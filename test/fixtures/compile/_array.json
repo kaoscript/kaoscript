@@ -1,0 +1,92 @@
+{
+  "requirements": {
+    "Class": {},
+    "Type": {}
+  },
+  "exports": {
+    "Array": {
+      "name": "Array",
+      "kind": 1,
+      "new": true,
+      "constructors": [],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "last": [
+          {
+            "kind": 51,
+            "name": "last",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "classMethods": {
+        "map": [
+          {
+            "kind": 51,
+            "name": "map",
+            "signature": {
+              "access": 3,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "type": "Array",
+                  "min": 1,
+                  "max": 1
+                },
+                {
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1
+                }
+              ]
+            }
+          },
+          {
+            "kind": 51,
+            "name": "map",
+            "signature": {
+              "access": 3,
+              "min": 3,
+              "max": 3,
+              "parameters": [
+                {
+                  "type": "Array",
+                  "min": 1,
+                  "max": 1
+                },
+                {
+                  "type": "Function",
+                  "min": 2,
+                  "max": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "final": {
+        "constructors": false,
+        "instanceMethods": {
+          "last": true
+        },
+        "classMethods": {
+          "map": true
+        },
+        "name": "__ks_Array"
+      }
+    }
+  }
+}

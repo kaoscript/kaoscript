@@ -1,0 +1,154 @@
+{
+  "requirements": {
+    "Array": {
+      "class": true
+    },
+    "Class": {},
+    "Function": {
+      "class": true
+    },
+    "Object": {
+      "class": true
+    },
+    "Type": {}
+  },
+  "exports": {
+    "Number": {
+      "name": "Number",
+      "kind": 1,
+      "new": true,
+      "constructors": [],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "limit": [
+          {
+            "kind": 51,
+            "name": "limit",
+            "signature": {
+              "access": 3,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 2,
+                  "max": 2
+                }
+              ]
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Number"
+              }
+            }
+          }
+        ],
+        "mod": [
+          {
+            "kind": 51,
+            "name": "mod",
+            "signature": {
+              "access": 3,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1
+                }
+              ]
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Number"
+              }
+            }
+          }
+        ],
+        "round": [
+          {
+            "kind": 51,
+            "name": "round",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Number"
+              }
+            }
+          }
+        ],
+        "toFloat": [
+          {
+            "kind": 51,
+            "name": "toFloat",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 0,
+              "parameters": []
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Number"
+              }
+            }
+          }
+        ],
+        "toInt": [
+          {
+            "kind": 51,
+            "name": "toInt",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Number"
+              }
+            }
+          }
+        ]
+      },
+      "classMethods": {},
+      "final": {
+        "constructors": false,
+        "instanceMethods": {
+          "limit": true,
+          "mod": true,
+          "round": true,
+          "toFloat": true,
+          "toInt": true
+        },
+        "classMethods": {},
+        "name": "__ks_Number"
+      }
+    }
+  }
+}

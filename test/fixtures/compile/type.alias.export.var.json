@@ -1,0 +1,38 @@
+{
+  "requirements": {
+    "Array": {
+      "class": true
+    },
+    "Class": {},
+    "Function": {
+      "class": true
+    },
+    "Object": {
+      "class": true
+    },
+    "Type": {}
+  },
+  "exports": {
+    "T": {
+      "name": "T",
+      "kind": 4,
+      "new": true,
+      "type": {
+        "types": [
+          {
+            "typeName": {
+              "kind": 38,
+              "name": "number"
+            }
+          },
+          {
+            "typeName": {
+              "kind": 38,
+              "name": "string"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "Array": {
+      "class": true
+    },
+    "Class": {},
+    "Function": {
+      "class": true
+    },
+    "Object": {
+      "class": true
+    },
+    "Type": {}
+  },
+  "exports": {
+    "disks": {
+      "name": "disks",
+      "kind": 3,
+      "new": true,
+      "async": true
+    }
+  }
+}

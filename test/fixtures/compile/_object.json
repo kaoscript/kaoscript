@@ -1,0 +1,71 @@
+{
+  "requirements": {
+    "Class": {},
+    "Type": {}
+  },
+  "exports": {
+    "Object": {
+      "name": "Object",
+      "kind": 1,
+      "new": true,
+      "constructors": [],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {
+        "map": [
+          {
+            "kind": 51,
+            "name": "map",
+            "signature": {
+              "access": 3,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "type": "Object",
+                  "min": 1,
+                  "max": 1
+                },
+                {
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1
+                }
+              ]
+            }
+          },
+          {
+            "kind": 51,
+            "name": "map",
+            "signature": {
+              "access": 3,
+              "min": 3,
+              "max": 3,
+              "parameters": [
+                {
+                  "type": "Object",
+                  "min": 1,
+                  "max": 1
+                },
+                {
+                  "type": "Function",
+                  "min": 2,
+                  "max": 2
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "final": {
+        "constructors": false,
+        "instanceMethods": {},
+        "classMethods": {
+          "map": true
+        },
+        "name": "__ks_Object"
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "requirements": {
+    "Array": {
+      "class": true
+    },
+    "Class": {},
+    "Function": {
+      "class": true
+    },
+    "Object": {
+      "class": true
+    },
+    "Type": {}
+  },
+  "exports": {
+    "Float": {
+      "name": "Float",
+      "kind": 5,
+      "new": true,
+      "type": {
+        "typeName": {
+          "kind": 38,
+          "name": "Object"
+        },
+        "properties": [
+          {
+            "name": {
+              "kind": 38,
+              "name": "parse"
+            },
+            "signature": {
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Number"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

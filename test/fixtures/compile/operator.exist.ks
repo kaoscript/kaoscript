@@ -1,0 +1,5 @@
+extern x, y, z
+
+let foo = x ?? y
+let bar = x() ?? y
+let qux = x ?? y ?? z

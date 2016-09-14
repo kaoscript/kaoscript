@@ -1,0 +1,24 @@
+{
+  "requirements": {
+    "Array": {
+      "class": true
+    },
+    "Class": {},
+    "Function": {
+      "class": true
+    },
+    "Object": {
+      "class": true
+    },
+    "Type": {}
+  },
+  "exports": {
+    "Colour": {
+      "name": "Color",
+      "kind": 2,
+      "new": false,
+      "type": "number",
+      "counter": 5
+    }
+  }
+}

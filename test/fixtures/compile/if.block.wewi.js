@@ -1,0 +1,9 @@
+module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+	let x = 5;
+	if(x === 5) {
+	}
+	else if(x === 6) {
+	}
+	else {
+	}
+}

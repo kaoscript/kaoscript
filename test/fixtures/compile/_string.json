@@ -1,0 +1,119 @@
+{
+  "requirements": {
+    "Array": {
+      "class": true
+    },
+    "Class": {},
+    "Function": {
+      "class": true
+    },
+    "Object": {
+      "class": true
+    },
+    "Type": {}
+  },
+  "exports": {
+    "String": {
+      "name": "String",
+      "kind": 1,
+      "new": true,
+      "constructors": [],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "toLowerCase": [
+          {
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "lines": [
+          {
+            "kind": 51,
+            "name": "lines",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Array"
+              }
+            }
+          }
+        ],
+        "lower": [
+          {
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "toFloat": [
+          {
+            "kind": 51,
+            "name": "toFloat",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 0,
+              "parameters": []
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Number"
+              }
+            }
+          }
+        ],
+        "toInt": [
+          {
+            "kind": 51,
+            "name": "toInt",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 0,
+                  "max": 1
+                }
+              ]
+            },
+            "type": {
+              "typeName": {
+                "kind": 38,
+                "name": "Number"
+              }
+            }
+          }
+        ]
+      },
+      "classMethods": {},
+      "final": {
+        "constructors": false,
+        "instanceMethods": {
+          "lines": true,
+          "lower": true,
+          "toFloat": true,
+          "toInt": true
+        },
+        "classMethods": {},
+        "name": "__ks_String"
+      }
+    }
+  }
+}

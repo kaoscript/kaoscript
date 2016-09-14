@@ -1,0 +1,41 @@
+enum ANSIColor {
+	black
+	red
+	green
+	yellow
+	blue
+	magenta
+	cyan
+	white
+	default
+}
+
+func color(fg: ANSIColor, bg: ANSIColor) -> String {
+	let fg_code
+	switch fg {
+		:black => fg_code = 30
+		:red => fg_code = 31
+		:green => fg_code = 32
+		:yellow => fg_code = 33
+		:blue => fg_code = 34
+		:magenta => fg_code = 35
+		:cyan => fg_code = 36
+		:white => fg_code = 37
+		:default => fg_code = 39
+	}
+	
+	let bg_code
+	switch bg {
+		:black => bg_code = 40
+		:red => bg_code = 41
+		:green => bg_code = 42
+		:yellow => bg_code = 44
+		:blue => bg_code = 44
+		:magenta => bg_code = 45
+		:cyan => bg_code = 46
+		:white => bg_code = 47
+		:default => bg_code = 49
+	}
+
+	return `\(fg_code);\(bg_code)m`
+}

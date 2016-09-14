@@ -1,0 +1,553 @@
+{
+  "requirements": {
+    "Array": {
+      "class": true
+    },
+    "Class": {},
+    "Function": {
+      "class": true
+    },
+    "Object": {
+      "class": true
+    },
+    "Type": {}
+  },
+  "exports": {
+    "Space": {
+      "name": "Space",
+      "kind": 2,
+      "new": true,
+      "type": "string"
+    },
+    "Color": {
+      "name": "Color",
+      "kind": 1,
+      "new": true,
+      "constructors": [
+        {
+          "access": 3,
+          "min": 1,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 1,
+              "max": "Infinity"
+            }
+          ]
+        }
+      ],
+      "instanceVariables": {
+        "_dummy": {
+          "access": 1,
+          "type": "Boolean"
+        },
+        "_space": {
+          "access": 1,
+          "type": "Space"
+        },
+        "_alpha": {
+          "access": 1,
+          "type": "Number"
+        },
+        "_red": {
+          "access": 1,
+          "type": "Number"
+        },
+        "_green": {
+          "access": 1,
+          "type": "Number"
+        },
+        "_blue": {
+          "access": 1,
+          "type": "Number"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "alpha": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "index": 0
+          },
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": [
+                  "String",
+                  "Number"
+                ],
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "index": 1
+          }
+        ],
+        "blend": [
+          {
+            "access": 3,
+            "min": 2,
+            "max": 4,
+            "parameters": [
+              {
+                "type": "Color",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Number",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Space",
+                "min": 0,
+                "max": 1
+              },
+              {
+                "type": "Boolean",
+                "min": 0,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "clearer": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": [
+                  "String",
+                  "Number"
+                ],
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "clone": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "contrast": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Color",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "copy": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Color",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "distance": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Color",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "equals": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Color",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "format": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "String",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "from": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": "Infinity"
+              }
+            ]
+          }
+        ],
+        "gradient": [
+          {
+            "access": 3,
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "Color",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Number",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "greyscale": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "String",
+                "min": 0,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "hex": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "isBlack": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "isTransparent": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "isWhite": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "like": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "String",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "luminance": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "negative": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": []
+          }
+        ],
+        "opaquer": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": [
+                  "String",
+                  "Number"
+                ],
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "readable": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "Color",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Boolean",
+                "min": 0,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "scheme": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Array",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "shade": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Number",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "space": [
+          {
+            "access": 3,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "index": 0
+          },
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "String",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "index": 1
+          }
+        ],
+        "tint": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Number",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "tone": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Number",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ]
+      },
+      "classMethods": {
+        "from": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": "Infinity"
+              }
+            ]
+          }
+        ],
+        "greyscale": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": "Infinity"
+              }
+            ]
+          }
+        ],
+        "hex": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": "Infinity"
+              }
+            ]
+          }
+        ],
+        "negative": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": "Infinity"
+              }
+            ]
+          }
+        ],
+        "registerFormatter": [
+          {
+            "access": 3,
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "String",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Function",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "registerParser": [
+          {
+            "access": 3,
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "String",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Function",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ],
+        "registerSpace": [
+          {
+            "access": 3,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Object",
+                "min": 1,
+                "max": 1
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

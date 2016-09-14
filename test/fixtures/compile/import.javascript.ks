@@ -1,0 +1,1 @@
+import Class, Type from @kaoscript/runtime/src/runtime.js
