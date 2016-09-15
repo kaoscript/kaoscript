@@ -2,6 +2,7 @@
 =================================================================
 
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+![Dependencies](https://david-dm.org/kaoscript/kaoscript.svg)
 
 Kaoscript is a language that compile to regular Javascript.
 It takes ideas from ES6, ES7, CoffeeScript, Swift, Rust, Dart, Spider, TypeScript, Haxe, C#, Java.
