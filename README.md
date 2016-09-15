@@ -9,7 +9,7 @@ It takes ideas from ES6, ES7, CoffeeScript, Swift, Rust, Dart, Spider, TypeScrip
 Why?
 ----
 
-I have only on main reason: it's **not recommended to extends natives classes** to avoid any conflict with a JavaScript engine or a dependency.
+I have only one main reason: it's **not recommended to extends natives classes** to avoid any conflict with a JavaScript engine or a dependency.
 It because it breaks your code consistency.
 For example, to call the array's functions `map` and `clone`, it is written differently:
 - `array.map(...)`
@@ -143,12 +143,12 @@ Loop
 ----
 
 ```kaoscript
-for x from 0 til 10 {
+for x from 0 to 10 {
 	console.log(x)
 }
 // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 
-for x from 0 to 10 {
+for x from 0 til 10 {
 	console.log(x)
 }
 // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9

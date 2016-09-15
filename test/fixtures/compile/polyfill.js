@@ -1,6 +1,8 @@
 module.exports = function() {
 	var {Class, Type} = require("@kaoscript/runtime/src/runtime.js");
 	var __ks_Array = {};
+	var __ks_Function = {};
+	var __ks_Object = {};
 	Class.newClassMethod({
 		class: Array,
 		name: "map",
@@ -93,7 +95,6 @@ module.exports = function() {
 			]
 		}
 	});
-	var __ks_Function = {};
 	Class.newClassMethod({
 		class: Function,
 		name: "vcurry",
@@ -127,7 +128,6 @@ module.exports = function() {
 			]
 		}
 	});
-	var __ks_Object = {};
 	Class.newClassMethod({
 		class: Object,
 		name: "map",

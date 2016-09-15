@@ -88,6 +88,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 		classMethods: {
 		}
 	};
+	var __ks_Greetings = {};
 	let hello = new Greetings("Hello world!");
 	console.log(hello.greet("miss White"));
 }

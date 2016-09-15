@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.1.1
+ * Version 0.1.2
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -80,7 +80,7 @@ impl Array {
 	} // }}}
 	appendUniq(...args) { // {{{
 		if args.length == 1 {
-			this.pushUniq.apply(this, args[0])
+			this.pushUniq.apply(this, Array.from(args[0]))
 		}
 		else {
 			for i from 0 til args.length {
@@ -876,12 +876,15 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 				else {
 					variable.final = {
-						constructors: false,
-						instanceMethods: {},
+						name: '__ks_' + variable.name.name
+						constructors: false
+						instanceMethods: {}
 						classMethods: {}
 					}
 					
 					$final.class(node, data, config, mode, variable)
+					
+					node.newExpression().code('var ' + variable.final.name + ' = {}')
 				}
 			}
 			else {
@@ -1071,10 +1074,13 @@ func $compile(node, data, config, mode, variable = null) {
 						
 						if !continuous {
 							variable.final = {
-								constructors: false,
-								instanceMethods: {},
+								name: '__ks_' + variable.name.name
+								constructors: false
+								instanceMethods: {}
 								classMethods: {}
 							}
+							
+							node.newExpression().code('var ' + variable.final.name + ' = {}')
 						}
 						
 						for i from 0 til declaration.members.length {
@@ -1523,14 +1529,6 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			if variable.kind != VariableKind.Class {
 				throw new Error('Invalid class for impl at line ' + data.start.line)
-			}
-			
-			if variable.final {
-				if !variable.final.name {
-					variable.final.name = '__ks_' + variable.name.name
-					
-					node.newExpression().code('var ' + variable.final.name + ' = {}')
-				}
 			}
 			
 			for i from 0 til data.members.length {
