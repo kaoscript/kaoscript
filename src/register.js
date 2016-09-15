@@ -19,7 +19,9 @@ var loadFile = function(module, filename) { // {{{
 			var data = fs.readFile(filename + extensions.binary);
 		}
 		else {
-			var compiler = new Compiler(filename);
+			var compiler = new Compiler(filename, {
+				register: false
+			});
 			
 			compiler.compile(source);
 			

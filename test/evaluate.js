@@ -6,7 +6,7 @@ var rimraf = require('rimraf');
 
 var {Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type} = require('@kaoscript/runtime')();
 
-require('../src/register.js');
+require('../register');
 
 describe('evaluate', function() {
 	before(function(done) {

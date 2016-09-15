@@ -1,7 +1,7 @@
 {
 	"name": "kaoscript",
 	"description": "Programming language combining features from ES7, CoffeeScript, TypeScript, Rust, Swift, C# and more",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"author": {
 		"name": "Baptiste Augrain",
 		"email": "daiyam@zokugun.org"
@@ -13,21 +13,28 @@
 	"bugs": {
 		"url": "https://github.com/kaoscript/kaoscript/issues"
 	},
+	"license": "MIT",
 	"licenses": [
 		{
 			"type": "MIT",
 			"url": "http://www.opensource.org/licenses/mit-license.php"
 		}
 	],
-	"main": "build/compiler.js",
 	"files": [
+		"bin",
 		"build",
-		"src"
+		"src",
+		"register.js"
 	],
+	"main": "build/compiler.js",
+	"bin": {
+		"kaoscript": "./bin/kaoscript"
+	},
 	"dependencies": {
 		"@kaoscript/ast": "0.1.x",
 		"@kaoscript/parser": "0.1.x",
-		"@kaoscript/runtime": "0.1.x"
+		"@kaoscript/runtime": "0.1.x",
+		"commander": "2.9.x"
 	},
 	"devDependencies": {
 		"chai": "2.x",
@@ -45,6 +52,8 @@
 		"es5",
 		"es6",
 		"es7",
-		"oop"
+		"oop",
+		"javascript",
+		"language"
 	]
 }

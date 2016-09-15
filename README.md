@@ -1,14 +1,32 @@
 [kaoscript](https://github.com/kaoscript/kaoscript)
 =================================================================
 
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 Kaoscript is a language that compile to regular Javascript.
 It takes ideas from ES6, ES7, CoffeeScript, Swift, Rust, Dart, Spider, TypeScript, Haxe, C#, Java.
+
+Why?
+----
+
+I have only on main reason: it's **not recommended to extends natives classes** to avoid any conflict with a JavaScript engine or a dependency.
+It because it breaks your code consistency.
+For example, to call the array's functions `map` and `clone`, it is written differently:
+- `array.map(...)`
+- `_.clone(array)`
+
+So how *kaoscript* is different?
+
+*kaoscript* compiles `array.clone()` to `_.clone(array)` so you can keep your code consistency.
+
+
+Additionally, I don't mind callbacks but **async/await are easier to read** but it will be only available for ES7.
 
 Features
 --------
 
 - **easy syntax**: close to ES6 and Swift
-- **fully OOP**: extendable core classes but fully compatible with the node.js
+- **fully OOP**: extendable native classes but fully compatible with the node.js
 - **partial/impl paradigm**
 - **async/await**: don't wait ES7
 - **check variables existences**
@@ -373,6 +391,7 @@ Todo
 - double dot (Dart)
 - Exception management (Java)
 - boolean conditions
+- macro
 
 License
 -------

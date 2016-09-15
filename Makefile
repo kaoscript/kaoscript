@@ -1,5 +1,9 @@
 comp:
-	node compile.js
+	./bin/kaoscript -c -o build src/compiler.ks
+
+build:
+	./bin/kaoscript -c -o build src/compiler.ks
+	./bin/kaoscript -c -o build -r src/compiler.ks=build/compiler.js src/bin.ks
 
 test:
 ifeq ($(g),)
@@ -19,4 +23,4 @@ clean:
 	find ./src -type f \( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksm" \) -delete
 	find ./test -type f \( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksm" \) -delete
 
-.PHONY: test
+.PHONY: test build

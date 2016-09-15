@@ -21,7 +21,11 @@ describe('compile', function() {
 		it(name, function() {
 			this.timeout(5000);
 			
-			var compiler = new Compiler(path.join(__dirname, 'fixtures', 'compile', file));
+			var compiler = new Compiler(path.join(__dirname, 'fixtures', 'compile', file), {
+				config: {
+					header: false
+				}
+			});
 			
 			try {
 				var error = fs.readFileSync(path.join(__dirname, 'fixtures', 'compile', name + '.error'), {

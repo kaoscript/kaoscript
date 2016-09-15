@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.1.0
+ * Version 0.1.1
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -14,11 +14,57 @@ import {
 	
 	*				from @kaoscript/ast
 	* as fs			from ./fs.js
+	* as metadata	from ../package.json
 	parse			from @kaoscript/parser
 	* as path		from path
 }
 
 extern console, JSON, process, require
+
+func $clone(value?) { // {{{
+	if value == null {
+		return null
+	}
+	else if value is Array {
+		return (value as Array).clone()
+	}
+	else if value is Object {
+		return Object.clone(value)
+	}
+	else {
+		return value
+	}
+} // }}}
+
+const $merge = {
+	merge(source, key, value) { // {{{
+		if value is Array {
+			source[key] = (value as Array).clone()
+		}
+		else if value is Object {
+			if source[key] is Object {
+				$merge.object(source[key], value)
+			}
+			else {
+				source[key] = $clone(value)
+			}
+		}
+		else {
+			source[key] = value
+		}
+		return source
+	} // }}}
+	object(source, current) { // {{{
+		for key of current {
+			if source[key] {
+				$merge.merge(source, key, current[key])
+			}
+			else {
+				source[key] = current[key]
+			}
+		}
+	} // }}}
+}
 
 impl Array {
 	append(...args) { // {{{
@@ -42,6 +88,16 @@ impl Array {
 			}
 		}
 		return this
+	} // }}}
+	clone() { // {{{
+		let i = this.length
+		let clone = new Array(i)
+		
+		while i {
+			clone[--i] = $clone(this[i])
+		}
+		
+		return clone
 	} // }}}
 	contains(item, from = 0) { // {{{
 		return this.indexOf(item, from) != -1
@@ -75,30 +131,46 @@ impl Array {
 }
 
 impl Object {
-	static clone(object) { // {{{
-		if object.constructor.clone is Function && object.constructor.clone != this {
-			return object.constructor.clone(object)
-		}
-		if object.constructor.prototype.clone is Function {
-			return object.clone()
-		}
-		
-		let clone = {}
-		
-		for key, value of object {
-			if value is array {
-				clone[key] = value.clone()
+	static {
+		clone(object) { // {{{
+			if object.constructor.clone is Function && object.constructor.clone != this {
+				return object.constructor.clone(object)
 			}
-			else if value is object {
-				clone[key] = Object.clone(value)
+			if object.constructor.prototype.clone is Function {
+				return object.clone()
 			}
-			else {
-				clone[key] = value
+			
+			let clone = {}
+			
+			for key, value of object {
+				clone[key] = $clone(value)
 			}
-		}
-		
-		return clone
-	} // }}}
+			
+			return clone
+		} // }}}
+		merge(...args) { // {{{
+			let source
+			
+			let i = 0
+			let l = args.length
+			while i < l && !((source ?= args[i]) && source is Object) {
+				++i
+			}
+			++i
+			
+			while i < l {
+				if args[i] is Object {
+					for key, value of args[i] {
+						$merge.merge(source, key, value)
+					}
+				}
+				
+				++i
+			}
+			
+			return source
+		} // }}}
+	}
 }
 
 enum MemberAccess { // {{{
@@ -4401,15 +4473,15 @@ func $implement(node, data, config, variable) { // {{{
 } // }}}
 
 const $import = {
-	addVariable(module, node, name, variable) { // {{{
+	addVariable(module, file?, node, name, variable) { // {{{
 		node.addVariable(name, variable)
 		
-		module.import(name)
+		module.import(name, file)
 	} // }}}
-	define(module, node, name, kind, type?) { // {{{
+	define(module, file?, node, name, kind, type?) { // {{{
 		$variable.define(node, name, kind, type)
 		
-		module.import(name.name || name)
+		module.import(name.name || name, file)
 	} // }}}
 	loadCoreModule(x, module, data, node) { // {{{
 		if $nodeModules[x] {
@@ -4421,15 +4493,16 @@ const $import = {
 	loadDirectory(x, moduleName?, module, data, node) { // {{{
 		let pkgfile = path.join(x, 'package.json')
 		if fs.isFile(pkgfile) {
+			let pkg
 			try {
-				let pkg = JSON.parse(fs.readFile(pkgfile))
-				
-				if pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node) {
-					return true
-				}
-				else if pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node)) {
-					return true
-				}
+				pkg = JSON.parse(fs.readFile(pkgfile))
+			}
+			
+			if pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node) {
+				return true
+			}
+			else if pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node)) {
+				return true
 			}
 		}
 		
@@ -4459,8 +4532,9 @@ const $import = {
 		return false
 	}, // }}}
 	loadKSFile(x, moduleName?, module, data, node) { // {{{
+		let file = null
 		if !moduleName {
-			moduleName = module.path(x, data.module)
+			file = moduleName = module.path(x, data.module)
 		}
 		
 		let metadata, name, alias, variable, exp
@@ -4470,7 +4544,9 @@ const $import = {
 		if fs.isFile(x + $extensions.metadata) && fs.isFile(x + $extensions.hash) && fs.readFile(x + $extensions.hash) == fs.sha256(source) && (metadata ?= $import.readMetadata(x)) {
 		}
 		else {
-			let compiler = new Compiler(x)
+			let compiler = new Compiler(x, {
+				register: false
+			})
 			
 			compiler.compile(source)
 			
@@ -4555,7 +4631,7 @@ const $import = {
 			
 			throw new Error(`Undefined variable \(name) in the imported module at line \(data.start.line)`) unless variable ?= exports[name]
 			
-			$import.addVariable(module, node, alias, variable)
+			$import.addVariable(module, file, node, alias, variable)
 			
 			if variable.kind != VariableKind::TypeAlias {
 				if variable.kind == VariableKind.Class && variable.final {
@@ -4575,7 +4651,7 @@ const $import = {
 			for name, alias of importVariables {
 				throw new Error(`Undefined variable \(name) in the imported module at line \(data.start.line)`) unless variable ?= exports[name]
 				
-				$import.addVariable(module, node, alias, variable)
+				$import.addVariable(module, file, node, alias, variable)
 				
 				if variable.kind != VariableKind::TypeAlias {
 					if nf {
@@ -4611,7 +4687,7 @@ const $import = {
 			let variables = []
 			
 			for name, variable of exports {
-				$import.addVariable(module, node, name, variable)
+				$import.addVariable(module, file, node, name, variable)
 				
 				if variable.kind != VariableKind::TypeAlias {
 					variables.push(name)
@@ -4675,8 +4751,9 @@ const $import = {
 		return true
 	}, // }}}
 	loadNodeFile(x?, moduleName?, module, data, node) { // {{{
+		let file = null
 		if !moduleName {
-			moduleName = module.path(x, data.module)
+			file = moduleName = module.path(x, data.module)
 		}
 		
 		let variables = {}
@@ -4687,7 +4764,7 @@ const $import = {
 				if specifier.local {
 					node.newExpression().code('var ', specifier.local.name, ' = require(', $quote(moduleName), ')')
 					
-					$import.define(module, node, specifier.local, VariableKind::Variable)
+					$import.define(module, file, node, specifier.local, VariableKind::Variable)
 				}
 				else {
 					throw new Error('Wilcard import is only suppoted for ks files')
@@ -4706,7 +4783,7 @@ const $import = {
 			
 			node.newExpression().code('var ', variables[alias], ' = require(', $quote(moduleName), ').', alias)
 			
-			$import.define(module, node, variables[alias], VariableKind::Variable)
+			$import.define(module, file, node, variables[alias], VariableKind::Variable)
 		}
 		else if count {
 			let exp = node.newExpression().code('var {')
@@ -4727,7 +4804,7 @@ const $import = {
 					exp.code(alias, ': ', variables[alias])
 				}
 				
-				$import.define(module, node, variables[alias], VariableKind::Variable)
+				$import.define(module, file, node, variables[alias], VariableKind::Variable)
 			}
 			
 			exp.code('} = require(', $quote(moduleName), ')')
@@ -7197,11 +7274,12 @@ class Module {
 		_exportMeta				= {}
 		_imports				= {}
 		_references				= {}
+		_register				= false
 		_requirements			= {}
 	}
 	Module(@compiler) { // {{{
-		if this._compiler._options.output{
-			this._output = path.dirname(this._compiler._options.output)
+		if this._compiler._options.output {
+			this._output = this._compiler._options.output
 		
 			if this._compiler._options.rewire is Array {
 				this._rewire = this._compiler._options.rewire
@@ -7279,8 +7357,12 @@ class Module {
 		
 		return this
 	} // }}}
-	import(name) { // {{{
+	import(name, file?) { // {{{
 		this._imports[name] = true
+		
+		if file && file.slice(-$extensions.source.length).toLowerCase() == $extensions.source {
+			this._register = true
+		}
 	} // }}}
 	listReferences(key) { // {{{
 		if this._references[key] {
@@ -7359,8 +7441,17 @@ class Module {
 		return data
 	} // }}}
 	toSource() { // {{{
+		let source = ''
+		if this._body._config.header {
+			source += `// Generated by kaoscript \(metadata.version)\n`
+		}
+		
+		if this._register && this._body._config.register {
+			source += 'require("kaoscript/register");\n'
+		}
+		
 		if this._binary {
-			return this._body.toSource().slice(0, -1)
+			source += this._body.toSource().slice(0, -1)
 		}
 		else {
 			if !(this._requirements.Class || this._requirements.Type) && !(this._imports.Class && this._imports.Type) {
@@ -7377,7 +7468,7 @@ class Module {
 				this._requirements.Type = {}
 			}
 			
-			let source = 'module.exports = function('
+			source += 'module.exports = function('
 			
 			let nf = false
 			for name of this._requirements {
@@ -7418,9 +7509,9 @@ class Module {
 			}
 			
 			source += '}'
-			
-			return source
 		}
+		
+		return source
 	} // }}}
 }
 
@@ -7430,9 +7521,11 @@ export class Compiler {
 		_module	: Module
 	}
 	Compiler(@file, options?) { // {{{
-		this._options = Object.append({
+		this._options = Object.merge({
 			context: 'node6',
+			register: true,
 			config: {
+				header: true,
 				parameters: 'kaoscript',
 				variables: 'es6'
 			}
@@ -7481,7 +7574,9 @@ export class Compiler {
 			throw new Error('Undefined option: output')
 		}
 		
-		fs.writeFile(this._options.output, this._module.toSource())
+		let filename = path.join(this._options.output, path.basename(this._file)).slice(0, -3) + '.js'
+		
+		fs.writeFile(filename, this._module.toSource())
 		
 		return this
 	} // }}}
