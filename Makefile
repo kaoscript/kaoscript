@@ -1,3 +1,6 @@
+bin:
+	./bin/kaoscript -c -o build -r src/compiler.ks=build/compiler.js src/bin.ks
+
 comp:
 	./bin/kaoscript -c -o build src/compiler.ks
 
@@ -22,4 +25,4 @@ endif
 clean:
 	find . -type f \( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksm" \) -delete
 
-.PHONY: test build
+.PHONY: test build bin

@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 ![Dependencies](https://img.shields.io/david/kaoscript/kaoscript.svg)
 [![Build Status](https://img.shields.io/travis/kaoscript/kaoscript.svg)](https://travis-ci.org/kaoscript/kaoscript)
+[![Waffle.io](https://img.shields.io/badge/kanban-waffle.io-blue.svg)](https://waffle.io/kaoscript/kaoscript)
 
 Kaoscript is a language that compile to regular Javascript.
 It takes ideas from ES6, ES7, CoffeeScript, Swift, Rust, Dart, Spider, TypeScript, Haxe, C#, Java.
@@ -408,6 +409,10 @@ Todo
 
 Changelog
 ---------
+
+### 0.2.1
+
+- binary evaluates script
 
 ### 0.2.0
 

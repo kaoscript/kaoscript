@@ -1,19 +1,21 @@
 /**
  * compiler.ks
- * Version 0.1.1
+ * Version 0.2.1
  * September 15th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-extern console, process
+extern console, global, Object, process, require
 
 import {
 	Compiler		from ./compiler.ks
 	* as metadata	from ../package.json
+	* as Module		from module
 	* as path		from path
 	* as program	from commander
+	* as vm			from vm
 }
 
 func rewire(option) {
@@ -47,9 +49,9 @@ if program.args.length == 0 {
 	process.exit(1)
 }
 
-let file = path.join(process.cwd(), program.args[0])
+const file = path.join(process.cwd(), program.args[0])
 
-let options = {
+const options = {
 	register: program.register
 	config: {
 		header: program.header
@@ -71,11 +73,11 @@ if program.rewire {
 	}
 }
 
+const compiler = new Compiler(file, options)
+
+compiler.compile()
+
 if program.compile {
-	let compiler = new Compiler(file, options)
-	
-	compiler.compile()
-	
 	if program.print {
 		console.log(compiler.toSource())
 	}
@@ -83,13 +85,27 @@ if program.compile {
 	compiler.writeOutput()
 }
 else if program.print {
-	let compiler = new Compiler(file, options)
-	
-	compiler.compile()
-	
 	console.log(compiler.toSource())
 }
 else {
-	program.outputHelp()
-	process.exit(1)
+	 const sandbox = {}
+	 for key of global {
+	 	 sandbox[key] = global[key]
+	 }
+	 
+	 _module = sandbox.module = new Module('eval')
+	 _require = sandbox.require = (path) => Module._load(path, _module, true)
+	 
+	 _module.filename = sandbox.__filename
+	 
+	 for r in Object.getOwnPropertyNames(require) {
+	 	 if r != 'paths' && r != 'arguments' && r != 'caller' {
+	 	 	 _require[r] = require[r]
+	 	 }
+	 }
+	 
+	 _require.paths = _module.paths = Module._nodeModulePaths(process.cwd()).concat(process.cwd())
+	 _require.resolve = (request) => Module._resolveFilename(request, _module)
+	 
+	 vm.runInNewContext(compiler.toSource(), sandbox, file)
 }
