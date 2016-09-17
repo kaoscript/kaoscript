@@ -1,4 +1,4 @@
-require expect: func, Class, Type
+require expect: func, Helper, Type
 
 func foo(x, y = 42, z = 24) {
 	return [x, y, z]

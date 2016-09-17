@@ -1,4 +1,4 @@
-module.exports = function(expect, Class, Type) {
+module.exports = function(expect, Helper, Type) {
 	function foo(x = null) {
 		if(x !== null && !Type.isNumber(x)) {
 			throw new Error("Invalid type for parameter 'x'");

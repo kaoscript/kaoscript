@@ -1,4 +1,5 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function() {
 	let view;
 	if(Type.is(view, UIImageView)) {
 		console.log("It's an image view");

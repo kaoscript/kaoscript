@@ -1,4 +1,5 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function() {
 	class Greetings {
 		constructor() {
 			this.__ks_init();

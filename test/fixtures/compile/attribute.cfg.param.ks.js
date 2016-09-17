@@ -1,4 +1,4 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+module.exports = function() {
 	function foo(x, y) {
 		if(arguments.length < 2) {
 			throw new Error("Wrong number of arguments");

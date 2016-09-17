@@ -1,6 +1,7 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
-	var Float = require("./_float.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type).Float;
-	var {Number, __ks_Number} = require("./_number.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type);
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function() {
+	var Float = require("./_float.ks")().Float;
+	var {Number, __ks_Number} = require("./_number.ks")();
 	function hex(n) {
 		if(n === undefined || n === null) {
 			throw new Error("Missing parameter 'n'");

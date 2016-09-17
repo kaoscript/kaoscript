@@ -1,6 +1,6 @@
-module.exports = function(Class, Type) {
+module.exports = function(Helper, Type) {
 	var __ks_Object = {};
-	Class.newClassMethod({
+	Helper.newClassMethod({
 		class: Object,
 		name: "map",
 		final: __ks_Object,
@@ -42,7 +42,7 @@ module.exports = function(Class, Type) {
 			]
 		}
 	});
-	Class.newClassMethod({
+	Helper.newClassMethod({
 		class: Object,
 		name: "map",
 		final: __ks_Object,

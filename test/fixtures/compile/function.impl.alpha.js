@@ -1,6 +1,6 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
-	var Float = require("./_float.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type).Float;
-	var {Number, __ks_Number} = require("./_number.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type);
+module.exports = function() {
+	var Float = require("./_float.ks")().Float;
+	var {Number, __ks_Number} = require("./_number.ks")();
 	function alpha(n = null, percentage) {
 		if(percentage === undefined || percentage === null) {
 			percentage = false;

@@ -3,18 +3,7 @@
     "Color": {
       "class": true
     },
-    "Space": {},
-    "Array": {
-      "class": true
-    },
-    "Class": {},
-    "Function": {
-      "class": true
-    },
-    "Object": {
-      "class": true
-    },
-    "Type": {}
+    "Space": {}
   },
   "exports": {
     "Color": {

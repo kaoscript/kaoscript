@@ -1,6 +1,7 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+var Helper = require("@kaoscript/runtime").Helper;
+module.exports = function() {
 	var __ks_String = {};
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: String,
 		name: "lower",
 		final: __ks_String,

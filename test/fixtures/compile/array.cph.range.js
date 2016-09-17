@@ -1,5 +1,6 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
-	let a = __ks_Array._cm_map(Array_Integer.range(0, 10), (i) => {
+var Helper = require("@kaoscript/runtime").Helper;
+module.exports = function() {
+	let a = Helper.mapRange(0, 10, 1, (i) => {
 		return i;
 	});
 }

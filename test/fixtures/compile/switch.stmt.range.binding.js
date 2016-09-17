@@ -1,4 +1,4 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+module.exports = function() {
 	function age() {
 		return 15;
 	}
@@ -15,7 +15,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 			let n = __ks_0;
 			console.log("I'm a teen of age " + n);
 		}
-		else if() {
+		else {
 			let n = __ks_0;
 			console.log("I'm an old person of age " + n);
 		}

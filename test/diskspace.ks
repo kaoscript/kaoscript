@@ -8,7 +8,6 @@ extern {
 
 import {
 	expect 		from chai
-	*			from @kaoscript/runtime
 	*			from ./fixtures/compile/diskspace.module.ks
 }
 

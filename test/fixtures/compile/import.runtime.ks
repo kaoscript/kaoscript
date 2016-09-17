@@ -1,1 +1,1 @@
-import * from @kaoscript/runtime
+import Helper, Type from @kaoscript/runtime

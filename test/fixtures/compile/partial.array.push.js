@@ -1,6 +1,7 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
-	var {Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type} = require("./polyfill.ks")();
-	Class.newInstanceMethod({
+	var __ks_Array = {};
+	Helper.newInstanceMethod({
 		class: Array,
 		name: "contains",
 		final: __ks_Array,
@@ -31,7 +32,7 @@ module.exports = function() {
 			]
 		}
 	});
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Array,
 		name: "pushUniq",
 		final: __ks_Array,

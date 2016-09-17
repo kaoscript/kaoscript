@@ -1,4 +1,4 @@
-require Class, Type
+require Helper, Type
 
 extern final class Array {
 }

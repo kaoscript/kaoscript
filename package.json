@@ -1,7 +1,7 @@
 {
 	"name": "kaoscript",
 	"description": "Programming language combining features from ES7, CoffeeScript, TypeScript, Rust, Swift, C# and more",
-	"version": "0.1.2",
+	"version": "0.2.0",
 	"author": {
 		"name": "Baptiste Augrain",
 		"email": "daiyam@zokugun.org"
@@ -45,7 +45,7 @@
 		"rimraf": "2.5.x"
 	},
 	"scripts": {
-		"test": "mocha --colors --reporter spec"
+		"test": "mocha --colors --reporter spec --compilers ks:./register.js"
 	},
 	"keywords": [
 		"kaoscript",

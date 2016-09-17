@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var rimraf = require('rimraf');
 
-var {Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type} = require('@kaoscript/runtime')();
+var {Helper, Type} = require('@kaoscript/runtime');
 
 require('../register');
 
@@ -29,7 +29,7 @@ describe('evaluate', function() {
 		it(name, function() {
 			this.timeout(5000);
 			
-			require(path.join(__dirname, 'fixtures', 'evaluate', file))(expect, Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type);
+			require(path.join(__dirname, 'fixtures', 'evaluate', file))(expect, Helper, Type);
 		});
 	}
 	

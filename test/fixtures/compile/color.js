@@ -1,9 +1,10 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
-	var {Array, __ks_Array} = require("./_array.ks")(Class, Type);
-	var Float = require("./_float.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type).Float;
-	var Integer = require("./_integer.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type).Integer;
-	var {Number, __ks_Number} = require("./_number.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type);
-	var {String, __ks_String} = require("./_string.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type);
+var {Helper, Type} = require("@kaoscript/runtime");
+module.exports = function() {
+	var {Array, __ks_Array} = require("./_array.ks")(Helper, Type);
+	var Float = require("./_float.ks")().Float;
+	var Integer = require("./_integer.ks")().Integer;
+	var {Number, __ks_Number} = require("./_number.ks")();
+	var {String, __ks_String} = require("./_string.ks")();
 	let $spaces = {};
 	let $aliases = {};
 	let $components = {};
@@ -196,7 +197,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 			throw new Error("Invalid type for parameter 'first'");
 		}
 		let that = first.apply(null, firstArgs);
-		let lastArgs = __ks_Object._cm_map(components, (name, component) => {
+		let lastArgs = Helper.mapObject(components, (name, component) => {
 			return that[component.field];
 		});
 		lastArgs.push(that);
@@ -278,7 +279,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 		}
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
-			let args = __ks_Object._cm_map(s.components, (name, component) => {
+			let args = Helper.mapObject(s.components, (name, component) => {
 				return that[component.field];
 			});
 			args.push(result);
@@ -306,7 +307,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 		let __ks_0 = $spaces[from].converters;
 		for(let name in __ks_0) {
 			if($spaces[name].converters[to]) {
-				$spaces[from].converters[to] = __ks_Function._cm_vcurry($binder, null, $spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name]);
+				$spaces[from].converters[to] = Helper.vcurry($binder, null, $spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name]);
 				return;
 			}
 		}
@@ -1180,7 +1181,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 			if(!Type.isArray(functions, Function)) {
 				throw new Error("Invalid type for parameter 'functions'");
 			}
-			return __ks_Array._cm_map(functions, (fn) => {
+			return Helper.mapArray(functions, (fn) => {
 				return fn(this.clone());
 			});
 		}
@@ -1439,7 +1440,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 					else if(Type.isValue(component.mutator)) {
 						$component(component, name, space.name);
 						if($components[name].families.length > 1) {
-							Class.newInstanceMethod({
+							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $getFieldWithoutCasting,
@@ -1452,7 +1453,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 									]
 								}
 							});
-							Class.newInstanceMethod({
+							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $setFieldWithoutCasting,
@@ -1472,7 +1473,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 							});
 						}
 						else {
-							Class.newInstanceMethod({
+							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $getFieldWithCasting,
@@ -1485,7 +1486,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 									]
 								}
 							});
-							Class.newInstanceMethod({
+							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $setFieldWithCasting,
@@ -1521,7 +1522,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 						}
 						$component(component, name, space.name);
 						if($components[name].families.length > 1) {
-							Class.newInstanceMethod({
+							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $getFieldWithoutCasting,
@@ -1534,7 +1535,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 									]
 								}
 							});
-							Class.newInstanceMethod({
+							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $setFieldWithoutCasting,
@@ -1554,7 +1555,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 							});
 						}
 						else {
-							Class.newInstanceMethod({
+							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $getFieldWithCasting,
@@ -1567,7 +1568,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 									]
 								}
 							});
-							Class.newInstanceMethod({
+							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $setFieldWithCasting,

@@ -1,4 +1,5 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+var {Helper, Type} = require("@kaoscript/runtime");
+module.exports = function() {
 	class Shape {
 		constructor() {
 			this.__ks_init();
@@ -57,7 +58,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 		classMethods: {
 		}
 	};
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Shape,
 		name: "draw",
 		function: function(canvas) {

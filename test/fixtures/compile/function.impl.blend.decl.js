@@ -1,4 +1,5 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function() {
 	function blend(x, y, percentage) {
 		if(x === undefined || x === null) {
 			throw new Error("Missing parameter 'x'");

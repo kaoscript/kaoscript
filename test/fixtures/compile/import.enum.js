@@ -1,5 +1,5 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
-	var Color = require("./export.enum.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type).Color;
+module.exports = function() {
+	var Color = require("./export.enum.ks")().Color;
 	let color = Color.Red;
 	console.log(color);
 	Color.DarkRed = 3;

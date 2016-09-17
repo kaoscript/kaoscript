@@ -8,7 +8,6 @@ extern {
 
 import {
 	expect 		from chai
-	*			from ./polyfill.ks
 	*			from ./diskspace.module.ks
 }
 
@@ -17,6 +16,8 @@ describe('diskspace', func() {
 		let d = await disks()
 		
 		expect(d).to.have.length.above(0)
+		
+		console.log(d)
 		
 		done()
 	}) // }}}

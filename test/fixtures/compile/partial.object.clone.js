@@ -1,6 +1,7 @@
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type} = require("./polyfill.ks")();
-	Class.newClassMethod({
+	var __ks_Object = {};
+	Helper.newClassMethod({
 		class: Object,
 		name: "clone",
 		final: __ks_Object,

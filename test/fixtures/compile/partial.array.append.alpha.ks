@@ -1,6 +1,4 @@
-import {
-	*				from ./polyfill.ks
-}
+extern final class Array
 
 impl Array {
 	appendUniq(...args) { // {{{

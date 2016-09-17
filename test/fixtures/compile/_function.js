@@ -1,6 +1,6 @@
-module.exports = function(Class, Type) {
+module.exports = function(Helper, Type) {
 	var __ks_Function = {};
-	Class.newClassMethod({
+	Helper.newClassMethod({
 		class: Function,
 		name: "vcurry",
 		final: __ks_Function,

@@ -1,6 +1,4 @@
-import {
-	*				from ./polyfill.ks
-}
+extern final class Object
 
 impl Object {
 	static clone(object) {

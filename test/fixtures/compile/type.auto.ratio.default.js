@@ -1,5 +1,5 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
-	var {Number, __ks_Number} = require("./_number.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type);
+module.exports = function() {
+	var {Number, __ks_Number} = require("./_number.ks")();
 	function foo() {
 		return 0.32;
 	}

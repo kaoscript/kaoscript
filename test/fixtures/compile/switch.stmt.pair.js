@@ -1,4 +1,5 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function() {
 	let pair = [2, -2];
 	let __ks_0 = ([x, y]) => x === y;
 	let __ks_1 = ([x, y]) => (x + y) === 0;

@@ -1,6 +1,5 @@
 var expect = require("chai").expect;
-var {Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type} = require("./polyfill.ks")();
-var disks = require("./diskspace.module.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type).disks;
+var disks = require("./diskspace.module.ks")().disks;
 describe("diskspace", function() {
 	it("print", function(done) {
 		if(done === undefined || done === null) {
@@ -11,6 +10,7 @@ describe("diskspace", function() {
 				return __ks_cb(__ks_e);
 			}
 			expect(d).to.have.length.above(0);
+			console.log(d);
 			done();
 		});
 	});

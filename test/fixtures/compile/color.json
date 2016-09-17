@@ -1,17 +1,5 @@
 {
-  "requirements": {
-    "Array": {
-      "class": true
-    },
-    "Class": {},
-    "Function": {
-      "class": true
-    },
-    "Object": {
-      "class": true
-    },
-    "Type": {}
-  },
+  "requirements": {},
   "exports": {
     "Space": {
       "name": "Space",

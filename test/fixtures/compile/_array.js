@@ -1,6 +1,6 @@
-module.exports = function(Class, Type) {
+module.exports = function(Helper, Type) {
 	var __ks_Array = {};
-	Class.newClassMethod({
+	Helper.newClassMethod({
 		class: Array,
 		name: "map",
 		final: __ks_Array,
@@ -42,7 +42,7 @@ module.exports = function(Class, Type) {
 			]
 		}
 	});
-	Class.newClassMethod({
+	Helper.newClassMethod({
 		class: Array,
 		name: "map",
 		final: __ks_Array,
@@ -92,7 +92,7 @@ module.exports = function(Class, Type) {
 			]
 		}
 	});
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Array,
 		name: "last",
 		final: __ks_Array,

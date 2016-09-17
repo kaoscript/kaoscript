@@ -1,4 +1,4 @@
-module.exports = function(expect, Class, Type) {
+module.exports = function(expect, Helper, Type) {
 	function foo(x, y, z) {
 		if(x === undefined || x === null) {
 			throw new Error("Missing parameter 'x'");

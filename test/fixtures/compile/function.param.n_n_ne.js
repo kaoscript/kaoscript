@@ -1,4 +1,4 @@
-module.exports = function(expect, Class, Type) {
+module.exports = function(expect, Helper, Type) {
 	function foo(x = null, y = null, z = null) {
 		return [x, y, z];
 	}

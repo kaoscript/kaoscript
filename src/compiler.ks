@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.1.2
+ * Version 0.2.0
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -10,8 +10,6 @@
 #![cfg(variables='es5')]
 
 import {
-	*				from @kaoscript/runtime
-	
 	*				from @kaoscript/ast
 	* as fs			from ./fs.js
 	* as metadata	from ../package.json
@@ -64,6 +62,11 @@ const $merge = {
 			}
 		}
 	} // }}}
+}
+
+extern {
+	final class Array
+	final class Object
 }
 
 impl Array {
@@ -299,13 +302,13 @@ const $typekinds = { // {{{
 } // }}}
 
 const $typeofs = { // {{{
-	Array: 'Type.isArray'
-	Boolean: 'Type.isBoolean'
-	Function: 'Type.isFunction'
-	NaN: 'isNaN'
-	Number: 'Type.isNumber'
-	Object: 'Type.isObject'
-	String: 'Type.isString'
+	Array: true
+	Boolean: true
+	Function: true
+	NaN: true
+	Number: true
+	Object: true
+	String: true
 } // }}}
 
 func $caller(data) { // {{{
@@ -396,9 +399,11 @@ func $compile(node, data, config, mode, variable = null) {
 			node.code(']')
 		} // }}}
 		Kind::ArrayComprehension => { // {{{
+			node.module().flag('Helper')
+			
 			if data.loop.kind == Kind.ForInStatement {
 				node
-					.code('__ks_Array._cm_map(')
+					.code($runtime.helper(config), '.mapArray(')
 					.compile(data.loop.value, config)
 					.code(', ')
 				
@@ -444,7 +449,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			else if data.loop.kind == Kind.ForOfStatement {
 				node
-					.code('__ks_Object._cm_map(')
+					.code($runtime.helper(config), '.mapObject(')
 					.compile(data.loop.value, config)
 					.code(', ')
 				
@@ -490,8 +495,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			else if data.loop.kind == Kind.ForRangeStatement {
 				node
-					.code('__ks_Array._cm_map(')
-					.code('Array_Integer.range(')
+					.code($runtime.helper(config), '.mapRange(')
 					.compile(data.loop.from, config)
 					.code(', ')
 					.compile(data.loop.to, config)
@@ -499,9 +503,12 @@ func $compile(node, data, config, mode, variable = null) {
 				if data.loop.by {
 					node.code(', ').compile(data.loop.by, config)
 				}
+				else {
+					node.code(', 1')
+				}
 				
 				node
-					.code('), ')
+					.code(', ')
 					.newControl()
 					.addMode(Mode.NoIndent)
 					.code('(')
@@ -544,8 +551,10 @@ func $compile(node, data, config, mode, variable = null) {
 			node.code(']')
 		} // }}}
 		Kind::ArrayRange => { // {{{
+			node.module().flag('Helper')
+			
 			node
-				.code('_ks_Array._cm_range(')
+				.code($runtime.helper(config), '.newArrayRange(')
 				.compile(data.from || data.then, config)
 				.code(', ')
 				.compile(data.to || data.til, config)
@@ -731,25 +740,27 @@ func $compile(node, data, config, mode, variable = null) {
 					}
 				}
 				else if callee.variables.length == 2 {
+					node.module().flag('Type')
+					
 					node.code('(') if mode & Mode.Operand
 					
 					let name = null
 					if(data.callee.object.kind == Kind::Identifier) {
-						if $typeofs[callee.variables[0].name] {
-							node.code($typeofs[callee.variables[0].name], '(').compile(data.callee.object, config).code(')')
+						if tof = $runtime.typeof(callee.variables[0].name, config) {
+							node.code(tof, '(').compile(data.callee.object, config).code(')')
 						}
 						else {
-							node.code('Type.is(').compile(data.callee.object, config).code(', ', callee.variables[0].name, ')')
+							node.code($runtime.type(config), '.is(').compile(data.callee.object, config).code(', ', callee.variables[0].name, ')')
 						}
 					}
 					else {
 						name = node.newTempName()
 						
-						if $typeofs[callee.variables[0].name] {
-							node.code($typeofs[callee.variables[0].name], '(', name, ' = ').compile(data.callee.object, config).code(')')
+						if tof = $runtime.typeof(callee.variables[0].name, config) {
+							node.code(tof, '(', name, ' = ').compile(data.callee.object, config).code(')')
 						}
 						else {
-							node.code('Type.is(', name, ' = ').compile(data.callee.object, config).code(', ', callee.variables[0].name, ')')
+							node.code($runtime.type(config), '.is(', name, ' = ').compile(data.callee.object, config).code(', ', callee.variables[0].name, ')')
 						}
 					}
 					
@@ -909,9 +920,11 @@ func $compile(node, data, config, mode, variable = null) {
 			node = node.newExpression()
 			
 			if list {
+				node.module().flag('Helper')
+				
 				if data.scope.kind == ScopeModifier::Null {
 					node
-						.code('__ks_Function._cm_vcurry(')
+						.code($runtime.helper(config), '.vcurry(')
 						.compile(data.callee, config)
 						.code(', null')
 					
@@ -923,7 +936,7 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 				else if data.scope.kind == ScopeModifier::This {
 					node
-						.code('__ks_Function._cm_vcurry(')
+						.code($runtime.helper(config), '.vcurry(')
 						.compile(data.callee, config)
 						.code(', ')
 					
@@ -1799,7 +1812,9 @@ func $compile(node, data, config, mode, variable = null) {
 						}
 						
 						if condition.kind == Kind::SwitchConditionArray {
-							ctrl.code('(', $typeofs.Array, '(', name, ')')
+							node.module().flag('Type')
+							
+							ctrl.code('(', $runtime.typeof('Array', config), '(', name, ')')
 				
 							mm = $switch.length(condition.values)
 							if mm.min == mm.max {
@@ -1880,7 +1895,7 @@ func $compile(node, data, config, mode, variable = null) {
 					
 					ctrl.compile(clause.body, config).step()
 				}
-				else if clause.bindings.length {
+				else if clause.bindings.length && $switch.hasTest(clause) {
 					if clauseIdx {
 						ctrl.code('else if(')
 					}
@@ -1910,7 +1925,11 @@ func $compile(node, data, config, mode, variable = null) {
 					
 					we = true
 					
-					ctrl.step().compile(clause.body, config).step()
+					ctrl.step()
+					
+					$switch.binding(clause, ctrl, name, config) if clause.bindings.length
+					
+					ctrl.compile(clause.body, config).step()
 				}
 			}
 		} // }}}
@@ -1975,6 +1994,8 @@ func $compile(node, data, config, mode, variable = null) {
 			ctrl.step()
 			
 			if data.catchClauses.length {
+				node.module().flag('Type')
+				
 				let error = node.newTempName()
 				
 				ctrl.code('catch(', error, ')').step()
@@ -1992,7 +2013,7 @@ func $compile(node, data, config, mode, variable = null) {
 						ifs.code('else ')
 					}
 					
-					ifs.code('if(Type.is(', error, ', ').compile(catchClause.type, config).code(')').step()
+					ifs.code('if(', $runtime.type(config), '.is(', error, ', ').compile(catchClause.type, config).code(')').step()
 					
 					if catchClause.binding {
 						ifs.newExpression().code($variable.scope(config), catchClause.binding.name, ' = ', error)
@@ -2273,14 +2294,14 @@ const $continuous = {
 			$continuous.constructor(clazz, method.data, config, method.signature, reflect, variable)
 		}
 		
-		$helper.constructor(clazz, reflect, variable)
+		$helper.constructor(clazz, reflect, variable, config)
 		
 		for name, methods of variable.instanceMethods {
 			for method in methods {
 				$continuous.instanceMethod(clazz, method.data, config, method.signature, reflect, name, variable)
 			}
 			
-			$helper.instanceMethod(clazz, reflect, name, variable)
+			$helper.instanceMethod(clazz, reflect, name, variable, config)
 		}
 		
 		for name, methods of variable.classMethods {
@@ -2288,7 +2309,7 @@ const $continuous = {
 				$continuous.classMethod(clazz, method.data, config, method.signature, reflect, name, variable)
 			}
 			
-			$helper.classMethod(clazz, reflect, name, variable)
+			$helper.classMethod(clazz, reflect, name, variable, config)
 		}
 		
 		for name, field of variable.instanceVariables {
@@ -2681,14 +2702,14 @@ const $final = {
 			$continuous.constructor(clazz, method.data, config, method.signature, reflect, variable)
 		}
 		
-		$helper.constructor(clazz, reflect, variable)
+		$helper.constructor(clazz, reflect, variable, config)
 		
 		for name, methods of variable.instanceMethods {
 			for method in methods {
 				$continuous.instanceMethod(clazz, method.data, config, method.signature, reflect, name, variable)
 			}
 			
-			$helper.instanceMethod(clazz, reflect, name, variable)
+			$helper.instanceMethod(clazz, reflect, name, variable, config)
 		}
 		
 		for name, methods of variable.classMethods {
@@ -2696,7 +2717,7 @@ const $final = {
 				$continuous.classMethod(clazz, method.data, config, method.signature, reflect, name, variable)
 			}
 			
-			$helper.classMethod(clazz, reflect, name, variable)
+			$helper.classMethod(clazz, reflect, name, variable, config)
 		}
 		
 		for name, field of variable.instanceVariables {
@@ -3072,9 +3093,11 @@ const $function = {
 				}
 			}
 			else if signature.async && !ra {
+				node.module().flag('Type')
+				
 				node
 					.newControl()
-					.code('if(!Type.isFunction(__ks_cb))')
+					.code('if(!', $runtime.type(config), '.isFunction(__ks_cb))')
 					.step()
 					.newExpression()
 					.code('throw new Error("Invalid callback")')
@@ -3632,7 +3655,7 @@ const $function = {
 }
 
 const $helper = {
-	classMethod(clazz, reflect, name, variable) { // {{{
+	classMethod(clazz, reflect, name, variable, config) { // {{{
 		let extend = false
 		if variable.extends {
 			extend = func(node, ctrl?) {
@@ -3651,9 +3674,9 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, clazz.newControl(), 'static ' + name + '()', reflect.classMethods[name], $continuous.methodCall^^(variable, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true)
+		$helper.methods(extend, clazz.newControl(), 'static ' + name + '()', reflect.classMethods[name], $continuous.methodCall^^(variable, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true, config)
 	} // }}}
-	constructor(clazz, reflect, variable) { // {{{
+	constructor(clazz, reflect, variable, config) { // {{{
 		let extend = false
 		if variable.extends {
 			extend = func(node, ctrl?) {
@@ -3670,17 +3693,19 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, clazz.newControl(), '__ks_cons(args)', reflect.constructors, $continuous.methodCall^^(variable, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
+		$helper.methods(extend, clazz.newControl(), '__ks_cons(args)', reflect.constructors, $continuous.methodCall^^(variable, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false, config)
 	} // }}}
-	decide(node, type, index, path, argName) { // {{{
-		if $typeofs[type] {
-			node.code($typeofs[type] + '(' + argName + '[' + index + '])')
+	decide(node, type, index, path, argName, config) { // {{{
+		node.module().flag('Type')
+		
+		if tof = $runtime.typeof(type, config) {
+			node.code(tof + '(' + argName + '[' + index + '])')
 		}
 		else {
-			node.code('Type.is(' + argName + '[' + index + '], ' + path + ')')
+			node.code($runtime.type(config), '.is(' + argName + '[' + index + '], ' + path + ')')
 		}
 	} // }}}
-	instanceMethod(clazz, reflect, name, variable) { // {{{
+	instanceMethod(clazz, reflect, name, variable, config) { // {{{
 		let extend = false
 		if variable.extends {
 			extend = func(node, ctrl?) {
@@ -3699,9 +3724,9 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, clazz.newControl(), name + '()', reflect.instanceMethods[name], $continuous.methodCall^^(variable, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true)
+		$helper.methods(extend, clazz.newControl(), name + '()', reflect.instanceMethods[name], $continuous.methodCall^^(variable, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true, config)
 	} // }}}
-	methods(extend, node, header, methods, call, argName, refName, returns) { // {{{
+	methods(extend, node, header, methods, call, argName, refName, returns, config) { // {{{
 		node.code(header).step()
 		
 		let method
@@ -3810,7 +3835,7 @@ const $helper = {
 						call(ctrl, group.methods[0], group.methods[0].index)
 					}
 					else {
-						$helper.methodCheck(ctrl, group, call, argName, refName, returns)
+						$helper.methodCheck(ctrl, group, call, argName, refName, returns, config)
 					}
 					
 					ctrl.step()
@@ -3826,7 +3851,7 @@ const $helper = {
 						call(ctrl, group.methods[0], group.methods[0].index)
 					}
 					else {
-						$helper.methodCheck(ctrl, group, call, argName, refName, returns)
+						$helper.methodCheck(ctrl, group, call, argName, refName, returns, config)
 					}
 					
 					ctrl.step()
@@ -3844,7 +3869,7 @@ const $helper = {
 						call(ctrl, group.methods[0], group.methods[0].index)
 					}
 					else {
-						$helper.methodCheck(ctrl, group, call, argName, refName, returns)
+						$helper.methodCheck(ctrl, group, call, argName, refName, returns, config)
 					}
 					
 					ctrl.step()
@@ -3861,8 +3886,8 @@ const $helper = {
 			}
 		}
 	} // }}}
-	methodCheck(node, group, call, argName, refName, returns) { // {{{
-		if $helper.methodCheckTree(group.methods, 0, node, call, argName, refName, returns) {
+	methodCheck(node, group, call, argName, refName, returns, config) { // {{{
+		if $helper.methodCheckTree(group.methods, 0, node, call, argName, refName, returns, config) {
 			if returns {
 				node.newExpression().code('throw new Error("Wrong type of arguments")')
 			}
@@ -3871,7 +3896,7 @@ const $helper = {
 			}
 		}
 	} // }}}
-	methodCheckTree(methods, index, node, call, argName, refName, returns) { // {{{
+	methodCheckTree(methods, index, node, call, argName, refName, returns, config) { // {{{
 		//console.log(index)
 		//console.log(JSON.stringify(methods, null, 2))
 		let tree = []
@@ -3921,7 +3946,7 @@ const $helper = {
 				return false
 			}
 			else {
-				return $helper.methodCheckTree(item.methods, index + 1, node, call, argName, refName, returns)
+				return $helper.methodCheckTree(item.methods, index + 1, node, call, argName, refName, returns, config)
 			}
 		}
 		else {
@@ -3951,7 +3976,7 @@ const $helper = {
 						
 						ctrl.code('if(')
 						
-						$helper.decide(ctrl, item.type, index, item.path, argName)
+						$helper.decide(ctrl, item.type, index, item.path, argName, config)
 						
 						ctrl.code(')')
 					}
@@ -3962,7 +3987,7 @@ const $helper = {
 						call(ctrl, item.methods[0], item.methods[0].index)
 					}
 					else {
-						$helper.methodCheckTree(item.methods, index + 1, ctrl, call, argName, refName, returns)
+						$helper.methodCheckTree(item.methods, index + 1, ctrl, call, argName, refName, returns, config)
 					}
 					
 					ctrl.step()
@@ -4172,7 +4197,7 @@ const $helper = {
 		else if type == 'Any' || type == '...' {
 			return $quote(type)
 		}
-		else if $typeofs[type] {
+		else if $runtime.typeof(type) {
 			return $quote(type)
 		}
 		else {
@@ -4189,6 +4214,8 @@ const $helper = {
 }
 
 func $implement(node, data, config, variable) { // {{{
+	node.module().flag('Helper')
+	
 	switch data.kind {
 		Kind::FieldDeclaration => {
 			if variable.final {
@@ -4199,7 +4226,7 @@ func $implement(node, data, config, variable) { // {{{
 				
 				node
 					.newExpression()
-					.code('Class.newField(' + $quote(data.name.name) + ', ' + $helper.type(type, node) + ')')
+					.code($runtime.helper(config), '.newField(' + $quote(data.name.name) + ', ' + $helper.type(type, node) + ')')
 			}
 		}
 		Kind::MethodAliasDeclaration => {
@@ -4230,7 +4257,7 @@ func $implement(node, data, config, variable) { // {{{
 				
 				let exp = node
 					.newExpression()
-					.code('Class.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
+					.code($runtime.helper(config), '.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
 					.indent()
 				
 				exp.newline().code('class: ').compile(variable.name, config).code(',')
@@ -4310,7 +4337,7 @@ func $implement(node, data, config, variable) { // {{{
 				
 				node.newExpression(Mode.NoIndent).newFunction().operation(func(ctrl) {
 					ctrl
-						.code('Class.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
+						.code($runtime.helper(config), '.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
 						.indent()
 					
 					ctrl.newline().code('class: ').compile(variable.name, config).code(',')
@@ -4397,7 +4424,7 @@ func $implement(node, data, config, variable) { // {{{
 				
 				let exp = node
 					.newExpression()
-					.code('Class.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
+					.code($runtime.helper(config), '.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
 					.indent()
 				
 				exp.newline().code('class: ').compile(variable.name, config).code(',')
@@ -4632,7 +4659,7 @@ const $import = {
 			$import.addVariable(module, file, node, alias, variable)
 			
 			if variable.kind != VariableKind::TypeAlias {
-				if variable.kind == VariableKind.Class && variable.final {
+				if variable.kind == VariableKind::Class && variable.final {
 					variable.final.name = '__ks_' + alias
 					
 					node.newExpression().code(`var {\(alias), \(variable.final.name)} = \(importCode)`)
@@ -4662,14 +4689,14 @@ const $import = {
 					if alias == name {
 						exp.code(name)
 						
-						if variable.kind == VariableKind.Class && variable.final {
+						if variable.kind == VariableKind::Class && variable.final {
 							exp.code(', ', variable.final.name)
 						}
 					}
 					else {
 						exp.code(name, ': ', alias)
 						
-						if variable.kind == VariableKind.Class && variable.final {
+						if variable.kind == VariableKind::Class && variable.final {
 							variable.final.name = '__ks_' + alias
 							
 							exp.code(', ', variable.final.name)
@@ -4690,7 +4717,7 @@ const $import = {
 				if variable.kind != VariableKind::TypeAlias {
 					variables.push(name)
 					
-					if variable.kind == VariableKind.Class && variable.final {
+					if variable.kind == VariableKind::Class && variable.final {
 						variable.final.name = '__ks_' + name
 						
 						variables.push(variable.final.name)
@@ -5128,12 +5155,14 @@ const $operator = {
 				}
 			} // }}}
 			AssignmentOperator::Existential => { // {{{
+				node.module().flag('Type')
+				
 				node.assignment(data, true)
 				
 				if data.right.kind == Kind::Identifier {
 					if mode & Mode.BooleanExpression {
 						node
-							.code('Type.isValue(')
+							.code($runtime.type(config), '.isValue(')
 							.compile(data.right, config, Mode.Key)
 							.code(') ? (')
 							.compile(data.left, config, Mode.Key)
@@ -5143,7 +5172,7 @@ const $operator = {
 					}
 					else {
 						node
-							.code('Type.isValue(')
+							.code($runtime.type(config), '.isValue(')
 							.compile(data.right, config, Mode.Key)
 							.code(') ? ')
 							.compile(data.left, config, Mode.Key)
@@ -5157,7 +5186,7 @@ const $operator = {
 					
 					if mode & Mode.BooleanExpression {
 						node
-							.code('Type.isValue(', name, ' = ')
+							.code($runtime.type(config), '.isValue(', name, ' = ')
 							.compile(data.right, config, Mode.Key)
 							.code(') ? (')
 							.compile(data.left, config, Mode.Key)
@@ -5165,7 +5194,7 @@ const $operator = {
 					}
 					else {
 						node
-							.code('Type.isValue(', name, ' = ')
+							.code($runtime.type(config), '.isValue(', name, ' = ')
 							.compile(data.right, config, Mode.Key)
 							.code(') ? ')
 							.compile(data.left, config, Mode.Key)
@@ -5243,9 +5272,11 @@ const $operator = {
 					.compile(data.right, config, Mode.Operand)
 			} // }}}
 			BinaryOperator::Existential => { // {{{
+				node.module().flag('Type')
+				
 				if data.left.kind == data.right.kind == Kind::Identifier {
 					node
-						.code('Type.isValue(')
+						.code($runtime.type(config), '.isValue(')
 						.compile(data.left, config, Mode.Operand)
 						.code(') ? ')
 						.compile(data.left, config, Mode.Operand)
@@ -5254,7 +5285,7 @@ const $operator = {
 				}
 				else {
 					node
-						.code('Type.vexists(')
+						.code($runtime.type(config), '.vexists(')
 						.compile(data.left, config, Mode.Operand)
 						.code(', ')
 						.compile(data.right, config, Mode.Operand)
@@ -5361,6 +5392,8 @@ const $operator = {
 				}
 			} // }}}
 			BinaryOperator::Existential => { // {{{
+				node.module().flag('Type')
+				
 				node.code('Type.vexists(')
 				
 				for i from 0 til data.operands.length {
@@ -5419,7 +5452,9 @@ const $operator = {
 				node.code('--').compile(data.argument, config, Mode.Operand)
 			} // }}}
 			UnaryOperator::Existential => { // {{{
-				node.code('Type.isValue(').compile(data.argument, config, Mode.Operand).code(')')
+				node.module().flag('Type')
+				
+				node.code($runtime.type(config), '.isValue(').compile(data.argument, config, Mode.Operand).code(')')
 			} // }}}
 			UnaryOperator::IncrementPostfix => { // {{{
 				node.compile(data.argument, config, Mode.Operand).code('++')
@@ -5447,6 +5482,41 @@ const $operator = {
 func $quote(value) { // {{{
 	return '"' + value.replace(/"/g, '\\"') + '"'
 } // }}}
+
+const $runtime = {
+	helper(config) { // {{{
+		return config.runtime.Helper
+	} // }}}
+	package(config) { // {{{
+		return config.runtime.package
+	} // }}}
+	type(config, node?) { // {{{
+		if node {
+			node.module().flag('Type')
+		}
+		
+		return config.runtime.Type
+	} // }}}
+	typeof(type, config?, node?) { // {{{
+		if config {
+			return false unless $typeofs[type]
+			
+			if type == 'NaN' {
+				return 'isNaN'
+			}
+			else {
+				if node {
+					node.module().flag('Type')
+				}
+				
+				return $runtime.type(config, node) + '.is' + type
+			}
+		}
+		else {
+			return $typeofs[type]
+		}
+	} // }}}
+}
 
 const $signature = {
 	type(type?, node) { // {{{
@@ -5502,6 +5572,15 @@ const $switch = {
 			}
 		}
 	}, // }}}
+	hasTest(clause) { // {{{
+		return true if clause.filter
+		
+		for binding in clause.bindings {
+			return true if binding.kind == Kind::ArrayBinding || binding.kind == Kind::ObjectBinding
+		}
+		
+		return false
+	} // }}}
 	length(elements) { // {{{
 		let min = 0
 		let max = 0
@@ -5525,6 +5604,8 @@ const $switch = {
 		let mm
 		for binding in clause.bindings {
 			if binding.kind == Kind::ArrayBinding {
+				ctrl.module().flag('Type')
+				
 				if nf {
 					ctrl.code(' && ')
 				}
@@ -5532,7 +5613,7 @@ const $switch = {
 					nf = true
 				}
 				
-				ctrl.code($typeofs.Array, '(', name, ')')
+				ctrl.code($runtime.typeof('Array', config), '(', name, ')')
 				
 				mm = $switch.length(binding.elements)
 				if mm.min == mm.max {
@@ -5583,7 +5664,7 @@ const $type = {
 			
 			if type.typeParameters {
 				if $generics[type.typeName.name] || !$types[type.typeName.name] || $generics[$types[type.typeName.name]] {
-					let tof = $typeofs[type.typeName.name] || $typeofs[$types[type.typeName.name]]
+					let tof = $runtime.typeof(type.typeName.name, config, node) || $runtime.typeof($types[type.typeName.name], config, node)
 					
 					if tof {
 						node
@@ -5600,7 +5681,7 @@ const $type = {
 					}
 					else {
 						node
-							.code('Type.is(')
+							.code($runtime.type(config, node), '.is(')
 							.compile(name, config, Mode.Operand)
 							.code(', ')
 							.compile(type.typeName, config, Mode.Operand)
@@ -5619,7 +5700,7 @@ const $type = {
 				}
 			}
 			else {
-				let tof = $typeofs[type.typeName.name] || $typeofs[$types[type.typeName.name]]
+				let tof = $runtime.typeof(type.typeName.name, config, node) || $runtime.typeof($types[type.typeName.name], config, node)
 				
 				if tof {
 					node
@@ -5629,7 +5710,7 @@ const $type = {
 				}
 				else {
 					node
-						.code('Type.is(')
+						.code($runtime.type(config, node), '.is(')
 						.compile(name, config, Mode.Operand)
 						.code(', ')
 						.compile(type, config, Mode.Operand)
@@ -6389,12 +6470,12 @@ class Block {
 		
 		return this
 	} // }}}
-	block(reference) {
+	block(reference) { // {{{
 		return {
 			block: this,
 			reference: reference
 		}
-	}
+	} // }}}
 	code(...args) { // {{{
 		for arg in args {
 			this._code.append(arg)
@@ -7236,6 +7317,9 @@ class ObjectBlock {
 	listNewVariables() { // {{{
 		return []
 	} // }}}
+	module() { // {{{
+		return this._parent.module()
+	} // }}}
 	newExpression(mode = 0) { // {{{
 		let code = new Expression(this, mode)
 		
@@ -7270,6 +7354,7 @@ class Module {
 		_compiler	: Compiler
 		_exportSource			= []
 		_exportMeta				= {}
+		_flags					= {}
 		_imports				= {}
 		_references				= {}
 		_register				= false
@@ -7355,6 +7440,11 @@ class Module {
 		
 		return this
 	} // }}}
+	flag(...args) { // {{{
+		for name in args {
+			this._flags[name] = true
+		}
+	} // }}}
 	import(name, file?) { // {{{
 		this._imports[name] = true
 		
@@ -7439,33 +7529,14 @@ class Module {
 		return data
 	} // }}}
 	toSource() { // {{{
-		let source = ''
-		if this._body._config.header {
-			source += `// Generated by kaoscript \(metadata.version)\n`
-		}
+		let config = this._body._config
 		
-		if this._register && this._body._config.register {
-			source += 'require("kaoscript/register");\n'
-		}
+		let source = ''
 		
 		if this._binary {
 			source += this._body.toSource().slice(0, -1)
 		}
 		else {
-			if !(this._requirements.Class || this._requirements.Type) && !(this._imports.Class && this._imports.Type) {
-				this._requirements.Array = {
-					class: true
-				}
-				this._requirements.Class = {}
-				this._requirements.Function = {
-					class: true
-				}
-				this._requirements.Object = {
-					class: true
-				}
-				this._requirements.Type = {}
-			}
-			
 			source += 'module.exports = function('
 			
 			let nf = false
@@ -7509,6 +7580,35 @@ class Module {
 			source += '}'
 		}
 		
+		let helper = $runtime.helper(config)
+		let type = $runtime.type(config)
+		
+		let hasHelper = !this._flags.Helper || this._requirements[helper] || this._imports[helper]
+		let hasType = !this._flags.Type || this._requirements[type] || this._imports[type]
+		
+		if !hasHelper || !hasType {
+			if hasHelper {
+				source = 'var ' + type + ' = require("' + $runtime.package(config) + '").Type;\n' + source
+			}
+			else if hasType {
+				source = 'var ' + helper + ' = require("' + $runtime.package(config) + '").Helper;\n' + source
+			}
+			else {
+				helper = `Helper: \(helper)` unless helper == 'Helper'
+				type = `Type: \(type)` unless type == 'Type'
+				
+				source = 'var {' + helper + ', ' + type + '} = require("' + $runtime.package(config) + '");\n' + source
+			}
+		}
+		
+		if this._register && config.register {
+			source = 'require("kaoscript/register");\n' + source
+		}
+		
+		if config.header {
+			source = `// Generated by kaoscript \(metadata.version)\n` + source
+		}
+		
 		return source
 	} // }}}
 }
@@ -7525,6 +7625,11 @@ export class Compiler {
 			config: {
 				header: true,
 				parameters: 'kaoscript',
+				runtime: {
+					Helper: 'Helper',
+					Type: 'Type',
+					package: '@kaoscript/runtime'
+				}
 				variables: 'es6'
 			}
 		}, options)

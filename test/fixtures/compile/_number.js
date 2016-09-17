@@ -1,6 +1,7 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+var Helper = require("@kaoscript/runtime").Helper;
+module.exports = function() {
 	var __ks_Number = {};
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Number,
 		name: "limit",
 		final: __ks_Number,
@@ -26,7 +27,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 			]
 		}
 	});
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Number,
 		name: "mod",
 		final: __ks_Number,
@@ -60,7 +61,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 			]
 		}
 	});
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Number,
 		name: "round",
 		final: __ks_Number,
@@ -84,7 +85,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 			]
 		}
 	});
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Number,
 		name: "toFloat",
 		final: __ks_Number,
@@ -99,7 +100,7 @@ module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Obj
 			]
 		}
 	});
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Number,
 		name: "toInt",
 		final: __ks_Number,

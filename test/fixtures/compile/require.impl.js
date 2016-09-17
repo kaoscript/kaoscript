@@ -1,6 +1,7 @@
-module.exports = function(Color, __ks_Color, Space, Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
-	Class.newField("_luma", "Number");
-	Class.newInstanceMethod({
+var {Helper, Type} = require("@kaoscript/runtime");
+module.exports = function(Color, __ks_Color, Space) {
+	Helper.newField("_luma", "Number");
+	Helper.newInstanceMethod({
 		class: Color,
 		name: "luma",
 		function: function() {
@@ -14,7 +15,7 @@ module.exports = function(Color, __ks_Color, Space, Array, __ks_Array, Class, Fu
 			]
 		}
 	});
-	Class.newInstanceMethod({
+	Helper.newInstanceMethod({
 		class: Color,
 		name: "luma",
 		function: function(luma) {

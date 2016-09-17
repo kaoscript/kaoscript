@@ -1,11 +1,12 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
+var Helper = require("@kaoscript/runtime").Helper;
+module.exports = function() {
 	let likes = {
 		leto: "spice",
 		paul: "chani",
 		duncan: "murbella"
 	};
 	function spicyHeroes() {
-		return spicyHeroes = __ks_Object._cm_map(likes, (hero, like) => {
+		return spicyHeroes = Helper.mapObject(likes, (hero, like) => {
 			return hero;
 		}, (hero, like) => {
 			return like === "spice";

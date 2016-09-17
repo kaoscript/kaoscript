@@ -1,5 +1,6 @@
-module.exports = function(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type) {
-	var {String, __ks_String} = require("./_string.ks")(Array, __ks_Array, Class, Function, __ks_Function, Object, __ks_Object, Type);
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function() {
+	var {String, __ks_String} = require("./_string.ks")();
 	var exec = require("child_process").exec;
 	const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i;
 	function disks(__ks_cb) {
