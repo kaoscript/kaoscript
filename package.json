@@ -36,7 +36,7 @@
 	"dependencies": {
 		"@kaoscript/ast": "0.1.x",
 		"@kaoscript/parser": "0.1.x",
-		"@kaoscript/runtime": ">=0.2.x <1",
+		"@kaoscript/runtime": "0.2.x",
 		"commander": "2.9.x"
 	},
 	"devDependencies": {
