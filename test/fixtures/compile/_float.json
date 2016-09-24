@@ -7,13 +7,13 @@
       "new": true,
       "type": {
         "typeName": {
-          "kind": 38,
+          "kind": 39,
           "name": "Object"
         },
         "properties": [
           {
             "name": {
-              "kind": 38,
+              "kind": 39,
               "name": "parse"
             },
             "signature": {
@@ -29,7 +29,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Number"
               }
             }

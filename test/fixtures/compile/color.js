@@ -278,7 +278,7 @@ module.exports = function() {
 			};
 		}
 		let s;
-		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
+		if(Type.isValue((s = $spaces[that._space], s.converters[space])) ? s.converters[space] : false) {
 			let args = Helper.mapObject(s.components, (name, component) => {
 				return that[component.field];
 			});
@@ -329,7 +329,7 @@ module.exports = function() {
 		if(args.length === 0) {
 			return that;
 		}
-		else if((Type.isString(args[0])) && Type.isValue($parsers[args[0]])) {
+		else if((Type.isString(args[0])) && Type.isValue($parsers[args[0]]) ? $parsers[args[0]] : false) {
 			if($parsers[args.shift()](that, args)) {
 				return that;
 			}
@@ -355,7 +355,7 @@ module.exports = function() {
 		if(space === undefined || space === null) {
 			throw new Error("Missing parameter 'space'");
 		}
-		if(Type.isValue($components[name].spaces[this._space])) {
+		if(Type.isValue($components[name].spaces[this._space]) ? $components[name].spaces[this._space] : false) {
 			return this[component.field];
 		}
 		else {
@@ -369,7 +369,7 @@ module.exports = function() {
 		if(field === undefined || field === null) {
 			throw new Error("Missing parameter 'field'");
 		}
-		if(Type.isValue($components[name].spaces[this._space])) {
+		if(Type.isValue($components[name].spaces[this._space]) ? $components[name].spaces[this._space] : false) {
 			return this[field];
 		}
 		else {
@@ -438,7 +438,7 @@ module.exports = function() {
 					return true;
 				}
 				else if(Type.isObject(args[0])) {
-					if(Type.isValue(args[0].r) && Type.isValue(args[0].g) && Type.isValue(args[0].b)) {
+					if(Type.isValue(args[0].r) ? args[0].r : false && Type.isValue(args[0].g) ? args[0].g : false && Type.isValue(args[0].b) ? args[0].b : false) {
 						that._space = Space.SRGB;
 						that._alpha = $caster.alpha(args[0].a);
 						that._red = $caster.ff(args[0].r);
@@ -446,7 +446,7 @@ module.exports = function() {
 						that._blue = $caster.ff(args[0].b);
 						return true;
 					}
-					if(Type.isValue(args[0].red) && Type.isValue(args[0].green) && Type.isValue(args[0].blue)) {
+					if(Type.isValue(args[0].red) ? args[0].red : false && Type.isValue(args[0].green) ? args[0].green : false && Type.isValue(args[0].blue) ? args[0].blue : false) {
 						that._space = Space.SRGB;
 						that._alpha = $caster.alpha(args[0].alpha);
 						that._red = $caster.ff(args[0].red);
@@ -470,7 +470,7 @@ module.exports = function() {
 						that._blue = c & 255;
 						return true;
 					}
-					if(Type.isValue($names[color])) {
+					if(Type.isValue($names[color]) ? $names[color] : false) {
 						color = "#" + $names[color];
 					}
 					let match, __ks_0;
@@ -614,8 +614,8 @@ module.exports = function() {
 		if(!(Type.isNumber(value) || Type.isString(value))) {
 			throw new Error("Invalid type for parameter 'value'");
 		}
-		if(Type.isValue($components[name].spaces[this._space])) {
-			if(Type.isValue(component.parser)) {
+		if(Type.isValue($components[name].spaces[this._space]) ? $components[name].spaces[this._space] : false) {
+			if(Type.isValue(component.parser) ? component.parser : false) {
 				this[component.field] = component.parser(value);
 			}
 			else if(component.loop) {
@@ -627,7 +627,7 @@ module.exports = function() {
 		}
 		else {
 			this.space(space);
-			if(Type.isValue(component.parser)) {
+			if(Type.isValue(component.parser) ? component.parser : false) {
 				this[component.field] = component.parser(value);
 			}
 			else if(component.loop) {
@@ -652,9 +652,9 @@ module.exports = function() {
 		if(!(Type.isNumber(value) || Type.isString(value))) {
 			throw new Error("Invalid type for parameter 'value'");
 		}
-		if(Type.isValue($components[name].spaces[this._space])) {
+		if(Type.isValue($components[name].spaces[this._space]) ? $components[name].spaces[this._space] : false) {
 			let component = $spaces[this._space].components[name];
-			if(Type.isValue(component.parser)) {
+			if(Type.isValue(component.parser) ? component.parser : false) {
 				this[field] = component.parser(value);
 			}
 			else if(component.loop) {
@@ -676,11 +676,12 @@ module.exports = function() {
 		if(!Type.isString(name)) {
 			throw new Error("Invalid type for parameter 'name'");
 		}
-		$spaces[name] = Type.vexists($spaces[name], {
+		let __ks_0;
+		$spaces[name] = Type.isValue((__ks_0 = $spaces[name])) ? __ks_0 : {
 			alias: {},
 			converters: {},
 			components: {}
-		});
+		};
 	}
 	let Space = {
 		RGB: "rgb",
@@ -944,7 +945,7 @@ module.exports = function() {
 			format = format || this._space;
 			let __ks_0;
 			if(Type.isValue(__ks_0 = $formatters[format]) ? (format = __ks_0, true) : false) {
-				return format.formatter((Type.isValue(format.space)) ? (this.like(format.space)) : (this));
+				return format.formatter((Type.isValue(format.space) ? format.space : undefined) ? (this.like(format.space)) : (this));
 			}
 			else {
 				return false;
@@ -1083,8 +1084,9 @@ module.exports = function() {
 			if(!Type.isString(space)) {
 				throw new Error("Invalid type for parameter 'space'");
 			}
-			space = Type.vexists($aliases[space], space);
-			return (this._space === space) || Type.isValue($spaces[this._space][space]) ? this : $convert(this, space);
+			let __ks_0;
+			space = Type.isValue((__ks_0 = $aliases[space])) ? __ks_0 : space;
+			return (this._space === space) || Type.isValue($spaces[this._space][space]) ? $spaces[this._space][space] : false ? this : $convert(this, space);
 		}
 		like() {
 			if(arguments.length === 1) {
@@ -1216,9 +1218,10 @@ module.exports = function() {
 			if(!Type.isString(space)) {
 				throw new Error("Invalid type for parameter 'space'");
 			}
-			space = Type.vexists($aliases[space], space);
-			if(!Type.isValue($spaces[space]) && Type.isValue($components[space])) {
-				if(Type.isValue($spaces[this._space].components[space])) {
+			let __ks_0;
+			space = Type.isValue((__ks_0 = $aliases[space])) ? __ks_0 : space;
+			if(!Type.isValue($spaces[space]) ? $spaces[space] : undefined && Type.isValue($components[space]) ? $components[space] : false) {
+				if(Type.isValue($spaces[this._space].components[space]) ? $spaces[this._space].components[space] : false) {
 					return this;
 				}
 				else if($components[space].families.length === 1) {
@@ -1228,7 +1231,7 @@ module.exports = function() {
 					throw new Error("The component '" + space + "' has a conflict between the spaces '" + $components[space].families.join("', '") + "'");
 				}
 			}
-			if((this._space !== space) && !Type.isValue($spaces[this._space][space])) {
+			if((this._space !== space) && !Type.isValue($spaces[this._space][space]) ? $spaces[this._space][space] : undefined) {
 				$convert(this, space, this);
 			}
 			return this;
@@ -1360,16 +1363,16 @@ module.exports = function() {
 			}
 			let spaces = Object.keys($spaces);
 			$space(space.name);
-			if(Type.isValue(space.parser)) {
+			if(Type.isValue(space.parser) ? space.parser : false) {
 				$parsers[space.name] = space.parser;
 			}
-			if(Type.isValue(space.formatter)) {
+			if(Type.isValue(space.formatter) ? space.formatter : false) {
 				$formatters[space.name] = {
 					space: space.name,
 					formatter: space.formatter
 				};
 			}
-			else if(Type.isValue(space.formatters)) {
+			else if(Type.isValue(space.formatters) ? space.formatters : false) {
 				let __ks_0 = space.formatters;
 				for(let name in __ks_0) {
 					let formatter = __ks_0[name];
@@ -1379,21 +1382,21 @@ module.exports = function() {
 					};
 				}
 			}
-			if(Type.isValue(space.alias)) {
+			if(Type.isValue(space.alias) ? space.alias : false) {
 				let __ks_0 = space.alias;
 				for(let __ks_1 = 0, __ks_2 = __ks_0.length, alias; __ks_1 < __ks_2; ++__ks_1) {
 					alias = __ks_0[__ks_1];
 					$spaces[space.name].alias[alias] = true;
 					$aliases[alias] = space.name;
 				}
-				if(Type.isValue($parsers[space.name])) {
+				if(Type.isValue($parsers[space.name]) ? $parsers[space.name] : false) {
 					let __ks_1 = space.alias;
 					for(let __ks_2 = 0, __ks_3 = __ks_1.length, alias; __ks_2 < __ks_3; ++__ks_2) {
 						alias = __ks_1[__ks_2];
 						$parsers[alias] = $parsers[space.name];
 					}
 				}
-				if(Type.isValue($formatters[space.name])) {
+				if(Type.isValue($formatters[space.name]) ? $formatters[space.name] : false) {
 					let __ks_1 = space.alias;
 					for(let __ks_2 = 0, __ks_3 = __ks_1.length, alias; __ks_2 < __ks_3; ++__ks_2) {
 						alias = __ks_1[__ks_2];
@@ -1401,8 +1404,8 @@ module.exports = function() {
 					}
 				}
 			}
-			if(Type.isValue(space.converters)) {
-				if(Type.isValue(space.converters.from)) {
+			if(Type.isValue(space.converters) ? space.converters : false) {
+				if(Type.isValue(space.converters.from) ? space.converters.from : false) {
 					let __ks_0 = space.converters.from;
 					for(let name in __ks_0) {
 						let converter = __ks_0[name];
@@ -1412,7 +1415,7 @@ module.exports = function() {
 						$spaces[name].converters[space.name] = converter;
 					}
 				}
-				if(Type.isValue(space.converters.to)) {
+				if(Type.isValue(space.converters.to) ? space.converters.to : false) {
 					let __ks_0 = space.converters.to;
 					for(let name in __ks_0) {
 						let converter = __ks_0[name];
@@ -1429,15 +1432,15 @@ module.exports = function() {
 					$find(space.name, name);
 				}
 			}
-			if(Type.isValue(space.components)) {
+			if(Type.isValue(space.components) ? space.components : false) {
 				let __ks_0 = space.components;
 				for(let name in __ks_0) {
 					let component = __ks_0[name];
-					if(Type.isValue(component.family)) {
+					if(Type.isValue(component.family) ? component.family : false) {
 						$spaces[space.name].components[name] = $spaces[component.family].components[name];
 						$components[name].spaces[space.name] = true;
 					}
-					else if(Type.isValue(component.mutator)) {
+					else if(Type.isValue(component.mutator) ? component.mutator : false) {
 						$component(component, name, space.name);
 						if($components[name].families.length > 1) {
 							Helper.newInstanceMethod({
@@ -1513,7 +1516,7 @@ module.exports = function() {
 						if(!Type.isValue(component.round)) {
 							component.round = 0;
 						}
-						if(!Type.isValue(component.loop) || (component.min !== 0)) {
+						if(!Type.isValue(component.loop) ? component.loop : undefined || (component.min !== 0)) {
 							component.loop = false;
 						}
 						else if(component.loop) {

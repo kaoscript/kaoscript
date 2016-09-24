@@ -3,12 +3,14 @@ module.exports = function() {
 		foo: 2
 	};
 	console.log(foo);
-	var {foo = 3} = {
+	var {foo: __ks_0 = 3} = {
 		foo: null
 	};
+	foo = __ks_0;
 	console.log(foo);
-	var {foo = 5} = {
+	var {foo: __ks_1 = 5} = {
 		bar: 2
 	};
+	foo = __ks_1;
 	console.log(foo);
 }

@@ -7,13 +7,13 @@
       "new": true,
       "type": {
         "typeName": {
-          "kind": 38,
+          "kind": 39,
           "name": "Object"
         },
         "properties": [
           {
             "name": {
-              "kind": 38,
+              "kind": 39,
               "name": "log"
             },
             "signature": {
@@ -60,7 +60,7 @@
       "instanceMethods": {
         "draw": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "draw",
             "signature": {
               "access": 3,
@@ -76,7 +76,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "string"
               }
             }
@@ -85,12 +85,12 @@
       },
       "classMethods": {},
       "final": {
+        "name": "__ks_Shape",
         "constructors": false,
         "instanceMethods": {
           "draw": true
         },
-        "classMethods": {},
-        "name": "__ks_Shape"
+        "classMethods": {}
       }
     }
   }

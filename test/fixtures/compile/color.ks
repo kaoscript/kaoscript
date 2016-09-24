@@ -194,14 +194,12 @@ let $caster = {
 
 func $component(component, name: string, space: string) -> void { // {{{
 	component.field = '_' + name
-
+	
 	$spaces[space].components[name] = component
-
-	if !?$components[name] {
-		$components[name] = {
-			spaces: {}
-			families: []
-		}
+	
+	$components[name] ??= {
+		spaces: {}
+		families: []
 	}
 	
 	$components[name].families.push(space)
@@ -699,12 +697,8 @@ export class Color {
 						}
 					}
 					else {
-						if !?component.min {
-							component.min = 0
-						}
-						if !?component.round {
-							component.round = 0
-						}
+						component.min ??= 0
+						component.round ??= 0
 						if !?component.loop || component.min != 0 {
 							component.loop = false
 						}

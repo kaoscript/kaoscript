@@ -21,15 +21,15 @@
       ],
       "instanceVariables": {
         "name": {
-		  "access": 3,
-		  "type": "String"
-		}
+          "access": 3,
+          "type": "String"
+        }
       },
       "classVariables": {
         "bar": {
-		  "access": 3,
-		  "type": "String"
-		}
+          "access": 3,
+          "type": "String"
+        }
       },
       "instanceMethods": {
         "qux": [

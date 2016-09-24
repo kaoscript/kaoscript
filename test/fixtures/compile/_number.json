@@ -11,7 +11,7 @@
       "instanceMethods": {
         "limit": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "limit",
             "signature": {
               "access": 3,
@@ -27,7 +27,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Number"
               }
             }
@@ -35,7 +35,7 @@
         ],
         "mod": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "mod",
             "signature": {
               "access": 3,
@@ -51,7 +51,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Number"
               }
             }
@@ -59,7 +59,7 @@
         ],
         "round": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "round",
             "signature": {
               "access": 3,
@@ -75,7 +75,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Number"
               }
             }
@@ -83,7 +83,7 @@
         ],
         "toFloat": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "toFloat",
             "signature": {
               "access": 3,
@@ -93,7 +93,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Number"
               }
             }
@@ -101,7 +101,7 @@
         ],
         "toInt": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "toInt",
             "signature": {
               "access": 3,
@@ -117,7 +117,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Number"
               }
             }
@@ -126,6 +126,7 @@
       },
       "classMethods": {},
       "final": {
+        "name": "__ks_Number",
         "constructors": false,
         "instanceMethods": {
           "limit": true,
@@ -134,8 +135,7 @@
           "toFloat": true,
           "toInt": true
         },
-        "classMethods": {},
-        "name": "__ks_Number"
+        "classMethods": {}
       }
     }
   }

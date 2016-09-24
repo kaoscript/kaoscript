@@ -15,7 +15,7 @@
       "classMethods": {
         "vcurry": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "vcurry",
             "signature": {
               "access": 3,
@@ -38,12 +38,12 @@
         ]
       },
       "final": {
+        "name": "__ks_Function",
         "constructors": false,
         "instanceMethods": {},
         "classMethods": {
           "vcurry": true
-        },
-        "name": "__ks_Function"
+        }
       }
     }
   }

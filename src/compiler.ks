@@ -106,7 +106,7 @@ impl Array {
 		return this.indexOf(item, from) != -1
 	} // }}}
 	static from(item) { // {{{
-		if(Type.isEnumerable(item) && !Type.isString(item)) {
+		if Type.isEnumerable(item) && !Type.isString(item) {
 			return (item is array) ? item : Array.prototype.slice.call(item)
 		}
 		else {
@@ -199,6 +199,8 @@ const Mode = { // {{{
 	Async: 1 << 13
 	BooleanExpression: 1 << 14
 	ObjectMember: 1 << 15
+	Parameter: 1 << 16
+	NoTest: 1 << 17
 } // }}}
 
 enum VariableKind { // {{{
@@ -377,7 +379,7 @@ func $compile(node, data, config, mode, variable = null) {
 				config = Object.clone(config)
 				
 				for arg in attr.declaration.arguments {
-					if(arg.kind == Kind::AttributeOperator) {
+					if arg.kind == Kind::AttributeOperator {
 						config[arg.name.name] = arg.value.value
 					}
 				}
@@ -387,17 +389,112 @@ func $compile(node, data, config, mode, variable = null) {
 	
 	switch data.kind {
 		Kind::ArrayBinding => { // {{{
-			node.code('[')
-			
-			for i from 0 til data.elements.length {
-				if i {
-					node.code(', ')
+			if mode & Mode.Parameter {
+				node.code('[')
+				
+				for i from 0 til data.elements.length {
+					if i {
+						node.code(', ')
+					}
+					
+					node.compile(data.elements[i], config, mode | Mode.Key)
 				}
 				
-				node.compile(data.elements[i], config, mode | Mode.Key)
+				node.code(']')
 			}
-			
-			node.code(']')
+			else {
+				let existing = {}
+				let existingCount = 0
+				let nonexisting = {}
+				let nonexistingCount = 0
+				
+				for element in data.elements {
+					if element.kind == Kind::BindingElement && !element.name.computed {
+						if node.hasVariable(element.name.name) {
+							existing[element.name.name] = true
+							++existingCount
+						}
+						else {
+							nonexisting[element.name.name] = true
+							++nonexistingCount
+						}
+					}
+				}
+				
+				if existingCount && nonexistingCount {
+					if !(mode & Mode.Declaration) {
+						node.code('var ')
+						
+						mode |= Mode.Declaration
+					}
+					
+					let variables = {}
+					
+					node.code('[')
+					
+					let element, name
+					for i from 0 til data.elements.length {
+						if i {
+							node.code(', ')
+						}
+						
+						element = data.elements[i]
+						if element.kind == Kind::BindingElement && !element.name.computed && existing[element.name.name] {
+							name = node.newTempName(false)
+							
+							node.compile(element, config, mode | Mode.Key, {
+								kind: Kind::ArrayBinding
+								name: name
+							})
+							
+							variables[name] = element.name.name
+						}
+						else {
+							node.compile(element, config, mode | Mode.Key)
+						}
+					}
+					
+					node.code(']')
+					
+					let {block, reference} = node.block()
+					
+					for name of variables {
+						block.newExpression().code(variables[name], ' = ', name)
+					}
+				}
+				else if existingCount {
+					node.code('[')
+					
+					for i from 0 til data.elements.length {
+						if i {
+							node.code(', ')
+						}
+						
+						node.compile(data.elements[i], config, mode | Mode.Key)
+					}
+					
+					node.code(']')
+				}
+				else {
+					if !(mode & Mode.Declaration) {
+						node.code('var ')
+						
+						mode |= Mode.Declaration
+					}
+					
+					node.code('[')
+					
+					for i from 0 til data.elements.length {
+						if i {
+							node.code(', ')
+						}
+						
+						node.compile(data.elements[i], config, mode | Mode.Key)
+					}
+					
+					node.code(']')
+				}
+			}
 		} // }}}
 		Kind::ArrayComprehension => { // {{{
 			node.module().flag('Helper')
@@ -460,7 +557,7 @@ func $compile(node, data, config, mode, variable = null) {
 					.code('(')
 					.parameter(data.loop.variable, config)
 				
-				if(data.loop.index) {
+				if data.loop.index {
 					ctrl
 						.code(', ')
 						.parameter(data.loop.index, config)
@@ -629,7 +726,17 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 			}
 			
-			node.compile(data.name, config, mode)
+			if variable {
+				if variable.kind == Kind::ArrayBinding {
+					node.code(variable.name)
+				}
+				else {
+					node.compile(data.name, config, mode).code(': ', variable.name)
+				}
+			}
+			else {
+				node.compile(data.name, config, mode)
+			}
 			
 			$variable.define(node, data.name, VariableKind::Variable)
 			
@@ -746,7 +853,7 @@ func $compile(node, data, config, mode, variable = null) {
 					node.code('(') if mode & Mode.Operand
 					
 					let name = null
-					if(data.callee.object.kind == Kind::Identifier) {
+					if data.callee.object.kind == Kind::Identifier {
 						if tof = $runtime.typeof(callee.variables[0].name, config) {
 							node.code(tof, '(').compile(data.callee.object, config).code(')')
 						}
@@ -803,6 +910,13 @@ func $compile(node, data, config, mode, variable = null) {
 							variable.callReplacement(node, data, list)
 						}
 						else {
+							/* let nullable = $expression.nullable(data)
+							if nullable {
+								node.module().flag('Type')
+								
+								node.code('Type.isFunction(').compile(data.callee, config).code(') ? ')
+							}
+							
 							node
 								.compile(data.callee, config)
 								.code('(')
@@ -822,6 +936,50 @@ func $compile(node, data, config, mode, variable = null) {
 							}
 							else {
 								node.code(')')
+							}
+							
+							if nullable {
+								node.code(' : undefined')
+							} */
+							if $expression.nullable(data) {
+								if mode & Mode.Await {
+									console.error(data)
+									throw new Error('Not Implemented')
+								}
+								
+								let name = $expression.value(node, data, config)
+								
+								node.code(' ? ').compile(name, config).code('(')
+								
+								for i from 0 til data.arguments.length {
+									if i {
+										node.code(', ')
+									}
+									
+									node.compile(data.arguments[i], config)
+								}
+								
+								node.code(') : undefined')
+							}
+							else {
+								node.compile(data.callee, config).code('(')
+								
+								for i from 0 til data.arguments.length {
+									if i {
+										node.code(', ')
+									}
+									
+									node.compile(data.arguments[i], config)
+								}
+								
+								if mode & Mode.Await {
+									if data.arguments.length {
+										node.code(', ')
+									}
+								}
+								else {
+									node.code(')')
+								}
 							}
 						}
 					}
@@ -994,7 +1152,7 @@ func $compile(node, data, config, mode, variable = null) {
 		Kind::EnumDeclaration => { // {{{
 			variable = $variable.define(node, data.name, VariableKind.Enum, data.type)
 			
-			if(variable.new) {
+			if variable.new {
 				let statement = node
 					.newExpression()
 					.code($variable.scope(config))
@@ -1079,7 +1237,7 @@ func $compile(node, data, config, mode, variable = null) {
 			for declaration in data.declarations {
 				switch declaration.kind {
 					Kind::ClassDeclaration => {
-						variable = $variable.define(node, declaration.name, VariableKind.Class, declaration)
+						variable = $variable.define(node, declaration.name, VariableKind::Class, declaration)
 						
 						let continuous = true
 						for i from 0 til declaration.modifiers.length while continuous {
@@ -1112,10 +1270,78 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		}
 		// }}}
+		Kind::ExternOrRequireDeclaration => { // {{{
+			let module = node.module()
+			
+			module.flag('Type')
+			
+			let type
+			for declaration in data.declarations {
+				switch declaration.kind {
+					Kind::ClassDeclaration => {
+						variable = $variable.define(node, declaration.name, VariableKind::Class, declaration)
+						
+						let continuous = true
+						for i from 0 til declaration.modifiers.length while continuous {
+							continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
+						}
+						
+						if !continuous {
+							variable.final = {
+								name: '__ks_' + variable.name.name
+								constructors: false
+								instanceMethods: {}
+								classMethods: {}
+							}
+						}
+						
+						for i from 0 til declaration.members.length {
+							$extern.classMember(declaration.members[i], variable, node)
+						}
+						
+						let name = node.newTempName()
+						
+						let ctrl = node
+							.newControl()
+							.code(`if(!Type.isValue(\(variable.name.name)))`)
+							.step()
+						
+						ctrl.newExpression().code(`var \(variable.name.name) = \(name)`)
+						ctrl.newExpression().code(`var __ks_\(variable.name.name) = __ks_\(name)`)
+						
+						ctrl.step().code('else').step().newExpression().code(`var __ks_\(variable.name.name) = {}`)
+						
+						module.require(name, VariableKind::Class)
+					}
+					Kind::VariableDeclarator => {
+						$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+						
+						let name = node.newTempName()
+						
+						let ctrl = node
+							.newControl()
+							.code(`if(!Type.isValue(\(variable.name.name)))`)
+							.step()
+						
+						ctrl.newExpression().code(`var \(variable.name.name) = \(name)`)
+						
+						module.require(name, type)
+					}
+					=> {
+						console.error(declaration)
+						throw new Error('Unknow kind ' + declaration.kind)
+					}
+				}
+			}
+		} // }}}
 		Kind::ForFromStatement => { // {{{
 			let ctrl = node.newControl()
 			
-			ctrl.code('for(', $variable.scope(config), data.variable.name, ' = ').compile(data.from, config)
+			ctrl.code('for(')
+			if data.declaration || !node.hasVariable(data.variable.name) {
+				ctrl.code($variable.scope(config))
+			}
+			ctrl.code(data.variable.name, ' = ').compile(data.from, config)
 			
 			let bound
 			if data.til {
@@ -1233,7 +1459,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			
 			if data.desc {
-				if data.index && node.hasVariable(data.index.name) {
+				if data.index && !data.declaration && node.hasVariable(data.index.name) {
 					index = data.index.name
 					
 					node.newExpression().code(index, ' = ', value, '.length - 1')
@@ -1259,7 +1485,7 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 			}
 			else {
-				if data.index && node.hasVariable(data.index.name) {
+				if data.index && !data.declaration && node.hasVariable(data.index.name) {
 					index = data.index.name
 					
 					node.newExpression().code(index, ' = 0')
@@ -1280,7 +1506,7 @@ func $compile(node, data, config, mode, variable = null) {
 				
 				ctrl.code(bound, ' = ', value, '.length')
 				
-				if !node.hasVariable(data.variable.name) {
+				if data.declaration || !node.hasVariable(data.variable.name) {
 					ctrl.code(', ', data.variable.name)
 				}
 			}
@@ -1335,7 +1561,7 @@ func $compile(node, data, config, mode, variable = null) {
 			let ctrl = node.newControl()
 			
 			ctrl.code('for(')
-			if !node.hasVariable(data.variable.name) {
+			if data.declaration || !node.hasVariable(data.variable.name) {
 				ctrl.code($variable.scope(config))
 			}
 			ctrl.code(data.variable.name, ' in ', value, ')')
@@ -1345,7 +1571,7 @@ func $compile(node, data, config, mode, variable = null) {
 			$variable.define(ctrl, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
 			
 			if data.index {
-				if !node.hasVariable(data.variable.name) {
+				if data.declaration || !node.hasVariable(data.variable.name) {
 					ctrl.code($variable.scope(config))
 				}
 				
@@ -1380,7 +1606,11 @@ func $compile(node, data, config, mode, variable = null) {
 		Kind::ForRangeStatement => { // {{{
 			let ctrl = node.newControl()
 			
-			ctrl.code('for(', $variable.scope(config), data.variable.name, ' = ').compile(data.from, config).code('; ')
+			ctrl.code('for(')
+			if data.declaration || !node.hasVariable(data.variable.name) {
+				ctrl.code($variable.scope(config))
+			}
+			ctrl.code(data.variable.name, ' = ').compile(data.from, config).code('; ')
 			
 			if data.until {
 				ctrl.code('!(').compile(data.until, config).code(') && ')
@@ -1563,28 +1793,85 @@ func $compile(node, data, config, mode, variable = null) {
 		Kind::MemberExpression => { // {{{
 			node = node.newExpression()
 			
-			node.compile(data.object, config, mode | Mode.Operand)
-			
-			if data.computed {
-				node
-					.code('[')
-					.compile(data.property, config)
-					.code(']')
+			if !(mode & Mode.NoTest) && $expression.nullable(data) {
+				let name = $expression.value(node, data, config)
+				
+				node.code(' ? ').compile(name, config).code(' : ', mode & Mode.BooleanExpression ? 'false' : 'undefined')
 			}
 			else {
-				node.code('.', data.property.name)
+				node.compile(data.object, config, mode | Mode.Operand)
+				
+				if data.computed {
+					node
+						.code('[')
+						.compile(data.property, config)
+						.code(']')
+				}
+				else {
+					node.code('.', data.property.name)
+				}
 			}
 		} // }}}
 		Kind::NumericExpression => node.code(data.value)
 		Kind::ObjectBinding => { // {{{
+			let existings = {}
+			let exists = false
+			
+			for element in data.elements {
+				if !element.name.computed && node.hasVariable(element.name.name) {
+					exists = true
+					existings[element.name.name] = true
+				}
+			}
+			
+			if !(mode & Mode.Declaration) {
+				node.code('var ')
+				
+				mode |= Mode.Declaration
+			}
+			
 			node.code('{')
 			
-			for i from 0 til data.elements.length {
-				if(i) {
-					node.code(', ')
+			if exists {
+				let variables = {}
+				
+				let name, element
+				for i from 0 til data.elements.length {
+					if i {
+						node.code(', ')
+					}
+					
+					element = data.elements[i]
+					
+					if existings[element.name.name] {
+						name = node.newTempName(false)
+						
+						node.compile(element, config, mode | Mode.Key, {
+							kind: Kind::ObjectBinding
+							name: name
+						})
+						
+						variables[name] = element.name.name
+					}
+					else {
+						node.compile(element, config, mode | Mode.Key)
+					}
 				}
 				
-				node.compile(data.elements[i], config, mode | Mode.Key)
+				let {block, reference} = node.block()
+				
+				for name of variables {
+					block.newExpression().code(variables[name], ' = ', name)
+				}
+			}
+			else {
+				for i from 0 til data.elements.length {
+					if i {
+						node.code(', ')
+					}
+					
+					node.compile(data.elements[i], config, mode | Mode.Key)
+				}
 			}
 			
 			node.code('}')
@@ -1648,10 +1935,97 @@ func $compile(node, data, config, mode, variable = null) {
 			let type
 			for declaration in data.declarations {
 				switch declaration.kind {
+					Kind::ClassDeclaration => {
+						variable = $variable.define(node, declaration.name, VariableKind::Class, declaration)
+						
+						let continuous = true
+						for i from 0 til declaration.modifiers.length while continuous {
+							continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
+						}
+						
+						if !continuous {
+							variable.final = {
+								name: '__ks_' + variable.name.name
+								constructors: false
+								instanceMethods: {}
+								classMethods: {}
+							}
+						}
+						
+						for i from 0 til declaration.members.length {
+							$extern.classMember(declaration.members[i], variable, node)
+						}
+						
+						module.require(declaration.name.name, VariableKind::Class)
+					}
 					Kind::VariableDeclarator => {
 						$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
 						
 						module.require(declaration.name.name, type)
+					}
+					=> {
+						console.error(declaration)
+						throw new Error('Unknow kind ' + declaration.kind)
+					}
+				}
+			}
+		} // }}}
+		Kind::RequireOrExternDeclaration => { // {{{
+			let module = node.module()
+			
+			module.flag('Type')
+			
+			let type
+			for declaration in data.declarations {
+				switch declaration.kind {
+					Kind::ClassDeclaration => {
+						variable = $variable.define(node, declaration.name, VariableKind::Class, declaration)
+						
+						let continuous = true
+						for i from 0 til declaration.modifiers.length while continuous {
+							continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
+						}
+						
+						if !continuous {
+							variable.final = {
+								name: '__ks_' + variable.name.name
+								constructors: false
+								instanceMethods: {}
+								classMethods: {}
+							}
+						}
+						
+						for i from 0 til declaration.members.length {
+							$extern.classMember(declaration.members[i], variable, node)
+						}
+						
+						let name = node.newTempName()
+						
+						let ctrl = node
+							.newControl()
+							.code(`if(Type.isValue(\(name)))`)
+							.step()
+						
+						ctrl.newExpression().code(`var \(variable.name.name) = \(name)`)
+						ctrl.newExpression().code(`var __ks_\(variable.name.name) = __ks_\(name)`)
+						
+						ctrl.step().code('else').step().newExpression().code(`var __ks_\(variable.name.name) = {}`)
+						
+						module.require(name, VariableKind::Class)
+					}
+					Kind::VariableDeclarator => {
+						$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+						
+						let name = node.newTempName()
+						
+						let ctrl = node
+							.newControl()
+							.code(`if(Type.isValue(\(name)))`)
+							.step()
+						
+						ctrl.newExpression().code(`var \(variable.name.name) = \(name)`)
+						
+						module.require(name, type)
 					}
 					=> {
 						console.error(declaration)
@@ -1768,17 +2142,7 @@ func $compile(node, data, config, mode, variable = null) {
 				if clause.filter && clause.bindings.length {
 					name = filters[clauseIdx] = node.newTempName()
 					
-					exp = node.newExpression().code($variable.scope(config), name, ' = (')
-					
-					for i from 0 til clause.bindings.length {
-						if i {
-							exp.code(', ')
-						}
-						
-						exp.compile(clause.bindings[i], config)
-					}
-					
-					exp.code(') => ').compile(clause.filter, config)
+					node.newExpression().newFunction().operation($switch.filter^^(name, clause, config))
 				}
 			}
 			
@@ -2122,6 +2486,8 @@ func $compile(node, data, config, mode, variable = null) {
 		Kind::VariableDeclarator => { // {{{
 			let exp = node.newExpression()
 			
+			exp._assignment = true
+			
 			if data.name.kind == Kind::Identifier {
 				if config.variables == 'es6' {
 					if variable == VariableModifier.Let {
@@ -2137,7 +2503,7 @@ func $compile(node, data, config, mode, variable = null) {
 					node.rename(data.name.name)
 				}
 				
-				exp.compile(data.name, config)
+				exp.compile(data.name, config, Mode.Declaration)
 			}
 			else {
 				if data.name.kind == Kind::ArrayBinding || data.name.kind == Kind::ObjectBinding || config.variables == 'es5' {
@@ -2152,10 +2518,10 @@ func $compile(node, data, config, mode, variable = null) {
 					}
 				}
 				
-				exp.compile(data.name, config)
+				exp.compile(data.name, config, Mode.Declaration)
 			}
 			
-			if(data.autotype) {
+			if data.autotype {
 				let type = data.type
 				
 				if !type && data.init {
@@ -2497,6 +2863,129 @@ const $continuous = {
 			node.code(retCode, variable.name.name, '.', fnName, index, '.apply(this, ', argName, ')')
 		}
 	} // }}}
+}
+
+const $expression = {
+	member(node, data, config, name) {
+		//console.log('member', data)
+		switch data.kind {
+			Kind::BinaryOperator => {
+				if data.operator.kind == BinaryOperator::Assignment {
+					if $expression.nullable(data.right) {
+						{name, operand} = $expression.member(node, data.right, config, name)
+						
+						return {name: [data.left], operand: operand, todo: data}
+					}
+					else {
+						return {name: [data.left], operand: false, todo: data}
+					}
+				}
+				else {
+					console.error(data)
+					throw new Error('Unknow kind ' + data.kind)
+				}
+			}
+			Kind::CallExpression => {
+				{name, operand} = $expression.member(node, data.callee, config, name)
+				
+				if data.nullable {
+					node.module().flag('Type')
+					
+					if operand {
+						node.code(' && ')
+					}
+					
+					node.code('Type.isFunction(').compile(name, config).code(')')
+					
+					return {name: name, operand: operand || true}
+				}
+				else {
+					return {name: name, operand: operand || false}
+				}
+			}
+			Kind::Identifier => {
+				return {name: [data.name], operand: false}
+			}
+			Kind::MemberExpression => {
+				{name, operand, todo} = $expression.member(node, data.object, config, name)
+				
+				if data.nullable {
+					node.module().flag('Type')
+					
+					if operand {
+						node.code(' && ')
+					}
+					
+					if todo {
+						node.code('Type.isValue((').compile(todo, config).code(', ').compile(name, config).code('))')
+					}
+					else {
+						node.code('Type.isValue(').compile(name, config).code(')')
+					}
+					
+					if data.computed {
+						name.push('[', data.property, ']')
+					}
+					else {
+						name.push('.', data.property.name)
+					}
+					
+					return {name: name, operand: operand || true}
+				}
+				else {
+					if data.computed {
+						name.push('[', data.property, ']')
+					}
+					else {
+						name.push('.', data.property.name)
+					}
+					
+					return {name: name, operand: operand || false, todo: todo}
+				}
+			}
+			=> {
+				console.error(data)
+				throw new Error('Unknow kind ' + data.kind)
+			}
+		}
+	}
+	nullable(data) {
+		switch data.kind {
+			Kind::BinaryOperator => {
+				return $expression.nullable(data.right)
+			}
+			Kind::CallExpression => {
+				return true if data.nullable
+				
+				return $expression.nullable(data.callee)
+			}
+			Kind::MemberExpression => {
+				return true if data.nullable
+				
+				return $expression.nullable(data.object) || $expression.nullable(data.property)
+			}
+		}
+		return false
+	}
+	value(node, data, config) {
+		//console.log('value', data)
+		switch data.kind {
+			Kind::CallExpression => {
+				{name, operand} = $expression.member(node, data, config, [])
+				
+				return name
+			}
+			Kind::MemberExpression => {
+				{name, operand} = $expression.member(node, data, config, [])
+				
+				return name
+			}
+			=> {
+				console.error(data)
+				throw new Error('Unknow kind ' + data.kind)
+			}
+		}
+	}
 }
 
 const $extern = {
@@ -2888,7 +3377,7 @@ const $function = {
 		let inc = false
 		let l = rest != -1 ? rest : data.parameters.length
 		
-		if (rest != -1 && !fr && (db == 0 || db + 1 == rest)) || (rest == -1 && ((!signature.async && signature.max == l && (db == 0 || db == l) || (signature.async && signature.max == l + 1 && (db == 0 || db == l + 1))))) { // {{{
+		if (rest != -1 && !fr && (db == 0 || db + 1 == rest)) || (rest == -1 && ((!signature.async && signature.max == l && (db == 0 || db == l)) || (signature.async && signature.max == l + 1 && (db == 0 || db == l + 1)))) { // {{{
 			let names = []
 			
 			for i from 0 til l {
@@ -3599,8 +4088,8 @@ const $function = {
 		for parameter in data.parameters {
 			signature.parameters.push(parameter = $function.signatureParameter(parameter, node))
 			
-			if(parameter.max == Infinity) {
-				if(signature.max == Infinity) {
+			if parameter.max == Infinity {
+				if signature.max == Infinity {
 					throw new Error('Function can have only one rest parameter')
 				}
 				else {
@@ -3636,10 +4125,10 @@ const $function = {
 		
 		if parameter.modifiers {
 			for modifier in parameter.modifiers {
-				if(modifier.kind == ParameterModifier.Rest) {
+				if modifier.kind == ParameterModifier.Rest {
 					signature.rest = true
 					
-					if(modifier.arity) {
+					if modifier.arity {
 						signature.min = modifier.arity.min
 						signature.max = modifier.arity.max
 					}
@@ -4175,7 +4664,7 @@ const $helper = {
 		
 		node.newline().code('access: ' + variable.access)
 		
-		if(variable.type) {
+		if variable.type {
 			node.code(',').newline().code('type: ' + $helper.type(variable.type, node, path))
 		}
 		
@@ -4411,7 +4900,7 @@ func $implement(node, data, config, variable) { // {{{
 			}
 		}
 		Kind::MethodLinkDeclaration => {
-			if(data.name.name == variable.name.name) {
+			if data.name.name == variable.name.name {
 				console.error(data)
 				throw new Error('Not Implemented')
 			}
@@ -5051,7 +5540,7 @@ const $method = {
 			else {
 				nf = true
 				
-				if(parameter.modifiers) {
+				if parameter.modifiers {
 					for modifier in parameter.modifiers {
 						if modifier.kind == ParameterModifier.Rest {
 							if modifier.arity {
@@ -5090,12 +5579,12 @@ const $operator = {
 	binaries: {
 		`\(BinaryOperator::And)`: true
 		`\(BinaryOperator::Equality)`: true
-		`\(BinaryOperator::Existential)`: true
 		`\(BinaryOperator::GreaterThan)`: true
 		`\(BinaryOperator::GreaterThanOrEqual)`: true
 		`\(BinaryOperator::Inequality)`: true
 		`\(BinaryOperator::LessThan)`: true
 		`\(BinaryOperator::LessThanOrEqual)`: true
+		`\(BinaryOperator::NullCoalescing)`: true
 		`\(BinaryOperator::Or)`: true
 		`\(BinaryOperator::TypeCheck)`: true
 	}
@@ -5145,14 +5634,14 @@ const $operator = {
 						.code('(')
 						.compile(data.left, config, Mode.Key)
 						.code(' = ')
-						.compile(data.right, config, Mode.Assignment)
+						.compile(data.right, config, mode | Mode.Assignment)
 						.code(')')
 				}
 				else {
 					node
 						.compile(data.left, config, Mode.Key)
 						.code(' = ')
-						.compile(data.right, config, Mode.Assignment)
+						.compile(data.right, config, mode | Mode.Assignment)
 				}
 			} // }}}
 			AssignmentOperator::Existential => { // {{{
@@ -5164,21 +5653,21 @@ const $operator = {
 					if mode & Mode.BooleanExpression {
 						node
 							.code($runtime.type(config), '.isValue(')
-							.compile(data.right, config, Mode.Key)
+							.compile(data.right, config, mode | Mode.Key)
 							.code(') ? (')
 							.compile(data.left, config, Mode.Key)
 							.code(' = ')
-							.compile(data.right, config, Mode.Assignment)
+							.compile(data.right, config, mode | Mode.Assignment)
 							.code(', true) : false')
 					}
 					else {
 						node
 							.code($runtime.type(config), '.isValue(')
-							.compile(data.right, config, Mode.Key)
+							.compile(data.right, config, mode | Mode.Key)
 							.code(') ? ')
 							.compile(data.left, config, Mode.Key)
 							.code(' = ')
-							.compile(data.right, config, Mode.Assignment)
+							.compile(data.right, config, mode | Mode.Assignment)
 							.code(' : undefined')
 					}
 				}
@@ -5188,7 +5677,7 @@ const $operator = {
 					if mode & Mode.BooleanExpression {
 						node
 							.code($runtime.type(config), '.isValue(', name, ' = ')
-							.compile(data.right, config, Mode.Key)
+							.compile(data.right, config, mode | Mode.Key)
 							.code(') ? (')
 							.compile(data.left, config, Mode.Key)
 							.code(' = ', name, ', true) : false')
@@ -5196,12 +5685,28 @@ const $operator = {
 					else {
 						node
 							.code($runtime.type(config), '.isValue(', name, ' = ')
-							.compile(data.right, config, Mode.Key)
+							.compile(data.right, config, mode | Mode.Key)
 							.code(') ? ')
 							.compile(data.left, config, Mode.Key)
 							.code(' = ', name, ' : undefined')
 					}
 				}
+			} // }}}
+			AssignmentOperator::NullCoalescing => { // {{{
+				node.module().flag('Type')
+				
+				node.assignment(data, true)
+				
+				node.addMode(Mode.NoIndent).removeMode(Mode.Statement)
+				
+				node
+					.newControl()
+					.code('if(!', $runtime.type(config), '.isValue(').compile(data.left, config, Mode.Key).code('))')
+					.step()
+					.newExpression()
+					.compile(data.left, config, Mode.Key)
+					.code(' = ')
+					.compile(data.right, config, Mode.Key)
 			} // }}}
 			AssignmentOperator::Subtraction => { // {{{
 				node
@@ -5272,27 +5777,6 @@ const $operator = {
 					.code(' === ')
 					.compile(data.right, config, Mode.Operand)
 			} // }}}
-			BinaryOperator::Existential => { // {{{
-				node.module().flag('Type')
-				
-				if data.left.kind == data.right.kind == Kind::Identifier {
-					node
-						.code($runtime.type(config), '.isValue(')
-						.compile(data.left, config, Mode.Operand)
-						.code(') ? ')
-						.compile(data.left, config, Mode.Operand)
-						.code(' : ')
-						.compile(data.right, config, Mode.Operand)
-				}
-				else {
-					node
-						.code($runtime.type(config), '.vexists(')
-						.compile(data.left, config, Mode.Operand)
-						.code(', ')
-						.compile(data.right, config, Mode.Operand)
-						.code(')')
-				}
-			} // }}}
 			BinaryOperator::GreaterThan => { // {{{
 				node
 					.compile(data.left, config, Mode.Operand)
@@ -5334,6 +5818,30 @@ const $operator = {
 					.compile(data.left, config, Mode.Operand)
 					.code(' * ')
 					.compile(data.right, config, Mode.Operand)
+			} // }}}
+			BinaryOperator::NullCoalescing => { // {{{
+				node.module().flag('Type')
+				
+				let type = $runtime.type(config)
+				
+				if data.left.kind == Kind::Identifier {
+					node
+						.code(`\(type).isValue(`)
+						.compile(data.left, config, Mode.Operand)
+						.code(') ? ')
+						.compile(data.left, config, Mode.Operand)
+						.code(' : ')
+						.compile(data.right, config, Mode.Operand)
+				}
+				else {
+					let name = node.newTempName()
+						
+					node
+						.code(`\(type).isValue((\(name) = `)
+						.compile(data.left, config, Mode.Operand)
+						.code(`)) ? \(name) : `)
+						.compile(data.right, config, Mode.Operand)
+				}
 			} // }}}
 			BinaryOperator::Or => { // {{{
 				node
@@ -5392,21 +5900,6 @@ const $operator = {
 					node.compile(data.operands[i + 1], config, Mode.Operand)
 				}
 			} // }}}
-			BinaryOperator::Existential => { // {{{
-				node.module().flag('Type')
-				
-				node.code('Type.vexists(')
-				
-				for i from 0 til data.operands.length {
-					if i {
-						node.code(', ')
-					}
-					
-					node.compile(data.operands[i], config, Mode.Operand)
-				}
-				
-				node.code(')')
-			} // }}}
 			BinaryOperator::LessThanOrEqual => { // {{{
 				for i from 0 til data.operands.length - 1 {
 					if i {
@@ -5428,6 +5921,35 @@ const $operator = {
 					
 					node.compile(data.operands[i], config, Mode.Operand)
 				}
+			} // }}}
+			BinaryOperator::NullCoalescing => { // {{{
+				node.module().flag('Type')
+				
+				let type = $runtime.type(config)
+				let operand, name
+				
+				for i from 0 til data.operands.length - 1 {
+					operand = data.operands[i]
+					
+					if operand.kind == Kind::Identifier {
+						node
+							.code(`\(type).isValue(`)
+							.compile(operand, config, Mode.Operand)
+							.code(') ? ')
+							.compile(operand, config, Mode.Operand)
+							.code(' : ')
+					}
+					else {
+						name = node.newTempName()
+						
+						node
+							.code(`\(type).isValue((\(name) = `)
+							.compile(operand, config, Mode.Operand)
+							.code(`)) ? \(name) : `)
+					}
+				}
+				
+				node.compile(data.operands[data.operands.length - 1], config, Mode.Operand)
 			} // }}}
 			BinaryOperator::Or => { // {{{
 				for i from 0 til data.operands.length {
@@ -5455,7 +5977,23 @@ const $operator = {
 			UnaryOperator::Existential => { // {{{
 				node.module().flag('Type')
 				
-				node.code($runtime.type(config), '.isValue(').compile(data.argument, config, Mode.Operand).code(')')
+				if data.argument.kind == Kind::MemberExpression {
+					{name, operand, todo} = $expression.member(node, data.argument, config, [])
+					
+					if operand {
+						node.code(' && ')
+					}
+					
+					if todo {
+						node.code($runtime.type(config), '.isValue((').compile(todo, config, Mode.NoTest).code(', ').compile(name, config).code(')) ? ').compile(name, config).code(' : ', mode & Mode.BooleanExpression ? 'false' : 'undefined')
+					}
+					else {
+						node.code($runtime.type(config), '.isValue(').compile(name, config).code(') ? ').compile(name, config).code(' : ', mode & Mode.BooleanExpression ? 'false' : 'undefined')
+					}
+				}
+				else {
+					node.code($runtime.type(config), '.isValue(').compile(data.argument, config, Mode.Operand).code(')')
+				}
 			} // }}}
 			UnaryOperator::IncrementPostfix => { // {{{
 				node.compile(data.argument, config, Mode.Operand).code('++')
@@ -5555,7 +6093,7 @@ const $switch = {
 	binding(clause, ctrl, name, config) { // {{{
 		for binding in clause.bindings {
 			if binding.kind == Kind::ArrayBinding {
-				ctrl.newExpression().code('var ').compile(binding, config).code(' = ', name)
+				ctrl.newExpression().compile(binding, config).code(' = ', name)
 			}
 			else if binding.kind == Kind::ObjectBinding {
 				console.error(binding)
@@ -5572,7 +6110,20 @@ const $switch = {
 				$variable.define(ctrl, binding, VariableKind::Variable)
 			}
 		}
-	}, // }}}
+	} // }}}
+	filter(name, clause, config, ctrl) { // {{{
+		ctrl.code($variable.scope(config), name, ' = (')
+		
+		for i from 0 til clause.bindings.length {
+			if i {
+				ctrl.code(', ')
+			}
+			
+			ctrl.compile(clause.bindings[i], config, Mode.Parameter)
+		}
+		
+		ctrl.code(') => ').compile(clause.filter, config)
+	} // }}}
 	hasTest(clause) { // {{{
 		return true if clause.filter
 		
@@ -6822,7 +7373,7 @@ class Control {
 		}
 	} // }}}
 	hasVariable(name, fromChild = false) { // {{{
-		if(fromChild || this._index % 2 == 0) {
+		if fromChild || this._index % 2 == 0 {
 			return this._parent.hasVariable(name)
 		}
 		else {
@@ -7004,6 +7555,7 @@ class Expression {
 		_prepared			= false
 		_usages				= []
 		_reference			= ''
+		_variable			= ''
 		_variables	: Array	= []
 	}
 	Expression(@parent, @mode = 0) { // {{{
@@ -7025,11 +7577,11 @@ class Expression {
 	} // }}}
 	assignment(data, variable = false) { // {{{
 		if data.left.kind == Kind::Identifier && !this.hasVariable(data.left.name) {
-			if variable || this._assignment {
+			if variable || this._assignment || this._variable.length {
 				this._variables.push(data.left.name)
 			}
 			else {
-				this._assignment = data.left.name
+				this._variable = data.left.name
 			}
 			
 			$variable.define(this, data.left, $variable.kind(data.right.type), data.right.type)
@@ -7059,6 +7611,16 @@ class Expression {
 		
 		if data is string {
 			this._code.push(data)
+		}
+		else if data is array {
+			for d in data {
+				if d is string {
+					this._code.push(d)
+				}
+				else {
+					$compile(this, d, config, mode, info)
+				}
+			}
 		}
 		else {
 			$compile(this, data, config, mode, info)
@@ -7128,18 +7690,18 @@ class Expression {
 	newRenamedVar(name) { // {{{
 		return this._parent.newRenamedVar(name)
 	} // }}}
-	newTempName() { // {{{
+	newTempName(variable = true) { // {{{
 		let name = this._parent.newTempName()
 		
-		this._variables.pushUniq(name)
+		this._variables.pushUniq(name) if variable
 		
 		return name
 	} // }}}
 	listNewVariables(mode = 0) { // {{{
 		this._prepared = true
 		
-		if(mode & Mode.PrepareAll && this._assignment) {
-			return [this._assignment].concat(this._variables)
+		if mode & Mode.PrepareAll && this._variable.length {
+			return [this._variable].concat(this._variables)
 		}
 		else {
 			return this._variables
@@ -7158,6 +7720,11 @@ class Expression {
 		return this
 	} // }}}
 	reference(@reference) => this
+	removeMode(mode) { // {{{
+		this._mode ^= mode
+		
+		return this
+	} // }}}
 	rename(name) { // {{{
 		this._parent.rename(name)
 		return this
@@ -7176,12 +7743,12 @@ class Expression {
 		}
 		
 		if this._prepared {
-			if !(mode & Mode.PrepareAll) && this._assignment {
+			if !(mode & Mode.PrepareAll) && this._variable.length {
 				src += $variable.scope(this._config)
 			}
 		}
 		else {
-			if this._assignment {
+			if this._variable.length {
 				src += $variable.scope(this._config)
 			}
 			
@@ -7388,13 +7955,13 @@ class Module {
 	} // }}}
 	do(data, config) { // {{{
 		for attr in data.attributes {
-			if(attr.declaration.kind == Kind::Identifier &&	attr.declaration.name == 'bin') {
+			if attr.declaration.kind == Kind::Identifier &&	attr.declaration.name == 'bin' {
 				this._binary = true
 				this._body.unindent()
 			}
 			else if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cfg' {
 				for arg in attr.declaration.arguments {
-					if(arg.kind == Kind::AttributeOperator) {
+					if arg.kind == Kind::AttributeOperator {
 						config[arg.name.name] = arg.value.value
 					}
 				}

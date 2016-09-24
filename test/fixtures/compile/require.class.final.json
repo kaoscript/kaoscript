@@ -1,0 +1,65 @@
+{
+  "requirements": {
+    "Array": {
+      "class": true
+    }
+  },
+  "exports": {
+    "Array": {
+      "name": "Array",
+      "kind": 1,
+      "new": true,
+      "constructors": [],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "contains": [
+          {
+            "kind": 52,
+            "name": "contains",
+            "signature": {
+              "access": 3,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 1,
+                  "max": 2
+                }
+              ]
+            }
+          }
+        ],
+        "pushUniq": [
+          {
+            "kind": 52,
+            "name": "pushUniq",
+            "signature": {
+              "access": 3,
+              "min": 1,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any",
+                  "min": 1,
+                  "max": "Infinity"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "classMethods": {},
+      "final": {
+        "name": "__ks_Array",
+        "constructors": false,
+        "instanceMethods": {
+          "contains": true,
+          "pushUniq": true
+        },
+        "classMethods": {}
+      }
+    }
+  }
+}

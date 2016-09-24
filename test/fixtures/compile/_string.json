@@ -18,7 +18,7 @@
         ],
         "lines": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "lines",
             "signature": {
               "access": 3,
@@ -34,7 +34,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Array"
               }
             }
@@ -49,7 +49,7 @@
         ],
         "toFloat": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "toFloat",
             "signature": {
               "access": 3,
@@ -59,7 +59,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Number"
               }
             }
@@ -67,7 +67,7 @@
         ],
         "toInt": [
           {
-            "kind": 51,
+            "kind": 52,
             "name": "toInt",
             "signature": {
               "access": 3,
@@ -83,7 +83,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 38,
+                "kind": 39,
                 "name": "Number"
               }
             }
@@ -92,6 +92,7 @@
       },
       "classMethods": {},
       "final": {
+        "name": "__ks_String",
         "constructors": false,
         "instanceMethods": {
           "lines": true,
@@ -99,8 +100,7 @@
           "toFloat": true,
           "toInt": true
         },
-        "classMethods": {},
-        "name": "__ks_String"
+        "classMethods": {}
       }
     }
   }
