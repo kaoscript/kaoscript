@@ -697,19 +697,19 @@ func $compile(node, data, config, mode, variable = null) {
 		Kind::BinaryOperator => { // {{{
 			exp = node.newExpression()
 			
-			if mode & Mode.Operand {
-				exp.code('(')
-			}
-			
 			if data.operator.kind == BinaryOperator.Assignment {
 				$operator.assignment(exp, data, config, mode)
 			}
 			else {
+				if mode & Mode.Operand {
+					exp.code('(')
+				}
+				
 				$operator.binary(exp, data, config, mode)
-			}
-			
-			if mode & Mode.Operand {
-				exp.code(')')
+				
+				if mode & Mode.Operand {
+					exp.code(')')
+				}
 			}
 		} // }}}
 		Kind::BindingElement => { // {{{
@@ -910,37 +910,6 @@ func $compile(node, data, config, mode, variable = null) {
 							variable.callReplacement(node, data, list)
 						}
 						else {
-							/* let nullable = $expression.nullable(data)
-							if nullable {
-								node.module().flag('Type')
-								
-								node.code('Type.isFunction(').compile(data.callee, config).code(') ? ')
-							}
-							
-							node
-								.compile(data.callee, config)
-								.code('(')
-							
-							for i from 0 til data.arguments.length {
-								if i {
-									node.code(', ')
-								}
-								
-								node.compile(data.arguments[i], config)
-							}
-							
-							if mode & Mode.Await {
-								if data.arguments.length {
-									node.code(', ')
-								}
-							}
-							else {
-								node.code(')')
-							}
-							
-							if nullable {
-								node.code(' : undefined')
-							} */
 							if $expression.nullable(data) {
 								if mode & Mode.Await {
 									console.error(data)
@@ -2309,24 +2278,18 @@ func $compile(node, data, config, mode, variable = null) {
 		} // }}}
 		Kind::TernaryConditionalExpression => { // {{{
 			if mode & Mode.Operand {
-				node
-					.code('(')
-					.compile(data.condition, config)
-					.code(' ? ')
-					.compile(data.then, config, Mode.Operand)
-					.code(' : ')
-					.compile(data.else, config, Mode.Operand)
-					.code(')')
+				node.code('(')
 			}
-			else {
-				node
-					.code('(')
-					.compile(data.condition, config)
-					.code(') ? (')
-					.compile(data.then, config)
-					.code(') : (')
-					.compile(data.else, config)
-					.code(')')
+			
+			node
+				.compile(data.condition, config, Mode.BooleanExpression)
+				.code(' ? ')
+				.compile(data.then, config)
+				.code(' : ')
+				.compile(data.else, config)
+			
+			if mode & Mode.Operand {
+				node.code(')')
 			}
 		} // }}}
 		Kind::ThrowStatement => node.newExpression().code('throw ').compile(data.value, config)
@@ -2866,8 +2829,7 @@ const $continuous = {
 }
 
 const $expression = {
-	member(node, data, config, name) {
-		//console.log('member', data)
+	member(node, data, config, name) { // {{{
 		switch data.kind {
 			Kind::BinaryOperator => {
 				if data.operator.kind == BinaryOperator::Assignment {
@@ -2948,8 +2910,8 @@ const $expression = {
 				throw new Error('Unknow kind ' + data.kind)
 			}
 		}
-	}
-	nullable(data) {
+	} // }}}
+	nullable(data) { // {{{
 		switch data.kind {
 			Kind::BinaryOperator => {
 				return $expression.nullable(data.right)
@@ -2966,9 +2928,8 @@ const $expression = {
 			}
 		}
 		return false
-	}
-	value(node, data, config) {
-		//console.log('value', data)
+	} // }}}
+	value(node, data, config) { // {{{
 		switch data.kind {
 			Kind::CallExpression => {
 				{name, operand} = $expression.member(node, data, config, [])
@@ -2985,7 +2946,7 @@ const $expression = {
 				throw new Error('Unknow kind ' + data.kind)
 			}
 		}
-	}
+	} // }}}
 }
 
 const $extern = {
@@ -5629,25 +5590,27 @@ const $operator = {
 			AssignmentOperator::Equality => { // {{{
 				node.assignment(data)
 				
-				if mode & Mode.BooleanExpression {
-					node
-						.code('(')
-						.compile(data.left, config, Mode.Key)
-						.code(' = ')
-						.compile(data.right, config, mode | Mode.Assignment)
-						.code(')')
+				if mode & Mode.Operand || mode & Mode.BooleanExpression {
+					node.code('(')
 				}
-				else {
-					node
-						.compile(data.left, config, Mode.Key)
-						.code(' = ')
-						.compile(data.right, config, mode | Mode.Assignment)
+				
+				node
+					.compile(data.left, config, Mode.Key)
+					.code(' = ')
+					.compile(data.right, config, mode | Mode.Assignment)
+				
+				if mode & Mode.Operand || mode & Mode.BooleanExpression {
+					node.code(')')
 				}
 			} // }}}
 			AssignmentOperator::Existential => { // {{{
 				node.module().flag('Type')
 				
 				node.assignment(data, true)
+				
+				if mode & Mode.Operand {
+					node.code('(')
+				}
 				
 				if data.right.kind == Kind::Identifier {
 					if mode & Mode.BooleanExpression {
@@ -5690,6 +5653,10 @@ const $operator = {
 							.compile(data.left, config, Mode.Key)
 							.code(' = ', name, ' : undefined')
 					}
+				}
+				
+				if mode & Mode.Operand {
+					node.code(')')
 				}
 			} // }}}
 			AssignmentOperator::NullCoalescing => { // {{{
@@ -5985,10 +5952,14 @@ const $operator = {
 					}
 					
 					if todo {
-						node.code($runtime.type(config), '.isValue((').compile(todo, config, Mode.NoTest).code(', ').compile(name, config).code(')) ? ').compile(name, config).code(' : ', mode & Mode.BooleanExpression ? 'false' : 'undefined')
+						node.code($runtime.type(config), '.isValue((').compile(todo, config, Mode.NoTest).code(', ').compile(name, config).code('))')
 					}
 					else {
-						node.code($runtime.type(config), '.isValue(').compile(name, config).code(') ? ').compile(name, config).code(' : ', mode & Mode.BooleanExpression ? 'false' : 'undefined')
+						node.code($runtime.type(config), '.isValue(').compile(name, config).code(')')
+					}
+					
+					if !(mode & Mode.BooleanExpression) {
+						node.code(' ? ').compile(name, config).code(' : undefined')
 					}
 				}
 				else {
@@ -6002,7 +5973,7 @@ const $operator = {
 				node.code('++').compile(data.argument, config, Mode.Operand)
 			} // }}}
 			UnaryOperator::Negation => { // {{{
-				node.code('!').compile(data.argument, config, Mode.Operand)
+				node.code('!').compile(data.argument, config, Mode.BooleanExpression | Mode.Operand)
 			} // }}}
 			UnaryOperator::Negative => { // {{{
 				node.code('-').compile(data.argument, config, Mode.Operand)

@@ -871,8 +871,7 @@ export class Color {
 		return this.hex() == color.hex()
 	} // }}}
 	
-	format(format: string) -> string { // {{{
-		format = format || this._space
+	format(format: string = this._space) -> string { // {{{
 		
 		if format ?= $formatters[format] {
 			return format.formatter(?format.space ? this.like(format.space) : this)

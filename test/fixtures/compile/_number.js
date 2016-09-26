@@ -12,7 +12,7 @@ module.exports = function() {
 			if(max === undefined || max === null) {
 				throw new Error("Missing parameter 'max'");
 			}
-			return (isNaN(this)) ? (min) : (Math.min(max, Math.max(min, this)));
+			return isNaN(this) ? min : Math.min(max, Math.max(min, this));
 		},
 		signature: {
 			access: 3,

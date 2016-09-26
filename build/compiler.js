@@ -182,7 +182,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'item'");
 			}
 			if(Type.isEnumerable(item) && !Type.isString(item)) {
-				return (Type.isArray(item)) ? (item) : (Array.prototype.slice.call(item));
+				return Type.isArray(item) ? item : Array.prototype.slice.call(item);
 			}
 			else {
 				return [item];
@@ -209,7 +209,7 @@ module.exports = function() {
 			if(index === undefined || index === null) {
 				index = 1;
 			}
-			return (this.length) ? (this[this.length - index]) : (null);
+			return this.length ? this[this.length - index] : null;
 		},
 		signature: {
 			access: 3,
@@ -508,10 +508,10 @@ module.exports = function() {
 					}
 				}
 				if(instance) {
-					$method.prepare(data, variable.instanceMethods[data.name.name] || ((variable.instanceMethods[data.name.name] = [])), node);
+					$method.prepare(data, variable.instanceMethods[data.name.name] || (variable.instanceMethods[data.name.name] = []), node);
 				}
 				else {
-					$method.prepare(data, variable.classMethods[data.name.name] || ((variable.classMethods[data.name.name] = [])), node);
+					$method.prepare(data, variable.classMethods[data.name.name] || (variable.classMethods[data.name.name] = []), node);
 				}
 			}
 		}
@@ -741,17 +741,17 @@ module.exports = function() {
 		}
 		else if(__ks_0 === Kind.BinaryOperator) {
 			var exp = node.newExpression();
-			if(mode & Mode.Operand) {
-				exp.code("(");
-			}
 			if(data.operator.kind === BinaryOperator.Assignment) {
 				$operator.assignment(exp, data, config, mode);
 			}
 			else {
+				if(mode & Mode.Operand) {
+					exp.code("(");
+				}
 				$operator.binary(exp, data, config, mode);
-			}
-			if(mode & Mode.Operand) {
-				exp.code(")");
+				if(mode & Mode.Operand) {
+					exp.code(")");
+				}
 			}
 		}
 		else if(__ks_0 === Kind.BindingElement) {
@@ -787,7 +787,7 @@ module.exports = function() {
 			var stack = [];
 			var r;
 			for(var i = 0, __ks_1 = data.statements.length; i < __ks_1; ++i) {
-				if(((r = node.compile(data.statements[i], config, mode))) && r.node && r.close) {
+				if((r = node.compile(data.statements[i], config, mode)) && r.node && r.close) {
 					node = r.node;
 					mode = r.mode;
 					stack.push(r);
@@ -812,10 +812,10 @@ module.exports = function() {
 			}
 			node = node.newExpression();
 			var callee;
-			if((data.callee.kind === Kind.MemberExpression) && !data.callee.computed && (data.callee.object.kind === Kind.MemberExpression) && !data.callee.object.computed && (data.callee.property.kind === Kind.Identifier) && (data.callee.property.name === "apply") && ((callee = $final.callee(data.callee.object, node)))) {
+			if((data.callee.kind === Kind.MemberExpression) && !data.callee.computed && (data.callee.object.kind === Kind.MemberExpression) && !data.callee.object.computed && (data.callee.property.kind === Kind.Identifier) && (data.callee.property.name === "apply") && (callee = $final.callee(data.callee.object, node))) {
 				if(callee.variable) {
 					if(data.callee.property.name === "apply") {
-						node.code(callee.variable.accessPath || "", callee.variable.final.name, (callee.instance) ? ("._im_") : ("._cm_"), data.callee.object.property.name, ".apply(", callee.variable.accessPath || "", callee.variable.final.name, ", ");
+						node.code(callee.variable.accessPath || "", callee.variable.final.name, callee.instance ? "._im_" : "._cm_", data.callee.object.property.name, ".apply(", callee.variable.accessPath || "", callee.variable.final.name, ", ");
 						if(data.arguments.length === 1) {
 							node.compile(data.arguments[0], config);
 						}
@@ -844,7 +844,7 @@ module.exports = function() {
 					throw new Error("Not Implemented");
 				}
 			}
-			else if((data.callee.kind === Kind.MemberExpression) && !data.callee.computed && ((callee = $final.callee(data.callee, node)))) {
+			else if((data.callee.kind === Kind.MemberExpression) && !data.callee.computed && (callee = $final.callee(data.callee, node))) {
 				if(callee.variable) {
 					if(callee.instance) {
 						node.code(callee.variable.accessPath || "", callee.variable.final.name, "._im_" + data.callee.property.name + "(").compile(data.callee.object, config);
@@ -902,12 +902,12 @@ module.exports = function() {
 						}
 					}
 					node.code(" ? ");
-					node.code(callee.variables[0].accessPath || "", callee.variables[0].final.name + "._im_" + data.callee.property.name + "(").compile((name) ? (name) : (data.callee.object), config);
+					node.code(callee.variables[0].accessPath || "", callee.variables[0].final.name + "._im_" + data.callee.property.name + "(").compile(name ? name : data.callee.object, config);
 					for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
 						node.code(", ").compile(data.arguments[i], config);
 					}
 					node.code(") : ");
-					node.code(callee.variables[1].accessPath || "", callee.variables[1].final.name + "._im_" + data.callee.property.name + "(").compile((name) ? (name) : (data.callee.object), config);
+					node.code(callee.variables[1].accessPath || "", callee.variables[1].final.name + "._im_" + data.callee.property.name + "(").compile(name ? name : data.callee.object, config);
 					for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
 						node.code(", ").compile(data.arguments[i], config);
 					}
@@ -1359,7 +1359,7 @@ module.exports = function() {
 				}
 				else {
 					ctrl = node.newControl();
-					index = (data.index) ? (data.index.name) : (ctrl.newTempName());
+					index = data.index ? data.index.name : ctrl.newTempName();
 					ctrl.code("for(", $variable.scope(config), index, " = ", value, ".length - 1");
 					if(!node.hasVariable(data.variable.name)) {
 						ctrl.code(", ", data.variable.name);
@@ -1374,7 +1374,7 @@ module.exports = function() {
 				}
 				else {
 					ctrl = node.newControl();
-					index = (data.index) ? (data.index.name) : (ctrl.newTempName());
+					index = data.index ? data.index.name : ctrl.newTempName();
 					ctrl.code("for(", $variable.scope(config), index, " = 0, ");
 				}
 				bound = ctrl.newTempName();
@@ -1592,7 +1592,7 @@ module.exports = function() {
 			node = node.newExpression();
 			if(!(mode & Mode.NoTest) && $expression.nullable(data)) {
 				var name = $expression.value(node, data, config);
-				node.code(" ? ").compile(name, config).code(" : ", (mode & Mode.BooleanExpression) ? ("false") : ("undefined"));
+				node.code(" ? ").compile(name, config).code(" : ", mode & Mode.BooleanExpression ? "false" : "undefined");
 			}
 			else {
 				node.compile(data.object, config, mode | Mode.Operand);
@@ -1670,10 +1670,10 @@ module.exports = function() {
 		else if(__ks_0 === Kind.ObjectMember) {
 			if((data.name.kind === Kind.Identifier) || (data.name.kind === Kind.Literal)) {
 				if(data.value.kind === Kind.FunctionExpression) {
-					node.newExpression().reference((data.name.kind === Kind.Identifier) ? ("." + data.name.name) : ("[" + $quote(data.name.value) + "]")).compile(data.name, config, Mode.Key).compile(data.value, config, Mode.NoIndent | Mode.ObjectMember);
+					node.newExpression().reference(data.name.kind === Kind.Identifier ? "." + data.name.name : "[" + $quote(data.name.value) + "]").compile(data.name, config, Mode.Key).compile(data.value, config, Mode.NoIndent | Mode.ObjectMember);
 				}
 				else {
-					node.newExpression().reference((data.name.kind === Kind.Identifier) ? ("." + data.name.name) : ("[" + $quote(data.name.value) + "]")).compile(data.name, config, Mode.Key).code(": ").compile(data.value, config, Mode.NoIndent);
+					node.newExpression().reference(data.name.kind === Kind.Identifier ? "." + data.name.name : "[" + $quote(data.name.value) + "]").compile(data.name, config, Mode.Key).code(": ").compile(data.value, config, Mode.NoIndent);
 				}
 			}
 			else {
@@ -2026,10 +2026,11 @@ module.exports = function() {
 		}
 		else if(__ks_0 === Kind.TernaryConditionalExpression) {
 			if(mode & Mode.Operand) {
-				node.code("(").compile(data.condition, config).code(" ? ").compile(data.then, config, Mode.Operand).code(" : ").compile(data.else, config, Mode.Operand).code(")");
+				node.code("(");
 			}
-			else {
-				node.code("(").compile(data.condition, config).code(") ? (").compile(data.then, config).code(") : (").compile(data.else, config).code(")");
+			node.compile(data.condition, config, Mode.BooleanExpression).code(" ? ").compile(data.then, config).code(" : ").compile(data.else, config);
+			if(mode & Mode.Operand) {
+				node.code(")");
 			}
 		}
 		else if(__ks_0 === Kind.ThrowStatement) {
@@ -2796,10 +2797,10 @@ module.exports = function() {
 					}
 					var methods;
 					if(instance) {
-						methods = variable.instanceMethods[data.name.name] || ((variable.instanceMethods[data.name.name] = []));
+						methods = variable.instanceMethods[data.name.name] || (variable.instanceMethods[data.name.name] = []);
 					}
 					else {
-						methods = variable.classMethods[data.name.name] || ((variable.classMethods[data.name.name] = []));
+						methods = variable.classMethods[data.name.name] || (variable.classMethods[data.name.name] = []);
 					}
 					methods.push($function.signature(data, node));
 				}
@@ -3205,7 +3206,7 @@ module.exports = function() {
 				}
 			}
 			var inc = false;
-			var l = (rest !== -1) ? (rest) : (data.parameters.length);
+			var l = rest !== -1 ? rest : data.parameters.length;
 			if(((rest !== -1) && !fr && ((db === 0) || ((db + 1) === rest))) || ((rest === -1) && ((!signature.async && (signature.max === l) && ((db === 0) || (db === l))) || (signature.async && (signature.max === (l + 1)) && ((db === 0) || (db === (l + 1))))))) {
 				var names = [];
 				for(var i = 0, __ks_1 = l; i < __ks_1; ++i) {
@@ -3323,7 +3324,7 @@ module.exports = function() {
 				}
 				if(rest !== -1) {
 					parameter = data.parameters[rest];
-					if(((arity = $function.arity(parameter))) && arity.min) {
+					if((arity = $function.arity(parameter)) && arity.min) {
 						node.newControl().code("if(").parameter(parameter.name, config).code(".length < ", arity.min, ")").step().newExpression().code("throw new Error(\"Wrong number of arguments\")");
 					}
 				}
@@ -3523,7 +3524,7 @@ module.exports = function() {
 							ctrl = node.newControl().code("if(arguments.length > __ks_m)").step();
 							if($type.isAny(parameter.type)) {
 								if(parameter.name) {
-									ctrl.newExpression().code("var ").compile(parameter.name, config).code(" = arguments[", (inc) ? ("++") : (""), "__ks_i]");
+									ctrl.newExpression().code("var ").compile(parameter.name, config).code(" = arguments[", inc ? "++" : "", "__ks_i]");
 								}
 								else {
 									ctrl.newExpression().code("++__ks_i");
@@ -3558,10 +3559,10 @@ module.exports = function() {
 					else {
 						if($type.isAny(parameter.type)) {
 							if(parameter.name) {
-								node.newExpression().code("var ").compile(parameter.name, config).code(" = arguments[", (inc) ? ("++") : (""), "__ks_i]");
+								node.newExpression().code("var ").compile(parameter.name, config).code(" = arguments[", inc ? "++" : "", "__ks_i]");
 							}
 							else {
-								node.newExpression().code((inc) ? ("++") : (""), "__ks_i");
+								node.newExpression().code(inc ? "++" : "", "__ks_i");
 							}
 						}
 						else {
@@ -3642,7 +3643,7 @@ module.exports = function() {
 			}
 			var signature = {
 				type: $signature.type(parameter.type, node),
-				min: (parameter.defaultValue || (parameter.type && parameter.type.nullable)) ? (0) : (1),
+				min: parameter.defaultValue || (parameter.type && parameter.type.nullable) ? 0 : 1,
 				max: 1
 			};
 			if(parameter.modifiers) {
@@ -4424,7 +4425,7 @@ module.exports = function() {
 						}
 					}
 				}
-				var exp = node.newExpression().code($runtime.helper(config), ".", (instance) ? ("newInstanceMethod") : ("newClassMethod"), "({").indent();
+				var exp = node.newExpression().code($runtime.helper(config), ".", instance ? "newInstanceMethod" : "newClassMethod", "({").indent();
 				exp.newline().code("class: ").compile(variable.name, config).code(",");
 				if(data.name.kind === Kind.Identifier) {
 					exp.newline().code("name: ", $quote(data.name.name), ",");
@@ -4492,7 +4493,7 @@ module.exports = function() {
 					if(ctrl === undefined || ctrl === null) {
 						throw new Error("Missing parameter 'ctrl'");
 					}
-					ctrl.code($runtime.helper(config), ".", (instance) ? ("newInstanceMethod") : ("newClassMethod"), "({").indent();
+					ctrl.code($runtime.helper(config), ".", instance ? "newInstanceMethod" : "newClassMethod", "({").indent();
 					ctrl.newline().code("class: ").compile(variable.name, config).code(",");
 					if(data.name.kind === Kind.Identifier) {
 						ctrl.newline().code("name: ", $quote(data.name.name), ",");
@@ -4567,7 +4568,7 @@ module.exports = function() {
 						instance = false;
 					}
 				}
-				var exp = node.newExpression().code($runtime.helper(config), ".", (instance) ? ("newInstanceMethod") : ("newClassMethod"), "({").indent();
+				var exp = node.newExpression().code($runtime.helper(config), ".", instance ? "newInstanceMethod" : "newClassMethod", "({").indent();
 				exp.newline().code("class: ").compile(variable.name, config).code(",");
 				if(data.name.kind === Kind.Identifier) {
 					exp.newline().code("name: ", $quote(data.name.name), ",");
@@ -4809,7 +4810,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					importVariables[specifier.alias.name] = (specifier.local) ? (specifier.local.name) : (specifier.alias.name);
+					importVariables[specifier.alias.name] = specifier.local ? specifier.local.name : specifier.alias.name;
 					++importVarCount;
 				}
 			}
@@ -4997,7 +4998,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					variables[specifier.alias.name] = (specifier.local) ? (specifier.local.name) : (specifier.alias.name);
+					variables[specifier.alias.name] = specifier.local ? specifier.local.name : specifier.alias.name;
 					++count;
 				}
 			}
@@ -5069,7 +5070,7 @@ module.exports = function() {
 			else if(/^\\\\/.test(start)) {
 				prefix = "\\\\";
 			}
-			var splitRe = (process.platform === "win32") ? (/[\/\\]/) : (/\/+/);
+			var splitRe = process.platform === "win32" ? /[\/\\]/ : /\/+/;
 			var parts = start.split(splitRe);
 			var dirs = [];
 			for(var i = parts.length - 1; i >= 0; --i) {
@@ -5300,7 +5301,7 @@ module.exports = function() {
 					}
 					last = {
 						type: $signature.type(parameter.type, node),
-						min: (parameter.defaultValue || (parameter.type && parameter.type.nullable)) ? (0) : (1),
+						min: parameter.defaultValue || (parameter.type && parameter.type.nullable) ? 0 : 1,
 						max: 1
 					};
 					if(parameter.modifiers) {
@@ -5382,16 +5383,20 @@ module.exports = function() {
 			}
 			else if(__ks_0 === AssignmentOperator.Equality) {
 				node.assignment(data);
-				if(mode & Mode.BooleanExpression) {
-					node.code("(").compile(data.left, config, Mode.Key).code(" = ").compile(data.right, config, mode | Mode.Assignment).code(")");
+				if((mode & Mode.Operand) || (mode & Mode.BooleanExpression)) {
+					node.code("(");
 				}
-				else {
-					node.compile(data.left, config, Mode.Key).code(" = ").compile(data.right, config, mode | Mode.Assignment);
+				node.compile(data.left, config, Mode.Key).code(" = ").compile(data.right, config, mode | Mode.Assignment);
+				if((mode & Mode.Operand) || (mode & Mode.BooleanExpression)) {
+					node.code(")");
 				}
 			}
 			else if(__ks_0 === AssignmentOperator.Existential) {
 				node.module().flag("Type");
 				node.assignment(data, true);
+				if(mode & Mode.Operand) {
+					node.code("(");
+				}
 				if(data.right.kind === Kind.Identifier) {
 					if(mode & Mode.BooleanExpression) {
 						node.code($runtime.type(config), ".isValue(").compile(data.right, config, mode | Mode.Key).code(") ? (").compile(data.left, config, Mode.Key).code(" = ").compile(data.right, config, mode | Mode.Assignment).code(", true) : false");
@@ -5408,6 +5413,9 @@ module.exports = function() {
 					else {
 						node.code($runtime.type(config), ".isValue(", name, " = ").compile(data.right, config, mode | Mode.Key).code(") ? ").compile(data.left, config, Mode.Key).code(" = ", name, " : undefined");
 					}
+				}
+				if(mode & Mode.Operand) {
+					node.code(")");
 				}
 			}
 			else if(__ks_0 === AssignmentOperator.NullCoalescing) {
@@ -5630,10 +5638,13 @@ module.exports = function() {
 						node.code(" && ");
 					}
 					if(todo) {
-						node.code($runtime.type(config), ".isValue((").compile(todo, config, Mode.NoTest).code(", ").compile(name, config).code(")) ? ").compile(name, config).code(" : ", (mode & Mode.BooleanExpression) ? ("false") : ("undefined"));
+						node.code($runtime.type(config), ".isValue((").compile(todo, config, Mode.NoTest).code(", ").compile(name, config).code("))");
 					}
 					else {
-						node.code($runtime.type(config), ".isValue(").compile(name, config).code(") ? ").compile(name, config).code(" : ", (mode & Mode.BooleanExpression) ? ("false") : ("undefined"));
+						node.code($runtime.type(config), ".isValue(").compile(name, config).code(")");
+					}
+					if(!(mode & Mode.BooleanExpression)) {
+						node.code(" ? ").compile(name, config).code(" : undefined");
 					}
 				}
 				else {
@@ -5647,7 +5658,7 @@ module.exports = function() {
 				node.code("++").compile(data.argument, config, Mode.Operand);
 			}
 			else if(__ks_0 === UnaryOperator.Negation) {
-				node.code("!").compile(data.argument, config, Mode.Operand);
+				node.code("!").compile(data.argument, config, Mode.BooleanExpression | Mode.Operand);
 			}
 			else if(__ks_0 === UnaryOperator.Negative) {
 				node.code("-").compile(data.argument, config, Mode.Operand);
@@ -6623,7 +6634,7 @@ module.exports = function() {
 				var variable = $variable.fromAST(data.object, node);
 				if(variable) {
 					if(data.computed) {
-						if(variable.type && ((variable = $variable.fromType(variable.type, node))) && variable.type && ((variable = $variable.fromType(variable.type, node)))) {
+						if(variable.type && (variable = $variable.fromType(variable.type, node)) && variable.type && (variable = $variable.fromType(variable.type, node))) {
 							return variable;
 						}
 					}
@@ -6794,7 +6805,7 @@ module.exports = function() {
 			if(config === undefined || config === null) {
 				throw new Error("Missing parameter 'config'");
 			}
-			return (config.variables === "es5") ? ("var ") : ("let ");
+			return config.variables === "es5" ? "var " : "let ";
 		},
 		value(variable, data) {
 			if(variable === undefined || variable === null) {
@@ -7563,7 +7574,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'name'");
 			}
 			if(this._variables[name]) {
-				var index = (this._renamedIndexes[name]) ? (this._renamedIndexes[name]) : (0);
+				var index = this._renamedIndexes[name] ? this._renamedIndexes[name] : 0;
 				var newName = "__ks_" + name + "_" + ++index;
 				while(this._variables[newName]) {
 					newName = "__ks_" + name + "_" + ++index;
@@ -7713,7 +7724,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'name'");
 			}
 			if(this._variables[name]) {
-				var index = (this._renamedIndexes[name]) ? (this._renamedIndexes[name]) : (0);
+				var index = this._renamedIndexes[name] ? this._renamedIndexes[name] : 0;
 				var newName = "__ks_" + name + "_" + ++index;
 				while(this._variables[newName]) {
 					newName = "__ks_" + name + "_" + ++index;
@@ -8107,7 +8118,7 @@ module.exports = function() {
 		__ks_func_newTempName_0() {
 			if((this._index % 2) === 0) {
 				if((this._index + 1) >= this._steps.length) {
-					this._steps.push((this._scope) ? (new Scope(this)) : (new Node(this)));
+					this._steps.push(this._scope ? new Scope(this) : new Node(this));
 				}
 				return this._steps[this._index + 1].newTempName();
 			}
@@ -8127,7 +8138,7 @@ module.exports = function() {
 			}
 			if((this._index % 2) === 0) {
 				if((this._index + 1) >= this._steps.length) {
-					this._steps.push((this._scope) ? (new Scope(this)) : (new Node(this)));
+					this._steps.push(this._scope ? new Scope(this) : new Node(this));
 				}
 				this._steps[this._index + 1].rename(name);
 			}
@@ -8204,7 +8215,7 @@ module.exports = function() {
 			this.compile(data, config, Mode.Key);
 			if((this._index % 2) === 0) {
 				if((this._index + 1) >= this._steps.length) {
-					this._steps.push((this._scope) ? (new Scope(this)) : (new Node(this)));
+					this._steps.push(this._scope ? new Scope(this) : new Node(this));
 				}
 				if(type) {
 					$variable.define(this._steps[this._index + 1], data.name || data, $variable.kind(type), type);
@@ -8234,7 +8245,7 @@ module.exports = function() {
 				mode = 0;
 			}
 			var src = "";
-			mode = (this._mode & Mode.PrepareAll) ? (Mode.PrepareAll) : (0);
+			mode = this._mode & Mode.PrepareAll ? Mode.PrepareAll : 0;
 			for(var s = 0, __ks_0 = this._steps.length; s < __ks_0; s += 2) {
 				if((s + 1) === this._steps.length) {
 					if(this._steps[s].length() === 0) {
@@ -8746,7 +8757,7 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_block_0(reference = null) {
-			return this._parent.block((reference) ? (this._reference + reference) : (this._reference));
+			return this._parent.block(reference ? this._reference + reference : this._reference);
 		}
 		block() {
 			if(arguments.length >= 0 && arguments.length <= 1) {

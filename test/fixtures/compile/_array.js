@@ -100,7 +100,7 @@ module.exports = function(Helper, Type) {
 			if(index === undefined || index === null) {
 				index = 1;
 			}
-			return (this.length) ? (this[this.length - index]) : (null);
+			return this.length ? this[this.length - index] : null;
 		},
 		signature: {
 			access: 3,
