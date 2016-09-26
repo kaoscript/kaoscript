@@ -49,6 +49,49 @@ Features
 - **attributes**
 - **advanced parameters**
 
+Getting Started
+---------------
+
+With [node](http://nodejs.org) previously installed:
+
+	npm install -g kaoscript
+
+Executes the file `hello.ks`:
+```
+#![bin]
+
+extern console
+
+console.log('Hello World!')
+```
+with the command line `kaoscript hello.ks`, you will get `Hello World!`.
+
+Module
+------
+
+By default, a koascript file is a module.
+The global atttribute `#![bin]` indicates that the file is a binary file (i.e. it executes itself like usual javascript file)
+
+For Node, a module file will look as:
+```
+module.exports = function() {
+	...your code...
+}
+```
+
+Alien Dependencies
+------------------
+
+There are three basics ways to add external dependencies:
+- `extern`: from the global scope (`extern console`)
+- `import`: from other dependencies (`import readFile from fs`)
+- `require`: from the module parameters (`require foo` -> `module.exports = function(foo)`)
+
+Two combined ways:
+- `extern|require`: first look into the global scope, and if not found, look into the module parameters
+- `require|extern`: first look into the module parameters, and if not found, look into the global scope
+
+
 Array
 -----
 
