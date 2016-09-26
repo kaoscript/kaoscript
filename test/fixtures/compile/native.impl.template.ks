@@ -1,0 +1,12 @@
+extern console, parseInt
+
+extern final class String
+
+impl String {
+	toInt(base = 10) -> Number => parseInt(this, base)
+}
+
+let d = 4
+let u = 2
+
+console.log(`\(d)\(u)`.toInt())

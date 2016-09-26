@@ -1,4 +1,5 @@
-module.exports = function(Helper, Type) {
+var {Helper, Type} = require("@kaoscript/runtime");
+module.exports = function() {
 	var __ks_Array = {};
 	Helper.newClassMethod({
 		class: Array,

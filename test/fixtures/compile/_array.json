@@ -1,7 +1,5 @@
 {
   "requirements": {
-    "Helper": {},
-    "Type": {}
   },
   "exports": {
     "Array": {

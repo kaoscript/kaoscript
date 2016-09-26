@@ -16,7 +16,7 @@ class Shape {
 
 class Rectangle extends Shape {
     draw() {
-        return super.pen() + ` I'm drawing a \(this._color) rectangle.`
+        return `\(super.pen()) I'm drawing a \(this._color) rectangle.`
     }
 }
 

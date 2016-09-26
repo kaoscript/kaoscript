@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.2.1
+ * Version 0.3.1
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -695,20 +695,20 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::BinaryOperator => { // {{{
-			exp = node.newExpression()
+			node = node.newExpression()
 			
 			if data.operator.kind == BinaryOperator.Assignment {
-				$operator.assignment(exp, data, config, mode)
+				$operator.assignment(node, data, config, mode)
 			}
 			else {
 				if mode & Mode.Operand {
-					exp.code('(')
+					node.code('(')
 				}
 				
-				$operator.binary(exp, data, config, mode)
+				$operator.binary(node, data, config, mode)
 				
 				if mode & Mode.Operand {
-					exp.code(')')
+					node.code(')')
 				}
 			}
 		} // }}}
@@ -904,9 +904,9 @@ func $compile(node, data, config, mode, variable = null) {
 			else {
 				if list {
 					if data.scope.kind == ScopeModifier::This {
-						let variable = node.getVariable(data.callee.name) if data.callee.kind == Kind::Identifier
+						variable = node.getVariable(data.callee.name) if data.callee.kind == Kind::Identifier
 						
-						if variable && variable.callReplacement {
+						if ?variable && variable.callReplacement {
 							variable.callReplacement(node, data, list)
 						}
 						else {
@@ -1768,7 +1768,15 @@ func $compile(node, data, config, mode, variable = null) {
 				node.code(' ? ').compile(name, config).code(' : ', mode & Mode.BooleanExpression ? 'false' : 'undefined')
 			}
 			else {
+				if data.object.kind == Kind::NumericExpression {
+					node.code('(')
+				}
+				
 				node.compile(data.object, config, mode | Mode.Operand)
+				
+				if data.object.kind == Kind::NumericExpression {
+					node.code(')')
+				}
 				
 				if data.computed {
 					node
@@ -2268,12 +2276,20 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::TemplateExpression => { // {{{
+			if mode & Mode.Operand {
+				node.code('(')
+			}
+			
 			for i from 0 til data.elements.length {
 				if i {
 					node.code(' + ')
 				}
 				
 				node.compile(data.elements[i], config)
+			}
+			
+			if mode & Mode.Operand {
+				node.code(')')
 			}
 		} // }}}
 		Kind::TernaryConditionalExpression => { // {{{
@@ -2866,7 +2882,7 @@ const $expression = {
 				}
 			}
 			Kind::Identifier => {
-				return {name: [data.name], operand: false}
+				return {name: [node.getRenamedVar(data.name)], operand: false}
 			}
 			Kind::MemberExpression => {
 				{name, operand, todo} = $expression.member(node, data.object, config, name)
@@ -6616,6 +6632,18 @@ const $variable = {
 	} // }}}
 	fromAST(data, node) { // {{{
 		switch data.kind {
+			Kind::ArrayComprehension, Kind::ArrayExpression, Kind::ArrayRange => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: 'Array'
+						}
+					}
+				}
+			}
 			Kind::BinaryOperator => {
 				if data.operator.kind == BinaryOperator::TypeCast {
 					return {
@@ -6830,6 +6858,18 @@ const $variable = {
 					}
 				}
 			}
+			Kind::ObjectExpression => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: 'Object'
+						}
+					}
+				}
+			}
 			Kind::TernaryConditionalExpression => {
 				let a = $type.type(data.then, node)
 				let b = $type.type(data.else, node)
@@ -6841,7 +6881,7 @@ const $variable = {
 					}
 				}
 			}
-			Kind::Template => {
+			Kind::TemplateExpression => {
 				return {
 					kind: VariableKind::Variable
 					type: {
@@ -7007,7 +7047,7 @@ class Block {
 		return this
 	} // }}}
 	codeVariable(data) { // {{{
-		let name = this._renamedVars[data.name] ?? data.name
+		let name = this.getRenamedVar(data.name) ?? data.name
 		
 		this._code.push(name)
 		

@@ -1,5 +1,3 @@
-require Helper, Type
-
 extern final class Array {
 }
 
