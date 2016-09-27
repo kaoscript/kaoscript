@@ -771,7 +771,7 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 			}
 			
-			node = node.newExpression()
+			node = node.newExpression().noVariable()
 			
 			let callee
 			if data.callee.kind == Kind::MemberExpression && !data.callee.computed && data.callee.object.kind == Kind::MemberExpression && !data.callee.object.computed && data.callee.property.kind == Kind::Identifier && (data.callee.property.name == 'apply') && (callee = $final.callee(data.callee.object, node)) {
@@ -1244,7 +1244,6 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			module.flag('Type')
 			
-			let type
 			for declaration in data.declarations {
 				switch declaration.kind {
 					Kind::ClassDeclaration => {
@@ -1268,37 +1267,12 @@ func $compile(node, data, config, mode, variable = null) {
 							$extern.classMember(declaration.members[i], variable, node)
 						}
 						
-						let name = node.newTempName()
-						
-						let ctrl = node
-							.newControl()
-							.code(`if(!Type.isValue(\(variable.name.name)))`)
-							.step()
-						
-						ctrl.newExpression().code(`var \(variable.name.name) = \(name)`)
-						ctrl.newExpression().code(`var __ks_\(variable.name.name) = __ks_\(name)`)
-						
-						ctrl.step().code('else').step().newExpression().code(`var __ks_\(variable.name.name) = {}`)
-						
-						module.require(name, VariableKind::Class)
+						module.require(declaration.name.name, VariableKind::Class, false)
 					}
 					Kind::VariableDeclarator => {
 						$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
 						
-						let name = node.newTempName()
-						
-						let ctrl = node
-							.newControl()
-							.code(`if(!Type.isValue(\(variable.name.name)))`)
-							.step()
-						
-						ctrl.newExpression().code(`var \(variable.name.name) = \(name)`)
-						
-						module.require(name, type)
-					}
-					=> {
-						console.error(declaration)
-						throw new Error('Unknow kind ' + declaration.kind)
+						module.require(declaration.name.name, type, false)
 					}
 				}
 			}
@@ -1952,7 +1926,6 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			module.flag('Type')
 			
-			let type
 			for declaration in data.declarations {
 				switch declaration.kind {
 					Kind::ClassDeclaration => {
@@ -1976,37 +1949,12 @@ func $compile(node, data, config, mode, variable = null) {
 							$extern.classMember(declaration.members[i], variable, node)
 						}
 						
-						let name = node.newTempName()
-						
-						let ctrl = node
-							.newControl()
-							.code(`if(Type.isValue(\(name)))`)
-							.step()
-						
-						ctrl.newExpression().code(`var \(variable.name.name) = \(name)`)
-						ctrl.newExpression().code(`var __ks_\(variable.name.name) = __ks_\(name)`)
-						
-						ctrl.step().code('else').step().newExpression().code(`var __ks_\(variable.name.name) = {}`)
-						
-						module.require(name, VariableKind::Class)
+						module.require(declaration.name.name, VariableKind::Class, true)
 					}
 					Kind::VariableDeclarator => {
 						$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
 						
-						let name = node.newTempName()
-						
-						let ctrl = node
-							.newControl()
-							.code(`if(Type.isValue(\(name)))`)
-							.step()
-						
-						ctrl.newExpression().code(`var \(variable.name.name) = \(name)`)
-						
-						module.require(name, type)
-					}
-					=> {
-						console.error(declaration)
-						throw new Error('Unknow kind ' + declaration.kind)
+						module.require(declaration.name.name, type, true)
 					}
 				}
 			}
@@ -2463,9 +2411,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::VariableDeclarator => { // {{{
-			let exp = node.newExpression()
-			
-			exp._assignment = true
+			let exp = node.newExpression().noVariable()
 			
 			if data.name.kind == Kind::Identifier {
 				if config.variables == 'es6' {
@@ -5069,6 +5015,7 @@ const $import = {
 			}
 		}
 		
+		let usages = []
 		let importCode
 		if (importVarCount && importAll) || (importVarCount && importAlias.length) || (importAll && importAlias.length) {
 			importCode = node.newTempName()
@@ -5077,19 +5024,82 @@ const $import = {
 				.newExpression()
 				.code('var ', importCode, ' = require(', $quote(moduleName), ')(')
 			
-			nf = false
-			for name of requirements {
+			let nf
+			let first = true
+			let nc = 0
+			for name, requirement of requirements {
+				throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`) if !requirement.nullable && (!?data.references || data.references.length == 0)
+				
+				nf = true
+				if data.references {
+					for reference in data.references while nf {
+						if reference.foreign? {
+							if reference.foreign.name == name {
+								if first {
+									first = false
+								}
+								else {
+									exp.code(', ')
+								}
+								
+								for i from 0 til nc {
+									if i {
+										exp.code(', ')
+									}
+									
+									exp.code('null')
+								}
+								
+								usages.push(reference.alias)
+								
+								exp.code(reference.alias.name)
+								
+								if requirement.class {
+									exp.code(', __ks_' + reference.alias.name)
+								}
+								
+								nf = false
+							}
+						}
+						else {
+							if reference.alias.name == name {
+								if first {
+									first = false
+								}
+								else {
+									exp.code(', ')
+								}
+								
+								for i from 0 til nc {
+									if i {
+										exp.code(', ')
+									}
+									
+									exp.code('null')
+								}
+								
+								usages.push(reference.alias)
+								
+								exp.code(reference.alias.name)
+								
+								if requirement.class {
+									exp.code(', __ks_' + reference.alias.name)
+								}
+								
+								nf = false
+							}
+						}
+					}
+				}
+				
 				if nf {
-					exp.code(', ')
-				}
-				else {
-					nf = true
-				}
-				
-				exp.code(name)
-				
-				if requirements[name].class {
-					exp.code(', __ks_', name)
+					if requirement.nullable {
+						++nc
+						++nc if requirement.class
+					}
+					else {
+						throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`)
+					}
 				}
 			}
 			
@@ -5098,19 +5108,82 @@ const $import = {
 		else if importVarCount || importAll || importAlias.length {
 			importCode = 'require(' + $quote(moduleName) + ')('
 			
-			nf = false
-			for name of requirements {
+			let nf
+			let first = true
+			let nc = 0
+			for name, requirement of requirements {
+				throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`) if !requirement.nullable && (!?data.references || data.references.length == 0)
+				
+				nf = true
+				if data.references {
+					for reference in data.references while nf {
+						if reference.foreign? {
+							if reference.foreign.name == name {
+								if first {
+									first = false
+								}
+								else {
+									importCode += ', '
+								}
+								
+								for i from 0 til nc {
+									if i {
+										importCode += ', '
+									}
+									
+									importCode += 'null'
+								}
+								
+								usages.push(reference.alias)
+								
+								importCode += reference.alias.name
+								
+								if requirement.class {
+									importCode += ', __ks_' + reference.alias.name
+								}
+								
+								nf = false
+							}
+						}
+						else {
+							if reference.alias.name == name {
+								if first {
+									first = false
+								}
+								else {
+									importCode += ', '
+								}
+								
+								for i from 0 til nc {
+									if i {
+										importCode += ', '
+									}
+									
+									importCode += 'null'
+								}
+								
+								usages.push(reference.alias)
+								
+								importCode += reference.alias.name
+								
+								if requirement.class {
+									importCode += ', __ks_' + reference.alias.name
+								}
+								
+								nf = false
+							}
+						}
+					}
+				}
+				
 				if nf {
-					importCode += ', '
-				}
-				else {
-					nf = true
-				}
-				
-				importCode += name
-				
-				if requirements[name].class {
-					importCode += ', __ks_' + name
+					if requirement.nullable {
+						++nc
+						++nc if requirement.class
+					}
+					else {
+						throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`)
+					}
 				}
 			}
 			
@@ -5123,21 +5196,21 @@ const $import = {
 			
 			throw new Error(`Undefined variable \(name) in the imported module at line \(data.start.line)`) unless variable ?= exports[name]
 			
-			$import.addVariable(module, file, node, alias, variable)
-			
 			if variable.kind != VariableKind::TypeAlias {
 				if variable.kind == VariableKind::Class && variable.final {
 					variable.final.name = '__ks_' + alias
 					
-					node.newExpression().code(`var {\(alias), \(variable.final.name)} = \(importCode)`)
+					node.newExpression().code(`var {\(alias), \(variable.final.name)} = \(importCode)`).use(usages, true)
 				}
 				else {
 					node.newExpression().code(`var \(alias) = \(importCode).\(name)`)
 				}
 			}
+			
+			$import.addVariable(module, file, node, alias, variable)
 		}
 		else if importVarCount {
-			exp = node.newExpression().code('var {')
+			exp = node.newExpression().use(usages, true).code('var {')
 			
 			nf = false
 			for name, alias of importVariables {
@@ -5176,11 +5249,11 @@ const $import = {
 		}
 		
 		if importAll {
+			exp = null
+			
 			let variables = []
 			
 			for name, variable of exports {
-				$import.addVariable(module, file, node, name, variable)
-				
 				if variable.kind != VariableKind::TypeAlias {
 					variables.push(name)
 					
@@ -5189,14 +5262,28 @@ const $import = {
 						
 						variables.push(variable.final.name)
 					}
+					
+					if exp == null {
+						exp = node.newExpression().use(usages, true)
+					}
 				}
+				
+				$import.addVariable(module, file, node, name, variable)
 			}
 			
 			if variables.length == 1 {
-				node.newExpression().code('var ', variables[0], ' = ', importCode, '.' + variables[0])
+				if exp == null {
+					exp = node.newExpression().use(usages, true)
+				}
+				
+				exp.code('var ', variables[0], ' = ', importCode, '.' + variables[0])
 			}
 			else if variables.length {
-				exp = node.newExpression().code('var {')
+				if exp == null {
+					exp = node.newExpression().use(usages, true)
+				}
+				
+				exp.code('var {')
 				
 				nf = false
 				for name in variables {
@@ -5215,7 +5302,7 @@ const $import = {
 		}
 		
 		if importAlias.length {
-			node.newExpression().code('var ', importAlias, ' = ', importCode)
+			node.newExpression().code('var ', importAlias, ' = ', importCode).use(usages, true)
 			
 			type = {
 				typeName: {
@@ -7558,10 +7645,10 @@ class Control {
 
 class Expression {
 	private {
-		_assignment			= false
 		_config				= null
 		_code		: Array = []
 		_mode
+		_noVariable			= false
 		_parent
 		_prepared			= false
 		_usages				= []
@@ -7588,7 +7675,7 @@ class Expression {
 	} // }}}
 	assignment(data, variable = false) { // {{{
 		if data.left.kind == Kind::Identifier && !this.hasVariable(data.left.name) {
-			if variable || this._assignment || this._variable.length {
+			if variable || this._noVariable || this._variable.length {
 				this._variables.push(data.left.name)
 			}
 			else {
@@ -7708,6 +7795,11 @@ class Expression {
 		
 		return name
 	} // }}}
+	noVariable() { // {{{
+		this._noVariable = true
+		
+		return this
+	} // }}}
 	listNewVariables(mode = 0) { // {{{
 		this._prepared = true
 		
@@ -7794,12 +7886,34 @@ class Expression {
 		
 		return this
 	} // }}}
-	use(data) { // {{{
-		if data.kind == Kind::Identifier {
-			this._usages.push({
-				name: data.name,
-				start: data.start
-			})
+	use(data, immediate = false) { // {{{
+		if immediate {
+			if data is Array {
+				for item in data {
+					throw new Error(`Undefined variable '\(item.name)' at line \(item.start.line)`) if item.kind == Kind::Identifier && !this._parent.hasVariable(item.name)
+				}
+			}
+			else if data.kind == Kind::Identifier {
+				throw new Error(`Undefined variable '\(data.name)' at line \(data.start.line)`) if !this._parent.hasVariable(data.name)
+			}
+		}
+		else {
+			if data is Array {
+				for item in data {
+					if item.kind == Kind::Identifier {
+						this._usages.push({
+							name: item.name,
+							start: item.start
+						})
+					}
+				}
+			}
+			else if data.kind == Kind::Identifier {
+				this._usages.push({
+					name: data.name,
+					start: data.start
+				})
+			}
 		}
 		
 		return this
@@ -7931,6 +8045,7 @@ class Module {
 		_binary		: Boolean	= false
 		_body		: Block 	= new Scope(this)
 		_compiler	: Compiler
+		_dynamicRequirements	= []
 		_exportSource			= []
 		_exportMeta				= {}
 		_flags					= {}
@@ -8083,10 +8198,52 @@ class Module {
 			this._requirements[name] = {}
 		}
 	} // }}}
+	require(name, kind, requireFirst) { // {{{
+		if this._binary {
+			throw new Error('Binary file can\'t require')
+		}
+		
+		let requirement = {
+			name: name
+			class: kind == VariableKind::Class
+			parameter: this._body.newTempName()
+			requireFirst: requireFirst
+		}
+		
+		this._requirements[requirement.parameter] = requirement
+		
+		this._dynamicRequirements.push(requirement)
+	} // }}}
 	toMetadata() { // {{{
 		let data = {
-			requirements: this._requirements,
+			requirements: {},
 			exports: {}
+		}
+		
+		for name, variable of this._requirements {
+			if variable.parameter {
+				if variable.class {
+					data.requirements[variable.name] = {
+						class: true
+						nullable: true
+					}
+				}
+				else {
+					data.requirements[variable.name] = {
+						nullable: true
+					}
+				}
+			}
+			else {
+				if variable.class {
+					data.requirements[name] = {
+						class: true
+					}
+				}
+				else {
+					data.requirements[name] = {}
+				}
+			}
 		}
 		
 		let d
@@ -8116,6 +8273,70 @@ class Module {
 			source += this._body.toSource().slice(0, -1)
 		}
 		else {
+			if this._dynamicRequirements.length {
+				source += 'function __ks_require('
+				
+				for requirement, i in this._dynamicRequirements {
+					if i {
+						source += ', '
+					}
+					
+					source += requirement.parameter
+					
+					if requirement.class {
+						source += ', __ks_' + requirement.parameter
+					}
+				}
+				
+				source += ') {\n'
+				
+				if this._dynamicRequirements.length == 1 {
+					requirement = this._dynamicRequirements[0]
+					
+					if requirement.requireFirst {
+						source += '\tif(Type.isValue(' + requirement.parameter + ')) {\n'
+						
+						if requirement.class {
+							source += '\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'
+							source += '\t}\n'
+							source += '\telse {\n'
+							source += '\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined"? {} : __ks_' + requirement.name + '];\n'
+							source += '\t}\n'
+						}
+						else {
+							source += '\t\treturn [' + requirement.parameter + '];\n'
+							source += '\t}\n'
+							source += '\telse {\n'
+							source += '\t\treturn [' + requirement.name + '];\n'
+							source += '\t}\n'
+						}
+					}
+					else {
+						source += '\tif(Type.isValue(' + requirement.name + ')) {\n'
+						
+						if requirement.class {
+							source += '\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined"? {} : __ks_' + requirement.name + '];\n'
+							source += '\t}\n'
+							source += '\telse {\n'
+							source += '\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'
+							source += '\t}\n'
+						}
+						else {
+							source += '\t\treturn [' + requirement.name + '];\n'
+							source += '\t}\n'
+							source += '\telse {\n'
+							source += '\t\treturn [' + requirement.parameter + '];\n'
+							source += '\t}\n'
+						}
+					}
+				}
+				else {
+					throw new Error('Not Implemented')
+				}
+				
+				source += '}\n'
+			}
+			
 			source += 'module.exports = function('
 			
 			let nf = false
@@ -8135,6 +8356,38 @@ class Module {
 			}
 			
 			source += ') {\n'
+			
+			if this._dynamicRequirements.length {
+				source += '\tvar ['
+				
+				for requirement, i in this._dynamicRequirements {
+					if i {
+						source += ', '
+					}
+					
+					source += requirement.name
+					
+					if requirement.class {
+						source += ', __ks_' + requirement.name
+					}
+				}
+				
+				source += '] = __ks_require('
+				
+				for requirement, i in this._dynamicRequirements {
+					if i {
+						source += ', '
+					}
+					
+					source += requirement.parameter
+					
+					if requirement.class {
+						source += ', __ks_' + requirement.parameter
+					}
+				}
+				
+				source += ');\n'
+			}
 			
 			source += this._body.toSource()
 			

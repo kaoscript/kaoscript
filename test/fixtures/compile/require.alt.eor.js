@@ -1,12 +1,14 @@
 var {Helper, Type} = require("@kaoscript/runtime");
-module.exports = function(__ks_0, __ks___ks_0) {
-	if(!Type.isValue(Array)) {
-		var Array = __ks_0;
-		var __ks_Array = __ks___ks_0;
+function __ks_require(__ks_0, __ks___ks_0) {
+	if(Type.isValue(Array)) {
+		return [Array, typeof __ks_Array === "undefined"? {} : __ks_Array];
 	}
 	else {
-		var __ks_Array = {};
+		return [__ks_0, __ks___ks_0];
 	}
+}
+module.exports = function(__ks_0, __ks___ks_0) {
+	var [Array, __ks_Array] = __ks_require(__ks_0, __ks___ks_0);
 	Helper.newInstanceMethod({
 		class: Array,
 		name: "contains",

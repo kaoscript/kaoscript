@@ -810,7 +810,7 @@ module.exports = function() {
 					list = false;
 				}
 			}
-			node = node.newExpression();
+			node = node.newExpression().noVariable();
 			var callee;
 			if((data.callee.kind === Kind.MemberExpression) && !data.callee.computed && (data.callee.object.kind === Kind.MemberExpression) && !data.callee.object.computed && (data.callee.property.kind === Kind.Identifier) && (data.callee.property.name === "apply") && (callee = $final.callee(data.callee.object, node))) {
 				if(callee.variable) {
@@ -1199,7 +1199,6 @@ module.exports = function() {
 		else if(__ks_0 === Kind.ExternOrRequireDeclaration) {
 			var module = node.module();
 			module.flag("Type");
-			var type;
 			var __ks_1 = data.declarations;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, declaration; __ks_2 < __ks_3; ++__ks_2) {
 				declaration = __ks_1[__ks_2];
@@ -1223,23 +1222,12 @@ module.exports = function() {
 					for(var i = 0, __ks_5 = declaration.members.length; i < __ks_5; ++i) {
 						$extern.classMember(declaration.members[i], variable, node);
 					}
-					var name = node.newTempName();
-					var ctrl = node.newControl().code("if(!Type.isValue(" + variable.name.name + "))").step();
-					ctrl.newExpression().code("var " + variable.name.name + " = " + name);
-					ctrl.newExpression().code("var __ks_" + variable.name.name + " = __ks_" + name);
-					ctrl.step().code("else").step().newExpression().code("var __ks_" + variable.name.name + " = {}");
-					module.require(name, VariableKind.Class);
+					module.require(declaration.name.name, VariableKind.Class, false);
 				}
 				else if(__ks_4 === Kind.VariableDeclarator) {
+					var type;
 					$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
-					var name = node.newTempName();
-					var ctrl = node.newControl().code("if(!Type.isValue(" + variable.name.name + "))").step();
-					ctrl.newExpression().code("var " + variable.name.name + " = " + name);
-					module.require(name, type);
-				}
-				else {
-					console.error(declaration);
-					throw new Error("Unknow kind " + declaration.kind);
+					module.require(declaration.name.name, type, false);
 				}
 			}
 		}
@@ -1749,7 +1737,6 @@ module.exports = function() {
 		else if(__ks_0 === Kind.RequireOrExternDeclaration) {
 			var module = node.module();
 			module.flag("Type");
-			var type;
 			var __ks_1 = data.declarations;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, declaration; __ks_2 < __ks_3; ++__ks_2) {
 				declaration = __ks_1[__ks_2];
@@ -1773,23 +1760,12 @@ module.exports = function() {
 					for(var i = 0, __ks_5 = declaration.members.length; i < __ks_5; ++i) {
 						$extern.classMember(declaration.members[i], variable, node);
 					}
-					var name = node.newTempName();
-					var ctrl = node.newControl().code("if(Type.isValue(" + name + "))").step();
-					ctrl.newExpression().code("var " + variable.name.name + " = " + name);
-					ctrl.newExpression().code("var __ks_" + variable.name.name + " = __ks_" + name);
-					ctrl.step().code("else").step().newExpression().code("var __ks_" + variable.name.name + " = {}");
-					module.require(name, VariableKind.Class);
+					module.require(declaration.name.name, VariableKind.Class, true);
 				}
 				else if(__ks_4 === Kind.VariableDeclarator) {
+					var type;
 					$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
-					var name = node.newTempName();
-					var ctrl = node.newControl().code("if(Type.isValue(" + name + "))").step();
-					ctrl.newExpression().code("var " + variable.name.name + " = " + name);
-					module.require(name, type);
-				}
-				else {
-					console.error(declaration);
-					throw new Error("Unknow kind " + declaration.kind);
+					module.require(declaration.name.name, type, true);
 				}
 			}
 		}
@@ -2149,8 +2125,7 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.VariableDeclarator) {
-			var exp = node.newExpression();
-			exp._assignment = true;
+			var exp = node.newExpression().noVariable();
 			if(data.name.kind === Kind.Identifier) {
 				if(config.variables === "es6") {
 					if(variable === VariableModifier.Let) {
@@ -4828,38 +4803,155 @@ module.exports = function() {
 					++importVarCount;
 				}
 			}
+			var usages = [];
 			var importCode;
 			if((importVarCount && importAll) || (importVarCount && importAlias.length) || (importAll && importAlias.length)) {
 				importCode = node.newTempName();
 				var __ks_exp_1 = node.newExpression().code("var ", importCode, " = require(", $quote(moduleName), ")(");
-				var nf = false;
+				var nf;
+				var first = true;
+				var nc = 0;
 				for(name in requirements) {
+					requirement = requirements[name];
+					if(!requirement.nullable && (!Type.isValue(data.references) || (data.references.length === 0))) {
+						throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+					}
+					nf = true;
+					if(data.references) {
+						var __ks_1 = data.references;
+						for(var __ks_2 = 0, __ks_3 = __ks_1.length, reference; nf && __ks_2 < __ks_3; ++__ks_2) {
+							reference = __ks_1[__ks_2];
+							if(Type.isValue(reference.foreign)) {
+								if(reference.foreign.name === name) {
+									if(first) {
+										first = false;
+									}
+									else {
+										__ks_exp_1.code(", ");
+									}
+									for(var i = 0, __ks_4 = nc; i < __ks_4; ++i) {
+										if(i) {
+											__ks_exp_1.code(", ");
+										}
+										__ks_exp_1.code("null");
+									}
+									usages.push(reference.alias);
+									__ks_exp_1.code(reference.alias.name);
+									if(requirement.class) {
+										__ks_exp_1.code(", __ks_" + reference.alias.name);
+									}
+									nf = false;
+								}
+							}
+							else {
+								if(reference.alias.name === name) {
+									if(first) {
+										first = false;
+									}
+									else {
+										__ks_exp_1.code(", ");
+									}
+									for(var i = 0, __ks_4 = nc; i < __ks_4; ++i) {
+										if(i) {
+											__ks_exp_1.code(", ");
+										}
+										__ks_exp_1.code("null");
+									}
+									usages.push(reference.alias);
+									__ks_exp_1.code(reference.alias.name);
+									if(requirement.class) {
+										__ks_exp_1.code(", __ks_" + reference.alias.name);
+									}
+									nf = false;
+								}
+							}
+						}
+					}
 					if(nf) {
-						__ks_exp_1.code(", ");
-					}
-					else {
-						nf = true;
-					}
-					__ks_exp_1.code(name);
-					if(requirements[name].class) {
-						__ks_exp_1.code(", __ks_", name);
+						if(requirement.nullable) {
+							++nc;
+							if(requirement.class) {
+								++nc;
+							}
+						}
+						else {
+							throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+						}
 					}
 				}
 				__ks_exp_1.code(")");
 			}
 			else if(importVarCount || importAll || importAlias.length) {
 				importCode = "require(" + $quote(moduleName) + ")(";
-				var nf = false;
+				var nf;
+				var first = true;
+				var nc = 0;
 				for(name in requirements) {
+					requirement = requirements[name];
+					if(!requirement.nullable && (!Type.isValue(data.references) || (data.references.length === 0))) {
+						throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+					}
+					nf = true;
+					if(data.references) {
+						var __ks_1 = data.references;
+						for(var __ks_2 = 0, __ks_3 = __ks_1.length, reference; nf && __ks_2 < __ks_3; ++__ks_2) {
+							reference = __ks_1[__ks_2];
+							if(Type.isValue(reference.foreign)) {
+								if(reference.foreign.name === name) {
+									if(first) {
+										first = false;
+									}
+									else {
+										importCode += ", ";
+									}
+									for(var i = 0, __ks_4 = nc; i < __ks_4; ++i) {
+										if(i) {
+											importCode += ", ";
+										}
+										importCode += "null";
+									}
+									usages.push(reference.alias);
+									importCode += reference.alias.name;
+									if(requirement.class) {
+										importCode += ", __ks_" + reference.alias.name;
+									}
+									nf = false;
+								}
+							}
+							else {
+								if(reference.alias.name === name) {
+									if(first) {
+										first = false;
+									}
+									else {
+										importCode += ", ";
+									}
+									for(var i = 0, __ks_4 = nc; i < __ks_4; ++i) {
+										if(i) {
+											importCode += ", ";
+										}
+										importCode += "null";
+									}
+									usages.push(reference.alias);
+									importCode += reference.alias.name;
+									if(requirement.class) {
+										importCode += ", __ks_" + reference.alias.name;
+									}
+									nf = false;
+								}
+							}
+						}
+					}
 					if(nf) {
-						importCode += ", ";
-					}
-					else {
-						nf = true;
-					}
-					importCode += name;
-					if(requirements[name].class) {
-						importCode += ", __ks_" + name;
+						if(requirement.nullable) {
+							++nc;
+							if(requirement.class) {
+								++nc;
+							}
+						}
+						else {
+							throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+						}
 					}
 				}
 				importCode += ")";
@@ -4872,19 +4964,19 @@ module.exports = function() {
 				if(!(Type.isValue(__ks_1 = exports[name]) ? variable = __ks_1 : undefined)) {
 					throw new Error("Undefined variable " + name + " in the imported module at line " + data.start.line);
 				}
-				$import.addVariable(module, file, node, alias, variable);
 				if(variable.kind !== VariableKind.TypeAlias) {
 					if((variable.kind === VariableKind.Class) && variable.final) {
 						variable.final.name = "__ks_" + alias;
-						node.newExpression().code("var {" + alias + ", " + variable.final.name + "} = " + importCode);
+						node.newExpression().code("var {" + alias + ", " + variable.final.name + "} = " + importCode).use(usages, true);
 					}
 					else {
 						node.newExpression().code("var " + alias + " = " + importCode + "." + name);
 					}
 				}
+				$import.addVariable(module, file, node, alias, variable);
 			}
 			else if(importVarCount) {
-				exp = node.newExpression().code("var {");
+				exp = node.newExpression().use(usages, true).code("var {");
 				var nf = false;
 				for(name in importVariables) {
 					alias = importVariables[name];
@@ -4918,23 +5010,33 @@ module.exports = function() {
 				exp.code("} = ", importCode);
 			}
 			if(importAll) {
+				exp = null;
 				var variables = [];
 				for(name in exports) {
 					variable = exports[name];
-					$import.addVariable(module, file, node, name, variable);
 					if(variable.kind !== VariableKind.TypeAlias) {
 						variables.push(name);
 						if((variable.kind === VariableKind.Class) && variable.final) {
 							variable.final.name = "__ks_" + name;
 							variables.push(variable.final.name);
 						}
+						if(exp === null) {
+							exp = node.newExpression().use(usages, true);
+						}
 					}
+					$import.addVariable(module, file, node, name, variable);
 				}
 				if(variables.length === 1) {
-					node.newExpression().code("var ", variables[0], " = ", importCode, "." + variables[0]);
+					if(exp === null) {
+						exp = node.newExpression().use(usages, true);
+					}
+					exp.code("var ", variables[0], " = ", importCode, "." + variables[0]);
 				}
 				else if(variables.length) {
-					exp = node.newExpression().code("var {");
+					if(exp === null) {
+						exp = node.newExpression().use(usages, true);
+					}
+					exp.code("var {");
 					var nf = false;
 					for(var __ks_1 = 0, __ks_2 = variables.length; __ks_1 < __ks_2; ++__ks_1) {
 						name = variables[__ks_1];
@@ -4950,7 +5052,7 @@ module.exports = function() {
 				}
 			}
 			if(importAlias.length) {
-				node.newExpression().code("var ", importAlias, " = ", importCode);
+				node.newExpression().code("var ", importAlias, " = ", importCode).use(usages, true);
 				var type = {
 					typeName: {
 						kind: Kind.Identifier,
@@ -8697,9 +8799,9 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_init_1() {
-			this._assignment = false;
 			this._config = null;
 			this._code = [];
+			this._noVariable = false;
 			this._prepared = false;
 			this._usages = [];
 			this._reference = "";
@@ -8778,7 +8880,7 @@ module.exports = function() {
 				var variable = false;
 			}
 			if((data.left.kind === Kind.Identifier) && !this.hasVariable(data.left.name)) {
-				if(variable || this._assignment || this._variable.length) {
+				if(variable || this._noVariable || this._variable.length) {
 					this._variables.push(data.left.name);
 				}
 				else {
@@ -9059,6 +9161,16 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
+		__ks_func_noVariable_0() {
+			this._noVariable = true;
+			return this;
+		}
+		noVariable() {
+			if(arguments.length === 0) {
+				return Expression.prototype.__ks_func_noVariable_0.apply(this);
+			}
+			throw new Error("Wrong number of arguments");
+		}
 		__ks_func_listNewVariables_0(mode) {
 			if(mode === undefined || mode === null) {
 				mode = 0;
@@ -9210,20 +9322,56 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_use_0(data) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
+		__ks_func_use_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
 			}
-			if(data.kind === Kind.Identifier) {
-				this._usages.push({
-					name: data.name,
-					start: data.start
-				});
+			var __ks_i = -1;
+			var data = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var immediate = arguments[++__ks_i];
+			}
+			else  {
+				var immediate = false;
+			}
+			if(immediate) {
+				if(Type.isArray(data)) {
+					for(var __ks_0 = 0, __ks_1 = data.length, item; __ks_0 < __ks_1; ++__ks_0) {
+						item = data[__ks_0];
+						if((item.kind === Kind.Identifier) && !this._parent.hasVariable(item.name)) {
+							throw new Error("Undefined variable '" + item.name + "' at line " + item.start.line);
+						}
+					}
+				}
+				else if(data.kind === Kind.Identifier) {
+					if(!this._parent.hasVariable(data.name)) {
+						throw new Error("Undefined variable '" + data.name + "' at line " + data.start.line);
+					}
+				}
+			}
+			else {
+				if(Type.isArray(data)) {
+					for(var __ks_0 = 0, __ks_1 = data.length, item; __ks_0 < __ks_1; ++__ks_0) {
+						item = data[__ks_0];
+						if(item.kind === Kind.Identifier) {
+							this._usages.push({
+								name: item.name,
+								start: item.start
+							});
+						}
+					}
+				}
+				else if(data.kind === Kind.Identifier) {
+					this._usages.push({
+						name: data.name,
+						start: data.start
+					});
+				}
 			}
 			return this;
 		}
 		use() {
-			if(arguments.length === 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Expression.prototype.__ks_func_use_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
@@ -9275,9 +9423,6 @@ module.exports = function() {
 			}
 		],
 		instanceVariables: {
-			_assignment: {
-				access: 1
-			},
 			_config: {
 				access: 1
 			},
@@ -9286,6 +9431,9 @@ module.exports = function() {
 				type: "Array"
 			},
 			_mode: {
+				access: 1
+			},
+			_noVariable: {
 				access: 1
 			},
 			_parent: {
@@ -9575,6 +9723,15 @@ module.exports = function() {
 					]
 				}
 			],
+			noVariable: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: [
+					]
+				}
+			],
 			listNewVariables: [
 				{
 					access: 3,
@@ -9672,12 +9829,12 @@ module.exports = function() {
 				{
 					access: 3,
 					min: 1,
-					max: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
 							min: 1,
-							max: 1
+							max: 2
 						}
 					]
 				}
@@ -10206,6 +10363,7 @@ module.exports = function() {
 		__ks_init_1() {
 			this._binary = false;
 			this._body = new Scope(this);
+			this._dynamicRequirements = [];
 			this._exportSource = [];
 			this._exportMeta = {};
 			this._flags = {};
@@ -10467,21 +10625,73 @@ module.exports = function() {
 				this._requirements[name] = {};
 			}
 		}
+		__ks_func_require_1(name, kind, requireFirst) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(kind === undefined || kind === null) {
+				throw new Error("Missing parameter 'kind'");
+			}
+			if(requireFirst === undefined || requireFirst === null) {
+				throw new Error("Missing parameter 'requireFirst'");
+			}
+			if(this._binary) {
+				throw new Error("Binary file can't require");
+			}
+			var requirement = {
+				name: name,
+				class: kind === VariableKind.Class,
+				parameter: this._body.newTempName(),
+				requireFirst: requireFirst
+			};
+			this._requirements[requirement.parameter] = requirement;
+			this._dynamicRequirements.push(requirement);
+		}
 		require() {
 			if(arguments.length === 2) {
 				return Module.prototype.__ks_func_require_0.apply(this, arguments);
+			}
+			else if(arguments.length === 3) {
+				return Module.prototype.__ks_func_require_1.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_toMetadata_0() {
 			var data = {
-				requirements: this._requirements,
+				requirements: {},
 				exports: {}
 			};
-			var d;
-			var __ks_0 = this._exportMeta;
+			var __ks_0 = this._requirements;
 			for(var name in __ks_0) {
 				var variable = __ks_0[name];
+				if(variable.parameter) {
+					if(variable.class) {
+						data.requirements[variable.name] = {
+							class: true,
+							nullable: true
+						};
+					}
+					else {
+						data.requirements[variable.name] = {
+							nullable: true
+						};
+					}
+				}
+				else {
+					if(variable.class) {
+						data.requirements[name] = {
+							class: true
+						};
+					}
+					else {
+						data.requirements[name] = {};
+					}
+				}
+			}
+			var d;
+			var __ks_1 = this._exportMeta;
+			for(var name in __ks_1) {
+				var variable = __ks_1[name];
 				d = {};
 				for(var n in variable) {
 					if(n === "name") {
@@ -10508,6 +10718,62 @@ module.exports = function() {
 				source += this._body.toSource().slice(0, -1);
 			}
 			else {
+				if(this._dynamicRequirements.length) {
+					source += "function __ks_require(";
+					var __ks_0 = this._dynamicRequirements;
+					for(var i = 0, __ks_1 = __ks_0.length, requirement; i < __ks_1; ++i) {
+						requirement = __ks_0[i];
+						if(i) {
+							source += ", ";
+						}
+						source += requirement.parameter;
+						if(requirement.class) {
+							source += ", __ks_" + requirement.parameter;
+						}
+					}
+					source += ") {\n";
+					if(this._dynamicRequirements.length === 1) {
+						var requirement = this._dynamicRequirements[0];
+						if(requirement.requireFirst) {
+							source += "\tif(Type.isValue(" + requirement.parameter + ")) {\n";
+							if(requirement.class) {
+								source += "\t\treturn [" + requirement.parameter + ", __ks_" + requirement.parameter + "];\n";
+								source += "\t}\n";
+								source += "\telse {\n";
+								source += "\t\treturn [" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\"? {} : __ks_" + requirement.name + "];\n";
+								source += "\t}\n";
+							}
+							else {
+								source += "\t\treturn [" + requirement.parameter + "];\n";
+								source += "\t}\n";
+								source += "\telse {\n";
+								source += "\t\treturn [" + requirement.name + "];\n";
+								source += "\t}\n";
+							}
+						}
+						else {
+							source += "\tif(Type.isValue(" + requirement.name + ")) {\n";
+							if(requirement.class) {
+								source += "\t\treturn [" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\"? {} : __ks_" + requirement.name + "];\n";
+								source += "\t}\n";
+								source += "\telse {\n";
+								source += "\t\treturn [" + requirement.parameter + ", __ks_" + requirement.parameter + "];\n";
+								source += "\t}\n";
+							}
+							else {
+								source += "\t\treturn [" + requirement.name + "];\n";
+								source += "\t}\n";
+								source += "\telse {\n";
+								source += "\t\treturn [" + requirement.parameter + "];\n";
+								source += "\t}\n";
+							}
+						}
+					}
+					else {
+						throw new Error("Not Implemented");
+					}
+					source += "}\n";
+				}
 				source += "module.exports = function(";
 				var nf = false;
 				var __ks_0 = this._requirements;
@@ -10524,6 +10790,33 @@ module.exports = function() {
 					}
 				}
 				source += ") {\n";
+				if(this._dynamicRequirements.length) {
+					source += "\tvar [";
+					var __ks_1 = this._dynamicRequirements;
+					for(var i = 0, __ks_2 = __ks_1.length, requirement; i < __ks_2; ++i) {
+						requirement = __ks_1[i];
+						if(i) {
+							source += ", ";
+						}
+						source += requirement.name;
+						if(requirement.class) {
+							source += ", __ks_" + requirement.name;
+						}
+					}
+					source += "] = __ks_require(";
+					var __ks_2 = this._dynamicRequirements;
+					for(var i = 0, __ks_3 = __ks_2.length, requirement; i < __ks_3; ++i) {
+						requirement = __ks_2[i];
+						if(i) {
+							source += ", ";
+						}
+						source += requirement.parameter;
+						if(requirement.class) {
+							source += ", __ks_" + requirement.parameter;
+						}
+					}
+					source += ");\n";
+				}
 				source += this._body.toSource();
 				if(this._exportSource.length) {
 					source += "\treturn {";
@@ -10607,6 +10900,9 @@ module.exports = function() {
 			_compiler: {
 				access: 1,
 				type: "#Compiler"
+			},
+			_dynamicRequirements: {
+				access: 1
 			},
 			_exportSource: {
 				access: 1
@@ -10750,6 +11046,18 @@ module.exports = function() {
 							type: "Any",
 							min: 2,
 							max: 2
+						}
+					]
+				},
+				{
+					access: 3,
+					min: 3,
+					max: 3,
+					parameters: [
+						{
+							type: "Any",
+							min: 3,
+							max: 3
 						}
 					]
 				}
