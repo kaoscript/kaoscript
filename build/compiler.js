@@ -224,6 +224,43 @@ module.exports = function() {
 			]
 		}
 	});
+	Helper.newClassMethod({
+		class: Array,
+		name: "merge",
+		final: __ks_Array,
+		function: function(...args) {
+			var source;
+			var i = 0;
+			var l = args.length;
+			var __ks_0;
+			while((i < l) && !((Type.isValue(__ks_0 = args[i]) ? (source = __ks_0, true) : false) && (Type.isArray(source)))) {
+				++i;
+			}
+			++i;
+			while(i < l) {
+				if(Type.isArray(args[i])) {
+					var __ks_0 = args[i];
+					for(var value in __ks_0) {
+						source.pushUniq(value);
+					}
+				}
+				++i;
+			}
+			return source;
+		},
+		signature: {
+			access: 3,
+			min: 1,
+			max: Infinity,
+			parameters: [
+				{
+					type: "Any",
+					min: 1,
+					max: Infinity
+				}
+			]
+		}
+	});
 	Helper.newInstanceMethod({
 		class: Array,
 		name: "pushUniq",
@@ -1205,6 +1242,7 @@ module.exports = function() {
 				var __ks_4 = declaration.kind;
 				if(__ks_4 === Kind.ClassDeclaration) {
 					variable = $variable.define(node, declaration.name, VariableKind.Class, declaration);
+					variable.requirement = declaration.name.name;
 					var continuous = true;
 					for(var i = 0, __ks_5 = declaration.modifiers.length; continuous && i < __ks_5; ++i) {
 						if(declaration.modifiers[i].kind === ClassModifier.Final) {
@@ -1226,7 +1264,8 @@ module.exports = function() {
 				}
 				else if(__ks_4 === Kind.VariableDeclarator) {
 					var type;
-					$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					variable.requirement = declaration.name.name;
 					module.require(declaration.name.name, type, false);
 				}
 			}
@@ -1705,6 +1744,7 @@ module.exports = function() {
 				var __ks_4 = declaration.kind;
 				if(__ks_4 === Kind.ClassDeclaration) {
 					variable = $variable.define(node, declaration.name, VariableKind.Class, declaration);
+					variable.requirement = declaration.name.name;
 					var continuous = true;
 					for(var i = 0, __ks_5 = declaration.modifiers.length; continuous && i < __ks_5; ++i) {
 						if(declaration.modifiers[i].kind === ClassModifier.Final) {
@@ -1725,7 +1765,8 @@ module.exports = function() {
 					module.require(declaration.name.name, VariableKind.Class);
 				}
 				else if(__ks_4 === Kind.VariableDeclarator) {
-					$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					variable.requirement = declaration.name.name;
 					module.require(declaration.name.name, type);
 				}
 				else {
@@ -1743,6 +1784,7 @@ module.exports = function() {
 				var __ks_4 = declaration.kind;
 				if(__ks_4 === Kind.ClassDeclaration) {
 					variable = $variable.define(node, declaration.name, VariableKind.Class, declaration);
+					variable.requirement = declaration.name.name;
 					var continuous = true;
 					for(var i = 0, __ks_5 = declaration.modifiers.length; continuous && i < __ks_5; ++i) {
 						if(declaration.modifiers[i].kind === ClassModifier.Final) {
@@ -1764,7 +1806,8 @@ module.exports = function() {
 				}
 				else if(__ks_4 === Kind.VariableDeclarator) {
 					var type;
-					$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					variable.requirement = declaration.name.name;
 					module.require(declaration.name.name, type, true);
 				}
 			}
@@ -4619,12 +4662,12 @@ module.exports = function() {
 	}
 	var $import = {
 		addVariable() {
-			if(arguments.length < 4) {
+			if(arguments.length < 5) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
 			var module = arguments[++__ks_i];
-			if(arguments.length > 4) {
+			if(arguments.length > 5) {
 				var file = arguments[++__ks_i];
 			}
 			else  {
@@ -4633,6 +4676,18 @@ module.exports = function() {
 			var node = arguments[++__ks_i];
 			var name = arguments[++__ks_i];
 			var variable = arguments[++__ks_i];
+			var data = arguments[++__ks_i];
+			if(Type.isValue(variable.requirement) && Type.isValue(data.references)) {
+				var nf = true;
+				var __ks_0 = data.references;
+				for(var __ks_1 = 0, __ks_2 = __ks_0.length, reference; nf && __ks_1 < __ks_2; ++__ks_1) {
+					reference = __ks_0[__ks_1];
+					if((Type.isValue(reference.foreign) && (reference.foreign.name === variable.requirement)) || (reference.alias.name === variable.requirement)) {
+						nf = false;
+						variable = $variable.merge(node.getVariable(reference.alias.name), variable);
+					}
+				}
+			}
 			node.addVariable(name, variable);
 			module.import(name, file);
 		},
@@ -4973,7 +5028,7 @@ module.exports = function() {
 						node.newExpression().code("var " + alias + " = " + importCode + "." + name);
 					}
 				}
-				$import.addVariable(module, file, node, alias, variable);
+				$import.addVariable(module, file, node, alias, variable, data);
 			}
 			else if(importVarCount) {
 				exp = node.newExpression().use(usages, true).code("var {");
@@ -4984,7 +5039,7 @@ module.exports = function() {
 					if(!(Type.isValue(__ks_1 = exports[name]) ? variable = __ks_1 : undefined)) {
 						throw new Error("Undefined variable " + name + " in the imported module at line " + data.start.line);
 					}
-					$import.addVariable(module, file, node, alias, variable);
+					$import.addVariable(module, file, node, alias, variable, data);
 					if(variable.kind !== VariableKind.TypeAlias) {
 						if(nf) {
 							exp.code(", ");
@@ -5024,7 +5079,7 @@ module.exports = function() {
 							exp = node.newExpression().use(usages, true);
 						}
 					}
-					$import.addVariable(module, file, node, name, variable);
+					$import.addVariable(module, file, node, name, variable, data);
 				}
 				if(variables.length === 1) {
 					if(exp === null) {
@@ -6940,6 +6995,24 @@ module.exports = function() {
 				}
 			}
 			return VariableKind.Variable;
+		},
+		merge(variable, importedVariable) {
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(importedVariable === undefined || importedVariable === null) {
+				throw new Error("Missing parameter 'importedVariable'");
+			}
+			if(variable.kind === VariableKind.Class) {
+				__ks_Array._cm_merge(variable.constructors, importedVariable.constructors);
+				__ks_Object._cm_merge(variable.instanceVariables, importedVariable.instanceVariables);
+				__ks_Object._cm_merge(variable.classVariables, importedVariable.classVariables);
+				__ks_Object._cm_merge(variable.instanceMethods, importedVariable.instanceMethods);
+				__ks_Object._cm_merge(variable.classMethods, importedVariable.classMethods);
+				__ks_Object._cm_merge(variable.final.instanceMethods, importedVariable.final.instanceMethods);
+				__ks_Object._cm_merge(variable.final.classMethods, importedVariable.final.classMethods);
+			}
+			return variable;
 		},
 		scope(config) {
 			if(config === undefined || config === null) {
@@ -10740,7 +10813,7 @@ module.exports = function() {
 								source += "\t\treturn [" + requirement.parameter + ", __ks_" + requirement.parameter + "];\n";
 								source += "\t}\n";
 								source += "\telse {\n";
-								source += "\t\treturn [" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\"? {} : __ks_" + requirement.name + "];\n";
+								source += "\t\treturn [" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\" ? {} : __ks_" + requirement.name + "];\n";
 								source += "\t}\n";
 							}
 							else {
@@ -10754,7 +10827,7 @@ module.exports = function() {
 						else {
 							source += "\tif(Type.isValue(" + requirement.name + ")) {\n";
 							if(requirement.class) {
-								source += "\t\treturn [" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\"? {} : __ks_" + requirement.name + "];\n";
+								source += "\t\treturn [" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\" ? {} : __ks_" + requirement.name + "];\n";
 								source += "\t}\n";
 								source += "\telse {\n";
 								source += "\t\treturn [" + requirement.parameter + ", __ks_" + requirement.parameter + "];\n";
@@ -10770,7 +10843,46 @@ module.exports = function() {
 						}
 					}
 					else {
-						throw new Error("Not Implemented");
+						source += "\tvar req = [];\n";
+						var __ks_1 = this._dynamicRequirements;
+						for(var __ks_2 = 0, __ks_3 = __ks_1.length, requirement; __ks_2 < __ks_3; ++__ks_2) {
+							requirement = __ks_1[__ks_2];
+							if(requirement.requireFirst) {
+								source += "\tif(Type.isValue(" + requirement.parameter + ")) {\n";
+								if(requirement.class) {
+									source += "\t\treq.push(" + requirement.parameter + ", __ks_" + requirement.parameter + ");\n";
+									source += "\t}\n";
+									source += "\telse {\n";
+									source += "\t\treq.push(" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\" ? {} : __ks_" + requirement.name + ");\n";
+									source += "\t}\n";
+								}
+								else {
+									source += "\t\treq.push(" + requirement.parameter + ");\n";
+									source += "\t}\n";
+									source += "\telse {\n";
+									source += "\t\treq.push(" + requirement.name + ");\n";
+									source += "\t}\n";
+								}
+							}
+							else {
+								source += "\tif(Type.isValue(" + requirement.name + ")) {\n";
+								if(requirement.class) {
+									source += "\t\treq.push(" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\" ? {} : __ks_" + requirement.name + ");\n";
+									source += "\t}\n";
+									source += "\telse {\n";
+									source += "\t\treq.push(" + requirement.parameter + ", __ks_" + requirement.parameter + ");\n";
+									source += "\t}\n";
+								}
+								else {
+									source += "\t\treq.push(" + requirement.name + ");\n";
+									source += "\t}\n";
+									source += "\telse {\n";
+									source += "\t\treq.push(" + requirement.parameter + ");\n";
+									source += "\t}\n";
+								}
+							}
+						}
+						source += "\treturn req;\n";
 					}
 					source += "}\n";
 				}

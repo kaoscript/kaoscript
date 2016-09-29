@@ -1,8 +1,7 @@
 {
   "requirements": {
     "Array": {
-      "class": true,
-      "nullable": true
+      "class": true
     }
   },
   "exports": {
@@ -14,37 +13,19 @@
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
-        "contains": [
+        "last": [
           {
             "kind": 52,
-            "name": "contains",
+            "name": "last",
             "signature": {
               "access": 3,
-              "min": 1,
-              "max": 2,
+              "min": 0,
+              "max": 1,
               "parameters": [
                 {
                   "type": "Any",
-                  "min": 1,
-                  "max": 2
-                }
-              ]
-            }
-          }
-        ],
-        "pushUniq": [
-          {
-            "kind": 52,
-            "name": "pushUniq",
-            "signature": {
-              "access": 3,
-              "min": 1,
-              "max": "Infinity",
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 1,
-                  "max": "Infinity"
+                  "min": 0,
+                  "max": 1
                 }
               ]
             }
@@ -57,8 +38,7 @@
         "name": "__ks_Array",
         "constructors": false,
         "instanceMethods": {
-          "contains": true,
-          "pushUniq": true
+          "last": true
         },
         "classMethods": {}
       }

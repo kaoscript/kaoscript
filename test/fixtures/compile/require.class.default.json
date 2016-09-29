@@ -49,14 +49,16 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "requirement": "Color"
     },
     "Space": {
       "name": "Space",
       "kind": 2,
       "new": true,
       "type": "number",
-      "counter": -1
+      "counter": -1,
+      "requirement": "Space"
     }
   }
 }

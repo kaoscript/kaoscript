@@ -1,7 +1,7 @@
 var {Helper, Type} = require("@kaoscript/runtime");
 function __ks_require(__ks_0, __ks___ks_0) {
 	if(Type.isValue(Array)) {
-		return [Array, typeof __ks_Array === "undefined"? {} : __ks_Array];
+		return [Array, typeof __ks_Array === "undefined" ? {} : __ks_Array];
 	}
 	else {
 		return [__ks_0, __ks___ks_0];

@@ -4,7 +4,7 @@ function __ks_require(__ks_0, __ks___ks_0) {
 		return [__ks_0, __ks___ks_0];
 	}
 	else {
-		return [Array, typeof __ks_Array === "undefined"? {} : __ks_Array];
+		return [Array, typeof __ks_Array === "undefined" ? {} : __ks_Array];
 	}
 }
 module.exports = function(__ks_0, __ks___ks_0) {

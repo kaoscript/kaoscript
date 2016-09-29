@@ -13,7 +13,8 @@
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "requirement": "Color"
     }
   }
 }

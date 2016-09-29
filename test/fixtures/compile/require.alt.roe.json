@@ -52,6 +52,7 @@
         ]
       },
       "classMethods": {},
+      "requirement": "Array",
       "final": {
         "name": "__ks_Array",
         "constructors": false,

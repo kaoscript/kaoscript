@@ -1,8 +1,7 @@
 {
   "requirements": {
     "Array": {
-      "class": true,
-      "nullable": true
+      "class": true
     }
   },
   "exports": {
@@ -13,54 +12,61 @@
       "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
-      "instanceMethods": {
-        "contains": [
+      "instanceMethods": {},
+      "classMethods": {
+        "map": [
           {
             "kind": 52,
-            "name": "contains",
+            "name": "map",
             "signature": {
               "access": 3,
-              "min": 1,
+              "min": 2,
               "max": 2,
               "parameters": [
                 {
-                  "type": "Any",
+                  "type": "Array",
                   "min": 1,
-                  "max": 2
+                  "max": 1
+                },
+                {
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1
                 }
               ]
             }
-          }
-        ],
-        "pushUniq": [
+          },
           {
             "kind": 52,
-            "name": "pushUniq",
+            "name": "map",
             "signature": {
               "access": 3,
-              "min": 1,
-              "max": "Infinity",
+              "min": 3,
+              "max": 3,
               "parameters": [
                 {
-                  "type": "Any",
+                  "type": "Array",
                   "min": 1,
-                  "max": "Infinity"
+                  "max": 1
+                },
+                {
+                  "type": "Function",
+                  "min": 2,
+                  "max": 2
                 }
               ]
             }
           }
         ]
       },
-      "classMethods": {},
       "requirement": "Array",
       "final": {
         "name": "__ks_Array",
         "constructors": false,
-        "instanceMethods": {
-          "contains": true,
-          "pushUniq": true
-        },
-        "classMethods": {}
+        "instanceMethods": {},
+        "classMethods": {
+          "map": true
+        }
       }
     }
   }

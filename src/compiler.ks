@@ -116,6 +116,28 @@ impl Array {
 	last(index = 1) { // {{{
 		return this.length ? this[this.length - index] : null
 	} // }}}
+	static merge(...args) { // {{{
+		let source
+		
+		let i = 0
+		let l = args.length
+		while i < l && !((source ?= args[i]) && source is Array) {
+			++i
+		}
+		++i
+		
+		while i < l {
+			if args[i] is Array {
+				for value of args[i] {
+					source.pushUniq(value)
+				}
+			}
+			
+			++i
+		}
+		
+		return source
+	} // }}}
 	pushUniq(...args) { // {{{
 		if args.length == 1 {
 			if !this.contains(args[0]) {
@@ -1249,6 +1271,8 @@ func $compile(node, data, config, mode, variable = null) {
 					Kind::ClassDeclaration => {
 						variable = $variable.define(node, declaration.name, VariableKind::Class, declaration)
 						
+						variable.requirement = declaration.name.name
+						
 						let continuous = true
 						for i from 0 til declaration.modifiers.length while continuous {
 							continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
@@ -1270,7 +1294,9 @@ func $compile(node, data, config, mode, variable = null) {
 						module.require(declaration.name.name, VariableKind::Class, false)
 					}
 					Kind::VariableDeclarator => {
-						$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+						variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+						
+						variable.requirement = declaration.name.name
 						
 						module.require(declaration.name.name, type, false)
 					}
@@ -1889,6 +1915,8 @@ func $compile(node, data, config, mode, variable = null) {
 					Kind::ClassDeclaration => {
 						variable = $variable.define(node, declaration.name, VariableKind::Class, declaration)
 						
+						variable.requirement = declaration.name.name
+						
 						let continuous = true
 						for i from 0 til declaration.modifiers.length while continuous {
 							continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
@@ -1910,7 +1938,9 @@ func $compile(node, data, config, mode, variable = null) {
 						module.require(declaration.name.name, VariableKind::Class)
 					}
 					Kind::VariableDeclarator => {
-						$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+						variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+						
+						variable.requirement = declaration.name.name
 						
 						module.require(declaration.name.name, type)
 					}
@@ -1930,6 +1960,8 @@ func $compile(node, data, config, mode, variable = null) {
 				switch declaration.kind {
 					Kind::ClassDeclaration => {
 						variable = $variable.define(node, declaration.name, VariableKind::Class, declaration)
+						
+						variable.requirement = declaration.name.name
 						
 						let continuous = true
 						for i from 0 til declaration.modifiers.length while continuous {
@@ -1952,7 +1984,9 @@ func $compile(node, data, config, mode, variable = null) {
 						module.require(declaration.name.name, VariableKind::Class, true)
 					}
 					Kind::VariableDeclarator => {
-						$variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+						variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+						
+						variable.requirement = declaration.name.name
 						
 						module.require(declaration.name.name, type, true)
 					}
@@ -4911,7 +4945,18 @@ func $implement(node, data, config, variable) { // {{{
 } // }}}
 
 const $import = {
-	addVariable(module, file?, node, name, variable) { // {{{
+	addVariable(module, file?, node, name, variable, data) { // {{{
+		if variable.requirement? && data.references? {
+			let nf = true
+			for reference in data.references while nf {
+				if (reference.foreign? && reference.foreign.name == variable.requirement) || reference.alias.name == variable.requirement {
+					nf = false
+					
+					variable = $variable.merge(node.getVariable(reference.alias.name), variable)
+				}
+			}
+		}
+		
 		node.addVariable(name, variable)
 		
 		module.import(name, file)
@@ -5207,7 +5252,7 @@ const $import = {
 				}
 			}
 			
-			$import.addVariable(module, file, node, alias, variable)
+			$import.addVariable(module, file, node, alias, variable, data)
 		}
 		else if importVarCount {
 			exp = node.newExpression().use(usages, true).code('var {')
@@ -5216,7 +5261,7 @@ const $import = {
 			for name, alias of importVariables {
 				throw new Error(`Undefined variable \(name) in the imported module at line \(data.start.line)`) unless variable ?= exports[name]
 				
-				$import.addVariable(module, file, node, alias, variable)
+				$import.addVariable(module, file, node, alias, variable, data)
 				
 				if variable.kind != VariableKind::TypeAlias {
 					if nf {
@@ -5268,7 +5313,7 @@ const $import = {
 					}
 				}
 				
-				$import.addVariable(module, file, node, name, variable)
+				$import.addVariable(module, file, node, name, variable, data)
 			}
 			
 			if variables.length == 1 {
@@ -7071,6 +7116,19 @@ const $variable = {
 		
 		return VariableKind::Variable
 	} // }}}
+	merge(variable, importedVariable) {
+		if variable.kind == VariableKind::Class {
+			Array.merge(variable.constructors, importedVariable.constructors)
+			Object.merge(variable.instanceVariables, importedVariable.instanceVariables)
+			Object.merge(variable.classVariables, importedVariable.classVariables)
+			Object.merge(variable.instanceMethods, importedVariable.instanceMethods)
+			Object.merge(variable.classMethods, importedVariable.classMethods)
+			Object.merge(variable.final.instanceMethods, importedVariable.final.instanceMethods)
+			Object.merge(variable.final.classMethods, importedVariable.final.classMethods)
+		}
+		
+		return variable
+	}
 	scope(config) { // {{{
 		return config.variables == 'es5' ? 'var ' : 'let '
 	} // }}}
@@ -8300,7 +8358,7 @@ class Module {
 							source += '\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'
 							source += '\t}\n'
 							source += '\telse {\n'
-							source += '\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined"? {} : __ks_' + requirement.name + '];\n'
+							source += '\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'
 							source += '\t}\n'
 						}
 						else {
@@ -8315,7 +8373,7 @@ class Module {
 						source += '\tif(Type.isValue(' + requirement.name + ')) {\n'
 						
 						if requirement.class {
-							source += '\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined"? {} : __ks_' + requirement.name + '];\n'
+							source += '\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'
 							source += '\t}\n'
 							source += '\telse {\n'
 							source += '\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'
@@ -8331,7 +8389,48 @@ class Module {
 					}
 				}
 				else {
-					throw new Error('Not Implemented')
+					source += '\tvar req = [];\n'
+					
+					for requirement in this._dynamicRequirements {
+						if requirement.requireFirst {
+							source += '\tif(Type.isValue(' + requirement.parameter + ')) {\n'
+							
+							if requirement.class {
+								source += '\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'
+								source += '\t}\n'
+								source += '\telse {\n'
+								source += '\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'
+								source += '\t}\n'
+							}
+							else {
+								source += '\t\treq.push(' + requirement.parameter + ');\n'
+								source += '\t}\n'
+								source += '\telse {\n'
+								source += '\t\treq.push(' + requirement.name + ');\n'
+								source += '\t}\n'
+							}
+						}
+						else {
+							source += '\tif(Type.isValue(' + requirement.name + ')) {\n'
+							
+							if requirement.class {
+								source += '\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'
+								source += '\t}\n'
+								source += '\telse {\n'
+								source += '\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'
+								source += '\t}\n'
+							}
+							else {
+								source += '\t\treq.push(' + requirement.name + ');\n'
+								source += '\t}\n'
+								source += '\telse {\n'
+								source += '\t\treq.push(' + requirement.parameter + ');\n'
+								source += '\t}\n'
+							}
+						}
+					}
+					
+					source += '\treturn req;\n'
 				}
 				
 				source += '}\n'
