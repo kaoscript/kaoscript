@@ -1489,7 +1489,15 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			$variable.define(ctrl, data.variable, VariableKind::Variable)
 			
-			ctrl.compile(data.body, config)
+			if data.when {
+				ctrl
+					.newControl()
+					.code('if(').compile(data.when, config).code(')').step()
+					.compile(data.body, config)
+			}
+			else {
+				ctrl.compile(data.body, config)
+			}
 		} // }}}
 		Kind::ForInStatement => { // {{{
 			let value, index, ctrl, bound
@@ -1648,7 +1656,15 @@ func $compile(node, data, config, mode, variable = null) {
 					.code('break')
 			}
 			
-			ctrl.compile(data.body, config)
+			if data.when {
+				ctrl
+					.newControl()
+					.code('if(').compile(data.when, config).code(')').step()
+					.compile(data.body, config)
+			}
+			else {
+				ctrl.compile(data.body, config)
+			}
 		} // }}}
 		Kind::ForRangeStatement => { // {{{
 			let ctrl = node.newControl()
@@ -1686,10 +1702,17 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			$variable.define(ctrl, data.variable.name, VariableKind::Variable)
 			
-			ctrl
-				.code(')')
-				.step()
-				.compile(data.body, config)
+			ctrl.code(')').step()
+			
+			if data.when {
+				ctrl
+					.newControl()
+					.code('if(').compile(data.when, config).code(')').step()
+					.compile(data.body, config)
+			}
+			else {
+				ctrl.compile(data.body, config)
+			}
 		} // }}}
 		Kind::FunctionDeclaration => { // {{{
 			variable = $variable.define(node, data.name, VariableKind::Function, data.type)

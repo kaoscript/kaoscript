@@ -1405,7 +1405,12 @@ module.exports = function() {
 			}
 			ctrl.code(")").step();
 			$variable.define(ctrl, data.variable, VariableKind.Variable);
-			ctrl.compile(data.body, config);
+			if(data.when) {
+				ctrl.newControl().code("if(").compile(data.when, config).code(")").step().compile(data.body, config);
+			}
+			else {
+				ctrl.compile(data.body, config);
+			}
 		}
 		else if(__ks_0 === Kind.ForInStatement) {
 			var value;
@@ -1509,7 +1514,12 @@ module.exports = function() {
 			else if(data.while) {
 				ctrl.newControl().code("if(!(").compile(data.while, config).code("))").step().newExpression().code("break");
 			}
-			ctrl.compile(data.body, config);
+			if(data.when) {
+				ctrl.newControl().code("if(").compile(data.when, config).code(")").step().compile(data.body, config);
+			}
+			else {
+				ctrl.compile(data.body, config);
+			}
 		}
 		else if(__ks_0 === Kind.ForRangeStatement) {
 			var ctrl = node.newControl();
@@ -1539,7 +1549,13 @@ module.exports = function() {
 				ctrl.code("++", data.variable.name);
 			}
 			$variable.define(ctrl, data.variable.name, VariableKind.Variable);
-			ctrl.code(")").step().compile(data.body, config);
+			ctrl.code(")").step();
+			if(data.when) {
+				ctrl.newControl().code("if(").compile(data.when, config).code(")").step().compile(data.body, config);
+			}
+			else {
+				ctrl.compile(data.body, config);
+			}
 		}
 		else if(__ks_0 === Kind.FunctionDeclaration) {
 			variable = $variable.define(node, data.name, VariableKind.Function, data.type);
