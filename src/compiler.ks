@@ -974,9 +974,42 @@ func $compile(node, data, config, mode, variable = null) {
 							}
 						}
 					}
+					else if data.scope.kind == ScopeModifier::Null {
+						node
+							.compile(data.callee, config)
+							.code('.call(null')
+						
+						for i from 0 til data.arguments.length {
+							node.code(', ').compile(data.arguments[i], config)
+						}
+						
+						if mode & Mode.Await {
+							if data.arguments.length {
+								node.code(', ')
+							}
+						}
+						else {
+							node.code(')')
+						}
+					}
 					else {
-						console.error(data)
-						throw new Error('Not Implemented')
+						node
+							.compile(data.callee, config)
+							.code('.call(')
+							.compile(data.scope.value, config)
+						
+						for i from 0 til data.arguments.length {
+							node.code(', ').compile(data.arguments[i], config)
+						}
+						
+						if mode & Mode.Await {
+							if data.arguments.length {
+								node.code(', ')
+							}
+						}
+						else {
+							node.code(')')
+						}
 					}
 				}
 				else if data.arguments.length == 1 {
@@ -1012,8 +1045,7 @@ func $compile(node, data, config, mode, variable = null) {
 					}
 				}
 				else {
-					console.error(data)
-					throw new Error('Not Implemented')
+					throw new Error(`Invalid to call function at line \(data.start.line)`)
 				}
 			}
 		} // }}}
@@ -1105,17 +1137,63 @@ func $compile(node, data, config, mode, variable = null) {
 					node.code(')')
 				}
 				else {
-					console.error(data)
-					throw new Error('Not Implemented')
+					node
+						.code($runtime.helper(config), '.vcurry(')
+						.compile(data.callee, config)
+						.code(', ')
+					
+					node.compile(data.scope.value, config)
+					
+					for i from 0 til data.arguments.length {
+						node.code(', ').compile(data.arguments[i], config)
+					}
+					
+					node.code(')')
 				}
 			}
 			else if data.arguments.length == 1 {
-				console.error(data)
-				throw new Error('Not Implemented')
+				node.module().flag('Helper')
+				
+				if data.scope.kind == ScopeModifier::Null {
+					node
+						.code($runtime.helper(config), '.curry(')
+						.compile(data.callee, config)
+						.code(', null, ')
+						.compile(data.arguments[0].argument, config)
+						.code(')')
+				}
+				else if data.scope.kind == ScopeModifier::This {
+					node
+						.code($runtime.helper(config), '.curry(')
+						.compile(data.callee, config)
+						.code(', ')
+					
+					let caller = $caller(data.callee)
+					if caller {
+						node.compile(caller, config)
+					}
+					else {
+						node.code('null')
+					}
+					
+					node
+						.code(', ')
+						.compile(data.arguments[0].argument, config)
+						.code(')')
+				}
+				else {
+					node
+						.code($runtime.helper(config), '.curry(')
+						.compile(data.callee, config)
+						.code(', ')
+						.compile(data.scope.value, config)
+						.code(', ')
+						.compile(data.arguments[0].argument, config)
+						.code(')')
+				}
 			}
 			else {
-				console.error(data)
-				throw new Error('Not Implemented')
+				throw new Error(`Invalid curry syntax at line \(data.start.line)`)
 			}
 		} // }}}
 		Kind::DoUntilStatement => { // {{{

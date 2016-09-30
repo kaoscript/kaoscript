@@ -1002,9 +1002,33 @@ module.exports = function() {
 							}
 						}
 					}
+					else if(data.scope.kind === ScopeModifier.Null) {
+						node.compile(data.callee, config).code(".call(null");
+						for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+							node.code(", ").compile(data.arguments[i], config);
+						}
+						if(mode & Mode.Await) {
+							if(data.arguments.length) {
+								node.code(", ");
+							}
+						}
+						else {
+							node.code(")");
+						}
+					}
 					else {
-						console.error(data);
-						throw new Error("Not Implemented");
+						node.compile(data.callee, config).code(".call(").compile(data.scope.value, config);
+						for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+							node.code(", ").compile(data.arguments[i], config);
+						}
+						if(mode & Mode.Await) {
+							if(data.arguments.length) {
+								node.code(", ");
+							}
+						}
+						else {
+							node.code(")");
+						}
 					}
 				}
 				else if(data.arguments.length === 1) {
@@ -1033,8 +1057,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					console.error(data);
-					throw new Error("Not Implemented");
+					throw new Error("Invalid to call function at line " + data.start.line);
 				}
 			}
 		}
@@ -1110,17 +1133,36 @@ module.exports = function() {
 					node.code(")");
 				}
 				else {
-					console.error(data);
-					throw new Error("Not Implemented");
+					node.code($runtime.helper(config), ".vcurry(").compile(data.callee, config).code(", ");
+					node.compile(data.scope.value, config);
+					for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+						node.code(", ").compile(data.arguments[i], config);
+					}
+					node.code(")");
 				}
 			}
 			else if(data.arguments.length === 1) {
-				console.error(data);
-				throw new Error("Not Implemented");
+				node.module().flag("Helper");
+				if(data.scope.kind === ScopeModifier.Null) {
+					node.code($runtime.helper(config), ".curry(").compile(data.callee, config).code(", null, ").compile(data.arguments[0].argument, config).code(")");
+				}
+				else if(data.scope.kind === ScopeModifier.This) {
+					node.code($runtime.helper(config), ".curry(").compile(data.callee, config).code(", ");
+					var caller = $caller(data.callee);
+					if(caller) {
+						node.compile(caller, config);
+					}
+					else {
+						node.code("null");
+					}
+					node.code(", ").compile(data.arguments[0].argument, config).code(")");
+				}
+				else {
+					node.code($runtime.helper(config), ".curry(").compile(data.callee, config).code(", ").compile(data.scope.value, config).code(", ").compile(data.arguments[0].argument, config).code(")");
+				}
 			}
 			else {
-				console.error(data);
-				throw new Error("Not Implemented");
+				throw new Error("Invalid curry syntax at line " + data.start.line);
 			}
 		}
 		else if(__ks_0 === Kind.DoUntilStatement) {
