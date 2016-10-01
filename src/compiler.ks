@@ -198,6 +198,13 @@ impl Object {
 	}
 }
 
+enum BlockMode { // {{{
+	Block
+	Function
+	Root
+	Scope
+} // }}}
+
 enum MemberAccess { // {{{
 	Private = 1
 	Protected
@@ -462,7 +469,7 @@ func $compile(node, data, config, mode, variable = null) {
 						
 						element = data.elements[i]
 						if element.kind == Kind::BindingElement && !element.name.computed && existing[element.name.name] {
-							name = node.newTempName(false)
+							name = node.acquireTempName()
 							
 							node.compile(element, config, mode | Mode.Key, {
 								kind: Kind::ArrayBinding
@@ -481,7 +488,9 @@ func $compile(node, data, config, mode, variable = null) {
 					let {block, reference} = node.block()
 					
 					for name of variables {
-						block.newExpression().code(variables[name], ' = ', name)
+						block.newExpression(config).code(variables[name], ' = ', name)
+						
+						node.releaseTempName(name)
 					}
 				}
 				else if existingCount {
@@ -528,7 +537,7 @@ func $compile(node, data, config, mode, variable = null) {
 					.code(', ')
 				
 				ctrl = node
-					.newControl()
+					.newControl(config)
 					.addMode(Mode.NoIndent)
 					.code('(')
 					.parameter(data.loop.variable, config)
@@ -542,13 +551,13 @@ func $compile(node, data, config, mode, variable = null) {
 				ctrl
 					.code(') =>')
 					.step()
-					.newExpression().code('return ').compile(data.body, config)
+					.newExpression(config).code('return ').compile(data.body, config)
 				
 				if data.loop.when {
 					node.code(', ')
 					
 					ctrl = node
-						.newControl()
+						.newControl(config)
 						.addMode(Mode.NoIndent)
 						.code('(')
 						.parameter(data.loop.variable, config)
@@ -562,7 +571,7 @@ func $compile(node, data, config, mode, variable = null) {
 					ctrl
 						.code(') =>')
 						.step()
-						.newExpression().code('return ').compile(data.loop.when, config)
+						.newExpression(config).code('return ').compile(data.loop.when, config)
 				}
 				
 				node.code(')')
@@ -574,7 +583,7 @@ func $compile(node, data, config, mode, variable = null) {
 					.code(', ')
 				
 				ctrl = node
-					.newControl()
+					.newControl(config)
 					.addMode(Mode.NoIndent)
 					.code('(')
 					.parameter(data.loop.variable, config)
@@ -588,13 +597,13 @@ func $compile(node, data, config, mode, variable = null) {
 				ctrl
 					.code(') =>')
 					.step()
-					.newExpression().code('return ').compile(data.body, config)
+					.newExpression(config).code('return ').compile(data.body, config)
 				
 				if data.loop.when {
 					node.code(', ')
 					
 					ctrl = node
-						.newControl()
+						.newControl(config)
 						.addMode(Mode.NoIndent)
 						.code('(')
 						.parameter(data.loop.variable, config)
@@ -608,7 +617,7 @@ func $compile(node, data, config, mode, variable = null) {
 					ctrl
 						.code(') =>')
 						.step()
-						.newExpression().code('return ').compile(data.loop.when, config)
+						.newExpression(config).code('return ').compile(data.loop.when, config)
 				}
 				
 				node.code(')')
@@ -629,25 +638,25 @@ func $compile(node, data, config, mode, variable = null) {
 				
 				node
 					.code(', ')
-					.newControl()
+					.newControl(config)
 					.addMode(Mode.NoIndent)
 					.code('(')
 					.parameter(data.loop.variable, config)
 					.code(') =>')
 					.step()
-					.newExpression().code('return ').compile(data.body, config)
+					.newExpression(config).code('return ').compile(data.body, config)
 				
 				if data.loop.when {
 					node.code(', ')
 					
 					node
-						.newControl()
+						.newControl(config)
 						.addMode(Mode.NoIndent)
 						.code('(')
 						.parameter(data.loop.variable, config)
 						.code(') =>')
 						.step()
-						.newExpression().code('return ').compile(data.loop.when, config)
+						.newExpression(config).code('return ').compile(data.loop.when, config)
 				}
 				
 				node.code(')')
@@ -689,7 +698,7 @@ func $compile(node, data, config, mode, variable = null) {
 			node.code(', ', !!data.from, ', ', !!data.to, ')')
 		} // }}}
 		Kind::AwaitExpression => { // {{{
-			let ctrl = node.newExpression().newControl().addMode(Mode.NoIndent)
+			let ctrl = node.newExpression(config).newControl(config).addMode(Mode.NoIndent)
 			
 			ctrl.compile(data.operation, config, Mode.Await)
 			
@@ -702,10 +711,10 @@ func $compile(node, data, config, mode, variable = null) {
 			ctrl.code(') =>').step()
 			
 			ctrl
-				.newControl()
+				.newControl(config)
 				.code('if(__ks_e)')
 				.step()
-				.newExpression()
+				.newExpression(config)
 				.code('return __ks_cb(__ks_e)')
 			
 			return {
@@ -717,7 +726,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::BinaryOperator => { // {{{
-			node = node.newExpression()
+			node = node.newExpression(config)
 			
 			if data.operator.kind == BinaryOperator.Assignment {
 				$operator.assignment(node, data, config, mode)
@@ -767,7 +776,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::Block => { // {{{
-			node = node.newBlock()
+			node = node.newBlock(config)
 			
 			let stack = []
 			let r
@@ -783,7 +792,7 @@ func $compile(node, data, config, mode, variable = null) {
 				item.close(item.node)
 			}
 		} // }}}
-		Kind::BreakStatement => node.newExpression().code('break')
+		Kind::BreakStatement => node.newExpression(config).code('break')
 		Kind::CallExpression => { // {{{
 			let list = true
 			
@@ -793,7 +802,7 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 			}
 			
-			node = node.newExpression().noVariable()
+			node = node.newExpression(config).noVariable()
 			
 			let callee
 			if data.callee.kind == Kind::MemberExpression && !data.callee.computed && data.callee.object.kind == Kind::MemberExpression && !data.callee.object.computed && data.callee.property.kind == Kind::Identifier && (data.callee.property.name == 'apply') && (callee = $final.callee(data.callee.object, node)) {
@@ -884,7 +893,7 @@ func $compile(node, data, config, mode, variable = null) {
 						}
 					}
 					else {
-						name = node.newTempName()
+						name = node.acquireTempName()
 						
 						if tof = $runtime.typeof(callee.variables[0].name, config) {
 							node.code(tof, '(', name, ' = ').compile(data.callee.object, config).code(')')
@@ -917,6 +926,8 @@ func $compile(node, data, config, mode, variable = null) {
 					node.code(')')
 					
 					node.code(')') if mode & Mode.Operand
+					
+					node.releaseTempName(name) if data.callee.object.kind != Kind::Identifier
 				}
 				else {
 					console.error(callee)
@@ -1077,7 +1088,7 @@ func $compile(node, data, config, mode, variable = null) {
 					
 					$final.class(node, data, config, mode, variable)
 					
-					node.newExpression().code('var ' + variable.final.name + ' = {}')
+					node.newExpression(config).code('var ' + variable.final.name + ' = {}')
 				}
 			}
 			else {
@@ -1089,7 +1100,7 @@ func $compile(node, data, config, mode, variable = null) {
 		} // }}}
 		Kind::CommentLine => { // {{{
 		} // }}}
-		Kind::ContinueStatement => node.newExpression().code('continue')
+		Kind::ContinueStatement => node.newExpression(config).code('continue')
 		Kind::CurryExpression => { // {{{
 			let list = true
 			
@@ -1099,7 +1110,7 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 			}
 			
-			node = node.newExpression()
+			node = node.newExpression(config)
 			
 			if list {
 				node.module().flag('Helper')
@@ -1198,7 +1209,7 @@ func $compile(node, data, config, mode, variable = null) {
 		} // }}}
 		Kind::DoUntilStatement => { // {{{
 			node
-				.newControl()
+				.newControl(config)
 				.code('do')
 				.step()
 				.compile(data.body, config)
@@ -1209,7 +1220,7 @@ func $compile(node, data, config, mode, variable = null) {
 		} // }}}
 		Kind::DoWhileStatement => { // {{{
 			node
-				.newControl()
+				.newControl(config)
 				.code('do')
 				.step()
 				.compile(data.body, config)
@@ -1223,7 +1234,7 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			if variable.new {
 				let statement = node
-					.newExpression()
+					.newExpression(config)
 					.code($variable.scope(config))
 					.compile(variable.name, config, Mode.Key)
 					.code(' = {')
@@ -1257,7 +1268,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			else {
 				node
-					.newExpression()
+					.newExpression(config)
 					.code(variable.name.name || variable.name, '.', data.name.name, ' = ', $variable.value(variable, data))
 			}
 		} // }}}
@@ -1321,7 +1332,7 @@ func $compile(node, data, config, mode, variable = null) {
 								classMethods: {}
 							}
 							
-							node.newExpression().code('var ' + variable.final.name + ' = {}')
+							node.newExpression(config).code('var ' + variable.final.name + ' = {}')
 						}
 						
 						for i from 0 til declaration.members.length {
@@ -1382,7 +1393,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::ForFromStatement => { // {{{
-			let ctrl = node.newControl()
+			let ctrl = node.newControl(config)
 			
 			ctrl.code('for(')
 			if data.declaration || !node.hasVariable(data.variable.name) {
@@ -1393,30 +1404,30 @@ func $compile(node, data, config, mode, variable = null) {
 			let bound
 			if data.til {
 				if data.til.kind != Kind::NumericExpression {
-					bound = ctrl.newTempName()
+					bound = ctrl.acquireTempName()
 					ctrl.code(', ', bound, ' = ').compile(data.til, config)
 				}
 			}
 			else {
 				if data.to.kind != Kind::NumericExpression {
-					bound = ctrl.newTempName()
+					bound = ctrl.acquireTempName()
 					ctrl.code(', ', bound, ' = ').compile(data.to, config)
 				}
 			}
 			
 			let by
 			if data.by && !(data.by.kind == Kind::NumericExpression || data.by.kind == Kind::Identifier) {
-				by = ctrl.newTempName()
+				by = ctrl.acquireTempName()
 				ctrl.code(', ', by, ' = ').compile(data.by, config)
 			}
 			
 			ctrl.code('; ')
 			
 			if data.until {
-				ctrl.code('!(').compile(data.until, config).code(') && ')
+				ctrl.code('!(').compile(data.until, config, Mode.BooleanExpression).code(') && ')
 			}
 			else if data.while {
-				ctrl.compile(data.while, config).code(' && ')
+				ctrl.compile(data.while, config, Mode.BooleanExpression).code(' && ')
 			}
 			
 			ctrl.code(data.variable.name)
@@ -1491,13 +1502,16 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			if data.when {
 				ctrl
-					.newControl()
-					.code('if(').compile(data.when, config).code(')').step()
+					.newControl(config)
+					.code('if(').compile(data.when, config, Mode.BooleanExpression).code(')').step()
 					.compile(data.body, config)
 			}
 			else {
 				ctrl.compile(data.body, config)
 			}
+			
+			ctrl.releaseTempName(bound) if bound
+			ctrl.releaseTempName(by) if by
 		} // }}}
 		Kind::ForInStatement => { // {{{
 			let value, index, ctrl, bound
@@ -1505,22 +1519,21 @@ func $compile(node, data, config, mode, variable = null) {
 				value = data.value.name
 			}
 			else {
-				value = node.newTempName()
+				let exp = node.newExpression(config)
 				
-				node
-					.newExpression()
-					.code($variable.scope(config), value, ' = ')
-					.compile(data.value, config)
+				value = node.acquireTempName(exp, true)
+				
+				exp.code(value, ' = ').compile(data.value, config)
 			}
 			
 			if data.desc {
 				if data.index && !data.declaration && node.hasVariable(data.index.name) {
 					index = data.index.name
 					
-					node.newExpression().code(index, ' = ', value, '.length - 1')
+					node.newExpression(config).code(index, ' = ', value, '.length - 1')
 					
 					ctrl = node
-						.newControl()
+						.newControl(config)
 						.code('for(')
 						
 					if !node.hasVariable(data.variable.name) {
@@ -1528,9 +1541,9 @@ func $compile(node, data, config, mode, variable = null) {
 					}
 				}
 				else {
-					ctrl = node.newControl()
+					ctrl = node.newControl(config)
 					
-					index = data.index ? data.index.name : ctrl.newTempName()
+					index = data.index ? data.index.name : ctrl.acquireTempName()
 					
 					ctrl.code('for(', $variable.scope(config), index, ' = ', value, '.length - 1')
 					
@@ -1543,21 +1556,21 @@ func $compile(node, data, config, mode, variable = null) {
 				if data.index && !data.declaration && node.hasVariable(data.index.name) {
 					index = data.index.name
 					
-					node.newExpression().code(index, ' = 0')
+					node.newExpression(config).code(index, ' = 0')
 					
 					ctrl = node
-						.newControl()
+						.newControl(config)
 						.code('for(', $variable.scope(config))
 				}
 				else {
-					ctrl = node.newControl()
+					ctrl = node.newControl(config)
 					
-					index = data.index ? data.index.name : ctrl.newTempName()
+					index = data.index ? data.index.name : ctrl.acquireTempName()
 					
 					ctrl.code('for(', $variable.scope(config), index, ' = 0, ')
 				}
 				
-				bound = ctrl.newTempName()
+				bound = ctrl.acquireTempName()
 				
 				ctrl.code(bound, ' = ', value, '.length')
 				
@@ -1569,10 +1582,10 @@ func $compile(node, data, config, mode, variable = null) {
 			ctrl.code('; ')
 			
 			if data.until {
-				ctrl.code('!(').compile(data.until, config).code(') && ')
+				ctrl.code('!(').compile(data.until, config, Mode.BooleanExpression).code(') && ')
 			}
 			else if data.while {
-				ctrl.compile(data.while, config).code(' && ')
+				ctrl.compile(data.while, config, Mode.BooleanExpression).code(' && ')
 			}
 			
 			if data.desc {
@@ -1587,20 +1600,24 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			
 			ctrl
-				.newExpression()
+				.newExpression(config)
 				.code(data.variable.name, ' = ', value, '[', index, ']')
 			
 			$variable.define(ctrl, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
 			
 			if data.when {
 				ctrl
-					.newControl()
-					.code('if(').compile(data.when, config).code(')').step()
+					.newControl(config)
+					.code('if(').compile(data.when, config, Mode.BooleanExpression).code(')').step()
 					.compile(data.body, config)
 			}
 			else {
 				ctrl.compile(data.body, config)
 			}
+			
+			node.releaseTempName(value) if data.value.kind != Kind::Identifier
+			ctrl._steps[1].releaseTempName(index)
+			ctrl._steps[1].releaseTempName(bound) if !data.desc
 		} // }}}
 		Kind::ForOfStatement => { // {{{
 			let value
@@ -1608,12 +1625,14 @@ func $compile(node, data, config, mode, variable = null) {
 				value = data.value.name
 			}
 			else {
-				value = node.newTempName()
+				let exp = node.newExpression(config)
 				
-				node.newExpression().code($variable.scope(config), value, ' = ').compile(data.value, config)
+				value = node.acquireTempName(exp, true)
+				
+				exp.code(value, ' = ').compile(data.value, config)
 			}
 			
-			let ctrl = node.newControl()
+			let ctrl = node.newControl(config)
 			
 			ctrl.code('for(')
 			if data.declaration || !node.hasVariable(data.variable.name) {
@@ -1637,37 +1656,39 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			if data.until {
 				ctrl
-					.newControl()
+					.newControl(config)
 					.code('if(')
-					.compile(data.until, config)
+					.compile(data.until, config, Mode.BooleanExpression)
 					.code(')')
 					.step()
-					.newExpression()
+					.newExpression(config)
 					.code('break')
 			}
 			else if data.while {
 				ctrl
-					.newControl()
+					.newControl(config)
 					.code('if(!(')
-					.compile(data.while, config)
+					.compile(data.while, config, Mode.BooleanExpression)
 					.code('))')
 					.step()
-					.newExpression()
+					.newExpression(config)
 					.code('break')
 			}
 			
 			if data.when {
 				ctrl
-					.newControl()
-					.code('if(').compile(data.when, config).code(')').step()
+					.newControl(config)
+					.code('if(').compile(data.when, config, Mode.BooleanExpression).code(')').step()
 					.compile(data.body, config)
 			}
 			else {
 				ctrl.compile(data.body, config)
 			}
+			
+			node.releaseTempName(value) if data.value.kind != Kind::Identifier
 		} // }}}
 		Kind::ForRangeStatement => { // {{{
-			let ctrl = node.newControl()
+			let ctrl = node.newControl(config)
 			
 			ctrl.code('for(')
 			if data.declaration || !node.hasVariable(data.variable.name) {
@@ -1676,10 +1697,10 @@ func $compile(node, data, config, mode, variable = null) {
 			ctrl.code(data.variable.name, ' = ').compile(data.from, config).code('; ')
 			
 			if data.until {
-				ctrl.code('!(').compile(data.until, config).code(') && ')
+				ctrl.code('!(').compile(data.until, config, Mode.BooleanExpression).code(') && ')
 			}
 			else if data.while {
-				ctrl.compile(data.while, config).code(' && ')
+				ctrl.compile(data.while, config, Mode.BooleanExpression).code(' && ')
 			}
 			
 			ctrl.code(data.variable.name, ' <= ')
@@ -1706,8 +1727,8 @@ func $compile(node, data, config, mode, variable = null) {
 			
 			if data.when {
 				ctrl
-					.newControl()
-					.code('if(').compile(data.when, config).code(')').step()
+					.newControl(config)
+					.code('if(').compile(data.when, config, Mode.BooleanExpression).code(')').step()
 					.compile(data.body, config)
 			}
 			else {
@@ -1723,7 +1744,7 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 			}
 			
-			node.newFunction().operation(func(ctrl) {
+			node.newFunction(config).operation(func(ctrl) {
 				ctrl.code('function ', data.name.name, '(')
 				
 				$function.parameters(ctrl, data, config, func(node) {
@@ -1739,12 +1760,12 @@ func $compile(node, data, config, mode, variable = null) {
 					ctrl.compile(data.body, config)
 				}
 				else {
-					ctrl.newExpression().code('return ').compile(data.body, config)
+					ctrl.newExpression(config).code('return ').compile(data.body, config)
 				}
 			})
 		} // }}}
 		Kind::FunctionExpression => { // {{{
-			node.newFunction().operation(func(ctrl) {
+			node.newFunction(config).operation(func(ctrl) {
 				ctrl.addMode(mode | Mode.NoIndent)
 				
 				if mode & Mode.ObjectMember {
@@ -1766,7 +1787,7 @@ func $compile(node, data, config, mode, variable = null) {
 					ctrl.compile(data.body, config)
 				}
 				else {
-					ctrl.newExpression().code('return ').compile(data.body, config)
+					ctrl.newExpression(config).code('return ').compile(data.body, config)
 				}
 			})
 		} // }}}
@@ -1783,7 +1804,7 @@ func $compile(node, data, config, mode, variable = null) {
 		Kind::IfExpression => { // {{{
 			if data.else {
 				node
-					.newExpression()
+					.newExpression(config)
 					.compile(data.condition, config, Mode.BooleanExpression)
 					.code(' ? ')
 					.compile(data.then, config)
@@ -1792,7 +1813,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			else if mode & Mode.Assignment {
 				node
-					.newExpression()
+					.newExpression(config)
 					.compile(data.condition, config, Mode.BooleanExpression)
 					.code(' ? ')
 					.compile(data.then, config)
@@ -1800,7 +1821,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			else {
 				node
-					.newControl(Mode.PrepareAll)
+					.newControl(config, Mode.PrepareAll)
 					.code('if(')
 					.compile(data.condition, config, Mode.BooleanExpression)
 					.code(')')
@@ -1809,7 +1830,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::IfStatement => { // {{{
-			let ctrl = node.newControl()
+			let ctrl = node.newControl(config)
 			
 			ctrl
 				.code('if(')
@@ -1857,11 +1878,11 @@ func $compile(node, data, config, mode, variable = null) {
 		Kind::ImportDeclarator => { // {{{
 			let module = node.module()
 			
-			$import.resolve(data, module.parent(), module, node)
+			$import.resolve(data, module.parent(), module, node, config)
 		} // }}}
 		Kind::Literal => node.code($quote(data.value))
 		Kind::MemberExpression => { // {{{
-			node = node.newExpression()
+			node = node.newExpression(config)
 			
 			if !(mode & Mode.NoTest) && $expression.nullable(data) {
 				let name = $expression.value(node, data, config)
@@ -1922,7 +1943,7 @@ func $compile(node, data, config, mode, variable = null) {
 					element = data.elements[i]
 					
 					if existings[element.name.name] {
-						name = node.newTempName(false)
+						name = node.acquireTempName()
 						
 						node.compile(element, config, mode | Mode.Key, {
 							kind: Kind::ObjectBinding
@@ -1939,7 +1960,9 @@ func $compile(node, data, config, mode, variable = null) {
 				let {block, reference} = node.block()
 				
 				for name of variables {
-					block.newExpression().code(variables[name], ' = ', name)
+					block.newExpression(config).code(variables[name], ' = ', name)
+					
+					node.releaseTempName(name)
 				}
 			}
 			else {
@@ -1955,7 +1978,7 @@ func $compile(node, data, config, mode, variable = null) {
 			node.code('}')
 		} // }}}
 		Kind::ObjectExpression => { // {{{
-			let obj = node.newObject()
+			let obj = node.newObject(config)
 			
 			if data.properties.length {
 				for i from 0 til data.properties.length {
@@ -1967,14 +1990,14 @@ func $compile(node, data, config, mode, variable = null) {
 			if data.name.kind == Kind::Identifier || data.name.kind == Kind::Literal {
 				if data.value.kind == Kind::FunctionExpression {
 					node
-						.newExpression()
+						.newExpression(config)
 						.reference(data.name.kind == Kind::Identifier ? '.' + data.name.name : '[' + $quote(data.name.value) + ']')
 						.compile(data.name, config, Mode.Key)
 						.compile(data.value, config, Mode.NoIndent | Mode.ObjectMember)
 				}
 				else {
 					node
-						.newExpression()
+						.newExpression(config)
 						.reference(data.name.kind == Kind::Identifier ? '.' + data.name.name : '[' + $quote(data.name.value) + ']')
 						.compile(data.name, config, Mode.Key)
 						.code(': ')
@@ -1984,7 +2007,7 @@ func $compile(node, data, config, mode, variable = null) {
 			else {
 				let {block, reference} = node.block()
 				
-				block.newExpression().code(reference, '[').compile(data.name, config, Mode.Key).code('] = ').compile(data.value, config)
+				block.newExpression(config).code(reference, '[').compile(data.name, config, Mode.Key).code('] = ').compile(data.value, config)
 			}
 		} // }}}
 		Kind::OmittedExpression => { // {{{
@@ -1993,7 +2016,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::PolyadicOperator => { // {{{
-			let exp = node.newExpression()
+			let exp = node.newExpression(config)
 			
 			if mode & Mode.Operand {
 				exp.code('(')
@@ -2098,24 +2121,24 @@ func $compile(node, data, config, mode, variable = null) {
 			if mode & Mode.Async {
 				if data.value {
 					node
-						.newExpression()
+						.newExpression(config)
 						.code('return __ks_cb(null, ')
 						.compile(data.value, config)
 						.code(')')
 				}
 				else {
-					node.newExpression().code('return __ks_cb()')
+					node.newExpression(config).code('return __ks_cb()')
 				}
 			}
 			else {
 				if data.value {
 					node
-						.newExpression()
+						.newExpression(config)
 						.code('return ')
 						.compile(data.value, config)
 				}
 				else {
-					node.newExpression().code('return')
+					node.newExpression(config).code('return')
 				}
 			}
 		} // }}}
@@ -2139,9 +2162,9 @@ func $compile(node, data, config, mode, variable = null) {
 						}
 						
 						if !nv {
-							name = conditions[clauseIdx][conditionIdx] = node.newTempName()
+							name = conditions[clauseIdx][conditionIdx] = node.acquireTempName()
 							
-							exp = node.newExpression().code($variable.scope(config), name, ' = ([')
+							exp = node.newExpression(config).code($variable.scope(config), name, ' = ([')
 							
 							let names = {}
 							for i from 0 til condition.values.length {
@@ -2200,9 +2223,9 @@ func $compile(node, data, config, mode, variable = null) {
 				}
 				
 				if clause.filter && clause.bindings.length {
-					name = filters[clauseIdx] = node.newTempName()
+					name = filters[clauseIdx] = node.acquireTempName()
 					
-					node.newExpression().newFunction().operation($switch.filter^^(name, clause, config))
+					node.newExpression(config).newFunction(config).operation($switch.filter^^(name, clause, config))
 				}
 			}
 			
@@ -2210,11 +2233,11 @@ func $compile(node, data, config, mode, variable = null) {
 				name = data.expression.name
 			}
 			else {
-				name = node.newTempName()
-				node.newExpression().code($variable.scope(config), name, ' = ').compile(data.expression, config)
+				name = node.acquireTempName()
+				node.newExpression(config).code($variable.scope(config), name, ' = ').compile(data.expression, config)
 			}
 			
-			let ctrl = node.newControl()
+			let ctrl = node.newControl(config)
 			let we = false
 			
 			let binding, mm
@@ -2391,17 +2414,17 @@ func $compile(node, data, config, mode, variable = null) {
 				node.code(')')
 			}
 		} // }}}
-		Kind::ThrowStatement => node.newExpression().code('throw ').compile(data.value, config)
+		Kind::ThrowStatement => node.newExpression(config).code('throw ').compile(data.value, config)
 		Kind::TryStatement => { // {{{
 			let finalizer = null
 			
 			if data.finalizer {
-				finalizer = node.newTempName()
+				finalizer = node.acquireTempName()
 				
 				node
-					.newExpression()
+					.newExpression(config)
 					.code($variable.scope(config), finalizer, ' = ')
-					.newControl()
+					.newControl(config)
 					.addMode(Mode.NoIndent)
 					.code('() =>')
 					.step()
@@ -2409,13 +2432,13 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			
 			let ctrl = node
-				.newControl()
+				.newControl(config)
 				.code('try')
 				.step()
 				.compile(data.body, config)
 			
 			if finalizer {
-				ctrl.newExpression().code(finalizer, '()')
+				ctrl.newExpression(config).code(finalizer, '()')
 			}
 			
 			ctrl.step()
@@ -2423,17 +2446,17 @@ func $compile(node, data, config, mode, variable = null) {
 			if data.catchClauses.length {
 				node.module().flag('Type')
 				
-				let error = node.newTempName()
+				let error = node.acquireTempName()
 				
 				ctrl.code('catch(', error, ')').step()
 				
 				$variable.define(ctrl, error, VariableKind::Variable)
 				
 				if finalizer {
-					ctrl.newExpression().code(finalizer, '()')
+					ctrl.newExpression(config).code(finalizer, '()')
 				}
 				
-				let ifs = ctrl.newControl()
+				let ifs = ctrl.newControl(config)
 				
 				for catchClause, i in data.catchClauses {
 					if i {
@@ -2443,7 +2466,7 @@ func $compile(node, data, config, mode, variable = null) {
 					ifs.code('if(', $runtime.type(config), '.is(', error, ', ').compile(catchClause.type, config).code(')').step()
 					
 					if catchClause.binding {
-						ifs.newExpression().code($variable.scope(config), catchClause.binding.name, ' = ', error)
+						ifs.newExpression(config).code($variable.scope(config), catchClause.binding.name, ' = ', error)
 						
 						$variable.define(ctrl, catchClause.binding, VariableKind::Variable)
 					}
@@ -2455,46 +2478,56 @@ func $compile(node, data, config, mode, variable = null) {
 					ifs.code('else').step()
 					
 					if data.catchClause.binding {
-						ifs.newExpression().code($variable.scope(config), data.catchClause.binding.name, ' = ', error)
+						ifs.newExpression(config).code($variable.scope(config), data.catchClause.binding.name, ' = ', error)
 						
 						$variable.define(ctrl, data.catchClause.binding, VariableKind::Variable)
 					}
 					
 					ifs.compile(data.catchClause.body, config).step()
 				}
+				
+				node.releaseTempName(error)
 			}
 			else if data.catchClause {
+				let error = node.acquireTempName()
+				
 				if data.catchClause.binding {
 					ctrl.code('catch(', data.catchClause.binding.name, ')').step()
 					
 					$variable.define(ctrl, data.catchClause.binding, VariableKind::Variable)
 				}
 				else {
-					ctrl.code('catch(', node.newTempName(), ')').step()
+					ctrl.code('catch(', error, ')').step()
 				}
 				
 				if finalizer {
-					ctrl.newExpression().code(finalizer, '()')
+					ctrl.newExpression(config).code(finalizer, '()')
 				}
 				
 				ctrl.compile(data.catchClause.body, config)
+				
+				node.releaseTempName(error)
 			}
 			else {
-				ctrl.code('catch(', node.newTempName(), ')').step()
+				let error = node.acquireTempName()
+				
+				ctrl.code('catch(', error, ')').step()
 				
 				if finalizer {
-					ctrl.newExpression().code(finalizer, '()')
+					ctrl.newExpression(config).code(finalizer, '()')
 				}
+				
+				node.releaseTempName(error)
 			}
 		} // }}}
 		Kind::TypeAliasDeclaration => $variable.define(node, data.name, VariableKind::TypeAlias, data.type)
 		Kind::TypeReference => node.code($types[data.typeName.name] || data.typeName.name)
-		Kind::UnaryExpression => $operator.unary(node.newExpression(), data, config, mode)
+		Kind::UnaryExpression => $operator.unary(node.newExpression(config), data, config, mode)
 		Kind::UnlessExpression => { // {{{
 			if data.else {
 				node
-					.newExpression()
-					.compile(data.condition, config)
+					.newExpression(config)
+					.compile(data.condition, config, Mode.BooleanExpression)
 					.code(' ? ')
 					.compile(data.else, config)
 					.code(' : ')
@@ -2502,35 +2535,35 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 			else if mode & Mode.Assignment {
 				node
-					.newExpression()
-					.compile(data.condition, config)
+					.newExpression(config)
+					.compile(data.condition, config, Mode.BooleanExpression)
 					.code(' ? undefined : ')
 					.compile(data.then, config)
 			}
 			else {
 				node
-					.newControl(Mode.PrepareAll)
-					.code('if(!(')
-					.compile(data.condition, config)
-					.code('))')
+					.newControl(config, Mode.PrepareAll)
+					.code('if(!')
+					.compile(data.condition, config, Mode.BooleanExpression | Mode.Operand)
+					.code(')')
 					.step()
 					.compile(data.then, config)
 			}
 		} // }}}
 		Kind::UnlessStatement => { // {{{
 			node
-				.newControl()
-				.code('if(!(')
-				.compile(data.condition, config)
-				.code('))')
+				.newControl(config)
+				.code('if(!')
+				.compile(data.condition, config, Mode.BooleanExpression | Mode.Operand)
+				.code(')')
 				.step()
 				.compile(data.then, config)
 		} // }}}
 		Kind::UntilStatement => { // {{{
 			node
-				.newControl()
+				.newControl(config)
 				.code('while(!(')
-				.compile(data.condition, config)
+				.compile(data.condition, config, Mode.BooleanExpression)
 				.code('))')
 				.step()
 				.compile(data.body, config)
@@ -2546,7 +2579,7 @@ func $compile(node, data, config, mode, variable = null) {
 			}
 		} // }}}
 		Kind::VariableDeclarator => { // {{{
-			let exp = node.newExpression().noVariable()
+			let exp = node.newExpression(config).noVariable()
 			
 			if data.name.kind == Kind::Identifier {
 				if config.variables == 'es6' {
@@ -2604,9 +2637,9 @@ func $compile(node, data, config, mode, variable = null) {
 		} // }}}
 		Kind::WhileStatement => { // {{{:
 			node
-				.newControl()
+				.newControl(config)
 				.code('while(')
-				.compile(data.condition, config)
+				.compile(data.condition, config, Mode.BooleanExpression)
 				.code(')')
 				.step()
 				.compile(data.body, config)
@@ -2621,7 +2654,7 @@ func $compile(node, data, config, mode, variable = null) {
 const $continuous = {
 	class(node, data, config, mode, variable) { // {{{
 		let clazz = node
-			.newControl()
+			.newControl(config)
 			.code('class ')
 			.compile(variable.name, config, Mode.Key)
 		
@@ -2641,12 +2674,12 @@ const $continuous = {
 		let ctrl
 		if !variable.extends {
 			ctrl = clazz
-				.newControl()
+				.newControl(config)
 				.code('constructor()')
 				.step()
 			
-			ctrl.newExpression().code('this.__ks_init()')
-			ctrl.newExpression().code('this.__ks_cons(arguments)')
+			ctrl.newExpression(config).code('this.__ks_init()')
+			ctrl.newExpression(config).code('this.__ks_cons(arguments)')
 		}
 		
 		let reflect = {
@@ -2673,21 +2706,21 @@ const $continuous = {
 		if noinit {
 			if variable.extends {
 				clazz
-					.newControl()
+					.newControl(config)
 					.code('__ks_init()')
 					.step()
-					.newExpression()
+					.newExpression(config)
 					.code(variable.extends.name.name, '.prototype.__ks_init.call(this)')
 			}
 			else {
-				clazz.newControl().code('__ks_init()').step()
+				clazz.newControl(config).code('__ks_init()').step()
 			}
 		}
 		else {
 			++reflect.inits
 			
 			ctrl = clazz
-				.newControl()
+				.newControl(config)
 				.code('__ks_init_1()')
 				.step()
 			
@@ -2702,19 +2735,19 @@ const $continuous = {
 			for name, field of variable.instanceVariables {
 				if field.data.defaultValue {
 					ctrl
-						.newExpression()
+						.newExpression(config)
 						.code('this.' + name + ' = ')
 						.compile(field.data.defaultValue, config)
 				}
 			}
 			
-			ctrl = clazz.newControl().code('__ks_init()').step()
+			ctrl = clazz.newControl(config).code('__ks_init()').step()
 			
 			if variable.extends {
-				ctrl.newExpression().code(variable.extends.name.name, '.prototype.__ks_init.call(this)')
+				ctrl.newExpression(config).code(variable.extends.name.name, '.prototype.__ks_init.call(this)')
 			}
 			
-			ctrl.newExpression().code(variable.name.name, '.prototype.__ks_init_1.call(this)')
+			ctrl.newExpression(config).code(variable.name.name, '.prototype.__ks_init_1.call(this)')
 		}
 		
 		for method in variable.constructors {
@@ -2747,12 +2780,12 @@ const $continuous = {
 			$continuous.classVariable(node, field.data, config, field.signature, reflect, name, variable)
 		}
 		
-		$helper.reflect(node, variable.name, reflect)
+		$helper.reflect(node, variable.name, reflect, config)
 		
 		let references = node.module().listReferences(variable.name.name)
 		if references {
 			for ref in references {
-				node.newExpression().code(ref)
+				node.newExpression(config).code(ref)
 			}
 		}
 		
@@ -2770,7 +2803,7 @@ const $continuous = {
 		
 		reflect.classMethods[name].push(signature)
 		
-		node.newFunction().operation(func(node) {
+		node.newFunction(config).operation(func(node) {
 			node.code('static __ks_sttc_' + name + '_' + index + '(')
 			
 			$function.parameters(node, data, config, func(node) {
@@ -2783,7 +2816,7 @@ const $continuous = {
 				node.compile(data.body, config)
 			}
 			else {
-				node.newExpression().code('return ').compile(data.body, config)
+				node.newExpression(config).code('return ').compile(data.body, config)
 			}
 		})
 	} // }}}
@@ -2791,7 +2824,7 @@ const $continuous = {
 		reflect.classVariables[name] = signature
 		
 		if data.defaultValue {
-			node.newExpression().compile(clazz.name, config).code(`.\(name) = `).compile(data.defaultValue, config)
+			node.newExpression(config).compile(clazz.name, config).code(`.\(name) = `).compile(data.defaultValue, config)
 		}
 	} // }}}
 	constructor(node, data, config, signature, reflect, clazz) { // {{{
@@ -2799,7 +2832,7 @@ const $continuous = {
 		
 		reflect.constructors.push(signature)
 		
-		node.newFunction().operation(func(node) {
+		node.newFunction(config).operation(func(node) {
 			node.code('__ks_cons_' + index + '(')
 			
 			$function.parameters(node, data, config, func(node) {
@@ -2856,7 +2889,7 @@ const $continuous = {
 					node.compile(data.body, config)
 				}
 				else {
-					node.newExpression().compile(data.body, config)
+					node.newExpression(config).compile(data.body, config)
 				}
 			}
 		})
@@ -2869,7 +2902,7 @@ const $continuous = {
 		
 		reflect.instanceMethods[name].push(signature)
 		
-		node.newFunction().operation(func(node) {
+		node.newFunction(config).operation(func(node) {
 			node.code('__ks_func_' + name + '_' + index + '(')
 			
 			$function.parameters(node, data, config, func(node) {
@@ -2911,7 +2944,7 @@ const $continuous = {
 				node.compile(data.body, config)
 			}
 			else {
-				node.newExpression().code('return ').compile(data.body, config)
+				node.newExpression(config).code('return ').compile(data.body, config)
 			}
 		})
 	} // }}}
@@ -3152,7 +3185,7 @@ const $final = {
 	} // }}}
 	class(node, data, config, mode, variable) { // {{{
 		let clazz = node
-			.newControl()
+			.newControl(config)
 			.code('class ')
 			.compile(variable.name, config, Mode.Key)
 		
@@ -3184,11 +3217,11 @@ const $final = {
 		let ctrl
 		if variable.extends {
 			ctrl = clazz
-				.newControl()
+				.newControl(config)
 				.code('__ks_init()')
 				.step()
 				
-			ctrl.newExpression().code(variable.extends.name.name, '.prototype.__ks_init.call(this)')
+			ctrl.newExpression(config).code(variable.extends.name.name, '.prototype.__ks_init.call(this)')
 			
 			if !noinit {
 				$variable.define(ctrl, {
@@ -3202,7 +3235,7 @@ const $final = {
 				for name, field of variable.instanceVariables {
 					if field.data.defaultValue {
 						ctrl
-							.newExpression()
+							.newExpression(config)
 							.code('this.' + name + ' = ')
 							.compile(field.data.defaultValue, config)
 					}
@@ -3211,7 +3244,7 @@ const $final = {
 		}
 		else {
 			ctrl = clazz
-				.newControl()
+				.newControl(config)
 				.code('constructor()')
 				.step()
 		
@@ -3227,13 +3260,13 @@ const $final = {
 				for name, field of variable.instanceVariables {
 					if field.data.defaultValue {
 						ctrl
-							.newExpression()
+							.newExpression(config)
 							.code('this.' + name + ' = ')
 							.compile(field.data.defaultValue, config)
 					}
 				}
 			}
-			ctrl.newExpression().code('this.__ks_cons(arguments)')
+			ctrl.newExpression(config).code('this.__ks_cons(arguments)')
 		}
 		
 		let reflect = {
@@ -3276,12 +3309,12 @@ const $final = {
 			$continuous.classVariable(node, field.data, config, field.signature, reflect, name, variable)
 		}
 		
-		$helper.reflect(node, variable.name, reflect)
+		$helper.reflect(node, variable.name, reflect, config)
 		
 		let references = node.module().listReferences(variable.name.name)
 		if references {
 			for ref in references {
-				node.newExpression().code(ref)
+				node.newExpression(config).code(ref)
 			}
 		}
 		
@@ -3449,7 +3482,7 @@ const $function = {
 					names[i] = parameter.name
 				}
 				else {
-					names[i] = node.newTempName()
+					names[i] = node.acquireTempName()
 				}
 				
 				node.parameter(names[i], config, parameter.type)
@@ -3470,7 +3503,7 @@ const $function = {
 					names[rest] = data.parameters[rest].name
 				}
 				else {
-					names[rest] = node.newTempName()
+					names[rest] = node.acquireTempName()
 				}
 				
 				node.code('...').parameter(names[rest], config, {
@@ -3493,10 +3526,10 @@ const $function = {
 			
 			if ra {
 				node
-					.newControl()
+					.newControl(config)
 					.code('if(arguments.length < ', signature.min, ')')
 					.step()
-					.newExpression()
+					.newExpression(config)
 					.code('throw new Error("Wrong number of arguments")')
 			}
 			
@@ -3505,7 +3538,7 @@ const $function = {
 				
 				if parameter.name && (!parameter.type || !parameter.type.nullable || parameter.defaultValue) {
 					ctrl = node
-						.newControl()
+						.newControl(config)
 						.code('if(')
 						.compile(parameter.name, config)
 						.code(' === undefined')
@@ -3523,18 +3556,18 @@ const $function = {
 					
 					if parameter.defaultValue {
 						ctrl
-							.newExpression()
+							.newExpression(config)
 							.compile(parameter.name, config)
 							.code(' = ')
 							.compile(parameter.defaultValue, config)
 					}
 					else {
-						ctrl.newExpression().code('throw new Error("Missing parameter \'').compile(parameter.name, config).code('\'")')
+						ctrl.newExpression(config).code('throw new Error("Missing parameter \'').compile(parameter.name, config).code('\'")')
 					}
 				}
 				
 				if !$type.isAny(parameter.type) {
-					ctrl = node.newControl()
+					ctrl = node.newControl(config)
 					
 					ctrl.code('if(')
 					
@@ -3551,7 +3584,7 @@ const $function = {
 					ctrl
 						.code(')')
 						.step()
-						.newExpression()
+						.newExpression(config)
 						.code('throw new Error("Invalid type for parameter \'').compile(parameter.name, config).code('\'")')
 				}
 			}
@@ -3561,24 +3594,24 @@ const $function = {
 				
 				if signature.parameters[rest].type == 'Any' {
 					if parameter.name {
-						node.newExpression().code($variable.scope(config), '__ks_i')
+						node.newExpression(config).code($variable.scope(config), '__ks_i')
 						
 						node
-							.newExpression()
+							.newExpression(config)
 							.code($variable.scope(config))
 							.parameter(parameter.name, config)
 							.code(' = arguments.length > ' + (maxb + ra) + ' ? Array.prototype.slice.call(arguments, ' + maxb + ', __ks_i = arguments.length - ' + ra + ') : (__ks_i = ' + maxb + ', [])')
 					}
 					else {
-						node.newExpression().code($variable.scope(config), '__ks_i = arguments.length > ' + (maxb + ra) + ' ? arguments.length - ' + ra + ' : ' + maxb)
+						node.newExpression(config).code($variable.scope(config), '__ks_i = arguments.length > ' + (maxb + ra) + ' ? arguments.length - ' + ra + ' : ' + maxb)
 					}
 				}
 				else {
-					node.newExpression().code($variable.scope(config), '__ks_i')
+					node.newExpression(config).code($variable.scope(config), '__ks_i')
 					
 					if parameter.name {
 						node
-							.newExpression()
+							.newExpression(config)
 							.code($variable.scope(config))
 							.parameter(parameter.name, config)
 							.code(' = []')
@@ -3591,12 +3624,12 @@ const $function = {
 				if maxb {
 				}
 				else {
-					node.newExpression().code($variable.scope(config), '__ks_i = -1')
+					node.newExpression(config).code($variable.scope(config), '__ks_i = -1')
 				}
 			
 				if parameter.name {
 					node
-						.newExpression()
+						.newExpression(config)
 						.code($variable.scope(config))
 						.parameter(parameter.name, config, {
 							kind: Kind::TypeReference
@@ -3609,7 +3642,7 @@ const $function = {
 				}
 				
 				ctrl = node
-					.newControl()
+					.newControl(config)
 					.code('while(')
 				
 				$type.check(ctrl, 'arguments[++__ks_i]', parameter.type, config)
@@ -3620,7 +3653,7 @@ const $function = {
 				
 				if parameter.name {
 					ctrl
-						.newExpression()
+						.newExpression(config)
 						.parameter(parameter.name, config)
 						.code('.push(arguments[__ks_i])')
 				}
@@ -3631,12 +3664,12 @@ const $function = {
 				
 				if (arity = $function.arity(parameter)) && arity.min {
 					node
-						.newControl()
+						.newControl(config)
 						.code('if(')
 						.parameter(parameter.name, config)
 						.code('.length < ', arity.min, ')')
 						.step()
-						.newExpression()
+						.newExpression(config)
 						.code('throw new Error("Wrong number of arguments")')
 				}
 			}
@@ -3644,10 +3677,10 @@ const $function = {
 				node.module().flag('Type')
 				
 				node
-					.newControl()
+					.newControl(config)
 					.code('if(!', $runtime.type(config), '.isFunction(__ks_cb))')
 					.step()
-					.newExpression()
+					.newExpression(config)
 					.code('throw new Error("Invalid callback")')
 			}
 		} // }}}
@@ -3656,14 +3689,14 @@ const $function = {
 			
 			if signature.min {
 				node
-					.newControl()
+					.newControl(config)
 					.code('if(arguments.length < ', signature.min, ')')
 					.step()
-					.newExpression()
+					.newExpression(config)
 					.code('throw new Error("Wrong number of arguments")')
 			}
 				
-			node.newExpression().code($variable.scope(config), '__ks_i = -1')
+			node.newExpression(config).code($variable.scope(config), '__ks_i = -1')
 			
 			let required = rb
 			let optional = 0
@@ -3682,35 +3715,35 @@ const $function = {
 						if $type.isAny(parameter.type) {
 							if required {
 								node
-									.newExpression()
+									.newExpression(config)
 									.code($variable.scope(config))
 									.compile(parameter.name, config)
 									.code(' = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - ', required, ', __ks_i + ', arity.max + 1, '))')
 								
 								if i + 1 < data.parameters.length {
-									node.newExpression().code('__ks_i += ').parameter(parameter.name, config).code('.length')
+									node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
 								}
 							}
 							else {
 								node
-									.newExpression()
+									.newExpression(config)
 									.code($variable.scope(config))
 									.compile(parameter.name, config)
 									.code(' = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + ', arity.max + 1, '))')
 								
 								if i + 1 < data.parameters.length {
-									node.newExpression().code('__ks_i += ').parameter(parameter.name, config).code('.length')
+									node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
 								}
 							}
 						}
 						else {
 							node
-								.newExpression()
+								.newExpression(config)
 								.code($variable.scope(config))
 								.compile(parameter.name, config)
 								.code(' = []')
 							
-							ctrl = node.newControl()
+							ctrl = node.newControl(config)
 							
 							if required {
 								ctrl.code('while(__ks_i < arguments.length - ', required, ' && ')
@@ -3733,27 +3766,27 @@ const $function = {
 				else { // {{{
 					if (parameter.type && parameter.type.nullable) || parameter.defaultValue {
 						ctrl = node
-							.newControl()
+							.newControl(config)
 							.code('if(arguments.length > ', signature.min + optional, ')')
 							.step()
 						
 						if $type.isAny(parameter.type) {
 							if parameter.name {
 								ctrl
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = arguments[++__ks_i]')
 							}
 							else {
 								ctrl
-									.newExpression()
+									.newExpression(config)
 									.code('++__ks_i')
 							}
 						}
 						else {
 							ctrl2 = ctrl
-								.newControl()
+								.newControl(config)
 								.code('if(')
 							
 							$type.check(ctrl2, 'arguments[__ks_i + 1]', parameter.type, config)
@@ -3761,7 +3794,7 @@ const $function = {
 							ctrl2
 								.code(')')
 								.step()
-								.newExpression()
+								.newExpression(config)
 								.code('var ')
 								.compile(parameter.name, config)
 								.code(' = arguments[++__ks_i]')
@@ -3773,12 +3806,12 @@ const $function = {
 							
 							if rest == -1 {
 								ctrl2
-									.newExpression()
+									.newExpression(config)
 									.code('throw new Error("Invalid type for parameter \'').compile(parameter.name, config).code('\'")')
 							}
 							else if parameter.defaultValue {
 								ctrl2
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = ')
@@ -3786,7 +3819,7 @@ const $function = {
 							}
 							else {
 								ctrl2
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = null')
@@ -3798,7 +3831,7 @@ const $function = {
 						
 							if parameter.defaultValue {
 								ctrl
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = ')
@@ -3806,7 +3839,7 @@ const $function = {
 							}
 							else {
 								ctrl
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = null')
@@ -3819,21 +3852,21 @@ const $function = {
 						if $type.isAny(parameter.type) {
 							if parameter.name {
 								node
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = arguments[++__ks_i]')
 							}
 							else {
 								node
-									.newExpression()
+									.newExpression(config)
 									.code('++__ks_i')
 							}
 						}
 						else {
 							if parameter.name {
 								ctrl = node
-									.newControl()
+									.newControl(config)
 									.code('if(')
 								
 								$type.check(ctrl, 'arguments[++__ks_i]', parameter.type, config)
@@ -3841,7 +3874,7 @@ const $function = {
 								ctrl
 									.code(')')
 									.step()
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = arguments[__ks_i]')
@@ -3849,12 +3882,12 @@ const $function = {
 								ctrl
 									.step()
 									.code('else ')
-									.newExpression()
+									.newExpression(config)
 									.code('throw new Error("Invalid type for parameter \'').compile(parameter.name, config).code('\'")')
 							}
 							else {
 								ctrl = node
-									.newControl()
+									.newControl(config)
 									.code('if(!')
 								
 								$type.check(ctrl, 'arguments[++__ks_i]', parameter.type, config)
@@ -3862,7 +3895,7 @@ const $function = {
 								ctrl
 									.code(')')
 									.step()
-									.newExpression()
+									.newExpression(config)
 									.code('throw new Error("Wrong type of arguments")')
 							}
 						}
@@ -3879,7 +3912,7 @@ const $function = {
 				if ra {
 					if parameter.name {
 						node
-							.newExpression()
+							.newExpression(config)
 							.code($variable.scope(config))
 							.parameter(parameter.name, config, {
 								kind: Kind::TypeReference
@@ -3891,21 +3924,21 @@ const $function = {
 							.code(' = arguments.length > __ks_i + ', ra + 1, ' ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - ' + ra + ') : []')
 						
 						if l + 1 < data.parameters.length {
-							node.newExpression().code('__ks_i += ').parameter(parameter.name, config).code('.length')
+							node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
 						}
 					}
 					else if l + 1 < data.parameters.length {
 						node
-							.newControl()
+							.newControl(config)
 							.code('if(arguments.length > __ks_i + ' , ra + 1, ')')
 							.step()
-							.newExpression().code('__ks_i = arguments.length - ', ra + 1)
+							.newExpression(config).code('__ks_i = arguments.length - ', ra + 1)
 					}
 				}
 				else {
 					if parameter.name {
 						node
-							.newExpression()
+							.newExpression(config)
 							.code($variable.scope(config))
 							.parameter(parameter.name, config, {
 								kind: Kind::TypeReference
@@ -3917,7 +3950,7 @@ const $function = {
 							.code(' = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : []')
 						
 						if l + 1 < data.parameters.length {
-							node.newExpression().code('__ks_i += ').parameter(parameter.name, config).code('.length')
+							node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
 						}
 					}
 				}
@@ -3928,12 +3961,12 @@ const $function = {
 			if ra != maxa && signature.parameters[rest].type != 'Any' {
 				if ra {
 					node
-						.newExpression()
+						.newExpression(config)
 						.code($variable.scope(config), '__ks_m = __ks_i + ', ra)
 				}
 				else {
 					node
-						.newExpression()
+						.newExpression(config)
 						.code($variable.scope(config), '__ks_m = __ks_i')
 				}
 			}
@@ -3950,13 +3983,13 @@ const $function = {
 						if parameter.name {
 							if $type.isAny(parameter.type) {
 								node
-									.newExpression()
+									.newExpression(config)
 									.code($variable.scope(config))
 									.compile(parameter.name, config)
 									.code(' = Array.prototype.slice.call(arguments, __ks_i + 1, __ks_i + ', arity.min + 1, ')')
 								
 								if i + 1 < data.parameters.length {
-									node.newExpression().code('__ks_i += ').parameter(parameter.name, config).code('.length')
+									node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
 								}
 							}
 							else {
@@ -3973,7 +4006,7 @@ const $function = {
 						if parameter.name {
 							if parameter.defaultValue {
 								node
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = ')
@@ -3981,7 +4014,7 @@ const $function = {
 							}
 							else {
 								node
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = null')
@@ -3990,27 +4023,27 @@ const $function = {
 					}
 					else {
 						ctrl = node
-							.newControl()
+							.newControl(config)
 							.code('if(arguments.length > __ks_m)')
 							.step()
 						
 						if $type.isAny(parameter.type) {
 							if parameter.name {
 								ctrl
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = arguments[', inc ? '++' : '', '__ks_i]')
 							}
 							else {
 								ctrl
-									.newExpression()
+									.newExpression(config)
 									.code('++__ks_i')
 							}
 						}
 						else {
 							ctrl2 = ctrl
-								.newControl()
+								.newControl(config)
 								.code('if(')
 							
 							$type.check(ctrl2, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type, config)
@@ -4018,7 +4051,7 @@ const $function = {
 							ctrl2
 								.code(')')
 								.step()
-								.newExpression()
+								.newExpression(config)
 								.code('var ')
 								.compile(parameter.name, config)
 								.code(' = arguments[__ks_i]')
@@ -4029,7 +4062,7 @@ const $function = {
 							
 							if parameter.defaultValue {
 								ctrl2
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = ')
@@ -4037,7 +4070,7 @@ const $function = {
 							}
 							else {
 								ctrl2
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = null')
@@ -4049,7 +4082,7 @@ const $function = {
 						
 							if parameter.defaultValue {
 								ctrl
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = ')
@@ -4057,7 +4090,7 @@ const $function = {
 							}
 							else {
 								ctrl
-									.newExpression()
+									.newExpression(config)
 									.code('var ')
 									.compile(parameter.name, config)
 									.code(' = null')
@@ -4073,21 +4106,21 @@ const $function = {
 					if $type.isAny(parameter.type) {
 						if parameter.name {
 							node
-								.newExpression()
+								.newExpression(config)
 								.code('var ')
 								.compile(parameter.name, config)
 								.code(' = arguments[', inc ? '++' : '', '__ks_i]')
 						}
 						else {
 							node
-								.newExpression()
+								.newExpression(config)
 								.code(inc ? '++' : '', '__ks_i')
 						}
 					}
 					else {
 						if parameter.name {
 							ctrl = node
-								.newControl()
+								.newControl(config)
 								.code('if(')
 							
 							$type.check(ctrl, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type, config)
@@ -4095,7 +4128,7 @@ const $function = {
 							ctrl
 								.code(')')
 								.step()
-								.newExpression()
+								.newExpression(config)
 								.code('var ')
 								.compile(parameter.name, config)
 								.code(' = arguments[__ks_i]')
@@ -4103,12 +4136,12 @@ const $function = {
 							ctrl
 								.step()
 								.code('else ')
-								.newExpression()
+								.newExpression(config)
 								.code('throw new Error("Invalid type for parameter \'').compile(parameter.name, config).code('\'")')
 						}
 						else {
 							ctrl = node
-								.newControl()
+								.newControl(config)
 								.code('if(!')
 							
 							$type.check(ctrl, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type, config)
@@ -4116,7 +4149,7 @@ const $function = {
 							ctrl
 								.code(')')
 								.step()
-								.newExpression()
+								.newExpression(config)
 								.code('throw new Error("Wrong type of arguments")')
 						}
 					}
@@ -4222,7 +4255,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, clazz.newControl(), 'static ' + name + '()', reflect.classMethods[name], $continuous.methodCall^^(variable, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true, config)
+		$helper.methods(extend, clazz.newControl(config), 'static ' + name + '()', reflect.classMethods[name], $continuous.methodCall^^(variable, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true, config)
 	} // }}}
 	constructor(clazz, reflect, variable, config) { // {{{
 		let extend = false
@@ -4241,7 +4274,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, clazz.newControl(), '__ks_cons(args)', reflect.constructors, $continuous.methodCall^^(variable, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false, config)
+		$helper.methods(extend, clazz.newControl(config), '__ks_cons(args)', reflect.constructors, $continuous.methodCall^^(variable, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false, config)
 	} // }}}
 	decide(node, type, index, path, argName, config) { // {{{
 		node.module().flag('Type')
@@ -4272,7 +4305,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, clazz.newControl(), name + '()', reflect.instanceMethods[name], $continuous.methodCall^^(variable, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true, config)
+		$helper.methods(extend, clazz.newControl(config), name + '()', reflect.instanceMethods[name], $continuous.methodCall^^(variable, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true, config)
 	} // }}}
 	methods(extend, node, header, methods, call, argName, refName, returns, config) { // {{{
 		node.code(header).step()
@@ -4284,7 +4317,7 @@ const $helper = {
 			}
 			else {
 				node
-					.newControl()
+					.newControl(config)
 					.code('if(' + argName + '.length !== 0)')
 					.step()
 					.code('throw new Error("Wrong number of arguments")')
@@ -4298,7 +4331,7 @@ const $helper = {
 			}
 			else {
 				if method.min == method.max {
-					let ctrl = node.newControl()
+					let ctrl = node.newControl(config)
 					
 					ctrl.code('if(' + argName + '.length === ' + method.min + ')').step()
 					
@@ -4322,7 +4355,7 @@ const $helper = {
 					}
 				}
 				else if method.max < Infinity {
-					let ctrl = node.newControl()
+					let ctrl = node.newControl(config)
 					
 					ctrl.code('if(' + argName + '.length >= ' + method.min + ' && ' + argName + '.length <= ' + method.max + ')').step()
 					
@@ -4368,7 +4401,7 @@ const $helper = {
 				}
 			}
 			
-			let ctrl = node.newControl()
+			let ctrl = node.newControl(config)
 			nf = true
 			
 			for group in groups {
@@ -4437,7 +4470,7 @@ const $helper = {
 	methodCheck(node, group, call, argName, refName, returns, config) { // {{{
 		if $helper.methodCheckTree(group.methods, 0, node, call, argName, refName, returns, config) {
 			if returns {
-				node.newExpression().code('throw new Error("Wrong type of arguments")')
+				node.newExpression(config).code('throw new Error("Wrong type of arguments")')
 			}
 			else {
 				node.code('else').step().code('throw new Error("Wrong type of arguments")')
@@ -4498,7 +4531,7 @@ const $helper = {
 			}
 		}
 		else {
-			let ctrl = node.newControl()
+			let ctrl = node.newControl(config)
 			let ne = true
 			
 			usages.sort(func(a, b) {
@@ -4579,10 +4612,10 @@ const $helper = {
 		
 		return types
 	} // }}}
-	reflect(node, name, reflect) { // {{{
+	reflect(node, name, reflect, config) { // {{{
 		let classname = name.name
 		
-		let exp = node.newExpression()
+		let exp = node.newExpression(config)
 		exp.code(classname + '.__ks_reflect = {').indent()
 		
 		if reflect.final {
@@ -4773,7 +4806,7 @@ func $implement(node, data, config, variable) { // {{{
 				let type = $signature.type(data.type, node)
 				
 				node
-					.newExpression()
+					.newExpression(config)
 					.code($runtime.helper(config), '.newField(' + $quote(data.name.name) + ', ' + $helper.type(type, node) + ')')
 			}
 		}
@@ -4804,7 +4837,7 @@ func $implement(node, data, config, variable) { // {{{
 				}
 				
 				let exp = node
-					.newExpression()
+					.newExpression(config)
 					.code($runtime.helper(config), '.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
 					.indent()
 				
@@ -4883,7 +4916,7 @@ func $implement(node, data, config, variable) { // {{{
 					}
 				}
 				
-				node.newExpression(Mode.NoIndent).newFunction().operation(func(ctrl) {
+				node.newExpression(config, Mode.NoIndent).newFunction(config).operation(func(ctrl) {
 					ctrl
 						.code($runtime.helper(config), '.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
 						.indent()
@@ -4920,7 +4953,7 @@ func $implement(node, data, config, variable) { // {{{
 						ctrl.compile(data.body, config)
 					}
 					else {
-						ctrl.newExpression().code('return ').compile(data.body, config)
+						ctrl.newExpression(config).code('return ').compile(data.body, config)
 					}
 					
 					ctrl.step(Mode.NoLine).code(',')
@@ -4971,7 +5004,7 @@ func $implement(node, data, config, variable) { // {{{
 				}
 				
 				let exp = node
-					.newExpression()
+					.newExpression(config)
 					.code($runtime.helper(config), '.', instance ? 'newInstanceMethod' : 'newClassMethod', '({')
 					.indent()
 				
@@ -5067,14 +5100,14 @@ const $import = {
 		
 		module.import(name.name || name, file)
 	} // }}}
-	loadCoreModule(x, module, data, node) { // {{{
+	loadCoreModule(x, module, data, node, config) { // {{{
 		if $nodeModules[x] {
-			return $import.loadNodeFile(null, x, module, data, node)
+			return $import.loadNodeFile(null, x, module, data, node, config)
 		}
 		
 		return false
 	}, // }}}
-	loadDirectory(x, moduleName?, module, data, node) { // {{{
+	loadDirectory(x, moduleName?, module, data, node, config) { // {{{
 		let pkgfile = path.join(x, 'package.json')
 		if fs.isFile(pkgfile) {
 			let pkg
@@ -5082,40 +5115,40 @@ const $import = {
 				pkg = JSON.parse(fs.readFile(pkgfile))
 			}
 			
-			if pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node) {
+			if pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node, config) {
 				return true
 			}
-			else if pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node)) {
+			else if pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node, config) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node, config)) {
 				return true
 			}
 		}
 		
-		return $import.loadFile(path.join(x, 'index'), moduleName, module, data, node)
+		return $import.loadFile(path.join(x, 'index'), moduleName, module, data, node, config)
 	}, // }}}
-	loadFile(x, moduleName?, module, data, node) { // {{{
+	loadFile(x, moduleName?, module, data, node, config) { // {{{
 		if fs.isFile(x) {
 			if x.endsWith($extensions.source) {
-				return $import.loadKSFile(x, moduleName, module, data, node)
+				return $import.loadKSFile(x, moduleName, module, data, node, config)
 			}
 			else {
-				return $import.loadNodeFile(x, moduleName, module, data, node)
+				return $import.loadNodeFile(x, moduleName, module, data, node, config)
 			}
 		}
 		
 		if fs.isFile(x + $extensions.source) {
-			return $import.loadKSFile(x + $extensions.source, moduleName, module, data, node)
+			return $import.loadKSFile(x + $extensions.source, moduleName, module, data, node, config)
 		}
 		else {
 			for ext of require.extensions {
 				if fs.isFile(x + ext) {
-					return $import.loadNodeFile(x, moduleName, module, data, node)
+					return $import.loadNodeFile(x, moduleName, module, data, node, config)
 				}
 			}
 		}
 		
 		return false
 	}, // }}}
-	loadKSFile(x, moduleName?, module, data, node) { // {{{
+	loadKSFile(x, moduleName?, module, data, node, config) { // {{{
 		let file = null
 		if !moduleName {
 			file = moduleName = module.path(x, data.module)
@@ -5164,10 +5197,10 @@ const $import = {
 		let usages = []
 		let importCode
 		if (importVarCount && importAll) || (importVarCount && importAlias.length) || (importAll && importAlias.length) {
-			importCode = node.newTempName()
+			importCode = node.acquireTempName()
 			
 			let exp = node
-				.newExpression()
+				.newExpression(config)
 				.code('var ', importCode, ' = require(', $quote(moduleName), ')(')
 			
 			let nf
@@ -5346,17 +5379,17 @@ const $import = {
 				if variable.kind == VariableKind::Class && variable.final {
 					variable.final.name = '__ks_' + alias
 					
-					node.newExpression().code(`var {\(alias), \(variable.final.name)} = \(importCode)`).use(usages, true)
+					node.newExpression(config).code(`var {\(alias), \(variable.final.name)} = \(importCode)`).use(usages, true)
 				}
 				else {
-					node.newExpression().code(`var \(alias) = \(importCode).\(name)`)
+					node.newExpression(config).code(`var \(alias) = \(importCode).\(name)`)
 				}
 			}
 			
 			$import.addVariable(module, file, node, alias, variable, data)
 		}
 		else if importVarCount {
-			exp = node.newExpression().use(usages, true).code('var {')
+			exp = node.newExpression(config).use(usages, true).code('var {')
 			
 			nf = false
 			for name, alias of importVariables {
@@ -5410,7 +5443,7 @@ const $import = {
 					}
 					
 					if exp == null {
-						exp = node.newExpression().use(usages, true)
+						exp = node.newExpression(config).use(usages, true)
 					}
 				}
 				
@@ -5419,14 +5452,14 @@ const $import = {
 			
 			if variables.length == 1 {
 				if exp == null {
-					exp = node.newExpression().use(usages, true)
+					exp = node.newExpression(config).use(usages, true)
 				}
 				
 				exp.code('var ', variables[0], ' = ', importCode, '.' + variables[0])
 			}
 			else if variables.length {
 				if exp == null {
-					exp = node.newExpression().use(usages, true)
+					exp = node.newExpression(config).use(usages, true)
 				}
 				
 				exp.code('var {')
@@ -5448,7 +5481,7 @@ const $import = {
 		}
 		
 		if importAlias.length {
-			node.newExpression().code('var ', importAlias, ' = ', importCode).use(usages, true)
+			node.newExpression(config).code('var ', importAlias, ' = ', importCode).use(usages, true)
 			
 			type = {
 				typeName: {
@@ -5473,9 +5506,11 @@ const $import = {
 			}, VariableKind::Variable, type)
 		}
 		
+		node.releaseTempName(importCode)
+		
 		return true
 	}, // }}}
-	loadNodeFile(x?, moduleName?, module, data, node) { // {{{
+	loadNodeFile(x?, moduleName?, module, data, node, config) { // {{{
 		let file = null
 		if !moduleName {
 			file = moduleName = module.path(x, data.module)
@@ -5487,7 +5522,7 @@ const $import = {
 		for specifier in data.specifiers {
 			if specifier.kind == Kind.ImportWildcardSpecifier {
 				if specifier.local {
-					node.newExpression().code('var ', specifier.local.name, ' = require(', $quote(moduleName), ')')
+					node.newExpression(config).code('var ', specifier.local.name, ' = require(', $quote(moduleName), ')')
 					
 					$import.define(module, file, node, specifier.local, VariableKind::Variable)
 				}
@@ -5506,12 +5541,12 @@ const $import = {
 			for alias of variables {
 			}
 			
-			node.newExpression().code('var ', variables[alias], ' = require(', $quote(moduleName), ').', alias)
+			node.newExpression(config).code('var ', variables[alias], ' = require(', $quote(moduleName), ').', alias)
 			
 			$import.define(module, file, node, variables[alias], VariableKind::Variable)
 		}
 		else if count {
-			let exp = node.newExpression().code('var {')
+			let exp = node.newExpression(config).code('var {')
 			
 			let nf = false
 			for alias of variables {
@@ -5537,14 +5572,14 @@ const $import = {
 		
 		return true
 	}, // }}}
-	loadNodeModule(x, start, module, data, node) { // {{{
+	loadNodeModule(x, start, module, data, node, config) { // {{{
 		let dirs = $import.nodeModulesPaths(start)
 		
 		let file
 		for dir in dirs {
 			file = path.join(dir, x)
 			
-			if $import.loadFile(file, x, module, data, node) || $import.loadDirectory(file, x, module, data, node) {
+			if $import.loadFile(file, x, module, data, node, config) || $import.loadDirectory(file, x, module, data, node, config) {
 				return true
 			}
 		}
@@ -5589,18 +5624,18 @@ const $import = {
 			return null
 		}
 	}, // }}}
-	resolve(data, y, module, node) { // {{{
+	resolve(data, y, module, node, config) { // {{{
 		let x = data.module
 		
 		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
 			x = fs.resolve(y, x)
 			
-			if !($import.loadFile(x, null, module, data, node) || $import.loadDirectory(x, null, module, data, node)) {
+			if !($import.loadFile(x, null, module, data, node, config) || $import.loadDirectory(x, null, module, data, node, config)) {
 				throw new Error("Cannot find module '" + x + "' from '" + y + "'")
 			}
 		}
 		else {
-			if !($import.loadNodeModule(x, y, module, data, node) || $import.loadCoreModule(x, module, data, node)) {
+			if !($import.loadNodeModule(x, y, module, data, node, config) || $import.loadCoreModule(x, module, data, node, config)) {
 				throw new Error("Cannot find module '" + x + "' from '" + y + "'")
 			}
 		}
@@ -5681,13 +5716,13 @@ const $method = {
 	} // }}}
 	setMember(node, name, data, config, clazz) { // {{{
 		if clazz.instanceVariables[name] {
-			node.newExpression().code('this.' + name + ' = ').compile(data, config)
+			node.newExpression(config).code('this.' + name + ' = ').compile(data, config)
 		}
 		else if clazz.instanceVariables['_' + name] {
-			node.newExpression().code('this._' + name + ' = ').compile(data, config)
+			node.newExpression(config).code('this._' + name + ' = ').compile(data, config)
 		}
 		else if clazz.instanceMethods[name] && clazz.instanceMethods[name]['1'] {
-			node.newExpression().code('this.' + name + '(').compile(data, config).code(')')
+			node.newExpression(config).code('this.' + name + '(').compile(data, config).code(')')
 		}
 		else {
 			throw new Error('Can\'t set member ' + name + ' (line ' + data.start.line + ')')
@@ -5884,24 +5919,50 @@ const $operator = {
 					}
 				}
 				else {
-					let name = node.newTempName()
+					let name = node.acquireTempName(node)
 					
-					if mode & Mode.BooleanExpression {
+					if $expression.nullable(data.right) {
+						node.code('(')
+						
+						let expression = $expression.value(node, data.right, config)
+						
 						node
-							.code($runtime.type(config), '.isValue(', name, ' = ')
-							.compile(data.right, config, mode | Mode.Key)
-							.code(') ? (')
-							.compile(data.left, config, Mode.Key)
-							.code(' = ', name, ', true) : false')
+							.code(' ? ', $runtime.type(config), '.isValue(', name, ' = ')
+							.compile(expression, config)
+							.code(') : false) ? ')
+						
+						if mode & Mode.BooleanExpression {
+							node
+								.code('(')
+								.compile(data.left, config, Mode.Key)
+								.code(' = ', name, ', true) : false')
+						}
+						else {
+							node
+								.compile(data.left, config, Mode.Key)
+								.code(' = ', name, ' : undefined')
+						}
 					}
 					else {
-						node
-							.code($runtime.type(config), '.isValue(', name, ' = ')
-							.compile(data.right, config, mode | Mode.Key)
-							.code(') ? ')
-							.compile(data.left, config, Mode.Key)
-							.code(' = ', name, ' : undefined')
+						if mode & Mode.BooleanExpression {
+							node
+								.code($runtime.type(config), '.isValue(', name, ' = ')
+								.compile(data.right, config, mode | Mode.Key)
+								.code(') ? (')
+								.compile(data.left, config, Mode.Key)
+								.code(' = ', name, ', true) : false')
+						}
+						else {
+							node
+								.code($runtime.type(config), '.isValue(', name, ' = ')
+								.compile(data.right, config, mode | Mode.Key)
+								.code(') ? ')
+								.compile(data.left, config, Mode.Key)
+								.code(' = ', name, ' : undefined')
+						}
 					}
+					
+					node.releaseTempName(name)
 				}
 				
 				if mode & Mode.Operand {
@@ -5916,10 +5977,10 @@ const $operator = {
 				node.addMode(Mode.NoIndent).removeMode(Mode.Statement)
 				
 				node
-					.newControl()
+					.newControl(config)
 					.code('if(!', $runtime.type(config), '.isValue(').compile(data.left, config, Mode.Key).code('))')
 					.step()
-					.newExpression()
+					.newExpression(config)
 					.compile(data.left, config, Mode.Key)
 					.code(' = ')
 					.compile(data.right, config, Mode.Key)
@@ -6050,13 +6111,15 @@ const $operator = {
 						.compile(data.right, config, Mode.Operand)
 				}
 				else {
-					let name = node.newTempName()
-						
+					let name = node.acquireTempName(node)
+					
 					node
 						.code(`\(type).isValue((\(name) = `)
 						.compile(data.left, config, Mode.Operand)
 						.code(`)) ? \(name) : `)
 						.compile(data.right, config, Mode.Operand)
+					
+					node.releaseTempName(name)
 				}
 			} // }}}
 			BinaryOperator::Or => { // {{{
@@ -6156,12 +6219,14 @@ const $operator = {
 							.code(' : ')
 					}
 					else {
-						name = node.newTempName()
+						name = node.acquireTempName(node)
 						
 						node
 							.code(`\(type).isValue((\(name) = `)
 							.compile(operand, config, Mode.Operand)
 							.code(`)) ? \(name) : `)
+						
+						node.releaseTempName(name)
 					}
 				}
 				
@@ -6313,19 +6378,19 @@ const $switch = {
 	binding(clause, ctrl, name, config) { // {{{
 		for binding in clause.bindings {
 			if binding.kind == Kind::ArrayBinding {
-				ctrl.newExpression().compile(binding, config).code(' = ', name)
+				ctrl.newExpression(config).compile(binding, config).code(' = ', name)
 			}
 			else if binding.kind == Kind::ObjectBinding {
 				console.error(binding)
 				throw new Error('Not Implemented')
 			}
 			else if binding.kind == Kind::SwitchTypeCast {
-				ctrl.newExpression().code($variable.scope(config), binding.name.name, ' = ', name)
+				ctrl.newExpression(config).code($variable.scope(config), binding.name.name, ' = ', name)
 				
 				$variable.define(ctrl, binding.name, VariableKind::Variable)
 			}
 			else {
-				ctrl.newExpression().code($variable.scope(config), binding.name, ' = ', name)
+				ctrl.newExpression(config).code($variable.scope(config), binding.name, ' = ', name)
 				
 				$variable.define(ctrl, binding, VariableKind::Variable)
 			}
@@ -7217,7 +7282,7 @@ const $variable = {
 		
 		return VariableKind::Variable
 	} // }}}
-	merge(variable, importedVariable) {
+	merge(variable, importedVariable) { // {{{
 		if variable.kind == VariableKind::Class {
 			Array.merge(variable.constructors, importedVariable.constructors)
 			Object.merge(variable.instanceVariables, importedVariable.instanceVariables)
@@ -7229,7 +7294,7 @@ const $variable = {
 		}
 		
 		return variable
-	}
+	} // }}}
 	scope(config) { // {{{
 		return config.variables == 'es5' ? 'var ' : 'let '
 	} // }}}
@@ -7257,22 +7322,20 @@ const $variable = {
 class Block {
 	private {
 		_code: Array	= []
-		_config			= null
+		_config
 		_parent
 		_prepared		= false
 		_renamedIndexes = {}
 		_renamedVars	= {}
 		_variables		= {}
 	}
-	Block() { // {{{
+	Block(@config: Object) { // {{{
 		this._indentation = 1
 		this._indent = '\t'
-		this._temp = -1
 	} // }}}
-	Block(@parent) { // {{{
+	Block(@parent, @config: Object) { // {{{
 		this._indentation = parent._indentation + 1
 		this._indent = '\t'.repeat(this._indentation)
-		this._temp = parent.getTempCount(true)
 	} // }}}
 	addVariable(name, definition) { // {{{
 		this._variables[name] = definition
@@ -7300,8 +7363,6 @@ class Block {
 		return name
 	} // }}}
 	compile(data, config, mode = 0, info = null) { // {{{
-		this._config = config if !this._config
-		
 		if data is string {
 			this._code.push(data)
 		}
@@ -7363,38 +7424,29 @@ class Block {
 		
 		return this
 	} // }}}
-	newBlock() { // {{{
+	newBlock(config) { // {{{
 		return this
 	} // }}}
-	newControl(mode = 0) { // {{{
-		let control = new Control(this, false, mode)
+	newControl(config, mode = 0) { // {{{
+		let control = new Control(this, config.variables == 'es6' ? BlockMode::Scope : BlockMode::Block, config, mode)
 		
 		this._code.push(control)
 		
 		return control
 	} // }}}
-	newExpression(mode = 0) { // {{{
-		let stmt = new Expression(this, mode | Mode.Statement)
+	newExpression(config, mode = 0) { // {{{
+		let stmt = new Expression(this, config, mode | Mode.Statement)
 		
 		this._code.push(stmt)
 		
 		return stmt
 	} // }}}
-	newFunction() { // {{{
-		let stmt = new FunctionBlock(this)
+	newFunction(config) { // {{{
+		let stmt = new FunctionBlock(this, config)
 		
 		this._code.push(stmt)
 		
 		return stmt
-	} // }}}
-	newTempName() { // {{{
-		let name = '__ks_' + ++this._temp
-		
-		while(this._variables[name]) {
-			name = '__ks_' + ++this._temp
-		}
-		
-		return name
 	} // }}}
 	rename(name) { // {{{
 		let newName = this.newRenamedVar(name)
@@ -7473,8 +7525,11 @@ class Block {
 }
 
 class Node extends Block {
-	Node(parent) { // {{{
-		super(parent)
+	Node(parent, config) { // {{{
+		super(parent, config)
+	} // }}}
+	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
+		return this._parent.acquireTempName(node, assignment, fromChild)
 	} // }}}
 	getRenamedVar(name) { // {{{
 		if this._renamedVars[name] {
@@ -7507,21 +7562,89 @@ class Node extends Block {
 			return this._parent.newRenamedVar(name)
 		}
 	} // }}}
+	releaseTempName(name, fromChild = true) { // {{{
+		this._parent.releaseTempName(name, fromChild)
+		
+		return this
+	} // }}}
 }
 
 class Scope extends Block {
 	private {
+		_mode
 		_module
+		_scopeParent		= null
+		_tempNextIndex 		= 0
+		_tempNames			= {}
+		_tempNameCount		= 0
 	}
-	Scope(parent) { // {{{
+	Scope(parent, config, @mode) { // {{{
 		if parent is Module {
-			super()
+			super(config)
 			
 			this._module = parent
 		}
 		else {
-			super(parent)
+			super(parent, config)
+			
+			if mode == BlockMode::Scope {
+				while !(parent is Scope) {
+					parent = parent._parent
+				}
+				this._scopeParent = parent
+				this._tempNextIndex = parent._tempNextIndex
+				this._tempParentNames = {}
+			}
 		}
+	} // }}}
+	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
+		if this._scopeParent && (name ?= this._scopeParent.acquireTempNameFromKid()) {
+			this._tempParentNames[name] = true
+			
+			return name
+		}
+		
+		if this._tempNameCount {
+			for i from 0 til this._tempNextIndex when this._tempNames[i] {
+				--this._tempNameCount
+				
+				name = this._tempNames[i]
+				
+				this._tempNames[i] = false
+				
+				return name
+			}
+		}
+		else {
+			let name = '__ks_' + this._tempNextIndex
+			
+			node.useTempVariable(name, assignment) if node
+			
+			++this._tempNextIndex
+			
+			return name
+		}
+	} // }}}
+	private acquireTempNameFromKid() { // {{{
+		if this._scopeParent && (name ?= this._scopeParent.acquireTempNameFromKid()) {
+			this._tempParentNames[name] = true
+			
+			return name
+		}
+		
+		if this._tempNameCount {
+			for i from 0 til this._tempNextIndex when this._tempNames[i] {
+				--this._tempNameCount
+				
+				name = this._tempNames[i]
+				
+				this._tempNames[i] = false
+				
+				return name
+			}
+		}
+		
+		return null
 	} // }}}
 	getRenamedVar(name) { // {{{
 		if this._renamedVars[name] {
@@ -7556,21 +7679,65 @@ class Scope extends Block {
 			return name
 		}
 	} // }}}
+	releaseTempName(name, fromChild = true) { // {{{
+		if name.length > 5 && name.substr(0, 5) == '__ks_' {
+			if this._scopeParent && this._tempParentNames[name] {
+				this._scopeParent.releaseTempNameFromKid(name)
+				
+				this._tempParentNames[name] = false
+			}
+			else {
+				++this._tempNameCount
+				
+				this._tempNames[name.substr(5)] = name
+			}
+		}
+		
+		return this
+	} // }}}
+	private releaseTempNameFromKid(name) { // {{{
+		if this._scopeParent && this._tempParentNames[name] {
+			this._scopeParent.releaseTempNameFromKid(name)
+			
+			this._tempParentNames[name] = false
+		}
+		else {
+			++this._tempNameCount
+				
+			this._tempNames[name.substr(5)] = name
+		}
+	} // }}}
 }
 
 class Control {
 	private {
+		_blockMode
+		_config
 		_index		= 0
 		_mode
 		_parent
-		_scope		= false
 		_steps		= []
 	}
-	Control(@parent, @scope, @mode = 0) { // {{{
+	Control(@parent, @blockMode, @config: Object, @mode = 0) { // {{{
 		this._indentation = parent._codeIndentation || parent._indentation
 		this._indent = parent._codeIndent || parent._indent
 		
-		this._steps.push(new Expression(this))
+		this._steps.push(new Expression(this, config))
+	} // }}}
+	acquireTempName(node?, assignment = false, fromChild = false) { // {{{
+		if fromChild {
+			return this._parent.acquireTempName(node, assignment, true)
+		}
+		else if this._index % 2 == 0 {
+			if this._index + 1 >= this._steps.length {
+				this._steps.push(this._blockMode == BlockMode::Block ? new Node(this, this._config) : new Scope(this, this._config, this._blockMode))
+			}
+			
+			return this._steps[this._index + 1].acquireTempName(node, assignment)
+		}
+		else {
+			return this._steps[this._index].acquireTempName(node, assignment)
+		}
 	} // }}}
 	addMode(mode) { // {{{
 		this._steps[this._index].addMode(mode)
@@ -7656,37 +7823,42 @@ class Control {
 		
 		return this
 	} // }}}
-	newBlock() { // {{{
-		return this._steps[this._index].newBlock()
+	newBlock(config) { // {{{
+		return this._steps[this._index].newBlock(config)
 	} // }}}
-	newControl(mode = 0) { // {{{
-		return this._steps[this._index].newControl(mode)
+	newControl(config, mode = 0) { // {{{
+		return this._steps[this._index].newControl(config, mode)
 	} // }}}
-	newExpression(mode = 0) { // {{{
-		return this._steps[this._index].newExpression(mode)
+	newExpression(config, mode = 0) { // {{{
+		return this._steps[this._index].newExpression(config, mode)
 	} // }}}
-	newFunction() { // {{{
-		return this._steps[this._index].newFunction()
+	newFunction(config) { // {{{
+		return this._steps[this._index].newFunction(config)
 	} // }}}
 	newRenamedVar(name) { // {{{
 		return this._parent.newRenamedVar(name)
 	} // }}}
-	newTempName() { // {{{
-		if this._index % 2 == 0 {
+	releaseTempName(name, fromChild = false) { // {{{
+		if fromChild {
+			this._parent.releaseTempName(name, true)
+		}
+		else if this._index % 2 == 0 {
 			if this._index + 1 >= this._steps.length {
-				this._steps.push(this._scope ? new Scope(this) : new Node(this))
+				this._steps.push(this._blockMode == BlockMode::Block ? new Node(this, this._config) : new Scope(this, this._config, this._blockMode))
 			}
 			
-			return this._steps[this._index + 1].newTempName()
+			this._steps[this._index + 1].releaseTempName(name)
 		}
 		else {
-			return this._steps[this._index].newTempName()
+			this._steps[this._index].releaseTempName(name)
 		}
+		
+		return this
 	} // }}}
 	rename(name) { // {{{
 		if this._index % 2 == 0 {
 			if this._index + 1 >= this._steps.length {
-				this._steps.push(this._scope ? new Scope(this) : new Node(this))
+				this._steps.push(this._blockMode == BlockMode::Block ? new Node(this, this._config) : new Scope(this, this._config, this._blockMode))
 			}
 			
 			this._steps[this._index + 1].rename(name)
@@ -7700,13 +7872,13 @@ class Control {
 	step(mode = 0) { // {{{
 		if this._index + 1 >= this._steps.length {
 			if this._steps.length % 2 == 0 {
-				this._steps.push(new Expression(this, mode))
+				this._steps.push(new Expression(this, this._config, mode))
 			}
-			else if this._scope {
-				this._steps.push(new Scope(this))
+			else if this._blockMode == BlockMode::Block {
+				this._steps.push(new Node(this, this._config))
 			}
 			else {
-				this._steps.push(new Node(this))
+				this._steps.push(new Scope(this, this._config, this._blockMode))
 			}
 		}
 		
@@ -7735,7 +7907,7 @@ class Control {
 		
 		if this._index % 2 == 0 {
 			if this._index + 1 >= this._steps.length {
-				this._steps.push(this._scope ? new Scope(this) : new Node(this))
+				this._steps.push(this._blockMode == BlockMode::Block ? new Node(this, this._config) : new Scope(this, this._config, this._blockMode))
 			}
 			
 			if type {
@@ -7804,7 +7976,7 @@ class Control {
 
 class Expression {
 	private {
-		_config				= null
+		_config
 		_code		: Array = []
 		_mode
 		_noVariable			= false
@@ -7815,12 +7987,15 @@ class Expression {
 		_variable			= ''
 		_variables	: Array	= []
 	}
-	Expression(@parent, @mode = 0) { // {{{
+	Expression(@parent, @config, @mode = 0) { // {{{
 		this._indentation = parent._indentation
 		this._indent = parent._indent
 		
 		this._codeIndentation = parent._indentation
 		this._codeIndent = parent._indent
+	} // }}}
+	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
+		return this._parent.acquireTempName(node, assignment, fromChild)
 	} // }}}
 	addMode(mode) { // {{{
 		this._mode |= mode
@@ -7864,8 +8039,6 @@ class Expression {
 		return this
 	} // }}}
 	compile(data, config, mode = 0, info = null) { // {{{
-		this._config = config if !this._config
-		
 		if data is string {
 			this._code.push(data)
 		}
@@ -7920,25 +8093,25 @@ class Expression {
 		
 		return this
 	} // }}}
-	newControl(mode = 0) { // {{{
-		let control = new Control(this, false, mode)
+	newControl(config, mode = 0) { // {{{
+		let control = new Control(this, config.variables == 'es6' ? BlockMode::Scope : BlockMode::Block, config, mode)
 		
 		this._code.push(control)
 		
 		return control
 	} // }}}
-	newExpression(mode = 0) { // {{{
+	newExpression(config, mode = 0) { // {{{
 		return this
 	} // }}}
-	newFunction() { // {{{
-		let code = new FunctionBlock(this)
+	newFunction(config) { // {{{
+		let code = new FunctionBlock(this, config)
 		
 		this._code.push(code)
 		
 		return code
 	} // }}}
-	newObject() { // {{{
-		let code = new ObjectBlock(this)
+	newObject(config) { // {{{
+		let code = new ObjectBlock(this, config)
 		
 		this._code.push(code)
 		
@@ -7946,13 +8119,6 @@ class Expression {
 	} // }}}
 	newRenamedVar(name) { // {{{
 		return this._parent.newRenamedVar(name)
-	} // }}}
-	newTempName(variable = true) { // {{{
-		let name = this._parent.newTempName()
-		
-		this._variables.pushUniq(name) if variable
-		
-		return name
 	} // }}}
 	noVariable() { // {{{
 		this._noVariable = true
@@ -7982,6 +8148,11 @@ class Expression {
 		return this
 	} // }}}
 	reference(@reference) => this
+	releaseTempName(name, fromChild = true) { // {{{
+		this._parent.releaseTempName(name, fromChild)
+		
+		return this
+	} // }}}
 	removeMode(mode) { // {{{
 		this._mode ^= mode
 		
@@ -8077,6 +8248,14 @@ class Expression {
 		
 		return this
 	} // }}}
+	useTempVariable(name, assignment) { // {{{
+		if assignment && this._variable.length == 0 {
+			this._variable = name
+		}
+		else {
+			this._variables.pushUniq(name)
+		}
+	} // }}}
 	write(data) { // {{{
 		if data is object {
 			this.code('{').indent()
@@ -8109,8 +8288,8 @@ class FunctionBlock {
 		_parent
 		_unprepared			= true
 	}
-	FunctionBlock(@parent) { // {{{
-		this._ctrl = new Control(parent, true, Mode.PrepareNone)
+	FunctionBlock(@parent, config) { // {{{
+		this._ctrl = new Control(parent, BlockMode::Function, config, Mode.PrepareNone)
 	} // }}}
 	listNewVariables() { // {{{
 		return []
@@ -8130,10 +8309,10 @@ class FunctionBlock {
 class ObjectBlock {
 	private {
 		_code		: Array = []
-		_config				= null
+		_config
 		_parent
 	}
-	ObjectBlock(@parent) { // {{{
+	ObjectBlock(@parent, @config) { // {{{
 		this._closingIndent = parent._codeIndent
 		
 		this._indentation = parent._codeIndentation + 1
@@ -8143,8 +8322,6 @@ class ObjectBlock {
 		return this._parent.block(reference)
 	} // }}}
 	compile(data, config, mode = 0, info = null) { // {{{
-		this._config = config if !this._config
-		
 		if data is string {
 			this._code.push(data)
 		}
@@ -8172,8 +8349,8 @@ class ObjectBlock {
 	module() { // {{{
 		return this._parent.module()
 	} // }}}
-	newExpression(mode = 0) { // {{{
-		let code = new Expression(this, mode)
+	newExpression(config, mode = 0) { // {{{
+		let code = new Expression(this, config, mode)
 		
 		this._code.push(code)
 		
@@ -8202,7 +8379,7 @@ class ObjectBlock {
 class Module {
 	private {
 		_binary		: Boolean	= false
-		_body		: Block 	= new Scope(this)
+		_body		: Block
 		_compiler	: Compiler
 		_dynamicRequirements	= []
 		_exportSource			= []
@@ -8239,6 +8416,8 @@ class Module {
 		return this
 	} // }}}
 	do(data, config) { // {{{
+		this._body = new Scope(this, config, BlockMode::Root)
+		
 		for attr in data.attributes {
 			if attr.declaration.kind == Kind::Identifier &&	attr.declaration.name == 'bin' {
 				this._binary = true
@@ -8365,7 +8544,7 @@ class Module {
 		let requirement = {
 			name: name
 			class: kind == VariableKind::Class
-			parameter: this._body.newTempName()
+			parameter: this._body.acquireTempName()
 			requireFirst: requireFirst
 		}
 		

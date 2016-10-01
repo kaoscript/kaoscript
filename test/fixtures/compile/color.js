@@ -1389,16 +1389,16 @@ module.exports = function() {
 					$aliases[alias] = space.name;
 				}
 				if(Type.isValue($parsers[space.name])) {
-					let __ks_1 = space.alias;
-					for(let __ks_2 = 0, __ks_3 = __ks_1.length, alias; __ks_2 < __ks_3; ++__ks_2) {
-						alias = __ks_1[__ks_2];
+					__ks_0 = space.alias;
+					for(let __ks_1 = 0, __ks_2 = __ks_0.length, alias; __ks_1 < __ks_2; ++__ks_1) {
+						alias = __ks_0[__ks_1];
 						$parsers[alias] = $parsers[space.name];
 					}
 				}
 				if(Type.isValue($formatters[space.name])) {
-					let __ks_1 = space.alias;
-					for(let __ks_2 = 0, __ks_3 = __ks_1.length, alias; __ks_2 < __ks_3; ++__ks_2) {
-						alias = __ks_1[__ks_2];
+					__ks_0 = space.alias;
+					for(let __ks_1 = 0, __ks_2 = __ks_0.length, alias; __ks_1 < __ks_2; ++__ks_1) {
+						alias = __ks_0[__ks_1];
 						$formatters[alias] = $formatters[space.name];
 					}
 				}

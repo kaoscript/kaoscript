@@ -239,7 +239,7 @@ module.exports = function() {
 			++i;
 			while(i < l) {
 				if(Type.isArray(args[i])) {
-					var __ks_0 = args[i];
+					__ks_0 = args[i];
 					for(var value in __ks_0) {
 						source.pushUniq(value);
 					}
@@ -343,7 +343,7 @@ module.exports = function() {
 			++i;
 			while(i < l) {
 				if(Type.isObject(args[i])) {
-					var __ks_0 = args[i];
+					__ks_0 = args[i];
 					for(var key in __ks_0) {
 						var value = __ks_0[key];
 						$merge.merge(source, key, value);
@@ -366,6 +366,12 @@ module.exports = function() {
 			]
 		}
 	});
+	var BlockMode = {
+		Block: 0,
+		Function: 1,
+		Root: 2,
+		Scope: 3
+	};
 	var MemberAccess = {
 		Private: 1,
 		Protected: 2,
@@ -605,7 +611,7 @@ module.exports = function() {
 				var existingCount = 0;
 				var nonexisting = {};
 				var nonexistingCount = 0;
-				var __ks_1 = data.elements;
+				__ks_1 = data.elements;
 				for(var __ks_2 = 0, __ks_3 = __ks_1.length, element; __ks_2 < __ks_3; ++__ks_2) {
 					element = __ks_1[__ks_2];
 					if((element.kind === Kind.BindingElement) && !element.name.computed) {
@@ -628,13 +634,13 @@ module.exports = function() {
 					node.code("[");
 					var element;
 					var name;
-					for(var i = 0, __ks_2 = data.elements.length; i < __ks_2; ++i) {
+					for(var i = 0, __ks_1 = data.elements.length; i < __ks_1; ++i) {
 						if(i) {
 							node.code(", ");
 						}
 						element = data.elements[i];
 						if((element.kind === Kind.BindingElement) && !element.name.computed && existing[element.name.name]) {
-							name = node.newTempName(false);
+							name = node.acquireTempName();
 							node.compile(element, config, mode | Mode.Key, {
 								kind: Kind.ArrayBinding,
 								name: name
@@ -648,12 +654,13 @@ module.exports = function() {
 					node.code("]");
 					var {block, reference} = node.block();
 					for(name in variables) {
-						block.newExpression().code(variables[name], " = ", name);
+						block.newExpression(config).code(variables[name], " = ", name);
+						node.releaseTempName(name);
 					}
 				}
 				else if(existingCount) {
 					node.code("[");
-					for(var i = 0, __ks_2 = data.elements.length; i < __ks_2; ++i) {
+					for(var i = 0, __ks_1 = data.elements.length; i < __ks_1; ++i) {
 						if(i) {
 							node.code(", ");
 						}
@@ -667,7 +674,7 @@ module.exports = function() {
 						mode |= Mode.Declaration;
 					}
 					node.code("[");
-					for(var i = 0, __ks_2 = data.elements.length; i < __ks_2; ++i) {
+					for(var i = 0, __ks_1 = data.elements.length; i < __ks_1; ++i) {
 						if(i) {
 							node.code(", ");
 						}
@@ -681,35 +688,35 @@ module.exports = function() {
 			node.module().flag("Helper");
 			if(data.loop.kind === Kind.ForInStatement) {
 				node.code($runtime.helper(config), ".mapArray(").compile(data.loop.value, config).code(", ");
-				var ctrl = node.newControl().addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config);
+				var ctrl = node.newControl(config).addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config);
 				if(data.loop.index) {
 					ctrl.code(", ").parameter(data.loop.index, config);
 				}
-				ctrl.code(") =>").step().newExpression().code("return ").compile(data.body, config);
+				ctrl.code(") =>").step().newExpression(config).code("return ").compile(data.body, config);
 				if(data.loop.when) {
 					node.code(", ");
-					ctrl = node.newControl().addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config);
+					ctrl = node.newControl(config).addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config);
 					if(data.loop.index) {
 						ctrl.code(", ").parameter(data.loop.index, config);
 					}
-					ctrl.code(") =>").step().newExpression().code("return ").compile(data.loop.when, config);
+					ctrl.code(") =>").step().newExpression(config).code("return ").compile(data.loop.when, config);
 				}
 				node.code(")");
 			}
 			else if(data.loop.kind === Kind.ForOfStatement) {
 				node.code($runtime.helper(config), ".mapObject(").compile(data.loop.value, config).code(", ");
-				var ctrl = node.newControl().addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config);
+				var ctrl = node.newControl(config).addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config);
 				if(data.loop.index) {
 					ctrl.code(", ").parameter(data.loop.index, config);
 				}
-				ctrl.code(") =>").step().newExpression().code("return ").compile(data.body, config);
+				ctrl.code(") =>").step().newExpression(config).code("return ").compile(data.body, config);
 				if(data.loop.when) {
 					node.code(", ");
-					ctrl = node.newControl().addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config);
+					ctrl = node.newControl(config).addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config);
 					if(data.loop.index) {
 						ctrl.code(", ").parameter(data.loop.index, config);
 					}
-					ctrl.code(") =>").step().newExpression().code("return ").compile(data.loop.when, config);
+					ctrl.code(") =>").step().newExpression(config).code("return ").compile(data.loop.when, config);
 				}
 				node.code(")");
 			}
@@ -721,10 +728,10 @@ module.exports = function() {
 				else {
 					node.code(", 1");
 				}
-				node.code(", ").newControl().addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config).code(") =>").step().newExpression().code("return ").compile(data.body, config);
+				node.code(", ").newControl(config).addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config).code(") =>").step().newExpression(config).code("return ").compile(data.body, config);
 				if(data.loop.when) {
 					node.code(", ");
-					node.newControl().addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config).code(") =>").step().newExpression().code("return ").compile(data.loop.when, config);
+					node.newControl(config).addMode(Mode.NoIndent).code("(").parameter(data.loop.variable, config).code(") =>").step().newExpression(config).code("return ").compile(data.loop.when, config);
 				}
 				node.code(")");
 			}
@@ -755,16 +762,16 @@ module.exports = function() {
 			node.code(", ", !!data.from, ", ", !!data.to, ")");
 		}
 		else if(__ks_0 === Kind.AwaitExpression) {
-			var ctrl = node.newExpression().newControl().addMode(Mode.NoIndent);
+			var ctrl = node.newExpression(config).newControl(config).addMode(Mode.NoIndent);
 			ctrl.compile(data.operation, config, Mode.Await);
 			ctrl.code("(__ks_e");
-			var __ks_1 = data.variables;
+			__ks_1 = data.variables;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length; __ks_2 < __ks_3; ++__ks_2) {
 				variable = __ks_1[__ks_2];
 				ctrl.code(", ").parameter(variable.name, config, variable.type);
 			}
 			ctrl.code(") =>").step();
-			ctrl.newControl().code("if(__ks_e)").step().newExpression().code("return __ks_cb(__ks_e)");
+			ctrl.newControl(config).code("if(__ks_e)").step().newExpression(config).code("return __ks_cb(__ks_e)");
 			return {
 				node: ctrl,
 				mode: Mode.Async,
@@ -777,7 +784,7 @@ module.exports = function() {
 			};
 		}
 		else if(__ks_0 === Kind.BinaryOperator) {
-			node = node.newExpression();
+			node = node.newExpression(config);
 			if(data.operator.kind === BinaryOperator.Assignment) {
 				$operator.assignment(node, data, config, mode);
 			}
@@ -820,7 +827,7 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.Block) {
-			node = node.newBlock();
+			node = node.newBlock(config);
 			var stack = [];
 			var r;
 			for(var i = 0, __ks_1 = data.statements.length; i < __ks_1; ++i) {
@@ -836,18 +843,18 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.BreakStatement) {
-			node.newExpression().code("break");
+			node.newExpression(config).code("break");
 		}
 		else if(__ks_0 === Kind.CallExpression) {
 			var list = true;
-			var __ks_1 = data.arguments;
+			__ks_1 = data.arguments;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, argument; list && __ks_2 < __ks_3; ++__ks_2) {
 				argument = __ks_1[__ks_2];
 				if((argument.kind === Kind.UnaryExpression) && (argument.operator.kind === UnaryOperator.Spread)) {
 					list = false;
 				}
 			}
-			node = node.newExpression().noVariable();
+			node = node.newExpression(config).noVariable();
 			var callee;
 			if((data.callee.kind === Kind.MemberExpression) && !data.callee.computed && (data.callee.object.kind === Kind.MemberExpression) && !data.callee.object.computed && (data.callee.property.kind === Kind.Identifier) && (data.callee.property.name === "apply") && (callee = $final.callee(data.callee.object, node))) {
 				if(callee.variable) {
@@ -859,9 +866,9 @@ module.exports = function() {
 						else if(data.arguments.length === 2) {
 							if(data.arguments[1].kind === Kind.ArrayExpression) {
 								node.code("[").compile(data.arguments[0], config);
-								var __ks_2 = data.arguments[1].values;
-								for(var __ks_3 = 0, __ks_4 = __ks_2.length, value; __ks_3 < __ks_4; ++__ks_3) {
-									value = __ks_2[__ks_3];
+								__ks_1 = data.arguments[1].values;
+								for(var __ks_2 = 0, __ks_3 = __ks_1.length, value; __ks_2 < __ks_3; ++__ks_2) {
+									value = __ks_1[__ks_2];
 									node.code(", ").compile(value, config);
 								}
 								node.code("]");
@@ -885,7 +892,7 @@ module.exports = function() {
 				if(callee.variable) {
 					if(callee.instance) {
 						node.code(callee.variable.accessPath || "", callee.variable.final.name, "._im_" + data.callee.property.name + "(").compile(data.callee.object, config);
-						for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+						for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 							node.code(", ").compile(data.arguments[i], config);
 						}
 						if(mode & Mode.Await) {
@@ -897,7 +904,7 @@ module.exports = function() {
 					}
 					else {
 						node.code(callee.variable.accessPath || "", callee.variable.final.name + "._cm_" + data.callee.property.name + "(");
-						for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+						for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 							if(i) {
 								node.code(", ");
 							}
@@ -929,7 +936,7 @@ module.exports = function() {
 						}
 					}
 					else {
-						name = node.newTempName();
+						name = node.acquireTempName();
 						var tof;
 						if((tof = $runtime.typeof(callee.variables[0].name, config))) {
 							node.code(tof, "(", name, " = ").compile(data.callee.object, config).code(")");
@@ -940,17 +947,20 @@ module.exports = function() {
 					}
 					node.code(" ? ");
 					node.code(callee.variables[0].accessPath || "", callee.variables[0].final.name + "._im_" + data.callee.property.name + "(").compile(name ? name : data.callee.object, config);
-					for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+					for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 						node.code(", ").compile(data.arguments[i], config);
 					}
 					node.code(") : ");
 					node.code(callee.variables[1].accessPath || "", callee.variables[1].final.name + "._im_" + data.callee.property.name + "(").compile(name ? name : data.callee.object, config);
-					for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+					for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 						node.code(", ").compile(data.arguments[i], config);
 					}
 					node.code(")");
 					if(mode & Mode.Operand) {
 						node.code(")");
+					}
+					if(data.callee.object.kind !== Kind.Identifier) {
+						node.releaseTempName(name);
 					}
 				}
 				else {
@@ -975,7 +985,7 @@ module.exports = function() {
 								}
 								var name = $expression.value(node, data, config);
 								node.code(" ? ").compile(name, config).code("(");
-								for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+								for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 									if(i) {
 										node.code(", ");
 									}
@@ -985,7 +995,7 @@ module.exports = function() {
 							}
 							else {
 								node.compile(data.callee, config).code("(");
-								for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+								for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 									if(i) {
 										node.code(", ");
 									}
@@ -1004,7 +1014,7 @@ module.exports = function() {
 					}
 					else if(data.scope.kind === ScopeModifier.Null) {
 						node.compile(data.callee, config).code(".call(null");
-						for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+						for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 							node.code(", ").compile(data.arguments[i], config);
 						}
 						if(mode & Mode.Await) {
@@ -1018,7 +1028,7 @@ module.exports = function() {
 					}
 					else {
 						node.compile(data.callee, config).code(".call(").compile(data.scope.value, config);
-						for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+						for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 							node.code(", ").compile(data.arguments[i], config);
 						}
 						if(mode & Mode.Await) {
@@ -1084,7 +1094,7 @@ module.exports = function() {
 						classMethods: {}
 					};
 					$final.class(node, data, config, mode, variable);
-					node.newExpression().code("var " + variable.final.name + " = {}");
+					node.newExpression(config).code("var " + variable.final.name + " = {}");
 				}
 			}
 			else {
@@ -1097,23 +1107,23 @@ module.exports = function() {
 		else if(__ks_0 === Kind.CommentLine) {
 		}
 		else if(__ks_0 === Kind.ContinueStatement) {
-			node.newExpression().code("continue");
+			node.newExpression(config).code("continue");
 		}
 		else if(__ks_0 === Kind.CurryExpression) {
 			var list = true;
-			var __ks_1 = data.arguments;
+			__ks_1 = data.arguments;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, argument; list && __ks_2 < __ks_3; ++__ks_2) {
 				argument = __ks_1[__ks_2];
 				if((argument.kind === Kind.UnaryExpression) && (argument.operator.kind === UnaryOperator.Spread)) {
 					list = false;
 				}
 			}
-			node = node.newExpression();
+			node = node.newExpression(config);
 			if(list) {
 				node.module().flag("Helper");
 				if(data.scope.kind === ScopeModifier.Null) {
 					node.code($runtime.helper(config), ".vcurry(").compile(data.callee, config).code(", null");
-					for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+					for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 						node.code(", ").compile(data.arguments[i], config);
 					}
 					node.code(")");
@@ -1127,7 +1137,7 @@ module.exports = function() {
 					else {
 						node.code("null");
 					}
-					for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+					for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 						node.code(", ").compile(data.arguments[i], config);
 					}
 					node.code(")");
@@ -1135,7 +1145,7 @@ module.exports = function() {
 				else {
 					node.code($runtime.helper(config), ".vcurry(").compile(data.callee, config).code(", ");
 					node.compile(data.scope.value, config);
-					for(var i = 0, __ks_2 = data.arguments.length; i < __ks_2; ++i) {
+					for(var i = 0, __ks_1 = data.arguments.length; i < __ks_1; ++i) {
 						node.code(", ").compile(data.arguments[i], config);
 					}
 					node.code(")");
@@ -1166,15 +1176,15 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.DoUntilStatement) {
-			node.newControl().code("do").step().compile(data.body, config).step().code("while(!(").compile(data.condition, config).code("))");
+			node.newControl(config).code("do").step().compile(data.body, config).step().code("while(!(").compile(data.condition, config).code("))");
 		}
 		else if(__ks_0 === Kind.DoWhileStatement) {
-			node.newControl().code("do").step().compile(data.body, config).step().code("while(").compile(data.condition, config).code(")");
+			node.newControl(config).code("do").step().compile(data.body, config).step().code("while(").compile(data.condition, config).code(")");
 		}
 		else if(__ks_0 === Kind.EnumDeclaration) {
 			variable = $variable.define(node, data.name, VariableKind.Enum, data.type);
 			if(variable.new) {
-				var statement = node.newExpression().code($variable.scope(config)).compile(variable.name, config, Mode.Key).code(" = {").indent();
+				var statement = node.newExpression(config).code($variable.scope(config)).compile(variable.name, config, Mode.Key).code(" = {").indent();
 				for(var i = 0, __ks_1 = data.members.length; i < __ks_1; ++i) {
 					if(i) {
 						statement.code(",");
@@ -1197,12 +1207,12 @@ module.exports = function() {
 				node.newline().code(data.name.name, ": ", $variable.value(variable, data));
 			}
 			else {
-				node.newExpression().code(variable.name.name || variable.name, ".", data.name.name, " = ", $variable.value(variable, data));
+				node.newExpression(config).code(variable.name.name || variable.name, ".", data.name.name, " = ", $variable.value(variable, data));
 			}
 		}
 		else if(__ks_0 === Kind.ExportDeclaration) {
 			var module = node.module();
-			var __ks_1 = data.declarations;
+			__ks_1 = data.declarations;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, declaration; __ks_2 < __ks_3; ++__ks_2) {
 				declaration = __ks_1[__ks_2];
 				var __ks_4 = declaration.kind;
@@ -1241,14 +1251,14 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.ExternDeclaration) {
-			var __ks_1 = data.declarations;
+			__ks_1 = data.declarations;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, declaration; __ks_2 < __ks_3; ++__ks_2) {
 				declaration = __ks_1[__ks_2];
-				var __ks_4 = declaration.kind;
-				if(__ks_4 === Kind.ClassDeclaration) {
+				var __ks_5 = declaration.kind;
+				if(__ks_5 === Kind.ClassDeclaration) {
 					variable = $variable.define(node, declaration.name, VariableKind.Class, declaration);
 					var continuous = true;
-					for(var i = 0, __ks_5 = declaration.modifiers.length; continuous && i < __ks_5; ++i) {
+					for(var i = 0, __ks_6 = declaration.modifiers.length; continuous && i < __ks_6; ++i) {
 						if(declaration.modifiers[i].kind === ClassModifier.Final) {
 							continuous = false;
 						}
@@ -1260,13 +1270,13 @@ module.exports = function() {
 							instanceMethods: {},
 							classMethods: {}
 						};
-						node.newExpression().code("var " + variable.final.name + " = {}");
+						node.newExpression(config).code("var " + variable.final.name + " = {}");
 					}
-					for(var i = 0, __ks_5 = declaration.members.length; i < __ks_5; ++i) {
+					for(var i = 0, __ks_6 = declaration.members.length; i < __ks_6; ++i) {
 						$extern.classMember(declaration.members[i], variable, node);
 					}
 				}
-				else if(__ks_4 === Kind.VariableDeclarator) {
+				else if(__ks_5 === Kind.VariableDeclarator) {
 					variable = $variable.define(node, declaration.name, $variable.kind(declaration.type), declaration.type);
 				}
 				else {
@@ -1278,15 +1288,15 @@ module.exports = function() {
 		else if(__ks_0 === Kind.ExternOrRequireDeclaration) {
 			var module = node.module();
 			module.flag("Type");
-			var __ks_1 = data.declarations;
+			__ks_1 = data.declarations;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, declaration; __ks_2 < __ks_3; ++__ks_2) {
 				declaration = __ks_1[__ks_2];
-				var __ks_4 = declaration.kind;
-				if(__ks_4 === Kind.ClassDeclaration) {
+				var __ks_6 = declaration.kind;
+				if(__ks_6 === Kind.ClassDeclaration) {
 					variable = $variable.define(node, declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
 					var continuous = true;
-					for(var i = 0, __ks_5 = declaration.modifiers.length; continuous && i < __ks_5; ++i) {
+					for(var i = 0, __ks_7 = declaration.modifiers.length; continuous && i < __ks_7; ++i) {
 						if(declaration.modifiers[i].kind === ClassModifier.Final) {
 							continuous = false;
 						}
@@ -1299,12 +1309,12 @@ module.exports = function() {
 							classMethods: {}
 						};
 					}
-					for(var i = 0, __ks_5 = declaration.members.length; i < __ks_5; ++i) {
+					for(var i = 0, __ks_7 = declaration.members.length; i < __ks_7; ++i) {
 						$extern.classMember(declaration.members[i], variable, node);
 					}
 					module.require(declaration.name.name, VariableKind.Class, false);
 				}
-				else if(__ks_4 === Kind.VariableDeclarator) {
+				else if(__ks_6 === Kind.VariableDeclarator) {
 					var type;
 					variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
@@ -1313,7 +1323,7 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.ForFromStatement) {
-			var ctrl = node.newControl();
+			var ctrl = node.newControl(config);
 			ctrl.code("for(");
 			if(data.declaration || !node.hasVariable(data.variable.name)) {
 				ctrl.code($variable.scope(config));
@@ -1322,27 +1332,27 @@ module.exports = function() {
 			var bound;
 			if(data.til) {
 				if(data.til.kind !== Kind.NumericExpression) {
-					bound = ctrl.newTempName();
+					bound = ctrl.acquireTempName();
 					ctrl.code(", ", bound, " = ").compile(data.til, config);
 				}
 			}
 			else {
 				if(data.to.kind !== Kind.NumericExpression) {
-					bound = ctrl.newTempName();
+					bound = ctrl.acquireTempName();
 					ctrl.code(", ", bound, " = ").compile(data.to, config);
 				}
 			}
 			var by;
 			if(data.by && !((data.by.kind === Kind.NumericExpression) || (data.by.kind === Kind.Identifier))) {
-				by = ctrl.newTempName();
+				by = ctrl.acquireTempName();
 				ctrl.code(", ", by, " = ").compile(data.by, config);
 			}
 			ctrl.code("; ");
 			if(data.until) {
-				ctrl.code("!(").compile(data.until, config).code(") && ");
+				ctrl.code("!(").compile(data.until, config, Mode.BooleanExpression).code(") && ");
 			}
 			else if(data.while) {
-				ctrl.compile(data.while, config).code(" && ");
+				ctrl.compile(data.while, config, Mode.BooleanExpression).code(" && ");
 			}
 			ctrl.code(data.variable.name);
 			var desc = (data.by && (data.by.kind === Kind.NumericExpression) && (data.by.value < 0)) || ((data.from.kind === Kind.NumericExpression) && ((data.to && (data.to.kind === Kind.NumericExpression) && (data.from.value > data.to.value)) || (data.til && (data.til.kind === Kind.NumericExpression) && (data.from.value > data.til.value))));
@@ -1406,10 +1416,16 @@ module.exports = function() {
 			ctrl.code(")").step();
 			$variable.define(ctrl, data.variable, VariableKind.Variable);
 			if(data.when) {
-				ctrl.newControl().code("if(").compile(data.when, config).code(")").step().compile(data.body, config);
+				ctrl.newControl(config).code("if(").compile(data.when, config, Mode.BooleanExpression).code(")").step().compile(data.body, config);
 			}
 			else {
 				ctrl.compile(data.body, config);
+			}
+			if(bound) {
+				ctrl.releaseTempName(bound);
+			}
+			if(by) {
+				ctrl.releaseTempName(by);
 			}
 		}
 		else if(__ks_0 === Kind.ForInStatement) {
@@ -1421,21 +1437,22 @@ module.exports = function() {
 				value = data.value.name;
 			}
 			else {
-				value = node.newTempName();
-				node.newExpression().code($variable.scope(config), value, " = ").compile(data.value, config);
+				var exp = node.newExpression(config);
+				value = node.acquireTempName(exp, true);
+				exp.code(value, " = ").compile(data.value, config);
 			}
 			if(data.desc) {
 				if(data.index && !data.declaration && node.hasVariable(data.index.name)) {
 					index = data.index.name;
-					node.newExpression().code(index, " = ", value, ".length - 1");
-					ctrl = node.newControl().code("for(");
+					node.newExpression(config).code(index, " = ", value, ".length - 1");
+					ctrl = node.newControl(config).code("for(");
 					if(!node.hasVariable(data.variable.name)) {
 						ctrl.code($variable.scope(config), data.variable.name);
 					}
 				}
 				else {
-					ctrl = node.newControl();
-					index = data.index ? data.index.name : ctrl.newTempName();
+					ctrl = node.newControl(config);
+					index = data.index ? data.index.name : ctrl.acquireTempName();
 					ctrl.code("for(", $variable.scope(config), index, " = ", value, ".length - 1");
 					if(!node.hasVariable(data.variable.name)) {
 						ctrl.code(", ", data.variable.name);
@@ -1445,15 +1462,15 @@ module.exports = function() {
 			else {
 				if(data.index && !data.declaration && node.hasVariable(data.index.name)) {
 					index = data.index.name;
-					node.newExpression().code(index, " = 0");
-					ctrl = node.newControl().code("for(", $variable.scope(config));
+					node.newExpression(config).code(index, " = 0");
+					ctrl = node.newControl(config).code("for(", $variable.scope(config));
 				}
 				else {
-					ctrl = node.newControl();
-					index = data.index ? data.index.name : ctrl.newTempName();
+					ctrl = node.newControl(config);
+					index = data.index ? data.index.name : ctrl.acquireTempName();
 					ctrl.code("for(", $variable.scope(config), index, " = 0, ");
 				}
-				bound = ctrl.newTempName();
+				bound = ctrl.acquireTempName();
 				ctrl.code(bound, " = ", value, ".length");
 				if(data.declaration || !node.hasVariable(data.variable.name)) {
 					ctrl.code(", ", data.variable.name);
@@ -1461,10 +1478,10 @@ module.exports = function() {
 			}
 			ctrl.code("; ");
 			if(data.until) {
-				ctrl.code("!(").compile(data.until, config).code(") && ");
+				ctrl.code("!(").compile(data.until, config, Mode.BooleanExpression).code(") && ");
 			}
 			else if(data.while) {
-				ctrl.compile(data.while, config).code(" && ");
+				ctrl.compile(data.while, config, Mode.BooleanExpression).code(" && ");
 			}
 			if(data.desc) {
 				ctrl.code(index, " >= 0; --", index, ")").step();
@@ -1475,13 +1492,20 @@ module.exports = function() {
 			if(data.index) {
 				$variable.define(ctrl, data.index, VariableKind.Variable);
 			}
-			ctrl.newExpression().code(data.variable.name, " = ", value, "[", index, "]");
+			ctrl.newExpression(config).code(data.variable.name, " = ", value, "[", index, "]");
 			$variable.define(ctrl, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
 			if(data.when) {
-				ctrl.newControl().code("if(").compile(data.when, config).code(")").step().compile(data.body, config);
+				ctrl.newControl(config).code("if(").compile(data.when, config, Mode.BooleanExpression).code(")").step().compile(data.body, config);
 			}
 			else {
 				ctrl.compile(data.body, config);
+			}
+			if(data.value.kind !== Kind.Identifier) {
+				node.releaseTempName(value);
+			}
+			ctrl._steps[1].releaseTempName(index);
+			if(!data.desc) {
+				ctrl._steps[1].releaseTempName(bound);
 			}
 		}
 		else if(__ks_0 === Kind.ForOfStatement) {
@@ -1490,10 +1514,11 @@ module.exports = function() {
 				value = data.value.name;
 			}
 			else {
-				value = node.newTempName();
-				node.newExpression().code($variable.scope(config), value, " = ").compile(data.value, config);
+				var exp = node.newExpression(config);
+				value = node.acquireTempName(exp, true);
+				exp.code(value, " = ").compile(data.value, config);
 			}
-			var ctrl = node.newControl();
+			var ctrl = node.newControl(config);
 			ctrl.code("for(");
 			if(data.declaration || !node.hasVariable(data.variable.name)) {
 				ctrl.code($variable.scope(config));
@@ -1509,30 +1534,33 @@ module.exports = function() {
 				$variable.define(ctrl, data.index, VariableKind.Variable);
 			}
 			if(data.until) {
-				ctrl.newControl().code("if(").compile(data.until, config).code(")").step().newExpression().code("break");
+				ctrl.newControl(config).code("if(").compile(data.until, config, Mode.BooleanExpression).code(")").step().newExpression(config).code("break");
 			}
 			else if(data.while) {
-				ctrl.newControl().code("if(!(").compile(data.while, config).code("))").step().newExpression().code("break");
+				ctrl.newControl(config).code("if(!(").compile(data.while, config, Mode.BooleanExpression).code("))").step().newExpression(config).code("break");
 			}
 			if(data.when) {
-				ctrl.newControl().code("if(").compile(data.when, config).code(")").step().compile(data.body, config);
+				ctrl.newControl(config).code("if(").compile(data.when, config, Mode.BooleanExpression).code(")").step().compile(data.body, config);
 			}
 			else {
 				ctrl.compile(data.body, config);
 			}
+			if(data.value.kind !== Kind.Identifier) {
+				node.releaseTempName(value);
+			}
 		}
 		else if(__ks_0 === Kind.ForRangeStatement) {
-			var ctrl = node.newControl();
+			var ctrl = node.newControl(config);
 			ctrl.code("for(");
 			if(data.declaration || !node.hasVariable(data.variable.name)) {
 				ctrl.code($variable.scope(config));
 			}
 			ctrl.code(data.variable.name, " = ").compile(data.from, config).code("; ");
 			if(data.until) {
-				ctrl.code("!(").compile(data.until, config).code(") && ");
+				ctrl.code("!(").compile(data.until, config, Mode.BooleanExpression).code(") && ");
 			}
 			else if(data.while) {
-				ctrl.compile(data.while, config).code(" && ");
+				ctrl.compile(data.while, config, Mode.BooleanExpression).code(" && ");
 			}
 			ctrl.code(data.variable.name, " <= ");
 			if(data.to.kind === Kind.NumericExpression) {
@@ -1551,7 +1579,7 @@ module.exports = function() {
 			$variable.define(ctrl, data.variable.name, VariableKind.Variable);
 			ctrl.code(")").step();
 			if(data.when) {
-				ctrl.newControl().code("if(").compile(data.when, config).code(")").step().compile(data.body, config);
+				ctrl.newControl(config).code("if(").compile(data.when, config, Mode.BooleanExpression).code(")").step().compile(data.body, config);
 			}
 			else {
 				ctrl.compile(data.body, config);
@@ -1559,14 +1587,14 @@ module.exports = function() {
 		}
 		else if(__ks_0 === Kind.FunctionDeclaration) {
 			variable = $variable.define(node, data.name, VariableKind.Function, data.type);
-			var __ks_1 = data.modifiers;
+			__ks_1 = data.modifiers;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, modifier; __ks_2 < __ks_3; ++__ks_2) {
 				modifier = __ks_1[__ks_2];
 				if(modifier.kind === FunctionModifier.Async) {
 					variable.async = true;
 				}
 			}
-			node.newFunction().operation(function(ctrl) {
+			node.newFunction(config).operation(function(ctrl) {
 				if(ctrl === undefined || ctrl === null) {
 					throw new Error("Missing parameter 'ctrl'");
 				}
@@ -1585,12 +1613,12 @@ module.exports = function() {
 					ctrl.compile(data.body, config);
 				}
 				else {
-					ctrl.newExpression().code("return ").compile(data.body, config);
+					ctrl.newExpression(config).code("return ").compile(data.body, config);
 				}
 			});
 		}
 		else if(__ks_0 === Kind.FunctionExpression) {
-			node.newFunction().operation(function(ctrl) {
+			node.newFunction(config).operation(function(ctrl) {
 				if(ctrl === undefined || ctrl === null) {
 					throw new Error("Missing parameter 'ctrl'");
 				}
@@ -1614,7 +1642,7 @@ module.exports = function() {
 					ctrl.compile(data.body, config);
 				}
 				else {
-					ctrl.newExpression().code("return ").compile(data.body, config);
+					ctrl.newExpression(config).code("return ").compile(data.body, config);
 				}
 			});
 		}
@@ -1629,20 +1657,20 @@ module.exports = function() {
 		}
 		else if(__ks_0 === Kind.IfExpression) {
 			if(data.else) {
-				node.newExpression().compile(data.condition, config, Mode.BooleanExpression).code(" ? ").compile(data.then, config).code(" : ").compile(data.else, config);
+				node.newExpression(config).compile(data.condition, config, Mode.BooleanExpression).code(" ? ").compile(data.then, config).code(" : ").compile(data.else, config);
 			}
 			else if(mode & Mode.Assignment) {
-				node.newExpression().compile(data.condition, config, Mode.BooleanExpression).code(" ? ").compile(data.then, config).code(" : undefined");
+				node.newExpression(config).compile(data.condition, config, Mode.BooleanExpression).code(" ? ").compile(data.then, config).code(" : undefined");
 			}
 			else {
-				node.newControl(Mode.PrepareAll).code("if(").compile(data.condition, config, Mode.BooleanExpression).code(")").step().compile(data.then, config);
+				node.newControl(config, Mode.PrepareAll).code("if(").compile(data.condition, config, Mode.BooleanExpression).code(")").step().compile(data.then, config);
 			}
 		}
 		else if(__ks_0 === Kind.IfStatement) {
-			var ctrl = node.newControl();
+			var ctrl = node.newControl(config);
 			ctrl.code("if(").compile(data.condition, config, Mode.BooleanExpression).code(")").step().compile(data.then, config);
 			if(data.elseifs) {
-				var __ks_1 = data.elseifs;
+				__ks_1 = data.elseifs;
 				for(var __ks_2 = 0, __ks_3 = __ks_1.length, elseif; __ks_2 < __ks_3; ++__ks_2) {
 					elseif = __ks_1[__ks_2];
 					ctrl.step().code("else if(").compile(elseif.condition, config, Mode.BooleanExpression).code(")").step().compile(elseif.body, config);
@@ -1662,7 +1690,7 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.ImportDeclaration) {
-			var __ks_1 = data.declarations;
+			__ks_1 = data.declarations;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, declaration; __ks_2 < __ks_3; ++__ks_2) {
 				declaration = __ks_1[__ks_2];
 				node.compile(declaration, config);
@@ -1670,13 +1698,13 @@ module.exports = function() {
 		}
 		else if(__ks_0 === Kind.ImportDeclarator) {
 			var module = node.module();
-			$import.resolve(data, module.parent(), module, node);
+			$import.resolve(data, module.parent(), module, node, config);
 		}
 		else if(__ks_0 === Kind.Literal) {
 			node.code($quote(data.value));
 		}
 		else if(__ks_0 === Kind.MemberExpression) {
-			node = node.newExpression();
+			node = node.newExpression(config);
 			if(!(mode & Mode.NoTest) && $expression.nullable(data)) {
 				var name = $expression.value(node, data, config);
 				node.code(" ? ").compile(name, config).code(" : ", mode & Mode.BooleanExpression ? "false" : "undefined");
@@ -1703,7 +1731,7 @@ module.exports = function() {
 		else if(__ks_0 === Kind.ObjectBinding) {
 			var existings = {};
 			var exists = false;
-			var __ks_1 = data.elements;
+			__ks_1 = data.elements;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, element; __ks_2 < __ks_3; ++__ks_2) {
 				element = __ks_1[__ks_2];
 				if(!element.name.computed && node.hasVariable(element.name.name)) {
@@ -1720,13 +1748,13 @@ module.exports = function() {
 				var variables = {};
 				var name;
 				var element;
-				for(var i = 0, __ks_2 = data.elements.length; i < __ks_2; ++i) {
+				for(var i = 0, __ks_1 = data.elements.length; i < __ks_1; ++i) {
 					if(i) {
 						node.code(", ");
 					}
 					element = data.elements[i];
 					if(existings[element.name.name]) {
-						name = node.newTempName(false);
+						name = node.acquireTempName();
 						node.compile(element, config, mode | Mode.Key, {
 							kind: Kind.ObjectBinding,
 							name: name
@@ -1739,11 +1767,12 @@ module.exports = function() {
 				}
 				var {block, reference} = node.block();
 				for(name in variables) {
-					block.newExpression().code(variables[name], " = ", name);
+					block.newExpression(config).code(variables[name], " = ", name);
+					node.releaseTempName(name);
 				}
 			}
 			else {
-				for(var i = 0, __ks_2 = data.elements.length; i < __ks_2; ++i) {
+				for(var i = 0, __ks_1 = data.elements.length; i < __ks_1; ++i) {
 					if(i) {
 						node.code(", ");
 					}
@@ -1753,7 +1782,7 @@ module.exports = function() {
 			node.code("}");
 		}
 		else if(__ks_0 === Kind.ObjectExpression) {
-			var obj = node.newObject();
+			var obj = node.newObject(config);
 			if(data.properties.length) {
 				for(var i = 0, __ks_1 = data.properties.length; i < __ks_1; ++i) {
 					obj.compile(data.properties[i], config);
@@ -1763,15 +1792,15 @@ module.exports = function() {
 		else if(__ks_0 === Kind.ObjectMember) {
 			if((data.name.kind === Kind.Identifier) || (data.name.kind === Kind.Literal)) {
 				if(data.value.kind === Kind.FunctionExpression) {
-					node.newExpression().reference(data.name.kind === Kind.Identifier ? "." + data.name.name : "[" + $quote(data.name.value) + "]").compile(data.name, config, Mode.Key).compile(data.value, config, Mode.NoIndent | Mode.ObjectMember);
+					node.newExpression(config).reference(data.name.kind === Kind.Identifier ? "." + data.name.name : "[" + $quote(data.name.value) + "]").compile(data.name, config, Mode.Key).compile(data.value, config, Mode.NoIndent | Mode.ObjectMember);
 				}
 				else {
-					node.newExpression().reference(data.name.kind === Kind.Identifier ? "." + data.name.name : "[" + $quote(data.name.value) + "]").compile(data.name, config, Mode.Key).code(": ").compile(data.value, config, Mode.NoIndent);
+					node.newExpression(config).reference(data.name.kind === Kind.Identifier ? "." + data.name.name : "[" + $quote(data.name.value) + "]").compile(data.name, config, Mode.Key).code(": ").compile(data.value, config, Mode.NoIndent);
 				}
 			}
 			else {
 				var {block, reference} = node.block();
-				block.newExpression().code(reference, "[").compile(data.name, config, Mode.Key).code("] = ").compile(data.value, config);
+				block.newExpression(config).code(reference, "[").compile(data.name, config, Mode.Key).code("] = ").compile(data.value, config);
 			}
 		}
 		else if(__ks_0 === Kind.OmittedExpression) {
@@ -1780,7 +1809,7 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.PolyadicOperator) {
-			var exp = node.newExpression();
+			var exp = node.newExpression(config);
 			if(mode & Mode.Operand) {
 				exp.code("(");
 				$operator.polyadic(exp, data, config, mode);
@@ -1796,15 +1825,15 @@ module.exports = function() {
 		else if(__ks_0 === Kind.RequireDeclaration) {
 			var module = node.module();
 			var type;
-			var __ks_1 = data.declarations;
+			__ks_1 = data.declarations;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, declaration; __ks_2 < __ks_3; ++__ks_2) {
 				declaration = __ks_1[__ks_2];
-				var __ks_4 = declaration.kind;
-				if(__ks_4 === Kind.ClassDeclaration) {
+				var __ks_7 = declaration.kind;
+				if(__ks_7 === Kind.ClassDeclaration) {
 					variable = $variable.define(node, declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
 					var continuous = true;
-					for(var i = 0, __ks_5 = declaration.modifiers.length; continuous && i < __ks_5; ++i) {
+					for(var i = 0, __ks_8 = declaration.modifiers.length; continuous && i < __ks_8; ++i) {
 						if(declaration.modifiers[i].kind === ClassModifier.Final) {
 							continuous = false;
 						}
@@ -1817,12 +1846,12 @@ module.exports = function() {
 							classMethods: {}
 						};
 					}
-					for(var i = 0, __ks_5 = declaration.members.length; i < __ks_5; ++i) {
+					for(var i = 0, __ks_8 = declaration.members.length; i < __ks_8; ++i) {
 						$extern.classMember(declaration.members[i], variable, node);
 					}
 					module.require(declaration.name.name, VariableKind.Class);
 				}
-				else if(__ks_4 === Kind.VariableDeclarator) {
+				else if(__ks_7 === Kind.VariableDeclarator) {
 					variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
 					module.require(declaration.name.name, type);
@@ -1836,15 +1865,15 @@ module.exports = function() {
 		else if(__ks_0 === Kind.RequireOrExternDeclaration) {
 			var module = node.module();
 			module.flag("Type");
-			var __ks_1 = data.declarations;
+			__ks_1 = data.declarations;
 			for(var __ks_2 = 0, __ks_3 = __ks_1.length, declaration; __ks_2 < __ks_3; ++__ks_2) {
 				declaration = __ks_1[__ks_2];
-				var __ks_4 = declaration.kind;
-				if(__ks_4 === Kind.ClassDeclaration) {
+				var __ks_8 = declaration.kind;
+				if(__ks_8 === Kind.ClassDeclaration) {
 					variable = $variable.define(node, declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
 					var continuous = true;
-					for(var i = 0, __ks_5 = declaration.modifiers.length; continuous && i < __ks_5; ++i) {
+					for(var i = 0, __ks_9 = declaration.modifiers.length; continuous && i < __ks_9; ++i) {
 						if(declaration.modifiers[i].kind === ClassModifier.Final) {
 							continuous = false;
 						}
@@ -1857,12 +1886,12 @@ module.exports = function() {
 							classMethods: {}
 						};
 					}
-					for(var i = 0, __ks_5 = declaration.members.length; i < __ks_5; ++i) {
+					for(var i = 0, __ks_9 = declaration.members.length; i < __ks_9; ++i) {
 						$extern.classMember(declaration.members[i], variable, node);
 					}
 					module.require(declaration.name.name, VariableKind.Class, true);
 				}
-				else if(__ks_4 === Kind.VariableDeclarator) {
+				else if(__ks_8 === Kind.VariableDeclarator) {
 					var type;
 					variable = $variable.define(node, declaration.name, type = $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
@@ -1873,18 +1902,18 @@ module.exports = function() {
 		else if(__ks_0 === Kind.ReturnStatement) {
 			if(mode & Mode.Async) {
 				if(data.value) {
-					node.newExpression().code("return __ks_cb(null, ").compile(data.value, config).code(")");
+					node.newExpression(config).code("return __ks_cb(null, ").compile(data.value, config).code(")");
 				}
 				else {
-					node.newExpression().code("return __ks_cb()");
+					node.newExpression(config).code("return __ks_cb()");
 				}
 			}
 			else {
 				if(data.value) {
-					node.newExpression().code("return ").compile(data.value, config);
+					node.newExpression(config).code("return ").compile(data.value, config);
 				}
 				else {
-					node.newExpression().code("return");
+					node.newExpression(config).code("return");
 				}
 			}
 		}
@@ -1895,27 +1924,27 @@ module.exports = function() {
 			var name;
 			var exp;
 			var value;
-			var __ks_1 = data.clauses;
+			__ks_1 = data.clauses;
 			for(var clauseIdx = 0, __ks_2 = __ks_1.length, clause; clauseIdx < __ks_2; ++clauseIdx) {
 				clause = __ks_1[clauseIdx];
-				var __ks_3 = clause.conditions;
-				for(var conditionIdx = 0, __ks_4 = __ks_3.length; conditionIdx < __ks_4; ++conditionIdx) {
+				__ks_3 = clause.conditions;
+				for(var conditionIdx = 0, __ks_9 = __ks_3.length; conditionIdx < __ks_9; ++conditionIdx) {
 					condition = __ks_3[conditionIdx];
 					if(condition.kind === Kind.SwitchConditionArray) {
 						if(!conditions[clauseIdx]) {
 							conditions[clauseIdx] = {};
 						}
 						var nv = true;
-						for(var i = 0, __ks_5 = condition.values.length; nv && i < __ks_5; ++i) {
+						for(var i = 0, __ks_10 = condition.values.length; nv && i < __ks_10; ++i) {
 							if(condition.values[i].kind !== Kind.OmittedExpression) {
 								nv = false;
 							}
 						}
 						if(!nv) {
-							name = conditions[clauseIdx][conditionIdx] = node.newTempName();
-							exp = node.newExpression().code($variable.scope(config), name, " = ([");
+							name = conditions[clauseIdx][conditionIdx] = node.acquireTempName();
+							exp = node.newExpression(config).code($variable.scope(config), name, " = ([");
 							var names = {};
-							for(var i = 0, __ks_5 = condition.values.length; i < __ks_5; ++i) {
+							for(var i = 0, __ks_10 = condition.values.length; i < __ks_10; ++i) {
 								if(i) {
 									exp.code(", ");
 								}
@@ -1930,9 +1959,9 @@ module.exports = function() {
 							}
 							exp.code("]) => ");
 							nv = false;
-							var __ks_5 = condition.values;
-							for(var i = 0, __ks_6 = __ks_5.length; i < __ks_6; ++i) {
-								value = __ks_5[i];
+							__ks_10 = condition.values;
+							for(var i = 0, __ks_11 = __ks_10.length; i < __ks_11; ++i) {
+								value = __ks_10[i];
 								if(value.kind !== Kind.OmittedExpression) {
 									if(nv) {
 										exp.code(" && ");
@@ -1966,24 +1995,24 @@ module.exports = function() {
 					}
 				}
 				if(clause.filter && clause.bindings.length) {
-					name = filters[clauseIdx] = node.newTempName();
-					node.newExpression().newFunction().operation(Helper.vcurry($switch.filter, null, name, clause, config));
+					name = filters[clauseIdx] = node.acquireTempName();
+					node.newExpression(config).newFunction(config).operation(Helper.vcurry($switch.filter, null, name, clause, config));
 				}
 			}
 			if(data.expression.kind === Kind.Identifier) {
 				name = data.expression.name;
 			}
 			else {
-				name = node.newTempName();
-				node.newExpression().code($variable.scope(config), name, " = ").compile(data.expression, config);
+				name = node.acquireTempName();
+				node.newExpression(config).code($variable.scope(config), name, " = ").compile(data.expression, config);
 			}
-			var ctrl = node.newControl();
+			var ctrl = node.newControl(config);
 			var we = false;
 			var binding;
 			var mm;
-			var __ks_2 = data.clauses;
-			for(var clauseIdx = 0, __ks_3 = __ks_2.length, clause; clauseIdx < __ks_3; ++clauseIdx) {
-				clause = __ks_2[clauseIdx];
+			__ks_1 = data.clauses;
+			for(var clauseIdx = 0, __ks_2 = __ks_1.length, clause; clauseIdx < __ks_2; ++clauseIdx) {
+				clause = __ks_1[clauseIdx];
 				if(clause.conditions.length) {
 					if(we) {
 						throw new Error("The default clause is before this clause");
@@ -1994,9 +2023,9 @@ module.exports = function() {
 					else {
 						ctrl.code("if(");
 					}
-					var __ks_4 = clause.conditions;
-					for(var i = 0, __ks_5 = __ks_4.length; i < __ks_5; ++i) {
-						condition = __ks_4[i];
+					__ks_3 = clause.conditions;
+					for(var i = 0, __ks_9 = __ks_3.length; i < __ks_9; ++i) {
+						condition = __ks_3[i];
 						if(i) {
 							ctrl.code(" || ");
 						}
@@ -2125,29 +2154,29 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.ThrowStatement) {
-			node.newExpression().code("throw ").compile(data.value, config);
+			node.newExpression(config).code("throw ").compile(data.value, config);
 		}
 		else if(__ks_0 === Kind.TryStatement) {
 			var finalizer = null;
 			if(data.finalizer) {
-				finalizer = node.newTempName();
-				node.newExpression().code($variable.scope(config), finalizer, " = ").newControl().addMode(Mode.NoIndent).code("() =>").step().compile(data.finalizer, config);
+				finalizer = node.acquireTempName();
+				node.newExpression(config).code($variable.scope(config), finalizer, " = ").newControl(config).addMode(Mode.NoIndent).code("() =>").step().compile(data.finalizer, config);
 			}
-			var ctrl = node.newControl().code("try").step().compile(data.body, config);
+			var ctrl = node.newControl(config).code("try").step().compile(data.body, config);
 			if(finalizer) {
-				ctrl.newExpression().code(finalizer, "()");
+				ctrl.newExpression(config).code(finalizer, "()");
 			}
 			ctrl.step();
 			if(data.catchClauses.length) {
 				node.module().flag("Type");
-				var error = node.newTempName();
+				var error = node.acquireTempName();
 				ctrl.code("catch(", error, ")").step();
 				$variable.define(ctrl, error, VariableKind.Variable);
 				if(finalizer) {
-					ctrl.newExpression().code(finalizer, "()");
+					ctrl.newExpression(config).code(finalizer, "()");
 				}
-				var ifs = ctrl.newControl();
-				var __ks_1 = data.catchClauses;
+				var ifs = ctrl.newControl(config);
+				__ks_1 = data.catchClauses;
 				for(var i = 0, __ks_2 = __ks_1.length, catchClause; i < __ks_2; ++i) {
 					catchClause = __ks_1[i];
 					if(i) {
@@ -2155,7 +2184,7 @@ module.exports = function() {
 					}
 					ifs.code("if(", $runtime.type(config), ".is(", error, ", ").compile(catchClause.type, config).code(")").step();
 					if(catchClause.binding) {
-						ifs.newExpression().code($variable.scope(config), catchClause.binding.name, " = ", error);
+						ifs.newExpression(config).code($variable.scope(config), catchClause.binding.name, " = ", error);
 						$variable.define(ctrl, catchClause.binding, VariableKind.Variable);
 					}
 					ifs.compile(catchClause.body, config).step();
@@ -2163,30 +2192,35 @@ module.exports = function() {
 				if(data.catchClause) {
 					ifs.code("else").step();
 					if(data.catchClause.binding) {
-						ifs.newExpression().code($variable.scope(config), data.catchClause.binding.name, " = ", error);
+						ifs.newExpression(config).code($variable.scope(config), data.catchClause.binding.name, " = ", error);
 						$variable.define(ctrl, data.catchClause.binding, VariableKind.Variable);
 					}
 					ifs.compile(data.catchClause.body, config).step();
 				}
+				node.releaseTempName(error);
 			}
 			else if(data.catchClause) {
+				var error = node.acquireTempName();
 				if(data.catchClause.binding) {
 					ctrl.code("catch(", data.catchClause.binding.name, ")").step();
 					$variable.define(ctrl, data.catchClause.binding, VariableKind.Variable);
 				}
 				else {
-					ctrl.code("catch(", node.newTempName(), ")").step();
+					ctrl.code("catch(", error, ")").step();
 				}
 				if(finalizer) {
-					ctrl.newExpression().code(finalizer, "()");
+					ctrl.newExpression(config).code(finalizer, "()");
 				}
 				ctrl.compile(data.catchClause.body, config);
+				node.releaseTempName(error);
 			}
 			else {
-				ctrl.code("catch(", node.newTempName(), ")").step();
+				var error = node.acquireTempName();
+				ctrl.code("catch(", error, ")").step();
 				if(finalizer) {
-					ctrl.newExpression().code(finalizer, "()");
+					ctrl.newExpression(config).code(finalizer, "()");
 				}
+				node.releaseTempName(error);
 			}
 		}
 		else if(__ks_0 === Kind.TypeAliasDeclaration) {
@@ -2196,24 +2230,24 @@ module.exports = function() {
 			node.code($types[data.typeName.name] || data.typeName.name);
 		}
 		else if(__ks_0 === Kind.UnaryExpression) {
-			$operator.unary(node.newExpression(), data, config, mode);
+			$operator.unary(node.newExpression(config), data, config, mode);
 		}
 		else if(__ks_0 === Kind.UnlessExpression) {
 			if(data.else) {
-				node.newExpression().compile(data.condition, config).code(" ? ").compile(data.else, config).code(" : ").compile(data.then, config);
+				node.newExpression(config).compile(data.condition, config, Mode.BooleanExpression).code(" ? ").compile(data.else, config).code(" : ").compile(data.then, config);
 			}
 			else if(mode & Mode.Assignment) {
-				node.newExpression().compile(data.condition, config).code(" ? undefined : ").compile(data.then, config);
+				node.newExpression(config).compile(data.condition, config, Mode.BooleanExpression).code(" ? undefined : ").compile(data.then, config);
 			}
 			else {
-				node.newControl(Mode.PrepareAll).code("if(!(").compile(data.condition, config).code("))").step().compile(data.then, config);
+				node.newControl(config, Mode.PrepareAll).code("if(!").compile(data.condition, config, Mode.BooleanExpression | Mode.Operand).code(")").step().compile(data.then, config);
 			}
 		}
 		else if(__ks_0 === Kind.UnlessStatement) {
-			node.newControl().code("if(!(").compile(data.condition, config).code("))").step().compile(data.then, config);
+			node.newControl(config).code("if(!").compile(data.condition, config, Mode.BooleanExpression | Mode.Operand).code(")").step().compile(data.then, config);
 		}
 		else if(__ks_0 === Kind.UntilStatement) {
-			node.newControl().code("while(!(").compile(data.condition, config).code("))").step().compile(data.body, config);
+			node.newControl(config).code("while(!(").compile(data.condition, config, Mode.BooleanExpression).code("))").step().compile(data.body, config);
 		}
 		else if(__ks_0 === Kind.VariableDeclaration) {
 			if(data.declarations.length === 1) {
@@ -2226,7 +2260,7 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.VariableDeclarator) {
-			var exp = node.newExpression().noVariable();
+			var exp = node.newExpression(config).noVariable();
 			if(data.name.kind === Kind.Identifier) {
 				if(config.variables === "es6") {
 					if(variable === VariableModifier.Let) {
@@ -2274,7 +2308,7 @@ module.exports = function() {
 			}
 		}
 		else if(__ks_0 === Kind.WhileStatement) {
-			node.newControl().code("while(").compile(data.condition, config).code(")").step().compile(data.body, config);
+			node.newControl(config).code("while(").compile(data.condition, config, Mode.BooleanExpression).code(")").step().compile(data.body, config);
 		}
 		else {
 			console.error(data);
@@ -2298,7 +2332,7 @@ module.exports = function() {
 			if(variable === undefined || variable === null) {
 				throw new Error("Missing parameter 'variable'");
 			}
-			var clazz = node.newControl().code("class ").compile(variable.name, config, Mode.Key);
+			var clazz = node.newControl(config).code("class ").compile(variable.name, config, Mode.Key);
 			if(data.extends) {
 				variable.extends = node.getVariable(data.extends.name);
 				if(variable.extends) {
@@ -2311,9 +2345,9 @@ module.exports = function() {
 			clazz.step();
 			var ctrl;
 			if(!variable.extends) {
-				ctrl = clazz.newControl().code("constructor()").step();
-				ctrl.newExpression().code("this.__ks_init()");
-				ctrl.newExpression().code("this.__ks_cons(arguments)");
+				ctrl = clazz.newControl(config).code("constructor()").step();
+				ctrl.newExpression(config).code("this.__ks_init()");
+				ctrl.newExpression(config).code("this.__ks_cons(arguments)");
 			}
 			var reflect = {
 				inits: 0,
@@ -2339,15 +2373,15 @@ module.exports = function() {
 			}
 			if(noinit) {
 				if(variable.extends) {
-					clazz.newControl().code("__ks_init()").step().newExpression().code(variable.extends.name.name, ".prototype.__ks_init.call(this)");
+					clazz.newControl(config).code("__ks_init()").step().newExpression(config).code(variable.extends.name.name, ".prototype.__ks_init.call(this)");
 				}
 				else {
-					clazz.newControl().code("__ks_init()").step();
+					clazz.newControl(config).code("__ks_init()").step();
 				}
 			}
 			else {
 				++reflect.inits;
-				ctrl = clazz.newControl().code("__ks_init_1()").step();
+				ctrl = clazz.newControl(config).code("__ks_init_1()").step();
 				$variable.define(ctrl, {
 					kind: Kind.Identifier,
 					name: "this"
@@ -2355,59 +2389,59 @@ module.exports = function() {
 					kind: Kind.TypeReference,
 					typeName: variable.name
 				});
-				var __ks_0 = variable.instanceVariables;
+				__ks_0 = variable.instanceVariables;
 				for(var name in __ks_0) {
 					var field = __ks_0[name];
 					if(field.data.defaultValue) {
-						ctrl.newExpression().code("this." + name + " = ").compile(field.data.defaultValue, config);
+						ctrl.newExpression(config).code("this." + name + " = ").compile(field.data.defaultValue, config);
 					}
 				}
-				ctrl = clazz.newControl().code("__ks_init()").step();
+				ctrl = clazz.newControl(config).code("__ks_init()").step();
 				if(variable.extends) {
-					ctrl.newExpression().code(variable.extends.name.name, ".prototype.__ks_init.call(this)");
+					ctrl.newExpression(config).code(variable.extends.name.name, ".prototype.__ks_init.call(this)");
 				}
-				ctrl.newExpression().code(variable.name.name, ".prototype.__ks_init_1.call(this)");
+				ctrl.newExpression(config).code(variable.name.name, ".prototype.__ks_init_1.call(this)");
 			}
-			var __ks_0 = variable.constructors;
+			__ks_0 = variable.constructors;
 			for(var __ks_1 = 0, __ks_2 = __ks_0.length, method; __ks_1 < __ks_2; ++__ks_1) {
 				method = __ks_0[__ks_1];
 				$continuous.constructor(clazz, method.data, config, method.signature, reflect, variable);
 			}
 			$helper.constructor(clazz, reflect, variable, config);
-			var __ks_1 = variable.instanceMethods;
-			for(var name in __ks_1) {
-				var methods = __ks_1[name];
-				for(var __ks_2 = 0, __ks_3 = methods.length, method; __ks_2 < __ks_3; ++__ks_2) {
-					method = methods[__ks_2];
+			__ks_0 = variable.instanceMethods;
+			for(var name in __ks_0) {
+				var methods = __ks_0[name];
+				for(var __ks_1 = 0, __ks_2 = methods.length, method; __ks_1 < __ks_2; ++__ks_1) {
+					method = methods[__ks_1];
 					$continuous.instanceMethod(clazz, method.data, config, method.signature, reflect, name, variable);
 				}
 				$helper.instanceMethod(clazz, reflect, name, variable, config);
 			}
-			var __ks_2 = variable.classMethods;
-			for(var name in __ks_2) {
-				var methods = __ks_2[name];
-				for(var __ks_3 = 0, __ks_4 = methods.length, method; __ks_3 < __ks_4; ++__ks_3) {
-					method = methods[__ks_3];
+			__ks_0 = variable.classMethods;
+			for(var name in __ks_0) {
+				var methods = __ks_0[name];
+				for(var __ks_1 = 0, __ks_2 = methods.length, method; __ks_1 < __ks_2; ++__ks_1) {
+					method = methods[__ks_1];
 					$continuous.classMethod(clazz, method.data, config, method.signature, reflect, name, variable);
 				}
 				$helper.classMethod(clazz, reflect, name, variable, config);
 			}
-			var __ks_3 = variable.instanceVariables;
-			for(var name in __ks_3) {
-				var field = __ks_3[name];
+			__ks_0 = variable.instanceVariables;
+			for(var name in __ks_0) {
+				var field = __ks_0[name];
 				reflect.instanceVariables[name] = field.signature;
 			}
-			var __ks_4 = variable.classVariables;
-			for(var name in __ks_4) {
-				var field = __ks_4[name];
+			__ks_0 = variable.classVariables;
+			for(var name in __ks_0) {
+				var field = __ks_0[name];
 				$continuous.classVariable(node, field.data, config, field.signature, reflect, name, variable);
 			}
-			$helper.reflect(node, variable.name, reflect);
+			$helper.reflect(node, variable.name, reflect, config);
 			var references = node.module().listReferences(variable.name.name);
 			if(references) {
-				for(var __ks_5 = 0, __ks_6 = references.length, ref; __ks_5 < __ks_6; ++__ks_5) {
-					ref = references[__ks_5];
-					node.newExpression().code(ref);
+				for(var __ks_0 = 0, __ks_1 = references.length, ref; __ks_0 < __ks_1; ++__ks_0) {
+					ref = references[__ks_0];
+					node.newExpression(config).code(ref);
 				}
 			}
 			variable.constructors = reflect.constructors;
@@ -2443,7 +2477,7 @@ module.exports = function() {
 			}
 			var index = reflect.classMethods[name].length;
 			reflect.classMethods[name].push(signature);
-			node.newFunction().operation(function(node) {
+			node.newFunction(config).operation(function(node) {
 				if(node === undefined || node === null) {
 					throw new Error("Missing parameter 'node'");
 				}
@@ -2459,7 +2493,7 @@ module.exports = function() {
 					node.compile(data.body, config);
 				}
 				else {
-					node.newExpression().code("return ").compile(data.body, config);
+					node.newExpression(config).code("return ").compile(data.body, config);
 				}
 			});
 		},
@@ -2487,7 +2521,7 @@ module.exports = function() {
 			}
 			reflect.classVariables[name] = signature;
 			if(data.defaultValue) {
-				node.newExpression().compile(clazz.name, config).code("." + name + " = ").compile(data.defaultValue, config);
+				node.newExpression(config).compile(clazz.name, config).code("." + name + " = ").compile(data.defaultValue, config);
 			}
 		},
 		constructor(node, data, config, signature, reflect, clazz) {
@@ -2511,7 +2545,7 @@ module.exports = function() {
 			}
 			var index = reflect.constructors.length;
 			reflect.constructors.push(signature);
-			node.newFunction().operation(function(node) {
+			node.newFunction(config).operation(function(node) {
 				if(node === undefined || node === null) {
 					throw new Error("Missing parameter 'node'");
 				}
@@ -2579,7 +2613,7 @@ module.exports = function() {
 						node.compile(data.body, config);
 					}
 					else {
-						node.newExpression().compile(data.body, config);
+						node.newExpression(config).compile(data.body, config);
 					}
 				}
 			});
@@ -2611,7 +2645,7 @@ module.exports = function() {
 			}
 			var index = reflect.instanceMethods[name].length;
 			reflect.instanceMethods[name].push(signature);
-			node.newFunction().operation(function(node) {
+			node.newFunction(config).operation(function(node) {
 				if(node === undefined || node === null) {
 					throw new Error("Missing parameter 'node'");
 				}
@@ -2659,7 +2693,7 @@ module.exports = function() {
 					node.compile(data.body, config);
 				}
 				else {
-					node.newExpression().code("return ").compile(data.body, config);
+					node.newExpression(config).code("return ").compile(data.body, config);
 				}
 			});
 		},
@@ -2936,7 +2970,7 @@ module.exports = function() {
 					}
 				}
 			}
-			var type, __ks_0;
+			var type;
 			if(data.type && (Type.isValue(__ks_0 = $signature.type(data.type, node)) ? (type = __ks_0, true) : false)) {
 				signature.type = type;
 			}
@@ -2992,7 +3026,7 @@ module.exports = function() {
 			if(variable === undefined || variable === null) {
 				throw new Error("Missing parameter 'variable'");
 			}
-			var clazz = node.newControl().code("class ").compile(variable.name, config, Mode.Key);
+			var clazz = node.newControl(config).code("class ").compile(variable.name, config, Mode.Key);
 			if(data.extends) {
 				variable.extends = node.getVariable(data.extends.name);
 				if(variable.extends) {
@@ -3019,8 +3053,8 @@ module.exports = function() {
 			}
 			var ctrl;
 			if(variable.extends) {
-				ctrl = clazz.newControl().code("__ks_init()").step();
-				ctrl.newExpression().code(variable.extends.name.name, ".prototype.__ks_init.call(this)");
+				ctrl = clazz.newControl(config).code("__ks_init()").step();
+				ctrl.newExpression(config).code(variable.extends.name.name, ".prototype.__ks_init.call(this)");
 				if(!noinit) {
 					$variable.define(ctrl, {
 						kind: Kind.Identifier,
@@ -3029,17 +3063,17 @@ module.exports = function() {
 						kind: Kind.TypeReference,
 						typeName: variable.name
 					});
-					var __ks_0 = variable.instanceVariables;
+					__ks_0 = variable.instanceVariables;
 					for(var name in __ks_0) {
 						var field = __ks_0[name];
 						if(field.data.defaultValue) {
-							ctrl.newExpression().code("this." + name + " = ").compile(field.data.defaultValue, config);
+							ctrl.newExpression(config).code("this." + name + " = ").compile(field.data.defaultValue, config);
 						}
 					}
 				}
 			}
 			else {
-				ctrl = clazz.newControl().code("constructor()").step();
+				ctrl = clazz.newControl(config).code("constructor()").step();
 				if(!noinit) {
 					$variable.define(ctrl, {
 						kind: Kind.Identifier,
@@ -3048,15 +3082,15 @@ module.exports = function() {
 						kind: Kind.TypeReference,
 						typeName: variable.name
 					});
-					var __ks_0 = variable.instanceVariables;
+					__ks_0 = variable.instanceVariables;
 					for(var name in __ks_0) {
 						var field = __ks_0[name];
 						if(field.data.defaultValue) {
-							ctrl.newExpression().code("this." + name + " = ").compile(field.data.defaultValue, config);
+							ctrl.newExpression(config).code("this." + name + " = ").compile(field.data.defaultValue, config);
 						}
 					}
 				}
-				ctrl.newExpression().code("this.__ks_cons(arguments)");
+				ctrl.newExpression(config).code("this.__ks_cons(arguments)");
 			}
 			var reflect = {
 				final: true,
@@ -3067,46 +3101,46 @@ module.exports = function() {
 				instanceMethods: {},
 				classMethods: {}
 			};
-			var __ks_0 = variable.constructors;
+			__ks_0 = variable.constructors;
 			for(var __ks_1 = 0, __ks_2 = __ks_0.length, method; __ks_1 < __ks_2; ++__ks_1) {
 				method = __ks_0[__ks_1];
 				$continuous.constructor(clazz, method.data, config, method.signature, reflect, variable);
 			}
 			$helper.constructor(clazz, reflect, variable, config);
-			var __ks_1 = variable.instanceMethods;
-			for(var name in __ks_1) {
-				var methods = __ks_1[name];
-				for(var __ks_2 = 0, __ks_3 = methods.length, method; __ks_2 < __ks_3; ++__ks_2) {
-					method = methods[__ks_2];
+			__ks_0 = variable.instanceMethods;
+			for(var name in __ks_0) {
+				var methods = __ks_0[name];
+				for(var __ks_1 = 0, __ks_2 = methods.length, method; __ks_1 < __ks_2; ++__ks_1) {
+					method = methods[__ks_1];
 					$continuous.instanceMethod(clazz, method.data, config, method.signature, reflect, name, variable);
 				}
 				$helper.instanceMethod(clazz, reflect, name, variable, config);
 			}
-			var __ks_2 = variable.classMethods;
-			for(var name in __ks_2) {
-				var methods = __ks_2[name];
-				for(var __ks_3 = 0, __ks_4 = methods.length, method; __ks_3 < __ks_4; ++__ks_3) {
-					method = methods[__ks_3];
+			__ks_0 = variable.classMethods;
+			for(var name in __ks_0) {
+				var methods = __ks_0[name];
+				for(var __ks_1 = 0, __ks_2 = methods.length, method; __ks_1 < __ks_2; ++__ks_1) {
+					method = methods[__ks_1];
 					$continuous.classMethod(clazz, method.data, config, method.signature, reflect, name, variable);
 				}
 				$helper.classMethod(clazz, reflect, name, variable, config);
 			}
-			var __ks_3 = variable.instanceVariables;
-			for(var name in __ks_3) {
-				var field = __ks_3[name];
+			__ks_0 = variable.instanceVariables;
+			for(var name in __ks_0) {
+				var field = __ks_0[name];
 				reflect.instanceVariables[name] = field.signature;
 			}
-			var __ks_4 = variable.classVariables;
-			for(var name in __ks_4) {
-				var field = __ks_4[name];
+			__ks_0 = variable.classVariables;
+			for(var name in __ks_0) {
+				var field = __ks_0[name];
 				$continuous.classVariable(node, field.data, config, field.signature, reflect, name, variable);
 			}
-			$helper.reflect(node, variable.name, reflect);
+			$helper.reflect(node, variable.name, reflect, config);
 			var references = node.module().listReferences(variable.name.name);
 			if(references) {
-				for(var __ks_5 = 0, __ks_6 = references.length, ref; __ks_5 < __ks_6; ++__ks_5) {
-					ref = references[__ks_5];
-					node.newExpression().code(ref);
+				for(var __ks_0 = 0, __ks_1 = references.length, ref; __ks_0 < __ks_1; ++__ks_0) {
+					ref = references[__ks_0];
+					node.newExpression(config).code(ref);
 				}
 			}
 			variable.constructors = reflect.constructors;
@@ -3299,7 +3333,7 @@ module.exports = function() {
 			var l = rest !== -1 ? rest : data.parameters.length;
 			if(((rest !== -1) && !fr && ((db === 0) || ((db + 1) === rest))) || ((rest === -1) && ((!signature.async && (signature.max === l) && ((db === 0) || (db === l))) || (signature.async && (signature.max === (l + 1)) && ((db === 0) || (db === (l + 1))))))) {
 				var names = [];
-				for(var i = 0, __ks_1 = l; i < __ks_1; ++i) {
+				for(var i = 0, __ks_0 = l; i < __ks_0; ++i) {
 					parameter = data.parameters[i];
 					if(i) {
 						node.code(", ");
@@ -3308,7 +3342,7 @@ module.exports = function() {
 						names[i] = parameter.name;
 					}
 					else {
-						names[i] = node.newTempName();
+						names[i] = node.acquireTempName();
 					}
 					node.parameter(names[i], config, parameter.type);
 					if(parameter.type) {
@@ -3325,7 +3359,7 @@ module.exports = function() {
 						names[rest] = data.parameters[rest].name;
 					}
 					else {
-						names[rest] = node.newTempName();
+						names[rest] = node.acquireTempName();
 					}
 					node.code("...").parameter(names[rest], config, {
 						kind: Kind.TypeReference,
@@ -3343,49 +3377,49 @@ module.exports = function() {
 				}
 				fn(node);
 				if(ra) {
-					node.newControl().code("if(arguments.length < ", signature.min, ")").step().newExpression().code("throw new Error(\"Wrong number of arguments\")");
+					node.newControl(config).code("if(arguments.length < ", signature.min, ")").step().newExpression(config).code("throw new Error(\"Wrong number of arguments\")");
 				}
-				for(var i = 0, __ks_1 = l; i < __ks_1; ++i) {
+				for(var i = 0, __ks_0 = l; i < __ks_0; ++i) {
 					parameter = data.parameters[i];
 					if(parameter.name && (!parameter.type || !parameter.type.nullable || parameter.defaultValue)) {
-						ctrl = node.newControl().code("if(").compile(parameter.name, config).code(" === undefined");
+						ctrl = node.newControl(config).code("if(").compile(parameter.name, config).code(" === undefined");
 						if(!parameter.type || !parameter.type.nullable) {
 							ctrl.code(" || ").compile(parameter.name, config).code(" === null");
 						}
 						ctrl.code(")").step();
 						if(parameter.defaultValue) {
-							ctrl.newExpression().compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
+							ctrl.newExpression(config).compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
 						}
 						else {
-							ctrl.newExpression().code("throw new Error(\"Missing parameter '").compile(parameter.name, config).code("'\")");
+							ctrl.newExpression(config).code("throw new Error(\"Missing parameter '").compile(parameter.name, config).code("'\")");
 						}
 					}
 					if(!$type.isAny(parameter.type)) {
-						ctrl = node.newControl();
+						ctrl = node.newControl(config);
 						ctrl.code("if(");
 						if(parameter.type.nullable) {
 							ctrl.compile(names[i], config).code(" !== null && ");
 						}
 						ctrl.code("!");
 						$type.check(ctrl, names[i], parameter.type, config);
-						ctrl.code(")").step().newExpression().code("throw new Error(\"Invalid type for parameter '").compile(parameter.name, config).code("'\")");
+						ctrl.code(")").step().newExpression(config).code("throw new Error(\"Invalid type for parameter '").compile(parameter.name, config).code("'\")");
 					}
 				}
 				if(ra) {
 					parameter = data.parameters[rest];
 					if(signature.parameters[rest].type === "Any") {
 						if(parameter.name) {
-							node.newExpression().code($variable.scope(config), "__ks_i");
-							node.newExpression().code($variable.scope(config)).parameter(parameter.name, config).code(" = arguments.length > " + (maxb + ra) + " ? Array.prototype.slice.call(arguments, " + maxb + ", __ks_i = arguments.length - " + ra + ") : (__ks_i = " + maxb + ", [])");
+							node.newExpression(config).code($variable.scope(config), "__ks_i");
+							node.newExpression(config).code($variable.scope(config)).parameter(parameter.name, config).code(" = arguments.length > " + (maxb + ra) + " ? Array.prototype.slice.call(arguments, " + maxb + ", __ks_i = arguments.length - " + ra + ") : (__ks_i = " + maxb + ", [])");
 						}
 						else {
-							node.newExpression().code($variable.scope(config), "__ks_i = arguments.length > " + (maxb + ra) + " ? arguments.length - " + ra + " : " + maxb);
+							node.newExpression(config).code($variable.scope(config), "__ks_i = arguments.length > " + (maxb + ra) + " ? arguments.length - " + ra + " : " + maxb);
 						}
 					}
 					else {
-						node.newExpression().code($variable.scope(config), "__ks_i");
+						node.newExpression(config).code($variable.scope(config), "__ks_i");
 						if(parameter.name) {
-							node.newExpression().code($variable.scope(config)).parameter(parameter.name, config).code(" = []");
+							node.newExpression(config).code($variable.scope(config)).parameter(parameter.name, config).code(" = []");
 						}
 					}
 				}
@@ -3394,10 +3428,10 @@ module.exports = function() {
 					if(maxb) {
 					}
 					else {
-						node.newExpression().code($variable.scope(config), "__ks_i = -1");
+						node.newExpression(config).code($variable.scope(config), "__ks_i = -1");
 					}
 					if(parameter.name) {
-						node.newExpression().code($variable.scope(config)).parameter(parameter.name, config, {
+						node.newExpression(config).code($variable.scope(config)).parameter(parameter.name, config, {
 							kind: Kind.TypeReference,
 							typeName: {
 								kind: Kind.Identifier,
@@ -3405,33 +3439,33 @@ module.exports = function() {
 							}
 						}).code(" = []");
 					}
-					ctrl = node.newControl().code("while(");
+					ctrl = node.newControl(config).code("while(");
 					$type.check(ctrl, "arguments[++__ks_i]", parameter.type, config);
 					ctrl.code(")").step();
 					if(parameter.name) {
-						ctrl.newExpression().parameter(parameter.name, config).code(".push(arguments[__ks_i])");
+						ctrl.newExpression(config).parameter(parameter.name, config).code(".push(arguments[__ks_i])");
 					}
 				}
 				if(rest !== -1) {
 					parameter = data.parameters[rest];
 					if((arity = $function.arity(parameter)) && arity.min) {
-						node.newControl().code("if(").parameter(parameter.name, config).code(".length < ", arity.min, ")").step().newExpression().code("throw new Error(\"Wrong number of arguments\")");
+						node.newControl(config).code("if(").parameter(parameter.name, config).code(".length < ", arity.min, ")").step().newExpression(config).code("throw new Error(\"Wrong number of arguments\")");
 					}
 				}
 				else if(signature.async && !ra) {
 					node.module().flag("Type");
-					node.newControl().code("if(!", $runtime.type(config), ".isFunction(__ks_cb))").step().newExpression().code("throw new Error(\"Invalid callback\")");
+					node.newControl(config).code("if(!", $runtime.type(config), ".isFunction(__ks_cb))").step().newExpression(config).code("throw new Error(\"Invalid callback\")");
 				}
 			}
 			else {
 				fn(node);
 				if(signature.min) {
-					node.newControl().code("if(arguments.length < ", signature.min, ")").step().newExpression().code("throw new Error(\"Wrong number of arguments\")");
+					node.newControl(config).code("if(arguments.length < ", signature.min, ")").step().newExpression(config).code("throw new Error(\"Wrong number of arguments\")");
 				}
-				node.newExpression().code($variable.scope(config), "__ks_i = -1");
+				node.newExpression(config).code($variable.scope(config), "__ks_i = -1");
 				var required = rb;
 				var optional = 0;
-				for(var i = 0, __ks_1 = l; i < __ks_1; ++i) {
+				for(var i = 0, __ks_0 = l; i < __ks_0; ++i) {
 					parameter = data.parameters[i];
 					if(parameter.name) {
 						$variable.define(node, parameter.name, $variable.kind(parameter.type), parameter.type);
@@ -3441,21 +3475,21 @@ module.exports = function() {
 						if(parameter.name) {
 							if($type.isAny(parameter.type)) {
 								if(required) {
-									node.newExpression().code($variable.scope(config)).compile(parameter.name, config).code(" = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - ", required, ", __ks_i + ", arity.max + 1, "))");
+									node.newExpression(config).code($variable.scope(config)).compile(parameter.name, config).code(" = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - ", required, ", __ks_i + ", arity.max + 1, "))");
 									if((i + 1) < data.parameters.length) {
-										node.newExpression().code("__ks_i += ").parameter(parameter.name, config).code(".length");
+										node.newExpression(config).code("__ks_i += ").parameter(parameter.name, config).code(".length");
 									}
 								}
 								else {
-									node.newExpression().code($variable.scope(config)).compile(parameter.name, config).code(" = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + ", arity.max + 1, "))");
+									node.newExpression(config).code($variable.scope(config)).compile(parameter.name, config).code(" = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + ", arity.max + 1, "))");
 									if((i + 1) < data.parameters.length) {
-										node.newExpression().code("__ks_i += ").parameter(parameter.name, config).code(".length");
+										node.newExpression(config).code("__ks_i += ").parameter(parameter.name, config).code(".length");
 									}
 								}
 							}
 							else {
-								node.newExpression().code($variable.scope(config)).compile(parameter.name, config).code(" = []");
-								ctrl = node.newControl();
+								node.newExpression(config).code($variable.scope(config)).compile(parameter.name, config).code(" = []");
+								ctrl = node.newControl(config);
 								if(required) {
 									ctrl.code("while(__ks_i < arguments.length - ", required, " && ");
 								}
@@ -3471,37 +3505,37 @@ module.exports = function() {
 					}
 					else {
 						if((parameter.type && parameter.type.nullable) || parameter.defaultValue) {
-							ctrl = node.newControl().code("if(arguments.length > ", signature.min + optional, ")").step();
+							ctrl = node.newControl(config).code("if(arguments.length > ", signature.min + optional, ")").step();
 							if($type.isAny(parameter.type)) {
 								if(parameter.name) {
-									ctrl.newExpression().code("var ").compile(parameter.name, config).code(" = arguments[++__ks_i]");
+									ctrl.newExpression(config).code("var ").compile(parameter.name, config).code(" = arguments[++__ks_i]");
 								}
 								else {
-									ctrl.newExpression().code("++__ks_i");
+									ctrl.newExpression(config).code("++__ks_i");
 								}
 							}
 							else {
-								ctrl2 = ctrl.newControl().code("if(");
+								ctrl2 = ctrl.newControl(config).code("if(");
 								$type.check(ctrl2, "arguments[__ks_i + 1]", parameter.type, config);
-								ctrl2.code(")").step().newExpression().code("var ").compile(parameter.name, config).code(" = arguments[++__ks_i]");
+								ctrl2.code(")").step().newExpression(config).code("var ").compile(parameter.name, config).code(" = arguments[++__ks_i]");
 								ctrl2.step().code("else ").step();
 								if(rest === -1) {
-									ctrl2.newExpression().code("throw new Error(\"Invalid type for parameter '").compile(parameter.name, config).code("'\")");
+									ctrl2.newExpression(config).code("throw new Error(\"Invalid type for parameter '").compile(parameter.name, config).code("'\")");
 								}
 								else if(parameter.defaultValue) {
-									ctrl2.newExpression().code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
+									ctrl2.newExpression(config).code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
 								}
 								else {
-									ctrl2.newExpression().code("var ").compile(parameter.name, config).code(" = null");
+									ctrl2.newExpression(config).code("var ").compile(parameter.name, config).code(" = null");
 								}
 							}
 							if(parameter.name) {
 								ctrl.step().code("else ").step();
 								if(parameter.defaultValue) {
-									ctrl.newExpression().code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
+									ctrl.newExpression(config).code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
 								}
 								else {
-									ctrl.newExpression().code("var ").compile(parameter.name, config).code(" = null");
+									ctrl.newExpression(config).code("var ").compile(parameter.name, config).code(" = null");
 								}
 							}
 							++optional;
@@ -3509,23 +3543,23 @@ module.exports = function() {
 						else {
 							if($type.isAny(parameter.type)) {
 								if(parameter.name) {
-									node.newExpression().code("var ").compile(parameter.name, config).code(" = arguments[++__ks_i]");
+									node.newExpression(config).code("var ").compile(parameter.name, config).code(" = arguments[++__ks_i]");
 								}
 								else {
-									node.newExpression().code("++__ks_i");
+									node.newExpression(config).code("++__ks_i");
 								}
 							}
 							else {
 								if(parameter.name) {
-									ctrl = node.newControl().code("if(");
+									ctrl = node.newControl(config).code("if(");
 									$type.check(ctrl, "arguments[++__ks_i]", parameter.type, config);
-									ctrl.code(")").step().newExpression().code("var ").compile(parameter.name, config).code(" = arguments[__ks_i]");
-									ctrl.step().code("else ").newExpression().code("throw new Error(\"Invalid type for parameter '").compile(parameter.name, config).code("'\")");
+									ctrl.code(")").step().newExpression(config).code("var ").compile(parameter.name, config).code(" = arguments[__ks_i]");
+									ctrl.step().code("else ").newExpression(config).code("throw new Error(\"Invalid type for parameter '").compile(parameter.name, config).code("'\")");
 								}
 								else {
-									ctrl = node.newControl().code("if(!");
+									ctrl = node.newControl(config).code("if(!");
 									$type.check(ctrl, "arguments[++__ks_i]", parameter.type, config);
-									ctrl.code(")").step().newExpression().code("throw new Error(\"Wrong type of arguments\")");
+									ctrl.code(")").step().newExpression(config).code("throw new Error(\"Wrong type of arguments\")");
 								}
 							}
 							--required;
@@ -3536,7 +3570,7 @@ module.exports = function() {
 					parameter = data.parameters[rest];
 					if(ra) {
 						if(parameter.name) {
-							node.newExpression().code($variable.scope(config)).parameter(parameter.name, config, {
+							node.newExpression(config).code($variable.scope(config)).parameter(parameter.name, config, {
 								kind: Kind.TypeReference,
 								typeName: {
 									kind: Kind.Identifier,
@@ -3544,16 +3578,16 @@ module.exports = function() {
 								}
 							}).code(" = arguments.length > __ks_i + ", ra + 1, " ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - " + ra + ") : []");
 							if((l + 1) < data.parameters.length) {
-								node.newExpression().code("__ks_i += ").parameter(parameter.name, config).code(".length");
+								node.newExpression(config).code("__ks_i += ").parameter(parameter.name, config).code(".length");
 							}
 						}
 						else if((l + 1) < data.parameters.length) {
-							node.newControl().code("if(arguments.length > __ks_i + ", ra + 1, ")").step().newExpression().code("__ks_i = arguments.length - ", ra + 1);
+							node.newControl(config).code("if(arguments.length > __ks_i + ", ra + 1, ")").step().newExpression(config).code("__ks_i = arguments.length - ", ra + 1);
 						}
 					}
 					else {
 						if(parameter.name) {
-							node.newExpression().code($variable.scope(config)).parameter(parameter.name, config, {
+							node.newExpression(config).code($variable.scope(config)).parameter(parameter.name, config, {
 								kind: Kind.TypeReference,
 								typeName: {
 									kind: Kind.Identifier,
@@ -3561,7 +3595,7 @@ module.exports = function() {
 								}
 							}).code(" = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : []");
 							if((l + 1) < data.parameters.length) {
-								node.newExpression().code("__ks_i += ").parameter(parameter.name, config).code(".length");
+								node.newExpression(config).code("__ks_i += ").parameter(parameter.name, config).code(".length");
 							}
 						}
 					}
@@ -3570,13 +3604,13 @@ module.exports = function() {
 			if(ra || maxa) {
 				if((ra !== maxa) && (signature.parameters[rest].type !== "Any")) {
 					if(ra) {
-						node.newExpression().code($variable.scope(config), "__ks_m = __ks_i + ", ra);
+						node.newExpression(config).code($variable.scope(config), "__ks_m = __ks_i + ", ra);
 					}
 					else {
-						node.newExpression().code($variable.scope(config), "__ks_m = __ks_i");
+						node.newExpression(config).code($variable.scope(config), "__ks_m = __ks_i");
 					}
 				}
-				for(var i = rest + 1, __ks_1 = data.parameters.length; i < __ks_1; ++i) {
+				for(var i = rest + 1, __ks_0 = data.parameters.length; i < __ks_0; ++i) {
 					parameter = data.parameters[i];
 					if(parameter.name) {
 						$variable.define(node, parameter.name, $variable.kind(parameter.type), parameter.type);
@@ -3585,9 +3619,9 @@ module.exports = function() {
 						if(arity.min) {
 							if(parameter.name) {
 								if($type.isAny(parameter.type)) {
-									node.newExpression().code($variable.scope(config)).compile(parameter.name, config).code(" = Array.prototype.slice.call(arguments, __ks_i + 1, __ks_i + ", arity.min + 1, ")");
+									node.newExpression(config).code($variable.scope(config)).compile(parameter.name, config).code(" = Array.prototype.slice.call(arguments, __ks_i + 1, __ks_i + ", arity.min + 1, ")");
 									if((i + 1) < data.parameters.length) {
-										node.newExpression().code("__ks_i += ").parameter(parameter.name, config).code(".length");
+										node.newExpression(config).code("__ks_i += ").parameter(parameter.name, config).code(".length");
 									}
 								}
 								else {
@@ -3603,42 +3637,42 @@ module.exports = function() {
 						if(signature.parameters[rest].type === "Any") {
 							if(parameter.name) {
 								if(parameter.defaultValue) {
-									node.newExpression().code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
+									node.newExpression(config).code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
 								}
 								else {
-									node.newExpression().code("var ").compile(parameter.name, config).code(" = null");
+									node.newExpression(config).code("var ").compile(parameter.name, config).code(" = null");
 								}
 							}
 						}
 						else {
-							ctrl = node.newControl().code("if(arguments.length > __ks_m)").step();
+							ctrl = node.newControl(config).code("if(arguments.length > __ks_m)").step();
 							if($type.isAny(parameter.type)) {
 								if(parameter.name) {
-									ctrl.newExpression().code("var ").compile(parameter.name, config).code(" = arguments[", inc ? "++" : "", "__ks_i]");
+									ctrl.newExpression(config).code("var ").compile(parameter.name, config).code(" = arguments[", inc ? "++" : "", "__ks_i]");
 								}
 								else {
-									ctrl.newExpression().code("++__ks_i");
+									ctrl.newExpression(config).code("++__ks_i");
 								}
 							}
 							else {
-								ctrl2 = ctrl.newControl().code("if(");
+								ctrl2 = ctrl.newControl(config).code("if(");
 								$type.check(ctrl2, "arguments[" + (inc ? "++" : "") + "__ks_i]", parameter.type, config);
-								ctrl2.code(")").step().newExpression().code("var ").compile(parameter.name, config).code(" = arguments[__ks_i]");
+								ctrl2.code(")").step().newExpression(config).code("var ").compile(parameter.name, config).code(" = arguments[__ks_i]");
 								ctrl2.step().code("else ");
 								if(parameter.defaultValue) {
-									ctrl2.newExpression().code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
+									ctrl2.newExpression(config).code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
 								}
 								else {
-									ctrl2.newExpression().code("var ").compile(parameter.name, config).code(" = null");
+									ctrl2.newExpression(config).code("var ").compile(parameter.name, config).code(" = null");
 								}
 							}
 							if(parameter.name) {
 								ctrl.step().code("else ").step();
 								if(parameter.defaultValue) {
-									ctrl.newExpression().code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
+									ctrl.newExpression(config).code("var ").compile(parameter.name, config).code(" = ").compile(parameter.defaultValue, config);
 								}
 								else {
-									ctrl.newExpression().code("var ").compile(parameter.name, config).code(" = null");
+									ctrl.newExpression(config).code("var ").compile(parameter.name, config).code(" = null");
 								}
 							}
 							if(!inc) {
@@ -3649,23 +3683,23 @@ module.exports = function() {
 					else {
 						if($type.isAny(parameter.type)) {
 							if(parameter.name) {
-								node.newExpression().code("var ").compile(parameter.name, config).code(" = arguments[", inc ? "++" : "", "__ks_i]");
+								node.newExpression(config).code("var ").compile(parameter.name, config).code(" = arguments[", inc ? "++" : "", "__ks_i]");
 							}
 							else {
-								node.newExpression().code(inc ? "++" : "", "__ks_i");
+								node.newExpression(config).code(inc ? "++" : "", "__ks_i");
 							}
 						}
 						else {
 							if(parameter.name) {
-								ctrl = node.newControl().code("if(");
+								ctrl = node.newControl(config).code("if(");
 								$type.check(ctrl, "arguments[" + (inc ? "++" : "") + "__ks_i]", parameter.type, config);
-								ctrl.code(")").step().newExpression().code("var ").compile(parameter.name, config).code(" = arguments[__ks_i]");
-								ctrl.step().code("else ").newExpression().code("throw new Error(\"Invalid type for parameter '").compile(parameter.name, config).code("'\")");
+								ctrl.code(")").step().newExpression(config).code("var ").compile(parameter.name, config).code(" = arguments[__ks_i]");
+								ctrl.step().code("else ").newExpression(config).code("throw new Error(\"Invalid type for parameter '").compile(parameter.name, config).code("'\")");
 							}
 							else {
-								ctrl = node.newControl().code("if(!");
+								ctrl = node.newControl(config).code("if(!");
 								$type.check(ctrl, "arguments[" + (inc ? "++" : "") + "__ks_i]", parameter.type, config);
-								ctrl.code(")").step().newExpression().code("throw new Error(\"Wrong type of arguments\")");
+								ctrl.code(")").step().newExpression(config).code("throw new Error(\"Wrong type of arguments\")");
 							}
 						}
 						if(!inc) {
@@ -3696,7 +3730,7 @@ module.exports = function() {
 					}
 				}
 			}
-			var __ks_0 = data.parameters;
+			__ks_0 = data.parameters;
 			for(var __ks_1 = 0, __ks_2 = __ks_0.length, parameter; __ks_1 < __ks_2; ++__ks_1) {
 				parameter = __ks_0[__ks_1];
 				signature.parameters.push(parameter = $function.signatureParameter(parameter, node));
@@ -3796,7 +3830,7 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, clazz.newControl(), "static " + name + "()", reflect.classMethods[name], Helper.vcurry($continuous.methodCall, null, variable, "__ks_sttc_" + name + "_", "arguments", "return "), "arguments", "classMethods." + name, true, config);
+			$helper.methods(extend, clazz.newControl(config), "static " + name + "()", reflect.classMethods[name], Helper.vcurry($continuous.methodCall, null, variable, "__ks_sttc_" + name + "_", "arguments", "return "), "arguments", "classMethods." + name, true, config);
 		},
 		constructor(clazz, reflect, variable, config) {
 			if(clazz === undefined || clazz === null) {
@@ -3833,7 +3867,7 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, clazz.newControl(), "__ks_cons(args)", reflect.constructors, Helper.vcurry($continuous.methodCall, null, variable, "prototype.__ks_cons_", "args", ""), "args", "constructors", false, config);
+			$helper.methods(extend, clazz.newControl(config), "__ks_cons(args)", reflect.constructors, Helper.vcurry($continuous.methodCall, null, variable, "prototype.__ks_cons_", "args", ""), "args", "constructors", false, config);
 		},
 		decide(node, type, index, path, argName, config) {
 			if(node === undefined || node === null) {
@@ -3902,7 +3936,7 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, clazz.newControl(), name + "()", reflect.instanceMethods[name], Helper.vcurry($continuous.methodCall, null, variable, "prototype.__ks_func_" + name + "_", "arguments", "return "), "arguments", "instanceMethods." + name, true, config);
+			$helper.methods(extend, clazz.newControl(config), name + "()", reflect.instanceMethods[name], Helper.vcurry($continuous.methodCall, null, variable, "prototype.__ks_func_" + name + "_", "arguments", "return "), "arguments", "instanceMethods." + name, true, config);
 		},
 		methods(extend, node, header, methods, call, argName, refName, returns, config) {
 			if(extend === undefined || extend === null) {
@@ -3939,7 +3973,7 @@ module.exports = function() {
 					extend(node);
 				}
 				else {
-					node.newControl().code("if(" + argName + ".length !== 0)").step().code("throw new Error(\"Wrong number of arguments\")");
+					node.newControl(config).code("if(" + argName + ".length !== 0)").step().code("throw new Error(\"Wrong number of arguments\")");
 				}
 			}
 			else if(methods.length === 1) {
@@ -3949,7 +3983,7 @@ module.exports = function() {
 				}
 				else {
 					if(method.min === method.max) {
-						var ctrl = node.newControl();
+						var ctrl = node.newControl(config);
 						ctrl.code("if(" + argName + ".length === " + method.min + ")").step();
 						call(ctrl, method, 0);
 						if(returns) {
@@ -3970,7 +4004,7 @@ module.exports = function() {
 						}
 					}
 					else if(method.max < Infinity) {
-						var ctrl = node.newControl();
+						var ctrl = node.newControl(config);
 						ctrl.code("if(" + argName + ".length >= " + method.min + " && " + argName + ".length <= " + method.max + ")").step();
 						call(ctrl, method, 0);
 						if(returns) {
@@ -4012,7 +4046,7 @@ module.exports = function() {
 						group.methods.push(method);
 					}
 				}
-				var ctrl = node.newControl();
+				var ctrl = node.newControl(config);
 				nf = true;
 				for(var __ks_0 = 0, __ks_1 = groups.length; __ks_0 < __ks_1; ++__ks_0) {
 					group = groups[__ks_0];
@@ -4091,7 +4125,7 @@ module.exports = function() {
 			}
 			if($helper.methodCheckTree(group.methods, 0, node, call, argName, refName, returns, config)) {
 				if(returns) {
-					node.newExpression().code("throw new Error(\"Wrong type of arguments\")");
+					node.newExpression(config).code("throw new Error(\"Wrong type of arguments\")");
 				}
 				else {
 					node.code("else").step().code("throw new Error(\"Wrong type of arguments\")");
@@ -4172,7 +4206,7 @@ module.exports = function() {
 				}
 			}
 			else {
-				var ctrl = node.newControl();
+				var ctrl = node.newControl(config);
 				var ne = true;
 				usages.sort(function(a, b) {
 					if(a === undefined || a === null) {
@@ -4254,7 +4288,7 @@ module.exports = function() {
 			}
 			return types;
 		},
-		reflect(node, name, reflect) {
+		reflect(node, name, reflect, config) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -4264,8 +4298,11 @@ module.exports = function() {
 			if(reflect === undefined || reflect === null) {
 				throw new Error("Missing parameter 'reflect'");
 			}
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
 			var classname = name.name;
-			var exp = node.newExpression();
+			var exp = node.newExpression(config);
 			exp.code(classname + ".__ks_reflect = {").indent();
 			if(reflect.final) {
 				exp.newline().code("final: true,");
@@ -4281,7 +4318,7 @@ module.exports = function() {
 			exp.unindent().newline().code("],");
 			exp.newline().code("instanceVariables: {").indent();
 			var nf = false;
-			var __ks_0 = reflect.instanceVariables;
+			__ks_0 = reflect.instanceVariables;
 			for(name in __ks_0) {
 				variable = __ks_0[name];
 				if(nf) {
@@ -4295,9 +4332,9 @@ module.exports = function() {
 			exp.unindent().newline().code("},");
 			exp.newline().code("classVariables: {").indent();
 			nf = false;
-			var __ks_1 = reflect.classVariables;
-			for(name in __ks_1) {
-				variable = __ks_1[name];
+			__ks_0 = reflect.classVariables;
+			for(name in __ks_0) {
+				variable = __ks_0[name];
 				if(nf) {
 					exp.code(",");
 				}
@@ -4309,9 +4346,9 @@ module.exports = function() {
 			exp.unindent().newline().code("},");
 			exp.newline().code("instanceMethods: {").indent();
 			nf = false;
-			var __ks_2 = reflect.instanceMethods;
-			for(name in __ks_2) {
-				methods = __ks_2[name];
+			__ks_0 = reflect.instanceMethods;
+			for(name in __ks_0) {
+				methods = __ks_0[name];
 				if(nf) {
 					exp.code(",");
 				}
@@ -4319,7 +4356,7 @@ module.exports = function() {
 					nf = true;
 				}
 				exp.newline().code(name + ": [").indent();
-				for(var i = 0, __ks_3 = methods.length; i < __ks_3; ++i) {
+				for(var i = 0, __ks_1 = methods.length; i < __ks_1; ++i) {
 					if(i) {
 						exp.code(",");
 					}
@@ -4330,9 +4367,9 @@ module.exports = function() {
 			exp.unindent().newline().code("},");
 			exp.newline().code("classMethods: {").indent();
 			nf = false;
-			var __ks_3 = reflect.classMethods;
-			for(name in __ks_3) {
-				methods = __ks_3[name];
+			__ks_0 = reflect.classMethods;
+			for(name in __ks_0) {
+				methods = __ks_0[name];
 				if(nf) {
 					exp.code(",");
 				}
@@ -4340,7 +4377,7 @@ module.exports = function() {
 					nf = true;
 				}
 				exp.newline().code(name + ": [").indent();
-				for(var i = 0, __ks_4 = methods.length; i < __ks_4; ++i) {
+				for(var i = 0, __ks_1 = methods.length; i < __ks_1; ++i) {
 					if(i) {
 						exp.code(",");
 					}
@@ -4456,7 +4493,7 @@ module.exports = function() {
 				return $quote(type);
 			}
 			else {
-				var variable, __ks_0;
+				var variable;
 				if(Type.isValue(__ks_0 = $variable.fromReflectType(type, node)) ? (variable = __ks_0, true) : false) {
 					return type;
 				}
@@ -4488,7 +4525,7 @@ module.exports = function() {
 			}
 			else {
 				var type = $signature.type(data.type, node);
-				node.newExpression().code($runtime.helper(config), ".newField(" + $quote(data.name.name) + ", " + $helper.type(type, node) + ")");
+				node.newExpression(config).code($runtime.helper(config), ".newField(" + $quote(data.name.name) + ", " + $helper.type(type, node) + ")");
 			}
 		}
 		else if(__ks_0 === Kind.MethodAliasDeclaration) {
@@ -4515,7 +4552,7 @@ module.exports = function() {
 						}
 					}
 				}
-				var exp = node.newExpression().code($runtime.helper(config), ".", instance ? "newInstanceMethod" : "newClassMethod", "({").indent();
+				var exp = node.newExpression(config).code($runtime.helper(config), ".", instance ? "newInstanceMethod" : "newClassMethod", "({").indent();
 				exp.newline().code("class: ").compile(variable.name, config).code(",");
 				if(data.name.kind === Kind.Identifier) {
 					exp.newline().code("name: ", $quote(data.name.name), ",");
@@ -4579,7 +4616,7 @@ module.exports = function() {
 						}
 					}
 				}
-				node.newExpression(Mode.NoIndent).newFunction().operation(function(ctrl) {
+				node.newExpression(config, Mode.NoIndent).newFunction(config).operation(function(ctrl) {
 					if(ctrl === undefined || ctrl === null) {
 						throw new Error("Missing parameter 'ctrl'");
 					}
@@ -4613,7 +4650,7 @@ module.exports = function() {
 						ctrl.compile(data.body, config);
 					}
 					else {
-						ctrl.newExpression().code("return ").compile(data.body, config);
+						ctrl.newExpression(config).code("return ").compile(data.body, config);
 					}
 					ctrl.step(Mode.NoLine).code(",");
 					ctrl.newline().code("signature: ");
@@ -4658,7 +4695,7 @@ module.exports = function() {
 						instance = false;
 					}
 				}
-				var exp = node.newExpression().code($runtime.helper(config), ".", instance ? "newInstanceMethod" : "newClassMethod", "({").indent();
+				var exp = node.newExpression(config).code($runtime.helper(config), ".", instance ? "newInstanceMethod" : "newClassMethod", "({").indent();
 				exp.newline().code("class: ").compile(variable.name, config).code(",");
 				if(data.name.kind === Kind.Identifier) {
 					exp.newline().code("name: ", $quote(data.name.name), ",");
@@ -4773,7 +4810,7 @@ module.exports = function() {
 			$variable.define(node, name, kind, type);
 			module.import(name.name || name, file);
 		},
-		loadCoreModule(x, module, data, node) {
+		loadCoreModule(x, module, data, node, config) {
 			if(x === undefined || x === null) {
 				throw new Error("Missing parameter 'x'");
 			}
@@ -4786,18 +4823,21 @@ module.exports = function() {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
 			if($nodeModules[x]) {
-				return $import.loadNodeFile(null, x, module, data, node);
+				return $import.loadNodeFile(null, x, module, data, node, config);
 			}
 			return false;
 		},
 		loadDirectory() {
-			if(arguments.length < 4) {
+			if(arguments.length < 5) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
 			var x = arguments[++__ks_i];
-			if(arguments.length > 4) {
+			if(arguments.length > 5) {
 				var moduleName = arguments[++__ks_i];
 			}
 			else  {
@@ -4806,6 +4846,7 @@ module.exports = function() {
 			var module = arguments[++__ks_i];
 			var data = arguments[++__ks_i];
 			var node = arguments[++__ks_i];
+			var config = arguments[++__ks_i];
 			var pkgfile = path.join(x, "package.json");
 			if(fs.isFile(pkgfile)) {
 				var pkg;
@@ -4814,22 +4855,22 @@ module.exports = function() {
 				}
 				catch(__ks_0) {
 				}
-				if(pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node)) {
+				if(pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node, config)) {
 					return true;
 				}
-				else if(pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node))) {
+				else if(pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node, config) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node, config))) {
 					return true;
 				}
 			}
-			return $import.loadFile(path.join(x, "index"), moduleName, module, data, node);
+			return $import.loadFile(path.join(x, "index"), moduleName, module, data, node, config);
 		},
 		loadFile() {
-			if(arguments.length < 4) {
+			if(arguments.length < 5) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
 			var x = arguments[++__ks_i];
-			if(arguments.length > 4) {
+			if(arguments.length > 5) {
 				var moduleName = arguments[++__ks_i];
 			}
 			else  {
@@ -4838,34 +4879,35 @@ module.exports = function() {
 			var module = arguments[++__ks_i];
 			var data = arguments[++__ks_i];
 			var node = arguments[++__ks_i];
+			var config = arguments[++__ks_i];
 			if(fs.isFile(x)) {
 				if(x.endsWith($extensions.source)) {
-					return $import.loadKSFile(x, moduleName, module, data, node);
+					return $import.loadKSFile(x, moduleName, module, data, node, config);
 				}
 				else {
-					return $import.loadNodeFile(x, moduleName, module, data, node);
+					return $import.loadNodeFile(x, moduleName, module, data, node, config);
 				}
 			}
 			if(fs.isFile(x + $extensions.source)) {
-				return $import.loadKSFile(x + $extensions.source, moduleName, module, data, node);
+				return $import.loadKSFile(x + $extensions.source, moduleName, module, data, node, config);
 			}
 			else {
 				var __ks_0 = require.extensions;
 				for(var ext in __ks_0) {
 					if(fs.isFile(x + ext)) {
-						return $import.loadNodeFile(x, moduleName, module, data, node);
+						return $import.loadNodeFile(x, moduleName, module, data, node, config);
 					}
 				}
 			}
 			return false;
 		},
 		loadKSFile() {
-			if(arguments.length < 4) {
+			if(arguments.length < 5) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
 			var x = arguments[++__ks_i];
-			if(arguments.length > 4) {
+			if(arguments.length > 5) {
 				var moduleName = arguments[++__ks_i];
 			}
 			else  {
@@ -4874,6 +4916,7 @@ module.exports = function() {
 			var module = arguments[++__ks_i];
 			var data = arguments[++__ks_i];
 			var node = arguments[++__ks_i];
+			var config = arguments[++__ks_i];
 			var file = null;
 			if(!moduleName) {
 				file = moduleName = module.path(x, data.module);
@@ -4900,7 +4943,7 @@ module.exports = function() {
 			var importVarCount = 0;
 			var importAll = false;
 			var importAlias = "";
-			var __ks_0 = data.specifiers;
+			__ks_0 = data.specifiers;
 			for(var __ks_1 = 0, __ks_2 = __ks_0.length, specifier; __ks_1 < __ks_2; ++__ks_1) {
 				specifier = __ks_0[__ks_1];
 				if(specifier.kind === Kind.ImportWildcardSpecifier) {
@@ -4919,8 +4962,8 @@ module.exports = function() {
 			var usages = [];
 			var importCode;
 			if((importVarCount && importAll) || (importVarCount && importAlias.length) || (importAll && importAlias.length)) {
-				importCode = node.newTempName();
-				var __ks_exp_1 = node.newExpression().code("var ", importCode, " = require(", $quote(moduleName), ")(");
+				importCode = node.acquireTempName();
+				var __ks_exp_1 = node.newExpression(config).code("var ", importCode, " = require(", $quote(moduleName), ")(");
 				var nf;
 				var first = true;
 				var nc = 0;
@@ -4931,9 +4974,9 @@ module.exports = function() {
 					}
 					nf = true;
 					if(data.references) {
-						var __ks_1 = data.references;
-						for(var __ks_2 = 0, __ks_3 = __ks_1.length, reference; nf && __ks_2 < __ks_3; ++__ks_2) {
-							reference = __ks_1[__ks_2];
+						__ks_0 = data.references;
+						for(var __ks_1 = 0, __ks_2 = __ks_0.length, reference; nf && __ks_1 < __ks_2; ++__ks_1) {
+							reference = __ks_0[__ks_1];
 							if(Type.isValue(reference.foreign)) {
 								if(reference.foreign.name === name) {
 									if(first) {
@@ -4942,7 +4985,7 @@ module.exports = function() {
 									else {
 										__ks_exp_1.code(", ");
 									}
-									for(var i = 0, __ks_4 = nc; i < __ks_4; ++i) {
+									for(var i = 0, __ks_3 = nc; i < __ks_3; ++i) {
 										if(i) {
 											__ks_exp_1.code(", ");
 										}
@@ -4964,7 +5007,7 @@ module.exports = function() {
 									else {
 										__ks_exp_1.code(", ");
 									}
-									for(var i = 0, __ks_4 = nc; i < __ks_4; ++i) {
+									for(var i = 0, __ks_3 = nc; i < __ks_3; ++i) {
 										if(i) {
 											__ks_exp_1.code(", ");
 										}
@@ -5006,9 +5049,9 @@ module.exports = function() {
 					}
 					nf = true;
 					if(data.references) {
-						var __ks_1 = data.references;
-						for(var __ks_2 = 0, __ks_3 = __ks_1.length, reference; nf && __ks_2 < __ks_3; ++__ks_2) {
-							reference = __ks_1[__ks_2];
+						__ks_0 = data.references;
+						for(var __ks_1 = 0, __ks_2 = __ks_0.length, reference; nf && __ks_1 < __ks_2; ++__ks_1) {
+							reference = __ks_0[__ks_1];
 							if(Type.isValue(reference.foreign)) {
 								if(reference.foreign.name === name) {
 									if(first) {
@@ -5017,7 +5060,7 @@ module.exports = function() {
 									else {
 										importCode += ", ";
 									}
-									for(var i = 0, __ks_4 = nc; i < __ks_4; ++i) {
+									for(var i = 0, __ks_3 = nc; i < __ks_3; ++i) {
 										if(i) {
 											importCode += ", ";
 										}
@@ -5039,7 +5082,7 @@ module.exports = function() {
 									else {
 										importCode += ", ";
 									}
-									for(var i = 0, __ks_4 = nc; i < __ks_4; ++i) {
+									for(var i = 0, __ks_3 = nc; i < __ks_3; ++i) {
 										if(i) {
 											importCode += ", ";
 										}
@@ -5073,28 +5116,26 @@ module.exports = function() {
 				for(name in importVariables) {
 					alias = importVariables[name];
 				}
-				var __ks_1;
-				if(!(Type.isValue(__ks_1 = exports[name]) ? variable = __ks_1 : undefined)) {
+				if(!(Type.isValue(__ks_0 = exports[name]) ? (variable = __ks_0, true) : false)) {
 					throw new Error("Undefined variable " + name + " in the imported module at line " + data.start.line);
 				}
 				if(variable.kind !== VariableKind.TypeAlias) {
 					if((variable.kind === VariableKind.Class) && variable.final) {
 						variable.final.name = "__ks_" + alias;
-						node.newExpression().code("var {" + alias + ", " + variable.final.name + "} = " + importCode).use(usages, true);
+						node.newExpression(config).code("var {" + alias + ", " + variable.final.name + "} = " + importCode).use(usages, true);
 					}
 					else {
-						node.newExpression().code("var " + alias + " = " + importCode + "." + name);
+						node.newExpression(config).code("var " + alias + " = " + importCode + "." + name);
 					}
 				}
 				$import.addVariable(module, file, node, alias, variable, data);
 			}
 			else if(importVarCount) {
-				exp = node.newExpression().use(usages, true).code("var {");
+				exp = node.newExpression(config).use(usages, true).code("var {");
 				var nf = false;
 				for(name in importVariables) {
 					alias = importVariables[name];
-					var __ks_1;
-					if(!(Type.isValue(__ks_1 = exports[name]) ? variable = __ks_1 : undefined)) {
+					if(!(Type.isValue(__ks_0 = exports[name]) ? (variable = __ks_0, true) : false)) {
 						throw new Error("Undefined variable " + name + " in the imported module at line " + data.start.line);
 					}
 					$import.addVariable(module, file, node, alias, variable, data);
@@ -5134,25 +5175,25 @@ module.exports = function() {
 							variables.push(variable.final.name);
 						}
 						if(exp === null) {
-							exp = node.newExpression().use(usages, true);
+							exp = node.newExpression(config).use(usages, true);
 						}
 					}
 					$import.addVariable(module, file, node, name, variable, data);
 				}
 				if(variables.length === 1) {
 					if(exp === null) {
-						exp = node.newExpression().use(usages, true);
+						exp = node.newExpression(config).use(usages, true);
 					}
 					exp.code("var ", variables[0], " = ", importCode, "." + variables[0]);
 				}
 				else if(variables.length) {
 					if(exp === null) {
-						exp = node.newExpression().use(usages, true);
+						exp = node.newExpression(config).use(usages, true);
 					}
 					exp.code("var {");
 					var nf = false;
-					for(var __ks_1 = 0, __ks_2 = variables.length; __ks_1 < __ks_2; ++__ks_1) {
-						name = variables[__ks_1];
+					for(var __ks_0 = 0, __ks_1 = variables.length; __ks_0 < __ks_1; ++__ks_0) {
+						name = variables[__ks_0];
 						if(nf) {
 							exp.code(", ");
 						}
@@ -5165,7 +5206,7 @@ module.exports = function() {
 				}
 			}
 			if(importAlias.length) {
-				node.newExpression().code("var ", importAlias, " = ", importCode).use(usages, true);
+				node.newExpression(config).code("var ", importAlias, " = ", importCode).use(usages, true);
 				var type = {
 					typeName: {
 						kind: Kind.Identifier,
@@ -5186,20 +5227,21 @@ module.exports = function() {
 					name: importAlias
 				}, VariableKind.Variable, type);
 			}
+			node.releaseTempName(importCode);
 			return true;
 		},
 		loadNodeFile() {
-			if(arguments.length < 3) {
+			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
-			if(arguments.length > 3) {
+			if(arguments.length > 4) {
 				var x = arguments[++__ks_i];
 			}
 			else  {
 				var x = null;
 			}
-			if(arguments.length > 4) {
+			if(arguments.length > 5) {
 				var moduleName = arguments[++__ks_i];
 			}
 			else  {
@@ -5208,6 +5250,7 @@ module.exports = function() {
 			var module = arguments[++__ks_i];
 			var data = arguments[++__ks_i];
 			var node = arguments[++__ks_i];
+			var config = arguments[++__ks_i];
 			var file = null;
 			if(!moduleName) {
 				file = moduleName = module.path(x, data.module);
@@ -5219,7 +5262,7 @@ module.exports = function() {
 				specifier = __ks_0[__ks_1];
 				if(specifier.kind === Kind.ImportWildcardSpecifier) {
 					if(specifier.local) {
-						node.newExpression().code("var ", specifier.local.name, " = require(", $quote(moduleName), ")");
+						node.newExpression(config).code("var ", specifier.local.name, " = require(", $quote(moduleName), ")");
 						$import.define(module, file, node, specifier.local, VariableKind.Variable);
 					}
 					else {
@@ -5235,11 +5278,11 @@ module.exports = function() {
 				var alias;
 				for(alias in variables) {
 				}
-				node.newExpression().code("var ", variables[alias], " = require(", $quote(moduleName), ").", alias);
+				node.newExpression(config).code("var ", variables[alias], " = require(", $quote(moduleName), ").", alias);
 				$import.define(module, file, node, variables[alias], VariableKind.Variable);
 			}
 			else if(count) {
-				var exp = node.newExpression().code("var {");
+				var exp = node.newExpression(config).code("var {");
 				var nf = false;
 				for(var alias in variables) {
 					if(nf) {
@@ -5260,7 +5303,7 @@ module.exports = function() {
 			}
 			return true;
 		},
-		loadNodeModule(x, start, module, data, node) {
+		loadNodeModule(x, start, module, data, node, config) {
 			if(x === undefined || x === null) {
 				throw new Error("Missing parameter 'x'");
 			}
@@ -5276,12 +5319,15 @@ module.exports = function() {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
 			var dirs = $import.nodeModulesPaths(start);
 			var file;
 			for(var __ks_0 = 0, __ks_1 = dirs.length, dir; __ks_0 < __ks_1; ++__ks_0) {
 				dir = dirs[__ks_0];
 				file = path.join(dir, x);
-				if($import.loadFile(file, x, module, data, node) || $import.loadDirectory(file, x, module, data, node)) {
+				if($import.loadFile(file, x, module, data, node, config) || $import.loadDirectory(file, x, module, data, node, config)) {
 					return true;
 				}
 			}
@@ -5324,7 +5370,7 @@ module.exports = function() {
 				return null;
 			}
 		},
-		resolve(data, y, module, node) {
+		resolve(data, y, module, node, config) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -5337,15 +5383,18 @@ module.exports = function() {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
 			var x = data.module;
 			if(/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x)) {
 				x = fs.resolve(y, x);
-				if(!($import.loadFile(x, null, module, data, node) || $import.loadDirectory(x, null, module, data, node))) {
+				if(!($import.loadFile(x, null, module, data, node, config) || $import.loadDirectory(x, null, module, data, node, config))) {
 					throw new Error("Cannot find module '" + x + "' from '" + y + "'");
 				}
 			}
 			else {
-				if(!($import.loadNodeModule(x, y, module, data, node) || $import.loadCoreModule(x, module, data, node))) {
+				if(!($import.loadNodeModule(x, y, module, data, node, config) || $import.loadCoreModule(x, module, data, node, config))) {
 					throw new Error("Cannot find module '" + x + "' from '" + y + "'");
 				}
 			}
@@ -5476,13 +5525,13 @@ module.exports = function() {
 				throw new Error("Missing parameter 'clazz'");
 			}
 			if(clazz.instanceVariables[name]) {
-				node.newExpression().code("this." + name + " = ").compile(data, config);
+				node.newExpression(config).code("this." + name + " = ").compile(data, config);
 			}
 			else if(clazz.instanceVariables["_" + name]) {
-				node.newExpression().code("this._" + name + " = ").compile(data, config);
+				node.newExpression(config).code("this._" + name + " = ").compile(data, config);
 			}
 			else if(clazz.instanceMethods[name] && clazz.instanceMethods[name]["1"]) {
-				node.newExpression().code("this." + name + "(").compile(data, config).code(")");
+				node.newExpression(config).code("this." + name + "(").compile(data, config).code(")");
 			}
 			else {
 				throw new Error("Can't set member " + name + " (line " + data.start.line + ")");
@@ -5519,7 +5568,7 @@ module.exports = function() {
 			var type;
 			var last;
 			var nf;
-			var __ks_0 = data.parameters;
+			__ks_0 = data.parameters;
 			for(var __ks_1 = 0, __ks_2 = __ks_0.length, parameter; __ks_1 < __ks_2; ++__ks_1) {
 				parameter = __ks_0[__ks_1];
 				type = $signature.type(parameter.type, node);
@@ -5553,7 +5602,7 @@ module.exports = function() {
 				else {
 					nf = true;
 					if(parameter.modifiers) {
-						var __ks_3 = parameter.modifiers;
+						__ks_3 = parameter.modifiers;
 						for(var __ks_4 = 0, __ks_5 = __ks_3.length, modifier; __ks_4 < __ks_5; ++__ks_4) {
 							modifier = __ks_3[__ks_4];
 							if(modifier.kind === ParameterModifier.Rest) {
@@ -5635,13 +5684,27 @@ module.exports = function() {
 					}
 				}
 				else {
-					var name = node.newTempName();
-					if(mode & Mode.BooleanExpression) {
-						node.code($runtime.type(config), ".isValue(", name, " = ").compile(data.right, config, mode | Mode.Key).code(") ? (").compile(data.left, config, Mode.Key).code(" = ", name, ", true) : false");
+					var name = node.acquireTempName(node);
+					if($expression.nullable(data.right)) {
+						node.code("(");
+						var expression = $expression.value(node, data.right, config);
+						node.code(" ? ", $runtime.type(config), ".isValue(", name, " = ").compile(expression, config).code(") : false) ? ");
+						if(mode & Mode.BooleanExpression) {
+							node.code("(").compile(data.left, config, Mode.Key).code(" = ", name, ", true) : false");
+						}
+						else {
+							node.compile(data.left, config, Mode.Key).code(" = ", name, " : undefined");
+						}
 					}
 					else {
-						node.code($runtime.type(config), ".isValue(", name, " = ").compile(data.right, config, mode | Mode.Key).code(") ? ").compile(data.left, config, Mode.Key).code(" = ", name, " : undefined");
+						if(mode & Mode.BooleanExpression) {
+							node.code($runtime.type(config), ".isValue(", name, " = ").compile(data.right, config, mode | Mode.Key).code(") ? (").compile(data.left, config, Mode.Key).code(" = ", name, ", true) : false");
+						}
+						else {
+							node.code($runtime.type(config), ".isValue(", name, " = ").compile(data.right, config, mode | Mode.Key).code(") ? ").compile(data.left, config, Mode.Key).code(" = ", name, " : undefined");
+						}
 					}
+					node.releaseTempName(name);
 				}
 				if(mode & Mode.Operand) {
 					node.code(")");
@@ -5651,7 +5714,7 @@ module.exports = function() {
 				node.module().flag("Type");
 				node.assignment(data, true);
 				node.addMode(Mode.NoIndent).removeMode(Mode.Statement);
-				node.newControl().code("if(!", $runtime.type(config), ".isValue(").compile(data.left, config, Mode.Key).code("))").step().newExpression().compile(data.left, config, Mode.Key).code(" = ").compile(data.right, config, Mode.Key);
+				node.newControl(config).code("if(!", $runtime.type(config), ".isValue(").compile(data.left, config, Mode.Key).code("))").step().newExpression(config).compile(data.left, config, Mode.Key).code(" = ").compile(data.right, config, Mode.Key);
 			}
 			else if(__ks_0 === AssignmentOperator.Subtraction) {
 				node.assignment(data).compile(data.left, config, Mode.Key).code(" -= ").compile(data.right, config, Mode.Assignment);
@@ -5730,8 +5793,9 @@ module.exports = function() {
 					node.code(type + ".isValue(").compile(data.left, config, Mode.Operand).code(") ? ").compile(data.left, config, Mode.Operand).code(" : ").compile(data.right, config, Mode.Operand);
 				}
 				else {
-					var name = node.newTempName();
+					var name = node.acquireTempName(node);
 					node.code(type + ".isValue((" + name + " = ").compile(data.left, config, Mode.Operand).code(")) ? " + name + " : ").compile(data.right, config, Mode.Operand);
+					node.releaseTempName(name);
 				}
 			}
 			else if(__ks_0 === BinaryOperator.Or) {
@@ -5820,8 +5884,9 @@ module.exports = function() {
 						node.code(type + ".isValue(").compile(operand, config, Mode.Operand).code(") ? ").compile(operand, config, Mode.Operand).code(" : ");
 					}
 					else {
-						name = node.newTempName();
+						name = node.acquireTempName(node);
 						node.code(type + ".isValue((" + name + " = ").compile(operand, config, Mode.Operand).code(")) ? " + name + " : ");
+						node.releaseTempName(name);
 					}
 				}
 				node.compile(data.operands[data.operands.length - 1], config, Mode.Operand);
@@ -5977,7 +6042,7 @@ module.exports = function() {
 				var node = null;
 			}
 			if(config) {
-				if(!($typeofs[type])) {
+				if(!$typeofs[type]) {
 					return false;
 				}
 				if(type === "NaN") {
@@ -6054,18 +6119,18 @@ module.exports = function() {
 			for(var __ks_1 = 0, __ks_2 = __ks_0.length, binding; __ks_1 < __ks_2; ++__ks_1) {
 				binding = __ks_0[__ks_1];
 				if(binding.kind === Kind.ArrayBinding) {
-					ctrl.newExpression().compile(binding, config).code(" = ", name);
+					ctrl.newExpression(config).compile(binding, config).code(" = ", name);
 				}
 				else if(binding.kind === Kind.ObjectBinding) {
 					console.error(binding);
 					throw new Error("Not Implemented");
 				}
 				else if(binding.kind === Kind.SwitchTypeCast) {
-					ctrl.newExpression().code($variable.scope(config), binding.name.name, " = ", name);
+					ctrl.newExpression(config).code($variable.scope(config), binding.name.name, " = ", name);
 					$variable.define(ctrl, binding.name, VariableKind.Variable);
 				}
 				else {
-					ctrl.newExpression().code($variable.scope(config), binding.name, " = ", name);
+					ctrl.newExpression(config).code($variable.scope(config), binding.name, " = ", name);
 					$variable.define(ctrl, binding, VariableKind.Variable);
 				}
 			}
@@ -6234,7 +6299,7 @@ module.exports = function() {
 						}
 						else {
 							node.code($runtime.type(config, node), ".is(").compile(name, config, Mode.Operand).code(", ").compile(type.typeName, config, Mode.Operand);
-							var __ks_0 = type.typeParameters;
+							__ks_0 = type.typeParameters;
 							for(var __ks_1 = 0, __ks_2 = __ks_0.length, typeParameter; __ks_1 < __ks_2; ++__ks_1) {
 								typeParameter = __ks_0[__ks_1];
 								node.code(", ").compile(typeParameter, config);
@@ -6426,7 +6491,7 @@ module.exports = function() {
 							properties: []
 						};
 						var prop;
-						var __ks_1 = data.properties;
+						__ks_1 = data.properties;
 						for(var __ks_2 = 0, __ks_3 = __ks_1.length, property; __ks_2 < __ks_3; ++__ks_2) {
 							property = __ks_1[__ks_2];
 							prop = {
@@ -6607,18 +6672,17 @@ module.exports = function() {
 					}
 				}
 				else if(variable.type.typeName) {
-					var __ks_0;
 					if(Type.isValue(__ks_0 = $variable.fromType(variable.type, node)) ? (variable = __ks_0, true) : false) {
 						return $variable.filterMember(variable, name, node);
 					}
 				}
 				else if(variable.type.types) {
 					var variables = [];
-					var __ks_0 = variable.type.types;
+					__ks_0 = variable.type.types;
 					for(var __ks_1 = 0, __ks_2 = __ks_0.length, type; __ks_1 < __ks_2; ++__ks_1) {
 						type = __ks_0[__ks_1];
-						var __ks_3, __ks_4;
-						if(!((Type.isValue(__ks_3 = $variable.fromType(type, node)) ? (variable = __ks_3, true) : false) && (Type.isValue(__ks_4 = $variable.filterMember(variable, name, node)) ? (variable = __ks_4, true) : false))) {
+						var __ks_3;
+						if(!((Type.isValue(__ks_3 = $variable.fromType(type, node)) ? (variable = __ks_3, true) : false) && (Type.isValue(__ks_3 = $variable.filterMember(variable, name, node)) ? (variable = __ks_3, true) : false))) {
 							return null;
 						}
 						variables.push(variable);
@@ -6660,8 +6724,8 @@ module.exports = function() {
 					var __ks_0 = variable.type.types;
 					for(var __ks_1 = 0, __ks_2 = __ks_0.length, type; __ks_1 < __ks_2; ++__ks_1) {
 						type = __ks_0[__ks_1];
-						var __ks_3, __ks_4;
-						if(!((Type.isValue(__ks_3 = $variable.fromType(type, node)) ? (variable = __ks_3, true) : false) && (Type.isValue(__ks_4 = $variable.filterMember(variable, name, node)) ? (variable = __ks_4, true) : false))) {
+						var __ks_3;
+						if(!((Type.isValue(__ks_3 = $variable.fromType(type, node)) ? (variable = __ks_3, true) : false) && (Type.isValue(__ks_3 = $variable.filterMember(variable, name, node)) ? (variable = __ks_3, true) : false))) {
 							return null;
 						}
 						variables.push(variable);
@@ -6669,7 +6733,6 @@ module.exports = function() {
 					return variables;
 				}
 				else {
-					var __ks_0;
 					if(Type.isValue(__ks_0 = $variable.fromType(variable.type, node)) ? (variable = __ks_0, true) : false) {
 						return $variable.filterMember(variable, name, node);
 					}
@@ -6775,11 +6838,11 @@ module.exports = function() {
 						var name = data.callee.property.name;
 						var varType;
 						if(Type.isArray(variable)) {
-							for(var __ks_2 = 0, __ks_3 = variable.length, vari; __ks_2 < __ks_3; ++__ks_2) {
-								vari = variable[__ks_2];
-								var __ks_4 = vari.instanceMethods[name];
-								for(var __ks_5 = 0, __ks_6 = __ks_4.length, member; __ks_5 < __ks_6; ++__ks_5) {
-									member = __ks_4[__ks_5];
+							for(var __ks_1 = 0, __ks_2 = variable.length, vari; __ks_1 < __ks_2; ++__ks_1) {
+								vari = variable[__ks_1];
+								__ks_3 = vari.instanceMethods[name];
+								for(var __ks_4 = 0, __ks_5 = __ks_3.length, member; __ks_4 < __ks_5; ++__ks_4) {
+									member = __ks_3[__ks_4];
 									if(member.type && $variable.filter(member, min, max)) {
 										varType = $variable.fromType(member.type, node);
 										if(varType) {
@@ -6801,9 +6864,9 @@ module.exports = function() {
 						else if(variable.kind === VariableKind.Class) {
 							if(data.callee.object.kind === Kind.Identifier) {
 								if(variable.classMethods[name]) {
-									var __ks_2 = variable.classMethods[name];
-									for(var __ks_3 = 0, __ks_4 = __ks_2.length, member; __ks_3 < __ks_4; ++__ks_3) {
-										member = __ks_2[__ks_3];
+									__ks_1 = variable.classMethods[name];
+									for(var __ks_2 = 0, __ks_3 = __ks_1.length, member; __ks_2 < __ks_3; ++__ks_2) {
+										member = __ks_1[__ks_2];
 										if(member.type && $variable.filter(member, min, max)) {
 											varType = $variable.fromType(member.type, node);
 											if(varType) {
@@ -6815,9 +6878,9 @@ module.exports = function() {
 							}
 							else {
 								if(variable.instanceMethods[name]) {
-									var __ks_2 = variable.instanceMethods[name];
-									for(var __ks_3 = 0, __ks_4 = __ks_2.length, member; __ks_3 < __ks_4; ++__ks_3) {
-										member = __ks_2[__ks_3];
+									__ks_1 = variable.instanceMethods[name];
+									for(var __ks_2 = 0, __ks_3 = __ks_1.length, member; __ks_2 < __ks_3; ++__ks_2) {
+										member = __ks_1[__ks_2];
 										if(member.type && $variable.filter(member, min, max)) {
 											varType = $variable.fromType(member.type, node);
 											if(varType) {
@@ -6830,9 +6893,9 @@ module.exports = function() {
 						}
 						else if(variable.kind === VariableKind.Variable) {
 							if(variable.type && variable.type.properties) {
-								var __ks_2 = variable.type.properties;
-								for(var __ks_3 = 0, __ks_4 = __ks_2.length, property; __ks_3 < __ks_4; ++__ks_3) {
-									property = __ks_2[__ks_3];
+								__ks_1 = variable.type.properties;
+								for(var __ks_2 = 0, __ks_3 = __ks_1.length, property; __ks_2 < __ks_3; ++__ks_2) {
+									property = __ks_1[__ks_2];
 									if(property.type && (property.name.name === name) && $variable.filter(property, min, max)) {
 										varType = $variable.fromType(property.type, node);
 										if(varType) {
@@ -7109,7 +7172,6 @@ module.exports = function() {
 		}
 		__ks_init_1() {
 			this._code = [];
-			this._config = null;
 			this._prepared = false;
 			this._renamedIndexes = {};
 			this._renamedVars = {};
@@ -7118,25 +7180,37 @@ module.exports = function() {
 		__ks_init() {
 			Block.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0() {
+		__ks_cons_0(config) {
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			if(!Type.isObject(config)) {
+				throw new Error("Invalid type for parameter 'config'");
+			}
+			this._config = config;
 			this._indentation = 1;
 			this._indent = "\t";
-			this._temp = -1;
 		}
-		__ks_cons_1(parent) {
+		__ks_cons_1(parent, config) {
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			if(!Type.isObject(config)) {
+				throw new Error("Invalid type for parameter 'config'");
+			}
 			this._parent = parent;
+			this._config = config;
 			this._indentation = parent._indentation + 1;
 			this._indent = "\t".repeat(this._indentation);
-			this._temp = parent.getTempCount(true);
 		}
 		__ks_cons(args) {
-			if(args.length === 0) {
-				Block.prototype.__ks_cons_0.apply(this);
+			if(args.length === 1) {
+				Block.prototype.__ks_cons_0.apply(this, args);
 			}
-			else if(args.length === 1) {
+			else if(args.length === 2) {
 				Block.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
@@ -7217,9 +7291,6 @@ module.exports = function() {
 			}
 			else  {
 				var info = null;
-			}
-			if(!this._config) {
-				this._config = config;
 			}
 			if(Type.isString(data)) {
 				this._code.push(data);
@@ -7348,64 +7419,73 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newBlock_0() {
+		__ks_func_newBlock_0(config) {
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
 			return this;
 		}
 		newBlock() {
-			if(arguments.length === 0) {
-				return Block.prototype.__ks_func_newBlock_0.apply(this);
+			if(arguments.length === 1) {
+				return Block.prototype.__ks_func_newBlock_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newControl_0(mode) {
-			if(mode === undefined || mode === null) {
-				mode = 0;
+		__ks_func_newControl_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
 			}
-			var control = new Control(this, false, mode);
+			var __ks_i = -1;
+			var config = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var mode = arguments[++__ks_i];
+			}
+			else  {
+				var mode = 0;
+			}
+			var control = new Control(this, config.variables === "es6" ? BlockMode.Scope : BlockMode.Block, config, mode);
 			this._code.push(control);
 			return control;
 		}
 		newControl() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Block.prototype.__ks_func_newControl_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newExpression_0(mode) {
-			if(mode === undefined || mode === null) {
-				mode = 0;
+		__ks_func_newExpression_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
 			}
-			var stmt = new Expression(this, mode | Mode.Statement);
+			var __ks_i = -1;
+			var config = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var mode = arguments[++__ks_i];
+			}
+			else  {
+				var mode = 0;
+			}
+			var stmt = new Expression(this, config, mode | Mode.Statement);
 			this._code.push(stmt);
 			return stmt;
 		}
 		newExpression() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Block.prototype.__ks_func_newExpression_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newFunction_0() {
-			var stmt = new FunctionBlock(this);
+		__ks_func_newFunction_0(config) {
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			var stmt = new FunctionBlock(this, config);
 			this._code.push(stmt);
 			return stmt;
 		}
 		newFunction() {
-			if(arguments.length === 0) {
-				return Block.prototype.__ks_func_newFunction_0.apply(this);
-			}
-			throw new Error("Wrong number of arguments");
-		}
-		__ks_func_newTempName_0() {
-			var name = "__ks_" + ++this._temp;
-			while(this._variables[name]) {
-				name = "__ks_" + ++this._temp;
-			}
-			return name;
-		}
-		newTempName() {
-			if(arguments.length === 0) {
-				return Block.prototype.__ks_func_newTempName_0.apply(this);
+			if(arguments.length === 1) {
+				return Block.prototype.__ks_func_newFunction_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -7502,18 +7582,28 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 0,
-				max: 0,
-				parameters: [
-				]
-			},
-			{
-				access: 3,
 				min: 1,
 				max: 1,
 				parameters: [
 					{
+						type: "Object",
+						min: 1,
+						max: 1
+					}
+				]
+			},
+			{
+				access: 3,
+				min: 2,
+				max: 2,
+				parameters: [
+					{
 						type: "Any",
+						min: 1,
+						max: 1
+					},
+					{
+						type: "Object",
 						min: 1,
 						max: 1
 					}
@@ -7694,22 +7784,27 @@ module.exports = function() {
 			newBlock: [
 				{
 					access: 3,
-					min: 0,
-					max: 0,
+					min: 1,
+					max: 1,
 					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
 					]
 				}
 			],
 			newControl: [
 				{
 					access: 3,
-					min: 0,
-					max: 1,
+					min: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 0,
-							max: 1
+							min: 1,
+							max: 2
 						}
 					]
 				}
@@ -7717,13 +7812,13 @@ module.exports = function() {
 			newExpression: [
 				{
 					access: 3,
-					min: 0,
-					max: 1,
+					min: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 0,
-							max: 1
+							min: 1,
+							max: 2
 						}
 					]
 				}
@@ -7731,18 +7826,14 @@ module.exports = function() {
 			newFunction: [
 				{
 					access: 3,
-					min: 0,
-					max: 0,
+					min: 1,
+					max: 1,
 					parameters: [
-					]
-				}
-			],
-			newTempName: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
 					]
 				}
 			],
@@ -7791,19 +7882,37 @@ module.exports = function() {
 		__ks_init() {
 			Block.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(parent) {
+		__ks_cons_0(parent, config) {
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
-			Block.prototype.__ks_cons.call(this, [parent]);
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			Block.prototype.__ks_cons.call(this, [parent, config]);
 		}
 		__ks_cons(args) {
-			if(args.length === 1) {
+			if(args.length === 2) {
 				Node.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
 				Block.prototype.__ks_cons.call(this, args);
 			}
+		}
+		__ks_func_acquireTempName_0(node = null, assignment, fromChild) {
+			if(assignment === undefined || assignment === null) {
+				assignment = false;
+			}
+			if(fromChild === undefined || fromChild === null) {
+				fromChild = true;
+			}
+			return this._parent.acquireTempName(node, assignment, fromChild);
+		}
+		acquireTempName() {
+			if(arguments.length >= 0 && arguments.length <= 3) {
+				return Node.prototype.__ks_func_acquireTempName_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_getRenamedVar_0(name) {
 			if(name === undefined || name === null) {
@@ -7866,19 +7975,40 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
+		__ks_func_releaseTempName_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
+			}
+			var __ks_i = -1;
+			var name = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var fromChild = arguments[++__ks_i];
+			}
+			else  {
+				var fromChild = true;
+			}
+			this._parent.releaseTempName(name, fromChild);
+			return this;
+		}
+		releaseTempName() {
+			if(arguments.length >= 1 && arguments.length <= 2) {
+				return Node.prototype.__ks_func_releaseTempName_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
 	}
 	Node.__ks_reflect = {
 		inits: 0,
 		constructors: [
 			{
 				access: 3,
-				min: 1,
-				max: 1,
+				min: 2,
+				max: 2,
 				parameters: [
 					{
 						type: "Any",
-						min: 1,
-						max: 1
+						min: 2,
+						max: 2
 					}
 				]
 			}
@@ -7888,6 +8018,20 @@ module.exports = function() {
 		classVariables: {
 		},
 		instanceMethods: {
+			acquireTempName: [
+				{
+					access: 3,
+					min: 0,
+					max: 3,
+					parameters: [
+						{
+							type: "Any",
+							min: 0,
+							max: 3
+						}
+					]
+				}
+			],
 			getRenamedVar: [
 				{
 					access: 3,
@@ -7924,34 +8068,134 @@ module.exports = function() {
 						}
 					]
 				}
+			],
+			releaseTempName: [
+				{
+					access: 3,
+					min: 1,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 2
+						}
+					]
+				}
 			]
 		},
 		classMethods: {
 		}
 	};
 	class Scope extends Block {
+		__ks_init_1() {
+			this._scopeParent = null;
+			this._tempNextIndex = 0;
+			this._tempNames = {};
+			this._tempNameCount = 0;
+		}
 		__ks_init() {
 			Block.prototype.__ks_init.call(this);
+			Scope.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(parent) {
+		__ks_cons_0(parent, config, mode) {
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			this._mode = mode;
 			if(Type.is(parent, Module)) {
-				Block.prototype.__ks_cons.call(this, []);
+				Block.prototype.__ks_cons.call(this, [config]);
 				this._module = parent;
 			}
 			else {
-				Block.prototype.__ks_cons.call(this, [parent]);
+				Block.prototype.__ks_cons.call(this, [parent, config]);
+				if(mode === BlockMode.Scope) {
+					while(!(Type.is(parent, Scope))) {
+						parent = parent._parent;
+					}
+					this._scopeParent = parent;
+					this._tempNextIndex = parent._tempNextIndex;
+					this._tempParentNames = {};
+				}
 			}
 		}
 		__ks_cons(args) {
-			if(args.length === 1) {
+			if(args.length === 3) {
 				Scope.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
 				Block.prototype.__ks_cons.call(this, args);
 			}
+		}
+		__ks_func_acquireTempName_0(node = null, assignment, fromChild) {
+			if(assignment === undefined || assignment === null) {
+				assignment = false;
+			}
+			if(fromChild === undefined || fromChild === null) {
+				fromChild = true;
+			}
+			var name, __ks_0;
+			if(this._scopeParent && (Type.isValue(__ks_0 = this._scopeParent.acquireTempNameFromKid()) ? (name = __ks_0, true) : false)) {
+				this._tempParentNames[name] = true;
+				return name;
+			}
+			if(this._tempNameCount) {
+				for(var i = 0, __ks_0 = this._tempNextIndex; i < __ks_0; ++i) {
+					if(this._tempNames[i]) {
+						--this._tempNameCount;
+						name = this._tempNames[i];
+						this._tempNames[i] = false;
+						return name;
+					}
+				}
+			}
+			else {
+				var __ks_name_1 = "__ks_" + this._tempNextIndex;
+				if(node) {
+					node.useTempVariable(__ks_name_1, assignment);
+				}
+				++this._tempNextIndex;
+				return __ks_name_1;
+			}
+		}
+		acquireTempName() {
+			if(arguments.length >= 0 && arguments.length <= 3) {
+				return Scope.prototype.__ks_func_acquireTempName_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_acquireTempNameFromKid_0() {
+			var name, __ks_0;
+			if(this._scopeParent && (Type.isValue(__ks_0 = this._scopeParent.acquireTempNameFromKid()) ? (name = __ks_0, true) : false)) {
+				this._tempParentNames[name] = true;
+				return name;
+			}
+			if(this._tempNameCount) {
+				for(var i = 0, __ks_0 = this._tempNextIndex; i < __ks_0; ++i) {
+					if(this._tempNames[i]) {
+						--this._tempNameCount;
+						name = this._tempNames[i];
+						this._tempNames[i] = false;
+						return name;
+					}
+				}
+			}
+			return null;
+		}
+		acquireTempNameFromKid() {
+			if(arguments.length === 0) {
+				return Scope.prototype.__ks_func_acquireTempNameFromKid_0.apply(this);
+			}
+			else if(Block.prototype.acquireTempNameFromKid) {
+				return Block.prototype.acquireTempNameFromKid.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_getRenamedVar_0(name) {
 			if(name === undefined || name === null) {
@@ -8016,31 +8260,121 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
+		__ks_func_releaseTempName_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
+			}
+			var __ks_i = -1;
+			var name = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var fromChild = arguments[++__ks_i];
+			}
+			else  {
+				var fromChild = true;
+			}
+			if((name.length > 5) && (name.substr(0, 5) === "__ks_")) {
+				if(this._scopeParent && this._tempParentNames[name]) {
+					this._scopeParent.releaseTempNameFromKid(name);
+					this._tempParentNames[name] = false;
+				}
+				else {
+					++this._tempNameCount;
+					this._tempNames[name.substr(5)] = name;
+				}
+			}
+			return this;
+		}
+		releaseTempName() {
+			if(arguments.length >= 1 && arguments.length <= 2) {
+				return Scope.prototype.__ks_func_releaseTempName_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_releaseTempNameFromKid_0(name) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(this._scopeParent && this._tempParentNames[name]) {
+				this._scopeParent.releaseTempNameFromKid(name);
+				this._tempParentNames[name] = false;
+			}
+			else {
+				++this._tempNameCount;
+				this._tempNames[name.substr(5)] = name;
+			}
+		}
+		releaseTempNameFromKid() {
+			if(arguments.length === 1) {
+				return Scope.prototype.__ks_func_releaseTempNameFromKid_0.apply(this, arguments);
+			}
+			else if(Block.prototype.releaseTempNameFromKid) {
+				return Block.prototype.releaseTempNameFromKid.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
 	}
 	Scope.__ks_reflect = {
-		inits: 0,
+		inits: 1,
 		constructors: [
 			{
 				access: 3,
-				min: 1,
-				max: 1,
+				min: 3,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
-						min: 1,
-						max: 1
+						min: 3,
+						max: 3
 					}
 				]
 			}
 		],
 		instanceVariables: {
+			_mode: {
+				access: 1
+			},
 			_module: {
+				access: 1
+			},
+			_scopeParent: {
+				access: 1
+			},
+			_tempNextIndex: {
+				access: 1
+			},
+			_tempNames: {
+				access: 1
+			},
+			_tempNameCount: {
 				access: 1
 			}
 		},
 		classVariables: {
 		},
 		instanceMethods: {
+			acquireTempName: [
+				{
+					access: 3,
+					min: 0,
+					max: 3,
+					parameters: [
+						{
+							type: "Any",
+							min: 0,
+							max: 3
+						}
+					]
+				}
+			],
+			acquireTempNameFromKid: [
+				{
+					access: 1,
+					min: 0,
+					max: 0,
+					parameters: [
+					]
+				}
+			],
 			getRenamedVar: [
 				{
 					access: 3,
@@ -8077,6 +8411,34 @@ module.exports = function() {
 						}
 					]
 				}
+			],
+			releaseTempName: [
+				{
+					access: 3,
+					min: 1,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 2
+						}
+					]
+				}
+			],
+			releaseTempNameFromKid: [
+				{
+					access: 1,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
 			]
 		},
 		classMethods: {
@@ -8089,39 +8451,69 @@ module.exports = function() {
 		}
 		__ks_init_1() {
 			this._index = 0;
-			this._scope = false;
 			this._steps = [];
 		}
 		__ks_init() {
 			Control.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0() {
-			if(arguments.length < 2) {
+			if(arguments.length < 3) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
 			var parent = arguments[++__ks_i];
-			var scope = arguments[++__ks_i];
-			if(arguments.length > 2) {
+			var blockMode = arguments[++__ks_i];
+			if(Type.isObject(arguments[++__ks_i])) {
+				var config = arguments[__ks_i];
+			}
+			else throw new Error("Invalid type for parameter 'config'")
+			if(arguments.length > 3) {
 				var mode = arguments[++__ks_i];
 			}
 			else  {
 				var mode = 0;
 			}
 			this._parent = parent;
-			this._scope = scope;
+			this._blockMode = blockMode;
+			this._config = config;
 			this._mode = mode;
 			this._indentation = parent._codeIndentation || parent._indentation;
 			this._indent = parent._codeIndent || parent._indent;
-			this._steps.push(new Expression(this));
+			this._steps.push(new Expression(this, config));
 		}
 		__ks_cons(args) {
-			if(args.length >= 2 && args.length <= 3) {
+			if(args.length >= 3 && args.length <= 4) {
 				Control.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
 				throw new Error("Wrong number of arguments");
 			}
+		}
+		__ks_func_acquireTempName_0(node = null, assignment, fromChild) {
+			if(assignment === undefined || assignment === null) {
+				assignment = false;
+			}
+			if(fromChild === undefined || fromChild === null) {
+				fromChild = false;
+			}
+			if(fromChild) {
+				return this._parent.acquireTempName(node, assignment, true);
+			}
+			else if((this._index % 2) === 0) {
+				if((this._index + 1) >= this._steps.length) {
+					this._steps.push(this._blockMode === BlockMode.Block ? new Node(this, this._config) : new Scope(this, this._config, this._blockMode));
+				}
+				return this._steps[this._index + 1].acquireTempName(node, assignment);
+			}
+			else {
+				return this._steps[this._index].acquireTempName(node, assignment);
+			}
+		}
+		acquireTempName() {
+			if(arguments.length >= 0 && arguments.length <= 3) {
+				return Control.prototype.__ks_func_acquireTempName_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_addMode_0(mode) {
 			if(mode === undefined || mode === null) {
@@ -8332,45 +8724,67 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newBlock_0() {
-			return this._steps[this._index].newBlock();
+		__ks_func_newBlock_0(config) {
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			return this._steps[this._index].newBlock(config);
 		}
 		newBlock() {
-			if(arguments.length === 0) {
-				return Control.prototype.__ks_func_newBlock_0.apply(this);
+			if(arguments.length === 1) {
+				return Control.prototype.__ks_func_newBlock_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newControl_0(mode) {
-			if(mode === undefined || mode === null) {
-				mode = 0;
+		__ks_func_newControl_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
 			}
-			return this._steps[this._index].newControl(mode);
+			var __ks_i = -1;
+			var config = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var mode = arguments[++__ks_i];
+			}
+			else  {
+				var mode = 0;
+			}
+			return this._steps[this._index].newControl(config, mode);
 		}
 		newControl() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Control.prototype.__ks_func_newControl_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newExpression_0(mode) {
-			if(mode === undefined || mode === null) {
-				mode = 0;
+		__ks_func_newExpression_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
 			}
-			return this._steps[this._index].newExpression(mode);
+			var __ks_i = -1;
+			var config = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var mode = arguments[++__ks_i];
+			}
+			else  {
+				var mode = 0;
+			}
+			return this._steps[this._index].newExpression(config, mode);
 		}
 		newExpression() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Control.prototype.__ks_func_newExpression_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newFunction_0() {
-			return this._steps[this._index].newFunction();
+		__ks_func_newFunction_0(config) {
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			return this._steps[this._index].newFunction(config);
 		}
 		newFunction() {
-			if(arguments.length === 0) {
-				return Control.prototype.__ks_func_newFunction_0.apply(this);
+			if(arguments.length === 1) {
+				return Control.prototype.__ks_func_newFunction_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -8386,20 +8800,35 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newTempName_0() {
-			if((this._index % 2) === 0) {
+		__ks_func_releaseTempName_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
+			}
+			var __ks_i = -1;
+			var name = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var fromChild = arguments[++__ks_i];
+			}
+			else  {
+				var fromChild = false;
+			}
+			if(fromChild) {
+				this._parent.releaseTempName(name, true);
+			}
+			else if((this._index % 2) === 0) {
 				if((this._index + 1) >= this._steps.length) {
-					this._steps.push(this._scope ? new Scope(this) : new Node(this));
+					this._steps.push(this._blockMode === BlockMode.Block ? new Node(this, this._config) : new Scope(this, this._config, this._blockMode));
 				}
-				return this._steps[this._index + 1].newTempName();
+				this._steps[this._index + 1].releaseTempName(name);
 			}
 			else {
-				return this._steps[this._index].newTempName();
+				this._steps[this._index].releaseTempName(name);
 			}
+			return this;
 		}
-		newTempName() {
-			if(arguments.length === 0) {
-				return Control.prototype.__ks_func_newTempName_0.apply(this);
+		releaseTempName() {
+			if(arguments.length >= 1 && arguments.length <= 2) {
+				return Control.prototype.__ks_func_releaseTempName_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -8409,7 +8838,7 @@ module.exports = function() {
 			}
 			if((this._index % 2) === 0) {
 				if((this._index + 1) >= this._steps.length) {
-					this._steps.push(this._scope ? new Scope(this) : new Node(this));
+					this._steps.push(this._blockMode === BlockMode.Block ? new Node(this, this._config) : new Scope(this, this._config, this._blockMode));
 				}
 				this._steps[this._index + 1].rename(name);
 			}
@@ -8430,13 +8859,13 @@ module.exports = function() {
 			}
 			if((this._index + 1) >= this._steps.length) {
 				if((this._steps.length % 2) === 0) {
-					this._steps.push(new Expression(this, mode));
+					this._steps.push(new Expression(this, this._config, mode));
 				}
-				else if(this._scope) {
-					this._steps.push(new Scope(this));
+				else if(this._blockMode === BlockMode.Block) {
+					this._steps.push(new Node(this, this._config));
 				}
 				else {
-					this._steps.push(new Node(this));
+					this._steps.push(new Scope(this, this._config, this._blockMode));
 				}
 			}
 			++this._index;
@@ -8486,7 +8915,7 @@ module.exports = function() {
 			this.compile(data, config, Mode.Key);
 			if((this._index % 2) === 0) {
 				if((this._index + 1) >= this._steps.length) {
-					this._steps.push(this._scope ? new Scope(this) : new Node(this));
+					this._steps.push(this._blockMode === BlockMode.Block ? new Node(this, this._config) : new Scope(this, this._config, this._blockMode));
 				}
 				if(type) {
 					$variable.define(this._steps[this._index + 1], data.name || data, $variable.kind(type), type);
@@ -8570,18 +8999,34 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 2,
-				max: 3,
+				min: 3,
+				max: 4,
 				parameters: [
 					{
 						type: "Any",
 						min: 2,
-						max: 3
+						max: 2
+					},
+					{
+						type: "Object",
+						min: 1,
+						max: 1
+					},
+					{
+						type: "Any",
+						min: 0,
+						max: 1
 					}
 				]
 			}
 		],
 		instanceVariables: {
+			_blockMode: {
+				access: 1
+			},
+			_config: {
+				access: 1
+			},
 			_index: {
 				access: 1
 			},
@@ -8591,9 +9036,6 @@ module.exports = function() {
 			_parent: {
 				access: 1
 			},
-			_scope: {
-				access: 1
-			},
 			_steps: {
 				access: 1
 			}
@@ -8601,6 +9043,20 @@ module.exports = function() {
 		classVariables: {
 		},
 		instanceMethods: {
+			acquireTempName: [
+				{
+					access: 3,
+					min: 0,
+					max: 3,
+					parameters: [
+						{
+							type: "Any",
+							min: 0,
+							max: 3
+						}
+					]
+				}
+			],
 			addMode: [
 				{
 					access: 3,
@@ -8766,22 +9222,27 @@ module.exports = function() {
 			newBlock: [
 				{
 					access: 3,
-					min: 0,
-					max: 0,
+					min: 1,
+					max: 1,
 					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
 					]
 				}
 			],
 			newControl: [
 				{
 					access: 3,
-					min: 0,
-					max: 1,
+					min: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 0,
-							max: 1
+							min: 1,
+							max: 2
 						}
 					]
 				}
@@ -8789,13 +9250,13 @@ module.exports = function() {
 			newExpression: [
 				{
 					access: 3,
-					min: 0,
-					max: 1,
+					min: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 0,
-							max: 1
+							min: 1,
+							max: 2
 						}
 					]
 				}
@@ -8803,9 +9264,14 @@ module.exports = function() {
 			newFunction: [
 				{
 					access: 3,
-					min: 0,
-					max: 0,
+					min: 1,
+					max: 1,
 					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
 					]
 				}
 			],
@@ -8823,12 +9289,17 @@ module.exports = function() {
 					]
 				}
 			],
-			newTempName: [
+			releaseTempName: [
 				{
 					access: 3,
-					min: 0,
-					max: 0,
+					min: 1,
+					max: 2,
 					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 2
+						}
 					]
 				}
 			],
@@ -8930,7 +9401,6 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_init_1() {
-			this._config = null;
 			this._code = [];
 			this._noVariable = false;
 			this._prepared = false;
@@ -8943,18 +9413,20 @@ module.exports = function() {
 			Expression.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0() {
-			if(arguments.length < 1) {
+			if(arguments.length < 2) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
 			var parent = arguments[++__ks_i];
-			if(arguments.length > 1) {
+			var config = arguments[++__ks_i];
+			if(arguments.length > 2) {
 				var mode = arguments[++__ks_i];
 			}
 			else  {
 				var mode = 0;
 			}
 			this._parent = parent;
+			this._config = config;
 			this._mode = mode;
 			this._indentation = parent._indentation;
 			this._indent = parent._indent;
@@ -8962,12 +9434,27 @@ module.exports = function() {
 			this._codeIndent = parent._indent;
 		}
 		__ks_cons(args) {
-			if(args.length >= 1 && args.length <= 2) {
+			if(args.length >= 2 && args.length <= 3) {
 				Expression.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
 				throw new Error("Wrong number of arguments");
 			}
+		}
+		__ks_func_acquireTempName_0(node = null, assignment, fromChild) {
+			if(assignment === undefined || assignment === null) {
+				assignment = false;
+			}
+			if(fromChild === undefined || fromChild === null) {
+				fromChild = true;
+			}
+			return this._parent.acquireTempName(node, assignment, fromChild);
+		}
+		acquireTempName() {
+			if(arguments.length >= 0 && arguments.length <= 3) {
+				return Expression.prototype.__ks_func_acquireTempName_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_addMode_0(mode) {
 			if(mode === undefined || mode === null) {
@@ -9078,9 +9565,6 @@ module.exports = function() {
 			}
 			else  {
 				var info = null;
-			}
-			if(!this._config) {
-				this._config = config;
 			}
 			if(Type.isString(data)) {
 				this._code.push(data);
@@ -9216,51 +9700,73 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newControl_0(mode) {
-			if(mode === undefined || mode === null) {
-				mode = 0;
+		__ks_func_newControl_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
 			}
-			var control = new Control(this, false, mode);
+			var __ks_i = -1;
+			var config = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var mode = arguments[++__ks_i];
+			}
+			else  {
+				var mode = 0;
+			}
+			var control = new Control(this, config.variables === "es6" ? BlockMode.Scope : BlockMode.Block, config, mode);
 			this._code.push(control);
 			return control;
 		}
 		newControl() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Expression.prototype.__ks_func_newControl_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newExpression_0(mode) {
-			if(mode === undefined || mode === null) {
-				mode = 0;
+		__ks_func_newExpression_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
+			}
+			var __ks_i = -1;
+			var config = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var mode = arguments[++__ks_i];
+			}
+			else  {
+				var mode = 0;
 			}
 			return this;
 		}
 		newExpression() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Expression.prototype.__ks_func_newExpression_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newFunction_0() {
-			var code = new FunctionBlock(this);
+		__ks_func_newFunction_0(config) {
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			var code = new FunctionBlock(this, config);
 			this._code.push(code);
 			return code;
 		}
 		newFunction() {
-			if(arguments.length === 0) {
-				return Expression.prototype.__ks_func_newFunction_0.apply(this);
+			if(arguments.length === 1) {
+				return Expression.prototype.__ks_func_newFunction_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newObject_0() {
-			var code = new ObjectBlock(this);
+		__ks_func_newObject_0(config) {
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
+			var code = new ObjectBlock(this, config);
 			this._code.push(code);
 			return code;
 		}
 		newObject() {
-			if(arguments.length === 0) {
-				return Expression.prototype.__ks_func_newObject_0.apply(this);
+			if(arguments.length === 1) {
+				return Expression.prototype.__ks_func_newObject_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -9273,22 +9779,6 @@ module.exports = function() {
 		newRenamedVar() {
 			if(arguments.length === 1) {
 				return Expression.prototype.__ks_func_newRenamedVar_0.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
-		}
-		__ks_func_newTempName_0(variable) {
-			if(variable === undefined || variable === null) {
-				variable = true;
-			}
-			var name = this._parent.newTempName();
-			if(variable) {
-				__ks_Array._im_pushUniq(this._variables, name);
-			}
-			return name;
-		}
-		newTempName() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
-				return Expression.prototype.__ks_func_newTempName_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -9361,6 +9851,27 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
+		__ks_func_releaseTempName_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
+			}
+			var __ks_i = -1;
+			var name = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var fromChild = arguments[++__ks_i];
+			}
+			else  {
+				var fromChild = true;
+			}
+			this._parent.releaseTempName(name, fromChild);
+			return this;
+		}
+		releaseTempName() {
+			if(arguments.length >= 1 && arguments.length <= 2) {
+				return Expression.prototype.__ks_func_releaseTempName_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
 		__ks_func_removeMode_0(mode) {
 			if(mode === undefined || mode === null) {
 				throw new Error("Missing parameter 'mode'");
@@ -9415,9 +9926,9 @@ module.exports = function() {
 					src = this._indent + $variable.scope(this._config) + this._variables.join(", ") + ";\n" + src;
 				}
 			}
-			var __ks_1 = this._code;
-			for(var __ks_2 = 0, __ks_3 = __ks_1.length, code; __ks_2 < __ks_3; ++__ks_2) {
-				code = __ks_1[__ks_2];
+			__ks_0 = this._code;
+			for(var __ks_1 = 0, __ks_2 = __ks_0.length, code; __ks_1 < __ks_2; ++__ks_1) {
+				code = __ks_0[__ks_1];
 				if(Type.isPrimitive(code)) {
 					src += code;
 				}
@@ -9507,6 +10018,26 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
+		__ks_func_useTempVariable_0(name, assignment) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(assignment === undefined || assignment === null) {
+				throw new Error("Missing parameter 'assignment'");
+			}
+			if(assignment && (this._variable.length === 0)) {
+				this._variable = name;
+			}
+			else {
+				__ks_Array._im_pushUniq(this._variables, name);
+			}
+		}
+		useTempVariable() {
+			if(arguments.length === 2) {
+				return Expression.prototype.__ks_func_useTempVariable_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
 		__ks_func_write_0(data) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
@@ -9542,13 +10073,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 1,
-				max: 2,
+				min: 2,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
-						min: 1,
-						max: 2
+						min: 2,
+						max: 3
 					}
 				]
 			}
@@ -9590,6 +10121,20 @@ module.exports = function() {
 		classVariables: {
 		},
 		instanceMethods: {
+			acquireTempName: [
+				{
+					access: 3,
+					min: 0,
+					max: 3,
+					parameters: [
+						{
+							type: "Any",
+							min: 0,
+							max: 3
+						}
+					]
+				}
+			],
 			addMode: [
 				{
 					access: 3,
@@ -9783,13 +10328,13 @@ module.exports = function() {
 			newControl: [
 				{
 					access: 3,
-					min: 0,
-					max: 1,
+					min: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 0,
-							max: 1
+							min: 1,
+							max: 2
 						}
 					]
 				}
@@ -9797,36 +10342,18 @@ module.exports = function() {
 			newExpression: [
 				{
 					access: 3,
-					min: 0,
-					max: 1,
+					min: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 0,
-							max: 1
+							min: 1,
+							max: 2
 						}
 					]
 				}
 			],
 			newFunction: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: [
-					]
-				}
-			],
-			newObject: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: [
-					]
-				}
-			],
-			newRenamedVar: [
 				{
 					access: 3,
 					min: 1,
@@ -9840,15 +10367,29 @@ module.exports = function() {
 					]
 				}
 			],
-			newTempName: [
+			newObject: [
 				{
 					access: 3,
-					min: 0,
+					min: 1,
 					max: 1,
 					parameters: [
 						{
 							type: "Any",
-							min: 0,
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			newRenamedVar: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
 							max: 1
 						}
 					]
@@ -9901,6 +10442,20 @@ module.exports = function() {
 							type: "Any",
 							min: 1,
 							max: 1
+						}
+					]
+				}
+			],
+			releaseTempName: [
+				{
+					access: 3,
+					min: 1,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 2
 						}
 					]
 				}
@@ -9970,6 +10525,20 @@ module.exports = function() {
 					]
 				}
 			],
+			useTempVariable: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
 			write: [
 				{
 					access: 3,
@@ -9999,15 +10568,18 @@ module.exports = function() {
 		__ks_init() {
 			FunctionBlock.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(parent) {
+		__ks_cons_0(parent, config) {
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
 			this._parent = parent;
-			this._ctrl = new Control(parent, true, Mode.PrepareNone);
+			this._ctrl = new Control(parent, BlockMode.Function, config, Mode.PrepareNone);
 		}
 		__ks_cons(args) {
-			if(args.length === 1) {
+			if(args.length === 2) {
 				FunctionBlock.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -10058,13 +10630,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 1,
-				max: 1,
+				min: 2,
+				max: 2,
 				parameters: [
 					{
 						type: "Any",
-						min: 1,
-						max: 1
+						min: 2,
+						max: 2
 					}
 				]
 			}
@@ -10131,22 +10703,25 @@ module.exports = function() {
 		}
 		__ks_init_1() {
 			this._code = [];
-			this._config = null;
 		}
 		__ks_init() {
 			ObjectBlock.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(parent) {
+		__ks_cons_0(parent, config) {
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
+			if(config === undefined || config === null) {
+				throw new Error("Missing parameter 'config'");
+			}
 			this._parent = parent;
+			this._config = config;
 			this._closingIndent = parent._codeIndent;
 			this._indentation = parent._codeIndentation + 1;
 			this._indent = "\t".repeat(this._indentation);
 		}
 		__ks_cons(args) {
-			if(args.length === 1) {
+			if(args.length === 2) {
 				ObjectBlock.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -10180,9 +10755,6 @@ module.exports = function() {
 			}
 			else  {
 				var info = null;
-			}
-			if(!this._config) {
-				this._config = config;
 			}
 			if(Type.isString(data)) {
 				this._code.push(data);
@@ -10280,16 +10852,24 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_newExpression_0(mode) {
-			if(mode === undefined || mode === null) {
-				mode = 0;
+		__ks_func_newExpression_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
 			}
-			var code = new Expression(this, mode);
+			var __ks_i = -1;
+			var config = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var mode = arguments[++__ks_i];
+			}
+			else  {
+				var mode = 0;
+			}
+			var code = new Expression(this, config, mode);
 			this._code.push(code);
 			return code;
 		}
 		newExpression() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return ObjectBlock.prototype.__ks_func_newExpression_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
@@ -10326,13 +10906,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 1,
-				max: 1,
+				min: 2,
+				max: 2,
 				parameters: [
 					{
 						type: "Any",
-						min: 1,
-						max: 1
+						min: 2,
+						max: 2
 					}
 				]
 			}
@@ -10457,13 +11037,13 @@ module.exports = function() {
 			newExpression: [
 				{
 					access: 3,
-					min: 0,
-					max: 1,
+					min: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 0,
-							max: 1
+							min: 1,
+							max: 2
 						}
 					]
 				}
@@ -10493,7 +11073,6 @@ module.exports = function() {
 		}
 		__ks_init_1() {
 			this._binary = false;
-			this._body = new Scope(this);
 			this._dynamicRequirements = [];
 			this._exportSource = [];
 			this._exportMeta = {};
@@ -10560,6 +11139,7 @@ module.exports = function() {
 			if(config === undefined || config === null) {
 				throw new Error("Missing parameter 'config'");
 			}
+			this._body = new Scope(this, config, BlockMode.Root);
 			var __ks_0 = data.attributes;
 			for(var __ks_1 = 0, __ks_2 = __ks_0.length, attr; __ks_1 < __ks_2; ++__ks_1) {
 				attr = __ks_0[__ks_1];
@@ -10577,9 +11157,9 @@ module.exports = function() {
 					}
 				}
 			}
-			var __ks_1 = data.body;
-			for(var __ks_2 = 0, __ks_3 = __ks_1.length, value; __ks_2 < __ks_3; ++__ks_2) {
-				value = __ks_1[__ks_2];
+			__ks_0 = data.body;
+			for(var __ks_1 = 0, __ks_2 = __ks_0.length, value; __ks_1 < __ks_2; ++__ks_1) {
+				value = __ks_0[__ks_1];
 				this._body.compile(value, config);
 			}
 			return this;
@@ -10606,7 +11186,7 @@ module.exports = function() {
 				throw new Error("Binary file can't export");
 			}
 			var variable = this._body.getVariable(name.name);
-			if(!(variable)) {
+			if(!variable) {
 				throw new Error("Undefined variable " + name.name);
 			}
 			if(variable.kind !== VariableKind.TypeAlias) {
@@ -10772,7 +11352,7 @@ module.exports = function() {
 			var requirement = {
 				name: name,
 				class: kind === VariableKind.Class,
-				parameter: this._body.newTempName(),
+				parameter: this._body.acquireTempName(),
 				requireFirst: requireFirst
 			};
 			this._requirements[requirement.parameter] = requirement;
@@ -10820,9 +11400,9 @@ module.exports = function() {
 				}
 			}
 			var d;
-			var __ks_1 = this._exportMeta;
-			for(var name in __ks_1) {
-				var variable = __ks_1[name];
+			__ks_0 = this._exportMeta;
+			for(var name in __ks_0) {
+				var variable = __ks_0[name];
 				d = {};
 				for(var n in variable) {
 					if(n === "name") {
@@ -10902,9 +11482,9 @@ module.exports = function() {
 					}
 					else {
 						source += "\tvar req = [];\n";
-						var __ks_1 = this._dynamicRequirements;
-						for(var __ks_2 = 0, __ks_3 = __ks_1.length, requirement; __ks_2 < __ks_3; ++__ks_2) {
-							requirement = __ks_1[__ks_2];
+						__ks_0 = this._dynamicRequirements;
+						for(var __ks_1 = 0, __ks_2 = __ks_0.length, requirement; __ks_1 < __ks_2; ++__ks_1) {
+							requirement = __ks_0[__ks_1];
 							if(requirement.requireFirst) {
 								source += "\tif(Type.isValue(" + requirement.parameter + ")) {\n";
 								if(requirement.class) {
@@ -10946,7 +11526,7 @@ module.exports = function() {
 				}
 				source += "module.exports = function(";
 				var nf = false;
-				var __ks_0 = this._requirements;
+				__ks_0 = this._requirements;
 				for(var name in __ks_0) {
 					if(nf) {
 						source += ", ";
@@ -10962,9 +11542,9 @@ module.exports = function() {
 				source += ") {\n";
 				if(this._dynamicRequirements.length) {
 					source += "\tvar [";
-					var __ks_1 = this._dynamicRequirements;
-					for(var i = 0, __ks_2 = __ks_1.length, requirement; i < __ks_2; ++i) {
-						requirement = __ks_1[i];
+					__ks_0 = this._dynamicRequirements;
+					for(var i = 0, __ks_1 = __ks_0.length, requirement; i < __ks_1; ++i) {
+						requirement = __ks_0[i];
 						if(i) {
 							source += ", ";
 						}
@@ -10974,9 +11554,9 @@ module.exports = function() {
 						}
 					}
 					source += "] = __ks_require(";
-					var __ks_2 = this._dynamicRequirements;
-					for(var i = 0, __ks_3 = __ks_2.length, requirement; i < __ks_3; ++i) {
-						requirement = __ks_2[i];
+					__ks_0 = this._dynamicRequirements;
+					for(var i = 0, __ks_1 = __ks_0.length, requirement; i < __ks_1; ++i) {
+						requirement = __ks_0[i];
 						if(i) {
 							source += ", ";
 						}
@@ -10991,9 +11571,9 @@ module.exports = function() {
 				if(this._exportSource.length) {
 					source += "\treturn {";
 					nf = false;
-					var __ks_1 = this._exportSource;
-					for(var __ks_2 = 0, __ks_3 = __ks_1.length, src; __ks_2 < __ks_3; ++__ks_2) {
-						src = __ks_1[__ks_2];
+					__ks_0 = this._exportSource;
+					for(var __ks_1 = 0, __ks_2 = __ks_0.length, src; __ks_1 < __ks_2; ++__ks_1) {
+						src = __ks_0[__ks_1];
 						if(nf) {
 							source += ",";
 						}

@@ -8,9 +8,9 @@ module.exports = function() {
 	};
 	foo = __ks_0;
 	console.log(foo);
-	var {foo: __ks_1 = 5} = {
+	var {foo: __ks_0 = 5} = {
 		bar: 2
 	};
-	foo = __ks_1;
+	foo = __ks_0;
 	console.log(foo);
 }
