@@ -387,10 +387,18 @@ func $class(data, variable, node) { // {{{
 				}
 				
 				if instance {
-					$method.prepare(data, variable.instanceMethods[data.name.name] || (variable.instanceMethods[data.name.name] = []), node)
+					if !(variable.instanceMethods[data.name.name] is Array) {
+						variable.instanceMethods[data.name.name] = []
+					}
+					
+					$method.prepare(data, variable.instanceMethods[data.name.name], node)
 				}
 				else {
-					$method.prepare(data, variable.classMethods[data.name.name] || (variable.classMethods[data.name.name] = []), node)
+					if !(variable.classMethods[data.name.name] is Array) {
+						variable.classMethods[data.name.name] = []
+					}
+					
+					$method.prepare(data, variable.classMethods[data.name.name], node)
 				}
 			}
 		}
@@ -2796,7 +2804,7 @@ const $continuous = {
 		variable.classMethods = reflect.classMethods
 	} // }}}
 	classMethod(node, data, config, signature, reflect, name, clazz) { // {{{
-		if !reflect.classMethods[name] {
+		if !(reflect.classMethods[name] is Array) {
 			reflect.classMethods[name] = []
 		}
 		let index = reflect.classMethods[name].length
@@ -2895,7 +2903,7 @@ const $continuous = {
 		})
 	} // }}}
 	instanceMethod(node, data, config, signature, reflect, name, clazz) { // {{{
-		if !reflect.instanceMethods[name] {
+		if !(reflect.instanceMethods[name] is Array) {
 			reflect.instanceMethods[name] = []
 		}
 		let index = reflect.instanceMethods[name].length

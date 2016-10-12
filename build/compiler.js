@@ -551,10 +551,16 @@ module.exports = function() {
 					}
 				}
 				if(instance) {
-					$method.prepare(data, variable.instanceMethods[data.name.name] || (variable.instanceMethods[data.name.name] = []), node);
+					if(!(Type.isArray(variable.instanceMethods[data.name.name]))) {
+						variable.instanceMethods[data.name.name] = [];
+					}
+					$method.prepare(data, variable.instanceMethods[data.name.name], node);
 				}
 				else {
-					$method.prepare(data, variable.classMethods[data.name.name] || (variable.classMethods[data.name.name] = []), node);
+					if(!(Type.isArray(variable.classMethods[data.name.name]))) {
+						variable.classMethods[data.name.name] = [];
+					}
+					$method.prepare(data, variable.classMethods[data.name.name], node);
 				}
 			}
 		}
@@ -2472,7 +2478,7 @@ module.exports = function() {
 			if(clazz === undefined || clazz === null) {
 				throw new Error("Missing parameter 'clazz'");
 			}
-			if(!reflect.classMethods[name]) {
+			if(!(Type.isArray(reflect.classMethods[name]))) {
 				reflect.classMethods[name] = [];
 			}
 			var index = reflect.classMethods[name].length;
@@ -2640,7 +2646,7 @@ module.exports = function() {
 			if(clazz === undefined || clazz === null) {
 				throw new Error("Missing parameter 'clazz'");
 			}
-			if(!reflect.instanceMethods[name]) {
+			if(!(Type.isArray(reflect.instanceMethods[name]))) {
 				reflect.instanceMethods[name] = [];
 			}
 			var index = reflect.instanceMethods[name].length;
