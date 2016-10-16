@@ -6,7 +6,7 @@ module.exports = function() {
 		}
 		if(true) {
 			var __ks_x_1 = "john";
-			console.log(Type.isValue(__ks_x_1.toUpperCase) ? __ks_x_1.toUpperCase : undefined);
+			console.log(Type.isValue(__ks_x_1.toUpperCase));
 		}
 	}
 }

@@ -12,7 +12,7 @@ module.exports = function() {
 			}
 		}
 		if(Type.isValue(x.bar)) {
-			__ks_0 = x.bar;
+			var __ks_0 = x.bar;
 			for(var __ks_1 = 0, __ks_2 = __ks_0.length, value; __ks_1 < __ks_2; ++__ks_1) {
 				value = __ks_0[__ks_1];
 				console.log(value);

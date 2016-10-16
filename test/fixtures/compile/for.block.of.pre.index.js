@@ -4,8 +4,7 @@ module.exports = function() {
 		paul: "chani",
 		duncan: "murbella"
 	};
-	let key;
-	let value;
+	let key, value;
 	for(key in likes) {
 		value = likes[key];
 	}
