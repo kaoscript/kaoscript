@@ -333,6 +333,20 @@ class FragmentBuilder {
 		_indent			= 1
 		_lines			= {}
 	}
+	line(...args) { // {{{
+		let line = LineBuilder.create(this, this._indent)
+		
+		if args.length == 1 && args[0] is Object {
+			line.compile(args[0])
+		}
+		else {
+			line.push(...args)
+		}
+		
+		line.done()
+		
+		return this
+	} // }}}
 	newControl() { // {{{
 		return new ControlBuilder(this, this._indent)
 	} // }}}
@@ -412,6 +426,16 @@ class ControlBuilder {
 		
 		return this
 	} // }}}
+	wrap(node) { // {{{
+		this._step.wrap(node)
+		
+		return this
+	} // }}}
+	wrapBoolean(node) { // {{{
+		this._step.wrapBoolean(node)
+		
+		return this
+	} // }}}
 }
 
 class BlockBuilder {
@@ -447,7 +471,14 @@ class BlockBuilder {
 		/* LineBuilder.create(this._builder, this._indent + 1).push(...args).done() */
 		let line = LineBuilder.create(this._builder, this._indent + 1)
 		
-		line.push(...args).done()
+		if args.length == 1 && args[0] is Object {
+			line.compile(args[0])
+		}
+		else {
+			line.push(...args)
+		}
+		
+		line.done()
 		
 		return this
 	} // }}}
@@ -1803,6 +1834,7 @@ class Base {
 	parent() => this._parent
 }
 
+// {{{ block/scope
 class Block extends Base {
 	private {
 		_body: Array		= []
@@ -2062,6 +2094,7 @@ class XScope extends Block {
 	updateTempNames() { // {{{
 	} // }}}
 }
+// }}}
 
 class Module {
 	private {
@@ -2131,7 +2164,6 @@ class Module {
 class Statement extends Base {
 	private {
 		_usages				= []
-		_variable			= ''
 		_variables	: Array	= []
 	}
 	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
@@ -2142,24 +2174,13 @@ class Statement extends Base {
 		
 		return this
 	} // }}}
-	rename(name) { // {{{
-		this._parent.rename(name)
-		
-		return this
-	} // }}}
-	assignment(data, variable = false) { // {{{
+	assignment(data, allowAssignement = false) { // {{{
 		if data.left.kind == Kind::Identifier && !this.hasVariable(data.left.name) {
-			if this.denyVariable() || variable || this._variable.length {
-				this._variables.push(data.left.name)
-			}
-			else {
-				this._variable = data.left.name
-			}
+			this._variables.push(data.left.name)
 			
 			$variable.define(this, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
-	denyVariable() => true
 	getRenamedVariable(name) { // {{{
 		return this._parent.getRenamedVariable(name)
 	} // }}}
@@ -2178,6 +2199,11 @@ class Statement extends Base {
 		
 		return this
 	} // }}}
+	rename(name) { // {{{
+		this._parent.rename(name)
+		
+		return this
+	} // }}}
 	statement() => this
 	toFragments(fragments) { // {{{
 		for variable in this._usages {
@@ -2187,12 +2213,10 @@ class Statement extends Base {
 		}
 		
 		if this._variables.length {
-			fragments.newLine().code('let ' + this._variables.join(', ')).done()
+			fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
 		}
 		
 		this.toStatementFragments(fragments)
-		
-		return fragments
 	} // }}}
 	use(data, immediate = false) { // {{{
 		if immediate {
@@ -2224,37 +2248,61 @@ class Statement extends Base {
 			}
 		}
 	} // }}}
-	/* useTempVariable(name, assignment) { // {{{
-		if assignment && this._variable.length == 0 {
-			this._variable = name
-		}
-		else {
-			this._variables.pushUniq(name)
-		}
-	} // }}} */
 }
 
 class ExpressionStatement extends Statement {
 	private {
-		_denyVariable
 		_expression
+		_variable			= ''
 	}
 	ExpressionStatement(data, parent) { // {{{
 		super(data, parent)
 		
-		this._denyVariable = !(data.kind == Kind::BinaryOperator && data.operator.kind == BinaryOperator::Assignment)
-		
 		this._expression = $compile.expression(data, this)
 	} // }}}
-	denyVariable() => this._denyVariable
-	toStatementFragments(fragments) { // {{{
-		let line = fragments.newLine()
-		
-		if this._variable.length {
-			line.code($variable.scope(this))
+	assignment(data, allowAssignement = false) { // {{{
+		if data.left.kind == Kind::Identifier && !this.hasVariable(data.left.name) {
+			if !allowAssignement || this._variable.length {
+				this._variables.push(data.left.name)
+			}
+			else {
+				this._variable = data.left.name
+			}
+			
+			$variable.define(this, data.left, $variable.kind(data.right.type), data.right.type)
+		}
+	} // }}}
+	toFragments(fragments) { // {{{
+		for variable in this._usages {
+			if !this._parent.hasVariable(variable.name) {
+				throw new Error(`Undefined variable '\(variable.name)' at line \(variable.start.line)`)
+			}
 		}
 		
-		line.compile(this._expression).done()
+		if this._expression.toStatementFragments? {
+			if this._variable.length {
+				this._variables.unshift(this._variable)
+			}
+			
+			if this._variables.length {
+				fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
+			}
+			
+			this._expression.toStatementFragments(fragments)
+		}
+		else {
+			if this._variables.length {
+				fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
+			}
+			
+			let line = fragments.newLine()
+			
+			if this._variable.length {
+				line.code($variable.scope(this))
+			}
+			
+			line.compile(this._expression).done()
+		}
 	} // }}}
 }
 
@@ -2971,6 +3019,52 @@ class ReturnStatement extends Statement {
 	} // }}}
 }
 
+class UnlessStatement extends Statement {
+	private {
+		_body
+		_then
+	}
+	UnlessStatement(data, parent) { // {{{
+		super(data, parent)
+		
+		this._condition = $compile.expression(data.condition, this)
+		this._then = $compile.expression(data.then, this)
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		fragments
+			.newControl()
+			.code('if(!')
+			.wrapBoolean(this._condition)
+			.code(')')
+			.step()
+			.compile(this._then)
+			.done()
+	} // }}}
+}
+
+class UntilStatement extends Statement {
+	private {
+		_body
+		_condition
+	}
+	UntilStatement(data, parent) { // {{{
+		super(data, parent)
+		
+		this._body = $compile.expression(data.body, this)
+		this._condition = $compile.expression(data.condition, this)
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		fragments
+			.newControl()
+			.code('while(!(')
+			.compileBoolean(this._condition)
+			.code('))')
+			.step()
+			.compile(this._body)
+			.done()
+	} // }}}
+}
+
 class VariableDeclaration extends Statement {
 	private {
 		_declarators = []
@@ -3057,12 +3151,42 @@ class VariableDeclarator extends Base {
 		line.done()
 	} // }}}
 }
+
+class WhileStatement extends Statement {
+	private {
+		_body
+		_condition
+	}
+	WhileStatement(data, parent) { // {{{
+		super(data, parent)
+		
+		this._body = $compile.expression(data.body, this)
+		this._condition = $compile.expression(data.condition, this)
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		fragments
+			.newControl()
+			.code('while(')
+			.compileBoolean(this._condition)
+			.code(')')
+			.step()
+			.compile(this._body)
+			.done()
+	} // }}}
+}
 // }}}
 
 // {{{ Expressions
 class Expression extends Base {
-	assignment(data, variable = false) {
-		this._parent.statement().assignment(data, variable)
+	allowAssignement() => false
+	assignment(data, variable?) {
+		/* this._parent.statement().assignment(data, variable) */
+		if variable? {
+			this._parent.assignment(data, variable && this.allowAssignement())
+		}
+		else {
+			this._parent.assignment(data, this.allowAssignement())
+		}
 	}
 	getRenamedVariable(name) { // {{{
 		return this._parent.statement().getRenamedVariable(name)
@@ -3087,24 +3211,28 @@ class AssignmentOperatorExpression extends Expression {
 		_left
 		_right
 	}
+	allowAssignement() => true
 	isComputed() => true
 	isNullable() => this._right.isNullable()
 	AssignmentOperatorExpression(data, parent) { // {{{
 		super(data, parent)
 		
-		parent.assignment(data)
+		this.assignment(data)
 		
 		this._left = $compile.expression(data.left, this)
 		this._right = $compile.expression(data.right, this)
 	} // }}}
 	toConditionalFragments(fragments) { // {{{
-		return fragments.compileConditional(this._right)
+		fragments.compileConditional(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments.compile(this._left).push($equals).compile(this._right)
+	} // }}}
+	toBooleanFragments(fragments) { // {{{
+		fragments.compile(this._left).push($equals).wrap(this._right)
 	} // }}}
 }
 
@@ -3129,7 +3257,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			.code(' ? ')
 			.compile(this._left)
 			.push($equals)
-			.compile(this._right)
+			.wrap(this._right)
 			.code(' : undefined')
 	} // }}}
 	toBooleanFragments(fragments) { // {{{
@@ -3152,7 +3280,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			.code(' ? (')
 			.compile(this._left)
 			.push($equals)
-			.compile(this._right)
+			.wrap(this._right)
 			.code(', true) : false')
 	} // }}}
 }
@@ -3568,6 +3696,48 @@ class TemplateExpression extends Expression {
 	} // }}}
 }
 
+class UnlessExpression extends Expression {
+	private {
+		_condition
+		_else
+		_then
+	}
+	UnlessExpression(data, parent) { // {{{
+		super(data, parent)
+		
+		this._condition = $compile.expression(data.condition, this)
+		this._else = $compile.expression(data.else, this) if data.else?
+		this._then = $compile.expression(data.then, this)
+	} // }}}
+	isComputed() => true
+	toFragments(fragments) { // {{{
+		if this._else? {
+			fragments
+				.wrapBoolean(this._condition)
+				.code(' ? ')
+				.compile(this._else)
+				.code(' : ')
+				.compile(this._then)
+		}
+		else {
+			fragments
+				.wrapBoolean(this._condition)
+				.code(' ? undefined : ')
+				.compile(this._then)
+		}
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		fragments
+			.newControl()
+			.code('if(!')
+			.wrapBoolean(this._condition)
+			.code(')')
+			.step()
+			.line(this._then)
+			.done()
+	} // }}}
+}
+
 // {{{ Unary Operators
 class UnaryOperatorExistential extends Expression {
 	private {
@@ -3763,6 +3933,7 @@ const $expressions = {
 	`\(Kind::ObjectMember)`					: ObjectMember
 	`\(Kind::TemplateExpression)`			: TemplateExpression
 	`\(Kind::TernaryConditionalExpression)`	: TernaryConditionalExpression
+	`\(Kind::UnlessExpression)`				: UnlessExpression
 }
 
 const $statements = {
@@ -3775,7 +3946,10 @@ const $statements = {
 	`\(Kind::IfStatement)`					: IfStatement
 	`\(Kind::Module)`						: Module
 	`\(Kind::ReturnStatement)`				: ReturnStatement
+	`\(Kind::UnlessStatement)`				: UnlessStatement
+	`\(Kind::UntilStatement)`				: UntilStatement
 	`\(Kind::VariableDeclaration)`			: VariableDeclaration
+	`\(Kind::WhileStatement)`				: WhileStatement
 	'default'								: ExpressionStatement
 }
 

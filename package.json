@@ -1,7 +1,7 @@
 {
 	"name": "kaoscript",
 	"description": "Programming language combining features from ES7, CoffeeScript, TypeScript, Rust, Swift, C# and more",
-	"version": "0.3.1",
+	"version": "0.4.0",
 	"author": {
 		"name": "Baptiste Augrain",
 		"email": "daiyam@zokugun.org"
@@ -34,8 +34,8 @@
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
-		"@kaoscript/ast": "0.2.x",
-		"@kaoscript/parser": "0.2.x",
+		"@kaoscript/ast": "0.3.x",
+		"@kaoscript/parser": "0.3.x",
 		"@kaoscript/runtime": "0.3.x",
 		"commander": "2.9.x"
 	},
