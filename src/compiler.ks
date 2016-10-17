@@ -294,18 +294,18 @@ const $typeofs = { // {{{
 } // }}}
 
 // {{{ fragments
-func $fragmentsToText(fragments) {
+func $fragmentsToText(fragments) { // {{{
 	return [fragment.code for fragment in fragments].join('')
-}
+} // }}}
 
-func $locationDataToString(location?) {
+func $locationDataToString(location?) { // {{{
 	if location? {
 		return `\(location.first_line + 1):\(location.first_column + 1)-\(location.last_line + 1):\(location.last_column + 1)`
 	}
 	else {
 		return 'No location data'
 	}
-}
+} // }}}
 
 class CodeFragment {
 	private {
@@ -315,14 +315,291 @@ class CodeFragment {
 	}
 	CodeFragment(@code)
 	CodeFragment(@code, @start, @end)
-	toString() {
+	toString() { // {{{
 		if this._start? {
 			return `\(this._code): \($locationDataToString(this._location))`
 		}
 		else {
 			return this.code
 		}
+	} // }}}
+}
+
+class FragmentBuilder {
+	private {
+		_blocks			= {}
+		_expressions	= {}
+		_fragments		= []
+		_indent			= 1
+		_lines			= {}
 	}
+	newControl() { // {{{
+		return new ControlBuilder(this, this._indent)
+	} // }}}
+	newLine() { // {{{
+		return LineBuilder.create(this, this._indent)
+	} // }}}
+	toArray() => this._fragments
+}
+
+class ControlBuilder {
+	private {
+		_builder
+		_indent
+		_step
+	}
+	ControlBuilder(@builder, @indent) { // {{{
+		this._step = ExpressionBuilder.create(this._builder, this._indent)
+	} // }}}
+	code(code) { // {{{
+		this._step.code(code)
+		
+		return this
+	} // }}}
+	code(code, data) { // {{{
+		this._step.code(code, data)
+		
+		return this
+	} // }}}
+	compile(node) { // {{{
+		this._step.compile(node)
+		
+		return this
+	} // }}}
+	compileBoolean(node) { // {{{
+		this._step.compileBoolean(node)
+		
+		return this
+	} // }}}
+	done() { // {{{
+		this._step.done()
+	} // }}}
+	indent() { // {{{
+		this._step.indent()
+		
+		return this
+	} // }}}
+	indent(indent) { // {{{
+		this._step.indent(indent)
+		
+		return this
+	} // }}}
+	line(...args) { // {{{
+		this._step.line(...args)
+		
+		return this
+	} // }}}
+	newControl() { // {{{
+		return this._step.newControl()
+	} // }}}
+	newLine() { // {{{
+		return this._step.newLine()
+	} // }}}
+	push(...args) { // {{{
+		this._step.push(...args)
+		
+		return this
+	} // }}}
+	step() { // {{{
+		this._step.done()
+		
+		if this._step is ExpressionBuilder {
+			this._step = BlockBuilder.create(this._builder, this._indent)
+		}
+		else {
+			this._step = ExpressionBuilder.create(this._builder, this._indent)
+		}
+		
+		return this
+	} // }}}
+}
+
+class BlockBuilder {
+	static create(builder, indent) { // {{{
+		builder._blocks[indent] ??= new BlockBuilder(builder, indent)
+	
+		return builder._blocks[indent].init()
+	} // }}}
+	private {
+		_builder
+		_indent
+	}
+	BlockBuilder(@builder, @indent)
+	compile(node) { // {{{
+		if node is Object {
+			node.toFragments(this)
+		}
+		else {
+			this._builder._fragments.push(new CodeFragment(node))
+		}
+		
+		return this
+	} // }}}
+	done() { // {{{
+		this._builder._fragments.push($indent(this._indent), new CodeFragment('}\n'))
+	} // }}}
+	private init() { // {{{
+		this._builder._fragments.push(new CodeFragment(' {\n'))
+		
+		return this
+	} // }}}
+	line(...args) { // {{{
+		/* LineBuilder.create(this._builder, this._indent + 1).push(...args).done() */
+		let line = LineBuilder.create(this._builder, this._indent + 1)
+		
+		line.push(...args).done()
+		
+		return this
+	} // }}}
+	newControl(indent = this._indent + 1) { // {{{
+		return new ControlBuilder(this._builder, indent)
+	} // }}}
+	newLine(indent = this._indent + 1) { // {{{
+		return LineBuilder.create(this._builder, indent)
+	} // }}}
+}
+
+class ExpressionBuilder {
+	static create(builder, indent) { // {{{
+		builder._expressions[indent] ??= new ExpressionBuilder(builder, indent)
+	
+		return builder._expressions[indent].init()
+	} // }}}
+	private {
+		_builder
+		_indent
+	}
+	ExpressionBuilder(@builder, @indent)
+	code(code) { // {{{
+		this._builder._fragments.push(new CodeFragment(code))
+		
+		return this
+	} // }}}
+	code(code, data) { // {{{
+		this._builder._fragments.push(new CodeFragment(code, data.start, data.end))
+		
+		return this
+	} // }}}
+	compile(node) { // {{{
+		if node is Object {
+			node.toFragments(this)
+		}
+		else {
+			this._builder._fragments.push(new CodeFragment(node))
+		}
+		
+		return this
+	} // }}}
+	compileBoolean(node) { // {{{
+		if node is Object {
+			node.toBooleanFragments(this)
+		}
+		else {
+			this._builder._fragments.push(new CodeFragment(node))
+		}
+		
+		return this
+	} // }}}
+	compileConditional(node) { // {{{
+		if node is Object {
+			node.toConditionalFragments(this)
+		}
+		else {
+			this._builder._fragments.push(new CodeFragment(node))
+		}
+		
+		return this
+	} // }}}
+	compileReusable(node) { // {{{
+		if node is Object {
+			node.toReusableFragments(this)
+		}
+		else {
+			this._builder._fragments.push(new CodeFragment(node))
+		}
+		
+		return this
+	} // }}}
+	done() { // {{{
+	} // }}}
+	private init() { // {{{
+		this._builder._fragments.push($indent(this._indent))
+		
+		return this
+	} // }}}
+	indent(d = 0) { // {{{
+		this._builder._fragments.push($indent(this._indent + d))
+		
+		return this
+	} // }}}
+	push(...args) { // {{{
+		for arg in args {
+			if arg is Array {
+				this.push(...arg)
+			}
+			else if arg is Object {
+				this._builder._fragments.push(arg)
+			}
+			else {
+				this._builder._fragments.push(new CodeFragment(arg))
+			}
+		}
+		
+		return this
+	} // }}}
+	wrap(node) { // {{{
+		if node.isComputed() {
+			this.code('(')
+			
+			node.toFragments(this)
+			
+			this.code(')')
+		}
+		else {
+			node.toFragments(this)
+		}
+		
+		return this
+	} // }}}
+	wrapBoolean(node) { // {{{
+		if node.isComputed() {
+			this.code('(')
+			
+			node.toBooleanFragments(this)
+			
+			this.code(')')
+		}
+		else {
+			node.toBooleanFragments(this)
+		}
+		
+		return this
+	} // }}}
+	wrapConditional(node) { // {{{
+		if node.isComputed() {
+			this.code('(')
+			
+			node.toConditionalFragments(this)
+			
+			this.code(')')
+		}
+		else {
+			node.toConditionalFragments(this)
+		}
+		
+		return this
+	} // }}}
+}
+
+class LineBuilder extends ExpressionBuilder {
+	static create(builder, indent) { // {{{
+		builder._lines[indent] ??= new LineBuilder(builder, indent)
+	
+		return builder._lines[indent].init()
+	} // }}}
+	done() { // {{{
+		this._builder._fragments.push($terminator)
+	} // }}}
 }
 // }}}
 
@@ -388,18 +665,18 @@ func $block(data) { // {{{
 } // }}}
 
 const $function = {
-	parameters(node, indent, fragments, fn) { // {{{
+	parameters(node, fragments, fn) { // {{{
 		if node._options.parameters == 'es5' {
-			$function.parametersES5(node, indent, fragments, fn)
+			$function.parametersES5(node, fragments, fn)
 		}
 		else if node._options.parameters == 'es6' {
-			$function.parametersES6(node, indent, fragments, fn)
+			$function.parametersES6(node, fragments, fn)
 		}
 		else {
-			$function.parametersKS(node, indent, fragments, fn)
+			$function.parametersKS(node, fragments, fn)
 		}
 	} // }}}
-	parametersKS(node, indent, fragments: Array, fn) { // {{{
+	parametersKS(node, fragments, fn) { // {{{
 		let signature = $function.signature(node._data, node)
 		//console.log(signature)
 		
@@ -459,15 +736,15 @@ const $function = {
 				if parameter.name {
 					names[i] = parameter.name.name
 					
-					fragments.push($codeLoc(parameter.name.name, parameter.name.start, parameter.name.end))
+					fragments.code(parameter.name.name, parameter.name)
 				}
 				else {
-					fragments.push($code(names[i] = node.acquireTempName()))
+					fragments.code(names[i] = node.acquireTempName())
 				}
 				
 				if parameter.type {
 					if parameter.type.nullable && !parameter.defaultValue {
-						fragments.push($code(' = null'))
+						fragments.code(' = null')
 					}
 				}
 			}
@@ -515,26 +792,28 @@ const $function = {
 				parameter = node._data.parameters[i]
 				
 				if parameter.name? && (!?parameter.type || !parameter.type.nullable || parameter.defaultValue?) {
-					fragments.push($indent(indent), $code('if('), $code(parameter.name.name), $code(' === undefined'))
+					let ctrl = fragments
+						.newControl()
+						.push('if(', parameter.name.name, ' === undefined')
 					
 					if !?parameter.type || !parameter.type.nullable {
-						fragments.push($code(' || '), $code(parameter.name.name), $code(' === null'))
+						ctrl.push(' || ', parameter.name.name, ' === null')
 					}
 					
-					fragments.push($code(') {\n'))
+					ctrl.code(')').step()
 					
 					if parameter.defaultValue? {
-						fragments.push($indent(indent + 1), $code(parameter.name.name), $equals)
-						
-						fragments.append(node._parameters[i]._defaultValue.toFragments(indent))
-						
-						fragments.push($terminator)
+						ctrl
+							.newLine()
+							.push(parameter.name.name, $equals)
+							.compile(node._parameters[i]._defaultValue)
+							.done()
 					}
 					else {
-						fragments.push($indent(indent + 1), $code('throw new Error("Missing parameter \''), $code(parameter.name.name), $code('\'")'), $terminator)
+						ctrl.line('throw new Error("Missing parameter \'', parameter.name.name, '\'")')
 					}
 					
-					fragments.push($indent(indent), $code('}\n'))
+					ctrl.done()
 				}
 				
 				/* if !$type.isAny(parameter.type) {
@@ -1560,14 +1839,10 @@ class Block extends Base {
 		return this
 	} // }}}
 	statement() => this
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toFragments(fragments) { // {{{
 		for statement in this._body {
-			fragments.append(statement.toFragments(indent))
+			statement.toFragments(fragments)
 		}
-		
-		return fragments
 	} // }}}
 }
 
@@ -1807,7 +2082,9 @@ class Module {
 		this._flags[name] = true
 	} // }}}
 	toFragments() { // {{{
-		let body = this._body.toFragments(1)
+		this._body.toFragments(builder = new FragmentBuilder())
+		
+		let body = builder.toArray()
 		
 		let fragments: Array = []
 		
@@ -1902,20 +2179,18 @@ class Statement extends Base {
 		return this
 	} // }}}
 	statement() => this
-	toFragments(indent) { // {{{
+	toFragments(fragments) { // {{{
 		for variable in this._usages {
 			if !this._parent.hasVariable(variable.name) {
 				throw new Error(`Undefined variable '\(variable.name)' at line \(variable.start.line)`)
 			}
 		}
 		
-		let fragments: Array = []
-		
 		if this._variables.length {
-			fragments.push($indent(indent), $code('let ' + this._variables.join(', ') + ';\n'))
+			fragments.newLine().code('let ' + this._variables.join(', ')).done()
 		}
 		
-		this.toStatementFragments(indent, fragments)
+		this.toStatementFragments(fragments)
 		
 		return fragments
 	} // }}}
@@ -1972,16 +2247,14 @@ class ExpressionStatement extends Statement {
 		this._expression = $compile.expression(data, this)
 	} // }}}
 	denyVariable() => this._denyVariable
-	toStatementFragments(indent, fragments: Array) { // {{{
-		fragments.push($indent(indent))
+	toStatementFragments(fragments) { // {{{
+		let line = fragments.newLine()
 		
 		if this._variable.length {
-			fragments.push($code($variable.scope(this)))
+			line.code($variable.scope(this))
 		}
 		
-		fragments.append(this._expression.toFragments(indent))
-		
-		fragments.push($terminator)
+		line.compile(this._expression).done()
 	} // }}}
 }
 
@@ -2001,7 +2274,7 @@ class ExternDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
+	toStatementFragments(fragments) { // {{{
 	} // }}}
 }
 
@@ -2050,32 +2323,29 @@ class ForFromStatement extends Statement {
 		
 		this._body = this.newBlock($block(data.body))
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
+	toStatementFragments(fragments) { // {{{
 		let data = this._data
 		
-		fragments.push($indent(indent), $code('for('))
+		let ctrl = fragments.newControl().code('for(')
+		
 		if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
-			fragments.push($code($variable.scope(this)))
+			ctrl.code($variable.scope(this))
 		}
-		fragments.append(this._variable.toFragments(indent))
-		fragments.push($equals)
-		fragments.append(this._from.toFragments(indent))
+		ctrl.compile(this._variable).push($equals).compile(this._from)
 		
 		let bound
 		if data.til {
 			if this._til.isComplex() {
 				bound = this.acquireTempName()
 				
-				fragments.push($code(bound), $equals)
-				fragments.append(this._til.toFragments(indent))
+				ctrl.push(bound, $equals).compile(this._til)
 			}
 		}
 		else {
 			if this._to.isComplex() {
 				bound = this.acquireTempName()
 				
-				fragments.push($code(bound), $equals)
-				fragments.append(this._to.toFragments(indent))
+				ctrl.push(bound, $equals).compile(this._to)
 			}
 		}
 		
@@ -2083,114 +2353,98 @@ class ForFromStatement extends Statement {
 		if data.by && this._by.isComplex() {
 			by = this.acquireTempName()
 			
-			fragments.push($comma, $code(by), $equals)
-			fragments.append(this._by.toFragments(indent))
+			ctrl.push($comma, by, $equals).compile(this._by)
 		}
 		
-		fragments.push($code('; '))
+		ctrl.code('; ')
 		
 		if data.until {
-			fragments.push($code('!('))
-			
-			fragments.append(this._until.toBooleanFragments(indent))
-			
-			fragments.push($code(') && '))
+			ctrl.code('!(').compileBoolean(this._until).code(') && ')
 		}
 		else if data.while {
-			fragments.append(this._while.toBooleanFragments(indent))
-			
-			fragments.push($code(' && '))
+			ctrl.compileBoolean(this._while).code(' && ')
 		}
 		
-		fragments.append(this._variable.toFragments(indent))
+		ctrl.compile(this._variable)
 		
 		let desc = (data.by && data.by.kind == Kind::NumericExpression && data.by.value < 0) || (data.from.kind == Kind::NumericExpression && ((data.to && data.to.kind == Kind::NumericExpression && data.from.value > data.to.value) || (data.til && data.til.kind == Kind::NumericExpression && data.from.value > data.til.value)))
 		
 		if data.til {
 			if desc {
-				fragments.push($code(' > '))
+				ctrl.code(' > ')
 			}
 			else {
-				fragments.push($code(' < '))
+				ctrl.code(' < ')
 			}
 			
 			if this._til.isComplex() {
-				fragments.push($code(bound))
+				ctrl.code(bound)
 			}
 			else {
-				fragments.append(this._til.toFragments(indent))
+				ctrl.compile(this._til)
 			}
 		}
 		else {
 			if desc {
-				fragments.push($code(' >= '))
+				ctrl.code(' >= ')
 			}
 			else {
-				fragments.push($code(' <= '))
+				ctrl.code(' <= ')
 			}
 			
 			if this._to.isComplex() {
-				fragments.push($code(bound))
+				ctrl.code(bound)
 			}
 			else {
-				fragments.append(this._to.toFragments(indent))
+				ctrl.compile(this._to)
 			}
 		}
 		
-		fragments.push($code('; '))
+		ctrl.code('; ')
 		
 		if data.by {
 			if data.by.kind == Kind::NumericExpression {
 				if data.by.value == 1 {
-					fragments.push($code('++'))
-					fragments.append(this._variable.toFragments(indent))
+					ctrl.code('++').compile(this._variable)
 				}
 				else if data.by.value == -1 {
-					fragments.push($code('--'))
-					fragments.append(this._variable.toFragments(indent))
+					ctrl.code('--').compile(this._variable)
 				}
 				else if data.by.value >= 0 {
-					fragments.append(this._variable.toFragments(indent))
-					fragments.push($code(' += '))
-					fragments.append(this._by.toFragments(indent))
+					ctrl.compile(this._variable).code(' += ').compile(this._by)
 				}
 				else {
-					fragments.append(this._variable.toFragments(indent))
-					fragments.push($code(' -= '))
-					fragments.push($code(-data.by.value))
+					ctrl.compile(this._variable).push(' -= ', -data.by.value)
 				}
 			}
 			else {
-				fragments.append(this._variable.toFragments(indent))
-				fragments.push($code(' += '))
-				fragments.append(this._by.toFragments(indent))
+				ctrl.compile(this._variable).code(' += ').compile(this._by)
 			}
 		}
 		else if desc {
-			fragments.push($code('--'))
-			fragments.append(this._variable.toFragments(indent))
+			ctrl.code('--').compile(this._variable)
 		}
 		else {
-			fragments.push($code('++'))
-			fragments.append(this._variable.toFragments(indent))
+			ctrl.code('++').compile(this._variable)
 		}
 		
-		fragments.push($code(') {\n'))
+		ctrl.code(')').step()
 		
 		if data.when {
-			fragments.push($indent(indent + 1), $code('if('))
-			fragments.append(this._when.toBooleanFragments(indent))
-			fragments.push($code(') {\n'))
-			
-			fragments.append(this._body.toFragments(indent + 2))
-			
-			fragments.push($indent(indent + 1), $code('}\n'))
+			ctrl
+				.newControl()
+				.code('if(')
+				.compileBoolean(this._when)
+				.code(')')
+				.step()
+				.compile(this._body)
+				.done()
 		}
 		else {
-			fragments.append(this._body.toFragments(indent + 1))
+			ctrl.compile(this._body)
 		}
 		
-		fragments.push($indent(indent), $code('}\n'))
+		ctrl.done()
 		
 		this.releaseTempName(bound) if ?bound
 		this.releaseTempName(by) if ?by
@@ -2239,7 +2493,7 @@ class ForInStatement extends Statement {
 		
 		this._body = this.newBlock($block(data.body))
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
+	toStatementFragments(fragments) { // {{{
 		let data = this._data
 		
 		let value, index, bound
@@ -2248,174 +2502,128 @@ class ForInStatement extends Statement {
 			
 			this.parent().updateTempNames()
 			
-			fragments.push($indent(indent))
+			let line = fragments.newLine()
+			
 			if !this.hasVariable(value) {
-				fragments.push($code($variable.scope(this)))
+				line.code($variable.scope(this))
 				
 				$variable.define(this.greatParent(), value, VariableKind::Variable)
 			}
-			fragments.push($code(value))
-			fragments.push($equals)
-			fragments.append(this._value.toFragments(indent))
-			fragments.push($terminator)
 			
-			/* fragments.newLine().define(value, this.greatParent(), VariableKind::Variable).push(this._value.toFragments(indent)) */
+			line.push(value, $equals).compile(this._value).done()
 		}
+		
+		let ctrl
 		
 		if data.desc {
 			if data.index && !data.declaration && this.greatParent().hasVariable(data.index.name) {
-				fragments.push($indent(indent))
-				fragments.append(this._index.toFragments(indent))
-				fragments.push($equals)
-				if value? {
-					fragments.push($code(value))
-				}
-				else {
-					fragments.append(this._value.toFragments(indent))
-				}
-				fragments.push($code('.length - 1;\n'))
+				fragments
+					.newLine()
+					.compile(this._index)
+					.push($equals)
+					.compile(value ?? this._value)
+					.code('.length - 1')
+					.done()
 				
-				fragments.push($indent(indent), $code('for('))
+				ctrl = fragments
+					.newControl()
+					.code('for(')
 			}
 			else {
 				index = this.acquireTempName() unless this._index?
 				
-				fragments.push($indent(indent), $code('for('), $code($variable.scope(this)))
-				if index? {
-					fragments.push($code(index))
-				}
-				else {
-					fragments.append(this._index.toFragments(indent))
-				}
-				fragments.push($equals)
-				if value? {
-					fragments.push($code(value))
-				}
-				else {
-					fragments.append(this._value.toFragments(indent))
-				}
-				fragments.push($code('.length - 1'))
+				ctrl = fragments
+					.newControl()
+					.push('for(', $variable.scope(this))
+					.compile(index ?? this._index)
+					.push($equals)
+					.compile(value ?? this._value)
+					.code('.length - 1')
 			}
 		}
 		else {
 			if data.index && !data.declaration && this.greatParent().hasVariable(data.index.name) {
-				fragments.push($indent(indent))
-				fragments.append(this._index.toFragments(indent))
-				fragments.push($code(' = 0;\n'))
+				fragments
+					.newLine()
+					.compile(this._index)
+					.code(' = 0')
+					.done()
 				
-				fragments.push($indent(indent), $code('for('), $code($variable.scope(this)))
+				ctrl = fragments
+					.newControl()
+					.push('for(', $variable.scope(this))
 			}
 			else {
 				index = this.acquireTempName() unless this._index?
 				
-				fragments.push($indent(indent), $code('for('), $code($variable.scope(this)))
-				if index? {
-					fragments.push($code(index))
-				}
-				else {
-					fragments.append(this._index.toFragments(indent))
-				}
-				fragments.push($code(' = 0, '))
+				ctrl = fragments
+					.newControl()
+					.push('for(', $variable.scope(this))
+					.compile(index ?? this._index)
+					.code(' = 0, ')
 			}
 			
 			bound = this.acquireTempName()
 			
-			fragments.push($code(bound), $equals)
-			if value? {
-				fragments.push($code(value))
-			}
-			else {
-				fragments.append(this._value.toFragments(indent))
-			}
-			fragments.push($code('.length'))
+			ctrl
+				.push(bound, $equals)
+				.compile(value ?? this._value)
+				.code('.length')
 		}
 		
 		if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
-			fragments.push($comma, $code(data.variable.name))
+			ctrl.push($comma, data.variable.name)
 		}
 		
-		fragments.push($code('; '))
+		ctrl.code('; ')
 		
 		if data.until {
-			fragments.push($code('!('))
-			
-			fragments.append(this._until.toBooleanFragments(indent))
-			
-			fragments.push($code(') && '))
+			ctrl.code('!(').compile(this._until).code(') && ')
 		}
 		else if data.while {
-			fragments.append(this._while.toBooleanFragments(indent))
-			
-			fragments.push($code(' && '))
+			ctrl.compile(this._while).code(' && ')
 		}
 		
 		if data.desc {
-			if index? {
-				fragments.push($code(index))
-			}
-			else {
-				fragments.append(this._index.toFragments(indent))
-			}
-			fragments.push($code(' >= 0; --'))
-			if index? {
-				fragments.push($code(index))
-			}
-			else {
-				fragments.append(this._index.toFragments(indent))
-			}
-			fragments.push($code(')'))
+			ctrl
+				.compile(index ?? this._index)
+				.code(' >= 0; --')
+				.compile(index ?? this._index)
 		}
 		else {
-			if index? {
-				fragments.push($code(index))
-			}
-			else {
-				fragments.append(this._index.toFragments(indent))
-			}
-			fragments.push($code(' < ' + bound + '; ++'))
-			if index? {
-				fragments.push($code(index))
-			}
-			else {
-				fragments.append(this._index.toFragments(indent))
-			}
-			fragments.push($code(')'))
+			ctrl
+				.compile(index ?? this._index)
+				.code(' < ' + bound + '; ++')
+				.compile(index ?? this._index)
 		}
 		
-		fragments.push($code(' {\n'))
+		ctrl.code(')').step()
 		
-		fragments.push($indent(indent + 1))
-		fragments.append(this._variable.toFragments(indent + 1))
-		fragments.push($equals)
-		if value? {
-			fragments.push($code(value))
-		}
-		else {
-			fragments.append(this._value.toFragments(indent))
-		}
-		fragments.push($code('['))
-		if index? {
-			fragments.push($code(index))
-		}
-		else {
-			fragments.append(this._index.toFragments(indent))
-		}
-		fragments.push($code('];\n'))
+		ctrl
+			.newLine()
+			.compile(this._variable)
+			.push($equals)
+			.compile(value ?? this._value)
+			.code('[')
+			.compile(index ?? this._index)
+			.code(']')
+			.done()
 		
 		if data.when {
-			fragments.push($indent(indent + 1), $code('if('))
-			fragments.append(this._when.toBooleanFragments(indent))
-			fragments.push($code(') {\n'))
-			
-			fragments.append(this._body.toFragments(indent + 2))
-			
-			fragments.push($indent(indent + 1), $code('}\n'))
+			ctrl
+				.newControl()
+				.code('if(')
+				.compileBoolean(this._when)
+				.code(')')
+				.step()
+				.compile(this._body)
+				.done()
 		}
 		else {
-			fragments.append(this._body.toFragments(indent + 1))
+			ctrl.compile(this._body)
 		}
 		
-		fragments.push($indent(indent), $code('}\n'))
+		ctrl.done()
 		
 		this.greatParent().releaseTempName(value) if value?
 		this.releaseTempName(index) if index?
@@ -2465,7 +2673,7 @@ class ForOfStatement extends Statement {
 		
 		this._body = this.newBlock($block(data.body))
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
+	toStatementFragments(fragments) { // {{{
 		let data = this._data
 		
 		let value
@@ -2474,85 +2682,69 @@ class ForOfStatement extends Statement {
 			
 			this.parent().updateTempNames()
 			
-			fragments.push($indent(indent))
+			let line = fragments.newLine()
+			
 			if !this.hasVariable(value) {
-				fragments.push($code($variable.scope(this)))
+				line.code($variable.scope(this))
 				
 				$variable.define(this.greatParent(), value, VariableKind::Variable)
 			}
-			fragments.push($code(value))
-			fragments.push($equals)
-			fragments.append(this._value.toFragments(indent))
-			fragments.push($terminator)
+			line.code(value).push($equals).compile(this._value).done()
 		}
 		
-		fragments.push($indent(indent), $code('for('))
+		let ctrl = fragments.newControl().code('for(')
+		
 		if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
-			fragments.push($code($variable.scope(this)))
+			ctrl.code($variable.scope(this))
 		}
-		fragments.append(this._variable.toFragments(indent))
-		fragments.push($code(' in '))
-		if value? {
-			fragments.push($code(value))
-		}
-		else {
-			fragments.append(this._value.toFragments(indent))
-		}
-		fragments.push($code(') {\n'))
+		ctrl.compile(this._variable).code(' in ').compile(value ?? this._value).code(')').step()
 		
 		if data.index {
-			fragments.push($indent(indent + 1))
+			let line = ctrl.newLine()
 			
 			if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
-				fragments.push($code($variable.scope(this)))
+				line.code($variable.scope(this))
 			}
 			
-			fragments.append(this._index.toFragments(indent))
-			fragments.push($equals)
-			if value? {
-				fragments.push($code(value))
-			}
-			else {
-				fragments.append(this._value.toFragments(indent))
-			}
-			fragments.push($code('['))
-			fragments.append(this._variable.toFragments(indent))
-			fragments.push($code(']'), $terminator)
+			line.compile(this._index).push($equals).compile(value ?? this._value).code('[').compile(this._variable).code(']').done()
 		}
 		
 		if data.until {
-			fragments.push($indent(indent + 1), $code('if('))
-			fragments.append(this._until.toBooleanFragments(indent))
-			fragments.push($code(') {\n'))
-			
-			fragments.push($indent(indent + 2), $code('break;\n'))
-			
-			fragments.push($indent(indent + 1), $code('}\n'))
+			ctrl
+				.newControl()
+				.code('if(')
+				.compile(this._until)
+				.code(')')
+				.step()
+				.line('break')
+				.done()
 		}
 		else if data.while {
-			fragments.push($indent(indent + 1), $code('if(!('))
-			fragments.append(this._while.toBooleanFragments(indent))
-			fragments.push($code(')) {\n'))
-			
-			fragments.push($indent(indent + 2), $code('break;\n'))
-			
-			fragments.push($indent(indent + 1), $code('}\n'))
+			ctrl
+				.newControl()
+				.code('if(!(')
+				.compile(this._while)
+				.code('))')
+				.step()
+				.line('break')
+				.done()
 		}
 		
 		if data.when {
-			fragments.push($indent(indent + 1), $code('if('))
-			fragments.append(this._when.toBooleanFragments(indent))
-			fragments.push($code(') {\n'))
-			
-			fragments.append(this._body.toFragments(indent + 2))
-			
-			fragments.push($indent(indent + 1), $code('}\n'))
+			ctrl
+				.newControl()
+				.code('if(')
+				.compileBoolean(this._when)
+				.code(')')
+				.step()
+				.compile(this._body)
+				.done()
 		}
 		else {
-			fragments.append(this._body.toFragments(indent + 1))
+			ctrl.compile(this._body)
 		}
 		
-		fragments.push($indent(indent), $code('}\n'))
+		ctrl.done()
 		
 		this.greatParent().releaseTempName(value) if value?
 	} // }}}
@@ -2598,99 +2790,74 @@ class ForRangeStatement extends Statement {
 		
 		this._body = this.newBlock($block(data.body))
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
+	toStatementFragments(fragments) { // {{{
 		let data = this._data
 		
-		fragments.push($indent(indent), $code('for('))
+		let ctrl = fragments.newControl().code('for(')
 		if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
-			fragments.push($code($variable.scope(this)))
+			ctrl.code($variable.scope(this))
 		}
-		fragments.append(this._variable.toFragments(indent))
-		fragments.push($equals)
-		fragments.append(this._from.toFragments(indent))
+		ctrl.compile(this._variable).push($equals).compile(this._from)
 		
 		let bound
 		if this._to.isComplex() {
 			bound = this.acquireTempName()
 			
-			fragments.push($code(bound), $equals)
-			fragments.append(this._to.toFragments(indent))
+			ctrl.push(bound, $equals).compile(this._to)
 		}
 		
 		let by
 		if data.by && this._by.isComplex() {
 			by = this.acquireTempName()
 			
-			fragments.push($comma, $code(by), $equals)
-			fragments.append(this._by.toFragments(indent))
+			ctrl.push($comma, by, $equals).compile(this._by)
 		}
 		
-		fragments.push($code('; '))
+		ctrl.code('; ')
 		
 		if data.until {
-			fragments.push($code('!('))
-			
-			fragments.append(this._until.toBooleanFragments(indent))
-			
-			fragments.push($code(') && '))
+			ctrl.code('!(').compile(this._until).code(') && ')
 		}
 		else if data.while {
-			fragments.append(this._while.toBooleanFragments(indent))
-			
-			fragments.push($code(' && '))
+			ctrl.compile(this._while).code(' && ')
 		}
 		
-		fragments.append(this._variable.toFragments(indent))
-		fragments.push($code(' <= '))
-		
-		if this._to.isComplex() {
-			fragments.push($code(bound))
-		}
-		else {
-			fragments.append(this._to.toFragments(indent))
-		}
-		
-		fragments.push($code('; '))
+		ctrl.compile(this._variable).code(' <= ').compile(bound ?? this._to).code('; ')
 		
 		if data.by {
 			if data.by.kind == Kind::NumericExpression {
 				if data.by.value == 1 {
-					fragments.push($code('++'))
-					fragments.append(this._variable.toFragments(indent))
+					ctrl.code('++').compile(this._variable)
 				}
 				else {
-					fragments.append(this._variable.toFragments(indent))
-					fragments.push($code(' += '))
-					fragments.append(this._by.toFragments(indent))
+					ctrl.compile(this._variable).code(' += ').compile(this._by)
 				}
 			}
 			else {
-				fragments.append(this._variable.toFragments(indent))
-				fragments.push($code(' += '))
-				fragments.append(this._by.toFragments(indent))
+				ctrl.compile(this._variable).code(' += ').compile(this._by)
 			}
 		}
 		else {
-			fragments.push($code('++'))
-			fragments.append(this._variable.toFragments(indent))
+			ctrl.code('++').compile(this._variable)
 		}
 		
-		fragments.push($code(') {\n'))
+		ctrl.code(')').step()
 		
 		if data.when {
-			fragments.push($indent(indent + 1), $code('if('))
-			fragments.append(this._when.toBooleanFragments(indent))
-			fragments.push($code(') {\n'))
-			
-			fragments.append(this._body.toFragments(indent + 2))
-			
-			fragments.push($indent(indent + 1), $code('}\n'))
+			ctrl
+				.newControl()
+				.code('if(')
+				.compileBoolean(this._when)
+				.code(')')
+				.step()
+				.compile(this._body)
+				.done()
 		}
 		else {
-			fragments.append(this._body.toFragments(indent + 1))
+			ctrl.compile(this._body)
 		}
 		
-		fragments.push($indent(indent), $code('}\n'))
+		ctrl.done()
 		
 		this.releaseTempName(bound) if bound?
 		this.releaseTempName(by) if by?
@@ -2725,16 +2892,16 @@ class FunctionDeclaration extends Statement {
 		
 		this._body.compile()
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
-		fragments.push($indent(indent), $code('function ' + this._data.name.name + '('))
+	toStatementFragments(fragments) { // {{{
+		let ctrl = fragments.newControl()
 		
-		$function.parameters(this, indent + 1, fragments, func() {
-			fragments.push($code(') {\n'))
+		ctrl.code('function ' + this._data.name.name + '(')
+		
+		$function.parameters(this, ctrl, func() {
+			ctrl.code(')').step()
 		})
 		
-		fragments.append(this._body.toFragments(indent + 1))
-		
-		fragments.push($indent(indent), $code('}\n'))
+		ctrl.compile(this._body).done()
 	} // }}}
 }
 
@@ -2764,16 +2931,15 @@ class IfStatement extends Statement {
 		this._condition = $compile.expression(data.condition, this)
 		this._then = $compile.expression(data.then, this)
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
-		fragments.push($indent(indent), $code('if('))
-		
-		fragments.append(this._condition.toBooleanFragments(indent))
-		
-		fragments.push($code(') {\n'))
-		
-		fragments.append(this._then.toFragments(indent + 1))
-		
-		fragments.push($indent(indent), $code('}\n'))
+	toStatementFragments(fragments) { // {{{
+		fragments
+			.newControl()
+			.code('if(')
+			.compileBoolean(this._condition)
+			.code(')')
+			.step()
+			.compile(this._then)
+			.done()
 	} // }}}
 }
 
@@ -2788,16 +2954,19 @@ class ReturnStatement extends Statement {
 			this._value = $compile.expression(data.value, this)
 		}
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
+	toStatementFragments(fragments) { // {{{
 		if this._value? {
-			fragments.push($indent(indent), $code('return '))
-			
-			fragments.append(this._value.toFragments(indent))
-			
-			fragments.push($terminator)
+			fragments
+				.newLine()
+				.code('return ')
+				.compile(this._value)
+				.done()
 		}
 		else {
-			fragments.push($indent(indent), $code('return'), $terminator)
+			fragments
+				.newLine()
+				.code('return', this._data)
+				.done()
 		}
 	} // }}}
 }
@@ -2827,20 +2996,20 @@ class VariableDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	toStatementFragments(indent, fragments: Array) { // {{{
+	toStatementFragments(fragments) { // {{{
 		if this._declarators.length == 1 {
-			this._declarators[0].toFragments(indent, this._data.modifiers, fragments)
+			this._declarators[0].toFragments(fragments, this._data.modifiers)
 		}
 		else {
-			fragments.push($indent(indent), this.modifier(this._declarators[0]._data), $space)
+			let line = fragments.newLine().push(this.modifier(this._declarators[0]._data), $space)
 			
 			for declarator, index in this._declarators {
-				fragments.push($comma) if index
+				line.push($comma) if index
 				
-				fragments.append(declarator._name.toFragments(indent))
+				line.compile(declarator._name)
 			}
 			
-			fragments.push($terminator)
+			line.done()
 		}
 	} // }}}
 }
@@ -2876,18 +3045,16 @@ class VariableDeclarator extends Base {
 		}
 	} // }}}
 	statement() => this._parent.statement()
-	toFragments(indent, modifier, fragments: Array) { // {{{
-		fragments.push($indent(indent), this._parent.modifier(this._data), $space)
+	toFragments(fragments, modifier) { // {{{
+		let line = fragments.newLine().push(this._parent.modifier(this._data), $space)
 		
-		fragments.append(this._name.toFragments(indent))
+		line.compile(this._name)
 		
 		if this._init {
-			fragments.push($equals)
-			
-			fragments.append(this._init.toFragments(indent))
+			line.push($equals).compile(this._init)
 		}
 		
-		fragments.push($terminator)
+		line.done()
 	} // }}}
 }
 // }}}
@@ -2906,9 +3073,9 @@ class Expression extends Base {
 	isConditional() => this.isNullable()
 	isNullable() => false
 	statement() => this._parent.statement()
-	toBooleanFragments(indent) => this.toFragments(indent)
-	toConditionalFragments(indent) => this.toFragments(indent)
-	toReusableFragments(indent) => this.toFragments(indent)
+	toBooleanFragments(fragments) => this.toFragments(fragments)
+	toConditionalFragments(fragments) => this.toFragments(fragments)
+	toReusableFragments(fragments) => this.toFragments(fragments)
 	use(data, immediate = false) { // {{{
 		this._parent.statement().use(data, immediate)
 	} // }}}
@@ -2930,93 +3097,63 @@ class AssignmentOperatorExpression extends Expression {
 		this._left = $compile.expression(data.left, this)
 		this._right = $compile.expression(data.right, this)
 	} // }}}
-	toConditionalFragments(indent) { // {{{
-		return this._right.toConditionalFragments(indent)
+	toConditionalFragments(fragments) { // {{{
+		return fragments.compileConditional(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.append(this._left.toFragments(indent))
-		
-		fragments.push($equals)
-		
-		fragments.append(this._right.toFragments(indent))
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).push($equals).compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toFragments(fragments) { // {{{
 		if this._right.isNullable() {
-			fragments.append(this._right.toConditionalFragments(indent))
-			
-			fragments.push($code(' && '))
-			
-			fragments.push($codeLoc($runtime.type(this) + '.isValue(', this._data.operator.start, this._data.operator.end))
-			
-			fragments.append(this._right.toFragments(indent))
-			
-			fragments.push($codeLoc(')', this._data.operator.start, this._data.operator.end))
+			fragments
+				.wrapBoolean(this._right)
+				.code(' && ')
+				.code($runtime.type(this) + '.isValue(', this._data.operator)
+				.compile(this._right)
+				.code(')', this._data.operator)
 		}
 		else {
-			fragments.push($codeLoc($runtime.type(this) + '.isValue(', this._data.operator.start, this._data.operator.end))
-			
-			fragments.append(this._right.toFragments(indent))
-			
-			fragments.push($codeLoc(')', this._data.operator.start, this._data.operator.end))
+			fragments
+				.code($runtime.type(this) + '.isValue(', this._data.operator)
+				.compile(this._right)
+				.code(')', this._data.operator)
 		}
 		
-		fragments.push($code(' ? '))
-		
-		fragments.append(this._left.toFragments(indent))
-		
-		fragments.push($equals)
-		
-		fragments.append(this._right.toFragments(indent))
-		
-		fragments.push($code(' : undefined'))
-		
-		return fragments
+		fragments
+			.code(' ? ')
+			.compile(this._left)
+			.push($equals)
+			.compile(this._right)
+			.code(' : undefined')
 	} // }}}
-	toBooleanFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toBooleanFragments(fragments) { // {{{
 		if this._right.isNullable() {
-			fragments.append(this._right.toConditionalFragments(indent))
-			
-			fragments.push($code(' && '))
-			
-			fragments.push($codeLoc($runtime.type(this) + '.isValue(', this._data.operator.start, this._data.operator.end))
-			
-			fragments.append(this._right.toFragments(indent))
-			
-			fragments.push($codeLoc(')', this._data.operator.start, this._data.operator.end))
+			fragments
+				.wrapBoolean(this._right)
+				.code(' && ')
+				.code($runtime.type(this) + '.isValue(', this._data.operator)
+				.compile(this._right)
+				.code(')', this._data.operator)
 		}
 		else {
-			fragments.push($codeLoc($runtime.type(this) + '.isValue(', this._data.operator.start, this._data.operator.end))
-			
-			fragments.append(this._right.toFragments(indent))
-			
-			fragments.push($codeLoc(')', this._data.operator.start, this._data.operator.end))
+			fragments
+				.code($runtime.type(this) + '.isValue(', this._data.operator)
+				.compile(this._right)
+				.code(')', this._data.operator)
 		}
 		
-		fragments.push($code(' ? ('))
-		
-		fragments.append(this._left.toFragments(indent))
-		
-		fragments.push($equals)
-		
-		fragments.append(this._right.toFragments(indent))
-		
-		fragments.push($code(', true) : false'))
-		
-		return fragments
+		fragments
+			.code(' ? (')
+			.compile(this._left)
+			.push($equals)
+			.compile(this._right)
+			.code(', true) : false')
 	} // }}}
 }
 // }}}}
@@ -3038,122 +3175,68 @@ class BinaryOperatorExpression extends Expression {
 }
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.append(this._left.toFragments(indent))
-		
-		fragments.push($space)
-		
-		fragments.push($codeLoc('&&', this._data.operator.start, this._data.operator.end))
-		
-		fragments.push($space)
-		
-		fragments.append(this._right.toFragments(indent))
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.push($space)
+			.code('&&', this._data.operator)
+			.push($space)
+			.wrap(this._right)
 	} // }}}
 }
 
 class BinaryOperatorEquality extends BinaryOperatorExpression {
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.push($code('(')) if this._left.isComputed()
-		fragments.append(this._left.toFragments(indent))
-		fragments.push($code(')')) if this._left.isComputed()
-		
-		fragments.push($space)
-		
-		fragments.push($codeLoc('===', this._data.operator.start, this._data.operator.end))
-		
-		fragments.push($space)
-		
-		fragments.push($code('(')) if this._right.isComputed()
-		fragments.append(this._right.toFragments(indent))
-		fragments.push($code(')')) if this._right.isComputed()
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.push($space)
+			.code('===', this._data.operator)
+			.push($space)
+			.wrap(this._right)
 	} // }}}
 }
 
 class BinaryOperatorGreaterThan extends BinaryOperatorExpression {
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.push($code('(')) if this._left.isComputed()
-		fragments.append(this._left.toFragments(indent))
-		fragments.push($code(')')) if this._left.isComputed()
-		
-		fragments.push($space)
-		
-		fragments.push($codeLoc('>', this._data.operator.start, this._data.operator.end))
-		
-		fragments.push($space)
-		
-		fragments.push($code('(')) if this._right.isComputed()
-		fragments.append(this._right.toFragments(indent))
-		fragments.push($code(')')) if this._right.isComputed()
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.push($space)
+			.code('>', this._data.operator)
+			.push($space)
+			.wrap(this._right)
 	} // }}}
 }
 
 class BinaryOperatorInequality extends BinaryOperatorExpression {
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.push($code('(')) if this._left.isComputed()
-		fragments.append(this._left.toFragments(indent))
-		fragments.push($code(')')) if this._left.isComputed()
-		
-		fragments.push($space)
-		
-		fragments.push($codeLoc('!==', this._data.operator.start, this._data.operator.end))
-		
-		fragments.push($space)
-		
-		fragments.push($code('(')) if this._right.isComputed()
-		fragments.append(this._right.toFragments(indent))
-		fragments.push($code(')')) if this._right.isComputed()
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.push($space)
+			.code('!==', this._data.operator)
+			.push($space)
+			.wrap(this._right)
 	} // }}}
 }
 
 class BinaryOperatorModulo extends BinaryOperatorExpression {
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.append(this._left.toFragments(indent))
-		
-		fragments.push($space)
-		
-		fragments.push($codeLoc('%', this._data.operator.start, this._data.operator.end))
-		
-		fragments.push($space)
-		
-		fragments.append(this._right.toFragments(indent))
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.push($space)
+			.code('%', this._data.operator)
+			.push($space)
+			.wrap(this._right)
 	} // }}}
 }
 
 class BinaryOperatorMultiplication extends BinaryOperatorExpression {
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.append(this._left.toFragments(indent))
-		
-		fragments.push($space)
-		
-		fragments.push($codeLoc('*', this._data.operator.start, this._data.operator.end))
-		
-		fragments.push($space)
-		
-		fragments.append(this._right.toFragments(indent))
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.push($space)
+			.code('*', this._data.operator)
+			.push($space)
+			.wrap(this._right)
 	} // }}}
 }
 // }}}
@@ -3167,20 +3250,16 @@ class ArrayExpression extends Expression {
 		
 		this._values = [$compile.expression(value, this) for value in data.values]
 	} // }}}
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.push($code('['))
+	toFragments(fragments) { // {{{
+		fragments.code('[')
 		
 		for value, index in this._values {
 			fragments.push($comma) if index
 			
-			fragments.append(value.toFragments(indent))
+			fragments.compile(value)
 		}
 		
-		fragments.push($code(']'))
-		
-		return fragments
+		fragments.code(']')
 	} // }}}
 }
 
@@ -3202,97 +3281,71 @@ class CallExpression extends Expression {
 	isNullable() { // {{{
 		return this._data.nullable || this._callee.isNullable()
 	} // }}}
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toFragments(fragments) { // {{{
 		if this._tempName? {
 			fragments.push(this._tempName)
 		}
 		else if this.isNullable() && !this._tested {
-			fragments.append(this.toConditionalFragments(indent))
-			
-			fragments.push($code(' ? '))
-			
-			fragments.append(this._callee.toFragments(indent))
-			
-			fragments.push($code('('))
+			fragments.wrapConditional(this).code(' ? ').compile(this._callee).code('(')
 			
 			for argument, index in this._arguments {
 				fragments.push($comma) if index
 				
-				fragments.append(argument.toFragments(indent))
+				fragments.compile(argument)
 			}
 			
-			fragments.push($code(')'))
-			
-			fragments.push($code(' : undefined'))
+			fragments.code(') : undefined')
 		}
 		else {
-			fragments.append(this._callee.toFragments(indent))
-			
-			fragments.push($code('('))
+			fragments.compile(this._callee).code('(')
 			
 			for argument, index in this._arguments {
 				fragments.push($comma) if index
 				
-				fragments.append(argument.toFragments(indent))
+				fragments.compile(argument)
 			}
 			
-			fragments.push($code(')'))
+			fragments.code(')')
 		}
-		
-		return fragments
 	} // }}}
-	toConditionalFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toConditionalFragments(fragments) { // {{{
 		if !this._tested {
 			this._tested = true
 			
 			if this._data.nullable {
 				if this._callee.isNullable() {
-					fragments.append(this._callee.toConditionalFragments(indent))
-					
-					fragments.push($code(' && '))
+					fragments
+						.wrapConditional(this._callee)
+						.code(' && ')
 				}
 				
-				fragments.push($code($runtime.type(this) + '.isFunction('))
-				
-				fragments.append(this._callee.toReusableFragments(indent))
-				
-				fragments.push($code(')'))
+				fragments
+					.code($runtime.type(this) + '.isFunction(')
+					.compileReusable(this._callee)
+					.code(')')
 			}
 			else {
 				if this._callee.isNullable() {
-					fragments.append(this._callee.toConditionalFragments(indent))
+					fragments.compileConditional(this._callee)
 				}
 			}
 		}
-		
-		return fragments
 	} // }}}
-	toReusableFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toReusableFragments(fragments) { // {{{
 		this._tempName = $code('__ks_0')
 		
-		fragments.push(this._tempName)
-		
-		fragments.push($code(' = '))
-		
-		fragments.append(this._callee.toFragments(indent))
-		
-		fragments.push($code('('))
+		fragments
+			.push(this._tempName, $equals)
+			.compile(this._callee)
+			.code('(')
 		
 		for argument, index in this._arguments {
 			fragments.push($comma) if index
 			
-			fragments.append(argument.toFragments(indent))
+			fragments.compile(argument)
 		}
 		
-		fragments.push($code(')'))
-		
-		return fragments
+		fragments.code(')')
 	} // }}}
 }
 
@@ -3314,73 +3367,46 @@ class MemberExpression extends Expression {
 	isNullable() { // {{{
 		return this._data.nullable || this._object.isNullable() || (this._data.computed && this._property.isNullable())
 	} // }}}
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toFragments(fragments) { // {{{
 		if this.isNullable() && !this._tested {
-			fragments.append(this.toConditionalFragments(indent))
-			
-			fragments.push($code(' ? '))
-			
-			fragments.append(this._object.toFragments(indent))
+			fragments.wrapConditional(this).code(' ? ').compile(this._object)
 			
 			if this._data.computed {
-				fragments.push($code('['))
-				
-				fragments.append(this._property.toFragments(indent))
-				
-				fragments.push($code('] : undefined'))
+				fragments.code('[').compile(this._property).code('] : undefined')
 			}
 			else {
-				fragments.push($code($dot))
-				
-				fragments.append(this._property.toFragments(indent))
-				
-				fragments.push($code(' : undefined'))
+				fragments.code($dot).compile(this._property).code(' : undefined')
 			}
 		}
 		else {
-			fragments.push($code('(')) if this._object.isComputed()
-			
-			fragments.append(this._object.toFragments(indent))
-			
-			fragments.push($code(')')) if this._object.isComputed()
-			
-			if this._data.computed {
-				fragments.push($code('['))
-				
-				fragments.append(this._property.toFragments(indent))
-				
-				fragments.push($code(']'))
+			if this._object.isComputed() {
+				fragments.code('(').compile(this._object).code(')')
 			}
 			else {
-				fragments.push($code($dot))
-				
-				fragments.append(this._property.toFragments(indent))
+				fragments.compile(this._object)
+			}
+			
+			if this._data.computed {
+				fragments.code('[').compile(this._property).code(']')
+			}
+			else {
+				fragments.code($dot).compile(this._property)
 			}
 		}
-		
-		return fragments
 	} // }}}
-	toBooleanFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toBooleanFragments(fragments) { // {{{
 		if this.isNullable() && !this._tested {
 			if this._data.computed {
 				throw new Error('Not Implemented')
 			}
 			else {
-				fragments.append(this.toConditionalFragments(indent))
-				
-				fragments.push($code(' ? '))
-				
-				fragments.append(this._object.toFragments(indent))
-				
-				fragments.push($code($dot))
-				
-				fragments.append(this._property.toFragments(indent))
-				
-				fragments.push($code(' : false'))
+				fragments
+					.compileConditional(this)
+					.code(' ? ')
+					.compile(this._object)
+					.code($dot)
+					.compile(this._property)
+					.code(' : false')
 			}
 		}
 		else {
@@ -3388,78 +3414,60 @@ class MemberExpression extends Expression {
 				throw new Error('Not Implemented')
 			}
 			else {
-				fragments.append(this._object.toFragments(indent))
-				
-				fragments.push($code($dot))
-				
-				fragments.append(this._property.toFragments(indent))
+				fragments
+					.compile(this._object)
+					.code($dot)
+					.compile(this._property)
 			}
 		}
-		
-		return fragments
 	} // }}}
-	toConditionalFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toConditionalFragments(fragments) { // {{{
 		if !this._tested {
 			this._tested = true
 			
 			let conditional = false
 			
 			if this._object.isNullable() {
-				fragments.append(this._object.toConditionalFragments(indent))
+				fragments.compileConditional(this._object)
 				
 				conditional = true
 			}
 			
 			if this._data.nullable {
-				fragments.push($code(' && ')) if conditional
+				fragments.code(' && ') if conditional
 				
-				fragments.push($code($runtime.type(this) + '.isValue('))
-				
-				fragments.append(this._object.toReusableFragments(indent))
-				
-				fragments.push($code(')'))
+				fragments
+					.code($runtime.type(this) + '.isValue(')
+					.compileReusable(this._object)
+					.code(')')
 				
 				conditional = true
 			}
 			
 			if this._data.computed && this._property.isNullable() {
-				fragments.push($code(' && ')) if conditional
+				fragments.code(' && ') if conditional
 				
-				fragments.append(this._property.toConditionalFragments(indent))
+				fragments.compileConditional(this._property)
 			}
 		}
-		
-		return fragments
 	} // }}}
-	toReusableFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toReusableFragments(fragments) { // {{{
 		if this._object.isCallable() {
-			fragments.push($code('('))
-			
-			fragments.append(this._object.toReusableFragments(indent))
-			
-			fragments.push($code(', '))
-			
-			fragments.append(this._object.toFragments(indent))
-			
-			fragments.push($code($dot))
-			
-			fragments.append(this._property.toFragments(indent))
-			
-			fragments.push($code(')'))
+			fragments
+				.code('(')
+				.compileReusable(this._object)
+				.code(', ')
+				.compile(this._object)
+				.code($dot)
+				.compile(this._property)
+				.code(')')
 		}
 		else {
-			fragments.append(this._object.toFragments(indent))
-			
-			fragments.push($code($dot))
-			
-			fragments.append(this._property.toFragments(indent))
+			fragments
+				.compile(this._object)
+				.code($dot)
+				.compile(this._property)
 		}
-		
-		return fragments
 	} // }}}
 }
 
@@ -3472,25 +3480,21 @@ class ObjectExpression extends Expression {
 		
 		this._properties = [$compile.expression(property, this) for property in data.properties]
 	} // }}}
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toFragments(fragments) { // {{{
 		if this._properties.length {
-			fragments.push($code('{\n'))
+			fragments.code('{\n')
 			
 			for property, index in this._properties {
-				fragments.push($code(',\n')) if index
+				fragments.code(',\n') if index
 				
-				fragments.append(property.toFragments(indent + 1))
+				fragments.compile(property)
 			}
 			
-			fragments.push($code('\n'), $indent(indent), $code('}'))
+			fragments.code('\n').indent().code('}')
 		}
 		else {
-			fragments.push($code('{}'))
+			fragments.code('{}')
 		}
-		
-		return fragments
 	} // }}}
 }
 
@@ -3505,25 +3509,19 @@ class ObjectMember extends Expression {
 		this._name = $compile.objectMemberName(data.name, this)
 		this._value = $compile.expression(data.value, this)
 	} // }}}
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toFragments(fragments) { // {{{
 		let data = this._data
 		
 		if data.name.kind == Kind::Identifier || data.name.kind == Kind::Literal {
-			fragments.push($indent(indent))
-			fragments.append(this._name.toFragments(indent))
+			fragments.indent(1).compile(this._name)
 			
 			if data.value.kind == Kind::FunctionExpression {
-				fragments.append(this._value.toFragments(indent))
+				fragments.compile(this._value)
 			}
 			else {
-				fragments.push($code(': '))
-				fragments.append(this._value.toFragments(indent + 1))
+				fragments.code(': ').compile(this._value)
 			}
 		}
-		
-		return fragments
 	} // }}}
 }
 
@@ -3541,24 +3539,13 @@ class TernaryConditionalExpression extends Expression {
 		this._then = $compile.expression(data.then, this)
 		this._else = $compile.expression(data.else, this)
 	} // }}}
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.push($code('(')) if this._condition.isComputed()
-		
-		fragments.append(this._condition.toBooleanFragments(indent))
-		
-		fragments.push($code(')')) if this._condition.isComputed()
-		
-		fragments.push($code(' ? '))
-		
-		fragments.append(this._then.toFragments(indent))
-		
-		fragments.push($code(' : '))
-		
-		fragments.append(this._else.toFragments(indent))
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments
+			.wrapBoolean(this._condition)
+			.code(' ? ')
+			.compile(this._then)
+			.code(' : ')
+			.compile(this._else)
 	} // }}}
 }
 
@@ -3572,16 +3559,12 @@ class TemplateExpression extends Expression {
 		this._elements = [$compile.expression(element, this) for element in data.elements]
 	} // }}}
 	isComputed() => this._data.elements > 1
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toFragments(fragments) { // {{{
 		for element, index in this._elements {
-			fragments.push($code(' + ')) if index
+			fragments.code(' + ') if index
 			
-			fragments.append(element.toFragments(indent))
+			fragments.compile(element)
 		}
-		
-		return fragments
 	} // }}}
 }
 
@@ -3595,29 +3578,21 @@ class UnaryOperatorExistential extends Expression {
 		
 		this._argument = $compile.expression(data.argument, this)
 	} // }}}
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
+	toFragments(fragments) { // {{{
 		if this._argument.isNullable() {
-			fragments.append(this._argument.toConditionalFragments(indent))
-			
-			fragments.push($code(' && '))
-			
-			fragments.push($codeLoc($runtime.type(this) + '.isValue(', this._data.operator.start, this._data.operator.end))
-			
-			fragments.append(this._argument.toFragments(indent))
-			
-			fragments.push($codeLoc(')', this._data.operator.start, this._data.operator.end))
+			fragments
+				.wrapConditional(this._argument)
+				.code(' && ')
+				.code($runtime.type(this) + '.isValue(',  this._data.operator)
+				.compile(this._argument)
+				.code(')',  this._data.operator)
 		}
 		else {
-			fragments.push($codeLoc($runtime.type(this) + '.isValue(', this._data.operator.start, this._data.operator.end))
-			
-			fragments.append(this._argument.toFragments(indent))
-			
-			fragments.push($codeLoc(')', this._data.operator.start, this._data.operator.end))
+			fragments
+				.code($runtime.type(this) + '.isValue(',  this._data.operator)
+				.compile(this._argument)
+				.code(')',  this._data.operator)
 		}
-		
-		return fragments
 	} // }}}
 }
 
@@ -3630,14 +3605,10 @@ class UnaryOperatorNegation extends Expression {
 		
 		this._argument = $compile.expression(data.argument, this)
 	} // }}}
-	toFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.push($codeLoc('!', this._data.operator.start, this._data.operator.end))
-		
-		fragments.append(this._argument.toFragments(indent))
-		
-		return fragments
+	toFragments(fragments) { // {{{
+		fragments
+			.code('!', this._data.operator)
+			.wrapBoolean(this._argument)
 	} // }}}
 }
 // }}}
@@ -3652,12 +3623,12 @@ class Literal extends Expression {
 		super(data, parent)
 	} // }}}
 	isComplex() => false
-	toFragments(indent) { // {{{
+	toFragments(fragments) { // {{{
 		if this._data {
-			return [$codeLoc(this._value, this._data.start, this._data.end)]
+			fragments.code(this._value, this._data)
 		}
 		else {
-			return [$code(this._value)]
+			fragments.code(this._value)
 		}
 	} // }}}
 }
@@ -3675,24 +3646,19 @@ class IdentifierLiteral extends Literal {
 			this.use(data)
 		}
 	} // }}}
-	toFragments(indent) { // {{{
+	toFragments(fragments) { // {{{
 		if this._isVariable {
-			return [$codeLoc(this.getRenamedVariable(this._value), this._data.start, this._data.end)]
+			fragments.code(this.getRenamedVariable(this._value), this._data)
 		}
 		else {
-			return [$codeLoc(this._value, this._data.start, this._data.end)]
+			fragments.code(this._value, this._data)
 		}
 	} // }}}
-	toConditionalFragments(indent) { // {{{
-		let fragments: Array = []
-		
-		fragments.push($code($runtime.type(this) + '.isValue('))
-		
-		fragments.append(this.toFragments(indent))
-		
-		fragments.push($code(')'))
-		
-		return fragments
+	toConditionalFragments(fragments) { // {{{
+		fragments
+			.code($runtime.type(this) + '.isValue(')
+			.compile(this)
+			.code(')')
 	} // }}}
 }
 
