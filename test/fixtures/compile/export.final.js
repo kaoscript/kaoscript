@@ -46,12 +46,9 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
-		classMethods: {
-		}
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
 	};
 	var __ks_Shape = {};
 	Helper.newInstanceMethod({

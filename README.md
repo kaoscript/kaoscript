@@ -3,7 +3,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 ![Dependencies](https://img.shields.io/david/kaoscript/kaoscript.svg)
-[![Build Status](https://img.shields.io/travis/kaoscript/kaoscript.svg)](https://travis-ci.org/kaoscript/kaoscript)
+[![Build Status](https://travis-ci.org/kaoscript/kaoscript.svg?branch=master)](https://travis-ci.org/kaoscript/kaoscript)
 [![Waffle.io](https://img.shields.io/badge/kanban-waffle.io-blue.svg)](https://waffle.io/kaoscript/kaoscript)
 
 Kaoscript is a language that compile to regular Javascript.
@@ -417,9 +417,10 @@ switch number {
 Runtime
 -------
 
-Kaoscript needs a runtime, to add dynamics functions on classes and to type checking, and imports it only when required.
+Kaoscript needs a runtime to add dynamics functions on classes and to do type checking.
+The runtime is imported only when it's needed.
 
-The default runtime (`@kaoscript/runtime`) is been kept at the bare minimum.
+The default runtime (`@kaoscript/runtime`) has only the bare minimum.
 
 You can use your own runtime with a global attribute like `#![cfg(runtime(package="yourpackage"))]`.
 Or configure the name of the runtime's variables like `#![cfg(runtime(Type="YourType"))]`.
@@ -449,22 +450,6 @@ Todo
 - boolean conditions
 - macro
 - full support of attributes
-
-Changelog
----------
-
-### 0.2.1
-
-- binary evaluates script
-
-### 0.2.0
-
-- require runtime only when needed
-- use your own runtime
-
-### 0.1.0
-
-- initial release
 
 License
 -------
