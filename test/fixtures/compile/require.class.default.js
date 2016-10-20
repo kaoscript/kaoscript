@@ -11,8 +11,7 @@ module.exports = function(Color, __ks_Color, Space) {
 			access: 3,
 			min: 0,
 			max: 0,
-			parameters: [
-			]
+			parameters: []
 		}
 	});
 	Helper.newInstanceMethod({

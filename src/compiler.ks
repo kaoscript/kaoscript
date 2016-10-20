@@ -201,7 +201,6 @@ impl Object {
 enum ImportKind {
 	KSFile
 	NodeFile
-	NodeModule
 }
 
 enum MemberAccess { // {{{
@@ -216,6 +215,15 @@ enum VariableKind { // {{{
 	Function
 	TypeAlias
 	Variable
+} // }}}
+
+const $defaultTypes = { // {{{
+	Array: 'Array'
+	Boolean: 'Boolean'
+	Function: 'Function'
+	Number: 'Number'
+	Object: 'Object'
+	String: 'String'
 } // }}}
 
 const $extensions = { // {{{
@@ -399,6 +407,11 @@ class ControlBuilder {
 		
 		return this
 	} // }}}
+	compileConditional(node) { // {{{
+		this._step.compileConditional(node)
+		
+		return this
+	} // }}}
 	done() { // {{{
 		this._step.done()
 		
@@ -440,6 +453,11 @@ class ControlBuilder {
 	} // }}}
 	wrapBoolean(node) { // {{{
 		this._step.wrapBoolean(node)
+		
+		return this
+	} // }}}
+	wrapConditional(node) { // {{{
+		this._step.wrapConditional(node)
 		
 		return this
 	} // }}}
@@ -925,6 +943,36 @@ const $field = {
 }
 
 const $final = {
+	callee(data, node) { // {{{
+		let variable = $variable.fromAST(data, node)
+		//console.log('callee.data', data)
+		//console.log('callee.variable', variable)
+		
+		if variable {
+			if variable is Array {
+				return {
+					variables: variable,
+					instance: true
+				}
+			}
+			else if variable.kind == VariableKind::Class && variable.final {
+				if variable.final.classMethods[data.property.name] {
+					return {
+						variable: variable,
+						instance: false
+					}
+				}
+				else if variable.final.instanceMethods[data.property.name] {
+					return {
+						variable: variable,
+						instance: true
+					}
+				}
+			}
+		}
+		
+		return false
+	} // }}}
 	class(node, fragments, data, variable) { // {{{
 		let clazz = fragments
 			.newControl()
@@ -1063,6 +1111,15 @@ const $final = {
 }
 
 const $function = {
+	arity(parameter) { // {{{
+		for i from 0 til parameter.modifiers.length {
+			if parameter.modifiers[i].kind == ParameterModifier::Rest {
+				return parameter.modifiers[i].arity
+			}
+		}
+		
+		return null
+	} // }}}
 	parameters(node, fragments, fn) { // {{{
 		if node._options.parameters == 'es5' {
 			$function.parametersES5(node, fragments, fn)
@@ -1075,6 +1132,7 @@ const $function = {
 		}
 	} // }}}
 	parametersKS(node, fragments, fn) { // {{{
+		let data = node._data
 		let signature = $function.signature(node._data, node)
 		//console.log(signature)
 		
@@ -1187,7 +1245,7 @@ const $function = {
 			} */
 			
 			for i from 0 til l {
-				parameter = node._data.parameters[i]
+				parameter = data.parameters[i]
 				
 				if parameter.name? && (!?parameter.type || !parameter.type.nullable || parameter.defaultValue?) {
 					ctrl = fragments
@@ -1332,7 +1390,7 @@ const $function = {
 			}
 		} // }}}
 		else { // {{{
-			fn()
+			fn(fragments)
 			
 			/* if signature.min {
 				node
@@ -1349,11 +1407,7 @@ const $function = {
 			let optional = 0
 			
 			for i from 0 til l {
-				/* parameter = data.parameters[i] */
-				
-				/* if parameter.name {
-					$variable.define(node, parameter.name, $variable.kind(parameter.type), parameter.type)
-				} */
+				parameter = data.parameters[i]
 				
 				if arity = $function.arity(parameter) { // {{{
 					required -= arity.min
@@ -2126,6 +2180,29 @@ const $import = {
 		
 		module.import(name, file)
 	} // }}}
+	define(module, file?, node, name, kind, type?) { // {{{
+		$variable.define(node, name, kind, type)
+		
+		module.import(name.name || name, file)
+	} // }}}
+	loadDirectory(x, moduleName?, module, data, node) { // {{{
+		let pkgfile = path.join(x, 'package.json')
+		if fs.isFile(pkgfile) {
+			let pkg
+			try {
+				pkg = JSON.parse(fs.readFile(pkgfile))
+			}
+			
+			if pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node) {
+				return true
+			}
+			else if pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node)) {
+				return true
+			}
+		}
+		
+		return $import.loadFile(path.join(x, 'index'), moduleName, module, data, node)
+	} // }}}
 	loadFile(x, moduleName?, module, data, node) { // {{{
 		if fs.isFile(x) {
 			if x.endsWith($extensions.source) {
@@ -2287,7 +2364,90 @@ const $import = {
 		}
 		
 		return true
-	}, // }}}
+	} // }}}
+	loadNodeFile(x?, moduleName?, module, data, node) { // {{{
+		let file = null
+		if !moduleName {
+			file = moduleName = module.path(x, data.module)
+		}
+		
+		node._kind = ImportKind::NodeFile
+		node._metadata = {
+			moduleName: moduleName
+		}
+		
+		let variables = node._metadata.variables = {}
+		let count = 0
+		
+		for specifier in data.specifiers {
+			if specifier.kind == Kind.ImportWildcardSpecifier {
+				if specifier.local {
+					node._metadata.wilcard = specifier.local.name
+					
+					$import.define(module, file, node, specifier.local, VariableKind::Variable)
+				}
+				else {
+					throw new Error('Wilcard import is only suppoted for ks files')
+				}
+			}
+			else {
+				variables[specifier.alias.name] = specifier.local ? specifier.local.name : specifier.alias.name
+				++count
+			}
+		}
+		
+		node._metadata.count = count
+		
+		for alias of variables {
+			$import.define(module, file, node, variables[alias], VariableKind::Variable)
+		}
+		
+		return true
+	} // }}}
+	loadNodeModule(x, start, module, data, node) { // {{{
+		let dirs = $import.nodeModulesPaths(start)
+		
+		let file
+		for dir in dirs {
+			file = path.join(dir, x)
+			
+			if $import.loadFile(file, x, module, data, node) || $import.loadDirectory(file, x, module, data, node) {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
+	nodeModulesPaths(start) { // {{{
+		start = fs.resolve(start)
+		
+		let prefix = '/'
+		if /^([A-Za-z]:)/.test(start) {
+			prefix = ''
+		}
+		else if /^\\\\/.test(start) {
+			prefix = '\\\\'
+		}
+		
+		let splitRe = process.platform == 'win32' ? /[\/\\]/ : /\/+/
+		
+		let parts = start.split(splitRe)
+		
+		let dirs = []
+		for i from parts.length - 1 to 0 by -1 {
+			if parts[i] == 'node_modules' {
+				continue
+			}
+			
+			dirs.push(prefix + path.join(path.join.apply(path, parts.slice(0, i + 1)), 'node_modules'))
+		}
+		
+		if process.platform == 'win32' {
+			dirs[dirs.length - 1] = dirs[dirs.length - 1].replace(':', ':\\')
+		}
+		
+		return dirs
+	} // }}}
 	readMetadata(x) { // {{{
 		try {
 			return JSON.parse(fs.readFile(x + $extensions.metadata))
@@ -2295,7 +2455,7 @@ const $import = {
 		catch {
 			return null
 		}
-	}, // }}}
+	} // }}}
 	resolve(data, y, module, node) { // {{{
 		let x = data.module
 		
@@ -2579,6 +2739,48 @@ const $import = {
 		}
 		
 		node.releaseTempName(importCode)
+	} // }}}
+	toNodeFileFragments(node, fragments, data, metadata) { // {{{
+		let moduleName = metadata.moduleName
+		
+		if metadata.wilcard? {
+			fragments.line('var ', metadata.wilcard, ' = require(', $quote(moduleName), ')')
+		}
+		
+		let variables = metadata.variables
+		let count = metadata.count
+		
+		if count == 1 {
+			let alias
+			for alias of variables {
+			}
+			
+			fragments.line('var ', variables[alias], ' = require(', $quote(moduleName), ').', alias)
+		}
+		else if count {
+			let line = fragments.newLine().code('var {')
+			
+			let nf = false
+			for alias of variables {
+				if nf {
+					line.code(', ')
+				}
+				else {
+					nf = true
+				}
+				
+				if variables[alias] == alias {
+					line.code(alias)
+				}
+				else {
+					line.code(alias, ': ', variables[alias])
+				}
+			}
+			
+			line.code('} = require(', $quote(moduleName), ')')
+			
+			line.done()
+		}
 	} // }}}
 }
 
@@ -3104,6 +3306,407 @@ const $variable = {
 		
 		return variable
 	} // }}}
+	filterType(variable, name, node) { // {{{
+		if variable.type {
+			if variable.type.properties {
+				for property in variable.type.properties {
+					if property.name.name == name {
+						return variable
+					}
+				}
+			}
+			else if variable.type.typeName {
+				if variable ?= $variable.fromType(variable.type, node) {
+					return $variable.filterMember(variable, name, node)
+				}
+			}
+			else if variable.type.types {
+				let variables = []
+				
+				for type in variable.type.types {
+					return null unless (variable ?= $variable.fromType(type, node)) && (variable ?= $variable.filterMember(variable, name, node))
+					
+					variables.push(variable)
+				}
+				
+				return variables
+			}
+			else {
+				console.error(variable)
+				throw new Error('Not implemented')
+			}
+		}
+		
+		return null
+	} // }}}
+	filterMember(variable, name, node) { // {{{
+		//console.log('variable.fromMember.var', variable)
+		//console.log('variable.fromMember.name', name)
+		
+		if variable.kind == VariableKind::Class {
+			if variable.instanceMethods[name] {
+				return variable
+			}
+			else if variable.instanceVariables[name] && variable.instanceVariables[name].type {
+				return $variable.fromReflectType(variable.instanceVariables[name].type, node)
+			}
+		}
+		else if variable.kind == VariableKind::Enum {
+			console.error(variable)
+			throw new Error('Not implemented')
+		}
+		else if variable.kind == VariableKind::TypeAlias {
+			if variable.type.types {
+				let variables = []
+				
+				for type in variable.type.types {
+					return null unless (variable ?= $variable.fromType(type, node)) && (variable ?= $variable.filterMember(variable, name, node))
+					
+					variables.push(variable)
+				}
+				
+				return variables
+			}
+			else {
+				return $variable.filterMember(variable, name, node) if variable ?= $variable.fromType(variable.type, node)
+			}
+		}
+		else if variable.kind == VariableKind::Variable {
+			console.error(variable)
+			throw new Error('Not implemented')
+		}
+		else {
+			console.error(variable)
+			throw new Error('Not implemented')
+		}
+		
+		return null
+	} // }}}
+	fromAST(data, node) { // {{{
+		switch data.kind {
+			Kind::ArrayComprehension, Kind::ArrayExpression, Kind::ArrayRange => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: 'Array'
+						}
+					}
+				}
+			}
+			Kind::BinaryOperator => {
+				if data.operator.kind == BinaryOperator::TypeCast {
+					return {
+						kind: VariableKind::Variable
+						type: data.right
+					}
+				}
+				else if $operator.binaries[data.operator.kind] {
+					return {
+						kind: VariableKind::Variable
+						type: {
+							kind: Kind::TypeReference
+							typeName: {
+								kind: Kind::Identifier
+								name: 'Boolean'
+							}
+						}
+					}
+				}
+				else if $operator.lefts[data.operator.kind] {
+					let type = $type.type(data.left, node)
+					
+					if type {
+						return {
+							kind: VariableKind::Variable
+							type: type
+						}
+					}
+				}
+				else if $operator.numerics[data.operator.kind] {
+					return {
+						kind: VariableKind::Variable
+						type: {
+							kind: Kind::TypeReference
+							typeName: {
+								kind: Kind::Identifier
+								name: 'Number'
+							}
+						}
+					}
+				}
+			}
+			Kind::CallExpression => {
+				let variable = $variable.fromAST(data.callee, node)
+				//console.log('getVariable.call.data', data)
+				//console.log('getVariable.call.variable', variable)
+				
+				if variable {
+					if data.callee.kind == Kind::Identifier {
+						return variable if variable.kind == VariableKind::Function
+					}
+					else if data.callee.kind == Kind::MemberExpression {
+						let min = 0
+						let max = 0
+						for arg in data.arguments {
+							if max == Infinity {
+								++min
+							}
+							else if arg.spread {
+								max = Infinity
+							}
+							else {
+								++min
+								++max
+							}
+						}
+						
+						let variables: array = []
+						let name = data.callee.property.name
+						
+						let varType
+						if variable is Array {
+							for vari in variable {
+								for member in vari.instanceMethods[name] {
+									if member.type && $variable.filter(member, min, max) {
+										varType = $variable.fromType(member.type, node)
+										
+										variables.pushUniq(varType) if varType
+									}
+									else {
+										return null
+									}
+								}
+							}
+							
+							return variables[0]	if variables.length == 1
+							return variables	if variables
+						}
+						else if variable.kind == VariableKind::Class {
+							if data.callee.object.kind == Kind::Identifier {
+								if variable.classMethods[name] {
+									for member in variable.classMethods[name] {
+										if member.type && $variable.filter(member, min, max) {
+											varType = $variable.fromType(member.type, node)
+											
+											variables.push(varType) if varType
+										}
+									}
+								}
+							}
+							else {
+								if variable.instanceMethods[name] {
+									for member in variable.instanceMethods[name] {
+										if member.type && $variable.filter(member, min, max) {
+											varType = $variable.fromType(member.type, node)
+											
+											variables.push(varType) if varType
+										}
+									}
+								}
+							}
+						}
+						else if variable.kind == VariableKind::Variable {
+							if variable.type && variable.type.properties {
+								for property in variable.type.properties {
+									if property.type && property.name.name == name && $variable.filter(property, min, max) {
+										varType = $variable.fromType(property.type, node)
+										
+										variables.push(varType) if varType
+									}
+								}
+							}
+						}
+						else {
+							console.error(variable)
+							throw new Error('Not implemented')
+						}
+						
+						if variables.length == 1 {
+							return variables[0]
+						}
+					}
+					else {
+						console.error(data.callee)
+						throw new Error('Not implemented')
+					}
+				}
+			}
+			Kind::Identifier => {
+				return node.getVariable(data.name)
+			}
+			Kind::Literal => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: $literalTypes[data.value] || 'String'
+						}
+					}
+				}
+			}
+			Kind::MemberExpression => {
+				let variable = $variable.fromAST(data.object, node)
+				//console.log('getVariable.member.data', data)
+				//console.log('getVariable.member.variable', variable)
+				
+				if variable {
+					if data.computed {
+						return variable if variable.type && (variable = $variable.fromType(variable.type, node)) && variable.type && (variable = $variable.fromType(variable.type, node))
+					}
+					else {
+						let name = data.property.name
+						
+						if variable.kind == VariableKind::Class {
+							if data.object.kind == Kind::Identifier {
+								if variable.classMethods[name] {
+									return variable
+								}
+							}
+							else {
+								if variable.instanceMethods[name] {
+									return variable
+								}
+								else if variable.instanceVariables[name] && variable.instanceVariables[name].type {
+									return $variable.fromReflectType(variable.instanceVariables[name].type, node)
+								}
+								else if variable.instanceVariables[name] {
+									console.error(variable)
+									throw new Error('Not implemented')
+								}
+							}
+						}
+						else if variable.kind == VariableKind::Function {
+							if data.object.kind == Kind::CallExpression {
+								return $variable.filterType(variable, name, node)
+							}
+							else {
+								return node.getVariable('Function')
+							}
+						}
+						else if variable.kind == VariableKind::Variable {
+							return $variable.filterType(variable, name, node)
+						}
+						else {
+							console.error(variable)
+							throw new Error('Not implemented')
+						}
+					}
+				}
+			}
+			Kind::NumericExpression => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: 'Number'
+						}
+					}
+				}
+			}
+			Kind::ObjectExpression => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: 'Object'
+						}
+					}
+				}
+			}
+			Kind::TernaryConditionalExpression => {
+				let a = $type.type(data.then, node)
+				let b = $type.type(data.else, node)
+				
+				if a && b && $type.same(a, b) {
+					return {
+						kind: VariableKind::Variable
+						type: a
+					}
+				}
+			}
+			Kind::TemplateExpression => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: 'String'
+						}
+					}
+				}
+			}
+			Kind::TypeReference => {
+				//console.log('getVariable.ref.data', data)
+				if data.typeName {
+					//console.log('getVariable.ref.variable', node.getVariable($types[data.typeName.name] || data.typeName.name))
+					return node.getVariable($types[data.typeName.name] || data.typeName.name)
+				}
+			}
+		}
+		
+		return null
+	} // }}}
+	fromType(data, node) { // {{{
+		//console.log('fromType', data)
+		
+		if data.typeName {
+			if data.typeName.kind == Kind::Identifier {
+				let name = $types[data.typeName.name] || data.typeName.name
+				let variable = node.getVariable(name)
+				
+				return variable if variable
+				
+				if name = $defaultTypes[name] {
+					variable = {
+						name: name
+						kind: VariableKind::Class
+						constructors: []
+						instanceVariables: {}
+						classVariables: {}
+						instanceMethods: {}
+						classMethods: {}
+					}
+					
+					if data.typeParameters && data.typeParameters.length == 1 {
+						variable.type = data.typeParameters[0]
+					}
+					
+					return variable
+				}
+			}
+			else {
+				let variable = $variable.fromAST(data.typeName.object, node)
+				
+				if variable && variable.kind == VariableKind::Variable && variable.type && variable.type.properties {
+					let name = data.typeName.property.name
+					
+					for property in variable.type.properties {
+						if property.name.name == name {
+							property.accessPath = (variable.accessPath || variable.name.name) + '.'
+							
+							return property
+						}
+					}
+				}
+				else {
+					console.error(data.typeName)
+					throw new Error('Not implemented')
+				}
+			}
+		}
+		
+		return null
+	} // }}}
 	kind(type?) { // {{{
 		if type {
 			switch type.kind {
@@ -3171,6 +3774,8 @@ class Base {
 	greatParent() => this._parent?._parent
 	module() => this._parent.module()
 	parent() => this._parent
+	scope() => this._parent.scope()
+	statement() => this._parent.statement()
 }
 
 // {{{ block/scope
@@ -3446,6 +4051,7 @@ class Module {
 		_compiler	: Compiler
 		_data
 		_directory
+		_dynamicRequirements	= []
 		_exportSource			= []
 		_exportMeta				= {}
 		_flags					= {}
@@ -3544,6 +4150,36 @@ class Module {
 		
 		return output
 	} // }}}
+	require(name, kind) { // {{{
+		if this._binary {
+			throw new Error('Binary file can\'t require')
+		}
+		
+		if kind == VariableKind::Class {
+			this._requirements[name] = {
+				class: true
+			}
+		}
+		else {
+			this._requirements[name] = {}
+		}
+	} // }}}
+	require(name, kind, requireFirst) { // {{{
+		if this._binary {
+			throw new Error('Binary file can\'t require')
+		}
+		
+		let requirement = {
+			name: name
+			class: kind == VariableKind::Class
+			parameter: this._body.acquireTempName()
+			requireFirst: requireFirst
+		}
+		
+		this._requirements[requirement.parameter] = requirement
+		
+		this._dynamicRequirements.push(requirement)
+	} // }}}
 	toFragments() { // {{{
 		this._body.toFragments(builder = new FragmentBuilder())
 		
@@ -3584,7 +4220,25 @@ class Module {
 				fragments.push($code(`// Generated by kaoscript \(metadata.version)\n`))
 			}
 			
-			fragments.push($code('module.exports = function() {\n'))
+			fragments.push($code('module.exports = function('))
+			
+			let nf = false
+			for name of this._requirements {
+				if nf {
+					fragments.push($comma)
+				}
+				else {
+					nf = true
+				}
+				
+				fragments.push($code(name))
+				
+				if this._requirements[name].class {
+					fragments.push($code(', __ks_' + name))
+				}
+			}
+			
+			fragments.push($code(') {\n'))
 			
 			fragments.append(body)
 			
@@ -3954,6 +4608,9 @@ class ExportDeclaration extends Statement {
 					this._exports.push({
 						name: declaration.name
 					})
+				}
+				Kind::ExportAlias => {
+					this._exports.push(declaration)
 				}
 				Kind::EnumDeclaration => {
 					this._declarations.push($compile.statement(declaration, this))
@@ -4751,6 +5408,8 @@ class Parameter {
 class IfStatement extends Statement {
 	private {
 		_condition
+		_else
+		_elseifs
 		_then
 	}
 	IfStatement(data, parent) { // {{{
@@ -4758,16 +5417,54 @@ class IfStatement extends Statement {
 		
 		this._condition = $compile.expression(data.condition, this)
 		this._then = $compile.expression($block(data.then), this)
+		
+		if data.elseifs? {
+			this._elseifs = [{
+				condition: $compile.expression(elseif.condition, this)
+				body: $compile.expression(elseif.body, this)
+			} for elseif in data.elseifs]
+		}
+		
+		this._else = $compile.expression($block(data.else.body), this) if data.else?
 	} // }}}
 	toStatementFragments(fragments) { // {{{
-		fragments
-			.newControl()
-			.code('if(')
-			.compileBoolean(this._condition)
-			.code(')')
-			.step()
-			.compile(this._then)
-			.done()
+		let ctrl = fragments.newControl()
+		
+		ctrl.code('if(')
+		
+		if this._condition.isAssignable() {
+			ctrl.code('(').compileBoolean(this._condition).code(')')
+		}
+		else {
+			ctrl.compileBoolean(this._condition)
+		}
+		
+		ctrl.code(')').step().compile(this._then)
+		
+		if this._elseifs? {
+			for elseif in this._elseifs {
+				ctrl.step().code('else if(')
+				
+				if elseif.condition.isAssignable() {
+					ctrl.code('(').compileBoolean(elseif.condition).code(')')
+				}
+				else {
+					ctrl.compileBoolean(elseif.condition)
+				}
+				
+				ctrl.code(')').step().compile(elseif.body)
+			}
+		}
+		
+		if this._else? {
+			ctrl
+				.step()
+				.code('else')
+				.step()
+				.compile(this._else)
+		}
+		
+		ctrl.done()
 	} // }}}
 }
 
@@ -4786,6 +5483,9 @@ class ImplementDeclaration extends Statement {
 		
 		for member in this._data.members {
 			switch member.kind {
+				Kind::FieldDeclaration => {
+					this._members.push(new ImplementFieldDeclaration(member, this, variable))
+				}
 				Kind::MethodDeclaration => {
 					this._members.push(new ImplementMethodDeclaration(member, this, variable))
 				}
@@ -4802,6 +5502,24 @@ class ImplementDeclaration extends Statement {
 		for member in this._members {
 			member.toFragments(fragments)
 		}
+	} // }}}
+}
+
+class ImplementFieldDeclaration extends Statement {
+	private {
+		_variable
+	}
+	ImplementFieldDeclaration(data, parent, @variable) { // {{{
+		super(data, parent)
+		
+		if variable.final {
+			throw new Error('Can\'t add a field to a final class')
+		}
+	} // }}}
+	toFragments(fragments) { // {{{
+		let type = $signature.type(this._data.type, this)
+		
+		fragments.line($runtime.helper(this), '.newField(' + $quote(this._data.name.name) + ', ' + $helper.type(type, this) + ')')
 	} // }}}
 }
 
@@ -4956,6 +5674,9 @@ class ImportDeclarator extends Statement {
 		if this._kind == ImportKind::KSFile {
 			$import.toKSFileFragments(this, fragments, this._data, this._metadata)
 		}
+		else if this._kind == ImportKind::NodeFile {
+			$import.toNodeFileFragments(this, fragments, this._data, this._metadata)
+		}
 		else {
 			throw new Error('Not Implemented')
 		}
@@ -5025,6 +5746,60 @@ class MethodDeclaration extends Statement {
 		}
 		
 		ctrl.done()
+	} // }}}
+}
+
+class RequireDeclaration extends Statement {
+	private {
+	}
+	RequireDeclaration(data, parent) { // {{{
+		super(data, parent)
+		
+		let module = parent.module()
+		
+		let type
+		for declaration in data.declarations {
+			switch declaration.kind {
+				Kind::ClassDeclaration => {
+					variable = $variable.define(parent, declaration.name, VariableKind::Class, declaration)
+					
+					variable.requirement = declaration.name.name
+					
+					let continuous = true
+					for i from 0 til declaration.modifiers.length while continuous {
+						continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
+					}
+					
+					if !continuous {
+						variable.final = {
+							name: '__ks_' + variable.name.name
+							constructors: false
+							instanceMethods: {}
+							classMethods: {}
+						}
+					}
+					
+					for i from 0 til declaration.members.length {
+						$extern.classMember(declaration.members[i], variable, parent)
+					}
+					
+					module.require(declaration.name.name, VariableKind::Class)
+				}
+				Kind::VariableDeclarator => {
+					variable = $variable.define(parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					
+					variable.requirement = declaration.name.name
+					
+					module.require(declaration.name.name, type)
+				}
+				=> {
+					console.error(declaration)
+					throw new Error('Unknow kind ' + declaration.kind)
+				}
+			}
+		}
+	} // }}}
+	toStatementFragments(fragments) { // {{{
 	} // }}}
 }
 
@@ -5356,12 +6131,12 @@ class WhileStatement extends Statement {
 
 // {{{ Expressions
 class Expression extends Base {
-	allowAssignement() => false
+	isAssignable() => false
 	assignment(data) { // {{{
-		this._parent.assignment(data, this.allowAssignement())
+		this._parent.assignment(data, this.isAssignable())
 	} // }}}
 	assignment(data, variable) { // {{{
-		this._parent.assignment(data, variable && this.allowAssignement())
+		this._parent.assignment(data, variable && this.isAssignable())
 	} // }}}
 	getRenamedVariable(name) { // {{{
 		return this._parent.statement().getRenamedVariable(name)
@@ -5371,7 +6146,6 @@ class Expression extends Base {
 	isComputed() => false
 	isConditional() => this.isNullable()
 	isNullable() => false
-	statement() => this._parent.statement()
 	toBooleanFragments(fragments) => this.toFragments(fragments)
 	toConditionalFragments(fragments) => this.toFragments(fragments)
 	toReusableFragments(fragments) => this.toFragments(fragments)
@@ -5386,7 +6160,7 @@ class AssignmentOperatorExpression extends Expression {
 		_left
 		_right
 	}
-	allowAssignement() => true
+	isAssignable() => true
 	isComputed() => true
 	isNullable() => this._right.isNullable()
 	AssignmentOperatorExpression(data, parent) { // {{{
@@ -5661,6 +6435,111 @@ class CallExpression extends Expression {
 	} // }}}
 }
 
+class CallFinalExpression extends Expression {
+	private {
+		_arguments
+		_callee
+		_object
+		_tempName = null
+		_tested = false
+	}
+	CallFinalExpression(data, parent, @callee) { // {{{
+		super(data, parent)
+		
+		this._object = $compile.expression(data.callee.object, this)
+		
+		this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
+	} // }}}
+	isCallable() => !this._tempName?
+	isNullable() { // {{{
+		return this._data.nullable || this._callee.isNullable()
+	} // }}}
+	toFragments(fragments) { // {{{
+		if this._callee.variable {
+			if this._callee.instance {
+				fragments
+					.code((this._callee.variable.accessPath || ''), this._callee.variable.final.name, '._im_' + this._data.callee.property.name + '(')
+					.compile(this._object)
+				
+				for i from 0 til this._arguments.length {
+					fragments.code(', ').compile(this._arguments[i])
+				}
+				
+				fragments.code(')')
+			}
+			else {
+			}
+		}
+		else if this._callee.variables.length == 2 {
+		}
+		else {
+			console.error(this._callee)
+			throw new Error('Not Implemented')
+		}
+	} // }}}
+}
+
+class EnumExpression extends Expression {
+	private {
+		_enum
+	}
+	EnumExpression(data, parent) { // {{{
+		super(data, parent)
+		
+		this._enum = $compile.expression(data.enum, this)
+	} // }}}
+	toFragments(fragments) { // {{{
+		fragments.compile(this._enum).code('.', this._data.member.name)
+	} // }}}
+}
+
+class IfExpression extends Expression {
+	private {
+		_condition
+		_else
+		_then
+	}
+	IfExpression(data, parent) { // {{{
+		super(data, parent)
+		
+		this._condition = $compile.expression(data.condition, this)
+		this._then = $compile.expression(data.then, this)
+		this._else = $compile.expression(data.else, this) if data.else?
+	} // }}}
+	isComputed() => true
+	toFragments(fragments) { // {{{
+		if this._else? {
+			fragments
+				.wrapBoolean(this._condition)
+				.code(' ? ')
+				.compile(this._then)
+				.code(' : ')
+				.compile(this._else)
+		}
+		else {
+			fragments
+				.wrapBoolean(this._condition)
+				.code(' ? ')
+				.compile(this._then)
+				.code(' : undefined')
+		}
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		let ctrl = fragments.newControl()
+		
+		ctrl.code('if(')
+		
+		if this._condition.isAssignable() {
+			ctrl.code('(').compileBoolean(this._condition).code(')')
+		}
+		else {
+			ctrl.compileBoolean(this._condition)
+		}
+		
+		ctrl.code(')').step().line(this._then).done()
+	} // }}}
+}
+
 class MemberExpression extends Expression {
 	private {
 		_object
@@ -5888,8 +6767,8 @@ class UnlessExpression extends Expression {
 		super(data, parent)
 		
 		this._condition = $compile.expression(data.condition, this)
-		this._else = $compile.expression(data.else, this) if data.else?
 		this._then = $compile.expression(data.then, this)
+		this._else = $compile.expression(data.else, this) if data.else?
 	} // }}}
 	isComputed() => true
 	toFragments(fragments) { // {{{
@@ -5961,6 +6840,21 @@ class UnaryOperatorNegation extends Expression {
 		fragments
 			.code('!', this._data.operator)
 			.wrapBoolean(this._argument)
+	} // }}}
+}
+class UnaryOperatorNew extends Expression {
+	private {
+		_argument
+	}
+	UnaryOperatorNew(data, parent) { // {{{
+		super(data, parent)
+		
+		this._argument = $compile.expression(data.argument, this)
+	} // }}}
+	toFragments(fragments) { // {{{
+		fragments
+			.code('new', this._data.operator, $space)
+			.wrap(this._argument)
 	} // }}}
 }
 // }}}
@@ -6107,8 +7001,17 @@ const $expressions = {
 			return new XScope(data, parent)
 		}
 	}
-	`\(Kind::CallExpression)`				: CallExpression
+	`\(Kind::EnumExpression)`				: EnumExpression
+	`\(Kind::CallExpression)`				: func(data, parent) {
+		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $final.callee(data.callee, parent.scope())) {
+			return new CallFinalExpression(data, parent, callee)
+		}
+		else {
+			return new CallExpression(data, parent)
+		}
+	}
 	`\(Kind::Identifier)`					: IdentifierLiteral
+	`\(Kind::IfExpression)`					: IfExpression
 	`\(Kind::Literal)`						: StringLiteral
 	`\(Kind::MemberExpression)`				: MemberExpression
 	`\(Kind::NumericExpression)`			: NumberLiteral
@@ -6134,6 +7037,7 @@ const $statements = {
 	`\(Kind::ImportDeclaration)`			: ImportDeclaration
 	`\(Kind::MethodDeclaration)`			: MethodDeclaration
 	`\(Kind::Module)`						: Module
+	`\(Kind::RequireDeclaration)`			: RequireDeclaration
 	`\(Kind::ReturnStatement)`				: ReturnStatement
 	`\(Kind::TryStatement)`					: TryStatement
 	`\(Kind::UnlessStatement)`				: UnlessStatement
@@ -6146,6 +7050,7 @@ const $statements = {
 const $unaryOperators = {
 	`\(UnaryOperator::Existential)`			: UnaryOperatorExistential
 	`\(UnaryOperator::Negation)`			: UnaryOperatorNegation
+	`\(UnaryOperator::New)`					: UnaryOperatorNew
 }
 
 export class Compiler {

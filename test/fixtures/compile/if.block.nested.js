@@ -1,10 +1,5 @@
 module.exports = function() {
-	let x;
-	let y;
-	let z;
-	let foo;
-	let bar;
-	let qux;
+	let x, y, z, foo, bar, qux;
 	if(x) {
 		if(foo) {
 		}
