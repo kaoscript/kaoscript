@@ -407,8 +407,8 @@ class ControlBuilder {
 		
 		return this
 	} // }}}
-	compileConditional(node) { // {{{
-		this._step.compileConditional(node)
+	compileNullable(node) { // {{{
+		this._step.compileNullable(node)
 		
 		return this
 	} // }}}
@@ -456,8 +456,8 @@ class ControlBuilder {
 		
 		return this
 	} // }}}
-	wrapConditional(node) { // {{{
-		this._step.wrapConditional(node)
+	wrapNullable(node) { // {{{
+		this._step.wrapNullable(node)
 		
 		return this
 	} // }}}
@@ -570,9 +570,9 @@ class ExpressionBuilder {
 		
 		return this
 	} // }}}
-	compileConditional(node) { // {{{
+	compileNullable(node) { // {{{
 		if node is Object {
-			node.toConditionalFragments(this)
+			node.toNullableFragments(this)
 		}
 		else {
 			this._builder._fragments.push(new CodeFragment(node))
@@ -640,16 +640,16 @@ class ExpressionBuilder {
 		
 		return this
 	} // }}}
-	wrapConditional(node) { // {{{
+	wrapNullable(node) { // {{{
 		if node.isComputed() {
 			this.code('(')
 			
-			node.toConditionalFragments(this)
+			node.toNullableFragments(this)
 			
 			this.code(')')
 		}
 		else {
-			node.toConditionalFragments(this)
+			node.toNullableFragments(this)
 		}
 		
 		return this
@@ -1185,7 +1185,7 @@ const $function = {
 			let names = []
 			
 			for i from 0 til l {
-				parameter = node._data.parameters[i]
+				parameter = data.parameters[i]
 				
 				fragments.code($comma) if i
 				
@@ -1205,44 +1205,42 @@ const $function = {
 				}
 			}
 			
-			/* if !ra && rest != -1 && (signature.parameters[rest].type == 'Any' || !maxa) {
+			if !ra && rest != -1 && (signature.parameters[rest].type == 'Any' || !maxa) {
+				parameter = data.parameters[rest]
+				
 				if rest {
-					node.code(', ')
+					fragments.code(', ')
 				}
 				
-				if data.parameters[rest].name {
-					names[rest] = data.parameters[rest].name
+				fragments.code('...')
+				
+				if parameter.name {
+					names[rest] = parameter.name.name
+					
+					fragments.code(parameter.name.name, parameter.name)
 				}
 				else {
-					names[rest] = node.acquireTempName()
+					fragments.code(names[rest] = node.acquireTempName())
 				}
-				
-				node.code('...').parameter(names[rest], config, {
-					kind: Kind::TypeReference
-					typeName: {
-						kind: Kind::Identifier
-						name: 'Array'
-					}
-				})
 			}
 			else if signature.async && !ra {
 				if l {
-					node.code(', ')
+					fragments.code(', ')
 				}
 				
-				node.parameter('__ks_cb', config)
-			} */
+				fragments.code('__ks_cb')
+			}
 			
 			fn(fragments)
 			
-			/* if ra {
-				node
-					.newControl(config)
+			if ra {
+				fragments
+					.newControl()
 					.code('if(arguments.length < ', signature.min, ')')
 					.step()
-					.newExpression(config)
-					.code('throw new Error("Wrong number of arguments")')
-			} */
+					.line('throw new Error("Wrong number of arguments")')
+					.done()
+			}
 			
 			for i from 0 til l {
 				parameter = data.parameters[i]
@@ -1295,113 +1293,92 @@ const $function = {
 			}
 			
 			if ra {
-				/* parameter = data.parameters[rest] */
+				parameter = data.parameters[rest]
 				
 				if signature.parameters[rest].type == 'Any' {
-					/* if parameter.name {
-						node.newExpression(config).code($variable.scope(config), '__ks_i')
+					if parameter.name {
+						fragments.line($variable.scope(node), '__ks_i')
 						
-						node
-							.newExpression(config)
-							.code($variable.scope(config))
-							.parameter(parameter.name, config)
-							.code(' = arguments.length > ' + (maxb + ra) + ' ? Array.prototype.slice.call(arguments, ' + maxb + ', __ks_i = arguments.length - ' + ra + ') : (__ks_i = ' + maxb + ', [])')
+						fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = arguments.length > ' + (maxb + ra) + ' ? Array.prototype.slice.call(arguments, ' + maxb + ', __ks_i = arguments.length - ' + ra + ') : (__ks_i = ' + maxb + ', [])')
 					}
 					else {
-						node.newExpression(config).code($variable.scope(config), '__ks_i = arguments.length > ' + (maxb + ra) + ' ? arguments.length - ' + ra + ' : ' + maxb)
-					} */
+						fragments.line($variable.scope(node), '__ks_i = arguments.length > ' + (maxb + ra) + ' ? arguments.length - ' + ra + ' : ' + maxb)
+					}
 				}
 				else {
-					/* node.newExpression(config).code($variable.scope(config), '__ks_i')
+					fragments.line($variable.scope(node), '__ks_i')
 					
 					if parameter.name {
-						node
-							.newExpression(config)
-							.code($variable.scope(config))
-							.parameter(parameter.name, config)
-							.code(' = []')
-					} */
+						fragments.line($variable.scope(node), parameter.name, parameter.name.name, ' = []')
+					}
 				}
 			}
 			else if rest != -1 && signature.parameters[rest].type != 'Any' && maxa {
-				/* parameter = data.parameters[rest] */
+				parameter = data.parameters[rest]
 				
-				/* if maxb {
+				if maxb {
 				}
 				else {
-					node.newExpression(config).code($variable.scope(config), '__ks_i = -1')
-				} */
+					fragments.line($variable.scope(node), '__ks_i = -1')
+				}
 			
-				/* if parameter.name {
-					node
-						.newExpression(config)
-						.code($variable.scope(config))
-						.parameter(parameter.name, config, {
-							kind: Kind::TypeReference
-							typeName: {
-								kind: Kind::Identifier
-								name: 'Array'
-							}
-						})
-						.code(' = []')
-				} */
+				if parameter.name {
+					fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = []')
+				}
 				
-				/* ctrl = node
-					.newControl(config)
+				ctrl = fragments
+					.newControl()
 					.code('while(')
 				
-				$type.check(ctrl, 'arguments[++__ks_i]', parameter.type, config)
+				$type.check(node, ctrl, 'arguments[++__ks_i]', parameter.type)
 				
 				ctrl
 					.code(')')
 					.step()
 				
 				if parameter.name {
-					ctrl
-						.newExpression(config)
-						.parameter(parameter.name, config)
-						.code('.push(arguments[__ks_i])')
-				} */
+					ctrl.line(parameter.name.name, parameter.name, '.push(arguments[__ks_i])')
+				}
+				
+				ctrl.done()
 			}
 			
 			if rest != -1 {
-				/* parameter = data.parameters[rest] */
+				parameter = data.parameters[rest]
 				
-				/* if (arity = $function.arity(parameter)) && arity.min {
-					node
-						.newControl(config)
-						.code('if(')
-						.parameter(parameter.name, config)
-						.code('.length < ', arity.min, ')')
+				if (arity = $function.arity(parameter)) && arity.min {
+					fragments
+						.newControl()
+						.code('if(', parameter.name.name, parameter.name, '.length < ', arity.min, ')')
 						.step()
-						.newExpression(config)
-						.code('throw new Error("Wrong number of arguments")')
-				} */
+						.line('throw new Error("Wrong number of arguments")')
+						.done()
+				}
 			}
 			else if signature.async && !ra {
-				/* node.module().flag('Type')
+				node.module().flag('Type')
 				
-				node
-					.newControl(config)
-					.code('if(!', $runtime.type(config), '.isFunction(__ks_cb))')
+				fragments
+					.newControl()
+					.code('if(!', $runtime.type(node), '.isFunction(__ks_cb))')
 					.step()
-					.newExpression(config)
-					.code('throw new Error("Invalid callback")') */
+					.line('throw new Error("Invalid callback")')
+					.done()
 			}
 		} // }}}
 		else { // {{{
 			fn(fragments)
 			
-			/* if signature.min {
-				node
-					.newControl(config)
+			if signature.min {
+				fragments
+					.newControl()
 					.code('if(arguments.length < ', signature.min, ')')
 					.step()
-					.newExpression(config)
-					.code('throw new Error("Wrong number of arguments")')
+					.line('throw new Error("Wrong number of arguments")')
+					.done()
 			}
 				
-			node.newExpression(config).code($variable.scope(config), '__ks_i = -1') */
+			fragments.line($variable.scope(node), '__ks_i = -1')
 			
 			let required = rb
 			let optional = 0
@@ -1414,37 +1391,25 @@ const $function = {
 					
 					if parameter.name {
 						if $type.isAny(parameter.type) {
-							/* if required {
-								node
-									.newExpression(config)
-									.code($variable.scope(config))
-									.compile(parameter.name, config)
-									.code(' = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - ', required, ', __ks_i + ', arity.max + 1, '))')
+							if required {
+								fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - ', required, ', __ks_i + ', arity.max + 1, '))')
 								
 								if i + 1 < data.parameters.length {
-									node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
+									fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
 								}
 							}
 							else {
-								node
-									.newExpression(config)
-									.code($variable.scope(config))
-									.compile(parameter.name, config)
-									.code(' = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + ', arity.max + 1, '))')
+								fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + ', arity.max + 1, '))')
 								
 								if i + 1 < data.parameters.length {
-									node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
+									fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
 								}
-							} */
+							}
 						}
 						else {
-							/* node
-								.newExpression(config)
-								.code($variable.scope(config))
-								.compile(parameter.name, config)
-								.code(' = []')
+							fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = []')
 							
-							ctrl = node.newControl(config)
+							ctrl = fragments.newControl()
 							
 							if required {
 								ctrl.code('while(__ks_i < arguments.length - ', required, ' && ')
@@ -1454,9 +1419,9 @@ const $function = {
 							}
 							
 							ctrl
-								.compile(parameter.name, config)
-								.code('.length < ', arity.max, ' )')
-								.step() */
+								.code(parameter.name.name, parameter.name, '.length < ', arity.max, ' )')
+								.step()
+								.done()
 						}
 					}
 					else {
@@ -1466,39 +1431,30 @@ const $function = {
 				} // }}}
 				else { // {{{
 					if (parameter.type && parameter.type.nullable) || parameter.defaultValue {
-						/* ctrl = node
-							.newControl(config)
+						ctrl = fragments
+							.newControl()
 							.code('if(arguments.length > ', signature.min + optional, ')')
 							.step()
 						
 						if $type.isAny(parameter.type) {
 							if parameter.name {
-								ctrl
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = arguments[++__ks_i]')
+								ctrl.line('var ', parameter.name.name, parameter.name, ' = arguments[++__ks_i]')
 							}
 							else {
-								ctrl
-									.newExpression(config)
-									.code('++__ks_i')
+								ctrl.line('++__ks_i')
 							}
 						}
 						else {
 							ctrl2 = ctrl
-								.newControl(config)
+								.newControl()
 								.code('if(')
 							
-							$type.check(ctrl2, 'arguments[__ks_i + 1]', parameter.type, config)
+							$type.check(node, ctrl2, 'arguments[__ks_i + 1]', parameter.type)
 							
 							ctrl2
 								.code(')')
 								.step()
-								.newExpression(config)
-								.code('var ')
-								.compile(parameter.name, config)
-								.code(' = arguments[++__ks_i]')
+								.line('var ', parameter.name.name, parameter.name, ' = arguments[++__ks_i]')
 							
 							ctrl2
 								.step()
@@ -1506,25 +1462,20 @@ const $function = {
 								.step()
 							
 							if rest == -1 {
-								ctrl2
-									.newExpression(config)
-									.code('throw new Error("Invalid type for parameter \'').compile(parameter.name, config).code('\'")')
+								ctrl2.line('throw new Error("Invalid type for parameter \'', parameter.name.name, parameter.name, '\'")')
 							}
 							else if parameter.defaultValue {
 								ctrl2
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = ')
-									.compile(parameter.defaultValue, config)
+									.newLine()
+									.code('var ', parameter.name.name, parameter.name, ' = ')
+									.compile(node._parameters[i]._defaultValue)
+									.done()
 							}
 							else {
-								ctrl2
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = null')
+								ctrl2.line('var ', parameter.name.name, parameter.name, ' = null')
 							}
+							
+							ctrl2.done()
 						}
 						
 						if parameter.name {
@@ -1532,165 +1483,121 @@ const $function = {
 						
 							if parameter.defaultValue {
 								ctrl
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = ')
-									.compile(parameter.defaultValue, config)
+									.newLine()
+									.code('var ', parameter.name.name, parameter.name, ' = ')
+									.compile(node._parameters[i]._defaultValue)
+									.done()
 							}
 							else {
-								ctrl
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = null')
+								ctrl.line('var ', parameter.name.name, parameter.name, ' = null')
 							}
 						}
 						
-						++optional */
+						ctrl.done()
+						
+						++optional
 					}
 					else {
-						/* if $type.isAny(parameter.type) {
+						if $type.isAny(parameter.type) {
 							if parameter.name {
-								node
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = arguments[++__ks_i]')
+								fragments.line('var ', parameter.name.name, parameter.name, ' = arguments[++__ks_i]')
 							}
 							else {
-								node
-									.newExpression(config)
-									.code('++__ks_i')
+								fragments.line('++__ks_i')
 							}
 						}
 						else {
 							if parameter.name {
-								ctrl = node
-									.newControl(config)
+								ctrl = fragments
+									.newControl()
 									.code('if(')
 								
-								$type.check(ctrl, 'arguments[++__ks_i]', parameter.type, config)
+								$type.check(node, ctrl, 'arguments[++__ks_i]', parameter.type)
 								
 								ctrl
 									.code(')')
 									.step()
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = arguments[__ks_i]')
+									.line('var ', parameter.name.name, parameter.name, ' = arguments[__ks_i]')
 								
 								ctrl
 									.step()
-									.code('else ')
-									.newExpression(config)
-									.code('throw new Error("Invalid type for parameter \'').compile(parameter.name, config).code('\'")')
+									.code('else throw new Error("Invalid type for parameter \'', parameter.name.name, parameter.name, '\'")')
+									.done()
 							}
 							else {
-								ctrl = node
-									.newControl(config)
+								ctrl = fragments
+									.newControl()
 									.code('if(!')
 								
-								$type.check(ctrl, 'arguments[++__ks_i]', parameter.type, config)
+								$type.check(node, ctrl, 'arguments[++__ks_i]', parameter.type)
 								
 								ctrl
 									.code(')')
 									.step()
-									.newExpression(config)
-									.code('throw new Error("Wrong type of arguments")')
+									.line('throw new Error("Wrong type of arguments")')
+									.done()
 							}
 						}
 						
-						--required */
+						--required
 					}
 				}
 				// }}}
 			}
 			
 			if rest != -1 { // {{{
-				/* parameter = data.parameters[rest] */
+				parameter = data.parameters[rest]
 				
 				if ra {
-					/* if parameter.name {
-						node
-							.newExpression(config)
-							.code($variable.scope(config))
-							.parameter(parameter.name, config, {
-								kind: Kind::TypeReference
-								typeName: {
-									kind: Kind::Identifier
-									name: 'Array'
-								}
-							})
-							.code(' = arguments.length > __ks_i + ', ra + 1, ' ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - ' + ra + ') : []')
+					if parameter.name {
+						fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = arguments.length > __ks_i + ', ra + 1, ' ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - ' + ra + ') : []')
 						
 						if l + 1 < data.parameters.length {
-							node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
+							fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
 						}
 					}
 					else if l + 1 < data.parameters.length {
-						node
-							.newControl(config)
+						fragments
+							.newControl()
 							.code('if(arguments.length > __ks_i + ' , ra + 1, ')')
 							.step()
-							.newExpression(config).code('__ks_i = arguments.length - ', ra + 1)
-					} */
+							.line('__ks_i = arguments.length - ', ra + 1)
+							.done()
+					}
 				}
 				else {
-					/* if parameter.name {
-						node
-							.newExpression(config)
-							.code($variable.scope(config))
-							.parameter(parameter.name, config, {
-								kind: Kind::TypeReference
-								typeName: {
-									kind: Kind::Identifier
-									name: 'Array'
-								}
-							})
-							.code(' = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : []')
+					if parameter.name {
+						fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : []')
 						
 						if l + 1 < data.parameters.length {
-							node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
+							fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
 						}
-					} */
+					}
 				}
 			} // }}}
 		} // }}}
 		
 		if ra || maxa { // {{{
-			/* if ra != maxa && signature.parameters[rest].type != 'Any' {
+			if ra != maxa && signature.parameters[rest].type != 'Any' {
 				if ra {
-					node
-						.newExpression(config)
-						.code($variable.scope(config), '__ks_m = __ks_i + ', ra)
+					fragments.line($variable.scope(node), '__ks_m = __ks_i + ', ra)
 				}
 				else {
-					node
-						.newExpression(config)
-						.code($variable.scope(config), '__ks_m = __ks_i')
+					fragments.line($variable.scope(node), '__ks_m = __ks_i')
 				}
-			} */
+			}
 			
-			/* for i from rest + 1 til data.parameters.length {
-				/* parameter = data.parameters[i] */
-				
-				/* if parameter.name {
-					$variable.define(node, parameter.name, $variable.kind(parameter.type), parameter.type)
-				} */
+			for i from rest + 1 til data.parameters.length {
+				parameter = data.parameters[i]
 				
 				if arity = $function.arity(parameter) {
-					/* if arity.min {
+					if arity.min {
 						if parameter.name {
 							if $type.isAny(parameter.type) {
-								node
-									.newExpression(config)
-									.code($variable.scope(config))
-									.compile(parameter.name, config)
-									.code(' = Array.prototype.slice.call(arguments, __ks_i + 1, __ks_i + ', arity.min + 1, ')')
+								fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = Array.prototype.slice.call(arguments, __ks_i + 1, __ks_i + ', arity.min + 1, ')')
 								
 								if i + 1 < data.parameters.length {
-									node.newExpression(config).code('__ks_i += ').parameter(parameter.name, config).code('.length')
+									fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
 								}
 							}
 							else {
@@ -1700,166 +1607,137 @@ const $function = {
 						}
 					}
 					else {
-					} */
+					}
 				}
 				else if (parameter.type && parameter.type.nullable) || parameter.defaultValue {
 					if signature.parameters[rest].type == 'Any' {
-						/* if parameter.name {
+						if parameter.name {
 							if parameter.defaultValue {
-								node
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = ')
-									.compile(parameter.defaultValue, config)
+								fragments
+									.newLine()
+									.code('var ', parameter.name.name, parameter.name, ' = ')
+									.compile(node._parameters[i]._defaultValue)
+									.done()
 							}
 							else {
-								node
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = null')
+								fragments.line('var ', parameter.name.name, parameter.name, ' = null')
 							}
-						} */
+						}
 					}
 					else {
-						/* ctrl = node
-							.newControl(config)
+						ctrl = fragments
+							.newControl()
 							.code('if(arguments.length > __ks_m)')
 							.step()
 						
 						if $type.isAny(parameter.type) {
 							if parameter.name {
-								ctrl
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = arguments[', inc ? '++' : '', '__ks_i]')
+								ctrl.line('var ', parameter.name.name, parameter.name, ' = arguments[', inc ? '++' : '', '__ks_i]')
 							}
 							else {
-								ctrl
-									.newExpression(config)
-									.code('++__ks_i')
+								ctrl.line('++__ks_i')
 							}
 						}
 						else {
 							ctrl2 = ctrl
-								.newControl(config)
+								.newControl()
 								.code('if(')
 							
-							$type.check(ctrl2, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type, config)
+							$type.check(node, ctrl2, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type)
 							
 							ctrl2
 								.code(')')
 								.step()
-								.newExpression(config)
-								.code('var ')
-								.compile(parameter.name, config)
-								.code(' = arguments[__ks_i]')
+								.line('var ', parameter.name.name, parameter.name, ' = arguments[__ks_i]')
 							
 							ctrl2
 								.step()
 								.code('else ')
+								.step()
 							
 							if parameter.defaultValue {
 								ctrl2
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = ')
-									.compile(parameter.defaultValue, config)
+									.newLine()
+									.code('var ', parameter.name.name, parameter.name, ' = ')
+									.compile(node._parameters[i]._defaultValue)
+									.done()
 							}
 							else {
-								ctrl2
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = null')
+								ctrl2.line('var ', parameter.name.name, parameter.name, ' = null')
 							}
-						} */
+							
+							ctrl2.done()
+						}
 						
-						/* if parameter.name {
+						if parameter.name {
 							ctrl.step().code('else ').step()
 						
 							if parameter.defaultValue {
 								ctrl
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = ')
-									.compile(parameter.defaultValue, config)
+									.newLine()
+									.code('var ', parameter.name.name, parameter.name, ' = ')
+									.compile(node._parameters[i]._defaultValue)
+									.done()
 							}
 							else {
-								ctrl
-									.newExpression(config)
-									.code('var ')
-									.compile(parameter.name, config)
-									.code(' = null')
+								ctrl.line('var ', parameter.name.name, parameter.name, ' = null')
 							}
 						}
 						
+						ctrl.done()
+						
 						if !inc {
 							inc = true
-						} */
+						}
 					}
 				}
 				else {
 					if $type.isAny(parameter.type) {
-						/* if parameter.name {
-							node
-								.newExpression(config)
-								.code('var ')
-								.compile(parameter.name, config)
-								.code(' = arguments[', inc ? '++' : '', '__ks_i]')
+						if parameter.name {
+							fragments.line('var ', parameter.name.name, parameter.name, ' = arguments[', inc ? '++' : '', '__ks_i]')
 						}
 						else {
-							node
-								.newExpression(config)
-								.code(inc ? '++' : '', '__ks_i')
-						} */
+							fragments.line(inc ? '++' : '', '__ks_i')
+						}
 					}
 					else {
-						/* if parameter.name {
-							ctrl = node
-								.newControl(config)
+						if parameter.name {
+							ctrl = fragments
+								.newControl()
 								.code('if(')
 							
-							$type.check(ctrl, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type, config)
+							$type.check(node, ctrl, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type)
 							
 							ctrl
 								.code(')')
 								.step()
-								.newExpression(config)
-								.code('var ')
-								.compile(parameter.name, config)
-								.code(' = arguments[__ks_i]')
+								.line('var ', parameter.name.name, parameter.name, ' = arguments[__ks_i]')
 							
 							ctrl
 								.step()
-								.code('else ')
-								.newExpression(config)
-								.code('throw new Error("Invalid type for parameter \'').compile(parameter.name, config).code('\'")')
+								.code('else throw new Error("Invalid type for parameter \'', parameter.name.name, parameter.name, '\'")')
+								.done()
 						}
 						else {
-							ctrl = node
-								.newControl(config)
+							ctrl = fragments
+								.newControl()
 								.code('if(!')
 							
-							$type.check(ctrl, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type, config)
+							$type.check(node, ctrl, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type)
 							
 							ctrl
 								.code(')')
 								.step()
-								.newExpression(config)
-								.code('throw new Error("Wrong type of arguments")')
-						} */
+								.line('throw new Error("Wrong type of arguments")')
+								.done()
+						}
 					}
 					
 					if !inc {
 						inc = true
 					}
 				}
-			} */
+			}
 		} // }}}
 	} // }}}
 	signature(data, node) { // {{{
@@ -3804,7 +3682,7 @@ class Block extends Base {
 		}
 	} // }}}
 	hasVariable(name, fromChild = true) { // {{{
-		return this._variables[name]? || (this._parent? && this._parent.hasVariable(name, true))
+		return this._variables[name]? || (this._parent? && this._parent.scope().hasVariable(name, true))
 	} // }}}
 	rename(name) { // {{{
 		let newName = this.newRenamedVariable(name)
@@ -4347,7 +4225,7 @@ class Statement extends Base {
 		return this._parent.getVariable(name, fromChild)
 	} // }}}
 	hasVariable(name, fromChild = true) { // {{{
-		return this._parent.hasVariable(name, fromChild)
+		return this.scope().hasVariable(name, fromChild)
 	} // }}}
 	newBlock() => this._parent.scope().newBlock()
 	newBlock(data) => this._parent.scope().newBlock(data, this._parent)
@@ -4368,7 +4246,7 @@ class Statement extends Base {
 	statement() => this
 	toFragments(fragments) { // {{{
 		for variable in this._usages {
-			if !this._parent.hasVariable(variable.name) {
+			if !this.scope().hasVariable(variable.name) {
 				throw new Error(`Undefined variable '\(variable.name)' at line \(variable.start.line)`)
 			}
 		}
@@ -4760,6 +4638,59 @@ class ExternDeclaration extends Statement {
 		for line in this._lines {
 			fragments.line(line)
 		}
+	} // }}}
+}
+
+class ExternOrRequireDeclaration extends Statement {
+	ExternOrRequireDeclaration(data, parent) { // {{{
+		super(data, parent)
+		
+		let module = this.module()
+		
+		module.flag('Type')
+		
+		for declaration in data.declarations {
+			switch declaration.kind {
+				Kind::ClassDeclaration => {
+					variable = $variable.define(parent, declaration.name, VariableKind::Class, declaration)
+					
+					variable.requirement = declaration.name.name
+					
+					let continuous = true
+					for i from 0 til declaration.modifiers.length while continuous {
+						continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
+					}
+					
+					if !continuous {
+						variable.final = {
+							name: '__ks_' + variable.name.name
+							constructors: false
+							instanceMethods: {}
+							classMethods: {}
+						}
+					}
+					
+					for i from 0 til declaration.members.length {
+						$extern.classMember(declaration.members[i], variable, this)
+					}
+					
+					module.require(declaration.name.name, VariableKind::Class, false)
+				}
+				Kind::VariableDeclarator => {
+					variable = $variable.define(parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					
+					variable.requirement = declaration.name.name
+					
+					module.require(declaration.name.name, type, false)
+				}
+				=> {
+					console.error(declaration)
+					throw new Error('Unknow kind ' + declaration.kind)
+				}
+			}
+		}
+	} // }}}
+	toStatementFragments(fragments) { // {{{
 	} // }}}
 }
 
@@ -5389,15 +5320,28 @@ class FunctionDeclaration extends Statement {
 
 class Parameter {
 	private {
-		_defaultValue = null
-		_name
+		_defaultValue	= null
+		_name			= null
 	}
 	Parameter(data, parent) { // {{{
 		if data.name? {
-			$variable.define(parent, data.name, $variable.kind(data.type), data.type)
+			let signature = $function.signatureParameter(data, parent)
+			
+			if signature.rest {
+				$variable.define(parent, data.name, VariableKind::Variable, {
+					kind: Kind::TypeReference
+					typeName: {
+						kind: Kind::Identifier
+						name: 'Array'
+					}
+				})
+			}
+			else {
+				$variable.define(parent, data.name, $variable.kind(data.type), data.type)
+			}
+			
+			this._name = $compile.expression(data.name, parent)
 		}
-		
-		this._name = $compile.expression(data.name, parent)
 		
 		if data.defaultValue? {
 			this._defaultValue = $compile.expression(data.defaultValue, parent)
@@ -5525,6 +5469,7 @@ class ImplementFieldDeclaration extends Statement {
 
 class ImplementMethodDeclaration extends Statement {
 	private {
+		_instance	= true
 		_parameters
 		_statements
 		_variable
@@ -5536,12 +5481,60 @@ class ImplementMethodDeclaration extends Statement {
 			console.error(data)
 			throw new Error('Not Implemented')
 		}
+		else {
+			for i from 0 til data.modifiers.length while this._instance {
+				if data.modifiers[i].kind == MemberModifier.Static {
+					this._instance = false
+				}
+			}
+			
+			if variable.final {
+				if this._instance {
+					if variable.final.instanceMethods[data.name.name] != true {
+						variable.final.instanceMethods[data.name.name] = true
+					}
+				}
+				else {
+					if variable.final.classMethods[data.name.name] != true {
+						variable.final.classMethods[data.name.name] = true
+					}
+				}
+			}
+			
+			if data.name.kind == Kind::Identifier {
+				let methods
+				if this._instance {
+					if !(variable.instanceMethods[data.name.name] is Array) {
+						variable.instanceMethods[data.name.name] = []
+					}
+					
+					methods = variable.instanceMethods[data.name.name]
+				}
+				else {
+					if !(variable.classMethods[data.name.name] is Array) {
+						variable.classMethods[data.name.name] = []
+					}
+					
+					methods = variable.classMethods[data.name.name]
+				}
+				
+				let method = {
+					kind: Kind::MethodDeclaration
+					name: data.name.name
+					signature: $method.signature(data, this)
+				}
+				
+				method.type = $type.type(data.type, this) if data.type
+				
+				methods.push(method)
+			}
+		}
 		
 		$variable.define(this, {
 			kind: Kind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(variable.name))
-
+		
 		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
 		
 		this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
@@ -5555,29 +5548,9 @@ class ImplementMethodDeclaration extends Statement {
 			throw new Error('Not Implemented')
 		}
 		else {
-			let instance = true
-			for i from 0 til data.modifiers.length while instance {
-				if data.modifiers[i].kind == MemberModifier.Static {
-					instance = false
-				}
-			}
-			
-			if variable.final {
-				if instance {
-					if !variable.final.instanceMethods[data.name.name] {
-						variable.final.instanceMethods[data.name.name] = true
-					}
-				}
-				else {
-					if !variable.final.classMethods[data.name.name] {
-						variable.final.classMethods[data.name.name] = true
-					}
-				}
-			}
-			
 			let line = fragments
 				.newLine()
-				.code($runtime.helper(this), '.', instance ? 'newInstanceMethod' : 'newClassMethod', '(')
+				.code($runtime.helper(this), '.', this._instance ? 'newInstanceMethod' : 'newClassMethod', '(')
 			
 			let object = line.newObject()
 			
@@ -5612,30 +5585,6 @@ class ImplementMethodDeclaration extends Statement {
 			
 			object.done()
 			line.code(')').done()
-			
-			if data.name.kind == Kind::Identifier {
-				let methods
-				if instance {
-					variable.instanceMethods[data.name.name] = [] if !variable.instanceMethods[data.name.name]
-					
-					methods = variable.instanceMethods[data.name.name]
-				}
-				else {
-					variable.classMethods[data.name.name] = [] if !variable.classMethods[data.name.name]
-					
-					methods = variable.classMethods[data.name.name]
-				}
-				
-				let method = {
-					kind: Kind::MethodDeclaration
-					name: data.name.name
-					signature: $method.signature(data, this)
-				}
-				
-				method.type = $type.type(data.type, this) if data.type
-				
-				methods.push(method)
-			}
 		}
 	} // }}}
 }
@@ -6147,7 +6096,7 @@ class Expression extends Base {
 	isConditional() => this.isNullable()
 	isNullable() => false
 	toBooleanFragments(fragments) => this.toFragments(fragments)
-	toConditionalFragments(fragments) => this.toFragments(fragments)
+	toNullableFragments(fragments) => this.toFragments(fragments)
 	toReusableFragments(fragments) => this.toFragments(fragments)
 	use(data, immediate = false) { // {{{
 		this._parent.statement().use(data, immediate)
@@ -6171,8 +6120,8 @@ class AssignmentOperatorExpression extends Expression {
 		this._left = $compile.expression(data.left, this)
 		this._right = $compile.expression(data.right, this)
 	} // }}}
-	toConditionalFragments(fragments) { // {{{
-		fragments.compileConditional(this._right)
+	toNullableFragments(fragments) { // {{{
+		fragments.compileNullable(this._right)
 	} // }}}
 }
 
@@ -6186,6 +6135,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
+	isAssignable() => false
 	toFragments(fragments) { // {{{
 		if this._right.isNullable() {
 			fragments
@@ -6349,6 +6299,39 @@ class ArrayExpression extends Expression {
 	} // }}}
 }
 
+class ArrayRange extends Expression {
+	private {
+		_by = null
+		_from
+		_to
+	}
+	ArrayRange(data, parent) { // {{{
+		super(data, parent)
+		
+		this._from = $compile.expression(data.from ?? data.then, this)
+		this._to = $compile.expression(data.to ?? data.til, this)
+		this._by = $compile.expression(data.by, this) if data.by?
+	} // }}}
+	toFragments(fragments) { // {{{
+		this.module().flag('Helper')
+		
+		fragments
+			.code($runtime.helper(this), '.newArrayRange(')
+			.compile(this._from)
+			.code(', ')
+			.compile(this._to)
+		
+		if this._by == null {
+			fragments.code(', 1')
+		}
+		else {
+			fragments.code(', ').compile(this._by)
+		}
+		
+		fragments.code(', ', !!this._data.from, ', ', !!this._data.to, ')')
+	} // }}}
+}
+
 class CallExpression extends Expression {
 	private {
 		_arguments
@@ -6372,7 +6355,7 @@ class CallExpression extends Expression {
 			fragments.code(this._tempName)
 		}
 		else if this.isNullable() && !this._tested {
-			fragments.wrapConditional(this).code(' ? ').compile(this._callee).code('(')
+			fragments.wrapNullable(this).code(' ? ').compile(this._callee).code('(')
 			
 			for argument, index in this._arguments {
 				fragments.code($comma) if index
@@ -6394,14 +6377,14 @@ class CallExpression extends Expression {
 			fragments.code(')')
 		}
 	} // }}}
-	toConditionalFragments(fragments) { // {{{
+	toNullableFragments(fragments) { // {{{
 		if !this._tested {
 			this._tested = true
 			
 			if this._data.nullable {
 				if this._callee.isNullable() {
 					fragments
-						.wrapConditional(this._callee)
+						.wrapNullable(this._callee)
 						.code(' && ')
 				}
 				
@@ -6412,7 +6395,7 @@ class CallExpression extends Expression {
 			}
 			else {
 				if this._callee.isNullable() {
-					fragments.compileConditional(this._callee)
+					fragments.compileNullable(this._callee)
 				}
 			}
 		}
@@ -6493,6 +6476,34 @@ class EnumExpression extends Expression {
 	} // }}}
 }
 
+class FunctionExpression extends Expression {
+	private {
+		_parameters
+		_statements
+	}
+	FunctionExpression(data, parent) { // {{{
+		super(data, new FunctionScope({}, parent))
+		
+		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
+		
+		this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
+	} // }}}
+	toFragments(fragments) { // {{{
+		fragments.code('function(')
+		
+		let block
+		$function.parameters(this, fragments, func(node) {
+			block = node.code(')').newBlock()
+		})
+		
+		for statement in this._statements {
+			block.compile(statement)
+		}
+		
+		block.done()
+	} // }}}
+}
+
 class IfExpression extends Expression {
 	private {
 		_condition
@@ -6560,7 +6571,7 @@ class MemberExpression extends Expression {
 	} // }}}
 	toFragments(fragments) { // {{{
 		if this.isNullable() && !this._tested {
-			fragments.wrapConditional(this).code(' ? ').compile(this._object)
+			fragments.wrapNullable(this).code(' ? ').compile(this._object)
 			
 			if this._data.computed {
 				fragments.code('[').compile(this._property).code('] : undefined')
@@ -6592,7 +6603,7 @@ class MemberExpression extends Expression {
 			}
 			else {
 				fragments
-					.compileConditional(this)
+					.compileNullable(this)
 					.code(' ? ')
 					.compile(this._object)
 					.code($dot)
@@ -6612,14 +6623,14 @@ class MemberExpression extends Expression {
 			}
 		}
 	} // }}}
-	toConditionalFragments(fragments) { // {{{
+	toNullableFragments(fragments) { // {{{
 		if !this._tested {
 			this._tested = true
 			
 			let conditional = false
 			
 			if this._object.isNullable() {
-				fragments.compileConditional(this._object)
+				fragments.compileNullable(this._object)
 				
 				conditional = true
 			}
@@ -6638,7 +6649,7 @@ class MemberExpression extends Expression {
 			if this._data.computed && this._property.isNullable() {
 				fragments.code(' && ') if conditional
 				
-				fragments.compileConditional(this._property)
+				fragments.compileNullable(this._property)
 			}
 		}
 	} // }}}
@@ -6812,7 +6823,7 @@ class UnaryOperatorExistential extends Expression {
 	toFragments(fragments) { // {{{
 		if this._argument.isNullable() {
 			fragments
-				.wrapConditional(this._argument)
+				.wrapNullable(this._argument)
 				.code(' && ')
 				.code($runtime.type(this) + '.isValue(',  this._data.operator)
 				.compile(this._argument)
@@ -6900,7 +6911,7 @@ class IdentifierLiteral extends Literal {
 			fragments.code(this._value, this._data)
 		}
 	} // }}}
-	toConditionalFragments(fragments) { // {{{
+	toNullableFragments(fragments) { // {{{
 		fragments
 			.code($runtime.type(this) + '.isValue(')
 			.compile(this)
@@ -6993,6 +7004,7 @@ const $binaryOperators = {
 
 const $expressions = {
 	`\(Kind::ArrayExpression)`				: ArrayExpression
+	`\(Kind::ArrayRange)`					: ArrayRange
 	`\(Kind::Block)`						: func(data, parent) {
 		if parent._options.variables == 'es6' {
 			return new Scope(data, parent)
@@ -7001,7 +7013,6 @@ const $expressions = {
 			return new XScope(data, parent)
 		}
 	}
-	`\(Kind::EnumExpression)`				: EnumExpression
 	`\(Kind::CallExpression)`				: func(data, parent) {
 		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $final.callee(data.callee, parent.scope())) {
 			return new CallFinalExpression(data, parent, callee)
@@ -7010,6 +7021,8 @@ const $expressions = {
 			return new CallExpression(data, parent)
 		}
 	}
+	`\(Kind::EnumExpression)`				: EnumExpression
+	`\(Kind::FunctionExpression)`			: FunctionExpression
 	`\(Kind::Identifier)`					: IdentifierLiteral
 	`\(Kind::IfExpression)`					: IfExpression
 	`\(Kind::Literal)`						: StringLiteral
@@ -7027,6 +7040,7 @@ const $statements = {
 	`\(Kind::EnumDeclaration)`				: EnumDeclaration
 	`\(Kind::ExportDeclaration)`			: ExportDeclaration
 	`\(Kind::ExternDeclaration)`			: ExternDeclaration
+	`\(Kind::ExternOrRequireDeclaration)`	: ExternOrRequireDeclaration
 	`\(Kind::ForFromStatement)`				: ForFromStatement
 	`\(Kind::ForInStatement)`				: ForInStatement
 	`\(Kind::ForOfStatement)`				: ForOfStatement
