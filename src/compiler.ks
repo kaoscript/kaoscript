@@ -856,21 +856,21 @@ func $block(data) { // {{{
 } // }}}
 
 const $continuous = {
-	constructor(node, fragments, data, declaration, signature, reflect, clazz) { // {{{
+	constructor(node, fragments, statement, signature, reflect) { // {{{
 		let index = reflect.constructors.length
 		
 		reflect.constructors.push(signature)
 	
-		declaration
+		statement
 			.name('__ks_cons_' + index)
 			.toFragments(fragments)
 	} // }}}
-	methodCall(variable, fnName, argName, retCode, fragments, method, index) { // {{{
+	methodCall(node, fnName, argName, retCode, fragments, method, index) { // {{{
 		if method.max == 0 {
-			fragments.line(retCode, variable.name.name, '.', fnName, index, '.apply(this)')
+			fragments.line(retCode, node._data.name.name, '.', fnName, index, '.apply(this)')
 		}
 		else {
-			fragments.line(retCode, variable.name.name, '.', fnName, index, '.apply(this, ', argName, ')')
+			fragments.line(retCode, node._data.name.name, '.', fnName, index, '.apply(this, ', argName, ')')
 		}
 	} // }}}
 }
@@ -973,30 +973,30 @@ const $final = {
 		
 		return false
 	} // }}}
-	class(node, fragments, data, variable) { // {{{
+	class(node, fragments) { // {{{
 		let clazz = fragments
 			.newControl()
-			.code('class ', variable.name.name)
+			.code('class ', node._variable.name.name)
 		
-		if data.extends {
-			variable.extends = node.getVariable(data.extends.name)
+		if node._data.extends? {
+			let superClazz = node.getVariable(node._data.extends.name)
 		
-			if variable.extends {
-				clazz.code(' extends ', variable.extends.name.name)
+			if superClazz {
+				clazz.code(' extends ', superClazz.name.name)
 			}
 			else {
-				throw new Error('Undefined class ' + data.extends.name + ' at line ' + data.extends.start.line)
+				throw new Error('Undefined class ' + node._data.extends.name + ' at line ' + node._data.extends.start.line)
 			}
 		}
 		
 		clazz.step()
 		
-		let noinit = Type.isEmptyObject(variable.instanceVariables)
+		let noinit = Type.isEmptyObject(node._instanceVariables)
 		
 		if !noinit {
 			noinit = true
 			
-			for name, field of variable.instanceVariables while noinit {
+			for name, field of node._instanceVariables while noinit {
 				if field.data.defaultValue {
 					noinit = false
 				}
@@ -1004,21 +1004,21 @@ const $final = {
 		}
 		
 		let ctrl
-		if variable.extends {
+		if node._data.extends? {
 			ctrl = fragments
 				.newControl()
 				.code('__ks_init()')
 				.step()
 				
-			ctrl.line(variable.extends.name.name, '.prototype.__ks_init.call(this)')
+			ctrl.line(node._data.extends.name, '.prototype.__ks_init.call(this)')
 			
 			if !noinit {
-				for name, field of variable.instanceVariables {
+				for name, field of node._instanceVariables {
 					if field.data.defaultValue {
 						ctrl
 							.newLine()
 							.code('this.' + name + ' = ')
-							.compile(field.fragments)
+							.compile(field.defaultValue)
 							.done()
 					}
 				}
@@ -1033,12 +1033,12 @@ const $final = {
 				.step()
 		
 			if !noinit {
-				for name, field of variable.instanceVariables {
+				for name, field of node._instanceVariables {
 					if field.data.defaultValue {
 						ctrl
 							.newLine()
 							.code('this.' + name + ' = ')
-							.compile(field.fragments)
+							.compile(field.defaultValue)
 							.done()
 					}
 				}
@@ -1059,11 +1059,11 @@ const $final = {
 			classMethods: {}
 		}
 		
-		for method in variable.constructors {
-			$continuous.constructor(node, clazz, method.data, method.fragments, method.signature, reflect, variable)
+		for method in node._constructors {
+			$continuous.constructor(node, clazz, method.statement, method.signature, reflect)
 		}
 		
-		$helper.constructor(node, clazz, reflect, variable)
+		$helper.constructor(node, clazz, reflect)
 		
 		/*
 		for name, methods of variable.instanceMethods {
@@ -1083,17 +1083,17 @@ const $final = {
 		}
 		*/
 		
-		for name, field of variable.instanceVariables {
+		for name, field of node._instanceVariables {
 			reflect.instanceVariables[name] = field.signature
 		}
 		
-		for name, field of variable.classVariables {
+		/* for name, field of node._classVariables {
 			$continuous.classVariable(fragments, field.data, field.signature, reflect, name, variable)
-		}
+		} */
 		
 		clazz.done()
 		
-		$helper.reflect(node, fragments, variable.name, reflect)
+		$helper.reflect(node, fragments, reflect)
 		
 		/* let references = node.module().listReferences(variable.name.name)
 		if references {
@@ -1101,12 +1101,6 @@ const $final = {
 				node.newExpression(config).code(ref)
 			}
 		} */
-		
-		variable.constructors = reflect.constructors
-		variable.instanceVariables = reflect.instanceVariables
-		variable.classVariables = reflect.classVariables
-		variable.instanceMethods = reflect.instanceMethods
-		variable.classMethods = reflect.classMethods
 	} // }}}
 }
 
@@ -1815,24 +1809,24 @@ const $function = {
 }
 
 const $helper = {
-	constructor(node, clazz, reflect, variable) { // {{{
+	constructor(node, fragments, reflect) { // {{{
 		let extend = false
-		if variable.extends {
+		if node._data.extends? {
 			extend = func(node, ctrl?) {
 				if ctrl {
 					ctrl
 						.step()
 						.code('else')
 						.step()
-						.line(variable.extends.name.name + '.prototype.__ks_cons.call(this, args)')
+						.line(node._data.extends.name + '.prototype.__ks_cons.call(this, args)')
 				}
 				else {
-					node.line(variable.extends.name.name + '.prototype.__ks_cons.call(this, args)')
+					node.line(node._data.extends.name + '.prototype.__ks_cons.call(this, args)')
 				}
 			}
 		}
 		
-		$helper.methods(extend, node, clazz.newControl(), '__ks_cons(args)', reflect.constructors, $continuous.methodCall^^(variable, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
+		$helper.methods(extend, node, fragments.newControl(), '__ks_cons(args)', reflect.constructors, $continuous.methodCall^^(node, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
 	} // }}}
 	methods(extend, node, fragments, header, methods, call, argName, refName, returns) { // {{{
 		fragments.code(header).step()
@@ -1910,8 +1904,8 @@ const $helper = {
 		
 		fragments.done()
 	} // }}}
-	reflect(node, fragments, name, reflect) { // {{{
-		let classname = name.name
+	reflect(node, fragments, reflect) { // {{{
+		let classname = node._variable.name.name
 		
 		let line = fragments.newLine()
 		
@@ -3821,11 +3815,6 @@ class FunctionScope extends AbstractScope {
 	FunctionScope(data, parent) { // {{{
 		super(data, parent)
 	} // }}}
-	compile() { // {{{
-		for statement in this._data.statements {
-			this._body.push($compile.statement(statement, this))
-		}
-	} // }}}
 }
 
 class ModuleScope extends AbstractScope {
@@ -3836,14 +3825,17 @@ class ModuleScope extends AbstractScope {
 		super(data)
 		
 		this._options = $applyAttributes(data, module._options)
-		
-		for statement in data.body {
-			this._body.push($compile.statement(statement, this))
+	} // }}}
+	analyse() { // {{{
+		for statement in this._data.body {
+			this._body.push(statement = $compile.statement(statement, this))
+			
+			statement.analyse()
 		}
 	} // }}}
-	compile() { // {{{
+	fuse() { // {{{
 		for statement in this._body {
-			statement.compile()
+			statement.fuse()
 		}
 	} // }}}
 	module() => this._module
@@ -3860,11 +3852,19 @@ class Scope extends AbstractScope {
 		this._scopeParent = parent
 		this._tempNextIndex = parent._tempNextIndex
 		this._tempParentNames = {}
-		
-		if data.statements {
-			for statement in data.statements {
-				this._body.push($compile.statement(statement, this))
+	} // }}}
+	analyse() { // {{{
+		if this._data.statements {
+			for statement in this._data.statements {
+				this._body.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
 			}
+		}
+	} // }}}
+	fuse() { // {{{
+		for statement in this._body {
+			statement.fuse()
 		}
 	} // }}}
 }
@@ -3872,15 +3872,23 @@ class Scope extends AbstractScope {
 class XScope extends Block {
 	XScope(data, parent) { // {{{
 		super(data, parent)
-		
-		if data.statements {
-			for statement in data.statements {
-				this._body.push($compile.statement(statement, this))
-			}
-		}
 	} // }}}
 	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
 		return this._parent.acquireTempName(node, assignment, fromChild)
+	} // }}}
+	analyse() { // {{{
+		if this._data.statements {
+			for statement in this._data.statements {
+				this._body.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
+			}
+		}
+	} // }}}
+	fuse() { // {{{
+		for statement in this._body {
+			statement.fuse()
+		}
 	} // }}}
 	getRenamedVariable(name) { // {{{
 		if this._renamedVariables[name] {
@@ -3959,8 +3967,8 @@ class Module {
 			this._output = null
 		}
 	} // }}}
-	compile() { // {{{
-		this._body.compile()
+	analyse() { // {{{
+		this._body.analyse()
 	} // }}}
 	directory() => this._directory
 	export(name, alias = false) { // {{{
@@ -3997,6 +4005,9 @@ class Module {
 	} // }}}
 	flag(name) { // {{{
 		this._flags[name] = true
+	} // }}}
+	fuse() { // {{{
+		this._body.fuse()
 	} // }}}
 	import(name, file?) { // {{{
 		this._imports[name] = true
@@ -4069,6 +4080,14 @@ class Module {
 			
 			let fragments: Array = []
 			
+			if this._options.header {
+				fragments.push($code(`// Generated by kaoscript \(metadata.version)\n`))
+			}
+			
+			if this._register && this._options.register {
+				fragments.push($code('require("kaoscript/register");\n'))
+			}
+			
 			let helper = $runtime.helper(this)
 			let type = $runtime.type(this)
 			
@@ -4090,12 +4109,109 @@ class Module {
 				}
 			}
 			
-			if this._register && this._options.register {
-				fragments.push($code('require("kaoscript/register");\n'))
-			}
-			
-			if this._options.header {
-				fragments.push($code(`// Generated by kaoscript \(metadata.version)\n`))
+			if this._dynamicRequirements.length {
+				fragments.push($code('function __ks_require('))
+				
+				for requirement, i in this._dynamicRequirements {
+					if i {
+						fragments.push($comma)
+					}
+					
+					fragments.push($code(requirement.parameter))
+					
+					if requirement.class {
+						fragments.push($code(', __ks_' + requirement.parameter))
+					}
+				}
+				
+				fragments.push($code(') {\n'))
+				
+				if this._dynamicRequirements.length == 1 {
+					requirement = this._dynamicRequirements[0]
+					
+					if requirement.requireFirst {
+						fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
+						
+						if requirement.class {
+							fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
+							fragments.push($code('\t}\n'))
+							fragments.push($code('\telse {\n'))
+							fragments.push($code('\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'))
+							fragments.push($code('\t}\n'))
+						}
+						else {
+							fragments.push($code('\t\treturn [' + requirement.parameter + '];\n'))
+							fragments.push($code('\t}\n'))
+							fragments.push($code('\telse {\n'))
+							fragments.push($code('\t\treturn [' + requirement.name + '];\n'))
+							fragments.push($code('\t}\n'))
+						}
+					}
+					else {
+						fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
+						
+						if requirement.class {
+							fragments.push($code('\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'))
+							fragments.push($code('\t}\n'))
+							fragments.push($code('\telse {\n'))
+							fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
+							fragments.push($code('\t}\n'))
+						}
+						else {
+							fragments.push($code('\t\treturn [' + requirement.name + '];\n'))
+							fragments.push($code('\t}\n'))
+							fragments.push($code('\telse {\n'))
+							fragments.push($code('\t\treturn [' + requirement.parameter + '];\n'))
+							fragments.push($code('\t}\n'))
+						}
+					}
+				}
+				else {
+					fragments.push($code('\tvar req = [];\n'))
+					
+					for requirement in this._dynamicRequirements {
+						if requirement.requireFirst {
+							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
+							
+							if requirement.class {
+								fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								fragments.push($code('\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'))
+								fragments.push($code('\t}\n'))
+							}
+							else {
+								fragments.push($code('\t\treq.push(' + requirement.parameter + ');\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								fragments.push($code('\t\treq.push(' + requirement.name + ');\n'))
+								fragments.push($code('\t}\n'))
+							}
+						}
+						else {
+							fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
+							
+							if requirement.class {
+								fragments.push($code('\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
+								fragments.push($code('\t}\n'))
+							}
+							else {
+								fragments.push($code('\t\treq.push(' + requirement.name + ');\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								fragments.push($code('\t\treq.push(' + requirement.parameter + ');\n'))
+								fragments.push($code('\t}\n'))
+							}
+						}
+					}
+					
+					fragments.push($code('\treturn req;\n'))
+				}
+				
+				fragments.push($code('}\n'))
 			}
 			
 			fragments.push($code('module.exports = function('))
@@ -4117,6 +4233,38 @@ class Module {
 			}
 			
 			fragments.push($code(') {\n'))
+			
+			if this._dynamicRequirements.length {
+				fragments.push($code('\tvar ['))
+				
+				for requirement, i in this._dynamicRequirements {
+					if i {
+						fragments.push($comma)
+					}
+					
+					fragments.push($code(requirement.name))
+					
+					if requirement.class {
+						fragments.push($code(', __ks_' + requirement.name))
+					}
+				}
+				
+				fragments.push($code('] = __ks_require('))
+				
+				for requirement, i in this._dynamicRequirements {
+					if i {
+						fragments.push($comma)
+					}
+					
+					fragments.push($code(requirement.parameter))
+					
+					if requirement.class {
+						fragments.push($code(', __ks_' + requirement.parameter))
+					}
+				}
+				
+				fragments.push($code(');\n'))
+			}
 			
 			fragments.append(body)
 			
@@ -4216,8 +4364,15 @@ class Statement extends Base {
 			$variable.define(this, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
-	compile() { // {{{
-	} // }}}
+	compile(statements) {
+		for statement in statements {
+			statement.analyse()
+		}
+		
+		for statement in statements {
+			statement.fuse()
+		}
+	}
 	getRenamedVariable(name) { // {{{
 		return this._parent.getRenamedVariable(name)
 	} // }}}
@@ -4227,6 +4382,7 @@ class Statement extends Base {
 	hasVariable(name, fromChild = true) { // {{{
 		return this.scope().hasVariable(name, fromChild)
 	} // }}}
+	module() => this._parent.module()
 	newBlock() => this._parent.scope().newBlock()
 	newBlock(data) => this._parent.scope().newBlock(data, this._parent)
 	newRenamedVariable(name) { // {{{
@@ -4291,11 +4447,19 @@ class Statement extends Base {
 
 class ClassDeclaration extends Statement {
 	private {
-		_continuous = true
+		_classMethods		= {}
+		_classVariables		= {}
+		_continuous 		= true
+		_constructors		= []
+		_instanceMethods	= {}
+		_instanceVariables	= {}
 		_variable
 	}
 	ClassDeclaration(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		this._variable = $variable.define(this, data.name, VariableKind::Class, data.type)
 		
@@ -4306,6 +4470,7 @@ class ClassDeclaration extends Statement {
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(this._variable.name))
 		
+		let signature
 		for member in data.members {
 			switch member.kind {
 				Kind::CommentBlock => {
@@ -4322,18 +4487,22 @@ class ClassDeclaration extends Statement {
 					
 					let variable = {
 						data: member,
-						signature: $field.signature(member, this)
+						signature: signature = $field.signature(member, this)
 					}
 					
 					if member.defaultValue? {
-						variable.fragments = $compile.expression(member.defaultValue, instance ? instanceVariableScope : this)
+						variable.defaultValue = $compile.expression(member.defaultValue, instance ? instanceVariableScope : this)
 					}
 					
 					if instance {
-						this._variable.instanceVariables[member.name.name] = variable
+						this._instanceVariables[member.name.name] = variable
+						
+						this._variable.instanceVariables[member.name.name] = signature
 					}
 					else {
-						this._variable.classVariables[member.name.name] = variable
+						this._classVariables[member.name.name] = variable
+						
+						this._variable._classVariables[member.name.name] = signature
 					}
 				}
 				Kind::MethodDeclaration => {
@@ -4342,11 +4511,13 @@ class ClassDeclaration extends Statement {
 						
 						method.isConstructor(true)
 						
-						this._variable.constructors.push({
+						this._constructors.push({
 							data: member
-							fragments: method
-							signature: $method.signature(member, this)
+							signature: signature = $method.signature(member, this)
+							statement: method
 						})
+						
+						this._variable.constructors.push(signature)
 					}
 					else {
 						let instance = true
@@ -4356,27 +4527,35 @@ class ClassDeclaration extends Statement {
 							}
 						}
 						
+						signature = $method.signature(member, this)
+						
 						if instance {
-							if !(this._variable.instanceMethods[member.name.name] is Array) {
+							if !(this._instanceMethods[member.name.name] is Array) {
+								this._instanceMethods[member.name.name] = []
 								this._variable.instanceMethods[member.name.name] = []
 							}
 							
-							this._variable.instanceMethods[member.name.name].push({
+							this._instanceMethods[member.name.name].push({
 								data: member,
-								fragments: $compile.statement(member, this)
-								signature: $method.signature(member, this)
+								signature: signature
+								statement: $compile.statement(member, this)
 							})
+							
+							this._variable.instanceMethods[member.name.name].push(signature)
 						}
 						else {
-							if !(this._variable.classMethods[member.name.name] is Array) {
+							if !(this._classMethods[member.name.name] is Array) {
+								this._classMethods[member.name.name] = []
 								this._variable.classMethods[member.name.name] = []
 							}
 							
-							this._variable.classMethods[member.name.name].push({
+							this._classMethods[member.name.name].push({
 								data: member,
-								fragments: $compile.statement(member, this)
-								signature: $method.signature(member, this)
+								signature: signature
+								statement: $compile.statement(member, this)
 							})
+							
+							this._variable.classMethods[member.name.name].push(signature)
 						}
 					}
 				}
@@ -4402,12 +4581,61 @@ class ClassDeclaration extends Statement {
 			}
 		}
 	} // }}}
+	fuse() { // {{{
+		for variable of this._instanceVariables when variable.defaultValue? {
+			variable.defaultValue.analyse()
+		}
+		
+		for variable of this._classVariables when variable.defaultValue? {
+			variable.defaultValue.analyse()
+		}
+		
+		for method in this._constructors {
+			method.statement.analyse()
+		}
+		
+		for methods of this._instanceMethods {
+			for method in methods {
+				method.statement.analyse()
+			}
+		}
+		
+		for methods of this._classMethods {
+			for method in methods {
+				method.statement.analyse()
+			}
+		}
+		
+		for variable of this._instanceVariables when variable.defaultValue? {
+			variable.statement.fuse()
+		}
+		
+		for variable of this._classVariables when variable.defaultValue? {
+			variable.statement.fuse()
+		}
+		
+		for method in this._constructors {
+			method.statement.fuse()
+		}
+		
+		for methods of this._instanceMethods {
+			for method in methods {
+				method.statement.fuse()
+			}
+		}
+		
+		for methods of this._classMethods {
+			for method in methods {
+				method.statement.fuse()
+			}
+		}
+	} // }}}
 	toStatementFragments(fragments) { // {{{
 		if this._continuous {
-			//$continuous.class(this, fragments, this._data, this._variable)
+			//$continuous.class(this, fragments)
 		}
 		else {
-			$final.class(this, fragments, this._data, this._variable)
+			$final.class(this, fragments)
 			
 			fragments.line('var ' + this._variable.final.name + ' = {}')
 		}
@@ -4421,12 +4649,15 @@ class EnumDeclaration extends Statement {
 	}
 	EnumDeclaration(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._variable = $variable.define(this, this._data.name, VariableKind::Enum, this._data.type)
 		
-		this._variable = $variable.define(this, data.name, VariableKind::Enum, data.type)
-		
-		for member in data.members {
+		for member in this._data.members {
 			this._members.push(new EnumMember(member, this))
 		}
+	} // }}}
+	fuse() { // {{{
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		if this._variable.new {
@@ -4453,8 +4684,6 @@ class EnumDeclaration extends Statement {
 }
 
 class EnumMember extends Base {
-	private {
-	}
 	EnumMember(data, parent) { // {{{
 		super(data, parent)
 	} // }}}
@@ -4473,42 +4702,44 @@ class EnumMember extends Base {
 class ExportDeclaration extends Statement {
 	private {
 		_declarations	= []
-		_exports		= []
 	}
 	ExportDeclaration(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		let module = this.module()
 		
+		let statement
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					this._declarations.push($compile.statement(declaration, this))
+					this._declarations.push(statement = $compile.statement(declaration, this))
 					
-					this._exports.push({
-						name: declaration.name
-					})
+					statement.analyse()
+					
+					module.export(declaration.name)
 				}
 				Kind::ExportAlias => {
-					this._exports.push(declaration)
+					module.export(declaration.name, declaration.alias)
 				}
 				Kind::EnumDeclaration => {
-					this._declarations.push($compile.statement(declaration, this))
+					this._declarations.push(statement = $compile.statement(declaration, this))
 					
-					this._exports.push({
-						name: declaration.name
-					})
+					statement.analyse()
+					
+					module.export(declaration.name)
 				}
 				Kind::Identifier => {
-					this._exports.push({
-						name: declaration
-					})
+					module.export(declaration)
 				}
 				Kind::VariableDeclaration => {
-					this._declarations.push($compile.statement(declaration, this))
+					this._declarations.push(statement = $compile.statement(declaration, this))
+					
+					statement.analyse()
 					
 					for j from 0 til declaration.declarations.length {
-						this._exports.push({
-							name: declaration.declarations[j].name
-						})
+						module.export(declaration.declarations[j].name)
 					}
 				}
 				=> {
@@ -4518,15 +4749,9 @@ class ExportDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	compile() { // {{{
+	fuse() { // {{{
 		for declaration in this._declarations {
-			declaration.compile()
-		}
-		
-		let module = this.module()
-		
-		for data in this._exports {
-			module.export(data.name, data.alias)
+			declaration.fuse()
 		}
 	} // }}}
 	toStatementFragments(fragments) { // {{{
@@ -4543,8 +4768,11 @@ class ExpressionStatement extends Statement {
 	}
 	ExpressionStatement(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._expression = $compile.expression(this._data, this)
 		
-		this._expression = $compile.expression(data, this)
+		this._expression.analyse()
 	} // }}}
 	assignment(data, allowAssignement = false) { // {{{
 		if data.left.kind == Kind::Identifier && !this.hasVariable(data.left.name) {
@@ -4557,6 +4785,9 @@ class ExpressionStatement extends Statement {
 			
 			$variable.define(this, data.left, $variable.kind(data.right.type), data.right.type)
 		}
+	} // }}}
+	fuse() { // {{{
+		this._expression.fuse()
 	} // }}}
 	toFragments(fragments) { // {{{
 		for variable in this._usages {
@@ -4598,11 +4829,14 @@ class ExternDeclaration extends Statement {
 	}
 	ExternDeclaration(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(parent, declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this._parent, declaration.name, VariableKind::Class, declaration)
 					
 					let continuous = true
 					for i from 0 til declaration.modifiers.length while continuous {
@@ -4625,7 +4859,7 @@ class ExternDeclaration extends Statement {
 					}
 				}
 				Kind::VariableDeclarator => {
-					$variable.define(parent, declaration.name, $variable.kind(declaration.type), declaration.type)
+					$variable.define(this._parent, declaration.name, $variable.kind(declaration.type), declaration.type)
 				}
 				=> {
 					console.error(declaration)
@@ -4633,6 +4867,8 @@ class ExternDeclaration extends Statement {
 				}
 			}
 		}
+	} // }}}
+	fuse() { // {{{
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		for line in this._lines {
@@ -4644,7 +4880,9 @@ class ExternDeclaration extends Statement {
 class ExternOrRequireDeclaration extends Statement {
 	ExternOrRequireDeclaration(data, parent) { // {{{
 		super(data, parent)
-		
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		let module = this.module()
 		
 		module.flag('Type')
@@ -4652,7 +4890,7 @@ class ExternOrRequireDeclaration extends Statement {
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(parent, declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this._parent, declaration.name, VariableKind::Class, declaration)
 					
 					variable.requirement = declaration.name.name
 					
@@ -4677,7 +4915,7 @@ class ExternOrRequireDeclaration extends Statement {
 					module.require(declaration.name.name, VariableKind::Class, false)
 				}
 				Kind::VariableDeclarator => {
-					variable = $variable.define(parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this._parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
@@ -4689,6 +4927,8 @@ class ExternOrRequireDeclaration extends Statement {
 				}
 			}
 		}
+	} // }}}
+	fuse() { // {{{
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 	} // }}}
@@ -4707,6 +4947,9 @@ class ForFromStatement extends Statement {
 	}
 	ForFromStatement(data, parent) { // {{{
 		super(data, parent.newBlock())
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		if !this.hasVariable(data.variable.name) {
 			$variable.define(this, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
@@ -4738,6 +4981,10 @@ class ForFromStatement extends Statement {
 		}
 		
 		this._body = this.newBlock($block(data.body))
+		this._body.analyse()
+	} // }}}
+	fuse() { // {{{
+		this._body.fuse()
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let data = this._data
@@ -4879,6 +5126,9 @@ class ForInStatement extends Statement {
 	}
 	ForInStatement(data, parent) { // {{{
 		super(data, parent.newBlock())
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		this._value = $compile.expression(data.value, this)
 		
@@ -4908,6 +5158,11 @@ class ForInStatement extends Statement {
 		}
 		
 		this._body = this.newBlock($block(data.body))
+		this._body.analyse()
+	} // }}}
+	fuse() { // {{{
+		this._value.fuse()
+		this._body.fuse()
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let data = this._data
@@ -5059,6 +5314,9 @@ class ForOfStatement extends Statement {
 	}
 	ForOfStatement(data, parent) { // {{{
 		super(data, parent.newBlock())
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		this._value = $compile.expression(data.value, this)
 		
@@ -5088,6 +5346,11 @@ class ForOfStatement extends Statement {
 		}
 		
 		this._body = this.newBlock($block(data.body))
+		this._body.analyse()
+	} // }}}
+	fuse() { // {{{
+		this._value.fuse()
+		this._body.fuse()
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let data = this._data
@@ -5179,6 +5442,9 @@ class ForRangeStatement extends Statement {
 	}
 	ForRangeStatement(data, parent) { // {{{
 		super(data, parent.newBlock())
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		if !this.hasVariable(data.variable.name) {
 			$variable.define(this, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
@@ -5205,6 +5471,10 @@ class ForRangeStatement extends Statement {
 		}
 		
 		this._body = this.newBlock($block(data.body))
+		this._body.analyse()
+	} // }}}
+	fuse() { // {{{
+		this._body.fuse()
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let data = this._data
@@ -5288,8 +5558,11 @@ class FunctionDeclaration extends Statement {
 	}
 	FunctionDeclaration(data, parent) { // {{{
 		super(data, new FunctionScope({}, parent))
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
-		variable = $variable.define(parent, data.name, VariableKind::Function, data.type)
+		variable = $variable.define(this.greatParent(), data.name, VariableKind::Function, data.type)
 		
 		for modifier in data.modifiers {
 			if modifier.kind == FunctionModifier::Async {
@@ -5300,6 +5573,11 @@ class FunctionDeclaration extends Statement {
 		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
 		
 		this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
+	} // }}}
+	fuse() { // {{{
+		this.compile(this._parameters)
+		
+		this.compile(this._statements)
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let ctrl = fragments.newControl()
@@ -5318,12 +5596,18 @@ class FunctionDeclaration extends Statement {
 	} // }}}
 }
 
-class Parameter {
+class Parameter extends Base {
 	private {
 		_defaultValue	= null
 		_name			= null
 	}
 	Parameter(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		let parent = this._parent
+		
 		if data.name? {
 			let signature = $function.signatureParameter(data, parent)
 			
@@ -5347,6 +5631,11 @@ class Parameter {
 			this._defaultValue = $compile.expression(data.defaultValue, parent)
 		}
 	} // }}}
+	fuse() {// {{{
+		if this._defaultValue != null {
+			this._defaultValue.fuse()
+		}
+	} // }}}
 }
 
 class IfStatement extends Statement {
@@ -5358,6 +5647,9 @@ class IfStatement extends Statement {
 	}
 	IfStatement(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		this._condition = $compile.expression(data.condition, this)
 		this._then = $compile.expression($block(data.then), this)
@@ -5370,6 +5662,19 @@ class IfStatement extends Statement {
 		}
 		
 		this._else = $compile.expression($block(data.else.body), this) if data.else?
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._then.fuse()
+		
+		if this._elseifs? {
+			for elseif in this._elseifs {
+				elseif.condition.fuse()
+				elseif.body.fuse()
+			}
+		}
+		
+		this._else.fuse() if this._else?
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let ctrl = fragments.newControl()
@@ -5418,26 +5723,37 @@ class ImplementDeclaration extends Statement {
 	}
 	ImplementDeclaration(data, parent) { // {{{
 		super(data, parent)
-		
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		let variable = this.getVariable(data.class.name)
 		
 		if variable.kind != VariableKind::Class {
 			throw new Error('Invalid class for impl at line ' + data.start.line)
 		}
 		
-		for member in this._data.members {
+		for member in data.members {
 			switch member.kind {
 				Kind::FieldDeclaration => {
-					this._members.push(new ImplementFieldDeclaration(member, this, variable))
+					this._members.push(member = new ImplementFieldDeclaration(member, this, variable))
+					
+					member.analyse()
 				}
 				Kind::MethodDeclaration => {
-					this._members.push(new ImplementMethodDeclaration(member, this, variable))
+					this._members.push(member = new ImplementMethodDeclaration(member, this, variable))
+					
+					member.analyse()
 				}
 				=> {
 					console.error(member)
 					throw new Error('Unknow kind ' + member.kind)
 				}
 			}
+		}
+	} // }}}
+	fuse() { // {{{
+		for member in this._members {
+			member.fuse()
 		}
 	} // }}}
 	toStatementFragments(fragments) { // {{{
@@ -5460,6 +5776,10 @@ class ImplementFieldDeclaration extends Statement {
 			throw new Error('Can\'t add a field to a final class')
 		}
 	} // }}}
+	analyse() { // {{{
+	} // }}}
+	fuse() { // {{{
+	} // }}}
 	toFragments(fragments) { // {{{
 		let type = $signature.type(this._data.type, this)
 		
@@ -5476,6 +5796,10 @@ class ImplementMethodDeclaration extends Statement {
 	}
 	ImplementMethodDeclaration(data, parent, @variable) { // {{{
 		super(data, new FunctionScope({}, parent))
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		let variable = this._variable
 		
 		if data.name.name == variable.name.name {
 			console.error(data)
@@ -5502,22 +5826,6 @@ class ImplementMethodDeclaration extends Statement {
 			}
 			
 			if data.name.kind == Kind::Identifier {
-				let methods
-				if this._instance {
-					if !(variable.instanceMethods[data.name.name] is Array) {
-						variable.instanceMethods[data.name.name] = []
-					}
-					
-					methods = variable.instanceMethods[data.name.name]
-				}
-				else {
-					if !(variable.classMethods[data.name.name] is Array) {
-						variable.classMethods[data.name.name] = []
-					}
-					
-					methods = variable.classMethods[data.name.name]
-				}
-				
 				let method = {
 					kind: Kind::MethodDeclaration
 					name: data.name.name
@@ -5526,7 +5834,20 @@ class ImplementMethodDeclaration extends Statement {
 				
 				method.type = $type.type(data.type, this) if data.type
 				
-				methods.push(method)
+				if this._instance {
+					if !(variable.instanceMethods[data.name.name] is Array) {
+						variable.instanceMethods[data.name.name] = []
+					}
+					
+					variable.instanceMethods[data.name.name].push(method)
+				}
+				else {
+					if !(variable.classMethods[data.name.name] is Array) {
+						variable.classMethods[data.name.name] = []
+					}
+					
+					variable.classMethods[data.name.name].push(method)
+				}
 			}
 		}
 		
@@ -5538,6 +5859,11 @@ class ImplementMethodDeclaration extends Statement {
 		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
 		
 		this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
+	} // }}}
+	fuse() { // {{{
+		this.compile(this._parameters)
+		
+		this.compile(this._statements)
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let data = this._data
@@ -5595,10 +5921,15 @@ class ImportDeclaration extends Statement {
 	}
 	ImportDeclaration(data, parent) { // {{{
 		super(data, parent)
-		
-		for declarator in data.declarations {
-			this._declarators.push(new ImportDeclarator(declarator, this))
+	} // }}}
+	analyse() { // {{{
+		for declarator in this._data.declarations {
+			this._declarators.push(declarator = new ImportDeclarator(declarator, this))
+			
+			declarator.analyse()
 		}
+	} // }}}
+	fuse() { // {{{
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		for declarator in this._declarators {
@@ -5614,10 +5945,11 @@ class ImportDeclarator extends Statement {
 	}
 	ImportDeclarator(data, parent) { // {{{
 		super(data, parent)
-		
+	} // }}}
+	analyse() { // {{{
 		let module = this.module()
 		
-		$import.resolve(data, module.directory(), module, this)
+		$import.resolve(this._data, module.directory(), module, this)
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		if this._kind == ImportKind::KSFile {
@@ -5641,15 +5973,20 @@ class MethodDeclaration extends Statement {
 	}
 	MethodDeclaration(data, parent) { // {{{
 		super(data, new FunctionScope({}, parent))
+	} // }}}
+	analyse() { // {{{
+		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
 		
-		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
-		
-		if data._body? {
-			this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
+		if this._data._body? {
+			this._statements = [$compile.statement(statement, this) for statement in $statements(this._data.body)]
 		}
 		else {
 			this._statements = []
 		}
+	} // }}}
+	fuse() { // {{{
+		this.compile(this._parameters)
+		this.compile(this._statements)
 	} // }}}
 	isConstructor(@isConstructor) => this
 	name(@name) => this
@@ -5699,18 +6036,18 @@ class MethodDeclaration extends Statement {
 }
 
 class RequireDeclaration extends Statement {
-	private {
-	}
 	RequireDeclaration(data, parent) { // {{{
 		super(data, parent)
-		
-		let module = parent.module()
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		let module = this.module()
 		
 		let type
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(parent, declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this._parent, declaration.name, VariableKind::Class, declaration)
 					
 					variable.requirement = declaration.name.name
 					
@@ -5729,13 +6066,13 @@ class RequireDeclaration extends Statement {
 					}
 					
 					for i from 0 til declaration.members.length {
-						$extern.classMember(declaration.members[i], variable, parent)
+						$extern.classMember(declaration.members[i], variable, this._parent)
 					}
 					
 					module.require(declaration.name.name, VariableKind::Class)
 				}
 				Kind::VariableDeclarator => {
-					variable = $variable.define(parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this._parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
@@ -5748,6 +6085,65 @@ class RequireDeclaration extends Statement {
 			}
 		}
 	} // }}}
+	fuse() { // {{{
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+	} // }}}
+}
+
+class RequireOrExternDeclaration extends Statement {
+	RequireOrExternDeclaration(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		let module = this.module()
+		
+		module.flag('Type')
+		
+		for declaration in data.declarations {
+			switch declaration.kind {
+				Kind::ClassDeclaration => {
+					variable = $variable.define(this._parent, declaration.name, VariableKind::Class, declaration)
+					
+					variable.requirement = declaration.name.name
+					
+					let continuous = true
+					for i from 0 til declaration.modifiers.length while continuous {
+						continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
+					}
+					
+					if !continuous {
+						variable.final = {
+							name: '__ks_' + variable.name.name
+							constructors: false
+							instanceMethods: {}
+							classMethods: {}
+						}
+					}
+					
+					for i from 0 til declaration.members.length {
+						$extern.classMember(declaration.members[i], variable, this)
+					}
+					
+					module.require(declaration.name.name, VariableKind::Class, true)
+				}
+				Kind::VariableDeclarator => {
+					variable = $variable.define(this._parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					
+					variable.requirement = declaration.name.name
+					
+					module.require(declaration.name.name, type, true)
+				}
+				=> {
+					console.error(declaration)
+					throw new Error('Unknow kind ' + declaration.kind)
+				}
+			}
+		}
+	} // }}}
+	fuse() { // {{{
+	} // }}}
 	toStatementFragments(fragments) { // {{{
 	} // }}}
 }
@@ -5758,13 +6154,19 @@ class ReturnStatement extends Statement {
 	}
 	ReturnStatement(data, parent) { // {{{
 		super(data, parent)
-		
-		if data.value? {
-			this._value = $compile.expression(data.value, this)
+	} // }}}
+	analyse() { // {{{
+		if this._data.value? {
+			this._value = $compile.expression(this._data.value, this)
+		}
+	} // }}}
+	fuse() { // {{{
+		if this._value != null && this._value.fuse? {
+			this._value.fuse()
 		}
 	} // }}}
 	toStatementFragments(fragments) { // {{{
-		if this._value? {
+		if this._value != null {
 			fragments
 				.newLine()
 				.code('return ')
@@ -5789,6 +6191,9 @@ class TryStatement extends Statement {
 	}
 	TryStatement(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		this._body = $compile.expression(data.body, this)
 		if data.catchClauses? {
@@ -5813,6 +6218,16 @@ class TryStatement extends Statement {
 		}
 		
 		this._finalizer = $compile.expression(data.finalizer, this) if data.finalizer?
+	} // }}}
+	fuse() { // {{{
+		this._body.fuse()
+		
+		for clause in this._catchClauses {
+			clause.body.fuse()
+		}
+		
+		this._catchClause.fuse() if this._catchClause?
+		this._finalizer.fuse() if this._finalizer?
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let finalizer = null
@@ -5928,9 +6343,14 @@ class UnlessStatement extends Statement {
 	}
 	UnlessStatement(data, parent) { // {{{
 		super(data, parent)
-		
-		this._condition = $compile.expression(data.condition, this)
-		this._then = $compile.expression(data.then, this)
+	} // }}}
+	analyse() { // {{{
+		this._condition = $compile.expression(this._data.condition, this)
+		this._then = $compile.expression(this._data.then, this)
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._then.fuse()
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		fragments
@@ -5951,9 +6371,14 @@ class UntilStatement extends Statement {
 	}
 	UntilStatement(data, parent) { // {{{
 		super(data, parent)
-		
-		this._body = $compile.expression(data.body, this)
-		this._condition = $compile.expression(data.condition, this)
+	} // }}}
+	analyse() { // {{{
+		this._condition = $compile.expression(this._data.condition, this)
+		this._body = $compile.expression(this._data.body, this)
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._body.fuse()
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		fragments
@@ -5974,9 +6399,17 @@ class VariableDeclaration extends Statement {
 	}
 	VariableDeclaration(data, parent) { // {{{
 		super(data, parent)
-		
-		for declarator in data.declarations {
-			this._declarators.push(new VariableDeclarator(declarator, this))
+	} // }}}
+	analyse() { // {{{
+		for declarator in this._data.declarations {
+			this._declarators.push(declarator = new VariableDeclarator(declarator, this))
+			
+			declarator.analyse()
+		}
+	} // }}}
+	fuse() { // {{{
+		for declarator in this._declarators {
+			declarator.fuse()
 		}
 	} // }}}
 	modifier(data) { // {{{
@@ -6012,18 +6445,21 @@ class VariableDeclaration extends Statement {
 
 class VariableDeclarator extends Base {
 	private {
-		_init	= false
+		_init	= null
 	}
 	VariableDeclarator(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		if data.name.kind == Kind::Identifier && this._options.variables == 'es5' {
-			parent.rename(data.name.name)
+			this._parent.rename(data.name.name)
 		}
 		
 		this._name = $compile.expression(data.name, this)
-		
-		if data.autotype {
+	
+		if data.autotype? {
 			let type = data.type
 			
 			if !type && data.init {
@@ -6036,8 +6472,13 @@ class VariableDeclarator extends Base {
 			$variable.define(this._parent, data.name, $variable.kind(data.type), data.type)
 		}
 		
-		if data.init {
+		if data.init? {
 			this._init = $compile.expression(data.init, this)
+		}
+	} // }}}
+	fuse() { // {{{
+		if this._init != null {
+			this._init.fuse()
 		}
 	} // }}}
 	statement() => this._parent.statement()
@@ -6046,7 +6487,7 @@ class VariableDeclarator extends Base {
 		
 		line.compile(this._name)
 		
-		if this._init {
+		if this._init != null {
 			line.code($equals).compile(this._init)
 		}
 		
@@ -6061,9 +6502,14 @@ class WhileStatement extends Statement {
 	}
 	WhileStatement(data, parent) { // {{{
 		super(data, parent)
-		
-		this._body = $compile.expression(data.body, this)
-		this._condition = $compile.expression(data.condition, this)
+	} // }}}
+	analyse() { // {{{
+		this._body = $compile.expression(this._data.body, this)
+		this._condition = $compile.expression(this._data.condition, this)
+	} // }}}
+	fuse() { // {{{
+		this._body.fuse()
+		this._condition.fuse()
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		fragments
@@ -6080,7 +6526,6 @@ class WhileStatement extends Statement {
 
 // {{{ Expressions
 class Expression extends Base {
-	isAssignable() => false
 	assignment(data) { // {{{
 		this._parent.assignment(data, this.isAssignable())
 	} // }}}
@@ -6090,6 +6535,7 @@ class Expression extends Base {
 	getRenamedVariable(name) { // {{{
 		return this._parent.statement().getRenamedVariable(name)
 	} // }}}
+	isAssignable() => false
 	isCallable() => false
 	isComplex() => true
 	isComputed() => false
@@ -6114,11 +6560,17 @@ class AssignmentOperatorExpression extends Expression {
 	isNullable() => this._right.isNullable()
 	AssignmentOperatorExpression(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		this.assignment(data)
 		
 		this._left = $compile.expression(data.left, this)
 		this._right = $compile.expression(data.right, this)
+	} // }}}
+	fuse() { // {{{
+		this._right.fuse()
 	} // }}}
 	toNullableFragments(fragments) { // {{{
 		fragments.compileNullable(this._right)
@@ -6193,11 +6645,13 @@ class BinaryOperatorExpression extends Expression {
 	}
 	isComputed() => true
 	isNullable() => this._left.isNullable() || this._right.isNullable()
-	BinaryOperatorExpression(data, parent) { // {{{
-		super(data, parent)
-		
-		this._left = $compile.expression(data.left, this)
-		this._right = $compile.expression(data.right, this)
+	analyse() { // {{{
+		this._left = $compile.expression(this._data.left, this)
+		this._right = $compile.expression(this._data.right, this)
+	} // }}}
+	fuse() { // {{{
+		this._left.fuse()
+		this._right.fuse()
 	} // }}}
 }
 
@@ -6283,8 +6737,14 @@ class ArrayExpression extends Expression {
 	}
 	ArrayExpression(data, parent) { // {{{
 		super(data, parent)
-		
-		this._values = [$compile.expression(value, this) for value in data.values]
+	} // }}}
+	analyse() { // {{{
+		this._values = [$compile.expression(value, this) for value in this._data.values]
+	} // }}}
+	fuse() { // {{{
+		for value in this._values {
+			value.fuse()
+		}
 	} // }}}
 	toFragments(fragments) { // {{{
 		fragments.code('[')
@@ -6307,10 +6767,15 @@ class ArrayRange extends Expression {
 	}
 	ArrayRange(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
 		
 		this._from = $compile.expression(data.from ?? data.then, this)
 		this._to = $compile.expression(data.to ?? data.til, this)
 		this._by = $compile.expression(data.by, this) if data.by?
+	} // }}}
+	fuse() { // {{{
 	} // }}}
 	toFragments(fragments) { // {{{
 		this.module().flag('Helper')
@@ -6341,10 +6806,18 @@ class CallExpression extends Expression {
 	}
 	CallExpression(data, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._callee = $compile.expression(this._data.callee, this)
 		
-		this._callee = $compile.expression(data.callee, this)
+		this._arguments = [$compile.expression(argument, this) for argument in this._data.arguments]
+	} // }}}
+	fuse() { // {{{
+		this._callee.fuse()
 		
-		this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
+		for argument in this._arguments {
+			argument.fuse()
+		}
 	} // }}}
 	isCallable() => !this._tempName?
 	isNullable() { // {{{
@@ -6428,10 +6901,18 @@ class CallFinalExpression extends Expression {
 	}
 	CallFinalExpression(data, parent, @callee) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._object = $compile.expression(this._data.callee.object, this)
 		
-		this._object = $compile.expression(data.callee.object, this)
+		this._arguments = [$compile.expression(argument, this) for argument in this._data.arguments]
+	} // }}}
+	fuse() { // {{{
+		this._object.fuse()
 		
-		this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
+		for argument in this._arguments {
+			argument.fuse()
+		}
 	} // }}}
 	isCallable() => !this._tempName?
 	isNullable() { // {{{
@@ -6468,8 +6949,11 @@ class EnumExpression extends Expression {
 	}
 	EnumExpression(data, parent) { // {{{
 		super(data, parent)
-		
-		this._enum = $compile.expression(data.enum, this)
+	} // }}}
+	analyse() { // {{{
+		this._enum = $compile.expression(this._data.enum, this)
+	} // }}}
+	fuse() { // {{{
 	} // }}}
 	toFragments(fragments) { // {{{
 		fragments.compile(this._enum).code('.', this._data.member.name)
@@ -6483,10 +6967,22 @@ class FunctionExpression extends Expression {
 	}
 	FunctionExpression(data, parent) { // {{{
 		super(data, new FunctionScope({}, parent))
+	} // }}}
+	analyse() { // {{{
+		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
 		
-		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
+		this._statements = [$compile.statement(statement, this) for statement in $statements(this._data.body)]
+	} // }}}
+	fuse() { // {{{
+		for parameter in this._parameters {
+			parameter.analyse()
+			parameter.fuse()
+		}
 		
-		this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
+		for statement in this._statements {
+			statement.analyse()
+			statement.fuse()
+		}
 	} // }}}
 	toFragments(fragments) { // {{{
 		fragments.code('function(')
@@ -6512,10 +7008,16 @@ class IfExpression extends Expression {
 	}
 	IfExpression(data, parent) { // {{{
 		super(data, parent)
-		
-		this._condition = $compile.expression(data.condition, this)
-		this._then = $compile.expression(data.then, this)
-		this._else = $compile.expression(data.else, this) if data.else?
+	} // }}}
+	analyse() { // {{{
+		this._condition = $compile.expression(this._data.condition, this)
+		this._then = $compile.expression(this._data.then, this)
+		this._else = $compile.expression(this._data.else, this) if this._data.else?
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._then.fuse()
+		this._else.fuse() if this._else?
 	} // }}}
 	isComputed() => true
 	toFragments(fragments) { // {{{
@@ -6559,9 +7061,13 @@ class MemberExpression extends Expression {
 	}
 	MemberExpression(data, parent) { // {{{
 		super(data, parent)
-		
-		this._object = $compile.expression(data.object, this)
-		this._property = $compile.expression(data.property, this)
+	} // }}}
+	analyse() { // {{{
+		this._object = $compile.expression(this._data.object, this)
+		this._property = $compile.expression(this._data.property, this)
+	} // }}}
+	fuse() { // {{{
+		this._object.fuse()
 	} // }}}
 	isCallable() { // {{{
 		return this._object.isCallable()
@@ -6679,8 +7185,14 @@ class ObjectExpression extends Expression {
 	}
 	ObjectExpression(data, parent) { // {{{
 		super(data, parent)
-		
-		this._properties = [$compile.expression(property, this) for property in data.properties]
+	} // }}}
+	analyse() { // {{{
+		this._properties = [$compile.expression(property, this) for property in this._data.properties]
+	} // }}}
+	fuse() { // {{{
+		for property in this._properties {
+			property.fuse()
+		}
 	} // }}}
 	toFragments(fragments) { // {{{
 		if this._properties.length {
@@ -6705,9 +7217,13 @@ class ObjectMember extends Expression {
 	}
 	ObjectMember(data, parent) { // {{{
 		super(data, parent)
-		
-		this._name = $compile.objectMemberName(data.name, this)
-		this._value = $compile.expression(data.value, this)
+	} // }}}
+	analyse() { // {{{
+		this._name = $compile.objectMemberName(this._data.name, this)
+		this._value = $compile.expression(this._data.value, this)
+	} // }}}
+	fuse() { // {{{
+		this._value.fuse()
 	} // }}}
 	toFragments(fragments) { // {{{
 		let data = this._data
@@ -6725,6 +7241,21 @@ class ObjectMember extends Expression {
 	} // }}}
 }
 
+class RegularExpression extends Expression {
+	private {
+		_value
+	}
+	RegularExpression(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+	} // }}}
+	fuse() { // {{{
+	} // }}}
+	toFragments(fragments) { // {{{
+		fragments.code(this._data.value)
+	} // }}}
+}
 
 class TernaryConditionalExpression extends Expression {
 	private {
@@ -6734,10 +7265,16 @@ class TernaryConditionalExpression extends Expression {
 	}
 	TernaryConditionalExpression(data, parent) { // {{{
 		super(data, parent)
-		
-		this._condition = $compile.expression(data.condition, this)
-		this._then = $compile.expression(data.then, this)
-		this._else = $compile.expression(data.else, this)
+	} // }}}
+	analyse() { // {{{
+		this._condition = $compile.expression(this._data.condition, this)
+		this._then = $compile.expression(this._data.then, this)
+		this._else = $compile.expression(this._data.else, this)
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._then.fuse()
+		this._else.fuse()
 	} // }}}
 	toFragments(fragments) { // {{{
 		fragments
@@ -6755,10 +7292,13 @@ class TemplateExpression extends Expression {
 	}
 	TemplateExpression(data, parent) { // {{{
 		super(data, parent)
-		
-		this._elements = [$compile.expression(element, this) for element in data.elements]
 	} // }}}
-	isComputed() => this._data.elements > 1
+	analyse() { // {{{
+		this._elements = [$compile.expression(element, this) for element in this._data.elements]
+	} // }}}
+	fuse() { // {{{
+	} // }}}
+	isComputed() => this._elements.length > 1
 	toFragments(fragments) { // {{{
 		for element, index in this._elements {
 			fragments.code(' + ') if index
@@ -6776,10 +7316,16 @@ class UnlessExpression extends Expression {
 	}
 	UnlessExpression(data, parent) { // {{{
 		super(data, parent)
-		
-		this._condition = $compile.expression(data.condition, this)
-		this._then = $compile.expression(data.then, this)
-		this._else = $compile.expression(data.else, this) if data.else?
+	} // }}}
+	analyse() { // {{{
+		this._condition = $compile.expression(this._data.condition, this)
+		this._then = $compile.expression(this._data.then, this)
+		this._else = $compile.expression(this._data.else, this) if this._data.else?
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._then.fuse()
+		this._else.fuse() if this._else?
 	} // }}}
 	isComputed() => true
 	toFragments(fragments) { // {{{
@@ -6811,15 +7357,20 @@ class UnlessExpression extends Expression {
 }
 
 // {{{ Unary Operators
-class UnaryOperatorExistential extends Expression {
+class UnaryOperatorExpression extends Expression {
 	private {
 		_argument
+		_right
 	}
-	UnaryOperatorExistential(data, parent) { // {{{
-		super(data, parent)
-		
-		this._argument = $compile.expression(data.argument, this)
+	analyse() { // {{{
+		this._argument = $compile.expression(this._data.argument, this)
 	} // }}}
+	fuse() { // {{{
+		this._argument.fuse()
+	} // }}}
+}
+
+class UnaryOperatorExistential extends UnaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		if this._argument.isNullable() {
 			fragments
@@ -6838,30 +7389,14 @@ class UnaryOperatorExistential extends Expression {
 	} // }}}
 }
 
-class UnaryOperatorNegation extends Expression {
-	private {
-		_argument
-	}
-	UnaryOperatorNegation(data, parent) { // {{{
-		super(data, parent)
-		
-		this._argument = $compile.expression(data.argument, this)
-	} // }}}
+class UnaryOperatorNegation extends UnaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
 			.code('!', this._data.operator)
 			.wrapBoolean(this._argument)
 	} // }}}
 }
-class UnaryOperatorNew extends Expression {
-	private {
-		_argument
-	}
-	UnaryOperatorNew(data, parent) { // {{{
-		super(data, parent)
-		
-		this._argument = $compile.expression(data.argument, this)
-	} // }}}
+class UnaryOperatorNew extends UnaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
 			.code('new', this._data.operator, $space)
@@ -6878,6 +7413,10 @@ class Literal extends Expression {
 	}
 	Literal(data, @value, parent) { // {{{
 		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+	} // }}}
+	fuse() { // {{{
 	} // }}}
 	isComplex() => false
 	toFragments(fragments) { // {{{
@@ -6935,40 +7474,48 @@ class StringLiteral extends Literal { // {{{
 
 const $compile = {
 	expression(data, parent) { // {{{
-		let clazz = $expressions[data.kind]
+		let expression
 		
-		if clazz {
-			return Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+		let clazz = $expressions[data.kind]
+		if clazz? {
+			expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
 		}
 		else if data.kind == Kind::BinaryOperator {
-			if clazz = $binaryOperators[data.operator.kind] {
-				return Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+			if clazz ?= $binaryOperators[data.operator.kind] {
+				expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
 			}
-			
-			if data.operator.kind == BinaryOperator::Assignment {
+			else if data.operator.kind == BinaryOperator::Assignment {
 				if clazz = $assignmentOperators[data.operator.assignment] {
-					return Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+					expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
 				}
-				
-				console.error(data)
-				throw new Error('Unknow assignment operator ' + data.operator.assignment)
+				else {
+					console.error(data)
+					throw new Error('Unknow assignment operator ' + data.operator.assignment)
+				}
 			}
-			
-			console.error(data)
-			throw new Error('Unknow binary operator ' + data.operator.kind)
+			else {
+				console.error(data)
+				throw new Error('Unknow binary operator ' + data.operator.kind)
+			}
 		}
 		else if data.kind == Kind::UnaryExpression {
-			if clazz = $unaryOperators[data.operator.kind] {
-				return Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+			if clazz ?= $unaryOperators[data.operator.kind] {
+				expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
 			}
-			
-			console.error(data)
-			throw new Error('Unknow unary operator ' + data.operator.kind)
+			else {
+				console.error(data)
+				throw new Error('Unknow unary operator ' + data.operator.kind)
+			}
 		}
 		else {
 			console.error(data)
 			throw new Error('Unknow kind ' + data.kind)
 		}
+		
+		//console.log(expression)
+		expression.analyse()
+		
+		return expression
 	} // }}}
 	objectMemberName(data, parent) { // {{{
 		switch(data.kind) {
@@ -7030,6 +7577,8 @@ const $expressions = {
 	`\(Kind::NumericExpression)`			: NumberLiteral
 	`\(Kind::ObjectExpression)`				: ObjectExpression
 	`\(Kind::ObjectMember)`					: ObjectMember
+	`\(Kind::ObjectMember)`					: ObjectMember
+	`\(Kind::RegularExpression)`			: RegularExpression
 	`\(Kind::TemplateExpression)`			: TemplateExpression
 	`\(Kind::TernaryConditionalExpression)`	: TernaryConditionalExpression
 	`\(Kind::UnlessExpression)`				: UnlessExpression
@@ -7052,6 +7601,7 @@ const $statements = {
 	`\(Kind::MethodDeclaration)`			: MethodDeclaration
 	`\(Kind::Module)`						: Module
 	`\(Kind::RequireDeclaration)`			: RequireDeclaration
+	`\(Kind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(Kind::ReturnStatement)`				: ReturnStatement
 	`\(Kind::TryStatement)`					: TryStatement
 	`\(Kind::UnlessStatement)`				: UnlessStatement
@@ -7100,7 +7650,9 @@ export class Compiler {
 		
 		this._module = new Class(parse(data), this, path.dirname(this._file))
 		
-		this._module.compile()
+		this._module.analyse()
+		
+		this._module.fuse()
 		
 		this._fragments = this._module.toFragments()
 		
