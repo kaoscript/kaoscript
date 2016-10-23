@@ -6,6 +6,8 @@
 [![Build Status](https://travis-ci.org/kaoscript/kaoscript.svg?branch=master)](https://travis-ci.org/kaoscript/kaoscript)
 [![Waffle.io](https://img.shields.io/badge/kanban-waffle.io-blue.svg)](https://waffle.io/kaoscript/kaoscript)
 
+[![NPM](https://nodei.co/npm/kaoscript.png?downloads=true&stars=true)](https://www.npmjs.com/package/kaoscript)
+
 Kaoscript is a language that compile to regular Javascript.
 It takes ideas from ES6, ES7, CoffeeScript, Swift, Rust, Dart, Spider, TypeScript, Haxe, C#, Java.
 

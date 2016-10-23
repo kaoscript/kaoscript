@@ -18,7 +18,7 @@
         ],
         "lines": [
           {
-            "kind": 52,
+            "kind": 53,
             "name": "lines",
             "signature": {
               "access": 3,
@@ -49,7 +49,7 @@
         ],
         "toFloat": [
           {
-            "kind": 52,
+            "kind": 53,
             "name": "toFloat",
             "signature": {
               "access": 3,
@@ -67,7 +67,7 @@
         ],
         "toInt": [
           {
-            "kind": 52,
+            "kind": 53,
             "name": "toInt",
             "signature": {
               "access": 3,

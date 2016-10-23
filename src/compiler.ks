@@ -3669,7 +3669,7 @@ class Block extends Base {
 			return this._variables[name]
 		}
 		else if this._parent {
-			return this._parent.getVariable(name, true)
+			return this._parent.scope().getVariable(name, true)
 		}
 		else {
 			return null
@@ -4364,7 +4364,7 @@ class Statement extends Base {
 			$variable.define(this, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
-	compile(statements) {
+	compile(statements) { // {{{
 		for statement in statements {
 			statement.analyse()
 		}
@@ -4372,19 +4372,19 @@ class Statement extends Base {
 		for statement in statements {
 			statement.fuse()
 		}
-	}
+	} // }}}
 	getRenamedVariable(name) { // {{{
 		return this._parent.getRenamedVariable(name)
 	} // }}}
 	getVariable(name, fromChild = true) { // {{{
-		return this._parent.getVariable(name, fromChild)
+		return this.scope().getVariable(name, fromChild)
 	} // }}}
 	hasVariable(name, fromChild = true) { // {{{
 		return this.scope().hasVariable(name, fromChild)
 	} // }}}
 	module() => this._parent.module()
-	newBlock() => this._parent.scope().newBlock()
-	newBlock(data) => this._parent.scope().newBlock(data, this._parent)
+	newBlock() => this.scope().newBlock()
+	newBlock(data) => this.scope().newBlock(data, this._parent)
 	newRenamedVariable(name) { // {{{
 		return this._parent.newRenamedVariable(name)
 	} // }}}
@@ -5612,7 +5612,7 @@ class Parameter extends Base {
 			let signature = $function.signatureParameter(data, parent)
 			
 			if signature.rest {
-				$variable.define(parent, data.name, VariableKind::Variable, {
+				$variable.define(parent.scope(), data.name, VariableKind::Variable, {
 					kind: Kind::TypeReference
 					typeName: {
 						kind: Kind::Identifier
@@ -5621,7 +5621,7 @@ class Parameter extends Base {
 				})
 			}
 			else {
-				$variable.define(parent, data.name, $variable.kind(data.type), data.type)
+				$variable.define(parent.scope(), data.name, $variable.kind(data.type), data.type)
 			}
 			
 			this._name = $compile.expression(data.name, parent)
@@ -5736,6 +5736,11 @@ class ImplementDeclaration extends Statement {
 			switch member.kind {
 				Kind::FieldDeclaration => {
 					this._members.push(member = new ImplementFieldDeclaration(member, this, variable))
+					
+					member.analyse()
+				}
+				Kind::MethodAliasDeclaration => {
+					this._members.push(member = new ImplementMethodAliasDeclaration(member, this, variable))
 					
 					member.analyse()
 				}
@@ -5912,6 +5917,122 @@ class ImplementMethodDeclaration extends Statement {
 			object.done()
 			line.code(')').done()
 		}
+	} // }}}
+}
+
+class ImplementMethodAliasDeclaration extends Statement {
+	private {
+		_arguments
+		_instance	= true
+		_name
+		_variable
+	}
+	ImplementMethodAliasDeclaration(data, parent, @variable) { // {{{
+		super(data, new FunctionScope({}, parent))
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		let variable = this._variable
+		
+		if data.name.name == variable.name.name {
+			console.error(data)
+			throw new Error('Not Implemented')
+		}
+		else {
+			if data.name.kind == Kind::TemplateExpression {
+				this._name = $compile.objectMemberName(data.name, this)
+			}
+			
+			for i from 0 til data.modifiers.length while this._instance {
+				if data.modifiers[i].kind == MemberModifier::Static {
+					this._instance = false
+				}
+			}
+			
+			if variable.final {
+				if this._instance {
+					if variable.final.instanceMethods[data.name.name] != true {
+						variable.final.instanceMethods[data.name.name] = true
+					}
+				}
+				else {
+					if variable.final.classMethods[data.name.name] != true {
+						variable.final.classMethods[data.name.name] = true
+					}
+				}
+			}
+			
+			if data.name.kind == Kind::Identifier {
+				if this._instance {
+					variable.instanceMethods[data.name.name] = variable.instanceMethods[data.alias.name]
+				}
+				else {
+					variable.classMethods[data.name.name] = variable.classMethods[data.alias.name]
+				}
+			}
+			
+			if data.arguments? {
+				this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
+			}
+		}
+	} // }}}
+	fuse() { // {{{
+		if this._arguments? {
+			for argument in this._arguments {
+				argument.fuse()
+			}
+		}
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		let data = this._data
+		let variable = this._variable
+		
+		let line = fragments
+			.newLine()
+			.code($runtime.helper(this), '.', this._instance ? 'newInstanceMethod' : 'newClassMethod', '(')
+		
+		let object = line.newObject()
+		
+		object.line('class: ', variable.name.name)
+		
+		if data.name.kind == Kind::TemplateExpression {
+			object.newLine().code('name: ').compile(this._name).done()
+		}
+		else if data.name.kind == Kind::Identifier {
+			object.line('name: ', $quote(data.name.name))
+		}
+		else {
+			console.error(data.name)
+			throw new Error('Not Implemented')
+		}
+		
+		if variable.final {
+			object.line('final: ', variable.final.name)
+		}
+		
+		object.line('method: ', $quote(data.alias.name))
+		
+		if data.arguments? {
+			let argsLine = object.newLine().code('arguments: ')
+			let array = argsLine.newArray()
+			
+			for argument in this._arguments {
+				array.compile(argument)
+			}
+			
+			array.done()
+			argsLine.done()
+		}
+		
+		let signLine = object.newLine().code('signature: ')
+		
+		$helper.reflectMethod(this, signLine, $method.signature(data, this))
+		
+		signLine.done()
+		
+		object.done()
+		
+		line.code(')').done()
 	} // }}}
 }
 
@@ -6577,6 +6698,12 @@ class AssignmentOperatorExpression extends Expression {
 	} // }}}
 }
 
+class AssignmentOperatorAddition extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' += ').compile(this._right)
+	} // }}}
+}
+
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments.compile(this._left).code($equals).compile(this._right)
@@ -6655,12 +6782,34 @@ class BinaryOperatorExpression extends Expression {
 	} // }}}
 }
 
+class BinaryOperatorAddition extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('+', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
 class BinaryOperatorAnd extends BinaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
 			.code('&&', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
+class BinaryOperatorDivision extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('/', this._data.operator)
 			.code($space)
 			.wrap(this._right)
 	} // }}}
@@ -6699,6 +6848,17 @@ class BinaryOperatorInequality extends BinaryOperatorExpression {
 	} // }}}
 }
 
+class BinaryOperatorLessThan extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('<', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
 class BinaryOperatorModulo extends BinaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
@@ -6716,6 +6876,17 @@ class BinaryOperatorMultiplication extends BinaryOperatorExpression {
 			.wrap(this._left)
 			.code($space)
 			.code('*', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
+class BinaryOperatorOr extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('||', this._data.operator)
 			.code($space)
 			.wrap(this._right)
 	} // }}}
@@ -6960,7 +7131,7 @@ class EnumExpression extends Expression {
 	} // }}}
 }
 
-class FunctionExpression extends Expression {
+class FunctionExpression extends Statement {
 	private {
 		_parameters
 		_statements
@@ -6976,16 +7147,36 @@ class FunctionExpression extends Expression {
 	fuse() { // {{{
 		for parameter in this._parameters {
 			parameter.analyse()
-			parameter.fuse()
 		}
 		
 		for statement in this._statements {
 			statement.analyse()
+		}
+		
+		for parameter in this._parameters {
+			parameter.fuse()
+		}
+		
+		for statement in this._statements {
 			statement.fuse()
 		}
 	} // }}}
 	toFragments(fragments) { // {{{
 		fragments.code('function(')
+		
+		let block
+		$function.parameters(this, fragments, func(node) {
+			block = node.code(')').newBlock()
+		})
+		
+		for statement in this._statements {
+			block.compile(statement)
+		}
+		
+		block.done()
+	} // }}}
+	toShorthandFragments(fragments) { // {{{
+		fragments.code('(')
 		
 		let block
 		$function.parameters(this, fragments, func(node) {
@@ -7232,7 +7423,7 @@ class ObjectMember extends Expression {
 			fragments.compile(this._name)
 			
 			if data.value.kind == Kind::FunctionExpression {
-				fragments.compile(this._value)
+				this._value.toShorthandFragments(fragments)
 			}
 			else {
 				fragments.code(': ').compile(this._value)
@@ -7535,17 +7726,22 @@ const $compile = {
 }
 
 const $assignmentOperators = {
+	`\(AssignmentOperator::Addition)`		: AssignmentOperatorAddition
 	`\(AssignmentOperator::Equality)`		: AssignmentOperatorEquality
 	`\(AssignmentOperator::Existential)`	: AssignmentOperatorExistential
 }
 
 const $binaryOperators = {
+	`\(BinaryOperator::Addition)`			: BinaryOperatorAddition
 	`\(BinaryOperator::And)`				: BinaryOperatorAnd
+	`\(BinaryOperator::Division)`			: BinaryOperatorDivision
 	`\(BinaryOperator::Equality)`			: BinaryOperatorEquality
 	`\(BinaryOperator::GreaterThan)`		: BinaryOperatorGreaterThan
 	`\(BinaryOperator::Inequality)`			: BinaryOperatorInequality
+	`\(BinaryOperator::LessThan)`			: BinaryOperatorLessThan
 	`\(BinaryOperator::Modulo)`				: BinaryOperatorModulo
 	`\(BinaryOperator::Multiplication)`		: BinaryOperatorMultiplication
+	`\(BinaryOperator::Or)`					: BinaryOperatorOr
 	`\(BinaryOperator::Subtraction)`		: BinaryOperatorSubtraction
 }
 
