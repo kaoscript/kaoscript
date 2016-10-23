@@ -4733,6 +4733,11 @@ class ExportDeclaration extends Statement {
 				Kind::Identifier => {
 					module.export(declaration)
 				}
+				Kind::TypeAliasDeclaration => {
+					$variable.define(this, declaration.name, VariableKind::TypeAlias, declaration.type)
+					
+					module.export(declaration.name)
+				}
 				Kind::VariableDeclaration => {
 					this._declarations.push(statement = $compile.statement(declaration, this))
 					
@@ -4771,8 +4776,6 @@ class ExpressionStatement extends Statement {
 	} // }}}
 	analyse() { // {{{
 		this._expression = $compile.expression(this._data, this)
-		
-		this._expression.analyse()
 	} // }}}
 	assignment(data, allowAssignement = false) { // {{{
 		if data.left.kind == Kind::Identifier && !this.hasVariable(data.left.name) {
@@ -6457,6 +6460,19 @@ class TryStatement extends Statement {
 	} // }}}
 }
 
+class TypeAliasDeclaration extends Statement {
+	TypeAliasDeclaration(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		$variable.define(this, this._data.name, VariableKind::TypeAlias, this._data.type)
+	} // }}}
+	fuse() { // {{{
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+	} // }}}
+}
+
 class UnlessStatement extends Statement {
 	private {
 		_body
@@ -6704,6 +6720,36 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	} // }}}
 }
 
+class AssignmentOperatorBitwiseAnd extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' &= ').compile(this._right)
+	} // }}}
+}
+
+class AssignmentOperatorBitwiseLeftShift extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' <<= ').compile(this._right)
+	} // }}}
+}
+
+class AssignmentOperatorBitwiseOr extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' |= ').compile(this._right)
+	} // }}}
+}
+
+class AssignmentOperatorBitwiseRightShift extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' >>= ').compile(this._right)
+	} // }}}
+}
+
+class AssignmentOperatorBitwiseXor extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' ^= ').compile(this._right)
+	} // }}}
+}
+
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments.compile(this._left).code($equals).compile(this._right)
@@ -6762,6 +6808,32 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			.code(', true) : false')
 	} // }}}
 }
+
+class AssignmentOperatorModulo extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' %= ').compile(this._right)
+	} // }}}
+}
+
+class AssignmentOperatorMultiplication extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' *= ').compile(this._right)
+	} // }}}
+}
+
+class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
+	isAssignable() => false
+	toFragments(fragments) { // {{{
+	} // }}}
+	toBooleanFragments(fragments) { // {{{
+	} // }}}
+}
+
+class AssignmentOperatorSubtraction extends AssignmentOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments.compile(this._left).code(' -= ').compile(this._right)
+	} // }}}
+}
 // }}}}
 
 // {{{ Binary Operators
@@ -6804,6 +6876,61 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 	} // }}}
 }
 
+class BinaryOperatorBitwiseAnd extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('&', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
+class BinaryOperatorBitwiseLeftShift extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('<<', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
+class BinaryOperatorBitwiseOr extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('|', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
+class BinaryOperatorBitwiseRightShift extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('>>', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
+class BinaryOperatorBitwiseXor extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('^', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
 class BinaryOperatorDivision extends BinaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
@@ -6837,6 +6964,17 @@ class BinaryOperatorGreaterThan extends BinaryOperatorExpression {
 	} // }}}
 }
 
+class BinaryOperatorGreaterThanOrEqual extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('>=', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
 class BinaryOperatorInequality extends BinaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
@@ -6854,6 +6992,17 @@ class BinaryOperatorLessThan extends BinaryOperatorExpression {
 			.wrap(this._left)
 			.code($space)
 			.code('<', this._data.operator)
+			.code($space)
+			.wrap(this._right)
+	} // }}}
+}
+
+class BinaryOperatorLessThanOrEqual extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._left)
+			.code($space)
+			.code('<=', this._data.operator)
 			.code($space)
 			.wrap(this._right)
 	} // }}}
@@ -6881,6 +7030,11 @@ class BinaryOperatorMultiplication extends BinaryOperatorExpression {
 	} // }}}
 }
 
+class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+	} // }}}
+}
+
 class BinaryOperatorOr extends BinaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
@@ -6898,6 +7052,16 @@ class BinaryOperatorSubtraction extends BinaryOperatorExpression {
 			.wrap(this._left)
 			.code($space, '-', this._data.operator, $space)
 			.wrap(this._right)
+	} // }}}
+}
+
+class BinaryOperatorTypeCast extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
+	} // }}}
+}
+
+class BinaryOperatorTypeCheck extends BinaryOperatorExpression {
+	toFragments(fragments) { // {{{
 	} // }}}
 }
 // }}}
@@ -7085,6 +7249,7 @@ class CallFinalExpression extends Expression {
 			argument.fuse()
 		}
 	} // }}}
+	isComputed() => this._callee.variables.length > 1
 	isCallable() => !this._tempName?
 	isNullable() { // {{{
 		return this._data.nullable || this._callee.isNullable()
@@ -7103,9 +7268,70 @@ class CallFinalExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
+				console.error(this._callee)
+				throw new Error('Not Implemented')
 			}
 		}
 		else if this._callee.variables.length == 2 {
+			let data = this._data
+			let callee = this._callee
+			
+			this.module().flag('Type')
+			
+			let name = null
+			if data.callee.object.kind == Kind::Identifier {
+				if tof = $runtime.typeof(callee.variables[0].name, this) {
+					fragments.code(tof, '(').compile(this._object).code(')')
+				}
+				else {
+					fragments.code($runtime.type(this), '.is(').compile(this._object).code(', ', callee.variables[0].name, ')')
+				}
+			}
+			else {
+				name = this.statement().acquireTempName()
+				
+				if tof = $runtime.typeof(callee.variables[0].name, this) {
+					fragments.code(tof, '(', name, ' = ').compile(this._object).code(')')
+				}
+				else {
+					fragments.code($runtime.type(this), '.is(', name, ' = ').compile(this._object).code(', ', callee.variables[0].name, ')')
+				}
+			}
+			
+			fragments.code(' ? ')
+			
+			fragments.code((callee.variables[0].accessPath || ''), callee.variables[0].final.name + '._im_' + data.callee.property.name + '(')
+			
+			if name? {
+				fragments.code(name)
+			}
+			else {
+				fragments.compile(this._object)
+			}
+			
+			for argument in this._arguments {
+				fragments.code(', ').compile(argument)
+			}
+			
+			fragments.code(') : ')
+			
+			fragments
+				.code((callee.variables[1].accessPath || ''), callee.variables[1].final.name + '._im_' + data.callee.property.name + '(')
+			
+			if name? {
+				fragments.code(name)
+			}
+			else {
+				fragments.compile(this._object)
+			}
+			
+			for argument in this._arguments {
+				fragments.code(', ').compile(argument)
+			}
+			
+			fragments.code(')')
+			
+			this.statement().releaseTempName(name) if name?
 		}
 		else {
 			console.error(this._callee)
@@ -7561,6 +7787,22 @@ class UnaryOperatorExpression extends Expression {
 	} // }}}
 }
 
+class UnaryOperatorDecrementPostfix extends UnaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._argument)
+			.code('--', this._data.operator)
+	} // }}}
+}
+
+class UnaryOperatorDecrementPrefix extends UnaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.code('--', this._data.operator)
+			.wrap(this._argument)
+	} // }}}
+}
+
 class UnaryOperatorExistential extends UnaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		if this._argument.isNullable() {
@@ -7580,6 +7822,22 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 	} // }}}
 }
 
+class UnaryOperatorIncrementPostfix extends UnaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.wrap(this._argument)
+			.code('++', this._data.operator)
+	} // }}}
+}
+
+class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.code('++', this._data.operator)
+			.wrap(this._argument)
+	} // }}}
+}
+
 class UnaryOperatorNegation extends UnaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
@@ -7587,6 +7845,15 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 			.wrapBoolean(this._argument)
 	} // }}}
 }
+
+class UnaryOperatorNegative extends UnaryOperatorExpression {
+	toFragments(fragments) { // {{{
+		fragments
+			.code('-', this._data.operator)
+			.wrap(this._argument)
+	} // }}}
+}
+
 class UnaryOperatorNew extends UnaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
@@ -7726,23 +7993,42 @@ const $compile = {
 }
 
 const $assignmentOperators = {
-	`\(AssignmentOperator::Addition)`		: AssignmentOperatorAddition
-	`\(AssignmentOperator::Equality)`		: AssignmentOperatorEquality
-	`\(AssignmentOperator::Existential)`	: AssignmentOperatorExistential
+	`\(AssignmentOperator::Addition)`			: AssignmentOperatorAddition
+	`\(AssignmentOperator::BitwiseAnd)`			: AssignmentOperatorBitwiseAnd
+	`\(AssignmentOperator::BitwiseLeftShift)`	: AssignmentOperatorBitwiseLeftShift
+	`\(AssignmentOperator::BitwiseOr)`			: AssignmentOperatorBitwiseOr
+	`\(AssignmentOperator::BitwiseRightShift)`	: AssignmentOperatorBitwiseRightShift
+	`\(AssignmentOperator::BitwiseXor)`			: AssignmentOperatorBitwiseXor
+	`\(AssignmentOperator::Equality)`			: AssignmentOperatorEquality
+	`\(AssignmentOperator::Existential)`		: AssignmentOperatorExistential
+	`\(AssignmentOperator::Modulo)`				: AssignmentOperatorModulo
+	`\(AssignmentOperator::Multiplication)`		: AssignmentOperatorMultiplication
+	`\(AssignmentOperator::NullCoalescing)`		: AssignmentOperatorNullCoalescing
+	`\(AssignmentOperator::Subtraction)`		: AssignmentOperatorSubtraction
 }
 
 const $binaryOperators = {
 	`\(BinaryOperator::Addition)`			: BinaryOperatorAddition
 	`\(BinaryOperator::And)`				: BinaryOperatorAnd
+	`\(BinaryOperator::BitwiseAnd)`			: BinaryOperatorBitwiseAnd
+	`\(BinaryOperator::BitwiseLeftShift)`	: BinaryOperatorBitwiseLeftShift
+	`\(BinaryOperator::BitwiseOr)`			: BinaryOperatorBitwiseOr
+	`\(BinaryOperator::BitwiseRightShift)`	: BinaryOperatorBitwiseRightShift
+	`\(BinaryOperator::BitwiseXor)`			: BinaryOperatorBitwiseXor
 	`\(BinaryOperator::Division)`			: BinaryOperatorDivision
 	`\(BinaryOperator::Equality)`			: BinaryOperatorEquality
 	`\(BinaryOperator::GreaterThan)`		: BinaryOperatorGreaterThan
+	`\(BinaryOperator::GreaterThanOrEqual)`	: BinaryOperatorGreaterThanOrEqual
 	`\(BinaryOperator::Inequality)`			: BinaryOperatorInequality
 	`\(BinaryOperator::LessThan)`			: BinaryOperatorLessThan
+	`\(BinaryOperator::LessThanOrEqual)`	: BinaryOperatorLessThanOrEqual
 	`\(BinaryOperator::Modulo)`				: BinaryOperatorModulo
 	`\(BinaryOperator::Multiplication)`		: BinaryOperatorMultiplication
+	`\(BinaryOperator::NullCoalescing)`		: BinaryOperatorNullCoalescing
 	`\(BinaryOperator::Or)`					: BinaryOperatorOr
 	`\(BinaryOperator::Subtraction)`		: BinaryOperatorSubtraction
+	`\(BinaryOperator::TypeCast)`			: BinaryOperatorTypeCast
+	`\(BinaryOperator::TypeCheck)`			: BinaryOperatorTypeCheck
 }
 
 const $expressions = {
@@ -7800,6 +8086,7 @@ const $statements = {
 	`\(Kind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(Kind::ReturnStatement)`				: ReturnStatement
 	`\(Kind::TryStatement)`					: TryStatement
+	`\(Kind::TypeAliasDeclaration)`			: TypeAliasDeclaration
 	`\(Kind::UnlessStatement)`				: UnlessStatement
 	`\(Kind::UntilStatement)`				: UntilStatement
 	`\(Kind::VariableDeclaration)`			: VariableDeclaration
@@ -7808,8 +8095,13 @@ const $statements = {
 }
 
 const $unaryOperators = {
+	`\(UnaryOperator::DecrementPostfix)`	: UnaryOperatorDecrementPostfix
+	`\(UnaryOperator::DecrementPrefix)`		: UnaryOperatorDecrementPrefix
 	`\(UnaryOperator::Existential)`			: UnaryOperatorExistential
+	`\(UnaryOperator::IncrementPostfix)`	: UnaryOperatorIncrementPostfix
+	`\(UnaryOperator::IncrementPrefix)`		: UnaryOperatorIncrementPrefix
 	`\(UnaryOperator::Negation)`			: UnaryOperatorNegation
+	`\(UnaryOperator::Negative)`			: UnaryOperatorNegative
 	`\(UnaryOperator::New)`					: UnaryOperatorNew
 }
 
