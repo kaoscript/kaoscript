@@ -855,6 +855,16 @@ func $block(data) { // {{{
 	}
 } // }}}
 
+func $caller(data, node) { // {{{
+	if data.kind == Kind.MemberExpression {
+		return $compile.expression(data.object, node)
+	}
+	else {
+		console.error(data)
+		throw new Error('Not Implemented')
+	}
+} // }}}
+
 const $continuous = {
 	constructor(node, fragments, statement, signature, reflect) { // {{{
 		let index = reflect.constructors.length
@@ -2769,17 +2779,9 @@ const $method = {
 }
 
 func $return(data?) { // {{{
-	return {statements: []}	if !?data
-	return data				if data.kind == Kind::Block
-	
 	return {
-		kind: Kind::Block
-		statements: [
-			{
-				kind: Kind::ReturnStatement
-				value: data
-			}
-		]
+		kind: Kind::ReturnStatement
+		value: data
 	}
 } // }}}
 
@@ -2876,9 +2878,9 @@ const $type = {
 							.code(tof + '(', name)
 						
 						for typeParameter in type.typeParameters {
-							fragments
-								.code(', ')
-								.expression(typeParameter)
+							fragments.code($comma)
+							
+							$type.compile(typeParameter, fragments)
 						}
 						
 						fragments.code(')')
@@ -2886,12 +2888,12 @@ const $type = {
 					else {
 						fragments
 							.code($runtime.type(node), '.is(', name, ', ')
-							.expression(type.typeName)
+							.expression(type.typeName.name)
 						
 						for typeParameter in type.typeParameters {
-							fragments
-								.code(', ')
-								.expression(typeParameter)
+							fragments.code($comma)
+							
+							$type.compile(typeParameter, fragments)
 						}
 						
 						fragments.code(')')
@@ -2909,10 +2911,11 @@ const $type = {
 						.code(tof + '(', name, ')')
 				}
 				else {
-					fragments
-						.code($runtime.type(node), '.is(', name, ', ')
-						.expression(type)
-						.code(')')
+					fragments.code($runtime.type(node), '.is(', name, ', ')
+					
+					$type.compile(type, fragments)
+					
+					fragments.code(')')
 				}
 			}
 		}
@@ -2932,6 +2935,11 @@ const $type = {
 		else {
 			console.error(type)
 			throw new Error('Not Implemented')
+		}
+	} // }}}
+	compile(data, fragments) { // {{{
+		switch(data.kind) {
+			Kind::TypeReference => fragments.code($types[data.typeName.name] ?? data.typeName.name)
 		}
 	} // }}}
 	isAny(type?) { // {{{
@@ -5563,6 +5571,11 @@ class FunctionDeclaration extends Statement {
 		super(data, new FunctionScope({}, parent))
 	} // }}}
 	analyse() { // {{{
+		$variable.define(this, {
+			kind: Kind::Identifier,
+			name: 'this'
+		}, VariableKind::Variable)
+		
 		let data = this._data
 		
 		variable = $variable.define(this.greatParent(), data.name, VariableKind::Function, data.type)
@@ -5638,6 +5651,14 @@ class Parameter extends Base {
 		if this._defaultValue != null {
 			this._defaultValue.fuse()
 		}
+		
+		/* if this._data.type? && this._data.type.kind == Kind::TypeReference {
+			let type = $type.unalias(this._data.type, this._parent)
+			
+			if type.typeParameters? {
+				console.log(type)
+			}
+		} */
 	} // }}}
 }
 
@@ -7066,6 +7087,220 @@ class BinaryOperatorTypeCheck extends BinaryOperatorExpression {
 }
 // }}}
 
+class ArrayComprehensionForIn extends Statement {
+	ArrayComprehensionForIn(data, parent) { // {{{
+		super(data, new FunctionScope({}, parent))
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		
+		$variable.define(this, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this, data.loop.index.name, VariableKind::Variable) if data.loop.index?
+		
+		this._variable = $compile.expression(data.loop.variable, this)
+		this._value = $compile.expression(data.loop.value, this)
+		this._index = $compile.expression(data.loop.index, this) if data.loop.index?
+		
+		this._body = $compile.statement($return(data.body), this)
+		this._body.analyse()
+		
+		if data.loop.when? {
+			this._when = $compile.statement($return(data.loop.when), this)
+			this._when.analyse()
+		}
+	} // }}}
+	fuse() { // {{{
+		this._variable.fuse()
+		this._value.fuse()
+		this._index.fuse() if this._index?
+		this._body.fuse()
+		this._when.fuse() if this._when?
+	} // }}}
+	toFragments(fragments) { // {{{
+		this.module().flag('Helper')
+		
+		fragments
+			.code($runtime.helper(this), '.mapArray(')
+			.compile(this._value)
+			.code(', ')
+		
+		fragments
+			.code('(')
+			.compile(this._variable)
+		
+		fragments.code($comma).compile(this._index) if this._index?
+		
+		fragments
+			.code(') =>')
+			.newBlock()
+			.compile(this._body)
+			.done()
+		
+		if this._when? {
+			fragments
+				.code($comma)
+				.code('(')
+				.compile(this._variable)
+			
+			fragments.code($comma).compile(this._index) if this._index?
+			
+			fragments
+				.code(') =>')
+				.newBlock()
+				.compile(this._when)
+				.done()
+		}
+		
+		fragments.code(')')
+	} // }}}
+}
+
+class ArrayComprehensionForOf extends Statement {
+	ArrayComprehensionForOf(data, parent) { // {{{
+		super(data, new FunctionScope({}, parent))
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		
+		$variable.define(this, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this, data.loop.index.name, VariableKind::Variable) if data.loop.index?
+		
+		this._variable = $compile.expression(data.loop.variable, this)
+		this._value = $compile.expression(data.loop.value, this)
+		this._index = $compile.expression(data.loop.index, this) if data.loop.index?
+		
+		this._body = $compile.statement($return(data.body), this)
+		this._body.analyse()
+		
+		if data.loop.when? {
+			this._when = $compile.statement($return(data.loop.when), this)
+			this._when.analyse()
+		}
+	} // }}}
+	fuse() { // {{{
+		this._variable.fuse()
+		this._value.fuse()
+		this._index.fuse() if this._index?
+		this._body.fuse()
+		this._when.fuse() if this._when?
+	} // }}}
+	toFragments(fragments) { // {{{
+		this.module().flag('Helper')
+		
+		fragments
+			.code($runtime.helper(this), '.mapObject(')
+			.compile(this._value)
+			.code(', ')
+		
+		fragments
+			.code('(')
+			.compile(this._variable)
+		
+		fragments.code($comma).compile(this._index) if this._index?
+		
+		fragments
+			.code(') =>')
+			.newBlock()
+			.compile(this._body)
+			.done()
+		
+		if this._when? {
+			fragments
+				.code($comma)
+				.code('(')
+				.compile(this._variable)
+			
+			fragments.code($comma).compile(this._index) if this._index?
+			
+			fragments
+				.code(') =>')
+				.newBlock()
+				.compile(this._when)
+				.done()
+		}
+		
+		fragments.code(')')
+	} // }}}
+}
+
+class ArrayComprehensionForRange extends Statement {
+	private {
+		_body
+		_by
+		_from
+		_to
+		_variable
+		_when
+	}
+	ArrayComprehensionForRange(data, parent) { // {{{
+		super(data, new FunctionScope({}, parent))
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		
+		$variable.define(this, data.loop.variable.name, VariableKind::Variable)
+		
+		this._variable = $compile.expression(data.loop.variable, this)
+		this._from = $compile.expression(data.loop.from, this)
+		this._to = $compile.expression(data.loop.to, this)
+		this._by = $compile.expression(data.loop.by, this) if data.loop.by?
+		
+		this._body = $compile.statement($return(data.body), this)
+		this._body.analyse()
+		
+		if data.loop.when? {
+			this._when = $compile.statement($return(data.loop.when), this)
+			this._when.analyse()
+		}
+	} // }}}
+	fuse() { // {{{
+		this._variable.fuse()
+		this._from.fuse()
+		this._to.fuse()
+		this._by.fuse() if this._by?
+		this._body.fuse()
+		this._when.fuse() if this._when?
+	} // }}}
+	toFragments(fragments) { // {{{
+		this.module().flag('Helper')
+		
+		fragments
+			.code($runtime.helper(this), '.mapRange(')
+			.compile(this._from)
+			.code($comma)
+			.compile(this._to)
+		
+		if this._by? {
+			fragments.code(', ').compile(this._by)
+		}
+		else {
+			fragments.code(', 1')
+		}
+		
+		fragments
+			.code($comma)
+			.code('(')
+			.compile(this._variable)
+			.code(') =>')
+			.newBlock()
+			.compile(this._body)
+			.done()
+		
+		if this._when? {
+			fragments
+				.code($comma)
+				.code('(')
+				.compile(this._variable)
+				.code(') =>')
+				.newBlock()
+				.compile(this._when)
+				.done()
+		}
+		
+		fragments.code(')')
+	} // }}}
+}
+
 class ArrayExpression extends Expression {
 	private {
 		_values
@@ -7134,10 +7369,13 @@ class ArrayRange extends Expression {
 
 class CallExpression extends Expression {
 	private {
-		_arguments
+		_arguments	= []
 		_callee
-		_tempName = null
-		_tested = false
+		_caller
+		_list		= true
+		_scope
+		_tempName	= null
+		_tested		= false
 	}
 	CallExpression(data, parent) { // {{{
 		super(data, parent)
@@ -7145,10 +7383,33 @@ class CallExpression extends Expression {
 	analyse() { // {{{
 		this._callee = $compile.expression(this._data.callee, this)
 		
-		this._arguments = [$compile.expression(argument, this) for argument in this._data.arguments]
+		for argument in this._data.arguments {
+			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
+				this._arguments.push($compile.expression(argument.argument, this))
+				
+				this._list = false
+			}
+			else {
+				this._arguments.push($compile.expression(argument, this))
+			}
+		}
+		
+		if this._data.scope.kind == ScopeModifier::Argument {
+			this._scope = $compile.expression(this._data.scope.value, this)
+		}
+		
+		if !this._list {
+			if this._arguments.length != 1 {
+				throw new Error(`Invalid to call function at line \(this._data.start.line)`)
+			}
+			
+			this._caller = $caller(this._data.callee, this)
+		}
 	} // }}}
 	fuse() { // {{{
 		this._callee.fuse()
+		this._caller.fuse() if this._caller?
+		this._scope.fuse() if this._scope?
 		
 		for argument in this._arguments {
 			argument.fuse()
@@ -7163,24 +7424,63 @@ class CallExpression extends Expression {
 			fragments.code(this._tempName)
 		}
 		else if this.isNullable() && !this._tested {
-			fragments.wrapNullable(this).code(' ? ').compile(this._callee).code('(')
+			fragments.wrapNullable(this).code(' ? ')
 			
-			for argument, index in this._arguments {
-				fragments.code($comma) if index
+			this._tested = true
+			
+			this.toFragments(fragments)
+			
+			fragments.code(' : undefined')
+		}
+		else if this._list {
+			let data = this._data
+			
+			if data.scope.kind == ScopeModifier::This {
+				fragments.compile(this._callee).code('(')
 				
-				fragments.compile(argument)
+				for argument, index in this._arguments {
+					fragments.code($comma) if index
+					
+					fragments.compile(argument)
+				}
+				
+				fragments.code(')')
 			}
-			
-			fragments.code(') : undefined')
+			else if data.scope.kind == ScopeModifier::Null {
+				fragments.compile(this._callee).code('.call(null')
+				
+				for argument in this._arguments {
+					fragments.code($comma).compile(argument)
+				}
+				
+				fragments.code(')')
+			}
+			else {
+				fragments.compile(this._callee).code('.call(').compile(this._scope)
+				
+				for argument in this._arguments {
+					fragments.code($comma).compile(argument)
+				}
+				
+				fragments.code(')')
+			}
 		}
 		else {
-			fragments.compile(this._callee).code('(')
+			let data = this._data
 			
-			for argument, index in this._arguments {
-				fragments.code($comma) if index
-				
-				fragments.compile(argument)
+			fragments.compile(this._callee).code('.apply(')
+			
+			if data.scope.kind == ScopeModifier::Null {
+				fragments.code('null')
 			}
+			else if data.scope.kind == ScopeModifier::This {
+				fragments.compile(this._caller)
+			}
+			else {
+				fragments.compile(this._scope)
+			}
+			
+			fragments.code($comma).compile(this._arguments[0])
 			
 			fragments.code(')')
 		}
@@ -7336,6 +7636,188 @@ class CallFinalExpression extends Expression {
 		else {
 			console.error(this._callee)
 			throw new Error('Not Implemented')
+		}
+	} // }}}
+}
+
+class CurryExpression extends Expression {
+	private {
+		_arguments	= []
+		_callee
+		_caller
+		_list		= true
+		_scope
+		_tempName	= null
+		_tested		= false
+	}
+	CurryExpression(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._callee = $compile.expression(this._data.callee, this)
+		
+		for argument in this._data.arguments {
+			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
+				this._arguments.push($compile.expression(argument.argument, this))
+				
+				this._list = false
+			}
+			else {
+				this._arguments.push($compile.expression(argument, this))
+			}
+		}
+		
+		if !this._list && this._arguments.length != 1 {
+			throw new Error(`Invalid curry syntax at line \(this._data.start.line)`)
+		}
+		
+		if this._data.scope.kind == ScopeModifier::This {
+			this._caller = $caller(this._data.callee, this)
+		}
+		else if this._data.scope.kind == ScopeModifier::Argument {
+			this._scope = $compile.expression(this._data.scope.value, this)
+		}
+	} // }}}
+	fuse() { // {{{
+		this._callee.fuse()
+		this._caller.fuse() if this._caller?
+		this._scope.fuse() if this._scope?
+		
+		for argument in this._arguments {
+			argument.fuse()
+		}
+	} // }}}
+	isCallable() => !this._tempName?
+	isNullable() { // {{{
+		return this._data.nullable || this._callee.isNullable()
+	} // }}}
+	toFragments(fragments) { // {{{
+		if this._tempName? {
+			fragments.code(this._tempName)
+		}
+		else if this.isNullable() && !this._tested {
+			fragments.wrapNullable(this).code(' ? ')
+			
+			this._tested = true
+			
+			this.toFragments(fragments)
+			
+			fragments.code(' : undefined')
+		}
+		else if this._list {
+			this.module().flag('Helper')
+			
+			let kind = this._data.scope.kind
+			
+			if kind == ScopeModifier::This {
+				fragments
+					.code($runtime.helper(this), '.vcurry(')
+					.compile(this._callee)
+					.code(', ')
+				
+				if this._caller? {
+					fragments.compile(this._caller)
+				}
+				else {
+					fragments.code('null')
+				}
+				
+				for argument in this._arguments {
+					fragments.code($comma).compile(argument)
+				}
+				
+				fragments.code(')')
+			}
+			else if kind == ScopeModifier::Null {
+				fragments
+					.code($runtime.helper(this), '.vcurry(')
+					.compile(this._callee)
+					.code(', null')
+				
+				for argument in this._arguments {
+					fragments.code($comma).compile(argument)
+				}
+				
+				fragments.code(')')
+			}
+			else {
+				fragments
+					.code($runtime.helper(this), '.vcurry(')
+					.compile(this._callee)
+					.code($comma)
+					.compile(this._scope)
+				
+				for argument in this._arguments {
+					fragments.code($comma).compile(argument)
+				}
+				
+				fragments.code(')')
+			}
+		}
+		else {
+			this.module().flag('Helper')
+			
+			let kind = this._data.scope.kind
+			
+			if kind == ScopeModifier::This {
+				fragments
+					.code($runtime.helper(this), '.curry(')
+					.compile(this._callee)
+					.code($comma)
+				
+				if this._caller? {
+					fragments.compile(this._caller)
+				}
+				else {
+					fragments.code('null')
+				}
+				
+				fragments
+					.code($comma)
+					.compile(this._arguments[0])
+					.code(')')
+			}
+			else if kind == ScopeModifier::Null {
+				fragments
+					.code($runtime.helper(this), '.curry(')
+					.compile(this._callee)
+					.code(', null, ')
+					.compile(this._arguments[0])
+					.code(')')
+			}
+			else {
+				fragments
+					.code($runtime.helper(this), '.curry(')
+					.compile(this._callee)
+					.code($comma)
+					.compile(this._scope)
+					.code($comma)
+					.compile(this._arguments[0])
+					.code(')')
+			}
+		}
+	} // }}}
+	toNullableFragments(fragments) { // {{{
+		if !this._tested {
+			this._tested = true
+			
+			if this._data.nullable {
+				if this._callee.isNullable() {
+					fragments
+						.wrapNullable(this._callee)
+						.code(' && ')
+				}
+				
+				fragments
+					.code($runtime.type(this) + '.isFunction(')
+					.compileReusable(this._callee)
+					.code(')')
+			}
+			else {
+				if this._callee.isNullable() {
+					fragments.compileNullable(this._callee)
+				}
+			}
 		}
 	} // }}}
 }
@@ -8032,6 +8514,21 @@ const $binaryOperators = {
 }
 
 const $expressions = {
+	`\(Kind::ArrayComprehension)`			: func(data, parent) {
+		if data.loop.kind == Kind::ForInStatement {
+			return new ArrayComprehensionForIn(data, parent)
+		}
+		else if data.loop.kind == Kind::ForOfStatement {
+			return new ArrayComprehensionForOf(data, parent)
+		}
+		else if data.loop.kind == Kind::ForRangeStatement {
+			return new ArrayComprehensionForRange(data, parent)
+		}
+		else {
+			console.error(data)
+			throw new Error('Not Implemented')
+		}
+	}
 	`\(Kind::ArrayExpression)`				: ArrayExpression
 	`\(Kind::ArrayRange)`					: ArrayRange
 	`\(Kind::Block)`						: func(data, parent) {
@@ -8050,6 +8547,7 @@ const $expressions = {
 			return new CallExpression(data, parent)
 		}
 	}
+	`\(Kind::CurryExpression)`				: CurryExpression
 	`\(Kind::EnumExpression)`				: EnumExpression
 	`\(Kind::FunctionExpression)`			: FunctionExpression
 	`\(Kind::Identifier)`					: IdentifierLiteral

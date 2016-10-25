@@ -427,17 +427,30 @@ The default runtime (`@kaoscript/runtime`) has only the bare minimum.
 You can use your own runtime with a global attribute like `#![cfg(runtime(package="yourpackage"))]`.
 Or configure the name of the runtime's variables like `#![cfg(runtime(Type="YourType"))]`.
 
+Syntax Highlighting
+-------------------
+
+- [ACE](https://github.com/kaoscript/highlight-ace)
+- [Atom](https://github.com/kaoscript/highlight-atom)
+- [Brackets](https://github.com/kaoscript/highlight-brackets)
+- [CodeMirror](https://github.com/kaoscript/highlight-codemirror)
+- [jEdit](https://github.com/kaoscript/highlight-jedit)
+- [Prism](https://github.com/kaoscript/highlight-prism)
+- [Rainbow](https://github.com/kaoscript/highlight-rainbow)
+- [TextMate](https://github.com/kaoscript/highlight-textmate)
+- [VS Code](https://github.com/kaoscript/highlight-vscode)
+
 Temporary Limitation
 --------------------
 
-The current compiler targets and requires Node6
+The current compiler targets and requires **Node6**
 
 Todo
 ----
 
+- more tests
 - context packages (node4, node6, IE, FF, or Chromium)
 - get more people involved ;)
-- syntax highlight
 - better documentation
 - operator overloading
 - class: versioning
