@@ -4358,7 +4358,13 @@ class Statement extends Base {
 		_variables	: Array	= []
 	}
 	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
-		return this._parent.acquireTempName(node, assignment, fromChild)
+		let name = this._parent.acquireTempName(node, assignment, fromChild)
+		
+		if !this.hasVariable(name) {
+			this._variables.push(name)
+		}
+		
+		return name
 	} // }}}
 	addVariable(name, definition) { // {{{
 		this._parent.addVariable(name, definition)
@@ -6781,20 +6787,25 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
+	analyse() { // {{{
+		super.analyse()
+		
+		this._right.analyseReusable()
+	} // }}}
 	isAssignable() => false
 	toFragments(fragments) { // {{{
 		if this._right.isNullable() {
 			fragments
-				.wrapBoolean(this._right)
+				.wrapNullable(this._right)
 				.code(' && ')
 				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compile(this._right)
+				.compileReusable(this._right)
 				.code(')', this._data.operator)
 		}
 		else {
 			fragments
 				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compile(this._right)
+				.compileReusable(this._right)
 				.code(')', this._data.operator)
 		}
 		
@@ -6808,16 +6819,16 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 	toBooleanFragments(fragments) { // {{{
 		if this._right.isNullable() {
 			fragments
-				.wrapBoolean(this._right)
+				.wrapNullable(this._right)
 				.code(' && ')
 				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compile(this._right)
+				.compileReusable(this._right)
 				.code(')', this._data.operator)
 		}
 		else {
 			fragments
 				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compile(this._right)
+				.compileReusable(this._right)
 				.code(')', this._data.operator)
 		}
 		
@@ -6889,11 +6900,11 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 class BinaryOperatorAnd extends BinaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrapBoolean(this._left)
 			.code($space)
 			.code('&&', this._data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrapBoolean(this._right)
 	} // }}}
 }
 
@@ -7059,11 +7070,11 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 class BinaryOperatorOr extends BinaryOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrapBoolean(this._left)
 			.code($space)
 			.code('||', this._data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrapBoolean(this._right)
 	} // }}}
 }
 
@@ -7373,8 +7384,9 @@ class CallExpression extends Expression {
 		_callee
 		_caller
 		_list		= true
+		_reusable	= false
+		_reuseName	= null
 		_scope
-		_tempName	= null
 		_tested		= false
 	}
 	CallExpression(data, parent) { // {{{
@@ -7406,6 +7418,9 @@ class CallExpression extends Expression {
 			this._caller = $caller(this._data.callee, this)
 		}
 	} // }}}
+	analyseReusable() { // {{{
+		this._reuseName = this.statement().acquireTempName()
+	} // }}}
 	fuse() { // {{{
 		this._callee.fuse()
 		this._caller.fuse() if this._caller?
@@ -7420,8 +7435,8 @@ class CallExpression extends Expression {
 		return this._data.nullable || this._callee.isNullable()
 	} // }}}
 	toFragments(fragments) { // {{{
-		if this._tempName? {
-			fragments.code(this._tempName)
+		if this._reusable {
+			fragments.code(this._reuseName)
 		}
 		else if this.isNullable() && !this._tested {
 			fragments.wrapNullable(this).code(' ? ')
@@ -7509,10 +7524,8 @@ class CallExpression extends Expression {
 		}
 	} // }}}
 	toReusableFragments(fragments) { // {{{
-		this._tempName = $code('__ks_0')
-		
 		fragments
-			.code(this._tempName, $equals)
+			.code(this._reuseName, $equals)
 			.compile(this._callee)
 			.code('(')
 		
@@ -7523,6 +7536,8 @@ class CallExpression extends Expression {
 		}
 		
 		fragments.code(')')
+		
+		this._reusable = true
 	} // }}}
 }
 
@@ -7531,7 +7546,6 @@ class CallFinalExpression extends Expression {
 		_arguments
 		_callee
 		_object
-		_tempName = null
 		_tested = false
 	}
 	CallFinalExpression(data, parent, @callee) { // {{{
@@ -7549,10 +7563,9 @@ class CallFinalExpression extends Expression {
 			argument.fuse()
 		}
 	} // }}}
-	isComputed() => this._callee.variables.length > 1
-	isCallable() => !this._tempName?
+	isComputed() => this._callee.variables? && this._callee.variables.length > 1
 	isNullable() { // {{{
-		return this._data.nullable || this._callee.isNullable()
+		return this._data.nullable || this._object.isNullable()
 	} // }}}
 	toFragments(fragments) { // {{{
 		if this._callee.variable {
@@ -7647,7 +7660,6 @@ class CurryExpression extends Expression {
 		_caller
 		_list		= true
 		_scope
-		_tempName	= null
 		_tested		= false
 	}
 	CurryExpression(data, parent) { // {{{
@@ -7687,15 +7699,11 @@ class CurryExpression extends Expression {
 			argument.fuse()
 		}
 	} // }}}
-	isCallable() => !this._tempName?
 	isNullable() { // {{{
 		return this._data.nullable || this._callee.isNullable()
 	} // }}}
 	toFragments(fragments) { // {{{
-		if this._tempName? {
-			fragments.code(this._tempName)
-		}
-		else if this.isNullable() && !this._tested {
+		if this.isNullable() && !this._tested {
 			fragments.wrapNullable(this).code(' ? ')
 			
 			this._tested = true
@@ -8355,6 +8363,8 @@ class Literal extends Expression {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
+	} // }}}
+	analyseReusable() { // {{{
 	} // }}}
 	fuse() { // {{{
 	} // }}}
