@@ -1137,7 +1137,7 @@ const $function = {
 	} // }}}
 	parametersKS(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = $function.signature(node._data, node)
+		let signature = $function.signature(node._data, node.scope())
 		//console.log(signature)
 		
 		let parameter, ctrl
@@ -1199,7 +1199,7 @@ const $function = {
 					fragments.code(parameter.name.name, parameter.name)
 				}
 				else {
-					fragments.code(names[i] = node.acquireTempName())
+					fragments.code(names[i] = node.scope().acquireTempName())
 				}
 				
 				if parameter.type {
@@ -1224,7 +1224,7 @@ const $function = {
 					fragments.code(parameter.name.name, parameter.name)
 				}
 				else {
-					fragments.code(names[rest] = node.acquireTempName())
+					fragments.code(names[rest] = node.scope().acquireTempName())
 				}
 			}
 			else if signature.async && !ra {
@@ -1744,7 +1744,7 @@ const $function = {
 			}
 		} // }}}
 	} // }}}
-	signature(data, node) { // {{{
+	signature(data, scope) { // {{{
 		let signature = {
 			min: 0,
 			max: 0,
@@ -1760,7 +1760,7 @@ const $function = {
 		}
 		
 		for parameter in data.parameters {
-			signature.parameters.push(parameter = $function.signatureParameter(parameter, node))
+			signature.parameters.push(parameter = $function.signatureParameter(parameter, scope))
 			
 			if parameter.max == Infinity {
 				if signature.max == Infinity {
@@ -1790,9 +1790,9 @@ const $function = {
 		
 		return signature
 	} // }}}
-	signatureParameter(parameter, node) { // {{{
+	signatureParameter(parameter, scope) { // {{{
 		let signature = {
-			type: $signature.type(parameter.type, node),
+			type: $signature.type(parameter.type, scope),
 			min: parameter.defaultValue || (parameter.type && parameter.type.nullable) ? 0 : 1,
 			max: 1
 		}
@@ -2053,17 +2053,17 @@ const $import = {
 				if (reference.foreign? && reference.foreign.name == variable.requirement) || reference.alias.name == variable.requirement {
 					nf = false
 					
-					variable = $variable.merge(node.getVariable(reference.alias.name), variable)
+					variable = $variable.merge(node.scope().getVariable(reference.alias.name), variable)
 				}
 			}
 		}
 		
-		node.addVariable(name, variable)
+		node.scope().addVariable(name, variable)
 		
 		module.import(name, file)
 	} // }}}
 	define(module, file?, node, name, kind, type?) { // {{{
-		$variable.define(node, name, kind, type)
+		$variable.define(node.scope(), name, kind, type)
 		
 		module.import(name.name || name, file)
 	} // }}}
@@ -2164,14 +2164,14 @@ const $import = {
 					for reference in data.references while nf {
 						if reference.foreign? {
 							if reference.foreign.name == name {
-								node.use(reference.alias, true)
+								$import.use(reference.alias, node.scope())
 								
 								nf = false
 							}
 						}
 						else {
 							if reference.alias.name == name {
-								node.use(reference.alias, true)
+								$import.use(reference.alias, node.scope())
 								
 								nf = false
 							}
@@ -2228,7 +2228,7 @@ const $import = {
 				type.properties.push(variable)
 			}
 			
-			variable = $variable.define(node, {
+			variable = $variable.define(node.scope(), {
 				kind: Kind::Identifier
 				name: importAlias
 			}, VariableKind::Variable, type)
@@ -2354,13 +2354,23 @@ const $import = {
 			}
 		}
 	} // }}}
+	use(data, scope) { // {{{
+		if data is Array {
+			for item in data {
+				throw new Error(`Undefined variable '\(item.name)' at line \(item.start.line)`) if item.kind == Kind::Identifier && !scope.hasVariable(item.name)
+			}
+		}
+		else if data.kind == Kind::Identifier {
+			throw new Error(`Undefined variable '\(data.name)' at line \(data.start.line)`) if !scope.hasVariable(data.name)
+		}
+	} // }}}
 	toKSFileFragments(node, fragments, data, metadata) { // {{{
 		let {moduleName, exports, requirements, importVariables, importVarCount, importAll, importAlias} = metadata
 		
 		let name, alias, variable, importCode
 		
 		if (importVarCount && importAll) || (importVarCount && importAlias.length) || (importAll && importAlias.length) {
-			importCode = node.acquireTempName()
+			importCode = node.scope().acquireTempName()
 			
 			let line = fragments
 				.newLine()
@@ -2620,7 +2630,7 @@ const $import = {
 			fragments.newLine().code('var ', importAlias, ' = ', importCode).done()
 		}
 		
-		node.releaseTempName(importCode)
+		node.scope().releaseTempName(importCode)
 	} // }}}
 	toNodeFileFragments(node, fragments, data, metadata) { // {{{
 		let moduleName = metadata.moduleName
@@ -2710,7 +2720,7 @@ const $method = {
 		
 		let type, last, nf
 		for parameter in data.parameters {
-			type = $signature.type(parameter.type, node)
+			type = $signature.type(parameter.type, node.scope())
 			
 			if !last || !$method.sameType(type, last.type) {
 				if last {
@@ -2719,7 +2729,7 @@ const $method = {
 				}
 				
 				last = {
-					type: $signature.type(parameter.type, node),
+					type: $signature.type(parameter.type, node.scope()),
 					min: parameter.defaultValue || (parameter.type && parameter.type.nullable) ? 0 : 1,
 					max: 1
 				}
@@ -2826,13 +2836,13 @@ const $runtime = {
 }
 
 const $signature = {
-	type(type?, node) { // {{{
+	type(type?, scope) { // {{{
 		if type {
 			if type.typeName {
 				return $types[type.typeName.name] if $types[type.typeName.name]
 				
-				if (variable ?= node.getVariable(type.typeName.name)) && variable.kind == VariableKind::TypeAlias {
-					return $signature.type(variable.type, node)
+				if (variable ?= scope.getVariable(type.typeName.name)) && variable.kind == VariableKind::TypeAlias {
+					return $signature.type(variable.type, scope)
 				}
 				
 				return type.typeName.name
@@ -2841,7 +2851,7 @@ const $signature = {
 				let types = []
 				
 				for i from 0 til type.types.length {
-					types.push($signature.type(type.types[i], node))
+					types.push($signature.type(type.types[i], scope))
 				}
 				
 				return types
@@ -2867,7 +2877,7 @@ func $toInt(data, defaultValue) { // {{{
 const $type = {
 	check(node, fragments, name, type) { // {{{
 		if type.kind == Kind::TypeReference {
-			type = $type.unalias(type, node)
+			type = $type.unalias(type, node.scope())
 			
 			if type.typeParameters {
 				if $generics[type.typeName.name] || !$types[type.typeName.name] || $generics[$types[type.typeName.name]] {
@@ -2970,7 +2980,7 @@ const $type = {
 			}
 		}
 	} // }}}
-	type(data, node) { // {{{
+	type(data, scope) { // {{{
 		//console.log('type.data', data)
 		return data if !data.kind
 		
@@ -2979,7 +2989,7 @@ const $type = {
 		switch data.kind {
 			Kind::BinaryOperator => {
 				if data.operator.kind == BinaryOperator::TypeCast {
-					return $type.type(data.right)
+					return $type.type(data.right, scope)
 				}
 				else if $operator.binaries[data.operator.kind] {
 					return {
@@ -2990,7 +3000,7 @@ const $type = {
 					}
 				}
 				else if $operator.lefts[data.operator.kind] {
-					return $type.type(data.left, node)
+					return $type.type(data.left, scope)
 				}
 				else if $operator.numerics[data.operator.kind] {
 					return {
@@ -3002,7 +3012,7 @@ const $type = {
 				}
 			}
 			Kind::Identifier => {
-				let variable = node.getVariable(data.name)
+				let variable = scope.getVariable(data.name)
 				
 				if variable && variable.type {
 					return variable.type
@@ -3043,10 +3053,10 @@ const $type = {
 					}
 					
 					if property.value.kind == Kind::FunctionExpression {
-						prop.signature = $function.signature(property.value, node)
+						prop.signature = $function.signature(property.value, scope)
 						
 						if property.value.type {
-							prop.type = $type.type(property.value.type, node)
+							prop.type = $type.type(property.value.type, scope)
 						}
 					}
 					
@@ -3082,10 +3092,10 @@ const $type = {
 							}
 							
 							if property.type {
-								prop.signature = $function.signature(property.type, node)
+								prop.signature = $function.signature(property.type, scope)
 								
 								if property.type.type {
-									prop.type = $type.type(property.type.type, node)
+									prop.type = $type.type(property.type.type, scope)
 								}
 							}
 							
@@ -3102,14 +3112,14 @@ const $type = {
 						}
 						
 						if data.typeParameters {
-							type.typeParameters = [$type.type(parameter, node) for parameter in data.typeParameters]
+							type.typeParameters = [$type.type(parameter, scope) for parameter in data.typeParameters]
 						}
 					}
 				}
 			}
 			Kind::UnionType => {
 				return {
-					types: [$type.type(type, node) for type in data.types]
+					types: [$type.type(type, scope) for type in data.types]
 				}
 			}
 		}
@@ -3133,11 +3143,11 @@ const $type = {
 			}
 		}
 	} // }}}
-	unalias(type, node) { // {{{
-		let variable = node.getVariable(type.typeName.name)
+	unalias(type, scope) { // {{{
+		let variable = scope.getVariable(type.typeName.name)
 		
 		if variable && variable.kind == VariableKind::TypeAlias {
-			return $type.unalias(variable.type, node)
+			return $type.unalias(variable.type, scope)
 		}
 		
 		return type
@@ -3145,13 +3155,13 @@ const $type = {
 }
 
 const $variable = {
-	define(node, name, kind, type?) { // {{{
-		let variable = node.getVariable(name.name || name)
+	define(scope, name, kind, type?) { // {{{
+		let variable = scope.getVariable(name.name || name)
 		if variable && variable.kind == kind {
 			variable.new = false
 		}
 		else {
-			node.addVariable(name.name || name, variable = {
+			scope.addVariable(name.name || name, variable = {
 				name: name,
 				kind: kind,
 				new: true
@@ -3177,10 +3187,10 @@ const $variable = {
 				}
 			}
 			else if kind == VariableKind::TypeAlias {
-				variable.type = $type.type(type, node)
+				variable.type = $type.type(type, scope)
 			}
 			else if (kind == VariableKind::Function || kind == VariableKind::Variable) && type {
-				variable.type = type if type ?= $type.type(type, node)
+				variable.type = type if type ?= $type.type(type, scope)
 			}
 		}
 		
@@ -3641,51 +3651,61 @@ const $variable = {
 	} // }}}
 }
 
-class Base {
+class AbstractNode {
 	private {
 		_data
 		_options
 		_parent = null
+		_scope = null
 	}
-	Base(@data)
-	Base(@data, @parent) { // {{{
+	AbstractNode(@data, @parent, @scope = parent.scope()) { // {{{
 		this._options = $applyAttributes(data, parent._options)
 	} // }}}
-	greatParent() => this._parent?._parent
+	greatScope() => this._parent?.scope()
 	module() => this._parent.module()
+	newScope() { // {{{
+		if this._options.variables == 'es6' {
+			return new Scope(this._scope)
+		}
+		else {
+			return new XScope(this._scope)
+		}
+	} // }}}
 	parent() => this._parent
-	scope() => this._parent.scope()
-	statement() => this._parent.statement()
+	scope() => this._scope
+	statement() => this._parent?.statement()
 }
 
-// {{{ block/scope
-class Block extends Base {
+class AbstractScope {
 	private {
 		_body: Array		= []
+		_parent
 		_prepared			= false
 		_renamedIndexes 	= {}
 		_renamedVariables	= {}
 		_variables			= {}
 	}
+	AbstractScope(@parent = null)
 	addVariable(name, definition) { // {{{
 		this._variables[name] = definition
 		
 		return this
 	} // }}}
-	getVariable(name, fromChild = true) { // {{{
+	getVariable(name) { // {{{
 		if this._variables[name] {
 			return this._variables[name]
 		}
 		else if this._parent {
-			return this._parent.scope().getVariable(name, true)
+			return this._parent.getVariable(name)
 		}
 		else {
 			return null
 		}
 	} // }}}
-	hasVariable(name, fromChild = true) { // {{{
-		return this._variables[name]? || (this._parent? && this._parent.scope().hasVariable(name, true))
+	hasVariable(name) { // {{{
+		return this._variables[name]? || (this._parent? && this._parent.hasVariable(name))
 	} // }}}
+	parent() => this._parent
 	rename(name) { // {{{
 		let newName = this.newRenamedVariable(name)
 		if newName != name {
@@ -3694,24 +3714,22 @@ class Block extends Base {
 	
 		return this
 	} // }}}
-	scope() => this
-	statement() => this._parent.statement()
-	toFragments(fragments) { // {{{
-		for statement in this._body {
-			statement.toFragments(fragments)
-		}
-	} // }}}
 }
 
-class AbstractScope extends Block {
+class Scope extends AbstractScope {
 	private {
-		_scopeParent		= null
 		_tempNextIndex 		= 0
 		_tempNames			= {}
 		_tempNameCount		= 0
+		_tempParentNames	= {}
 	}
-	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
-		if this._scopeParent && (name ?= this._scopeParent.acquireTempNameFromKid()) {
+	Scope(data, parent) { // {{{
+		super(data, parent)
+		
+		this._tempNextIndex = parent._tempNextIndex
+	} // }}}
+	acquireTempName(node?, assignment = false) { // {{{
+		if this._parent && (name ?= this._parent.acquireTempNameFromKid()) {
 			this._tempParentNames[name] = true
 			
 			return name
@@ -3737,7 +3755,7 @@ class AbstractScope extends Block {
 		}
 	} // }}}
 	private acquireTempNameFromKid() { // {{{
-		if this._scopeParent && (name ?= this._scopeParent.acquireTempNameFromKid()) {
+		if this._parent && (name ?= this._parent.acquireTempNameFromKid()) {
 			this._tempParentNames[name] = true
 			
 			return name
@@ -3765,8 +3783,6 @@ class AbstractScope extends Block {
 			return name
 		}
 	} // }}}
-	newBlock() => $expressions[Kind::Block]({}, this)
-	newBlock(data, parent) => $expressions[Kind::Block](data, parent)
 	newRenamedVariable(name) { // {{{
 		if this._variables[name] {
 			let index = this._renamedIndexes[name] ? this._renamedIndexes[name] : 0
@@ -3784,10 +3800,10 @@ class AbstractScope extends Block {
 			return name
 		}
 	} // }}}
-	releaseTempName(name, fromChild = true) { // {{{
+	releaseTempName(name) { // {{{
 		if name.length > 5 && name.substr(0, 5) == '__ks_' {
-			if this._scopeParent && this._tempParentNames[name] {
-				this._scopeParent.releaseTempNameFromKid(name)
+			if this._parent && this._tempParentNames[name] {
+				this._parent.releaseTempNameFromKid(name)
 				
 				this._tempParentNames[name] = false
 			}
@@ -3801,8 +3817,8 @@ class AbstractScope extends Block {
 		return this
 	} // }}}
 	private releaseTempNameFromKid(name) { // {{{
-		if this._scopeParent && this._tempParentNames[name] {
-			this._scopeParent.releaseTempNameFromKid(name)
+		if this._parent && this._tempParentNames[name] {
+			this._parent.releaseTempNameFromKid(name)
 			
 			this._tempParentNames[name] = false
 		}
@@ -3813,90 +3829,15 @@ class AbstractScope extends Block {
 		}
 	} // }}}
 	updateTempNames() { // {{{
-		if this._scopeParent && this._scopeParent._tempNextIndex > this._tempNextIndex {
-			this._tempNextIndex = this._scopeParent._tempNextIndex
+		if this._parent && this._parent._tempNextIndex > this._tempNextIndex {
+			this._tempNextIndex = this._parent._tempNextIndex
 		}
 	} // }}}
 }
 
-class FunctionScope extends AbstractScope {
-	FunctionScope(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
-}
-
-class ModuleScope extends AbstractScope {
-	private {
-		_module
-	}
-	ModuleScope(data, @module) { // {{{
-		super(data)
-		
-		this._options = $applyAttributes(data, module._options)
-	} // }}}
-	analyse() { // {{{
-		for statement in this._data.body {
-			this._body.push(statement = $compile.statement(statement, this))
-			
-			statement.analyse()
-		}
-	} // }}}
-	fuse() { // {{{
-		for statement in this._body {
-			statement.fuse()
-		}
-	} // }}}
-	module() => this._module
-}
-
-class Scope extends AbstractScope {
-	Scope(data, parent) { // {{{
-		super(data, parent)
-		
-		while !(parent is AbstractScope) {
-			parent = parent._parent
-		}
-		
-		this._scopeParent = parent
-		this._tempNextIndex = parent._tempNextIndex
-		this._tempParentNames = {}
-	} // }}}
-	analyse() { // {{{
-		if this._data.statements {
-			for statement in this._data.statements {
-				this._body.push(statement = $compile.statement(statement, this))
-				
-				statement.analyse()
-			}
-		}
-	} // }}}
-	fuse() { // {{{
-		for statement in this._body {
-			statement.fuse()
-		}
-	} // }}}
-}
-
-class XScope extends Block {
-	XScope(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
-	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
-		return this._parent.acquireTempName(node, assignment, fromChild)
-	} // }}}
-	analyse() { // {{{
-		if this._data.statements {
-			for statement in this._data.statements {
-				this._body.push(statement = $compile.statement(statement, this))
-				
-				statement.analyse()
-			}
-		}
-	} // }}}
-	fuse() { // {{{
-		for statement in this._body {
-			statement.fuse()
-		}
+class XScope extends AbstractScope {
+	acquireTempName(node?, assignment = false) { // {{{
+		return this._parent.acquireTempName(node, assignment)
 	} // }}}
 	getRenamedVariable(name) { // {{{
 		if this._renamedVariables[name] {
@@ -3909,8 +3850,6 @@ class XScope extends Block {
 			return this._parent.getRenamedVariable(name)
 		}
 	} // }}}
-	newBlock() => new XScope({}, this)
-	newBlock(data, parent) => new XScope(data, parent)
 	newRenamedVariable(name) { // {{{
 		if this._variables[name] {
 			let index = this._renamedIndexes[name] ? this._renamedIndexes[name] : 0
@@ -3928,15 +3867,14 @@ class XScope extends Block {
 			return this._parent.newRenamedVariable(name)
 		}
 	} // }}}
-	releaseTempName(name, fromChild = true) { // {{{
-		this._parent.releaseTempName(name, fromChild)
+	releaseTempName(name) { // {{{
+		this._parent.releaseTempName(name)
 		
 		return this
 	} // }}}
 	updateTempNames() { // {{{
 	} // }}}
 }
-// }}}
 
 class Module {
 	private {
@@ -3959,7 +3897,7 @@ class Module {
 	Module(@data, @compiler, @directory) { // {{{
 		this._options = $applyAttributes(data, this._compiler._options.config)
 		
-		this._body = new ModuleScope(data, this)
+		this._body = new ModuleBlock(data, this)
 		
 		if this._compiler._options.output {
 			this._output = this._compiler._options.output
@@ -3982,7 +3920,7 @@ class Module {
 	export(name, alias = false) { // {{{
 		throw new Error('Binary file can\'t export') if this._binary
 		
-		let variable = this._body.getVariable(name.name)
+		let variable = this._body.scope().getVariable(name.name)
 		
 		throw new Error(`Undefined variable \(name.name)`) unless variable
 		
@@ -4069,7 +4007,7 @@ class Module {
 		let requirement = {
 			name: name
 			class: kind == VariableKind::Class
-			parameter: this._body.acquireTempName()
+			parameter: this._body.scope().acquireTempName()
 			requireFirst: requireFirst
 		}
 		
@@ -4351,31 +4289,46 @@ class Module {
 	} // }}}
 }
 
-// {{{ Statements
-class Statement extends Base {
+class ModuleBlock extends AbstractNode {
 	private {
-		_usages				= []
+		_body: Array		= []
+		_module
+	}
+	ModuleBlock(data, @module) {
+		this._data = data
+		this._options = $applyAttributes(data, module._options)
+		this._scope = new Scope()
+	}
+	analyse() { // {{{
+		for statement in this._data.body {
+			this._body.push(statement = $compile.statement(statement, this))
+			
+			statement.analyse()
+		}
+	} // }}}
+	fuse() { // {{{
+		for statement in this._body {
+			statement.fuse()
+		}
+	} // }}}
+	module() => this._module
+	toFragments(fragments) { // {{{
+		for statement in this._body {
+			statement.toFragments(fragments)
+		}
+	} // }}}
+}
+
+// {{{ Statements
+class Statement extends AbstractNode {
+	private {
 		_variables	: Array	= []
 	}
-	acquireTempName(node?, assignment = false, fromChild = true) { // {{{
-		let name = this._parent.acquireTempName(node, assignment, fromChild)
-		
-		if !this.hasVariable(name) {
-			this._variables.push(name)
-		}
-		
-		return name
-	} // }}}
-	addVariable(name, definition) { // {{{
-		this._parent.addVariable(name, definition)
-		
-		return this
-	} // }}}
 	assignment(data, allowAssignement = false) { // {{{
-		if data.left.kind == Kind::Identifier && !this.hasVariable(data.left.name) {
+		if data.left.kind == Kind::Identifier && !this._scope.hasVariable(data.left.name) {
 			this._variables.push(data.left.name)
 			
-			$variable.define(this, data.left, $variable.kind(data.right.type), data.right.type)
+			$variable.define(this._scope, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
 	compile(statements) { // {{{
@@ -4387,75 +4340,13 @@ class Statement extends Base {
 			statement.fuse()
 		}
 	} // }}}
-	getRenamedVariable(name) { // {{{
-		return this._parent.getRenamedVariable(name)
-	} // }}}
-	getVariable(name, fromChild = true) { // {{{
-		return this.scope().getVariable(name, fromChild)
-	} // }}}
-	hasVariable(name, fromChild = true) { // {{{
-		return this.scope().hasVariable(name, fromChild)
-	} // }}}
-	module() => this._parent.module()
-	newBlock() => this.scope().newBlock()
-	newBlock(data) => this.scope().newBlock(data, this._parent)
-	newRenamedVariable(name) { // {{{
-		return this._parent.newRenamedVariable(name)
-	} // }}}
-	releaseTempName(name, fromChild = true) { // {{{
-		this._parent.releaseTempName(name, fromChild)
-		
-		return this
-	} // }}}
-	rename(name) { // {{{
-		this._parent.rename(name)
-		
-		return this
-	} // }}}
-	scope() => this._parent.scope()
 	statement() => this
 	toFragments(fragments) { // {{{
-		for variable in this._usages {
-			if !this.scope().hasVariable(variable.name) {
-				throw new Error(`Undefined variable '\(variable.name)' at line \(variable.start.line)`)
-			}
-		}
-		
 		if this._variables.length {
 			fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
 		}
 		
 		this.toStatementFragments(fragments)
-	} // }}}
-	use(data, immediate = false) { // {{{
-		if immediate {
-			if data is Array {
-				for item in data {
-					throw new Error(`Undefined variable '\(item.name)' at line \(item.start.line)`) if item.kind == Kind::Identifier && !this._parent.hasVariable(item.name)
-				}
-			}
-			else if data.kind == Kind::Identifier {
-				throw new Error(`Undefined variable '\(data.name)' at line \(data.start.line)`) if !this._parent.hasVariable(data.name)
-			}
-		}
-		else {
-			if data is Array {
-				for item in data {
-					if item.kind == Kind::Identifier {
-						this._usages.push({
-							name: item.name,
-							start: item.start
-						})
-					}
-				}
-			}
-			else if data.kind == Kind::Identifier {
-				this._usages.push({
-					name: data.name,
-					start: data.start
-				})
-			}
-		}
 	} // }}}
 }
 
@@ -4470,16 +4361,14 @@ class ClassDeclaration extends Statement {
 		_variable
 	}
 	ClassDeclaration(data, parent) { // {{{
-		super(data, parent)
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
-		this._variable = $variable.define(this, data.name, VariableKind::Class, data.type)
+		this._variable = $variable.define(this.greatScope(), data.name, VariableKind::Class, data.type)
 		
-		let instanceVariableScope = new AbstractScope({}, this)
-		
-		$variable.define(instanceVariableScope, {
+		$variable.define(this._scope, {
 			kind: Kind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(this._variable.name))
@@ -4505,7 +4394,7 @@ class ClassDeclaration extends Statement {
 					}
 					
 					if member.defaultValue? {
-						variable.defaultValue = $compile.expression(member.defaultValue, instance ? instanceVariableScope : this)
+						variable.defaultValue = $compile.expression(member.defaultValue, instance ? this : this._parent)
 					}
 					
 					if instance {
@@ -4665,7 +4554,7 @@ class EnumDeclaration extends Statement {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		this._variable = $variable.define(this, this._data.name, VariableKind::Enum, this._data.type)
+		this._variable = $variable.define(this._scope, this._data.name, VariableKind::Enum, this._data.type)
 		
 		for member in this._data.members {
 			this._members.push(new EnumMember(member, this))
@@ -4697,7 +4586,7 @@ class EnumDeclaration extends Statement {
 	} // }}}
 }
 
-class EnumMember extends Base {
+class EnumMember extends AbstractNode {
 	EnumMember(data, parent) { // {{{
 		super(data, parent)
 	} // }}}
@@ -4748,7 +4637,7 @@ class ExportDeclaration extends Statement {
 					module.export(declaration)
 				}
 				Kind::TypeAliasDeclaration => {
-					$variable.define(this, declaration.name, VariableKind::TypeAlias, declaration.type)
+					$variable.define(this._scope, declaration.name, VariableKind::TypeAlias, declaration.type)
 					
 					module.export(declaration.name)
 				}
@@ -4792,7 +4681,7 @@ class ExpressionStatement extends Statement {
 		this._expression = $compile.expression(this._data, this)
 	} // }}}
 	assignment(data, allowAssignement = false) { // {{{
-		if data.left.kind == Kind::Identifier && !this.hasVariable(data.left.name) {
+		if data.left.kind == Kind::Identifier && !this._scope.hasVariable(data.left.name) {
 			if !allowAssignement || this._variable.length {
 				this._variables.push(data.left.name)
 			}
@@ -4800,19 +4689,13 @@ class ExpressionStatement extends Statement {
 				this._variable = data.left.name
 			}
 			
-			$variable.define(this, data.left, $variable.kind(data.right.type), data.right.type)
+			$variable.define(this._scope, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
 	fuse() { // {{{
 		this._expression.fuse()
 	} // }}}
 	toFragments(fragments) { // {{{
-		for variable in this._usages {
-			if !this._parent.hasVariable(variable.name) {
-				throw new Error(`Undefined variable '\(variable.name)' at line \(variable.start.line)`)
-			}
-		}
-		
 		if this._expression.toStatementFragments? {
 			if this._variable.length {
 				this._variables.unshift(this._variable)
@@ -4853,7 +4736,7 @@ class ExternDeclaration extends Statement {
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(this._parent, declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					let continuous = true
 					for i from 0 til declaration.modifiers.length while continuous {
@@ -4876,7 +4759,7 @@ class ExternDeclaration extends Statement {
 					}
 				}
 				Kind::VariableDeclarator => {
-					$variable.define(this._parent, declaration.name, $variable.kind(declaration.type), declaration.type)
+					$variable.define(this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type)
 				}
 				=> {
 					console.error(declaration)
@@ -4907,7 +4790,7 @@ class ExternOrRequireDeclaration extends Statement {
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(this._parent, declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					variable.requirement = declaration.name.name
 					
@@ -4932,7 +4815,7 @@ class ExternOrRequireDeclaration extends Statement {
 					module.require(declaration.name.name, VariableKind::Class, false)
 				}
 				Kind::VariableDeclarator => {
-					variable = $variable.define(this._parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
@@ -4963,13 +4846,13 @@ class ForFromStatement extends Statement {
 		_while
 	}
 	ForFromStatement(data, parent) { // {{{
-		super(data, parent.newBlock())
+		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
-		if !this.hasVariable(data.variable.name) {
-			$variable.define(this, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+		if !this._scope.hasVariable(data.variable.name) {
+			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
 		}
 		
 		this._variable = $compile.expression(data.variable, this)
@@ -4997,8 +4880,7 @@ class ForFromStatement extends Statement {
 			this._when = $compile.expression(data.when, this)
 		}
 		
-		this._body = this.newBlock($block(data.body))
-		this._body.analyse()
+		this._body = $compile.expression($block(data.body), this)
 	} // }}}
 	fuse() { // {{{
 		this._body.fuse()
@@ -5008,7 +4890,7 @@ class ForFromStatement extends Statement {
 		
 		let ctrl = fragments.newControl().code('for(')
 		
-		if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
+		if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
 			ctrl.code($variable.scope(this))
 		}
 		ctrl.compile(this._variable).code($equals).compile(this._from)
@@ -5016,14 +4898,14 @@ class ForFromStatement extends Statement {
 		let bound
 		if data.til {
 			if this._til.isComplex() {
-				bound = this.acquireTempName()
+				bound = this._scope.acquireTempName()
 				
 				ctrl.code(bound, $equals).compile(this._til)
 			}
 		}
 		else {
 			if this._to.isComplex() {
-				bound = this.acquireTempName()
+				bound = this._scope.acquireTempName()
 				
 				ctrl.code(bound, $equals).compile(this._to)
 			}
@@ -5031,7 +4913,7 @@ class ForFromStatement extends Statement {
 		
 		let by
 		if data.by && this._by.isComplex() {
-			by = this.acquireTempName()
+			by = this._scope.acquireTempName()
 			
 			ctrl.code($comma, by, $equals).compile(this._by)
 		}
@@ -5126,8 +5008,8 @@ class ForFromStatement extends Statement {
 		
 		ctrl.done()
 		
-		this.releaseTempName(bound) if ?bound
-		this.releaseTempName(by) if ?by
+		this._scope.releaseTempName(bound) if ?bound
+		this._scope.releaseTempName(by) if ?by
 	} // }}}
 }
 
@@ -5142,25 +5024,25 @@ class ForInStatement extends Statement {
 		_while
 	}
 	ForInStatement(data, parent) { // {{{
-		super(data, parent.newBlock())
+		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
 		this._value = $compile.expression(data.value, this)
 		
-		if !this.hasVariable(data.variable.name) {
-			$variable.define(this, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+		if !this._scope.hasVariable(data.variable.name) {
+			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
 		}
 		
 		this._variable = $compile.expression(data.variable, this)
 		
 		if data.index {
-			this._index = $compile.expression(data.index, this)
-			
-			if data.index && (data.declaration || !this.hasVariable(data.index.name)) {
-				$variable.define(this, data.index.name, $variable.kind(data.index.type), data.index.type)
+			if data.index && (data.declaration || !this._scope.hasVariable(data.index.name)) {
+				$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type)
 			}
+			
+			this._index = $compile.expression(data.index, this)
 		}
 		
 		if data.until {
@@ -5174,8 +5056,7 @@ class ForInStatement extends Statement {
 			this._when = $compile.expression(data.when, this)
 		}
 		
-		this._body = this.newBlock($block(data.body))
-		this._body.analyse()
+		this._body = $compile.expression($block(data.body), this)
 	} // }}}
 	fuse() { // {{{
 		this._value.fuse()
@@ -5186,16 +5067,16 @@ class ForInStatement extends Statement {
 		
 		let value, index, bound
 		if this._value.isComplex() {
-			value = this.greatParent().acquireTempName()
+			value = this.greatScope().acquireTempName()
 			
-			this.parent().updateTempNames()
+			this._scope.updateTempNames()
 			
 			let line = fragments.newLine()
 			
-			if !this.hasVariable(value) {
+			if !this.greatScope().hasVariable(value) {
 				line.code($variable.scope(this))
 				
-				$variable.define(this.greatParent(), value, VariableKind::Variable)
+				$variable.define(this.greatScope(), value, VariableKind::Variable)
 			}
 			
 			line.code(value, $equals).compile(this._value).done()
@@ -5204,7 +5085,7 @@ class ForInStatement extends Statement {
 		let ctrl
 		
 		if data.desc {
-			if data.index && !data.declaration && this.greatParent().hasVariable(data.index.name) {
+			if data.index && !data.declaration && this.greatScope().hasVariable(data.index.name) {
 				fragments
 					.newLine()
 					.compile(this._index)
@@ -5218,7 +5099,7 @@ class ForInStatement extends Statement {
 					.code('for(')
 			}
 			else {
-				index = this.acquireTempName() unless this._index?
+				index = this._scope.acquireTempName() unless this._index?
 				
 				ctrl = fragments
 					.newControl()
@@ -5230,7 +5111,7 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if data.index && !data.declaration && this.greatParent().hasVariable(data.index.name) {
+			if data.index && !data.declaration && this.greatScope().hasVariable(data.index.name) {
 				fragments
 					.newLine()
 					.compile(this._index)
@@ -5242,7 +5123,7 @@ class ForInStatement extends Statement {
 					.code('for(', $variable.scope(this))
 			}
 			else {
-				index = this.acquireTempName() unless this._index?
+				index = this._scope.acquireTempName() unless this._index?
 				
 				ctrl = fragments
 					.newControl()
@@ -5251,7 +5132,7 @@ class ForInStatement extends Statement {
 					.code(' = 0, ')
 			}
 			
-			bound = this.acquireTempName()
+			bound = this._scope.acquireTempName()
 			
 			ctrl
 				.code(bound, $equals)
@@ -5259,7 +5140,7 @@ class ForInStatement extends Statement {
 				.code('.length')
 		}
 		
-		if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
+		if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
 			ctrl.code($comma, data.variable.name)
 		}
 		
@@ -5313,9 +5194,9 @@ class ForInStatement extends Statement {
 		
 		ctrl.done()
 		
-		this.greatParent().releaseTempName(value) if value?
-		this.releaseTempName(index) if index?
-		this.releaseTempName(bound) if bound?
+		this.greatScope().releaseTempName(value) if value?
+		this._scope.releaseTempName(index) if index?
+		this._scope.releaseTempName(bound) if bound?
 	} // }}}
 }
 
@@ -5330,25 +5211,25 @@ class ForOfStatement extends Statement {
 		_while
 	}
 	ForOfStatement(data, parent) { // {{{
-		super(data, parent.newBlock())
+		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
 		this._value = $compile.expression(data.value, this)
 		
-		if !this.hasVariable(data.variable.name) {
-			$variable.define(this, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+		if !this._scope.hasVariable(data.variable.name) {
+			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
 		}
 		
 		this._variable = $compile.expression(data.variable, this)
 		
 		if data.index {
-			this._index = $compile.expression(data.index, this)
-			
-			if data.index && (data.declaration || !this.hasVariable(data.index.name)) {
-				$variable.define(this, data.index.name, $variable.kind(data.index.type), data.index.type)
+			if data.index && (data.declaration || !this._scope.hasVariable(data.index.name)) {
+				$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type)
 			}
+			
+			this._index = $compile.expression(data.index, this)
 		}
 		
 		if data.until {
@@ -5362,8 +5243,7 @@ class ForOfStatement extends Statement {
 			this._when = $compile.expression(data.when, this)
 		}
 		
-		this._body = this.newBlock($block(data.body))
-		this._body.analyse()
+		this._body = $compile.expression($block(data.body), this)
 	} // }}}
 	fuse() { // {{{
 		this._value.fuse()
@@ -5374,23 +5254,23 @@ class ForOfStatement extends Statement {
 		
 		let value
 		if this._value.isComplex() {
-			value = this.greatParent().acquireTempName()
+			value = this.greatScope().acquireTempName()
 			
-			this.parent().updateTempNames()
+			this._scope.updateTempNames()
 			
 			let line = fragments.newLine()
 			
-			if !this.hasVariable(value) {
+			if !this.greatScope().hasVariable(value) {
 				line.code($variable.scope(this))
 				
-				$variable.define(this.greatParent(), value, VariableKind::Variable)
+				$variable.define(this.greatScope(), value, VariableKind::Variable)
 			}
 			line.code(value, $equals).compile(this._value).done()
 		}
 		
 		let ctrl = fragments.newControl().code('for(')
 		
-		if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
+		if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
 			ctrl.code($variable.scope(this))
 		}
 		ctrl.compile(this._variable).code(' in ').compile(value ?? this._value).code(')').step()
@@ -5398,7 +5278,7 @@ class ForOfStatement extends Statement {
 		if data.index {
 			let line = ctrl.newLine()
 			
-			if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
+			if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
 				line.code($variable.scope(this))
 			}
 			
@@ -5442,7 +5322,7 @@ class ForOfStatement extends Statement {
 		
 		ctrl.done()
 		
-		this.greatParent().releaseTempName(value) if value?
+		this.greatScope().releaseTempName(value) if value?
 	} // }}}
 }
 
@@ -5458,13 +5338,13 @@ class ForRangeStatement extends Statement {
 		_while
 	}
 	ForRangeStatement(data, parent) { // {{{
-		super(data, parent.newBlock())
+		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
-		if !this.hasVariable(data.variable.name) {
-			$variable.define(this, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+		if !this._scope.hasVariable(data.variable.name) {
+			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
 		}
 		
 		this._variable = $compile.expression(data.variable, this)
@@ -5487,8 +5367,7 @@ class ForRangeStatement extends Statement {
 			this._when = $compile.expression(data.when, this)
 		}
 		
-		this._body = this.newBlock($block(data.body))
-		this._body.analyse()
+		this._body = $compile.expression($block(data.body), this)
 	} // }}}
 	fuse() { // {{{
 		this._body.fuse()
@@ -5497,21 +5376,21 @@ class ForRangeStatement extends Statement {
 		let data = this._data
 		
 		let ctrl = fragments.newControl().code('for(')
-		if data.declaration || !this.greatParent().hasVariable(data.variable.name) {
+		if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
 			ctrl.code($variable.scope(this))
 		}
 		ctrl.compile(this._variable).code($equals).compile(this._from)
 		
 		let bound
 		if this._to.isComplex() {
-			bound = this.acquireTempName()
+			bound = this._scope.acquireTempName()
 			
 			ctrl.code(bound, $equals).compile(this._to)
 		}
 		
 		let by
 		if data.by && this._by.isComplex() {
-			by = this.acquireTempName()
+			by = this._scope.acquireTempName()
 			
 			ctrl.code($comma, by, $equals).compile(this._by)
 		}
@@ -5562,8 +5441,8 @@ class ForRangeStatement extends Statement {
 		
 		ctrl.done()
 		
-		this.releaseTempName(bound) if bound?
-		this.releaseTempName(by) if by?
+		this._scope.releaseTempName(bound) if bound?
+		this._scope.releaseTempName(by) if by?
 	} // }}}
 }
 
@@ -5574,17 +5453,17 @@ class FunctionDeclaration extends Statement {
 		_statements
 	}
 	FunctionDeclaration(data, parent) { // {{{
-		super(data, new FunctionScope({}, parent))
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this, {
+		$variable.define(this._scope, {
 			kind: Kind::Identifier,
 			name: 'this'
 		}, VariableKind::Variable)
 		
 		let data = this._data
 		
-		variable = $variable.define(this.greatParent(), data.name, VariableKind::Function, data.type)
+		variable = $variable.define(this.greatScope(), data.name, VariableKind::Function, data.type)
 		
 		for modifier in data.modifiers {
 			if modifier.kind == FunctionModifier::Async {
@@ -5618,7 +5497,7 @@ class FunctionDeclaration extends Statement {
 	} // }}}
 }
 
-class Parameter extends Base {
+class Parameter extends AbstractNode {
 	private {
 		_defaultValue	= null
 		_name			= null
@@ -5631,10 +5510,10 @@ class Parameter extends Base {
 		let parent = this._parent
 		
 		if data.name? {
-			let signature = $function.signatureParameter(data, parent)
+			let signature = $function.signatureParameter(data, this._scope)
 			
 			if signature.rest {
-				$variable.define(parent.scope(), data.name, VariableKind::Variable, {
+				$variable.define(this._scope, data.name, VariableKind::Variable, {
 					kind: Kind::TypeReference
 					typeName: {
 						kind: Kind::Identifier
@@ -5643,7 +5522,7 @@ class Parameter extends Base {
 				})
 			}
 			else {
-				$variable.define(parent.scope(), data.name, $variable.kind(data.type), data.type)
+				$variable.define(this._scope, data.name, $variable.kind(data.type), data.type)
 			}
 			
 			this._name = $compile.expression(data.name, parent)
@@ -5676,7 +5555,7 @@ class IfStatement extends Statement {
 		_then
 	}
 	IfStatement(data, parent) { // {{{
-		super(data, parent)
+		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
@@ -5756,7 +5635,7 @@ class ImplementDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
-		let variable = this.getVariable(data.class.name)
+		let variable = this._scope.getVariable(data.class.name)
 		
 		if variable.kind != VariableKind::Class {
 			throw new Error('Invalid class for impl at line ' + data.start.line)
@@ -5816,7 +5695,7 @@ class ImplementFieldDeclaration extends Statement {
 	fuse() { // {{{
 	} // }}}
 	toFragments(fragments) { // {{{
-		let type = $signature.type(this._data.type, this)
+		let type = $signature.type(this._data.type, this._scope)
 		
 		fragments.line($runtime.helper(this), '.newField(' + $quote(this._data.name.name) + ', ' + $helper.type(type, this) + ')')
 	} // }}}
@@ -5830,7 +5709,7 @@ class ImplementMethodDeclaration extends Statement {
 		_variable
 	}
 	ImplementMethodDeclaration(data, parent, @variable) { // {{{
-		super(data, new FunctionScope({}, parent))
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
@@ -5867,7 +5746,7 @@ class ImplementMethodDeclaration extends Statement {
 					signature: $method.signature(data, this)
 				}
 				
-				method.type = $type.type(data.type, this) if data.type
+				method.type = $type.type(data.type, this._scope) if data.type
 				
 				if this._instance {
 					if !(variable.instanceMethods[data.name.name] is Array) {
@@ -5886,7 +5765,7 @@ class ImplementMethodDeclaration extends Statement {
 			}
 		}
 		
-		$variable.define(this, {
+		$variable.define(this._scope, {
 			kind: Kind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(variable.name))
@@ -5958,7 +5837,7 @@ class ImplementMethodAliasDeclaration extends Statement {
 		_variable
 	}
 	ImplementMethodAliasDeclaration(data, parent, @variable) { // {{{
-		super(data, new FunctionScope({}, parent))
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
@@ -6123,7 +6002,7 @@ class MethodDeclaration extends Statement {
 		_statements
 	}
 	MethodDeclaration(data, parent) { // {{{
-		super(data, new FunctionScope({}, parent))
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
@@ -6150,7 +6029,7 @@ class MethodDeclaration extends Statement {
 			node.code(')').step()
 		})
 		
-		let variable = this.greatParent()._variable
+		let variable = this._parent._variable
 		
 		let nf, modifier
 		for parameter, p in this._data.parameters {
@@ -6198,7 +6077,7 @@ class RequireDeclaration extends Statement {
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(this._parent, declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					variable.requirement = declaration.name.name
 					
@@ -6223,7 +6102,7 @@ class RequireDeclaration extends Statement {
 					module.require(declaration.name.name, VariableKind::Class)
 				}
 				Kind::VariableDeclarator => {
-					variable = $variable.define(this._parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
@@ -6255,7 +6134,7 @@ class RequireOrExternDeclaration extends Statement {
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(this._parent, declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					variable.requirement = declaration.name.name
 					
@@ -6280,7 +6159,7 @@ class RequireOrExternDeclaration extends Statement {
 					module.require(declaration.name.name, VariableKind::Class, true)
 				}
 				Kind::VariableDeclarator => {
-					variable = $variable.define(this._parent, declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
@@ -6355,7 +6234,7 @@ class TryStatement extends Statement {
 				})
 				
 				if clause.binding? {
-					$variable.define(this, clause.binding, VariableKind::Variable)
+					$variable.define(this._scope, clause.binding, VariableKind::Variable)
 				}
 			}
 		}
@@ -6364,7 +6243,7 @@ class TryStatement extends Statement {
 			this._catchClause = $compile.expression(data.catchClause.body, this)
 			
 			if this._data.catchClause.binding? {
-				$variable.define(this, data.catchClause.binding, VariableKind::Variable)
+				$variable.define(this._scope, data.catchClause.binding, VariableKind::Variable)
 			}
 		}
 		
@@ -6384,7 +6263,7 @@ class TryStatement extends Statement {
 		let finalizer = null
 		
 		if this._finalizer? {
-			finalizer = this.acquireTempName()
+			finalizer = this._scope.acquireTempName()
 			
 			let line = fragments
 				.newLine()
@@ -6413,7 +6292,7 @@ class TryStatement extends Statement {
 		if this._catchClauses.length {
 			this.module().flag('Type')
 			
-			let error = this.acquireTempName()
+			let error = this._scope.acquireTempName()
 			
 			ctrl.code('catch(', error, ')').step()
 			
@@ -6451,10 +6330,10 @@ class TryStatement extends Statement {
 			
 			ifs.done()
 			
-			this.releaseTempName(error)
+			this._scope.releaseTempName(error)
 		}
 		else if this._catchClause? {
-			let error = this.acquireTempName()
+			let error = this._scope.acquireTempName()
 			
 			if this._data.catchClause.binding? {
 				ctrl.code('catch(', this._data.catchClause.binding.name, ')').step()
@@ -6469,10 +6348,10 @@ class TryStatement extends Statement {
 			
 			ctrl.compile(this._catchClause)
 			
-			this.releaseTempName(error)
+			this._scope.releaseTempName(error)
 		}
 		else {
-			let error = this.acquireTempName()
+			let error = this._scope.acquireTempName()
 			
 			ctrl.code('catch(', error, ')').step()
 			
@@ -6480,7 +6359,7 @@ class TryStatement extends Statement {
 				ctrl.line(finalizer, '()')
 			}
 			
-			this.releaseTempName(error)
+			this._scope.releaseTempName(error)
 		}
 		
 		ctrl.done()
@@ -6492,7 +6371,7 @@ class TypeAliasDeclaration extends Statement {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this, this._data.name, VariableKind::TypeAlias, this._data.type)
+		$variable.define(this._scope, this._data.name, VariableKind::TypeAlias, this._data.type)
 	} // }}}
 	fuse() { // {{{
 	} // }}}
@@ -6607,7 +6486,7 @@ class VariableDeclaration extends Statement {
 	} // }}}
 }
 
-class VariableDeclarator extends Base {
+class VariableDeclarator extends AbstractNode {
 	private {
 		_init	= null
 	}
@@ -6618,11 +6497,9 @@ class VariableDeclarator extends Base {
 		let data = this._data
 		
 		if data.name.kind == Kind::Identifier && this._options.variables == 'es5' {
-			this._parent.rename(data.name.name)
+			this._scope.rename(data.name.name)
 		}
 		
-		this._name = $compile.expression(data.name, this)
-	
 		if data.autotype? {
 			let type = data.type
 			
@@ -6630,11 +6507,13 @@ class VariableDeclarator extends Base {
 				type = data.init
 			}
 			
-			$variable.define(this._parent, data.name, $variable.kind(data.type), type)
+			$variable.define(this._scope, data.name, $variable.kind(data.type), type)
 		}
 		else {
-			$variable.define(this._parent, data.name, $variable.kind(data.type), data.type)
+			$variable.define(this._scope, data.name, $variable.kind(data.type), data.type)
 		}
+		
+		this._name = $compile.expression(data.name, this)
 		
 		if data.init? {
 			this._init = $compile.expression(data.init, this)
@@ -6689,15 +6568,12 @@ class WhileStatement extends Statement {
 // }}}
 
 // {{{ Expressions
-class Expression extends Base {
+class Expression extends AbstractNode {
 	assignment(data) { // {{{
 		this._parent.assignment(data, this.isAssignable())
 	} // }}}
 	assignment(data, variable) { // {{{
 		this._parent.assignment(data, variable && this.isAssignable())
-	} // }}}
-	getRenamedVariable(name) { // {{{
-		return this._parent.statement().getRenamedVariable(name)
 	} // }}}
 	isAssignable() => false
 	isCallable() => false
@@ -6708,9 +6584,6 @@ class Expression extends Base {
 	toBooleanFragments(fragments) => this.toFragments(fragments)
 	toNullableFragments(fragments) => this.toFragments(fragments)
 	toReusableFragments(fragments) => this.toFragments(fragments)
-	use(data, immediate = false) { // {{{
-		this._parent.statement().use(data, immediate)
-	} // }}}
 }
 
 // {{{ Assignment Operators
@@ -7098,15 +6971,15 @@ class BinaryOperatorTypeCheck extends BinaryOperatorExpression {
 }
 // }}}
 
-class ArrayComprehensionForIn extends Statement {
+class ArrayComprehensionForIn extends Expression {
 	ArrayComprehensionForIn(data, parent) { // {{{
-		super(data, new FunctionScope({}, parent))
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
-		$variable.define(this, data.loop.variable.name, VariableKind::Variable)
-		$variable.define(this, data.loop.index.name, VariableKind::Variable) if data.loop.index?
+		$variable.define(this._scope, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
 		
 		this._variable = $compile.expression(data.loop.variable, this)
 		this._value = $compile.expression(data.loop.value, this)
@@ -7166,15 +7039,15 @@ class ArrayComprehensionForIn extends Statement {
 	} // }}}
 }
 
-class ArrayComprehensionForOf extends Statement {
+class ArrayComprehensionForOf extends Expression {
 	ArrayComprehensionForOf(data, parent) { // {{{
-		super(data, new FunctionScope({}, parent))
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
-		$variable.define(this, data.loop.variable.name, VariableKind::Variable)
-		$variable.define(this, data.loop.index.name, VariableKind::Variable) if data.loop.index?
+		$variable.define(this._scope, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
 		
 		this._variable = $compile.expression(data.loop.variable, this)
 		this._value = $compile.expression(data.loop.value, this)
@@ -7234,7 +7107,7 @@ class ArrayComprehensionForOf extends Statement {
 	} // }}}
 }
 
-class ArrayComprehensionForRange extends Statement {
+class ArrayComprehensionForRange extends Expression {
 	private {
 		_body
 		_by
@@ -7244,12 +7117,12 @@ class ArrayComprehensionForRange extends Statement {
 		_when
 	}
 	ArrayComprehensionForRange(data, parent) { // {{{
-		super(data, new FunctionScope({}, parent))
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
-		$variable.define(this, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this._scope, data.loop.variable.name, VariableKind::Variable)
 		
 		this._variable = $compile.expression(data.loop.variable, this)
 		this._from = $compile.expression(data.loop.from, this)
@@ -7378,15 +7251,40 @@ class ArrayRange extends Expression {
 	} // }}}
 }
 
+class BlockExpression extends Expression {
+	private {
+		_body = []
+	}
+	analyse() { // {{{
+		if this._data.statements {
+			for statement in this._data.statements {
+				this._body.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
+			}
+		}
+	} // }}}
+	fuse() { // {{{
+		for statement in this._body {
+			statement.fuse()
+		}
+	} // }}}
+	toFragments(fragments) { // {{{
+		for statement in this._body {
+			statement.toFragments(fragments)
+		}
+	} // }}}
+}
+
 class CallExpression extends Expression {
 	private {
 		_arguments	= []
 		_callee
 		_caller
+		_callScope
 		_list		= true
 		_reusable	= false
 		_reuseName	= null
-		_scope
 		_tested		= false
 	}
 	CallExpression(data, parent) { // {{{
@@ -7407,7 +7305,7 @@ class CallExpression extends Expression {
 		}
 		
 		if this._data.scope.kind == ScopeModifier::Argument {
-			this._scope = $compile.expression(this._data.scope.value, this)
+			this._callScope = $compile.expression(this._data.scope.value, this)
 		}
 		
 		if !this._list {
@@ -7424,7 +7322,7 @@ class CallExpression extends Expression {
 	fuse() { // {{{
 		this._callee.fuse()
 		this._caller.fuse() if this._caller?
-		this._scope.fuse() if this._scope?
+		this._callScope.fuse() if this._callScope?
 		
 		for argument in this._arguments {
 			argument.fuse()
@@ -7471,7 +7369,7 @@ class CallExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
-				fragments.compile(this._callee).code('.call(').compile(this._scope)
+				fragments.compile(this._callee).code('.call(').compile(this._callScope)
 				
 				for argument in this._arguments {
 					fragments.code($comma).compile(argument)
@@ -7492,7 +7390,7 @@ class CallExpression extends Expression {
 				fragments.compile(this._caller)
 			}
 			else {
-				fragments.compile(this._scope)
+				fragments.compile(this._callScope)
 			}
 			
 			fragments.code($comma).compile(this._arguments[0])
@@ -7658,8 +7556,8 @@ class CurryExpression extends Expression {
 		_arguments	= []
 		_callee
 		_caller
+		_callScope
 		_list		= true
-		_scope
 		_tested		= false
 	}
 	CurryExpression(data, parent) { // {{{
@@ -7687,13 +7585,13 @@ class CurryExpression extends Expression {
 			this._caller = $caller(this._data.callee, this)
 		}
 		else if this._data.scope.kind == ScopeModifier::Argument {
-			this._scope = $compile.expression(this._data.scope.value, this)
+			this._callScope = $compile.expression(this._data.scope.value, this)
 		}
 	} // }}}
 	fuse() { // {{{
 		this._callee.fuse()
 		this._caller.fuse() if this._caller?
-		this._scope.fuse() if this._scope?
+		this._callScope.fuse() if this._callScope?
 		
 		for argument in this._arguments {
 			argument.fuse()
@@ -7753,7 +7651,7 @@ class CurryExpression extends Expression {
 					.code($runtime.helper(this), '.vcurry(')
 					.compile(this._callee)
 					.code($comma)
-					.compile(this._scope)
+					.compile(this._callScope)
 				
 				for argument in this._arguments {
 					fragments.code($comma).compile(argument)
@@ -7798,7 +7696,7 @@ class CurryExpression extends Expression {
 					.code($runtime.helper(this), '.curry(')
 					.compile(this._callee)
 					.code($comma)
-					.compile(this._scope)
+					.compile(this._callScope)
 					.code($comma)
 					.compile(this._arguments[0])
 					.code(')')
@@ -7847,13 +7745,13 @@ class EnumExpression extends Expression {
 	} // }}}
 }
 
-class FunctionExpression extends Statement {
+class FunctionExpression extends Expression {
 	private {
 		_parameters
 		_statements
 	}
 	FunctionExpression(data, parent) { // {{{
-		super(data, new FunctionScope({}, parent))
+		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
@@ -8389,12 +8287,14 @@ class IdentifierLiteral extends Literal {
 		if variable && !((parent is MemberExpression && parent._data.object != data) || $predefined[data.name]) {
 			this._isVariable = true
 			
-			this.use(data)
+			if !this._scope.hasVariable(data.name) {
+				throw new Error(`Undefined variable '\(data.name)' at line \(data.start.line)`)
+			}
 		}
 	} // }}}
 	toFragments(fragments) { // {{{
 		if this._isVariable {
-			fragments.code(this.getRenamedVariable(this._value), this._data)
+			fragments.code(this._scope.getRenamedVariable(this._value), this._data)
 		}
 		else {
 			fragments.code(this._value, this._data)
@@ -8541,14 +8441,7 @@ const $expressions = {
 	}
 	`\(Kind::ArrayExpression)`				: ArrayExpression
 	`\(Kind::ArrayRange)`					: ArrayRange
-	`\(Kind::Block)`						: func(data, parent) {
-		if parent._options.variables == 'es6' {
-			return new Scope(data, parent)
-		}
-		else {
-			return new XScope(data, parent)
-		}
-	}
+	`\(Kind::Block)`						: BlockExpression
 	`\(Kind::CallExpression)`				: func(data, parent) {
 		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $final.callee(data.callee, parent.scope())) {
 			return new CallFinalExpression(data, parent, callee)
