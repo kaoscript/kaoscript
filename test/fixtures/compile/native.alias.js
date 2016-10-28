@@ -10,8 +10,7 @@ module.exports = function() {
 			access: 3,
 			min: 0,
 			max: 0,
-			parameters: [
-			]
+			parameters: []
 		}
 	});
 	let foo = "HELLO!";

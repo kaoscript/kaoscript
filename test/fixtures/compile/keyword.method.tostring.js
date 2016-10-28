@@ -23,24 +23,19 @@ module.exports = function() {
 	}
 	Foo.__ks_reflect = {
 		inits: 0,
-		constructors: [
-		],
-		instanceVariables: {
-		},
-		classVariables: {
-		},
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
 		instanceMethods: {
 			toString: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 }

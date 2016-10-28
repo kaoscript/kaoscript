@@ -867,6 +867,143 @@ func $caller(data, node) { // {{{
 } // }}}
 
 const $continuous = {
+	class(node, fragments) { // {{{
+		let clazz = fragments
+			.newControl()
+			.code('class ', node._variable.name.name)
+		
+		if node._data.extends? {
+			let superClazz = node.getVariable(node._data.extends.name)
+		
+			if superClazz {
+				clazz.code(' extends ', superClazz.name.name)
+			}
+			else {
+				throw new Error('Undefined class ' + node._data.extends.name + ' at line ' + node._data.extends.start.line)
+			}
+		}
+		
+		clazz.step()
+		
+		let ctrl
+		if !?node._data.extends {
+			clazz
+				.newControl()
+				.code('constructor()')
+				.step()
+				.line('this.__ks_init()')
+				.line('this.__ks_cons(arguments)')
+				.done()
+		}
+		
+		let reflect = {
+			inits: 0
+			constructors: []
+			instanceVariables: {}
+			classVariables: {}
+			instanceMethods: {}
+			classMethods: {}
+		}
+		
+		let noinit = Type.isEmptyObject(node._instanceVariables)
+		
+		if !noinit {
+			noinit = true
+			
+			for name, field of node._instanceVariables while noinit {
+				if field.data.defaultValue {
+					noinit = false
+				}
+			}
+		}
+		
+		if noinit {
+			if node._data.extends? {
+				clazz
+					.newControl()
+					.code('__ks_init()')
+					.step()
+					.line(node._data.extends.name + '.prototype.__ks_init.call(this)')
+					.done()
+			}
+			else {
+				clazz.newControl().code('__ks_init()').step().done()
+			}
+		}
+		else {
+			++reflect.inits
+			
+			ctrl = clazz
+				.newControl()
+				.code('__ks_init_1()')
+				.step()
+			
+			for name, field of node._instanceVariables {
+				if field.data.defaultValue {
+					ctrl
+						.newLine()
+						.code('this.' + name + ' = ')
+						.compile(field.defaultValue)
+						.done()
+				}
+			}
+			
+			ctrl.done()
+			
+			ctrl = clazz.newControl().code('__ks_init()').step()
+			
+			if node._data.extends? {
+				ctrl.line(node._data.extends.name + '.prototype.__ks_init.call(this)')
+			}
+			
+			ctrl.line(node._variable.name.name + '.prototype.__ks_init_1.call(this)')
+			
+			ctrl.done()
+		}
+		
+		for method in node._constructors {
+			$continuous.constructor(node, clazz, method.statement, method.signature, reflect)
+		}
+		
+		$helper.constructor(node, clazz, reflect)
+		
+		for name, methods of node._instanceMethods {
+			for method in methods {
+				$continuous.instanceMethod(node, clazz, method.statement, method.signature, reflect, name)
+			}
+			
+			$helper.instanceMethod(node, clazz, reflect, name)
+		}
+		
+		/*
+		for name, methods of variable.classMethods {
+			for method in methods {
+				$continuous.classMethod(clazz, method.data, config, method.signature, reflect, name, variable)
+			}
+			
+			$helper.classMethod(clazz, reflect, name, variable, config)
+		}
+		*/
+		
+		for name, field of node._instanceVariables {
+			reflect.instanceVariables[name] = field.signature
+		}
+		
+		/* for name, field of node._classVariables {
+			$continuous.classVariable(fragments, field.data, field.signature, reflect, name, variable)
+		} */
+		
+		clazz.done()
+		
+		$helper.reflect(node, fragments, reflect)
+		
+		/* let references = node.module().listReferences(variable.name.name)
+		if references {
+			for ref in references {
+				node.newExpression(config).code(ref)
+			}
+		} */
+	} // }}}
 	constructor(node, fragments, statement, signature, reflect) { // {{{
 		let index = reflect.constructors.length
 		
@@ -874,6 +1011,18 @@ const $continuous = {
 	
 		statement
 			.name('__ks_cons_' + index)
+			.toFragments(fragments)
+	} // }}}
+	instanceMethod(node, fragments, statement, signature, reflect, name) { // {{{
+		if !(reflect.instanceMethods[name] is Array) {
+			reflect.instanceMethods[name] = []
+		}
+		let index = reflect.instanceMethods[name].length
+		
+		reflect.instanceMethods[name].push(signature)
+		
+		statement
+			.name('__ks_func_' + name + '_' + index)
 			.toFragments(fragments)
 	} // }}}
 	methodCall(node, fnName, argName, retCode, fragments, method, index) { // {{{
@@ -1901,6 +2050,13 @@ const $helper = {
 		
 		$helper.methods(extend, node, fragments.newControl(), '__ks_cons(args)', reflect.constructors, $continuous.methodCall^^(node, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
 	} // }}}
+	instanceMethod(node, fragments, reflect, name) { // {{{
+		let extend = false
+		if node._data.extends? {
+		}
+		
+		$helper.methods(extend, node, fragments.newControl(), name + '()', reflect.instanceMethods[name], $continuous.methodCall^^(node, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true)
+	} // }}}
 	methods(extend, node, fragments, header, methods, call, argName, refName, returns) { // {{{
 		fragments.code(header).step()
 		
@@ -1914,7 +2070,7 @@ const $helper = {
 					.newControl()
 					.code('if(' + argName + '.length !== 0)')
 					.step()
-					.code('throw new Error("Wrong number of arguments")')
+					.line('throw new Error("Wrong number of arguments")')
 					.done()
 			}
 		}
@@ -1933,6 +2089,8 @@ const $helper = {
 					call(ctrl, method, 0)
 					
 					if returns {
+						ctrl.done()
+						
 						if extend {
 							extend(fragments, ctrl)
 						}
@@ -1947,9 +2105,9 @@ const $helper = {
 						else {
 							ctrl.step().code('else').step().line('throw new Error("Wrong number of arguments")')
 						}
+						
+						ctrl.done()
 					}
-					
-					ctrl.done()
 				}
 				else if method.max < Infinity {
 					let ctrl = fragments.newControl()
@@ -1959,13 +2117,13 @@ const $helper = {
 					call(ctrl, method, 0)
 					
 					if returns {
+						ctrl.done()
+						
 						fragments.line('throw new Error("Wrong number of arguments")')
 					}
 					else {
-						ctrl.step().code('else').step().line('throw new Error("Wrong number of arguments")')
+						ctrl.step().code('else').step().line('throw new Error("Wrong number of arguments")').done()
 					}
-					
-					ctrl.done()
 				}
 				else {
 					call(fragments, method, 0)
@@ -3974,7 +4132,6 @@ class Module {
 				}
 			}
 		}
-		console.log(this._options)
 		
 		this._body = new ModuleBlock(data, this)
 		
@@ -4568,11 +4725,11 @@ class ClassDeclaration extends Statement {
 		}
 	} // }}}
 	fuse() { // {{{
-		for variable of this._instanceVariables when variable.defaultValue? {
+		for name, variable of this._instanceVariables when variable.defaultValue? {
 			variable.defaultValue.analyse()
 		}
 		
-		for variable of this._classVariables when variable.defaultValue? {
+		for name, variable of this._classVariables when variable.defaultValue? {
 			variable.defaultValue.analyse()
 		}
 		
@@ -4580,23 +4737,23 @@ class ClassDeclaration extends Statement {
 			method.statement.analyse()
 		}
 		
-		for methods of this._instanceMethods {
+		for name, methods of this._instanceMethods {
 			for method in methods {
 				method.statement.analyse()
 			}
 		}
 		
-		for methods of this._classMethods {
+		for name, methods of this._classMethods {
 			for method in methods {
 				method.statement.analyse()
 			}
 		}
 		
-		for variable of this._instanceVariables when variable.defaultValue? {
+		for name, variable of this._instanceVariables when variable.defaultValue? {
 			variable.statement.fuse()
 		}
 		
-		for variable of this._classVariables when variable.defaultValue? {
+		for name, variable of this._classVariables when variable.defaultValue? {
 			variable.statement.fuse()
 		}
 		
@@ -4604,13 +4761,13 @@ class ClassDeclaration extends Statement {
 			method.statement.fuse()
 		}
 		
-		for methods of this._instanceMethods {
+		for name, methods of this._instanceMethods {
 			for method in methods {
 				method.statement.fuse()
 			}
 		}
 		
-		for methods of this._classMethods {
+		for name, methods of this._classMethods {
 			for method in methods {
 				method.statement.fuse()
 			}
@@ -4618,13 +4775,73 @@ class ClassDeclaration extends Statement {
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		if this._continuous {
-			//$continuous.class(this, fragments)
+			$continuous.class(this, fragments)
 		}
 		else {
 			$final.class(this, fragments)
 			
 			fragments.line('var ' + this._variable.final.name + ' = {}')
 		}
+	} // }}}
+}
+
+class DoUntilStatement extends Statement {
+	private {
+		_body
+		_condition
+	}
+	DoUntilStatement(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._condition = $compile.expression(this._data.condition, this)
+		this._body = $compile.expression(this._data.body, this)
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._body.fuse()
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		fragments
+			.newControl()
+			.code('do')
+			.step()
+			.compile(this._body)
+			.step()
+			.code('while(!(')
+			.compileBoolean(this._condition)
+			.code('))')
+			.done()
+	} // }}}
+}
+
+class DoWhileStatement extends Statement {
+	private {
+		_body
+		_condition
+	}
+	DoWhileStatement(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._body = $compile.expression(this._data.body, this)
+		this._condition = $compile.expression(this._data.condition, this)
+	} // }}}
+	fuse() { // {{{
+		this._body.fuse()
+		this._condition.fuse()
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		fragments
+			.newControl()
+			.code('do')
+			.step()
+			.compile(this._body)
+			.step()
+			.code('while(')
+			.compileBoolean(this._condition)
+			.code(')')
+			.done()
 	} // }}}
 }
 
@@ -6132,7 +6349,7 @@ class MethodDeclaration extends Statement {
 	analyse() { // {{{
 		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
 		
-		if this._data._body? {
+		if this._data.body? {
 			this._statements = [$compile.statement(statement, this) for statement in $statements(this._data.body)]
 		}
 		else {
@@ -8116,7 +8333,7 @@ class MemberExpression extends Expression {
 			}
 		}
 		else {
-			if this._object.isComputed() {
+			if this._object.isComputed() || this._object._data.kind == Kind::NumericExpression {
 				fragments.code('(').compile(this._object).code(')')
 			}
 			else {
@@ -8669,9 +8886,9 @@ const $compile = {
 	} // }}}
 	objectMemberName(data, parent) { // {{{
 		switch(data.kind) {
-			Kind::Identifier	=> return new IdentifierLiteral(data, parent, false)
-			Kind::Literal		=> return new StringLiteral(data, parent)
-								=> {
+			Kind::Identifier			=> return new IdentifierLiteral(data, parent, false)
+			Kind::Literal				=> return new StringLiteral(data, parent)
+			=> {
 				console.error(data)
 				throw new Error('Unknow member kind ' + data.kind)
 			}
@@ -8769,6 +8986,8 @@ const $expressions = {
 
 const $statements = {
 	`\(Kind::ClassDeclaration)`				: ClassDeclaration
+	`\(Kind::DoUntilStatement)`				: DoUntilStatement
+	`\(Kind::DoWhileStatement)`				: DoWhileStatement
 	`\(Kind::EnumDeclaration)`				: EnumDeclaration
 	`\(Kind::ExportDeclaration)`			: ExportDeclaration
 	`\(Kind::ExternDeclaration)`			: ExternDeclaration
