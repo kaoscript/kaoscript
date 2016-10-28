@@ -3728,7 +3728,7 @@ class Scope extends AbstractScope {
 		
 		this._tempNextIndex = parent._tempNextIndex
 	} // }}}
-	acquireTempName(node?, assignment = false) { // {{{
+	acquireTempName(statement: Statement?, assignment = false) { // {{{
 		if this._parent && (name ?= this._parent.acquireTempNameFromKid()) {
 			this._tempParentNames[name] = true
 			
@@ -3750,6 +3750,8 @@ class Scope extends AbstractScope {
 			let name = '__ks_' + this._tempNextIndex
 			
 			++this._tempNextIndex
+			
+			statement._variables.pushUniq(name) if statement?
 			
 			return name
 		}
@@ -3836,8 +3838,8 @@ class Scope extends AbstractScope {
 }
 
 class XScope extends AbstractScope {
-	acquireTempName(node?, assignment = false) { // {{{
-		return this._parent.acquireTempName(node, assignment)
+	acquireTempName(statement: Statement?, assignment = false) { // {{{
+		return this._parent.acquireTempName(statement, assignment)
 	} // }}}
 	getRenamedVariable(name) { // {{{
 		if this._renamedVariables[name] {
@@ -4680,9 +4682,9 @@ class ExpressionStatement extends Statement {
 	analyse() { // {{{
 		this._expression = $compile.expression(this._data, this)
 	} // }}}
-	assignment(data, allowAssignement = false) { // {{{
+	assignment(data, expression) { // {{{
 		if data.left.kind == Kind::Identifier && !this._scope.hasVariable(data.left.name) {
-			if !allowAssignement || this._variable.length {
+			if !expression.isAssignable() || this._variable.length {
 				this._variables.push(data.left.name)
 			}
 			else {
@@ -5549,80 +5551,122 @@ class Parameter extends AbstractNode {
 
 class IfStatement extends Statement {
 	private {
-		_condition
-		_else
-		_elseifs
-		_then
+		_items	= []
 	}
 	IfStatement(data, parent) { // {{{
-		super(data, parent, parent.newScope())
+		super(data, parent)
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
-		this._condition = $compile.expression(data.condition, this)
-		this._then = $compile.expression($block(data.then), this)
+		this._items.push(new IfClause(data, this))
 		
-		if data.elseifs? {
-			this._elseifs = [{
-				condition: $compile.expression(elseif.condition, this)
-				body: $compile.expression(elseif.body, this)
-			} for elseif in data.elseifs]
+		for elseif in data.elseifs {
+			this._items.push(new IfElseClause(elseif, this))
 		}
 		
-		this._else = $compile.expression($block(data.else.body), this) if data.else?
+		this._items.push(new ElseClause(data.else, this)) if data.else?
 	} // }}}
 	fuse() { // {{{
-		this._condition.fuse()
-		this._then.fuse()
-		
-		if this._elseifs? {
-			for elseif in this._elseifs {
-				elseif.condition.fuse()
-				elseif.body.fuse()
-			}
+		for item in this._items {
+			item.fuse()
 		}
-		
-		this._else.fuse() if this._else?
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		let ctrl = fragments.newControl()
 		
-		ctrl.code('if(')
-		
-		if this._condition.isAssignable() {
-			ctrl.code('(').compileBoolean(this._condition).code(')')
-		}
-		else {
-			ctrl.compileBoolean(this._condition)
-		}
-		
-		ctrl.code(')').step().compile(this._then)
-		
-		if this._elseifs? {
-			for elseif in this._elseifs {
-				ctrl.step().code('else if(')
-				
-				if elseif.condition.isAssignable() {
-					ctrl.code('(').compileBoolean(elseif.condition).code(')')
-				}
-				else {
-					ctrl.compileBoolean(elseif.condition)
-				}
-				
-				ctrl.code(')').step().compile(elseif.body)
-			}
-		}
-		
-		if this._else? {
-			ctrl
-				.step()
-				.code('else')
-				.step()
-				.compile(this._else)
+		for item, index in this._items {
+			ctrl.step() if index
+			
+			item.toFragments(ctrl)
 		}
 		
 		ctrl.done()
+	} // }}}
+}
+
+class IfClause extends AbstractNode {
+	private {
+		_condition
+		_body
+	}
+	IfClause(data, parent) { // {{{
+		super(data, parent, parent.newScope())
+		
+		this.analyse()
+	} // }}}
+	analyse() { // {{{
+		this._condition = $compile.expression(this._data.condition, this)
+		this._body = $compile.expression($block(this._data.then), this)
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._body.fuse()
+	} // }}}
+	toFragments(fragments) { // {{{
+		fragments.code('if(')
+		
+		if this._condition.isAssignable() {
+			fragments.code('(').compileBoolean(this._condition).code(')')
+		}
+		else {
+			fragments.compileBoolean(this._condition)
+		}
+		
+		fragments.code(')').step().compile(this._body)
+	} // }}}
+}
+
+class IfElseClause extends AbstractNode {
+	private {
+		_condition
+		_body
+	}
+	IfElseClause(data, parent) { // {{{
+		super(data, parent, parent.newScope())
+		
+		this.analyse()
+	} // }}}
+	analyse() { // {{{
+		this._condition = $compile.expression(this._data.condition, this)
+		this._body = $compile.expression($block(this._data.body), this)
+	} // }}}
+	fuse() { // {{{
+		this._condition.fuse()
+		this._body.fuse()
+	} // }}}
+	toFragments(fragments) { // {{{
+		fragments.code('else if(')
+		
+		if this._condition.isAssignable() {
+			fragments.code('(').compileBoolean(this._condition).code(')')
+		}
+		else {
+			fragments.compileBoolean(this._condition)
+		}
+		
+		fragments.code(')').step().compile(this._body)
+	} // }}}
+}
+
+class ElseClause extends AbstractNode {
+	private {
+		_condition
+		_body
+	}
+	ElseClause(data, parent) { // {{{
+		super(data, parent, parent.newScope())
+		
+		this.analyse()
+	} // }}}
+	analyse() { // {{{
+		this._body = $compile.expression($block(this._data.body), this)
+	} // }}}
+	fuse() { // {{{
+		this._body.fuse()
+	} // }}}
+	toFragments(fragments) { // {{{
+		fragments.code('else').step().compile(this._body)
 	} // }}}
 }
 
@@ -6224,28 +6268,31 @@ class TryStatement extends Statement {
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
+		let scope = this._scope
 		
 		this._body = $compile.expression(data.body, this)
 		if data.catchClauses? {
 			for clause in data.catchClauses {
+				if clause.binding? {
+					$variable.define(this._scope = new Scope(scope), clause.binding, VariableKind::Variable)
+				}
+				
 				this._catchClauses.push({
 					body: $compile.expression(clause.body, this)
 					type: $compile.expression(clause.type, this)
 				})
-				
-				if clause.binding? {
-					$variable.define(this._scope, clause.binding, VariableKind::Variable)
-				}
 			}
 		}
 		
 		if data.catchClause? {
-			this._catchClause = $compile.expression(data.catchClause.body, this)
-			
 			if this._data.catchClause.binding? {
-				$variable.define(this._scope, data.catchClause.binding, VariableKind::Variable)
+				$variable.define(this._scope = new Scope(scope), data.catchClause.binding, VariableKind::Variable)
 			}
+			
+			this._catchClause = $compile.expression(data.catchClause.body, this)
 		}
+		
+		this._scope = scope
 		
 		this._finalizer = $compile.expression(data.finalizer, this) if data.finalizer?
 	} // }}}
@@ -6569,12 +6616,6 @@ class WhileStatement extends Statement {
 
 // {{{ Expressions
 class Expression extends AbstractNode {
-	assignment(data) { // {{{
-		this._parent.assignment(data, this.isAssignable())
-	} // }}}
-	assignment(data, variable) { // {{{
-		this._parent.assignment(data, variable && this.isAssignable())
-	} // }}}
 	isAssignable() => false
 	isCallable() => false
 	isComplex() => true
@@ -6605,6 +6646,14 @@ class AssignmentOperatorExpression extends Expression {
 		
 		this._left = $compile.expression(data.left, this)
 		this._right = $compile.expression(data.right, this)
+	} // }}}
+	assignment(data) { // {{{
+		let expression = this
+		while !(expression._parent is Statement) {
+			expression = expression._parent
+		}
+		
+		expression._parent.assignment(data, expression)
 	} // }}}
 	fuse() { // {{{
 		this._right.fuse()
@@ -6729,8 +6778,28 @@ class AssignmentOperatorMultiplication extends AssignmentOperatorExpression {
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	isAssignable() => false
 	toFragments(fragments) { // {{{
+		fragments
+			.compileNullable(this._left)
+			.code(' ? undefined : ')
+			.compile(this._left)
+			.code($equals)
+			.compile(this._right)
 	} // }}}
-	toBooleanFragments(fragments) { // {{{
+	toStatementFragments(fragments) { // {{{
+		let ctrl = fragments.newControl()
+		
+		ctrl
+			.code('if(!')
+			.compileNullable(this._left)
+			.code(')')
+			.step()
+			.newLine()
+			.compile(this._left)
+			.code($equals)
+			.compile(this._right)
+			.done()
+		
+		ctrl.done()
 	} // }}}
 }
 
@@ -6746,6 +6815,7 @@ class BinaryOperatorExpression extends Expression {
 	private {
 		_left
 		_right
+		_tested = false
 	}
 	isComputed() => true
 	isNullable() => this._left.isNullable() || this._right.isNullable()
@@ -6757,10 +6827,40 @@ class BinaryOperatorExpression extends Expression {
 		this._left.fuse()
 		this._right.fuse()
 	} // }}}
+	toFragments(fragments) { // {{{
+		let test = this.isNullable() && !this._tested
+		if test {
+			fragments
+				.compileNullable(this)
+				.code(' ? ')
+		}
+		
+		this.toOperatorFragments(fragments)
+		
+		if test {
+			fragments.code(' : false')
+		}
+	} // }}}
+	toNullableFragments(fragments) { // {{{
+		if !this._tested {
+			if this._left.isNullable() {
+				fragments.compileNullable(this._left)
+				
+				if this._right.isNullable() {
+					fragments.code(' && ').compileNullable(this._right)
+				}
+			}
+			else {
+				fragments.compileNullable(this._right)
+			}
+			
+			this._tested = true
+		}
+	} // }}}
 }
 
 class BinaryOperatorAddition extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6771,7 +6871,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrapBoolean(this._left)
 			.code($space)
@@ -6782,7 +6882,7 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorBitwiseAnd extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6793,7 +6893,7 @@ class BinaryOperatorBitwiseAnd extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorBitwiseLeftShift extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6804,7 +6904,7 @@ class BinaryOperatorBitwiseLeftShift extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorBitwiseOr extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6815,7 +6915,7 @@ class BinaryOperatorBitwiseOr extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorBitwiseRightShift extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6826,7 +6926,7 @@ class BinaryOperatorBitwiseRightShift extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorBitwiseXor extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6837,7 +6937,7 @@ class BinaryOperatorBitwiseXor extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorDivision extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6848,7 +6948,7 @@ class BinaryOperatorDivision extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorEquality extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6859,7 +6959,7 @@ class BinaryOperatorEquality extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorGreaterThan extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6870,7 +6970,7 @@ class BinaryOperatorGreaterThan extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorGreaterThanOrEqual extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6881,7 +6981,7 @@ class BinaryOperatorGreaterThanOrEqual extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorInequality extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6892,7 +6992,7 @@ class BinaryOperatorInequality extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorLessThan extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6903,7 +7003,7 @@ class BinaryOperatorLessThan extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorLessThanOrEqual extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6914,7 +7014,7 @@ class BinaryOperatorLessThanOrEqual extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorModulo extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6925,7 +7025,7 @@ class BinaryOperatorModulo extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorMultiplication extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space)
@@ -6936,12 +7036,25 @@ class BinaryOperatorMultiplication extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	analyse() { // {{{
+		super.analyse()
+		
+		if this._data.left != Kind::Identifier {
+			this._left.analyseReusable()
+		}
 	} // }}}
+	toFragments(fragments) { // {{{
+		fragments
+			.compileNullable(this._left)
+			.code(' ? ')
+			.compile(this._left)
+			.code(' : ')
+			.compile(this._right)
+	} // }}}}
 }
 
 class BinaryOperatorOr extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrapBoolean(this._left)
 			.code($space)
@@ -6952,7 +7065,7 @@ class BinaryOperatorOr extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorSubtraction extends BinaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toOperatorFragments(fragments) { // {{{
 		fragments
 			.wrap(this._left)
 			.code($space, '-', this._data.operator, $space)
@@ -6960,13 +7073,32 @@ class BinaryOperatorSubtraction extends BinaryOperatorExpression {
 	} // }}}
 }
 
-class BinaryOperatorTypeCast extends BinaryOperatorExpression {
+class BinaryOperatorTypeCast extends Expression {
+	private {
+		_left
+	}
+	isComputed() => false
+	isNullable() => this._left.isNullable()
+	analyse() { // {{{
+		this._left = $compile.expression(this._data.left, this)
+	} // }}}
+	fuse() { // {{{
+		this._left.fuse()
+	} // }}}
 	toFragments(fragments) { // {{{
+		fragments.compile(this._left)
 	} // }}}
 }
 
-class BinaryOperatorTypeCheck extends BinaryOperatorExpression {
+class BinaryOperatorTypeCheck extends Expression {
+	isComputed() => false
+	isNullable() => false
+	analyse() { // {{{
+	} // }}}
+	fuse() { // {{{
+	} // }}}
 	toFragments(fragments) { // {{{
+		$type.check(this, fragments, this._data.left.name, this._data.right)
 	} // }}}
 }
 // }}}
@@ -7315,9 +7447,13 @@ class CallExpression extends Expression {
 			
 			this._caller = $caller(this._data.callee, this)
 		}
+		
+		if this._data.nullable && (this._callee.isNullable() || this._callee.isCallable()) {
+			this._callee.analyseReusable()
+		}
 	} // }}}
 	analyseReusable() { // {{{
-		this._reuseName = this.statement().acquireTempName()
+		this._reuseName ??= this._scope.acquireTempName(this.statement())
 	} // }}}
 	fuse() { // {{{
 		this._callee.fuse()
@@ -7328,7 +7464,7 @@ class CallExpression extends Expression {
 			argument.fuse()
 		}
 	} // }}}
-	isCallable() => !this._tempName?
+	isCallable() => !this._reusable
 	isNullable() { // {{{
 		return this._data.nullable || this._callee.isNullable()
 	} // }}}
@@ -7414,10 +7550,14 @@ class CallExpression extends Expression {
 					.compileReusable(this._callee)
 					.code(')')
 			}
+			else if this._callee.isNullable() {
+				fragments.compileNullable(this._callee)
+			}
 			else {
-				if this._callee.isNullable() {
-					fragments.compileNullable(this._callee)
-				}
+				fragments
+					.code($runtime.type(this) + '.isValue(')
+					.compileReusable(this)
+					.code(')')
 			}
 		}
 	} // }}}
@@ -7499,7 +7639,7 @@ class CallFinalExpression extends Expression {
 				}
 			}
 			else {
-				name = this.statement().acquireTempName()
+				name = this._scope.acquireTempName()
 				
 				if tof = $runtime.typeof(callee.variables[0].name, this) {
 					fragments.code(tof, '(', name, ' = ').compile(this._object).code(')')
@@ -7542,7 +7682,7 @@ class CallFinalExpression extends Expression {
 			
 			fragments.code(')')
 			
-			this.statement().releaseTempName(name) if name?
+			this._scope.releaseTempName(name) if name?
 		}
 		else {
 			console.error(this._callee)
@@ -7870,16 +8010,19 @@ class MemberExpression extends Expression {
 	analyse() { // {{{
 		this._object = $compile.expression(this._data.object, this)
 		this._property = $compile.expression(this._data.property, this)
+		
+		if (this._data.nullable && (this._object.isNullable() || this._object.isCallable())) || this._property.isNullable() {
+			this._object.analyseReusable()
+		}
+	} // }}}
+	analyseReusable() { // {{{
+		this._object.analyseReusable()
 	} // }}}
 	fuse() { // {{{
 		this._object.fuse()
 	} // }}}
-	isCallable() { // {{{
-		return this._object.isCallable()
-	} // }}}
-	isNullable() { // {{{
-		return this._data.nullable || this._object.isNullable() || (this._data.computed && this._property.isNullable())
-	} // }}}
+	isCallable() => this._object.isCallable()
+	isNullable() => this._data.nullable || this._object.isNullable() || (this._data.computed && this._property.isNullable())
 	toFragments(fragments) { // {{{
 		if this.isNullable() && !this._tested {
 			fragments.wrapNullable(this).code(' ? ').compile(this._object)
@@ -8043,6 +8186,74 @@ class ObjectMember extends Expression {
 				fragments.code(': ').compile(this._value)
 			}
 		}
+	} // }}}
+}
+
+class PolyadicOperatorExpression extends Expression {
+	private {
+		_operands
+	}
+	isComputed() => true
+	isNullable() {
+		for operand in this._operands {
+			return true if operand.isNullable()
+		}
+		
+		return false
+	}
+	analyse() { // {{{
+		this._operands = [$compile.expression(operand, this) for operand in this._data.operands]
+	} // }}}
+	fuse() { // {{{
+		for operand in this._operands {
+			operand.fuse()
+		}
+	} // }}}
+}
+
+class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
+	PolyadicOperatorNullCoalescing(data, parent) { // {{{
+		super(data, parent, new Scope(parent.scope()))
+	} // }}}
+	analyse() { // {{{
+		this._operands = []
+		
+		let l = this._data.operands.length - 1
+		let scope = this._scope
+		
+		let operand
+		for i from 0 to l {
+			if i == l {
+				this._scope = scope
+			}
+			else {
+				this._scope = new Scope(scope)
+			}
+			
+			this._operands.push(operand = $compile.expression(this._data.operands[i], this))
+			
+			if i != l && this._data.operands[i].kind != Kind::Identifier {
+				operand.analyseReusable()
+			}
+		}
+	} // }}}
+	toFragments(fragments) { // {{{
+		this.module().flag('Type')
+		
+		let l = this._operands.length - 1
+		
+		let operand
+		for i from 0 til l {
+			operand = this._operands[i]
+			
+			fragments
+				.compileNullable(operand)
+				.code(' ? ')
+				.compile(operand)
+				.code(' : ')
+		}
+		
+		fragments.compile(this._operands[l])
 	} // }}}
 }
 
@@ -8319,7 +8530,6 @@ class StringLiteral extends Literal { // {{{
 		super(data, $quote(data.value), parent)
 	} // }}}
 } // }}}
-
 // }}}
 
 const $compile = {
@@ -8346,6 +8556,15 @@ const $compile = {
 			else {
 				console.error(data)
 				throw new Error('Unknow binary operator ' + data.operator.kind)
+			}
+		}
+		else if data.kind == Kind::PolyadicOperator {
+			if clazz ?= $polyadicOperators[data.operator.kind] {
+				expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+			}
+			else {
+				console.error(data)
+				throw new Error('Unknow unary operator ' + data.operator.kind)
 			}
 		}
 		else if data.kind == Kind::UnaryExpression {
@@ -8493,6 +8712,22 @@ const $statements = {
 	`\(Kind::VariableDeclaration)`			: VariableDeclaration
 	`\(Kind::WhileStatement)`				: WhileStatement
 	`default`								: ExpressionStatement
+}
+
+const $polyadicOperators = {
+	/* `\(BinaryOperator::Addition)`			: PolyadicOperatorAddition
+	`\(BinaryOperator::And)`				: PolyadicOperatorAnd
+	`\(BinaryOperator::Division)`			: PolyadicOperatorDivision
+	`\(BinaryOperator::Equality)`			: PolyadicOperatorEquality
+	`\(BinaryOperator::GreaterThan)`		: PolyadicOperatorGreaterThan
+	`\(BinaryOperator::GreaterThanOrEqual)`	: PolyadicOperatorGreaterThanOrEqual
+	`\(BinaryOperator::LessThan)`			: PolyadicOperatorLessThan
+	`\(BinaryOperator::LessThanOrEqual)`	: PolyadicOperatorLessThanOrEqual
+	`\(BinaryOperator::Modulo)`				: PolyadicOperatorModulo
+	`\(BinaryOperator::Multiplication)`		: PolyadicOperatorMultiplication */
+	`\(BinaryOperator::NullCoalescing)`		: PolyadicOperatorNullCoalescing
+	/* `\(BinaryOperator::Or)`					: PolyadicOperatorOr
+	`\(BinaryOperator::Subtraction)`		: PolyadicOperatorSubtraction */
 }
 
 const $unaryOperators = {
