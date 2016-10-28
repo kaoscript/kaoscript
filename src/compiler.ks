@@ -355,10 +355,11 @@ class FragmentBuilder {
 		_blocks			= {}
 		_expressions	= {}
 		_fragments		= []
-		_indent			= 1
+		_indent
 		_lines			= {}
 		_objects		= {}
 	}
+	FragmentBuilder(@indent)
 	line(...args) { // {{{
 		let line = LineBuilder.create(this, this._indent)
 		
@@ -1135,9 +1136,71 @@ const $function = {
 			$function.parametersKS(node, fragments, fn)
 		}
 	} // }}}
+	parametersES5(node, fragments, fn) { // {{{
+		let data = node._data
+		let signature = $function.signature(data, node.scope())
+		
+		for parameter, i in data.parameters {
+			if signature.parameters[i].rest {
+				throw new Error(`Parameter can't be a rest parameter at line \(parameter.start.line)`)
+			}
+			else if parameter.defaultValue {
+				throw new Error(`Parameter can't have a default value at line \(parameter.start.line)`)
+			}
+			else if parameter.type && parameter.type.nullable {
+				throw new Error(`Parameter can't be nullable at line \(parameter.start.line)`)
+			}
+			else if !parameter.name {
+				throw new Error(`Parameter must be named at line \(parameter.start.line)`)
+			}
+			
+			fragments.code($comma) if i
+			
+			fragments.code(parameter.name.name, parameter.name)
+		}
+		
+		fn(fragments)
+	} // }}}
+	parametersES6(node, fragments, fn) { // {{{
+		let data = node._data
+		let signature = $function.signature(data, node.scope())
+		let rest = false
+		
+		for parameter, i in data.parameters {
+			if !parameter.name {
+				throw new Error(`Parameter must be named at line \(parameter.start.line)`)
+			}
+			
+			fragments.code($comma) if i
+			
+			if signature.parameters[i].rest {
+				fragments.code('...').code(parameter.name.name, parameter.name)
+				
+				rest = true
+			}
+			else if rest {
+				throw new Error(`Parameter must be before the rest parameter at line \(parameter.start.line)`)
+			}
+			else {
+				fragments.code(parameter.name.name, parameter.name)
+			}
+			
+			if parameter.type {
+				if parameter.type.nullable && !parameter.defaultValue {
+					fragments.code(' = null')
+				}
+			}
+			
+			if parameter.defaultValue {
+				fragments.code(' = ').compile(node._parameters[i]._defaultValue)
+			}
+		}
+		
+		fn(fragments)
+	} // }}}
 	parametersKS(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = $function.signature(node._data, node.scope())
+		let signature = $function.signature(data, node.scope())
 		//console.log(signature)
 		
 		let parameter, ctrl
@@ -3899,6 +3962,20 @@ class Module {
 	Module(@data, @compiler, @directory) { // {{{
 		this._options = $applyAttributes(data, this._compiler._options.config)
 		
+		for attr in data.attributes {
+			if attr.declaration.kind == Kind::Identifier &&	attr.declaration.name == 'bin' {
+				this._binary = true
+			}
+			else if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cfg' {
+				for arg in attr.declaration.arguments {
+					if arg.kind == Kind::AttributeOperator {
+						this._options[arg.name.name] = arg.value.value
+					}
+				}
+			}
+		}
+		console.log(this._options)
+		
 		this._body = new ModuleBlock(data, this)
 		
 		if this._compiler._options.output {
@@ -4018,13 +4095,17 @@ class Module {
 		this._dynamicRequirements.push(requirement)
 	} // }}}
 	toFragments() { // {{{
-		this._body.toFragments(builder = new FragmentBuilder())
-		
 		if this._binary {
+			let builder = new FragmentBuilder(0)
+			
+			this._body.toFragments(builder)
+			
 			return builder.toArray()
 		}
 		else {
-			let body = builder.toArray()
+			let builder = new FragmentBuilder(1)
+			
+			this._body.toFragments(builder)
 			
 			let fragments: Array = []
 			
@@ -4214,7 +4295,7 @@ class Module {
 				fragments.push($code(');\n'))
 			}
 			
-			fragments.append(body)
+			fragments.append(builder.toArray())
 			
 			if this._exportSource.length {
 				fragments.push($code('\treturn {'))
@@ -4234,7 +4315,7 @@ class Module {
 				fragments.push($code('\n\t};\n'))
 			}
 			
-			fragments.push($code('}'))
+			fragments.push($code('}\n'))
 			
 			return fragments
 		}
@@ -8802,7 +8883,12 @@ export class Compiler {
 			source += fragment.code
 		}
 		
-		return source
+		if source.length {
+			return source.substr(0, source.length - 1)
+		}
+		else {
+			return source
+		}
 	} // }}}
 	toSourceMap() { // {{{
 		return this._module.toSourceMap()
