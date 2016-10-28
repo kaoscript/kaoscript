@@ -3877,12 +3877,14 @@ class AbstractNode {
 		_data
 		_options
 		_parent = null
+		_reference
 		_scope = null
 	}
 	AbstractNode(@data, @parent, @scope = parent.scope()) { // {{{
 		this._options = $applyAttributes(data, parent._options)
 	} // }}}
-	greatScope() => this._parent?.scope()
+	greatParent() => this._parent?._parent
+	greatScope() => this._parent?._scope
 	module() => this._parent.module()
 	newScope() { // {{{
 		if this._options.variables == 'es6' {
@@ -3893,6 +3895,16 @@ class AbstractNode {
 		}
 	} // }}}
 	parent() => this._parent
+	reference() { // {{{
+		if this._parent? && this._parent.reference()? {
+			return this._parent.reference() + this._reference
+		}
+		else {
+			return this._reference
+		}
+	}
+	reference(@reference) { // {{{
+	} // }}}
 	scope() => this._scope
 	statement() => this._parent?.statement()
 }
@@ -4562,8 +4574,12 @@ class ModuleBlock extends AbstractNode {
 // {{{ Statements
 class Statement extends AbstractNode {
 	private {
+		_afterwards	: Array	= []
 		_variables	: Array	= []
 	}
+	afterward(node) { // {{{
+		this._afterwards.push(node)
+	} // }}}
 	assignment(data, allowAssignement = false) { // {{{
 		if data.left.kind == Kind::Identifier && !this._scope.hasVariable(data.left.name) {
 			this._variables.push(data.left.name)
@@ -4587,6 +4603,10 @@ class Statement extends AbstractNode {
 		}
 		
 		this.toStatementFragments(fragments)
+		
+		for afterward in this._afterwards {
+			afterward.toFragments(fragments)
+		}
 	} // }}}
 }
 
@@ -4750,11 +4770,11 @@ class ClassDeclaration extends Statement {
 		}
 		
 		for name, variable of this._instanceVariables when variable.defaultValue? {
-			variable.statement.fuse()
+			variable.defaultValue.fuse()
 		}
 		
 		for name, variable of this._classVariables when variable.defaultValue? {
-			variable.statement.fuse()
+			variable.defaultValue.fuse()
 		}
 		
 		for method in this._constructors {
@@ -5836,14 +5856,6 @@ class Parameter extends AbstractNode {
 		if this._defaultValue != null {
 			this._defaultValue.fuse()
 		}
-		
-		/* if this._data.type? && this._data.type.kind == Kind::TypeReference {
-			let type = $type.unalias(this._data.type, this._parent)
-			
-			if type.typeParameters? {
-				console.log(type)
-			}
-		} */
 	} // }}}
 }
 
@@ -6861,6 +6873,10 @@ class VariableDeclarator extends AbstractNode {
 		this._name = $compile.expression(data.name, this)
 		
 		if data.init? {
+			if data.name.kind == Kind::Identifier {
+				this.reference(data.name.name)
+			}
+			
 			this._init = $compile.expression(data.init, this)
 		}
 	} // }}}
@@ -8427,19 +8443,34 @@ class MemberExpression extends Expression {
 
 class ObjectExpression extends Expression {
 	private {
-		_properties
+		_properties = []
+		_templates = []
 	}
 	ObjectExpression(data, parent) { // {{{
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		this._properties = [$compile.expression(property, this) for property in this._data.properties]
+		for property in this._data.properties {
+			if property.name.kind == Kind::Identifier || property.name.kind == Kind::Literal {
+				this._properties.push(property = new ObjectMember(property, this))
+			}
+			else {
+				this._templates.push(property = new ObjectTemplateMember(property, this))
+			}
+			
+			property.analyse()
+		}
 	} // }}}
 	fuse() { // {{{
 		for property in this._properties {
 			property.fuse()
 		}
+		
+		for property in this._templates {
+			property.fuse()
+		}
 	} // }}}
+	reference() => this._parent.reference()
 	toFragments(fragments) { // {{{
 		if this._properties.length {
 			let object = fragments.newObject()
@@ -8465,25 +8496,64 @@ class ObjectMember extends Expression {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		this._name = $compile.objectMemberName(this._data.name, this)
+		if this._data.name.kind == Kind::Identifier	{
+			this._name = new IdentifierLiteral(this._data.name, this, false)
+			
+			this.reference('.' + this._data.name.name)
+		}
+		else {
+			this._name = new StringLiteral(this._data.name, this)
+			
+			this.reference('[' + $quote(this._data.name.value) + ']')
+		}
+		
+		this._name.analyse()
+		
 		this._value = $compile.expression(this._data.value, this)
 	} // }}}
 	fuse() { // {{{
 		this._value.fuse()
 	} // }}}
 	toFragments(fragments) { // {{{
-		let data = this._data
+		fragments.compile(this._name)
 		
-		if data.name.kind == Kind::Identifier || data.name.kind == Kind::Literal {
-			fragments.compile(this._name)
-			
-			if data.value.kind == Kind::FunctionExpression {
-				this._value.toShorthandFragments(fragments)
-			}
-			else {
-				fragments.code(': ').compile(this._value)
-			}
+		if this._data.value.kind == Kind::FunctionExpression {
+			this._value.toShorthandFragments(fragments)
 		}
+		else {
+			fragments.code(': ').compile(this._value)
+		}
+	} // }}}
+}
+
+class ObjectTemplateMember extends Expression {
+	private {
+		_name
+		_value
+	}
+	ObjectTemplateMember(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._name = new TemplateExpression(this._data.name, this)
+		
+		this._name.analyse()
+		
+		this._value = $compile.expression(this._data.value, this)
+		
+		this.statement().afterward(this)
+	} // }}}
+	fuse() { // {{{
+		this._value.fuse()
+	} // }}}
+	toFragments(fragments) { // {{{
+		fragments
+			.newLine()
+			.code(this.parent().reference(), '[')
+			.compile(this._name)
+			.code('] = ')
+			.compile(this._value)
+			.done()
 	} // }}}
 }
 
