@@ -93,10 +93,8 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
+		classVariables: {},
+		instanceMethods: {},
 		classMethods: {
 			makeCircle: [
 				{

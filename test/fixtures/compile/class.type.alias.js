@@ -47,8 +47,7 @@ module.exports = function() {
 				access: 3,
 				min: 0,
 				max: 0,
-				parameters: [
-				]
+				parameters: []
 			}
 		],
 		instanceVariables: {
@@ -57,16 +56,14 @@ module.exports = function() {
 				type: "Number"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			height: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -82,7 +79,6 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 }

@@ -36,14 +36,10 @@ module.exports = function() {
 				]
 			}
 		],
-		instanceVariables: {
-		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
-		classMethods: {
-		}
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
 	};
 	class Bar {
 		constructor() {
@@ -64,19 +60,15 @@ module.exports = function() {
 	}
 	Bar.__ks_reflect = {
 		inits: 1,
-		constructors: [
-		],
+		constructors: [],
 		instanceVariables: {
 			_foo: {
 				access: 1,
 				type: Foo
 			}
 		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
-		classMethods: {
-		}
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
 	};
 }

@@ -68,8 +68,7 @@ module.exports = function() {
 				access: 3,
 				min: 0,
 				max: 0,
-				parameters: [
-				]
+				parameters: []
 			},
 			{
 				access: 3,
@@ -90,8 +89,7 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			greet: [
 				{
@@ -120,8 +118,7 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	let hello = new Greetings("Hello world!");
 	console.log(hello.greet("miss White"));

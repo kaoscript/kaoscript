@@ -24,8 +24,7 @@ module.exports = function() {
 				access: 3,
 				min: 0,
 				max: 0,
-				parameters: [
-				]
+				parameters: []
 			}
 		],
 		instanceVariables: {
@@ -34,11 +33,8 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
-		classMethods: {
-		}
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
 	};
 }

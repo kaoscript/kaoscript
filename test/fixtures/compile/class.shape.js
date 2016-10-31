@@ -88,16 +88,14 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			color: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -125,8 +123,7 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	let s = new Shape("#777");
 	console.log(s.color());

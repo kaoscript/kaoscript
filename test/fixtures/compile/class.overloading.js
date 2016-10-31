@@ -239,12 +239,9 @@ module.exports = function() {
 	}
 	Greetings.__ks_reflect = {
 		inits: 0,
-		constructors: [
-		],
-		instanceVariables: {
-		},
-		classVariables: {
-		},
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
 		instanceMethods: {
 			foo: [
 				{
@@ -265,8 +262,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -286,8 +282,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -307,8 +302,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -433,8 +427,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -450,7 +443,6 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 }

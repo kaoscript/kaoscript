@@ -45,8 +45,7 @@ module.exports = function() {
 				access: 3,
 				min: 0,
 				max: 0,
-				parameters: [
-				]
+				parameters: []
 			},
 			{
 				access: 3,
@@ -67,8 +66,7 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			greet: [
 				{
@@ -85,8 +83,7 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	var __ks_Greetings = {};
 	let hello = new Greetings("Hello world!");

@@ -78,8 +78,7 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	console.log(Foo.bar);
 	let foo = new Foo("xyz");

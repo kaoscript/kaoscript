@@ -96,18 +96,15 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
+		classVariables: {},
+		instanceMethods: {},
 		classMethods: {
 			registerCircle: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			]
 		}

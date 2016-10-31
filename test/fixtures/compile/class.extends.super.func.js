@@ -52,21 +52,18 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			draw: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	class Rectangle extends Shape {
 		__ks_init() {
@@ -87,25 +84,20 @@ module.exports = function() {
 	}
 	Rectangle.__ks_reflect = {
 		inits: 0,
-		constructors: [
-		],
-		instanceVariables: {
-		},
-		classVariables: {
-		},
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
 		instanceMethods: {
 			draw: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	let r = new Rectangle("black");
 	console.log(r.draw());
