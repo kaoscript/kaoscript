@@ -4957,7 +4957,7 @@ class Statement extends AbstractNode {
 		this.toStatementFragments(fragments)
 		
 		for afterward in this._afterwards {
-			afterward.toFragments(fragments)
+			afterward.toAfterwardFragments(fragments)
 		}
 	} // }}}
 }
@@ -5380,6 +5380,7 @@ class DoWhileStatement extends Statement {
 class EnumDeclaration extends Statement {
 	private {
 		_members = []
+		_new
 		_variable
 	}
 	EnumDeclaration(data, parent) { // {{{
@@ -5388,6 +5389,8 @@ class EnumDeclaration extends Statement {
 	analyse() { // {{{
 		this._variable = $variable.define(this._scope, this._data.name, VariableKind::Enum, this._data.type)
 		
+		this._new = this._variable.new
+		
 		for member in this._data.members {
 			this._members.push(new EnumMember(member, this))
 		}
@@ -5395,7 +5398,7 @@ class EnumDeclaration extends Statement {
 	fuse() { // {{{
 	} // }}}
 	toStatementFragments(fragments) { // {{{
-		if this._variable.new {
+		if this._new {
 			let line = fragments.newLine().code($variable.scope(this), this._variable.name.name, $equals)
 			let object = line.newObject()
 			
@@ -5425,7 +5428,7 @@ class EnumMember extends AbstractNode {
 	toFragments(fragments) { // {{{
 		let variable = this._parent._variable
 		
-		if variable.new {
+		if this._parent._new {
 			fragments.code(this._data.name.name, ': ', $variable.value(variable, this._data))
 		}
 		else {
@@ -5528,7 +5531,27 @@ class ExpressionStatement extends Statement {
 		this._expression.fuse()
 	} // }}}
 	toFragments(fragments) { // {{{
-		if this._expression.toStatementFragments? {
+		if this._expression.isAssignable() {
+			if this._variables.length {
+				fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
+			}
+			
+			let line = fragments.newLine()
+			
+			if this._variable.length {
+				line.code($variable.scope(this))
+			}
+			
+			if this._expression.toAssignmentFragments? {
+				this._expression.toAssignmentFragments(line)
+			}
+			else {
+				this._expression.toFragments(line)
+			}
+			
+			line.done()
+		}
+		else if this._expression.toStatementFragments? {
 			if this._variable.length {
 				this._variables.unshift(this._variable)
 			}
@@ -5551,6 +5574,10 @@ class ExpressionStatement extends Statement {
 			}
 			
 			line.compile(this._expression).done()
+		}
+		
+		for afterward in this._afterwards {
+			afterward.toAfterwardFragments(fragments)
 		}
 	} // }}}
 }
@@ -7643,6 +7670,7 @@ class AssignmentOperatorExpression extends Expression {
 		expression._parent.assignment(data, expression)
 	} // }}}
 	fuse() { // {{{
+		this._left.fuse()
 		this._right.fuse()
 	} // }}}
 	toNullableFragments(fragments) { // {{{
@@ -7689,6 +7717,16 @@ class AssignmentOperatorBitwiseXor extends AssignmentOperatorExpression {
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	toFragments(fragments) { // {{{
 		fragments.compile(this._left).code($equals).compile(this._right)
+	} // }}}
+	toAssignmentFragments(fragments) { // {{{
+		if this._left.toAssignmentFragments? {
+			this._left.toAssignmentFragments(fragments)
+			
+			fragments.code($equals).compile(this._right)
+		}
+		else {
+			fragments.compile(this._left).code($equals).compile(this._right)
+		}
 	} // }}}
 	toBooleanFragments(fragments) { // {{{
 		fragments.compile(this._left).code($equals).wrap(this._right)
@@ -8092,6 +8130,91 @@ class BinaryOperatorTypeCheck extends Expression {
 }
 // }}}
 
+class ArrayBinding extends Expression {
+	private {
+		_elements			= []
+		_existing			= {}
+		_existingCount		= 0
+		_nonexisting		= {}
+		_nonexistingCount	= 0
+		_variables			= {}
+	}
+	ArrayBinding(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		for element in this._data.elements {
+			if element.kind == Kind::BindingElement && !element.name.computed {
+				if this._scope.hasVariable(element.name.name) {
+					this._existing[element.name.name] = true
+					++this._existingCount
+				}
+				else {
+					this._nonexisting[element.name.name] = true
+					++this._nonexistingCount
+				}
+			}
+			
+			this._elements.push($compile.expression(element, this))
+		}
+	} // }}}
+	fuse() { // {{{
+		for element in this._elements {
+			element.fuse()
+		}
+	} // }}}
+	toFragments(fragments) { // {{{
+		if this._existingCount && this._nonexistingCount {
+			fragments.code('[')
+			
+			let name
+			for element, i in this._data.elements {
+				fragments.code(', ') if i
+				
+				if element.kind == Kind::BindingElement && !element.name.computed && this._existing[element.name.name] {
+					name = this._scope.acquireTempName()
+					
+					this._elements[i].toFragments(fragments, Kind::ArrayBinding, name)
+					
+					this._variables[name] = element.name.name
+				}
+				else {
+					fragments.compile(this._elements[i])
+				}
+			}
+			
+			fragments.code(']')
+			
+			this.statement().afterward(this)
+		}
+		else {
+			fragments.code('[')
+			
+			for i from 0 til this._elements.length {
+				fragments.code(', ') if i
+				
+				fragments.compile(this._elements[i])
+			}
+			
+			fragments.code(']')
+		}
+	} // }}}
+	toAfterwardFragments(fragments) { // {{{
+		for name, variable of this._variables {
+			fragments.line(variable, ' = ', name)
+			
+			this._scope.releaseTempName(name)
+		}
+	} // }}}
+	toAssignmentFragments(fragments) { // {{{
+		if this._nonexistingCount {
+			fragments.code('var ')
+		}
+		
+		this.toFragments(fragments)
+	} // }}}
+}
+
 class ArrayComprehensionForIn extends Expression {
 	ArrayComprehensionForIn(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
@@ -8372,6 +8495,79 @@ class ArrayRange extends Expression {
 	} // }}}
 }
 
+class BindingElement extends Expression {
+	private {
+		_alias
+		_defaultValue
+		_name
+	}
+	BindingElement(data, parent) { // {{{
+		super(data, parent, new Scope(parent.scope()))
+	} // }}}
+	analyse() { // {{{
+		$variable.define(this.statement().scope(), this._data.name, VariableKind::Variable)
+		
+		if this._data.alias? {
+			$variable.define(this._scope, this._data.alias, VariableKind::Variable)
+			
+			this._alias = $compile.expression(this._data.alias, this)
+		}
+		
+		this._name = $compile.expression(this._data.name, this)
+		this._defaultValue = $compile.expression(this._data.defaultValue, this) if this._data.defaultValue?
+	} // }}}
+	fuse() { // {{{
+		this._alias.fuse() if this._alias?
+		this._name.fuse()
+		this._defaultValue.fuse() if this._defaultValue?
+	} // }}}
+	toFragments(fragments) { // {{{
+		if this._data.spread {
+			fragments.code('...')
+		}
+		
+		if this._alias? {
+			if this._data.alias.computed {
+				fragments.code('[').compile(this._alias).code(']: ')
+			}
+			else {
+				fragments.compile(this._alias).code(': ')
+			}
+		}
+		
+		fragments.compile(this._name)
+		
+		if this._defaultValue? {
+			fragments.code(' = ').compile(this._defaultValue)
+		}
+	} // }}}
+	toFragments(fragments, kind, name) { // {{{
+		if this._data.spread {
+			fragments.code('...')
+		}
+		
+		if this._alias? {
+			if this._data.alias.computed {
+				fragments.code('[').compile(this._alias).code(']: ')
+			}
+			else {
+				fragments.compile(this._alias).code(': ')
+			}
+		}
+		
+		if kind == Kind::ArrayBinding {
+			fragments.code(name)
+		}
+		else {
+			fragments.compile(this._name).code(': ', name)
+		}
+		
+		if this._defaultValue? {
+			fragments.code(' = ').compile(this._defaultValue)
+		}
+	} // }}}
+}
+
 class BlockExpression extends Expression {
 	private {
 		_body = []
@@ -8616,9 +8812,9 @@ class CallFinalExpression extends Expression {
 		return this._data.nullable || this._object.isNullable()
 	} // }}}
 	toFragments(fragments) { // {{{
-		let path = this._callee.variable.accessPath? ? this._callee.variable.accessPath + this._callee.variable.final.name : this._callee.variable.final.name
-		
-		if this._callee.variable {
+		if this._callee.variable? {
+			let path = this._callee.variable.accessPath? ? this._callee.variable.accessPath + this._callee.variable.final.name : this._callee.variable.final.name
+			
 			if this._callee.instance {
 				if this._list {
 					fragments
@@ -9156,6 +9352,81 @@ class MemberExpression extends Expression {
 	} // }}}
 }
 
+class ObjectBinding extends Expression {
+	private {
+		_elements			= []
+		_exists				= false
+		_existing			= {}
+		_variables			= {}
+	}
+	ObjectBinding(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		for element in this._data.elements {
+			if !element.name.computed && element.name.name? && this._scope.hasVariable(element.name.name) {
+				this._exists = true
+				this._existing[element.name.name] = true
+			}
+			
+			this._elements.push($compile.expression(element, this))
+		}
+	} // }}}
+	fuse() { // {{{
+		for element in this._elements {
+			element.fuse()
+		}
+	} // }}}
+	toFragments(fragments) { // {{{
+		if this._exists {
+			fragments.code('{')
+			
+			let name
+			for element, i in this._data.elements {
+				fragments.code(', ') if i
+				
+				if this._existing[element.name.name] {
+					name = this._scope.acquireTempName()
+					
+					this._elements[i].toFragments(fragments, Kind::ObjectBinding, name)
+					
+					this._variables[name] = element.name.name
+				}
+				else {
+					this._elements[i].toFragments(fragments)
+				}
+			}
+			
+			fragments.code('}')
+			
+			this.statement().afterward(this)
+		}
+		else {
+			fragments.code('{')
+			
+			for i from 0 til this._elements.length {
+				fragments.code(', ') if i
+				
+				fragments.compile(this._elements[i])
+			}
+			
+			fragments.code('}')
+		}
+	} // }}}
+	toAfterwardFragments(fragments) { // {{{
+		for name, variable of this._variables {
+			fragments.line(variable, ' = ', name)
+			
+			this._scope.releaseTempName(name)
+		}
+	} // }}}
+	toAssignmentFragments(fragments) { // {{{
+		fragments.code('var ')
+		
+		this.toFragments(fragments)
+	} // }}}
+}
+
 class ObjectExpression extends Expression {
 	private {
 		_properties = []
@@ -9261,7 +9532,7 @@ class ObjectTemplateMember extends Expression {
 	fuse() { // {{{
 		this._value.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toAfterwardFragments(fragments) { // {{{
 		fragments
 			.newLine()
 			.code(this.parent().reference(), '[')
@@ -9269,6 +9540,21 @@ class ObjectTemplateMember extends Expression {
 			.code('] = ')
 			.compile(this._value)
 			.done()
+	} // }}}
+}
+
+class OmittedExpression extends Expression {
+	OmittedExpression(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+	} // }}}
+	fuse() { // {{{
+	} // }}}
+	toFragments(fragments) { // {{{
+		if this._data.spread {
+			fragments.code('...')
+		}
 	} // }}}
 }
 
@@ -9788,6 +10074,7 @@ const $binaryOperators = {
 }
 
 const $expressions = {
+	`\(Kind::ArrayBinding)`					: ArrayBinding
 	`\(Kind::ArrayComprehension)`			: func(data, parent) {
 		if data.loop.kind == Kind::ForInStatement {
 			return new ArrayComprehensionForIn(data, parent)
@@ -9805,6 +10092,7 @@ const $expressions = {
 	}
 	`\(Kind::ArrayExpression)`				: ArrayExpression
 	`\(Kind::ArrayRange)`					: ArrayRange
+	`\(Kind::BindingElement)`				: BindingElement
 	`\(Kind::Block)`						: BlockExpression
 	`\(Kind::CallExpression)`				: func(data, parent) {
 		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $final.callee(data.callee, parent)) {
@@ -9822,9 +10110,10 @@ const $expressions = {
 	`\(Kind::Literal)`						: StringLiteral
 	`\(Kind::MemberExpression)`				: MemberExpression
 	`\(Kind::NumericExpression)`			: NumberLiteral
+	`\(Kind::ObjectBinding)`				: ObjectBinding
 	`\(Kind::ObjectExpression)`				: ObjectExpression
 	`\(Kind::ObjectMember)`					: ObjectMember
-	`\(Kind::ObjectMember)`					: ObjectMember
+	`\(Kind::OmittedExpression)`			: OmittedExpression
 	`\(Kind::RegularExpression)`			: RegularExpression
 	`\(Kind::TemplateExpression)`			: TemplateExpression
 	`\(Kind::TernaryConditionalExpression)`	: TernaryConditionalExpression
