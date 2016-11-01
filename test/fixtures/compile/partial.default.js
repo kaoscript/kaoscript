@@ -51,12 +51,9 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
-		classMethods: {
-		}
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
 	};
 	Helper.newInstanceMethod({
 		class: Shape,

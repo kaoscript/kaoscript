@@ -75,7 +75,7 @@ module.exports = function() {
 			}
 			else {
 				for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
-					__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(Array.from(args[i])));
+					__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[i]));
 				}
 			}
 			return this;

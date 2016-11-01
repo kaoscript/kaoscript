@@ -21,11 +21,11 @@ impl Array {
 	} // }}}
 	appendUniq(...args) { // {{{
 		if args.length == 1 {
-			this.pushUniq.apply(this, args[0])
+			this.pushUniq(...args[0])
 		}
 		else {
 			for i from 0 til args.length {
-				this.pushUniq.apply(this, Array.from(args[i]))
+				this.pushUniq(...args[i])
 			}
 		}
 		return this

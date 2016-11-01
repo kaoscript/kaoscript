@@ -2565,9 +2565,14 @@ const $helper = {
 			return type.type
 		}
 		else if type.kind == HelperTypeKind::Unreferenced {
-			node.module().addReference(type.type, path + '.type = ' + type.type)
-			
-			return $quote('#' + type.type)
+			if path? {
+				node.module().addReference(type.type, path + '.type = ' + type.type)
+				
+				return $quote('#' + type.type)
+			}
+			else {
+				throw new Error(`Invalid type \(type.type)`)
+			}
 		}
 	} // }}}
 }
@@ -3412,7 +3417,8 @@ const $type = {
 					
 					if tof {
 						fragments
-							.code(tof + '(', name)
+							.code(tof + '(')
+							.compile(name)
 						
 						for typeParameter in type.typeParameters {
 							fragments.code($comma)
@@ -3424,7 +3430,9 @@ const $type = {
 					}
 					else {
 						fragments
-							.code($runtime.type(node), '.is(', name, ', ')
+							.code($runtime.type(node), '.is(')
+							.compile(name)
+							.code(', ')
 							.expression(type.typeName.name)
 						
 						for typeParameter in type.typeParameters {
@@ -3445,10 +3453,15 @@ const $type = {
 				
 				if tof {
 					fragments
-						.code(tof + '(', name, ')')
+						.code(tof + '(')
+						.compile(name)
+						.code(')')
 				}
 				else {
-					fragments.code($runtime.type(node), '.is(', name, ', ')
+					fragments
+						.code($runtime.type(node), '.is(')
+						.compile(name)
+						.code(', ')
 					
 					$type.compile(type, fragments)
 					
@@ -3757,8 +3770,8 @@ const $variable = {
 		return null
 	} // }}}
 	filterMember(variable, name, node) { // {{{
-		//console.log('variable.fromMember.var', variable)
-		//console.log('variable.fromMember.name', name)
+		//console.log('variable.filterMember.var', variable)
+		//console.log('variable.filterMember.name', name)
 		
 		if variable.kind == VariableKind::Class {
 			if variable.instanceMethods[name] {
@@ -3952,7 +3965,7 @@ const $variable = {
 				}
 			}
 			Kind::Identifier => {
-				return node.getVariable(data.name)
+				return node.scope().getVariable(data.name)
 			}
 			Kind::Literal => {
 				return {
@@ -4002,7 +4015,7 @@ const $variable = {
 								return $variable.filterType(variable, name, node)
 							}
 							else {
-								return node.getVariable('Function')
+								return node.scope().getVariable('Function')
 							}
 						}
 						else if variable.kind == VariableKind::Variable {
@@ -4063,10 +4076,8 @@ const $variable = {
 				}
 			}
 			Kind::TypeReference => {
-				//console.log('getVariable.ref.data', data)
 				if data.typeName {
-					//console.log('getVariable.ref.variable', node.getVariable($types[data.typeName.name] || data.typeName.name))
-					return node.getVariable($types[data.typeName.name] || data.typeName.name)
+					return node.scope().getVariable($types[data.typeName.name] || data.typeName.name)
 				}
 			}
 		}
@@ -4079,7 +4090,7 @@ const $variable = {
 		if data.typeName {
 			if data.typeName.kind == Kind::Identifier {
 				let name = $types[data.typeName.name] || data.typeName.name
-				let variable = node.getVariable(name)
+				let variable = node.scope().getVariable(name)
 				
 				return variable if variable
 				
@@ -5721,14 +5732,14 @@ class ForFromStatement extends Statement {
 			if this._til.isComplex() {
 				bound = this._scope.acquireTempName()
 				
-				ctrl.code(bound, $equals).compile(this._til)
+				ctrl.code($comma, bound, $equals).compile(this._til)
 			}
 		}
 		else {
 			if this._to.isComplex() {
 				bound = this._scope.acquireTempName()
 				
-				ctrl.code(bound, $equals).compile(this._to)
+				ctrl.code($comma, bound, $equals).compile(this._to)
 			}
 		}
 		
@@ -6513,6 +6524,11 @@ class ImplementDeclaration extends Statement {
 					
 					member.analyse()
 				}
+				Kind::MethodLinkDeclaration => {
+					this._members.push(member = new ImplementMethodLinkDeclaration(member, this, variable))
+					
+					member.analyse()
+				}
 				=> {
 					console.error(member)
 					throw new Error('Unknow kind ' + member.kind)
@@ -6546,19 +6562,23 @@ class ImplementFieldDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
+		this._type = $helper.analyseType($signature.type(this._data.type, this._scope), this)
+		
+		if this._type.kind == HelperTypeKind::Unreferenced {
+			throw new Error(`Invalid type \(this._type.type) at line \(this._data.start.line)`)
+		}
 	} // }}}
 	fuse() { // {{{
 	} // }}}
 	toFragments(fragments) { // {{{
-		let type = $signature.type(this._data.type, this._scope)
-		
-		fragments.line($runtime.helper(this), '.newField(' + $quote(this._data.name.name) + ', ' + $helper.type(type, this) + ')')
+		fragments.line($runtime.helper(this), '.newField(' + $quote(this._data.name.name) + ', ' + $helper.type(this._type, this) + ')')
 	} // }}}
 }
 
 class ImplementMethodDeclaration extends Statement {
 	private {
 		_instance	= true
+		_name
 		_parameters
 		_statements
 		_variable
@@ -6618,6 +6638,9 @@ class ImplementMethodDeclaration extends Statement {
 					variable.classMethods[data.name.name].push(method)
 				}
 			}
+			else if data.name.kind == Kind.TemplateExpression {
+				this._name = $compile.expression(data.name, this)
+			}
 		}
 		
 		$variable.define(this._scope, {
@@ -6655,7 +6678,7 @@ class ImplementMethodDeclaration extends Statement {
 				object.newLine().code('name: ' + $quote(data.name.name))
 			}
 			else if data.name.kind == Kind.TemplateExpression {
-				object.newLine().code('name: ' + data.name.name)
+				object.newLine().code('name: ').compile(this._name)
 			}
 			else {
 				console.error(data.name)
@@ -6690,6 +6713,8 @@ class ImplementMethodAliasDeclaration extends Statement {
 		_arguments
 		_instance	= true
 		_name
+		_parameters
+		_signature
 		_variable
 	}
 	ImplementMethodAliasDeclaration(data, parent, @variable) { // {{{
@@ -6705,7 +6730,7 @@ class ImplementMethodAliasDeclaration extends Statement {
 		}
 		else {
 			if data.name.kind == Kind::TemplateExpression {
-				this._name = $compile.objectMemberName(data.name, this)
+				this._name = $compile.expression(data.name, this)
 			}
 			
 			for i from 0 til data.modifiers.length while this._instance {
@@ -6735,6 +6760,10 @@ class ImplementMethodAliasDeclaration extends Statement {
 					variable.classMethods[data.name.name] = variable.classMethods[data.alias.name]
 				}
 			}
+			
+			this._signature = $method.signature(data, this)
+			
+			this._parameters = [$helper.analyseType(parameter.type, this) for parameter in this._signature.parameters]
 			
 			if data.arguments? {
 				this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
@@ -6780,18 +6809,138 @@ class ImplementMethodAliasDeclaration extends Statement {
 		if data.arguments? {
 			let argsLine = object.newLine().code('arguments: ')
 			let array = argsLine.newArray()
+			let line = array.newLine()
 			
 			for argument in this._arguments {
-				array.compile(argument)
+				line.compile(argument)
 			}
 			
+			line.done()
 			array.done()
 			argsLine.done()
 		}
 		
 		let signLine = object.newLine().code('signature: ')
 		
-		$helper.reflectMethod(this, signLine, $method.signature(data, this))
+		$helper.reflectMethod(this, signLine, this._signature, this._parameters)
+		
+		signLine.done()
+		
+		object.done()
+		
+		line.code(')').done()
+	} // }}}
+}
+
+class ImplementMethodLinkDeclaration extends Statement {
+	private {
+		_arguments
+		_functionName
+		_instance	= true
+		_name
+		_parameters
+		_signature
+		_variable
+	}
+	ImplementMethodLinkDeclaration(data, parent, @variable) { // {{{
+		super(data, parent, new Scope(parent.scope()))
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		let variable = this._variable
+		
+		if data.name.name == variable.name.name {
+			console.error(data)
+			throw new Error('Not Implemented')
+		}
+		else {
+			if data.name.kind == Kind::TemplateExpression {
+				this._name = $compile.expression(data.name, this)
+			}
+			
+			for i from 0 til data.modifiers.length while this._instance {
+				if data.modifiers[i].kind == MemberModifier::Static {
+					this._instance = false
+				}
+			}
+			
+			if variable.final {
+				if this._instance {
+					if variable.final.instanceMethods[data.name.name] != true {
+						variable.final.instanceMethods[data.name.name] = true
+					}
+				}
+				else {
+					if variable.final.classMethods[data.name.name] != true {
+						variable.final.classMethods[data.name.name] = true
+					}
+				}
+			}
+			
+			this._functionName = $compile.expression(data.alias, this)
+			
+			this._signature = $method.signature(data, this)
+			
+			this._parameters = [$helper.analyseType(parameter.type, this) for parameter in this._signature.parameters]
+			
+			if data.arguments? {
+				this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
+			}
+		}
+	} // }}}
+	fuse() { // {{{
+		if this._arguments? {
+			for argument in this._arguments {
+				argument.fuse()
+			}
+		}
+	} // }}}
+	toStatementFragments(fragments) { // {{{
+		let data = this._data
+		let variable = this._variable
+		
+		let line = fragments
+			.newLine()
+			.code($runtime.helper(this), '.', this._instance ? 'newInstanceMethod' : 'newClassMethod', '(')
+		
+		let object = line.newObject()
+		
+		object.line('class: ', variable.name.name)
+		
+		if data.name.kind == Kind::TemplateExpression {
+			object.newLine().code('name: ').compile(this._name).done()
+		}
+		else if data.name.kind == Kind::Identifier {
+			object.line('name: ', $quote(data.name.name))
+		}
+		else {
+			console.error(data.name)
+			throw new Error('Not Implemented')
+		}
+		
+		if variable.final {
+			object.line('final: ', variable.final.name)
+		}
+		
+		object.newLine().code('function: ').compile(this._functionName)
+		
+		if data.arguments? {
+			let argsLine = object.newLine().code('arguments: ')
+			let array = argsLine.newArray()
+			let line = array.newLine()
+			
+			for argument in this._arguments {
+				line.compile(argument)
+			}
+			
+			line.done()
+			array.done()
+			argsLine.done()
+		}
+		
+		let signLine = object.newLine().code('signature: ')
+		
+		$helper.reflectMethod(this, signLine, this._signature, this._parameters)
 		
 		signLine.done()
 		
@@ -7932,11 +8081,13 @@ class BinaryOperatorTypeCheck extends Expression {
 	isComputed() => false
 	isNullable() => false
 	analyse() { // {{{
+		this._left = $compile.expression(this._data.left, this)
 	} // }}}
 	fuse() { // {{{
+		this._left.fuse()
 	} // }}}
 	toFragments(fragments) { // {{{
-		$type.check(this, fragments, this._data.left.name, this._data.right)
+		$type.check(this, fragments, this._left, this._data.right)
 	} // }}}
 }
 // }}}
@@ -8430,10 +8581,11 @@ class CallExpression extends Expression {
 
 class CallFinalExpression extends Expression {
 	private {
-		_arguments
+		_arguments	= []
 		_callee
+		_list		= true
 		_object
-		_tested = false
+		_tested		= false
 	}
 	CallFinalExpression(data, parent, @callee) { // {{{
 		super(data, parent)
@@ -8441,7 +8593,16 @@ class CallFinalExpression extends Expression {
 	analyse() { // {{{
 		this._object = $compile.expression(this._data.callee.object, this)
 		
-		this._arguments = [$compile.expression(argument, this) for argument in this._data.arguments]
+		for argument in this._data.arguments {
+			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
+				this._arguments.push($compile.expression(argument.argument, this))
+				
+				this._list = false
+			}
+			else {
+				this._arguments.push($compile.expression(argument, this))
+			}
+		}
 	} // }}}
 	fuse() { // {{{
 		this._object.fuse()
@@ -8455,21 +8616,40 @@ class CallFinalExpression extends Expression {
 		return this._data.nullable || this._object.isNullable()
 	} // }}}
 	toFragments(fragments) { // {{{
+		let path = this._callee.variable.accessPath? ? this._callee.variable.accessPath + this._callee.variable.final.name : this._callee.variable.final.name
+		
 		if this._callee.variable {
 			if this._callee.instance {
-				fragments
-					.code((this._callee.variable.accessPath || ''), this._callee.variable.final.name, '._im_' + this._data.callee.property.name + '(')
-					.compile(this._object)
+				if this._list {
+					fragments
+						.code(path + '._im_' + this._data.callee.property.name + '(')
+						.compile(this._object)
+					
+					for i from 0 til this._arguments.length {
+						fragments.code(', ').compile(this._arguments[i])
+					}
+					
+					fragments.code(')')
+				}
+				else {
+					fragments
+						.code(`\(path)._im_\(this._data.callee.property.name).apply(\(path), [`)
+						.compile(this._object)
+						.code('].concat(')
+						.compile(this._arguments[0])
+						.code('))')
+				}
+			}
+			else {
+				fragments.code((this._callee.variable.accessPath ?? ''), this._callee.variable.final.name + '._cm_' + this._data.callee.property.name + '(')
 				
 				for i from 0 til this._arguments.length {
-					fragments.code(', ').compile(this._arguments[i])
+					fragments.code($comma) if i
+					
+					fragments.compile(this._arguments[i])
 				}
 				
 				fragments.code(')')
-			}
-			else {
-				console.error(this._callee)
-				throw new Error('Not Implemented')
 			}
 		}
 		else if this._callee.variables.length == 2 {
@@ -9561,16 +9741,6 @@ const $compile = {
 		
 		return expression
 	} // }}}
-	objectMemberName(data, parent) { // {{{
-		switch(data.kind) {
-			Kind::Identifier			=> return new IdentifierLiteral(data, parent, false)
-			Kind::Literal				=> return new StringLiteral(data, parent)
-			=> {
-				console.error(data)
-				throw new Error('Unknow member kind ' + data.kind)
-			}
-		}
-	} // }}}
 	statement(data, parent) { // {{{
 		let clazz = $statements[data.kind] ?? $statements.default
 		
@@ -9637,7 +9807,7 @@ const $expressions = {
 	`\(Kind::ArrayRange)`					: ArrayRange
 	`\(Kind::Block)`						: BlockExpression
 	`\(Kind::CallExpression)`				: func(data, parent) {
-		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $final.callee(data.callee, parent.scope())) {
+		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $final.callee(data.callee, parent)) {
 			return new CallFinalExpression(data, parent, callee)
 		}
 		else {

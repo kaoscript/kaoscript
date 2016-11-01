@@ -51,12 +51,9 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
-		classMethods: {
-		}
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
 	};
 	let name = "draw";
 	let shape = "rectangle";
@@ -73,7 +70,9 @@ module.exports = function() {
 		class: Shape,
 		name: name,
 		function: draw,
-		arguments: [shape],
+		arguments: [
+			shape
+		],
 		signature: {
 			access: 3,
 			min: 1,

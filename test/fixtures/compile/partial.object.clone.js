@@ -9,7 +9,7 @@ module.exports = function() {
 			if(object === undefined || object === null) {
 				throw new Error("Missing parameter 'object'");
 			}
-			if((Type.isFunction(object.constructor.clone)) && (object.constructor.clone !== this)) {
+			if(Type.isFunction(object.constructor.clone) && (object.constructor.clone !== this)) {
 				return object.constructor.clone(object);
 			}
 			if(Type.isFunction(object.constructor.prototype.clone)) {

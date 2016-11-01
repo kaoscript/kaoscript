@@ -64,16 +64,14 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			draw: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -89,8 +87,7 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	var __ks_Shape = {};
 	Helper.newInstanceMethod({
@@ -193,16 +190,14 @@ module.exports = function() {
 				type: Shape
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			draw: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -230,8 +225,7 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	let shape = new Proxy("yellow");
 	console.log(shape.draw("rectangle"));

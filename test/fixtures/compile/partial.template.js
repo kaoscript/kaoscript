@@ -51,12 +51,9 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
-		instanceMethods: {
-		},
-		classMethods: {
-		}
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
 	};
 	let name = "draw";
 	Helper.newInstanceMethod({

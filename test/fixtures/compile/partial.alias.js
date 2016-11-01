@@ -66,8 +66,7 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			draw: [
 				{
@@ -84,15 +83,16 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {
-		}
+		classMethods: {}
 	};
 	let shape = "rectangle";
 	Helper.newInstanceMethod({
 		class: Shape,
 		name: shape,
 		method: "draw",
-		arguments: [shape],
+		arguments: [
+			shape
+		],
 		signature: {
 			access: 3,
 			min: 1,

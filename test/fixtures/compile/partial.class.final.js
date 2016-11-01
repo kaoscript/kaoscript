@@ -64,16 +64,14 @@ module.exports = function() {
 				type: "String"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			draw: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			]
 		},
@@ -83,8 +81,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			]
 		}
@@ -101,8 +98,7 @@ module.exports = function() {
 			access: 3,
 			min: 0,
 			max: 0,
-			parameters: [
-			]
+			parameters: []
 		}
 	});
 	let shape = Shape.makeBlue();
