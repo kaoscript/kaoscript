@@ -19,14 +19,12 @@ module.exports = function() {
 			console.log(value);
 		}
 		if(Type.isValue(x.bar)) {
-			let __ks_0 = x.bar;
-			for(let key in __ks_0) {
-				let value = __ks_0[key];
+			for(let key in x.bar) {
+				let value = x.bar[key];
 				console.log(key, value);
 			}
-			__ks_0 = x.bar;
-			for(let key in __ks_0) {
-				let value = __ks_0[key];
+			for(let key in x.bar) {
+				let value = x.bar[key];
 				console.log(key, value);
 			}
 		}

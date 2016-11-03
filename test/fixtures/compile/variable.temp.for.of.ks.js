@@ -5,16 +5,14 @@ module.exports = function() {
 			throw new Error("Missing parameter 'x'");
 		}
 		if(Type.isValue(x.foo)) {
-			let __ks_0 = x.foo;
-			for(let key in __ks_0) {
-				let value = __ks_0[key];
+			for(let key in x.foo) {
+				let value = x.foo[key];
 				console.log(key, value);
 			}
 		}
 		if(Type.isValue(x.bar)) {
-			let __ks_0 = x.bar;
-			for(let key in __ks_0) {
-				let value = __ks_0[key];
+			for(let key in x.bar) {
+				let value = x.bar[key];
 				console.log(key, value);
 			}
 		}

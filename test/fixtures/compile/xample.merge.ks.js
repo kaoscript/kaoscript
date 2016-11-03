@@ -9,15 +9,13 @@ module.exports = function() {
 			let source;
 			let i = 0;
 			let l = args.length;
-			let __ks_0;
-			while((i < l) && !((Type.isValue(__ks_0 = args[i]) ? (source = __ks_0, true) : false) && (Type.isArray(source)))) {
+			while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isArray(source))) {
 				++i;
 			}
 			++i;
 			while(i < l) {
 				if(Type.isArray(args[i])) {
-					__ks_0 = args[i];
-					for(let value in __ks_0) {
+					for(let value in args[i]) {
 						source.pushUniq(value);
 					}
 				}

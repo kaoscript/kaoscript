@@ -51,8 +51,8 @@ module.exports = function(__ks_0, __ks___ks_0) {
 				}
 			}
 			else {
-				for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
-					item = args[__ks_0];
+				for(let __ks_1 = 0, __ks_2 = args.length, item; __ks_1 < __ks_2; ++__ks_1) {
+					item = args[__ks_1];
 					if(!__ks_Array._im_contains(this, item)) {
 						this.push(item);
 					}

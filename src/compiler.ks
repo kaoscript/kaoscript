@@ -4307,8 +4307,8 @@ class Scope extends AbstractScope {
 		_tempNameCount		= 0
 		_tempParentNames	= {}
 	}
-	Scope(data, parent) { // {{{
-		super(data, parent)
+	Scope(parent) { // {{{
+		super(parent)
 		
 		this._tempNextIndex = parent._tempNextIndex
 	} // }}}
@@ -5741,13 +5741,19 @@ class ForFromStatement extends Statement {
 		
 		if data.til {
 			this._til = $compile.expression(data.til, this)
+			
+			this._boundName = this._scope.acquireTempName() if this._til.isComposite()
 		}
 		else {
 			this._to = $compile.expression(data.to, this)
+			
+			this._boundName = this._scope.acquireTempName() if this._to.isComposite()
 		}
 		
 		if data.by {
 			this._by = $compile.expression(data.by, this)
+			
+			this._byName = this._scope.acquireTempName() if this._by.isComposite()
 		}
 		
 		if data.until {
@@ -5762,6 +5768,9 @@ class ForFromStatement extends Statement {
 		}
 		
 		this._body = $compile.expression($block(data.body), this)
+		
+		this._scope.releaseTempName(this._boundName) if ?this._boundName
+		this._scope.releaseTempName(this._byName) if ?this._byName
 	} // }}}
 	fuse() { // {{{
 		this._body.fuse()
@@ -5776,27 +5785,12 @@ class ForFromStatement extends Statement {
 		}
 		ctrl.compile(this._variable).code($equals).compile(this._from)
 		
-		let bound
-		if data.til {
-			if this._til.isComplex() {
-				bound = this._scope.acquireTempName()
-				
-				ctrl.code($comma, bound, $equals).compile(this._til)
-			}
-		}
-		else {
-			if this._to.isComplex() {
-				bound = this._scope.acquireTempName()
-				
-				ctrl.code($comma, bound, $equals).compile(this._to)
-			}
+		if this._boundName? {
+			ctrl.code($comma, this._boundName, $equals).compile(this._til ?? this._to)
 		}
 		
-		let by
-		if data.by && this._by.isComplex() {
-			by = this._scope.acquireTempName()
-			
-			ctrl.code($comma, by, $equals).compile(this._by)
+		if this._byName? {
+			ctrl.code($comma, this._byName, $equals).compile(this._by)
 		}
 		
 		ctrl.code('; ')
@@ -5820,12 +5814,7 @@ class ForFromStatement extends Statement {
 				ctrl.code(' < ')
 			}
 			
-			if this._til.isComplex() {
-				ctrl.code(bound)
-			}
-			else {
-				ctrl.compile(this._til)
-			}
+			ctrl.compile(this._boundName ?? this._til)
 		}
 		else {
 			if desc {
@@ -5835,12 +5824,7 @@ class ForFromStatement extends Statement {
 				ctrl.code(' <= ')
 			}
 			
-			if this._to.isComplex() {
-				ctrl.code(bound)
-			}
-			else {
-				ctrl.compile(this._to)
-			}
+			ctrl.compile(this._boundName ?? this._to)
 		}
 		
 		ctrl.code('; ')
@@ -5861,7 +5845,7 @@ class ForFromStatement extends Statement {
 				}
 			}
 			else {
-				ctrl.compile(this._variable).code(' += ').compile(this._by)
+				ctrl.compile(this._variable).code(' += ').compile(this._byName ?? this._by)
 			}
 		}
 		else if desc {
@@ -5888,9 +5872,6 @@ class ForFromStatement extends Statement {
 		}
 		
 		ctrl.done()
-		
-		this._scope.releaseTempName(bound) if ?bound
-		this._scope.releaseTempName(by) if ?by
 	} // }}}
 }
 
@@ -5937,7 +5918,25 @@ class ForInStatement extends Statement {
 			this._when = $compile.expression(data.when, this)
 		}
 		
+		if this._value.isEntangled() {
+			this._valueName = this.greatScope().acquireTempName()
+			
+			this._scope.updateTempNames()
+		}
+		
+		if !?this._index && !(data.index && !data.declaration && this.greatScope().hasVariable(data.index.name)) {
+			this._indexName = this._scope.acquireTempName()
+		}
+		
+		if !data.desc {
+			this._boundName = this._scope.acquireTempName()
+		}
+		
 		this._body = $compile.expression($block(data.body), this)
+		
+		this.greatScope().releaseTempName(this._valueName) if this._valueName?
+		this._scope.releaseTempName(this._indexName) if this._indexName?
+		this._scope.releaseTempName(this._boundName) if this._boundName?
 	} // }}}
 	fuse() { // {{{
 		this._value.fuse()
@@ -5946,21 +5945,16 @@ class ForInStatement extends Statement {
 	toStatementFragments(fragments) { // {{{
 		let data = this._data
 		
-		let value, index, bound
-		if this._value.isComplex() {
-			value = this.greatScope().acquireTempName()
-			
-			this._scope.updateTempNames()
-			
+		if this._valueName? {
 			let line = fragments.newLine()
 			
-			if !this.greatScope().hasVariable(value) {
+			if !this.greatScope().hasVariable(this._valueName) {
 				line.code($variable.scope(this))
 				
-				$variable.define(this.greatScope(), value, VariableKind::Variable)
+				$variable.define(this.greatScope(), this._valueName, VariableKind::Variable)
 			}
 			
-			line.code(value, $equals).compile(this._value).done()
+			line.code(this._valueName, $equals).compile(this._value).done()
 		}
 		
 		let ctrl
@@ -5971,7 +5965,7 @@ class ForInStatement extends Statement {
 					.newLine()
 					.compile(this._index)
 					.code($equals)
-					.compile(value ?? this._value)
+					.compile(this._valueName ?? this._value)
 					.code('.length - 1')
 					.done()
 				
@@ -5980,14 +5974,12 @@ class ForInStatement extends Statement {
 					.code('for(')
 			}
 			else {
-				index = this._scope.acquireTempName() unless this._index?
-				
 				ctrl = fragments
 					.newControl()
 					.code('for(', $variable.scope(this))
-					.compile(index ?? this._index)
+					.compile(this._indexName ?? this._index)
 					.code($equals)
-					.compile(value ?? this._value)
+					.compile(this._valueName ?? this._value)
 					.code('.length - 1')
 			}
 		}
@@ -6004,20 +5996,16 @@ class ForInStatement extends Statement {
 					.code('for(', $variable.scope(this))
 			}
 			else {
-				index = this._scope.acquireTempName() unless this._index?
-				
 				ctrl = fragments
 					.newControl()
 					.code('for(', $variable.scope(this))
-					.compile(index ?? this._index)
+					.compile(this._indexName ?? this._index)
 					.code(' = 0, ')
 			}
 			
-			bound = this._scope.acquireTempName()
-			
 			ctrl
-				.code(bound, $equals)
-				.compile(value ?? this._value)
+				.code(this._boundName, $equals)
+				.compile(this._valueName ?? this._value)
 				.code('.length')
 		}
 		
@@ -6036,15 +6024,15 @@ class ForInStatement extends Statement {
 		
 		if data.desc {
 			ctrl
-				.compile(index ?? this._index)
+				.compile(this._indexName ?? this._index)
 				.code(' >= 0; --')
-				.compile(index ?? this._index)
+				.compile(this._indexName ?? this._index)
 		}
 		else {
 			ctrl
-				.compile(index ?? this._index)
-				.code(' < ' + bound + '; ++')
-				.compile(index ?? this._index)
+				.compile(this._indexName ?? this._index)
+				.code(' < ' + this._boundName + '; ++')
+				.compile(this._indexName ?? this._index)
 		}
 		
 		ctrl.code(')').step()
@@ -6053,9 +6041,9 @@ class ForInStatement extends Statement {
 			.newLine()
 			.compile(this._variable)
 			.code($equals)
-			.compile(value ?? this._value)
+			.compile(this._valueName ?? this._value)
 			.code('[')
-			.compile(index ?? this._index)
+			.compile(this._indexName ?? this._index)
 			.code(']')
 			.done()
 		
@@ -6074,10 +6062,6 @@ class ForInStatement extends Statement {
 		}
 		
 		ctrl.done()
-		
-		this.greatScope().releaseTempName(value) if value?
-		this._scope.releaseTempName(index) if index?
-		this._scope.releaseTempName(bound) if bound?
 	} // }}}
 }
 
@@ -6124,7 +6108,15 @@ class ForOfStatement extends Statement {
 			this._when = $compile.expression(data.when, this)
 		}
 		
+		if this._value.isEntangled() {
+			this._valueName = this.greatScope().acquireTempName()
+			
+			this._scope.updateTempNames()
+		}
+		
 		this._body = $compile.expression($block(data.body), this)
+		
+		this.greatScope().releaseTempName(this._valueName) if this._valueName?
 	} // }}}
 	fuse() { // {{{
 		this._value.fuse()
@@ -6133,20 +6125,16 @@ class ForOfStatement extends Statement {
 	toStatementFragments(fragments) { // {{{
 		let data = this._data
 		
-		let value
-		if this._value.isComplex() {
-			value = this.greatScope().acquireTempName()
-			
-			this._scope.updateTempNames()
-			
+		if this._valueName? {
 			let line = fragments.newLine()
 			
-			if !this.greatScope().hasVariable(value) {
+			if !this.greatScope().hasVariable(this._valueName) {
 				line.code($variable.scope(this))
 				
-				$variable.define(this.greatScope(), value, VariableKind::Variable)
+				$variable.define(this.greatScope(), this._valueName, VariableKind::Variable)
 			}
-			line.code(value, $equals).compile(this._value).done()
+			
+			line.code(this._valueName, $equals).compile(this._value).done()
 		}
 		
 		let ctrl = fragments.newControl().code('for(')
@@ -6154,7 +6142,7 @@ class ForOfStatement extends Statement {
 		if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
 			ctrl.code($variable.scope(this))
 		}
-		ctrl.compile(this._variable).code(' in ').compile(value ?? this._value).code(')').step()
+		ctrl.compile(this._variable).code(' in ').compile(this._valueName ?? this._value).code(')').step()
 		
 		if data.index {
 			let line = ctrl.newLine()
@@ -6163,7 +6151,7 @@ class ForOfStatement extends Statement {
 				line.code($variable.scope(this))
 			}
 			
-			line.compile(this._index).code($equals).compile(value ?? this._value).code('[').compile(this._variable).code(']').done()
+			line.compile(this._index).code($equals).compile(this._valueName ?? this._value).code('[').compile(this._variable).code(']').done()
 		}
 		
 		if data.until {
@@ -6202,8 +6190,6 @@ class ForOfStatement extends Statement {
 		}
 		
 		ctrl.done()
-		
-		this.greatScope().releaseTempName(value) if value?
 	} // }}}
 }
 
@@ -6232,9 +6218,12 @@ class ForRangeStatement extends Statement {
 		this._from = $compile.expression(data.from, this)
 		
 		this._to = $compile.expression(data.to, this)
+		this._boundName = this._scope.acquireTempName() if this._to.isComposite()
 		
 		if data.by {
 			this._by = $compile.expression(data.by, this)
+			
+			this._byName = this._scope.acquireTempName() if this._by.isComposite()
 		}
 		
 		if data.until {
@@ -6249,6 +6238,9 @@ class ForRangeStatement extends Statement {
 		}
 		
 		this._body = $compile.expression($block(data.body), this)
+		
+		this._scope.releaseTempName(this._boundName) if this._boundName?
+		this._scope.releaseTempName(this._byName) if this._byName?
 	} // }}}
 	fuse() { // {{{
 		this._body.fuse()
@@ -6262,18 +6254,12 @@ class ForRangeStatement extends Statement {
 		}
 		ctrl.compile(this._variable).code($equals).compile(this._from)
 		
-		let bound
-		if this._to.isComplex() {
-			bound = this._scope.acquireTempName()
-			
-			ctrl.code(bound, $equals).compile(this._to)
+		if this._boundName? {
+			ctrl.code(this._boundName, $equals).compile(this._to)
 		}
 		
-		let by
-		if data.by && this._by.isComplex() {
-			by = this._scope.acquireTempName()
-			
-			ctrl.code($comma, by, $equals).compile(this._by)
+		if this._byName? {
+			ctrl.code($comma, this._byName, $equals).compile(this._by)
 		}
 		
 		ctrl.code('; ')
@@ -6285,7 +6271,7 @@ class ForRangeStatement extends Statement {
 			ctrl.compile(this._while).code(' && ')
 		}
 		
-		ctrl.compile(this._variable).code(' <= ').compile(bound ?? this._to).code('; ')
+		ctrl.compile(this._variable).code(' <= ').compile(this._boundName ?? this._to).code('; ')
 		
 		if data.by {
 			if data.by.kind == Kind::NumericExpression {
@@ -6297,7 +6283,7 @@ class ForRangeStatement extends Statement {
 				}
 			}
 			else {
-				ctrl.compile(this._variable).code(' += ').compile(this._by)
+				ctrl.compile(this._variable).code(' += ').compile(this._byName ?? this._by)
 			}
 		}
 		else {
@@ -6321,9 +6307,6 @@ class ForRangeStatement extends Statement {
 		}
 		
 		ctrl.done()
-		
-		this._scope.releaseTempName(bound) if bound?
-		this._scope.releaseTempName(by) if by?
 	} // }}}
 }
 
@@ -8173,9 +8156,10 @@ class WhileStatement extends Statement {
 class Expression extends AbstractNode {
 	isAssignable() => false
 	isCallable() => false
-	isComplex() => true
+	isComposite() => true
 	isComputed() => false
 	isConditional() => this.isNullable()
+	isEntangled() => true
 	isNullable() => false
 	toBooleanFragments(fragments) => this.toFragments(fragments)
 	toNullableFragments(fragments) => this.toFragments(fragments)
@@ -9301,16 +9285,7 @@ class CallExpression extends Expression {
 	toReusableFragments(fragments) { // {{{
 		fragments
 			.code(this._reuseName, $equals)
-			.compile(this._callee)
-			.code('(')
-		
-		for argument, index in this._arguments {
-			fragments.code($comma) if index
-			
-			fragments.compile(argument)
-		}
-		
-		fragments.code(')')
+			.compile(this)
 		
 		this._reusable = true
 	} // }}}
@@ -9788,6 +9763,7 @@ class MemberExpression extends Expression {
 		this._object.fuse()
 	} // }}}
 	isCallable() => this._object.isCallable()
+	isEntangled() => this.isCallable() || this.isNullable()
 	isNullable() => this._data.nullable || this._object.isNullable() || (this._data.computed && this._property.isNullable())
 	toFragments(fragments) { // {{{
 		if this.isNullable() && !this._tested {
@@ -9819,7 +9795,14 @@ class MemberExpression extends Expression {
 	toBooleanFragments(fragments) { // {{{
 		if this.isNullable() && !this._tested {
 			if this._data.computed {
-				throw new Error('Not Implemented')
+				fragments
+					.compileNullable(this)
+					.code(' ? ')
+					.compile(this._object)
+					.code('[')
+					.compile(this._property)
+					.code(']')
+					.code(' : false')
 			}
 			else {
 				fragments
@@ -9833,7 +9816,11 @@ class MemberExpression extends Expression {
 		}
 		else {
 			if this._data.computed {
-				throw new Error('Not Implemented')
+				fragments
+					.compile(this._object)
+					.code('[')
+					.compile(this._property)
+					.code(']')
 			}
 			else {
 				fragments
@@ -9875,14 +9862,34 @@ class MemberExpression extends Expression {
 	} // }}}
 	toReusableFragments(fragments) { // {{{
 		if this._object.isCallable() {
+			if this._data.computed {
+				fragments
+					.code('(')
+					.compileReusable(this._object)
+					.code(', ')
+					.compile(this._object)
+					.code('[')
+					.compileReusable(this._property)
+					.code(']')
+					.code(')')
+			}
+			else {
+				fragments
+					.code('(')
+					.compileReusable(this._object)
+					.code(', ')
+					.compile(this._object)
+					.code($dot)
+					.compile(this._property)
+					.code(')')
+			}
+		}
+		else if this._data.computed {
 			fragments
-				.code('(')
-				.compileReusable(this._object)
-				.code(', ')
 				.compile(this._object)
-				.code($dot)
-				.compile(this._property)
-				.code(')')
+				.code('[')
+				.compileReusable(this._property)
+				.code(']')
 		}
 		else {
 			fragments
@@ -10105,13 +10112,13 @@ class PolyadicOperatorExpression extends Expression {
 		_tested = false
 	}
 	isComputed() => true
-	isNullable() {
+	isNullable() { // {{{
 		for operand in this._operands {
 			return true if operand.isNullable()
 		}
 		
 		return false
-	}
+	} // }}}
 	analyse() { // {{{
 		this._operands = [$compile.expression(operand, this) for operand in this._data.operands]
 	} // }}}
@@ -10474,7 +10481,8 @@ class Literal extends Expression {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	isComplex() => false
+	isComposite() => false
+	isEntangled() => false
 	toFragments(fragments) { // {{{
 		if this._data {
 			fragments.code(this._value, this._data)

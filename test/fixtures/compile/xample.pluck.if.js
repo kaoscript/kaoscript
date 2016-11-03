@@ -13,9 +13,9 @@ module.exports = function() {
 			let value;
 			for(let __ks_0 = 0, __ks_1 = this.length, item; __ks_0 < __ks_1; ++__ks_0) {
 				item = this[__ks_0];
-				let __ks_2;
-				if((Type.isValue(item) ? Type.isValue(__ks_2 = item[name]) : false) ? (value = __ks_2, true) : false) {
+				if(Type.isValue(item) && Type.isValue(item[name]) ? (value = item[name], true) : false) {
 					if(Type.isFunction(value)) {
+						let __ks_2;
 						if(Type.isValue(__ks_2 = value.call(item)) ? (value = __ks_2, true) : false) {
 							result.push(value);
 						}

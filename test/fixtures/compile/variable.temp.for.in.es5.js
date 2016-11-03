@@ -5,16 +5,14 @@ module.exports = function() {
 			throw new Error("Missing parameter 'x'");
 		}
 		if(Type.isValue(x.foo)) {
-			var __ks_0 = x.foo;
-			for(var __ks_1 = 0, __ks_2 = __ks_0.length, value; __ks_1 < __ks_2; ++__ks_1) {
-				value = __ks_0[__ks_1];
+			for(var __ks_0 = 0, __ks_1 = x.foo.length, value; __ks_0 < __ks_1; ++__ks_0) {
+				value = x.foo[__ks_0];
 				console.log(value);
 			}
 		}
 		if(Type.isValue(x.bar)) {
-			var __ks_0 = x.bar;
-			for(var __ks_1 = 0, __ks_2 = __ks_0.length, value; __ks_1 < __ks_2; ++__ks_1) {
-				value = __ks_0[__ks_1];
+			for(var __ks_0 = 0, __ks_1 = x.bar.length, value; __ks_0 < __ks_1; ++__ks_0) {
+				value = x.bar[__ks_0];
 				console.log(value);
 			}
 		}
