@@ -3542,6 +3542,19 @@ const $type = {
 			}
 		}
 	} // }}}
+	same(a, b) { // {{{
+		return false if a.kind != b.kind
+		
+		if a.kind == Kind::TypeReference {
+			return false if a.typeName.kind != b.typeName.kind
+			
+			if a.typeName.kind == Kind::Identifier {
+				return false if a.typeName.name != b.typeName.name
+			}
+		}
+		
+		return true
+	} // }}}
 	type(data, scope) { // {{{
 		//console.log('type.data', data)
 		return data if !data.kind
@@ -3757,6 +3770,28 @@ const $variable = {
 		}
 		
 		return variable
+	} // }}}
+	filter(method, min, max) { // {{{
+		if method.signature {
+			if min >= method.signature.min && max <= method.signature.max {
+				return true
+			}
+		}
+		else if method.typeName {
+			if method.typeName.name == 'func' || method.typeName.name == 'Function' {
+				return true
+			}
+			else {
+				console.error(method)
+				throw new Error('Not implemented')
+			}
+		}
+		else {
+			console.error(method)
+			throw new Error('Not implemented')
+		}
+		
+		return false
 	} // }}}
 	filterType(variable, name, node) { // {{{
 		if variable.type {
@@ -4075,8 +4110,8 @@ const $variable = {
 				}
 			}
 			Kind::TernaryConditionalExpression => {
-				let a = $type.type(data.then, node)
-				let b = $type.type(data.else, node)
+				let a = $type.type(data.then, node.scope())
+				let b = $type.type(data.else, node.scope())
 				
 				if a && b && $type.same(a, b) {
 					return {
