@@ -1,4 +1,4 @@
-extern NaN
+extern Error, NaN
 
 import * from ./_array.ks
 import * from ./_float.ks

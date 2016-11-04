@@ -912,7 +912,10 @@ func $block(data) { // {{{
 } // }}}
 
 func $caller(data, node) { // {{{
-	if data.kind == Kind.MemberExpression {
+	if data.kind == Kind.Identifier {
+		return $compile.expression(data, node)
+	}
+	else if data.kind == Kind.MemberExpression {
 		return $compile.expression(data.object, node)
 	}
 	else {
@@ -6961,13 +6964,11 @@ class ImplementMethodAliasDeclaration extends Statement {
 		if data.arguments? {
 			let argsLine = object.newLine().code('arguments: ')
 			let array = argsLine.newArray()
-			let line = array.newLine()
 			
 			for argument in this._arguments {
-				line.compile(argument)
+				array.newLine().compile(argument).done()
 			}
 			
-			line.done()
 			array.done()
 			argsLine.done()
 		}
@@ -7079,13 +7080,11 @@ class ImplementMethodLinkDeclaration extends Statement {
 		if data.arguments? {
 			let argsLine = object.newLine().code('arguments: ')
 			let array = argsLine.newArray()
-			let line = array.newLine()
 			
 			for argument in this._arguments {
-				line.compile(argument)
+				array.newLine().compile(argument).done()
 			}
 			
-			line.done()
 			array.done()
 			argsLine.done()
 		}
@@ -8544,8 +8543,24 @@ class AssignmentOperatorMultiplication extends AssignmentOperatorExpression {
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	isAssignable() => false
 	toFragments(fragments, mode) { // {{{
+		if this._left.isNullable() {
+			fragments.code('(')
+			
+			this._left.toNullableFragments(fragments)
+			
+			fragments
+				.code(' && ' + $runtime.type(this) + '.isValue(')
+				.compile(this._left)
+				.code('))')
+		}
+		else {
+			fragments
+				.code($runtime.type(this) + '.isValue(')
+				.compile(this._left)
+				.code(')')
+		}
+		
 		fragments
-			.compileNullable(this._left)
 			.code(' ? undefined : ')
 			.compile(this._left)
 			.code($equals)
@@ -8554,9 +8569,26 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
+		ctrl.code('if(!')
+		
+		if this._left.isNullable() {
+			ctrl.code('(')
+			
+			this._left.toNullableFragments(ctrl)
+			
+			ctrl
+				.code(' && ' + $runtime.type(this) + '.isValue(')
+				.compile(this._left)
+				.code('))')
+		}
+		else {
+			ctrl
+				.code($runtime.type(this) + '.isValue(')
+				.compile(this._left)
+				.code(')')
+		}
+		
 		ctrl
-			.code('if(!')
-			.compileNullable(this._left)
 			.code(')')
 			.step()
 			.newLine()
@@ -8810,8 +8842,24 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
+		if this._left.isNullable() {
+			fragments.code('(')
+			
+			this._left.toNullableFragments(fragments)
+			
+			fragments
+				.code(' && ' + $runtime.type(this) + '.isValue(')
+				.compileReusable(this._left)
+				.code('))')
+		}
+		else {
+			fragments
+				.code($runtime.type(this) + '.isValue(')
+				.compileReusable(this._left)
+				.code(')')
+		}
+		
 		fragments
-			.compileNullable(this._left)
 			.code(' ? ')
 			.compile(this._left)
 			.code(' : ')
@@ -9431,7 +9479,7 @@ class CallExpression extends Expression {
 			}
 		}
 	} // }}}
-	toCallFragments(fragments, mode) {
+	toCallFragments(fragments, mode) { // {{{
 		let data = this._data
 		
 		if this._list {
@@ -9474,7 +9522,7 @@ class CallExpression extends Expression {
 			
 			fragments.code($comma).compile(this._arguments[0], mode)
 		}
-	}
+	} // }}}
 	toNullableFragments(fragments) { // {{{
 		if !this._tested {
 			this._tested = true
@@ -10479,6 +10527,25 @@ class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
 	} // }}}
 }
 
+class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('*', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
+		}
+	} // }}}
+}
+
 class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	PolyadicOperatorNullCoalescing(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
@@ -10514,14 +10581,49 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		for i from 0 til l {
 			operand = this._operands[i]
 			
+			if operand.isNullable() {
+				fragments.code('(')
+				
+				operand.toNullableFragments(fragments)
+				
+				fragments
+					.code(' && ' + $runtime.type(this) + '.isValue(')
+					.compileReusable(operand)
+					.code('))')
+			}
+			else {
+				fragments
+					.code($runtime.type(this) + '.isValue(')
+					.compileReusable(operand)
+					.code(')')
+			}
+			
 			fragments
-				.compileNullable(operand)
 				.code(' ? ')
 				.compile(operand)
 				.code(' : ')
 		}
 		
 		fragments.compile(this._operands[l])
+	} // }}}
+}
+
+class PolyadicOperatorOr extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('||', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrapBoolean(operand)
+		}
 	} // }}}
 }
 
@@ -10780,12 +10882,6 @@ class IdentifierLiteral extends Literal {
 			fragments.code(this._value, this._data)
 		}
 	} // }}}
-	toNullableFragments(fragments) { // {{{
-		fragments
-			.code($runtime.type(this) + '.isValue(')
-			.compile(this)
-			.code(')')
-	} // }}}
 }
 
 class NumberLiteral extends Literal { // {{{
@@ -10989,11 +11085,11 @@ const $polyadicOperators = {
 	`\(BinaryOperator::GreaterThanOrEqual)`	: PolyadicOperatorGreaterThanOrEqual
 	`\(BinaryOperator::LessThan)`			: PolyadicOperatorLessThan */
 	`\(BinaryOperator::LessThanOrEqual)`	: PolyadicOperatorLessThanOrEqual
-	/* `\(BinaryOperator::Modulo)`				: PolyadicOperatorModulo
-	`\(BinaryOperator::Multiplication)`		: PolyadicOperatorMultiplication */
+	/* `\(BinaryOperator::Modulo)`				: PolyadicOperatorModulo */
+	`\(BinaryOperator::Multiplication)`		: PolyadicOperatorMultiplication
 	`\(BinaryOperator::NullCoalescing)`		: PolyadicOperatorNullCoalescing
-	/* `\(BinaryOperator::Or)`					: PolyadicOperatorOr
-	`\(BinaryOperator::Subtraction)`		: PolyadicOperatorSubtraction */
+	`\(BinaryOperator::Or)`					: PolyadicOperatorOr
+	/* `\(BinaryOperator::Subtraction)`		: PolyadicOperatorSubtraction */
 }
 
 const $unaryOperators = {

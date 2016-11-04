@@ -278,7 +278,7 @@ module.exports = function() {
 			};
 		}
 		let s;
-		if(Type.isValue((s = $spaces[that._space], s.converters[space]))) {
+		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
 			let args = Helper.mapObject(s.components, (name, component) => {
 				return that[component.field];
 			});
@@ -304,8 +304,7 @@ module.exports = function() {
 		if(!Type.isString(to)) {
 			throw new Error("Invalid type for parameter 'to'");
 		}
-		let __ks_0 = $spaces[from].converters;
-		for(let name in __ks_0) {
+		for(let name in $spaces[from].converters) {
 			if($spaces[name].converters[to]) {
 				$spaces[from].converters[to] = Helper.vcurry($binder, null, $spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name]);
 				return;
@@ -329,7 +328,7 @@ module.exports = function() {
 		if(args.length === 0) {
 			return that;
 		}
-		else if((Type.isString(args[0])) && Type.isValue($parsers[args[0]])) {
+		else if(Type.isString(args[0]) && Type.isValue($parsers[args[0]])) {
 			if($parsers[args.shift()](that, args)) {
 				return that;
 			}
@@ -431,7 +430,7 @@ module.exports = function() {
 				}
 				else if(Type.isArray(args[0])) {
 					that._space = Space.SRGB;
-					that._alpha = args[0].length === 4 ? $caster.alpha(args[0][3]) : 1;
+					that._alpha = (args[0].length === 4) ? $caster.alpha(args[0][3]) : 1;
 					that._red = $caster.ff(args[0][0]);
 					that._green = $caster.ff(args[0][1]);
 					that._blue = $caster.ff(args[0][2]);
@@ -550,7 +549,7 @@ module.exports = function() {
 			}
 			else if(args.length >= 3) {
 				that._space = Space.SRGB;
-				that._alpha = args.length >= 4 ? $caster.alpha(args[3]) : 1;
+				that._alpha = (args.length >= 4) ? $caster.alpha(args[3]) : 1;
 				that._red = $caster.ff(args[0]);
 				that._green = $caster.ff(args[1]);
 				that._blue = $caster.ff(args[2]);
@@ -575,7 +574,7 @@ module.exports = function() {
 				if(Type.isNumeric(args[0])) {
 					that._space = Space.SRGB;
 					that._red = that._green = that._blue = $caster.ff(args[0]);
-					that._alpha = args.length >= 2 ? $caster.alpha(args[1]) : 1;
+					that._alpha = (args.length >= 2) ? $caster.alpha(args[1]) : 1;
 					return true;
 				}
 				else if(Type.isString(args[0])) {
@@ -676,8 +675,7 @@ module.exports = function() {
 		if(!Type.isString(name)) {
 			throw new Error("Invalid type for parameter 'name'");
 		}
-		let __ks_0;
-		$spaces[name] = Type.isValue((__ks_0 = $spaces[name])) ? __ks_0 : {
+		$spaces[name] = Type.isValue($spaces[name]) ? $spaces[name] : {
 			alias: {},
 			converters: {},
 			components: {}
@@ -942,8 +940,7 @@ module.exports = function() {
 			if(!Type.isString(format)) {
 				throw new Error("Invalid type for parameter 'format'");
 			}
-			let __ks_0;
-			if(Type.isValue(__ks_0 = $formatters[format]) ? (format = __ks_0, true) : false) {
+			if(Type.isValue($formatters[format]) ? (format = $formatters[format], true) : false) {
 				return format.formatter(Type.isValue(format.space) ? this.like(format.space) : this);
 			}
 			else {
@@ -983,7 +980,7 @@ module.exports = function() {
 				let red = endColor._red - this._red;
 				let green = endColor._green - this._green;
 				let blue = endColor._blue - this._blue;
-				for(let i = 1, __ks_0 = length; i < __ks_0; ++i) {
+				for(let i = 1; i < length; ++i) {
 					let offset = i / length;
 					let color = this.clone();
 					color._red += Math.round(red * offset);
@@ -1083,9 +1080,8 @@ module.exports = function() {
 			if(!Type.isString(space)) {
 				throw new Error("Invalid type for parameter 'space'");
 			}
-			let __ks_0;
-			space = Type.isValue((__ks_0 = $aliases[space])) ? __ks_0 : space;
-			return (this._space === space) || Type.isValue($spaces[this._space][space]) ? this : $convert(this, space);
+			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
+			return ((this._space === space) || Type.isValue($spaces[this._space][space])) ? this : $convert(this, space);
 		}
 		like() {
 			if(arguments.length === 1) {
@@ -1096,11 +1092,11 @@ module.exports = function() {
 		__ks_func_luminance_0() {
 			let that = this.like(Space.SRGB);
 			let r = that._red / 255;
-			r = r < 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+			r = (r < 0.03928) ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
 			let g = that._green / 255;
-			g = g < 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+			g = (g < 0.03928) ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
 			let b = that._blue / 255;
-			b = b < 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+			b = (b < 0.03928) ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
 			return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
 		}
 		luminance() {
@@ -1217,8 +1213,7 @@ module.exports = function() {
 			if(!Type.isString(space)) {
 				throw new Error("Invalid type for parameter 'space'");
 			}
-			let __ks_0;
-			space = Type.isValue((__ks_0 = $aliases[space])) ? __ks_0 : space;
+			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
 			if(!Type.isValue($spaces[space]) && Type.isValue($components[space])) {
 				if(Type.isValue($spaces[this._space].components[space])) {
 					return this;
@@ -1372,9 +1367,8 @@ module.exports = function() {
 				};
 			}
 			else if(Type.isValue(space.formatters)) {
-				let __ks_0 = space.formatters;
-				for(let name in __ks_0) {
-					let formatter = __ks_0[name];
+				for(let name in space.formatters) {
+					let formatter = space.formatters[name];
 					$formatters[name] = {
 						space: space.name,
 						formatter: formatter
@@ -1382,32 +1376,28 @@ module.exports = function() {
 				}
 			}
 			if(Type.isValue(space.alias)) {
-				let __ks_0 = space.alias;
-				for(let __ks_1 = 0, __ks_2 = __ks_0.length, alias; __ks_1 < __ks_2; ++__ks_1) {
-					alias = __ks_0[__ks_1];
+				for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
+					alias = space.alias[__ks_0];
 					$spaces[space.name].alias[alias] = true;
 					$aliases[alias] = space.name;
 				}
 				if(Type.isValue($parsers[space.name])) {
-					__ks_0 = space.alias;
-					for(let __ks_1 = 0, __ks_2 = __ks_0.length, alias; __ks_1 < __ks_2; ++__ks_1) {
-						alias = __ks_0[__ks_1];
+					for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
+						alias = space.alias[__ks_0];
 						$parsers[alias] = $parsers[space.name];
 					}
 				}
 				if(Type.isValue($formatters[space.name])) {
-					__ks_0 = space.alias;
-					for(let __ks_1 = 0, __ks_2 = __ks_0.length, alias; __ks_1 < __ks_2; ++__ks_1) {
-						alias = __ks_0[__ks_1];
+					for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
+						alias = space.alias[__ks_0];
 						$formatters[alias] = $formatters[space.name];
 					}
 				}
 			}
 			if(Type.isValue(space.converters)) {
 				if(Type.isValue(space.converters.from)) {
-					let __ks_0 = space.converters.from;
-					for(let name in __ks_0) {
-						let converter = __ks_0[name];
+					for(let name in space.converters.from) {
+						let converter = space.converters.from[name];
 						if(Type.isValue(!$spaces[name])) {
 							$space(name);
 						}
@@ -1415,9 +1405,8 @@ module.exports = function() {
 					}
 				}
 				if(Type.isValue(space.converters.to)) {
-					let __ks_0 = space.converters.to;
-					for(let name in __ks_0) {
-						let converter = __ks_0[name];
+					for(let name in space.converters.to) {
+						let converter = space.converters.to[name];
 						$spaces[space.name].converters[name] = converter;
 					}
 				}
@@ -1432,9 +1421,8 @@ module.exports = function() {
 				}
 			}
 			if(Type.isValue(space.components)) {
-				let __ks_0 = space.components;
-				for(let name in __ks_0) {
-					let component = __ks_0[name];
+				for(let name in space.components) {
+					let component = space.components[name];
 					if(Type.isValue(component.family)) {
 						$spaces[space.name].components[name] = $spaces[component.family].components[name];
 						$components[name].spaces[space.name] = true;
@@ -1446,20 +1434,25 @@ module.exports = function() {
 								class: Color,
 								name: name,
 								function: $getFieldWithoutCasting,
-								arguments: [name, component.field],
+								arguments: [
+									name,
+									component.field
+								],
 								signature: {
 									access: 3,
 									min: 0,
 									max: 0,
-									parameters: [
-									]
+									parameters: []
 								}
 							});
 							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $setFieldWithoutCasting,
-								arguments: [name, component.field],
+								arguments: [
+									name,
+									component.field
+								],
 								signature: {
 									access: 3,
 									min: 1,
@@ -1479,20 +1472,27 @@ module.exports = function() {
 								class: Color,
 								name: name,
 								function: $getFieldWithCasting,
-								arguments: [name, component, space.name],
+								arguments: [
+									name,
+									component,
+									space.name
+								],
 								signature: {
 									access: 3,
 									min: 0,
 									max: 0,
-									parameters: [
-									]
+									parameters: []
 								}
 							});
 							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $setFieldWithCasting,
-								arguments: [name, component, space.name],
+								arguments: [
+									name,
+									component,
+									space.name
+								],
 								signature: {
 									access: 3,
 									min: 1,
@@ -1528,20 +1528,25 @@ module.exports = function() {
 								class: Color,
 								name: name,
 								function: $getFieldWithoutCasting,
-								arguments: [name, component.field],
+								arguments: [
+									name,
+									component.field
+								],
 								signature: {
 									access: 3,
 									min: 0,
 									max: 0,
-									parameters: [
-									]
+									parameters: []
 								}
 							});
 							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $setFieldWithoutCasting,
-								arguments: [name, component.field],
+								arguments: [
+									name,
+									component.field
+								],
 								signature: {
 									access: 3,
 									min: 1,
@@ -1561,20 +1566,27 @@ module.exports = function() {
 								class: Color,
 								name: name,
 								function: $getFieldWithCasting,
-								arguments: [name, component, space.name],
+								arguments: [
+									name,
+									component,
+									space.name
+								],
 								signature: {
 									access: 3,
 									min: 0,
 									max: 0,
-									parameters: [
-									]
+									parameters: []
 								}
 							});
 							Helper.newInstanceMethod({
 								class: Color,
 								name: name,
 								function: $setFieldWithCasting,
-								arguments: [name, component, space.name],
+								arguments: [
+									name,
+									component,
+									space.name
+								],
 								signature: {
 									access: 3,
 									min: 1,
@@ -1642,16 +1654,14 @@ module.exports = function() {
 				type: "Number"
 			}
 		},
-		classVariables: {
-		},
+		classVariables: {},
 		instanceMethods: {
 			alpha: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
@@ -1714,8 +1724,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			],
 			contrast: [
@@ -1840,8 +1849,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			],
 			isBlack: [
@@ -1849,8 +1857,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			],
 			isTransparent: [
@@ -1858,8 +1865,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			],
 			isWhite: [
@@ -1867,8 +1873,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			],
 			like: [
@@ -1890,8 +1895,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			],
 			negative: [
@@ -1899,8 +1903,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				}
 			],
 			opaquer: [
@@ -1969,8 +1972,7 @@ module.exports = function() {
 					access: 3,
 					min: 0,
 					max: 0,
-					parameters: [
-					]
+					parameters: []
 				},
 				{
 					access: 3,
