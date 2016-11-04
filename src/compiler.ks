@@ -209,6 +209,11 @@ enum MemberAccess { // {{{
 	Public
 } // }}}
 
+enum Mode {
+	None
+	Async
+}
+
 enum HelperTypeKind {
 	Native
 	Referenced
@@ -248,6 +253,39 @@ const $literalTypes = { // {{{
 	Infinity: 'Number'
 	NaN: 'Number'
 	true: 'Boolean'
+} // }}}
+
+const $nodeModules = { // {{{
+	assert: true
+	buffer: true
+	child_process: true
+	cluster: true
+	constants: true
+	crypto: true
+	dgram: true
+	dns: true
+	domain: true
+	events: true
+	fs: true
+	http: true
+	https: true
+	module: true
+	net: true
+	os: true
+	path: true
+	punycode: true
+	querystring: true
+	readline: true
+	repl: true
+	stream: true
+	string_decoder: true
+	tls: true
+	tty: true
+	url: true
+	util: true
+	v8: true
+	vm: true
+	zlib: true
 } // }}}
 
 const $operator = { // {{{
@@ -405,8 +443,8 @@ class ControlBuilder {
 		
 		return this
 	} // }}}
-	compile(node) { // {{{
-		this._step.compile(node)
+	compile(node, mode = Mode::None) { // {{{
+		this._step.compile(node, mode)
 		
 		return this
 	} // }}}
@@ -487,9 +525,9 @@ class BlockBuilder {
 		_indent
 	}
 	BlockBuilder(@builder, @indent)
-	compile(node) { // {{{
+	compile(node, mode = Mode::None) { // {{{
 		if node is Object {
-			node.toFragments(this)
+			node.toFragments(this, mode)
 		}
 		else {
 			this._builder._fragments.push(new CodeFragment(node))
@@ -568,9 +606,9 @@ class ExpressionBuilder {
 		
 		return this
 	} // }}}
-	compile(node) { // {{{
+	compile(node, mode = Mode::None) { // {{{
 		if node is Object {
-			node.toFragments(this)
+			node.toFragments(this, mode)
 		}
 		else {
 			this._builder._fragments.push(new CodeFragment(node))
@@ -630,16 +668,16 @@ class ExpressionBuilder {
 	newObject(indent = this._indent) { // {{{
 		return ObjectBuilder.create(this._builder, indent)
 	} // }}}
-	wrap(node) { // {{{
+	wrap(node, mode = Mode::None) { // {{{
 		if node.isComputed() {
 			this.code('(')
 			
-			node.toFragments(this)
+			node.toFragments(this, mode)
 			
 			this.code(')')
 		}
 		else {
-			node.toFragments(this)
+			node.toFragments(this, mode)
 		}
 		
 		return this
@@ -1022,7 +1060,7 @@ const $continuous = {
 		
 		statement
 			.name('static __ks_sttc_' + name + '_' + index)
-			.toFragments(fragments)
+			.toFragments(fragments, Mode::None)
 	} // }}}
 	constructor(node, fragments, statement, signature, parameters, reflect) { // {{{
 		let index = reflect.constructors.length
@@ -1034,7 +1072,7 @@ const $continuous = {
 	
 		statement
 			.name('__ks_cons_' + index)
-			.toFragments(fragments)
+			.toFragments(fragments, Mode::None)
 	} // }}}
 	instanceMethod(node, fragments, statement, signature, parameters, reflect, name) { // {{{
 		if !(reflect.instanceMethods[name] is Array) {
@@ -1049,7 +1087,7 @@ const $continuous = {
 		
 		statement
 			.name('__ks_func_' + name + '_' + index)
-			.toFragments(fragments)
+			.toFragments(fragments, Mode::None)
 	} // }}}
 	methodCall(node, fnName, argName, retCode, fragments, method, index) { // {{{
 		if method.max == 0 {
@@ -2599,6 +2637,13 @@ const $import = {
 		
 		module.import(name.name || name, file)
 	} // }}}
+	loadCoreModule(x, module, data, node) { // {{{
+		if $nodeModules[x] {
+			return $import.loadNodeFile(null, x, module, data, node)
+		}
+		
+		return false
+	}, // }}}
 	loadDirectory(x, moduleName?, module, data, node) { // {{{
 		let pkgfile = path.join(x, 'package.json')
 		if fs.isFile(pkgfile) {
@@ -4975,7 +5020,7 @@ class ModuleBlock extends AbstractNode {
 	module() => this._module
 	toFragments(fragments) { // {{{
 		for statement in this._body {
-			statement.toFragments(fragments)
+			statement.toFragments(fragments, Mode::None)
 		}
 	} // }}}
 }
@@ -5005,16 +5050,22 @@ class Statement extends AbstractNode {
 			statement.fuse()
 		}
 	} // }}}
+	isAsync() => false
 	statement() => this
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._variables.length {
 			fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
 		}
 		
-		this.toStatementFragments(fragments)
-		
-		for afterward in this._afterwards {
-			afterward.toAfterwardFragments(fragments)
+		if r ?= this.toStatementFragments(fragments, mode) {
+			r.afterwards = this._afterwards
+			
+			return r
+		}
+		else {
+			for afterward in this._afterwards {
+				afterward.toAfterwardFragments(fragments)
+			}
 		}
 	} // }}}
 }
@@ -5362,7 +5413,7 @@ class ClassDeclaration extends Statement {
 		
 		return scope
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		if this._continuous {
 			$continuous.class(this, fragments)
 		}
@@ -5390,7 +5441,7 @@ class DoUntilStatement extends Statement {
 		this._condition.fuse()
 		this._body.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('do')
@@ -5420,7 +5471,7 @@ class DoWhileStatement extends Statement {
 		this._body.fuse()
 		this._condition.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('do')
@@ -5454,7 +5505,7 @@ class EnumDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		if this._new {
 			let line = fragments.newLine().code($variable.scope(this), this._variable.name.name, $equals)
 			let object = line.newObject()
@@ -5554,9 +5605,9 @@ class ExportDeclaration extends Statement {
 			declaration.fuse()
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		for declaration in this._declarations {
-			declaration.toFragments(fragments)
+			declaration.toFragments(fragments, Mode::None)
 		}
 	} // }}}
 }
@@ -5587,7 +5638,7 @@ class ExpressionStatement extends Statement {
 	fuse() { // {{{
 		this._expression.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._expression.isAssignable() {
 			if this._variables.length {
 				fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
@@ -5603,7 +5654,7 @@ class ExpressionStatement extends Statement {
 				this._expression.toAssignmentFragments(line)
 			}
 			else {
-				this._expression.toFragments(line)
+				this._expression.toFragments(line, Mode::None)
 			}
 			
 			line.done()
@@ -5617,7 +5668,7 @@ class ExpressionStatement extends Statement {
 				fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
 			}
 			
-			this._expression.toStatementFragments(fragments)
+			this._expression.toStatementFragments(fragments, Mode::None)
 		}
 		else {
 			if this._variables.length {
@@ -5630,7 +5681,7 @@ class ExpressionStatement extends Statement {
 				line.code($variable.scope(this))
 			}
 			
-			line.compile(this._expression).done()
+			line.compile(this._expression, Mode::None).done()
 		}
 		
 		for afterward in this._afterwards {
@@ -5686,7 +5737,7 @@ class ExternDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		for line in this._lines {
 			fragments.line(line)
 		}
@@ -5746,7 +5797,7 @@ class ExternOrRequireDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
 
@@ -5810,7 +5861,7 @@ class ForFromStatement extends Statement {
 	fuse() { // {{{
 		this._body.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let data = this._data
 		
 		let ctrl = fragments.newControl().code('for(')
@@ -5977,7 +6028,7 @@ class ForInStatement extends Statement {
 		this._value.fuse()
 		this._body.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let data = this._data
 		
 		if this._valueName? {
@@ -6157,7 +6208,7 @@ class ForOfStatement extends Statement {
 		this._value.fuse()
 		this._body.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let data = this._data
 		
 		if this._valueName? {
@@ -6280,7 +6331,7 @@ class ForRangeStatement extends Statement {
 	fuse() { // {{{
 		this._body.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let data = this._data
 		
 		let ctrl = fragments.newControl().code('for(')
@@ -6348,6 +6399,7 @@ class ForRangeStatement extends Statement {
 
 class FunctionDeclaration extends Statement {
 	private {
+		_async		= false
 		_parameters
 		_statements
 	}
@@ -6375,11 +6427,22 @@ class FunctionDeclaration extends Statement {
 		this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
 	} // }}}
 	fuse() { // {{{
-		this.compile(this._parameters)
+		for parameter in this._parameters {
+			parameter.analyse()
+			parameter.fuse()
+		}
 		
-		this.compile(this._statements)
+		for statement in this._statements {
+			statement.analyse()
+			
+			this._async = statement.isAsync() if !this._async
+		}
+		
+		for statement in this._statements {
+			statement.fuse()
+		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		ctrl.code('function ' + this._data.name.name + '(')
@@ -6388,8 +6451,30 @@ class FunctionDeclaration extends Statement {
 			node.code(')').step()
 		})
 		
-		for statement in this._statements {
-			ctrl.compile(statement)
+		if this._async {
+			let stack = []
+			
+			let f = ctrl
+			let m = Mode::None
+			
+			let item
+			for statement in this._statements {
+				if item ?= statement.toFragments(f, m) {
+					f = item.fragments
+					m = item.mode
+					
+					stack.push(item)
+				}
+			}
+			
+			for item in stack {
+				item.done(item.fragments)
+			}
+		}
+		else {
+			for statement in this._statements {
+				ctrl.compile(statement, Mode::None)
+			}
 		}
 		
 		ctrl.done()
@@ -6461,13 +6546,13 @@ class IfStatement extends Statement {
 			item.fuse()
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		for item, index in this._items {
 			ctrl.step() if index
 			
-			item.toFragments(ctrl)
+			item.toFragments(ctrl, mode)
 		}
 		
 		ctrl.done()
@@ -6492,7 +6577,7 @@ class IfClause extends AbstractNode {
 		this._condition.fuse()
 		this._body.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.code('if(')
 		
 		if this._condition.isAssignable() {
@@ -6502,7 +6587,7 @@ class IfClause extends AbstractNode {
 			fragments.compileBoolean(this._condition)
 		}
 		
-		fragments.code(')').step().compile(this._body)
+		fragments.code(')').step().compile(this._body, mode)
 	} // }}}
 }
 
@@ -6524,7 +6609,7 @@ class IfElseClause extends AbstractNode {
 		this._condition.fuse()
 		this._body.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.code('else if(')
 		
 		if this._condition.isAssignable() {
@@ -6554,7 +6639,7 @@ class ElseClause extends AbstractNode {
 	fuse() { // {{{
 		this._body.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.code('else').step().compile(this._body)
 	} // }}}
 }
@@ -6608,11 +6693,11 @@ class ImplementDeclaration extends Statement {
 			member.fuse()
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
 		for member in this._members {
-			member.toFragments(fragments)
+			member.toFragments(fragments, Mode::None)
 		}
 	} // }}}
 }
@@ -6637,7 +6722,7 @@ class ImplementFieldDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.line($runtime.helper(this), '.newField(' + $quote(this._data.name.name) + ', ' + $helper.type(this._type, this) + ')')
 	} // }}}
 }
@@ -6724,7 +6809,7 @@ class ImplementMethodDeclaration extends Statement {
 		
 		this.compile(this._statements)
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let data = this._data
 		let variable = this._variable
 		
@@ -6844,7 +6929,7 @@ class ImplementMethodAliasDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let data = this._data
 		let variable = this._variable
 		
@@ -6962,7 +7047,7 @@ class ImplementMethodLinkDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let data = this._data
 		let variable = this._variable
 		
@@ -7033,9 +7118,9 @@ class ImportDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		for declarator in this._declarators {
-			declarator.toFragments(fragments)
+			declarator.toFragments(fragments, mode)
 		}
 	} // }}}
 }
@@ -7053,7 +7138,7 @@ class ImportDeclarator extends Statement {
 		
 		$import.resolve(this._data, module.directory(), module, this)
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		if this._kind == ImportKind::KSFile {
 			$import.toKSFileFragments(this, fragments, this._data, this._metadata)
 		}
@@ -7092,7 +7177,7 @@ class MethodDeclaration extends Statement {
 	} // }}}
 	isConstructor(@isConstructor) => this
 	name(@name) => this
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		ctrl.code(this._name + '(')
@@ -7189,7 +7274,7 @@ class RequireDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
 
@@ -7246,7 +7331,7 @@ class RequireOrExternDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
 
@@ -7267,19 +7352,31 @@ class ReturnStatement extends Statement {
 			this._value.fuse()
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
-		if this._value != null {
-			fragments
-				.newLine()
-				.code('return ')
-				.compile(this._value)
-				.done()
+	toStatementFragments(fragments, mode) { // {{{
+		if mode == Mode::Async {
+			if this._value != null {
+				fragments
+					.newLine()
+					.code('return __ks_cb(null, ')
+					.compile(this._value)
+					.code(')')
+					.done()
+			}
+			else {
+				fragments.line('return __ks_cb()')
+			}
 		}
 		else {
-			fragments
-				.newLine()
-				.code('return', this._data)
-				.done()
+			if this._value != null {
+				fragments
+					.newLine()
+					.code('return ')
+					.compile(this._value)
+					.done()
+			}
+			else {
+				fragments.line('return', this._data)
+			}
 		}
 	} // }}}
 }
@@ -7386,7 +7483,7 @@ class SwitchStatement extends Statement {
 			clause.body.fuse()
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		if this._value? {
 			fragments
 				.newLine()
@@ -7435,7 +7532,7 @@ class SwitchStatement extends Statement {
 					binding.toFragments(ctrl)
 				}
 				
-				clause.body.toFragments(ctrl)
+				clause.body.toFragments(ctrl, mode)
 			}
 			else if clause.hasTest {
 				if clauseIdx {
@@ -7453,7 +7550,7 @@ class SwitchStatement extends Statement {
 					binding.toFragments(ctrl)
 				}
 				
-				clause.body.toFragments(ctrl)
+				clause.body.toFragments(ctrl, mode)
 			}
 			else {
 				if clauseIdx {
@@ -7471,7 +7568,7 @@ class SwitchStatement extends Statement {
 					binding.toFragments(ctrl)
 				}
 				
-				clause.body.toFragments(ctrl)
+				clause.body.toFragments(ctrl, mode)
 			}
 		}
 		
@@ -7816,7 +7913,7 @@ class ThrowStatement extends Statement {
 	fuse() { // {{{
 		this._value.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newLine()
 			.code('throw ')
@@ -7875,7 +7972,7 @@ class TryStatement extends Statement {
 		this._catchClause.fuse() if this._catchClause?
 		this._finalizer.fuse() if this._finalizer?
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let finalizer = null
 		
 		if this._finalizer? {
@@ -7991,7 +8088,7 @@ class TypeAliasDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
 
@@ -8011,7 +8108,7 @@ class UnlessStatement extends Statement {
 		this._condition.fuse()
 		this._then.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('if(!')
@@ -8039,7 +8136,7 @@ class UntilStatement extends Statement {
 		this._condition.fuse()
 		this._body.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('while(!(')
@@ -8053,6 +8150,7 @@ class UntilStatement extends Statement {
 
 class VariableDeclaration extends Statement {
 	private {
+		_async = false
 		_declarators = []
 		_init = false
 	}
@@ -8061,9 +8159,18 @@ class VariableDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		for declarator in this._data.declarations {
-			this._declarators.push(declarator = new VariableDeclarator(declarator, this))
+			if declarator.kind == Kind::AwaitExpression {
+				declarator = new AwaitDeclarator(declarator, this)
+				
+				this._async = true
+			}
+			else {
+				declarator = new VariableDeclarator(declarator, this)
+			}
 			
 			declarator.analyse()
+			
+			this._declarators.push(declarator)
 		}
 	} // }}}
 	fuse() { // {{{
@@ -8071,6 +8178,7 @@ class VariableDeclaration extends Statement {
 			declarator.fuse()
 		}
 	} // }}}
+	isAsync() => this._async
 	modifier(data) { // {{{
 		if data.name.kind == Kind::ArrayBinding || data.name.kind == Kind::ObjectBinding || this._options.variables == 'es5' {
 			return $code('var')
@@ -8084,9 +8192,14 @@ class VariableDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		if this._declarators.length == 1 {
-			this._declarators[0].toFragments(fragments, this._data.modifiers)
+			if this._async {
+				return this._declarators[0].toFragments(fragments)
+			}
+			else {
+				this._declarators[0].toFragments(fragments, this._data.modifiers)
+			}
 		}
 		else {
 			let line = fragments.newLine().code(this.modifier(this._declarators[0]._data), $space)
@@ -8098,6 +8211,74 @@ class VariableDeclaration extends Statement {
 			}
 			
 			line.done()
+		}
+	} // }}}
+}
+
+class AwaitDeclarator extends AbstractNode {
+	private {
+		_operation
+		_variables = []
+	}
+	AwaitDeclarator(data, parent) { // {{{
+		super(data, parent, new Scope(parent._scope))
+	} // }}}
+	analyse() { // {{{
+		let data = this._data
+		
+		this._operation = $compile.expression(data.operation, this)
+		
+		for variable in data.variables {
+			if variable.kind == Kind::VariableDeclarator {
+				$variable.define(this._scope._parent, variable.name, $variable.kind(variable.type), variable.type)
+				
+				this._variables.push($compile.expression(variable.name, this))
+			}
+			else {
+				$variable.define(this._scope._parent, variable, VariableKind::Variable)
+				
+				this._variables.push($compile.expression(variable, this))
+			}
+		}
+	} // }}}
+	fuse() { // {{{
+		this._operation.fuse()
+		
+		for variable in this._variables {
+			variable.fuse()
+		}
+	} // }}}
+	statement() => this._parent.statement()
+	toFragments(fragments) { // {{{
+		let line = fragments.newLine()
+		
+		this._operation.toFragments(line, Mode::Async)
+		
+		line.code('(__ks_e')
+		
+		for variable in this._variables {
+			line.code(', ').compile(variable)
+		}
+		
+		line.code(') =>')
+		
+		let block = line.newBlock()
+		
+		block
+			.newControl()
+			.code('if(__ks_e)')
+			.step()
+			.line('return __ks_cb(__ks_e)')
+			.done()
+		
+		return {
+			fragments: block
+			mode: Mode::Async
+			done: func(block) {
+				block.done()
+				
+				line.code(')').done()
+			}
 		}
 	} // }}}
 }
@@ -8174,7 +8355,7 @@ class WhileStatement extends Statement {
 		this._body.fuse()
 		this._condition.fuse()
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('while(')
@@ -8196,9 +8377,9 @@ class Expression extends AbstractNode {
 	isConditional() => this.isNullable()
 	isEntangled() => true
 	isNullable() => false
-	toBooleanFragments(fragments) => this.toFragments(fragments)
-	toNullableFragments(fragments) => this.toFragments(fragments)
-	toReusableFragments(fragments) => this.toFragments(fragments)
+	toBooleanFragments(fragments) => this.toFragments(fragments, Mode::None)
+	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
+	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
 }
 
 // {{{ Assignment Operators
@@ -8239,43 +8420,43 @@ class AssignmentOperatorExpression extends Expression {
 }
 
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' += ').compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseAnd extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' &= ').compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseLeftShift extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' <<= ').compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseOr extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' |= ').compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseRightShift extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' >>= ').compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseXor extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' ^= ').compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code($equals).compile(this._right)
 	} // }}}
 	toAssignmentFragments(fragments) { // {{{
@@ -8300,7 +8481,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		this._right.analyseReusable()
 	} // }}}
 	isAssignable() => false
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._right.isNullable() {
 			fragments
 				.wrapNullable(this._right)
@@ -8349,20 +8530,20 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorModulo extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' %= ').compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorMultiplication extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' *= ').compile(this._right)
 	} // }}}
 }
 
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	isAssignable() => false
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.compileNullable(this._left)
 			.code(' ? undefined : ')
@@ -8370,7 +8551,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 			.code($equals)
 			.compile(this._right)
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		ctrl
@@ -8389,7 +8570,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorSubtraction extends AssignmentOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code(' -= ').compile(this._right)
 	} // }}}
 }
@@ -8412,7 +8593,7 @@ class BinaryOperatorExpression extends Expression {
 		this._left.fuse()
 		this._right.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		let test = this.isNullable() && !this._tested
 		if test {
 			fragments
@@ -8628,7 +8809,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			this._left.analyseReusable()
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.compileNullable(this._left)
 			.code(' ? ')
@@ -8670,7 +8851,7 @@ class BinaryOperatorTypeCast extends Expression {
 	fuse() { // {{{
 		this._left.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._left)
 	} // }}}
 }
@@ -8684,7 +8865,7 @@ class BinaryOperatorTypeCheck extends Expression {
 	fuse() { // {{{
 		this._left.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		$type.check(this, fragments, this._left, this._data.right)
 	} // }}}
 }
@@ -8723,7 +8904,7 @@ class ArrayBinding extends Expression {
 			element.fuse()
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._existingCount && this._nonexistingCount {
 			fragments.code('[')
 			
@@ -8739,7 +8920,7 @@ class ArrayBinding extends Expression {
 					this._variables[name] = element.name.name
 				}
 				else {
-					fragments.compile(this._elements[i])
+					this._elements[i].toFragments(fragments)
 				}
 			}
 			
@@ -8753,7 +8934,7 @@ class ArrayBinding extends Expression {
 			for i from 0 til this._elements.length {
 				fragments.code(', ') if i
 				
-				fragments.compile(this._elements[i])
+				this._elements[i].toFragments(fragments)
 			}
 			
 			fragments.code(']')
@@ -8771,7 +8952,7 @@ class ArrayBinding extends Expression {
 			fragments.code('var ')
 		}
 		
-		this.toFragments(fragments)
+		this.toFragments(fragments, Mode::None)
 	} // }}}
 }
 
@@ -8804,7 +8985,7 @@ class ArrayComprehensionForIn extends Expression {
 		this._body.fuse()
 		this._when.fuse() if this._when?
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
 		fragments
@@ -8872,7 +9053,7 @@ class ArrayComprehensionForOf extends Expression {
 		this._body.fuse()
 		this._when.fuse() if this._when?
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
 		fragments
@@ -8949,7 +9130,7 @@ class ArrayComprehensionForRange extends Expression {
 		this._body.fuse()
 		this._when.fuse() if this._when?
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
 		fragments
@@ -9004,7 +9185,7 @@ class ArrayExpression extends Expression {
 			value.fuse()
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.code('[')
 		
 		for value, index in this._values {
@@ -9035,7 +9216,7 @@ class ArrayRange extends Expression {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
 		fragments
@@ -9146,9 +9327,9 @@ class BlockExpression extends Expression {
 			statement.fuse()
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		for statement in this._body {
-			statement.toFragments(fragments)
+			statement.toFragments(fragments, mode)
 		}
 	} // }}}
 }
@@ -9224,72 +9405,76 @@ class CallExpression extends Expression {
 	isNullable() { // {{{
 		return this._data.nullable || this._callee.isNullable()
 	} // }}}
-	toFragments(fragments) { // {{{
-		if this._reusable {
-			fragments.code(this._reuseName)
+	toFragments(fragments, mode) { // {{{
+		if mode == Mode::Async {
+			this.toCallFragments(fragments, mode)
+			
+			fragments.code(', ') if this._arguments.length
 		}
-		else if this.isNullable() && !this._tested {
-			fragments.wrapNullable(this).code(' ? ')
-			
-			this._tested = true
-			
-			this.toFragments(fragments)
-			
-			fragments.code(' : undefined')
+		else {
+			if this._reusable {
+				fragments.code(this._reuseName)
+			}
+			else if this.isNullable() && !this._tested {
+				fragments.wrapNullable(this).code(' ? ')
+				
+				this._tested = true
+				
+				this.toFragments(fragments, mode)
+				
+				fragments.code(' : undefined')
+			}
+			else {
+				this.toCallFragments(fragments, mode)
+				
+				fragments.code(')')
+			}
 		}
-		else if this._list {
-			let data = this._data
-			
+	} // }}}
+	toCallFragments(fragments, mode) {
+		let data = this._data
+		
+		if this._list {
 			if data.scope.kind == ScopeModifier::This {
-				fragments.compile(this._callee).code('(')
+				fragments.compile(this._callee, mode).code('(')
 				
 				for argument, index in this._arguments {
 					fragments.code($comma) if index
 					
-					fragments.compile(argument)
+					fragments.compile(argument, mode)
 				}
-				
-				fragments.code(')')
 			}
 			else if data.scope.kind == ScopeModifier::Null {
-				fragments.compile(this._callee).code('.call(null')
+				fragments.compile(this._callee, mode).code('.call(null')
 				
 				for argument in this._arguments {
-					fragments.code($comma).compile(argument)
+					fragments.code($comma).compile(argument, mode)
 				}
-				
-				fragments.code(')')
 			}
 			else {
-				fragments.compile(this._callee).code('.call(').compile(this._callScope)
+				fragments.compile(this._callee, mode).code('.call(').compile(this._callScope, mode)
 				
 				for argument in this._arguments {
-					fragments.code($comma).compile(argument)
+					fragments.code($comma).compile(argument, mode)
 				}
-				
-				fragments.code(')')
 			}
 		}
 		else {
-			let data = this._data
-			
-			fragments.compile(this._callee).code('.apply(')
+			fragments.compile(this._callee, mode).code('.apply(')
 			
 			if data.scope.kind == ScopeModifier::Null {
 				fragments.code('null')
 			}
 			else if data.scope.kind == ScopeModifier::This {
-				fragments.compile(this._caller)
+				fragments.compile(this._caller, mode)
 			}
 			else {
-				fragments.compile(this._callScope)
+				fragments.compile(this._callScope, mode)
 			}
 			
-			fragments.code($comma).compile(this._arguments[0])
-			
-			fragments.code(')')
+			fragments.code($comma).compile(this._arguments[0], mode)
 		}
-	} // }}}
+	}
 	toNullableFragments(fragments) { // {{{
 		if !this._tested {
 			this._tested = true
@@ -9362,7 +9547,7 @@ class CallFinalExpression extends Expression {
 	isNullable() { // {{{
 		return this._data.nullable || this._object.isNullable()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._callee.variable? {
 			let path = this._callee.variable.accessPath? ? this._callee.variable.accessPath + this._callee.variable.final.name : this._callee.variable.final.name
 			
@@ -9516,7 +9701,7 @@ class CurryExpression extends Expression {
 	isNullable() { // {{{
 		return this._data.nullable || this._callee.isNullable()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this.isNullable() && !this._tested {
 			fragments.wrapNullable(this).code(' ? ')
 			
@@ -9656,13 +9841,14 @@ class EnumExpression extends Expression {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._enum).code('.', this._data.member.name)
 	} // }}}
 }
 
 class FunctionExpression extends Expression {
 	private {
+		_async		= false
 		_parameters
 		_statements
 	}
@@ -9677,21 +9863,20 @@ class FunctionExpression extends Expression {
 	fuse() { // {{{
 		for parameter in this._parameters {
 			parameter.analyse()
+			parameter.fuse()
 		}
 		
 		for statement in this._statements {
 			statement.analyse()
-		}
-		
-		for parameter in this._parameters {
-			parameter.fuse()
+			
+			this._async = statement.isAsync() if !this._async
 		}
 		
 		for statement in this._statements {
 			statement.fuse()
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.code('function(')
 		
 		let block
@@ -9699,8 +9884,30 @@ class FunctionExpression extends Expression {
 			block = node.code(')').newBlock()
 		})
 		
-		for statement in this._statements {
-			block.compile(statement)
+		if this._async {
+			let stack = []
+			
+			let f = block
+			let m = Mode::None
+			
+			let item
+			for statement in this._statements {
+				if item ?= statement.toFragments(f, m) {
+					f = item.fragments
+					m = item.mode
+					
+					stack.push(item)
+				}
+			}
+			
+			for item in stack {
+				item.done(item.fragments)
+			}
+		}
+		else {
+			for statement in this._statements {
+				block.compile(statement)
+			}
 		}
 		
 		block.done()
@@ -9713,8 +9920,30 @@ class FunctionExpression extends Expression {
 			block = node.code(')').newBlock()
 		})
 		
-		for statement in this._statements {
-			block.compile(statement)
+		if this._async {
+			let stack = []
+			
+			let f = block
+			let m = Mode::None
+			
+			let item
+			for statement in this._statements {
+				if item ?= statement.toFragments(f, m) {
+					f = item.fragments
+					m = item.mode
+					
+					stack.push(item)
+				}
+			}
+			
+			for item in stack {
+				item.done(item.fragments)
+			}
+		}
+		else {
+			for statement in this._statements {
+				block.compile(statement)
+			}
 		}
 		
 		block.done()
@@ -9741,7 +9970,7 @@ class IfExpression extends Expression {
 		this._else.fuse() if this._else?
 	} // }}}
 	isComputed() => true
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._else? {
 			fragments
 				.wrapBoolean(this._condition)
@@ -9758,7 +9987,7 @@ class IfExpression extends Expression {
 				.code(' : undefined')
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		ctrl.code('if(')
@@ -9800,7 +10029,7 @@ class MemberExpression extends Expression {
 	isCallable() => this._object.isCallable()
 	isEntangled() => this.isCallable() || this.isNullable()
 	isNullable() => this._data.nullable || this._object.isNullable() || (this._data.computed && this._property.isNullable())
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this.isNullable() && !this._tested {
 			fragments.wrapNullable(this).code(' ? ').compile(this._object)
 			
@@ -9960,7 +10189,7 @@ class ObjectBinding extends Expression {
 			element.fuse()
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._exists {
 			fragments.code('{')
 			
@@ -9990,7 +10219,7 @@ class ObjectBinding extends Expression {
 			for i from 0 til this._elements.length {
 				fragments.code(', ') if i
 				
-				fragments.compile(this._elements[i])
+				this._elements[i].toFragments(fragments)
 			}
 			
 			fragments.code('}')
@@ -10006,7 +10235,7 @@ class ObjectBinding extends Expression {
 	toAssignmentFragments(fragments) { // {{{
 		fragments.code('var ')
 		
-		this.toFragments(fragments)
+		this.toFragments(fragments, Mode::None)
 	} // }}}
 }
 
@@ -10040,7 +10269,7 @@ class ObjectExpression extends Expression {
 		}
 	} // }}}
 	reference() => this._parent.reference()
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._properties.length {
 			let object = fragments.newObject()
 			
@@ -10083,7 +10312,7 @@ class ObjectMember extends Expression {
 	fuse() { // {{{
 		this._value.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._name)
 		
 		if this._data.value.kind == Kind::FunctionExpression {
@@ -10162,7 +10391,7 @@ class PolyadicOperatorExpression extends Expression {
 			operand.fuse()
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		let test = this.isNullable() && !this._tested
 		if test {
 			fragments
@@ -10276,7 +10505,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			}
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		this.module().flag('Type')
 		
 		let l = this._operands.length - 1
@@ -10307,7 +10536,7 @@ class RegularExpression extends Expression {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments.code(this._data.value)
 	} // }}}
 }
@@ -10331,7 +10560,7 @@ class TernaryConditionalExpression extends Expression {
 		this._then.fuse()
 		this._else.fuse()
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(this._condition)
 			.code(' ? ')
@@ -10354,7 +10583,7 @@ class TemplateExpression extends Expression {
 	fuse() { // {{{
 	} // }}}
 	isComputed() => this._elements.length > 1
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		for element, index in this._elements {
 			fragments.code(' + ') if index
 			
@@ -10383,7 +10612,7 @@ class UnlessExpression extends Expression {
 		this._else.fuse() if this._else?
 	} // }}}
 	isComputed() => true
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._else? {
 			fragments
 				.wrapBoolean(this._condition)
@@ -10399,7 +10628,7 @@ class UnlessExpression extends Expression {
 				.compile(this._then)
 		}
 	} // }}}
-	toStatementFragments(fragments) { // {{{
+	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('if(!')
@@ -10426,7 +10655,7 @@ class UnaryOperatorExpression extends Expression {
 }
 
 class UnaryOperatorDecrementPostfix extends UnaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrap(this._argument)
 			.code('--', this._data.operator)
@@ -10434,7 +10663,7 @@ class UnaryOperatorDecrementPostfix extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorDecrementPrefix extends UnaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('--', this._data.operator)
 			.wrap(this._argument)
@@ -10442,7 +10671,7 @@ class UnaryOperatorDecrementPrefix extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._argument.isNullable() {
 			fragments
 				.wrapNullable(this._argument)
@@ -10461,7 +10690,7 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorIncrementPostfix extends UnaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrap(this._argument)
 			.code('++', this._data.operator)
@@ -10469,7 +10698,7 @@ class UnaryOperatorIncrementPostfix extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('++', this._data.operator)
 			.wrap(this._argument)
@@ -10477,7 +10706,7 @@ class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('!', this._data.operator)
 			.wrapBoolean(this._argument)
@@ -10485,7 +10714,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorNegative extends UnaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('-', this._data.operator)
 			.wrap(this._argument)
@@ -10493,7 +10722,7 @@ class UnaryOperatorNegative extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorNew extends UnaryOperatorExpression {
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('new', this._data.operator, $space)
 			.wrap(this._argument)
@@ -10518,7 +10747,7 @@ class Literal extends Expression {
 	} // }}}
 	isComposite() => false
 	isEntangled() => false
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._data {
 			fragments.code(this._value, this._data)
 		}
@@ -10543,7 +10772,7 @@ class IdentifierLiteral extends Literal {
 			}
 		}
 	} // }}}
-	toFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if this._isVariable {
 			fragments.code(this._scope.getRenamedVariable(this._value), this._data)
 		}
