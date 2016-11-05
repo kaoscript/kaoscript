@@ -13274,6 +13274,172 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
+	class IncludeDeclaration extends Statement {
+		__ks_init_1() {
+			this._statements = [];
+		}
+		__ks_init() {
+			Statement.prototype.__ks_init.call(this);
+			IncludeDeclaration.prototype.__ks_init_1.call(this);
+		}
+		__ks_cons_0(data, parent) {
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(parent === undefined || parent === null) {
+				throw new Error("Missing parameter 'parent'");
+			}
+			Statement.prototype.__ks_cons.call(this, [data, parent]);
+		}
+		__ks_cons(args) {
+			if(args.length === 2) {
+				IncludeDeclaration.prototype.__ks_cons_0.apply(this, args);
+			}
+			else {
+				Statement.prototype.__ks_cons.call(this, args);
+			}
+		}
+		__ks_func_analyse_0() {
+			var directory = this.module().directory();
+			var path, data;
+			for(var __ks_0 = 0, __ks_1 = this._data.files.length, file; __ks_0 < __ks_1; ++__ks_0) {
+				file = this._data.files[__ks_0];
+				if(/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(file)) {
+					path = fs.resolve(directory, file);
+					if(fs.isFile(path) || fs.isFile(path += $extensions.source)) {
+						data = parse(fs.readFile(path));
+						for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
+							statement = data.body[__ks_2];
+							this._statements.push(statement = $compile.statement(statement, this));
+							statement.analyse();
+						}
+					}
+					else {
+						throw new Error("Cannot find file '" + file + "' from '" + directory + "'");
+					}
+				}
+				else {
+					var nf = true;
+					var __ks_2 = $import.nodeModulesPaths(directory);
+					for(var __ks_3 = 0, __ks_4 = __ks_2.length, dir; nf && __ks_3 < __ks_4; ++__ks_3) {
+						dir = __ks_2[__ks_3];
+						path = fs.resolve(dir, file);
+						if(fs.isFile(path) || fs.isFile(path += $extensions.source)) {
+							nf = false;
+						}
+					}
+					if(nf) {
+						throw new Error("Cannot find module '" + file + "' from '" + directory + "'");
+					}
+					data = parse(fs.readFile(path));
+					for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
+						statement = data.body[__ks_2];
+						this._statements.push(statement = $compile.statement(statement, this));
+						statement.analyse();
+					}
+				}
+			}
+		}
+		analyse() {
+			if(arguments.length === 0) {
+				return IncludeDeclaration.prototype.__ks_func_analyse_0.apply(this);
+			}
+			else if(Statement.prototype.analyse) {
+				return Statement.prototype.analyse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_fuse_0() {
+			for(var __ks_0 = 0, __ks_1 = this._statements.length, statement; __ks_0 < __ks_1; ++__ks_0) {
+				statement = this._statements[__ks_0];
+				statement.fuse();
+			}
+		}
+		fuse() {
+			if(arguments.length === 0) {
+				return IncludeDeclaration.prototype.__ks_func_fuse_0.apply(this);
+			}
+			else if(Statement.prototype.fuse) {
+				return Statement.prototype.fuse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_toFragments_0(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			for(var __ks_0 = 0, __ks_1 = this._statements.length, statement; __ks_0 < __ks_1; ++__ks_0) {
+				statement = this._statements[__ks_0];
+				statement.toFragments(fragments, mode);
+			}
+		}
+		toFragments() {
+			if(arguments.length === 2) {
+				return IncludeDeclaration.prototype.__ks_func_toFragments_0.apply(this, arguments);
+			}
+			return Statement.prototype.toFragments.apply(this, arguments);
+		}
+	}
+	IncludeDeclaration.__ks_reflect = {
+		inits: 1,
+		constructors: [
+			{
+				access: 3,
+				min: 2,
+				max: 2,
+				parameters: [
+					{
+						type: "Any",
+						min: 2,
+						max: 2
+					}
+				]
+			}
+		],
+		instanceVariables: {
+			_statements: {
+				access: 1,
+				type: "Any"
+			}
+		},
+		classVariables: {},
+		instanceMethods: {
+			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			fuse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			toFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
 	class MethodDeclaration extends Statement {
 		__ks_init_1() {
 			this._isConstructor = false;
@@ -25759,6 +25925,7 @@ module.exports = function() {
 	$statements[Kind.IfStatement] = IfStatement;
 	$statements[Kind.ImplementDeclaration] = ImplementDeclaration;
 	$statements[Kind.ImportDeclaration] = ImportDeclaration;
+	$statements[Kind.IncludeDeclaration] = IncludeDeclaration;
 	$statements[Kind.MethodDeclaration] = MethodDeclaration;
 	$statements[Kind.Module] = Module;
 	$statements[Kind.RequireDeclaration] = RequireDeclaration;

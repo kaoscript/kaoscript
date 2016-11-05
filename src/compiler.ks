@@ -7210,6 +7210,70 @@ class ImportDeclarator extends Statement {
 	} // }}}
 }
 
+class IncludeDeclaration extends Statement {
+	private {
+		_statements = []
+	}
+	IncludeDeclaration(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		let directory = this.module().directory()
+		
+		let path, data
+		for file in this._data.files {
+			if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(file) {
+				path = fs.resolve(directory, file)
+				
+				if fs.isFile(path) || fs.isFile(path += $extensions.source) {
+					data = parse(fs.readFile(path))
+					
+					for statement in data.body {
+						this._statements.push(statement = $compile.statement(statement, this))
+						
+						statement.analyse()
+					}
+				}
+				else {
+					throw new Error(`Cannot find file '\(file)' from '\(directory)'`)
+				}
+			}
+			else {
+				let nf = true
+				for dir in $import.nodeModulesPaths(directory) while nf {
+					path = fs.resolve(dir, file)
+				
+					if fs.isFile(path) || fs.isFile(path += $extensions.source) {
+						nf = false
+					}
+				}
+				
+				if nf {
+					throw new Error(`Cannot find module '\(file)' from '\(directory)'`)
+				}
+				
+				data = parse(fs.readFile(path))
+				
+				for statement in data.body {
+					this._statements.push(statement = $compile.statement(statement, this))
+					
+					statement.analyse()
+				}
+			}
+		}
+	} // }}}
+	fuse() { // {{{
+		for statement in this._statements {
+			statement.fuse()
+		}
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		for statement in this._statements {
+			statement.toFragments(fragments, mode)
+		}
+	} // }}}
+}
+
 class MethodDeclaration extends Statement {
 	private {
 		_isConstructor = false
@@ -11127,6 +11191,7 @@ const $statements = {
 	`\(Kind::IfStatement)`					: IfStatement
 	`\(Kind::ImplementDeclaration)`			: ImplementDeclaration
 	`\(Kind::ImportDeclaration)`			: ImportDeclaration
+	`\(Kind::IncludeDeclaration)`			: IncludeDeclaration
 	`\(Kind::MethodDeclaration)`			: MethodDeclaration
 	`\(Kind::Module)`						: Module
 	`\(Kind::RequireDeclaration)`			: RequireDeclaration
