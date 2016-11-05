@@ -2323,7 +2323,8 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_line_0(...args) {
-			this.newLine().code.apply(this.newLine(), args);
+			var __ks_0;
+			(__ks_0 = this.newLine(), __ks_0.code).apply(__ks_0, args);
 			return this;
 		}
 		line() {
@@ -2558,11 +2559,11 @@ module.exports = function() {
 		if(node === undefined || node === null) {
 			throw new Error("Missing parameter 'node'");
 		}
-		if(data.kind === Kind.Identifier) {
-			return $compile.expression(data, node);
+		if(Type.is(data, IdentifierLiteral)) {
+			return data;
 		}
-		else if(data.kind === Kind.MemberExpression) {
-			return $compile.expression(data.object, node);
+		else if(Type.is(data, MemberExpression)) {
+			return data._object;
 		}
 		else {
 			console.error(data);
@@ -20918,9 +20919,9 @@ module.exports = function() {
 				if(this._arguments.length !== 1) {
 					throw new Error("Invalid to call function at line " + this._data.start.line);
 				}
-				this._caller = $caller(this._data.callee, this);
+				this._caller = $caller(this._callee, this);
 			}
-			if(this._data.nullable && (this._callee.isNullable() || this._callee.isCallable())) {
+			if((this._data.nullable && (this._callee.isNullable() || this._callee.isCallable())) || (!this._list && (this._data.scope.kind === ScopeModifier.This))) {
 				this._callee.analyseReusable();
 			}
 		}
@@ -21060,15 +21061,14 @@ module.exports = function() {
 				}
 			}
 			else {
-				fragments.compile(this._callee, mode).code(".apply(");
 				if(data.scope.kind === ScopeModifier.Null) {
-					fragments.code("null");
+					fragments.compile(this._callee, mode).code(".apply(null");
 				}
 				else if(data.scope.kind === ScopeModifier.This) {
-					fragments.compile(this._caller, mode);
+					fragments.compileReusable(this._callee).code(".apply(").compile(this._caller, mode);
 				}
 				else {
-					fragments.compile(this._callScope, mode);
+					fragments.compile(this._callee, mode).code(".apply(").compile(this._callScope, mode);
 				}
 				fragments.code($comma).compile(this._arguments[0], mode);
 			}
@@ -21592,7 +21592,7 @@ module.exports = function() {
 				throw new Error("Invalid curry syntax at line " + this._data.start.line);
 			}
 			if(this._data.scope.kind === ScopeModifier.This) {
-				this._caller = $caller(this._data.callee, this);
+				this._caller = $caller(this._callee, this);
 			}
 			else if(this._data.scope.kind === ScopeModifier.Argument) {
 				this._callScope = $compile.expression(this._data.scope.value, this);
