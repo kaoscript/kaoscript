@@ -17,7 +17,7 @@ import {
 	* as path		from path
 }
 
-extern console, JSON, process, require
+extern console, Error, JSON, process, require
 
 func $clone(value?) { // {{{
 	if value == null {
@@ -71,23 +71,34 @@ extern {
 
 impl Array {
 	append(...args) { // {{{
-		if args.length == 1 {
-			this.push.apply(this, Array.from(args[0]))
-		}
-		else {
-			for i from 0 til args.length {
-				this.push.apply(this, Array.from(args[i]))
+		let l, i, j, arg
+		for k from 0 til args.length {
+			arg = Array.from(args[k])
+			
+			if (l = arg.length) > 50000 {
+				i = 0
+				j = 50000
+				
+				while(i < l) {
+					this.push(...arg.slice(i, j))
+					
+					i = j
+					j += 50000
+				}
+			}
+			else {
+				this.push(...arg)
 			}
 		}
 		return this
 	} // }}}
 	appendUniq(...args) { // {{{
 		if args.length == 1 {
-			this.pushUniq.apply(this, Array.from(args[0]))
+			this.pushUniq(...args[0])
 		}
 		else {
 			for i from 0 til args.length {
-				this.pushUniq.apply(this, Array.from(args[i]))
+				this.pushUniq(...args[i])
 			}
 		}
 		return this
@@ -1329,13 +1340,13 @@ const $function = {
 	} // }}}
 	parameters(node, fragments, fn) { // {{{
 		if node._options.parameters == 'es5' {
-			$function.parametersES5(node, fragments, fn)
+			return $function.parametersES5(node, fragments, fn)
 		}
 		else if node._options.parameters == 'es6' {
-			$function.parametersES6(node, fragments, fn)
+			return $function.parametersES6(node, fragments, fn)
 		}
 		else {
-			$function.parametersKS(node, fragments, fn)
+			return $function.parametersKS(node, fragments, fn)
 		}
 	} // }}}
 	parametersES5(node, fragments, fn) { // {{{
@@ -1361,7 +1372,7 @@ const $function = {
 			fragments.code(parameter.name.name, parameter.name)
 		}
 		
-		fn(fragments)
+		return fn(fragments)
 	} // }}}
 	parametersES6(node, fragments, fn) { // {{{
 		let data = node._data
@@ -1398,7 +1409,7 @@ const $function = {
 			}
 		}
 		
-		fn(fragments)
+		return fn(fragments)
 	} // }}}
 	parametersKS(node, fragments, fn) { // {{{
 		let data = node._data
@@ -1500,7 +1511,7 @@ const $function = {
 				fragments.code('__ks_cb')
 			}
 			
-			fn(fragments)
+			fragments = fn(fragments)
 			
 			if ra {
 				fragments
@@ -1636,7 +1647,7 @@ const $function = {
 			}
 		} // }}}
 		else { // {{{
-			fn(fragments)
+			fragments = fn(fragments)
 			
 			if signature.min {
 				fragments
@@ -2008,6 +2019,8 @@ const $function = {
 				}
 			}
 		} // }}}
+		
+		return fragments
 	} // }}}
 	signature(data, scope) { // {{{
 		let signature = {
@@ -2084,8 +2097,14 @@ const $function = {
 }
 
 const $helper = {
-	analyseType(type, node) { // {{{
-		if type is Array {
+	analyseType(type?, node) { // {{{
+		if !?type {
+			return {
+				kind: HelperTypeKind::Native
+				type: 'Any'
+			}
+		}
+		else if type is Array {
 			return [$helper.analyseType(t, node) for t in type]
 		}
 		else if type == 'Any' || type == '...'  || $typeofs[type] {
@@ -2116,7 +2135,7 @@ const $helper = {
 				if node._extendsVariable.classMethods[name] {
 					ctrl.done()
 					
-					fragments.code('return ' + node._extendsName + '.' + name + '.apply(null, arguments)')
+					fragments.line('return ' + node._extendsName + '.' + name + '.apply(null, arguments)')
 				}
 				else {
 					ctrl
@@ -2901,7 +2920,7 @@ const $import = {
 				continue
 			}
 			
-			dirs.push(prefix + path.join(path.join.apply(path, parts.slice(0, i + 1)), 'node_modules'))
+			dirs.push(prefix + path.join(path.join(...parts.slice(0, i + 1)), 'node_modules'))
 		}
 		
 		if process.platform == 'win32' {
@@ -3859,9 +3878,9 @@ const $variable = {
 				let variables = []
 				
 				for type in variable.type.types {
-					return null unless (variable ?= $variable.fromType(type, node)) && (variable ?= $variable.filterMember(variable, name, node))
+					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $variable.filterMember(v, name, node))
 					
-					variables.push(variable)
+					variables.push(v)
 				}
 				
 				return variables
@@ -3895,9 +3914,9 @@ const $variable = {
 				let variables = []
 				
 				for type in variable.type.types {
-					return null unless (variable ?= $variable.fromType(type, node)) && (variable ?= $variable.filterMember(variable, name, node))
+					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $variable.filterMember(v, name, node))
 					
-					variables.push(variable)
+					variables.push(v)
 				}
 				
 				return variables
@@ -4385,6 +4404,7 @@ class AbstractScope {
 
 class Scope extends AbstractScope {
 	private {
+		_scopeParent
 		_tempNextIndex 		= 0
 		_tempNames			= {}
 		_tempNameCount		= 0
@@ -4393,10 +4413,17 @@ class Scope extends AbstractScope {
 	Scope(parent) { // {{{
 		super(parent)
 		
-		this._tempNextIndex = parent._tempNextIndex
+		while parent? && !(parent is Scope) {
+			parent = parent._parent
+		}
+		
+		if parent? {
+			this._scopeParent = parent
+			this._tempNextIndex = parent._tempNextIndex
+		}
 	} // }}}
 	acquireTempName(statement: Statement?, assignment = false) { // {{{
-		if this._parent && (name ?= this._parent.acquireTempNameFromKid()) {
+		if this._scopeParent && (name ?= this._scopeParent.acquireTempNameFromKid()) {
 			this._tempParentNames[name] = true
 			
 			return name
@@ -4471,8 +4498,8 @@ class Scope extends AbstractScope {
 	} // }}}
 	releaseTempName(name) { // {{{
 		if name.length > 5 && name.substr(0, 5) == '__ks_' {
-			if this._parent && this._tempParentNames[name] {
-				this._parent.releaseTempNameFromKid(name)
+			if this._scopeParent && this._tempParentNames[name] {
+				this._scopeParent.releaseTempNameFromKid(name)
 				
 				this._tempParentNames[name] = false
 			}
@@ -5003,11 +5030,11 @@ class ModuleBlock extends AbstractNode {
 		_body: Array		= []
 		_module
 	}
-	ModuleBlock(data, @module) {
+	ModuleBlock(data, @module) { // {{{
 		this._data = data
 		this._options = $applyAttributes(data, module._options)
 		this._scope = new Scope()
-	}
+	} // }}}
 	analyse() { // {{{
 		for statement in this._data.body {
 			this._body.push(statement = $compile.statement(statement, this))
@@ -5070,6 +5097,19 @@ class Statement extends AbstractNode {
 				afterward.toAfterwardFragments(fragments)
 			}
 		}
+	} // }}}
+}
+
+class BreakStatement extends Statement {
+	BreakStatement(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+	} // }}}
+	fuse() { // {{{
+	} // }}}
+	toStatementFragments(fragments, mode) { // {{{
+		fragments.line('break', this._data)
 	} // }}}
 }
 
@@ -5428,6 +5468,19 @@ class ClassDeclaration extends Statement {
 	} // }}}
 }
 
+class ContinueStatement extends Statement {
+	ContinueStatement(data, parent) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+	} // }}}
+	fuse() { // {{{
+	} // }}}
+	toStatementFragments(fragments, mode) { // {{{
+		fragments.line('continue', this._data)
+	} // }}}
+}
+
 class DoUntilStatement extends Statement {
 	private {
 		_body
@@ -5573,6 +5626,13 @@ class ExportDeclaration extends Statement {
 					module.export(declaration.name, declaration.alias)
 				}
 				Kind::EnumDeclaration => {
+					this._declarations.push(statement = $compile.statement(declaration, this))
+					
+					statement.analyse()
+					
+					module.export(declaration.name)
+				}
+				Kind::FunctionDeclaration => {
 					this._declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
@@ -6451,7 +6511,7 @@ class FunctionDeclaration extends Statement {
 		ctrl.code('function ' + this._data.name.name + '(')
 		
 		$function.parameters(this, ctrl, func(node) {
-			node.code(')').step()
+			return node.code(')').step()
 		})
 		
 		if this._async {
@@ -6847,7 +6907,7 @@ class ImplementMethodDeclaration extends Statement {
 			let ctrl = object.newControl().code('function: function(')
 			
 			$function.parameters(this, ctrl, func(fragments) {
-				fragments.code(')').step()
+				return fragments.code(')').step()
 			})
 			
 			for statement in this._statements {
@@ -7182,7 +7242,7 @@ class MethodDeclaration extends Statement {
 		ctrl.code(this._name + '(')
 		
 		$function.parameters(this, ctrl, func(node) {
-			node.code(')').step()
+			return node.code(')').step()
 		})
 		
 		let variable = this._parent._variable
@@ -7406,7 +7466,7 @@ class SwitchStatement extends Statement {
 				hasTest: false
 				bindings: []
 				conditions: []
-				scope: new Scope(this._scope)
+				scope: this.newScope()
 			}
 			
 			this._scope = clause.scope
@@ -8101,7 +8161,7 @@ class UnlessStatement extends Statement {
 	} // }}}
 	analyse() { // {{{
 		this._condition = $compile.expression(this._data.condition, this)
-		this._then = $compile.expression(this._data.then, this)
+		this._then = $compile.expression($block(this._data.then), this)
 	} // }}}
 	fuse() { // {{{
 		this._condition.fuse()
@@ -8863,7 +8923,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			.code(' ? ')
 			.compile(this._left)
 			.code(' : ')
-			.compile(this._right)
+			.wrap(this._right)
 	} // }}}}
 }
 
@@ -9384,14 +9444,14 @@ class BlockExpression extends Expression {
 
 class CallExpression extends Expression {
 	private {
-		_arguments	= []
+		_arguments		= []
 		_callee
 		_caller
 		_callScope
-		_list		= true
-		_reusable	= false
-		_reuseName	= null
-		_tested		= false
+		_list			= true
+		_reusable		= false
+		_reuseName		= null
+		_tested			= false
 	}
 	CallExpression(data, parent) { // {{{
 		super(data, parent)
@@ -9927,9 +9987,8 @@ class FunctionExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.code('function(')
 		
-		let block
-		$function.parameters(this, fragments, func(node) {
-			block = node.code(')').newBlock()
+		let block = $function.parameters(this, fragments, func(fragments) {
+			return fragments.code(')').newBlock()
 		})
 		
 		if this._async {
@@ -9963,9 +10022,8 @@ class FunctionExpression extends Expression {
 	toShorthandFragments(fragments) { // {{{
 		fragments.code('(')
 		
-		let block
-		$function.parameters(this, fragments, func(node) {
-			block = node.code(')').newBlock()
+		let block = $function.parameters(this, fragments, func(fragments) {
+			return fragments.code(')').newBlock()
 		})
 		
 		if this._async {
@@ -10055,7 +10113,7 @@ class MemberExpression extends Expression {
 	private {
 		_object
 		_property
-		_tested = false
+		_tested			= false
 	}
 	MemberExpression(data, parent) { // {{{
 		super(data, parent)
@@ -10662,6 +10720,7 @@ class TernaryConditionalExpression extends Expression {
 		this._then.fuse()
 		this._else.fuse()
 	} // }}}
+	isComputed() => true
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(this._condition)
@@ -11045,7 +11104,9 @@ const $expressions = {
 }
 
 const $statements = {
+	`\(Kind::BreakStatement)`				: BreakStatement
 	`\(Kind::ClassDeclaration)`				: ClassDeclaration
+	`\(Kind::ContinueStatement)`			: ContinueStatement
 	`\(Kind::DoUntilStatement)`				: DoUntilStatement
 	`\(Kind::DoWhileStatement)`				: DoWhileStatement
 	`\(Kind::EnumDeclaration)`				: EnumDeclaration
