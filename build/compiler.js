@@ -24975,6 +24975,267 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
+	class PolyadicOperatorDivision extends PolyadicOperatorExpression {
+		__ks_init() {
+			PolyadicOperatorExpression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_toOperatorFragments_0(fragments) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			var nf = false;
+			for(var __ks_0 = 0, __ks_1 = this._operands.length, operand; __ks_0 < __ks_1; ++__ks_0) {
+				operand = this._operands[__ks_0];
+				if(nf) {
+					fragments.code($space).code("/", this._data.operator).code($space);
+				}
+				else {
+					nf = true;
+				}
+				fragments.wrap(operand);
+			}
+		}
+		toOperatorFragments() {
+			if(arguments.length === 1) {
+				return PolyadicOperatorDivision.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+			}
+			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
+				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	PolyadicOperatorDivision.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			toOperatorFragments: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class PolyadicOperatorEquality extends PolyadicOperatorExpression {
+		__ks_init() {
+			PolyadicOperatorExpression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_toOperatorFragments_0(fragments) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			var l = this._operands.length - 1;
+			for(var i = 0; i < l; ++i) {
+				if(i) {
+					fragments.code(" && ");
+				}
+				fragments.compile(this._operands[i]).code(" === ").compile(this._operands[i + 1]);
+			}
+		}
+		toOperatorFragments() {
+			if(arguments.length === 1) {
+				return PolyadicOperatorEquality.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+			}
+			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
+				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	PolyadicOperatorEquality.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			toOperatorFragments: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class PolyadicOperatorGreaterThan extends PolyadicOperatorExpression {
+		__ks_init() {
+			PolyadicOperatorExpression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_toOperatorFragments_0(fragments) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			for(var i = 0, __ks_0 = this._operands.length - 1; i < __ks_0; ++i) {
+				if(i) {
+					fragments.code(" && ");
+				}
+				fragments.wrap(this._operands[i]).code($space).code(">", this._data.operator).code($space).wrap(this._operands[i + 1]);
+			}
+		}
+		toOperatorFragments() {
+			if(arguments.length === 1) {
+				return PolyadicOperatorGreaterThan.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+			}
+			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
+				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	PolyadicOperatorGreaterThan.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			toOperatorFragments: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class PolyadicOperatorGreaterThanOrEqual extends PolyadicOperatorExpression {
+		__ks_init() {
+			PolyadicOperatorExpression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_toOperatorFragments_0(fragments) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			for(var i = 0, __ks_0 = this._operands.length - 1; i < __ks_0; ++i) {
+				if(i) {
+					fragments.code(" && ");
+				}
+				fragments.wrap(this._operands[i]).code($space).code(">=", this._data.operator).code($space).wrap(this._operands[i + 1]);
+			}
+		}
+		toOperatorFragments() {
+			if(arguments.length === 1) {
+				return PolyadicOperatorGreaterThanOrEqual.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+			}
+			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
+				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	PolyadicOperatorGreaterThanOrEqual.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			toOperatorFragments: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class PolyadicOperatorLessThan extends PolyadicOperatorExpression {
+		__ks_init() {
+			PolyadicOperatorExpression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_toOperatorFragments_0(fragments) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			for(var i = 0, __ks_0 = this._operands.length - 1; i < __ks_0; ++i) {
+				if(i) {
+					fragments.code(" && ");
+				}
+				fragments.wrap(this._operands[i]).code($space).code("<", this._data.operator).code($space).wrap(this._operands[i + 1]);
+			}
+		}
+		toOperatorFragments() {
+			if(arguments.length === 1) {
+				return PolyadicOperatorLessThan.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+			}
+			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
+				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	PolyadicOperatorLessThan.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			toOperatorFragments: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
 	class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
 		__ks_init() {
 			PolyadicOperatorExpression.prototype.__ks_init.call(this);
@@ -25060,6 +25321,62 @@ module.exports = function() {
 		}
 	}
 	PolyadicOperatorMultiplication.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			toOperatorFragments: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class PolyadicOperatorModulo extends PolyadicOperatorExpression {
+		__ks_init() {
+			PolyadicOperatorExpression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_toOperatorFragments_0(fragments) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			var nf = false;
+			for(var __ks_0 = 0, __ks_1 = this._operands.length, operand; __ks_0 < __ks_1; ++__ks_0) {
+				operand = this._operands[__ks_0];
+				if(nf) {
+					fragments.code($space).code("%", this._data.operator).code($space);
+				}
+				else {
+					nf = true;
+				}
+				fragments.wrap(operand);
+			}
+		}
+		toOperatorFragments() {
+			if(arguments.length === 1) {
+				return PolyadicOperatorModulo.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+			}
+			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
+				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	PolyadicOperatorModulo.__ks_reflect = {
 		inits: 0,
 		constructors: [],
 		instanceVariables: {},
@@ -25296,6 +25613,62 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
+	class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
+		__ks_init() {
+			PolyadicOperatorExpression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_toOperatorFragments_0(fragments) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			var nf = false;
+			for(var __ks_0 = 0, __ks_1 = this._operands.length, operand; __ks_0 < __ks_1; ++__ks_0) {
+				operand = this._operands[__ks_0];
+				if(nf) {
+					fragments.code($space).code("-", this._data.operator).code($space);
+				}
+				else {
+					nf = true;
+				}
+				fragments.wrap(operand);
+			}
+		}
+		toOperatorFragments() {
+			if(arguments.length === 1) {
+				return PolyadicOperatorSubtraction.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+			}
+			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
+				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	PolyadicOperatorSubtraction.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			toOperatorFragments: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
 	class UnaryOperatorExpression extends Expression {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
@@ -25357,6 +25730,55 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class UnaryOperatorBitwiseNot extends UnaryOperatorExpression {
+		__ks_init() {
+			UnaryOperatorExpression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			UnaryOperatorExpression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_toFragments_0(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			fragments.code("~", this._data.operator).wrap(this._argument);
+		}
+		toFragments() {
+			if(arguments.length === 2) {
+				return UnaryOperatorBitwiseNot.prototype.__ks_func_toFragments_0.apply(this, arguments);
+			}
+			else if(UnaryOperatorExpression.prototype.toFragments) {
+				return UnaryOperatorExpression.prototype.toFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	UnaryOperatorBitwiseNot.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			toFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
 				}
 			]
 		},
@@ -25977,11 +26399,19 @@ module.exports = function() {
 	var $polyadicOperators = {};
 	$polyadicOperators[BinaryOperator.Addition] = PolyadicOperatorAddition;
 	$polyadicOperators[BinaryOperator.And] = PolyadicOperatorAnd;
+	$polyadicOperators[BinaryOperator.Division] = PolyadicOperatorDivision;
+	$polyadicOperators[BinaryOperator.Equality] = PolyadicOperatorEquality;
+	$polyadicOperators[BinaryOperator.GreaterThan] = PolyadicOperatorGreaterThan;
+	$polyadicOperators[BinaryOperator.GreaterThanOrEqual] = PolyadicOperatorGreaterThanOrEqual;
+	$polyadicOperators[BinaryOperator.LessThan] = PolyadicOperatorLessThan;
 	$polyadicOperators[BinaryOperator.LessThanOrEqual] = PolyadicOperatorLessThanOrEqual;
+	$polyadicOperators[BinaryOperator.Modulo] = PolyadicOperatorModulo;
 	$polyadicOperators[BinaryOperator.Multiplication] = PolyadicOperatorMultiplication;
 	$polyadicOperators[BinaryOperator.NullCoalescing] = PolyadicOperatorNullCoalescing;
 	$polyadicOperators[BinaryOperator.Or] = PolyadicOperatorOr;
+	$polyadicOperators[BinaryOperator.Subtraction] = PolyadicOperatorSubtraction;
 	var $unaryOperators = {};
+	$unaryOperators[UnaryOperator.BitwiseNot] = UnaryOperatorBitwiseNot;
 	$unaryOperators[UnaryOperator.DecrementPostfix] = UnaryOperatorDecrementPostfix;
 	$unaryOperators[UnaryOperator.DecrementPrefix] = UnaryOperatorDecrementPrefix;
 	$unaryOperators[UnaryOperator.Existential] = UnaryOperatorExistential;

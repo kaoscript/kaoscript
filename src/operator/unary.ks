@@ -11,6 +11,14 @@ class UnaryOperatorExpression extends Expression {
 	} // }}}
 }
 
+class UnaryOperatorBitwiseNot extends UnaryOperatorExpression {
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.code('~', this._data.operator)
+			.wrap(this._argument)
+	} // }}}
+}
+
 class UnaryOperatorDecrementPostfix extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments

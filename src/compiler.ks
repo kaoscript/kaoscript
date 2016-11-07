@@ -1326,21 +1326,21 @@ const $statements = {
 const $polyadicOperators = {
 	`\(BinaryOperator::Addition)`			: PolyadicOperatorAddition
 	`\(BinaryOperator::And)`				: PolyadicOperatorAnd
-	/* `\(BinaryOperator::Division)`			: PolyadicOperatorDivision
+	`\(BinaryOperator::Division)`			: PolyadicOperatorDivision
 	`\(BinaryOperator::Equality)`			: PolyadicOperatorEquality
 	`\(BinaryOperator::GreaterThan)`		: PolyadicOperatorGreaterThan
 	`\(BinaryOperator::GreaterThanOrEqual)`	: PolyadicOperatorGreaterThanOrEqual
-	`\(BinaryOperator::LessThan)`			: PolyadicOperatorLessThan */
+	`\(BinaryOperator::LessThan)`			: PolyadicOperatorLessThan
 	`\(BinaryOperator::LessThanOrEqual)`	: PolyadicOperatorLessThanOrEqual
-	/* `\(BinaryOperator::Modulo)`				: PolyadicOperatorModulo */
+	`\(BinaryOperator::Modulo)`				: PolyadicOperatorModulo
 	`\(BinaryOperator::Multiplication)`		: PolyadicOperatorMultiplication
 	`\(BinaryOperator::NullCoalescing)`		: PolyadicOperatorNullCoalescing
 	`\(BinaryOperator::Or)`					: PolyadicOperatorOr
-	/* `\(BinaryOperator::Subtraction)`		: PolyadicOperatorSubtraction */
+	`\(BinaryOperator::Subtraction)`		: PolyadicOperatorSubtraction
 }
 
 const $unaryOperators = {
-	/* `\(UnaryOperator::BitwiseNot)`			: UnaryOperatorBitwiseNot */
+	`\(UnaryOperator::BitwiseNot)`			: UnaryOperatorBitwiseNot
 	`\(UnaryOperator::DecrementPostfix)`	: UnaryOperatorDecrementPostfix
 	`\(UnaryOperator::DecrementPrefix)`		: UnaryOperatorDecrementPrefix
 	`\(UnaryOperator::Existential)`			: UnaryOperatorExistential

@@ -92,6 +92,85 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	} // }}}
 }
 
+class PolyadicOperatorDivision extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('/', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
+		}
+	} // }}}
+}
+
+class PolyadicOperatorEquality extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let l = this._operands.length - 1
+		
+		for i from 0 til l {
+			fragments.code(' && ') if i
+			
+			fragments
+				.compile(this._operands[i])
+				.code(' === ')
+				.compile(this._operands[i + 1])
+		}
+	} // }}}
+}
+
+class PolyadicOperatorGreaterThan extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		for i from 0 til this._operands.length - 1 {
+			fragments.code(' && ') if i
+			
+			fragments
+				.wrap(this._operands[i])
+				.code($space)
+				.code('>', this._data.operator)
+				.code($space)
+				.wrap(this._operands[i + 1])
+		}
+	} // }}}
+}
+
+class PolyadicOperatorGreaterThanOrEqual extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		for i from 0 til this._operands.length - 1 {
+			fragments.code(' && ') if i
+			
+			fragments
+				.wrap(this._operands[i])
+				.code($space)
+				.code('>=', this._data.operator)
+				.code($space)
+				.wrap(this._operands[i + 1])
+		}
+	} // }}}
+}
+
+class PolyadicOperatorLessThan extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		for i from 0 til this._operands.length - 1 {
+			fragments.code(' && ') if i
+			
+			fragments
+				.wrap(this._operands[i])
+				.code($space)
+				.code('<', this._data.operator)
+				.code($space)
+				.wrap(this._operands[i + 1])
+		}
+	} // }}}
+}
+
 class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		for i from 0 til this._operands.length - 1 {
@@ -115,6 +194,24 @@ class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
 				fragments
 					.code($space)
 					.code('*', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
+		}
+	} // }}}
+}
+class PolyadicOperatorModulo extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('%', this._data.operator)
 					.code($space)
 			}
 			else {
@@ -192,6 +289,25 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			}
 			
 			fragments.wrapBoolean(operand)
+		}
+	} // }}}
+}
+
+class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('-', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
 		}
 	} // }}}
 }
