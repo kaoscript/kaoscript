@@ -1,3 +1,18 @@
+const $predefined = { // {{{
+	false: true
+	null: true
+	string: true
+	true: true
+	Error: true
+	Function: true
+	Infinity: true
+	Math: true
+	NaN: true
+	Object: true
+	String: true
+	Type: true
+} // }}}
+
 class Literal extends Expression {
 	private {
 		_value
@@ -28,7 +43,7 @@ class IdentifierLiteral extends Literal {
 	IdentifierLiteral(data, parent, scope = parent.scope(), variable = true) { // {{{
 		super(data, parent, scope, data.name)
 		
-		if variable && !((parent is MemberExpression && parent._data.object != data) || $predefined[data.name]) {
+		if variable && !((parent is MemberExpression && parent._data.object != data) || $predefined[data.name] == true) {
 			this._isVariable = true
 			
 			if !this._scope.hasVariable(data.name) {

@@ -89,21 +89,6 @@ const $operator = { // {{{
 	}
 } // }}}
 
-const $predefined = { // {{{
-	false: 1
-	null: 1
-	string: 1
-	true: 1
-	Error: 1
-	Function: 1
-	Infinity: 1
-	Math: 1
-	NaN: 1
-	Object: 1
-	String: 1
-	Type: 1
-} // }}}
-
 const $types = { // {{{
 	any: 'Any'
 	array: 'Array'
