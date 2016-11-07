@@ -7,9 +7,6 @@ class ArrayBinding extends Expression {
 		_nonexistingCount	= 0
 		_variables			= {}
 	}
-	ArrayBinding(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		for element in this._data.elements {
 			if element.kind == Kind::BindingElement && !element.name.computed {
@@ -89,8 +86,8 @@ class BindingElement extends Expression {
 		_defaultValue
 		_name
 	}
-	BindingElement(data, parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+	BindingElement(data, parent, scope) { // {{{
+		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
 		$variable.define(this.statement().scope(), this._data.name, VariableKind::Variable)
@@ -163,9 +160,6 @@ class ObjectBinding extends Expression {
 		_existing			= {}
 		_variables			= {}
 	}
-	ObjectBinding(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		for element in this._data.elements {
 			if !element.name.computed && element.name.name? && this._scope.hasVariable(element.name.name) {

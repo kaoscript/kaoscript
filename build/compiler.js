@@ -232,7 +232,7 @@ module.exports = function() {
 				}
 				else if(type.types) {
 					var types = [];
-					for(var i = 0, __ks_1 = type.types.length; i < __ks_1; ++i) {
+					for(var i = 0, __ks_0 = type.types.length; i < __ks_0; ++i) {
 						types.push($signature.type(type.types[i], scope));
 					}
 					return types;
@@ -682,10 +682,10 @@ module.exports = function() {
 				}
 				else if(variable.type.types) {
 					var variables = [];
-					for(var __ks_1 = 0, __ks_2 = variable.type.types.length, type; __ks_1 < __ks_2; ++__ks_1) {
-						type = variable.type.types[__ks_1];
-						var v, __ks_3, __ks_4;
-						if(!((Type.isValue(__ks_3 = $variable.fromType(type, node)) ? (v = __ks_3, true) : false) && (Type.isValue(__ks_4 = $variable.filterMember(v, name, node)) ? (v = __ks_4, true) : false))) {
+					for(var __ks_0 = 0, __ks_1 = variable.type.types.length, type; __ks_0 < __ks_1; ++__ks_0) {
+						type = variable.type.types[__ks_0];
+						var v, __ks_2, __ks_3;
+						if(!((Type.isValue(__ks_2 = $variable.fromType(type, node)) ? (v = __ks_2, true) : false) && (Type.isValue(__ks_3 = $variable.filterMember(v, name, node)) ? (v = __ks_3, true) : false))) {
 							return null;
 						}
 						variables.push(v);
@@ -1252,9 +1252,23 @@ module.exports = function() {
 				return new XScope(this._scope);
 			}
 		}
+		__ks_func_newScope_1(scope) {
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			if(this._options.variables === "es6") {
+				return new Scope(scope);
+			}
+			else {
+				return new XScope(scope);
+			}
+		}
 		newScope() {
 			if(arguments.length === 0) {
 				return AbstractNode.prototype.__ks_func_newScope_0.apply(this);
+			}
+			else if(arguments.length === 1) {
+				return AbstractNode.prototype.__ks_func_newScope_1.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -1395,6 +1409,18 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				},
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
 				}
 			],
 			parent: [
@@ -4065,7 +4091,7 @@ module.exports = function() {
 				return name;
 			}
 			if(this._tempNameCount) {
-				for(var i = 0, __ks_1 = this._tempNextIndex; i < __ks_1; ++i) {
+				for(var i = 0, __ks_0 = this._tempNextIndex; i < __ks_0; ++i) {
 					if(this._tempNames[i]) {
 						--this._tempNameCount;
 						name = this._tempNames[i];
@@ -4096,7 +4122,7 @@ module.exports = function() {
 				return name;
 			}
 			if(this._tempNameCount) {
-				for(var i = 0, __ks_1 = this._tempNextIndex; i < __ks_1; ++i) {
+				for(var i = 0, __ks_0 = this._tempNextIndex; i < __ks_0; ++i) {
 					if(this._tempNames[i]) {
 						--this._tempNameCount;
 						name = this._tempNames[i];
@@ -5649,8 +5675,8 @@ module.exports = function() {
 				return r;
 			}
 			else {
-				for(var __ks_1 = 0, __ks_2 = this._afterwards.length, afterward; __ks_1 < __ks_2; ++__ks_1) {
-					afterward = this._afterwards[__ks_1];
+				for(var __ks_0 = 0, __ks_1 = this._afterwards.length, afterward; __ks_0 < __ks_1; ++__ks_0) {
+					afterward = this._afterwards[__ks_0];
 					afterward.toAfterwardFragments(fragments);
 				}
 			}
@@ -5975,8 +6001,8 @@ module.exports = function() {
 			$helper.reflect(node, fragments, reflect);
 			var references;
 			if(Type.isValue(__ks_0 = node.module().listReferences(node._name)) ? (references = __ks_0, true) : false) {
-				for(var __ks_1 = 0, __ks_2 = references.length, ref; __ks_1 < __ks_2; ++__ks_1) {
-					ref = references[__ks_1];
+				for(var __ks_0 = 0, __ks_1 = references.length, ref; __ks_0 < __ks_1; ++__ks_0) {
+					ref = references[__ks_0];
 					fragments.line(ref);
 				}
 			}
@@ -6255,8 +6281,8 @@ module.exports = function() {
 			$helper.reflect(node, fragments, reflect);
 			var references;
 			if(Type.isValue(__ks_0 = node.module().listReferences(node._name)) ? (references = __ks_0, true) : false) {
-				for(var __ks_1 = 0, __ks_2 = references.length, ref; __ks_1 < __ks_2; ++__ks_1) {
-					ref = references[__ks_1];
+				for(var __ks_0 = 0, __ks_1 = references.length, ref; __ks_0 < __ks_1; ++__ks_0) {
+					ref = references[__ks_0];
 					fragments.line(ref);
 				}
 			}
@@ -7219,16 +7245,16 @@ module.exports = function() {
 				}, VariableKind.Variable);
 			}
 			var signature, method;
-			for(var __ks_1 = 0, __ks_2 = data.members.length, member; __ks_1 < __ks_2; ++__ks_1) {
-				member = data.members[__ks_1];
-				var __ks_3 = member.kind;
-				if(__ks_3 === Kind.CommentBlock) {
+			for(var __ks_0 = 0, __ks_1 = data.members.length, member; __ks_0 < __ks_1; ++__ks_0) {
+				member = data.members[__ks_0];
+				var __ks_2 = member.kind;
+				if(__ks_2 === Kind.CommentBlock) {
 				}
-				else if(__ks_3 === Kind.CommentLine) {
+				else if(__ks_2 === Kind.CommentLine) {
 				}
-				else if(__ks_3 === Kind.FieldDeclaration) {
+				else if(__ks_2 === Kind.FieldDeclaration) {
 					var instance = true;
-					for(var i = 0, __ks_4 = member.modifiers.length; instance && i < __ks_4; ++i) {
+					for(var i = 0, __ks_3 = member.modifiers.length; instance && i < __ks_3; ++i) {
 						if(member.modifiers[i].kind === MemberModifier.Static) {
 							instance = false;
 						}
@@ -7257,7 +7283,7 @@ module.exports = function() {
 						this._variable.classVariables[member.name.name] = signature;
 					}
 				}
-				else if(__ks_3 === Kind.MethodDeclaration) {
+				else if(__ks_2 === Kind.MethodDeclaration) {
 					if(member.name.name === this._variable.name.name) {
 						this._scope = this._constructorScope;
 						method = $compile.statement(member, this);
@@ -7276,7 +7302,7 @@ module.exports = function() {
 					}
 					else {
 						var instance = true;
-						for(var i = 0, __ks_4 = member.modifiers.length; instance && i < __ks_4; ++i) {
+						for(var i = 0, __ks_3 = member.modifiers.length; instance && i < __ks_3; ++i) {
 							if(member.modifiers[i].kind === MemberModifier.Static) {
 								instance = false;
 							}
@@ -7317,7 +7343,7 @@ module.exports = function() {
 					throw new Error("Unknow kind " + member.kind);
 				}
 			}
-			for(var i = 0, __ks_1 = data.modifiers.length; this._continuous && i < __ks_1; ++i) {
+			for(var i = 0, __ks_0 = data.modifiers.length; this._continuous && i < __ks_0; ++i) {
 				if(data.modifiers[i].kind === ClassModifier.Final) {
 					this._continuous = false;
 				}
@@ -9179,8 +9205,12 @@ module.exports = function() {
 		classMethods: {}
 	};
 	class ForFromStatement extends Statement {
+		__ks_init_1() {
+			this._defineVariable = false;
+		}
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
+			ForFromStatement.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0(data, parent) {
 			if(data === undefined || data === null) {
@@ -9203,6 +9233,7 @@ module.exports = function() {
 			var data = this._data;
 			if(!this._scope.hasVariable(data.variable.name)) {
 				$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
 			this._from = $compile.expression(data.from, this);
@@ -9271,7 +9302,7 @@ module.exports = function() {
 			}
 			var data = this._data;
 			var ctrl = fragments.newControl().code("for(");
-			if(data.declaration || !this.greatScope().hasVariable(data.variable.name)) {
+			if(data.declaration || this._defineVariable) {
 				ctrl.code($variable.scope(this));
 			}
 			ctrl.compile(this._variable).code($equals).compile(this._from);
@@ -9354,7 +9385,7 @@ module.exports = function() {
 		}
 	}
 	ForFromStatement.__ks_reflect = {
-		inits: 0,
+		inits: 1,
 		constructors: [
 			{
 				access: 3,
@@ -9375,6 +9406,10 @@ module.exports = function() {
 				type: "Any"
 			},
 			_by: {
+				access: 1,
+				type: "Any"
+			},
+			_defineVariable: {
 				access: 1,
 				type: "Any"
 			},
@@ -9439,8 +9474,13 @@ module.exports = function() {
 		classMethods: {}
 	};
 	class ForInStatement extends Statement {
+		__ks_init_1() {
+			this._defineIndex = false;
+			this._defineVariable = false;
+		}
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
+			ForInStatement.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0(data, parent) {
 			if(data === undefined || data === null) {
@@ -9464,11 +9504,13 @@ module.exports = function() {
 			this._value = $compile.expression(data.value, this);
 			if(!this._scope.hasVariable(data.variable.name)) {
 				$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
 			if(data.index) {
 				if(data.index && (data.declaration || !this._scope.hasVariable(data.index.name))) {
 					$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type);
+					this._defineIndex = true;
 				}
 				this._index = $compile.expression(data.index, this);
 			}
@@ -9542,7 +9584,7 @@ module.exports = function() {
 			}
 			var ctrl;
 			if(data.desc) {
-				if(data.index && !data.declaration && this.greatScope().hasVariable(data.index.name)) {
+				if(data.index && !data.declaration && !this._defineIndex) {
 					fragments.newLine().compile(this._index).code($equals).compile(Type.isValue(this._valueName) ? this._valueName : this._value).code(".length - 1").done();
 					ctrl = fragments.newControl().code("for(");
 				}
@@ -9551,7 +9593,7 @@ module.exports = function() {
 				}
 			}
 			else {
-				if(data.index && !data.declaration && this.greatScope().hasVariable(data.index.name)) {
+				if(data.index && !data.declaration && !this._defineIndex) {
 					fragments.newLine().compile(this._index).code(" = 0").done();
 					ctrl = fragments.newControl().code("for(", $variable.scope(this));
 				}
@@ -9560,7 +9602,7 @@ module.exports = function() {
 				}
 				ctrl.code(this._boundName, $equals).compile(Type.isValue(this._valueName) ? this._valueName : this._value).code(".length");
 			}
-			if(data.declaration || !this.greatScope().hasVariable(data.variable.name)) {
+			if(data.declaration || this._defineVariable) {
 				ctrl.code($comma, data.variable.name);
 			}
 			ctrl.code("; ");
@@ -9597,7 +9639,7 @@ module.exports = function() {
 		}
 	}
 	ForInStatement.__ks_reflect = {
-		inits: 0,
+		inits: 1,
 		constructors: [
 			{
 				access: 3,
@@ -9614,6 +9656,14 @@ module.exports = function() {
 		],
 		instanceVariables: {
 			_body: {
+				access: 1,
+				type: "Any"
+			},
+			_defineIndex: {
+				access: 1,
+				type: "Any"
+			},
+			_defineVariable: {
 				access: 1,
 				type: "Any"
 			},
@@ -9678,8 +9728,13 @@ module.exports = function() {
 		classMethods: {}
 	};
 	class ForOfStatement extends Statement {
+		__ks_init_1() {
+			this._defineIndex = false;
+			this._defineVariable = false;
+		}
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
+			ForOfStatement.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0(data, parent) {
 			if(data === undefined || data === null) {
@@ -9703,11 +9758,13 @@ module.exports = function() {
 			this._value = $compile.expression(data.value, this);
 			if(!this._scope.hasVariable(data.variable.name)) {
 				$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
 			if(data.index) {
 				if(data.index && (data.declaration || !this._scope.hasVariable(data.index.name))) {
 					$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type);
+					this._defineIndex = true;
 				}
 				this._index = $compile.expression(data.index, this);
 			}
@@ -9768,13 +9825,13 @@ module.exports = function() {
 				line.code(this._valueName, $equals).compile(this._value).done();
 			}
 			var ctrl = fragments.newControl().code("for(");
-			if(data.declaration || !this.greatScope().hasVariable(data.variable.name)) {
+			if(data.declaration || this._defineVariable) {
 				ctrl.code($variable.scope(this));
 			}
 			ctrl.compile(this._variable).code(" in ").compile(Type.isValue(this._valueName) ? this._valueName : this._value).code(")").step();
 			if(data.index) {
 				var line = ctrl.newLine();
-				if(data.declaration || !this.greatScope().hasVariable(data.variable.name)) {
+				if(data.declaration || this._defineIndex) {
 					line.code($variable.scope(this));
 				}
 				line.compile(this._index).code($equals).compile(Type.isValue(this._valueName) ? this._valueName : this._value).code("[").compile(this._variable).code("]").done();
@@ -9804,7 +9861,7 @@ module.exports = function() {
 		}
 	}
 	ForOfStatement.__ks_reflect = {
-		inits: 0,
+		inits: 1,
 		constructors: [
 			{
 				access: 3,
@@ -9821,6 +9878,14 @@ module.exports = function() {
 		],
 		instanceVariables: {
 			_body: {
+				access: 1,
+				type: "Any"
+			},
+			_defineIndex: {
+				access: 1,
+				type: "Any"
+			},
+			_defineVariable: {
 				access: 1,
 				type: "Any"
 			},
@@ -9885,8 +9950,12 @@ module.exports = function() {
 		classMethods: {}
 	};
 	class ForRangeStatement extends Statement {
+		__ks_init_1() {
+			this._defineVariable = false;
+		}
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
+			ForRangeStatement.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0(data, parent) {
 			if(data === undefined || data === null) {
@@ -9909,6 +9978,7 @@ module.exports = function() {
 			var data = this._data;
 			if(!this._scope.hasVariable(data.variable.name)) {
 				$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
 			this._from = $compile.expression(data.from, this);
@@ -9969,7 +10039,7 @@ module.exports = function() {
 			}
 			var data = this._data;
 			var ctrl = fragments.newControl().code("for(");
-			if(data.declaration || !this.greatScope().hasVariable(data.variable.name)) {
+			if(data.declaration || this._defineVariable) {
 				ctrl.code($variable.scope(this));
 			}
 			ctrl.compile(this._variable).code($equals).compile(this._from);
@@ -10023,7 +10093,7 @@ module.exports = function() {
 		}
 	}
 	ForRangeStatement.__ks_reflect = {
-		inits: 0,
+		inits: 1,
 		constructors: [
 			{
 				access: 3,
@@ -10044,6 +10114,10 @@ module.exports = function() {
 				type: "Any"
 			},
 			_by: {
+				access: 1,
+				type: "Any"
+			},
+			_defineVariable: {
 				access: 1,
 				type: "Any"
 			},
@@ -12764,8 +12838,8 @@ module.exports = function() {
 			var importVarCount = 0;
 			var importAll = false;
 			var importAlias = "";
-			for(var __ks_1 = 0, __ks_2 = data.specifiers.length, specifier; __ks_1 < __ks_2; ++__ks_1) {
-				specifier = data.specifiers[__ks_1];
+			for(var __ks_0 = 0, __ks_1 = data.specifiers.length, specifier; __ks_0 < __ks_1; ++__ks_0) {
+				specifier = data.specifiers[__ks_0];
 				if(specifier.kind === Kind.ImportWildcardSpecifier) {
 					if(specifier.local) {
 						importAlias = specifier.local.name;
@@ -12782,14 +12856,14 @@ module.exports = function() {
 			if(importVarCount || importAll || importAlias.length) {
 				var nf;
 				for(name in requirements) {
-					requirement = requirements[name];
+					var requirement = requirements[name];
 					if(!requirement.nullable && (!Type.isValue(data.references) || (data.references.length === 0))) {
 						throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
 					}
 					nf = true;
 					if(data.references) {
-						for(var __ks_1 = 0, __ks_2 = data.references.length, reference; nf && __ks_1 < __ks_2; ++__ks_1) {
-							reference = data.references[__ks_1];
+						for(var __ks_0 = 0, __ks_1 = data.references.length, reference; nf && __ks_0 < __ks_1; ++__ks_0) {
+							reference = data.references[__ks_0];
 							if(Type.isValue(reference.foreign)) {
 								if(reference.foreign.name === name) {
 									$import.use(reference.alias, node.scope());
@@ -13054,7 +13128,7 @@ module.exports = function() {
 				var first = true;
 				var nc = 0;
 				for(name in requirements) {
-					requirement = requirements[name];
+					var requirement = requirements[name];
 					nf = true;
 					if(data.references) {
 						for(var __ks_0 = 0, __ks_1 = data.references.length, reference; nf && __ks_0 < __ks_1; ++__ks_0) {
@@ -13123,7 +13197,7 @@ module.exports = function() {
 				var first = true;
 				var nc = 0;
 				for(name in requirements) {
-					requirement = requirements[name];
+					var requirement = requirements[name];
 					if(!requirement.nullable && (!Type.isValue(data.references) || (data.references.length === 0))) {
 						throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
 					}
@@ -16587,22 +16661,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			VariableDeclaration.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				VariableDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			for(var __ks_0 = 0, __ks_1 = this._data.declarations.length, declarator; __ks_0 < __ks_1; ++__ks_0) {
@@ -16715,20 +16775,7 @@ module.exports = function() {
 	}
 	VariableDeclaration.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_async: {
 				access: 1,
@@ -16987,22 +17034,8 @@ module.exports = function() {
 			AbstractNode.prototype.__ks_init.call(this);
 			VariableDeclarator.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				VariableDeclarator.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -17085,20 +17118,7 @@ module.exports = function() {
 	}
 	VariableDeclarator.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_init: {
 				access: 1,
@@ -17282,6 +17302,31 @@ module.exports = function() {
 		__ks_cons(args) {
 			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
+		__ks_func_acquireReusable_0(acquire) {
+			if(acquire === undefined || acquire === null) {
+				throw new Error("Missing parameter 'acquire'");
+			}
+		}
+		acquireReusable() {
+			if(arguments.length === 1) {
+				return Expression.prototype.__ks_func_acquireReusable_0.apply(this, arguments);
+			}
+			else if(AbstractNode.prototype.acquireReusable) {
+				return AbstractNode.prototype.acquireReusable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_releaseReusable_0() {
+		}
+		releaseReusable() {
+			if(arguments.length === 0) {
+				return Expression.prototype.__ks_func_releaseReusable_0.apply(this);
+			}
+			else if(AbstractNode.prototype.releaseReusable) {
+				return AbstractNode.prototype.releaseReusable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
 		__ks_func_isAssignable_0() {
 			return false;
 		}
@@ -17418,6 +17463,28 @@ module.exports = function() {
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
+			acquireReusable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			releaseReusable: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
 			isAssignable: [
 				{
 					access: 3,
@@ -17523,21 +17590,24 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, value, parent) {
+		__ks_cons_0(data, parent, scope, value) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
-			}
-			if(value === undefined || value === null) {
-				throw new Error("Missing parameter 'value'");
 			}
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			if(value === undefined || value === null) {
+				throw new Error("Missing parameter 'value'");
+			}
 			this._value = value;
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
+			Expression.prototype.__ks_cons.call(this, [data, parent, scope]);
 		}
 		__ks_cons(args) {
-			if(args.length === 3) {
+			if(args.length === 4) {
 				Literal.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -17552,17 +17622,6 @@ module.exports = function() {
 			}
 			else if(Expression.prototype.analyse) {
 				return Expression.prototype.analyse.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
-		}
-		__ks_func_analyseReusable_0() {
-		}
-		analyseReusable() {
-			if(arguments.length === 0) {
-				return Literal.prototype.__ks_func_analyseReusable_0.apply(this);
-			}
-			else if(Expression.prototype.analyseReusable) {
-				return Expression.prototype.analyseReusable.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -17624,13 +17683,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 3,
-				max: 3,
+				min: 4,
+				max: 4,
 				parameters: [
 					{
 						type: "Any",
-						min: 3,
-						max: 3
+						min: 4,
+						max: 4
 					}
 				]
 			}
@@ -17644,14 +17703,6 @@ module.exports = function() {
 		classVariables: {},
 		instanceMethods: {
 			analyse: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				}
-			],
-			analyseReusable: [
 				{
 					access: 3,
 					min: 0,
@@ -17716,12 +17767,18 @@ module.exports = function() {
 			var data = arguments[++__ks_i];
 			var parent = arguments[++__ks_i];
 			if(arguments.length > 2) {
+				var scope = arguments[++__ks_i];
+			}
+			else  {
+				var scope = parent.scope();
+			}
+			if(arguments.length > 3) {
 				var variable = arguments[++__ks_i];
 			}
 			else  {
 				var variable = true;
 			}
-			Literal.prototype.__ks_cons.call(this, [data, data.name, parent]);
+			Literal.prototype.__ks_cons.call(this, [data, parent, scope, data.name]);
 			if(variable && !((Type.is(parent, MemberExpression) && (parent._data.object !== data)) || $predefined[data.name])) {
 				this._isVariable = true;
 				if(!this._scope.hasVariable(data.name)) {
@@ -17730,7 +17787,7 @@ module.exports = function() {
 			}
 		}
 		__ks_cons(args) {
-			if(args.length >= 2 && args.length <= 3) {
+			if(args.length >= 2 && args.length <= 4) {
 				IdentifierLiteral.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -17764,12 +17821,12 @@ module.exports = function() {
 			{
 				access: 3,
 				min: 2,
-				max: 3,
+				max: 4,
 				parameters: [
 					{
 						type: "Any",
 						min: 2,
-						max: 3
+						max: 4
 					}
 				]
 			}
@@ -17803,21 +17860,27 @@ module.exports = function() {
 		__ks_init() {
 			Literal.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
+		__ks_cons_0() {
+			if(arguments.length < 2) {
+				throw new Error("Wrong number of arguments");
 			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
+			var __ks_i = -1;
+			var data = arguments[++__ks_i];
+			var parent = arguments[++__ks_i];
+			if(arguments.length > 2) {
+				var scope = arguments[++__ks_i];
 			}
-			Literal.prototype.__ks_cons.call(this, [data, data.value, parent]);
+			else  {
+				var scope = parent.scope();
+			}
+			Literal.prototype.__ks_cons.call(this, [data, parent, scope, data.value]);
 		}
 		__ks_cons(args) {
-			if(args.length === 2) {
+			if(args.length >= 2 && args.length <= 3) {
 				NumberLiteral.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				Literal.prototype.__ks_cons.call(this, args);
+				throw new Error("Wrong number of arguments");
 			}
 		}
 	}
@@ -17827,12 +17890,12 @@ module.exports = function() {
 			{
 				access: 3,
 				min: 2,
-				max: 2,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
 						min: 2,
-						max: 2
+						max: 3
 					}
 				]
 			}
@@ -17846,21 +17909,27 @@ module.exports = function() {
 		__ks_init() {
 			Literal.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
+		__ks_cons_0() {
+			if(arguments.length < 2) {
+				throw new Error("Wrong number of arguments");
 			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
+			var __ks_i = -1;
+			var data = arguments[++__ks_i];
+			var parent = arguments[++__ks_i];
+			if(arguments.length > 2) {
+				var scope = arguments[++__ks_i];
 			}
-			Literal.prototype.__ks_cons.call(this, [data, $quote(data.value), parent]);
+			else  {
+				var scope = parent.scope();
+			}
+			Literal.prototype.__ks_cons.call(this, [data, parent, scope, $quote(data.value)]);
 		}
 		__ks_cons(args) {
-			if(args.length === 2) {
+			if(args.length >= 2 && args.length <= 3) {
 				StringLiteral.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				Literal.prototype.__ks_cons.call(this, args);
+				throw new Error("Wrong number of arguments");
 			}
 		}
 	}
@@ -17870,12 +17939,12 @@ module.exports = function() {
 			{
 				access: 3,
 				min: 2,
-				max: 2,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
 						min: 2,
-						max: 2
+						max: 3
 					}
 				]
 			}
@@ -17889,22 +17958,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ArrayExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._values = Helper.mapArray(this._data.values, (value) => {
@@ -17964,20 +18019,7 @@ module.exports = function() {
 	}
 	ArrayExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_values: {
 				access: 1,
@@ -18027,22 +18069,8 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			ArrayRange.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ArrayRange.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -18101,20 +18129,7 @@ module.exports = function() {
 	}
 	ArrayRange.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_by: {
 				access: 1,
@@ -18174,17 +18189,20 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
+		__ks_cons_0(data, parent, scope) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
-			Expression.prototype.__ks_cons.call(this, [data, parent, new Scope(parent.scope())]);
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			Expression.prototype.__ks_cons.call(this, [data, parent, parent.newScope(scope)]);
 		}
 		__ks_cons(args) {
-			if(args.length === 2) {
+			if(args.length === 3) {
 				ArrayComprehensionForIn.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -18276,13 +18294,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 2,
-				max: 2,
+				min: 3,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
-						min: 2,
-						max: 2
+						min: 3,
+						max: 3
 					}
 				]
 			}
@@ -18327,17 +18345,20 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
+		__ks_cons_0(data, parent, scope) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
-			Expression.prototype.__ks_cons.call(this, [data, parent, new Scope(parent.scope())]);
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			Expression.prototype.__ks_cons.call(this, [data, parent, parent.newScope(scope)]);
 		}
 		__ks_cons(args) {
-			if(args.length === 2) {
+			if(args.length === 3) {
 				ArrayComprehensionForOf.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -18429,13 +18450,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 2,
-				max: 2,
+				min: 3,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
-						min: 2,
-						max: 2
+						min: 3,
+						max: 3
 					}
 				]
 			}
@@ -18480,17 +18501,20 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
+		__ks_cons_0(data, parent, scope) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
-			Expression.prototype.__ks_cons.call(this, [data, parent, new Scope(parent.scope())]);
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			Expression.prototype.__ks_cons.call(this, [data, parent, parent.newScope(scope)]);
 		}
 		__ks_cons(args) {
-			if(args.length === 2) {
+			if(args.length === 3) {
 				ArrayComprehensionForRange.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -18579,13 +18603,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 2,
-				max: 2,
+				min: 3,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
-						min: 2,
-						max: 2
+						min: 3,
+						max: 3
 					}
 				]
 			}
@@ -18664,22 +18688,8 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			ArrayBinding.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ArrayBinding.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			for(var __ks_0 = 0, __ks_1 = this._data.elements.length, element; __ks_0 < __ks_1; ++__ks_0) {
@@ -18808,20 +18818,7 @@ module.exports = function() {
 	}
 	ArrayBinding.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_elements: {
 				access: 1,
@@ -18915,17 +18912,20 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
+		__ks_cons_0(data, parent, scope) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
-			Expression.prototype.__ks_cons.call(this, [data, parent, new Scope(parent.scope())]);
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			Expression.prototype.__ks_cons.call(this, [data, parent, new Scope(scope)]);
 		}
 		__ks_cons(args) {
-			if(args.length === 2) {
+			if(args.length === 3) {
 				BindingElement.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -19036,13 +19036,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 2,
-				max: 2,
+				min: 3,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
-						min: 2,
-						max: 2
+						min: 3,
+						max: 3
 					}
 				]
 			}
@@ -19119,22 +19119,8 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			ObjectBinding.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ObjectBinding.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			for(var __ks_0 = 0, __ks_1 = this._data.elements.length, element; __ks_0 < __ks_1; ++__ks_0) {
@@ -19255,20 +19241,7 @@ module.exports = function() {
 	}
 	ObjectBinding.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_elements: {
 				access: 1,
@@ -19490,22 +19463,8 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			CallExpression.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				CallExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			if(this._data.callee.kind === Kind.Identifier) {
@@ -19519,9 +19478,9 @@ module.exports = function() {
 					throw new Error("Undefined variable " + this._data.callee.name + " at line " + this._data.callee.start.line);
 				}
 			}
-			this._callee = $compile.expression(this._data.callee, this);
-			for(var __ks_1 = 0, __ks_2 = this._data.arguments.length, argument; __ks_1 < __ks_2; ++__ks_1) {
-				argument = this._data.arguments[__ks_1];
+			this._callee = $compile.expression(this._data.callee, this, false);
+			for(var __ks_0 = 0, __ks_1 = this._data.arguments.length, argument; __ks_0 < __ks_1; ++__ks_0) {
+				argument = this._data.arguments[__ks_0];
 				if((argument.kind === Kind.UnaryExpression) && (argument.operator.kind === UnaryOperator.Spread)) {
 					this._arguments.push($compile.expression(argument.argument, this));
 					this._list = false;
@@ -19539,9 +19498,6 @@ module.exports = function() {
 				}
 				this._caller = $caller(this._callee, this);
 			}
-			if((this._data.nullable && (this._callee.isNullable() || this._callee.isCallable())) || (!this._list && (this._data.scope.kind === ScopeModifier.This))) {
-				this._callee.analyseReusable();
-			}
 		}
 		analyse() {
 			if(arguments.length === 0) {
@@ -19552,19 +19508,32 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_analyseReusable_0() {
-			if(!Type.isValue(this._reuseName)) {
-				this._reuseName = this._scope.acquireTempName(this.statement());
+		__ks_func_acquireReusable_0(acquire) {
+			if(acquire === undefined || acquire === null) {
+				throw new Error("Missing parameter 'acquire'");
 			}
+			if(acquire) {
+				this._reuseName = this.statement().scope().acquireTempName(this.statement());
+			}
+			this._callee.acquireReusable(this._data.nullable || (!this._list && (this._data.scope.kind === ScopeModifier.This)));
 		}
-		analyseReusable() {
+		acquireReusable() {
+			if(arguments.length === 1) {
+				return CallExpression.prototype.__ks_func_acquireReusable_0.apply(this, arguments);
+			}
+			return Expression.prototype.acquireReusable.apply(this, arguments);
+		}
+		__ks_func_releaseReusable_0() {
+			if(Type.isValue(this._reuseName)) {
+				this.statement().scope().releaseTempName(this._reuseName);
+			}
+			this._callee.releaseReusable();
+		}
+		releaseReusable() {
 			if(arguments.length === 0) {
-				return CallExpression.prototype.__ks_func_analyseReusable_0.apply(this);
+				return CallExpression.prototype.__ks_func_releaseReusable_0.apply(this);
 			}
-			else if(Expression.prototype.analyseReusable) {
-				return Expression.prototype.analyseReusable.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
+			return Expression.prototype.releaseReusable.apply(this, arguments);
 		}
 		__ks_func_fuse_0() {
 			this._callee.fuse();
@@ -19742,20 +19711,7 @@ module.exports = function() {
 	}
 	CallExpression.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_arguments: {
 				access: 1,
@@ -19800,7 +19756,21 @@ module.exports = function() {
 					parameters: []
 				}
 			],
-			analyseReusable: [
+			acquireReusable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			releaseReusable: [
 				{
 					access: 3,
 					min: 0,
@@ -19901,21 +19871,24 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			CallFinalExpression.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent, callee) {
+		__ks_cons_0(data, parent, scope, callee) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
 			if(callee === undefined || callee === null) {
 				throw new Error("Missing parameter 'callee'");
 			}
 			this._callee = callee;
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
+			Expression.prototype.__ks_cons.call(this, [data, parent, scope]);
 		}
 		__ks_cons(args) {
-			if(args.length === 3) {
+			if(args.length === 4) {
 				CallFinalExpression.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -20083,13 +20056,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 3,
-				max: 3,
+				min: 4,
+				max: 4,
 				parameters: [
 					{
 						type: "Any",
-						min: 3,
-						max: 3
+						min: 4,
+						max: 4
 					}
 				]
 			}
@@ -20177,22 +20150,8 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			CurryExpression.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				CurryExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._callee = $compile.expression(this._data.callee, this);
@@ -20361,20 +20320,7 @@ module.exports = function() {
 	}
 	CurryExpression.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_arguments: {
 				access: 1,
@@ -20462,22 +20408,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				EnumExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._enum = $compile.expression(this._data.enum, this);
@@ -20523,20 +20455,7 @@ module.exports = function() {
 	}
 	EnumExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_enum: {
 				access: 1,
@@ -20586,17 +20505,20 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			FunctionExpression.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
+		__ks_cons_0(data, parent, scope) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
-			Expression.prototype.__ks_cons.call(this, [data, parent, new Scope(parent.scope())]);
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			Expression.prototype.__ks_cons.call(this, [data, parent, new Scope(scope)]);
 		}
 		__ks_cons(args) {
-			if(args.length === 2) {
+			if(args.length === 3) {
 				FunctionExpression.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -20750,13 +20672,13 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 2,
-				max: 2,
+				min: 3,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
-						min: 2,
-						max: 2
+						min: 3,
+						max: 3
 					}
 				]
 			}
@@ -20828,22 +20750,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				IfExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._condition = $compile.expression(this._data.condition, this);
@@ -20938,20 +20846,7 @@ module.exports = function() {
 	}
 	IfExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -21031,29 +20926,12 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			MemberExpression.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				MemberExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
-			this._object = $compile.expression(this._data.object, this);
+			this._object = $compile.expression(this._data.object, this, false);
 			this._property = $compile.expression(this._data.property, this);
-			if((this._data.nullable && (this._object.isNullable() || this._object.isCallable())) || this._property.isNullable()) {
-				this._object.analyseReusable();
-			}
 		}
 		analyse() {
 			if(arguments.length === 0) {
@@ -21064,17 +20942,26 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_analyseReusable_0() {
-			this._object.analyseReusable();
+		__ks_func_acquireReusable_0(acquire) {
+			if(acquire === undefined || acquire === null) {
+				throw new Error("Missing parameter 'acquire'");
+			}
+			this._object.acquireReusable(this._data.nullable || acquire);
 		}
-		analyseReusable() {
+		acquireReusable() {
+			if(arguments.length === 1) {
+				return MemberExpression.prototype.__ks_func_acquireReusable_0.apply(this, arguments);
+			}
+			return Expression.prototype.acquireReusable.apply(this, arguments);
+		}
+		__ks_func_releaseReusable_0() {
+			this._object.releaseReusable();
+		}
+		releaseReusable() {
 			if(arguments.length === 0) {
-				return MemberExpression.prototype.__ks_func_analyseReusable_0.apply(this);
+				return MemberExpression.prototype.__ks_func_releaseReusable_0.apply(this);
 			}
-			else if(Expression.prototype.analyseReusable) {
-				return Expression.prototype.analyseReusable.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
+			return Expression.prototype.releaseReusable.apply(this, arguments);
 		}
 		__ks_func_fuse_0() {
 			this._object.fuse();
@@ -21242,20 +21129,7 @@ module.exports = function() {
 	}
 	MemberExpression.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_object: {
 				access: 1,
@@ -21280,7 +21154,21 @@ module.exports = function() {
 					parameters: []
 				}
 			],
-			analyseReusable: [
+			acquireReusable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			releaseReusable: [
 				{
 					access: 3,
 					min: 0,
@@ -21388,22 +21276,8 @@ module.exports = function() {
 			Expression.prototype.__ks_init.call(this);
 			ObjectExpression.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ObjectExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			for(var __ks_0 = 0, __ks_1 = this._data.properties.length, property; __ks_0 < __ks_1; ++__ks_0) {
@@ -21488,20 +21362,7 @@ module.exports = function() {
 	}
 	ObjectExpression.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_properties: {
 				access: 1,
@@ -21559,26 +21420,12 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ObjectMember.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			if(this._data.name.kind === Kind.Identifier) {
-				this._name = new IdentifierLiteral(this._data.name, this, false);
+				this._name = new IdentifierLiteral(this._data.name, this, this.scope(), false);
 				this.reference("." + this._data.name.name);
 			}
 			else {
@@ -21636,20 +21483,7 @@ module.exports = function() {
 	}
 	ObjectMember.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_name: {
 				access: 1,
@@ -21699,22 +21533,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ObjectTemplateMember.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._name = new TemplateExpression(this._data.name, this);
@@ -21761,20 +21581,7 @@ module.exports = function() {
 	}
 	ObjectTemplateMember.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_name: {
 				access: 1,
@@ -21824,22 +21631,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				OmittedExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 		}
@@ -21883,20 +21676,7 @@ module.exports = function() {
 	}
 	OmittedExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -21937,22 +21717,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				RegularExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 		}
@@ -21997,20 +21763,7 @@ module.exports = function() {
 	}
 	RegularExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -22056,22 +21809,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				TernaryConditionalExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._condition = $compile.expression(this._data.condition, this);
@@ -22131,20 +21870,7 @@ module.exports = function() {
 	}
 	TernaryConditionalExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -22206,22 +21932,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				TemplateExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._elements = Helper.mapArray(this._data.elements, (element) => {
@@ -22284,20 +21996,7 @@ module.exports = function() {
 	}
 	TemplateExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_elements: {
 				access: 1,
@@ -22351,22 +22050,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				UnlessExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._condition = $compile.expression(this._data.condition, this);
@@ -22453,20 +22138,7 @@ module.exports = function() {
 	}
 	UnlessExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -23159,15 +22831,32 @@ module.exports = function() {
 		__ks_cons(args) {
 			AssignmentOperatorExpression.prototype.__ks_cons.call(this, args);
 		}
-		__ks_func_analyse_0() {
-			super.analyse();
-			this._right.analyseReusable();
-		}
-		analyse() {
-			if(arguments.length === 0) {
-				return AssignmentOperatorExistential.prototype.__ks_func_analyse_0.apply(this);
+		__ks_func_acquireReusable_0(acquire) {
+			if(acquire === undefined || acquire === null) {
+				throw new Error("Missing parameter 'acquire'");
 			}
-			return AssignmentOperatorExpression.prototype.analyse.apply(this, arguments);
+			this._right.acquireReusable(true);
+		}
+		acquireReusable() {
+			if(arguments.length === 1) {
+				return AssignmentOperatorExistential.prototype.__ks_func_acquireReusable_0.apply(this, arguments);
+			}
+			else if(AssignmentOperatorExpression.prototype.acquireReusable) {
+				return AssignmentOperatorExpression.prototype.acquireReusable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_releaseReusable_0() {
+			this._right.releaseReusable();
+		}
+		releaseReusable() {
+			if(arguments.length === 0) {
+				return AssignmentOperatorExistential.prototype.__ks_func_releaseReusable_0.apply(this);
+			}
+			else if(AssignmentOperatorExpression.prototype.releaseReusable) {
+				return AssignmentOperatorExpression.prototype.releaseReusable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_isAssignable_0() {
 			return false;
@@ -23230,7 +22919,21 @@ module.exports = function() {
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
-			analyse: [
+			acquireReusable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			releaseReusable: [
 				{
 					access: 3,
 					min: 0,
@@ -23571,8 +23274,8 @@ module.exports = function() {
 			return Expression.prototype.isNullable.apply(this, arguments);
 		}
 		__ks_func_analyse_0() {
-			this._left = $compile.expression(this._data.left, this);
-			this._right = $compile.expression(this._data.right, this);
+			this._left = $compile.expression(this._data.left, this, false);
+			this._right = $compile.expression(this._data.right, this, false);
 		}
 		analyse() {
 			if(arguments.length === 0) {
@@ -23582,6 +23285,29 @@ module.exports = function() {
 				return Expression.prototype.analyse.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_acquireReusable_0(acquire) {
+			if(acquire === undefined || acquire === null) {
+				throw new Error("Missing parameter 'acquire'");
+			}
+			this._left.acquireReusable(false);
+			this._right.acquireReusable(false);
+		}
+		acquireReusable() {
+			if(arguments.length === 1) {
+				return BinaryOperatorExpression.prototype.__ks_func_acquireReusable_0.apply(this, arguments);
+			}
+			return Expression.prototype.acquireReusable.apply(this, arguments);
+		}
+		__ks_func_releaseReusable_0() {
+			this._left.releaseReusable();
+			this._right.releaseReusable();
+		}
+		releaseReusable() {
+			if(arguments.length === 0) {
+				return BinaryOperatorExpression.prototype.__ks_func_releaseReusable_0.apply(this);
+			}
+			return Expression.prototype.releaseReusable.apply(this, arguments);
 		}
 		__ks_func_fuse_0() {
 			this._left.fuse();
@@ -23681,6 +23407,28 @@ module.exports = function() {
 				}
 			],
 			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			acquireReusable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			releaseReusable: [
 				{
 					access: 3,
 					min: 0,
@@ -24472,15 +24220,33 @@ module.exports = function() {
 		}
 		__ks_func_analyse_0() {
 			super.analyse();
-			if(this._data.left !== Kind.Identifier) {
-				this._left.analyseReusable();
-			}
 		}
 		analyse() {
 			if(arguments.length === 0) {
 				return BinaryOperatorNullCoalescing.prototype.__ks_func_analyse_0.apply(this);
 			}
 			return BinaryOperatorExpression.prototype.analyse.apply(this, arguments);
+		}
+		__ks_func_acquireReusable_0(acquire) {
+			if(acquire === undefined || acquire === null) {
+				throw new Error("Missing parameter 'acquire'");
+			}
+			this._left.acquireReusable(true);
+		}
+		acquireReusable() {
+			if(arguments.length === 1) {
+				return BinaryOperatorNullCoalescing.prototype.__ks_func_acquireReusable_0.apply(this, arguments);
+			}
+			return BinaryOperatorExpression.prototype.acquireReusable.apply(this, arguments);
+		}
+		__ks_func_releaseReusable_0() {
+			this._left.releaseReusable();
+		}
+		releaseReusable() {
+			if(arguments.length === 0) {
+				return BinaryOperatorNullCoalescing.prototype.__ks_func_releaseReusable_0.apply(this);
+			}
+			return BinaryOperatorExpression.prototype.releaseReusable.apply(this, arguments);
 		}
 		__ks_func_toFragments_0(fragments, mode) {
 			if(fragments === undefined || fragments === null) {
@@ -24513,6 +24279,28 @@ module.exports = function() {
 		classVariables: {},
 		instanceMethods: {
 			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			acquireReusable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			releaseReusable: [
 				{
 					access: 3,
 					min: 0,
@@ -25316,28 +25104,44 @@ module.exports = function() {
 			}
 		}
 		__ks_func_analyse_0() {
-			this._operands = [];
-			var l = this._data.operands.length - 1;
-			var scope = this._scope;
-			var operand;
-			for(var i = 0; i <= l; ++i) {
-				if(i === l) {
-					this._scope = scope;
-				}
-				else {
-					this._scope = new Scope(scope);
-				}
-				this._operands.push(operand = $compile.expression(this._data.operands[i], this));
-				if((i !== l) && (this._data.operands[i].kind !== Kind.Identifier)) {
-					operand.analyseReusable();
-				}
-			}
+			this._operands = Helper.mapArray(this._data.operands, (operand) => {
+				return $compile.expression(operand, this, this.newScope());
+			});
 		}
 		analyse() {
 			if(arguments.length === 0) {
 				return PolyadicOperatorNullCoalescing.prototype.__ks_func_analyse_0.apply(this);
 			}
 			return PolyadicOperatorExpression.prototype.analyse.apply(this, arguments);
+		}
+		__ks_func_acquireReusable_0(acquire) {
+			if(acquire === undefined || acquire === null) {
+				throw new Error("Missing parameter 'acquire'");
+			}
+			for(var i = 0, __ks_0 = this._operands.length - 2; i <= __ks_0; ++i) {
+				this._operands[i].acquireReusable(true);
+				this._operands[i].releaseReusable();
+			}
+		}
+		acquireReusable() {
+			if(arguments.length === 1) {
+				return PolyadicOperatorNullCoalescing.prototype.__ks_func_acquireReusable_0.apply(this, arguments);
+			}
+			else if(PolyadicOperatorExpression.prototype.acquireReusable) {
+				return PolyadicOperatorExpression.prototype.acquireReusable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_releaseReusable_0() {
+		}
+		releaseReusable() {
+			if(arguments.length === 0) {
+				return PolyadicOperatorNullCoalescing.prototype.__ks_func_releaseReusable_0.apply(this);
+			}
+			else if(PolyadicOperatorExpression.prototype.releaseReusable) {
+				return PolyadicOperatorExpression.prototype.releaseReusable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_toFragments_0(fragments, mode) {
 			if(fragments === undefined || fragments === null) {
@@ -25390,6 +25194,28 @@ module.exports = function() {
 		classVariables: {},
 		instanceMethods: {
 			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			acquireReusable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			releaseReusable: [
 				{
 					access: 3,
 					min: 0,
@@ -25934,25 +25760,37 @@ module.exports = function() {
 		classMethods: {}
 	};
 	var $compile = {
-		expression(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
+		expression() {
+			if(arguments.length < 2) {
+				throw new Error("Wrong number of arguments");
 			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
+			var __ks_i = -1;
+			var data = arguments[++__ks_i];
+			var parent = arguments[++__ks_i];
+			if(arguments.length > 2) {
+				var reusable = arguments[++__ks_i];
+			}
+			else  {
+				var reusable = true;
+			}
+			if(arguments.length > 3) {
+				var scope = arguments[++__ks_i];
+			}
+			else  {
+				var scope = parent.scope();
 			}
 			var expression;
 			var clazz = $expressions[data.kind];
 			if(Type.isValue(clazz)) {
-				expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent);
+				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope);
 			}
 			else if(data.kind === Kind.BinaryOperator) {
 				if(Type.isValue($binaryOperators[data.operator.kind]) ? (clazz = $binaryOperators[data.operator.kind], true) : false) {
-					expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent);
+					expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope);
 				}
 				else if(data.operator.kind === BinaryOperator.Assignment) {
 					if((clazz = $assignmentOperators[data.operator.assignment])) {
-						expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent);
+						expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope);
 					}
 					else {
 						console.error(data);
@@ -25966,7 +25804,7 @@ module.exports = function() {
 			}
 			else if(data.kind === Kind.PolyadicOperator) {
 				if(Type.isValue($polyadicOperators[data.operator.kind]) ? (clazz = $polyadicOperators[data.operator.kind], true) : false) {
-					expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent);
+					expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope);
 				}
 				else {
 					console.error(data);
@@ -25975,7 +25813,7 @@ module.exports = function() {
 			}
 			else if(data.kind === Kind.UnaryExpression) {
 				if(Type.isValue($unaryOperators[data.operator.kind]) ? (clazz = $unaryOperators[data.operator.kind], true) : false) {
-					expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent);
+					expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope);
 				}
 				else {
 					console.error(data);
@@ -25987,6 +25825,10 @@ module.exports = function() {
 				throw new Error("Unknow kind " + data.kind);
 			}
 			expression.analyse();
+			if(reusable) {
+				expression.acquireReusable(false);
+				expression.releaseReusable();
+			}
 			return expression;
 		},
 		statement(data, parent) {
@@ -26037,21 +25879,24 @@ module.exports = function() {
 	$binaryOperators[BinaryOperator.TypeCheck] = BinaryOperatorTypeCheck;
 	var $expressions = {};
 	$expressions[Kind.ArrayBinding] = ArrayBinding;
-	$expressions[Kind.ArrayComprehension] = function(data, parent) {
+	$expressions[Kind.ArrayComprehension] = function(data, parent, scope) {
 		if(data === undefined || data === null) {
 			throw new Error("Missing parameter 'data'");
 		}
 		if(parent === undefined || parent === null) {
 			throw new Error("Missing parameter 'parent'");
 		}
+		if(scope === undefined || scope === null) {
+			throw new Error("Missing parameter 'scope'");
+		}
 		if(data.loop.kind === Kind.ForInStatement) {
-			return new ArrayComprehensionForIn(data, parent);
+			return new ArrayComprehensionForIn(data, parent, scope);
 		}
 		else if(data.loop.kind === Kind.ForOfStatement) {
-			return new ArrayComprehensionForOf(data, parent);
+			return new ArrayComprehensionForOf(data, parent, scope);
 		}
 		else if(data.loop.kind === Kind.ForRangeStatement) {
-			return new ArrayComprehensionForRange(data, parent);
+			return new ArrayComprehensionForRange(data, parent, scope);
 		}
 		else {
 			console.error(data);
@@ -26062,19 +25907,22 @@ module.exports = function() {
 	$expressions[Kind.ArrayRange] = ArrayRange;
 	$expressions[Kind.BindingElement] = BindingElement;
 	$expressions[Kind.Block] = BlockExpression;
-	$expressions[Kind.CallExpression] = function(data, parent) {
+	$expressions[Kind.CallExpression] = function(data, parent, scope) {
 		if(data === undefined || data === null) {
 			throw new Error("Missing parameter 'data'");
 		}
 		if(parent === undefined || parent === null) {
 			throw new Error("Missing parameter 'parent'");
 		}
+		if(scope === undefined || scope === null) {
+			throw new Error("Missing parameter 'scope'");
+		}
 		var callee;
 		if((data.callee.kind === Kind.MemberExpression) && !data.callee.computed && (callee = $final.callee(data.callee, parent))) {
-			return new CallFinalExpression(data, parent, callee);
+			return new CallFinalExpression(data, parent, scope, callee);
 		}
 		else {
-			return new CallExpression(data, parent);
+			return new CallExpression(data, parent, scope);
 		}
 	};
 	$expressions[Kind.CurryExpression] = CurryExpression;

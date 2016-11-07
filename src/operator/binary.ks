@@ -7,8 +7,16 @@ class BinaryOperatorExpression extends Expression {
 	isComputed() => true
 	isNullable() => this._left.isNullable() || this._right.isNullable()
 	analyse() { // {{{
-		this._left = $compile.expression(this._data.left, this)
-		this._right = $compile.expression(this._data.right, this)
+		this._left = $compile.expression(this._data.left, this, false)
+		this._right = $compile.expression(this._data.right, this, false)
+	} // }}}
+	acquireReusable(acquire) { // {{{
+		this._left.acquireReusable(false)
+		this._right.acquireReusable(false)
+	} // }}}
+	releaseReusable() { // {{{
+		this._left.releaseReusable()
+		this._right.releaseReusable()
 	} // }}}
 	fuse() { // {{{
 		this._left.fuse()
@@ -225,10 +233,12 @@ class BinaryOperatorMultiplication extends BinaryOperatorExpression {
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	analyse() { // {{{
 		super.analyse()
-		
-		if this._data.left != Kind::Identifier {
-			this._left.analyseReusable()
-		}
+	} // }}}
+	acquireReusable(acquire) { // {{{
+		this._left.acquireReusable(true)
+	} // }}}
+	releaseReusable() { // {{{
+		this._left.releaseReusable()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if this._left.isNullable() {

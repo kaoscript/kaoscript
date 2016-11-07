@@ -4,19 +4,15 @@ class MemberExpression extends Expression {
 		_property
 		_tested			= false
 	}
-	MemberExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
-		this._object = $compile.expression(this._data.object, this)
+		this._object = $compile.expression(this._data.object, this, false)
 		this._property = $compile.expression(this._data.property, this)
-		
-		if (this._data.nullable && (this._object.isNullable() || this._object.isCallable())) || this._property.isNullable() {
-			this._object.analyseReusable()
-		}
 	} // }}}
-	analyseReusable() { // {{{
-		this._object.analyseReusable()
+	acquireReusable(acquire) { // {{{
+		this._object.acquireReusable(this._data.nullable || acquire)
+	} // }}}
+	releaseReusable() { // {{{
+		this._object.releaseReusable()
 	} // }}}
 	fuse() { // {{{
 		this._object.fuse()

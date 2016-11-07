@@ -2,9 +2,6 @@ class EnumExpression extends Expression {
 	private {
 		_enum
 	}
-	EnumExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._enum = $compile.expression(this._data.enum, this)
 	} // }}}

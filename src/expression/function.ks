@@ -4,8 +4,8 @@ class FunctionExpression extends Expression {
 		_parameters
 		_statements
 	}
-	FunctionExpression(data, parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+	FunctionExpression(data, parent, scope) { // {{{
+		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
 		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]

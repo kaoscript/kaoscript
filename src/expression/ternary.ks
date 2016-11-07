@@ -4,9 +4,6 @@ class TernaryConditionalExpression extends Expression {
 		_else
 		_then
 	}
-	TernaryConditionalExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._condition = $compile.expression(this._data.condition, this)
 		this._then = $compile.expression(this._data.then, this)

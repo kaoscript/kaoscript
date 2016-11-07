@@ -4,9 +4,6 @@ class VariableDeclaration extends Statement {
 		_declarators = []
 		_init = false
 	}
-	VariableDeclaration(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		for declarator in this._data.declarations {
 			if declarator.kind == Kind::AwaitExpression {
@@ -137,9 +134,6 @@ class VariableDeclarator extends AbstractNode {
 	private {
 		_init	= null
 	}
-	VariableDeclarator(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		

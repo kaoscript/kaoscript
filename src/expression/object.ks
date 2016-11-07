@@ -3,9 +3,6 @@ class ObjectExpression extends Expression {
 		_properties = []
 		_templates = []
 	}
-	ObjectExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		for property in this._data.properties {
 			if property.name.kind == Kind::Identifier || property.name.kind == Kind::Literal {
@@ -49,12 +46,9 @@ class ObjectMember extends Expression {
 		_name
 		_value
 	}
-	ObjectMember(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		if this._data.name.kind == Kind::Identifier	{
-			this._name = new IdentifierLiteral(this._data.name, this, false)
+			this._name = new IdentifierLiteral(this._data.name, this, this.scope(), false)
 			
 			this.reference('.' + this._data.name.name)
 		}
@@ -88,9 +82,6 @@ class ObjectTemplateMember extends Expression {
 		_name
 		_value
 	}
-	ObjectTemplateMember(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._name = new TemplateExpression(this._data.name, this)
 		

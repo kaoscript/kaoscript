@@ -1,6 +1,8 @@
 class ForInStatement extends Statement {
 	private {
 		_body
+		_defineIndex	= false
+		_defineVariable	= false
 		_index
 		_until
 		_value
@@ -18,6 +20,8 @@ class ForInStatement extends Statement {
 		
 		if !this._scope.hasVariable(data.variable.name) {
 			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+			
+			this._defineVariable = true
 		}
 		
 		this._variable = $compile.expression(data.variable, this)
@@ -25,6 +29,8 @@ class ForInStatement extends Statement {
 		if data.index {
 			if data.index && (data.declaration || !this._scope.hasVariable(data.index.name)) {
 				$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type)
+				
+				this._defineIndex = true
 			}
 			
 			this._index = $compile.expression(data.index, this)
@@ -83,7 +89,7 @@ class ForInStatement extends Statement {
 		let ctrl
 		
 		if data.desc {
-			if data.index && !data.declaration && this.greatScope().hasVariable(data.index.name) {
+			if data.index && !data.declaration && !this._defineIndex {
 				fragments
 					.newLine()
 					.compile(this._index)
@@ -107,7 +113,7 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if data.index && !data.declaration && this.greatScope().hasVariable(data.index.name) {
+			if data.index && !data.declaration && !this._defineIndex {
 				fragments
 					.newLine()
 					.compile(this._index)
@@ -132,7 +138,7 @@ class ForInStatement extends Statement {
 				.code('.length')
 		}
 		
-		if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
+		if data.declaration || this._defineVariable {
 			ctrl.code($comma, data.variable.name)
 		}
 		

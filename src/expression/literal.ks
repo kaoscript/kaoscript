@@ -2,12 +2,10 @@ class Literal extends Expression {
 	private {
 		_value
 	}
-	Literal(data, @value, parent) { // {{{
-		super(data, parent)
+	Literal(data, parent, scope, @value) { // {{{
+		super(data, parent, scope)
 	} // }}}
 	analyse() { // {{{
-	} // }}}
-	analyseReusable() { // {{{
 	} // }}}
 	fuse() { // {{{
 	} // }}}
@@ -27,8 +25,8 @@ class IdentifierLiteral extends Literal {
 	private {
 		_isVariable = false
 	}
-	IdentifierLiteral(data, parent, variable = true) { // {{{
-		super(data, data.name, parent)
+	IdentifierLiteral(data, parent, scope = parent.scope(), variable = true) { // {{{
+		super(data, parent, scope, data.name)
 		
 		if variable && !((parent is MemberExpression && parent._data.object != data) || $predefined[data.name]) {
 			this._isVariable = true
@@ -49,13 +47,13 @@ class IdentifierLiteral extends Literal {
 }
 
 class NumberLiteral extends Literal { // {{{
-	NumberLiteral(data, parent) { // {{{
-		super(data, data.value, parent)
+	NumberLiteral(data, parent, scope = parent.scope()) { // {{{
+		super(data, parent, scope, data.value)
 	} // }}}
 } // }}}
 
 class StringLiteral extends Literal { // {{{
-	StringLiteral(data, parent) { // {{{
-		super(data, $quote(data.value), parent)
+	StringLiteral(data, parent, scope = parent.scope()) { // {{{
+		super(data, parent, scope, $quote(data.value))
 	} // }}}
 } // }}}

@@ -2,9 +2,6 @@ class RegularExpression extends Expression {
 	private {
 		_value
 	}
-	RegularExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 	} // }}}
 	fuse() { // {{{

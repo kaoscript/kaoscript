@@ -22,9 +22,6 @@ class CallExpression extends Expression {
 		_reuseName		= null
 		_tested			= false
 	}
-	CallExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		if this._data.callee.kind == Kind::Identifier {
 			if variable ?= this._scope.getVariable(this._data.callee.name) {
@@ -37,7 +34,7 @@ class CallExpression extends Expression {
 			}
 		}
 		
-		this._callee = $compile.expression(this._data.callee, this)
+		this._callee = $compile.expression(this._data.callee, this, false)
 		
 		for argument in this._data.arguments {
 			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
@@ -61,13 +58,18 @@ class CallExpression extends Expression {
 			
 			this._caller = $caller(this._callee, this)
 		}
-		
-		if (this._data.nullable && (this._callee.isNullable() || this._callee.isCallable())) || (!this._list && this._data.scope.kind == ScopeModifier::This) {
-			this._callee.analyseReusable()
-		}
 	} // }}}
-	analyseReusable() { // {{{
-		this._reuseName ??= this._scope.acquireTempName(this.statement())
+	acquireReusable(acquire) { // {{{
+		if acquire {
+			this._reuseName = this.statement().scope().acquireTempName(this.statement())
+		}
+		
+		this._callee.acquireReusable(this._data.nullable || (!this._list && this._data.scope.kind == ScopeModifier::This))
+	} // }}}
+	releaseReusable() { // {{{
+		this.statement().scope().releaseTempName(this._reuseName) if this._reuseName?
+		
+		this._callee.releaseReusable()
 	} // }}}
 	fuse() { // {{{
 		this._callee.fuse()
@@ -202,8 +204,8 @@ class CallFinalExpression extends Expression {
 		_object
 		_tested		= false
 	}
-	CallFinalExpression(data, parent, @callee) { // {{{
-		super(data, parent)
+	CallFinalExpression(data, parent, scope, @callee) { // {{{
+		super(data, parent, scope)
 	} // }}}
 	analyse() { // {{{
 		this._object = $compile.expression(this._data.callee.object, this)

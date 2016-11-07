@@ -6,8 +6,8 @@ func $return(data?) { // {{{
 } // }}}
 
 class ArrayComprehensionForIn extends Expression {
-	ArrayComprehensionForIn(data, parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+	ArrayComprehensionForIn(data, parent, scope) { // {{{
+		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
@@ -74,8 +74,8 @@ class ArrayComprehensionForIn extends Expression {
 }
 
 class ArrayComprehensionForOf extends Expression {
-	ArrayComprehensionForOf(data, parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+	ArrayComprehensionForOf(data, parent, scope) { // {{{
+		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
@@ -150,8 +150,8 @@ class ArrayComprehensionForRange extends Expression {
 		_variable
 		_when
 	}
-	ArrayComprehensionForRange(data, parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+	ArrayComprehensionForRange(data, parent, scope) { // {{{
+		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data

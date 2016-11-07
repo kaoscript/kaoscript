@@ -2,9 +2,6 @@ class TemplateExpression extends Expression {
 	private {
 		_elements
 	}
-	TemplateExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._elements = [$compile.expression(element, this) for element in this._data.elements]
 	} // }}}

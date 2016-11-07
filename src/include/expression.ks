@@ -1,4 +1,8 @@
 class Expression extends AbstractNode {
+	acquireReusable(acquire) { // {{{
+	} // }}}
+	releaseReusable() { // {{{
+	} // }}}
 	isAssignable() => false
 	isCallable() => false
 	isComposite() => true

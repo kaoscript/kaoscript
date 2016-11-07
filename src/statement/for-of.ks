@@ -1,6 +1,8 @@
 class ForOfStatement extends Statement {
 	private {
 		_body
+		_defineIndex	= false
+		_defineVariable	= false
 		_index
 		_until
 		_value
@@ -18,6 +20,8 @@ class ForOfStatement extends Statement {
 		
 		if !this._scope.hasVariable(data.variable.name) {
 			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+			
+			this._defineVariable = true
 		}
 		
 		this._variable = $compile.expression(data.variable, this)
@@ -25,6 +29,8 @@ class ForOfStatement extends Statement {
 		if data.index {
 			if data.index && (data.declaration || !this._scope.hasVariable(data.index.name)) {
 				$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type)
+				
+				this._defineIndex = true
 			}
 			
 			this._index = $compile.expression(data.index, this)
@@ -72,7 +78,7 @@ class ForOfStatement extends Statement {
 		
 		let ctrl = fragments.newControl().code('for(')
 		
-		if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
+		if data.declaration || this._defineVariable {
 			ctrl.code($variable.scope(this))
 		}
 		ctrl.compile(this._variable).code(' in ').compile(this._valueName ?? this._value).code(')').step()
@@ -80,7 +86,7 @@ class ForOfStatement extends Statement {
 		if data.index {
 			let line = ctrl.newLine()
 			
-			if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
+			if data.declaration || this._defineIndex {
 				line.code($variable.scope(this))
 			}
 			

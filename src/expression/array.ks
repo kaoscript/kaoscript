@@ -2,9 +2,6 @@ class ArrayExpression extends Expression {
 	private {
 		_values
 	}
-	ArrayExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._values = [$compile.expression(value, this) for value in this._data.values]
 	} // }}}
@@ -32,9 +29,6 @@ class ArrayRange extends Expression {
 		_from
 		_to
 	}
-	ArrayRange(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		

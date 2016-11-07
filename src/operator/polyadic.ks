@@ -131,26 +131,15 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		this._operands = []
-		
-		let l = this._data.operands.length - 1
-		let scope = this._scope
-		
-		let operand
-		for i from 0 to l {
-			if i == l {
-				this._scope = scope
-			}
-			else {
-				this._scope = new Scope(scope)
-			}
-			
-			this._operands.push(operand = $compile.expression(this._data.operands[i], this))
-			
-			if i != l && this._data.operands[i].kind != Kind::Identifier {
-				operand.analyseReusable()
-			}
+		this._operands = [$compile.expression(operand, this, this.newScope()) for operand in this._data.operands]
+	} // }}}
+	acquireReusable(acquire) { // {{{
+		for i from 0 to this._operands.length - 2 {
+			this._operands[i].acquireReusable(true)
+			this._operands[i].releaseReusable()
 		}
+	} // }}}
+	releaseReusable() { // {{{
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Type')

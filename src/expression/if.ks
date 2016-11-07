@@ -4,9 +4,6 @@ class IfExpression extends Expression {
 		_else
 		_then
 	}
-	IfExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._condition = $compile.expression(this._data.condition, this)
 		this._then = $compile.expression(this._data.then, this)

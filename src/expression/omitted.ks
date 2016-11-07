@@ -1,7 +1,4 @@
 class OmittedExpression extends Expression {
-	OmittedExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 	} // }}}
 	fuse() { // {{{

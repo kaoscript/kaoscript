@@ -7,9 +7,6 @@ class CurryExpression extends Expression {
 		_list		= true
 		_tested		= false
 	}
-	CurryExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._callee = $compile.expression(this._data.callee, this)
 		

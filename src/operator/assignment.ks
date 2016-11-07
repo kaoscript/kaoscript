@@ -90,10 +90,11 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
-	analyse() { // {{{
-		super.analyse()
-		
-		this._right.analyseReusable()
+	acquireReusable(acquire) { // {{{
+		this._right.acquireReusable(true)
+	} // }}}
+	releaseReusable() { // {{{
+		this._right.releaseReusable()
 	} // }}}
 	isAssignable() => false
 	toFragments(fragments, mode) { // {{{

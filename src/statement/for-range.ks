@@ -2,6 +2,7 @@ class ForRangeStatement extends Statement {
 	private {
 		_body
 		_by
+		_defineVariable	= false
 		_til
 		_to
 		_until
@@ -17,6 +18,8 @@ class ForRangeStatement extends Statement {
 		
 		if !this._scope.hasVariable(data.variable.name) {
 			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+			
+			this._defineVariable = true
 		}
 		
 		this._variable = $compile.expression(data.variable, this)
@@ -54,7 +57,7 @@ class ForRangeStatement extends Statement {
 		let data = this._data
 		
 		let ctrl = fragments.newControl().code('for(')
-		if data.declaration || !this.greatScope().hasVariable(data.variable.name) {
+		if data.declaration || this._defineVariable {
 			ctrl.code($variable.scope(this))
 		}
 		ctrl.compile(this._variable).code($equals).compile(this._from)

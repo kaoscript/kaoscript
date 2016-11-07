@@ -1100,6 +1100,14 @@ class AbstractNode {
 			return new XScope(this._scope)
 		}
 	} // }}}
+	newScope(scope) { // {{{
+		if this._options.variables == 'es6' {
+			return new Scope(scope)
+		}
+		else {
+			return new XScope(scope)
+		}
+	} // }}}
 	parent() => this._parent
 	reference() { // {{{
 		if this._parent? && this._parent.reference()? {
@@ -1129,20 +1137,20 @@ include {
 }
 
 const $compile = {
-	expression(data, parent) { // {{{
+	expression(data, parent, reusable = true, scope = parent.scope()) { // {{{
 		let expression
 		
 		let clazz = $expressions[data.kind]
 		if clazz? {
-			expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+			expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 		}
 		else if data.kind == Kind::BinaryOperator {
 			if clazz ?= $binaryOperators[data.operator.kind] {
-				expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
 			else if data.operator.kind == BinaryOperator::Assignment {
 				if clazz = $assignmentOperators[data.operator.assignment] {
-					expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+					expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 				}
 				else {
 					console.error(data)
@@ -1156,7 +1164,7 @@ const $compile = {
 		}
 		else if data.kind == Kind::PolyadicOperator {
 			if clazz ?= $polyadicOperators[data.operator.kind] {
-				expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
 			else {
 				console.error(data)
@@ -1165,7 +1173,7 @@ const $compile = {
 		}
 		else if data.kind == Kind::UnaryExpression {
 			if clazz ?= $unaryOperators[data.operator.kind] {
-				expression = Type.isConstructor(clazz) ? new clazz(data, parent) : clazz(data, parent)
+				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
 			else {
 				console.error(data)
@@ -1179,6 +1187,11 @@ const $compile = {
 		
 		//console.log(expression)
 		expression.analyse()
+		
+		if reusable {
+			expression.acquireReusable(false)
+			expression.releaseReusable()
+		}
 		
 		return expression
 	} // }}}
@@ -1230,15 +1243,15 @@ const $binaryOperators = {
 
 const $expressions = {
 	`\(Kind::ArrayBinding)`					: ArrayBinding
-	`\(Kind::ArrayComprehension)`			: func(data, parent) {
+	`\(Kind::ArrayComprehension)`			: func(data, parent, scope) {
 		if data.loop.kind == Kind::ForInStatement {
-			return new ArrayComprehensionForIn(data, parent)
+			return new ArrayComprehensionForIn(data, parent, scope)
 		}
 		else if data.loop.kind == Kind::ForOfStatement {
-			return new ArrayComprehensionForOf(data, parent)
+			return new ArrayComprehensionForOf(data, parent, scope)
 		}
 		else if data.loop.kind == Kind::ForRangeStatement {
-			return new ArrayComprehensionForRange(data, parent)
+			return new ArrayComprehensionForRange(data, parent, scope)
 		}
 		else {
 			console.error(data)
@@ -1249,12 +1262,12 @@ const $expressions = {
 	`\(Kind::ArrayRange)`					: ArrayRange
 	`\(Kind::BindingElement)`				: BindingElement
 	`\(Kind::Block)`						: BlockExpression
-	`\(Kind::CallExpression)`				: func(data, parent) {
+	`\(Kind::CallExpression)`				: func(data, parent, scope) {
 		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $final.callee(data.callee, parent)) {
-			return new CallFinalExpression(data, parent, callee)
+			return new CallFinalExpression(data, parent, scope, callee)
 		}
 		else {
-			return new CallExpression(data, parent)
+			return new CallExpression(data, parent, scope)
 		}
 	}
 	`\(Kind::CurryExpression)`				: CurryExpression
