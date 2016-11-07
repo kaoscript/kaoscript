@@ -44,7 +44,7 @@ class ArrayRange extends Expression {
 		fragments
 			.code($runtime.helper(this), '.newArrayRange(')
 			.compile(this._from)
-			.code(', ')
+			.code($comma)
 			.compile(this._to)
 		
 		if this._by == null {
@@ -54,6 +54,6 @@ class ArrayRange extends Expression {
 			fragments.code(', ').compile(this._by)
 		}
 		
-		fragments.code(', ', !!this._data.from, ', ', !!this._data.to, ')')
+		fragments.code($comma, this._data.from?, $comma, this._data.to?, ')')
 	} // }}}
 }

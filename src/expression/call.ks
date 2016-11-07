@@ -21,6 +21,7 @@ class CallExpression extends Expression {
 		_reusable		= false
 		_reuseName		= null
 		_tested			= false
+		_type
 	}
 	analyse() { // {{{
 		if this._data.callee.kind == Kind::Identifier {
@@ -56,6 +57,7 @@ class CallExpression extends Expression {
 				throw new Error(`Invalid to call function at line \(this._data.start.line)`)
 			}
 			
+			this._type = $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope)
 			this._caller = $caller(this._callee, this)
 		}
 	} // }}}
@@ -157,7 +159,15 @@ class CallExpression extends Expression {
 					.compile(this._callScope, mode)
 			}
 			
-			fragments.code($comma).compile(this._arguments[0], mode)
+			if this._type == 'Array' {
+				fragments.code($comma).compile(this._arguments[0], mode)
+			}
+			else {
+				fragments
+					.code(', [].concat(')
+					.compile(this._arguments[0], mode)
+					.code(')')
+			}
 		}
 	} // }}}
 	toNullableFragments(fragments) { // {{{

@@ -392,7 +392,23 @@ module.exports = function() {
 			}
 			var type = null;
 			var __ks_0 = data.kind;
-			if(__ks_0 === Kind.BinaryOperator) {
+			if(__ks_0 === Kind.ArrayComprehension) {
+				return {
+					typeName: {
+						kind: Kind.Identifier,
+						name: "Array"
+					}
+				};
+			}
+			else if(__ks_0 === Kind.ArrayRange) {
+				return {
+					typeName: {
+						kind: Kind.Identifier,
+						name: "Array"
+					}
+				};
+			}
+			else if(__ks_0 === Kind.BinaryOperator) {
 				if(data.operator.kind === BinaryOperator.TypeCast) {
 					return $type.type(data.right, scope);
 				}
@@ -1528,13 +1544,13 @@ module.exports = function() {
 					i = 0;
 					j = 50000;
 					while(i < l) {
-						this.push.apply(this, arg.slice(i, j));
+						this.push.apply(this, [].concat(arg.slice(i, j)));
 						i = j;
 						j += 50000;
 					}
 				}
 				else {
-					this.push.apply(this, arg);
+					this.push.apply(this, [].concat(arg));
 				}
 			}
 			return this;
@@ -2814,7 +2830,7 @@ module.exports = function() {
 			for(var i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
 				arg = args[i];
 				if(Type.isArray(arg)) {
-					this.push.apply(this, arg);
+					this.push.apply(this, [].concat(arg));
 				}
 				else if(Type.isObject(arg)) {
 					this._builder._fragments.push(arg);
@@ -13092,7 +13108,7 @@ module.exports = function() {
 				if(parts[i] === "node_modules") {
 					continue;
 				}
-				dirs.push(prefix + path.join(path.join.apply(path, parts.slice(0, i + 1)), "node_modules"));
+				dirs.push(prefix + path.join(path.join.apply(path, [].concat(parts.slice(0, i + 1))), "node_modules"));
 			}
 			if(process.platform === "win32") {
 				dirs[dirs.length - 1] = dirs[dirs.length - 1].replace(":", ":\\");
@@ -18173,14 +18189,14 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
-			fragments.code($runtime.helper(this), ".newArrayRange(").compile(this._from).code(", ").compile(this._to);
+			fragments.code($runtime.helper(this), ".newArrayRange(").compile(this._from).code($comma).compile(this._to);
 			if(this._by === null) {
 				fragments.code(", 1");
 			}
 			else {
 				fragments.code(", ").compile(this._by);
 			}
-			fragments.code(", ", !!this._data.from, ", ", !!this._data.to, ")");
+			fragments.code($comma, Type.isValue(this._data.from), $comma, Type.isValue(this._data.to), ")");
 		}
 		toFragments() {
 			if(arguments.length === 2) {
@@ -18250,6 +18266,179 @@ module.exports = function() {
 			value: data
 		};
 	}
+	class ArrayComprehensionForFrom extends Expression {
+		__ks_init_1() {
+			this._by = null;
+		}
+		__ks_init() {
+			Expression.prototype.__ks_init.call(this);
+			ArrayComprehensionForFrom.prototype.__ks_init_1.call(this);
+		}
+		__ks_cons_0(data, parent, scope) {
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(parent === undefined || parent === null) {
+				throw new Error("Missing parameter 'parent'");
+			}
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			Expression.prototype.__ks_cons.call(this, [data, parent, parent.newScope(scope)]);
+		}
+		__ks_cons(args) {
+			if(args.length === 3) {
+				ArrayComprehensionForFrom.prototype.__ks_cons_0.apply(this, args);
+			}
+			else {
+				Expression.prototype.__ks_cons.call(this, args);
+			}
+		}
+		__ks_func_analyse_0() {
+			var data = this._data;
+			$variable.define(this._scope, data.loop.variable.name, VariableKind.Variable);
+			this._variable = $compile.expression(data.loop.variable, this);
+			this._from = $compile.expression(data.loop.from, this);
+			this._to = $compile.expression(Type.isValue(data.loop.to) ? data.loop.to : data.loop.til, this);
+			if(Type.isValue(data.loop.by)) {
+				this._by = $compile.expression(data.loop.by, this);
+			}
+			this._body = $compile.statement($return(data.body), this);
+			this._body.analyse();
+			if(Type.isValue(data.loop.when)) {
+				this._when = $compile.statement($return(data.loop.when), this);
+				this._when.analyse();
+			}
+		}
+		analyse() {
+			if(arguments.length === 0) {
+				return ArrayComprehensionForFrom.prototype.__ks_func_analyse_0.apply(this);
+			}
+			else if(Expression.prototype.analyse) {
+				return Expression.prototype.analyse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_fuse_0() {
+			this._body.fuse();
+			if(Type.isValue(this._when)) {
+				this._when.fuse();
+			}
+		}
+		fuse() {
+			if(arguments.length === 0) {
+				return ArrayComprehensionForFrom.prototype.__ks_func_fuse_0.apply(this);
+			}
+			else if(Expression.prototype.fuse) {
+				return Expression.prototype.fuse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_toFragments_0(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			this.module().flag("Helper");
+			fragments.code($runtime.helper(this), ".mapRange(").compile(this._from).code($comma).compile(this._to);
+			if(this._by === null) {
+				fragments.code(", 1");
+			}
+			else {
+				fragments.code($comma).compile(this._by);
+			}
+			fragments.code($comma, Type.isValue(this._data.loop.from), $comma, Type.isValue(this._data.loop.to), $comma);
+			fragments.code("(").compile(this._variable).code(") =>").newBlock().compile(this._body).done();
+			if(Type.isValue(this._when)) {
+				fragments.code($comma).code("(").compile(this._variable).code(") =>").newBlock().compile(this._when).done();
+			}
+			fragments.code(")");
+		}
+		toFragments() {
+			if(arguments.length === 2) {
+				return ArrayComprehensionForFrom.prototype.__ks_func_toFragments_0.apply(this, arguments);
+			}
+			else if(Expression.prototype.toFragments) {
+				return Expression.prototype.toFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	ArrayComprehensionForFrom.__ks_reflect = {
+		inits: 1,
+		constructors: [
+			{
+				access: 3,
+				min: 3,
+				max: 3,
+				parameters: [
+					{
+						type: "Any",
+						min: 3,
+						max: 3
+					}
+				]
+			}
+		],
+		instanceVariables: {
+			_body: {
+				access: 1,
+				type: "Any"
+			},
+			_by: {
+				access: 1,
+				type: "Any"
+			},
+			_from: {
+				access: 1,
+				type: "Any"
+			},
+			_to: {
+				access: 1,
+				type: "Any"
+			},
+			_variable: {
+				access: 1,
+				type: "Any"
+			}
+		},
+		classVariables: {},
+		instanceMethods: {
+			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			fuse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			toFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
 	class ArrayComprehensionForIn extends Expression {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
@@ -18370,7 +18559,28 @@ module.exports = function() {
 				]
 			}
 		],
-		instanceVariables: {},
+		instanceVariables: {
+			_body: {
+				access: 1,
+				type: "Any"
+			},
+			_index: {
+				access: 1,
+				type: "Any"
+			},
+			_value: {
+				access: 1,
+				type: "Any"
+			},
+			_variable: {
+				access: 1,
+				type: "Any"
+			},
+			_when: {
+				access: 1,
+				type: "Any"
+			}
+		},
 		classVariables: {},
 		instanceMethods: {
 			analyse: [
@@ -18526,7 +18736,28 @@ module.exports = function() {
 				]
 			}
 		],
-		instanceVariables: {},
+		instanceVariables: {
+			_body: {
+				access: 1,
+				type: "Any"
+			},
+			_index: {
+				access: 1,
+				type: "Any"
+			},
+			_value: {
+				access: 1,
+				type: "Any"
+			},
+			_variable: {
+				access: 1,
+				type: "Any"
+			},
+			_when: {
+				access: 1,
+				type: "Any"
+			}
+		},
 		classVariables: {},
 		instanceMethods: {
 			analyse: [
@@ -19561,6 +19792,7 @@ module.exports = function() {
 				if(this._arguments.length !== 1) {
 					throw new Error("Invalid to call function at line " + this._data.start.line);
 				}
+				this._type = $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope);
 				this._caller = $caller(this._callee, this);
 			}
 		}
@@ -19722,7 +19954,12 @@ module.exports = function() {
 				else {
 					fragments.compile(this._callee, mode).code(".apply(").compile(this._callScope, mode);
 				}
-				fragments.code($comma).compile(this._arguments[0], mode);
+				if(this._type === "Array") {
+					fragments.code($comma).compile(this._arguments[0], mode);
+				}
+				else {
+					fragments.code(", [].concat(").compile(this._arguments[0], mode).code(")");
+				}
 			}
 		}
 		toCallFragments() {
@@ -19807,6 +20044,10 @@ module.exports = function() {
 				type: "Any"
 			},
 			_tested: {
+				access: 1,
+				type: "Any"
+			},
+			_type: {
 				access: 1,
 				type: "Any"
 			}
@@ -26376,7 +26617,10 @@ module.exports = function() {
 		if(scope === undefined || scope === null) {
 			throw new Error("Missing parameter 'scope'");
 		}
-		if(data.loop.kind === Kind.ForInStatement) {
+		if(data.loop.kind === Kind.ForFromStatement) {
+			return new ArrayComprehensionForFrom(data, parent, scope);
+		}
+		else if(data.loop.kind === Kind.ForInStatement) {
 			return new ArrayComprehensionForIn(data, parent, scope);
 		}
 		else if(data.loop.kind === Kind.ForOfStatement) {

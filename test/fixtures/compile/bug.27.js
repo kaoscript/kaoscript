@@ -7,6 +7,6 @@ module.exports = function() {
 			throw new Error("Missing parameter 'args'");
 		}
 		let __ks_0;
-		(__ks_0 = foo.bar(), __ks_0.qux).apply(__ks_0, args);
+		(__ks_0 = foo.bar(), __ks_0.qux).apply(__ks_0, [].concat(args));
 	}
 }

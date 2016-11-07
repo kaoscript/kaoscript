@@ -172,7 +172,7 @@ func $blend(x: float, y: float, percentage: float) -> float { // {{{
 func $binder(last: func, components, first: func, ...firstArgs) -> func { // {{{
 	let that = first**(...firstArgs)
 	
-	let lastArgs = [that[component.field] for name, component of components]
+	let lastArgs := [that[component.field] for name, component of components]
 	lastArgs.push(that)
 	
 	return last**(...lastArgs)
@@ -208,7 +208,7 @@ func $component(component, name: string, space: string) -> void { // {{{
 
 func $convert(that: Color, space: string, result: object = {_alpha: 0}) -> object { // {{{
 	if ?(s = $spaces[that._space]).converters[space] {
-		let args = [that[component.field] for name, component of s.components]
+		let args := [that[component.field] for name, component of s.components]
 		
 		args.push(result)
 		

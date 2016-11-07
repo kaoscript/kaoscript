@@ -365,6 +365,22 @@ const $type = {
 		let type = null
 		
 		switch data.kind {
+			Kind::ArrayComprehension => {
+				return {
+					typeName: {
+						kind: Kind::Identifier
+						name: 'Array'
+					}
+				}
+			}
+			Kind::ArrayRange => {
+				return {
+					typeName: {
+						kind: Kind::Identifier
+						name: 'Array'
+					}
+				}
+			}
 			Kind::BinaryOperator => {
 				if data.operator.kind == BinaryOperator::TypeCast {
 					return $type.type(data.right, scope)
@@ -1229,7 +1245,10 @@ const $binaryOperators = {
 const $expressions = {
 	`\(Kind::ArrayBinding)`					: ArrayBinding
 	`\(Kind::ArrayComprehension)`			: func(data, parent, scope) {
-		if data.loop.kind == Kind::ForInStatement {
+		if data.loop.kind == Kind::ForFromStatement {
+			return new ArrayComprehensionForFrom(data, parent, scope)
+		}
+		else if data.loop.kind == Kind::ForInStatement {
 			return new ArrayComprehensionForIn(data, parent, scope)
 		}
 		else if data.loop.kind == Kind::ForOfStatement {
