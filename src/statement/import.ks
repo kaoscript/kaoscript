@@ -116,7 +116,7 @@ const $import = {
 		
 		let source = fs.readFile(x)
 		
-		if fs.isFile(x + $extensions.metadata) && fs.isFile(x + $extensions.hash) && fs.readFile(x + $extensions.hash) == fs.sha256(source) && (metadata ?= $import.readMetadata(x)) {
+		if fs.isFile(fs.hidden(x, $extensions.metadata)) && fs.isFile(fs.hidden(x, $extensions.hash)) && fs.readFile(fs.hidden(x, $extensions.hash)) == fs.sha256(source) && (metadata ?= $import.readMetadata(x)) {
 		}
 		else {
 			let compiler = new Compiler(x, {
@@ -330,7 +330,7 @@ const $import = {
 	} // }}}
 	readMetadata(x) { // {{{
 		try {
-			return JSON.parse(fs.readFile(x + $extensions.metadata))
+			return JSON.parse(fs.readFile(fs.hidden(x, $extensions.metadata)))
 		}
 		catch {
 			return null

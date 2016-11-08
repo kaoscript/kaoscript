@@ -1427,15 +1427,15 @@ export class Compiler {
 		return this._module.toSourceMap()
 	} // }}}
 	writeFiles() { // {{{
-		fs.writeFile(this._file + $extensions.binary, this.toSource())
+		fs.writeFile(fs.hidden(this._file, $extensions.binary), this.toSource())
 		
 		if !this._module._binary {
 			let metadata = this.toMetadata()
 			
-			fs.writeFile(this._file + $extensions.metadata, JSON.stringify(metadata))
+			fs.writeFile(fs.hidden(this._file, $extensions.metadata), JSON.stringify(metadata))
 		}
 		
-		fs.writeFile(this._file + $extensions.hash, this._sha256)
+		fs.writeFile(fs.hidden(this._file, $extensions.hash), this._sha256)
 	} // }}}
 	writeOutput() { // {{{
 		if !this._options.output {

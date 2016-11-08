@@ -12890,7 +12890,7 @@ module.exports = function() {
 			var metadata, name, alias, variable;
 			var source = fs.readFile(x);
 			var __ks_0;
-			if(fs.isFile(x + $extensions.metadata) && fs.isFile(x + $extensions.hash) && (fs.readFile(x + $extensions.hash) === fs.sha256(source)) && (Type.isValue(__ks_0 = $import.readMetadata(x)) ? (metadata = __ks_0, true) : false)) {
+			if(fs.isFile(fs.hidden(x, $extensions.metadata)) && fs.isFile(fs.hidden(x, $extensions.hash)) && (fs.readFile(fs.hidden(x, $extensions.hash)) === fs.sha256(source)) && (Type.isValue(__ks_0 = $import.readMetadata(x)) ? (metadata = __ks_0, true) : false)) {
 			}
 			else {
 				var compiler = new Compiler(x, {
@@ -13120,7 +13120,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'x'");
 			}
 			try {
-				return JSON.parse(fs.readFile(x + $extensions.metadata));
+				return JSON.parse(fs.readFile(fs.hidden(x, $extensions.metadata)));
 			}
 			catch(__ks_0) {
 				return null;
@@ -26828,12 +26828,12 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_writeFiles_0() {
-			fs.writeFile(this._file + $extensions.binary, this.toSource());
+			fs.writeFile(fs.hidden(this._file, $extensions.binary), this.toSource());
 			if(!this._module._binary) {
 				var metadata = this.toMetadata();
-				fs.writeFile(this._file + $extensions.metadata, JSON.stringify(metadata));
+				fs.writeFile(fs.hidden(this._file, $extensions.metadata), JSON.stringify(metadata));
 			}
-			fs.writeFile(this._file + $extensions.hash, this._sha256);
+			fs.writeFile(fs.hidden(this._file, $extensions.hash), this._sha256);
 		}
 		writeFiles() {
 			if(arguments.length === 0) {

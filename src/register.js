@@ -15,8 +15,8 @@ var loadFile = function(module, filename) { // {{{
 	try {
 		var source = fs.readFile(filename);
 		
-		if(fs.isFile(filename + extensions.binary) && fs.isFile(filename + extensions.hash) && fs.readFile(filename + extensions.hash) === fs.sha256(source)) {
-			var data = fs.readFile(filename + extensions.binary);
+		if(fs.isFile(fs.hidden(filename, extensions.binary)) && fs.isFile(fs.hidden(filename, extensions.hash)) && fs.readFile(fs.hidden(filename, extensions.hash)) === fs.sha256(source)) {
+			var data = fs.readFile(fs.hidden(filename, extensions.binary));
 		}
 		else {
 			var compiler = new Compiler(filename, {
