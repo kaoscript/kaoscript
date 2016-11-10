@@ -1357,13 +1357,17 @@ const $unaryOperators = {
 
 export class Compiler {
 	private {
-		_file	: String
+		_file: String
+		_fragments
+		_hashes
+		_module
+		_options
 	}
 	static {
 		register() { // {{{
 		} // }}}
 	}
-	Compiler(@file, options?) { // {{{
+	Compiler(@file, options?, @hashes = {}) { // {{{
 		this._options = Object.merge({
 			context: 'node6',
 			register: true,
@@ -1380,13 +1384,7 @@ export class Compiler {
 		}, options)
 	} // }}}
 	compile(data?) { // {{{
-		data ??= fs.readFile(this._file)
-		
-		this._sha256 = fs.sha256(data)
-		
-		let Class = $statements[Kind::Module]
-		
-		this._module = new Class(parse(data), this, this._file)
+		this._module = new $statements[Kind::Module](data ?? fs.readFile(this._file), this, this._file)
 		
 		this._module.analyse()
 		
@@ -1405,6 +1403,12 @@ export class Compiler {
 		console.timeEnd('compile') */
 		
 		return this
+	} // }}}
+	sha256(file, data?) { // {{{
+		return this._hashes[file] ?? (this._hashes[file] = fs.sha256(data ?? fs.readFile(file)))
+	} // }}}
+	toHashes() { // {{{
+		return this._module.toHashes()
 	} // }}}
 	toMetadata() { // {{{
 		return this._module.toMetadata()
@@ -1435,7 +1439,7 @@ export class Compiler {
 			fs.writeFile(fs.hidden(this._file, $extensions.metadata), JSON.stringify(metadata))
 		}
 		
-		fs.writeFile(fs.hidden(this._file, $extensions.hash), this._sha256)
+		fs.writeFile(fs.hidden(this._file, $extensions.hash), JSON.stringify(this._module.toHashes()))
 	} // }}}
 	writeOutput() { // {{{
 		if !this._options.output {
@@ -1454,6 +1458,29 @@ export func compileFile(file, options?) { // {{{
 	let compiler = new Compiler(file, options)
 	
 	return compiler.compile().toSource()
+} // }}}
+
+export func isUpToDate(file, source) { // {{{
+	let hashes
+	try {
+		hashes = JSON.parse(fs.readFile(fs.hidden(file, $extensions.hash)))
+	}
+	catch {
+		return false
+	}
+	
+	let root = path.dirname(file)
+	
+	for name, hash of hashes {
+		if name == '.' {
+			return null if fs.sha256(source) != hash
+		}
+		else {
+			return null if fs.sha256(fs.readFile(path.join(root, name))) != hash
+		}
+	}
+	
+	return true
 } // }}}
 
 export $extensions as extensions

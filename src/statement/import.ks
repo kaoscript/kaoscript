@@ -112,23 +112,27 @@ const $import = {
 			file = moduleName = module.path(x, data.module)
 		}
 		
-		let metadata, name, alias, variable
+		let metadata, name, alias, variable, hashes
 		
 		let source = fs.readFile(x)
 		
-		if fs.isFile(fs.hidden(x, $extensions.metadata)) && fs.isFile(fs.hidden(x, $extensions.hash)) && fs.readFile(fs.hidden(x, $extensions.hash)) == fs.sha256(source) && (metadata ?= $import.readMetadata(x)) {
+		if fs.isFile(fs.hidden(x, $extensions.metadata)) && fs.isFile(fs.hidden(x, $extensions.hash)) && (hashes ?= module.isUpToDate(x, source)) && (metadata ?= $import.readMetadata(x)) {
 		}
 		else {
 			let compiler = new Compiler(x, {
 				register: false
-			})
+			}, module.compiler()._hashes)
 			
 			compiler.compile(source)
 			
 			compiler.writeFiles()
 			
 			metadata = compiler.toMetadata()
+			
+			hashes = compiler.toHashes()
 		}
+		
+		module.addHashes(x, hashes)
 		
 		let {exports, requirements} = metadata
 		

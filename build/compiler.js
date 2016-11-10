@@ -4639,6 +4639,7 @@ module.exports = function() {
 			this._exportSource = [];
 			this._exportMeta = {};
 			this._flags = {};
+			this._hashes = {};
 			this._imports = {};
 			this._references = {};
 			this._register = false;
@@ -4657,13 +4658,13 @@ module.exports = function() {
 			if(file === undefined || file === null) {
 				throw new Error("Missing parameter 'file'");
 			}
-			this._data = data;
 			this._compiler = compiler;
 			this._file = file;
+			this._data = parse(data);
 			this._directory = path.dirname(file);
-			this._options = $applyAttributes(data, this._compiler._options.config);
-			for(var __ks_0 = 0, __ks_1 = data.attributes.length, attr; __ks_0 < __ks_1; ++__ks_0) {
-				attr = data.attributes[__ks_0];
+			this._options = $applyAttributes(this._data, this._compiler._options.config);
+			for(var __ks_0 = 0, __ks_1 = this._data.attributes.length, attr; __ks_0 < __ks_1; ++__ks_0) {
+				attr = this._data.attributes[__ks_0];
 				if((attr.declaration.kind === Kind.Identifier) && (attr.declaration.name === "bin")) {
 					this._binary = true;
 				}
@@ -4676,7 +4677,7 @@ module.exports = function() {
 					}
 				}
 			}
-			this._body = new ModuleBlock(data, this);
+			this._body = new ModuleBlock(this._data, this);
 			if(this._compiler._options.output) {
 				this._output = this._compiler._options.output;
 				if(Type.isArray(this._compiler._options.rewire)) {
@@ -4689,6 +4690,7 @@ module.exports = function() {
 			else {
 				this._output = null;
 			}
+			this._hashes["."] = this._compiler.sha256(file, data);
 		}
 		__ks_cons(args) {
 			if(args.length === 3) {
@@ -4697,6 +4699,45 @@ module.exports = function() {
 			else {
 				throw new Error("Wrong number of arguments");
 			}
+		}
+		__ks_func_addHash_0(file, hash) {
+			if(file === undefined || file === null) {
+				throw new Error("Missing parameter 'file'");
+			}
+			if(hash === undefined || hash === null) {
+				throw new Error("Missing parameter 'hash'");
+			}
+			this._hashes[path.relative(this._directory, file)] = hash;
+		}
+		addHash() {
+			if(arguments.length === 2) {
+				return Module.prototype.__ks_func_addHash_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_addHashes_0(file, hashes) {
+			if(file === undefined || file === null) {
+				throw new Error("Missing parameter 'file'");
+			}
+			if(hashes === undefined || hashes === null) {
+				throw new Error("Missing parameter 'hashes'");
+			}
+			var root = path.dirname(file);
+			for(var name in hashes) {
+				var hash = hashes[name];
+				if(name === ".") {
+					this._hashes[path.relative(this._directory, file)] = hash;
+				}
+				else {
+					this._hashes[path.relative(this._directory, path.join(root, name))] = hash;
+				}
+			}
+		}
+		addHashes() {
+			if(arguments.length === 2) {
+				return Module.prototype.__ks_func_addHashes_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_addReference_0(key, code) {
 			if(key === undefined || key === null) {
@@ -4725,6 +4766,15 @@ module.exports = function() {
 		analyse() {
 			if(arguments.length === 0) {
 				return Module.prototype.__ks_func_analyse_0.apply(this);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_compiler_0() {
+			return this._compiler;
+		}
+		compiler() {
+			if(arguments.length === 0) {
+				return Module.prototype.__ks_func_compiler_0.apply(this);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -4838,6 +4888,42 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
+		__ks_func_isUpToDate_0(file, data) {
+			if(file === undefined || file === null) {
+				throw new Error("Missing parameter 'file'");
+			}
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			var hashes;
+			try {
+				hashes = JSON.parse(fs.readFile(fs.hidden(file, $extensions.hash)));
+			}
+			catch(__ks_0) {
+				return null;
+			}
+			var root = path.dirname(file);
+			for(var name in hashes) {
+				var hash = hashes[name];
+				if(name === ".") {
+					if(this._compiler.sha256(file, data) !== hash) {
+						return null;
+					}
+				}
+				else {
+					if(this._compiler.sha256(path.join(root, name)) !== hash) {
+						return null;
+					}
+				}
+			}
+			return hashes;
+		}
+		isUpToDate() {
+			if(arguments.length === 2) {
+				return Module.prototype.__ks_func_isUpToDate_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
 		__ks_func_listReferences_0(key) {
 			if(key === undefined || key === null) {
 				throw new Error("Missing parameter 'key'");
@@ -4941,6 +5027,15 @@ module.exports = function() {
 			}
 			else if(arguments.length === 3) {
 				return Module.prototype.__ks_func_require_1.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_toHashes_0() {
+			return this._hashes;
+		}
+		toHashes() {
+			if(arguments.length === 0) {
+				return Module.prototype.__ks_func_toHashes_0.apply(this);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -5251,6 +5346,10 @@ module.exports = function() {
 				access: 1,
 				type: "Any"
 			},
+			_hashes: {
+				access: 1,
+				type: "Any"
+			},
 			_imports: {
 				access: 1,
 				type: "Any"
@@ -5282,6 +5381,34 @@ module.exports = function() {
 		},
 		classVariables: {},
 		instanceMethods: {
+			addHash: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
+			addHashes: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
 			addReference: [
 				{
 					access: 3,
@@ -5297,6 +5424,14 @@ module.exports = function() {
 				}
 			],
 			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			compiler: [
 				{
 					access: 3,
 					min: 0,
@@ -5370,6 +5505,20 @@ module.exports = function() {
 					]
 				}
 			],
+			isUpToDate: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
 			listReferences: [
 				{
 					access: 3,
@@ -5422,6 +5571,14 @@ module.exports = function() {
 							max: 3
 						}
 					]
+				}
+			],
+			toHashes: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
 				}
 			],
 			toFragments: [
@@ -12887,19 +13044,21 @@ module.exports = function() {
 			if(!moduleName) {
 				file = moduleName = module.path(x, data.module);
 			}
-			var metadata, name, alias, variable;
+			var metadata, name, alias, variable, hashes;
 			var source = fs.readFile(x);
 			var __ks_0;
-			if(fs.isFile(fs.hidden(x, $extensions.metadata)) && fs.isFile(fs.hidden(x, $extensions.hash)) && (fs.readFile(fs.hidden(x, $extensions.hash)) === fs.sha256(source)) && (Type.isValue(__ks_0 = $import.readMetadata(x)) ? (metadata = __ks_0, true) : false)) {
+			if(fs.isFile(fs.hidden(x, $extensions.metadata)) && fs.isFile(fs.hidden(x, $extensions.hash)) && (Type.isValue(__ks_0 = module.isUpToDate(x, source)) ? (hashes = __ks_0, true) : false) && (Type.isValue(__ks_0 = $import.readMetadata(x)) ? (metadata = __ks_0, true) : false)) {
 			}
 			else {
 				var compiler = new Compiler(x, {
 					register: false
-				});
+				}, module.compiler()._hashes);
 				compiler.compile(source);
 				compiler.writeFiles();
 				metadata = compiler.toMetadata();
+				hashes = compiler.toHashes();
 			}
+			module.addHashes(x, hashes);
 			var {exports, requirements} = metadata;
 			var importVariables = {};
 			var importVarCount = 0;
@@ -13729,6 +13888,8 @@ module.exports = function() {
 		}
 		__ks_func_analyse_0() {
 			var directory = this.directory();
+			var module = this.module();
+			var compiler = module.compiler();
 			var path, data, declarator;
 			for(var __ks_0 = 0, __ks_1 = this._data.files.length, file; __ks_0 < __ks_1; ++__ks_0) {
 				file = this._data.files[__ks_0];
@@ -13736,7 +13897,9 @@ module.exports = function() {
 					path = fs.resolve(directory, file);
 					if(fs.isFile(path) || fs.isFile(path += $extensions.source)) {
 						declarator = new IncludeDeclarator(path, this);
-						data = parse(fs.readFile(path));
+						data = fs.readFile(path);
+						module.addHash(path, compiler.sha256(path, data));
+						data = parse(data);
 						for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 							statement = data.body[__ks_2];
 							this._statements.push(statement = $compile.statement(statement, declarator));
@@ -26748,7 +26911,14 @@ module.exports = function() {
 			else  {
 				var options = null;
 			}
+			if(arguments.length > 2) {
+				var hashes = arguments[++__ks_i];
+			}
+			else  {
+				var hashes = {};
+			}
 			this._file = file;
+			this._hashes = hashes;
 			this._options = __ks_Object._cm_merge({
 				context: "node6",
 				register: true,
@@ -26765,7 +26935,7 @@ module.exports = function() {
 			}, options);
 		}
 		__ks_cons(args) {
-			if(args.length >= 1 && args.length <= 2) {
+			if(args.length >= 1 && args.length <= 3) {
 				Compiler.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -26773,12 +26943,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_compile_0(data = null) {
-			if(!Type.isValue(data)) {
-				data = fs.readFile(this._file);
-			}
-			this._sha256 = fs.sha256(data);
-			var Class = $statements[Kind.Module];
-			this._module = new Class(parse(data), this, this._file);
+			this._module = new $statements[Kind.Module](Type.isValue(data) ? data : fs.readFile(this._file), this, this._file);
 			this._module.analyse();
 			this._module.fuse();
 			this._fragments = this._module.toFragments();
@@ -26787,6 +26952,35 @@ module.exports = function() {
 		compile() {
 			if(arguments.length >= 0 && arguments.length <= 1) {
 				return Compiler.prototype.__ks_func_compile_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_sha256_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
+			}
+			var __ks_i = -1;
+			var file = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var data = arguments[++__ks_i];
+			}
+			else  {
+				var data = null;
+			}
+			return Type.isValue(this._hashes[file]) ? this._hashes[file] : (this._hashes[file] = fs.sha256(Type.isValue(data) ? data : fs.readFile(file)));
+		}
+		sha256() {
+			if(arguments.length >= 1 && arguments.length <= 2) {
+				return Compiler.prototype.__ks_func_sha256_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_toHashes_0() {
+			return this._module.toHashes();
+		}
+		toHashes() {
+			if(arguments.length === 0) {
+				return Compiler.prototype.__ks_func_toHashes_0.apply(this);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -26833,7 +27027,7 @@ module.exports = function() {
 				var metadata = this.toMetadata();
 				fs.writeFile(fs.hidden(this._file, $extensions.metadata), JSON.stringify(metadata));
 			}
-			fs.writeFile(fs.hidden(this._file, $extensions.hash), this._sha256);
+			fs.writeFile(fs.hidden(this._file, $extensions.hash), JSON.stringify(this._module.toHashes()));
 		}
 		writeFiles() {
 			if(arguments.length === 0) {
@@ -26870,12 +27064,12 @@ module.exports = function() {
 			{
 				access: 3,
 				min: 1,
-				max: 2,
+				max: 3,
 				parameters: [
 					{
 						type: "Any",
 						min: 1,
-						max: 2
+						max: 3
 					}
 				]
 			}
@@ -26884,6 +27078,22 @@ module.exports = function() {
 			_file: {
 				access: 1,
 				type: "String"
+			},
+			_fragments: {
+				access: 1,
+				type: "Any"
+			},
+			_hashes: {
+				access: 1,
+				type: "Any"
+			},
+			_module: {
+				access: 1,
+				type: "Any"
+			},
+			_options: {
+				access: 1,
+				type: "Any"
 			}
 		},
 		classVariables: {},
@@ -26900,6 +27110,28 @@ module.exports = function() {
 							max: 1
 						}
 					]
+				}
+			],
+			sha256: [
+				{
+					access: 3,
+					min: 1,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 2
+						}
+					]
+				}
+			],
+			toHashes: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
 				}
 			],
 			toMetadata: [
@@ -26970,9 +27202,40 @@ module.exports = function() {
 		var compiler = new Compiler(file, options);
 		return compiler.compile().toSource();
 	}
+	function isUpToDate(file, source) {
+		if(file === undefined || file === null) {
+			throw new Error("Missing parameter 'file'");
+		}
+		if(source === undefined || source === null) {
+			throw new Error("Missing parameter 'source'");
+		}
+		var hashes;
+		try {
+			hashes = JSON.parse(fs.readFile(fs.hidden(file, $extensions.hash)));
+		}
+		catch(__ks_0) {
+			return false;
+		}
+		var root = path.dirname(file);
+		for(var name in hashes) {
+			var hash = hashes[name];
+			if(name === ".") {
+				if(fs.sha256(source) !== hash) {
+					return null;
+				}
+			}
+			else {
+				if(fs.sha256(fs.readFile(path.join(root, name))) !== hash) {
+					return null;
+				}
+			}
+		}
+		return true;
+	}
 	return {
 		Compiler: Compiler,
 		compileFile: compileFile,
+		isUpToDate: isUpToDate,
 		extensions: $extensions
 	};
 }

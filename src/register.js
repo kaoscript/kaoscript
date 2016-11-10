@@ -7,7 +7,7 @@
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-var {Compiler, extensions} = require('../build/compiler.js')();
+var {Compiler, extensions, isUpToDate} = require('../build/compiler.js')();
 var fs = require('./fs.js');
 var path = require('path');
 
@@ -15,7 +15,7 @@ var loadFile = function(module, filename) { // {{{
 	try {
 		var source = fs.readFile(filename);
 		
-		if(fs.isFile(fs.hidden(filename, extensions.binary)) && fs.isFile(fs.hidden(filename, extensions.hash)) && fs.readFile(fs.hidden(filename, extensions.hash)) === fs.sha256(source)) {
+		if(fs.isFile(fs.hidden(filename, extensions.binary)) && fs.isFile(fs.hidden(filename, extensions.hash)) && isUpToDate(filename, source)) {
 			var data = fs.readFile(fs.hidden(filename, extensions.binary));
 		}
 		else {

@@ -10,6 +10,7 @@ class Module {
 		_exportMeta				= {}
 		_file
 		_flags					= {}
+		_hashes					= {}
 		_imports				= {}
 		_options
 		_output
@@ -18,11 +19,12 @@ class Module {
 		_requirements			= {}
 		_rewire
 	}
-	Module(@data, @compiler, @file) { // {{{
+	Module(data, @compiler, @file) { // {{{
+		this._data = parse(data)
 		this._directory = path.dirname(file)
-		this._options = $applyAttributes(data, this._compiler._options.config)
+		this._options = $applyAttributes(this._data, this._compiler._options.config)
 		
-		for attr in data.attributes {
+		for attr in this._data.attributes {
 			if attr.declaration.kind == Kind::Identifier &&	attr.declaration.name == 'bin' {
 				this._binary = true
 			}
@@ -35,7 +37,7 @@ class Module {
 			}
 		}
 		
-		this._body = new ModuleBlock(data, this)
+		this._body = new ModuleBlock(this._data, this)
 		
 		if this._compiler._options.output {
 			this._output = this._compiler._options.output
@@ -49,6 +51,23 @@ class Module {
 		}
 		else {
 			this._output = null
+		}
+		
+		this._hashes['.'] = this._compiler.sha256(file, data)
+	} // }}}
+	addHash(file, hash) { // {{{
+		this._hashes[path.relative(this._directory, file)] = hash
+	} // }}}
+	addHashes(file, hashes) { // {{{
+		let root = path.dirname(file)
+		
+		for name, hash of hashes {
+			if name == '.' {
+				this._hashes[path.relative(this._directory, file)] = hash
+			}
+			else {
+				this._hashes[path.relative(this._directory, path.join(root, name))] = hash
+			}
 		}
 	} // }}}
 	addReference(key, code) { // {{{
@@ -64,6 +83,7 @@ class Module {
 	analyse() { // {{{
 		this._body.analyse()
 	} // }}}
+	compiler() => this._compiler
 	directory() => this._directory
 	export(name, alias = false) { // {{{
 		throw new Error('Binary file can\'t export') if this._binary
@@ -110,6 +130,28 @@ class Module {
 		if file && file.slice(-$extensions.source.length).toLowerCase() == $extensions.source {
 			this._register = true
 		}
+	} // }}}
+	isUpToDate(file, data) { // {{{
+		let hashes
+		try {
+			hashes = JSON.parse(fs.readFile(fs.hidden(file, $extensions.hash)))
+		}
+		catch {
+			return null
+		}
+		
+		let root = path.dirname(file)
+		
+		for name, hash of hashes {
+			if name == '.' {
+				return null if this._compiler.sha256(file, data) != hash
+			}
+			else {
+				return null if this._compiler.sha256(path.join(root, name)) != hash
+			}
+		}
+		
+		return hashes
 	} // }}}
 	listReferences(key) { // {{{
 		if this._references[key] {
@@ -176,6 +218,7 @@ class Module {
 		
 		this._dynamicRequirements.push(requirement)
 	} // }}}
+	toHashes() => this._hashes
 	toFragments() { // {{{
 		if this._binary {
 			let builder = new FragmentBuilder(0)

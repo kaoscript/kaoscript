@@ -7,6 +7,8 @@ class IncludeDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		let directory = this.directory()
+		let module = this.module()
+		let compiler = module.compiler()
 		
 		let path, data, declarator
 		for file in this._data.files {
@@ -16,7 +18,11 @@ class IncludeDeclaration extends Statement {
 				if fs.isFile(path) || fs.isFile(path += $extensions.source) {
 					declarator = new IncludeDeclarator(path, this)
 					
-					data = parse(fs.readFile(path))
+					data = fs.readFile(path)
+					
+					module.addHash(path, compiler.sha256(path, data))
+					
+					data = parse(data)
 					
 					for statement in data.body {
 						this._statements.push(statement = $compile.statement(statement, declarator))
