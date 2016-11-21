@@ -4641,6 +4641,7 @@ module.exports = function() {
 			this._flags = {};
 			this._hashes = {};
 			this._imports = {};
+			this._includes = {};
 			this._references = {};
 			this._register = false;
 			this._requirements = {};
@@ -4736,6 +4737,18 @@ module.exports = function() {
 		addHashes() {
 			if(arguments.length === 2) {
 				return Module.prototype.__ks_func_addHashes_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_addInclude_0(path) {
+			if(path === undefined || path === null) {
+				throw new Error("Missing parameter 'path'");
+			}
+			this._includes[path] = true;
+		}
+		addInclude() {
+			if(arguments.length === 1) {
+				return Module.prototype.__ks_func_addInclude_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -4862,6 +4875,18 @@ module.exports = function() {
 		fuse() {
 			if(arguments.length === 0) {
 				return Module.prototype.__ks_func_fuse_0.apply(this);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_hasInclude_0(path) {
+			if(path === undefined || path === null) {
+				throw new Error("Missing parameter 'path'");
+			}
+			return Type.isValue(this._includes) ? this._includes[path] : undefined;
+		}
+		hasInclude() {
+			if(arguments.length === 1) {
+				return Module.prototype.__ks_func_hasInclude_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -5354,6 +5379,10 @@ module.exports = function() {
 				access: 1,
 				type: "Any"
 			},
+			_includes: {
+				access: 1,
+				type: "Any"
+			},
 			_options: {
 				access: 1,
 				type: "Any"
@@ -5405,6 +5434,20 @@ module.exports = function() {
 							type: "Any",
 							min: 2,
 							max: 2
+						}
+					]
+				}
+			],
+			addInclude: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
 						}
 					]
 				}
@@ -5489,6 +5532,20 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			],
+			hasInclude: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
 				}
 			],
 			import: [
@@ -13869,22 +13926,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			IncludeDeclaration.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				IncludeDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var directory = this.directory();
@@ -13899,6 +13942,7 @@ module.exports = function() {
 						declarator = new IncludeDeclarator(path, this);
 						data = fs.readFile(path);
 						module.addHash(path, compiler.sha256(path, data));
+						module.addInclude(path);
 						data = parse(data);
 						for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 							statement = data.body[__ks_2];
@@ -13924,7 +13968,10 @@ module.exports = function() {
 						throw new Error("Cannot find module '" + file + "' from '" + directory + "'");
 					}
 					declarator = new IncludeDeclarator(path, this);
-					data = parse(fs.readFile(path));
+					data = fs.readFile(path);
+					module.addHash(path, compiler.sha256(path, data));
+					module.addInclude(path);
+					data = parse(data);
 					for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 						statement = data.body[__ks_2];
 						this._statements.push(statement = $compile.statement(statement, declarator));
@@ -13978,20 +14025,160 @@ module.exports = function() {
 	}
 	IncludeDeclaration.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
+		constructors: [],
+		instanceVariables: {
+			_statements: {
+				access: 1,
+				type: "Any"
 			}
-		],
+		},
+		classVariables: {},
+		instanceMethods: {
+			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			fuse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			toFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class IncludeOnceDeclaration extends Statement {
+		__ks_init_1() {
+			this._statements = [];
+		}
+		__ks_init() {
+			Statement.prototype.__ks_init.call(this);
+			IncludeOnceDeclaration.prototype.__ks_init_1.call(this);
+		}
+		__ks_cons(args) {
+			Statement.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_analyse_0() {
+			var directory = this.directory();
+			var module = this.module();
+			var compiler = module.compiler();
+			var path, data, declarator;
+			for(var __ks_0 = 0, __ks_1 = this._data.files.length, file; __ks_0 < __ks_1; ++__ks_0) {
+				file = this._data.files[__ks_0];
+				if(/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(file)) {
+					path = fs.resolve(directory, file);
+					if(fs.isFile(path) || fs.isFile(path += $extensions.source)) {
+						if(!module.hasInclude(path)) {
+							declarator = new IncludeDeclarator(path, this);
+							data = fs.readFile(path);
+							module.addHash(path, compiler.sha256(path, data));
+							module.addInclude(path);
+							data = parse(data);
+							for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
+								statement = data.body[__ks_2];
+								this._statements.push(statement = $compile.statement(statement, declarator));
+								statement.analyse();
+							}
+						}
+					}
+					else {
+						throw new Error("Cannot find file '" + file + "' from '" + directory + "'");
+					}
+				}
+				else {
+					var nf = true;
+					var __ks_2 = $import.nodeModulesPaths(directory);
+					for(var __ks_3 = 0, __ks_4 = __ks_2.length, dir; nf && __ks_3 < __ks_4; ++__ks_3) {
+						dir = __ks_2[__ks_3];
+						path = fs.resolve(dir, file);
+						if(fs.isFile(path) || fs.isFile(path += $extensions.source)) {
+							nf = false;
+						}
+					}
+					if(nf) {
+						throw new Error("Cannot find module '" + file + "' from '" + directory + "'");
+					}
+					if(!module.hasInclude(path)) {
+						declarator = new IncludeDeclarator(path, this);
+						data = fs.readFile(path);
+						module.addHash(path, compiler.sha256(path, data));
+						module.addInclude(path);
+						data = parse(data);
+						for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
+							statement = data.body[__ks_2];
+							this._statements.push(statement = $compile.statement(statement, declarator));
+							statement.analyse();
+						}
+					}
+				}
+			}
+		}
+		analyse() {
+			if(arguments.length === 0) {
+				return IncludeOnceDeclaration.prototype.__ks_func_analyse_0.apply(this);
+			}
+			else if(Statement.prototype.analyse) {
+				return Statement.prototype.analyse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_fuse_0() {
+			for(var __ks_0 = 0, __ks_1 = this._statements.length, statement; __ks_0 < __ks_1; ++__ks_0) {
+				statement = this._statements[__ks_0];
+				statement.fuse();
+			}
+		}
+		fuse() {
+			if(arguments.length === 0) {
+				return IncludeOnceDeclaration.prototype.__ks_func_fuse_0.apply(this);
+			}
+			else if(Statement.prototype.fuse) {
+				return Statement.prototype.fuse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_toFragments_0(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			for(var __ks_0 = 0, __ks_1 = this._statements.length, statement; __ks_0 < __ks_1; ++__ks_0) {
+				statement = this._statements[__ks_0];
+				statement.toFragments(fragments, mode);
+			}
+		}
+		toFragments() {
+			if(arguments.length === 2) {
+				return IncludeOnceDeclaration.prototype.__ks_func_toFragments_0.apply(this, arguments);
+			}
+			return Statement.prototype.toFragments.apply(this, arguments);
+		}
+	}
+	IncludeOnceDeclaration.__ks_reflect = {
+		inits: 1,
+		constructors: [],
 		instanceVariables: {
 			_statements: {
 				access: 1,
@@ -26854,6 +27041,7 @@ module.exports = function() {
 	$statements[Kind.ImplementDeclaration] = ImplementDeclaration;
 	$statements[Kind.ImportDeclaration] = ImportDeclaration;
 	$statements[Kind.IncludeDeclaration] = IncludeDeclaration;
+	$statements[Kind.IncludeOnceDeclaration] = IncludeOnceDeclaration;
 	$statements[Kind.MethodDeclaration] = MethodDeclaration;
 	$statements[Kind.Module] = Module;
 	$statements[Kind.RequireDeclaration] = RequireDeclaration;

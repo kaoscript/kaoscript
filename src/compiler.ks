@@ -1311,6 +1311,7 @@ const $statements = {
 	`\(Kind::ImplementDeclaration)`			: ImplementDeclaration
 	`\(Kind::ImportDeclaration)`			: ImportDeclaration
 	`\(Kind::IncludeDeclaration)`			: IncludeDeclaration
+	`\(Kind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration
 	`\(Kind::MethodDeclaration)`			: MethodDeclaration
 	`\(Kind::Module)`						: Module
 	`\(Kind::RequireDeclaration)`			: RequireDeclaration

@@ -15,7 +15,7 @@
       "instanceMethods": {
         "contains": [
           {
-            "kind": 53,
+            "kind": 54,
             "name": "contains",
             "signature": {
               "access": 3,
@@ -33,7 +33,7 @@
         ],
         "pushUniq": [
           {
-            "kind": 53,
+            "kind": 54,
             "name": "pushUniq",
             "signature": {
               "access": 3,

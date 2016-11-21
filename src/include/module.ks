@@ -12,6 +12,7 @@ class Module {
 		_flags					= {}
 		_hashes					= {}
 		_imports				= {}
+		_includes				= {}
 		_options
 		_output
 		_references				= {}
@@ -70,6 +71,9 @@ class Module {
 			}
 		}
 	} // }}}
+	addInclude(path) {
+		this._includes[path] = true
+	}
 	addReference(key, code) { // {{{
 		if this._references[key] {
 			this._references[key].push(code)
@@ -124,6 +128,9 @@ class Module {
 	fuse() { // {{{
 		this._body.fuse()
 	} // }}}
+	hasInclude(path) {
+		return this._includes?[path]
+	}
 	import(name, file?) { // {{{
 		this._imports[name] = true
 		

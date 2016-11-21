@@ -11,7 +11,7 @@
       "instanceMethods": {
         "limit": [
           {
-            "kind": 53,
+            "kind": 54,
             "name": "limit",
             "signature": {
               "access": 3,
@@ -35,7 +35,7 @@
         ],
         "mod": [
           {
-            "kind": 53,
+            "kind": 54,
             "name": "mod",
             "signature": {
               "access": 3,
@@ -59,7 +59,7 @@
         ],
         "round": [
           {
-            "kind": 53,
+            "kind": 54,
             "name": "round",
             "signature": {
               "access": 3,
@@ -83,7 +83,7 @@
         ],
         "toFloat": [
           {
-            "kind": 53,
+            "kind": 54,
             "name": "toFloat",
             "signature": {
               "access": 3,
@@ -101,7 +101,7 @@
         ],
         "toInt": [
           {
-            "kind": 53,
+            "kind": 54,
             "name": "toInt",
             "signature": {
               "access": 3,
