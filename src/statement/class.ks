@@ -225,13 +225,13 @@ const $final = {
 				}
 			}
 			else if variable.kind == VariableKind::Class && variable.final {
-				if variable.final.classMethods[data.property.name] {
+				if variable.final.classMethods[data.property.name] == true {
 					return {
 						variable: variable,
 						instance: false
 					}
 				}
-				else if variable.final.instanceMethods[data.property.name] {
+				else if variable.final.instanceMethods[data.property.name] == true {
 					return {
 						variable: variable,
 						instance: true

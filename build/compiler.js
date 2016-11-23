@@ -712,7 +712,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'node'");
 			}
 			if(variable.kind === VariableKind.Class) {
-				if(variable.instanceMethods[name]) {
+				if(Type.isArray(variable.instanceMethods[name])) {
 					return variable;
 				}
 				else if(variable.instanceVariables[name] && variable.instanceVariables[name].type) {
@@ -864,10 +864,10 @@ module.exports = function() {
 							}
 						}
 						else if(variable.kind === VariableKind.Class) {
-							if(data.callee.object.kind === Kind.Identifier) {
-								if(variable.classMethods[name]) {
-									for(var __ks_1 = 0, __ks_2 = variable.classMethods[name].length, member; __ks_1 < __ks_2; ++__ks_1) {
-										member = variable.classMethods[name][__ks_1];
+							if((data.callee.object.kind !== Kind.Identifier) || (node.scope().getVariable(data.callee.object.name).kind === VariableKind.Variable)) {
+								if(Type.isArray(variable.instanceMethods[name])) {
+									for(var __ks_1 = 0, __ks_2 = variable.instanceMethods[name].length, member; __ks_1 < __ks_2; ++__ks_1) {
+										member = variable.instanceMethods[name][__ks_1];
 										if(member.type && $variable.filter(member, min, max)) {
 											varType = $variable.fromType(member.type, node);
 											if(varType) {
@@ -878,9 +878,9 @@ module.exports = function() {
 								}
 							}
 							else {
-								if(variable.instanceMethods[name]) {
-									for(var __ks_1 = 0, __ks_2 = variable.instanceMethods[name].length, member; __ks_1 < __ks_2; ++__ks_1) {
-										member = variable.instanceMethods[name][__ks_1];
+								if(Type.isArray(variable.classMethods[name])) {
+									for(var __ks_1 = 0, __ks_2 = variable.classMethods[name].length, member; __ks_1 < __ks_2; ++__ks_1) {
+										member = variable.classMethods[name][__ks_1];
 										if(member.type && $variable.filter(member, min, max)) {
 											varType = $variable.fromType(member.type, node);
 											if(varType) {
@@ -6454,13 +6454,13 @@ module.exports = function() {
 					};
 				}
 				else if((variable.kind === VariableKind.Class) && variable.final) {
-					if(variable.final.classMethods[data.property.name]) {
+					if(variable.final.classMethods[data.property.name] === true) {
 						return {
 							variable: variable,
 							instance: false
 						};
 					}
-					else if(variable.final.instanceMethods[data.property.name]) {
+					else if(variable.final.instanceMethods[data.property.name] === true) {
 						return {
 							variable: variable,
 							instance: true
@@ -9149,23 +9149,35 @@ module.exports = function() {
 			}
 			else if(__ks_0 === Kind.MethodDeclaration) {
 				if(data.name.name === variable.name.name) {
-					variable.constructors.push($function.signature(data, node));
+					variable.constructors.push($function.signature(data, node.scope()));
 				}
 				else {
+					var method = {
+						kind: Kind.MethodDeclaration,
+						name: data.name.name,
+						signature: $method.signature(data, node)
+					};
+					if(data.type) {
+						method.type = $type.type(data.type, node.scope());
+					}
 					var instance = true;
 					for(var i = 0, __ks_1 = data.modifiers.length; instance && i < __ks_1; ++i) {
 						if(data.modifiers[i].kind === MemberModifier.Static) {
 							instance = false;
 						}
 					}
-					var methods;
 					if(instance) {
-						methods = variable.instanceMethods[data.name.name] || (variable.instanceMethods[data.name.name] = []);
+						if(!Type.isArray(variable.instanceMethods[data.name.name])) {
+							variable.instanceMethods[data.name.name] = [];
+						}
+						variable.instanceMethods[data.name.name].push(method);
 					}
 					else {
-						methods = variable.classMethods[data.name.name] || (variable.classMethods[data.name.name] = []);
+						if(!Type.isArray(variable.classMethods[data.name.name])) {
+							variable.classMethods[data.name.name] = [];
+						}
+						variable.classMethods[data.name.name].push(method);
 					}
-					methods.push($function.signature(data, node));
 				}
 			}
 			else {

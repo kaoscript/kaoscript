@@ -650,7 +650,7 @@ const $variable = {
 		//console.log('variable.filterMember.name', name)
 		
 		if variable.kind == VariableKind::Class {
-			if variable.instanceMethods[name] {
+			if variable.instanceMethods[name] is Array {
 				return variable
 			}
 			else if variable.instanceVariables[name] && variable.instanceVariables[name].type {
@@ -791,9 +791,9 @@ const $variable = {
 							return variables	if variables
 						}
 						else if variable.kind == VariableKind::Class {
-							if data.callee.object.kind == Kind::Identifier {
-								if variable.classMethods[name] {
-									for member in variable.classMethods[name] {
+							if data.callee.object.kind != Kind::Identifier || node.scope().getVariable(data.callee.object.name).kind == VariableKind::Variable {
+								if variable.instanceMethods[name] is Array {
+									for member in variable.instanceMethods[name] {
 										if member.type && $variable.filter(member, min, max) {
 											varType = $variable.fromType(member.type, node)
 											
@@ -803,8 +803,8 @@ const $variable = {
 								}
 							}
 							else {
-								if variable.instanceMethods[name] {
-									for member in variable.instanceMethods[name] {
+								if variable.classMethods[name] is Array {
+									for member in variable.classMethods[name] {
 										if member.type && $variable.filter(member, min, max) {
 											varType = $variable.fromType(member.type, node)
 											
@@ -1015,7 +1015,7 @@ const $variable = {
 		if type == 'Any' {
 			return null
 		}
-		else if type is string {
+		else if type is String {
 			return node.scope().getVariable(type)
 		}
 		else {

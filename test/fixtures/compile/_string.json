@@ -11,9 +11,20 @@
       "instanceMethods": {
         "toLowerCase": [
           {
-            "min": 0,
-            "max": 0,
-            "parameters": []
+            "kind": 54,
+            "name": "toLowerCase",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 0,
+              "parameters": []
+            },
+            "type": {
+              "typeName": {
+                "kind": 39,
+                "name": "string"
+              }
+            }
           }
         ],
         "lines": [
@@ -42,9 +53,20 @@
         ],
         "lower": [
           {
-            "min": 0,
-            "max": 0,
-            "parameters": []
+            "kind": 54,
+            "name": "toLowerCase",
+            "signature": {
+              "access": 3,
+              "min": 0,
+              "max": 0,
+              "parameters": []
+            },
+            "type": {
+              "typeName": {
+                "kind": 39,
+                "name": "string"
+              }
+            }
           }
         ],
         "toFloat": [

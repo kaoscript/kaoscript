@@ -15,23 +15,36 @@ const $extern = {
 			}
 			Kind::MethodDeclaration => {
 				if data.name.name == variable.name.name {
-					variable.constructors.push($function.signature(data, node))
+					variable.constructors.push($function.signature(data, node.scope()))
 				}
 				else {
+					let method = {
+						kind: Kind::MethodDeclaration
+						name: data.name.name
+						signature: $method.signature(data, node)
+					}
+					
+					method.type = $type.type(data.type, node.scope()) if data.type
+					
 					let instance = true
 					for i from 0 til data.modifiers.length while instance {
 						instance = false if data.modifiers[i].kind == MemberModifier::Static
 					}
 					
-					let methods
 					if instance {
-						methods = variable.instanceMethods[data.name.name] || (variable.instanceMethods[data.name.name] = [])
+						if !(variable.instanceMethods[data.name.name] is Array) {
+							variable.instanceMethods[data.name.name] = []
+						}
+						
+						variable.instanceMethods[data.name.name].push(method)
 					}
 					else {
-						methods = variable.classMethods[data.name.name] || (variable.classMethods[data.name.name] = [])
+						if !(variable.classMethods[data.name.name] is Array) {
+							variable.classMethods[data.name.name] = []
+						}
+						
+						variable.classMethods[data.name.name].push(method)
 					}
-					
-					methods.push($function.signature(data, node))
 				}
 			}
 			=> {
