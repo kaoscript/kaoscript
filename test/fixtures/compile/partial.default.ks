@@ -7,7 +7,7 @@ class Shape {
 }
 
 impl Shape {
-	draw(canvas) -> string {
+	draw(canvas): string {
 		return `I'm drawing a \(this._color) rectangle.`
 	}
 }

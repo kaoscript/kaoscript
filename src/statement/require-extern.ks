@@ -15,13 +15,8 @@ class RequireOrExternDeclaration extends Statement {
 					
 					variable.requirement = declaration.name.name
 					
-					let continuous = true
-					for i from 0 til declaration.modifiers.length while continuous {
-						continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
-					}
-					
-					if !continuous {
-						variable.final = {
+					if declaration.sealed {
+						variable.sealed = {
 							name: '__ks_' + variable.name.name
 							constructors: false
 							instanceMethods: {}

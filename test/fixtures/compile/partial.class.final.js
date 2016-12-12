@@ -42,7 +42,7 @@ module.exports = function() {
 		}
 	}
 	Shape.__ks_reflect = {
-		final: true,
+		sealed: true,
 		inits: 0,
 		constructors: [
 			{
@@ -90,7 +90,7 @@ module.exports = function() {
 	Helper.newClassMethod({
 		class: Shape,
 		name: "makeRed",
-		final: __ks_Shape,
+		sealed: __ks_Shape,
 		function: function() {
 			return new Shape("red");
 		},

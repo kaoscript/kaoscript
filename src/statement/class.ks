@@ -211,266 +211,6 @@ const $field = {
 	} // }}}
 }
 
-const $final = {
-	callee(data, node) { // {{{
-		let variable = $variable.fromAST(data, node)
-		//console.log('callee.data', data)
-		//console.log('callee.variable', variable)
-		
-		if variable {
-			if variable is Array {
-				return {
-					variables: variable,
-					instance: true
-				}
-			}
-			else if variable.kind == VariableKind::Class && variable.final {
-				if variable.final.classMethods[data.property.name] == true {
-					return {
-						variable: variable,
-						instance: false
-					}
-				}
-				else if variable.final.instanceMethods[data.property.name] == true {
-					return {
-						variable: variable,
-						instance: true
-					}
-				}
-			}
-		}
-		
-		return false
-	} // }}}
-	class(node, fragments) { // {{{
-		let clazz = fragments
-			.newControl()
-			.code('class ', node._name)
-		
-		if node._extends {
-			clazz.code(' extends ', node._extendsName)
-		}
-		
-		clazz.step()
-		
-		let noinit = Type.isEmptyObject(node._instanceVariables)
-		
-		if !noinit {
-			noinit = true
-			
-			for name, field of node._instanceVariables while noinit {
-				if field.data.defaultValue {
-					noinit = false
-				}
-			}
-		}
-		
-		let ctrl
-		if node._extends {
-			ctrl = fragments
-				.newControl()
-				.code('__ks_init()')
-				.step()
-				
-			ctrl.line(node._extendsName, '.prototype.__ks_init.call(this)')
-			
-			if !noinit {
-				for name, field of node._instanceVariables when field.data.defaultValue? {
-					ctrl
-						.newLine()
-						.code('this.' + name + ' = ')
-						.compile(field.defaultValue)
-						.done()
-				}
-			}
-			
-			ctrl.done()
-		}
-		else {
-			ctrl = clazz
-				.newControl()
-				.code('constructor()')
-				.step()
-		
-			if !noinit {
-				for name, field of node._instanceVariables when field.data.defaultValue? {
-					ctrl
-						.newLine()
-						.code('this.' + name + ' = ')
-						.compile(field.defaultValue)
-						.done()
-				}
-			}
-			
-			ctrl.line('this.__ks_cons(arguments)')
-			
-			ctrl.done()
-		}
-		
-		let reflect = {
-			final: true
-			inits: 0
-			constructors: []
-			instanceVariables: node._instanceVariables
-			classVariables: node._classVariables
-			instanceMethods: {}
-			classMethods: {}
-		}
-		
-		for method in node._constructors {
-			$continuous.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect)
-		}
-		
-		$helper.constructor(node, clazz, reflect)
-		
-		for name, methods of node._instanceMethods {
-			for method in methods {
-				$continuous.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
-			}
-			
-			$helper.instanceMethod(node, clazz, reflect, name)
-		}
-		
-		for name, methods of node._classMethods {
-			for method in methods {
-				$continuous.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
-			}
-			
-			$helper.classMethod(node, clazz, reflect, name)
-		}
-		
-		clazz.done()
-		
-		for name, field of node._classVariables when field.defaultValue? {
-			fragments
-				.newLine()
-				.code(`\(node._name).\(name) = `)
-				.compile(field.defaultValue)
-				.done()
-		}
-		
-		$helper.reflect(node, fragments, reflect)
-		
-		if references ?= node.module().listReferences(node._name) {
-			for ref in references {
-				fragments.line(ref)
-			}
-		}
-	} // }}}
-}
-
-const $method = {
-	sameType(s1, s2) { // {{{
-		if s1 is Array {
-			if s2 is Array && s1.length == s2.length {
-				for i from 0 til s1.length {
-					if !$method.sameType(s1[i], s2[i]) {
-						return false
-					}
-				}
-				
-				return true
-			}
-			else {
-				return false
-			}
-		}
-		else {
-			return s1 == s2
-		}
-	} // }}}
-	signature(data, node) { // {{{
-		let signature = {
-			access: MemberAccess::Public
-			min: 0,
-			max: 0,
-			parameters: []
-		}
-		
-		if data.modifiers {
-			for modifier in data.modifiers {
-				if modifier.kind == FunctionModifier.Async {
-					signature.async = true
-				}
-				else if modifier.kind == MemberModifier::Private {
-					signature.access = MemberAccess::Private
-				}
-				else if modifier.kind == MemberModifier::Protected {
-					signature.access = MemberAccess::Protected
-				}
-			}
-		}
-		
-		let type, last, nf
-		for parameter in data.parameters {
-			type = $signature.type(parameter.type, node.scope())
-			
-			if !last || !$method.sameType(type, last.type) {
-				if last {
-					signature.min += last.min
-					signature.max += last.max
-				}
-				
-				last = {
-					type: $signature.type(parameter.type, node.scope()),
-					min: parameter.defaultValue || (parameter.type && parameter.type.nullable) ? 0 : 1,
-					max: 1
-				}
-				
-				if parameter.modifiers {
-					for modifier in parameter.modifiers {
-						if modifier.kind == ParameterModifier.Rest {
-							if modifier.arity {
-								last.min += modifier.arity.min
-								last.max += modifier.arity.max
-							}
-							else {
-								last.max = Infinity
-							}
-						}
-					}
-				}
-				
-				signature.parameters.push(last)
-			}
-			else {
-				nf = true
-				
-				if parameter.modifiers {
-					for modifier in parameter.modifiers {
-						if modifier.kind == ParameterModifier.Rest {
-							if modifier.arity {
-								last.min += modifier.arity.min
-								last.max += modifier.arity.max
-							}
-							else {
-								last.max = Infinity
-							}
-							
-							nf = false
-						}
-					}
-				}
-				
-				if nf {
-					if !(parameter.defaultValue || (parameter.type && parameter.type.nullable)) {
-						++last.min
-					}
-					
-					++last.max
-				}
-			}
-		}
-		
-		if last {
-			signature.min += last.min
-			signature.max += last.max
-		}
-		
-		return signature
-	} // }}}
-}
-
 const $helper = {
 	analyseType(type?, node) { // {{{
 		if !?type {
@@ -890,8 +630,8 @@ const $helper = {
 		
 		let object = line.newObject()
 		
-		if reflect.final {
-			object.line('final: true')
+		if reflect.sealed {
+			object.line('sealed: true')
 		}
 		
 		object.newLine().code('inits: ' + reflect.inits)
@@ -1012,16 +752,128 @@ const $helper = {
 	} // }}}
 }
 
+const $method = {
+	sameType(s1, s2) { // {{{
+		if s1 is Array {
+			if s2 is Array && s1.length == s2.length {
+				for i from 0 til s1.length {
+					if !$method.sameType(s1[i], s2[i]) {
+						return false
+					}
+				}
+				
+				return true
+			}
+			else {
+				return false
+			}
+		}
+		else {
+			return s1 == s2
+		}
+	} // }}}
+	signature(data, node) { // {{{
+		let signature = {
+			access: MemberAccess::Public
+			min: 0,
+			max: 0,
+			parameters: []
+		}
+		
+		if data.modifiers {
+			for modifier in data.modifiers {
+				if modifier.kind == FunctionModifier.Async {
+					signature.async = true
+				}
+				else if modifier.kind == MemberModifier::Private {
+					signature.access = MemberAccess::Private
+				}
+				else if modifier.kind == MemberModifier::Protected {
+					signature.access = MemberAccess::Protected
+				}
+			}
+		}
+		
+		let type, last, nf
+		for parameter in data.parameters {
+			type = $signature.type(parameter.type, node.scope())
+			
+			if !last || !$method.sameType(type, last.type) {
+				if last {
+					signature.min += last.min
+					signature.max += last.max
+				}
+				
+				last = {
+					type: $signature.type(parameter.type, node.scope()),
+					min: parameter.defaultValue || (parameter.type && parameter.type.nullable) ? 0 : 1,
+					max: 1
+				}
+				
+				if parameter.modifiers {
+					for modifier in parameter.modifiers {
+						if modifier.kind == ParameterModifier.Rest {
+							if modifier.arity {
+								last.min += modifier.arity.min
+								last.max += modifier.arity.max
+							}
+							else {
+								last.max = Infinity
+							}
+						}
+					}
+				}
+				
+				signature.parameters.push(last)
+			}
+			else {
+				nf = true
+				
+				if parameter.modifiers {
+					for modifier in parameter.modifiers {
+						if modifier.kind == ParameterModifier.Rest {
+							if modifier.arity {
+								last.min += modifier.arity.min
+								last.max += modifier.arity.max
+							}
+							else {
+								last.max = Infinity
+							}
+							
+							nf = false
+						}
+					}
+				}
+				
+				if nf {
+					if !(parameter.defaultValue || (parameter.type && parameter.type.nullable)) {
+						++last.min
+					}
+					
+					++last.max
+				}
+			}
+		}
+		
+		if last {
+			signature.min += last.min
+			signature.max += last.max
+		}
+		
+		return signature
+	} // }}}
+}
+
 class ClassDeclaration extends Statement {
 	private {
 		_classMethods		= {}
 		_classVariables		= {}
-		_continuous 		= true
 		_constructors		= []
 		_constructorScope
 		_extends
 		_extendsName
 		_extendsVariable
+		_sealed 			= false
 		_instanceMethods	= {}
 		_instanceVariables	= {}
 		_instanceVariableScope
@@ -1264,14 +1116,10 @@ class ClassDeclaration extends Statement {
 			}
 		}
 		
-		for i from 0 til data.modifiers.length while this._continuous {
-			if data.modifiers[i].kind == ClassModifier::Final {
-				this._continuous = false
-			}
-		}
+		this._sealed = !!data.sealed
 		
-		if !this._continuous {
-			this._variable.final = {
+		if this._sealed {
+			this._variable.sealed = {
 				name: '__ks_' + this._variable.name.name
 				constructors: false
 				instanceMethods: {}
@@ -1356,13 +1204,13 @@ class ClassDeclaration extends Statement {
 		return scope
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if this._continuous {
-			$continuous.class(this, fragments)
+		if this._sealed {
+			$sealed.class(this, fragments)
+			
+			fragments.line('var ' + this._variable.sealed.name + ' = {}')
 		}
 		else {
-			$final.class(this, fragments)
-			
-			fragments.line('var ' + this._variable.final.name + ' = {}')
+			$continuous.class(this, fragments)
 		}
 	} // }}}
 }

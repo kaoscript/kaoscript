@@ -2,8 +2,8 @@ extern console: {
 	log(...args)
 }
 
-extern final class String {
-	toLowerCase() -> string
+extern sealed class String {
+	toLowerCase(): string
 }
 
 impl String {

@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Array,
 		name: "contains",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function() {
 			if(arguments.length < 1) {
 				throw new Error("Wrong number of arguments");
@@ -35,7 +35,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Array,
 		name: "pushUniq",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(...args) {
 			if(args.length === 1) {
 				if(!__ks_Array._im_contains(this, args[0])) {
@@ -68,7 +68,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Array,
 		name: "appendUniq",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(...args) {
 			if(args.length === 1) {
 				__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[0]));

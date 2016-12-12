@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: String,
 		name: "toInt",
-		final: __ks_String,
+		sealed: __ks_String,
 		function: function(base) {
 			if(base === undefined || base === null) {
 				base = 10;

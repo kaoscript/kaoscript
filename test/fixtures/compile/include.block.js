@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newClassMethod({
 		class: Array,
 		name: "map",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(array, iterator) {
 			if(array === undefined || array === null) {
 				throw new Error("Missing parameter 'array'");
@@ -46,7 +46,7 @@ module.exports = function() {
 	Helper.newClassMethod({
 		class: Array,
 		name: "map",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(array, iterator, condition) {
 			if(array === undefined || array === null) {
 				throw new Error("Missing parameter 'array'");
@@ -96,7 +96,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Array,
 		name: "last",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(index) {
 			if(index === undefined || index === null) {
 				index = 1;
@@ -120,7 +120,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: String,
 		name: "lines",
-		final: __ks_String,
+		sealed: __ks_String,
 		function: function(emptyLines) {
 			if(emptyLines === undefined || emptyLines === null) {
 				emptyLines = false;
@@ -151,7 +151,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: String,
 		name: "lower",
-		final: __ks_String,
+		sealed: __ks_String,
 		method: "toLowerCase",
 		signature: {
 			access: 3,
@@ -163,7 +163,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: String,
 		name: "toFloat",
-		final: __ks_String,
+		sealed: __ks_String,
 		function: function() {
 			return parseFloat(this);
 		},
@@ -177,7 +177,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: String,
 		name: "toInt",
-		final: __ks_String,
+		sealed: __ks_String,
 		function: function(base) {
 			if(base === undefined || base === null) {
 				base = 10;

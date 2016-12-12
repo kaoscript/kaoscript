@@ -5,7 +5,7 @@ class Shape {
 	
 	Shape(@color: string)
 	
-	draw(shape, canvas) -> string {
+	draw(shape, canvas): string {
 		return `I'm drawing a \(this._color) \(shape).`
 	}
 }

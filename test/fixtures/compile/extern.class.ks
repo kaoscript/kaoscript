@@ -5,7 +5,7 @@ extern console: {
 extern class Shape {
 	Shape(color: string)
 	
-	draw(shape, canvas) -> string
+	draw(shape, canvas): string
 }
 
 let shape = new Shape('yellow')

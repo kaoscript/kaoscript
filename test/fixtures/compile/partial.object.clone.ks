@@ -1,4 +1,4 @@
-extern final class Object
+extern sealed class Object
 
 impl Object {
 	static clone(object) {

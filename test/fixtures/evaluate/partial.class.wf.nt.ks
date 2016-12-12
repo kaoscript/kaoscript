@@ -1,23 +1,23 @@
 require expect: func
 
-final class Shape {
+sealed class Shape {
 	private {
 		_color: string = ''
 	}
 	
-	static makeBlue() -> Shape {
+	static makeBlue(): Shape {
 		return new Shape('blue')
 	}
 	
 	Shape(@color: string)
 	
-	draw() -> string {
+	draw(): string {
 		return `I'm drawing a \(this._color) rectangle.`
 	}
 }
 
 impl Shape {
-	static makeRed() -> Shape {
+	static makeRed(): Shape {
 		return new Shape('red')
 	}
 }

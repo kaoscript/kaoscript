@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-extern final class String {
+extern sealed class String {
 }
 
 impl String {

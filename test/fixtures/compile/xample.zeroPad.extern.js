@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Number,
 		name: "zeroPad",
-		final: __ks_Number,
+		sealed: __ks_Number,
 		function: function(length) {
 			if(length === undefined || length === null) {
 				throw new Error("Missing parameter 'length'");
@@ -28,7 +28,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: String,
 		name: "lpad",
-		final: __ks_String,
+		sealed: __ks_String,
 		function: function(length, pad) {
 			if(length === undefined || length === null) {
 				throw new Error("Missing parameter 'length'");

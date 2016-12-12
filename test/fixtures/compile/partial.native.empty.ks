@@ -1,3 +1,3 @@
-extern final class Array
+extern sealed class Array
 
 export Array

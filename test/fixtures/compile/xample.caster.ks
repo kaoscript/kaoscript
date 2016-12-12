@@ -5,12 +5,12 @@ extern {
 		log(...args)
 	}
 	Float: {
-		parse(value) -> Number
+		parse(value): Number
 	}
 }
 
 let $caster = {
-	hex(n: string | number) -> int { // {{{
+	hex(n: string | number): int { // {{{
 		return Float.parse(n).limit(0, 255).round()
 	} // }}}
 }

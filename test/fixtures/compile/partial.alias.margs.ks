@@ -1,7 +1,7 @@
 class Shape {
 	Shape()
 	
-	draw(shape, color, canvas) -> string {
+	draw(shape, color, canvas): string {
 		return `I'm drawing a \(color) \(shape).`
 	}
 }

@@ -1,9 +1,9 @@
 extern console, isNaN
 
-extern final class Number
+extern sealed class Number
 
 impl Number {
-	mod(max) -> Number {
+	mod(max): Number {
 		if isNaN(this) {
 			return 0
 		}

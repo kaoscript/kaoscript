@@ -3,7 +3,7 @@ module.exports = function(Array, __ks_Array) {
 	Helper.newClassMethod({
 		class: Array,
 		name: "map",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(array, iterator) {
 			if(array === undefined || array === null) {
 				throw new Error("Missing parameter 'array'");
@@ -45,7 +45,7 @@ module.exports = function(Array, __ks_Array) {
 	Helper.newClassMethod({
 		class: Array,
 		name: "map",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(array, iterator, condition) {
 			if(array === undefined || array === null) {
 				throw new Error("Missing parameter 'array'");

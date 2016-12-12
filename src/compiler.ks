@@ -24,6 +24,12 @@ enum Mode {
 	Async
 }
 
+enum CalleeKind {
+	ClassMethod
+	InstanceMethod
+	VariableProperty
+}
+
 enum VariableKind { // {{{
 	Class = 1
 	Enum
@@ -317,6 +323,13 @@ const $type = {
 			Kind::TypeReference => fragments.code($types[data.typeName.name] ?? data.typeName.name)
 		}
 	} // }}}
+	fromAST(type?) { // {{{
+		return VariableKind::Variable	if !?type
+		return VariableKind::Class		if type.kind == Kind::ClassDeclaration
+		return VariableKind::Enum		if type.kind == Kind::EnumDeclaration
+		return VariableKind::Function	if type.kind == Kind::FunctionExpression
+		return VariableKind::Variable
+	} // }}}
 	isAny(type?) { // {{{
 		if !type {
 			return true
@@ -434,16 +447,14 @@ const $type = {
 						kind: Kind::Identifier
 						name: 'Object'
 					}
-					properties: []
+					properties: {}
 				}
 				
 				let prop
 				for property in data.properties {
 					prop = {
-						name: {
-							kind: Kind::Identifier
-							name: property.name.name
-						}
+						kind: $type.fromAST(property.value)
+						name: property.name.name
 					}
 					
 					if property.value.kind == Kind::FunctionExpression {
@@ -454,7 +465,7 @@ const $type = {
 						}
 					}
 					
-					type.properties.push(prop)
+					type.properties[property.name.name] = prop
 				}
 			}
 			Kind::Template => {
@@ -473,27 +484,30 @@ const $type = {
 								kind: Kind::Identifier
 								name: 'Object'
 							}
-							properties: []
+							properties: {}
 						}
 						
 						let prop
 						for property in data.properties {
 							prop = {
-								name: {
-									kind: Kind::Identifier
-									name: property.name.name
+								kind: $type.fromAST(property.type)
+								name: property.name.name
+							}
+							
+							if property.type? {
+								if property.type.kind == Kind::FunctionExpression {
+									prop.signature = $function.signature(property.type, scope)
+									
+									if property.type.type {
+										prop.type = $type.type(property.type.type, scope)
+									}
+								}
+								else {
+									prop.type = $type.type(property.type, scope)
 								}
 							}
 							
-							if property.type {
-								prop.signature = $function.signature(property.type, scope)
-								
-								if property.type.type {
-									prop.type = $type.type(property.type.type, scope)
-								}
-							}
-							
-							type.properties.push(prop)
+							type.properties[property.name.name] = prop
 						}
 					}
 					else {
@@ -590,91 +604,50 @@ const $variable = {
 		
 		return variable
 	} // }}}
-	filter(method, min, max) { // {{{
-		if method.signature {
-			if min >= method.signature.min && max <= method.signature.max {
-				return true
-			}
-		}
-		else if method.typeName {
-			if method.typeName.name == 'func' || method.typeName.name == 'Function' {
-				return true
-			}
-			else {
-				console.error(method)
-				throw new Error('Not implemented')
-			}
-		}
-		else {
-			console.error(method)
-			throw new Error('Not implemented')
-		}
-		
-		return false
-	} // }}}
-	filterType(variable, name, node) { // {{{
-		if variable.type {
-			if variable.type.properties {
-				for property in variable.type.properties {
-					if property.name.name == name {
-						return variable
-					}
-				}
-			}
-			else if variable.type.typeName {
-				if variable ?= $variable.fromType(variable.type, node) {
-					return $variable.filterMember(variable, name, node)
-				}
-			}
-			else if variable.type.types {
-				let variables = []
-				
-				for type in variable.type.types {
-					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $variable.filterMember(v, name, node))
-					
-					variables.push(v)
-				}
-				
-				return variables
-			}
-			else {
-				console.error(variable)
-				throw new Error('Not implemented')
-			}
-		}
-		
-		return null
-	} // }}}
 	filterMember(variable, name, node) { // {{{
 		//console.log('variable.filterMember.var', variable)
 		//console.log('variable.filterMember.name', name)
 		
 		if variable.kind == VariableKind::Class {
-			if variable.instanceMethods[name] is Array {
-				return variable
+			if variable.instanceMethods[name]? {
+				let variables: Array = []
+				
+				for method in variable.instanceMethods[name] {
+					return null unless method.type? && (v ?= $variable.fromType(method.type, node))
+					
+					variables.pushUniq(v)
+				}
+				
+				return variables[0]	if variables.length == 1
+				return variables	if variables.length > 0
 			}
-			else if variable.instanceVariables[name] && variable.instanceVariables[name].type {
-				return $variable.fromReflectType(variable.instanceVariables[name].type, node)
+			else if variable.instanceVariables[name]? {
+				return $variable.fromReflectType(variable.instanceVariables[name].type, node) if variable.instanceVariables[name].type?
 			}
 		}
 		else if variable.kind == VariableKind::Enum {
-			console.error(variable)
 			throw new Error('Not implemented')
 		}
 		else if variable.kind == VariableKind::TypeAlias {
 			if variable.type.types {
-				let variables = []
+				let variables: Array = []
 				
 				for type in variable.type.types {
 					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $variable.filterMember(v, name, node))
 					
-					variables.push(v)
+					variables.pushUniq(v)
 				}
 				
-				return variables
+				return variables[0]	if variables.length == 1
+				return variables	if variables.length > 0
 			}
 			else {
-				return $variable.filterMember(variable, name, node) if variable ?= $variable.fromType(variable.type, node)
+				if variable.type.properties? {
+					return variable.type.properties[name] if variable.type.properties[name] is Object
+				}
+				else {
+					return $variable.filterMember(variable, name, node) if variable ?= $variable.fromType(variable.type, node)
+				}
 			}
 		}
 		else if variable.kind == VariableKind::Variable {
@@ -688,7 +661,40 @@ const $variable = {
 		
 		return null
 	} // }}}
+	filterType(variable, name, node) { // {{{
+		//console.log('variable.filterType.variable', variable)
+		//console.log('variable.filterType.name', name)
+		if variable.type? {
+			if variable.type.properties {
+				return variable.type.properties[name] if variable.type.properties[name] is Object
+			}
+			else if variable.type.typeName {
+				if variable ?= $variable.fromType(variable.type, node) {
+					return $variable.filterMember(variable, name, node)
+				}
+			}
+			else if variable.type.types {
+				let variables: Array = []
+				
+				for type in variable.type.types {
+					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $variable.filterMember(v, name, node))
+					
+					variables.pushUniq(v)
+				}
+				
+				return variables[0]	if variables.length == 1
+				return variables	if variables.length > 0
+			}
+			else {
+				console.error(variable)
+				throw new Error('Not implemented')
+			}
+		}
+		
+		return null
+	} // }}}
 	fromAST(data, node) { // {{{
+		//console.log(data)
 		switch data.kind {
 			Kind::ArrayComprehension, Kind::ArrayExpression, Kind::ArrayRange => {
 				return {
@@ -722,7 +728,7 @@ const $variable = {
 					}
 				}
 				else if $operator.lefts[data.operator.kind] {
-					let type = $type.type(data.left, node)
+					let type = $type.type(data.left, node.scope())
 					
 					if type {
 						return {
@@ -749,93 +755,14 @@ const $variable = {
 				//console.log('getVariable.call.data', data)
 				//console.log('getVariable.call.variable', variable)
 				
-				if variable {
-					if data.callee.kind == Kind::Identifier {
-						return variable if variable.kind == VariableKind::Function
+				if variable? {
+					if variable.kind == VariableKind::Class {
+						return variable
 					}
-					else if data.callee.kind == Kind::MemberExpression {
-						let min = 0
-						let max = 0
-						for arg in data.arguments {
-							if max == Infinity {
-								++min
-							}
-							else if arg.spread {
-								max = Infinity
-							}
-							else {
-								++min
-								++max
-							}
-						}
-						
-						let variables: array = []
-						let name = data.callee.property.name
-						
-						let varType
-						if variable is Array {
-							for vari in variable {
-								for member in vari.instanceMethods[name] {
-									if member.type && $variable.filter(member, min, max) {
-										varType = $variable.fromType(member.type, node)
-										
-										variables.pushUniq(varType) if varType
-									}
-									else {
-										return null
-									}
-								}
-							}
-							
-							return variables[0]	if variables.length == 1
-							return variables	if variables
-						}
-						else if variable.kind == VariableKind::Class {
-							if data.callee.object.kind != Kind::Identifier || node.scope().getVariable(data.callee.object.name).kind == VariableKind::Variable {
-								if variable.instanceMethods[name] is Array {
-									for member in variable.instanceMethods[name] {
-										if member.type && $variable.filter(member, min, max) {
-											varType = $variable.fromType(member.type, node)
-											
-											variables.push(varType) if varType
-										}
-									}
-								}
-							}
-							else {
-								if variable.classMethods[name] is Array {
-									for member in variable.classMethods[name] {
-										if member.type && $variable.filter(member, min, max) {
-											varType = $variable.fromType(member.type, node)
-											
-											variables.push(varType) if varType
-										}
-									}
-								}
-							}
-						}
-						else if variable.kind == VariableKind::Variable {
-							if variable.type && variable.type.properties {
-								for property in variable.type.properties {
-									if property.type && property.name.name == name && $variable.filter(property, min, max) {
-										varType = $variable.fromType(property.type, node)
-										
-										variables.push(varType) if varType
-									}
-								}
-							}
-						}
-						else {
-							console.error(variable)
-							throw new Error('Not implemented')
-						}
-						
-						if variables.length == 1 {
-							return variables[0]
-						}
+					else if variable.kind == VariableKind::Function || variable.kind == VariableKind::Variable {
+						return $variable.fromType(variable.type, node) if variable.type?
 					}
 					else {
-						console.error(data.callee)
 						throw new Error('Not implemented')
 					}
 				}
@@ -860,46 +787,41 @@ const $variable = {
 				//console.log('getVariable.member.data', data)
 				//console.log('getVariable.member.variable', variable)
 				
-				if variable {
+				if variable? {
+					if variable.kind == VariableKind::TypeAlias {
+						variable = $variable.fromType($type.unalias(variable.type, node.scope()), node)
+					}
+					
 					if data.computed {
-						return variable if variable.type && (variable = $variable.fromType(variable.type, node)) && variable.type && (variable = $variable.fromType(variable.type, node))
+						return variable if variable.type? && (variable ?= $variable.fromType(variable.type, node)) && variable.type? && (variable ?= $variable.fromType(variable.type, node))
 					}
 					else {
 						let name = data.property.name
 						
 						if variable.kind == VariableKind::Class {
 							if data.object.kind == Kind::Identifier {
-								if variable.classMethods[name] {
-									return variable
+								if variable.classMethods[name]? {
+									let variables: Array = []
+									
+									for method in variable.classMethods[name] {
+										return null unless method.type? && (v ?= $variable.fromType(method.type, node))
+										
+										variables.pushUniq(v)
+									}
+									
+									return variables[0]	if variables.length == 1
+									return variables	if variables.length > 0
+								}
+								else if variable.classVariables[name]? {
+									return $variable.fromReflectType(variable.classVariables[name].type, node) if variable.classVariables[name].type?
 								}
 							}
 							else {
-								if variable.instanceMethods[name] {
-									return variable
-								}
-								else if variable.instanceVariables[name] && variable.instanceVariables[name].type {
-									return $variable.fromReflectType(variable.instanceVariables[name].type, node)
-								}
-								else if variable.instanceVariables[name] {
-									console.error(variable)
-									throw new Error('Not implemented')
-								}
+								return $variable.filterMember(variable, name, node)
 							}
-						}
-						else if variable.kind == VariableKind::Function {
-							if data.object.kind == Kind::CallExpression {
-								return $variable.filterType(variable, name, node)
-							}
-							else {
-								return node.scope().getVariable('Function')
-							}
-						}
-						else if variable.kind == VariableKind::Variable {
-							return $variable.filterType(variable, name, node)
 						}
 						else {
-							console.error(variable)
-							throw new Error('Not implemented')
+							return $variable.filterType(variable, name, node)
 						}
 					}
 				}
@@ -994,12 +916,11 @@ const $variable = {
 				if variable && variable.kind == VariableKind::Variable && variable.type && variable.type.properties {
 					let name = data.typeName.property.name
 					
-					for property in variable.type.properties {
-						if property.name.name == name {
-							property.accessPath = (variable.accessPath || variable.name.name) + '.'
-							
-							return property
-						}
+					let property = variable.type.properties[name]
+					if property is Object {
+						property.accessPath = (variable.accessPath || variable.name.name) + '.'
+						
+						return property
 					}
 				}
 				else {
@@ -1047,8 +968,8 @@ const $variable = {
 			Object.merge(variable.classVariables, importedVariable.classVariables)
 			Object.merge(variable.instanceMethods, importedVariable.instanceMethods)
 			Object.merge(variable.classMethods, importedVariable.classMethods)
-			Object.merge(variable.final.instanceMethods, importedVariable.final.instanceMethods)
-			Object.merge(variable.final.classMethods, importedVariable.final.classMethods)
+			Object.merge(variable.sealed.instanceMethods, importedVariable.sealed.instanceMethods)
+			Object.merge(variable.sealed.classMethods, importedVariable.sealed.classMethods)
 		}
 		
 		return variable
@@ -1129,6 +1050,7 @@ include {
 	./include/fragment
 	./include/scope
 	./include/module
+	./include/sealed
 	./include/statement
 	./include/expression
 	./operator/assignment
@@ -1267,8 +1189,8 @@ const $expressions = {
 	`\(Kind::BindingElement)`				: BindingElement
 	`\(Kind::Block)`						: BlockExpression
 	`\(Kind::CallExpression)`				: func(data, parent, scope) {
-		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $final.callee(data.callee, parent)) {
-			return new CallFinalExpression(data, parent, scope, callee)
+		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $sealed.callee(data.callee, parent)) {
+			return new CallSealedExpression(data, parent, scope, callee)
 		}
 		else {
 			return new CallExpression(data, parent, scope)
@@ -1280,7 +1202,14 @@ const $expressions = {
 	`\(Kind::Identifier)`					: IdentifierLiteral
 	`\(Kind::IfExpression)`					: IfExpression
 	`\(Kind::Literal)`						: StringLiteral
-	`\(Kind::MemberExpression)`				: MemberExpression
+	`\(Kind::MemberExpression)`				: func(data, parent, scope) {
+		if callee = $sealed.callee(data, parent) {
+			return new MemberSealedExpression(data, parent, scope, callee)
+		}
+		else {
+			return new MemberExpression(data, parent, scope)
+		}
+	}
 	`\(Kind::NumericExpression)`			: NumberLiteral
 	`\(Kind::ObjectBinding)`				: ObjectBinding
 	`\(Kind::ObjectExpression)`				: ObjectExpression

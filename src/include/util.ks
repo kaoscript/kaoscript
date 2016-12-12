@@ -44,8 +44,8 @@ const $merge = {
 }
 
 extern {
-	final class Array
-	final class Object
+	sealed class Array
+	sealed class Object
 }
 
 impl Array {

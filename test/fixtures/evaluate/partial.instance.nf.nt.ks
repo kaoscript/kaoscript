@@ -7,17 +7,17 @@ class Shape {
 	
 	Shape(@color: string)
 	
-	draw() -> string {
+	draw(): string {
 		return `I'm drawing with a \(this._color) pencil.`
 	}
 	
-	draw(shape) -> string {
+	draw(shape): string {
 		return `I'm drawing a \(this._color) \(shape).`
 	}
 }
 
 impl Shape {
-	draw(color, shape) -> string {
+	draw(color, shape): string {
 		return `I'm drawing a \(color) \(shape).`
 	}
 }

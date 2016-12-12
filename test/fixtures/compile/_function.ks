@@ -1,6 +1,6 @@
 require Helper, Type
 
-extern final class Function {
+extern sealed class Function {
 }
 
 impl Function {

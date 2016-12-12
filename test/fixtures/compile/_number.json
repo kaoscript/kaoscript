@@ -125,7 +125,7 @@
         ]
       },
       "classMethods": {},
-      "final": {
+      "sealed": {
         "name": "__ks_Number",
         "constructors": false,
         "instanceMethods": {

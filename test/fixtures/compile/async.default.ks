@@ -1,2 +1,2 @@
-func foo(bar: string, qux: Number) async -> string {
+func foo(bar: string, qux: Number) async: string {
 }

@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newClassMethod({
 		class: Array,
 		name: "merge",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(...args) {
 			var source;
 			var i = 0;

@@ -7,6 +7,6 @@ extern {
 	}
 }
 
-func degree(value: number | string) -> number {
+func degree(value: number | string): number {
 	return value.toInt().mod(360)
 }

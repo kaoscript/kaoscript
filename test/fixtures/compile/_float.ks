@@ -1,7 +1,7 @@
 extern parseFloat
 
 export let Float := {
-	parse(value?) -> Number {
+	parse(value?): Number {
 		return parseFloat(value)
 	}
 }

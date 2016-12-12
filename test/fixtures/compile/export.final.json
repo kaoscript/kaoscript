@@ -10,12 +10,10 @@
           "kind": 39,
           "name": "Object"
         },
-        "properties": [
-          {
-            "name": {
-              "kind": 39,
-              "name": "log"
-            },
+        "properties": {
+          "log": {
+            "kind": 3,
+            "name": "log",
             "signature": {
               "min": 0,
               "max": "Infinity",
@@ -29,7 +27,7 @@
               ]
             }
           }
-        ]
+        }
       }
     },
     "Shape": {
@@ -84,7 +82,7 @@
         ]
       },
       "classMethods": {},
-      "final": {
+      "sealed": {
         "name": "__ks_Shape",
         "constructors": false,
         "instanceMethods": {

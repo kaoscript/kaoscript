@@ -1,11 +1,11 @@
 extern parseFloat, parseInt
 
-extern final class String {
-	toLowerCase() -> string
+extern sealed class String {
+	toLowerCase(): string
 }
 
 impl String {
-	lines(emptyLines = false) -> Array { // {{{
+	lines(emptyLines = false): Array { // {{{
 		if this.length == 0 {
 			return []
 		}
@@ -17,8 +17,8 @@ impl String {
 		}
 	} // }}}
 	lower() as toLowerCase
-	toFloat() -> Number => parseFloat(this)
-	toInt(base = 10) -> Number => parseInt(this, base)
+	toFloat(): Number => parseFloat(this)
+	toInt(base = 10): Number => parseInt(this, base)
 }
 
 export String

@@ -1,70 +1,85 @@
 class ImplementDeclaration extends Statement {
 	private {
-		_members = []
+		_properties = []
 	}
 	ImplementDeclaration(data, parent) { // {{{
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
-		let variable = this._scope.getVariable(data.class.name)
+		this._variable = this._scope.getVariable(data.variable.name)
 		
-		if variable.kind != VariableKind::Class {
-			throw new Error('Invalid class for impl at line ' + data.start.line)
-		}
-		
-		for member in data.members {
-			switch member.kind {
-				Kind::FieldDeclaration => {
-					this._members.push(member = new ImplementFieldDeclaration(member, this, variable))
-					
-					member.analyse()
+		if this._variable.kind == VariableKind::Class {
+			for property in data.properties {
+				switch property.kind {
+					Kind::FieldDeclaration => {
+						property = new ImplementClassFieldDeclaration(property, this, this._variable)
+					}
+					Kind::MethodAliasDeclaration => {
+						property = new ImplementClassMethodAliasDeclaration(property, this, this._variable)
+					}
+					Kind::MethodDeclaration => {
+						property = new ImplementClassMethodDeclaration(property, this, this._variable)
+					}
+					Kind::MethodLinkDeclaration => {
+						property = new ImplementClassMethodLinkDeclaration(property, this, this._variable)
+					}
+					=> {
+						console.error(property)
+						throw new Error('Unknow kind ' + property.kind)
+					}
 				}
-				Kind::MethodAliasDeclaration => {
-					this._members.push(member = new ImplementMethodAliasDeclaration(member, this, variable))
-					
-					member.analyse()
-				}
-				Kind::MethodDeclaration => {
-					this._members.push(member = new ImplementMethodDeclaration(member, this, variable))
-					
-					member.analyse()
-				}
-				Kind::MethodLinkDeclaration => {
-					this._members.push(member = new ImplementMethodLinkDeclaration(member, this, variable))
-					
-					member.analyse()
-				}
-				=> {
-					console.error(member)
-					throw new Error('Unknow kind ' + member.kind)
-				}
+				
+				property.analyse()
+				
+				this._properties.push(property)
 			}
+		}
+		else if this._variable.kind == VariableKind::Variable {
+			for property in data.properties {
+				switch property.kind {
+					Kind::FieldDeclaration => {
+						property = new ImplementVariableFieldDeclaration(property, this, this._variable)
+					}
+					Kind::MethodDeclaration => {
+						property = new ImplementVariableMethodDeclaration(property, this, this._variable)
+					}
+					=> {
+						console.error(property)
+						throw new Error('Unknow kind ' + property.kind)
+					}
+				}
+				
+				property.analyse()
+				
+				this._properties.push(property)
+			}
+		}
+		else {
+			throw new Error('Invalid class/variable for impl at line ' + data.start.line)
 		}
 	} // }}}
 	fuse() { // {{{
-		for member in this._members {
-			member.fuse()
+		for property in this._properties {
+			property.fuse()
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		this.module().flag('Helper')
-		
-		for member in this._members {
-			member.toFragments(fragments, Mode::None)
+		for property in this._properties {
+			property.toFragments(fragments, Mode::None)
 		}
 	} // }}}
 }
 
-class ImplementFieldDeclaration extends Statement {
+class ImplementClassFieldDeclaration extends Statement {
 	private {
 		_variable
 	}
-	ImplementFieldDeclaration(data, parent, @variable) { // {{{
+	ImplementClassFieldDeclaration(data, parent, @variable) { // {{{
 		super(data, parent)
 		
-		if variable.final {
-			throw new Error('Can\'t add a field to a final class')
+		if variable.sealed {
+			throw new Error('Can\'t add a field to a sealed class')
 		}
 	} // }}}
 	analyse() { // {{{
@@ -77,11 +92,13 @@ class ImplementFieldDeclaration extends Statement {
 	fuse() { // {{{
 	} // }}}
 	toFragments(fragments, mode) { // {{{
+		this.module().flag('Helper')
+		
 		fragments.line($runtime.helper(this), '.newField(' + $quote(this._data.name.name) + ', ' + $helper.type(this._type, this) + ')')
 	} // }}}
 }
 
-class ImplementMethodDeclaration extends Statement {
+class ImplementClassMethodDeclaration extends Statement {
 	private {
 		_instance	= true
 		_name
@@ -89,7 +106,7 @@ class ImplementMethodDeclaration extends Statement {
 		_statements
 		_variable
 	}
-	ImplementMethodDeclaration(data, parent, @variable) { // {{{
+	ImplementClassMethodDeclaration(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -107,15 +124,15 @@ class ImplementMethodDeclaration extends Statement {
 				}
 			}
 			
-			if variable.final {
+			if variable.sealed {
 				if this._instance {
-					if variable.final.instanceMethods[data.name.name] != true {
-						variable.final.instanceMethods[data.name.name] = true
+					if variable.sealed.instanceMethods[data.name.name] != true {
+						variable.sealed.instanceMethods[data.name.name] = true
 					}
 				}
 				else {
-					if variable.final.classMethods[data.name.name] != true {
-						variable.final.classMethods[data.name.name] = true
+					if variable.sealed.classMethods[data.name.name] != true {
+						variable.sealed.classMethods[data.name.name] = true
 					}
 				}
 			}
@@ -164,6 +181,8 @@ class ImplementMethodDeclaration extends Statement {
 		this.compile(this._statements)
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
+		this.module().flag('Helper')
+		
 		let data = this._data
 		let variable = this._variable
 		
@@ -191,8 +210,8 @@ class ImplementMethodDeclaration extends Statement {
 				throw new Error('Not Implemented')
 			}
 			
-			if variable.final {
-				object.newLine().code('final: ' + variable.final.name)
+			if variable.sealed {
+				object.newLine().code('sealed: ' + variable.sealed.name)
 			}
 			
 			let ctrl = object.newControl().code('function: function(')
@@ -214,7 +233,7 @@ class ImplementMethodDeclaration extends Statement {
 	} // }}}
 }
 
-class ImplementMethodAliasDeclaration extends Statement {
+class ImplementClassMethodAliasDeclaration extends Statement {
 	private {
 		_arguments
 		_instance	= true
@@ -223,7 +242,7 @@ class ImplementMethodAliasDeclaration extends Statement {
 		_signature
 		_variable
 	}
-	ImplementMethodAliasDeclaration(data, parent, @variable) { // {{{
+	ImplementClassMethodAliasDeclaration(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -245,15 +264,15 @@ class ImplementMethodAliasDeclaration extends Statement {
 				}
 			}
 			
-			if variable.final {
+			if variable.sealed {
 				if this._instance {
-					if variable.final.instanceMethods[data.name.name] != true {
-						variable.final.instanceMethods[data.name.name] = true
+					if variable.sealed.instanceMethods[data.name.name] != true {
+						variable.sealed.instanceMethods[data.name.name] = true
 					}
 				}
 				else {
-					if variable.final.classMethods[data.name.name] != true {
-						variable.final.classMethods[data.name.name] = true
+					if variable.sealed.classMethods[data.name.name] != true {
+						variable.sealed.classMethods[data.name.name] = true
 					}
 				}
 			}
@@ -284,6 +303,8 @@ class ImplementMethodAliasDeclaration extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
+		this.module().flag('Helper')
+		
 		let data = this._data
 		let variable = this._variable
 		
@@ -306,8 +327,8 @@ class ImplementMethodAliasDeclaration extends Statement {
 			throw new Error('Not Implemented')
 		}
 		
-		if variable.final {
-			object.line('final: ', variable.final.name)
+		if variable.sealed {
+			object.line('sealed: ', variable.sealed.name)
 		}
 		
 		object.line('method: ', $quote(data.alias.name))
@@ -336,7 +357,7 @@ class ImplementMethodAliasDeclaration extends Statement {
 	} // }}}
 }
 
-class ImplementMethodLinkDeclaration extends Statement {
+class ImplementClassMethodLinkDeclaration extends Statement {
 	private {
 		_arguments
 		_functionName
@@ -346,7 +367,7 @@ class ImplementMethodLinkDeclaration extends Statement {
 		_signature
 		_variable
 	}
-	ImplementMethodLinkDeclaration(data, parent, @variable) { // {{{
+	ImplementClassMethodLinkDeclaration(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -368,15 +389,15 @@ class ImplementMethodLinkDeclaration extends Statement {
 				}
 			}
 			
-			if variable.final {
+			if variable.sealed {
 				if this._instance {
-					if variable.final.instanceMethods[data.name.name] != true {
-						variable.final.instanceMethods[data.name.name] = true
+					if variable.sealed.instanceMethods[data.name.name] != true {
+						variable.sealed.instanceMethods[data.name.name] = true
 					}
 				}
 				else {
-					if variable.final.classMethods[data.name.name] != true {
-						variable.final.classMethods[data.name.name] = true
+					if variable.sealed.classMethods[data.name.name] != true {
+						variable.sealed.classMethods[data.name.name] = true
 					}
 				}
 			}
@@ -400,6 +421,8 @@ class ImplementMethodLinkDeclaration extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
+		this.module().flag('Helper')
+		
 		let data = this._data
 		let variable = this._variable
 		
@@ -422,8 +445,8 @@ class ImplementMethodLinkDeclaration extends Statement {
 			throw new Error('Not Implemented')
 		}
 		
-		if variable.final {
-			object.line('final: ', variable.final.name)
+		if variable.sealed {
+			object.line('sealed: ', variable.sealed.name)
 		}
 		
 		object.newLine().code('function: ').compile(this._functionName)
@@ -449,5 +472,94 @@ class ImplementMethodLinkDeclaration extends Statement {
 		object.done()
 		
 		line.code(')').done()
+	} // }}}
+}
+
+class ImplementVariableFieldDeclaration extends Statement {
+	private {
+		_type
+		_value
+		_variable
+	}
+	ImplementVariableFieldDeclaration(data, parent, @variable) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		this._type = $helper.analyseType($signature.type(this._data.type, this._scope), this)
+		this._value = $compile.expression(this._data.defaultValue, this)
+		
+		let property = {
+			kind: VariableKind::Variable
+			name: this._data.name.name
+		}
+		
+		if this._data.type? {
+			property.type = $type.type(this._data.type, this._scope)
+		}
+		
+		this._variable.sealed.properties[property.name] = property
+	} // }}}
+	fuse() { // {{{
+		this._value.fuse()
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.newLine()
+			.code(this._variable.sealed.name, '.', this._data.name.name, ' = ')
+			.compile(this._value)
+			.done()
+	} // }}}
+}
+
+class ImplementVariableMethodDeclaration extends Statement {
+	private {
+		_parameters
+		_statements
+		_variable
+	}
+	ImplementVariableMethodDeclaration(data, parent, @variable) { // {{{
+		super(data, parent, new Scope(parent.scope()))
+	} // }}}
+	analyse() { // {{{
+		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
+		
+		if this._data.body? {
+			this._statements = [$compile.statement(statement, this) for statement in $statements(this._data.body)]
+		}
+		else {
+			this._statements = []
+		}
+		
+		let property = {
+			kind: VariableKind::Function
+			name: this._data.name.name
+			signature: $function.signature(this._data, this._scope)
+		}
+		
+		if this._data.type? {
+			property.type = $type.type(this._data.type, this._scope)
+		}
+		
+		this._variable.sealed.properties[property.name] = property
+	} // }}}
+	fuse() { // {{{
+		this.compile(this._parameters)
+		
+		this.compile(this._statements)
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		let line = fragments.newLine().code(this._variable.sealed.name, '.', this._data.name.name, ' = function(')
+		
+		let block = $function.parameters(this, line, func(fragments) {
+			return fragments.code(')').newBlock()
+		})
+		
+		for statement in this._statements {
+			block.compile(statement)
+		}
+		
+		block.done()
+		
+		line.done()
 	} // }}}
 }

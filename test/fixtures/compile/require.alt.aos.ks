@@ -1,5 +1,5 @@
-extern|require final class Array
-extern|require final class Object
-extern|require final class String
+extern|require sealed class Array
+extern|require sealed class Object
+extern|require sealed class String
 
 export Array, Object, String

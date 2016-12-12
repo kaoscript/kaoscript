@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: String,
 		name: "lower",
-		final: __ks_String,
+		sealed: __ks_String,
 		method: "toLowerCase",
 		signature: {
 			access: 3,

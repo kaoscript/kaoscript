@@ -9,7 +9,7 @@ class Shape {
 let name = 'draw'
 
 impl Shape {
-	`\(name)`(canvas) -> string {
+	`\(name)`(canvas): string {
 		return `I'm drawing a \(this._color) rectangle.`
 	}
 }

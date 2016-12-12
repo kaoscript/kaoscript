@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: String,
 		name: "lowerFirst",
-		final: __ks_String,
+		sealed: __ks_String,
 		function: function() {
 			return this.charAt(0).toLowerCase() + this.substring(1);
 		},

@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Object,
 		name: "map",
-		final: __ks_Object,
+		sealed: __ks_Object,
 		function: function(iterator) {
 			if(iterator === undefined || iterator === null) {
 				throw new Error("Missing parameter 'iterator'");

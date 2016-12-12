@@ -104,12 +104,12 @@ class Module {
 				this._exportSource.push(`\(name.name): \(name.name)`)
 			}
 			
-			if variable.kind == VariableKind::Class && variable.final {
+			if variable.kind == VariableKind::Class && variable.sealed {
 				if alias {
-					this._exportSource.push(`__ks_\(alias.name): \(variable.final.name)`)
+					this._exportSource.push(`__ks_\(alias.name): \(variable.sealed.name)`)
 				}
 				else {
-					this._exportSource.push(`__ks_\(name.name): \(variable.final.name)`)
+					this._exportSource.push(`__ks_\(name.name): \(variable.sealed.name)`)
 				}
 			}
 		}

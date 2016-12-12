@@ -38,7 +38,7 @@ module.exports = function() {
 		}
 	}
 	Greetings.__ks_reflect = {
-		final: true,
+		sealed: true,
 		inits: 0,
 		constructors: [
 			{

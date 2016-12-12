@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Array,
 		name: "pluck",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(name) {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");

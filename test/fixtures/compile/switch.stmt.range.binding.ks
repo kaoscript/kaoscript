@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-func age() -> int => 15
+func age(): int => 15
 
 func main() {
 	switch age() {

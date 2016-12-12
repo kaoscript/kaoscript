@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-final class Greetings {
+sealed class Greetings {
 	private {
 		_message: string = ''
 	}

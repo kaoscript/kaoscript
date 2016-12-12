@@ -35,7 +35,13 @@ class CallExpression extends Expression {
 			}
 		}
 		
-		this._callee = $compile.expression(this._data.callee, this, false)
+		if this._data.callee.kind == Kind::MemberExpression {
+			this._callee = new MemberExpression(this._data.callee, this, this.scope())
+			this._callee.analyse()
+		}
+		else {
+			this._callee = $compile.expression(this._data.callee, this, false)
+		}
 		
 		for argument in this._data.arguments {
 			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
@@ -206,7 +212,7 @@ class CallExpression extends Expression {
 	} // }}}
 }
 
-class CallFinalExpression extends Expression {
+class CallSealedExpression extends Expression {
 	private {
 		_arguments	= []
 		_callee
@@ -214,7 +220,7 @@ class CallFinalExpression extends Expression {
 		_object
 		_tested		= false
 	}
-	CallFinalExpression(data, parent, scope, @callee) { // {{{
+	CallSealedExpression(data, parent, scope, @callee) { // {{{
 		super(data, parent, scope)
 	} // }}}
 	analyse() { // {{{
@@ -238,15 +244,81 @@ class CallFinalExpression extends Expression {
 			argument.fuse()
 		}
 	} // }}}
-	isComputed() => this._callee.variables? && this._callee.variables.length > 1
+	isComputed() => this._callee is Array
 	isNullable() { // {{{
 		return this._data.nullable || this._object.isNullable()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this._callee.variable? {
-			let path = this._callee.variable.accessPath? ? this._callee.variable.accessPath + this._callee.variable.final.name : this._callee.variable.final.name
+		if this._callee is Array {
+			if this._callee.length == 2 {
+				let data = this._data
+				let callee = this._callee
+				
+				this.module().flag('Type')
+				
+				let name = null
+				if data.callee.object.kind == Kind::Identifier {
+					if tof = $runtime.typeof(callee[0].variable.name, this) {
+						fragments.code(tof, '(').compile(this._object).code(')')
+					}
+					else {
+						fragments.code($runtime.type(this), '.is(').compile(this._object).code(', ', callee[0].variable.name, ')')
+					}
+				}
+				else {
+					name = this._scope.acquireTempName()
+					
+					if tof = $runtime.typeof(callee[0].variable.name, this) {
+						fragments.code(tof, '(', name, ' = ').compile(this._object).code(')')
+					}
+					else {
+						fragments.code($runtime.type(this), '.is(', name, ' = ').compile(this._object).code(', ', callee[0].variable.name, ')')
+					}
+				}
+				
+				fragments.code(' ? ')
+				
+				fragments.code((callee[0].variable.accessPath || ''), callee[0].variable.sealed.name + '._im_' + data.callee.property.name + '(')
+				
+				if name? {
+					fragments.code(name)
+				}
+				else {
+					fragments.compile(this._object)
+				}
+				
+				for argument in this._arguments {
+					fragments.code(', ').compile(argument)
+				}
+				
+				fragments.code(') : ')
+				
+				fragments.code((callee[1].variable.accessPath || ''), callee[1].variable.sealed.name + '._im_' + data.callee.property.name + '(')
+				
+				if name? {
+					fragments.code(name)
+				}
+				else {
+					fragments.compile(this._object)
+				}
+				
+				for argument in this._arguments {
+					fragments.code(', ').compile(argument)
+				}
+				
+				fragments.code(')')
+				
+				this._scope.releaseTempName(name) if name?
+			}
+			else {
+				console.error(this._callee)
+				throw new Error('Not Implemented')
+			}
+		}
+		else {
+			let path = this._callee.variable.accessPath? ? this._callee.variable.accessPath + this._callee.variable.sealed.name : this._callee.variable.sealed.name
 			
-			if this._callee.instance {
+			if this._callee.kind == CalleeKind::InstanceMethod {
 				if this._list {
 					fragments
 						.code(path + '._im_' + this._data.callee.property.name + '(')
@@ -267,8 +339,8 @@ class CallFinalExpression extends Expression {
 						.code('))')
 				}
 			}
-			else {
-				fragments.code((this._callee.variable.accessPath ?? ''), this._callee.variable.final.name + '._cm_' + this._data.callee.property.name + '(')
+			else if this._callee.kind == CalleeKind::ClassMethod {
+				fragments.code((this._callee.variable.accessPath ?? ''), this._callee.variable.sealed.name + '._cm_' + this._data.callee.property.name + '(')
 				
 				for i from 0 til this._arguments.length {
 					fragments.code($comma) if i
@@ -278,71 +350,15 @@ class CallFinalExpression extends Expression {
 				
 				fragments.code(')')
 			}
-		}
-		else if this._callee.variables.length == 2 {
-			let data = this._data
-			let callee = this._callee
-			
-			this.module().flag('Type')
-			
-			let name = null
-			if data.callee.object.kind == Kind::Identifier {
-				if tof = $runtime.typeof(callee.variables[0].name, this) {
-					fragments.code(tof, '(').compile(this._object).code(')')
-				}
-				else {
-					fragments.code($runtime.type(this), '.is(').compile(this._object).code(', ', callee.variables[0].name, ')')
-				}
-			}
 			else {
-				name = this._scope.acquireTempName()
+				fragments.code(path + '.' + this._data.callee.property.name + '(')
 				
-				if tof = $runtime.typeof(callee.variables[0].name, this) {
-					fragments.code(tof, '(', name, ' = ').compile(this._object).code(')')
+				for i from 0 til this._arguments.length {
+					fragments.code(', ').compile(this._arguments[i])
 				}
-				else {
-					fragments.code($runtime.type(this), '.is(', name, ' = ').compile(this._object).code(', ', callee.variables[0].name, ')')
-				}
+				
+				fragments.code(')')
 			}
-			
-			fragments.code(' ? ')
-			
-			fragments.code((callee.variables[0].accessPath || ''), callee.variables[0].final.name + '._im_' + data.callee.property.name + '(')
-			
-			if name? {
-				fragments.code(name)
-			}
-			else {
-				fragments.compile(this._object)
-			}
-			
-			for argument in this._arguments {
-				fragments.code(', ').compile(argument)
-			}
-			
-			fragments.code(') : ')
-			
-			fragments
-				.code((callee.variables[1].accessPath || ''), callee.variables[1].final.name + '._im_' + data.callee.property.name + '(')
-			
-			if name? {
-				fragments.code(name)
-			}
-			else {
-				fragments.compile(this._object)
-			}
-			
-			for argument in this._arguments {
-				fragments.code(', ').compile(argument)
-			}
-			
-			fragments.code(')')
-			
-			this._scope.releaseTempName(name) if name?
-		}
-		else {
-			console.error(this._callee)
-			throw new Error('Not Implemented')
 		}
 	} // }}}
 }

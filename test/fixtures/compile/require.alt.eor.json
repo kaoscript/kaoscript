@@ -53,7 +53,7 @@
       },
       "classMethods": {},
       "requirement": "Array",
-      "final": {
+      "sealed": {
         "name": "__ks_Array",
         "constructors": false,
         "instanceMethods": {

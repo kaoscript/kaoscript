@@ -3,7 +3,7 @@ module.exports = function(Helper, Type) {
 	Helper.newClassMethod({
 		class: Function,
 		name: "vcurry",
-		final: __ks_Function,
+		sealed: __ks_Function,
 		function: function(self, bind = null, ...args) {
 			if(self === undefined || self === null) {
 				throw new Error("Missing parameter 'self'");

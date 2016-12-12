@@ -1,4 +1,4 @@
-extern|require final class Array
+extern|require sealed class Array
 
 impl Array {
 	contains(item, from = 0) { // {{{

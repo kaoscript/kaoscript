@@ -3,7 +3,7 @@ module.exports = function(Array, __ks_Array) {
 	Helper.newInstanceMethod({
 		class: Array,
 		name: "last",
-		final: __ks_Array,
+		sealed: __ks_Array,
 		function: function(index) {
 			if(index === undefined || index === null) {
 				index = 1;

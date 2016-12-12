@@ -7,7 +7,7 @@ class Shape {
 	
 	Shape(@color)
 	
-	draw() -> string {
+	draw(): string {
 		throw new Error('Not Implemented')
 	}
 }

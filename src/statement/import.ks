@@ -218,16 +218,11 @@ const $import = {
 					kind: Kind::Identifier
 					name: 'Object'
 				}
-				properties: []
+				properties: {}
 			}
 			
 			for name, variable of exports {
-				variable.name = {
-					kind: Kind::Identifier
-					name: variable.name
-				}
-				
-				type.properties.push(variable)
+				type.properties[variable.name] = variable
 			}
 			
 			variable = $variable.define(node.scope(), {
@@ -541,10 +536,10 @@ const $import = {
 			variable = exports[name]
 			
 			if variable.kind != VariableKind::TypeAlias {
-				if variable.kind == VariableKind::Class && variable.final {
-					variable.final.name = '__ks_' + alias
+				if variable.kind == VariableKind::Class && variable.sealed {
+					variable.sealed.name = '__ks_' + alias
 					
-					fragments.newLine().code(`var {\(alias), \(variable.final.name)} = \(importCode)`).done()
+					fragments.newLine().code(`var {\(alias), \(variable.sealed.name)} = \(importCode)`).done()
 				}
 				else {
 					fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
@@ -569,17 +564,17 @@ const $import = {
 					if alias == name {
 						line.code(name)
 						
-						if variable.kind == VariableKind::Class && variable.final {
-							line.code(', ', variable.final.name)
+						if variable.kind == VariableKind::Class && variable.sealed {
+							line.code(', ', variable.sealed.name)
 						}
 					}
 					else {
 						line.code(name, ': ', alias)
 						
-						if variable.kind == VariableKind::Class && variable.final {
-							variable.final.name = '__ks_' + alias
+						if variable.kind == VariableKind::Class && variable.sealed {
+							variable.sealed.name = '__ks_' + alias
 							
-							line.code(', ', variable.final.name)
+							line.code(', ', variable.sealed.name)
 						}
 					}
 				}
@@ -595,10 +590,10 @@ const $import = {
 				if variable.kind != VariableKind::TypeAlias {
 					variables.push(name)
 					
-					if variable.kind == VariableKind::Class && variable.final {
-						variable.final.name = '__ks_' + name
+					if variable.kind == VariableKind::Class && variable.sealed {
+						variable.sealed.name = '__ks_' + name
 						
-						variables.push(variable.final.name)
+						variables.push(variable.sealed.name)
 					}
 				}
 			}

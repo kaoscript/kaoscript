@@ -1,6 +1,6 @@
 extern console
 
-extern final class Object
+extern sealed class Object
 
 impl Object {
 	map(iterator: func) {

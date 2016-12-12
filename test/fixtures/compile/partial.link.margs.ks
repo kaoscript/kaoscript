@@ -5,7 +5,7 @@ let name = 'draw'
 let shape = 'rectangle'
 let color = 'blue'
 
-func draw(shape, color, canvas) -> string {
+func draw(shape, color, canvas): string {
 	return `I'm drawing a \(color) \(shape).`
 }
 

@@ -1,4 +1,4 @@
-require final class Array
+require sealed class Array
 
 impl Array {
 	last(index = 1) {

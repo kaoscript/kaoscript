@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Number,
 		name: "mod",
-		final: __ks_Number,
+		sealed: __ks_Number,
 		function: function(max) {
 			if(max === undefined || max === null) {
 				throw new Error("Missing parameter 'max'");

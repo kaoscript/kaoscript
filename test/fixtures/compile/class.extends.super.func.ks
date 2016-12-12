@@ -9,7 +9,7 @@ class Shape {
 	
     Shape(@color)
     
-    draw() -> string {
+    draw(): string {
         return `I'm drawing with a \(this._color) pen.`
     }
 }

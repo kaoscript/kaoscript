@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newClassMethod({
 		class: Object,
 		name: "clone",
-		final: __ks_Object,
+		sealed: __ks_Object,
 		function: function(object) {
 			if(object === undefined || object === null) {
 				throw new Error("Missing parameter 'object'");

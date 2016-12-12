@@ -6,7 +6,7 @@ class Shape {
 	
 	static registerCircle() {
 		impl Shape {
-			makeCircle(color: string) -> Shape => new Shape('circle', color)
+			makeCircle(color: string): Shape => new Shape('circle', color)
 		}
 	}
 	

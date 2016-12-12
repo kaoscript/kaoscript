@@ -70,20 +70,15 @@ class ExternDeclaration extends Statement {
 				Kind::ClassDeclaration => {
 					variable = $variable.define(this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
-					let continuous = true
-					for i from 0 til declaration.modifiers.length while continuous {
-						continuous = false if declaration.modifiers[i].kind == ClassModifier::Final
-					}
-					
-					if !continuous {
-						variable.final = {
+					if declaration.sealed {
+						variable.sealed = {
 							name: '__ks_' + variable.name.name
 							constructors: false
 							instanceMethods: {}
 							classMethods: {}
 						}
 						
-						this._lines.push('var ' + variable.final.name + ' = {}')
+						this._lines.push('var ' + variable.sealed.name + ' = {}')
 					}
 					
 					for i from 0 til declaration.members.length {
@@ -91,7 +86,16 @@ class ExternDeclaration extends Statement {
 					}
 				}
 				Kind::VariableDeclarator => {
-					$variable.define(this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type)
+					
+					if declaration.sealed {
+						variable.sealed = {
+							name: '__ks_' + variable.name.name
+							properties: {}
+						}
+						
+						this._lines.push('var ' + variable.sealed.name + ' = {}')
+					}
 				}
 				=> {
 					console.error(declaration)

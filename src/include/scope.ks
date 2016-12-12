@@ -18,7 +18,6 @@ let $keywords = { // {{{
 	enum: true
 	export: true
 	extends: true
-	final: true
 	finally: true
 	float: true
 	for: true
@@ -39,6 +38,7 @@ let $keywords = { // {{{
 	protected: true
 	public: true
 	return: true
+	sealed: true
 	short: true
 	static: true
 	switch: true

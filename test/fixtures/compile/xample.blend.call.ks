@@ -8,7 +8,7 @@ extern {
 
 type float = Number
 
-func blend(x: float, y: float, percentage: float) -> float {
+func blend(x: float, y: float, percentage: float): float {
 	return (1 - percentage) * x + percentage * y
 }
 

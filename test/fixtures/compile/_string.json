@@ -113,7 +113,7 @@
         ]
       },
       "classMethods": {},
-      "final": {
+      "sealed": {
         "name": "__ks_String",
         "constructors": false,
         "instanceMethods": {

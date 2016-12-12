@@ -2,14 +2,14 @@ import * from ./_number.ks
 
 extern {
 	console: {
-		log(...args) -> void
+		log(...args): void
 	}
 	Float: {
-		parse(value) -> Number
+		parse(value): Number
 	}
 }
 
-func hex(n: string | number) -> int { // {{{
+func hex(n: string | number): int { // {{{
 	return Float.parse(n).limit(0, 255).round()
 } // }}}
 

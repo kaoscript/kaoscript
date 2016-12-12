@@ -4,7 +4,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Number,
 		name: "limit",
-		final: __ks_Number,
+		sealed: __ks_Number,
 		function: function(min, max) {
 			if(min === undefined || min === null) {
 				throw new Error("Missing parameter 'min'");
@@ -30,7 +30,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Number,
 		name: "mod",
-		final: __ks_Number,
+		sealed: __ks_Number,
 		function: function(max) {
 			if(max === undefined || max === null) {
 				throw new Error("Missing parameter 'max'");
@@ -64,7 +64,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Number,
 		name: "round",
-		final: __ks_Number,
+		sealed: __ks_Number,
 		function: function(precision) {
 			if(precision === undefined || precision === null) {
 				precision = 0;
@@ -88,7 +88,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Number,
 		name: "toFloat",
-		final: __ks_Number,
+		sealed: __ks_Number,
 		function: function() {
 			return parseFloat(this);
 		},
@@ -102,7 +102,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Number,
 		name: "toInt",
-		final: __ks_Number,
+		sealed: __ks_Number,
 		function: function(base) {
 			if(base === undefined || base === null) {
 				base = 10;

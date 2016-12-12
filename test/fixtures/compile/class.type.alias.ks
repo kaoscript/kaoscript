@@ -10,6 +10,6 @@ class Person {
 	}
 	
 	Person()
-	height() -> float => this._float
+	height(): float => this._float
 	height(@height: float) => this
 }

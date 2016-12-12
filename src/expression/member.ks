@@ -154,3 +154,23 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 }
+
+class MemberSealedExpression extends Expression {
+	private {
+		_callee
+	}
+	MemberSealedExpression(data, parent, scope, @callee) { // {{{
+		super(data, parent, scope)
+	} // }}}
+	analyse() { // {{{
+	} // }}}
+	fuse() { // {{{
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		if this._callee.variable.accessPath? {
+			fragments.code(this._callee.variable.accessPath)
+		}
+		
+		fragments.code(this._callee.variable.sealed.name + '.' + this._data.property.name)
+	} // }}}
+}

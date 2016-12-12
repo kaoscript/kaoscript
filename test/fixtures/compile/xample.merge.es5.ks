@@ -1,6 +1,6 @@
 #![cfg(variables='es5')]
 
-extern final class Array
+extern sealed class Array
 
 impl Array {
 	static merge(...args) {

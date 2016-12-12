@@ -1,6 +1,6 @@
 require expect: func
 
-final class Shape {
+sealed class Shape {
 	private {
 		_shape: string = ''
 	}
@@ -10,7 +10,7 @@ final class Shape {
 	shape() => this._shape
 }
 
-final class Action {
+sealed class Action {
 	private {
 		_color: string = ''
 	}
@@ -19,15 +19,15 @@ final class Action {
 }
 
 impl Action {
-	draw() -> string {
+	draw(): string {
 		return `I'm drawing with a \(this._color) pen.`
 	}
 	
-	draw(shape: string) -> string {
+	draw(shape: string): string {
 		return `I'm drawing a \(this._color) \(shape).`
 	}
 	
-	draw(shape: Shape) -> string {
+	draw(shape: Shape): string {
 		return `I'm drawing a \(this._color) \(shape.shape()).`
 	}
 }

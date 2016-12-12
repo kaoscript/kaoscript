@@ -1,6 +1,6 @@
 extern console
 
-extern final class Array
+extern sealed class Array
 
 impl Array {
 	last(index = 1) {

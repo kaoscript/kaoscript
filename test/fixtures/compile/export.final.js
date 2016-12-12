@@ -24,7 +24,7 @@ module.exports = function() {
 		}
 	}
 	Shape.__ks_reflect = {
-		final: true,
+		sealed: true,
 		inits: 0,
 		constructors: [
 			{
@@ -54,7 +54,7 @@ module.exports = function() {
 	Helper.newInstanceMethod({
 		class: Shape,
 		name: "draw",
-		final: __ks_Shape,
+		sealed: __ks_Shape,
 		function: function(shape) {
 			if(shape === undefined || shape === null) {
 				throw new Error("Missing parameter 'shape'");

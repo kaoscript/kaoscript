@@ -3,7 +3,7 @@ module.exports = function(Helper, Type) {
 	Helper.newClassMethod({
 		class: Object,
 		name: "map",
-		final: __ks_Object,
+		sealed: __ks_Object,
 		function: function(object, iterator) {
 			if(object === undefined || object === null) {
 				throw new Error("Missing parameter 'object'");
@@ -45,7 +45,7 @@ module.exports = function(Helper, Type) {
 	Helper.newClassMethod({
 		class: Object,
 		name: "map",
-		final: __ks_Object,
+		sealed: __ks_Object,
 		function: function(object, iterator, condition) {
 			if(object === undefined || object === null) {
 				throw new Error("Missing parameter 'object'");

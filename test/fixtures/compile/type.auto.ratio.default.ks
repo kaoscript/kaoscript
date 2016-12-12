@@ -6,7 +6,7 @@ extern console: {
 
 type float = Number
 
-func foo() -> float {
+func foo(): float {
 	return 0.32
 }
 

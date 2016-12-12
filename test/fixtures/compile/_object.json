@@ -58,7 +58,7 @@
           }
         ]
       },
-      "final": {
+      "sealed": {
         "name": "__ks_Object",
         "constructors": false,
         "instanceMethods": {},

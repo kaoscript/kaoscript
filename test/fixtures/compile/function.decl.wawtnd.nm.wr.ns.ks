@@ -1,2 +1,2 @@
-func foo(bar: string, qux: Number) -> string {
+func foo(bar: string, qux: Number): string {
 }
