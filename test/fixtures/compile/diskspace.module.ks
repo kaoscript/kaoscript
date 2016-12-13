@@ -13,10 +13,10 @@ func disks() async {
 		
 		if matches {
 			disks.push({
-				device: matches[1].trim(),
-				mount: matches[9],
-				total: matches[2].toInt() * 1024,
-				used: matches[3].toInt() * 1024,
+				device: matches[1].trim()
+				mount: matches[9]
+				total: matches[2].toInt() * 1024
+				used: matches[3].toInt() * 1024
 				available: matches[4].toInt() * 1024
 			})
 		}

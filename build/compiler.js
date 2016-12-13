@@ -679,7 +679,16 @@ module.exports = function() {
 				}
 				else if(Type.isValue(variable.instanceVariables[name])) {
 					if(Type.isValue(variable.instanceVariables[name].type)) {
-						return $variable.fromReflectType(variable.instanceVariables[name].type, node);
+						return {
+							kind: VariableKind.Variable,
+							type: {
+								kind: Kind.TypeReference,
+								typeName: {
+									kind: Kind.Identifier,
+									name: variable.instanceVariables[name].type
+								}
+							}
+						};
 					}
 				}
 			}
@@ -838,11 +847,37 @@ module.exports = function() {
 				var variable = $variable.fromAST(data.callee, node);
 				if(Type.isValue(variable)) {
 					if(variable.kind === VariableKind.Class) {
-						return variable;
+						if(Type.isString(variable.name)) {
+							return {
+								kind: VariableKind.Variable,
+								type: {
+									kind: Kind.TypeReference,
+									typeName: {
+										kind: Kind.Identifier,
+										name: variable.name
+									}
+								}
+							};
+						}
+						else {
+							return {
+								kind: VariableKind.Variable,
+								type: {
+									kind: Kind.TypeReference,
+									typeName: variable.name
+								}
+							};
+						}
 					}
 					else if((variable.kind === VariableKind.Function) || (variable.kind === VariableKind.Variable)) {
-						if(Type.isValue(variable.type)) {
-							return $variable.fromType(variable.type, node);
+						if(Type.isValue(variable.type) && Type.isValue(variable.type.typeName)) {
+							return {
+								kind: VariableKind.Variable,
+								type: {
+									kind: Kind.TypeReference,
+									typeName: variable.type.typeName
+								}
+							};
 						}
 					}
 					else {
@@ -873,8 +908,19 @@ module.exports = function() {
 					}
 					if(data.computed) {
 						var __ks_1;
-						if(Type.isValue(variable.type) && (Type.isValue(__ks_1 = $variable.fromType(variable.type, node)) ? (variable = __ks_1, true) : false) && Type.isValue(variable.type) && (Type.isValue(__ks_1 = $variable.fromType(variable.type, node)) ? (variable = __ks_1, true) : false)) {
-							return variable;
+						if(Type.isValue(variable.type) && (Type.isValue(__ks_1 = $variable.fromType(variable.type, node)) ? (variable = __ks_1, true) : false)) {
+							if(Type.isValue(variable.type) && (Type.isValue(__ks_1 = $variable.fromType(variable.type, node)) ? (variable = __ks_1, true) : false)) {
+								return {
+									kind: VariableKind.Variable,
+									type: {
+										kind: Kind.TypeReference,
+										typeName: {
+											kind: Kind.Identifier,
+											name: variable.name
+										}
+									}
+								};
+							}
 						}
 					}
 					else {
@@ -5906,20 +5952,30 @@ module.exports = function() {
 			}
 			var name = arguments[++__ks_i];
 			var node = arguments[++__ks_i];
+			if(arguments.length > 3) {
+				var instance = arguments[++__ks_i];
+			}
+			else  {
+				var instance = false;
+			}
 			if(Type.isValue(variable)) {
 				if(variable.kind === VariableKind.Class) {
 					if(Type.isValue(variable.sealed)) {
-						if(variable.sealed.classMethods[name] === true) {
-							return {
-								kind: CalleeKind.ClassMethod,
-								variable: variable
-							};
+						if(instance) {
+							if(variable.sealed.instanceMethods[name] === true) {
+								return {
+									kind: CalleeKind.InstanceMethod,
+									variable: variable
+								};
+							}
 						}
-						else if(variable.sealed.instanceMethods[name] === true) {
-							return {
-								kind: CalleeKind.InstanceMethod,
-								variable: variable
-							};
+						else {
+							if(variable.sealed.classMethods[name] === true) {
+								return {
+									kind: CalleeKind.ClassMethod,
+									variable: variable
+								};
+							}
 						}
 					}
 				}
@@ -5929,7 +5985,7 @@ module.exports = function() {
 						for(var __ks_0 = 0, __ks_1 = variable.type.types.length, type; __ks_0 < __ks_1; ++__ks_0) {
 							type = variable.type.types[__ks_0];
 							var v;
-							if(!(v = $sealed.filter($variable.fromType(type, node), name, node))) {
+							if(!(v = $sealed.filter($variable.fromType(type, node), name, node, true))) {
 								return false;
 							}
 							variables.push(v);
@@ -5943,7 +5999,7 @@ module.exports = function() {
 					}
 					else {
 						if(Type.isValue(__ks_0 = $variable.fromType(variable.type, node)) ? (variable = __ks_0, true) : false) {
-							return $sealed.filter(variable, name, node);
+							return $sealed.filter(variable, name, node, true);
 						}
 					}
 				}
@@ -5972,14 +6028,14 @@ module.exports = function() {
 				throw new Error("Missing parameter 'node'");
 			}
 			if(Type.isValue(type.typeName)) {
-				return $sealed.filter($variable.fromType(type, node), name, node);
+				return $sealed.filter($variable.fromType(type, node), name, node, true);
 			}
 			else if(Type.isValue(type.types)) {
 				var variables = [];
 				for(var __ks_0 = 0, __ks_1 = type.types.length, t; __ks_0 < __ks_1; ++__ks_0) {
 					t = type.types[__ks_0];
 					var v;
-					if(!(v = $sealed.filter($variable.fromType(t, node), name, node))) {
+					if(!(v = $sealed.filter($variable.fromType(t, node), name, node, true))) {
 						return false;
 					}
 					variables.push(v);

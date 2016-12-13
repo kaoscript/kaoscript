@@ -622,7 +622,19 @@ const $variable = {
 				return variables	if variables.length > 0
 			}
 			else if variable.instanceVariables[name]? {
-				return $variable.fromReflectType(variable.instanceVariables[name].type, node) if variable.instanceVariables[name].type?
+				//return $variable.fromReflectType(variable.instanceVariables[name].type, node) if variable.instanceVariables[name].type?
+				if variable.instanceVariables[name].type? {
+					return {
+						kind: VariableKind::Variable
+						type: {
+							kind: Kind::TypeReference
+							typeName: {
+								kind: Kind::Identifier
+								name: variable.instanceVariables[name].type
+							}
+						}
+					}
+				}
 			}
 		}
 		else if variable.kind == VariableKind::Enum {
@@ -757,10 +769,38 @@ const $variable = {
 				
 				if variable? {
 					if variable.kind == VariableKind::Class {
-						return variable
+						if variable.name is String {
+							return {
+								kind: VariableKind::Variable
+								type: {
+									kind: Kind::TypeReference
+									typeName: {
+										kind: Kind::Identifier
+										name: variable.name
+									}
+								}
+							}
+						}
+						else {
+							return {
+								kind: VariableKind::Variable
+								type: {
+									kind: Kind::TypeReference
+									typeName: variable.name
+								}
+							}
+						}
 					}
 					else if variable.kind == VariableKind::Function || variable.kind == VariableKind::Variable {
-						return $variable.fromType(variable.type, node) if variable.type?
+						if variable.type?.typeName? {
+							return {
+								kind: VariableKind::Variable
+								type: {
+									kind: Kind::TypeReference
+									typeName: variable.type.typeName
+								}
+							}
+						}
 					}
 					else {
 						throw new Error('Not implemented')
@@ -793,7 +833,22 @@ const $variable = {
 					}
 					
 					if data.computed {
-						return variable if variable.type? && (variable ?= $variable.fromType(variable.type, node)) && variable.type? && (variable ?= $variable.fromType(variable.type, node))
+						// if array
+						if variable.type? && (variable ?= $variable.fromType(variable.type, node)) {
+							// if generic
+							if variable.type? && (variable ?= $variable.fromType(variable.type, node)) {
+								return {
+									kind: VariableKind::Variable
+									type: {
+										kind: Kind::TypeReference
+										typeName: {
+											kind: Kind::Identifier
+											name: variable.name
+										}
+									}
+								}
+							}
+						}
 					}
 					else {
 						let name = data.property.name

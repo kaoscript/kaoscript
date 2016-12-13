@@ -126,20 +126,24 @@ const $sealed = {
 			}
 		}
 	} // }}}
-	filter(variable?, name, node) { // {{{
+	filter(variable?, name, node, instance = false) { // {{{
 		if variable? {
 			if variable.kind == VariableKind::Class {
 				if variable.sealed? {
-					if variable.sealed.classMethods[name] == true {
-						return {
-							kind: CalleeKind::ClassMethod
-							variable: variable
+					if instance {
+						if variable.sealed.instanceMethods[name] == true {
+							return {
+								kind: CalleeKind::InstanceMethod
+								variable: variable
+							}
 						}
 					}
-					else if variable.sealed.instanceMethods[name] == true {
-						return {
-							kind: CalleeKind::InstanceMethod
-							variable: variable
+					else {
+						if variable.sealed.classMethods[name] == true {
+							return {
+								kind: CalleeKind::ClassMethod
+								variable: variable
+							}
 						}
 					}
 				}
@@ -149,7 +153,7 @@ const $sealed = {
 					let variables = []
 					
 					for type in variable.type.types {
-						return false unless v = $sealed.filter($variable.fromType(type, node), name, node)
+						return false unless v = $sealed.filter($variable.fromType(type, node), name, node, true)
 						
 						variables.push(v)
 					}
@@ -158,7 +162,7 @@ const $sealed = {
 					return variables	if variables.length > 0
 				}
 				else {
-					return $sealed.filter(variable, name, node) if variable ?= $variable.fromType(variable.type, node)
+					return $sealed.filter(variable, name, node, true) if variable ?= $variable.fromType(variable.type, node)
 				}
 			}
 			else if variable.kind == VariableKind::Variable {
@@ -179,13 +183,13 @@ const $sealed = {
 	} // }}}
 	filterType(type, name, node) { // {{{
 		if type.typeName? {
-			return $sealed.filter($variable.fromType(type, node), name, node)
+			return $sealed.filter($variable.fromType(type, node), name, node, true)
 		}
 		else if type.types? {
 			let variables = []
 			
 			for t in type.types {
-				return false unless v = $sealed.filter($variable.fromType(t, node), name, node)
+				return false unless v = $sealed.filter($variable.fromType(t, node), name, node, true)
 				
 				variables.push(v)
 			}
