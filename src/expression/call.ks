@@ -59,11 +59,6 @@ class CallExpression extends Expression {
 		}
 		
 		if !this._list {
-			if this._arguments.length != 1 {
-				throw new Error(`Invalid to call function at line \(this._data.start.line)`)
-			}
-			
-			this._type = $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope)
 			this._caller = $caller(this._callee, this)
 		}
 	} // }}}
@@ -165,14 +160,19 @@ class CallExpression extends Expression {
 					.compile(this._callScope, mode)
 			}
 			
-			if this._type == 'Array' {
-				fragments.code($comma).compile(this._arguments[0], mode)
+			if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+				fragments.code($comma).compile(this._arguments[0])
 			}
 			else {
-				fragments
-					.code(', [].concat(')
-					.compile(this._arguments[0], mode)
-					.code(')')
+				fragments.code(', [].concat(')
+				
+				for i from 0 til this._arguments.length {
+					fragments.code($comma) if i != 0
+					
+					fragments.compile(this._arguments[i])
+				}
+				
+				fragments.code(')')
 			}
 		}
 	} // }}}
@@ -321,43 +321,80 @@ class CallSealedExpression extends Expression {
 			if this._callee.kind == CalleeKind::InstanceMethod {
 				if this._list {
 					fragments
-						.code(path + '._im_' + this._data.callee.property.name + '(')
+						.code(`\(path)._im_\(this._data.callee.property.name)(`)
 						.compile(this._object)
 					
 					for i from 0 til this._arguments.length {
-						fragments.code(', ').compile(this._arguments[i])
+						fragments.code($comma).compile(this._arguments[i])
 					}
 					
 					fragments.code(')')
 				}
 				else {
 					fragments
-						.code(`\(path)._im_\(this._data.callee.property.name).apply(\(path), [`)
+						.code(`\(path)._im_\(this._data.callee.property.name).apply(\(path), [].concat(`)
 						.compile(this._object)
-						.code('].concat(')
-						.compile(this._arguments[0])
-						.code('))')
+					
+					for i from 0 til this._arguments.length {
+						fragments.code($comma).compile(this._arguments[i])
+					}
+					
+					fragments.code('))')
 				}
 			}
 			else if this._callee.kind == CalleeKind::ClassMethod {
-				fragments.code((this._callee.variable.accessPath ?? ''), this._callee.variable.sealed.name + '._cm_' + this._data.callee.property.name + '(')
-				
-				for i from 0 til this._arguments.length {
-					fragments.code($comma) if i
+				if this._list {
+					fragments.code(`\(path)._cm_\(this._data.callee.property.name)(`)
 					
-					fragments.compile(this._arguments[i])
+					for i from 0 til this._arguments.length {
+						fragments.code($comma) if i != 0
+						
+						fragments.compile(this._arguments[i])
+					}
+					
+					fragments.code(')')
 				}
-				
-				fragments.code(')')
+				else if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+					fragments.code(`\(path)._cm_\(this._data.callee.property.name).apply(\(path), `).compile(this._arguments[0]).code(')')
+				}
+				else {
+					fragments.code(`\(path)._cm_\(this._data.callee.property.name).apply(\(path), [].concat(`)
+					
+					for i from 0 til this._arguments.length {
+						fragments.code($comma) if i != 0
+						
+						fragments.compile(this._arguments[i])
+					}
+					
+					fragments.code('))')
+				}
 			}
 			else {
-				fragments.code(path + '.' + this._data.callee.property.name + '(')
-				
-				for i from 0 til this._arguments.length {
-					fragments.code(', ').compile(this._arguments[i])
+				if this._list {
+					fragments.code(`\(path).\(this._data.callee.property.name)(`)
+					
+					for i from 0 til this._arguments.length {
+						fragments.code($comma) if i != 0
+						
+						fragments.compile(this._arguments[i])
+					}
+					
+					fragments.code(')')
 				}
-				
-				fragments.code(')')
+				else if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+					fragments.code(`\(path).\(this._data.callee.property.name).apply(\(path), `).compile(this._arguments[0]).code(')')
+				}
+				else {
+					fragments.code(`\(path).\(this._data.callee.property.name).apply(\(path), [].concat(`)
+					
+					for i from 0 til this._arguments.length {
+						fragments.code($comma) if i != 0
+						
+						fragments.compile(this._arguments[i])
+					}
+					
+					fragments.code('))')
+				}
 			}
 		}
 	} // }}}

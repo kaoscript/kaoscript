@@ -21,10 +21,6 @@ class CurryExpression extends Expression {
 			}
 		}
 		
-		if !this._list && this._arguments.length != 1 {
-			throw new Error(`Invalid curry syntax at line \(this._data.start.line)`)
-		}
-		
 		if this._data.scope.kind == ScopeModifier::This {
 			this._caller = $caller(this._callee, this)
 		}
@@ -122,18 +118,47 @@ class CurryExpression extends Expression {
 					fragments.code('null')
 				}
 				
-				fragments
-					.code($comma)
-					.compile(this._arguments[0])
-					.code(')')
+				fragments.code($comma)
+				
+				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+					fragments.compile(this._arguments[0])
+				}
+				else {
+					fragments.code('[].concat(')
+					
+					for i from 0 til this._arguments.length {
+						fragments.code($comma) if i != 0
+						
+						fragments.compile(this._arguments[i])
+					}
+					
+					fragments.code(')')
+				}
+					
+				fragments.code(')')
 			}
 			else if kind == ScopeModifier::Null {
 				fragments
 					.code($runtime.helper(this), '.curry(')
 					.compile(this._callee)
 					.code(', null, ')
-					.compile(this._arguments[0])
-					.code(')')
+				
+				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+					fragments.compile(this._arguments[0])
+				}
+				else {
+					fragments.code('[].concat(')
+					
+					for i from 0 til this._arguments.length {
+						fragments.code($comma) if i != 0
+						
+						fragments.compile(this._arguments[i])
+					}
+					
+					fragments.code(')')
+				}
+				
+				fragments.code(')')
 			}
 			else {
 				fragments
@@ -142,8 +167,23 @@ class CurryExpression extends Expression {
 					.code($comma)
 					.compile(this._callScope)
 					.code($comma)
-					.compile(this._arguments[0])
-					.code(')')
+				
+				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+					fragments.compile(this._arguments[0])
+				}
+				else {
+					fragments.code('[].concat(')
+					
+					for i from 0 til this._arguments.length {
+						fragments.code($comma) if i != 0
+						
+						fragments.compile(this._arguments[i])
+					}
+					
+					fragments.code(')')
+				}
+				
+				fragments.code(')')
 			}
 		}
 	} // }}}

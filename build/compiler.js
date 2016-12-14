@@ -420,6 +420,14 @@ module.exports = function() {
 					}
 				};
 			}
+			else if(__ks_0 === Kind.ArrayExpression) {
+				return {
+					typeName: {
+						kind: Kind.Identifier,
+						name: "Array"
+					}
+				};
+			}
 			else if(__ks_0 === Kind.ArrayRange) {
 				return {
 					typeName: {
@@ -1552,11 +1560,11 @@ module.exports = function() {
 		sealed: __ks_Array,
 		function: function(...args) {
 			if(args.length === 1) {
-				__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[0]));
+				__ks_Array._im_pushUniq.apply(__ks_Array, [].concat(this, args[0]));
 			}
 			else {
 				for(var i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
-					__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[i]));
+					__ks_Array._im_pushUniq.apply(__ks_Array, [].concat(this, args[i]));
 				}
 			}
 			return this;
@@ -20529,10 +20537,6 @@ module.exports = function() {
 				this._callScope = $compile.expression(this._data.scope.value, this);
 			}
 			if(!this._list) {
-				if(this._arguments.length !== 1) {
-					throw new Error("Invalid to call function at line " + this._data.start.line);
-				}
-				this._type = $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope);
 				this._caller = $caller(this._callee, this);
 			}
 		}
@@ -20694,11 +20698,18 @@ module.exports = function() {
 				else {
 					fragments.compile(this._callee, mode).code(".apply(").compile(this._callScope, mode);
 				}
-				if(this._type === "Array") {
-					fragments.code($comma).compile(this._arguments[0], mode);
+				if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+					fragments.code($comma).compile(this._arguments[0]);
 				}
 				else {
-					fragments.code(", [].concat(").compile(this._arguments[0], mode).code(")");
+					fragments.code(", [].concat(");
+					for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+						if(i !== 0) {
+							fragments.code($comma);
+						}
+						fragments.compile(this._arguments[i]);
+					}
+					fragments.code(")");
 				}
 			}
 		}
@@ -21069,30 +21080,67 @@ module.exports = function() {
 					if(this._list) {
 						fragments.code(path + "._im_" + this._data.callee.property.name + "(").compile(this._object);
 						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
-							fragments.code(", ").compile(this._arguments[i]);
+							fragments.code($comma).compile(this._arguments[i]);
 						}
 						fragments.code(")");
 					}
 					else {
-						fragments.code(path + "._im_" + this._data.callee.property.name + ".apply(" + path + ", [").compile(this._object).code("].concat(").compile(this._arguments[0]).code("))");
+						fragments.code(path + "._im_" + this._data.callee.property.name + ".apply(" + path + ", [].concat(").compile(this._object);
+						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+							fragments.code($comma).compile(this._arguments[i]);
+						}
+						fragments.code("))");
 					}
 				}
 				else if(this._callee.kind === CalleeKind.ClassMethod) {
-					fragments.code(Type.isValue(this._callee.variable.accessPath) ? this._callee.variable.accessPath : "", this._callee.variable.sealed.name + "._cm_" + this._data.callee.property.name + "(");
-					for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
-						if(i) {
-							fragments.code($comma);
+					if(this._list) {
+						fragments.code(path + "._cm_" + this._data.callee.property.name + "(");
+						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+							if(i !== 0) {
+								fragments.code($comma);
+							}
+							fragments.compile(this._arguments[i]);
 						}
-						fragments.compile(this._arguments[i]);
+						fragments.code(")");
 					}
-					fragments.code(")");
+					else if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+						fragments.code(path + "._cm_" + this._data.callee.property.name + ".apply(" + path + ", ").compile(this._arguments[0]).code(")");
+					}
+					else {
+						fragments.code(path + "._cm_" + this._data.callee.property.name + ".apply(" + path + ", [].concat(");
+						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+							if(i !== 0) {
+								fragments.code($comma);
+							}
+							fragments.compile(this._arguments[i]);
+						}
+						fragments.code("))");
+					}
 				}
 				else {
-					fragments.code(path + "." + this._data.callee.property.name + "(");
-					for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
-						fragments.code(", ").compile(this._arguments[i]);
+					if(this._list) {
+						fragments.code(path + "." + this._data.callee.property.name + "(");
+						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+							if(i !== 0) {
+								fragments.code($comma);
+							}
+							fragments.compile(this._arguments[i]);
+						}
+						fragments.code(")");
 					}
-					fragments.code(")");
+					else if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+						fragments.code(path + "." + this._data.callee.property.name + ".apply(" + path + ", ").compile(this._arguments[0]).code(")");
+					}
+					else {
+						fragments.code(path + "." + this._data.callee.property.name + ".apply(" + path + ", [].concat(");
+						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+							if(i !== 0) {
+								fragments.code($comma);
+							}
+							fragments.compile(this._arguments[i]);
+						}
+						fragments.code("))");
+					}
 				}
 			}
 		}
@@ -21220,9 +21268,6 @@ module.exports = function() {
 					this._arguments.push($compile.expression(argument, this));
 				}
 			}
-			if(!this._list && (this._arguments.length !== 1)) {
-				throw new Error("Invalid curry syntax at line " + this._data.start.line);
-			}
 			if(this._data.scope.kind === ScopeModifier.This) {
 				this._caller = $caller(this._callee, this);
 			}
@@ -21328,13 +21373,55 @@ module.exports = function() {
 					else {
 						fragments.code("null");
 					}
-					fragments.code($comma).compile(this._arguments[0]).code(")");
+					fragments.code($comma);
+					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+						fragments.compile(this._arguments[0]);
+					}
+					else {
+						fragments.code("[].concat(");
+						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+							if(i !== 0) {
+								fragments.code($comma);
+							}
+							fragments.compile(this._arguments[i]);
+						}
+						fragments.code(")");
+					}
+					fragments.code(")");
 				}
 				else if(kind === ScopeModifier.Null) {
-					fragments.code($runtime.helper(this), ".curry(").compile(this._callee).code(", null, ").compile(this._arguments[0]).code(")");
+					fragments.code($runtime.helper(this), ".curry(").compile(this._callee).code(", null, ");
+					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+						fragments.compile(this._arguments[0]);
+					}
+					else {
+						fragments.code("[].concat(");
+						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+							if(i !== 0) {
+								fragments.code($comma);
+							}
+							fragments.compile(this._arguments[i]);
+						}
+						fragments.code(")");
+					}
+					fragments.code(")");
 				}
 				else {
-					fragments.code($runtime.helper(this), ".curry(").compile(this._callee).code($comma).compile(this._callScope).code($comma).compile(this._arguments[0]).code(")");
+					fragments.code($runtime.helper(this), ".curry(").compile(this._callee).code($comma).compile(this._callScope).code($comma);
+					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+						fragments.compile(this._arguments[0]);
+					}
+					else {
+						fragments.code("[].concat(");
+						for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+							if(i !== 0) {
+								fragments.code($comma);
+							}
+							fragments.compile(this._arguments[i]);
+						}
+						fragments.code(")");
+					}
+					fragments.code(")");
 				}
 			}
 		}

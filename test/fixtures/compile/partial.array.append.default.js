@@ -71,11 +71,11 @@ module.exports = function() {
 		sealed: __ks_Array,
 		function: function(...args) {
 			if(args.length === 1) {
-				__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[0]));
+				__ks_Array._im_pushUniq.apply(__ks_Array, [].concat(this, args[0]));
 			}
 			else {
 				for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
-					__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[i]));
+					__ks_Array._im_pushUniq.apply(__ks_Array, [].concat(this, args[i]));
 				}
 			}
 			return this;

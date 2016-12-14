@@ -386,6 +386,14 @@ const $type = {
 					}
 				}
 			}
+			Kind::ArrayExpression => {
+				return {
+					typeName: {
+						kind: Kind::Identifier
+						name: 'Array'
+					}
+				}
+			}
 			Kind::ArrayRange => {
 				return {
 					typeName: {
