@@ -10,7 +10,7 @@ class RequireDeclaration extends Statement {
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(this.greatScope(), declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					variable.requirement = declaration.name.name
 					
@@ -30,15 +30,14 @@ class RequireDeclaration extends Statement {
 					module.require(declaration.name.name, VariableKind::Class)
 				}
 				Kind::VariableDeclarator => {
-					variable = $variable.define(this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
 					module.require(declaration.name.name, type)
 				}
 				=> {
-					console.error(declaration)
-					throw new Error('Unknow kind ' + declaration.kind)
+					$throw('Unknow kind ' + declaration.kind, this)
 				}
 			}
 		}

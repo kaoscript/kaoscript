@@ -90,10 +90,10 @@ class BindingElement extends Expression {
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this.statement().scope(), this._data.name, VariableKind::Variable)
+		$variable.define(this.statement(), this.statement().scope(), this._data.name, VariableKind::Variable)
 		
 		if this._data.alias? {
-			$variable.define(this._scope, this._data.alias, VariableKind::Variable)
+			$variable.define(this, this._scope, this._data.alias, VariableKind::Variable)
 			
 			this._alias = $compile.expression(this._data.alias, this)
 		}

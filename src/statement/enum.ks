@@ -8,7 +8,7 @@ class EnumDeclaration extends Statement {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		this._variable = $variable.define(this._scope, this._data.name, VariableKind::Enum, this._data.type)
+		this._variable = $variable.define(this, this._scope, this._data.name, VariableKind::Enum, this._data.type)
 		
 		this._new = this._variable.new
 		

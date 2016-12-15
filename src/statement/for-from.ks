@@ -17,7 +17,7 @@ class ForFromStatement extends Statement {
 		let data = this._data
 		
 		if !this._scope.hasVariable(data.variable.name) {
-			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+			$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
 			
 			this._defineVariable = true
 		}

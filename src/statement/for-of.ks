@@ -19,7 +19,7 @@ class ForOfStatement extends Statement {
 		this._value = $compile.expression(data.value, this)
 		
 		if !this._scope.hasVariable(data.variable.name) {
-			$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+			$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
 			
 			this._defineVariable = true
 		}
@@ -28,7 +28,7 @@ class ForOfStatement extends Statement {
 		
 		if data.index {
 			if data.index && (data.declaration || !this._scope.hasVariable(data.index.name)) {
-				$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type)
+				$variable.define(this, this._scope, data.index.name, $variable.kind(data.index.type), data.index.type)
 				
 				this._defineIndex = true
 			}
@@ -70,7 +70,7 @@ class ForOfStatement extends Statement {
 			if !this.greatScope().hasVariable(this._valueName) {
 				line.code($variable.scope(this))
 				
-				$variable.define(this.greatScope(), this._valueName, VariableKind::Variable)
+				$variable.define(this, this.greatScope(), this._valueName, VariableKind::Variable)
 			}
 			
 			line.code(this._valueName, $equals).compile(this._value).done()

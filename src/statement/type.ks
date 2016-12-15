@@ -3,7 +3,7 @@ class TypeAliasDeclaration extends Statement {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this._scope, this._data.name, VariableKind::TypeAlias, this._data.type)
+		$variable.define(this, this._scope, this._data.name, VariableKind::TypeAlias, this._data.type)
 	} // }}}
 	fuse() { // {{{
 	} // }}}

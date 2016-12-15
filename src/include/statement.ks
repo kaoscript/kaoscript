@@ -10,7 +10,7 @@ class Statement extends AbstractNode {
 		if data.left.kind == Kind::Identifier && !this._scope.hasVariable(data.left.name) {
 			this._variables.push(data.left.name)
 			
-			$variable.define(this._scope, data.left, $variable.kind(data.right.type), data.right.type)
+			$variable.define(this, this._scope, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
 	compile(statements) { // {{{

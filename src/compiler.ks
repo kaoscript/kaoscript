@@ -221,7 +221,6 @@ const $signature = {
 				return types
 			}
 			else {
-				console.error(type)
 				throw new Error('Not Implemented')
 			}
 		}
@@ -230,6 +229,14 @@ const $signature = {
 		}
 	} // }}}
 }
+
+func $throw(message, node) { // {{{
+	let error = new Error(message)
+	
+	error.filename = node.file()
+	
+	throw error
+} // }}}
 
 func $toInt(data, defaultValue) { // {{{
 	switch data.kind {
@@ -277,7 +284,7 @@ const $type = {
 					}
 				}
 				else {
-					throw new Error('Generic on primitive at line ' + type.start.line)
+					$throw('Generic on primitive at line ' + type.start.line, node)
 				}
 			}
 			else {
@@ -315,8 +322,7 @@ const $type = {
 			fragments.code(')')
 		}
 		else {
-			console.error(type)
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', node)
 		}
 	} // }}}
 	compile(data, fragments) { // {{{
@@ -372,7 +378,7 @@ const $type = {
 		
 		return true
 	} // }}}
-	type(data, scope) { // {{{
+	type(data, scope, node) { // {{{
 		//console.log('type.data', data)
 		return data if !data.kind
 		
@@ -405,7 +411,7 @@ const $type = {
 			}
 			Kind::BinaryOperator => {
 				if data.operator.kind == BinaryOperator::TypeCasting {
-					return $type.type(data.right, scope)
+					return $type.type(data.right, scope, node)
 				}
 				else if $operator.binaries[data.operator.kind] {
 					return {
@@ -416,7 +422,7 @@ const $type = {
 					}
 				}
 				else if $operator.lefts[data.operator.kind] {
-					return $type.type(data.left, scope)
+					return $type.type(data.left, scope, node)
 				}
 				else if $operator.numerics[data.operator.kind] {
 					return {
@@ -467,10 +473,10 @@ const $type = {
 					}
 					
 					if property.value.kind == Kind::FunctionExpression {
-						prop.signature = $function.signature(property.value, scope)
+						prop.signature = $function.signature(property.value, node)
 						
 						if property.value.type {
-							prop.type = $type.type(property.value.type, scope)
+							prop.type = $type.type(property.value.type, scope, node)
 						}
 					}
 					
@@ -505,14 +511,14 @@ const $type = {
 							
 							if property.type? {
 								if property.type.kind == Kind::FunctionExpression {
-									prop.signature = $function.signature(property.type, scope)
+									prop.signature = $function.signature(property.type, node)
 									
 									if property.type.type {
-										prop.type = $type.type(property.type.type, scope)
+										prop.type = $type.type(property.type.type, scope, node)
 									}
 								}
 								else {
-									prop.type = $type.type(property.type, scope)
+									prop.type = $type.type(property.type, scope, node)
 								}
 							}
 							
@@ -529,14 +535,14 @@ const $type = {
 						}
 						
 						if data.typeParameters {
-							type.typeParameters = [$type.type(parameter, scope) for parameter in data.typeParameters]
+							type.typeParameters = [$type.type(parameter, scope, node) for parameter in data.typeParameters]
 						}
 					}
 				}
 			}
 			Kind::UnionType => {
 				return {
-					types: [$type.type(type, scope) for type in data.types]
+					types: [$type.type(type, scope, node) for type in data.types]
 				}
 			}
 		}
@@ -572,7 +578,7 @@ const $type = {
 }
 
 const $variable = {
-	define(scope, name, kind, type?) { // {{{
+	define(node, scope, name, kind, type?) { // {{{
 		let variable = scope.getVariable(name.name || name)
 		if variable && variable.kind == kind {
 			variable.new = false
@@ -604,10 +610,10 @@ const $variable = {
 				}
 			}
 			else if kind == VariableKind::TypeAlias {
-				variable.type = $type.type(type, scope)
+				variable.type = $type.type(type, scope, node)
 			}
 			else if (kind == VariableKind::Function || kind == VariableKind::Variable) && type {
-				variable.type = type if type ?= $type.type(type, scope)
+				variable.type = type if type ?= $type.type(type, scope, node)
 			}
 		}
 		
@@ -647,7 +653,7 @@ const $variable = {
 			}
 		}
 		else if variable.kind == VariableKind::Enum {
-			throw new Error('Not implemented')
+			$throw('Not implemented', node)
 		}
 		else if variable.kind == VariableKind::TypeAlias {
 			if variable.type.types {
@@ -672,12 +678,10 @@ const $variable = {
 			}
 		}
 		else if variable.kind == VariableKind::Variable {
-			console.error(variable)
-			throw new Error('Not implemented')
+			$throw('Not implemented', node)
 		}
 		else {
-			console.error(variable)
-			throw new Error('Not implemented')
+			$throw('Not implemented', node)
 		}
 		
 		return null
@@ -707,8 +711,7 @@ const $variable = {
 				return variables	if variables.length > 0
 			}
 			else {
-				console.error(variable)
-				throw new Error('Not implemented')
+				$throw('Not implemented', node)
 			}
 		}
 		
@@ -749,7 +752,7 @@ const $variable = {
 					}
 				}
 				else if $operator.lefts[data.operator.kind] {
-					let type = $type.type(data.left, node.scope())
+					let type = $type.type(data.left, node.scope(), node)
 					
 					if type {
 						return {
@@ -812,7 +815,7 @@ const $variable = {
 						}
 					}
 					else {
-						throw new Error('Not implemented')
+						$throw('Not implemented', node)
 					}
 				}
 			}
@@ -915,8 +918,8 @@ const $variable = {
 				}
 			}
 			Kind::TernaryConditionalExpression => {
-				let a = $type.type(data.then, node.scope())
-				let b = $type.type(data.else, node.scope())
+				let a = $type.type(data.then, node.scope(), node)
+				let b = $type.type(data.else, node.scope(), node)
 				
 				if a && b && $type.same(a, b) {
 					return {
@@ -988,8 +991,7 @@ const $variable = {
 					}
 				}
 				else {
-					console.error(data.typeName)
-					throw new Error('Not implemented')
+					$throw('Not implemented', node)
 				}
 			}
 		}
@@ -1004,8 +1006,7 @@ const $variable = {
 			return node.scope().getVariable(type)
 		}
 		else {
-			console.error(type)
-			throw new Error('Not implemented')
+			$throw('Not implemented', node)
 		}
 	} // }}}
 	kind(type?) { // {{{
@@ -1141,12 +1142,12 @@ const $compile = {
 				}
 				else {
 					console.error(data)
-					throw new Error('Unknow assignment operator ' + data.operator.assignment)
+					$throw('Unknow assignment operator ' + data.operator.assignment, parent)
 				}
 			}
 			else {
 				console.error(data)
-				throw new Error('Unknow binary operator ' + data.operator.kind)
+				$throw('Unknow binary operator ' + data.operator.kind, parent)
 			}
 		}
 		else if data.kind == Kind::PolyadicOperator {
@@ -1155,7 +1156,7 @@ const $compile = {
 			}
 			else {
 				console.error(data)
-				throw new Error('Unknow polyadic operator ' + data.operator.kind)
+				$throw('Unknow polyadic operator ' + data.operator.kind, parent)
 			}
 		}
 		else if data.kind == Kind::UnaryExpression {
@@ -1164,12 +1165,12 @@ const $compile = {
 			}
 			else {
 				console.error(data)
-				throw new Error('Unknow unary operator ' + data.operator.kind)
+				$throw('Unknow unary operator ' + data.operator.kind, parent)
 			}
 		}
 		else {
 			console.error(data)
-			throw new Error('Unknow kind ' + data.kind)
+			$throw('Unknow kind ' + data.kind, parent)
 		}
 		
 		//console.log(expression)
@@ -1245,8 +1246,7 @@ const $expressions = {
 			return new ArrayComprehensionForRange(data, parent, scope)
 		}
 		else {
-			console.error(data)
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', parent)
 		}
 	}
 	`\(Kind::ArrayExpression)`				: ArrayExpression

@@ -7,7 +7,7 @@ func $caller(data, node) { // {{{
 	}
 	else {
 		console.error(data)
-		throw new Error('Not Implemented')
+		$throw('Not Implemented', node)
 	}
 } // }}}
 
@@ -31,7 +31,7 @@ class CallExpression extends Expression {
 				}
 			}
 			else {
-				throw new Error(`Undefined variable \(this._data.callee.name) at line \(this._data.callee.start.line)`)
+				$throw(`Undefined variable \(this._data.callee.name) at line \(this._data.callee.start.line)`, this)
 			}
 		}
 		
@@ -160,7 +160,7 @@ class CallExpression extends Expression {
 					.compile(this._callScope, mode)
 			}
 			
-			if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+			if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
 				fragments.code($comma).compile(this._arguments[0])
 			}
 			else {
@@ -311,8 +311,7 @@ class CallSealedExpression extends Expression {
 				this._scope.releaseTempName(name) if name?
 			}
 			else {
-				console.error(this._callee)
-				throw new Error('Not Implemented')
+				$throw('Not Implemented', this)
 			}
 		}
 		else {
@@ -354,7 +353,7 @@ class CallSealedExpression extends Expression {
 					
 					fragments.code(')')
 				}
-				else if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+				else if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
 					fragments.code(`\(path)._cm_\(this._data.callee.property.name).apply(\(path), `).compile(this._arguments[0]).code(')')
 				}
 				else {
@@ -381,7 +380,7 @@ class CallSealedExpression extends Expression {
 					
 					fragments.code(')')
 				}
-				else if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+				else if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
 					fragments.code(`\(path).\(this._data.callee.property.name).apply(\(path), `).compile(this._arguments[0]).code(')')
 				}
 				else {

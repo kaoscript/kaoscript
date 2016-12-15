@@ -21,7 +21,15 @@ class Module {
 		_rewire
 	}
 	Module(data, @compiler, @file) { // {{{
-		this._data = parse(data)
+		try {
+			this._data = parse(data)
+		}
+		catch(error) {
+			error.filename = file
+			
+			throw error
+		}
+		
 		this._directory = path.dirname(file)
 		this._options = $applyAttributes(this._data, this._compiler._options.config)
 		
@@ -71,9 +79,9 @@ class Module {
 			}
 		}
 	} // }}}
-	addInclude(path) {
+	addInclude(path) { // {{{
 		this._includes[path] = true
-	}
+	} // }}}
 	addReference(key, code) { // {{{
 		if this._references[key] {
 			this._references[key].push(code)
@@ -90,11 +98,11 @@ class Module {
 	compiler() => this._compiler
 	directory() => this._directory
 	export(name, alias = false) { // {{{
-		throw new Error('Binary file can\'t export') if this._binary
+		$throw('Binary file can\'t export', this) if this._binary
 		
 		let variable = this._body.scope().getVariable(name.name)
 		
-		throw new Error(`Undefined variable \(name.name)`) unless variable
+		$throw(`Undefined variable \(name.name)`, this) unless variable
 		
 		if variable.kind != VariableKind::TypeAlias {
 			if alias {
@@ -128,9 +136,9 @@ class Module {
 	fuse() { // {{{
 		this._body.fuse()
 	} // }}}
-	hasInclude(path) {
+	hasInclude(path) { // {{{
 		return this._includes?[path]
-	}
+	} // }}}
 	import(name, file?) { // {{{
 		this._imports[name] = true
 		
@@ -197,7 +205,7 @@ class Module {
 	} // }}}
 	require(name, kind) { // {{{
 		if this._binary {
-			throw new Error('Binary file can\'t require')
+			$throw('Binary file can\'t require', this)
 		}
 		
 		if kind == VariableKind::Class {
@@ -211,7 +219,7 @@ class Module {
 	} // }}}
 	require(name, kind, requireFirst) { // {{{
 		if this._binary {
-			throw new Error('Binary file can\'t require')
+			$throw('Binary file can\'t require', this)
 		}
 		
 		let requirement = {

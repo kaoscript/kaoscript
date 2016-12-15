@@ -2,20 +2,18 @@ const $extern = {
 	classMember(data, variable, node) { // {{{
 		switch(data.kind) {
 			Kind::FieldDeclaration => {
-				console.error(data)
-				throw new Error('Not Implemented')
+				$throw('Not Implemented', node)
 			}
 			Kind::MethodAliasDeclaration => {
 				if data.name.name == variable.name.name {
-					console.error(data)
-					throw new Error('Not Implemented')
+					$throw('Not Implemented', node)
 				}
 				else {
 				}
 			}
 			Kind::MethodDeclaration => {
 				if data.name.name == variable.name.name {
-					variable.constructors.push($function.signature(data, node.scope()))
+					variable.constructors.push($function.signature(data, node))
 				}
 				else {
 					let method = {
@@ -24,7 +22,7 @@ const $extern = {
 						signature: $method.signature(data, node)
 					}
 					
-					method.type = $type.type(data.type, node.scope()) if data.type
+					method.type = $type.type(data.type, node.scope(), node) if data.type
 					
 					let instance = true
 					for i from 0 til data.modifiers.length while instance {
@@ -48,8 +46,7 @@ const $extern = {
 				}
 			}
 			=> {
-				console.error(data)
-				throw new Error('Unknow kind ' + data.kind)
+				$throw('Unknow kind ' + data.kind, node)
 			}
 		}
 	} // }}}
@@ -68,7 +65,7 @@ class ExternDeclaration extends Statement {
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(this.greatScope(), declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					if declaration.sealed {
 						variable.sealed = {
@@ -86,7 +83,7 @@ class ExternDeclaration extends Statement {
 					}
 				}
 				Kind::VariableDeclarator => {
-					variable = $variable.define(this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this, this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type)
 					
 					if declaration.sealed {
 						variable.sealed = {
@@ -98,8 +95,7 @@ class ExternDeclaration extends Statement {
 					}
 				}
 				=> {
-					console.error(declaration)
-					throw new Error('Unknow kind ' + declaration.kind)
+					$throw('Unknow kind ' + declaration.kind, this)
 				}
 			}
 		}

@@ -198,8 +198,7 @@ const $sealed = {
 			return variables	if variables.length > 0
 		}
 		else {
-			console.error(type)
-			throw new Error('Not implemented')
+			$throw('Not implemented', node)
 		}
 		
 		return false

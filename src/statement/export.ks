@@ -40,7 +40,7 @@ class ExportDeclaration extends Statement {
 					module.export(declaration)
 				}
 				Kind::TypeAliasDeclaration => {
-					$variable.define(this._scope, declaration.name, VariableKind::TypeAlias, declaration.type)
+					$variable.define(this, this._scope, declaration.name, VariableKind::TypeAlias, declaration.type)
 					
 					module.export(declaration.name)
 				}
@@ -54,8 +54,7 @@ class ExportDeclaration extends Statement {
 					}
 				}
 				=> {
-					console.error(declaration)
-					throw new Error('Not Implemented')
+					$throw('Not Implemented', this)
 				}
 			}
 		}

@@ -11,7 +11,7 @@ class ExternOrRequireDeclaration extends Statement {
 		for declaration in data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
-					variable = $variable.define(this.greatScope(), declaration.name, VariableKind::Class, declaration)
+					variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					variable.requirement = declaration.name.name
 					
@@ -31,15 +31,14 @@ class ExternOrRequireDeclaration extends Statement {
 					module.require(declaration.name.name, VariableKind::Class, false)
 				}
 				Kind::VariableDeclarator => {
-					variable = $variable.define(this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
+					variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
 					module.require(declaration.name.name, type, false)
 				}
 				=> {
-					console.error(declaration)
-					throw new Error('Unknow kind ' + declaration.kind)
+					$throw('Unknow kind ' + declaration.kind, this)
 				}
 			}
 		}

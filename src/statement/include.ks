@@ -20,7 +20,14 @@ class IncludeDeclaration extends Statement {
 					module.addHash(path, compiler.sha256(path, data))
 					module.addInclude(path)
 					
-					data = parse(data)
+					try {
+						data = parse(data)
+					}
+					catch(error) {
+						error.filename = path
+						
+						throw error
+					}
 					
 					for statement in data.body {
 						this._statements.push(statement = $compile.statement(statement, declarator))
@@ -29,7 +36,7 @@ class IncludeDeclaration extends Statement {
 					}
 				}
 				else {
-					throw new Error(`Cannot find file '\(file)' from '\(directory)'`)
+					$throw(`Cannot find file '\(file)' from '\(directory)'`, this)
 				}
 			}
 			else {
@@ -43,7 +50,7 @@ class IncludeDeclaration extends Statement {
 				}
 				
 				if nf {
-					throw new Error(`Cannot find module '\(file)' from '\(directory)'`)
+					$throw(`Cannot find module '\(file)' from '\(directory)'`, this)
 				}
 				
 				declarator = new IncludeDeclarator(path, this)
@@ -53,7 +60,14 @@ class IncludeDeclaration extends Statement {
 				module.addHash(path, compiler.sha256(path, data))
 				module.addInclude(path)
 				
-				data = parse(data)
+				try {
+					data = parse(data)
+				}
+				catch(error) {
+					error.filename = path
+					
+					throw error
+				}
 				
 				for statement in data.body {
 					this._statements.push(statement = $compile.statement(statement, declarator))
@@ -98,7 +112,14 @@ class IncludeOnceDeclaration extends Statement {
 						module.addHash(path, compiler.sha256(path, data))
 						module.addInclude(path)
 						
-						data = parse(data)
+						try {
+							data = parse(data)
+						}
+						catch(error) {
+							error.filename = path
+							
+							throw error
+						}
 						
 						for statement in data.body {
 							this._statements.push(statement = $compile.statement(statement, declarator))
@@ -108,7 +129,7 @@ class IncludeOnceDeclaration extends Statement {
 					}
 				}
 				else {
-					throw new Error(`Cannot find file '\(file)' from '\(directory)'`)
+					$throw(`Cannot find file '\(file)' from '\(directory)'`, this)
 				}
 			}
 			else {
@@ -122,7 +143,7 @@ class IncludeOnceDeclaration extends Statement {
 				}
 				
 				if nf {
-					throw new Error(`Cannot find module '\(file)' from '\(directory)'`)
+					$throw(`Cannot find module '\(file)' from '\(directory)'`, this)
 				}
 				
 				if !module.hasInclude(path) {
@@ -133,7 +154,14 @@ class IncludeOnceDeclaration extends Statement {
 					module.addHash(path, compiler.sha256(path, data))
 					module.addInclude(path)
 					
-					data = parse(data)
+					try {
+						data = parse(data)
+					}
+					catch(error) {
+						error.filename = path
+						
+						throw error
+					}
 					
 					for statement in data.body {
 						this._statements.push(statement = $compile.statement(statement, declarator))

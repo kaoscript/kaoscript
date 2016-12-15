@@ -56,10 +56,10 @@ class SwitchStatement extends Statement {
 					condition = new SwitchConditionArray(condition, this)
 				}
 				else if condition.kind == Kind::SwitchConditionEnum {
-					throw new Error('Not Implemented')
+					$throw('Not Implemented', this)
 				}
 				else if condition.kind == Kind::SwitchConditionObject {
-					throw new Error('Not Implemented')
+					$throw('Not Implemented', this)
 				}
 				else if condition.kind == Kind::SwitchConditionRange {
 					condition = new SwitchConditionRange(condition, this)
@@ -83,7 +83,7 @@ class SwitchStatement extends Statement {
 					clause.hasTest = true
 				}
 				else if binding.kind == Kind::ObjectBinding {
-					throw new Error('Not Implemented')
+					$throw('Not Implemented', this)
 					
 					clause.hasTest = true
 				}
@@ -147,7 +147,7 @@ class SwitchStatement extends Statement {
 		for clause, clauseIdx in this._clauses {
 			if clause.conditions.length {
 				if we {
-					throw new Error('The default clause is before this clause')
+					$throw('The default clause is before this clause', this)
 				}
 				
 				if clauseIdx {
@@ -244,7 +244,7 @@ class SwitchBindingType extends AbstractNode {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this._scope, this._data.name, VariableKind::Variable)
+		$variable.define(this, this._scope, this._data.name, VariableKind::Variable)
 	} // }}}
 	fuse() { // {{{
 	} // }}}
@@ -258,7 +258,7 @@ class SwitchBindingValue extends AbstractNode {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this._scope, this._data, VariableKind::Variable)
+		$variable.define(this, this._scope, this._data, VariableKind::Variable)
 	} // }}}
 	fuse() { // {{{
 	} // }}}

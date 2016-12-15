@@ -25,8 +25,7 @@ class ImplementDeclaration extends Statement {
 						property = new ImplementClassMethodLinkDeclaration(property, this, this._variable)
 					}
 					=> {
-						console.error(property)
-						throw new Error('Unknow kind ' + property.kind)
+						$throw('Unknow kind ' + property.kind, this)
 					}
 				}
 				
@@ -45,8 +44,7 @@ class ImplementDeclaration extends Statement {
 						property = new ImplementVariableMethodDeclaration(property, this, this._variable)
 					}
 					=> {
-						console.error(property)
-						throw new Error('Unknow kind ' + property.kind)
+						$throw('Unknow kind ' + property.kind, this)
 					}
 				}
 				
@@ -56,7 +54,7 @@ class ImplementDeclaration extends Statement {
 			}
 		}
 		else {
-			throw new Error('Invalid class/variable for impl at line ' + data.start.line)
+			$throw('Invalid class/variable for impl at line ' + data.start.line, this)
 		}
 	} // }}}
 	fuse() { // {{{
@@ -79,14 +77,14 @@ class ImplementClassFieldDeclaration extends Statement {
 		super(data, parent)
 		
 		if variable.sealed {
-			throw new Error('Can\'t add a field to a sealed class')
+			$throw('Can\'t add a field to a sealed class', this)
 		}
 	} // }}}
 	analyse() { // {{{
 		this._type = $helper.analyseType($signature.type(this._data.type, this._scope), this)
 		
 		if this._type.kind == HelperTypeKind::Unreferenced {
-			throw new Error(`Invalid type \(this._type.type) at line \(this._data.start.line)`)
+			$throw(`Invalid type \(this._type.type) at line \(this._data.start.line)`, this)
 		}
 	} // }}}
 	fuse() { // {{{
@@ -114,8 +112,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		let variable = this._variable
 		
 		if data.name.name == variable.name.name {
-			console.error(data)
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', this)
 		}
 		else {
 			for i from 0 til data.modifiers.length while this._instance {
@@ -144,7 +141,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					signature: $method.signature(data, this)
 				}
 				
-				method.type = $type.type(data.type, this._scope) if data.type
+				method.type = $type.type(data.type, this._scope, this) if data.type
 				
 				if this._instance {
 					if !(variable.instanceMethods[data.name.name] is Array) {
@@ -166,7 +163,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 		
-		$variable.define(this._scope, {
+		$variable.define(this, this._scope, {
 			kind: Kind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(variable.name))
@@ -187,8 +184,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		let variable = this._variable
 		
 		if data.name.name == variable.name.name {
-			console.error(data)
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', this)
 		}
 		else {
 			let line = fragments
@@ -206,8 +202,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				object.newLine().code('name: ').compile(this._name)
 			}
 			else {
-				console.error(data.name)
-				throw new Error('Not Implemented')
+				$throw('Not Implemented', this)
 			}
 			
 			if variable.sealed {
@@ -250,8 +245,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		let variable = this._variable
 		
 		if data.name.name == variable.name.name {
-			console.error(data)
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', this)
 		}
 		else {
 			if data.name.kind == Kind::TemplateExpression {
@@ -323,8 +317,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 			object.line('name: ', $quote(data.name.name))
 		}
 		else {
-			console.error(data.name)
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', this)
 		}
 		
 		if variable.sealed {
@@ -375,8 +368,7 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		let variable = this._variable
 		
 		if data.name.name == variable.name.name {
-			console.error(data)
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', this)
 		}
 		else {
 			if data.name.kind == Kind::TemplateExpression {
@@ -441,8 +433,7 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 			object.line('name: ', $quote(data.name.name))
 		}
 		else {
-			console.error(data.name)
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', this)
 		}
 		
 		if variable.sealed {
@@ -494,7 +485,7 @@ class ImplementVariableFieldDeclaration extends Statement {
 		}
 		
 		if this._data.type? {
-			property.type = $type.type(this._data.type, this._scope)
+			property.type = $type.type(this._data.type, this._scope, this)
 		}
 		
 		this._variable.sealed.properties[property.name] = property
@@ -533,11 +524,11 @@ class ImplementVariableMethodDeclaration extends Statement {
 		let property = {
 			kind: VariableKind::Function
 			name: this._data.name.name
-			signature: $function.signature(this._data, this._scope)
+			signature: $function.signature(this._data, this)
 		}
 		
 		if this._data.type? {
-			property.type = $type.type(this._data.type, this._scope)
+			property.type = $type.type(this._data.type, this._scope, this)
 		}
 		
 		this._variable.sealed.properties[property.name] = property

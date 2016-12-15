@@ -43,12 +43,22 @@ class IdentifierLiteral extends Literal {
 	IdentifierLiteral(data, parent, scope = parent.scope(), variable = true) { // {{{
 		super(data, parent, scope, data.name)
 		
-		if variable && !((parent is MemberExpression && parent._data.object != data) || $predefined[data.name] == true) {
-			this._isVariable = true
-			
-			if !this._scope.hasVariable(data.name) {
-				throw new Error(`Undefined variable '\(data.name)' at line \(data.start.line)`)
+		if variable && $predefined[data.name] != true {
+			if parent is MemberExpression {
+				if parent._data.object == data {
+					this._isVariable = true
+				}
+				else if parent._data.computed && parent._data.property == data {
+					this._isVariable = true
+				}
 			}
+			else {
+				this._isVariable = true
+			}
+		}
+		
+		if this._isVariable && !this._scope.hasVariable(data.name) {
+			$throw(`Undefined variable '\(data.name)' at line \(data.start.line)`, this)
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{

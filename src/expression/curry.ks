@@ -120,7 +120,7 @@ class CurryExpression extends Expression {
 				
 				fragments.code($comma)
 				
-				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
 					fragments.compile(this._arguments[0])
 				}
 				else {
@@ -143,7 +143,7 @@ class CurryExpression extends Expression {
 					.compile(this._callee)
 					.code(', null, ')
 				
-				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
 					fragments.compile(this._arguments[0])
 				}
 				else {
@@ -168,7 +168,7 @@ class CurryExpression extends Expression {
 					.compile(this._callScope)
 					.code($comma)
 				
-				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) == 'Array' {
+				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
 					fragments.compile(this._arguments[0])
 				}
 				else {

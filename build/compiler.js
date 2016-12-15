@@ -230,7 +230,6 @@ module.exports = function() {
 					return types;
 				}
 				else {
-					console.error(type);
 					throw new Error("Not Implemented");
 				}
 			}
@@ -239,6 +238,17 @@ module.exports = function() {
 			}
 		}
 	};
+	function $throw(message, node) {
+		if(message === undefined || message === null) {
+			throw new Error("Missing parameter 'message'");
+		}
+		if(node === undefined || node === null) {
+			throw new Error("Missing parameter 'node'");
+		}
+		var error = new Error(message);
+		error.filename = node.file();
+		throw error;
+	}
 	function $toInt(data, defaultValue) {
 		if(data === undefined || data === null) {
 			throw new Error("Missing parameter 'data'");
@@ -293,7 +303,7 @@ module.exports = function() {
 						}
 					}
 					else {
-						throw new Error("Generic on primitive at line " + type.start.line);
+						$throw("Generic on primitive at line " + type.start.line, node);
 					}
 				}
 				else {
@@ -319,8 +329,7 @@ module.exports = function() {
 				fragments.code(")");
 			}
 			else {
-				console.error(type);
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", node);
 			}
 		},
 		compile(data, fragments) {
@@ -401,12 +410,15 @@ module.exports = function() {
 			}
 			return true;
 		},
-		type(data, scope) {
+		type(data, scope, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
 			if(scope === undefined || scope === null) {
 				throw new Error("Missing parameter 'scope'");
+			}
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
 			}
 			if(!data.kind) {
 				return data;
@@ -439,7 +451,7 @@ module.exports = function() {
 			}
 			else if(__ks_0 === Kind.BinaryOperator) {
 				if(data.operator.kind === BinaryOperator.TypeCasting) {
-					return $type.type(data.right, scope);
+					return $type.type(data.right, scope, node);
 				}
 				else if($operator.binaries[data.operator.kind]) {
 					return {
@@ -450,7 +462,7 @@ module.exports = function() {
 					};
 				}
 				else if($operator.lefts[data.operator.kind]) {
-					return $type.type(data.left, scope);
+					return $type.type(data.left, scope, node);
 				}
 				else if($operator.numerics[data.operator.kind]) {
 					return {
@@ -499,9 +511,9 @@ module.exports = function() {
 						name: property.name.name
 					};
 					if(property.value.kind === Kind.FunctionExpression) {
-						prop.signature = $function.signature(property.value, scope);
+						prop.signature = $function.signature(property.value, node);
 						if(property.value.type) {
-							prop.type = $type.type(property.value.type, scope);
+							prop.type = $type.type(property.value.type, scope, node);
 						}
 					}
 					type.properties[property.name.name] = prop;
@@ -534,13 +546,13 @@ module.exports = function() {
 							};
 							if(Type.isValue(property.type)) {
 								if(property.type.kind === Kind.FunctionExpression) {
-									prop.signature = $function.signature(property.type, scope);
+									prop.signature = $function.signature(property.type, node);
 									if(property.type.type) {
-										prop.type = $type.type(property.type.type, scope);
+										prop.type = $type.type(property.type.type, scope, node);
 									}
 								}
 								else {
-									prop.type = $type.type(property.type, scope);
+									prop.type = $type.type(property.type, scope, node);
 								}
 							}
 							type.properties[property.name.name] = prop;
@@ -555,7 +567,7 @@ module.exports = function() {
 						}
 						if(data.typeParameters) {
 							type.typeParameters = Helper.mapArray(data.typeParameters, (parameter) => {
-								return $type.type(parameter, scope);
+								return $type.type(parameter, scope, node);
 							});
 						}
 					}
@@ -564,7 +576,7 @@ module.exports = function() {
 			else if(__ks_0 === Kind.UnionType) {
 				return {
 					types: Helper.mapArray(data.types, (type) => {
-						return $type.type(type, scope);
+						return $type.type(type, scope, node);
 					})
 				};
 			}
@@ -605,14 +617,15 @@ module.exports = function() {
 	};
 	var $variable = {
 		define() {
-			if(arguments.length < 3) {
+			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
+			var node = arguments[++__ks_i];
 			var scope = arguments[++__ks_i];
 			var name = arguments[++__ks_i];
 			var kind = arguments[++__ks_i];
-			if(arguments.length > 3) {
+			if(arguments.length > 4) {
 				var type = arguments[++__ks_i];
 			}
 			else  {
@@ -647,11 +660,11 @@ module.exports = function() {
 					}
 				}
 				else if(kind === VariableKind.TypeAlias) {
-					variable.type = $type.type(type, scope);
+					variable.type = $type.type(type, scope, node);
 				}
 				else if(((kind === VariableKind.Function) || (kind === VariableKind.Variable)) && type) {
 					var __ks_0;
-					if(Type.isValue(__ks_0 = $type.type(type, scope)) ? (type = __ks_0, true) : false) {
+					if(Type.isValue(__ks_0 = $type.type(type, scope, node)) ? (type = __ks_0, true) : false) {
 						variable.type = type;
 					}
 				}
@@ -702,7 +715,7 @@ module.exports = function() {
 				}
 			}
 			else if(variable.kind === VariableKind.Enum) {
-				throw new Error("Not implemented");
+				$throw("Not implemented", node);
 			}
 			else if(variable.kind === VariableKind.TypeAlias) {
 				if(variable.type.types) {
@@ -736,12 +749,10 @@ module.exports = function() {
 				}
 			}
 			else if(variable.kind === VariableKind.Variable) {
-				console.error(variable);
-				throw new Error("Not implemented");
+				$throw("Not implemented", node);
 			}
 			else {
-				console.error(variable);
-				throw new Error("Not implemented");
+				$throw("Not implemented", node);
 			}
 			return null;
 		},
@@ -785,8 +796,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					console.error(variable);
-					throw new Error("Not implemented");
+					$throw("Not implemented", node);
 				}
 			}
 			return null;
@@ -831,7 +841,7 @@ module.exports = function() {
 					};
 				}
 				else if($operator.lefts[data.operator.kind]) {
-					var type = $type.type(data.left, node.scope());
+					var type = $type.type(data.left, node.scope(), node);
 					if(type) {
 						return {
 							kind: VariableKind.Variable,
@@ -890,7 +900,7 @@ module.exports = function() {
 						}
 					}
 					else {
-						throw new Error("Not implemented");
+						$throw("Not implemented", node);
 					}
 				}
 			}
@@ -994,8 +1004,8 @@ module.exports = function() {
 				};
 			}
 			else if(__ks_0 === Kind.TernaryConditionalExpression) {
-				var a = $type.type(data.then, node.scope());
-				var b = $type.type(data.else, node.scope());
+				var a = $type.type(data.then, node.scope(), node);
+				var b = $type.type(data.else, node.scope(), node);
 				if(a && b && $type.same(a, b)) {
 					return {
 						kind: VariableKind.Variable,
@@ -1063,8 +1073,7 @@ module.exports = function() {
 						}
 					}
 					else {
-						console.error(data.typeName);
-						throw new Error("Not implemented");
+						$throw("Not implemented", node);
 					}
 				}
 			}
@@ -1084,8 +1093,7 @@ module.exports = function() {
 				return node.scope().getVariable(type);
 			}
 			else {
-				console.error(type);
-				throw new Error("Not implemented");
+				$throw("Not implemented", node);
 			}
 		},
 		kind(type = null) {
@@ -4648,7 +4656,13 @@ module.exports = function() {
 			}
 			this._compiler = compiler;
 			this._file = file;
-			this._data = parse(data);
+			try {
+				this._data = parse(data);
+			}
+			catch(error) {
+				error.filename = file;
+				throw error;
+			}
 			this._directory = path.dirname(file);
 			this._options = $applyAttributes(this._data, this._compiler._options.config);
 			for(var __ks_0 = 0, __ks_1 = this._data.attributes.length, attr; __ks_0 < __ks_1; ++__ks_0) {
@@ -4800,11 +4814,11 @@ module.exports = function() {
 				var alias = false;
 			}
 			if(this._binary) {
-				throw new Error("Binary file can't export");
+				$throw("Binary file can't export", this);
 			}
 			var variable = this._body.scope().getVariable(name.name);
 			if(!variable) {
-				throw new Error("Undefined variable " + name.name);
+				$throw("Undefined variable " + name.name, this);
 			}
 			if(variable.kind !== VariableKind.TypeAlias) {
 				if(alias) {
@@ -5000,7 +5014,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'kind'");
 			}
 			if(this._binary) {
-				throw new Error("Binary file can't require");
+				$throw("Binary file can't require", this);
 			}
 			if(kind === VariableKind.Class) {
 				this._requirements[name] = {
@@ -5022,7 +5036,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'requireFirst'");
 			}
 			if(this._binary) {
-				throw new Error("Binary file can't require");
+				$throw("Binary file can't require", this);
 			}
 			var requirement = {
 				name: name,
@@ -6057,8 +6071,7 @@ module.exports = function() {
 				}
 			}
 			else {
-				console.error(type);
-				throw new Error("Not implemented");
+				$throw("Not implemented", node);
 			}
 			return false;
 		}
@@ -6104,7 +6117,7 @@ module.exports = function() {
 			}
 			if((data.left.kind === Kind.Identifier) && !this._scope.hasVariable(data.left.name)) {
 				this._variables.push(data.left.name);
-				$variable.define(this._scope, data.left, $variable.kind(data.right.type), data.right.type);
+				$variable.define(this, this._scope, data.left, $variable.kind(data.right.type), data.right.type);
 			}
 		}
 		assignment() {
@@ -7137,7 +7150,7 @@ module.exports = function() {
 						}
 					}
 					else {
-						throw new Error("Not Implemented");
+						$throw("Not Implemented", node);
 					}
 				}
 				ctrl.done();
@@ -7348,7 +7361,7 @@ module.exports = function() {
 					return $quote("#" + type.type);
 				}
 				else {
-					throw new Error("Invalid type " + type.type);
+					$throw("Invalid type " + type.type, node);
 				}
 			}
 		}
@@ -7503,9 +7516,9 @@ module.exports = function() {
 			var data = this._data;
 			var scope = this._scope;
 			this._name = data.name.name;
-			this._variable = $variable.define(scope, data.name, VariableKind.Class, data.type);
+			this._variable = $variable.define(this, scope, data.name, VariableKind.Class, data.type);
 			var classname = data.name;
-			var thisVariable = $variable.define(this._constructorScope, {
+			var thisVariable = $variable.define(this, this._constructorScope, {
 				kind: Kind.Identifier,
 				name: "this"
 			}, VariableKind.Variable, $type.reference(classname.name));
@@ -7549,18 +7562,18 @@ module.exports = function() {
 					nullable: false
 				};
 			};
-			$variable.define(this._instanceVariableScope, {
+			$variable.define(this, this._instanceVariableScope, {
 				kind: Kind.Identifier,
 				name: "this"
 			}, VariableKind.Variable, $type.reference(classname.name));
 			if((this._extends = Type.isValue(data.extends))) {
 				var __ks_0;
 				if(!(Type.isValue(__ks_0 = this._scope.getVariable(data.extends.name)) ? (this._extendsVariable = __ks_0, true) : false)) {
-					throw new Error("Undefined class " + data.extends.name + " at line " + data.extends.start.line);
+					$throw("Undefined class " + data.extends.name + " at line " + data.extends.start.line, this);
 				}
 				this._extendsName = data.extends.name;
 				var extname = data.extends;
-				var superVariable = $variable.define(this._constructorScope, {
+				var superVariable = $variable.define(this, this._constructorScope, {
 					kind: Kind.Identifier,
 					name: "super"
 				}, VariableKind.Variable);
@@ -7604,7 +7617,7 @@ module.exports = function() {
 						nullable: false
 					};
 				};
-				$variable.define(this._instanceVariableScope, {
+				$variable.define(this, this._instanceVariableScope, {
 					kind: Kind.Identifier,
 					name: "super"
 				}, VariableKind.Variable);
@@ -7704,8 +7717,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					console.error(member);
-					throw new Error("Unknow kind " + member.kind);
+					$throw("Unknow kind " + member.kind, this);
 				}
 			}
 			this._sealed = !!data.sealed;
@@ -7806,12 +7818,12 @@ module.exports = function() {
 				throw new Error("Missing parameter 'member'");
 			}
 			var scope = new Scope(this._scope);
-			$variable.define(scope, {
+			$variable.define(this, scope, {
 				kind: Kind.Identifier,
 				name: "this"
 			}, VariableKind.Variable, $type.reference(data.name.name));
 			if(this._extends) {
-				var variable = $variable.define(scope, {
+				var variable = $variable.define(this, scope, {
 					kind: Kind.Identifier,
 					name: "super"
 				}, VariableKind.Variable);
@@ -8109,7 +8121,7 @@ module.exports = function() {
 							ctrl.newLine().code("this." + name + "(").compile(this._parameters[p]._name).code(")").done();
 						}
 						else {
-							throw new Error("Can't set member " + name + " (line " + parameter.start.line + ")");
+							$throw("Can't set member " + name + " (line " + parameter.start.line + ")", this);
 						}
 						nf = false;
 					}
@@ -8622,7 +8634,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_analyse_0() {
-			this._variable = $variable.define(this._scope, this._data.name, VariableKind.Enum, this._data.type);
+			this._variable = $variable.define(this, this._scope, this._data.name, VariableKind.Enum, this._data.type);
 			this._new = this._variable.new;
 			for(var __ks_0 = 0, __ks_1 = this._data.members.length, member; __ks_0 < __ks_1; ++__ks_0) {
 				member = this._data.members[__ks_0];
@@ -8883,7 +8895,7 @@ module.exports = function() {
 					module.export(declaration);
 				}
 				else if(__ks_2 === Kind.TypeAliasDeclaration) {
-					$variable.define(this._scope, declaration.name, VariableKind.TypeAlias, declaration.type);
+					$variable.define(this, this._scope, declaration.name, VariableKind.TypeAlias, declaration.type);
 					module.export(declaration.name);
 				}
 				else if(__ks_2 === Kind.VariableDeclaration) {
@@ -8894,8 +8906,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					console.error(declaration);
-					throw new Error("Not Implemented");
+					$throw("Not Implemented", this);
 				}
 			}
 		}
@@ -9053,7 +9064,7 @@ module.exports = function() {
 				else {
 					this._variable = data.left.name;
 				}
-				$variable.define(this._scope, data.left, $variable.kind(data.right.type), data.right.type);
+				$variable.define(this, this._scope, data.left, $variable.kind(data.right.type), data.right.type);
 			}
 		}
 		assignment() {
@@ -9216,20 +9227,18 @@ module.exports = function() {
 			}
 			var __ks_0 = data.kind;
 			if(__ks_0 === Kind.FieldDeclaration) {
-				console.error(data);
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", node);
 			}
 			else if(__ks_0 === Kind.MethodAliasDeclaration) {
 				if(data.name.name === variable.name.name) {
-					console.error(data);
-					throw new Error("Not Implemented");
+					$throw("Not Implemented", node);
 				}
 				else {
 				}
 			}
 			else if(__ks_0 === Kind.MethodDeclaration) {
 				if(data.name.name === variable.name.name) {
-					variable.constructors.push($function.signature(data, node.scope()));
+					variable.constructors.push($function.signature(data, node));
 				}
 				else {
 					var method = {
@@ -9238,7 +9247,7 @@ module.exports = function() {
 						signature: $method.signature(data, node)
 					};
 					if(data.type) {
-						method.type = $type.type(data.type, node.scope());
+						method.type = $type.type(data.type, node.scope(), node);
 					}
 					var instance = true;
 					for(var i = 0, __ks_1 = data.modifiers.length; instance && i < __ks_1; ++i) {
@@ -9261,8 +9270,7 @@ module.exports = function() {
 				}
 			}
 			else {
-				console.error(data);
-				throw new Error("Unknow kind " + data.kind);
+				$throw("Unknow kind " + data.kind, node);
 			}
 		}
 	};
@@ -9297,7 +9305,7 @@ module.exports = function() {
 				declaration = data.declarations[__ks_0];
 				var __ks_2 = declaration.kind;
 				if(__ks_2 === Kind.ClassDeclaration) {
-					var variable = $variable.define(this.greatScope(), declaration.name, VariableKind.Class, declaration);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind.Class, declaration);
 					if(declaration.sealed) {
 						variable.sealed = {
 							name: "__ks_" + variable.name.name,
@@ -9312,7 +9320,7 @@ module.exports = function() {
 					}
 				}
 				else if(__ks_2 === Kind.VariableDeclarator) {
-					var variable = $variable.define(this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type);
 					if(declaration.sealed) {
 						variable.sealed = {
 							name: "__ks_" + variable.name.name,
@@ -9322,8 +9330,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					console.error(declaration);
-					throw new Error("Unknow kind " + declaration.kind);
+					$throw("Unknow kind " + declaration.kind, this);
 				}
 			}
 		}
@@ -9455,7 +9462,7 @@ module.exports = function() {
 				declaration = data.declarations[__ks_0];
 				var __ks_2 = declaration.kind;
 				if(__ks_2 === Kind.ClassDeclaration) {
-					var variable = $variable.define(this.greatScope(), declaration.name, VariableKind.Class, declaration);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
 					if(declaration.sealed) {
 						variable.sealed = {
@@ -9472,13 +9479,12 @@ module.exports = function() {
 				}
 				else if(__ks_2 === Kind.VariableDeclarator) {
 					var type;
-					var variable = $variable.define(this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
 					module.require(declaration.name.name, type, false);
 				}
 				else {
-					console.error(declaration);
-					throw new Error("Unknow kind " + declaration.kind);
+					$throw("Unknow kind " + declaration.kind, this);
 				}
 			}
 		}
@@ -9600,7 +9606,7 @@ module.exports = function() {
 		__ks_func_analyse_0() {
 			var data = this._data;
 			if(!this._scope.hasVariable(data.variable.name)) {
-				$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
 				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
@@ -9871,13 +9877,13 @@ module.exports = function() {
 			var data = this._data;
 			this._value = $compile.expression(data.value, this);
 			if(!this._scope.hasVariable(data.variable.name)) {
-				$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
 				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
 			if(data.index) {
 				if(data.index && (data.declaration || !this._scope.hasVariable(data.index.name))) {
-					$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type);
+					$variable.define(this, this._scope, data.index.name, $variable.kind(data.index.type), data.index.type);
 					this._defineIndex = true;
 				}
 				this._index = $compile.expression(data.index, this);
@@ -9946,7 +9952,7 @@ module.exports = function() {
 				var line = fragments.newLine();
 				if(!this.greatScope().hasVariable(this._valueName)) {
 					line.code($variable.scope(this));
-					$variable.define(this.greatScope(), this._valueName, VariableKind.Variable);
+					$variable.define(this, this.greatScope(), this._valueName, VariableKind.Variable);
 				}
 				line.code(this._valueName, $equals).compile(this._value).done();
 			}
@@ -10125,13 +10131,13 @@ module.exports = function() {
 			var data = this._data;
 			this._value = $compile.expression(data.value, this);
 			if(!this._scope.hasVariable(data.variable.name)) {
-				$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
 				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
 			if(data.index) {
 				if(data.index && (data.declaration || !this._scope.hasVariable(data.index.name))) {
-					$variable.define(this._scope, data.index.name, $variable.kind(data.index.type), data.index.type);
+					$variable.define(this, this._scope, data.index.name, $variable.kind(data.index.type), data.index.type);
 					this._defineIndex = true;
 				}
 				this._index = $compile.expression(data.index, this);
@@ -10188,7 +10194,7 @@ module.exports = function() {
 				var line = fragments.newLine();
 				if(!this.greatScope().hasVariable(this._valueName)) {
 					line.code($variable.scope(this));
-					$variable.define(this.greatScope(), this._valueName, VariableKind.Variable);
+					$variable.define(this, this.greatScope(), this._valueName, VariableKind.Variable);
 				}
 				line.code(this._valueName, $equals).compile(this._value).done();
 			}
@@ -10345,7 +10351,7 @@ module.exports = function() {
 		__ks_func_analyse_0() {
 			var data = this._data;
 			if(!this._scope.hasVariable(data.variable.name)) {
-				$variable.define(this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
 				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
@@ -10592,20 +10598,20 @@ module.exports = function() {
 				throw new Error("Missing parameter 'fn'");
 			}
 			var data = node._data;
-			var signature = $function.signature(data, node.scope());
+			var signature = $function.signature(data, node);
 			for(var i = 0, __ks_0 = data.parameters.length, parameter; i < __ks_0; ++i) {
 				parameter = data.parameters[i];
 				if(signature.parameters[i].rest) {
-					throw new Error("Parameter can't be a rest parameter at line " + parameter.start.line);
+					$throw("Parameter can't be a rest parameter at line " + parameter.start.line, node);
 				}
 				else if(parameter.defaultValue) {
-					throw new Error("Parameter can't have a default value at line " + parameter.start.line);
+					$throw("Parameter can't have a default value at line " + parameter.start.line, node);
 				}
 				else if(parameter.type && parameter.type.nullable) {
-					throw new Error("Parameter can't be nullable at line " + parameter.start.line);
+					$throw("Parameter can't be nullable at line " + parameter.start.line, node);
 				}
 				else if(!parameter.name) {
-					throw new Error("Parameter must be named at line " + parameter.start.line);
+					$throw("Parameter must be named at line " + parameter.start.line, node);
 				}
 				if(i) {
 					fragments.code($comma);
@@ -10625,12 +10631,12 @@ module.exports = function() {
 				throw new Error("Missing parameter 'fn'");
 			}
 			var data = node._data;
-			var signature = $function.signature(data, node.scope());
+			var signature = $function.signature(data, node);
 			var rest = false;
 			for(var i = 0, __ks_0 = data.parameters.length, parameter; i < __ks_0; ++i) {
 				parameter = data.parameters[i];
 				if(!parameter.name) {
-					throw new Error("Parameter must be named at line " + parameter.start.line);
+					$throw("Parameter must be named at line " + parameter.start.line, node);
 				}
 				if(i) {
 					fragments.code($comma);
@@ -10640,7 +10646,7 @@ module.exports = function() {
 					rest = true;
 				}
 				else if(rest) {
-					throw new Error("Parameter must be before the rest parameter at line " + parameter.start.line);
+					$throw("Parameter must be before the rest parameter at line " + parameter.start.line, node);
 				}
 				else {
 					fragments.code(parameter.name.name, parameter.name);
@@ -10667,7 +10673,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'fn'");
 			}
 			var data = node._data;
-			var signature = $function.signature(data, node.scope());
+			var signature = $function.signature(data, node);
 			var parameter, ctrl;
 			var maxb = 0;
 			var rb = 0;
@@ -11067,12 +11073,12 @@ module.exports = function() {
 			}
 			return fragments;
 		},
-		signature(data, scope) {
+		signature(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
-			if(scope === undefined || scope === null) {
-				throw new Error("Missing parameter 'scope'");
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
 			}
 			var signature = {
 				min: 0,
@@ -11087,12 +11093,13 @@ module.exports = function() {
 					}
 				}
 			}
+			var scope = node.scope();
 			for(var __ks_0 = 0, __ks_1 = data.parameters.length, parameter; __ks_0 < __ks_1; ++__ks_0) {
 				parameter = data.parameters[__ks_0];
 				signature.parameters.push(parameter = $function.signatureParameter(parameter, scope));
 				if(parameter.max === Infinity) {
 					if(signature.max === Infinity) {
-						throw new Error("Function can have only one rest parameter");
+						$throw("Function can have only one rest parameter", node);
 					}
 					else {
 						signature.max = Infinity;
@@ -11171,12 +11178,12 @@ module.exports = function() {
 			}
 		}
 		__ks_func_analyse_0() {
-			$variable.define(this._scope, {
+			$variable.define(this, this._scope, {
 				kind: Kind.Identifier,
 				name: "this"
 			}, VariableKind.Variable);
 			var data = this._data;
-			var variable = $variable.define(this.greatScope(), data.name, VariableKind.Function, data.type);
+			var variable = $variable.define(this, this.greatScope(), data.name, VariableKind.Function, data.type);
 			for(var __ks_0 = 0, __ks_1 = data.modifiers.length, modifier; __ks_0 < __ks_1; ++__ks_0) {
 				modifier = data.modifiers[__ks_0];
 				if(modifier.kind === FunctionModifier.Async) {
@@ -11375,7 +11382,7 @@ module.exports = function() {
 			if(Type.isValue(data.name)) {
 				var signature = $function.signatureParameter(data, this._scope);
 				if(signature.rest) {
-					$variable.define(this._scope, data.name, VariableKind.Variable, {
+					$variable.define(this, this._scope, data.name, VariableKind.Variable, {
 						kind: Kind.TypeReference,
 						typeName: {
 							kind: Kind.Identifier,
@@ -11384,7 +11391,7 @@ module.exports = function() {
 					});
 				}
 				else {
-					$variable.define(this._scope, data.name, $variable.kind(data.type), data.type);
+					$variable.define(this, this._scope, data.name, $variable.kind(data.type), data.type);
 				}
 				this._name = $compile.expression(data.name, parent);
 			}
@@ -12048,8 +12055,7 @@ module.exports = function() {
 						property = new ImplementClassMethodLinkDeclaration(property, this, this._variable);
 					}
 					else {
-						console.error(property);
-						throw new Error("Unknow kind " + property.kind);
+						$throw("Unknow kind " + property.kind, this);
 					}
 					property.analyse();
 					this._properties.push(property);
@@ -12066,15 +12072,14 @@ module.exports = function() {
 						property = new ImplementVariableMethodDeclaration(property, this, this._variable);
 					}
 					else {
-						console.error(property);
-						throw new Error("Unknow kind " + property.kind);
+						$throw("Unknow kind " + property.kind, this);
 					}
 					property.analyse();
 					this._properties.push(property);
 				}
 			}
 			else {
-				throw new Error("Invalid class/variable for impl at line " + data.start.line);
+				$throw("Invalid class/variable for impl at line " + data.start.line, this);
 			}
 		}
 		analyse() {
@@ -12197,7 +12202,7 @@ module.exports = function() {
 			this._variable = variable;
 			Statement.prototype.__ks_cons.call(this, [data, parent]);
 			if(variable.sealed) {
-				throw new Error("Can't add a field to a sealed class");
+				$throw("Can't add a field to a sealed class", this);
 			}
 		}
 		__ks_cons(args) {
@@ -12211,7 +12216,7 @@ module.exports = function() {
 		__ks_func_analyse_0() {
 			this._type = $helper.analyseType($signature.type(this._data.type, this._scope), this);
 			if(this._type.kind === HelperTypeKind.Unreferenced) {
-				throw new Error("Invalid type " + this._type.type + " at line " + this._data.start.line);
+				$throw("Invalid type " + this._type.type + " at line " + this._data.start.line, this);
 			}
 		}
 		analyse() {
@@ -12341,8 +12346,7 @@ module.exports = function() {
 			var data = this._data;
 			var variable = this._variable;
 			if(data.name.name === variable.name.name) {
-				console.error(data);
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", this);
 			}
 			else {
 				for(var i = 0, __ks_0 = data.modifiers.length; this._instance && i < __ks_0; ++i) {
@@ -12369,7 +12373,7 @@ module.exports = function() {
 						signature: $method.signature(data, this)
 					};
 					if(data.type) {
-						method.type = $type.type(data.type, this._scope);
+						method.type = $type.type(data.type, this._scope, this);
 					}
 					if(this._instance) {
 						if(!Type.isArray(variable.instanceMethods[data.name.name])) {
@@ -12388,7 +12392,7 @@ module.exports = function() {
 					this._name = $compile.expression(data.name, this);
 				}
 			}
-			$variable.define(this._scope, {
+			$variable.define(this, this._scope, {
 				kind: Kind.Identifier,
 				name: "this"
 			}, VariableKind.Variable, $type.reference(variable.name));
@@ -12432,8 +12436,7 @@ module.exports = function() {
 			var data = this._data;
 			var variable = this._variable;
 			if(data.name.name === variable.name.name) {
-				console.error(data);
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", this);
 			}
 			else {
 				var line = fragments.newLine().code($runtime.helper(this), ".", this._instance ? "newInstanceMethod" : "newClassMethod", "(");
@@ -12446,8 +12449,7 @@ module.exports = function() {
 					object.newLine().code("name: ").compile(this._name);
 				}
 				else {
-					console.error(data.name);
-					throw new Error("Not Implemented");
+					$throw("Not Implemented", this);
 				}
 				if(variable.sealed) {
 					object.newLine().code("sealed: " + variable.sealed.name);
@@ -12587,8 +12589,7 @@ module.exports = function() {
 			var data = this._data;
 			var variable = this._variable;
 			if(data.name.name === variable.name.name) {
-				console.error(data);
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", this);
 			}
 			else {
 				if(data.name.kind === Kind.TemplateExpression) {
@@ -12676,8 +12677,7 @@ module.exports = function() {
 				object.line("name: ", $quote(data.name.name));
 			}
 			else {
-				console.error(data.name);
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", this);
 			}
 			if(variable.sealed) {
 				object.line("sealed: ", variable.sealed.name);
@@ -12819,8 +12819,7 @@ module.exports = function() {
 			var data = this._data;
 			var variable = this._variable;
 			if(data.name.name === variable.name.name) {
-				console.error(data);
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", this);
 			}
 			else {
 				if(data.name.kind === Kind.TemplateExpression) {
@@ -12901,8 +12900,7 @@ module.exports = function() {
 				object.line("name: ", $quote(data.name.name));
 			}
 			else {
-				console.error(data.name);
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", this);
 			}
 			if(variable.sealed) {
 				object.line("sealed: ", variable.sealed.name);
@@ -13048,7 +13046,7 @@ module.exports = function() {
 				name: this._data.name.name
 			};
 			if(Type.isValue(this._data.type)) {
-				property.type = $type.type(this._data.type, this._scope);
+				property.type = $type.type(this._data.type, this._scope, this);
 			}
 			this._variable.sealed.properties[property.name] = property;
 		}
@@ -13194,10 +13192,10 @@ module.exports = function() {
 			var property = {
 				kind: VariableKind.Function,
 				name: this._data.name.name,
-				signature: $function.signature(this._data, this._scope)
+				signature: $function.signature(this._data, this)
 			};
 			if(Type.isValue(this._data.type)) {
-				property.type = $type.type(this._data.type, this._scope);
+				property.type = $type.type(this._data.type, this._scope, this);
 			}
 			this._variable.sealed.properties[property.name] = property;
 		}
@@ -13403,7 +13401,7 @@ module.exports = function() {
 			else  {
 				var type = null;
 			}
-			$variable.define(node.scope(), name, kind, type);
+			$variable.define(node, node.scope(), name, kind, type);
 			module.import(name.name || name, file);
 		},
 		loadCoreModule(x, module, data, node) {
@@ -13550,7 +13548,7 @@ module.exports = function() {
 				for(name in requirements) {
 					var requirement = requirements[name];
 					if(!requirement.nullable && (!Type.isValue(data.references) || (data.references.length === 0))) {
-						throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+						$throw("Missing requirement '" + name + "' at line " + data.start.line, node);
 					}
 					nf = true;
 					if(data.references) {
@@ -13558,13 +13556,13 @@ module.exports = function() {
 							reference = data.references[__ks_0];
 							if(Type.isValue(reference.foreign)) {
 								if(reference.foreign.name === name) {
-									$import.use(reference.alias, node.scope());
+									$import.use(reference.alias, node);
 									nf = false;
 								}
 							}
 							else {
 								if(reference.alias.name === name) {
-									$import.use(reference.alias, node.scope());
+									$import.use(reference.alias, node);
 									nf = false;
 								}
 							}
@@ -13572,7 +13570,7 @@ module.exports = function() {
 					}
 					if(nf) {
 						if(!requirement.nullable) {
-							throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+							$throw("Missing requirement '" + name + "' at line " + data.start.line, node);
 						}
 					}
 				}
@@ -13582,7 +13580,7 @@ module.exports = function() {
 					alias = importVariables[name];
 				}
 				if(!(Type.isValue(exports[name]) ? (variable = exports[name], true) : false)) {
-					throw new Error("Undefined variable " + name + " in the imported module at line " + data.start.line);
+					$throw("Undefined variable " + name + " in the imported module at line " + data.start.line, node);
 				}
 				$import.addVariable(module, file, node, alias, variable, data);
 			}
@@ -13591,7 +13589,7 @@ module.exports = function() {
 				for(name in importVariables) {
 					alias = importVariables[name];
 					if(!(Type.isValue(exports[name]) ? (variable = exports[name], true) : false)) {
-						throw new Error("Undefined variable " + name + " in the imported module at line " + data.start.line);
+						$throw("Undefined variable " + name + " in the imported module at line " + data.start.line, node);
 					}
 					$import.addVariable(module, file, node, alias, variable, data);
 				}
@@ -13614,7 +13612,7 @@ module.exports = function() {
 					variable = exports[name];
 					type.properties[variable.name] = variable;
 				}
-				variable = $variable.define(node.scope(), {
+				variable = $variable.define(node, node.scope(), {
 					kind: Kind.Identifier,
 					name: importAlias
 				}, VariableKind.Variable, type);
@@ -13669,7 +13667,7 @@ module.exports = function() {
 						$import.define(module, file, node, specifier.local, VariableKind.Variable);
 					}
 					else {
-						throw new Error("Wilcard import is only suppoted for ks files");
+						$throw("Wilcard import is only suppoted for ks files", node);
 					}
 				}
 				else {
@@ -13764,33 +13762,33 @@ module.exports = function() {
 			if(/^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x)) {
 				x = fs.resolve(y, x);
 				if(!($import.loadFile(x, null, module, data, node) || $import.loadDirectory(x, null, module, data, node))) {
-					throw new Error("Cannot find module '" + x + "' from '" + y + "'");
+					$throw("Cannot find module '" + x + "' from '" + y + "'", node);
 				}
 			}
 			else {
 				if(!($import.loadNodeModule(x, y, module, data, node) || $import.loadCoreModule(x, module, data, node))) {
-					throw new Error("Cannot find module '" + x + "' from '" + y + "'");
+					$throw("Cannot find module '" + x + "' from '" + y + "'", node);
 				}
 			}
 		},
-		use(data, scope) {
+		use(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
-			if(scope === undefined || scope === null) {
-				throw new Error("Missing parameter 'scope'");
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
 			}
 			if(Type.isArray(data)) {
 				for(var __ks_0 = 0, __ks_1 = data.length, item; __ks_0 < __ks_1; ++__ks_0) {
 					item = data[__ks_0];
-					if((item.kind === Kind.Identifier) && !scope.hasVariable(item.name)) {
-						throw new Error("Undefined variable '" + item.name + "' at line " + item.start.line);
+					if((item.kind === Kind.Identifier) && !node.scope().hasVariable(item.name)) {
+						$throw("Undefined variable '" + item.name + "' at line " + item.start.line, node);
 					}
 				}
 			}
 			else if(data.kind === Kind.Identifier) {
-				if(!scope.hasVariable(data.name)) {
-					throw new Error("Undefined variable '" + data.name + "' at line " + data.start.line);
+				if(!node.scope().hasVariable(data.name)) {
+					$throw("Undefined variable '" + data.name + "' at line " + data.start.line, node);
 				}
 			}
 		},
@@ -13873,7 +13871,7 @@ module.exports = function() {
 							}
 						}
 						else {
-							throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+							$throw("Missing requirement '" + name + "' at line " + data.start.line, node);
 						}
 					}
 				}
@@ -13887,7 +13885,7 @@ module.exports = function() {
 				for(name in requirements) {
 					var requirement = requirements[name];
 					if(!requirement.nullable && (!Type.isValue(data.references) || (data.references.length === 0))) {
-						throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+						$throw("Missing requirement '" + name + "' at line " + data.start.line, node);
 					}
 					nf = true;
 					if(data.references) {
@@ -13945,7 +13943,7 @@ module.exports = function() {
 							}
 						}
 						else {
-							throw new Error("Missing requirement '" + name + "' at line " + data.start.line);
+							$throw("Missing requirement '" + name + "' at line " + data.start.line, node);
 						}
 					}
 				}
@@ -14257,7 +14255,7 @@ module.exports = function() {
 				$import.toNodeFileFragments(this, fragments, this._data, this._metadata);
 			}
 			else {
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", this);
 			}
 		}
 		toStatementFragments() {
@@ -14348,7 +14346,13 @@ module.exports = function() {
 						data = fs.readFile(path);
 						module.addHash(path, compiler.sha256(path, data));
 						module.addInclude(path);
-						data = parse(data);
+						try {
+							data = parse(data);
+						}
+						catch(error) {
+							error.filename = path;
+							throw error;
+						}
 						for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 							statement = data.body[__ks_2];
 							this._statements.push(statement = $compile.statement(statement, declarator));
@@ -14356,7 +14360,7 @@ module.exports = function() {
 						}
 					}
 					else {
-						throw new Error("Cannot find file '" + file + "' from '" + directory + "'");
+						$throw("Cannot find file '" + file + "' from '" + directory + "'", this);
 					}
 				}
 				else {
@@ -14370,13 +14374,19 @@ module.exports = function() {
 						}
 					}
 					if(nf) {
-						throw new Error("Cannot find module '" + file + "' from '" + directory + "'");
+						$throw("Cannot find module '" + file + "' from '" + directory + "'", this);
 					}
 					declarator = new IncludeDeclarator(path, this);
 					data = fs.readFile(path);
 					module.addHash(path, compiler.sha256(path, data));
 					module.addInclude(path);
-					data = parse(data);
+					try {
+						data = parse(data);
+					}
+					catch(error) {
+						error.filename = path;
+						throw error;
+					}
 					for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 						statement = data.body[__ks_2];
 						this._statements.push(statement = $compile.statement(statement, declarator));
@@ -14498,7 +14508,13 @@ module.exports = function() {
 							data = fs.readFile(path);
 							module.addHash(path, compiler.sha256(path, data));
 							module.addInclude(path);
-							data = parse(data);
+							try {
+								data = parse(data);
+							}
+							catch(error) {
+								error.filename = path;
+								throw error;
+							}
 							for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 								statement = data.body[__ks_2];
 								this._statements.push(statement = $compile.statement(statement, declarator));
@@ -14507,7 +14523,7 @@ module.exports = function() {
 						}
 					}
 					else {
-						throw new Error("Cannot find file '" + file + "' from '" + directory + "'");
+						$throw("Cannot find file '" + file + "' from '" + directory + "'", this);
 					}
 				}
 				else {
@@ -14521,14 +14537,20 @@ module.exports = function() {
 						}
 					}
 					if(nf) {
-						throw new Error("Cannot find module '" + file + "' from '" + directory + "'");
+						$throw("Cannot find module '" + file + "' from '" + directory + "'", this);
 					}
 					if(!module.hasInclude(path)) {
 						declarator = new IncludeDeclarator(path, this);
 						data = fs.readFile(path);
 						module.addHash(path, compiler.sha256(path, data));
 						module.addInclude(path);
-						data = parse(data);
+						try {
+							data = parse(data);
+						}
+						catch(error) {
+							error.filename = path;
+							throw error;
+						}
 						for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 							statement = data.body[__ks_2];
 							this._statements.push(statement = $compile.statement(statement, declarator));
@@ -14749,7 +14771,7 @@ module.exports = function() {
 				declaration = data.declarations[__ks_0];
 				var __ks_2 = declaration.kind;
 				if(__ks_2 === Kind.ClassDeclaration) {
-					var variable = $variable.define(this.greatScope(), declaration.name, VariableKind.Class, declaration);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
 					if(declaration.sealed) {
 						variable.sealed = {
@@ -14765,13 +14787,12 @@ module.exports = function() {
 					module.require(declaration.name.name, VariableKind.Class);
 				}
 				else if(__ks_2 === Kind.VariableDeclarator) {
-					var variable = $variable.define(this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
 					module.require(declaration.name.name, type);
 				}
 				else {
-					console.error(declaration);
-					throw new Error("Unknow kind " + declaration.kind);
+					$throw("Unknow kind " + declaration.kind, this);
 				}
 			}
 		}
@@ -14894,7 +14915,7 @@ module.exports = function() {
 				declaration = data.declarations[__ks_0];
 				var __ks_2 = declaration.kind;
 				if(__ks_2 === Kind.ClassDeclaration) {
-					var variable = $variable.define(this.greatScope(), declaration.name, VariableKind.Class, declaration);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
 					if(declaration.sealed) {
 						variable.sealed = {
@@ -14911,13 +14932,12 @@ module.exports = function() {
 				}
 				else if(__ks_2 === Kind.VariableDeclarator) {
 					var type;
-					var variable = $variable.define(this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
 					module.require(declaration.name.name, type, true);
 				}
 				else {
-					console.error(declaration);
-					throw new Error("Unknow kind " + declaration.kind);
+					$throw("Unknow kind " + declaration.kind, this);
 				}
 			}
 		}
@@ -15228,10 +15248,10 @@ module.exports = function() {
 						condition = new SwitchConditionArray(condition, this);
 					}
 					else if(condition.kind === Kind.SwitchConditionEnum) {
-						throw new Error("Not Implemented");
+						$throw("Not Implemented", this);
 					}
 					else if(condition.kind === Kind.SwitchConditionObject) {
-						throw new Error("Not Implemented");
+						$throw("Not Implemented", this);
 					}
 					else if(condition.kind === Kind.SwitchConditionRange) {
 						condition = new SwitchConditionRange(condition, this);
@@ -15252,7 +15272,7 @@ module.exports = function() {
 						clause.hasTest = true;
 					}
 					else if(binding.kind === Kind.ObjectBinding) {
-						throw new Error("Not Implemented");
+						$throw("Not Implemented", this);
 						clause.hasTest = true;
 					}
 					else if(binding.kind === Kind.SwitchTypeCasting) {
@@ -15329,7 +15349,7 @@ module.exports = function() {
 				clause = this._clauses[clauseIdx];
 				if(clause.conditions.length) {
 					if(we) {
-						throw new Error("The default clause is before this clause");
+						$throw("The default clause is before this clause", this);
 					}
 					if(clauseIdx) {
 						ctrl.step().code("else if(");
@@ -15606,7 +15626,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_analyse_0() {
-			$variable.define(this._scope, this._data.name, VariableKind.Variable);
+			$variable.define(this, this._scope, this._data.name, VariableKind.Variable);
 		}
 		analyse() {
 			if(arguments.length === 0) {
@@ -15718,7 +15738,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_analyse_0() {
-			$variable.define(this._scope, this._data, VariableKind.Variable);
+			$variable.define(this, this._scope, this._data, VariableKind.Variable);
 		}
 		analyse() {
 			if(arguments.length === 0) {
@@ -16892,7 +16912,7 @@ module.exports = function() {
 				for(var __ks_0 = 0, __ks_1 = data.catchClauses.length, clause; __ks_0 < __ks_1; ++__ks_0) {
 					clause = data.catchClauses[__ks_0];
 					if(Type.isValue(clause.binding)) {
-						$variable.define(this._scope = new Scope(scope), clause.binding, VariableKind.Variable);
+						$variable.define(this, this._scope = new Scope(scope), clause.binding, VariableKind.Variable);
 					}
 					this._catchClauses.push({
 						body: $compile.expression(clause.body, this),
@@ -16902,7 +16922,7 @@ module.exports = function() {
 			}
 			if(Type.isValue(data.catchClause)) {
 				if(Type.isValue(this._data.catchClause.binding)) {
-					$variable.define(this._scope = new Scope(scope), data.catchClause.binding, VariableKind.Variable);
+					$variable.define(this, this._scope = new Scope(scope), data.catchClause.binding, VariableKind.Variable);
 				}
 				this._catchClause = $compile.expression(data.catchClause.body, this);
 			}
@@ -17115,7 +17135,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_analyse_0() {
-			$variable.define(this._scope, this._data.name, VariableKind.TypeAlias, this._data.type);
+			$variable.define(this, this._scope, this._data.name, VariableKind.TypeAlias, this._data.type);
 		}
 		analyse() {
 			if(arguments.length === 0) {
@@ -17688,11 +17708,11 @@ module.exports = function() {
 			for(var __ks_0 = 0, __ks_1 = data.variables.length, variable; __ks_0 < __ks_1; ++__ks_0) {
 				variable = data.variables[__ks_0];
 				if(variable.kind === Kind.VariableDeclarator) {
-					$variable.define(this._scope._parent, variable.name, $variable.kind(variable.type), variable.type);
+					$variable.define(this, this._scope._parent, variable.name, $variable.kind(variable.type), variable.type);
 					this._variables.push($compile.expression(variable.name, this));
 				}
 				else {
-					$variable.define(this._scope._parent, variable, VariableKind.Variable);
+					$variable.define(this, this._scope._parent, variable, VariableKind.Variable);
 					this._variables.push($compile.expression(variable, this));
 				}
 			}
@@ -17857,10 +17877,10 @@ module.exports = function() {
 				if(!type && data.init) {
 					type = data.init;
 				}
-				$variable.define(this._scope, data.name, $variable.kind(data.type), type);
+				$variable.define(this, this._scope, data.name, $variable.kind(data.type), type);
 			}
 			else {
-				$variable.define(this._scope, data.name, $variable.kind(data.type), data.type);
+				$variable.define(this, this._scope, data.name, $variable.kind(data.type), data.type);
 			}
 			this._name = $compile.expression(data.name, this);
 			if(Type.isValue(data.init)) {
@@ -18603,11 +18623,21 @@ module.exports = function() {
 				var variable = true;
 			}
 			Literal.prototype.__ks_cons.call(this, [data, parent, scope, data.name]);
-			if(variable && !((Type.is(parent, MemberExpression) && (parent._data.object !== data)) || ($predefined[data.name] === true))) {
-				this._isVariable = true;
-				if(!this._scope.hasVariable(data.name)) {
-					throw new Error("Undefined variable '" + data.name + "' at line " + data.start.line);
+			if(variable && ($predefined[data.name] !== true)) {
+				if(Type.is(parent, MemberExpression)) {
+					if(parent._data.object === data) {
+						this._isVariable = true;
+					}
+					else if(parent._data.computed && (parent._data.property === data)) {
+						this._isVariable = true;
+					}
 				}
+				else {
+					this._isVariable = true;
+				}
+			}
+			if(this._isVariable && !this._scope.hasVariable(data.name)) {
+				$throw("Undefined variable '" + data.name + "' at line " + data.start.line, this);
 			}
 		}
 		__ks_cons(args) {
@@ -19039,7 +19069,7 @@ module.exports = function() {
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
-			$variable.define(this._scope, data.loop.variable.name, VariableKind.Variable);
+			$variable.define(this, this._scope, data.loop.variable.name, VariableKind.Variable);
 			this._variable = $compile.expression(data.loop.variable, this);
 			this._from = $compile.expression(data.loop.from, this);
 			this._to = $compile.expression(Type.isValue(data.loop.to) ? data.loop.to : data.loop.til, this);
@@ -19208,9 +19238,9 @@ module.exports = function() {
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
-			$variable.define(this._scope, data.loop.variable.name, VariableKind.Variable);
+			$variable.define(this, this._scope, data.loop.variable.name, VariableKind.Variable);
 			if(Type.isValue(data.loop.index)) {
-				$variable.define(this._scope, data.loop.index.name, VariableKind.Variable);
+				$variable.define(this, this._scope, data.loop.index.name, VariableKind.Variable);
 			}
 			this._variable = $compile.expression(data.loop.variable, this);
 			this._value = $compile.expression(data.loop.value, this);
@@ -19385,9 +19415,9 @@ module.exports = function() {
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
-			$variable.define(this._scope, data.loop.variable.name, VariableKind.Variable);
+			$variable.define(this, this._scope, data.loop.variable.name, VariableKind.Variable);
 			if(Type.isValue(data.loop.index)) {
-				$variable.define(this._scope, data.loop.index.name, VariableKind.Variable);
+				$variable.define(this, this._scope, data.loop.index.name, VariableKind.Variable);
 			}
 			this._variable = $compile.expression(data.loop.variable, this);
 			this._value = $compile.expression(data.loop.value, this);
@@ -19562,7 +19592,7 @@ module.exports = function() {
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
-			$variable.define(this._scope, data.loop.variable.name, VariableKind.Variable);
+			$variable.define(this, this._scope, data.loop.variable.name, VariableKind.Variable);
 			this._variable = $compile.expression(data.loop.variable, this);
 			this._from = $compile.expression(data.loop.from, this);
 			this._to = $compile.expression(data.loop.to, this);
@@ -19972,9 +20002,9 @@ module.exports = function() {
 			}
 		}
 		__ks_func_analyse_0() {
-			$variable.define(this.statement().scope(), this._data.name, VariableKind.Variable);
+			$variable.define(this.statement(), this.statement().scope(), this._data.name, VariableKind.Variable);
 			if(Type.isValue(this._data.alias)) {
-				$variable.define(this._scope, this._data.alias, VariableKind.Variable);
+				$variable.define(this, this._scope, this._data.alias, VariableKind.Variable);
 				this._alias = $compile.expression(this._data.alias, this);
 			}
 			this._name = $compile.expression(this._data.name, this);
@@ -20487,7 +20517,7 @@ module.exports = function() {
 		}
 		else {
 			console.error(data);
-			throw new Error("Not Implemented");
+			$throw("Not Implemented", node);
 		}
 	}
 	class CallExpression extends Expression {
@@ -20514,7 +20544,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					throw new Error("Undefined variable " + this._data.callee.name + " at line " + this._data.callee.start.line);
+					$throw("Undefined variable " + this._data.callee.name + " at line " + this._data.callee.start.line, this);
 				}
 			}
 			if(this._data.callee.kind === Kind.MemberExpression) {
@@ -20699,7 +20729,7 @@ module.exports = function() {
 				else {
 					fragments.compile(this._callee, mode).code(".apply(").compile(this._callScope, mode);
 				}
-				if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+				if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) === "Array")) {
 					fragments.code($comma).compile(this._arguments[0]);
 				}
 				else {
@@ -21071,8 +21101,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					console.error(this._callee);
-					throw new Error("Not Implemented");
+					$throw("Not Implemented", this);
 				}
 			}
 			else {
@@ -21104,7 +21133,7 @@ module.exports = function() {
 						}
 						fragments.code(")");
 					}
-					else if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+					else if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) === "Array")) {
 						fragments.code(path + "._cm_" + this._data.callee.property.name + ".apply(" + path + ", ").compile(this._arguments[0]).code(")");
 					}
 					else {
@@ -21129,7 +21158,7 @@ module.exports = function() {
 						}
 						fragments.code(")");
 					}
-					else if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+					else if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) === "Array")) {
 						fragments.code(path + "." + this._data.callee.property.name + ".apply(" + path + ", ").compile(this._arguments[0]).code(")");
 					}
 					else {
@@ -21375,7 +21404,7 @@ module.exports = function() {
 						fragments.code("null");
 					}
 					fragments.code($comma);
-					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) === "Array")) {
 						fragments.compile(this._arguments[0]);
 					}
 					else {
@@ -21392,7 +21421,7 @@ module.exports = function() {
 				}
 				else if(kind === ScopeModifier.Null) {
 					fragments.code($runtime.helper(this), ".curry(").compile(this._callee).code(", null, ");
-					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) === "Array")) {
 						fragments.compile(this._arguments[0]);
 					}
 					else {
@@ -21409,7 +21438,7 @@ module.exports = function() {
 				}
 				else {
 					fragments.code($runtime.helper(this), ".curry(").compile(this._callee).code($comma).compile(this._callScope).code($comma);
-					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope), this._scope) === "Array")) {
+					if((this._arguments.length === 1) && ($signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) === "Array")) {
 						fragments.compile(this._arguments[0]);
 					}
 					else {
@@ -26006,7 +26035,7 @@ module.exports = function() {
 				fragments.code(")");
 			}
 			else {
-				throw new Error("Not Implemented");
+				$throw("Not Implemented", this);
 			}
 		}
 		toFragments() {
@@ -27622,12 +27651,12 @@ module.exports = function() {
 					}
 					else {
 						console.error(data);
-						throw new Error("Unknow assignment operator " + data.operator.assignment);
+						$throw("Unknow assignment operator " + data.operator.assignment, parent);
 					}
 				}
 				else {
 					console.error(data);
-					throw new Error("Unknow binary operator " + data.operator.kind);
+					$throw("Unknow binary operator " + data.operator.kind, parent);
 				}
 			}
 			else if(data.kind === Kind.PolyadicOperator) {
@@ -27636,7 +27665,7 @@ module.exports = function() {
 				}
 				else {
 					console.error(data);
-					throw new Error("Unknow polyadic operator " + data.operator.kind);
+					$throw("Unknow polyadic operator " + data.operator.kind, parent);
 				}
 			}
 			else if(data.kind === Kind.UnaryExpression) {
@@ -27645,12 +27674,12 @@ module.exports = function() {
 				}
 				else {
 					console.error(data);
-					throw new Error("Unknow unary operator " + data.operator.kind);
+					$throw("Unknow unary operator " + data.operator.kind, parent);
 				}
 			}
 			else {
 				console.error(data);
-				throw new Error("Unknow kind " + data.kind);
+				$throw("Unknow kind " + data.kind, parent);
 			}
 			expression.analyse();
 			if(reusable) {
@@ -27731,8 +27760,7 @@ module.exports = function() {
 			return new ArrayComprehensionForRange(data, parent, scope);
 		}
 		else {
-			console.error(data);
-			throw new Error("Not Implemented");
+			$throw("Not Implemented", parent);
 		}
 	};
 	$expressions[Kind.ArrayExpression] = ArrayExpression;

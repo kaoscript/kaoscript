@@ -77,12 +77,12 @@ class AwaitDeclarator extends AbstractNode {
 		
 		for variable in data.variables {
 			if variable.kind == Kind::VariableDeclarator {
-				$variable.define(this._scope._parent, variable.name, $variable.kind(variable.type), variable.type)
+				$variable.define(this, this._scope._parent, variable.name, $variable.kind(variable.type), variable.type)
 				
 				this._variables.push($compile.expression(variable.name, this))
 			}
 			else {
-				$variable.define(this._scope._parent, variable, VariableKind::Variable)
+				$variable.define(this, this._scope._parent, variable, VariableKind::Variable)
 				
 				this._variables.push($compile.expression(variable, this))
 			}
@@ -148,10 +148,10 @@ class VariableDeclarator extends AbstractNode {
 				type = data.init
 			}
 			
-			$variable.define(this._scope, data.name, $variable.kind(data.type), type)
+			$variable.define(this, this._scope, data.name, $variable.kind(data.type), type)
 		}
 		else {
-			$variable.define(this._scope, data.name, $variable.kind(data.type), data.type)
+			$variable.define(this, this._scope, data.name, $variable.kind(data.type), data.type)
 		}
 		
 		this._name = $compile.expression(data.name, this)

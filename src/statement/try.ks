@@ -16,7 +16,7 @@ class TryStatement extends Statement {
 		if data.catchClauses? {
 			for clause in data.catchClauses {
 				if clause.binding? {
-					$variable.define(this._scope = new Scope(scope), clause.binding, VariableKind::Variable)
+					$variable.define(this, this._scope = new Scope(scope), clause.binding, VariableKind::Variable)
 				}
 				
 				this._catchClauses.push({
@@ -28,7 +28,7 @@ class TryStatement extends Statement {
 		
 		if data.catchClause? {
 			if this._data.catchClause.binding? {
-				$variable.define(this._scope = new Scope(scope), data.catchClause.binding, VariableKind::Variable)
+				$variable.define(this, this._scope = new Scope(scope), data.catchClause.binding, VariableKind::Variable)
 			}
 			
 			this._catchClause = $compile.expression(data.catchClause.body, this)

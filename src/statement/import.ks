@@ -54,7 +54,7 @@ const $import = {
 		module.import(name, file)
 	} // }}}
 	define(module, file?, node, name, kind, type?) { // {{{
-		$variable.define(node.scope(), name, kind, type)
+		$variable.define(node, node.scope(), name, kind, type)
 		
 		module.import(name.name || name, file)
 	} // }}}
@@ -159,21 +159,21 @@ const $import = {
 		if importVarCount || importAll || importAlias.length {
 			let nf
 			for name, requirement of requirements {
-				throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`) if !requirement.nullable && (!?data.references || data.references.length == 0)
+				$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node) if !requirement.nullable && (!?data.references || data.references.length == 0)
 				
 				nf = true
 				if data.references {
 					for reference in data.references while nf {
 						if reference.foreign? {
 							if reference.foreign.name == name {
-								$import.use(reference.alias, node.scope())
+								$import.use(reference.alias, node)
 								
 								nf = false
 							}
 						}
 						else {
 							if reference.alias.name == name {
-								$import.use(reference.alias, node.scope())
+								$import.use(reference.alias, node)
 								
 								nf = false
 							}
@@ -183,7 +183,7 @@ const $import = {
 				
 				if nf {
 					if !requirement.nullable {
-						throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`)
+						$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node)
 					}
 				}
 			}
@@ -193,14 +193,14 @@ const $import = {
 			for name, alias of importVariables {
 			}
 			
-			throw new Error(`Undefined variable \(name) in the imported module at line \(data.start.line)`) unless variable ?= exports[name]
+			$throw(`Undefined variable \(name) in the imported module at line \(data.start.line)`, node) unless variable ?= exports[name]
 			
 			$import.addVariable(module, file, node, alias, variable, data)
 		}
 		else if importVarCount {
 			nf = false
 			for name, alias of importVariables {
-				throw new Error(`Undefined variable \(name) in the imported module at line \(data.start.line)`) unless variable ?= exports[name]
+				$throw(`Undefined variable \(name) in the imported module at line \(data.start.line)`, node) unless variable ?= exports[name]
 				
 				$import.addVariable(module, file, node, alias, variable, data)
 			}
@@ -225,7 +225,7 @@ const $import = {
 				type.properties[variable.name] = variable
 			}
 			
-			variable = $variable.define(node.scope(), {
+			variable = $variable.define(node, node.scope(), {
 				kind: Kind::Identifier
 				name: importAlias
 			}, VariableKind::Variable, type)
@@ -266,7 +266,7 @@ const $import = {
 					$import.define(module, file, node, specifier.local, VariableKind::Variable)
 				}
 				else {
-					throw new Error('Wilcard import is only suppoted for ks files')
+					$throw('Wilcard import is only suppoted for ks files', node)
 				}
 			}
 			else {
@@ -342,23 +342,23 @@ const $import = {
 			x = fs.resolve(y, x)
 			
 			if !($import.loadFile(x, null, module, data, node) || $import.loadDirectory(x, null, module, data, node)) {
-				throw new Error("Cannot find module '" + x + "' from '" + y + "'")
+				$throw("Cannot find module '" + x + "' from '" + y + "'", node)
 			}
 		}
 		else {
 			if !($import.loadNodeModule(x, y, module, data, node) || $import.loadCoreModule(x, module, data, node)) {
-				throw new Error("Cannot find module '" + x + "' from '" + y + "'")
+				$throw("Cannot find module '" + x + "' from '" + y + "'", node)
 			}
 		}
 	} // }}}
-	use(data, scope) { // {{{
+	use(data, node) { // {{{
 		if data is Array {
 			for item in data {
-				throw new Error(`Undefined variable '\(item.name)' at line \(item.start.line)`) if item.kind == Kind::Identifier && !scope.hasVariable(item.name)
+				$throw(`Undefined variable '\(item.name)' at line \(item.start.line)`, node) if item.kind == Kind::Identifier && !node.scope().hasVariable(item.name)
 			}
 		}
 		else if data.kind == Kind::Identifier {
-			throw new Error(`Undefined variable '\(data.name)' at line \(data.start.line)`) if !scope.hasVariable(data.name)
+			$throw(`Undefined variable '\(data.name)' at line \(data.start.line)`, node) if !node.scope().hasVariable(data.name)
 		}
 	} // }}}
 	toKSFileFragments(node, fragments, data, metadata) { // {{{
@@ -441,7 +441,7 @@ const $import = {
 						++nc if requirement.class
 					}
 					else {
-						throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`)
+						$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node)
 					}
 				}
 			}
@@ -455,7 +455,7 @@ const $import = {
 			let first = true
 			let nc = 0
 			for name, requirement of requirements {
-				throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`) if !requirement.nullable && (!?data.references || data.references.length == 0)
+				$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node) if !requirement.nullable && (!?data.references || data.references.length == 0)
 				
 				nf = true
 				if data.references {
@@ -521,7 +521,7 @@ const $import = {
 						++nc if requirement.class
 					}
 					else {
-						throw new Error(`Missing requirement '\(name)' at line \(data.start.line)`)
+						$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node)
 					}
 				}
 			}
@@ -715,7 +715,7 @@ class ImportDeclarator extends Statement {
 			$import.toNodeFileFragments(this, fragments, this._data, this._metadata)
 		}
 		else {
-			throw new Error('Not Implemented')
+			$throw('Not Implemented', this)
 		}
 	} // }}}
 }

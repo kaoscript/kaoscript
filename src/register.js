@@ -32,7 +32,7 @@ var loadFile = function(module, filename) { // {{{
 	}
 	catch(error) {
 		if(!error.message.startsWith('/')) {
-			error.message = filename + ': '+ error.message;
+			error.message = (error.filename || filename) + ': '+ error.message;
 		}
 		
 		throw error;

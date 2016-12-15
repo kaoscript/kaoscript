@@ -21,20 +21,20 @@ const $function = {
 	} // }}}
 	parametersES5(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = $function.signature(data, node.scope())
+		let signature = $function.signature(data, node)
 		
 		for parameter, i in data.parameters {
 			if signature.parameters[i].rest {
-				throw new Error(`Parameter can't be a rest parameter at line \(parameter.start.line)`)
+				$throw(`Parameter can't be a rest parameter at line \(parameter.start.line)`, node)
 			}
 			else if parameter.defaultValue {
-				throw new Error(`Parameter can't have a default value at line \(parameter.start.line)`)
+				$throw(`Parameter can't have a default value at line \(parameter.start.line)`, node)
 			}
 			else if parameter.type && parameter.type.nullable {
-				throw new Error(`Parameter can't be nullable at line \(parameter.start.line)`)
+				$throw(`Parameter can't be nullable at line \(parameter.start.line)`, node)
 			}
 			else if !parameter.name {
-				throw new Error(`Parameter must be named at line \(parameter.start.line)`)
+				$throw(`Parameter must be named at line \(parameter.start.line)`, node)
 			}
 			
 			fragments.code($comma) if i
@@ -46,12 +46,12 @@ const $function = {
 	} // }}}
 	parametersES6(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = $function.signature(data, node.scope())
+		let signature = $function.signature(data, node)
 		let rest = false
 		
 		for parameter, i in data.parameters {
 			if !parameter.name {
-				throw new Error(`Parameter must be named at line \(parameter.start.line)`)
+				$throw(`Parameter must be named at line \(parameter.start.line)`, node)
 			}
 			
 			fragments.code($comma) if i
@@ -62,7 +62,7 @@ const $function = {
 				rest = true
 			}
 			else if rest {
-				throw new Error(`Parameter must be before the rest parameter at line \(parameter.start.line)`)
+				$throw(`Parameter must be before the rest parameter at line \(parameter.start.line)`, node)
 			}
 			else {
 				fragments.code(parameter.name.name, parameter.name)
@@ -83,7 +83,7 @@ const $function = {
 	} // }}}
 	parametersKS(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = $function.signature(data, node.scope())
+		let signature = $function.signature(data, node)
 		//console.log(signature)
 		
 		let parameter, ctrl
@@ -692,7 +692,7 @@ const $function = {
 		
 		return fragments
 	} // }}}
-	signature(data, scope) { // {{{
+	signature(data, node) { // {{{
 		let signature = {
 			min: 0,
 			max: 0,
@@ -707,12 +707,13 @@ const $function = {
 			}
 		}
 		
+		let scope = node.scope()
 		for parameter in data.parameters {
 			signature.parameters.push(parameter = $function.signatureParameter(parameter, scope))
 			
 			if parameter.max == Infinity {
 				if signature.max == Infinity {
-					throw new Error('Function can have only one rest parameter')
+					$throw('Function can have only one rest parameter', node)
 				}
 				else {
 					signature.max = Infinity
@@ -776,14 +777,14 @@ class FunctionDeclaration extends Statement {
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this._scope, {
+		$variable.define(this, this._scope, {
 			kind: Kind::Identifier,
 			name: 'this'
 		}, VariableKind::Variable)
 		
 		let data = this._data
 		
-		variable = $variable.define(this.greatScope(), data.name, VariableKind::Function, data.type)
+		variable = $variable.define(this, this.greatScope(), data.name, VariableKind::Function, data.type)
 		
 		for modifier in data.modifiers {
 			if modifier.kind == FunctionModifier::Async {
@@ -866,7 +867,7 @@ class Parameter extends AbstractNode {
 			let signature = $function.signatureParameter(data, this._scope)
 			
 			if signature.rest {
-				$variable.define(this._scope, data.name, VariableKind::Variable, {
+				$variable.define(this, this._scope, data.name, VariableKind::Variable, {
 					kind: Kind::TypeReference
 					typeName: {
 						kind: Kind::Identifier
@@ -875,7 +876,7 @@ class Parameter extends AbstractNode {
 				})
 			}
 			else {
-				$variable.define(this._scope, data.name, $variable.kind(data.type), data.type)
+				$variable.define(this, this._scope, data.name, $variable.kind(data.type), data.type)
 			}
 			
 			this._name = $compile.expression(data.name, parent)

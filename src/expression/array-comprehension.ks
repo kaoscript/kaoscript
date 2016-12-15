@@ -20,7 +20,7 @@ class ArrayComprehensionForFrom extends Expression {
 	analyse() { // {{{
 		let data = this._data
 		
-		$variable.define(this._scope, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
 		
 		this._variable = $compile.expression(data.loop.variable, this)
 		
@@ -95,8 +95,8 @@ class ArrayComprehensionForIn extends Expression {
 	analyse() { // {{{
 		let data = this._data
 		
-		$variable.define(this._scope, data.loop.variable.name, VariableKind::Variable)
-		$variable.define(this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
+		$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this, this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
 		
 		this._variable = $compile.expression(data.loop.variable, this)
 		this._value = $compile.expression(data.loop.value, this)
@@ -170,8 +170,8 @@ class ArrayComprehensionForOf extends Expression {
 	analyse() { // {{{
 		let data = this._data
 		
-		$variable.define(this._scope, data.loop.variable.name, VariableKind::Variable)
-		$variable.define(this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
+		$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this, this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
 		
 		this._variable = $compile.expression(data.loop.variable, this)
 		this._value = $compile.expression(data.loop.value, this)
@@ -246,7 +246,7 @@ class ArrayComprehensionForRange extends Expression {
 	analyse() { // {{{
 		let data = this._data
 		
-		$variable.define(this._scope, data.loop.variable.name, VariableKind::Variable)
+		$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
 		
 		this._variable = $compile.expression(data.loop.variable, this)
 		this._from = $compile.expression(data.loop.from, this)

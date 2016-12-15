@@ -581,7 +581,7 @@ const $helper = {
 					}
 				}
 				else {
-					throw new Error('Not Implemented')
+					$throw('Not Implemented', node)
 				}
 			}
 			
@@ -746,7 +746,7 @@ const $helper = {
 				return $quote('#' + type.type)
 			}
 			else {
-				throw new Error(`Invalid type \(type.type)`)
+				$throw(`Invalid type \(type.type)`, node)
 			}
 		}
 	} // }}}
@@ -891,11 +891,11 @@ class ClassDeclaration extends Statement {
 		let scope = this._scope
 		
 		this._name = data.name.name
-		this._variable = $variable.define(scope, data.name, VariableKind::Class, data.type)
+		this._variable = $variable.define(this, scope, data.name, VariableKind::Class, data.type)
 		
 		let classname = data.name
 		
-		let thisVariable = $variable.define(this._constructorScope, {
+		let thisVariable = $variable.define(this, this._constructorScope, {
 			kind: Kind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
@@ -939,21 +939,21 @@ class ClassDeclaration extends Statement {
 			}
 		}
 		
-		$variable.define(this._instanceVariableScope, {
+		$variable.define(this, this._instanceVariableScope, {
 			kind: Kind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
 		
 		if this._extends = data.extends? {
 			if !(this._extendsVariable ?= this._scope.getVariable(data.extends.name)) {
-				throw new Error(`Undefined class \(data.extends.name) at line \(data.extends.start.line)`)
+				$throw(`Undefined class \(data.extends.name) at line \(data.extends.start.line)`, this)
 			}
 			
 			this._extendsName = data.extends.name
 			
 			let extname = data.extends
 			
-			let superVariable = $variable.define(this._constructorScope, {
+			let superVariable = $variable.define(this, this._constructorScope, {
 				kind: Kind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
@@ -997,7 +997,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 			
-			$variable.define(this._instanceVariableScope, {
+			$variable.define(this, this._instanceVariableScope, {
 				kind: Kind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
@@ -1110,8 +1110,7 @@ class ClassDeclaration extends Statement {
 					}
 				}
 				=> {
-					console.error(member)
-					throw new Error('Unknow kind ' + member.kind)
+					$throw('Unknow kind ' + member.kind, this)
 				}
 			}
 		}
@@ -1179,13 +1178,13 @@ class ClassDeclaration extends Statement {
 	newInstanceMethodScope(data, member) { // {{{
 		let scope = new Scope(this._scope)
 		
-		$variable.define(scope, {
+		$variable.define(this, scope, {
 			kind: Kind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(data.name.name))
 		
 		if this._extends {
-			let variable = $variable.define(scope, {
+			let variable = $variable.define(this, scope, {
 				kind: Kind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
@@ -1270,7 +1269,7 @@ class MethodDeclaration extends Statement {
 						ctrl.newLine().code('this.' + name + '(').compile(this._parameters[p]._name).code(')').done()
 					}
 					else {
-						throw new Error('Can\'t set member ' + name + ' (line ' + parameter.start.line + ')')
+						$throw('Can\'t set member ' + name + ' (line ' + parameter.start.line + ')', this)
 					}
 					
 					nf = false
