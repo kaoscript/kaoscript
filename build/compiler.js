@@ -59,7 +59,8 @@ module.exports = function() {
 	$operator.binaries[BinaryOperator.LessThanOrEqual] = true;
 	$operator.binaries[BinaryOperator.NullCoalescing] = true;
 	$operator.binaries[BinaryOperator.Or] = true;
-	$operator.binaries[BinaryOperator.TypeCheck] = true;
+	$operator.binaries[BinaryOperator.TypeEquality] = true;
+	$operator.binaries[BinaryOperator.TypeInequality] = true;
 	$operator.lefts[BinaryOperator.Addition] = true;
 	$operator.lefts[BinaryOperator.Assignment] = true;
 	$operator.numerics[BinaryOperator.BitwiseAnd] = true;
@@ -307,7 +308,7 @@ module.exports = function() {
 					}
 				}
 			}
-			else if(type.types) {
+			else if(Type.isValue(type.types)) {
 				fragments.code("(");
 				for(var i = 0, __ks_0 = type.types.length; i < __ks_0; ++i) {
 					if(i) {
@@ -437,7 +438,7 @@ module.exports = function() {
 				};
 			}
 			else if(__ks_0 === Kind.BinaryOperator) {
-				if(data.operator.kind === BinaryOperator.TypeCast) {
+				if(data.operator.kind === BinaryOperator.TypeCasting) {
 					return $type.type(data.right, scope);
 				}
 				else if($operator.binaries[data.operator.kind]) {
@@ -811,7 +812,7 @@ module.exports = function() {
 				};
 			}
 			else if(__ks_0 === Kind.BinaryOperator) {
-				if(data.operator.kind === BinaryOperator.TypeCast) {
+				if(data.operator.kind === BinaryOperator.TypeCasting) {
 					return {
 						kind: VariableKind.Variable,
 						type: data.right
@@ -15254,7 +15255,7 @@ module.exports = function() {
 						throw new Error("Not Implemented");
 						clause.hasTest = true;
 					}
-					else if(binding.kind === Kind.SwitchTypeCast) {
+					else if(binding.kind === Kind.SwitchTypeCasting) {
 						binding = new SwitchBindingType(binding, this);
 					}
 					else {
@@ -25688,7 +25689,7 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
-	class BinaryOperatorTypeCast extends Expression {
+	class BinaryOperatorTypeCasting extends Expression {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
@@ -25700,7 +25701,7 @@ module.exports = function() {
 		}
 		isComputed() {
 			if(arguments.length === 0) {
-				return BinaryOperatorTypeCast.prototype.__ks_func_isComputed_0.apply(this);
+				return BinaryOperatorTypeCasting.prototype.__ks_func_isComputed_0.apply(this);
 			}
 			return Expression.prototype.isComputed.apply(this, arguments);
 		}
@@ -25709,7 +25710,7 @@ module.exports = function() {
 		}
 		isNullable() {
 			if(arguments.length === 0) {
-				return BinaryOperatorTypeCast.prototype.__ks_func_isNullable_0.apply(this);
+				return BinaryOperatorTypeCasting.prototype.__ks_func_isNullable_0.apply(this);
 			}
 			return Expression.prototype.isNullable.apply(this, arguments);
 		}
@@ -25718,7 +25719,7 @@ module.exports = function() {
 		}
 		analyse() {
 			if(arguments.length === 0) {
-				return BinaryOperatorTypeCast.prototype.__ks_func_analyse_0.apply(this);
+				return BinaryOperatorTypeCasting.prototype.__ks_func_analyse_0.apply(this);
 			}
 			else if(Expression.prototype.analyse) {
 				return Expression.prototype.analyse.apply(this, arguments);
@@ -25730,7 +25731,7 @@ module.exports = function() {
 		}
 		fuse() {
 			if(arguments.length === 0) {
-				return BinaryOperatorTypeCast.prototype.__ks_func_fuse_0.apply(this);
+				return BinaryOperatorTypeCasting.prototype.__ks_func_fuse_0.apply(this);
 			}
 			else if(Expression.prototype.fuse) {
 				return Expression.prototype.fuse.apply(this, arguments);
@@ -25748,7 +25749,7 @@ module.exports = function() {
 		}
 		toFragments() {
 			if(arguments.length === 2) {
-				return BinaryOperatorTypeCast.prototype.__ks_func_toFragments_0.apply(this, arguments);
+				return BinaryOperatorTypeCasting.prototype.__ks_func_toFragments_0.apply(this, arguments);
 			}
 			else if(Expression.prototype.toFragments) {
 				return Expression.prototype.toFragments.apply(this, arguments);
@@ -25756,7 +25757,7 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		}
 	}
-	BinaryOperatorTypeCast.__ks_reflect = {
+	BinaryOperatorTypeCasting.__ks_reflect = {
 		inits: 0,
 		constructors: [],
 		instanceVariables: {
@@ -25816,7 +25817,7 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
-	class BinaryOperatorTypeCheck extends Expression {
+	class BinaryOperatorTypeEquality extends Expression {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
@@ -25828,7 +25829,7 @@ module.exports = function() {
 		}
 		isComputed() {
 			if(arguments.length === 0) {
-				return BinaryOperatorTypeCheck.prototype.__ks_func_isComputed_0.apply(this);
+				return BinaryOperatorTypeEquality.prototype.__ks_func_isComputed_0.apply(this);
 			}
 			return Expression.prototype.isComputed.apply(this, arguments);
 		}
@@ -25837,7 +25838,7 @@ module.exports = function() {
 		}
 		isNullable() {
 			if(arguments.length === 0) {
-				return BinaryOperatorTypeCheck.prototype.__ks_func_isNullable_0.apply(this);
+				return BinaryOperatorTypeEquality.prototype.__ks_func_isNullable_0.apply(this);
 			}
 			return Expression.prototype.isNullable.apply(this, arguments);
 		}
@@ -25846,7 +25847,7 @@ module.exports = function() {
 		}
 		analyse() {
 			if(arguments.length === 0) {
-				return BinaryOperatorTypeCheck.prototype.__ks_func_analyse_0.apply(this);
+				return BinaryOperatorTypeEquality.prototype.__ks_func_analyse_0.apply(this);
 			}
 			else if(Expression.prototype.analyse) {
 				return Expression.prototype.analyse.apply(this, arguments);
@@ -25858,7 +25859,7 @@ module.exports = function() {
 		}
 		fuse() {
 			if(arguments.length === 0) {
-				return BinaryOperatorTypeCheck.prototype.__ks_func_fuse_0.apply(this);
+				return BinaryOperatorTypeEquality.prototype.__ks_func_fuse_0.apply(this);
 			}
 			else if(Expression.prototype.fuse) {
 				return Expression.prototype.fuse.apply(this, arguments);
@@ -25876,7 +25877,7 @@ module.exports = function() {
 		}
 		toFragments() {
 			if(arguments.length === 2) {
-				return BinaryOperatorTypeCheck.prototype.__ks_func_toFragments_0.apply(this, arguments);
+				return BinaryOperatorTypeEquality.prototype.__ks_func_toFragments_0.apply(this, arguments);
 			}
 			else if(Expression.prototype.toFragments) {
 				return Expression.prototype.toFragments.apply(this, arguments);
@@ -25884,7 +25885,141 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		}
 	}
-	BinaryOperatorTypeCheck.__ks_reflect = {
+	BinaryOperatorTypeEquality.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			isComputed: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			isNullable: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			fuse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			toFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class BinaryOperatorTypeInequality extends Expression {
+		__ks_init() {
+			Expression.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			Expression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_isComputed_0() {
+			return false;
+		}
+		isComputed() {
+			if(arguments.length === 0) {
+				return BinaryOperatorTypeInequality.prototype.__ks_func_isComputed_0.apply(this);
+			}
+			return Expression.prototype.isComputed.apply(this, arguments);
+		}
+		__ks_func_isNullable_0() {
+			return false;
+		}
+		isNullable() {
+			if(arguments.length === 0) {
+				return BinaryOperatorTypeInequality.prototype.__ks_func_isNullable_0.apply(this);
+			}
+			return Expression.prototype.isNullable.apply(this, arguments);
+		}
+		__ks_func_analyse_0() {
+			this._left = $compile.expression(this._data.left, this);
+		}
+		analyse() {
+			if(arguments.length === 0) {
+				return BinaryOperatorTypeInequality.prototype.__ks_func_analyse_0.apply(this);
+			}
+			else if(Expression.prototype.analyse) {
+				return Expression.prototype.analyse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_fuse_0() {
+			this._left.fuse();
+		}
+		fuse() {
+			if(arguments.length === 0) {
+				return BinaryOperatorTypeInequality.prototype.__ks_func_fuse_0.apply(this);
+			}
+			else if(Expression.prototype.fuse) {
+				return Expression.prototype.fuse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_toFragments_0(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			if(this._data.right.kind === Kind.TypeReference) {
+				fragments.code("!");
+				$type.check(this, fragments, this._left, this._data.right);
+			}
+			else if(Type.isValue(this._data.right.types)) {
+				fragments.code("!(");
+				$type.check(this, fragments, this._left, this._data.right);
+				fragments.code(")");
+			}
+			else {
+				throw new Error("Not Implemented");
+			}
+		}
+		toFragments() {
+			if(arguments.length === 2) {
+				return BinaryOperatorTypeInequality.prototype.__ks_func_toFragments_0.apply(this, arguments);
+			}
+			else if(Expression.prototype.toFragments) {
+				return Expression.prototype.toFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	BinaryOperatorTypeInequality.__ks_reflect = {
 		inits: 0,
 		constructors: [],
 		instanceVariables: {},
@@ -27568,8 +27703,9 @@ module.exports = function() {
 	$binaryOperators[BinaryOperator.NullCoalescing] = BinaryOperatorNullCoalescing;
 	$binaryOperators[BinaryOperator.Or] = BinaryOperatorOr;
 	$binaryOperators[BinaryOperator.Subtraction] = BinaryOperatorSubtraction;
-	$binaryOperators[BinaryOperator.TypeCast] = BinaryOperatorTypeCast;
-	$binaryOperators[BinaryOperator.TypeCheck] = BinaryOperatorTypeCheck;
+	$binaryOperators[BinaryOperator.TypeCasting] = BinaryOperatorTypeCasting;
+	$binaryOperators[BinaryOperator.TypeEquality] = BinaryOperatorTypeEquality;
+	$binaryOperators[BinaryOperator.TypeInequality] = BinaryOperatorTypeInequality;
 	var $expressions = {};
 	$expressions[Kind.ArrayBinding] = ArrayBinding;
 	$expressions[Kind.ArrayComprehension] = function(data, parent, scope) {

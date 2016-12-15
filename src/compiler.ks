@@ -76,7 +76,8 @@ const $operator = { // {{{
 		`\(BinaryOperator::LessThanOrEqual)`: true
 		`\(BinaryOperator::NullCoalescing)`: true
 		`\(BinaryOperator::Or)`: true
-		`\(BinaryOperator::TypeCheck)`: true
+		`\(BinaryOperator::TypeEquality)`: true
+		`\(BinaryOperator::TypeInequality)`: true
 	}
 	lefts: {
 		`\(BinaryOperator::Addition)`: true
@@ -300,7 +301,7 @@ const $type = {
 				}
 			}
 		}
-		else if type.types {
+		else if type.types? {
 			fragments.code('(')
 			
 			for i from 0 til type.types.length {
@@ -403,7 +404,7 @@ const $type = {
 				}
 			}
 			Kind::BinaryOperator => {
-				if data.operator.kind == BinaryOperator::TypeCast {
+				if data.operator.kind == BinaryOperator::TypeCasting {
 					return $type.type(data.right, scope)
 				}
 				else if $operator.binaries[data.operator.kind] {
@@ -729,7 +730,7 @@ const $variable = {
 				}
 			}
 			Kind::BinaryOperator => {
-				if data.operator.kind == BinaryOperator::TypeCast {
+				if data.operator.kind == BinaryOperator::TypeCasting {
 					return {
 						kind: VariableKind::Variable
 						type: data.right
@@ -1223,8 +1224,9 @@ const $binaryOperators = {
 	`\(BinaryOperator::NullCoalescing)`		: BinaryOperatorNullCoalescing
 	`\(BinaryOperator::Or)`					: BinaryOperatorOr
 	`\(BinaryOperator::Subtraction)`		: BinaryOperatorSubtraction
-	`\(BinaryOperator::TypeCast)`			: BinaryOperatorTypeCast
-	`\(BinaryOperator::TypeCheck)`			: BinaryOperatorTypeCheck
+	`\(BinaryOperator::TypeCasting)`		: BinaryOperatorTypeCasting
+	`\(BinaryOperator::TypeEquality)`		: BinaryOperatorTypeEquality
+	`\(BinaryOperator::TypeInequality)`		: BinaryOperatorTypeInequality
 }
 
 const $expressions = {

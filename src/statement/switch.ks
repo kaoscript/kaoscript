@@ -87,7 +87,7 @@ class SwitchStatement extends Statement {
 					
 					clause.hasTest = true
 				}
-				else if binding.kind == Kind::SwitchTypeCast {
+				else if binding.kind == Kind::SwitchTypeCasting {
 					binding = new SwitchBindingType(binding, this)
 				}
 				else {

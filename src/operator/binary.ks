@@ -286,7 +286,7 @@ class BinaryOperatorSubtraction extends BinaryOperatorExpression {
 	} // }}}
 }
 
-class BinaryOperatorTypeCast extends Expression {
+class BinaryOperatorTypeCasting extends Expression {
 	private {
 		_left
 	}
@@ -303,7 +303,7 @@ class BinaryOperatorTypeCast extends Expression {
 	} // }}}
 }
 
-class BinaryOperatorTypeCheck extends Expression {
+class BinaryOperatorTypeEquality extends Expression {
 	isComputed() => false
 	isNullable() => false
 	analyse() { // {{{
@@ -314,5 +314,33 @@ class BinaryOperatorTypeCheck extends Expression {
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		$type.check(this, fragments, this._left, this._data.right)
+	} // }}}
+}
+
+class BinaryOperatorTypeInequality extends Expression {
+	isComputed() => false
+	isNullable() => false
+	analyse() { // {{{
+		this._left = $compile.expression(this._data.left, this)
+	} // }}}
+	fuse() { // {{{
+		this._left.fuse()
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		if this._data.right.kind == Kind::TypeReference {
+			fragments.code('!')
+			
+			$type.check(this, fragments, this._left, this._data.right)
+		}
+		else if this._data.right.types? {
+			fragments.code('!(')
+			
+			$type.check(this, fragments, this._left, this._data.right)
+			
+			fragments.code(')')
+		}
+		else {
+			throw new Error('Not Implemented')
+		}
 	} // }}}
 }
