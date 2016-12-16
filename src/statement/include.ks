@@ -23,7 +23,7 @@ class IncludeDeclaration extends Statement {
 					try {
 						data = parse(data)
 					}
-					catch(error) {
+					catch error {
 						error.filename = path
 						
 						throw error
@@ -63,7 +63,7 @@ class IncludeDeclaration extends Statement {
 				try {
 					data = parse(data)
 				}
-				catch(error) {
+				catch error {
 					error.filename = path
 					
 					throw error
@@ -115,7 +115,7 @@ class IncludeOnceDeclaration extends Statement {
 						try {
 							data = parse(data)
 						}
-						catch(error) {
+						catch error {
 							error.filename = path
 							
 							throw error
@@ -157,7 +157,7 @@ class IncludeOnceDeclaration extends Statement {
 					try {
 						data = parse(data)
 					}
-					catch(error) {
+					catch error {
 						error.filename = path
 						
 						throw error

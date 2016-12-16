@@ -24,7 +24,7 @@ class Module {
 		try {
 			this._data = parse(data)
 		}
-		catch(error) {
+		catch error {
 			error.filename = file
 			
 			throw error

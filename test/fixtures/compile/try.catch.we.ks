@@ -5,6 +5,6 @@ extern console: {
 try {
 	console.log('foobar')
 }
-catch(error) {
+catch error {
 	console.log(error)
 }

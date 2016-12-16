@@ -47,7 +47,7 @@ describe('color.space', func() {
 			try {
 				c.space('hsb')
 			}
-			catch(e) {
+			catch e {
 				error = e
 			}
 			
@@ -186,7 +186,7 @@ describe('color.space', func() {
 			try {
 				c.space('blue')
 			}
-			catch(e) {
+			catch e {
 				error = e
 			}
 			
