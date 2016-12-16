@@ -331,11 +331,15 @@ class CallSealedExpression extends Expression {
 				}
 				else {
 					fragments
-						.code(`\(path)._im_\(this._data.callee.property.name).apply(\(path), [].concat(`)
+						.code(`\(path)._im_\(this._data.callee.property.name).apply(\(path), [`)
 						.compile(this._object)
+						.code(`].concat(`)
+						
 					
 					for i from 0 til this._arguments.length {
-						fragments.code($comma).compile(this._arguments[i])
+						fragments.code($comma) if i != 0
+						
+						fragments.compile(this._arguments[i])
 					}
 					
 					fragments.code('))')
