@@ -19649,7 +19649,7 @@ module.exports = function() {
 			else {
 				fragments.code(", 1");
 			}
-			fragments.code($comma).code("(").compile(this._variable).code(") =>").newBlock().compile(this._body).done();
+			fragments.code($comma, "true", $comma, "true", $comma).code("(").compile(this._variable).code(") =>").newBlock().compile(this._body).done();
 			if(Type.isValue(this._when)) {
 				fragments.code($comma).code("(").compile(this._variable).code(") =>").newBlock().compile(this._when).done();
 			}

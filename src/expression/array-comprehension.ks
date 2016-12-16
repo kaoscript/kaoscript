@@ -286,7 +286,7 @@ class ArrayComprehensionForRange extends Expression {
 		}
 		
 		fragments
-			.code($comma)
+			.code($comma, 'true', $comma, 'true', $comma)
 			.code('(')
 			.compile(this._variable)
 			.code(') =>')
