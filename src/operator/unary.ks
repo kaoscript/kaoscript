@@ -85,11 +85,3 @@ class UnaryOperatorNegative extends UnaryOperatorExpression {
 			.wrap(this._argument)
 	} // }}}
 }
-
-class UnaryOperatorNew extends UnaryOperatorExpression {
-	toFragments(fragments, mode) { // {{{
-		fragments
-			.code('new', this._data.operator, $space)
-			.wrap(this._argument)
-	} // }}}
-}

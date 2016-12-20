@@ -22,6 +22,7 @@ include {
 	../expression/binding
 	../expression/block
 	../expression/call
+	../expression/create
 	../expression/curry
 	../expression/enum
 	../expression/function

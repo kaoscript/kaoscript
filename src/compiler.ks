@@ -159,6 +159,18 @@ func $block(data) { // {{{
 	}
 } // }}}
 
+func $identifier(name) { // {{{
+	if name is String {
+		return {
+			kind: Kind::Identifier
+			name: name
+		}
+	}
+	else {
+		return name
+	}
+} // }}}
+
 func $statements(data) { // {{{
 	return data.statements if data.kind == Kind::Block
 	
@@ -781,25 +793,11 @@ const $variable = {
 				
 				if variable? {
 					if variable.kind == VariableKind::Class {
-						if variable.name is String {
-							return {
-								kind: VariableKind::Variable
-								type: {
-									kind: Kind::TypeReference
-									typeName: {
-										kind: Kind::Identifier
-										name: variable.name
-									}
-								}
-							}
-						}
-						else {
-							return {
-								kind: VariableKind::Variable
-								type: {
-									kind: Kind::TypeReference
-									typeName: variable.name
-								}
+						return {
+							kind: VariableKind::Variable
+							type: {
+								kind: Kind::TypeReference
+								typeName: $identifier(variable.name)
 							}
 						}
 					}
@@ -816,6 +814,17 @@ const $variable = {
 					}
 					else {
 						$throw('Not implemented', node)
+					}
+				}
+			}
+			Kind::CreateExpression => {
+				if variable ?= $variable.fromAST(data.class, node) {
+					return {
+						kind: VariableKind::Variable
+						type: {
+							kind: Kind::TypeReference
+							typeName: $identifier(variable.name)
+						}
 					}
 				}
 			}
@@ -853,10 +862,7 @@ const $variable = {
 									kind: VariableKind::Variable
 									type: {
 										kind: Kind::TypeReference
-										typeName: {
-											kind: Kind::Identifier
-											name: variable.name
-										}
+										typeName: $identifier(variable.name)
 									}
 								}
 							}
@@ -1261,6 +1267,7 @@ const $expressions = {
 			return new CallExpression(data, parent, scope)
 		}
 	}
+	`\(Kind::CreateExpression)`				: CreateExpression
 	`\(Kind::CurryExpression)`				: CurryExpression
 	`\(Kind::EnumExpression)`				: EnumExpression
 	`\(Kind::FunctionExpression)`			: FunctionExpression
@@ -1347,7 +1354,6 @@ const $unaryOperators = {
 	`\(UnaryOperator::IncrementPrefix)`		: UnaryOperatorIncrementPrefix
 	`\(UnaryOperator::Negation)`			: UnaryOperatorNegation
 	`\(UnaryOperator::Negative)`			: UnaryOperatorNegative
-	`\(UnaryOperator::New)`					: UnaryOperatorNew
 }
 
 export class Compiler {

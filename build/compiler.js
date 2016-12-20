@@ -136,6 +136,20 @@ module.exports = function() {
 			statements: [data]
 		};
 	}
+	function $identifier(name) {
+		if(name === undefined || name === null) {
+			throw new Error("Missing parameter 'name'");
+		}
+		if(Type.isString(name)) {
+			return {
+				kind: Kind.Identifier,
+				name: name
+			};
+		}
+		else {
+			return name;
+		}
+	}
 	function $statements(data) {
 		if(data === undefined || data === null) {
 			throw new Error("Missing parameter 'data'");
@@ -866,27 +880,13 @@ module.exports = function() {
 				var variable = $variable.fromAST(data.callee, node);
 				if(Type.isValue(variable)) {
 					if(variable.kind === VariableKind.Class) {
-						if(Type.isString(variable.name)) {
-							return {
-								kind: VariableKind.Variable,
-								type: {
-									kind: Kind.TypeReference,
-									typeName: {
-										kind: Kind.Identifier,
-										name: variable.name
-									}
-								}
-							};
-						}
-						else {
-							return {
-								kind: VariableKind.Variable,
-								type: {
-									kind: Kind.TypeReference,
-									typeName: variable.name
-								}
-							};
-						}
+						return {
+							kind: VariableKind.Variable,
+							type: {
+								kind: Kind.TypeReference,
+								typeName: $identifier(variable.name)
+							}
+						};
 					}
 					else if((variable.kind === VariableKind.Function) || (variable.kind === VariableKind.Variable)) {
 						if(Type.isValue(variable.type) && Type.isValue(variable.type.typeName)) {
@@ -902,6 +902,18 @@ module.exports = function() {
 					else {
 						$throw("Not implemented", node);
 					}
+				}
+			}
+			else if(__ks_0 === Kind.CreateExpression) {
+				var variable, __ks_1;
+				if(Type.isValue(__ks_1 = $variable.fromAST(data.class, node)) ? (variable = __ks_1, true) : false) {
+					return {
+						kind: VariableKind.Variable,
+						type: {
+							kind: Kind.TypeReference,
+							typeName: $identifier(variable.name)
+						}
+					};
 				}
 			}
 			else if(__ks_0 === Kind.Identifier) {
@@ -926,17 +938,13 @@ module.exports = function() {
 						variable = $variable.fromType($type.unalias(variable.type, node.scope()), node);
 					}
 					if(data.computed) {
-						var __ks_1;
 						if(Type.isValue(variable.type) && (Type.isValue(__ks_1 = $variable.fromType(variable.type, node)) ? (variable = __ks_1, true) : false)) {
 							if(Type.isValue(variable.type) && (Type.isValue(__ks_1 = $variable.fromType(variable.type, node)) ? (variable = __ks_1, true) : false)) {
 								return {
 									kind: VariableKind.Variable,
 									type: {
 										kind: Kind.TypeReference,
-										typeName: {
-											kind: Kind.Identifier,
-											name: variable.name
-										}
+										typeName: $identifier(variable.name)
 									}
 								};
 							}
@@ -7738,18 +7746,6 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_fuse_0() {
-			for(var name in this._instanceVariables) {
-				var variable = this._instanceVariables[name];
-				if(Type.isValue(variable.defaultValue)) {
-					variable.defaultValue.analyse();
-				}
-			}
-			for(var name in this._classVariables) {
-				var variable = this._classVariables[name];
-				if(Type.isValue(variable.defaultValue)) {
-					variable.defaultValue.analyse();
-				}
-			}
 			for(var __ks_0 = 0, __ks_1 = this._constructors.length, method; __ks_0 < __ks_1; ++__ks_0) {
 				method = this._constructors[__ks_0];
 				method.statement.analyse();
@@ -21274,6 +21270,139 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
+	class CreateExpression extends Expression {
+		__ks_init_1() {
+			this._arguments = [];
+			this._list = true;
+		}
+		__ks_init() {
+			Expression.prototype.__ks_init.call(this);
+			CreateExpression.prototype.__ks_init_1.call(this);
+		}
+		__ks_cons(args) {
+			Expression.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_analyse_0() {
+			this._class = $compile.expression(this._data.class, this);
+			for(var __ks_0 = 0, __ks_1 = this._data.arguments.length, argument; __ks_0 < __ks_1; ++__ks_0) {
+				argument = this._data.arguments[__ks_0];
+				if((argument.kind === Kind.UnaryExpression) && (argument.operator.kind === UnaryOperator.Spread)) {
+					this._arguments.push($compile.expression(argument.argument, this));
+					this._list = false;
+				}
+				else {
+					this._arguments.push($compile.expression(argument, this));
+				}
+			}
+		}
+		analyse() {
+			if(arguments.length === 0) {
+				return CreateExpression.prototype.__ks_func_analyse_0.apply(this);
+			}
+			else if(Expression.prototype.analyse) {
+				return Expression.prototype.analyse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_fuse_0() {
+			this._class.fuse();
+			for(var __ks_0 = 0, __ks_1 = this._arguments.length, argument; __ks_0 < __ks_1; ++__ks_0) {
+				argument = this._arguments[__ks_0];
+				argument.fuse();
+			}
+		}
+		fuse() {
+			if(arguments.length === 0) {
+				return CreateExpression.prototype.__ks_func_fuse_0.apply(this);
+			}
+			else if(Expression.prototype.fuse) {
+				return Expression.prototype.fuse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_toFragments_0(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			if(this._list) {
+				fragments.code("new ").compile(this._class).code("(");
+				for(var i = 0, __ks_0 = this._arguments.length; i < __ks_0; ++i) {
+					if(i !== 0) {
+						fragments.code($comma);
+					}
+					fragments.compile(this._arguments[i]);
+				}
+				fragments.code(")");
+			}
+			else {
+				$throw("Not Implemted");
+			}
+		}
+		toFragments() {
+			if(arguments.length === 2) {
+				return CreateExpression.prototype.__ks_func_toFragments_0.apply(this, arguments);
+			}
+			else if(Expression.prototype.toFragments) {
+				return Expression.prototype.toFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	}
+	CreateExpression.__ks_reflect = {
+		inits: 1,
+		constructors: [],
+		instanceVariables: {
+			_arguments: {
+				access: 1,
+				type: "Any"
+			},
+			_class: {
+				access: 1,
+				type: "Any"
+			},
+			_list: {
+				access: 1,
+				type: "Any"
+			}
+		},
+		classVariables: {},
+		instanceMethods: {
+			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			fuse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			toFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
 	class CurryExpression extends Expression {
 		__ks_init_1() {
 			this._arguments = [];
@@ -27568,55 +27697,6 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
-	class UnaryOperatorNew extends UnaryOperatorExpression {
-		__ks_init() {
-			UnaryOperatorExpression.prototype.__ks_init.call(this);
-		}
-		__ks_cons(args) {
-			UnaryOperatorExpression.prototype.__ks_cons.call(this, args);
-		}
-		__ks_func_toFragments_0(fragments, mode) {
-			if(fragments === undefined || fragments === null) {
-				throw new Error("Missing parameter 'fragments'");
-			}
-			if(mode === undefined || mode === null) {
-				throw new Error("Missing parameter 'mode'");
-			}
-			fragments.code("new", this._data.operator, $space).wrap(this._argument);
-		}
-		toFragments() {
-			if(arguments.length === 2) {
-				return UnaryOperatorNew.prototype.__ks_func_toFragments_0.apply(this, arguments);
-			}
-			else if(UnaryOperatorExpression.prototype.toFragments) {
-				return UnaryOperatorExpression.prototype.toFragments.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
-		}
-	}
-	UnaryOperatorNew.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {
-			toFragments: [
-				{
-					access: 3,
-					min: 2,
-					max: 2,
-					parameters: [
-						{
-							type: "Any",
-							min: 2,
-							max: 2
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	var $compile = {
 		expression() {
 			if(arguments.length < 2) {
@@ -27786,6 +27866,7 @@ module.exports = function() {
 			return new CallExpression(data, parent, scope);
 		}
 	};
+	$expressions[Kind.CreateExpression] = CreateExpression;
 	$expressions[Kind.CurryExpression] = CurryExpression;
 	$expressions[Kind.EnumExpression] = EnumExpression;
 	$expressions[Kind.FunctionExpression] = FunctionExpression;
@@ -27876,7 +27957,6 @@ module.exports = function() {
 	$unaryOperators[UnaryOperator.IncrementPrefix] = UnaryOperatorIncrementPrefix;
 	$unaryOperators[UnaryOperator.Negation] = UnaryOperatorNegation;
 	$unaryOperators[UnaryOperator.Negative] = UnaryOperatorNegative;
-	$unaryOperators[UnaryOperator.New] = UnaryOperatorNew;
 	class Compiler {
 		constructor() {
 			this.__ks_init();

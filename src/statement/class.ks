@@ -1127,13 +1127,13 @@ class ClassDeclaration extends Statement {
 		}
 	} // }}}
 	fuse() { // {{{
-		for name, variable of this._instanceVariables when variable.defaultValue? {
+		/* for name, variable of this._instanceVariables when variable.defaultValue? {
 			variable.defaultValue.analyse()
 		}
 		
 		for name, variable of this._classVariables when variable.defaultValue? {
 			variable.defaultValue.analyse()
-		}
+		} */
 		
 		for method in this._constructors {
 			method.statement.analyse()
