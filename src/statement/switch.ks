@@ -26,9 +26,6 @@ class SwitchStatement extends Statement {
 		_name
 		_value
 	}
-	SwitchStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let scope = this._scope
 		
@@ -221,9 +218,6 @@ class SwitchBindingArray extends AbstractNode {
 	private {
 		_array
 	}
-	SwitchBindingArray(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._array = $compile.expression(this._data, this)
 	} // }}}
@@ -240,9 +234,6 @@ class SwitchBindingArray extends AbstractNode {
 }
 
 class SwitchBindingType extends AbstractNode {
-	SwitchBindingType(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		$variable.define(this, this._scope, this._data.name, VariableKind::Variable)
 	} // }}}
@@ -254,9 +245,6 @@ class SwitchBindingType extends AbstractNode {
 }
 
 class SwitchBindingValue extends AbstractNode {
-	SwitchBindingValue(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		$variable.define(this, this._scope, this._data, VariableKind::Variable)
 	} // }}}
@@ -272,9 +260,6 @@ class SwitchConditionArray extends AbstractNode {
 		_name
 		_values = []
 	}
-	SwitchConditionArray(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let nv = true
 		for i from 0 til this._data.values.length while nv {
@@ -378,9 +363,6 @@ class SwitchConditionRange extends AbstractNode {
 		_right
 		_to		= true
 	}
-	SwitchConditionRange(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		if this._data.from? {
 			this._left = $compile.expression(this._data.from, this)
@@ -415,9 +397,6 @@ class SwitchConditionRange extends AbstractNode {
 }
 
 class SwitchConditionType extends AbstractNode {
-	SwitchConditionType(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 	} // }}}
 	fuse() { // {{{
@@ -433,9 +412,6 @@ class SwitchConditionValue extends AbstractNode {
 	private {
 		_value
 	}
-	SwitchConditionValue(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._value = $compile.expression(this._data, this)
 	} // }}}
@@ -457,9 +433,6 @@ class SwitchFilter extends AbstractNode {
 		_filter
 		_name
 	}
-	SwitchFilter(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		if this._data.filter? {
 			if this._data.bindings.length > 0 {

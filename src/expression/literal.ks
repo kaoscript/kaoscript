@@ -17,7 +17,7 @@ class Literal extends Expression {
 	private {
 		_value
 	}
-	Literal(data, parent, scope, @value) { // {{{
+	$create(data, parent, scope, @value) { // {{{
 		super(data, parent, scope)
 	} // }}}
 	analyse() { // {{{
@@ -40,7 +40,7 @@ class IdentifierLiteral extends Literal {
 	private {
 		_isVariable = false
 	}
-	IdentifierLiteral(data, parent, scope = parent.scope(), variable = true) { // {{{
+	$create(data, parent, scope = parent.scope(), variable = true) { // {{{
 		super(data, parent, scope, data.name)
 		
 		if variable && $predefined[data.name] != true {
@@ -72,13 +72,13 @@ class IdentifierLiteral extends Literal {
 }
 
 class NumberLiteral extends Literal { // {{{
-	NumberLiteral(data, parent, scope = parent.scope()) { // {{{
+	$create(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.value)
 	} // }}}
 } // }}}
 
 class StringLiteral extends Literal { // {{{
-	StringLiteral(data, parent, scope = parent.scope()) { // {{{
+	$create(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, $quote(data.value))
 	} // }}}
 } // }}}

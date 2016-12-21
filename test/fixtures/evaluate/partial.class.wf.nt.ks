@@ -9,7 +9,7 @@ sealed class Shape {
 		return new Shape('blue')
 	}
 	
-	Shape(@color: string)
+	$create(@color: string)
 	
 	draw(): string {
 		return `I'm drawing a \(this._color) rectangle.`

@@ -6,9 +6,6 @@ class AssignmentOperatorExpression extends Expression {
 	isAssignable() => true
 	isComputed() => true
 	isNullable() => this._right.isNullable()
-	AssignmentOperatorExpression(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		

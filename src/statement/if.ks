@@ -2,9 +2,6 @@ class IfStatement extends Statement {
 	private {
 		_items	= []
 	}
-	IfStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		
@@ -39,7 +36,7 @@ class IfClause extends AbstractNode {
 		_condition
 		_body
 	}
-	IfClause(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, parent.newScope())
 		
 		this.analyse()
@@ -71,7 +68,7 @@ class IfElseClause extends AbstractNode {
 		_condition
 		_body
 	}
-	IfElseClause(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, parent.newScope())
 		
 		this.analyse()
@@ -103,7 +100,7 @@ class ElseClause extends AbstractNode {
 		_condition
 		_body
 	}
-	ElseClause(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, parent.newScope())
 		
 		this.analyse()

@@ -86,7 +86,7 @@ class BindingElement extends Expression {
 		_defaultValue
 		_name
 	}
-	BindingElement(data, parent, scope) { // {{{
+	$create(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{

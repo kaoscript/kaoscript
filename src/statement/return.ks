@@ -2,9 +2,6 @@ class ReturnStatement extends Statement {
 	private {
 		_value = null
 	}
-	ReturnStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		if this._data.value? {
 			this._value = $compile.expression(this._data.value, this)

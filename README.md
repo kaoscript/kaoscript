@@ -264,8 +264,13 @@ class Shape {
 		_color: string
 	}
 	
-    Shape(@color)
-	// automatically the instance variable '_color' as the parameter 'color'
+    $create(@color)
+	// constructor, automatically set the instance variable '_color' as the parameter 'color'
+	
+	$destroy() {
+		this._color = null
+	}
+	// destructor
 	
 	// getter/setter
 	color() => this._color

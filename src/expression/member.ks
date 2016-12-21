@@ -163,7 +163,7 @@ class MemberSealedExpression extends Expression {
 	private {
 		_callee
 	}
-	MemberSealedExpression(data, parent, scope, @callee) { // {{{
+	$create(data, parent, scope, @callee) { // {{{
 		super(data, parent, scope)
 	} // }}}
 	analyse() { // {{{

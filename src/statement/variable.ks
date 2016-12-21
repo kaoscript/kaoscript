@@ -67,7 +67,7 @@ class AwaitDeclarator extends AbstractNode {
 		_operation
 		_variables = []
 	}
-	AwaitDeclarator(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, new Scope(parent._scope))
 	} // }}}
 	analyse() { // {{{

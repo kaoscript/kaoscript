@@ -11,7 +11,7 @@ class Foo {
 		name: string
 	}
 	
-	Foo(@name)
+	$create(@name)
 	
 	qux(name) {
 		this.bar = 'Hello ' + name

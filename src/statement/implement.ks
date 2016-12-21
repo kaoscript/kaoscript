@@ -2,9 +2,6 @@ class ImplementDeclaration extends Statement {
 	private {
 		_properties = []
 	}
-	ImplementDeclaration(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		this._variable = this._scope.getVariable(data.variable.name)
@@ -73,7 +70,7 @@ class ImplementClassFieldDeclaration extends Statement {
 	private {
 		_variable
 	}
-	ImplementClassFieldDeclaration(data, parent, @variable) { // {{{
+	$create(data, parent, @variable) { // {{{
 		super(data, parent)
 		
 		if variable.sealed {
@@ -98,20 +95,25 @@ class ImplementClassFieldDeclaration extends Statement {
 
 class ImplementClassMethodDeclaration extends Statement {
 	private {
-		_instance	= true
+		_isContructor	= false
+		_isDestructor	= false
+		_instance		= true
 		_name
 		_parameters
 		_statements
 		_variable
 	}
-	ImplementClassMethodDeclaration(data, parent, @variable) { // {{{
+	$create(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		let variable = this._variable
 		
-		if data.name.name == variable.name.name {
+		if this._isContructor = data.name.kind == Kind::Identifier && $method.isConstructor(data.name.name, variable) {
+			$throw('Not Implemented', this)
+		}
+		else if this._isDestructor = data.name.kind == Kind::Identifier && $method.isDestructor(data.name.name, variable) {
 			$throw('Not Implemented', this)
 		}
 		else {
@@ -183,7 +185,10 @@ class ImplementClassMethodDeclaration extends Statement {
 		let data = this._data
 		let variable = this._variable
 		
-		if data.name.name == variable.name.name {
+		if this._isContructor {
+			$throw('Not Implemented', this)
+		}
+		else if this._isDestructor {
 			$throw('Not Implemented', this)
 		}
 		else {
@@ -231,20 +236,25 @@ class ImplementClassMethodDeclaration extends Statement {
 class ImplementClassMethodAliasDeclaration extends Statement {
 	private {
 		_arguments
-		_instance	= true
+		_isContructor	= false
+		_isDestructor	= false
+		_instance		= true
 		_name
 		_parameters
 		_signature
 		_variable
 	}
-	ImplementClassMethodAliasDeclaration(data, parent, @variable) { // {{{
+	$create(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		let variable = this._variable
 		
-		if data.name.name == variable.name.name {
+		if this._isContructor = data.name.kind == Kind::Identifier && $method.isConstructor(data.name.name, variable) {
+			$throw('Not Implemented', this)
+		}
+		else if this._isDestructor = data.name.kind == Kind::Identifier && $method.isDestructor(data.name.name, variable) {
 			$throw('Not Implemented', this)
 		}
 		else {
@@ -354,20 +364,25 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 	private {
 		_arguments
 		_functionName
+		_isContructor	= false
+		_isDestructor	= false
 		_instance	= true
 		_name
 		_parameters
 		_signature
 		_variable
 	}
-	ImplementClassMethodLinkDeclaration(data, parent, @variable) { // {{{
+	$create(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		let variable = this._variable
 		
-		if data.name.name == variable.name.name {
+		if this._isContructor = data.name.kind == Kind::Identifier && $method.isConstructor(data.name.name, variable) {
+			$throw('Not Implemented', this)
+		}
+		else if this._isDestructor = data.name.kind == Kind::Identifier && $method.isDestructor(data.name.name, variable) {
 			$throw('Not Implemented', this)
 		}
 		else {
@@ -472,7 +487,7 @@ class ImplementVariableFieldDeclaration extends Statement {
 		_value
 		_variable
 	}
-	ImplementVariableFieldDeclaration(data, parent, @variable) { // {{{
+	$create(data, parent, @variable) { // {{{
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
@@ -508,7 +523,7 @@ class ImplementVariableMethodDeclaration extends Statement {
 		_statements
 		_variable
 	}
-	ImplementVariableMethodDeclaration(data, parent, @variable) { // {{{
+	$create(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{

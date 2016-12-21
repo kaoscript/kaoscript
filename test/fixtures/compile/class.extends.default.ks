@@ -5,7 +5,7 @@ class Shape {
 		_color: string
 	}
 	
-	Shape(@color)
+	$create(@color)
 	
 	draw(): string {
 		throw new Error('Not Implemented')
@@ -13,7 +13,7 @@ class Shape {
 }
 
 class Rectangle extends Shape {
-	Rectangle(color) {
+	$create(color) {
 		super(color)
 	}
 	

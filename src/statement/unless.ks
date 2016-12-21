@@ -3,9 +3,6 @@ class UnlessStatement extends Statement {
 		_body
 		_then
 	}
-	UnlessStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._condition = $compile.expression(this._data.condition, this)
 		this._then = $compile.expression($block(this._data.then), this)

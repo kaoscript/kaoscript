@@ -1110,7 +1110,7 @@ class AbstractNode {
 		_reference
 		_scope = null
 	}
-	AbstractNode(@data, @parent, @scope = parent.scope()) { // {{{
+	$create(@data, @parent, @scope = parent.scope()) { // {{{
 		this._options = $applyAttributes(data, parent._options)
 	} // }}}
 	directory() => this._parent.directory()
@@ -1402,7 +1402,7 @@ export class Compiler {
 		register() { // {{{
 		} // }}}
 	}
-	Compiler(@file, options?, @hashes = {}) { // {{{
+	$create(@file, options?, @hashes = {}) { // {{{
 		this._options = Object.merge({
 			context: 'node6',
 			register: true,

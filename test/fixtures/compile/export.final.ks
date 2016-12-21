@@ -7,7 +7,7 @@ sealed class Shape {
 		_color: string = ''
 	}
 	
-	Shape(@color: string)
+	$create(@color: string)
 }
 
 impl Shape {

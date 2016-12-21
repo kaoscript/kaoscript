@@ -3,9 +3,6 @@ class ExpressionStatement extends Statement {
 		_expression
 		_variable			= ''
 	}
-	ExpressionStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._expression = $compile.expression(this._data, this)
 	} // }}}

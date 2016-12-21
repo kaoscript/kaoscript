@@ -5,9 +5,6 @@ class TryStatement extends Statement {
 		_catchClauses = []
 		_finalizer
 	}
-	TryStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		let scope = this._scope

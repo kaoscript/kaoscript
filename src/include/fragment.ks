@@ -6,8 +6,8 @@ class CodeFragment {
 		code
 		start	= null
 	}
-	CodeFragment(@code)
-	CodeFragment(@code, @start, @end)
+	$create(@code)
+	$create(@code, @start, @end)
 	toString() { // {{{
 		if this._start? {
 			return `\(this._code): \($locationDataToString(this._location))`
@@ -63,7 +63,7 @@ class FragmentBuilder {
 		_lines			= {}
 		_objects		= {}
 	}
-	FragmentBuilder(@indent)
+	$create(@indent)
 	line(...args) { // {{{
 		let line = LineBuilder.create(this, this._indent)
 		
@@ -95,7 +95,7 @@ class ControlBuilder {
 		_indent
 		_step
 	}
-	ControlBuilder(@builder, @indent, @addLastNewLine = true) { // {{{
+	$create(@builder, @indent, @addLastNewLine = true) { // {{{
 		this._step = ExpressionBuilder.create(this._builder, this._indent)
 	} // }}}
 	code(...args) { // {{{
@@ -184,7 +184,7 @@ class BlockBuilder {
 		_builder
 		_indent
 	}
-	BlockBuilder(@builder, @indent)
+	$create(@builder, @indent)
 	compile(node, mode = Mode::None) { // {{{
 		if node is Object {
 			node.toFragments(this, mode)
@@ -235,7 +235,7 @@ class ExpressionBuilder {
 		_builder
 		_indent
 	}
-	ExpressionBuilder(@builder, @indent)
+	$create(@builder, @indent)
 	code(...args) { // {{{
 		let arg, data
 		for i from 0 til args.length {
@@ -394,7 +394,7 @@ class ObjectBuilder {
 		_indent
 		_line
 	}
-	ObjectBuilder(@builder, @indent)
+	$create(@builder, @indent)
 	done() { // {{{
 		if this._line? {
 			this._line.done()
@@ -458,7 +458,7 @@ class ArrayBuilder {
 		_indent
 		_line
 	}
-	ArrayBuilder(@builder, @indent)
+	$create(@builder, @indent)
 	done() { // {{{
 		if this._line? {
 			this._line.done()

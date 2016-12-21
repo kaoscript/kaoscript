@@ -3,9 +3,6 @@ class WhileStatement extends Statement {
 		_body
 		_condition
 	}
-	WhileStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._body = $compile.expression(this._data.body, this)
 		this._condition = $compile.expression(this._data.condition, this)

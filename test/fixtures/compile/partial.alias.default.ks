@@ -3,7 +3,7 @@ class Shape {
 		_color: string = ''
 	}
 	
-	Shape(@color: string)
+	$create(@color: string)
 	
 	draw(shape, canvas): string {
 		return `I'm drawing a \(this._color) \(shape).`

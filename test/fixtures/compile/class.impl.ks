@@ -10,5 +10,5 @@ class Shape {
 		}
 	}
 	
-	Shape(@type: string, @color: string)
+	$create(@type: string, @color: string)
 }

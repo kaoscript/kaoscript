@@ -677,9 +677,6 @@ class ImportDeclaration extends Statement {
 	private {
 		_declarators = []
 	}
-	ImportDeclaration(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		for declarator in this._data.declarations {
 			this._declarators.push(declarator = new ImportDeclarator(declarator, this))
@@ -701,9 +698,6 @@ class ImportDeclarator extends Statement {
 		_metadata
 		_kind
 	}
-	ImportDeclarator(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		$import.resolve(this._data, this.directory(), this.module(), this)
 	} // }}}

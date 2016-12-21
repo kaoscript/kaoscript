@@ -4,9 +4,6 @@ class EnumDeclaration extends Statement {
 		_new
 		_variable
 	}
-	EnumDeclaration(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._variable = $variable.define(this, this._scope, this._data.name, VariableKind::Enum, this._data.type)
 		
@@ -43,9 +40,6 @@ class EnumDeclaration extends Statement {
 }
 
 class EnumMember extends AbstractNode {
-	EnumMember(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	toFragments(fragments) { // {{{
 		let variable = this._parent._variable
 		

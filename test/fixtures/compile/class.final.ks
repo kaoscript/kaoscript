@@ -7,11 +7,11 @@ sealed class Greetings {
 		_message: string = ''
 	}
 	
-	Greetings() {
+	$create() {
 		this('Hello!')
 	}
 	
-	Greetings(message) {
+	$create(message) {
 		this._message = message
 	}
 	

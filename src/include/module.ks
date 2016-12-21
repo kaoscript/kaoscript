@@ -20,7 +20,7 @@ class Module {
 		_requirements			= {}
 		_rewire
 	}
-	Module(data, @compiler, @file) { // {{{
+	$create(data, @compiler, @file) { // {{{
 		try {
 			this._data = parse(data)
 		}
@@ -513,7 +513,7 @@ class ModuleBlock extends AbstractNode {
 		_body: Array		= []
 		_module
 	}
-	ModuleBlock(data, @module) { // {{{
+	$create(data, @module) { // {{{
 		this._data = data
 		this._options = $applyAttributes(data, module._options)
 		this._scope = new Scope()

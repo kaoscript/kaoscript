@@ -5,15 +5,14 @@ const $extern = {
 				$throw('Not Implemented', node)
 			}
 			Kind::MethodAliasDeclaration => {
-				if data.name.name == variable.name.name {
-					$throw('Not Implemented', node)
-				}
-				else {
-				}
+				$throw('Not Implemented', node)
 			}
 			Kind::MethodDeclaration => {
-				if data.name.name == variable.name.name {
+				if $method.isConstructor(data.name.name, variable) {
 					variable.constructors.push($function.signature(data, node))
+				}
+				else if $method.isDestructor(data.name.name, variable) {
+					$throw('Not Implemented', node)
 				}
 				else {
 					let method = {
@@ -56,9 +55,6 @@ class ExternDeclaration extends Statement {
 	private {
 		_lines = []
 	}
-	ExternDeclaration(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		

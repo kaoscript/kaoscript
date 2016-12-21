@@ -773,7 +773,7 @@ class FunctionDeclaration extends Statement {
 		_parameters
 		_statements
 	}
-	FunctionDeclaration(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -856,9 +856,6 @@ class Parameter extends AbstractNode {
 		_defaultValue	= null
 		_name			= null
 	}
-	Parameter(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		let parent = this._parent

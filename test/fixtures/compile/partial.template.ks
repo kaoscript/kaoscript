@@ -3,7 +3,7 @@ class Shape {
 		_color: string = ''
 	}
 	
-	Shape(@color: string)
+	$create(@color: string)
 }
 
 let name = 'draw'

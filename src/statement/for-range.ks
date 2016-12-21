@@ -10,7 +10,7 @@ class ForRangeStatement extends Statement {
 		_when
 		_while
 	}
-	ForRangeStatement(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{

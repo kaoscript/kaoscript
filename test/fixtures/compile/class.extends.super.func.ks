@@ -7,7 +7,7 @@ class Shape {
 		_color: string
 	}
 	
-    Shape(@color)
+    $create(@color)
     
     draw(): string {
         return `I'm drawing with a \(this._color) pen.`

@@ -224,7 +224,7 @@ class PolyadicOperatorModulo extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
-	PolyadicOperatorNullCoalescing(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{

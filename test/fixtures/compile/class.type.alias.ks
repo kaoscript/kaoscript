@@ -9,7 +9,7 @@ class Person {
 		_height: float
 	}
 	
-	Person()
+	$create()
 	height(): float => this._float
 	height(@height: float) => this
 }

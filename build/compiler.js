@@ -6366,22 +6366,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				BreakStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 		}
@@ -6426,20 +6412,7 @@ module.exports = function() {
 	}
 	BreakStatement.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -7436,6 +7409,24 @@ module.exports = function() {
 		}
 	};
 	var $method = {
+		isConstructor(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			return name === "$create";
+		},
+		isDestructor(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			return name === "$destroy";
+		},
 		sameType(s1, s2) {
 			if(s1 === undefined || s1 === null) {
 				throw new Error("Missing parameter 's1'");
@@ -7731,7 +7722,7 @@ module.exports = function() {
 					}
 				}
 				else if(__ks_2 === Kind.MethodDeclaration) {
-					if(member.name.name === this._variable.name.name) {
+					if($method.isConstructor(member.name.name, this._variable)) {
 						this._scope = this._constructorScope;
 						method = $compile.statement(member, this);
 						method.isConstructor(true);
@@ -7746,6 +7737,9 @@ module.exports = function() {
 						});
 						this._variable.constructors.push(signature);
 						this._scope = scope;
+					}
+					else if($method.isDestructor(member.name.name, this._variable)) {
+						$throw("Not Implemented", this);
 					}
 					else {
 						var instance = true;
@@ -8301,22 +8295,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ContinueStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 		}
@@ -8361,20 +8341,7 @@ module.exports = function() {
 	}
 	ContinueStatement.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -8509,22 +8476,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				DoUntilStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._condition = $compile.expression(this._data.condition, this);
@@ -8573,20 +8526,7 @@ module.exports = function() {
 	}
 	DoUntilStatement.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -8636,22 +8576,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				DoWhileStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._body = $compile.expression(this._data.body, this);
@@ -8700,20 +8626,7 @@ module.exports = function() {
 	}
 	DoWhileStatement.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -8767,22 +8680,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			EnumDeclaration.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				EnumDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._variable = $variable.define(this, this._scope, this._data.name, VariableKind.Enum, this._data.type);
@@ -8850,20 +8749,7 @@ module.exports = function() {
 	}
 	EnumDeclaration.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_members: {
 				access: 1,
@@ -8917,22 +8803,8 @@ module.exports = function() {
 		__ks_init() {
 			AbstractNode.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				EnumMember.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_toFragments_0(fragments) {
 			if(fragments === undefined || fragments === null) {
@@ -8958,20 +8830,7 @@ module.exports = function() {
 	}
 	EnumMember.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -9000,22 +8859,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			ExportDeclaration.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ExportDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -9109,20 +8954,7 @@ module.exports = function() {
 	}
 	ExportDeclaration.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_declarations: {
 				access: 1,
@@ -9172,22 +9004,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			ExpressionStatement.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ExpressionStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._expression = $compile.expression(this._data, this);
@@ -9292,20 +9110,7 @@ module.exports = function() {
 	}
 	ExpressionStatement.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_expression: {
 				access: 1,
@@ -9381,15 +9186,14 @@ module.exports = function() {
 				$throw("Not Implemented", node);
 			}
 			else if(__ks_0 === Kind.MethodAliasDeclaration) {
-				if(data.name.name === variable.name.name) {
-					$throw("Not Implemented", node);
-				}
-				else {
-				}
+				$throw("Not Implemented", node);
 			}
 			else if(__ks_0 === Kind.MethodDeclaration) {
-				if(data.name.name === variable.name.name) {
+				if($method.isConstructor(data.name.name, variable)) {
 					variable.constructors.push($function.signature(data, node));
+				}
+				else if($method.isDestructor(data.name.name, variable)) {
+					$throw("Not Implemented", node);
 				}
 				else {
 					var method = {
@@ -9433,22 +9237,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			ExternDeclaration.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ExternDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -9529,20 +9319,7 @@ module.exports = function() {
 	}
 	ExternDeclaration.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_lines: {
 				access: 1,
@@ -9588,22 +9365,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ExternOrRequireDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -9679,20 +9442,7 @@ module.exports = function() {
 	}
 	ExternOrRequireDeclaration.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -11510,22 +11260,8 @@ module.exports = function() {
 			AbstractNode.prototype.__ks_init.call(this);
 			Parameter.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				Parameter.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -11576,20 +11312,7 @@ module.exports = function() {
 	}
 	Parameter.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_defaultValue: {
 				access: 1,
@@ -11629,22 +11352,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			IfStatement.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				IfStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -11710,20 +11419,7 @@ module.exports = function() {
 	}
 	IfStatement.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_items: {
 				access: 1,
@@ -12169,22 +11865,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			ImplementDeclaration.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ImplementDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -12281,20 +11963,7 @@ module.exports = function() {
 	}
 	ImplementDeclaration.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_properties: {
 				access: 1,
@@ -12466,6 +12135,8 @@ module.exports = function() {
 	};
 	class ImplementClassMethodDeclaration extends Statement {
 		__ks_init_1() {
+			this._isContructor = false;
+			this._isDestructor = false;
 			this._instance = true;
 		}
 		__ks_init() {
@@ -12496,7 +12167,10 @@ module.exports = function() {
 		__ks_func_analyse_0() {
 			var data = this._data;
 			var variable = this._variable;
-			if(data.name.name === variable.name.name) {
+			if((this._isContructor = ((data.name.kind === Kind.Identifier) && $method.isConstructor(data.name.name, variable)))) {
+				$throw("Not Implemented", this);
+			}
+			else if((this._isDestructor = ((data.name.kind === Kind.Identifier) && $method.isDestructor(data.name.name, variable)))) {
 				$throw("Not Implemented", this);
 			}
 			else {
@@ -12586,7 +12260,10 @@ module.exports = function() {
 			this.module().flag("Helper");
 			var data = this._data;
 			var variable = this._variable;
-			if(data.name.name === variable.name.name) {
+			if(this._isContructor) {
+				$throw("Not Implemented", this);
+			}
+			else if(this._isDestructor) {
 				$throw("Not Implemented", this);
 			}
 			else {
@@ -12651,6 +12328,14 @@ module.exports = function() {
 			}
 		],
 		instanceVariables: {
+			_isContructor: {
+				access: 1,
+				type: "Any"
+			},
+			_isDestructor: {
+				access: 1,
+				type: "Any"
+			},
 			_instance: {
 				access: 1,
 				type: "Any"
@@ -12709,6 +12394,8 @@ module.exports = function() {
 	};
 	class ImplementClassMethodAliasDeclaration extends Statement {
 		__ks_init_1() {
+			this._isContructor = false;
+			this._isDestructor = false;
 			this._instance = true;
 		}
 		__ks_init() {
@@ -12739,7 +12426,10 @@ module.exports = function() {
 		__ks_func_analyse_0() {
 			var data = this._data;
 			var variable = this._variable;
-			if(data.name.name === variable.name.name) {
+			if((this._isContructor = ((data.name.kind === Kind.Identifier) && $method.isConstructor(data.name.name, variable)))) {
+				$throw("Not Implemented", this);
+			}
+			else if((this._isDestructor = ((data.name.kind === Kind.Identifier) && $method.isDestructor(data.name.name, variable)))) {
 				$throw("Not Implemented", this);
 			}
 			else {
@@ -12881,6 +12571,14 @@ module.exports = function() {
 				access: 1,
 				type: "Any"
 			},
+			_isContructor: {
+				access: 1,
+				type: "Any"
+			},
+			_isDestructor: {
+				access: 1,
+				type: "Any"
+			},
 			_instance: {
 				access: 1,
 				type: "Any"
@@ -12939,6 +12637,8 @@ module.exports = function() {
 	};
 	class ImplementClassMethodLinkDeclaration extends Statement {
 		__ks_init_1() {
+			this._isContructor = false;
+			this._isDestructor = false;
 			this._instance = true;
 		}
 		__ks_init() {
@@ -12969,7 +12669,10 @@ module.exports = function() {
 		__ks_func_analyse_0() {
 			var data = this._data;
 			var variable = this._variable;
-			if(data.name.name === variable.name.name) {
+			if((this._isContructor = ((data.name.kind === Kind.Identifier) && $method.isConstructor(data.name.name, variable)))) {
+				$throw("Not Implemented", this);
+			}
+			else if((this._isDestructor = ((data.name.kind === Kind.Identifier) && $method.isDestructor(data.name.name, variable)))) {
 				$throw("Not Implemented", this);
 			}
 			else {
@@ -13105,6 +12808,14 @@ module.exports = function() {
 				type: "Any"
 			},
 			_functionName: {
+				access: 1,
+				type: "Any"
+			},
+			_isContructor: {
+				access: 1,
+				type: "Any"
+			},
+			_isDestructor: {
 				access: 1,
 				type: "Any"
 			},
@@ -14236,22 +13947,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			ImportDeclaration.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ImportDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			for(var __ks_0 = 0, __ks_1 = this._data.declarations.length, declarator; __ks_0 < __ks_1; ++__ks_0) {
@@ -14304,20 +14001,7 @@ module.exports = function() {
 	}
 	ImportDeclaration.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_declarators: {
 				access: 1,
@@ -14363,22 +14047,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ImportDeclarator.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			$import.resolve(this._data, this.directory(), this.module(), this);
@@ -14421,20 +14091,7 @@ module.exports = function() {
 	}
 	ImportDeclarator.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_metadata: {
 				access: 1,
@@ -14897,22 +14554,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				RequireDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -14987,20 +14630,7 @@ module.exports = function() {
 	}
 	RequireDeclaration.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -15041,22 +14671,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				RequireOrExternDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -15132,20 +14748,7 @@ module.exports = function() {
 	}
 	RequireOrExternDeclaration.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -15190,22 +14793,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			ReturnStatement.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ReturnStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			if(Type.isValue(this._data.value)) {
@@ -15271,20 +14860,7 @@ module.exports = function() {
 	}
 	ReturnStatement.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -15357,22 +14933,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			SwitchStatement.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var scope = this._scope;
@@ -15572,20 +15134,7 @@ module.exports = function() {
 	}
 	SwitchStatement.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_clauses: {
 				access: 1,
@@ -15639,22 +15188,8 @@ module.exports = function() {
 		__ks_init() {
 			AbstractNode.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchBindingArray.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._array = $compile.expression(this._data, this);
@@ -15700,20 +15235,7 @@ module.exports = function() {
 	}
 	SwitchBindingArray.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_array: {
 				access: 1,
@@ -15759,22 +15281,8 @@ module.exports = function() {
 		__ks_init() {
 			AbstractNode.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchBindingType.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			$variable.define(this, this._scope, this._data.name, VariableKind.Variable);
@@ -15817,20 +15325,7 @@ module.exports = function() {
 	}
 	SwitchBindingType.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -15871,22 +15366,8 @@ module.exports = function() {
 		__ks_init() {
 			AbstractNode.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchBindingValue.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			$variable.define(this, this._scope, this._data, VariableKind.Variable);
@@ -15929,20 +15410,7 @@ module.exports = function() {
 	}
 	SwitchBindingValue.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -15987,22 +15455,8 @@ module.exports = function() {
 			AbstractNode.prototype.__ks_init.call(this);
 			SwitchConditionArray.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchConditionArray.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var nv = true;
@@ -16138,20 +15592,7 @@ module.exports = function() {
 	}
 	SwitchConditionArray.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_name: {
 				access: 1,
@@ -16220,22 +15661,8 @@ module.exports = function() {
 			AbstractNode.prototype.__ks_init.call(this);
 			SwitchConditionRange.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchConditionRange.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			if(Type.isValue(this._data.from)) {
@@ -16310,20 +15737,7 @@ module.exports = function() {
 	}
 	SwitchConditionRange.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_from: {
 				access: 1,
@@ -16395,22 +15809,8 @@ module.exports = function() {
 		__ks_init() {
 			AbstractNode.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchConditionType.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 		}
@@ -16469,20 +15869,7 @@ module.exports = function() {
 	}
 	SwitchConditionType.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -16537,22 +15924,8 @@ module.exports = function() {
 		__ks_init() {
 			AbstractNode.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchConditionValue.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._value = $compile.expression(this._data, this);
@@ -16613,20 +15986,7 @@ module.exports = function() {
 	}
 	SwitchConditionValue.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -16690,22 +16050,8 @@ module.exports = function() {
 			AbstractNode.prototype.__ks_init.call(this);
 			SwitchFilter.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			AbstractNode.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				SwitchFilter.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				AbstractNode.prototype.__ks_cons.call(this, args);
-			}
+			AbstractNode.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			if(Type.isValue(this._data.filter)) {
@@ -16828,20 +16174,7 @@ module.exports = function() {
 	}
 	SwitchFilter.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_bindings: {
 				access: 1,
@@ -16913,22 +16246,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			ThrowStatement.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				ThrowStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._value = $compile.expression(this._data.value, this);
@@ -16975,20 +16294,7 @@ module.exports = function() {
 	}
 	ThrowStatement.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -17038,22 +16344,8 @@ module.exports = function() {
 			Statement.prototype.__ks_init.call(this);
 			TryStatement.prototype.__ks_init_1.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				TryStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
@@ -17197,20 +16489,7 @@ module.exports = function() {
 	}
 	TryStatement.__ks_reflect = {
 		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -17268,22 +16547,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				TypeAliasDeclaration.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			$variable.define(this, this._scope, this._data.name, VariableKind.TypeAlias, this._data.type);
@@ -17328,20 +16593,7 @@ module.exports = function() {
 	}
 	TypeAliasDeclaration.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -17382,22 +16634,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				UnlessStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._condition = $compile.expression(this._data.condition, this);
@@ -17446,20 +16684,7 @@ module.exports = function() {
 	}
 	UnlessStatement.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -17509,22 +16734,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				UntilStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._condition = $compile.expression(this._data.condition, this);
@@ -17573,20 +16784,7 @@ module.exports = function() {
 	}
 	UntilStatement.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -18158,22 +17356,8 @@ module.exports = function() {
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Statement.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				WhileStatement.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Statement.prototype.__ks_cons.call(this, args);
-			}
+			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
 			this._body = $compile.expression(this._data.body, this);
@@ -18222,20 +17406,7 @@ module.exports = function() {
 	}
 	WhileStatement.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -23977,22 +23148,8 @@ module.exports = function() {
 		__ks_init() {
 			Expression.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(data, parent) {
-			if(data === undefined || data === null) {
-				throw new Error("Missing parameter 'data'");
-			}
-			if(parent === undefined || parent === null) {
-				throw new Error("Missing parameter 'parent'");
-			}
-			Expression.prototype.__ks_cons.call(this, [data, parent]);
-		}
 		__ks_cons(args) {
-			if(args.length === 2) {
-				AssignmentOperatorExpression.prototype.__ks_cons_0.apply(this, args);
-			}
-			else {
-				Expression.prototype.__ks_cons.call(this, args);
-			}
+			Expression.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_isAssignable_0() {
 			return true;
@@ -24083,20 +23240,7 @@ module.exports = function() {
 	}
 	AssignmentOperatorExpression.__ks_reflect = {
 		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 2,
-				max: 2,
-				parameters: [
-					{
-						type: "Any",
-						min: 2,
-						max: 2
-					}
-				]
-			}
-		],
+		constructors: [],
 		instanceVariables: {
 			_left: {
 				access: 1,

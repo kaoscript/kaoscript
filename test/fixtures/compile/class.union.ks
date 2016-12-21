@@ -6,11 +6,11 @@ extern Person: class
 class Greetings {
 	private _message: string = ''
 	
-	Greetings() {
+	$create() {
 		this('Hello!')
 	}
 	
-	Greetings(@message)
+	$create(@message)
 	
 	greet(name: string | number) {
 		return this._message + '\nIt\'s nice to meet you, ' + name + '.'

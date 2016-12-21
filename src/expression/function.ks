@@ -4,7 +4,7 @@ class FunctionExpression extends Expression {
 		_parameters
 		_statements
 	}
-	FunctionExpression(data, parent, scope) { // {{{
+	$create(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{

@@ -1,7 +1,4 @@
 class ContinueStatement extends Statement {
-	ContinueStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 	} // }}}
 	fuse() { // {{{

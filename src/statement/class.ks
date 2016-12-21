@@ -753,6 +753,8 @@ const $helper = {
 }
 
 const $method = {
+	isConstructor(name, variable) => name == '$create'
+	isDestructor(name, variable) => name == '$destroy'
 	sameType(s1, s2) { // {{{
 		if s1 is Array {
 			if s2 is Array && s1.length == s2.length {
@@ -880,7 +882,7 @@ class ClassDeclaration extends Statement {
 		_name
 		_variable
 	}
-	ClassDeclaration(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent)
 		
 		this._constructorScope = new Scope(parent.scope())
@@ -1046,7 +1048,7 @@ class ClassDeclaration extends Statement {
 					}
 				}
 				Kind::MethodDeclaration => {
-					if member.name.name == this._variable.name.name {
+					if $method.isConstructor(member.name.name, this._variable) {
 						this._scope = this._constructorScope
 						
 						method = $compile.statement(member, this)
@@ -1065,6 +1067,9 @@ class ClassDeclaration extends Statement {
 						this._variable.constructors.push(signature)
 						
 						this._scope = scope
+					}
+					else if $method.isDestructor(member.name.name, this._variable) {
+						$throw('Not Implemented', this)
 					}
 					else {
 						let instance = true
@@ -1221,7 +1226,7 @@ class MethodDeclaration extends Statement {
 		_parameters
 		_statements
 	}
-	MethodDeclaration(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{

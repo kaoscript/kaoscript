@@ -10,7 +10,7 @@ class ForInStatement extends Statement {
 		_when
 		_while
 	}
-	ForInStatement(data, parent) { // {{{
+	$create(data, parent) { // {{{
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{

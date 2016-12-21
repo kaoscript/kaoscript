@@ -3,9 +3,6 @@ class UntilStatement extends Statement {
 		_body
 		_condition
 	}
-	UntilStatement(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		this._condition = $compile.expression(this._data.condition, this)
 		this._body = $compile.expression(this._data.body, this)

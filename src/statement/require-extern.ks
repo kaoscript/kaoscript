@@ -1,7 +1,4 @@
 class RequireOrExternDeclaration extends Statement {
-	RequireOrExternDeclaration(data, parent) { // {{{
-		super(data, parent)
-	} // }}}
 	analyse() { // {{{
 		let data = this._data
 		let module = this.module()
