@@ -170,7 +170,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		
 		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
 		
-		this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
+		this._statements = [$compile.statement(statement, this) for statement in $body(data.body)]
 	} // }}}
 	fuse() { // {{{
 		this.compile(this._parameters)
@@ -515,7 +515,7 @@ class ImplementVariableMethodDeclaration extends Statement {
 		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
 		
 		if this._data.body? {
-			this._statements = [$compile.statement(statement, this) for statement in $statements(this._data.body)]
+			this._statements = [$compile.statement(statement, this) for statement in $body(this._data.body)]
 		}
 		else {
 			this._statements = []

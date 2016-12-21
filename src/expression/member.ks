@@ -18,11 +18,15 @@ class MemberExpression extends Expression {
 		this._object.fuse()
 	} // }}}
 	isCallable() => this._object.isCallable()
+	isComputed() => this.isNullable() && !this._tested
 	isEntangled() => this.isCallable() || this.isNullable()
 	isNullable() => this._data.nullable || this._object.isNullable() || (this._data.computed && this._property.isNullable())
+	isNullableComputed() => (this._object.isNullable() ? 1 : 0) + (this._data.nullable ? 1 : 0) + (this._data.computed && this._property.isNullable() ? 1 : 0) > 1
 	toFragments(fragments, mode) { // {{{
 		if this.isNullable() && !this._tested {
 			fragments.wrapNullable(this).code(' ? ').compile(this._object)
+			
+			this._testing = false
 			
 			if this._data.computed {
 				fragments.code('[').compile(this._property).code('] : undefined')
@@ -47,7 +51,7 @@ class MemberExpression extends Expression {
 			}
 		}
 	} // }}}
-	toBooleanFragments(fragments) { // {{{
+	toBooleanFragments(fragments, mode) { // {{{
 		if this.isNullable() && !this._tested {
 			if this._data.computed {
 				fragments

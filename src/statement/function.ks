@@ -794,7 +794,7 @@ class FunctionDeclaration extends Statement {
 		
 		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
 		
-		this._statements = [$compile.statement(statement, this) for statement in $statements(data.body)]
+		this._statements = [$compile.statement(statement, this) for statement in $body(data.body)]
 	} // }}}
 	fuse() { // {{{
 		for parameter in this._parameters {

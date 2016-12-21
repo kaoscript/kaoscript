@@ -276,9 +276,9 @@ class ExpressionBuilder {
 		
 		return this
 	} // }}}
-	compileBoolean(node) { // {{{
+	compileBoolean(node, mode = Mode::None) { // {{{
 		if node is Object {
-			node.toBooleanFragments(this)
+			node.toBooleanFragments(this, mode)
 		}
 		else {
 			this._builder._fragments.push(new CodeFragment(node))
@@ -342,22 +342,22 @@ class ExpressionBuilder {
 		
 		return this
 	} // }}}
-	wrapBoolean(node) { // {{{
-		if node.isComputed() {
+	wrapBoolean(node, mode = Mode::None) { // {{{
+		if node.isBooleanComputed() {
 			this.code('(')
 			
-			node.toBooleanFragments(this)
+			node.toBooleanFragments(this, mode)
 			
 			this.code(')')
 		}
 		else {
-			node.toBooleanFragments(this)
+			node.toBooleanFragments(this, mode)
 		}
 		
 		return this
 	} // }}}
 	wrapNullable(node) { // {{{
-		if node.isComputed() {
+		if node.isNullableComputed() {
 			this.code('(')
 			
 			node.toNullableFragments(this)

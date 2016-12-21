@@ -137,8 +137,14 @@ class VariableDeclarator extends AbstractNode {
 	analyse() { // {{{
 		let data = this._data
 		
-		if data.name.kind == Kind::Identifier && this._options.variables == 'es5' {
-			this._scope.rename(data.name.name)
+		if data.name.kind == Kind::Identifier {
+			if this._options.variables == 'es5' {
+				this._scope.rename(data.name.name)
+			}
+			
+			if this._scope.hasVariable(data.name.name, false) {
+				$throw(`Already declared variable '\(data.name.name)' at line \(data.name.start.line)`, this)
+			}
 		}
 		
 		if data.autotype? {

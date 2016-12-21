@@ -84,7 +84,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 			fragments.compile(this._left).code($equals).compile(this._right)
 		}
 	} // }}}
-	toBooleanFragments(fragments) { // {{{
+	toBooleanFragments(fragments, mode) { // {{{
 		fragments.compile(this._left).code($equals).wrap(this._right)
 	} // }}}
 }
@@ -120,7 +120,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			.wrap(this._right)
 			.code(' : undefined')
 	} // }}}
-	toBooleanFragments(fragments) { // {{{
+	toBooleanFragments(fragments, mode) { // {{{
 		if this._right.isNullable() {
 			fragments
 				.wrapNullable(this._right)

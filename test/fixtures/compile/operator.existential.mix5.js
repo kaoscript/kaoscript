@@ -1,6 +1,6 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	if(Type.isValue(foo) && Type.isValue(foo) ? (foo.bar() + "world") === ("hello" + foo.qux()) : false) {
+	if((Type.isValue(foo) && Type.isValue(foo)) ? (foo.bar() + "world") === ("hello" + foo.qux()) : false) {
 		console.log(foo);
 	}
 }

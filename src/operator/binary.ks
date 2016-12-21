@@ -6,6 +6,7 @@ class BinaryOperatorExpression extends Expression {
 	}
 	isComputed() => true
 	isNullable() => this._left.isNullable() || this._right.isNullable()
+	isNullableComputed() => (this._left.isNullable() && this._right.isNullable()) || this._left.isNullableComputed() || this._right.isNullableComputed()
 	analyse() { // {{{
 		this._left = $compile.expression(this._data.left, this, false)
 		this._right = $compile.expression(this._data.right, this, false)
@@ -23,17 +24,17 @@ class BinaryOperatorExpression extends Expression {
 		this._right.fuse()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		let test = this.isNullable() && !this._tested
-		if test {
+		if this.isNullable() && !this._tested {
 			fragments
-				.compileNullable(this)
+				.wrapNullable(this)
 				.code(' ? ')
-		}
-		
-		this.toOperatorFragments(fragments)
-		
-		if test {
+			
+			this.toOperatorFragments(fragments)
+			
 			fragments.code(' : false')
+		}
+		else {
+			this.toOperatorFragments(fragments)
 		}
 	} // }}}
 	toNullableFragments(fragments) { // {{{
@@ -66,7 +67,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(this._left)
 			.code($space)
@@ -267,7 +268,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorOr extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(this._left)
 			.code($space)

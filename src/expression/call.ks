@@ -24,6 +24,10 @@ class CallExpression extends Expression {
 		_type
 	}
 	analyse() { // {{{
+		if (callee ?= $variable.fromAST(this._data.callee, this)) && callee.kind == VariableKind::Class {
+			$throw(`A class is not a function, 'new' operator is required at line \(this._data.callee.start.line)`, this)
+		}
+		
 		if this._data.callee.kind == Kind::Identifier {
 			if variable ?= this._scope.getVariable(this._data.callee.name) {
 				if variable.callable? {
@@ -84,9 +88,9 @@ class CallExpression extends Expression {
 		}
 	} // }}}
 	isCallable() => !this._reusable
-	isNullable() { // {{{
-		return this._data.nullable || this._callee.isNullable()
-	} // }}}
+	isComputed() => this.isNullable() && !this._tested
+	isNullable() => this._data.nullable || this._callee.isNullable()
+	isNullableComputed() => this._data.nullable && this._callee.isNullable()
 	toFragments(fragments, mode) { // {{{
 		if mode == Mode::Async {
 			this.toCallFragments(fragments, mode)
@@ -105,6 +109,32 @@ class CallExpression extends Expression {
 				this.toFragments(fragments, mode)
 				
 				fragments.code(' : undefined')
+			}
+			else {
+				this.toCallFragments(fragments, mode)
+				
+				fragments.code(')')
+			}
+		}
+	} // }}}
+	toBooleanFragments(fragments, mode) { // {{{
+		if mode == Mode::Async {
+			this.toCallFragments(fragments, mode)
+			
+			fragments.code(', ') if this._arguments.length
+		}
+		else {
+			if this._reusable {
+				fragments.code(this._reuseName)
+			}
+			else if this.isNullable() && !this._tested {
+				fragments.wrapNullable(this).code(' ? ')
+				
+				this._tested = true
+				
+				this.toFragments(fragments, mode)
+				
+				fragments.code(' : false')
 			}
 			else {
 				this.toCallFragments(fragments, mode)
@@ -183,7 +213,7 @@ class CallExpression extends Expression {
 			if this._data.nullable {
 				if this._callee.isNullable() {
 					fragments
-						.wrapNullable(this._callee)
+						.compileNullable(this._callee)
 						.code(' && ')
 				}
 				

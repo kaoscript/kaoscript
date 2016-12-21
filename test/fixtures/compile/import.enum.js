@@ -5,7 +5,7 @@ module.exports = function() {
 	Color.DarkRed = 3;
 	Color.DarkGreen = 4;
 	Color.DarkBlue = 5;
-	let color = Color.DarkGreen;
+	color = Color.DarkGreen;
 	console.log(color);
 	return {
 		Colour: Color

@@ -4,13 +4,15 @@ class Expression extends AbstractNode {
 	releaseReusable() { // {{{
 	} // }}}
 	isAssignable() => false
+	isBooleanComputed() => this.isComputed()
 	isCallable() => false
 	isComposite() => true
 	isComputed() => false
 	isConditional() => this.isNullable()
 	isEntangled() => true
 	isNullable() => false
-	toBooleanFragments(fragments) => this.toFragments(fragments, Mode::None)
+	isNullableComputed() => this.isComputed()
+	toBooleanFragments(fragments, mode = Mode::None) => this.toFragments(fragments, mode)
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
 	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
 }

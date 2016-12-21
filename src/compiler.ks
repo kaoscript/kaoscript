@@ -159,6 +159,17 @@ func $block(data) { // {{{
 	}
 } // }}}
 
+func $body(data) { // {{{
+	return data.statements if data.kind == Kind::Block
+	
+	return [
+		{
+			kind: Kind::ReturnStatement
+			value: data
+		}
+	]
+} // }}}
+
 func $identifier(name) { // {{{
 	if name is String {
 		return {
@@ -169,17 +180,6 @@ func $identifier(name) { // {{{
 	else {
 		return name
 	}
-} // }}}
-
-func $statements(data) { // {{{
-	return data.statements if data.kind == Kind::Block
-	
-	return [
-		{
-			kind: Kind::ReturnStatement
-			value: data
-		}
-	]
 } // }}}
 
 const $runtime = {
@@ -640,16 +640,24 @@ const $variable = {
 				let variables: Array = []
 				
 				for method in variable.instanceMethods[name] {
-					return null unless method.type? && (v ?= $variable.fromType(method.type, node))
-					
-					variables.pushUniq(v)
+					if method.type?.typeName? {
+						$variable.push(variables, {
+							kind: VariableKind::Variable
+							type: {
+								kind: Kind::TypeReference
+								typeName: method.type.typeName
+							}
+						})
+					}
+					else {
+						return null
+					}
 				}
 				
 				return variables[0]	if variables.length == 1
 				return variables	if variables.length > 0
 			}
 			else if variable.instanceVariables[name]? {
-				//return $variable.fromReflectType(variable.instanceVariables[name].type, node) if variable.instanceVariables[name].type?
 				if variable.instanceVariables[name].type? {
 					return {
 						kind: VariableKind::Variable
@@ -674,7 +682,7 @@ const $variable = {
 				for type in variable.type.types {
 					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $variable.filterMember(v, name, node))
 					
-					variables.pushUniq(v)
+					$variable.push(variables, v)
 				}
 				
 				return variables[0]	if variables.length == 1
@@ -716,7 +724,7 @@ const $variable = {
 				for type in variable.type.types {
 					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $variable.filterMember(v, name, node))
 					
-					variables.pushUniq(v)
+					$variable.push(variables, v)
 				}
 				
 				return variables[0]	if variables.length == 1
@@ -877,9 +885,18 @@ const $variable = {
 									let variables: Array = []
 									
 									for method in variable.classMethods[name] {
-										return null unless method.type? && (v ?= $variable.fromType(method.type, node))
-										
-										variables.pushUniq(v)
+										if method.type?.typeName? {
+											$variable.push(variables, {
+												kind: VariableKind::Variable
+												type: {
+													kind: Kind::TypeReference
+													typeName: method.type.typeName
+												}
+											})
+										}
+										else {
+											return null
+										}
 									}
 									
 									return variables[0]	if variables.length == 1
@@ -958,7 +975,7 @@ const $variable = {
 	fromType(data, node) { // {{{
 		//console.log('fromType', data)
 		
-		if data.typeName {
+		if data.typeName? {
 			if data.typeName.kind == Kind::Identifier {
 				let name = $types[data.typeName.name] || data.typeName.name
 				let variable = node.scope().getVariable(name)
@@ -1044,6 +1061,22 @@ const $variable = {
 		}
 		
 		return variable
+	} // }}}
+	push(variables, variable) { // {{{
+		let nf = true
+		
+		if variable.kind == VariableKind::Variable {
+			if variable.type? {
+				for v in variables while nf {
+					nf = false if v.kind == VariableKind::Variable && v.type? && $type.same(variable.type, v.type)
+				}
+			}
+		}
+		else {
+			$throw('Not implemented')
+		}
+		
+		variables.push(variable) if nf
 	} // }}}
 	scope(node) { // {{{
 		return node._options.variables == 'es5' ? 'var ' : 'let '
@@ -1297,6 +1330,7 @@ const $statements = {
 	`\(Kind::BreakStatement)`				: BreakStatement
 	`\(Kind::ClassDeclaration)`				: ClassDeclaration
 	`\(Kind::ContinueStatement)`			: ContinueStatement
+	`\(Kind::DestroyStatement)`				: DestroyStatement
 	`\(Kind::DoUntilStatement)`				: DoUntilStatement
 	`\(Kind::DoWhileStatement)`				: DoWhileStatement
 	`\(Kind::EnumDeclaration)`				: EnumDeclaration

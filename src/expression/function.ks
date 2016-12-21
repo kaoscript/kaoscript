@@ -10,7 +10,7 @@ class FunctionExpression extends Expression {
 	analyse() { // {{{
 		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
 		
-		this._statements = [$compile.statement(statement, this) for statement in $statements(this._data.body)]
+		this._statements = [$compile.statement(statement, this) for statement in $body(this._data.body)]
 	} // }}}
 	fuse() { // {{{
 		for parameter in this._parameters {

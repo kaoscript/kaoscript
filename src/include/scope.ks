@@ -93,8 +93,8 @@ class AbstractScope {
 			return null
 		}
 	} // }}}
-	hasVariable(name) { // {{{
-		return this._variables[name] is Object || (this._parent? && this._parent.hasVariable(name))
+	hasVariable(name, lookAtParent = true) { // {{{
+		return this._variables[name] is Object || (lookAtParent && this._parent?.hasVariable(name))
 	} // }}}
 	parent() => this._parent
 	rename(name) { // {{{

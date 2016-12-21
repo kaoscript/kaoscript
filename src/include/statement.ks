@@ -46,6 +46,7 @@ include {
 	../statement/break
 	../statement/class
 	../statement/continue
+	../statement/destroy
 	../statement/do-until
 	../statement/do-while
 	../statement/enum

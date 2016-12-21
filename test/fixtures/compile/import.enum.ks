@@ -14,7 +14,7 @@ enum Color {
 	DarkBlue
 }
 
-let color = Color::DarkGreen
+color = Color::DarkGreen
 
 console.log(color)
 
