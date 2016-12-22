@@ -1245,7 +1245,7 @@ class ClassDeclaration extends Statement {
 							statement: method
 						}
 						
-						this._variable.destructor++
+						this._variable.destructors++
 						
 						this._scope = scope
 					}

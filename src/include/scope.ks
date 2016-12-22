@@ -96,7 +96,20 @@ class AbstractScope {
 	hasVariable(name, lookAtParent = true) { // {{{
 		return this._variables[name] is Object || (lookAtParent && this._parent?.hasVariable(name))
 	} // }}}
+	isDeclaredVariable(name, lookAtParent = true) { // {{{
+		return this._variables[name]? || (lookAtParent && this._parent?.isDeclaredVariable(name))
+	} // }}}
 	parent() => this._parent
+	removeVariable(name) { // {{{
+		if this._variables[name] is Object {
+			this._variables[name] = false
+		}
+		else {
+			this._parent?.removeVariable(name)
+		}
+		
+		return this
+	} // }}}
 	rename(name, newName = this.newRenamedVariable(name)) { // {{{
 		if newName != name {
 			this._renamedVariables[name] = newName

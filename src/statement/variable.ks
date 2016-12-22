@@ -132,7 +132,8 @@ class AwaitDeclarator extends AbstractNode {
 
 class VariableDeclarator extends AbstractNode {
 	private {
-		_init	= null
+		_declare	= true
+		_init		= null
 	}
 	analyse() { // {{{
 		let data = this._data
@@ -145,9 +146,13 @@ class VariableDeclarator extends AbstractNode {
 			if this._scope.hasVariable(data.name.name, false) {
 				$throw(`Already declared variable '\(data.name.name)' at line \(data.name.start.line)`, this)
 			}
+			
+			if this._scope.isDeclaredVariable(data.name.name, false) {
+				this._declare = false
+			}
 		}
 		
-		if data.autotype? {
+		if data.autotype {
 			let type = data.type
 			
 			if !type && data.init {
@@ -177,7 +182,9 @@ class VariableDeclarator extends AbstractNode {
 	} // }}}
 	statement() => this._parent.statement()
 	toFragments(fragments, modifier) { // {{{
-		let line = fragments.newLine().code(this._parent.modifier(this._data), $space)
+		let line = fragments.newLine()
+		
+		line.code(this._parent.modifier(this._data), $space) if this._declare
 		
 		line.compile(this._name)
 		

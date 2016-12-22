@@ -445,6 +445,11 @@ const $type = {
 					}
 				}
 			}
+			Kind::CreateExpression => {
+				return {
+					typeName: data.class
+				}
+			}
 			Kind::Identifier => {
 				let variable = scope.getVariable(data.name)
 				

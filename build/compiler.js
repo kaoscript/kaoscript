@@ -487,6 +487,11 @@ module.exports = function() {
 					};
 				}
 			}
+			else if(__ks_0 === Kind.CreateExpression) {
+				return {
+					typeName: data.class
+				};
+			}
 			else if(__ks_0 === Kind.Identifier) {
 				var variable = scope.getVariable(data.name);
 				if(variable && variable.type) {
@@ -4052,12 +4057,50 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
+		__ks_func_isDeclaredVariable_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
+			}
+			var __ks_i = -1;
+			var name = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var lookAtParent = arguments[++__ks_i];
+			}
+			else  {
+				var lookAtParent = true;
+			}
+			return Type.isValue(this._variables[name]) || (lookAtParent && (Type.isValue(this._parent) ? this._parent.isDeclaredVariable(name) : false));
+		}
+		isDeclaredVariable() {
+			if(arguments.length >= 1 && arguments.length <= 2) {
+				return AbstractScope.prototype.__ks_func_isDeclaredVariable_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
 		__ks_func_parent_0() {
 			return this._parent;
 		}
 		parent() {
 			if(arguments.length === 0) {
 				return AbstractScope.prototype.__ks_func_parent_0.apply(this);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+		__ks_func_removeVariable_0(name) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(Type.isObject(this._variables[name])) {
+				this._variables[name] = false;
+			}
+			else {
+				Type.isValue(this._parent) ? this._parent.removeVariable(name) : undefined;
+			}
+			return this;
+		}
+		removeVariable() {
+			if(arguments.length === 1) {
+				return AbstractScope.prototype.__ks_func_removeVariable_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -4172,12 +4215,40 @@ module.exports = function() {
 					]
 				}
 			],
+			isDeclaredVariable: [
+				{
+					access: 3,
+					min: 1,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 2
+						}
+					]
+				}
+			],
 			parent: [
 				{
 					access: 3,
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			],
+			removeVariable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
 				}
 			],
 			rename: [
@@ -7830,7 +7901,7 @@ module.exports = function() {
 							data: member,
 							statement: method
 						};
-						this._variable.destructor++;
+						this._variable.destructors++;
 						this._scope = scope;
 					}
 					else {
@@ -8457,7 +8528,11 @@ module.exports = function() {
 			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
-			this._variable = $compile.expression(this._data.variable, this);
+			this._expression = $compile.expression(this._data.variable, this);
+			if(this._data.variable.kind === Kind.Identifier) {
+				this._variable = this._scope.getVariable(this._data.variable.name);
+				this._scope.removeVariable(this._data.variable.name);
+			}
 		}
 		analyse() {
 			if(arguments.length === 0) {
@@ -8469,7 +8544,7 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_fuse_0() {
-			this._variable.fuse();
+			this._expression.fuse();
 		}
 		fuse() {
 			if(arguments.length === 0) {
@@ -8487,7 +8562,16 @@ module.exports = function() {
 			if(mode === undefined || mode === null) {
 				throw new Error("Missing parameter 'mode'");
 			}
-			console.log(this._data);
+			var type, __ks_0;
+			if(Type.isValue(this._variable) && Type.isValue(this._variable.type) && (Type.isValue(__ks_0 = $variable.fromType(this._variable.type, this)) ? (type = __ks_0, true) : false) && (type.destructors > 0)) {
+				fragments.newLine().code(type.name.name, ".__ks_destroy(").compile(this._expression).code(")").done();
+			}
+			if(Type.is(this._expression, IdentifierLiteral)) {
+				fragments.newLine().compile(this._expression).code(" = undefined").done();
+			}
+			else {
+				fragments.newLine().code("delete ").compile(this._expression).done();
+			}
 		}
 		toStatementFragments() {
 			if(arguments.length === 2) {
@@ -8504,6 +8588,10 @@ module.exports = function() {
 		constructors: [],
 		destructors: 0,
 		instanceVariables: {
+			_expression: {
+				access: 1,
+				type: "Any"
+			},
 			_variable: {
 				access: 1,
 				type: "Any"
@@ -17328,6 +17416,7 @@ module.exports = function() {
 	};
 	class VariableDeclarator extends AbstractNode {
 		__ks_init_1() {
+			this._declare = true;
 			this._init = null;
 		}
 		__ks_init() {
@@ -17346,8 +17435,11 @@ module.exports = function() {
 				if(this._scope.hasVariable(data.name.name, false)) {
 					$throw("Already declared variable '" + data.name.name + "' at line " + data.name.start.line, this);
 				}
+				if(this._scope.isDeclaredVariable(data.name.name, false)) {
+					this._declare = false;
+				}
 			}
-			if(Type.isValue(data.autotype)) {
+			if(data.autotype) {
 				var type = data.type;
 				if(!type && data.init) {
 					type = data.init;
@@ -17404,7 +17496,10 @@ module.exports = function() {
 			if(modifier === undefined || modifier === null) {
 				throw new Error("Missing parameter 'modifier'");
 			}
-			var line = fragments.newLine().code(this._parent.modifier(this._data), $space);
+			var line = fragments.newLine();
+			if(this._declare) {
+				line.code(this._parent.modifier(this._data), $space);
+			}
 			line.compile(this._name);
 			if(this._init !== null) {
 				line.code($equals).compile(this._init);
@@ -17426,6 +17521,10 @@ module.exports = function() {
 		constructors: [],
 		destructors: 0,
 		instanceVariables: {
+			_declare: {
+				access: 1,
+				type: "Any"
+			},
 			_init: {
 				access: 1,
 				type: "Any"
