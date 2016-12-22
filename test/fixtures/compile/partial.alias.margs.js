@@ -46,6 +46,7 @@ module.exports = function() {
 				parameters: []
 			}
 		],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {

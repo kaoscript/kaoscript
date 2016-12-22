@@ -27,6 +27,7 @@ module.exports = function() {
 				parameters: []
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_bar: {
 				access: 1,

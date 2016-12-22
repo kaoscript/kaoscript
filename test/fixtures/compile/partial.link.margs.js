@@ -16,6 +16,7 @@ module.exports = function() {
 	Shape.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {},

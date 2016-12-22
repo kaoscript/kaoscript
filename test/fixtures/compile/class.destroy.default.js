@@ -1,28 +1,37 @@
 module.exports = function() {
 	class Greetings {
 		constructor() {
-			this._message = "";
+			this.__ks_init();
 			this.__ks_cons(arguments);
+		}
+		__ks_init_1() {
+			this._message = "";
+		}
+		__ks_init() {
+			Greetings.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0() {
 			Greetings.prototype.__ks_cons.call(this, ["Hello!"]);
 		}
-		__ks_cons_1(message) {
-			if(message === undefined || message === null) {
-				throw new Error("Missing parameter 'message'");
-			}
+		__ks_cons_1(message = null) {
 			this._message = message;
 		}
 		__ks_cons(args) {
-			if(args.length === 0) {
-				Greetings.prototype.__ks_cons_0.apply(this);
-			}
-			else if(args.length === 1) {
+			if(args.length >= 0 && arguments.length <= 1) {
 				Greetings.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
 				throw new Error("Wrong number of arguments");
 			}
+		}
+		static __ks_destroy_0(that) {
+			if(that === undefined || that === null) {
+				throw new Error("Missing parameter 'that'");
+			}
+			that._message = null;
+		}
+		static __ks_destroy(that) {
+			Greetings.__ks_destroy_0(that);
 		}
 		__ks_func_greet_0(name) {
 			if(name === undefined || name === null) {
@@ -38,8 +47,7 @@ module.exports = function() {
 		}
 	}
 	Greetings.__ks_reflect = {
-		sealed: true,
-		inits: 0,
+		inits: 1,
 		constructors: [
 			{
 				access: 3,
@@ -49,17 +57,18 @@ module.exports = function() {
 			},
 			{
 				access: 3,
-				min: 1,
+				min: 0,
 				max: 1,
 				parameters: [
 					{
 						type: "Any",
-						min: 1,
+						min: 0,
 						max: 1
 					}
 				]
 			}
 		],
+		destructors: 1,
 		instanceVariables: {
 			_message: {
 				access: 1,
@@ -85,7 +94,4 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
-	var __ks_Greetings = {};
-	let hello = new Greetings("Hello world!");
-	console.log(hello.greet("miss White"));
 }

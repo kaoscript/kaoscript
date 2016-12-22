@@ -46,6 +46,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_color: {
 				access: 1,
@@ -88,6 +89,7 @@ module.exports = function() {
 	Rectangle.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {

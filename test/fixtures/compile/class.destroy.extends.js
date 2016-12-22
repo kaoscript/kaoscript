@@ -4,7 +4,11 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		}
+		__ks_init_1() {
+			this._color = "black";
+		}
 		__ks_init() {
+			Shape.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0(color) {
 			if(color === undefined || color === null) {
@@ -20,8 +24,17 @@ module.exports = function() {
 				throw new Error("Wrong number of arguments");
 			}
 		}
+		static __ks_destroy_0(that) {
+			if(that === undefined || that === null) {
+				throw new Error("Missing parameter 'that'");
+			}
+			that._color = null;
+		}
+		static __ks_destroy(that) {
+			Shape.__ks_destroy_0(that);
+		}
 		__ks_func_draw_0() {
-			return "I'm drawing with a " + this._color + " pen.";
+			throw new Error("Not Implemented");
 		}
 		draw() {
 			if(arguments.length === 0) {
@@ -31,7 +44,7 @@ module.exports = function() {
 		}
 	}
 	Shape.__ks_reflect = {
-		inits: 0,
+		inits: 1,
 		constructors: [
 			{
 				access: 3,
@@ -46,7 +59,7 @@ module.exports = function() {
 				]
 			}
 		],
-		destructors: 0,
+		destructors: 1,
 		instanceVariables: {
 			_color: {
 				access: 1,
@@ -67,14 +80,39 @@ module.exports = function() {
 		classMethods: {}
 	};
 	class Rectangle extends Shape {
+		__ks_init_1() {
+			this._foo = "bar";
+		}
 		__ks_init() {
 			Shape.prototype.__ks_init.call(this);
+			Rectangle.prototype.__ks_init_1.call(this);
+		}
+		__ks_cons_0(color) {
+			if(color === undefined || color === null) {
+				throw new Error("Missing parameter 'color'");
+			}
+			Shape.prototype.__ks_cons.call(this, [color]);
 		}
 		__ks_cons(args) {
-			Shape.prototype.__ks_cons.call(this, args);
+			if(args.length === 1) {
+				Rectangle.prototype.__ks_cons_0.apply(this, args);
+			}
+			else {
+				Shape.prototype.__ks_cons.call(this, args);
+			}
+		}
+		static __ks_destroy_0(that) {
+			if(that === undefined || that === null) {
+				throw new Error("Missing parameter 'that'");
+			}
+			that._foo = null;
+		}
+		static __ks_destroy(that) {
+			Shape.__ks_destroy(that);
+			Rectangle.__ks_destroy_0(that);
 		}
 		__ks_func_draw_0() {
-			return super.draw() + " I'm drawing a " + this._color + " rectangle.";
+			return "I'm drawing a " + this._color + " rectangle.";
 		}
 		draw() {
 			if(arguments.length === 0) {
@@ -84,10 +122,28 @@ module.exports = function() {
 		}
 	}
 	Rectangle.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
+		inits: 1,
+		constructors: [
+			{
+				access: 3,
+				min: 1,
+				max: 1,
+				parameters: [
+					{
+						type: "Any",
+						min: 1,
+						max: 1
+					}
+				]
+			}
+		],
+		destructors: 1,
+		instanceVariables: {
+			_foo: {
+				access: 1,
+				type: "String"
+			}
+		},
 		classVariables: {},
 		instanceMethods: {
 			draw: [
@@ -101,6 +157,4 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
-	let r = new Rectangle("black");
-	console.log(r.draw());
 }

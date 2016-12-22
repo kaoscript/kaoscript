@@ -240,6 +240,7 @@ module.exports = function() {
 	Greetings.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {

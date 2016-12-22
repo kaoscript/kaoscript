@@ -657,6 +657,7 @@ module.exports = function() {
 				});
 				if(kind === VariableKind.Class) {
 					variable.constructors = [];
+					variable.destructors = 0;
 					variable.instanceVariables = {};
 					variable.classVariables = {};
 					variable.instanceMethods = {};
@@ -1383,6 +1384,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_data: {
 				access: 1,
@@ -1964,6 +1966,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			end: {
 				access: 1,
@@ -2130,6 +2133,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_arrays: {
 				access: 1,
@@ -2418,6 +2422,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_addLastNewLine: {
 				access: 1,
@@ -2740,6 +2745,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_builder: {
 				access: 1,
@@ -3177,6 +3183,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_builder: {
 				access: 1,
@@ -3449,6 +3456,7 @@ module.exports = function() {
 	LineBuilder.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -3605,6 +3613,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_builder: {
 				access: 1,
@@ -3812,6 +3821,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_builder: {
 				access: 1,
@@ -4051,18 +4061,25 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_rename_0(name) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
+		__ks_func_rename_0() {
+			if(arguments.length < 1) {
+				throw new Error("Wrong number of arguments");
 			}
-			var newName = this.newRenamedVariable(name);
+			var __ks_i = -1;
+			var name = arguments[++__ks_i];
+			if(arguments.length > 1) {
+				var newName = arguments[++__ks_i];
+			}
+			else  {
+				var newName = this.newRenamedVariable(name);
+			}
 			if(newName !== name) {
 				this._renamedVariables[name] = newName;
 			}
 			return this;
 		}
 		rename() {
-			if(arguments.length === 1) {
+			if(arguments.length >= 1 && arguments.length <= 2) {
 				return AbstractScope.prototype.__ks_func_rename_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
@@ -4084,6 +4101,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -4166,12 +4184,12 @@ module.exports = function() {
 				{
 					access: 3,
 					min: 1,
-					max: 1,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
 							min: 1,
-							max: 1
+							max: 2
 						}
 					]
 				}
@@ -4279,8 +4297,11 @@ module.exports = function() {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
 			}
-			if(this._renamedVariables[name]) {
+			if(Type.isString(this._renamedVariables[name])) {
 				return this._renamedVariables[name];
+			}
+			else if(Type.isValue(this._scopeParent)) {
+				return this._scopeParent.getRenamedVariable(name);
 			}
 			else {
 				return name;
@@ -4399,6 +4420,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_scopeParent: {
 				access: 1,
@@ -4619,6 +4641,7 @@ module.exports = function() {
 	XScope.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -5400,6 +5423,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_binary: {
 				access: 1,
@@ -5848,6 +5872,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -5931,104 +5956,6 @@ module.exports = function() {
 			else {
 				var variable = $variable.fromAST(data.object, node);
 				return $sealed.filter(variable, data.property.name, node);
-			}
-		},
-		class(node, fragments) {
-			if(node === undefined || node === null) {
-				throw new Error("Missing parameter 'node'");
-			}
-			if(fragments === undefined || fragments === null) {
-				throw new Error("Missing parameter 'fragments'");
-			}
-			var clazz = fragments.newControl().code("class ", node._name);
-			if(node._extends) {
-				clazz.code(" extends ", node._extendsName);
-			}
-			clazz.step();
-			var noinit = Type.isEmptyObject(node._instanceVariables);
-			if(!noinit) {
-				noinit = true;
-				for(var name in node._instanceVariables) {
-					var field = node._instanceVariables[name];
-					if(!(noinit)) {
-						break;
-					}
-					if(field.data.defaultValue) {
-						noinit = false;
-					}
-				}
-			}
-			var ctrl;
-			if(node._extends) {
-				ctrl = fragments.newControl().code("__ks_init()").step();
-				ctrl.line(node._extendsName, ".prototype.__ks_init.call(this)");
-				if(!noinit) {
-					for(var name in node._instanceVariables) {
-						var field = node._instanceVariables[name];
-						if(Type.isValue(field.data.defaultValue)) {
-							ctrl.newLine().code("this." + name + " = ").compile(field.defaultValue).done();
-						}
-					}
-				}
-				ctrl.done();
-			}
-			else {
-				ctrl = clazz.newControl().code("constructor()").step();
-				if(!noinit) {
-					for(var name in node._instanceVariables) {
-						var field = node._instanceVariables[name];
-						if(Type.isValue(field.data.defaultValue)) {
-							ctrl.newLine().code("this." + name + " = ").compile(field.defaultValue).done();
-						}
-					}
-				}
-				ctrl.line("this.__ks_cons(arguments)");
-				ctrl.done();
-			}
-			var reflect = {
-				sealed: true,
-				inits: 0,
-				constructors: [],
-				instanceVariables: node._instanceVariables,
-				classVariables: node._classVariables,
-				instanceMethods: {},
-				classMethods: {}
-			};
-			for(var __ks_0 = 0, __ks_1 = node._constructors.length, method; __ks_0 < __ks_1; ++__ks_0) {
-				method = node._constructors[__ks_0];
-				$continuous.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect);
-			}
-			$helper.constructor(node, clazz, reflect);
-			for(var name in node._instanceMethods) {
-				var methods = node._instanceMethods[name];
-				for(var __ks_0 = 0, __ks_1 = methods.length, method; __ks_0 < __ks_1; ++__ks_0) {
-					method = methods[__ks_0];
-					$continuous.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name);
-				}
-				$helper.instanceMethod(node, clazz, reflect, name);
-			}
-			for(var name in node._classMethods) {
-				var methods = node._classMethods[name];
-				for(var __ks_0 = 0, __ks_1 = methods.length, method; __ks_0 < __ks_1; ++__ks_0) {
-					method = methods[__ks_0];
-					$continuous.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name);
-				}
-				$helper.classMethod(node, clazz, reflect, name);
-			}
-			clazz.done();
-			for(var name in node._classVariables) {
-				var field = node._classVariables[name];
-				if(Type.isValue(field.defaultValue)) {
-					fragments.newLine().code(node._name + "." + name + " = ").compile(field.defaultValue).done();
-				}
-			}
-			$helper.reflect(node, fragments, reflect);
-			var references;
-			if(Type.isValue(__ks_0 = node.module().listReferences(node._name)) ? (references = __ks_0, true) : false) {
-				for(var __ks_0 = 0, __ks_1 = references.length, ref; __ks_0 < __ks_1; ++__ks_0) {
-					ref = references[__ks_0];
-					fragments.line(ref);
-				}
 			}
 		},
 		filter() {
@@ -6273,6 +6200,7 @@ module.exports = function() {
 	Statement.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_afterwards: {
 				access: 1,
@@ -6413,6 +6341,7 @@ module.exports = function() {
 	BreakStatement.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -6459,8 +6388,8 @@ module.exports = function() {
 		Referenced: 1,
 		Unreferenced: 2
 	};
-	var $continuous = {
-		class(node, fragments) {
+	var $class = {
+		continuous(node, fragments) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -6479,6 +6408,7 @@ module.exports = function() {
 			var reflect = {
 				inits: 0,
 				constructors: [],
+				destructors: 0,
 				instanceVariables: node._instanceVariables,
 				classVariables: node._classVariables,
 				instanceMethods: {},
@@ -6524,14 +6454,18 @@ module.exports = function() {
 			}
 			for(var __ks_0 = 0, __ks_1 = node._constructors.length, method; __ks_0 < __ks_1; ++__ks_0) {
 				method = node._constructors[__ks_0];
-				$continuous.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect);
+				$class.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect);
 			}
 			$helper.constructor(node, clazz, reflect);
+			if(Type.isValue(node._destructor)) {
+				$class.destructor(node, clazz, node._destructor.statement, reflect);
+				$helper.destructor(node, clazz, reflect);
+			}
 			for(var name in node._instanceMethods) {
 				var methods = node._instanceMethods[name];
 				for(var __ks_0 = 0, __ks_1 = methods.length, method; __ks_0 < __ks_1; ++__ks_0) {
 					method = methods[__ks_0];
-					$continuous.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name);
+					$class.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name);
 				}
 				$helper.instanceMethod(node, clazz, reflect, name);
 			}
@@ -6539,7 +6473,7 @@ module.exports = function() {
 				var methods = node._classMethods[name];
 				for(var __ks_0 = 0, __ks_1 = methods.length, method; __ks_0 < __ks_1; ++__ks_0) {
 					method = methods[__ks_0];
-					$continuous.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name);
+					$class.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name);
 				}
 				$helper.classMethod(node, clazz, reflect, name);
 			}
@@ -6617,6 +6551,22 @@ module.exports = function() {
 			});
 			statement.name("__ks_cons_" + index).toFragments(fragments, Mode.None);
 		},
+		destructor(node, fragments, statement, reflect) {
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(statement === undefined || statement === null) {
+				throw new Error("Missing parameter 'statement'");
+			}
+			if(reflect === undefined || reflect === null) {
+				throw new Error("Missing parameter 'reflect'");
+			}
+			statement.name("static __ks_destroy_" + reflect.destructors).toFragments(fragments, Mode.None);
+			reflect.destructors++;
+		},
 		instanceMethod(node, fragments, statement, signature, parameters, reflect, name) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
@@ -6676,6 +6626,109 @@ module.exports = function() {
 			}
 			else {
 				fragments.line(retCode, node._data.name.name, ".", fnName, index, ".apply(this, ", argName, ")");
+			}
+		},
+		sealed(node, fragments) {
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			var clazz = fragments.newControl().code("class ", node._name);
+			if(node._extends) {
+				clazz.code(" extends ", node._extendsName);
+			}
+			clazz.step();
+			var noinit = Type.isEmptyObject(node._instanceVariables);
+			if(!noinit) {
+				noinit = true;
+				for(var name in node._instanceVariables) {
+					var field = node._instanceVariables[name];
+					if(!(noinit)) {
+						break;
+					}
+					if(field.data.defaultValue) {
+						noinit = false;
+					}
+				}
+			}
+			var ctrl;
+			if(node._extends) {
+				ctrl = fragments.newControl().code("__ks_init()").step();
+				ctrl.line(node._extendsName, ".prototype.__ks_init.call(this)");
+				if(!noinit) {
+					for(var name in node._instanceVariables) {
+						var field = node._instanceVariables[name];
+						if(Type.isValue(field.data.defaultValue)) {
+							ctrl.newLine().code("this." + name + " = ").compile(field.defaultValue).done();
+						}
+					}
+				}
+				ctrl.done();
+			}
+			else {
+				ctrl = clazz.newControl().code("constructor()").step();
+				if(!noinit) {
+					for(var name in node._instanceVariables) {
+						var field = node._instanceVariables[name];
+						if(Type.isValue(field.data.defaultValue)) {
+							ctrl.newLine().code("this." + name + " = ").compile(field.defaultValue).done();
+						}
+					}
+				}
+				ctrl.line("this.__ks_cons(arguments)");
+				ctrl.done();
+			}
+			var reflect = {
+				sealed: true,
+				inits: 0,
+				constructors: [],
+				destructors: 0,
+				instanceVariables: node._instanceVariables,
+				classVariables: node._classVariables,
+				instanceMethods: {},
+				classMethods: {}
+			};
+			for(var __ks_0 = 0, __ks_1 = node._constructors.length, method; __ks_0 < __ks_1; ++__ks_0) {
+				method = node._constructors[__ks_0];
+				$class.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect);
+			}
+			$helper.constructor(node, clazz, reflect);
+			if(Type.isValue(node._destructor)) {
+				$class.destructor(node, clazz, node._destructor.statement, reflect);
+				$helper.destructor(node, clazz, reflect);
+			}
+			for(var name in node._instanceMethods) {
+				var methods = node._instanceMethods[name];
+				for(var __ks_0 = 0, __ks_1 = methods.length, method; __ks_0 < __ks_1; ++__ks_0) {
+					method = methods[__ks_0];
+					$class.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name);
+				}
+				$helper.instanceMethod(node, clazz, reflect, name);
+			}
+			for(var name in node._classMethods) {
+				var methods = node._classMethods[name];
+				for(var __ks_0 = 0, __ks_1 = methods.length, method; __ks_0 < __ks_1; ++__ks_0) {
+					method = methods[__ks_0];
+					$class.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name);
+				}
+				$helper.classMethod(node, clazz, reflect, name);
+			}
+			clazz.done();
+			for(var name in node._classVariables) {
+				var field = node._classVariables[name];
+				if(Type.isValue(field.defaultValue)) {
+					fragments.newLine().code(node._name + "." + name + " = ").compile(field.defaultValue).done();
+				}
+			}
+			$helper.reflect(node, fragments, reflect);
+			var references;
+			if(Type.isValue(__ks_0 = node.module().listReferences(node._name)) ? (references = __ks_0, true) : false) {
+				for(var __ks_0 = 0, __ks_1 = references.length, ref; __ks_0 < __ks_1; ++__ks_0) {
+					ref = references[__ks_0];
+					fragments.line(ref);
+				}
 			}
 		}
 	};
@@ -6789,7 +6842,7 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, node, fragments.newControl(), "static " + name + "()", reflect.classMethods[name], Helper.vcurry($continuous.methodCall, null, node, "__ks_sttc_" + name + "_", "arguments", "return "), "arguments", "classMethods." + name, true);
+			$helper.methods(extend, node, fragments.newControl(), "static " + name + "()", reflect.classMethods[name], Helper.vcurry($class.methodCall, null, node, "__ks_sttc_" + name + "_", "arguments", "return "), "arguments", "classMethods." + name, true);
 		},
 		constructor(node, fragments, reflect) {
 			if(node === undefined || node === null) {
@@ -6824,7 +6877,7 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, node, fragments.newControl(), "__ks_cons(args)", reflect.constructors, Helper.vcurry($continuous.methodCall, null, node, "prototype.__ks_cons_", "args", ""), "args", "constructors", false);
+			$helper.methods(extend, node, fragments.newControl(), "__ks_cons(args)", reflect.constructors, Helper.vcurry($class.methodCall, null, node, "prototype.__ks_cons_", "args", ""), "args", "constructors", false);
 		},
 		decide(node, fragments, type, index, path, argName) {
 			if(node === undefined || node === null) {
@@ -6853,6 +6906,26 @@ module.exports = function() {
 			else {
 				fragments.code($runtime.type(node), ".is(" + argName + "[" + index + "], " + path + ")");
 			}
+		},
+		destructor(node, fragments, reflect) {
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(reflect === undefined || reflect === null) {
+				throw new Error("Missing parameter 'reflect'");
+			}
+			var ctrl = fragments.newControl();
+			ctrl.code("static __ks_destroy(that)").step();
+			if(node._extends) {
+				ctrl.line(node._extendsName + ".__ks_destroy(that)");
+			}
+			for(var i = 0, __ks_0 = reflect.destructors; i < __ks_0; ++i) {
+				ctrl.line(node._name + ".__ks_destroy_" + i + "(that)");
+			}
+			ctrl.done();
 		},
 		instanceMethod(node, fragments, reflect, name) {
 			if(node === undefined || node === null) {
@@ -6889,7 +6962,7 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, node, fragments.newControl(), name + "()", reflect.instanceMethods[name], Helper.vcurry($continuous.methodCall, null, node, "prototype.__ks_func_" + name + "_", "arguments", "return "), "arguments", "instanceMethods." + name, true);
+			$helper.methods(extend, node, fragments.newControl(), name + "()", reflect.instanceMethods[name], Helper.vcurry($class.methodCall, null, node, "prototype.__ks_func_" + name + "_", "arguments", "return "), "arguments", "instanceMethods." + name, true);
 		},
 		methods(extend, node, fragments, header, methods, call, argName, refName, returns) {
 			if(extend === undefined || extend === null) {
@@ -7258,6 +7331,7 @@ module.exports = function() {
 				$helper.reflectMethod(node, a.newLine(), reflect.constructors[i].signature, reflect.constructors[i].parameters, classname + ".__ks_reflect.constructors[" + i + "].type");
 			}
 			a.done();
+			object.line("destructors: ", reflect.destructors);
 			var o = object.newLine().code("instanceVariables: ").newObject();
 			for(var name in reflect.instanceVariables) {
 				var variable = reflect.instanceVariables[name];
@@ -7545,6 +7619,7 @@ module.exports = function() {
 			this._classMethods = {};
 			this._classVariables = {};
 			this._constructors = [];
+			this._destructor = null;
 			this._sealed = false;
 			this._instanceMethods = {};
 			this._instanceVariables = {};
@@ -7562,6 +7637,7 @@ module.exports = function() {
 			}
 			Statement.prototype.__ks_cons.call(this, [data, parent]);
 			this._constructorScope = new Scope(parent.scope());
+			this._destructorScope = new Scope(parent.scope());
 			this._instanceVariableScope = new Scope(parent.scope());
 		}
 		__ks_cons(args) {
@@ -7622,6 +7698,11 @@ module.exports = function() {
 					nullable: false
 				};
 			};
+			thisVariable = $variable.define(this, this._destructorScope, {
+				kind: Kind.Identifier,
+				name: "this"
+			}, VariableKind.Variable, $type.reference(classname.name));
+			this._destructorScope.rename("this", "that");
 			$variable.define(this, this._instanceVariableScope, {
 				kind: Kind.Identifier,
 				name: "this"
@@ -7725,7 +7806,6 @@ module.exports = function() {
 					if($method.isConstructor(member.name.name, this._variable)) {
 						this._scope = this._constructorScope;
 						method = $compile.statement(member, this);
-						method.isConstructor(true);
 						signature = $method.signature(member, this);
 						this._constructors.push({
 							data: member,
@@ -7739,7 +7819,19 @@ module.exports = function() {
 						this._scope = scope;
 					}
 					else if($method.isDestructor(member.name.name, this._variable)) {
-						$throw("Not Implemented", this);
+						this._scope = this._destructorScope;
+						member.parameters.push({
+							kind: Kind.Parameter,
+							modifiers: [],
+							name: $identifier("that")
+						});
+						method = $compile.statement(member, this);
+						this._destructor = {
+							data: member,
+							statement: method
+						};
+						this._variable.destructor++;
+						this._scope = scope;
 					}
 					else {
 						var instance = true;
@@ -7807,6 +7899,9 @@ module.exports = function() {
 				method = this._constructors[__ks_0];
 				method.statement.analyse();
 			}
+			if(Type.isValue(this._destructor)) {
+				this._destructor.statement.analyse();
+			}
 			for(var name in this._instanceMethods) {
 				var methods = this._instanceMethods[name];
 				for(var __ks_0 = 0, __ks_1 = methods.length, method; __ks_0 < __ks_1; ++__ks_0) {
@@ -7836,6 +7931,9 @@ module.exports = function() {
 			for(var __ks_0 = 0, __ks_1 = this._constructors.length, method; __ks_0 < __ks_1; ++__ks_0) {
 				method = this._constructors[__ks_0];
 				method.statement.fuse();
+			}
+			if(Type.isValue(this._destructor)) {
+				this._destructor.statement.fuse();
 			}
 			for(var name in this._instanceMethods) {
 				var methods = this._instanceMethods[name];
@@ -7910,11 +8008,11 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			if(this._sealed) {
-				$sealed.class(this, fragments);
+				$class.sealed(this, fragments);
 				fragments.line("var " + this._variable.sealed.name + " = {}");
 			}
 			else {
-				$continuous.class(this, fragments);
+				$class.continuous(this, fragments);
 			}
 		}
 		toStatementFragments() {
@@ -7943,6 +8041,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_classMethods: {
 				access: 1,
@@ -7957,6 +8056,14 @@ module.exports = function() {
 				type: "Any"
 			},
 			_constructorScope: {
+				access: 1,
+				type: "Any"
+			},
+			_destructor: {
+				access: 1,
+				type: "Any"
+			},
+			_destructorScope: {
 				access: 1,
 				type: "Any"
 			},
@@ -8047,12 +8154,8 @@ module.exports = function() {
 		classMethods: {}
 	};
 	class MethodDeclaration extends Statement {
-		__ks_init_1() {
-			this._isConstructor = false;
-		}
 		__ks_init() {
 			Statement.prototype.__ks_init.call(this);
-			MethodDeclaration.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0(data, parent) {
 			if(data === undefined || data === null) {
@@ -8103,22 +8206,6 @@ module.exports = function() {
 			}
 			else if(Statement.prototype.fuse) {
 				return Statement.prototype.fuse.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
-		}
-		__ks_func_isConstructor_0(isConstructor) {
-			if(isConstructor === undefined || isConstructor === null) {
-				throw new Error("Missing parameter 'isConstructor'");
-			}
-			this._isConstructor = isConstructor;
-			return this;
-		}
-		isConstructor() {
-			if(arguments.length === 1) {
-				return MethodDeclaration.prototype.__ks_func_isConstructor_0.apply(this, arguments);
-			}
-			else if(Statement.prototype.isConstructor) {
-				return Statement.prototype.isConstructor.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -8195,7 +8282,7 @@ module.exports = function() {
 		}
 	}
 	MethodDeclaration.__ks_reflect = {
-		inits: 1,
+		inits: 0,
 		constructors: [
 			{
 				access: 3,
@@ -8210,11 +8297,8 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
-			_isConstructor: {
-				access: 1,
-				type: "Any"
-			},
 			_name: {
 				access: 1,
 				type: "Any"
@@ -8244,20 +8328,6 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
-				}
-			],
-			isConstructor: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
 				}
 			],
 			name: [
@@ -8342,6 +8412,7 @@ module.exports = function() {
 	ContinueStatement.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -8431,6 +8502,7 @@ module.exports = function() {
 	DestroyStatement.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_variable: {
 				access: 1,
@@ -8527,6 +8599,7 @@ module.exports = function() {
 	DoUntilStatement.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -8627,6 +8700,7 @@ module.exports = function() {
 	DoWhileStatement.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -8750,6 +8824,7 @@ module.exports = function() {
 	EnumDeclaration.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_members: {
 				access: 1,
@@ -8831,6 +8906,7 @@ module.exports = function() {
 	EnumMember.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -8955,6 +9031,7 @@ module.exports = function() {
 	ExportDeclaration.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_declarations: {
 				access: 1,
@@ -9111,6 +9188,7 @@ module.exports = function() {
 	ExpressionStatement.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_expression: {
 				access: 1,
@@ -9320,6 +9398,7 @@ module.exports = function() {
 	ExternDeclaration.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_lines: {
 				access: 1,
@@ -9443,6 +9522,7 @@ module.exports = function() {
 	ExternOrRequireDeclaration.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -9675,6 +9755,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -9929,6 +10010,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -10151,6 +10233,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -10383,6 +10466,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -11202,6 +11286,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_async: {
 				access: 1,
@@ -11313,6 +11398,7 @@ module.exports = function() {
 	Parameter.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_defaultValue: {
 				access: 1,
@@ -11420,6 +11506,7 @@ module.exports = function() {
 	IfStatement.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_items: {
 				access: 1,
@@ -11551,6 +11638,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -11686,6 +11774,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -11812,6 +11901,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -11964,6 +12054,7 @@ module.exports = function() {
 	ImplementDeclaration.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_properties: {
 				access: 1,
@@ -12092,6 +12183,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_variable: {
 				access: 1,
@@ -12327,6 +12419,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_isContructor: {
 				access: 1,
@@ -12566,6 +12659,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_arguments: {
 				access: 1,
@@ -12802,6 +12896,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_arguments: {
 				access: 1,
@@ -12965,6 +13060,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_type: {
 				access: 1,
@@ -13127,6 +13223,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_parameters: {
 				access: 1,
@@ -14002,6 +14099,7 @@ module.exports = function() {
 	ImportDeclaration.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_declarators: {
 				access: 1,
@@ -14092,6 +14190,7 @@ module.exports = function() {
 	ImportDeclarator.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_metadata: {
 				access: 1,
@@ -14249,6 +14348,7 @@ module.exports = function() {
 	IncludeDeclaration.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_statements: {
 				access: 1,
@@ -14414,6 +14514,7 @@ module.exports = function() {
 	IncludeOnceDeclaration.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_statements: {
 				access: 1,
@@ -14519,6 +14620,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_directory: {
 				access: 1,
@@ -14631,6 +14733,7 @@ module.exports = function() {
 	RequireDeclaration.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -14749,6 +14852,7 @@ module.exports = function() {
 	RequireOrExternDeclaration.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -14861,6 +14965,7 @@ module.exports = function() {
 	ReturnStatement.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -15135,6 +15240,7 @@ module.exports = function() {
 	SwitchStatement.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_clauses: {
 				access: 1,
@@ -15236,6 +15342,7 @@ module.exports = function() {
 	SwitchBindingArray.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_array: {
 				access: 1,
@@ -15326,6 +15433,7 @@ module.exports = function() {
 	SwitchBindingType.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -15411,6 +15519,7 @@ module.exports = function() {
 	SwitchBindingValue.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -15593,6 +15702,7 @@ module.exports = function() {
 	SwitchConditionArray.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_name: {
 				access: 1,
@@ -15738,6 +15848,7 @@ module.exports = function() {
 	SwitchConditionRange.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_from: {
 				access: 1,
@@ -15870,6 +15981,7 @@ module.exports = function() {
 	SwitchConditionType.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -15987,6 +16099,7 @@ module.exports = function() {
 	SwitchConditionValue.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -16175,6 +16288,7 @@ module.exports = function() {
 	SwitchFilter.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_bindings: {
 				access: 1,
@@ -16295,6 +16409,7 @@ module.exports = function() {
 	ThrowStatement.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -16490,6 +16605,7 @@ module.exports = function() {
 	TryStatement.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -16594,6 +16710,7 @@ module.exports = function() {
 	TypeAliasDeclaration.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -16685,6 +16802,7 @@ module.exports = function() {
 	UnlessStatement.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -16785,6 +16903,7 @@ module.exports = function() {
 	UntilStatement.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -16955,6 +17074,7 @@ module.exports = function() {
 	VariableDeclaration.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_async: {
 				access: 1,
@@ -17152,6 +17272,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_operation: {
 				access: 1,
@@ -17303,6 +17424,7 @@ module.exports = function() {
 	VariableDeclarator.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_init: {
 				access: 1,
@@ -17407,6 +17529,7 @@ module.exports = function() {
 	WhileStatement.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -17646,6 +17769,7 @@ module.exports = function() {
 	Expression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -17910,6 +18034,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -18057,6 +18182,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_isVariable: {
 				access: 1,
@@ -18126,6 +18252,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {},
@@ -18175,6 +18302,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {},
@@ -18246,6 +18374,7 @@ module.exports = function() {
 	ArrayExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_values: {
 				access: 1,
@@ -18356,6 +18485,7 @@ module.exports = function() {
 	ArrayRange.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_by: {
 				access: 1,
@@ -18527,6 +18657,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -18704,6 +18835,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -18881,6 +19013,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -19055,6 +19188,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -19260,6 +19394,7 @@ module.exports = function() {
 	ArrayBinding.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_elements: {
 				access: 1,
@@ -19488,6 +19623,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_alias: {
 				access: 1,
@@ -19683,6 +19819,7 @@ module.exports = function() {
 	ObjectBinding.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_elements: {
 				access: 1,
@@ -19833,6 +19970,7 @@ module.exports = function() {
 	BlockExpression.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_body: {
 				access: 1,
@@ -20225,6 +20363,7 @@ module.exports = function() {
 	CallExpression.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_arguments: {
 				access: 1,
@@ -20662,6 +20801,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_arguments: {
 				access: 1,
@@ -20819,6 +20959,7 @@ module.exports = function() {
 	CreateExpression.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_arguments: {
 				access: 1,
@@ -21088,6 +21229,7 @@ module.exports = function() {
 	CurryExpression.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_arguments: {
 				access: 1,
@@ -21223,6 +21365,7 @@ module.exports = function() {
 	EnumExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_enum: {
 				access: 1,
@@ -21450,6 +21593,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_async: {
 				access: 1,
@@ -21614,6 +21758,7 @@ module.exports = function() {
 	IfExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -21919,6 +22064,7 @@ module.exports = function() {
 	MemberExpression.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_object: {
 				access: 1,
@@ -22160,6 +22306,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_callee: {
 				access: 1,
@@ -22297,6 +22444,7 @@ module.exports = function() {
 	ObjectExpression.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_properties: {
 				access: 1,
@@ -22418,6 +22566,7 @@ module.exports = function() {
 	ObjectMember.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_name: {
 				access: 1,
@@ -22516,6 +22665,7 @@ module.exports = function() {
 	ObjectTemplateMember.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_name: {
 				access: 1,
@@ -22611,6 +22761,7 @@ module.exports = function() {
 	OmittedExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -22698,6 +22849,7 @@ module.exports = function() {
 	RegularExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_value: {
 				access: 1,
@@ -22805,6 +22957,7 @@ module.exports = function() {
 	TernaryConditionalExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -22931,6 +23084,7 @@ module.exports = function() {
 	TemplateExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_elements: {
 				access: 1,
@@ -23073,6 +23227,7 @@ module.exports = function() {
 	UnlessExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_condition: {
 				access: 1,
@@ -23241,6 +23396,7 @@ module.exports = function() {
 	AssignmentOperatorExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_left: {
 				access: 1,
@@ -23353,6 +23509,7 @@ module.exports = function() {
 	AssignmentOperatorAddition.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23402,6 +23559,7 @@ module.exports = function() {
 	AssignmentOperatorBitwiseAnd.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23451,6 +23609,7 @@ module.exports = function() {
 	AssignmentOperatorBitwiseLeftShift.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23500,6 +23659,7 @@ module.exports = function() {
 	AssignmentOperatorBitwiseOr.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23549,6 +23709,7 @@ module.exports = function() {
 	AssignmentOperatorBitwiseRightShift.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23598,6 +23759,7 @@ module.exports = function() {
 	AssignmentOperatorBitwiseXor.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23686,6 +23848,7 @@ module.exports = function() {
 	AssignmentOperatorEquality.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23829,6 +23992,7 @@ module.exports = function() {
 	AssignmentOperatorExistential.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23922,6 +24086,7 @@ module.exports = function() {
 	AssignmentOperatorModulo.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -23971,6 +24136,7 @@ module.exports = function() {
 	AssignmentOperatorMultiplication.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24066,6 +24232,7 @@ module.exports = function() {
 	AssignmentOperatorNullCoalescing.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24137,6 +24304,7 @@ module.exports = function() {
 	AssignmentOperatorSubtraction.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24296,6 +24464,7 @@ module.exports = function() {
 	BinaryOperatorExpression.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_left: {
 				access: 1,
@@ -24431,6 +24600,7 @@ module.exports = function() {
 	BinaryOperatorAddition.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24477,6 +24647,7 @@ module.exports = function() {
 	BinaryOperatorAnd.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24523,6 +24694,7 @@ module.exports = function() {
 	BinaryOperatorBitwiseAnd.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24569,6 +24741,7 @@ module.exports = function() {
 	BinaryOperatorBitwiseLeftShift.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24615,6 +24788,7 @@ module.exports = function() {
 	BinaryOperatorBitwiseOr.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24661,6 +24835,7 @@ module.exports = function() {
 	BinaryOperatorBitwiseRightShift.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24707,6 +24882,7 @@ module.exports = function() {
 	BinaryOperatorBitwiseXor.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24753,6 +24929,7 @@ module.exports = function() {
 	BinaryOperatorDivision.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24799,6 +24976,7 @@ module.exports = function() {
 	BinaryOperatorEquality.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24845,6 +25023,7 @@ module.exports = function() {
 	BinaryOperatorGreaterThan.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24891,6 +25070,7 @@ module.exports = function() {
 	BinaryOperatorGreaterThanOrEqual.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24937,6 +25117,7 @@ module.exports = function() {
 	BinaryOperatorInequality.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -24983,6 +25164,7 @@ module.exports = function() {
 	BinaryOperatorLessThan.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25029,6 +25211,7 @@ module.exports = function() {
 	BinaryOperatorLessThanOrEqual.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25075,6 +25258,7 @@ module.exports = function() {
 	BinaryOperatorModulo.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25121,6 +25305,7 @@ module.exports = function() {
 	BinaryOperatorMultiplication.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25205,6 +25390,7 @@ module.exports = function() {
 	BinaryOperatorNullCoalescing.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25281,6 +25467,7 @@ module.exports = function() {
 	BinaryOperatorOr.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25327,6 +25514,7 @@ module.exports = function() {
 	BinaryOperatorSubtraction.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25418,6 +25606,7 @@ module.exports = function() {
 	BinaryOperatorTypeCasting.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_left: {
 				access: 1,
@@ -25546,6 +25735,7 @@ module.exports = function() {
 	BinaryOperatorTypeEquality.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25680,6 +25870,7 @@ module.exports = function() {
 	BinaryOperatorTypeInequality.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -25852,6 +26043,7 @@ module.exports = function() {
 	PolyadicOperatorExpression.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_operands: {
 				access: 1,
@@ -25963,6 +26155,7 @@ module.exports = function() {
 	PolyadicOperatorAddition.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26019,6 +26212,7 @@ module.exports = function() {
 	PolyadicOperatorAnd.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26075,6 +26269,7 @@ module.exports = function() {
 	PolyadicOperatorDivision.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26127,6 +26322,7 @@ module.exports = function() {
 	PolyadicOperatorEquality.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26178,6 +26374,7 @@ module.exports = function() {
 	PolyadicOperatorGreaterThan.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26229,6 +26426,7 @@ module.exports = function() {
 	PolyadicOperatorGreaterThanOrEqual.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26280,6 +26478,7 @@ module.exports = function() {
 	PolyadicOperatorLessThan.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26331,6 +26530,7 @@ module.exports = function() {
 	PolyadicOperatorLessThanOrEqual.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26387,6 +26587,7 @@ module.exports = function() {
 	PolyadicOperatorMultiplication.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26443,6 +26644,7 @@ module.exports = function() {
 	PolyadicOperatorModulo.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26571,6 +26773,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26657,6 +26860,7 @@ module.exports = function() {
 	PolyadicOperatorOr.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26713,6 +26917,7 @@ module.exports = function() {
 	PolyadicOperatorSubtraction.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26768,6 +26973,7 @@ module.exports = function() {
 	UnaryOperatorExpression.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_argument: {
 				access: 1,
@@ -26828,6 +27034,7 @@ module.exports = function() {
 	UnaryOperatorBitwiseNot.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26877,6 +27084,7 @@ module.exports = function() {
 	UnaryOperatorDecrementPostfix.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26926,6 +27134,7 @@ module.exports = function() {
 	UnaryOperatorDecrementPrefix.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -26980,6 +27189,7 @@ module.exports = function() {
 	UnaryOperatorExistential.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -27029,6 +27239,7 @@ module.exports = function() {
 	UnaryOperatorIncrementPostfix.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -27078,6 +27289,7 @@ module.exports = function() {
 	UnaryOperatorIncrementPrefix.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -27127,6 +27339,7 @@ module.exports = function() {
 	UnaryOperatorNegation.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -27176,6 +27389,7 @@ module.exports = function() {
 	UnaryOperatorNegative.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
@@ -27639,6 +27853,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_file: {
 				access: 1,

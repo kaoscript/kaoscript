@@ -1,14 +1,8 @@
 module.exports = function() {
 	class Greetings {
 		constructor() {
-			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_1() {
 			this._message = "";
-		}
-		__ks_init() {
-			Greetings.prototype.__ks_init_1.call(this);
+			this.__ks_cons(arguments);
 		}
 		__ks_cons_0() {
 			Greetings.prototype.__ks_cons.call(this, ["Hello!"]);
@@ -44,7 +38,8 @@ module.exports = function() {
 		}
 	}
 	Greetings.__ks_reflect = {
-		inits: 1,
+		sealed: true,
+		inits: 0,
 		constructors: [
 			{
 				access: 3,
@@ -69,7 +64,7 @@ module.exports = function() {
 		instanceVariables: {
 			_message: {
 				access: 1,
-				type: "Any"
+				type: "String"
 			}
 		},
 		classVariables: {},
@@ -91,6 +86,7 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
+	var __ks_Greetings = {};
 	let hello = new Greetings("Hello world!");
 	console.log(hello.greet("miss White"));
 }

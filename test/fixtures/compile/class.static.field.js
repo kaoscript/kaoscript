@@ -50,6 +50,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			name: {
 				access: 3,

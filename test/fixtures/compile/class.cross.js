@@ -38,6 +38,7 @@ module.exports = function() {
 	Foo.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_bar: {
 				access: 1,
@@ -107,6 +108,7 @@ module.exports = function() {
 	Bar.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_foo: {
 				access: 1,

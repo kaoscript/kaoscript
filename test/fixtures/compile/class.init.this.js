@@ -36,6 +36,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {},
@@ -61,6 +62,7 @@ module.exports = function() {
 	Bar.__ks_reflect = {
 		inits: 1,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {
 			_foo: {
 				access: 1,

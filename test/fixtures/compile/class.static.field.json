@@ -19,6 +19,7 @@
           ]
         }
       ],
+      "destructors": 0,
       "instanceVariables": {
         "name": {
           "access": 3,

@@ -15,6 +15,7 @@ module.exports = function() {
 	Foo.__ks_reflect = {
 		inits: 0,
 		constructors: [],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {},

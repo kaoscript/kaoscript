@@ -83,6 +83,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_message: {
 				access: 1,

@@ -10,8 +10,8 @@ enum HelperTypeKind { // {{{
 	Unreferenced
 } // }}}
 
-const $continuous = {
-	class(node, fragments) { // {{{
+const $class = {
+	continuous(node, fragments) { // {{{
 		let clazz = fragments
 			.newControl()
 			.code('class ', node._name)
@@ -36,6 +36,7 @@ const $continuous = {
 		let reflect = {
 			inits: 0
 			constructors: []
+			destructors: 0
 			instanceVariables: node._instanceVariables
 			classVariables: node._classVariables
 			instanceMethods: {}
@@ -97,14 +98,20 @@ const $continuous = {
 		}
 		
 		for method in node._constructors {
-			$continuous.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect)
+			$class.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect)
 		}
 		
 		$helper.constructor(node, clazz, reflect)
 		
+		if node._destructor? {
+			$class.destructor(node, clazz, node._destructor.statement, reflect)
+			
+			$helper.destructor(node, clazz, reflect)
+		}
+		
 		for name, methods of node._instanceMethods {
 			for method in methods {
-				$continuous.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+				$class.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
 			}
 			
 			$helper.instanceMethod(node, clazz, reflect, name)
@@ -112,7 +119,7 @@ const $continuous = {
 		
 		for name, methods of node._classMethods {
 			for method in methods {
-				$continuous.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+				$class.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
 			}
 			
 			$helper.classMethod(node, clazz, reflect, name)
@@ -163,6 +170,13 @@ const $continuous = {
 			.name('__ks_cons_' + index)
 			.toFragments(fragments, Mode::None)
 	} // }}}
+	destructor(node, fragments, statement, reflect) { // {{{
+		statement
+			.name('static __ks_destroy_' + reflect.destructors)
+			.toFragments(fragments, Mode::None)
+		
+		reflect.destructors++
+	} // }}}
 	instanceMethod(node, fragments, statement, signature, parameters, reflect, name) { // {{{
 		if !(reflect.instanceMethods[name] is Array) {
 			reflect.instanceMethods[name] = []
@@ -184,6 +198,128 @@ const $continuous = {
 		}
 		else {
 			fragments.line(retCode, node._data.name.name, '.', fnName, index, '.apply(this, ', argName, ')')
+		}
+	} // }}}
+	sealed(node, fragments) { // {{{
+		let clazz = fragments
+			.newControl()
+			.code('class ', node._name)
+		
+		if node._extends {
+			clazz.code(' extends ', node._extendsName)
+		}
+		
+		clazz.step()
+		
+		let noinit = Type.isEmptyObject(node._instanceVariables)
+		
+		if !noinit {
+			noinit = true
+			
+			for name, field of node._instanceVariables while noinit {
+				if field.data.defaultValue {
+					noinit = false
+				}
+			}
+		}
+		
+		let ctrl
+		if node._extends {
+			ctrl = fragments
+				.newControl()
+				.code('__ks_init()')
+				.step()
+				
+			ctrl.line(node._extendsName, '.prototype.__ks_init.call(this)')
+			
+			if !noinit {
+				for name, field of node._instanceVariables when field.data.defaultValue? {
+					ctrl
+						.newLine()
+						.code('this.' + name + ' = ')
+						.compile(field.defaultValue)
+						.done()
+				}
+			}
+			
+			ctrl.done()
+		}
+		else {
+			ctrl = clazz
+				.newControl()
+				.code('constructor()')
+				.step()
+		
+			if !noinit {
+				for name, field of node._instanceVariables when field.data.defaultValue? {
+					ctrl
+						.newLine()
+						.code('this.' + name + ' = ')
+						.compile(field.defaultValue)
+						.done()
+				}
+			}
+			
+			ctrl.line('this.__ks_cons(arguments)')
+			
+			ctrl.done()
+		}
+		
+		let reflect = {
+			sealed: true
+			inits: 0
+			constructors: []
+			destructors: 0
+			instanceVariables: node._instanceVariables
+			classVariables: node._classVariables
+			instanceMethods: {}
+			classMethods: {}
+		}
+		
+		for method in node._constructors {
+			$class.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect)
+		}
+		
+		$helper.constructor(node, clazz, reflect)
+		
+		if node._destructor? {
+			$class.destructor(node, clazz, node._destructor.statement, reflect)
+			
+			$helper.destructor(node, clazz, reflect)
+		}
+		
+		for name, methods of node._instanceMethods {
+			for method in methods {
+				$class.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+			}
+			
+			$helper.instanceMethod(node, clazz, reflect, name)
+		}
+		
+		for name, methods of node._classMethods {
+			for method in methods {
+				$class.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+			}
+			
+			$helper.classMethod(node, clazz, reflect, name)
+		}
+		
+		clazz.done()
+		
+		for name, field of node._classVariables when field.defaultValue? {
+			fragments
+				.newLine()
+				.code(`\(node._name).\(name) = `)
+				.compile(field.defaultValue)
+				.done()
+		}
+		
+		$helper.reflect(node, fragments, reflect)
+		
+		if references ?= node.module().listReferences(node._name) {
+			for ref in references {
+				fragments.line(ref)
+			}
 		}
 	} // }}}
 }
@@ -265,7 +401,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), 'static ' + name + '()', reflect.classMethods[name], $continuous.methodCall^^(node, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true)
+		$helper.methods(extend, node, fragments.newControl(), 'static ' + name + '()', reflect.classMethods[name], $class.methodCall^^(node, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true)
 	} // }}}
 	constructor(node, fragments, reflect) { // {{{
 		let extend = false
@@ -285,7 +421,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), '__ks_cons(args)', reflect.constructors, $continuous.methodCall^^(node, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
+		$helper.methods(extend, node, fragments.newControl(), '__ks_cons(args)', reflect.constructors, $class.methodCall^^(node, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
 	} // }}}
 	decide(node, fragments, type, index, path, argName) { // {{{
 		node.module().flag('Type')
@@ -296,6 +432,21 @@ const $helper = {
 		else {
 			fragments.code($runtime.type(node), '.is(' + argName + '[' + index + '], ' + path + ')')
 		}
+	} // }}}
+	destructor(node, fragments, reflect) { // {{{
+		let ctrl = fragments.newControl()
+		
+		ctrl.code('static __ks_destroy(that)').step()
+		
+		if node._extends {
+			ctrl.line(`\(node._extendsName).__ks_destroy(that)`)
+		}
+		
+		for i from 0 til reflect.destructors {
+			ctrl.line(`\(node._name).__ks_destroy_\(i)(that)`)
+		}
+		
+		ctrl.done()
 	} // }}}
 	instanceMethod(node, fragments, reflect, name) { // {{{
 		let extend = false
@@ -319,7 +470,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), name + '()', reflect.instanceMethods[name], $continuous.methodCall^^(node, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true)
+		$helper.methods(extend, node, fragments.newControl(), name + '()', reflect.instanceMethods[name], $class.methodCall^^(node, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true)
 	} // }}}
 	methods(extend, node, fragments, header, methods, call, argName, refName, returns) { // {{{
 		fragments.code(header).step()
@@ -642,6 +793,8 @@ const $helper = {
 		}
 		a.done()
 		
+		object.line('destructors: ', reflect.destructors)
+		
 		o = object.newLine().code('instanceVariables: ').newObject()
 		for name, variable of reflect.instanceVariables {
 			$helper.reflectVariable(node, o.newLine(), name, variable.signature, variable.type, classname + '.__ks_reflect.instanceVariables.' + name)
@@ -872,6 +1025,8 @@ class ClassDeclaration extends Statement {
 		_classVariables		= {}
 		_constructors		= []
 		_constructorScope
+		_destructor			= null
+		_destructorScope
 		_extends
 		_extendsName
 		_extendsVariable
@@ -886,6 +1041,7 @@ class ClassDeclaration extends Statement {
 		super(data, parent)
 		
 		this._constructorScope = new Scope(parent.scope())
+		this._destructorScope = new Scope(parent.scope())
 		this._instanceVariableScope = new Scope(parent.scope())
 	} // }}}
 	analyse() { // {{{
@@ -940,6 +1096,13 @@ class ClassDeclaration extends Statement {
 				nullable: false
 			}
 		}
+		
+		thisVariable = $variable.define(this, this._destructorScope, {
+			kind: Kind::Identifier
+			name: 'this'
+		}, VariableKind::Variable, $type.reference(classname.name))
+		
+		this._destructorScope.rename('this', 'that')
 		
 		$variable.define(this, this._instanceVariableScope, {
 			kind: Kind::Identifier
@@ -1053,8 +1216,6 @@ class ClassDeclaration extends Statement {
 						
 						method = $compile.statement(member, this)
 						
-						method.isConstructor(true)
-						
 						signature = $method.signature(member, this)
 						
 						this._constructors.push({
@@ -1069,7 +1230,24 @@ class ClassDeclaration extends Statement {
 						this._scope = scope
 					}
 					else if $method.isDestructor(member.name.name, this._variable) {
-						$throw('Not Implemented', this)
+						this._scope = this._destructorScope
+						
+						member.parameters.push({
+							kind: Kind::Parameter
+							modifiers: []
+							name: $identifier('that')
+						})
+						
+						method = $compile.statement(member, this)
+						
+						this._destructor = {
+							data: member
+							statement: method
+						}
+						
+						this._variable.destructor++
+						
+						this._scope = scope
 					}
 					else {
 						let instance = true
@@ -1132,17 +1310,11 @@ class ClassDeclaration extends Statement {
 		}
 	} // }}}
 	fuse() { // {{{
-		/* for name, variable of this._instanceVariables when variable.defaultValue? {
-			variable.defaultValue.analyse()
-		}
-		
-		for name, variable of this._classVariables when variable.defaultValue? {
-			variable.defaultValue.analyse()
-		} */
-		
 		for method in this._constructors {
 			method.statement.analyse()
 		}
+		
+		this._destructor.statement.analyse() if this._destructor?
 		
 		for name, methods of this._instanceMethods {
 			for method in methods {
@@ -1167,6 +1339,8 @@ class ClassDeclaration extends Statement {
 		for method in this._constructors {
 			method.statement.fuse()
 		}
+		
+		this._destructor.statement.fuse() if this._destructor?
 		
 		for name, methods of this._instanceMethods {
 			for method in methods {
@@ -1209,19 +1383,18 @@ class ClassDeclaration extends Statement {
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if this._sealed {
-			$sealed.class(this, fragments)
+			$class.sealed(this, fragments)
 			
 			fragments.line('var ' + this._variable.sealed.name + ' = {}')
 		}
 		else {
-			$continuous.class(this, fragments)
+			$class.continuous(this, fragments)
 		}
 	} // }}}
 }
 
 class MethodDeclaration extends Statement {
 	private {
-		_isConstructor = false
 		_name
 		_parameters
 		_statements
@@ -1243,7 +1416,6 @@ class MethodDeclaration extends Statement {
 		this.compile(this._parameters)
 		this.compile(this._statements)
 	} // }}}
-	isConstructor(@isConstructor) => this
 	name(@name) => this
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()

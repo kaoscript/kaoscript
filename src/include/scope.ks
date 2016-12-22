@@ -97,8 +97,7 @@ class AbstractScope {
 		return this._variables[name] is Object || (lookAtParent && this._parent?.hasVariable(name))
 	} // }}}
 	parent() => this._parent
-	rename(name) { // {{{
-		let newName = this.newRenamedVariable(name)
+	rename(name, newName = this.newRenamedVariable(name)) { // {{{
 		if newName != name {
 			this._renamedVariables[name] = newName
 		}
@@ -177,8 +176,11 @@ class Scope extends AbstractScope {
 		return null
 	} // }}}
 	getRenamedVariable(name) { // {{{
-		if this._renamedVariables[name] {
+		if this._renamedVariables[name] is String {
 			return this._renamedVariables[name]
+		}
+		else if this._scopeParent? {
+			return this._scopeParent.getRenamedVariable(name)
 		}
 		else {
 			return name

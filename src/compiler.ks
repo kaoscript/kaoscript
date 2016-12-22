@@ -604,6 +604,7 @@ const $variable = {
 			
 			if kind == VariableKind::Class {
 				variable.constructors = []
+				variable.destructors = 0
 				variable.instanceVariables = {}
 				variable.classVariables = {}
 				variable.instanceMethods = {}

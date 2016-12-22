@@ -46,6 +46,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {
 			_color: {
 				access: 1,
@@ -109,6 +110,7 @@ module.exports = function() {
 				]
 			}
 		],
+		destructors: 0,
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
