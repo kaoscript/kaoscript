@@ -4,12 +4,12 @@ class WhileStatement extends Statement {
 		_condition
 	}
 	analyse() { // {{{
-		this._body = $compile.expression(this._data.body, this)
 		this._condition = $compile.expression(this._data.condition, this)
+		this._body = $compile.expression(this._data.body, this)
 	} // }}}
 	fuse() { // {{{
-		this._body.fuse()
 		this._condition.fuse()
+		this._body.fuse()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments

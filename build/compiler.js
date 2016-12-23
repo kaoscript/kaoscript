@@ -17595,8 +17595,8 @@ module.exports = function() {
 			Statement.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_analyse_0() {
-			this._body = $compile.expression(this._data.body, this);
 			this._condition = $compile.expression(this._data.condition, this);
+			this._body = $compile.expression(this._data.body, this);
 		}
 		analyse() {
 			if(arguments.length === 0) {
@@ -17608,8 +17608,8 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		}
 		__ks_func_fuse_0() {
-			this._body.fuse();
 			this._condition.fuse();
+			this._body.fuse();
 		}
 		fuse() {
 			if(arguments.length === 0) {
