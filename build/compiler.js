@@ -930,7 +930,21 @@ module.exports = function() {
 				}
 			}
 			else if(__ks_0 === Kind.Identifier) {
-				return node.scope().getVariable(data.name);
+				if(Type.isString($literalTypes[data.name])) {
+					return {
+						kind: VariableKind.Variable,
+						type: {
+							kind: Kind.TypeReference,
+							typeName: {
+								kind: Kind.Identifier,
+								name: $literalTypes[data.name]
+							}
+						}
+					};
+				}
+				else {
+					return node.scope().getVariable(data.name);
+				}
 			}
 			else if(__ks_0 === Kind.Literal) {
 				return {
@@ -939,7 +953,7 @@ module.exports = function() {
 						kind: Kind.TypeReference,
 						typeName: {
 							kind: Kind.Identifier,
-							name: $literalTypes[data.value] || "String"
+							name: "String"
 						}
 					}
 				};

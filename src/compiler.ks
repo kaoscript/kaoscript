@@ -843,7 +843,21 @@ const $variable = {
 				}
 			}
 			Kind::Identifier => {
-				return node.scope().getVariable(data.name)
+				if $literalTypes[data.name] is String {
+					return {
+						kind: VariableKind::Variable
+						type: {
+							kind: Kind::TypeReference
+							typeName: {
+								kind: Kind::Identifier
+								name: $literalTypes[data.name]
+							}
+						}
+					}
+				}
+				else {
+					return node.scope().getVariable(data.name)
+				}
 			}
 			Kind::Literal => {
 				return {
@@ -852,7 +866,7 @@ const $variable = {
 						kind: Kind::TypeReference
 						typeName: {
 							kind: Kind::Identifier
-							name: $literalTypes[data.value] || 'String'
+							name: 'String'
 						}
 					}
 				}
