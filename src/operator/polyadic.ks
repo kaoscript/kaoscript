@@ -74,7 +74,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorAnd extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		let nf = false
 		for operand in this._operands {
 			if nf {
@@ -275,7 +275,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorOr extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
+	toFragments(fragments, mode) { // {{{
 		let nf = false
 		for operand in this._operands {
 			if nf {

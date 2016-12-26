@@ -19,7 +19,20 @@ class ForInStatement extends Statement {
 		this._value = $compile.expression(data.value, this)
 		
 		if !this._scope.hasVariable(data.variable.name) {
-			$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+			if data.variable.type? {
+				$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+			}
+			else if (variable ?= $variable.fromAST(data.value, this)) && variable.type?.typeName?.name == 'Array' && variable.type.typeParameters? {
+				if variable.type.typeParameters.length == 1 {
+					$variable.define(this, this._scope, data.variable.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
+				}
+				else {
+					$variable.define(this, this._scope, data.variable.name, VariableKind::Variable, variable.type.typeParameters)
+				}
+			}
+			else {
+				$variable.define(this, this._scope, data.variable.name, VariableKind::Variable)
+			}
 			
 			this._defineVariable = true
 		}

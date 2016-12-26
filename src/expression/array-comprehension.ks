@@ -95,7 +95,13 @@ class ArrayComprehensionForIn extends Expression {
 	analyse() { // {{{
 		let data = this._data
 		
-		$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
+		if (variable ?= $variable.fromAST(data.loop.value, this)) && variable.type?.typeName?.name == 'Array' && variable.type.typeParameters?.length == 1 {
+			$variable.define(this, this._scope, data.loop.variable.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
+		}
+		else {
+			$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
+		}
+		
 		$variable.define(this, this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
 		
 		this._variable = $compile.expression(data.loop.variable, this)

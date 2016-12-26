@@ -646,13 +646,10 @@ const $variable = {
 				let variables: Array = []
 				
 				for method in variable.instanceMethods[name] {
-					if method.type?.typeName? {
+					if method.type? {
 						$variable.push(variables, {
 							kind: VariableKind::Variable
-							type: {
-								kind: Kind::TypeReference
-								typeName: method.type.typeName
-							}
+							type: method.type
 						})
 					}
 					else {
@@ -816,13 +813,10 @@ const $variable = {
 						}
 					}
 					else if variable.kind == VariableKind::Function || variable.kind == VariableKind::Variable {
-						if variable.type?.typeName? {
+						if variable.type? {
 							return {
 								kind: VariableKind::Variable
-								type: {
-									kind: Kind::TypeReference
-									typeName: variable.type.typeName
-								}
+								type: variable.type
 							}
 						}
 					}

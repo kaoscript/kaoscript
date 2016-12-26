@@ -706,13 +706,10 @@ module.exports = function() {
 					var variables = [];
 					for(var __ks_0 = 0, __ks_1 = variable.instanceMethods[name].length, method; __ks_0 < __ks_1; ++__ks_0) {
 						method = variable.instanceMethods[name][__ks_0];
-						if(Type.isValue(method.type) && Type.isValue(method.type.typeName)) {
+						if(Type.isValue(method.type)) {
 							$variable.push(variables, {
 								kind: VariableKind.Variable,
-								type: {
-									kind: Kind.TypeReference,
-									typeName: method.type.typeName
-								}
+								type: method.type
 							});
 						}
 						else {
@@ -902,13 +899,10 @@ module.exports = function() {
 						};
 					}
 					else if((variable.kind === VariableKind.Function) || (variable.kind === VariableKind.Variable)) {
-						if(Type.isValue(variable.type) && Type.isValue(variable.type.typeName)) {
+						if(Type.isValue(variable.type)) {
 							return {
 								kind: VariableKind.Variable,
-								type: {
-									kind: Kind.TypeReference,
-									typeName: variable.type.typeName
-								}
+								type: variable.type
 							};
 						}
 					}
@@ -9961,7 +9955,21 @@ module.exports = function() {
 			var data = this._data;
 			this._value = $compile.expression(data.value, this);
 			if(!this._scope.hasVariable(data.variable.name)) {
-				$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				var variable, __ks_0;
+				if(Type.isValue(data.variable.type)) {
+					$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type);
+				}
+				else if((Type.isValue(__ks_0 = $variable.fromAST(data.value, this)) ? (variable = __ks_0, true) : false) && ((Type.isValue(variable.type) && Type.isValue(variable.type.typeName)) ? variable.type.typeName.name === "Array" : false) && Type.isValue(variable.type.typeParameters)) {
+					if(variable.type.typeParameters.length === 1) {
+						$variable.define(this, this._scope, data.variable.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0]);
+					}
+					else {
+						$variable.define(this, this._scope, data.variable.name, VariableKind.Variable, variable.type.typeParameters);
+					}
+				}
+				else {
+					$variable.define(this, this._scope, data.variable.name, VariableKind.Variable);
+				}
 				this._defineVariable = true;
 			}
 			this._variable = $compile.expression(data.variable, this);
@@ -18854,7 +18862,13 @@ module.exports = function() {
 		}
 		__ks_func_analyse_0() {
 			var data = this._data;
-			$variable.define(this, this._scope, data.loop.variable.name, VariableKind.Variable);
+			var variable, __ks_0;
+			if((Type.isValue(__ks_0 = $variable.fromAST(data.loop.value, this)) ? (variable = __ks_0, true) : false) && ((Type.isValue(variable.type) && Type.isValue(variable.type.typeName)) ? variable.type.typeName.name === "Array" : false) && (Type.isValue(variable.type.typeParameters) ? variable.type.typeParameters.length === 1 : false)) {
+				$variable.define(this, this._scope, data.loop.variable.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0]);
+			}
+			else {
+				$variable.define(this, this._scope, data.loop.variable.name, VariableKind.Variable);
+			}
 			if(Type.isValue(data.loop.index)) {
 				$variable.define(this, this._scope, data.loop.index.name, VariableKind.Variable);
 			}
@@ -26296,9 +26310,12 @@ module.exports = function() {
 		__ks_cons(args) {
 			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
 		}
-		__ks_func_toOperatorFragments_0(fragments) {
+		__ks_func_toFragments_0(fragments, mode) {
 			if(fragments === undefined || fragments === null) {
 				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
 			}
 			var nf = false;
 			for(var __ks_0 = 0, __ks_1 = this._operands.length, operand; __ks_0 < __ks_1; ++__ks_0) {
@@ -26312,14 +26329,11 @@ module.exports = function() {
 				fragments.wrapBoolean(operand);
 			}
 		}
-		toOperatorFragments() {
-			if(arguments.length === 1) {
-				return PolyadicOperatorAnd.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+		toFragments() {
+			if(arguments.length === 2) {
+				return PolyadicOperatorAnd.prototype.__ks_func_toFragments_0.apply(this, arguments);
 			}
-			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
-				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
+			return PolyadicOperatorExpression.prototype.toFragments.apply(this, arguments);
 		}
 	}
 	PolyadicOperatorAnd.__ks_reflect = {
@@ -26329,16 +26343,16 @@ module.exports = function() {
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
-			toOperatorFragments: [
+			toFragments: [
 				{
 					access: 3,
-					min: 1,
-					max: 1,
+					min: 2,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 1,
-							max: 1
+							min: 2,
+							max: 2
 						}
 					]
 				}
@@ -26944,9 +26958,12 @@ module.exports = function() {
 		__ks_cons(args) {
 			PolyadicOperatorExpression.prototype.__ks_cons.call(this, args);
 		}
-		__ks_func_toOperatorFragments_0(fragments) {
+		__ks_func_toFragments_0(fragments, mode) {
 			if(fragments === undefined || fragments === null) {
 				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
 			}
 			var nf = false;
 			for(var __ks_0 = 0, __ks_1 = this._operands.length, operand; __ks_0 < __ks_1; ++__ks_0) {
@@ -26960,14 +26977,11 @@ module.exports = function() {
 				fragments.wrapBoolean(operand);
 			}
 		}
-		toOperatorFragments() {
-			if(arguments.length === 1) {
-				return PolyadicOperatorOr.prototype.__ks_func_toOperatorFragments_0.apply(this, arguments);
+		toFragments() {
+			if(arguments.length === 2) {
+				return PolyadicOperatorOr.prototype.__ks_func_toFragments_0.apply(this, arguments);
 			}
-			else if(PolyadicOperatorExpression.prototype.toOperatorFragments) {
-				return PolyadicOperatorExpression.prototype.toOperatorFragments.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
+			return PolyadicOperatorExpression.prototype.toFragments.apply(this, arguments);
 		}
 	}
 	PolyadicOperatorOr.__ks_reflect = {
@@ -26977,16 +26991,16 @@ module.exports = function() {
 		instanceVariables: {},
 		classVariables: {},
 		instanceMethods: {
-			toOperatorFragments: [
+			toFragments: [
 				{
 					access: 3,
-					min: 1,
-					max: 1,
+					min: 2,
+					max: 2,
 					parameters: [
 						{
 							type: "Any",
-							min: 1,
-							max: 1
+							min: 2,
+							max: 2
 						}
 					]
 				}
