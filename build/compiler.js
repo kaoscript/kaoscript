@@ -28,6 +28,7 @@ module.exports = function() {
 		Function: "Function",
 		Number: "Number",
 		Object: "Object",
+		RegExp: "RegExp",
 		String: "String"
 	};
 	var $extensions = {
@@ -95,6 +96,7 @@ module.exports = function() {
 		NaN: true,
 		Number: true,
 		Object: true,
+		RegExp: true,
 		String: true
 	};
 	function $applyAttributes(data, options) {
@@ -538,6 +540,14 @@ module.exports = function() {
 					type.properties[property.name.name] = prop;
 				}
 			}
+			else if(__ks_0 === Kind.RegularExpression) {
+				return {
+					typeName: {
+						kind: Kind.Identifier,
+						name: "RegExp"
+					}
+				};
+			}
 			else if(__ks_0 === Kind.Template) {
 				return {
 					typeName: {
@@ -702,7 +712,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'node'");
 			}
 			if(variable.kind === VariableKind.Class) {
-				if(Type.isValue(variable.instanceMethods[name])) {
+				if(Type.isArray(variable.instanceMethods[name])) {
 					var variables = [];
 					for(var __ks_0 = 0, __ks_1 = variable.instanceMethods[name].length, method; __ks_0 < __ks_1; ++__ks_0) {
 						method = variable.instanceMethods[name][__ks_0];
@@ -723,7 +733,7 @@ module.exports = function() {
 						return variables;
 					}
 				}
-				else if(Type.isValue(variable.instanceVariables[name])) {
+				else if(Type.isObject(variable.instanceVariables[name])) {
 					if(Type.isValue(variable.instanceVariables[name].type)) {
 						return {
 							kind: VariableKind.Variable,
@@ -5000,7 +5010,7 @@ module.exports = function() {
 				else {
 					this._exportSource.push(name.name + ": " + name.name);
 				}
-				if((variable.kind === VariableKind.Class) && variable.sealed) {
+				if(variable.sealed) {
 					if(alias) {
 						this._exportSource.push("__ks_" + alias.name + ": " + variable.sealed.name);
 					}
@@ -5179,31 +5189,22 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		}
-		__ks_func_require_0(name, kind) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
-			}
-			if(kind === undefined || kind === null) {
-				throw new Error("Missing parameter 'kind'");
+		__ks_func_require_0(variable) {
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
 			}
 			if(this._binary) {
 				$throw("Binary file can't require", this);
 			}
-			if(kind === VariableKind.Class) {
-				this._requirements[name] = {
-					class: true
-				};
-			}
-			else {
-				this._requirements[name] = {};
-			}
+			this._requirements[variable.requirement] = {
+				name: variable.requirement,
+				extendable: (variable.kind === VariableKind.Class) || variable.sealed,
+				requireFirst: false
+			};
 		}
-		__ks_func_require_1(name, kind, requireFirst) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
-			}
-			if(kind === undefined || kind === null) {
-				throw new Error("Missing parameter 'kind'");
+		__ks_func_require_1(variable, requireFirst) {
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
 			}
 			if(requireFirst === undefined || requireFirst === null) {
 				throw new Error("Missing parameter 'requireFirst'");
@@ -5212,8 +5213,8 @@ module.exports = function() {
 				$throw("Binary file can't require", this);
 			}
 			var requirement = {
-				name: name,
-				class: kind === VariableKind.Class,
+				name: variable.requirement,
+				extendable: (variable.kind === VariableKind.Class) || variable.sealed,
 				parameter: this._body.scope().acquireTempName(),
 				requireFirst: requireFirst
 			};
@@ -5221,10 +5222,10 @@ module.exports = function() {
 			this._dynamicRequirements.push(requirement);
 		}
 		require() {
-			if(arguments.length === 2) {
+			if(arguments.length === 1) {
 				return Module.prototype.__ks_func_require_0.apply(this, arguments);
 			}
-			else if(arguments.length === 3) {
+			else if(arguments.length === 2) {
 				return Module.prototype.__ks_func_require_1.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
@@ -5281,7 +5282,7 @@ module.exports = function() {
 							fragments.push($comma);
 						}
 						fragments.push($code(requirement.parameter));
-						if(requirement.class) {
+						if(requirement.extendable) {
 							fragments.push($code(", __ks_" + requirement.parameter));
 						}
 					}
@@ -5290,7 +5291,7 @@ module.exports = function() {
 						var requirement = this._dynamicRequirements[0];
 						if(requirement.requireFirst) {
 							fragments.push($code("\tif(Type.isValue(" + requirement.parameter + ")) {\n"));
-							if(requirement.class) {
+							if(requirement.extendable) {
 								fragments.push($code("\t\treturn [" + requirement.parameter + ", __ks_" + requirement.parameter + "];\n"));
 								fragments.push($code("\t}\n"));
 								fragments.push($code("\telse {\n"));
@@ -5307,7 +5308,7 @@ module.exports = function() {
 						}
 						else {
 							fragments.push($code("\tif(Type.isValue(" + requirement.name + ")) {\n"));
-							if(requirement.class) {
+							if(requirement.extendable) {
 								fragments.push($code("\t\treturn [" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\" ? {} : __ks_" + requirement.name + "];\n"));
 								fragments.push($code("\t}\n"));
 								fragments.push($code("\telse {\n"));
@@ -5329,7 +5330,7 @@ module.exports = function() {
 							requirement = this._dynamicRequirements[__ks_0];
 							if(requirement.requireFirst) {
 								fragments.push($code("\tif(Type.isValue(" + requirement.parameter + ")) {\n"));
-								if(requirement.class) {
+								if(requirement.extendable) {
 									fragments.push($code("\t\treq.push(" + requirement.parameter + ", __ks_" + requirement.parameter + ");\n"));
 									fragments.push($code("\t}\n"));
 									fragments.push($code("\telse {\n"));
@@ -5346,7 +5347,7 @@ module.exports = function() {
 							}
 							else {
 								fragments.push($code("\tif(Type.isValue(" + requirement.name + ")) {\n"));
-								if(requirement.class) {
+								if(requirement.extendable) {
 									fragments.push($code("\t\treq.push(" + requirement.name + ", typeof __ks_" + requirement.name + " === \"undefined\" ? {} : __ks_" + requirement.name + ");\n"));
 									fragments.push($code("\t}\n"));
 									fragments.push($code("\telse {\n"));
@@ -5376,7 +5377,7 @@ module.exports = function() {
 						nf = true;
 					}
 					fragments.push($code(name));
-					if(this._requirements[name].class) {
+					if(this._requirements[name].extendable) {
 						fragments.push($code(", __ks_" + name));
 					}
 				}
@@ -5389,7 +5390,7 @@ module.exports = function() {
 							fragments.push($comma);
 						}
 						fragments.push($code(requirement.name));
-						if(requirement.class) {
+						if(requirement.extendable) {
 							fragments.push($code(", __ks_" + requirement.name));
 						}
 					}
@@ -5400,7 +5401,7 @@ module.exports = function() {
 							fragments.push($comma);
 						}
 						fragments.push($code(requirement.parameter));
-						if(requirement.class) {
+						if(requirement.extendable) {
 							fragments.push($code(", __ks_" + requirement.parameter));
 						}
 					}
@@ -5440,7 +5441,7 @@ module.exports = function() {
 			for(var name in this._requirements) {
 				var variable = this._requirements[name];
 				if(variable.parameter) {
-					if(variable.class) {
+					if(variable.extendable) {
 						data.requirements[variable.name] = {
 							class: true,
 							nullable: true
@@ -5453,7 +5454,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					if(variable.class) {
+					if(variable.extendable) {
 						data.requirements[name] = {
 							class: true
 						};
@@ -5780,6 +5781,18 @@ module.exports = function() {
 			require: [
 				{
 					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				},
+				{
+					access: 3,
 					min: 2,
 					max: 2,
 					parameters: [
@@ -5787,18 +5800,6 @@ module.exports = function() {
 							type: "Any",
 							min: 2,
 							max: 2
-						}
-					]
-				},
-				{
-					access: 3,
-					min: 3,
-					max: 3,
-					parameters: [
-						{
-							type: "Any",
-							min: 3,
-							max: 3
 						}
 					]
 				}
@@ -9564,13 +9565,19 @@ module.exports = function() {
 					for(var i = 0, __ks_3 = declaration.members.length; i < __ks_3; ++i) {
 						$extern.classMember(declaration.members[i], variable, this);
 					}
-					module.require(declaration.name.name, VariableKind.Class, false);
+					module.require(variable, false);
 				}
 				else if(__ks_2 === Kind.VariableDeclarator) {
 					var type;
 					var variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
-					module.require(declaration.name.name, type, false);
+					if(declaration.sealed) {
+						variable.sealed = {
+							name: "__ks_" + variable.name.name,
+							properties: {}
+						};
+					}
+					module.require(variable, false);
 				}
 				else {
 					$throw("Unknow kind " + declaration.kind, this);
@@ -14024,7 +14031,7 @@ module.exports = function() {
 				}
 				variable = exports[name];
 				if(variable.kind !== VariableKind.TypeAlias) {
-					if((variable.kind === VariableKind.Class) && variable.sealed) {
+					if(variable.sealed) {
 						variable.sealed.name = "__ks_" + alias;
 						fragments.newLine().code("var {" + alias + ", " + variable.sealed.name + "} = " + importCode).done();
 					}
@@ -14048,13 +14055,13 @@ module.exports = function() {
 						}
 						if(alias === name) {
 							line.code(name);
-							if((variable.kind === VariableKind.Class) && variable.sealed) {
+							if(variable.sealed) {
 								line.code(", ", variable.sealed.name);
 							}
 						}
 						else {
 							line.code(name, ": ", alias);
-							if((variable.kind === VariableKind.Class) && variable.sealed) {
+							if(variable.sealed) {
 								variable.sealed.name = "__ks_" + alias;
 								line.code(", ", variable.sealed.name);
 							}
@@ -14069,7 +14076,7 @@ module.exports = function() {
 					variable = exports[name];
 					if(variable.kind !== VariableKind.TypeAlias) {
 						variables.push(name);
-						if((variable.kind === VariableKind.Class) && variable.sealed) {
+						if(variable.sealed) {
 							variable.sealed.name = "__ks_" + name;
 							variables.push(variable.sealed.name);
 						}
@@ -14790,12 +14797,12 @@ module.exports = function() {
 					for(var i = 0, __ks_3 = declaration.members.length; i < __ks_3; ++i) {
 						$extern.classMember(declaration.members[i], variable, this._parent);
 					}
-					module.require(declaration.name.name, VariableKind.Class);
+					module.require(variable);
 				}
 				else if(__ks_2 === Kind.VariableDeclarator) {
 					var variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
-					module.require(declaration.name.name, type);
+					module.require(variable);
 				}
 				else {
 					$throw("Unknow kind " + declaration.kind, this);
@@ -14908,13 +14915,18 @@ module.exports = function() {
 					for(var i = 0, __ks_3 = declaration.members.length; i < __ks_3; ++i) {
 						$extern.classMember(declaration.members[i], variable, this);
 					}
-					module.require(declaration.name.name, VariableKind.Class, true);
+					module.require(variable, true);
 				}
 				else if(__ks_2 === Kind.VariableDeclarator) {
-					var type;
-					var variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type);
+					var variable = $variable.define(this, this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type);
 					variable.requirement = declaration.name.name;
-					module.require(declaration.name.name, type, true);
+					if(declaration.sealed) {
+						variable.sealed = {
+							name: "__ks_" + variable.name.name,
+							properties: {}
+						};
+					}
+					module.require(variable, true);
 				}
 				else {
 					$throw("Unknow kind " + declaration.kind, this);

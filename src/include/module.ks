@@ -112,7 +112,7 @@ class Module {
 				this._exportSource.push(`\(name.name): \(name.name)`)
 			}
 			
-			if variable.kind == VariableKind::Class && variable.sealed {
+			if variable.sealed {
 				if alias {
 					this._exportSource.push(`__ks_\(alias.name): \(variable.sealed.name)`)
 				}
@@ -203,28 +203,25 @@ class Module {
 		
 		return output
 	} // }}}
-	require(name, kind) { // {{{
+	require(variable) { // {{{
 		if this._binary {
 			$throw('Binary file can\'t require', this)
 		}
 		
-		if kind == VariableKind::Class {
-			this._requirements[name] = {
-				class: true
-			}
-		}
-		else {
-			this._requirements[name] = {}
+		this._requirements[variable.requirement] = {
+			name: variable.requirement
+			extendable: variable.kind == VariableKind::Class || variable.sealed
+			requireFirst: false
 		}
 	} // }}}
-	require(name, kind, requireFirst) { // {{{
+	require(variable, requireFirst) { // {{{
 		if this._binary {
 			$throw('Binary file can\'t require', this)
 		}
 		
 		let requirement = {
-			name: name
-			class: kind == VariableKind::Class
+			name: variable.requirement
+			extendable: variable.kind == VariableKind::Class || variable.sealed
 			parameter: this._body.scope().acquireTempName()
 			requireFirst: requireFirst
 		}
@@ -284,7 +281,7 @@ class Module {
 					
 					fragments.push($code(requirement.parameter))
 					
-					if requirement.class {
+					if requirement.extendable {
 						fragments.push($code(', __ks_' + requirement.parameter))
 					}
 				}
@@ -297,7 +294,7 @@ class Module {
 					if requirement.requireFirst {
 						fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 						
-						if requirement.class {
+						if requirement.extendable {
 							fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
 							fragments.push($code('\t}\n'))
 							fragments.push($code('\telse {\n'))
@@ -315,7 +312,7 @@ class Module {
 					else {
 						fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
 						
-						if requirement.class {
+						if requirement.extendable {
 							fragments.push($code('\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'))
 							fragments.push($code('\t}\n'))
 							fragments.push($code('\telse {\n'))
@@ -338,7 +335,7 @@ class Module {
 						if requirement.requireFirst {
 							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 							
-							if requirement.class {
+							if requirement.extendable {
 								fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
 								fragments.push($code('\t}\n'))
 								fragments.push($code('\telse {\n'))
@@ -356,7 +353,7 @@ class Module {
 						else {
 							fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
 							
-							if requirement.class {
+							if requirement.extendable {
 								fragments.push($code('\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'))
 								fragments.push($code('\t}\n'))
 								fragments.push($code('\telse {\n'))
@@ -392,7 +389,7 @@ class Module {
 				
 				fragments.push($code(name))
 				
-				if this._requirements[name].class {
+				if this._requirements[name].extendable {
 					fragments.push($code(', __ks_' + name))
 				}
 			}
@@ -409,7 +406,7 @@ class Module {
 					
 					fragments.push($code(requirement.name))
 					
-					if requirement.class {
+					if requirement.extendable {
 						fragments.push($code(', __ks_' + requirement.name))
 					}
 				}
@@ -423,7 +420,7 @@ class Module {
 					
 					fragments.push($code(requirement.parameter))
 					
-					if requirement.class {
+					if requirement.extendable {
 						fragments.push($code(', __ks_' + requirement.parameter))
 					}
 				}
@@ -464,7 +461,7 @@ class Module {
 		
 		for name, variable of this._requirements {
 			if variable.parameter {
-				if variable.class {
+				if variable.extendable {
 					data.requirements[variable.name] = {
 						class: true
 						nullable: true
@@ -477,7 +474,7 @@ class Module {
 				}
 			}
 			else {
-				if variable.class {
+				if variable.extendable {
 					data.requirements[name] = {
 						class: true
 					}

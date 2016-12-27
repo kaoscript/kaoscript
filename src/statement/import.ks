@@ -536,7 +536,7 @@ const $import = {
 			variable = exports[name]
 			
 			if variable.kind != VariableKind::TypeAlias {
-				if variable.kind == VariableKind::Class && variable.sealed {
+				if variable.sealed {
 					variable.sealed.name = '__ks_' + alias
 					
 					fragments.newLine().code(`var {\(alias), \(variable.sealed.name)} = \(importCode)`).done()
@@ -564,14 +564,14 @@ const $import = {
 					if alias == name {
 						line.code(name)
 						
-						if variable.kind == VariableKind::Class && variable.sealed {
+						if variable.sealed {
 							line.code(', ', variable.sealed.name)
 						}
 					}
 					else {
 						line.code(name, ': ', alias)
 						
-						if variable.kind == VariableKind::Class && variable.sealed {
+						if variable.sealed {
 							variable.sealed.name = '__ks_' + alias
 							
 							line.code(', ', variable.sealed.name)
@@ -590,7 +590,7 @@ const $import = {
 				if variable.kind != VariableKind::TypeAlias {
 					variables.push(name)
 					
-					if variable.kind == VariableKind::Class && variable.sealed {
+					if variable.sealed {
 						variable.sealed.name = '__ks_' + name
 						
 						variables.push(variable.sealed.name)

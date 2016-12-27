@@ -1,4 +1,4 @@
-import Shape, console from ./export.final.ks
+import * from ./export.sealed.class.ks
 
 let shape: Shape = new Shape('yellow')
 console.log(shape.draw('rectangle'))

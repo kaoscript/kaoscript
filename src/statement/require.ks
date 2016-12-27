@@ -24,14 +24,14 @@ class RequireDeclaration extends Statement {
 						$extern.classMember(declaration.members[i], variable, this._parent)
 					}
 					
-					module.require(declaration.name.name, VariableKind::Class)
+					module.require(variable)
 				}
 				Kind::VariableDeclarator => {
 					variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
-					module.require(declaration.name.name, type)
+					module.require(variable)
 				}
 				=> {
 					$throw('Unknow kind ' + declaration.kind, this)

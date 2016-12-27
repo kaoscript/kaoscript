@@ -1,4 +1,4 @@
-import Shape from ./export.final.ks
+import Shape from ./export.sealed.class.ks
 
 extern console: {
 	log(...args)

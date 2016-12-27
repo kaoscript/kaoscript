@@ -25,14 +25,21 @@ class ExternOrRequireDeclaration extends Statement {
 						$extern.classMember(declaration.members[i], variable, this)
 					}
 					
-					module.require(declaration.name.name, VariableKind::Class, false)
+					module.require(variable, false)
 				}
 				Kind::VariableDeclarator => {
 					variable = $variable.define(this, this.greatScope(), declaration.name, type = $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name
 					
-					module.require(declaration.name.name, type, false)
+					if declaration.sealed {
+						variable.sealed = {
+							name: '__ks_' + variable.name.name
+							properties: {}
+						}
+					}
+					
+					module.require(variable, false)
 				}
 				=> {
 					$throw('Unknow kind ' + declaration.kind, this)

@@ -44,6 +44,7 @@ const $defaultTypes = { // {{{
 	Function: 'Function'
 	Number: 'Number'
 	Object: 'Object'
+	RegExp: 'RegExp'
 	String: 'String'
 } // }}}
 
@@ -121,6 +122,7 @@ const $typeofs = { // {{{
 	NaN: true
 	Number: true
 	Object: true
+	RegExp: true
 	String: true
 } // }}}
 
@@ -500,6 +502,14 @@ const $type = {
 					type.properties[property.name.name] = prop
 				}
 			}
+			Kind::RegularExpression => {
+				return {
+					typeName: {
+						kind: Kind::Identifier
+						name: 'RegExp'
+					}
+				}
+			}
 			Kind::Template => {
 				return {
 					typeName: {
@@ -642,7 +652,7 @@ const $variable = {
 		//console.log('variable.filterMember.name', name)
 		
 		if variable.kind == VariableKind::Class {
-			if variable.instanceMethods[name]? {
+			if variable.instanceMethods[name] is Array {
 				let variables: Array = []
 				
 				for method in variable.instanceMethods[name] {
@@ -660,7 +670,7 @@ const $variable = {
 				return variables[0]	if variables.length == 1
 				return variables	if variables.length > 0
 			}
-			else if variable.instanceVariables[name]? {
+			else if variable.instanceVariables[name] is Object {
 				if variable.instanceVariables[name].type? {
 					return {
 						kind: VariableKind::Variable
