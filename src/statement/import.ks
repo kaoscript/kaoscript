@@ -259,7 +259,7 @@ const $import = {
 		let count = 0
 		
 		for specifier in data.specifiers {
-			if specifier.kind == Kind.ImportWildcardSpecifier {
+			if specifier.kind == Kind::ImportWildcardSpecifier {
 				if specifier.local {
 					node._metadata.wilcard = specifier.local.name
 					

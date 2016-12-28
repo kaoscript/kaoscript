@@ -933,6 +933,18 @@ module.exports = function() {
 					};
 				}
 			}
+			else if(__ks_0 === Kind.FunctionExpression) {
+				return {
+					kind: VariableKind.Variable,
+					type: {
+						kind: Kind.TypeReference,
+						typeName: {
+							kind: Kind.Identifier,
+							name: "Function"
+						}
+					}
+				};
+			}
 			else if(__ks_0 === Kind.Identifier) {
 				if(Type.isString($literalTypes[data.name])) {
 					return {
@@ -6035,23 +6047,24 @@ module.exports = function() {
 			}
 			else {
 				var variable = $variable.fromAST(data.object, node);
-				return $sealed.filter(variable, data.property.name, node);
+				return $sealed.filter(variable, data.property.name, data, node);
 			}
 		},
 		filter() {
-			if(arguments.length < 2) {
+			if(arguments.length < 3) {
 				throw new Error("Wrong number of arguments");
 			}
 			var __ks_i = -1;
-			if(arguments.length > 2) {
+			if(arguments.length > 3) {
 				var variable = arguments[++__ks_i];
 			}
 			else  {
 				var variable = null;
 			}
 			var name = arguments[++__ks_i];
+			var data = arguments[++__ks_i];
 			var node = arguments[++__ks_i];
-			if(arguments.length > 3) {
+			if(arguments.length > 4) {
 				var instance = arguments[++__ks_i];
 			}
 			else  {
@@ -6078,13 +6091,25 @@ module.exports = function() {
 						}
 					}
 				}
+				else if(variable.kind === VariableKind.Enum) {
+					$throw("Invalid Enum syntax at line " + data.start.line, node);
+				}
+				else if(variable.kind === VariableKind.Function) {
+					return $sealed.filterType({
+						kind: Kind.TypeReference,
+						typeName: {
+							kind: Kind.Identifier,
+							name: "Function"
+						}
+					}, name, data, node);
+				}
 				else if(variable.kind === VariableKind.TypeAlias) {
 					if(Type.isValue(variable.type) && Type.isValue(variable.type.types)) {
 						var variables = [];
 						for(var __ks_0 = 0, __ks_1 = variable.type.types.length, type; __ks_0 < __ks_1; ++__ks_0) {
 							type = variable.type.types[__ks_0];
 							var v;
-							if(!(v = $sealed.filter($variable.fromType(type, node), name, node, true))) {
+							if(!(v = $sealed.filter($variable.fromType(type, node), name, data, node, true))) {
 								return false;
 							}
 							variables.push(v);
@@ -6098,7 +6123,7 @@ module.exports = function() {
 					}
 					else {
 						if(Type.isValue(__ks_0 = $variable.fromType(variable.type, node)) ? (variable = __ks_0, true) : false) {
-							return $sealed.filter(variable, name, node, true);
+							return $sealed.filter(variable, name, data, node, true);
 						}
 					}
 				}
@@ -6110,31 +6135,37 @@ module.exports = function() {
 						};
 					}
 					if(Type.isValue(variable.type)) {
-						return $sealed.filterType(variable.type, name, node);
+						return $sealed.filterType(variable.type, name, data, node);
 					}
+				}
+				else {
+					$throw("Not implemented", node);
 				}
 			}
 			return false;
 		},
-		filterType(type, name, node) {
+		filterType(type, name, data, node) {
 			if(type === undefined || type === null) {
 				throw new Error("Missing parameter 'type'");
 			}
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
 			}
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
 			if(Type.isValue(type.typeName)) {
-				return $sealed.filter($variable.fromType(type, node), name, node, true);
+				return $sealed.filter($variable.fromType(type, node), name, data, node, true);
 			}
 			else if(Type.isValue(type.types)) {
 				var variables = [];
 				for(var __ks_0 = 0, __ks_1 = type.types.length, t; __ks_0 < __ks_1; ++__ks_0) {
 					t = type.types[__ks_0];
 					var v;
-					if(!(v = $sealed.filter($variable.fromType(t, node), name, node, true))) {
+					if(!(v = $sealed.filter($variable.fromType(t, node), name, data, node, true))) {
 						return false;
 					}
 					variables.push(v);

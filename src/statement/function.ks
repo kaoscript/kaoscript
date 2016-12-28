@@ -748,7 +748,7 @@ const $function = {
 		
 		if parameter.modifiers {
 			for modifier in parameter.modifiers {
-				if modifier.kind == ParameterModifier.Rest {
+				if modifier.kind == ParameterModifier::Rest {
 					signature.rest = true
 					
 					if modifier.arity {

@@ -937,7 +937,7 @@ const $method = {
 		
 		if data.modifiers {
 			for modifier in data.modifiers {
-				if modifier.kind == FunctionModifier.Async {
+				if modifier.kind == FunctionModifier::Async {
 					signature.async = true
 				}
 				else if modifier.kind == MemberModifier::Private {
@@ -967,7 +967,7 @@ const $method = {
 				
 				if parameter.modifiers {
 					for modifier in parameter.modifiers {
-						if modifier.kind == ParameterModifier.Rest {
+						if modifier.kind == ParameterModifier::Rest {
 							if modifier.arity {
 								last.min += modifier.arity.min
 								last.max += modifier.arity.max
@@ -986,7 +986,7 @@ const $method = {
 				
 				if parameter.modifiers {
 					for modifier in parameter.modifiers {
-						if modifier.kind == ParameterModifier.Rest {
+						if modifier.kind == ParameterModifier::Rest {
 							if modifier.arity {
 								last.min += modifier.arity.min
 								last.max += modifier.arity.max

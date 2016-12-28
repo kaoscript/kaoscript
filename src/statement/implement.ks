@@ -118,7 +118,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 		else {
 			for i from 0 til data.modifiers.length while this._instance {
-				if data.modifiers[i].kind == MemberModifier.Static {
+				if data.modifiers[i].kind == MemberModifier::Static {
 					this._instance = false
 				}
 			}
@@ -160,7 +160,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					variable.classMethods[data.name.name].push(method)
 				}
 			}
-			else if data.name.kind == Kind.TemplateExpression {
+			else if data.name.kind == Kind::TemplateExpression {
 				this._name = $compile.expression(data.name, this)
 			}
 		}
@@ -203,7 +203,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			if data.name.kind == Kind::Identifier {
 				object.newLine().code('name: ' + $quote(data.name.name))
 			}
-			else if data.name.kind == Kind.TemplateExpression {
+			else if data.name.kind == Kind::TemplateExpression {
 				object.newLine().code('name: ').compile(this._name)
 			}
 			else {

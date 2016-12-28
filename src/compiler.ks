@@ -578,7 +578,7 @@ const $type = {
 		return type
 	} // }}}
 	typeName(data) { // {{{
-		if data.kind == Kind.Identifier {
+		if data.kind == Kind::Identifier {
 			return {
 				kind: Kind::Identifier
 				name: data.name
@@ -842,6 +842,18 @@ const $variable = {
 						type: {
 							kind: Kind::TypeReference
 							typeName: $identifier(variable.name)
+						}
+					}
+				}
+			}
+			Kind::FunctionExpression => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: 'Function'
 						}
 					}
 				}

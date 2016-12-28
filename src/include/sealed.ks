@@ -8,10 +8,10 @@ const $sealed = {
 			//console.log('callee.data', data)
 			//console.log('callee.variable', variable)
 			
-			return $sealed.filter(variable, data.property.name, node)
+			return $sealed.filter(variable, data.property.name, data, node)
 		}
 	} // }}}
-	filter(variable?, name, node, instance = false) { // {{{
+	filter(variable?, name, data, node, instance = false) { // {{{
 		if variable? {
 			if variable.kind == VariableKind::Class {
 				if variable.sealed? {
@@ -33,12 +33,24 @@ const $sealed = {
 					}
 				}
 			}
+			else if variable.kind == VariableKind::Enum {
+				$throw('Invalid Enum syntax at line ' + data.start.line, node)
+			}
+			else if variable.kind == VariableKind::Function {
+				return $sealed.filterType({
+					kind: Kind::TypeReference
+					typeName: {
+						kind: Kind::Identifier
+						name: 'Function'
+					}
+				}, name, data, node)
+			}
 			else if variable.kind == VariableKind::TypeAlias {
 				if variable.type?.types? {
 					let variables = []
 					
 					for type in variable.type.types {
-						return false unless v = $sealed.filter($variable.fromType(type, node), name, node, true)
+						return false unless v = $sealed.filter($variable.fromType(type, node), name, data, node, true)
 						
 						variables.push(v)
 					}
@@ -47,7 +59,7 @@ const $sealed = {
 					return variables	if variables.length > 0
 				}
 				else {
-					return $sealed.filter(variable, name, node, true) if variable ?= $variable.fromType(variable.type, node)
+					return $sealed.filter(variable, name, data, node, true) if variable ?= $variable.fromType(variable.type, node)
 				}
 			}
 			else if variable.kind == VariableKind::Variable {
@@ -59,22 +71,25 @@ const $sealed = {
 				}
 				
 				if variable.type? {
-					return $sealed.filterType(variable.type, name, node)
+					return $sealed.filterType(variable.type, name, data, node)
 				}
+			}
+			else {
+				$throw('Not implemented', node)
 			}
 		}
 		
 		return false
 	} // }}}
-	filterType(type, name, node) { // {{{
+	filterType(type, name, data, node) { // {{{
 		if type.typeName? {
-			return $sealed.filter($variable.fromType(type, node), name, node, true)
+			return $sealed.filter($variable.fromType(type, node), name, data, node, true)
 		}
 		else if type.types? {
 			let variables = []
 			
 			for t in type.types {
-				return false unless v = $sealed.filter($variable.fromType(t, node), name, node, true)
+				return false unless v = $sealed.filter($variable.fromType(t, node), name, data, node, true)
 				
 				variables.push(v)
 			}
