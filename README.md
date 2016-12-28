@@ -93,7 +93,6 @@ Two combined ways:
 - `extern|require`: first look into the global scope, and if not found, look into the module parameters
 - `require|extern`: first look into the module parameters, and if not found, look into the global scope
 
-
 Array
 -----
 
@@ -146,7 +145,7 @@ import * from ./_number.ks
 
 extern console, parseFoat
 
-func alpha(n?, percentage = false) -> float {
+func alpha(n?, percentage = false): float {
 	let i: Number = parseFoat(n)
 	
 	return 1 if i is NaN else (percentage ? i / 100 : i).limit(0, 1).round(3)
@@ -185,7 +184,7 @@ func disks() async {
 }
 
 let d = await disks()
-````
+```
 
 Loop
 ----
@@ -276,7 +275,7 @@ class Shape {
 	color() => this._color
 	color(@color) => this
     
-    draw() -> string {
+    draw(): string {
         return `I'm drawing with a \(this._color) pen.`
     }
 }
@@ -294,7 +293,7 @@ console.log(r.draw())
 
 
 impl Shape {
-	draw(shape) -> string {
+	draw(shape): string {
 		return `I'm drawing a \(this._color) \(shape).`
 	}
 }
@@ -320,7 +319,7 @@ extern final class Number {
 // 'final' avoid to directly extends the class Number
 
 impl Number {
-	mod(max) -> Number {
+	mod(max): Number {
 		if isNaN(this) {
 			return 0
 		}
