@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.3.0
+ * Version 0.4.1
  * September 15th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -58,10 +58,6 @@ const options = {
 	}
 }
 
-if program.output {
-	options.output = path.join(process.cwd(), program.output)
-}
-
 if program.rewire {
 	options.rewire = []
 	
@@ -73,11 +69,13 @@ if program.rewire {
 	}
 }
 
-const compiler = new Compiler(file, options)
-
-compiler.compile()
-
 if program.compile {
+	options.output = path.join(process.cwd(), program.output ?? '')
+	
+	const compiler = new Compiler(file, options)
+	
+	compiler.compile()
+	
 	if program.print {
 		console.log(compiler.toSource())
 	}
@@ -85,27 +83,35 @@ if program.compile {
 	compiler.writeOutput()
 }
 else if program.print {
+	const compiler = new Compiler(file, options)
+	
+	compiler.compile()
+	
 	console.log(compiler.toSource())
 }
 else {
-	 const sandbox = {}
-	 for key of global {
-	 	 sandbox[key] = global[key]
-	 }
-	 
-	 _module = sandbox.module = new Module('eval')
-	 _require = sandbox.require = (path) => Module._load(path, _module, true)
-	 
-	 _module.filename = sandbox.__filename
-	 
-	 for r in Object.getOwnPropertyNames(require) {
-	 	 if r != 'paths' && r != 'arguments' && r != 'caller' {
-	 	 	 _require[r] = require[r]
-	 	 }
-	 }
-	 
-	 _require.paths = _module.paths = Module._nodeModulePaths(process.cwd()).concat(process.cwd())
-	 _require.resolve = (request) => Module._resolveFilename(request, _module)
-	 
-	 vm.runInNewContext(compiler.toSource(), sandbox, file)
+	const compiler = new Compiler(file, options)
+	
+	compiler.compile()
+	
+	const sandbox = {}
+	for key of global {
+		sandbox[key] = global[key]
+	}
+	
+	_module = sandbox.module = new Module('eval')
+	_require = sandbox.require = (path) => Module._load(path, _module, true)
+	
+	_module.filename = sandbox.__filename
+	
+	for r in Object.getOwnPropertyNames(require) {
+		if r != 'paths' && r != 'arguments' && r != 'caller' {
+			_require[r] = require[r]
+		}
+	}
+	
+	_require.paths = _module.paths = Module._nodeModulePaths(process.cwd()).concat(process.cwd())
+	_require.resolve = (request) => Module._resolveFilename(request, _module)
+	
+	vm.runInNewContext(compiler.toSource(), sandbox, file)
 }
