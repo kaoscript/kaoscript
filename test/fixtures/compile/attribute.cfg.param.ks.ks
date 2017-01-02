@@ -1,4 +1,4 @@
-#![cfg(parameters='kaoscript')]
+#![cfg(parse(parameters='kaoscript'))]
 
 extern console: {
 	log(...args)

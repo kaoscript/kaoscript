@@ -9,7 +9,7 @@ module.exports = function(expect, Helper, Type) {
 		if(arguments.length > 2) {
 			var z = arguments[++__ks_i];
 		}
-		else  {
+		else {
 			var z = 24;
 		}
 		return [x, y, z];

@@ -8,11 +8,19 @@ const $function = {
 		
 		return null
 	} // }}}
+	item(name, node) { // {{{
+		if node._options.format.functions == 'es5' {
+			return name + ': function'
+		}
+		else {
+			return name
+		}
+	} // }}}
 	parameters(node, fragments, fn) { // {{{
-		if node._options.parameters == 'es5' {
+		if node._options.parse.parameters == 'es5' {
 			return $function.parametersES5(node, fragments, fn)
 		}
-		else if node._options.parameters == 'es6' {
+		else if node._options.parse.parameters == 'es6' {
 			return $function.parametersES6(node, fragments, fn)
 		}
 		else {
@@ -23,23 +31,23 @@ const $function = {
 		let data = node._data
 		let signature = $function.signature(data, node)
 		
-		for parameter, i in data.parameters {
+		for parameter, i in node._parameters {
 			if signature.parameters[i].rest {
 				$throw(`Parameter can't be a rest parameter at line \(parameter.start.line)`, node)
 			}
-			else if parameter.defaultValue {
+			else if parameter._defaultValue != null {
 				$throw(`Parameter can't have a default value at line \(parameter.start.line)`, node)
 			}
-			else if parameter.type && parameter.type.nullable {
+			else if parameter._nullable {
 				$throw(`Parameter can't be nullable at line \(parameter.start.line)`, node)
 			}
-			else if !parameter.name {
+			else if parameter._anonymous {
 				$throw(`Parameter must be named at line \(parameter.start.line)`, node)
 			}
 			
 			fragments.code($comma) if i
 			
-			fragments.code(parameter.name.name, parameter.name)
+			parameter.toParameterFragments(fragments)
 		}
 		
 		return fn(fragments)
@@ -49,15 +57,17 @@ const $function = {
 		let signature = $function.signature(data, node)
 		let rest = false
 		
-		for parameter, i in data.parameters {
-			if !parameter.name {
+		for parameter, i in node._parameters {
+			if parameter._anonymous {
 				$throw(`Parameter must be named at line \(parameter.start.line)`, node)
 			}
 			
 			fragments.code($comma) if i
 			
 			if signature.parameters[i].rest {
-				fragments.code('...').code(parameter.name.name, parameter.name)
+				fragments.code('...')
+				
+				parameter.toParameterFragments(fragments)
 				
 				rest = true
 			}
@@ -65,17 +75,11 @@ const $function = {
 				$throw(`Parameter must be before the rest parameter at line \(parameter.start.line)`, node)
 			}
 			else {
-				fragments.code(parameter.name.name, parameter.name)
+				parameter.toParameterFragments(fragments)
 			}
 			
-			if parameter.type {
-				if parameter.type.nullable && !parameter.defaultValue {
-					fragments.code(' = null')
-				}
-			}
-			
-			if parameter.defaultValue {
-				fragments.code(' = ').compile(node._parameters[i]._defaultValue)
+			if parameter._defaultValue != null {
+				fragments.code(' = ').compile(parameter._defaultValue)
 			}
 		}
 		
@@ -134,29 +138,16 @@ const $function = {
 		if (rest != -1 && !fr && (db == 0 || db + 1 == rest)) || (rest == -1 && ((!signature.async && signature.max == l && (db == 0 || db == l)) || (signature.async && signature.max == l + 1 && (db == 0 || db == l + 1)))) { // {{{
 			let names = []
 			
-			for i from 0 til l {
-				parameter = data.parameters[i]
-				
+			for parameter, i in node._parameters while i < l {
 				fragments.code($comma) if i
 				
-				if parameter.name {
-					names[i] = parameter.name.name
-					
-					fragments.code(parameter.name.name, parameter.name)
-				}
-				else {
-					fragments.code(names[i] = node.scope().acquireTempName())
-				}
+				parameter.toParameterFragments(fragments)
 				
-				if parameter.type {
-					if parameter.type.nullable && !parameter.defaultValue {
-						fragments.code(' = null')
-					}
-				}
+				names.push(parameter._name)
 			}
 			
-			if !ra && rest != -1 && (signature.parameters[rest].type == 'Any' || !maxa) {
-				parameter = data.parameters[rest]
+			if !ra && rest != -1 && (signature.parameters[rest].type == 'Any' || !maxa) && node._options.format.parameters == 'es6' {
+				parameter = node._parameters[rest]
 				
 				if rest {
 					fragments.code(', ')
@@ -164,14 +155,9 @@ const $function = {
 				
 				fragments.code('...')
 				
-				if parameter.name {
-					names[rest] = parameter.name.name
-					
-					fragments.code(parameter.name.name, parameter.name)
-				}
-				else {
-					fragments.code(names[rest] = node.scope().acquireTempName())
-				}
+				parameter.toParameterFragments(fragments)
+				
+				names.push(parameter._name)
 			}
 			else if signature.async && !ra {
 				if l {
@@ -192,51 +178,57 @@ const $function = {
 					.done()
 			}
 			
-			for i from 0 til l {
-				parameter = data.parameters[i]
-				
-				if parameter.name? && (!?parameter.type || !parameter.type.nullable || parameter.defaultValue?) {
+			for parameter, i in node._parameters while i < l {
+				if !parameter._anonymous && (node._options.format.parameters == 'es5' || (node._options.format.parameters == 'es6' && !parameter._nullable) || parameter._defaultValue != null) {
 					ctrl = fragments
 						.newControl()
-						.code('if(', parameter.name.name, ' === undefined')
+						.code('if(').compile(parameter).code(' === undefined')
 					
-					if !?parameter.type || !parameter.type.nullable {
-						ctrl.code(' || ', parameter.name.name, ' === null')
+					if !parameter._nullable {
+						ctrl.code(' || ').compile(parameter).code(' === null')
 					}
 					
 					ctrl.code(')').step()
 					
-					if parameter.defaultValue? {
+					if parameter._defaultValue != null {
 						ctrl
 							.newLine()
-							.code(parameter.name.name, $equals)
-							.compile(node._parameters[i]._defaultValue)
+							.compile(parameter)
+							.code($equals)
+							.compile(parameter._defaultValue)
+							.done()
+					}
+					else if parameter._nullable {
+						ctrl
+							.newLine()
+							.compile(parameter)
+							.code($equals, 'null')
 							.done()
 					}
 					else {
-						ctrl.line('throw new Error("Missing parameter \'', parameter.name.name, '\'")')
+						ctrl.line('throw new Error("Missing parameter \'', parameter._name, '\'")')
 					}
 					
 					ctrl.done()
 				}
 				
-				if !$type.isAny(parameter.type) {
+				if !$type.isAny(parameter._type) {
 					ctrl = fragments
 						.newControl()
 						.code('if(')
 					
-					if parameter.type.nullable {
+					if parameter._nullable {
 						ctrl.code(names[i], ' !== null && ')
 					}
 					
 					ctrl.code('!')
 					
-					$type.check(node, ctrl, names[i], parameter.type)
+					$type.check(node, ctrl, names[i], parameter._type)
 					
 					ctrl
 						.code(')')
 						.step()
-						.line('throw new Error("Invalid type for parameter \'', parameter.name.name, '\'")')
+						.line('throw new Error("Invalid type for parameter \'', parameter._name, '\'")')
 					
 					ctrl.done()
 				}
@@ -289,6 +281,34 @@ const $function = {
 				if parameter.name {
 					ctrl.line(parameter.name.name, parameter.name, '.push(arguments[__ks_i])')
 				}
+				
+				ctrl.done()
+			}
+			else if rest != -1 && node._options.format.parameters == 'es5' {
+				parameter = node._parameters[rest]
+				
+				fragments
+					.newLine()
+					.code($variable.scope(node))
+					.compile(parameter)
+					.code($equals, `Array.prototype.slice.call(arguments, \(maxb), arguments.length)`)
+					.done()
+			}
+			
+			if rest != -1 && (parameter = node._parameters[rest])._defaultValue != null {
+				ctrl = fragments
+					.newControl()
+					.code('if(')
+					.compile(parameter)
+					.code('.length === 0)')
+					.step()
+				
+				ctrl
+					.newLine()
+					.compile(parameter)
+					.code($equals)
+					.compile(parameter._defaultValue)
+					.done()
 				
 				ctrl.done()
 			}
@@ -408,7 +428,7 @@ const $function = {
 							
 							ctrl2
 								.step()
-								.code('else ')
+								.code('else')
 								.step()
 							
 							if rest == -1 {
@@ -429,7 +449,7 @@ const $function = {
 						}
 						
 						if parameter.name {
-							ctrl.step().code('else ').step()
+							ctrl.step().code('else').step()
 						
 							if parameter.defaultValue {
 								ctrl
@@ -602,7 +622,7 @@ const $function = {
 							
 							ctrl2
 								.step()
-								.code('else ')
+								.code('else')
 								.step()
 							
 							if parameter.defaultValue {
@@ -620,7 +640,7 @@ const $function = {
 						}
 						
 						if parameter.name {
-							ctrl.step().code('else ').step()
+							ctrl.step().code('else').step()
 						
 							if parameter.defaultValue {
 								ctrl
@@ -853,12 +873,18 @@ class FunctionDeclaration extends Statement {
 
 class Parameter extends AbstractNode {
 	private {
+		_anonymous		= false
 		_defaultValue	= null
 		_name			= null
+		_nullable		= false
+		_type
+		_variable		= null
 	}
 	analyse() { // {{{
 		let data = this._data
 		let parent = this._parent
+		
+		this._type = data.type
 		
 		if data.name? {
 			let signature = $function.signatureParameter(data, this._scope)
@@ -876,16 +902,38 @@ class Parameter extends AbstractNode {
 				$variable.define(this, this._scope, data.name, $variable.kind(data.type), data.type)
 			}
 			
-			this._name = $compile.expression(data.name, parent)
+			this._variable = $compile.expression(data.name, parent)
+		}
+		else {
+			let name = {
+				kind: Kind::Identifier
+				name: this._scope.acquireTempName()
+			}
+			
+			$variable.define(this, this._scope, name, VariableKind::Variable)
+			
+			this._variable = $compile.expression(name, parent)
+			this._anonymous = true
 		}
 		
 		if data.defaultValue? {
 			this._defaultValue = $compile.expression(data.defaultValue, parent)
 		}
+		
+		this._name = this._variable._value
+		this._nullable = this._data.type?.nullable
 	} // }}}
 	fuse() {// {{{
 		if this._defaultValue != null {
 			this._defaultValue.fuse()
 		}
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments.compile(this._variable)
+	} // }}}
+	toParameterFragments(fragments) { // {{{
+		fragments.compile(this._variable)
+		
+		fragments.code(' = null') if this._nullable && !?this._data.defaultValue && this._options.format.parameters == 'es6'
 	} // }}}
 }

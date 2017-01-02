@@ -9,7 +9,7 @@ module.exports = function(expect, Helper, Type) {
 		if(arguments.length > 4) {
 			var x = arguments[++__ks_i];
 		}
-		else  {
+		else {
 			var x = 42;
 		}
 		let values = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + 4));

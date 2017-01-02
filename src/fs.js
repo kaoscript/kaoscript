@@ -30,8 +30,8 @@ module.exports = {
 			}
 		}
 	}, // }}}
-	hidden: function(file, ext) { // {{{
-		return path.join(path.dirname(file), '.' + path.basename(file) + ext)
+	hidden: function(file, target, ext) { // {{{
+		return path.join(path.dirname(file), '.' + path.basename(file) + '.' + target + ext)
 	}, // }}}
 	isFile: function(file) { // {{{
 		file = path.resolve(this.resolve(file));

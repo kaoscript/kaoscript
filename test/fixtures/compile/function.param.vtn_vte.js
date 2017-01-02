@@ -8,11 +8,11 @@ module.exports = function(expect, Helper, Type) {
 			if(Type.isNumber(arguments[__ks_i + 1])) {
 				var x = arguments[++__ks_i];
 			}
-			else  {
+			else {
 				throw new Error("Invalid type for parameter 'x'");
 			}
 		}
-		else  {
+		else {
 			var x = null;
 		}
 		if(Type.isString(arguments[++__ks_i])) {

@@ -1,4 +1,4 @@
-#![cfg(variables='es5')]
+#![cfg(format(variables='es5'))]
 
 extern sealed class Array
 

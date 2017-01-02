@@ -31,7 +31,7 @@ class Module {
 		}
 		
 		this._directory = path.dirname(file)
-		this._options = $applyAttributes(this._data, this._compiler._options.config)
+		this._options = $attribute.apply(this._data, this._compiler._options.config)
 		
 		for attr in this._data.attributes {
 			if attr.declaration.kind == Kind::Identifier &&	attr.declaration.name == 'bin' {
@@ -146,10 +146,10 @@ class Module {
 			this._register = true
 		}
 	} // }}}
-	isUpToDate(file, data) { // {{{
+	isUpToDate(file, target, data) { // {{{
 		let hashes
 		try {
-			hashes = JSON.parse(fs.readFile(fs.hidden(file, $extensions.hash)))
+			hashes = JSON.parse(fs.readFile(getHashPath(file, target)))
 		}
 		catch {
 			return null
@@ -258,6 +258,10 @@ class Module {
 			}
 			else if hasType {
 				fragments.push($code('var ' + helper + ' = require("' + $runtime.package(this) + '").Helper;\n'))
+			}
+			else if this._options.format.destructuring == 'es5' {
+				fragments.push($code('var __ks__ = require("@kaoscript/runtime");\n'))
+				fragments.push($code(`var \(helper) = __ks__.Helper, \(type) = __ks__.Type;\n`))
 			}
 			else {
 				helper = `Helper: \(helper)` unless helper == 'Helper'
@@ -397,35 +401,67 @@ class Module {
 			fragments.push($code(') {\n'))
 			
 			if this._dynamicRequirements.length {
-				fragments.push($code('\tvar ['))
-				
-				for requirement, i in this._dynamicRequirements {
-					if i {
-						fragments.push($comma)
+				if this._options.format.destructuring == 'es5' {
+					fragments.push($code('\tvar __ks__ = __ks_require('))
+					
+					for requirement, i in this._dynamicRequirements {
+						if i {
+							fragments.push($comma)
+						}
+						
+						fragments.push($code(requirement.parameter))
+						
+						if requirement.extendable {
+							fragments.push($code(', __ks_' + requirement.parameter))
+						}
 					}
 					
-					fragments.push($code(requirement.name))
+					fragments.push($code(');\n'))
 					
-					if requirement.extendable {
-						fragments.push($code(', __ks_' + requirement.name))
+					fragments.push($code('\tvar '))
+					
+					let i = -1
+					for requirement in this._dynamicRequirements {
+						fragments.push($comma) if i != -1
+						
+						fragments.push($code(`\(requirement.name) = __ks__[\(++i)]`))
+						
+						if requirement.extendable {
+							fragments.push($code(`, __ks_\(requirement.name) = __ks__[\(++i)]`))
+						}
 					}
+					
+					fragments.push($code(';\n'))
 				}
-				
-				fragments.push($code('] = __ks_require('))
-				
-				for requirement, i in this._dynamicRequirements {
-					if i {
-						fragments.push($comma)
+				else {
+					fragments.push($code('\tvar ['))
+					
+					for requirement, i in this._dynamicRequirements {
+						fragments.push($comma) if i != 0
+						
+						fragments.push($code(requirement.name))
+						
+						if requirement.extendable {
+							fragments.push($code(', __ks_' + requirement.name))
+						}
 					}
 					
-					fragments.push($code(requirement.parameter))
+					fragments.push($code('] = __ks_require('))
 					
-					if requirement.extendable {
-						fragments.push($code(', __ks_' + requirement.parameter))
+					for requirement, i in this._dynamicRequirements {
+						if i {
+							fragments.push($comma)
+						}
+						
+						fragments.push($code(requirement.parameter))
+						
+						if requirement.extendable {
+							fragments.push($code(', __ks_' + requirement.parameter))
+						}
 					}
+					
+					fragments.push($code(');\n'))
 				}
-				
-				fragments.push($code(');\n'))
 			}
 			
 			fragments.append(builder.toArray())
@@ -512,7 +548,7 @@ class ModuleBlock extends AbstractNode {
 	}
 	$create(data, @module) { // {{{
 		this._data = data
-		this._options = $applyAttributes(data, module._options)
+		this._options = $attribute.apply(data, module._options)
 		this._scope = new Scope()
 	} // }}}
 	analyse() { // {{{

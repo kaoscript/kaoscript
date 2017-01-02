@@ -268,11 +268,11 @@ module.exports = function() {
 			if(Type.isObject(arguments[__ks_i + 1])) {
 				var result = arguments[++__ks_i];
 			}
-			else  {
+			else {
 				throw new Error("Invalid type for parameter 'result'");
 			}
 		}
-		else  {
+		else {
 			var result = {
 				_alpha: 0
 			};
@@ -746,22 +746,22 @@ module.exports = function() {
 				if(Type.is(arguments[__ks_i + 1], Space)) {
 					var space = arguments[++__ks_i];
 				}
-				else  {
+				else {
 					throw new Error("Invalid type for parameter 'space'");
 				}
 			}
-			else  {
+			else {
 				var space = Space.SRGB;
 			}
 			if(arguments.length > 3) {
 				if(Type.isBoolean(arguments[__ks_i + 1])) {
 					var alpha = arguments[++__ks_i];
 				}
-				else  {
+				else {
 					throw new Error("Invalid type for parameter 'alpha'");
 				}
 			}
-			else  {
+			else {
 				var alpha = false;
 			}
 			if(alpha) {
@@ -1151,11 +1151,11 @@ module.exports = function() {
 				if(Type.isBoolean(arguments[__ks_i + 1])) {
 					var tripleA = arguments[++__ks_i];
 				}
-				else  {
+				else {
 					throw new Error("Invalid type for parameter 'tripleA'");
 				}
 			}
-			else  {
+			else {
 				var tripleA = false;
 			}
 			if(tripleA) {

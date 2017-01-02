@@ -227,9 +227,9 @@ class SwitchBindingArray extends AbstractNode {
 	toFragments(fragments) { // {{{
 		let line = fragments.newLine()
 		
-		this._array.toAssignmentFragments(line)
+		this._array.toAssignmentFragments(line, this._parent._name)
 		
-		line.code(' = ', this._parent._name).done()
+		line.done()
 	} // }}}
 }
 

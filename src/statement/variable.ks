@@ -27,7 +27,7 @@ class VariableDeclaration extends Statement {
 	} // }}}
 	isAsync() => this._async
 	modifier(data) { // {{{
-		if data.name.kind == Kind::ArrayBinding || data.name.kind == Kind::ObjectBinding || this._options.variables == 'es5' {
+		if data.name.kind == Kind::ArrayBinding || data.name.kind == Kind::ObjectBinding || this._options.format.variables == 'es5' {
 			return $code('var')
 		}
 		else {
@@ -139,7 +139,7 @@ class VariableDeclarator extends AbstractNode {
 		let data = this._data
 		
 		if data.name.kind == Kind::Identifier {
-			if this._options.variables == 'es5' {
+			if this._options.format.variables == 'es5' {
 				this._scope.rename(data.name.name)
 			}
 			
@@ -182,16 +182,32 @@ class VariableDeclarator extends AbstractNode {
 	} // }}}
 	statement() => this._parent.statement()
 	toFragments(fragments, modifier) { // {{{
-		let line = fragments.newLine()
-		
-		line.code(this._parent.modifier(this._data), $space) if this._declare
-		
-		line.compile(this._name)
-		
-		if this._init != null {
-			line.code($equals).compile(this._init)
+		if this._options.format.destructuring == 'es5' && (this._name is ArrayBinding || this._name is ObjectBinding) {
+			if this._init != null {
+				let line = fragments.newLine()
+			
+				line.code(this._parent.modifier(this._data), $space) if this._declare
+				
+				this._name.toFlatFragments(line, this._init)
+				
+				line.done()
+			}
+			else if this._declare {
+				fragments.line(this._parent.modifier(this._data), $space, this._name.listVariables().join(', '))
+			}
 		}
-		
-		line.done()
+		else {
+			let line = fragments.newLine()
+			
+			line.code(this._parent.modifier(this._data), $space) if this._declare
+			
+			line.compile(this._name)
+			
+			if this._init != null {
+				line.code($equals).compile(this._init)
+			}
+			
+			line.done()
+		}
 	} // }}}
 }

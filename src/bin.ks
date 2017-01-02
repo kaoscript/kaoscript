@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.4.1
+ * Version 0.5.0
  * September 15th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -42,6 +42,7 @@ program
 	.option('-p, --print', 'print out the compiled JavaScript')
 	.option('    --no-register', 'suppress "require(kaoscript/register)"')
 	.option('-r, --rewire <src-path=gen-path,...>', 'rewire the references to source files to generated files', rewire)
+	.option('-t, --target <engine>', 'set the engine/runtime/browser to compile for')
 	.parse(process.argv)
 
 if program.args.length == 0 {
@@ -58,7 +59,7 @@ const options = {
 	}
 }
 
-if program.rewire {
+if program.rewire? {
 	options.rewire = []
 	
 	for item in program.rewire {
@@ -67,6 +68,10 @@ if program.rewire {
 			output: path.join(process.cwd(), item.output)
 		})
 	}
+}
+
+if program.target? {
+	options.target = program.target
 }
 
 if program.compile {

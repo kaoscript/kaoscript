@@ -8,7 +8,7 @@ class ArrayBinding extends Expression {
 		_variables			= {}
 	}
 	analyse() { // {{{
-		for element in this._data.elements {
+		for element, index in this._data.elements {
 			if element.kind == Kind::BindingElement && !element.name.computed {
 				if this._scope.hasVariable(element.name.name) {
 					this._existing[element.name.name] = true
@@ -20,7 +20,11 @@ class ArrayBinding extends Expression {
 				}
 			}
 			
-			this._elements.push($compile.expression(element, this))
+			this._elements.push(element = $compile.expression(element, this))
+			
+			if element is BindingElement {
+				element.index(index)
+			}
 		}
 	} // }}}
 	fuse() { // {{{
@@ -39,7 +43,7 @@ class ArrayBinding extends Expression {
 				if element.kind == Kind::BindingElement && !element.name.computed && this._existing[element.name.name] {
 					name = this._scope.acquireTempName()
 					
-					this._elements[i].toFragments(fragments, Kind::ArrayBinding, name)
+					this._elements[i].toExistFragments(fragments, name)
 					
 					this._variables[name] = element.name.name
 				}
@@ -71,20 +75,58 @@ class ArrayBinding extends Expression {
 			this._scope.releaseTempName(name)
 		}
 	} // }}}
-	toAssignmentFragments(fragments) { // {{{
+	toAssignmentFragments(fragments, value) { // {{{
 		if this._nonexistingCount {
 			fragments.code('var ')
 		}
 		
-		this.toFragments(fragments, Mode::None)
+		if this._options.format.destructuring == 'es5' {
+			this.toFlatFragments(fragments, value)
+		}
+		else {
+			fragments
+				.compile(this)
+				.code($equals)
+				.compile(value)
+		}
+	} // }}}
+	toFlatFragments(fragments, value) { // {{{
+		if value.isComposite() {
+			if this._elements.length == 1 {
+				this._elements[0].toFlatFragments(fragments, value)
+			}
+			else {
+				let variable = new IdentifierLiteral({
+					kind: Kind::Identifier
+					name: this._name
+				}, this, this._scope, false)
+				
+				this._elements[0].toFlatFragments(fragments, new TempBinding(variable, value, this))
+				
+				for i from 1 til this._elements.length {
+					fragments.code(', ')
+					
+					this._elements[i].toFlatFragments(fragments, variable)
+				}
+			}
+		}
+		else {
+			for i from 0 til this._elements.length {
+				fragments.code(', ') if i
+				
+				this._elements[i].toFlatFragments(fragments, value)
+			}
+		}
 	} // }}}
 }
 
 class BindingElement extends Expression {
 	private {
 		_alias
-		_defaultValue
+		_defaultValue	 = null
+		_index			= -1
 		_name
+		_variable
 	}
 	$create(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
@@ -99,13 +141,23 @@ class BindingElement extends Expression {
 		}
 		
 		this._name = $compile.expression(this._data.name, this)
-		this._defaultValue = $compile.expression(this._data.defaultValue, this) if this._data.defaultValue?
+		
+		if this._data.defaultValue? {
+			this._defaultValue = $compile.expression(this._data.defaultValue, this)
+			
+			if this._options.format.destructuring == 'es5' {
+				this._variable = this._scope.acquireTempName(this.statement())
+				
+				this._scope.releaseTempName(this._variable)
+			}
+		}
 	} // }}}
 	fuse() { // {{{
 		this._alias.fuse() if this._alias?
 		this._name.fuse()
 		this._defaultValue.fuse() if this._defaultValue?
 	} // }}}
+	index(@index) => this
 	toFragments(fragments) { // {{{
 		if this._data.spread {
 			fragments.code('...')
@@ -126,7 +178,7 @@ class BindingElement extends Expression {
 			fragments.code(' = ').compile(this._defaultValue)
 		}
 	} // }}}
-	toFragments(fragments, kind, name) { // {{{
+	toExistFragments(fragments, name) { // {{{
 		if this._data.spread {
 			fragments.code('...')
 		}
@@ -140,16 +192,70 @@ class BindingElement extends Expression {
 			}
 		}
 		
-		if kind == Kind::ArrayBinding {
-			fragments.code(name)
-		}
-		else {
+		if this._index == -1 {
 			fragments.compile(this._name).code(': ', name)
 		}
+		else {
+			fragments.code(name)
+		}
 		
-		if this._defaultValue? {
+		if this._defaultValue != null {
 			fragments.code(' = ').compile(this._defaultValue)
 		}
+	} // }}}
+	toFlatFragments(fragments, value) { // {{{
+		if this._name is ObjectBinding {
+			this._name.toFlatFragments(fragments, new FlatBindingElement(value, this._alias ?? this._name, this))
+		}
+		else if this._defaultValue? {
+			let variable = new IdentifierLiteral({
+				kind: Kind::Identifier
+				name: this._variable
+			}, this, this._scope, false)
+			
+			fragments
+				.compile(this._name)
+				.code($equals, 'Type.isValue(')
+				.compile(variable)
+				.code($equals)
+				.compile(new FlatBindingElement(value, this._alias ?? this._name, this))
+				.code(') ? ')
+				.compile(variable)
+				.code(' : ')
+				.compile(this._defaultValue)
+		}
+		else if this._index == -1 {
+			fragments
+				.compile(this._name)
+				.code($equals)
+				.wrap(value)
+				.code('.')
+				.compile(this._alias ?? this._name)
+		}
+		else {
+			fragments
+				.compile(this._name)
+				.code($equals)
+				.wrap(value)
+				.code(`[\(this._index)]`)
+		}
+	} // }}}
+}
+
+class FlatBindingElement extends Expression {
+	private {
+		_item
+		_property
+	}
+	$create(@item, @property, parent) { // {{{
+		super({}, parent)
+	} // }}}
+	isComposite() => false
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.wrap(this._item)
+			.code('.')
+			.compile(this._property)
 	} // }}}
 }
 
@@ -158,9 +264,14 @@ class ObjectBinding extends Expression {
 		_elements			= []
 		_exists				= false
 		_existing			= {}
+		_name				= null
 		_variables			= {}
 	}
 	analyse() { // {{{
+		if this._options.format.destructuring == 'es5' && this._data.elements.length > 1 {
+			this._name = this._scope.acquireTempName(this.statement())
+		}
+		
 		for element in this._data.elements {
 			if !element.name.computed && element.name.name? && this._scope.hasVariable(element.name.name) {
 				this._exists = true
@@ -168,6 +279,10 @@ class ObjectBinding extends Expression {
 			}
 			
 			this._elements.push($compile.expression(element, this))
+		}
+		
+		if this._name != null {
+			this._scope.releaseTempName(this._name)
 		}
 	} // }}}
 	fuse() { // {{{
@@ -186,7 +301,7 @@ class ObjectBinding extends Expression {
 				if this._existing[element.name.name] {
 					name = this._scope.acquireTempName()
 					
-					this._elements[i].toFragments(fragments, Kind::ObjectBinding, name)
+					this._elements[i].toExistFragments(fragments, name)
 					
 					this._variables[name] = element.name.name
 				}
@@ -218,9 +333,62 @@ class ObjectBinding extends Expression {
 			this._scope.releaseTempName(name)
 		}
 	} // }}}
-	toAssignmentFragments(fragments) { // {{{
+	toAssignmentFragments(fragments, value) { // {{{
 		fragments.code('var ')
 		
-		this.toFragments(fragments, Mode::None)
+		if this._options.format.destructuring == 'es5' {
+			this.toFlatFragments(fragments, value)
+		}
+		else {
+			fragments
+				.compile(this)
+				.code($equals)
+				.compile(value)
+		}
+	} // }}}
+	toFlatFragments(fragments, value) { // {{{
+		if value.isComposite() {
+			if this._elements.length == 1 {
+				this._elements[0].toFlatFragments(fragments, value)
+			}
+			else {
+				let variable = new IdentifierLiteral({
+					kind: Kind::Identifier
+					name: this._name
+				}, this, this._scope, false)
+				
+				this._elements[0].toFlatFragments(fragments, new TempBinding(variable, value, this))
+				
+				for i from 1 til this._elements.length {
+					fragments.code(', ')
+					
+					this._elements[i].toFlatFragments(fragments, variable)
+				}
+			}
+		}
+		else {
+			for i from 0 til this._elements.length {
+				fragments.code(', ') if i
+				
+				this._elements[i].toFlatFragments(fragments, value)
+			}
+		}
+	} // }}}
+}
+
+class TempBinding extends Expression {
+	private {
+		_name
+		_value
+	}
+	$create(@name, @value, parent) { // {{{
+		super({}, parent)
+	} // }}}
+	isComputed() => true
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.compile(this._name)
+			.code($equals)
+			.compile(this._value)
 	} // }}}
 }

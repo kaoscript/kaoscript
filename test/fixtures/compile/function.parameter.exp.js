@@ -7,7 +7,7 @@ module.exports = function() {
 		if(arguments.length > 1) {
 			var x = arguments[++__ks_i];
 		}
-		else  {
+		else {
 			var x = null;
 		}
 		var y = arguments[++__ks_i];

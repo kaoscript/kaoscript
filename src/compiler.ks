@@ -1,14 +1,12 @@
 /**
  * compiler.ks
- * Version 0.4.0
+ * Version 0.5.0
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-#![cfg(variables='es5')]
-
 import {
 	*				from @kaoscript/ast
 	* as fs			from ./fs.js
@@ -126,29 +124,39 @@ const $typeofs = { // {{{
 	String: true
 } // }}}
 
-func $applyAttributes(data, options) { // {{{
-	let nc = true
-	
-	if data.attributes && data.attributes.length {
-		for attr in data.attributes {
-			if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cfg' {
-				if nc {
-					options = Object.clone(options)
-					
-					nc = false
-				}
-				
-				for arg in attr.declaration.arguments {
-					if arg.kind == Kind::AttributeOperator {
-						options[arg.name.name] = arg.value.value
+const $attribute = {
+	apply(data, options) { // {{{
+		let nc = true
+		
+		if data.attributes && data.attributes.length {
+			for attr in data.attributes {
+				if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cfg' {
+					if nc {
+						options = Object.clone(options)
+						
+						nc = false
 					}
+					
+					$attribute.expression(attr.declaration, options)
 				}
 			}
 		}
-	}
-	
-	return options
-} // }}}
+		
+		return options
+	} // }}}
+	expression(attr, options) { // {{{
+		for arg in attr.arguments {
+			if arg.kind == Kind::AttributeExpression {
+				options[arg.name.name] ??= {}
+				
+				$attribute.expression(arg, options[arg.name.name])
+			}
+			else if arg.kind == Kind::AttributeOperator {
+				options[arg.name.name] = arg.value.value
+			}
+		}
+	} // }}}
+}
 
 func $block(data) { // {{{
 	return data if data.kind == Kind::Block
@@ -1115,7 +1123,7 @@ const $variable = {
 		variables.push(variable) if nf
 	} // }}}
 	scope(node) { // {{{
-		return node._options.variables == 'es5' ? 'var ' : 'let '
+		return node._options.format.variables == 'es5' ? 'var ' : 'let '
 	} // }}}
 	value(variable, data) { // {{{
 		if variable.kind == VariableKind::Enum {
@@ -1147,7 +1155,7 @@ class AbstractNode {
 		_scope = null
 	}
 	$create(@data, @parent, @scope = parent.scope()) { // {{{
-		this._options = $applyAttributes(data, parent._options)
+		this._options = $attribute.apply(data, parent._options)
 	} // }}}
 	directory() => this._parent.directory()
 	file() => this._parent.file()
@@ -1426,6 +1434,29 @@ const $unaryOperators = {
 	`\(UnaryOperator::Negative)`			: UnaryOperatorNegative
 }
 
+const $targets = {
+	es5: { // {{{
+		format: {
+			classes: 'es5'
+			destructuring: 'es5'
+			functions: 'es5'
+			parameters: 'es5'
+			spreads: 'es5'
+			variables: 'es5'
+		}
+	} // }}}
+	es6: { // {{{
+		format: {
+			classes: 'es6'
+			destructuring: 'es6'
+			functions: 'es6'
+			parameters: 'es6'
+			spreads: 'es6'
+			variables: 'es6'
+		}
+	} // }}}
+}
+
 export class Compiler {
 	private {
 		_file: String
@@ -1434,46 +1465,46 @@ export class Compiler {
 		_module
 		_options
 	}
-	static {
-		register() { // {{{
-		} // }}}
-	}
 	$create(@file, options?, @hashes = {}) { // {{{
 		this._options = Object.merge({
-			context: 'node6',
-			register: true,
+			target: 'es6'
+			register: true
 			config: {
-				header: true,
-				parameters: 'kaoscript',
+				header: true
+				parse: {
+					parameters: 'kaoscript'
+				}
+				format: {}
 				runtime: {
-					Helper: 'Helper',
-					Type: 'Type',
+					Helper: 'Helper'
+					Type: 'Type'
 					package: '@kaoscript/runtime'
 				}
-				variables: 'es6'
 			}
 		}, options)
+		
+		this._options.config = Object.defaults($targets[this._options.target], this._options.config)
 	} // }}}
 	compile(data?) { // {{{
+		//console.time('parse')
 		this._module = new $statements[Kind::Module](data ?? fs.readFile(this._file), this, this._file)
+		//console.timeEnd('parse')
 		
+		//console.time('compile')
 		this._module.analyse()
 		
 		this._module.fuse()
 		
 		this._fragments = this._module.toFragments()
-		
-		/* console.time('parse')
-		data = parse(data)
-		console.timeEnd('parse')
-		
-		console.time('compile')
-		this._module = new Class(data, this._options.config)
-		
-		this._fragments = this._module.toFragments()
-		console.timeEnd('compile') */
+		//console.timeEnd('compile')
 		
 		return this
+	} // }}}
+	createServant(file) { // {{{
+		return new Compiler(file, {
+			register: false
+			target: this._options.target
+		}, this._hashes)
 	} // }}}
 	sha256(file, data?) { // {{{
 		return this._hashes[file] ?? (this._hashes[file] = fs.sha256(data ?? fs.readFile(file)))
@@ -1502,15 +1533,15 @@ export class Compiler {
 		return this._module.toSourceMap()
 	} // }}}
 	writeFiles() { // {{{
-		fs.writeFile(fs.hidden(this._file, $extensions.binary), this.toSource())
+		fs.writeFile(getBinaryPath(this._file, this._options.target), this.toSource())
 		
 		if !this._module._binary {
 			let metadata = this.toMetadata()
 			
-			fs.writeFile(fs.hidden(this._file, $extensions.metadata), JSON.stringify(metadata))
+			fs.writeFile(getMetadataPath(this._file, this._options.target), JSON.stringify(metadata))
 		}
 		
-		fs.writeFile(fs.hidden(this._file, $extensions.hash), JSON.stringify(this._module.toHashes()))
+		fs.writeFile(getHashPath(this._file, this._options.target), JSON.stringify(this._module.toHashes()))
 	} // }}}
 	writeOutput() { // {{{
 		if !this._options.output {
@@ -1531,10 +1562,16 @@ export func compileFile(file, options?) { // {{{
 	return compiler.compile().toSource()
 } // }}}
 
-export func isUpToDate(file, source) { // {{{
+export func getBinaryPath(file, target) => fs.hidden(file, target, $extensions.binary)
+
+export func getHashPath(file, target) => fs.hidden(file, target, $extensions.hash)
+
+export func getMetadataPath(file, target) => fs.hidden(file, target, $extensions.metadata)
+
+export func isUpToDate(file, target, source) { // {{{
 	let hashes
 	try {
-		hashes = JSON.parse(fs.readFile(fs.hidden(file, $extensions.hash)))
+		hashes = JSON.parse(fs.readFile(getHashPath(file, target)))
 	}
 	catch {
 		return false

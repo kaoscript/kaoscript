@@ -115,13 +115,12 @@ const $import = {
 		let metadata, name, alias, variable, hashes
 		
 		let source = fs.readFile(x)
+		let target = module.compiler()._options.target
 		
-		if fs.isFile(fs.hidden(x, $extensions.metadata)) && fs.isFile(fs.hidden(x, $extensions.hash)) && (hashes ?= module.isUpToDate(x, source)) && (metadata ?= $import.readMetadata(x)) {
+		if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (metadata ?= $import.readMetadata(getMetadataPath(x, target))) {
 		}
 		else {
-			let compiler = new Compiler(x, {
-				register: false
-			}, module.compiler()._hashes)
+			let compiler = module.compiler().createServant(x)
 			
 			compiler.compile(source)
 			
@@ -327,9 +326,9 @@ const $import = {
 		
 		return dirs
 	} // }}}
-	readMetadata(x) { // {{{
+	readMetadata(file) { // {{{
 		try {
-			return JSON.parse(fs.readFile(fs.hidden(x, $extensions.metadata)))
+			return JSON.parse(fs.readFile(file))
 		}
 		catch {
 			return null
@@ -365,9 +364,11 @@ const $import = {
 		let {moduleName, exports, requirements, importVariables, importVarCount, importAll, importAlias} = metadata
 		
 		let name, alias, variable, importCode
+		let importCodeVariable = false
 		
 		if (importVarCount && importAll) || (importVarCount && importAlias.length) || (importAll && importAlias.length) {
 			importCode = node.scope().acquireTempName()
+			importCodeVariable = true
 			
 			let line = fragments
 				.newLine()
@@ -546,41 +547,89 @@ const $import = {
 				}
 			}
 		}
-		else if importVarCount {
-			let line = fragments.newLine().code('var {')
-			
-			let nf = false
-			for name, alias of importVariables {
-				variable = exports[name]
-				
-				if variable.kind != VariableKind::TypeAlias {
-					if nf {
-						line.code(', ')
-					}
-					else {
-						nf = true
-					}
+		else if importVarCount > 0 {
+			if node._options.format.destructuring == 'es5' {
+				if importCodeVariable {
+					let line = fragments.newLine().code('var ')
 					
-					if alias == name {
-						line.code(name)
+					let nf = false
+					for name, alias of importVariables {
+						variable = exports[alias]
 						
-						if variable.sealed {
-							line.code(', ', variable.sealed.name)
+						if variable.kind != VariableKind::TypeAlias {
+							if nf {
+								line.code(', ')
+							}
+							else {
+								nf = true
+							}
+							
+							line.code(`\(alias) = \(importCode).\(name)`)
 						}
 					}
-					else {
-						line.code(name, ': ', alias)
+					
+					line.done()
+				}
+				else {
+					fragments.line(`var __ks__ = \(importCode)`)
+					
+					let line = fragments.newLine().code('var ')
+					
+					let nf = false
+					for name, alias of importVariables {
+						variable = exports[alias]
 						
-						if variable.sealed {
-							variable.sealed.name = '__ks_' + alias
+						if variable.kind != VariableKind::TypeAlias {
+							if nf {
+								line.code(', ')
+							}
+							else {
+								nf = true
+							}
 							
-							line.code(', ', variable.sealed.name)
+							line.code(`\(alias) = __ks__.\(name)`)
+						}
+					}
+					
+					line.done()
+				}
+			}
+			else {
+				let line = fragments.newLine().code('var {')
+				
+				let nf = false
+				for name, alias of importVariables {
+					variable = exports[name]
+					
+					if variable.kind != VariableKind::TypeAlias {
+						if nf {
+							line.code(', ')
+						}
+						else {
+							nf = true
+						}
+						
+						if alias == name {
+							line.code(name)
+							
+							if variable.sealed {
+								line.code(', ', variable.sealed.name)
+							}
+						}
+						else {
+							line.code(name, ': ', alias)
+							
+							if variable.sealed {
+								variable.sealed.name = '__ks_' + alias
+								
+								line.code(', ', variable.sealed.name)
+							}
 						}
 					}
 				}
+				
+				line.code('} = ', importCode).done()
 			}
-			
-			line.code('} = ', importCode).done()
 		}
 		
 		if importAll {
@@ -604,22 +653,50 @@ const $import = {
 					.code('var ', variables[0], ' = ', importCode, '.' + variables[0])
 					.done()
 			}
-			else if variables.length {
-				let line = fragments.newLine().code('var {')
-				
-				nf = false
-				for name in variables {
-					if nf {
-						line.code(', ')
+			else if variables.length > 0 {
+				if node._options.format.destructuring == 'es5' {
+					if importCodeVariable {
+						let line = fragments.newLine().code('var ')
+						
+						for name, i in variables {
+							if i > 0 {
+								line.code(', ')
+							}
+							
+							line.code(`\(name) = \(importCode).\(name)`)
+						}
+						
+						line.done()
 					}
 					else {
-						nf = true
+						fragments.line(`var __ks__ = \(importCode)`)
+						
+						let line = fragments.newLine().code('var ')
+						
+						for name, i in variables {
+							if i > 0 {
+								line.code(', ')
+							}
+							
+							line.code(`\(name) = __ks__.\(name)`)
+						}
+						
+						line.done()
+					}
+				}
+				else {
+					let line = fragments.newLine().code('var {')
+					
+					for name, i in variables {
+						if i > 0 {
+							line.code(', ')
+						}
+						
+						line.code(name)
 					}
 					
-					line.code(name)
+					line.code('} = ', importCode).done()
 				}
-				
-				line.code('} = ', importCode).done()
 			}
 		}
 		
@@ -646,29 +723,50 @@ const $import = {
 			
 			fragments.line('var ', variables[alias], ' = require(', $quote(moduleName), ').', alias)
 		}
-		else if count {
-			let line = fragments.newLine().code('var {')
-			
-			let nf = false
-			for alias of variables {
-				if nf {
-					line.code(', ')
-				}
-				else {
-					nf = true
+		else if count > 0 {
+			if node._options.format.destructuring == 'es5' {
+				fragments.line('var __ks__ = require(', $quote(moduleName), ')')
+				
+				let line = fragments.newLine().code('var ')
+				
+				let nf = false
+				for name, alias of variables {
+					if nf {
+						line.code(', ')
+					}
+					else {
+						nf = true
+					}
+					
+					line.code(`\(alias) = __ks__.\(name)`)
 				}
 				
-				if variables[alias] == alias {
-					line.code(alias)
-				}
-				else {
-					line.code(alias, ': ', variables[alias])
-				}
+				line.done()
 			}
-			
-			line.code('} = require(', $quote(moduleName), ')')
-			
-			line.done()
+			else {
+				let line = fragments.newLine().code('var {')
+				
+				let nf = false
+				for alias of variables {
+					if nf {
+						line.code(', ')
+					}
+					else {
+						nf = true
+					}
+					
+					if variables[alias] == alias {
+						line.code(alias)
+					}
+					else {
+						line.code(alias, ': ', variables[alias])
+					}
+				}
+				
+				line.code('} = require(', $quote(moduleName), ')')
+				
+				line.done()
+			}
 		}
 	} // }}}
 }

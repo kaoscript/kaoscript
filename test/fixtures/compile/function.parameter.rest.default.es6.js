@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	function foo(...items) {
 		console.log(items);
@@ -32,7 +33,7 @@ module.exports = function() {
 		if(arguments.length > 0) {
 			var x = arguments[++__ks_i];
 		}
-		else  {
+		else {
 			var x = 1;
 		}
 		let items = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
@@ -41,6 +42,9 @@ module.exports = function() {
 		console.log(x, items, z);
 	}
 	function corge(...items) {
+		if(items.length === 0) {
+			items = Helper.newArrayRange(1, 5, 1, true, true);
+		}
 		console.log(items);
 	}
 	function grault() {

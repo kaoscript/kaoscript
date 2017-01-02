@@ -163,6 +163,14 @@ impl Object {
 			
 			return clone
 		} // }}}
+		defaults(...args): Object => Object.merge({}, ...args)
+		isEmpty(item) { // {{{
+			for key of item when item.hasOwnProperty(key) {
+				return false
+			}
+			
+			return true
+		} // }}}
 		merge(...args) { // {{{
 			let source
 			

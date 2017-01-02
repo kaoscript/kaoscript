@@ -15,7 +15,7 @@ Why?
 ----
 
 I have only one main reason: it's **not recommended to extends natives classes** to avoid any conflict with a JavaScript engine or a dependency.
-It because it breaks your code consistency.
+Because of that, your code consistency is broken!
 For example, to call the array's functions `map` and `clone`, it is written differently:
 - `array.map(...)`
 - `_.clone(array)`
@@ -444,16 +444,10 @@ Syntax Highlighting
 - [TextMate](https://github.com/kaoscript/highlight-textmate)
 - [VS Code](https://github.com/kaoscript/highlight-vscode)
 
-Temporary Limitation
---------------------
-
-The current compiler targets and requires **Node6**
-
 Todo
 ----
 
 - more tests
-- context packages (node4, node6, IE, FF, or Chromium)
 - get more people involved ;)
 - better documentation
 - operator overloading
@@ -469,6 +463,7 @@ Todo
 - boolean conditions
 - macro
 - full support of attributes
+- coverage
 
 License
 -------

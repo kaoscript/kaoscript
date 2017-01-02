@@ -38,6 +38,13 @@ class CallExpression extends Expression {
 				$throw(`Undefined variable \(this._data.callee.name) at line \(this._data.callee.start.line)`, this)
 			}
 		}
+		else if this._data.callee.kind == Kind::MemberExpression && this._data.callee.object.kind == Kind::Identifier {
+			if variable ?= this._scope.getVariable(this._data.callee.object.name) {
+				if variable.reduce? {
+					variable.reduce(this._data)
+				}
+			}
+		}
 		
 		if this._data.callee.kind == Kind::MemberExpression {
 			this._callee = new MemberExpression(this._data.callee, this, this.scope())

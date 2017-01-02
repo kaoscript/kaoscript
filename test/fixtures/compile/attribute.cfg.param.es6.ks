@@ -1,4 +1,4 @@
-#![cfg(parameters='es6')]
+#![cfg(parse(parameters='es6'))]
 
 extern console: {
 	log(...args)

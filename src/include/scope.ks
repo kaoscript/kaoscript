@@ -124,7 +124,6 @@ class Scope extends AbstractScope {
 		_scopeParent
 		_tempNextIndex 		= 0
 		_tempNames			= {}
-		_tempNameCount		= 0
 		_tempParentNames	= {}
 	}
 	$create(parent) { // {{{
@@ -146,44 +145,31 @@ class Scope extends AbstractScope {
 			return name
 		}
 		
-		if this._tempNameCount {
-			for i from 0 til this._tempNextIndex when this._tempNames[i] {
-				--this._tempNameCount
-				
-				name = this._tempNames[i]
-				
-				this._tempNames[i] = false
-				
-				return name
-			}
-		}
-		else {
-			let name = '__ks_' + this._tempNextIndex
-			
-			++this._tempNextIndex
-			
-			statement._variables.pushUniq(name) if statement?
-			
-			return name
-		}
-	} // }}}
-	private acquireTempNameFromKid() { // {{{
-		if this._parent && (name ?= this._parent.acquireTempNameFromKid()) {
-			this._tempParentNames[name] = true
+		for name of this._tempNames when this._tempNames[name] {
+			this._tempNames[name] = false
 			
 			return name
 		}
 		
-		if this._tempNameCount {
-			for i from 0 til this._tempNextIndex when this._tempNames[i] {
-				--this._tempNameCount
-				
-				name = this._tempNames[i]
-				
-				this._tempNames[i] = false
-				
-				return name
-			}
+		while this._tempParentNames[name = '__ks_' + this._tempNextIndex] {
+			++this._tempNextIndex
+		}
+		
+		++this._tempNextIndex
+		
+		statement._variables.pushUniq(name) if statement?
+		
+		return name
+	} // }}}
+	private acquireTempNameFromKid() { // {{{
+		if this._parent && (name ?= this._parent.acquireTempNameFromKid()) {
+			return name
+		}
+		
+		for name of this._tempNames when this._tempNames[name] {
+			this._tempNames[name] = false
+			
+			return name
 		}
 		
 		return null
@@ -224,9 +210,7 @@ class Scope extends AbstractScope {
 				this._tempParentNames[name] = false
 			}
 			else {
-				++this._tempNameCount
-				
-				this._tempNames[name.substr(5)] = name
+				this._tempNames[name] = true
 			}
 		}
 		
@@ -239,9 +223,7 @@ class Scope extends AbstractScope {
 			this._tempParentNames[name] = false
 		}
 		else {
-			++this._tempNameCount
-				
-			this._tempNames[name.substr(5)] = name
+			this._tempNames[name] = true
 		}
 	} // }}}
 	updateTempNames() { // {{{

@@ -14,7 +14,7 @@ module.exports = function() {
 			if(arguments.length > 1) {
 				var from = arguments[++__ks_i];
 			}
-			else  {
+			else {
 				var from = 0;
 			}
 			return this.indexOf(item, from) !== -1;

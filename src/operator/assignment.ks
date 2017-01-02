@@ -73,9 +73,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	} // }}}
 	toAssignmentFragments(fragments) { // {{{
 		if this._left.toAssignmentFragments? {
-			this._left.toAssignmentFragments(fragments)
-			
-			fragments.code($equals).compile(this._right)
+			this._left.toAssignmentFragments(fragments, this._right)
 		}
 		else {
 			fragments.compile(this._left).code($equals).compile(this._right)

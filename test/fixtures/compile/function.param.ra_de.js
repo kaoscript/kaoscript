@@ -9,7 +9,7 @@ module.exports = function(expect, Helper, Type) {
 		if(arguments.length > 3) {
 			var x = arguments[++__ks_i];
 		}
-		else  {
+		else {
 			var x = 42;
 		}
 		return [items, x];

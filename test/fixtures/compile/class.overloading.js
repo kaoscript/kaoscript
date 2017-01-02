@@ -45,13 +45,13 @@ module.exports = function() {
 			if(arguments.length > 1) {
 				var bar = arguments[++__ks_i];
 			}
-			else  {
+			else {
 				var bar = "bar";
 			}
 			if(arguments.length > 2) {
 				var qux = arguments[++__ks_i];
 			}
-			else  {
+			else {
 				var qux = "qux";
 			}
 			console.log(foo, bar, qux);
@@ -100,7 +100,7 @@ module.exports = function() {
 			if(arguments.length > 2) {
 				var priority = arguments[++__ks_i];
 			}
-			else  {
+			else {
 				var priority = 1;
 			}
 			console.log(name, priority, message);
@@ -129,7 +129,7 @@ module.exports = function() {
 			if(arguments.length > 2) {
 				var priority = arguments[++__ks_i];
 			}
-			else  {
+			else {
 				var priority = 1;
 			}
 			var message = arguments[++__ks_i];
@@ -170,11 +170,11 @@ module.exports = function() {
 				if(Type.isNumber(arguments[__ks_i + 1])) {
 					var priority = arguments[++__ks_i];
 				}
-				else  {
+				else {
 					throw new Error("Invalid type for parameter 'priority'");
 				}
 			}
-			else  {
+			else {
 				var priority = 1;
 			}
 			console.log(name, priority, message);
@@ -192,11 +192,11 @@ module.exports = function() {
 				if(Type.isNumber(arguments[__ks_i + 1])) {
 					var priority = arguments[++__ks_i];
 				}
-				else  {
+				else {
 					throw new Error("Invalid type for parameter 'priority'");
 				}
 			}
-			else  {
+			else {
 				var priority = 1;
 			}
 			if(Type.isArray(arguments[++__ks_i])) {

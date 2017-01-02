@@ -1,26 +1,30 @@
 /**
  * register.js
- * Version 0.1.0
+ * Version 0.5.0
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-var {Compiler, extensions, isUpToDate} = require('../build/compiler.js')();
+var _ = require('../build/compiler.js')();
 var fs = require('./fs.js');
 var path = require('path');
+
+var Compiler = _.Compiler;
+var target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'es6' : 'es5';
 
 var loadFile = function(module, filename) { // {{{
 	try {
 		var source = fs.readFile(filename);
 		
-		if(fs.isFile(fs.hidden(filename, extensions.binary)) && fs.isFile(fs.hidden(filename, extensions.hash)) && isUpToDate(filename, source)) {
-			var data = fs.readFile(fs.hidden(filename, extensions.binary));
+		if(fs.isFile(_.getBinaryPath(filename, target)) && fs.isFile(_.getHashPath(filename, target)) && _.isUpToDate(filename, target, source)) {
+			var data = fs.readFile(_.getBinaryPath(filename, target));
 		}
 		else {
 			var compiler = new Compiler(filename, {
-				register: false
+				register: false,
+				target: target
 			});
 			
 			compiler.compile(source);
@@ -42,7 +46,7 @@ var loadFile = function(module, filename) { // {{{
 }; // }}}
 
 if(require.extensions) {
-	require.extensions[extensions.source] = loadFile;
+	require.extensions[_.extensions.source] = loadFile;
 	
 	var Module = require('module');
 	var findExtension = function(filename) { // {{{

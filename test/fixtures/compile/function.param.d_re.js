@@ -4,7 +4,7 @@ module.exports = function(expect, Helper, Type) {
 		if(arguments.length > 0) {
 			var x = arguments[++__ks_i];
 		}
-		else  {
+		else {
 			var x = 42;
 		}
 		let items = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];

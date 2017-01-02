@@ -5,11 +5,11 @@ module.exports = function(expect, Helper, Type) {
 			if(Type.isNumber(arguments[__ks_i + 1])) {
 				var x = arguments[++__ks_i];
 			}
-			else  {
+			else {
 				var x = null;
 			}
 		}
-		else  {
+		else {
 			var x = null;
 		}
 		let items = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];

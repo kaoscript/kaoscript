@@ -7,14 +7,14 @@ module.exports = function(expect, Helper, Type) {
 		if(arguments.length > 1) {
 			var x = arguments[++__ks_i];
 		}
-		else  {
+		else {
 			var x = null;
 		}
 		++__ks_i;
 		if(arguments.length > 2) {
 			var z = arguments[++__ks_i];
 		}
-		else  {
+		else {
 			var z = null;
 		}
 		return [x, z];
