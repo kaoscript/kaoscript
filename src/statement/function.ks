@@ -8,14 +8,6 @@ const $function = {
 		
 		return null
 	} // }}}
-	item(name, node) { // {{{
-		if node._options.format.functions == 'es5' {
-			return name + ': function'
-		}
-		else {
-			return name
-		}
-	} // }}}
 	parameters(node, fragments, fn) { // {{{
 		if node._options.parse.parameters == 'es5' {
 			return $function.parametersES5(node, fragments, fn)

@@ -102,7 +102,7 @@ module.exports = function() {
 		String: true
 	};
 	var $attribute = {
-		apply(data, options) {
+		apply: function(data, options) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -124,7 +124,7 @@ module.exports = function() {
 			}
 			return options;
 		},
-		expression(attr, options) {
+		expression: function(attr, options) {
 			if(attr === undefined || attr === null) {
 				throw new Error("Missing parameter 'attr'");
 			}
@@ -184,19 +184,19 @@ module.exports = function() {
 		}
 	}
 	var $runtime = {
-		helper(node) {
+		helper: function(node) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
 			return node._options.runtime.Helper;
 		},
-		package(node) {
+		package: function(node) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
 			return node._options.runtime.package;
 		},
-		type(node) {
+		type: function(node) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -205,7 +205,7 @@ module.exports = function() {
 			}
 			return node._options.runtime.Type;
 		},
-		typeof() {
+		typeof: function() {
 			if(arguments.length < 1) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -234,7 +234,7 @@ module.exports = function() {
 		}
 	};
 	var $signature = {
-		type() {
+		type: function() {
 			if(arguments.length < 1) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -300,7 +300,7 @@ module.exports = function() {
 		}
 	}
 	var $type = {
-		check(node, fragments, name, type) {
+		check: function(node, fragments, name, type) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -367,7 +367,7 @@ module.exports = function() {
 				$throw("Not Implemented", node);
 			}
 		},
-		compile(data, fragments) {
+		compile: function(data, fragments) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -379,7 +379,7 @@ module.exports = function() {
 				fragments.code(Type.isValue($types[data.typeName.name]) ? $types[data.typeName.name] : data.typeName.name);
 			}
 		},
-		fromAST(type) {
+		fromAST: function(type) {
 			if(type === undefined) {
 				type = null;
 			}
@@ -397,7 +397,7 @@ module.exports = function() {
 			}
 			return VariableKind.Variable;
 		},
-		isAny(type) {
+		isAny: function(type) {
 			if(type === undefined) {
 				type = null;
 			}
@@ -409,7 +409,7 @@ module.exports = function() {
 			}
 			return false;
 		},
-		reference(name) {
+		reference: function(name) {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
 			}
@@ -429,7 +429,7 @@ module.exports = function() {
 				};
 			}
 		},
-		same(a, b) {
+		same: function(a, b) {
 			if(a === undefined || a === null) {
 				throw new Error("Missing parameter 'a'");
 			}
@@ -451,7 +451,7 @@ module.exports = function() {
 			}
 			return true;
 		},
-		type(data, scope, node) {
+		type: function(data, scope, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -620,7 +620,7 @@ module.exports = function() {
 							type.nullable = true;
 						}
 						if(data.typeParameters) {
-							type.typeParameters = Helper.mapArray(data.typeParameters, (parameter) => {
+							type.typeParameters = Helper.mapArray(data.typeParameters, function(parameter) {
 								return $type.type(parameter, scope, node);
 							});
 						}
@@ -629,14 +629,14 @@ module.exports = function() {
 			}
 			else if(__ks_0 === Kind.UnionType) {
 				return {
-					types: Helper.mapArray(data.types, (type) => {
+					types: Helper.mapArray(data.types, function(type) {
 						return $type.type(type, scope, node);
 					})
 				};
 			}
 			return type;
 		},
-		typeName(data) {
+		typeName: function(data) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -655,7 +655,7 @@ module.exports = function() {
 				};
 			}
 		},
-		unalias(type, scope) {
+		unalias: function(type, scope) {
 			if(type === undefined || type === null) {
 				throw new Error("Missing parameter 'type'");
 			}
@@ -670,7 +670,7 @@ module.exports = function() {
 		}
 	};
 	var $variable = {
-		define() {
+		define: function() {
 			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -726,7 +726,7 @@ module.exports = function() {
 			}
 			return variable;
 		},
-		filterMember(variable, name, node) {
+		filterMember: function(variable, name, node) {
 			if(variable === undefined || variable === null) {
 				throw new Error("Missing parameter 'variable'");
 			}
@@ -815,7 +815,7 @@ module.exports = function() {
 			}
 			return null;
 		},
-		filterType(variable, name, node) {
+		filterType: function(variable, name, node) {
 			if(variable === undefined || variable === null) {
 				throw new Error("Missing parameter 'variable'");
 			}
@@ -860,7 +860,7 @@ module.exports = function() {
 			}
 			return null;
 		},
-		fromAST(data, node) {
+		fromAST: function(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -1115,7 +1115,7 @@ module.exports = function() {
 			}
 			return null;
 		},
-		fromType(data, node) {
+		fromType: function(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -1162,7 +1162,7 @@ module.exports = function() {
 			}
 			return null;
 		},
-		fromReflectType(type, node) {
+		fromReflectType: function(type, node) {
 			if(type === undefined || type === null) {
 				throw new Error("Missing parameter 'type'");
 			}
@@ -1179,7 +1179,7 @@ module.exports = function() {
 				$throw("Not implemented", node);
 			}
 		},
-		kind(type) {
+		kind: function(type) {
 			if(type === undefined) {
 				type = null;
 			}
@@ -1196,7 +1196,7 @@ module.exports = function() {
 			}
 			return VariableKind.Variable;
 		},
-		merge(variable, importedVariable) {
+		merge: function(variable, importedVariable) {
 			if(variable === undefined || variable === null) {
 				throw new Error("Missing parameter 'variable'");
 			}
@@ -1214,7 +1214,7 @@ module.exports = function() {
 			}
 			return variable;
 		},
-		push(variables, variable) {
+		push: function(variables, variable) {
 			if(variables === undefined || variables === null) {
 				throw new Error("Missing parameter 'variables'");
 			}
@@ -1239,13 +1239,13 @@ module.exports = function() {
 				variables.push(variable);
 			}
 		},
-		scope(node) {
+		scope: function(node) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
 			return (node._options.format.variables === "es5") ? "var " : "let ";
 		},
-		value(variable, data) {
+		value: function(variable, data) {
 			if(variable === undefined || variable === null) {
 				throw new Error("Missing parameter 'variable'");
 			}
@@ -1598,7 +1598,7 @@ module.exports = function() {
 		}
 	}
 	var $merge = {
-		merge(source, key, value) {
+		merge: function(source, key, value) {
 			if(source === undefined || source === null) {
 				throw new Error("Missing parameter 'source'");
 			}
@@ -1624,7 +1624,7 @@ module.exports = function() {
 			}
 			return source;
 		},
-		object(source, current) {
+		object: function(source, current) {
 			if(source === undefined || source === null) {
 				throw new Error("Missing parameter 'source'");
 			}
@@ -2138,7 +2138,7 @@ module.exports = function() {
 		if(fragments === undefined || fragments === null) {
 			throw new Error("Missing parameter 'fragments'");
 		}
-		return Helper.mapArray(fragments, (fragment) => {
+		return Helper.mapArray(fragments, function(fragment) {
 			return fragment.code;
 		}).join("");
 	}
@@ -6184,7 +6184,7 @@ module.exports = function() {
 		classMethods: {}
 	};
 	var $sealed = {
-		callee(data, node) {
+		callee: function(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -6199,7 +6199,7 @@ module.exports = function() {
 				return $sealed.filter(variable, data.property.name, data, node);
 			}
 		},
-		filter() {
+		filter: function() {
 			if(arguments.length < 3) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -6293,7 +6293,7 @@ module.exports = function() {
 			}
 			return false;
 		},
-		filterType(type, name, data, node) {
+		filterType: function(type, name, data, node) {
 			if(type === undefined || type === null) {
 				throw new Error("Missing parameter 'type'");
 			}
@@ -6653,7 +6653,7 @@ module.exports = function() {
 		Unreferenced: 2
 	};
 	var $class = {
-		continuous(node, fragments) {
+		continuous: function(node, fragments) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -6708,26 +6708,26 @@ module.exports = function() {
 					ctrl.done();
 				}
 				if(!node._extends) {
-					clazz.newControl().code($function.item("$create", node), "()").step().line("this.__ks_init()").line("this.__ks_cons(arguments)");
+					clazz.newControl().code($class.methodHeader("$create", node), "()").step().line("this.__ks_init()").line("this.__ks_cons(arguments)");
 				}
 				if(noinit) {
 					if(node._extends) {
-						clazz.newControl().code($function.item("__ks_init", node), "()").step().line(node._extendsName + ".prototype.__ks_init.call(this)");
+						clazz.newControl().code($class.methodHeader("__ks_init", node), "()").step().line(node._extendsName + ".prototype.__ks_init.call(this)");
 					}
 					else {
-						clazz.newControl().code($function.item("__ks_init", node), "()").step();
+						clazz.newControl().code($class.methodHeader("__ks_init", node), "()").step();
 					}
 				}
 				else {
 					++reflect.inits;
-					ctrl = clazz.newControl().code($function.item("__ks_init_1", node), "()").step();
+					ctrl = clazz.newControl().code($class.methodHeader("__ks_init_1", node), "()").step();
 					for(var name in node._instanceVariables) {
 						var field = node._instanceVariables[name];
 						if(Type.isValue(field.data.defaultValue)) {
 							ctrl.newLine().code("this." + name + " = ").compile(field.defaultValue).done();
 						}
 					}
-					ctrl = clazz.newControl().code($function.item("__ks_init", node), "()").step();
+					ctrl = clazz.newControl().code($class.methodHeader("__ks_init", node), "()").step();
 					if(node._extends) {
 						ctrl.line(node._extendsName + ".prototype.__ks_init.call(this)");
 					}
@@ -6826,7 +6826,7 @@ module.exports = function() {
 				}
 			}
 		},
-		classMethod(node, fragments, statement, signature, parameters, reflect, name) {
+		classMethod: function(node, fragments, statement, signature, parameters, reflect, name) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -6858,7 +6858,7 @@ module.exports = function() {
 			});
 			statement.name("__ks_sttc_" + name + "_" + index).toFragments(fragments, Mode.None);
 		},
-		constructor(node, fragments, statement, signature, parameters, reflect) {
+		constructor: function(node, fragments, statement, signature, parameters, reflect) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -6884,7 +6884,7 @@ module.exports = function() {
 			});
 			statement.name("__ks_cons_" + index).toFragments(fragments, Mode.None);
 		},
-		destructor(node, fragments, statement, reflect) {
+		destructor: function(node, fragments, statement, reflect) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -6900,7 +6900,7 @@ module.exports = function() {
 			statement.name("__ks_destroy_" + reflect.destructors).toFragments(fragments, Mode.None);
 			reflect.destructors++;
 		},
-		instanceMethod(node, fragments, statement, signature, parameters, reflect, name) {
+		instanceMethod: function(node, fragments, statement, signature, parameters, reflect, name) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -6932,7 +6932,7 @@ module.exports = function() {
 			});
 			statement.name("__ks_func_" + name + "_" + index).toFragments(fragments, Mode.None);
 		},
-		methodCall(node, fnName, argName, retCode, fragments, method, index) {
+		methodCall: function(node, fnName, argName, retCode, fragments, method, index) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -6961,7 +6961,21 @@ module.exports = function() {
 				fragments.line(retCode, node._data.name.name, ".", fnName, index, ".apply(this, ", argName, ")");
 			}
 		},
-		sealed(node, fragments) {
+		methodHeader: function(name, node) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(node._es5) {
+				return name + ": function";
+			}
+			else {
+				return name;
+			}
+		},
+		sealed: function(node, fragments) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -7017,7 +7031,7 @@ module.exports = function() {
 					ctrl.done();
 				}
 				if(node._extends) {
-					ctrl = clazz.newControl().code($function.item("__ks_init", node), "()").step();
+					ctrl = clazz.newControl().code($class.methodHeader("__ks_init", node), "()").step();
 					ctrl.line(node._extendsName, ".prototype.__ks_init.call(this)");
 					if(!noinit) {
 						for(var name in node._instanceVariables) {
@@ -7029,7 +7043,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					ctrl = clazz.newControl().code($function.item("$create", node), "()").step();
+					ctrl = clazz.newControl().code($class.methodHeader("$create", node), "()").step();
 					if(!noinit) {
 						for(var name in node._instanceVariables) {
 							var field = node._instanceVariables[name];
@@ -7133,7 +7147,7 @@ module.exports = function() {
 		}
 	};
 	var $field = {
-		signature(data, node) {
+		signature: function(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -7162,7 +7176,7 @@ module.exports = function() {
 		}
 	};
 	var $helper = {
-		analyseType() {
+		analyseType: function() {
 			if(arguments.length < 1) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -7181,7 +7195,7 @@ module.exports = function() {
 				};
 			}
 			else if(Type.isArray(type)) {
-				return Helper.mapArray(type, (t) => {
+				return Helper.mapArray(type, function(t) {
 					return $helper.analyseType(t, node);
 				});
 			}
@@ -7207,7 +7221,7 @@ module.exports = function() {
 				}
 			}
 		},
-		classMethod(node, fragments, reflect, name) {
+		classMethod: function(node, fragments, reflect, name) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -7242,9 +7256,9 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, node, fragments.newControl(), node._es5 ? $function.item(name, node) + "()" : "static " + name + "()", reflect.classMethods[name], Helper.vcurry($class.methodCall, null, node, "__ks_sttc_" + name + "_", "arguments", "return "), "arguments", "classMethods." + name, true);
+			$helper.methods(extend, node, fragments.newControl(), node._es5 ? $class.methodHeader(name, node) + "()" : "static " + name + "()", reflect.classMethods[name], Helper.vcurry($class.methodCall, null, node, "__ks_sttc_" + name + "_", "arguments", "return "), "arguments", "classMethods." + name, true);
 		},
-		constructor(node, fragments, reflect) {
+		constructor: function(node, fragments, reflect) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -7277,9 +7291,9 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, node, fragments.newControl(), $function.item("__ks_cons", node) + "(args)", reflect.constructors, Helper.vcurry($class.methodCall, null, node, "prototype.__ks_cons_", "args", ""), "args", "constructors", false);
+			$helper.methods(extend, node, fragments.newControl(), $class.methodHeader("__ks_cons", node) + "(args)", reflect.constructors, Helper.vcurry($class.methodCall, null, node, "prototype.__ks_cons_", "args", ""), "args", "constructors", false);
 		},
-		decide(node, fragments, type, index, path, argName) {
+		decide: function(node, fragments, type, index, path, argName) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -7307,7 +7321,7 @@ module.exports = function() {
 				fragments.code($runtime.type(node), ".is(" + argName + "[" + index + "], " + path + ")");
 			}
 		},
-		destructor(node, fragments, reflect) {
+		destructor: function(node, fragments, reflect) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -7319,7 +7333,7 @@ module.exports = function() {
 			}
 			var ctrl = fragments.newControl();
 			if(node._es5) {
-				ctrl.code($function.item("__ks_destroy", node) + "(that)");
+				ctrl.code($class.methodHeader("__ks_destroy", node) + "(that)");
 			}
 			else {
 				ctrl.code("static __ks_destroy(that)");
@@ -7335,7 +7349,7 @@ module.exports = function() {
 				ctrl.done();
 			}
 		},
-		instanceMethod(node, fragments, reflect, name) {
+		instanceMethod: function(node, fragments, reflect, name) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -7370,9 +7384,9 @@ module.exports = function() {
 					}
 				};
 			}
-			$helper.methods(extend, node, fragments.newControl(), $function.item(name, node) + "()", reflect.instanceMethods[name], Helper.vcurry($class.methodCall, null, node, "prototype.__ks_func_" + name + "_", "arguments", "return "), "arguments", "instanceMethods." + name, true);
+			$helper.methods(extend, node, fragments.newControl(), $class.methodHeader(name, node) + "()", reflect.instanceMethods[name], Helper.vcurry($class.methodCall, null, node, "prototype.__ks_func_" + name + "_", "arguments", "return "), "arguments", "instanceMethods." + name, true);
 		},
-		methods(extend, node, fragments, header, methods, call, argName, refName, returns) {
+		methods: function(extend, node, fragments, header, methods, call, argName, refName, returns) {
 			if(extend === undefined || extend === null) {
 				throw new Error("Missing parameter 'extend'");
 			}
@@ -7537,7 +7551,7 @@ module.exports = function() {
 				fragments.done();
 			}
 		},
-		methodCheck(node, fragments, group, call, argName, refName, returns) {
+		methodCheck: function(node, fragments, group, call, argName, refName, returns) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -7568,7 +7582,7 @@ module.exports = function() {
 				}
 			}
 		},
-		methodCheckTree(methods, index, node, fragments, call, argName, refName, returns) {
+		methodCheckTree: function(methods, index, node, fragments, call, argName, refName, returns) {
 			if(methods === undefined || methods === null) {
 				throw new Error("Missing parameter 'methods'");
 			}
@@ -7682,7 +7696,7 @@ module.exports = function() {
 				return ne;
 			}
 		},
-		methodTypes(method, index) {
+		methodTypes: function(method, index) {
 			if(method === undefined || method === null) {
 				throw new Error("Missing parameter 'method'");
 			}
@@ -7718,7 +7732,7 @@ module.exports = function() {
 			}
 			return types;
 		},
-		reflect(node, fragments, reflect) {
+		reflect: function(node, fragments, reflect) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -7777,7 +7791,7 @@ module.exports = function() {
 			object.done();
 			line.done();
 		},
-		reflectMethod() {
+		reflectMethod: function() {
 			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -7803,7 +7817,7 @@ module.exports = function() {
 			array.done();
 			object.done();
 		},
-		reflectParameter() {
+		reflectParameter: function() {
 			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -7824,7 +7838,7 @@ module.exports = function() {
 			object.newLine().code("max: " + signature.max);
 			object.done();
 		},
-		reflectVariable() {
+		reflectVariable: function() {
 			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -7852,7 +7866,7 @@ module.exports = function() {
 			}
 			object.done();
 		},
-		type() {
+		type: function() {
 			if(arguments.length < 2) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -7893,7 +7907,7 @@ module.exports = function() {
 		}
 	};
 	var $method = {
-		isConstructor(name, variable) {
+		isConstructor: function(name, variable) {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
 			}
@@ -7902,7 +7916,7 @@ module.exports = function() {
 			}
 			return name === "$create";
 		},
-		isDestructor(name, variable) {
+		isDestructor: function(name, variable) {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
 			}
@@ -7911,7 +7925,7 @@ module.exports = function() {
 			}
 			return name === "$destroy";
 		},
-		sameType(s1, s2) {
+		sameType: function(s1, s2) {
 			if(s1 === undefined || s1 === null) {
 				throw new Error("Missing parameter 's1'");
 			}
@@ -7935,7 +7949,7 @@ module.exports = function() {
 				return s1 === s2;
 			}
 		},
-		signature(data, node) {
+		signature: function(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -8225,9 +8239,9 @@ module.exports = function() {
 							data: member,
 							signature: signature,
 							statement: method,
-							parameters: Helper.mapArray(signature.parameters, (parameter) => {
+							parameters: Helper.mapArray(signature.parameters, Helper.vcurry(function(parameter) {
 								return $helper.analyseType(parameter.type, this);
-							})
+							}, this))
 						});
 						this._variable.constructors.push(signature);
 						this._scope = scope;
@@ -8263,9 +8277,9 @@ module.exports = function() {
 							data: member,
 							signature: signature,
 							statement: $compile.statement(member, this),
-							parameters: Helper.mapArray(signature.parameters, (parameter) => {
+							parameters: Helper.mapArray(signature.parameters, Helper.vcurry(function(parameter) {
 								return $helper.analyseType(parameter.type, this);
-							})
+							}, this))
 						};
 						if(instance) {
 							if(!Type.isArray(this._instanceMethods[member.name.name])) {
@@ -8680,13 +8694,13 @@ module.exports = function() {
 			}
 		},
 		__ks_func_analyse_0: function() {
-			this._parameters = Helper.mapArray(this._data.parameters, (parameter) => {
+			this._parameters = Helper.mapArray(this._data.parameters, Helper.vcurry(function(parameter) {
 				return new Parameter(parameter, this);
-			});
+			}, this));
 			if(Type.isValue(this._data.body)) {
-				this._statements = Helper.mapArray($body(this._data.body), (statement) => {
+				this._statements = Helper.mapArray($body(this._data.body), Helper.vcurry(function(statement) {
 					return $compile.statement(statement, this);
-				});
+				}, this));
 			}
 			else {
 				this._statements = [];
@@ -8755,7 +8769,7 @@ module.exports = function() {
 			}
 			var ctrl = fragments.newControl();
 			if(this._parent._es5) {
-				ctrl.code($function.item(this._name, this._parent) + "(");
+				ctrl.code($class.methodHeader(this._name, this._parent) + "(");
 			}
 			else {
 				if(this._static) {
@@ -9831,7 +9845,7 @@ module.exports = function() {
 		classMethods: {}
 	};
 	var $extern = {
-		classMember(data, variable, node) {
+		classMember: function(data, variable, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -11156,7 +11170,7 @@ module.exports = function() {
 		classMethods: {}
 	};
 	var $function = {
-		arity(parameter) {
+		arity: function(parameter) {
 			if(parameter === undefined || parameter === null) {
 				throw new Error("Missing parameter 'parameter'");
 			}
@@ -11167,21 +11181,7 @@ module.exports = function() {
 			}
 			return null;
 		},
-		item(name, node) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
-			}
-			if(node === undefined || node === null) {
-				throw new Error("Missing parameter 'node'");
-			}
-			if(node._options.format.functions === "es5") {
-				return name + ": function";
-			}
-			else {
-				return name;
-			}
-		},
-		parameters(node, fragments, fn) {
+		parameters: function(node, fragments, fn) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -11201,7 +11201,7 @@ module.exports = function() {
 				return $function.parametersKS(node, fragments, fn);
 			}
 		},
-		parametersES5(node, fragments, fn) {
+		parametersES5: function(node, fragments, fn) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -11234,7 +11234,7 @@ module.exports = function() {
 			}
 			return fn(fragments);
 		},
-		parametersES6(node, fragments, fn) {
+		parametersES6: function(node, fragments, fn) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -11272,7 +11272,7 @@ module.exports = function() {
 			}
 			return fn(fragments);
 		},
-		parametersKS(node, fragments, fn) {
+		parametersKS: function(node, fragments, fn) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -11680,7 +11680,7 @@ module.exports = function() {
 			}
 			return fragments;
 		},
-		signature(data, node) {
+		signature: function(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -11728,7 +11728,7 @@ module.exports = function() {
 			}
 			return signature;
 		},
-		signatureParameter(parameter, scope) {
+		signatureParameter: function(parameter, scope) {
 			if(parameter === undefined || parameter === null) {
 				throw new Error("Missing parameter 'parameter'");
 			}
@@ -11799,12 +11799,12 @@ module.exports = function() {
 					variable.async = true;
 				}
 			}
-			this._parameters = Helper.mapArray(data.parameters, (parameter) => {
+			this._parameters = Helper.mapArray(data.parameters, Helper.vcurry(function(parameter) {
 				return new Parameter(parameter, this);
-			});
-			this._statements = Helper.mapArray($body(data.body), (statement) => {
+			}, this));
+			this._statements = Helper.mapArray($body(data.body), Helper.vcurry(function(statement) {
 				return $compile.statement(statement, this);
-			});
+			}, this));
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -13048,12 +13048,12 @@ module.exports = function() {
 				kind: Kind.Identifier,
 				name: "this"
 			}, VariableKind.Variable, $type.reference(variable.name));
-			this._parameters = Helper.mapArray(data.parameters, (parameter) => {
+			this._parameters = Helper.mapArray(data.parameters, Helper.vcurry(function(parameter) {
 				return new Parameter(parameter, this);
-			});
-			this._statements = Helper.mapArray($body(data.body), (statement) => {
+			}, this));
+			this._statements = Helper.mapArray($body(data.body), Helper.vcurry(function(statement) {
 				return $compile.statement(statement, this);
-			});
+			}, this));
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -13121,9 +13121,9 @@ module.exports = function() {
 					ctrl.compile(statement);
 				}
 				var signature = $method.signature(data, this);
-				$helper.reflectMethod(this, object.newLine().code("signature: "), signature, Helper.mapArray(signature.parameters, (parameter) => {
+				$helper.reflectMethod(this, object.newLine().code("signature: "), signature, Helper.mapArray(signature.parameters, Helper.vcurry(function(parameter) {
 					return $helper.analyseType(parameter.type, this);
-				}));
+				}, this)));
 				object.done();
 				line.code(")").done();
 			}
@@ -13292,13 +13292,13 @@ module.exports = function() {
 					}
 				}
 				this._signature = $method.signature(data, this);
-				this._parameters = Helper.mapArray(this._signature.parameters, (parameter) => {
+				this._parameters = Helper.mapArray(this._signature.parameters, Helper.vcurry(function(parameter) {
 					return $helper.analyseType(parameter.type, this);
-				});
+				}, this));
 				if(Type.isValue(data.arguments)) {
-					this._arguments = Helper.mapArray(data.arguments, (argument) => {
+					this._arguments = Helper.mapArray(data.arguments, Helper.vcurry(function(argument) {
 						return $compile.expression(argument, this);
-					});
+					}, this));
 				}
 			}
 		},
@@ -13531,13 +13531,13 @@ module.exports = function() {
 				}
 				this._functionName = $compile.expression(data.alias, this);
 				this._signature = $method.signature(data, this);
-				this._parameters = Helper.mapArray(this._signature.parameters, (parameter) => {
+				this._parameters = Helper.mapArray(this._signature.parameters, Helper.vcurry(function(parameter) {
 					return $helper.analyseType(parameter.type, this);
-				});
+				}, this));
 				if(Type.isValue(data.arguments)) {
-					this._arguments = Helper.mapArray(data.arguments, (argument) => {
+					this._arguments = Helper.mapArray(data.arguments, Helper.vcurry(function(argument) {
 						return $compile.expression(argument, this);
-					});
+					}, this));
 				}
 			}
 		},
@@ -13879,13 +13879,13 @@ module.exports = function() {
 			}
 		},
 		__ks_func_analyse_0: function() {
-			this._parameters = Helper.mapArray(this._data.parameters, (parameter) => {
+			this._parameters = Helper.mapArray(this._data.parameters, Helper.vcurry(function(parameter) {
 				return new Parameter(parameter, this);
-			});
+			}, this));
 			if(Type.isValue(this._data.body)) {
-				this._statements = Helper.mapArray($body(this._data.body), (statement) => {
+				this._statements = Helper.mapArray($body(this._data.body), Helper.vcurry(function(statement) {
 					return $compile.statement(statement, this);
-				});
+				}, this));
 			}
 			else {
 				this._statements = [];
@@ -14053,7 +14053,7 @@ module.exports = function() {
 		zlib: true
 	};
 	var $import = {
-		addVariable() {
+		addVariable: function() {
 			if(arguments.length < 5) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -14082,7 +14082,7 @@ module.exports = function() {
 			node.scope().addVariable(name, variable);
 			module.import(name, file);
 		},
-		define() {
+		define: function() {
 			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -14106,7 +14106,7 @@ module.exports = function() {
 			$variable.define(node, node.scope(), name, kind, type);
 			module.import(name.name || name, file);
 		},
-		loadCoreModule(x, module, data, node) {
+		loadCoreModule: function(x, module, data, node) {
 			if(x === undefined || x === null) {
 				throw new Error("Missing parameter 'x'");
 			}
@@ -14124,7 +14124,7 @@ module.exports = function() {
 			}
 			return false;
 		},
-		loadDirectory() {
+		loadDirectory: function() {
 			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -14156,7 +14156,7 @@ module.exports = function() {
 			}
 			return $import.loadFile(path.join(x, "index"), moduleName, module, data, node);
 		},
-		loadFile() {
+		loadFile: function() {
 			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -14191,7 +14191,7 @@ module.exports = function() {
 			}
 			return false;
 		},
-		loadKSFile() {
+		loadKSFile: function() {
 			if(arguments.length < 4) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -14330,7 +14330,7 @@ module.exports = function() {
 			};
 			return true;
 		},
-		loadNodeFile() {
+		loadNodeFile: function() {
 			if(arguments.length < 3) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -14382,7 +14382,7 @@ module.exports = function() {
 			}
 			return true;
 		},
-		loadNodeModule(x, start, module, data, node) {
+		loadNodeModule: function(x, start, module, data, node) {
 			if(x === undefined || x === null) {
 				throw new Error("Missing parameter 'x'");
 			}
@@ -14409,7 +14409,7 @@ module.exports = function() {
 			}
 			return false;
 		},
-		nodeModulesPaths(start) {
+		nodeModulesPaths: function(start) {
 			if(start === undefined || start === null) {
 				throw new Error("Missing parameter 'start'");
 			}
@@ -14435,7 +14435,7 @@ module.exports = function() {
 			}
 			return dirs;
 		},
-		readMetadata(file) {
+		readMetadata: function(file) {
 			if(file === undefined || file === null) {
 				throw new Error("Missing parameter 'file'");
 			}
@@ -14446,7 +14446,7 @@ module.exports = function() {
 				return null;
 			}
 		},
-		resolve(data, y, module, node) {
+		resolve: function(data, y, module, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -14472,7 +14472,7 @@ module.exports = function() {
 				}
 			}
 		},
-		use(data, node) {
+		use: function(data, node) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}
@@ -14493,7 +14493,7 @@ module.exports = function() {
 				}
 			}
 		},
-		toKSFileFragments(node, fragments, data, metadata) {
+		toKSFileFragments: function(node, fragments, data, metadata) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -14798,7 +14798,7 @@ module.exports = function() {
 			}
 			node.scope().releaseTempName(importCode);
 		},
-		toNodeFileFragments(node, fragments, data, metadata) {
+		toNodeFileFragments: function(node, fragments, data, metadata) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
 			}
@@ -15856,7 +15856,7 @@ module.exports = function() {
 		classMethods: {}
 	};
 	var $switch = {
-		length(elements) {
+		length: function(elements) {
 			if(elements === undefined || elements === null) {
 				throw new Error("Missing parameter 'elements'");
 			}
@@ -18117,7 +18117,7 @@ module.exports = function() {
 			return {
 				fragments: block,
 				mode: Mode.Async,
-				done(block) {
+				done: function(block) {
 					if(block === undefined || block === null) {
 						throw new Error("Missing parameter 'block'");
 					}
@@ -19268,9 +19268,9 @@ module.exports = function() {
 			Expression.prototype.__ks_cons.call(this, args);
 		},
 		__ks_func_analyse_0: function() {
-			this._values = Helper.mapArray(this._data.values, (value) => {
+			this._values = Helper.mapArray(this._data.values, Helper.vcurry(function(value) {
 				return $compile.expression(value, this);
-			});
+			}, this));
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -19489,6 +19489,43 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
+	var $comprehension = {
+		headerBefore: {
+			"es5": "function(",
+			"es5-curry": "Helper.vcurry(function(",
+			"es6": "("
+		},
+		headerAfter: {
+			"es5": ")",
+			"es5-curry": ")",
+			"es6": ") =>"
+		},
+		footer: {
+			"es5": "",
+			"es5-curry": ", this)",
+			"es6": ""
+		},
+		kind: function(node) {
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(node._options.format.functions === "es5") {
+				var parent = node.parent();
+				while(Type.isValue(parent) && !(Type.is(parent, ClassDeclaration) || Type.is(parent, ImplementDeclaration))) {
+					parent = parent.parent();
+				}
+				if(Type.isValue(parent)) {
+					return "es5-curry";
+				}
+				else {
+					return "es5";
+				}
+			}
+			else {
+				return "es6";
+			}
+		}
+	};
 	function $return(data) {
 		if(data === undefined) {
 			data = null;
@@ -19576,6 +19613,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
+			var kind = $comprehension.kind(this);
 			fragments.code($runtime.helper(this), ".mapRange(").compile(this._from).code($comma).compile(this._to);
 			if(this._by === null) {
 				fragments.code(", 1");
@@ -19584,9 +19622,11 @@ module.exports = function() {
 				fragments.code($comma).compile(this._by);
 			}
 			fragments.code($comma, Type.isValue(this._data.loop.from), $comma, Type.isValue(this._data.loop.to), $comma);
-			fragments.code("(").compile(this._variable).code(") =>").newBlock().compile(this._body).done();
+			fragments.code($comprehension.headerBefore[kind]).compile(this._variable).code($comprehension.headerAfter[kind]).newBlock().compile(this._body).done();
+			fragments.code($comprehension.footer[kind]);
 			if(Type.isValue(this._when)) {
-				fragments.code($comma).code("(").compile(this._variable).code(") =>").newBlock().compile(this._when).done();
+				fragments.code($comma).code($comprehension.headerBefore[kind]).compile(this._variable).code($comprehension.headerAfter[kind]).newBlock().compile(this._when).done();
+				fragments.code($comprehension.footer[kind]);
 			}
 			fragments.code(")");
 		},
@@ -19761,18 +19801,21 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
+			var kind = $comprehension.kind(this);
 			fragments.code($runtime.helper(this), ".mapArray(").compile(this._value).code(", ");
-			fragments.code("(").compile(this._variable);
+			fragments.code($comprehension.headerBefore[kind]).compile(this._variable);
 			if(Type.isValue(this._index)) {
 				fragments.code($comma).compile(this._index);
 			}
-			fragments.code(") =>").newBlock().compile(this._body).done();
+			fragments.code($comprehension.headerAfter[kind]).newBlock().compile(this._body).done();
+			fragments.code($comprehension.footer[kind]);
 			if(Type.isValue(this._when)) {
-				fragments.code($comma).code("(").compile(this._variable);
+				fragments.code($comma).code($comprehension.headerBefore[kind]).compile(this._variable);
 				if(Type.isValue(this._index)) {
 					fragments.code($comma).compile(this._index);
 				}
-				fragments.code(") =>").newBlock().compile(this._when).done();
+				fragments.code($comprehension.headerAfter[kind]).newBlock().compile(this._when).done();
+				fragments.code($comprehension.footer[kind]);
 			}
 			fragments.code(")");
 		},
@@ -19941,18 +19984,21 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
+			var kind = $comprehension.kind(this);
 			fragments.code($runtime.helper(this), ".mapObject(").compile(this._value).code(", ");
-			fragments.code("(").compile(this._variable);
+			fragments.code($comprehension.headerBefore[kind]).compile(this._variable);
 			if(Type.isValue(this._index)) {
 				fragments.code($comma).compile(this._index);
 			}
-			fragments.code(") =>").newBlock().compile(this._body).done();
+			fragments.code($comprehension.headerAfter[kind]).newBlock().compile(this._body).done();
+			fragments.code($comprehension.footer[kind]);
 			if(Type.isValue(this._when)) {
-				fragments.code($comma).code("(").compile(this._variable);
+				fragments.code($comma).code($comprehension.headerBefore[kind]).compile(this._variable);
 				if(Type.isValue(this._index)) {
 					fragments.code($comma).compile(this._index);
 				}
-				fragments.code(") =>").newBlock().compile(this._when).done();
+				fragments.code($comprehension.headerAfter[kind]).newBlock().compile(this._when).done();
+				fragments.code($comprehension.footer[kind]);
 			}
 			fragments.code(")");
 		},
@@ -20120,6 +20166,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
+			var kind = $comprehension.kind(this);
 			fragments.code($runtime.helper(this), ".mapRange(").compile(this._from).code($comma).compile(this._to);
 			if(Type.isValue(this._by)) {
 				fragments.code(", ").compile(this._by);
@@ -20127,9 +20174,11 @@ module.exports = function() {
 			else {
 				fragments.code(", 1");
 			}
-			fragments.code($comma, "true", $comma, "true", $comma).code("(").compile(this._variable).code(") =>").newBlock().compile(this._body).done();
+			fragments.code($comma, "true", $comma, "true", $comma).code($comprehension.headerBefore[kind]).compile(this._variable).code($comprehension.headerAfter[kind]).newBlock().compile(this._body).done();
+			fragments.code($comprehension.footer[kind]);
 			if(Type.isValue(this._when)) {
-				fragments.code($comma).code("(").compile(this._variable).code(") =>").newBlock().compile(this._when).done();
+				fragments.code($comma).code($comprehension.headerBefore[kind]).compile(this._variable).code($comprehension.headerAfter[kind]).newBlock().compile(this._when).done();
+				fragments.code($comprehension.footer[kind]);
 			}
 			fragments.code(")");
 		},
@@ -22897,12 +22946,12 @@ module.exports = function() {
 			}
 		},
 		__ks_func_analyse_0: function() {
-			this._parameters = Helper.mapArray(this._data.parameters, (parameter) => {
+			this._parameters = Helper.mapArray(this._data.parameters, Helper.vcurry(function(parameter) {
 				return new Parameter(parameter, this);
-			});
-			this._statements = Helper.mapArray($body(this._data.body), (statement) => {
+			}, this));
+			this._statements = Helper.mapArray($body(this._data.body), Helper.vcurry(function(statement) {
 				return $compile.statement(statement, this);
-			});
+			}, this));
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -24017,7 +24066,10 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			fragments.compile(this._name);
-			if(this._data.value.kind === Kind.FunctionExpression) {
+			if(this._options.format.functions === "es5") {
+				fragments.code(": ").compile(this._value);
+			}
+			else if(this._data.value.kind === Kind.FunctionExpression) {
 				this._value.toShorthandFragments(fragments);
 			}
 			else {
@@ -24504,9 +24556,9 @@ module.exports = function() {
 			Expression.prototype.__ks_cons.call(this, args);
 		},
 		__ks_func_analyse_0: function() {
-			this._elements = Helper.mapArray(this._data.elements, (element) => {
+			this._elements = Helper.mapArray(this._data.elements, Helper.vcurry(function(element) {
 				return $compile.expression(element, this);
-			});
+			}, this));
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -27515,9 +27567,9 @@ module.exports = function() {
 			return Expression.prototype.isNullable.apply(this, arguments);
 		},
 		__ks_func_analyse_0: function() {
-			this._operands = Helper.mapArray(this._data.operands, (operand) => {
+			this._operands = Helper.mapArray(this._data.operands, Helper.vcurry(function(operand) {
 				return $compile.expression(operand, this);
-			});
+			}, this));
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -28265,9 +28317,9 @@ module.exports = function() {
 			}
 		},
 		__ks_func_analyse_0: function() {
-			this._operands = Helper.mapArray(this._data.operands, (operand) => {
+			this._operands = Helper.mapArray(this._data.operands, Helper.vcurry(function(operand) {
 				return $compile.expression(operand, this, this.newScope());
-			});
+			}, this));
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -29011,7 +29063,7 @@ module.exports = function() {
 		classMethods: {}
 	};
 	var $compile = {
-		expression() {
+		expression: function() {
 			if(arguments.length < 2) {
 				throw new Error("Wrong number of arguments");
 			}
@@ -29082,7 +29134,7 @@ module.exports = function() {
 			}
 			return expression;
 		},
-		statement(data, parent) {
+		statement: function(data, parent) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
 			}

@@ -1,3 +1,39 @@
+$comprehension = {
+	headerBefore: {
+		'es5': 'function('
+		'es5-curry': 'Helper.vcurry(function('
+		'es6': '('
+	}
+	headerAfter: {
+		'es5': ')'
+		'es5-curry': ')'
+		'es6': ') =>'
+	}
+	footer: {
+		'es5': ''
+		'es5-curry': ', this)'
+		'es6': ''
+	}
+	kind(node) { // {{{
+		if node._options.format.functions == 'es5' {
+			let parent = node.parent()
+			while parent? && !(parent is ClassDeclaration || parent is ImplementDeclaration) {
+				parent = parent.parent()
+			}
+			
+			if parent? {
+				return 'es5-curry'
+			}
+			else {
+				return 'es5'
+			}
+		}
+		else {
+			return 'es6'
+		}
+	} // }}}
+}
+
 func $return(data?) { // {{{
 	return {
 		kind: Kind::ReturnStatement
@@ -43,6 +79,8 @@ class ArrayComprehensionForFrom extends Expression {
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
+		let kind = $comprehension.kind(this)
+		
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
 			.compile(this._from)
@@ -59,22 +97,26 @@ class ArrayComprehensionForFrom extends Expression {
 		fragments.code($comma, this._data.loop.from?, $comma, this._data.loop.to?, $comma)
 		
 		fragments
-			.code('(')
+			.code($comprehension.headerBefore[kind])
 			.compile(this._variable)
-			.code(') =>')
+			.code($comprehension.headerAfter[kind])
 			.newBlock()
 			.compile(this._body)
 			.done()
 		
+		fragments.code($comprehension.footer[kind])
+		
 		if this._when? {
 			fragments
 				.code($comma)
-				.code('(')
+				.code($comprehension.headerBefore[kind])
 				.compile(this._variable)
-				.code(') =>')
+				.code($comprehension.headerAfter[kind])
 				.newBlock()
 				.compile(this._when)
 				.done()
+			
+			fragments.code($comprehension.footer[kind])
 		}
 		
 		fragments.code(')')
@@ -126,36 +168,42 @@ class ArrayComprehensionForIn extends Expression {
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
+		let kind = $comprehension.kind(this)
+		
 		fragments
 			.code($runtime.helper(this), '.mapArray(')
 			.compile(this._value)
 			.code(', ')
 		
 		fragments
-			.code('(')
+			.code($comprehension.headerBefore[kind])
 			.compile(this._variable)
 		
 		fragments.code($comma).compile(this._index) if this._index?
 		
 		fragments
-			.code(') =>')
+			.code($comprehension.headerAfter[kind])
 			.newBlock()
 			.compile(this._body)
 			.done()
 		
+		fragments.code($comprehension.footer[kind])
+		
 		if this._when? {
 			fragments
 				.code($comma)
-				.code('(')
+				.code($comprehension.headerBefore[kind])
 				.compile(this._variable)
 			
 			fragments.code($comma).compile(this._index) if this._index?
 			
 			fragments
-				.code(') =>')
+				.code($comprehension.headerAfter[kind])
 				.newBlock()
 				.compile(this._when)
 				.done()
+			
+			fragments.code($comprehension.footer[kind])
 		}
 		
 		fragments.code(')')
@@ -201,36 +249,42 @@ class ArrayComprehensionForOf extends Expression {
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
+		let kind = $comprehension.kind(this)
+		
 		fragments
 			.code($runtime.helper(this), '.mapObject(')
 			.compile(this._value)
 			.code(', ')
 		
 		fragments
-			.code('(')
+			.code($comprehension.headerBefore[kind])
 			.compile(this._variable)
 		
 		fragments.code($comma).compile(this._index) if this._index?
 		
 		fragments
-			.code(') =>')
+			.code($comprehension.headerAfter[kind])
 			.newBlock()
 			.compile(this._body)
 			.done()
 		
+		fragments.code($comprehension.footer[kind])
+		
 		if this._when? {
 			fragments
 				.code($comma)
-				.code('(')
+				.code($comprehension.headerBefore[kind])
 				.compile(this._variable)
 			
 			fragments.code($comma).compile(this._index) if this._index?
 			
 			fragments
-				.code(') =>')
+				.code($comprehension.headerAfter[kind])
 				.newBlock()
 				.compile(this._when)
 				.done()
+			
+			fragments.code($comprehension.footer[kind])
 		}
 		
 		fragments.code(')')
@@ -278,6 +332,8 @@ class ArrayComprehensionForRange extends Expression {
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
+		let kind = $comprehension.kind(this)
+		
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
 			.compile(this._from)
@@ -293,22 +349,26 @@ class ArrayComprehensionForRange extends Expression {
 		
 		fragments
 			.code($comma, 'true', $comma, 'true', $comma)
-			.code('(')
+			.code($comprehension.headerBefore[kind])
 			.compile(this._variable)
-			.code(') =>')
+			.code($comprehension.headerAfter[kind])
 			.newBlock()
 			.compile(this._body)
 			.done()
 		
+		fragments.code($comprehension.footer[kind])
+		
 		if this._when? {
 			fragments
 				.code($comma)
-				.code('(')
+				.code($comprehension.headerBefore[kind])
 				.compile(this._variable)
-				.code(') =>')
+				.code($comprehension.headerAfter[kind])
 				.newBlock()
 				.compile(this._when)
 				.done()
+			
+			fragments.code($comprehension.footer[kind])
 		}
 		
 		fragments.code(')')

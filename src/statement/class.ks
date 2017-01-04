@@ -70,7 +70,7 @@ const $class = {
 			if !node._extends {
 				clazz
 					.newControl()
-					.code($function.item('$create', node), '()')
+					.code($class.methodHeader('$create', node), '()')
 					.step()
 					.line('this.__ks_init()')
 					.line('this.__ks_cons(arguments)')
@@ -80,12 +80,12 @@ const $class = {
 				if node._extends {
 					clazz
 						.newControl()
-						.code($function.item('__ks_init', node), '()')
+						.code($class.methodHeader('__ks_init', node), '()')
 						.step()
 						.line(node._extendsName + '.prototype.__ks_init.call(this)')
 				}
 				else {
-					clazz.newControl().code($function.item('__ks_init', node), '()').step()
+					clazz.newControl().code($class.methodHeader('__ks_init', node), '()').step()
 				}
 			}
 			else {
@@ -93,7 +93,7 @@ const $class = {
 				
 				ctrl = clazz
 					.newControl()
-					.code($function.item('__ks_init_1', node), '()')
+					.code($class.methodHeader('__ks_init_1', node), '()')
 					.step()
 				
 				for name, field of node._instanceVariables when field.data.defaultValue? {
@@ -104,7 +104,7 @@ const $class = {
 						.done()
 				}
 				
-				ctrl = clazz.newControl().code($function.item('__ks_init', node), '()').step()
+				ctrl = clazz.newControl().code($class.methodHeader('__ks_init', node), '()').step()
 				
 				if node._extends {
 					ctrl.line(node._extendsName + '.prototype.__ks_init.call(this)')
@@ -298,6 +298,14 @@ const $class = {
 			fragments.line(retCode, node._data.name.name, '.', fnName, index, '.apply(this, ', argName, ')')
 		}
 	} // }}}
+	methodHeader(name, node) { // {{{
+		if node._es5 {
+			return name + ': function'
+		}
+		else {
+			return name
+		}
+	} // }}}
 	sealed(node, fragments) { // {{{
 		let reflect = {
 			sealed: true
@@ -358,7 +366,7 @@ const $class = {
 			if node._extends {
 				ctrl = clazz
 					.newControl()
-					.code($function.item('__ks_init', node), '()')
+					.code($class.methodHeader('__ks_init', node), '()')
 					.step()
 					
 				ctrl.line(node._extendsName, '.prototype.__ks_init.call(this)')
@@ -376,7 +384,7 @@ const $class = {
 			else {
 				ctrl = clazz
 					.newControl()
-					.code($function.item('$create', node), '()')
+					.code($class.methodHeader('$create', node), '()')
 					.step()
 			
 				if !noinit {
@@ -588,7 +596,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), node._es5 ? $function.item(name, node) + '()' : 'static ' + name + '()', reflect.classMethods[name], $class.methodCall^^(node, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true)
+		$helper.methods(extend, node, fragments.newControl(), node._es5 ? $class.methodHeader(name, node) + '()' : 'static ' + name + '()', reflect.classMethods[name], $class.methodCall^^(node, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true)
 	} // }}}
 	constructor(node, fragments, reflect) { // {{{
 		let extend = false
@@ -608,7 +616,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), $function.item('__ks_cons', node) + '(args)', reflect.constructors, $class.methodCall^^(node, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
+		$helper.methods(extend, node, fragments.newControl(), $class.methodHeader('__ks_cons', node) + '(args)', reflect.constructors, $class.methodCall^^(node, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
 	} // }}}
 	decide(node, fragments, type, index, path, argName) { // {{{
 		node.module().flag('Type')
@@ -624,7 +632,7 @@ const $helper = {
 		let ctrl = fragments.newControl()
 		
 		if node._es5 {
-			ctrl.code($function.item('__ks_destroy', node) + '(that)')
+			ctrl.code($class.methodHeader('__ks_destroy', node) + '(that)')
 		}
 		else {
 			ctrl.code('static __ks_destroy(that)')
@@ -664,7 +672,7 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), $function.item(name, node) + '()', reflect.instanceMethods[name], $class.methodCall^^(node, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true)
+		$helper.methods(extend, node, fragments.newControl(), $class.methodHeader(name, node) + '()', reflect.instanceMethods[name], $class.methodCall^^(node, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true)
 	} // }}}
 	methods(extend, node, fragments, header, methods, call, argName, refName, returns) { // {{{
 		fragments.code(header).step()
@@ -1700,7 +1708,7 @@ class MethodDeclaration extends Statement {
 		let ctrl = fragments.newControl()
 		
 		if this._parent._es5 {
-			ctrl.code($function.item(this._name, this._parent) + '(')
+			ctrl.code($class.methodHeader(this._name, this._parent) + '(')
 		}
 		else {
 			ctrl.code('static ') if this._static
