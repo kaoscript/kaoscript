@@ -10,16 +10,16 @@ build:
 
 test:
 ifeq ($(g),)
-	node_modules/.bin/mocha --colors --reporter spec
+	node_modules/.bin/mocha --colors --check-leaks --reporter spec
 else
-	node_modules/.bin/mocha --colors --reporter spec -g "$(g)"
+	node_modules/.bin/mocha --colors --check-leaks --reporter spec -g "$(g)"
 endif
 
 testks:
 ifeq ($(g),)
-	node_modules/.bin/mocha --colors --reporter spec --compilers ks:./register.js -g ""
+	node_modules/.bin/mocha --colors --check-leaks --reporter spec --compilers ks:./register.js -g ""
 else
-	node_modules/.bin/mocha --colors --reporter spec --compilers ks:./register.js -g "$(g)"
+	node_modules/.bin/mocha --colors --check-leaks --reporter spec --compilers ks:./register.js -g "$(g)"
 endif
 
 clean:

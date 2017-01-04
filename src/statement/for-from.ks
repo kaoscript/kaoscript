@@ -25,21 +25,23 @@ class ForFromStatement extends Statement {
 		this._variable = $compile.expression(data.variable, this)
 		this._from = $compile.expression(data.from, this)
 		
+		let context = this._defineVariable ? null : this
+		
 		if data.til {
 			this._til = $compile.expression(data.til, this)
 			
-			this._boundName = this._scope.acquireTempName() if this._til.isComposite()
+			this._boundName = this._scope.acquireTempName(context) if this._til.isComposite()
 		}
 		else {
 			this._to = $compile.expression(data.to, this)
 			
-			this._boundName = this._scope.acquireTempName() if this._to.isComposite()
+			this._boundName = this._scope.acquireTempName(context) if this._to.isComposite()
 		}
 		
 		if data.by {
 			this._by = $compile.expression(data.by, this)
 			
-			this._byName = this._scope.acquireTempName() if this._by.isComposite()
+			this._byName = this._scope.acquireTempName(context) if this._by.isComposite()
 		}
 		
 		if data.until {
