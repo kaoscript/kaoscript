@@ -3,8 +3,7 @@ var expect = require('chai').expect;
 var fs = require('fs');
 var path = require('path');
 var rimraf = require('rimraf');
-
-var {Helper, Type} = require('@kaoscript/runtime');
+var rt = require('@kaoscript/runtime');
 
 require('../register');
 
@@ -29,7 +28,7 @@ describe('evaluate', function() {
 		it(name, function() {
 			this.timeout(5000);
 			
-			require(path.join(__dirname, 'fixtures', 'evaluate', file))(expect, Helper, Type);
+			require(path.join(__dirname, 'fixtures', 'evaluate', file))(expect, rt.Helper, rt.Type);
 		});
 	}
 	
