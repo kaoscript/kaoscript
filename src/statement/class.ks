@@ -1444,7 +1444,7 @@ class ClassDeclaration extends Statement {
 						
 						method = $compile.statement(member, this)
 						
-						method.isStatic(true)
+						method.instance(false)
 						
 						this._destructor = {
 							data: member
@@ -1487,7 +1487,7 @@ class ClassDeclaration extends Statement {
 							this._scope = scope
 						}
 						else {
-							method.statement.isStatic(true)
+							method.statement.instance(false)
 							
 							if !(this._classMethods[member.name.name] is Array) {
 								this._classMethods[member.name.name] = []
@@ -1683,7 +1683,7 @@ class MethodDeclaration extends Statement {
 		_name
 		_parameters
 		_statements
-		_static			= false
+		_instance		= true
 	}
 	$create(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
@@ -1702,7 +1702,7 @@ class MethodDeclaration extends Statement {
 		this.compile(this._parameters)
 		this.compile(this._statements)
 	} // }}}
-	isStatic(@static) => this
+	instance(@instance) => this
 	name(@name) => this
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
@@ -1711,7 +1711,7 @@ class MethodDeclaration extends Statement {
 			ctrl.code($class.methodHeader(this._name, this._parent) + '(')
 		}
 		else {
-			ctrl.code('static ') if this._static
+			ctrl.code('static ') if !this._instance
 			
 			ctrl.code(this._name + '(')
 		}

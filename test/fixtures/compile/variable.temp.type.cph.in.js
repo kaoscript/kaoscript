@@ -4,7 +4,7 @@ module.exports = function() {
 	function foo() {
 		return ["1", "8", "F"];
 	}
-	let items = Helper.mapArray(foo(), (item) => {
+	let items = Helper.mapArray(foo(), function(item) {
 		return __ks_String._im_toInt(item, 16);
 	});
 }

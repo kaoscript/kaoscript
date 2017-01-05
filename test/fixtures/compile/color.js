@@ -197,7 +197,7 @@ module.exports = function() {
 			throw new Error("Invalid type for parameter 'first'");
 		}
 		let that = first.apply(null, firstArgs);
-		let lastArgs = Helper.mapObject(components, (name, component) => {
+		let lastArgs = Helper.mapObject(components, function(name, component) {
 			return that[component.field];
 		});
 		lastArgs.push(that);
@@ -279,7 +279,7 @@ module.exports = function() {
 		}
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
-			let args = Helper.mapObject(s.components, (name, component) => {
+			let args = Helper.mapObject(s.components, function(name, component) {
 				return that[component.field];
 			});
 			args.push(result);

@@ -8,6 +8,27 @@ const $function = {
 		
 		return null
 	} // }}}
+	isArgumentsRequired(node) { // {{{
+		if node._data.kind == Kind::ArrayComprehension {
+			return false
+		}
+		
+		let signature = $function.signature(node._data, node)
+		
+		let optional = false
+		for parameter, i in signature.parameters {
+			if optional {
+				if parameter.min > 0 {
+					return true
+				}
+			}
+			else if parameter.max == Infinity || parameter.min == 0 {
+				optional = true
+			}
+		}
+		
+		return false
+	} // }}}
 	parameters(node, fragments, fn) { // {{{
 		if node._options.parse.parameters == 'es5' {
 			return $function.parametersES5(node, fragments, fn)
@@ -776,6 +797,108 @@ const $function = {
 		}
 		
 		return signature
+	} // }}}
+	surround(node) { // {{{
+		let parent = node._parent
+		while parent? && !(parent is MethodDeclaration || parent is ImplementClassMethodDeclaration) {
+			parent = parent.parent()
+		}
+		
+		if parent?._instance {
+			if node._options.format.functions == 'es5' || $function.isArgumentsRequired(node) {
+				if $function.useThisVariable(node._data.body) {
+					return {
+						beforeParameters: 'Helper.vcurry(function('
+						afterParameters: ')'
+						footer: ', this)'
+					}
+				}
+				else {
+					return {
+						beforeParameters: 'function('
+						afterParameters: ')'
+						footer: ''
+					}
+				}
+			}
+			else {
+				return {
+					beforeParameters: '('
+					afterParameters: ') =>'
+					footer: ''
+				}
+			}
+		}
+		else {
+			return {
+				beforeParameters: 'function('
+				afterParameters: ')'
+				footer: ''
+			}
+		}
+	} // }}}
+	useThisVariable(data) { // {{{
+		switch data.kind {
+			Kind::ArrayExpression => {
+				for value in data.values {
+					if $function.useThisVariable(value) {
+						return true
+					}
+				}
+			}
+			Kind::BinaryOperator => {
+				if $function.useThisVariable(data.left) || $function.useThisVariable(data.right) {
+					return true
+				}
+			}
+			Kind::Block => {
+				for statement in data.statements {
+					if $function.useThisVariable(statement) {
+						return true
+					}
+				}
+			}
+			Kind::CallExpression => {
+				if $function.useThisVariable(data.callee) {
+					return true
+				}
+				
+				for arg in data.arguments {
+					if $function.useThisVariable(arg) {
+						return true
+					}
+				}
+			}
+			Kind::CreateExpression => {
+				if $function.useThisVariable(data.class) {
+					return true
+				}
+				
+				for arg in data.arguments {
+					if $function.useThisVariable(arg) {
+						return true
+					}
+				}
+			}
+			Kind::EnumExpression => return false
+			Kind::Identifier => return data.name == 'this'
+			Kind::Literal => return false
+			Kind::MemberExpression => return $function.useThisVariable(data.object)
+			Kind::ObjectExpression => {
+				for property in data.properties {
+					if $function.useThisVariable(property.value) {
+						return true
+					}
+				}
+			}
+			Kind::ReturnStatement => return $function.useThisVariable(data.value)
+			=> {
+				console.error(data)
+				$throw('Unknow kind ' + data.kind)
+			}
+		}
+		
+		return false
 	} // }}}
 }
 

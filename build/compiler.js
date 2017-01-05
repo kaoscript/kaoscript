@@ -273,15 +273,22 @@ module.exports = function() {
 			}
 		}
 	};
-	function $throw(message, node) {
-		if(message === undefined || message === null) {
-			throw new Error("Missing parameter 'message'");
+	function $throw() {
+		if(arguments.length < 1) {
+			throw new Error("Wrong number of arguments");
 		}
-		if(node === undefined || node === null) {
-			throw new Error("Missing parameter 'node'");
+		var __ks_i = -1;
+		var message = arguments[++__ks_i];
+		if(arguments.length > 1) {
+			var node = arguments[++__ks_i];
+		}
+		else {
+			var node = null;
 		}
 		var error = new Error(message);
-		error.filename = node.file();
+		if(Type.isValue(node)) {
+			error.filename = node.file();
+		}
 		throw error;
 	}
 	function $toInt(data, defaultValue) {
@@ -8254,7 +8261,7 @@ module.exports = function() {
 							name: $identifier("that")
 						});
 						method = $compile.statement(member, this);
-						method.isStatic(true);
+						method.instance(false);
 						this._destructor = {
 							data: member,
 							statement: method
@@ -8291,7 +8298,7 @@ module.exports = function() {
 							this._scope = scope;
 						}
 						else {
-							method.statement.isStatic(true);
+							method.statement.instance(false);
 							if(!Type.isArray(this._classMethods[member.name.name])) {
 								this._classMethods[member.name.name] = [];
 								this._variable.classMethods[member.name.name] = [];
@@ -8670,7 +8677,7 @@ module.exports = function() {
 		$name: "MethodDeclaration",
 		$extends: Statement,
 		__ks_init_1: function() {
-			this._static = false;
+			this._instance = true;
 		},
 		__ks_init: function() {
 			Statement.prototype.__ks_init.call(this);
@@ -8728,19 +8735,19 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		},
-		__ks_func_isStatic_0: function(__ks_static_1) {
-			if(__ks_static_1 === undefined || __ks_static_1 === null) {
-				throw new Error("Missing parameter 'static'");
+		__ks_func_instance_0: function(instance) {
+			if(instance === undefined || instance === null) {
+				throw new Error("Missing parameter 'instance'");
 			}
-			this._static = __ks_static_1;
+			this._instance = instance;
 			return this;
 		},
-		isStatic: function() {
+		instance: function() {
 			if(arguments.length === 1) {
-				return MethodDeclaration.prototype.__ks_func_isStatic_0.apply(this, arguments);
+				return MethodDeclaration.prototype.__ks_func_instance_0.apply(this, arguments);
 			}
-			else if(Statement.prototype.isStatic) {
-				return Statement.prototype.isStatic.apply(this, arguments);
+			else if(Statement.prototype.instance) {
+				return Statement.prototype.instance.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		},
@@ -8772,7 +8779,7 @@ module.exports = function() {
 				ctrl.code($class.methodHeader(this._name, this._parent) + "(");
 			}
 			else {
-				if(this._static) {
+				if(!this._instance) {
 					ctrl.code("static ");
 				}
 				ctrl.code(this._name + "(");
@@ -8856,7 +8863,7 @@ module.exports = function() {
 				access: 1,
 				type: "Any"
 			},
-			_static: {
+			_instance: {
 				access: 1,
 				type: "Any"
 			}
@@ -8879,7 +8886,7 @@ module.exports = function() {
 					parameters: []
 				}
 			],
-			isStatic: [
+			instance: [
 				{
 					access: 3,
 					min: 1,
@@ -11181,6 +11188,28 @@ module.exports = function() {
 			}
 			return null;
 		},
+		isArgumentsRequired: function(node) {
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(node._data.kind === Kind.ArrayComprehension) {
+				return false;
+			}
+			var signature = $function.signature(node._data, node);
+			var optional = false;
+			for(var i = 0, __ks_0 = signature.parameters.length, parameter; i < __ks_0; ++i) {
+				parameter = signature.parameters[i];
+				if(optional) {
+					if(parameter.min > 0) {
+						return true;
+					}
+				}
+				else if((parameter.max === Infinity) || (parameter.min === 0)) {
+					optional = true;
+				}
+			}
+			return false;
+		},
 		parameters: function(node, fragments, fn) {
 			if(node === undefined || node === null) {
 				throw new Error("Missing parameter 'node'");
@@ -11757,6 +11786,124 @@ module.exports = function() {
 				}
 			}
 			return signature;
+		},
+		surround: function(node) {
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			var parent = node._parent;
+			while(Type.isValue(parent) && !(Type.is(parent, MethodDeclaration) || Type.is(parent, ImplementClassMethodDeclaration))) {
+				parent = parent.parent();
+			}
+			if(Type.isValue(parent) ? parent._instance : false) {
+				if((node._options.format.functions === "es5") || $function.isArgumentsRequired(node)) {
+					if($function.useThisVariable(node._data.body)) {
+						return {
+							beforeParameters: "Helper.vcurry(function(",
+							afterParameters: ")",
+							footer: ", this)"
+						};
+					}
+					else {
+						return {
+							beforeParameters: "function(",
+							afterParameters: ")",
+							footer: ""
+						};
+					}
+				}
+				else {
+					return {
+						beforeParameters: "(",
+						afterParameters: ") =>",
+						footer: ""
+					};
+				}
+			}
+			else {
+				return {
+					beforeParameters: "function(",
+					afterParameters: ")",
+					footer: ""
+				};
+			}
+		},
+		useThisVariable: function(data) {
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			var __ks_0 = data.kind;
+			if(__ks_0 === Kind.ArrayExpression) {
+				for(var __ks_1 = 0, __ks_2 = data.values.length, value; __ks_1 < __ks_2; ++__ks_1) {
+					value = data.values[__ks_1];
+					if($function.useThisVariable(value)) {
+						return true;
+					}
+				}
+			}
+			else if(__ks_0 === Kind.BinaryOperator) {
+				if($function.useThisVariable(data.left) || $function.useThisVariable(data.right)) {
+					return true;
+				}
+			}
+			else if(__ks_0 === Kind.Block) {
+				for(var __ks_1 = 0, __ks_2 = data.statements.length, statement; __ks_1 < __ks_2; ++__ks_1) {
+					statement = data.statements[__ks_1];
+					if($function.useThisVariable(statement)) {
+						return true;
+					}
+				}
+			}
+			else if(__ks_0 === Kind.CallExpression) {
+				if($function.useThisVariable(data.callee)) {
+					return true;
+				}
+				for(var __ks_1 = 0, __ks_2 = data.arguments.length, arg; __ks_1 < __ks_2; ++__ks_1) {
+					arg = data.arguments[__ks_1];
+					if($function.useThisVariable(arg)) {
+						return true;
+					}
+				}
+			}
+			else if(__ks_0 === Kind.CreateExpression) {
+				if($function.useThisVariable(data.class)) {
+					return true;
+				}
+				for(var __ks_1 = 0, __ks_2 = data.arguments.length, arg; __ks_1 < __ks_2; ++__ks_1) {
+					arg = data.arguments[__ks_1];
+					if($function.useThisVariable(arg)) {
+						return true;
+					}
+				}
+			}
+			else if(__ks_0 === Kind.EnumExpression) {
+				return false;
+			}
+			else if(__ks_0 === Kind.Identifier) {
+				return data.name === "this";
+			}
+			else if(__ks_0 === Kind.Literal) {
+				return false;
+			}
+			else if(__ks_0 === Kind.MemberExpression) {
+				return $function.useThisVariable(data.object);
+			}
+			else if(__ks_0 === Kind.ObjectExpression) {
+				for(var __ks_1 = 0, __ks_2 = data.properties.length, property; __ks_1 < __ks_2; ++__ks_1) {
+					property = data.properties[__ks_1];
+					if($function.useThisVariable(property.value)) {
+						return true;
+					}
+				}
+			}
+			else if(__ks_0 === Kind.ReturnStatement) {
+				return $function.useThisVariable(data.value);
+			}
+			else {
+				console.error(data);
+				$throw("Unknow kind " + data.kind);
+			}
+			return false;
 		}
 	};
 	var FunctionDeclaration = Helper.class({
@@ -19489,43 +19636,6 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
-	var $comprehension = {
-		headerBefore: {
-			"es5": "function(",
-			"es5-curry": "Helper.vcurry(function(",
-			"es6": "("
-		},
-		headerAfter: {
-			"es5": ")",
-			"es5-curry": ")",
-			"es6": ") =>"
-		},
-		footer: {
-			"es5": "",
-			"es5-curry": ", this)",
-			"es6": ""
-		},
-		kind: function(node) {
-			if(node === undefined || node === null) {
-				throw new Error("Missing parameter 'node'");
-			}
-			if(node._options.format.functions === "es5") {
-				var parent = node.parent();
-				while(Type.isValue(parent) && !(Type.is(parent, ClassDeclaration) || Type.is(parent, ImplementDeclaration))) {
-					parent = parent.parent();
-				}
-				if(Type.isValue(parent)) {
-					return "es5-curry";
-				}
-				else {
-					return "es5";
-				}
-			}
-			else {
-				return "es6";
-			}
-		}
-	};
 	function $return(data) {
 		if(data === undefined) {
 			data = null;
@@ -19613,7 +19723,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
-			var kind = $comprehension.kind(this);
+			var surround = $function.surround(this);
 			fragments.code($runtime.helper(this), ".mapRange(").compile(this._from).code($comma).compile(this._to);
 			if(this._by === null) {
 				fragments.code(", 1");
@@ -19622,11 +19732,11 @@ module.exports = function() {
 				fragments.code($comma).compile(this._by);
 			}
 			fragments.code($comma, Type.isValue(this._data.loop.from), $comma, Type.isValue(this._data.loop.to), $comma);
-			fragments.code($comprehension.headerBefore[kind]).compile(this._variable).code($comprehension.headerAfter[kind]).newBlock().compile(this._body).done();
-			fragments.code($comprehension.footer[kind]);
+			fragments.code(surround.beforeParameters).compile(this._variable).code(surround.afterParameters).newBlock().compile(this._body).done();
+			fragments.code(surround.footer);
 			if(Type.isValue(this._when)) {
-				fragments.code($comma).code($comprehension.headerBefore[kind]).compile(this._variable).code($comprehension.headerAfter[kind]).newBlock().compile(this._when).done();
-				fragments.code($comprehension.footer[kind]);
+				fragments.code($comma).code(surround.beforeParameters).compile(this._variable).code(surround.afterParameters).newBlock().compile(this._when).done();
+				fragments.code(surround.footer);
 			}
 			fragments.code(")");
 		},
@@ -19801,21 +19911,21 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
-			var kind = $comprehension.kind(this);
+			var surround = $function.surround(this);
 			fragments.code($runtime.helper(this), ".mapArray(").compile(this._value).code(", ");
-			fragments.code($comprehension.headerBefore[kind]).compile(this._variable);
+			fragments.code(surround.beforeParameters).compile(this._variable);
 			if(Type.isValue(this._index)) {
 				fragments.code($comma).compile(this._index);
 			}
-			fragments.code($comprehension.headerAfter[kind]).newBlock().compile(this._body).done();
-			fragments.code($comprehension.footer[kind]);
+			fragments.code(surround.afterParameters).newBlock().compile(this._body).done();
+			fragments.code(surround.footer);
 			if(Type.isValue(this._when)) {
-				fragments.code($comma).code($comprehension.headerBefore[kind]).compile(this._variable);
+				fragments.code($comma).code(surround.beforeParameters).compile(this._variable);
 				if(Type.isValue(this._index)) {
 					fragments.code($comma).compile(this._index);
 				}
-				fragments.code($comprehension.headerAfter[kind]).newBlock().compile(this._when).done();
-				fragments.code($comprehension.footer[kind]);
+				fragments.code(surround.afterParameters).newBlock().compile(this._when).done();
+				fragments.code(surround.footer);
 			}
 			fragments.code(")");
 		},
@@ -19984,21 +20094,21 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
-			var kind = $comprehension.kind(this);
+			var surround = $function.surround(this);
 			fragments.code($runtime.helper(this), ".mapObject(").compile(this._value).code(", ");
-			fragments.code($comprehension.headerBefore[kind]).compile(this._variable);
+			fragments.code(surround.beforeParameters).compile(this._variable);
 			if(Type.isValue(this._index)) {
 				fragments.code($comma).compile(this._index);
 			}
-			fragments.code($comprehension.headerAfter[kind]).newBlock().compile(this._body).done();
-			fragments.code($comprehension.footer[kind]);
+			fragments.code(surround.afterParameters).newBlock().compile(this._body).done();
+			fragments.code(surround.footer);
 			if(Type.isValue(this._when)) {
-				fragments.code($comma).code($comprehension.headerBefore[kind]).compile(this._variable);
+				fragments.code($comma).code(surround.beforeParameters).compile(this._variable);
 				if(Type.isValue(this._index)) {
 					fragments.code($comma).compile(this._index);
 				}
-				fragments.code($comprehension.headerAfter[kind]).newBlock().compile(this._when).done();
-				fragments.code($comprehension.footer[kind]);
+				fragments.code(surround.afterParameters).newBlock().compile(this._when).done();
+				fragments.code(surround.footer);
 			}
 			fragments.code(")");
 		},
@@ -20166,7 +20276,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			this.module().flag("Helper");
-			var kind = $comprehension.kind(this);
+			var surround = $function.surround(this);
 			fragments.code($runtime.helper(this), ".mapRange(").compile(this._from).code($comma).compile(this._to);
 			if(Type.isValue(this._by)) {
 				fragments.code(", ").compile(this._by);
@@ -20174,11 +20284,11 @@ module.exports = function() {
 			else {
 				fragments.code(", 1");
 			}
-			fragments.code($comma, "true", $comma, "true", $comma).code($comprehension.headerBefore[kind]).compile(this._variable).code($comprehension.headerAfter[kind]).newBlock().compile(this._body).done();
-			fragments.code($comprehension.footer[kind]);
+			fragments.code($comma, "true", $comma, "true", $comma).code(surround.beforeParameters).compile(this._variable).code(surround.afterParameters).newBlock().compile(this._body).done();
+			fragments.code(surround.footer);
 			if(Type.isValue(this._when)) {
-				fragments.code($comma).code($comprehension.headerBefore[kind]).compile(this._variable).code($comprehension.headerAfter[kind]).newBlock().compile(this._when).done();
-				fragments.code($comprehension.footer[kind]);
+				fragments.code($comma).code(surround.beforeParameters).compile(this._variable).code(surround.afterParameters).newBlock().compile(this._when).done();
+				fragments.code(surround.footer);
 			}
 			fragments.code(")");
 		},
@@ -22920,6 +23030,7 @@ module.exports = function() {
 		$extends: Expression,
 		__ks_init_1: function() {
 			this._async = false;
+			this._isObjectMember = false;
 		},
 		__ks_init: function() {
 			Expression.prototype.__ks_init.call(this);
@@ -22952,6 +23063,7 @@ module.exports = function() {
 			this._statements = Helper.mapArray($body(this._data.body), Helper.vcurry(function(statement) {
 				return $compile.statement(statement, this);
 			}, this));
+			this._isObjectMember = Type.is(this._parent, ObjectMember);
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -22996,12 +23108,32 @@ module.exports = function() {
 			if(mode === undefined || mode === null) {
 				throw new Error("Missing parameter 'mode'");
 			}
-			fragments.code("function(");
+			var surround;
+			if(this._isObjectMember) {
+				if(this._options.format.functions === "es5") {
+					surround = {
+						beforeParameters: ": function(",
+						afterParameters: ")",
+						footer: ""
+					};
+				}
+				else {
+					surround = {
+						beforeParameters: "(",
+						afterParameters: ")",
+						footer: ""
+					};
+				}
+			}
+			else {
+				surround = $function.surround(this);
+			}
+			fragments.code(surround.beforeParameters);
 			var block = $function.parameters(this, fragments, function(fragments) {
 				if(fragments === undefined || fragments === null) {
 					throw new Error("Missing parameter 'fragments'");
 				}
-				return fragments.code(")").newBlock();
+				return fragments.code(surround.afterParameters).newBlock();
 			});
 			if(this._async) {
 				var stack = [];
@@ -23029,6 +23161,9 @@ module.exports = function() {
 				}
 			}
 			block.done();
+			if(surround.footer.length > 0) {
+				fragments.code(surround.footer);
+			}
 		},
 		toFragments: function() {
 			if(arguments.length === 2) {
@@ -23036,53 +23171,6 @@ module.exports = function() {
 			}
 			else if(Expression.prototype.toFragments) {
 				return Expression.prototype.toFragments.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
-		},
-		__ks_func_toShorthandFragments_0: function(fragments) {
-			if(fragments === undefined || fragments === null) {
-				throw new Error("Missing parameter 'fragments'");
-			}
-			fragments.code("(");
-			var block = $function.parameters(this, fragments, function(fragments) {
-				if(fragments === undefined || fragments === null) {
-					throw new Error("Missing parameter 'fragments'");
-				}
-				return fragments.code(")").newBlock();
-			});
-			if(this._async) {
-				var stack = [];
-				var f = block;
-				var m = Mode.None;
-				var item;
-				for(var __ks_0 = 0, __ks_1 = this._statements.length, statement; __ks_0 < __ks_1; ++__ks_0) {
-					statement = this._statements[__ks_0];
-					var __ks_2;
-					if(Type.isValue(__ks_2 = statement.toFragments(f, m)) ? (item = __ks_2, true) : false) {
-						f = item.fragments;
-						m = item.mode;
-						stack.push(item);
-					}
-				}
-				for(var __ks_2 = 0, __ks_0 = stack.length; __ks_2 < __ks_0; ++__ks_2) {
-					item = stack[__ks_2];
-					item.done(item.fragments);
-				}
-			}
-			else {
-				for(var __ks_2 = 0, __ks_0 = this._statements.length, statement; __ks_2 < __ks_0; ++__ks_2) {
-					statement = this._statements[__ks_2];
-					block.compile(statement);
-				}
-			}
-			block.done();
-		},
-		toShorthandFragments: function() {
-			if(arguments.length === 1) {
-				return FunctionExpression.prototype.__ks_func_toShorthandFragments_0.apply(this, arguments);
-			}
-			else if(Expression.prototype.toShorthandFragments) {
-				return Expression.prototype.toShorthandFragments.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}
@@ -23106,6 +23194,10 @@ module.exports = function() {
 		destructors: 0,
 		instanceVariables: {
 			_async: {
+				access: 1,
+				type: "Any"
+			},
+			_isObjectMember: {
 				access: 1,
 				type: "Any"
 			},
@@ -23146,20 +23238,6 @@ module.exports = function() {
 							type: "Any",
 							min: 2,
 							max: 2
-						}
-					]
-				}
-			],
-			toShorthandFragments: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
 						}
 					]
 				}
@@ -24066,15 +24144,10 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			fragments.compile(this._name);
-			if(this._options.format.functions === "es5") {
-				fragments.code(": ").compile(this._value);
+			if(this._data.value.kind !== Kind.FunctionExpression) {
+				fragments.code(": ");
 			}
-			else if(this._data.value.kind === Kind.FunctionExpression) {
-				this._value.toShorthandFragments(fragments);
-			}
-			else {
-				fragments.code(": ").compile(this._value);
-			}
+			fragments.compile(this._value);
 		},
 		toFragments: function() {
 			if(arguments.length === 2) {

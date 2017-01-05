@@ -5,9 +5,9 @@ module.exports = function() {
 		paul: "chani",
 		duncan: "murbella"
 	};
-	let spicyHeroes = Helper.mapObject(likes, (hero, like) => {
+	let spicyHeroes = Helper.mapObject(likes, function(hero, like) {
 		return hero;
-	}, (hero, like) => {
+	}, function(hero, like) {
 		return like === "spice";
 	});
 }

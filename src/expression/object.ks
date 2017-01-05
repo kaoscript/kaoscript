@@ -68,15 +68,11 @@ class ObjectMember extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._name)
 		
-		if this._options.format.functions == 'es5' {
-			fragments.code(': ').compile(this._value)
+		if this._data.value.kind != Kind::FunctionExpression {
+			fragments.code(': ')
 		}
-		else if this._data.value.kind == Kind::FunctionExpression {
-			this._value.toShorthandFragments(fragments)
-		}
-		else {
-			fragments.code(': ').compile(this._value)
-		}
+		
+		fragments.compile(this._value)
 	} // }}}
 }
 

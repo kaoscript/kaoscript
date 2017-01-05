@@ -252,10 +252,12 @@ const $signature = {
 	} // }}}
 }
 
-func $throw(message, node) { // {{{
+func $throw(message, node?) { // {{{
 	let error = new Error(message)
 	
-	error.filename = node.file()
+	if node? {
+		error.filename = node.file()
+	}
 	
 	throw error
 } // }}}
