@@ -1165,7 +1165,7 @@ class AbstractNode {
 	greatScope() => this._parent?._scope
 	module() => this._parent.module()
 	newScope() { // {{{
-		if this._options.variables == 'es6' {
+		if this._options.format.variables == 'es6' {
 			return new Scope(this._scope)
 		}
 		else {
@@ -1173,7 +1173,7 @@ class AbstractNode {
 		}
 	} // }}}
 	newScope(scope) { // {{{
-		if this._options.variables == 'es6' {
+		if this._options.format.variables == 'es6' {
 			return new Scope(scope)
 		}
 		else {

@@ -138,8 +138,8 @@ class Scope extends AbstractScope {
 			this._tempNextIndex = parent._tempNextIndex
 		}
 	} // }}}
-	acquireTempName(statement: Statement?, assignment = false) { // {{{
-		if this._scopeParent && (name ?= this._scopeParent.acquireTempNameFromKid()) {
+	acquireTempName(statement: Statement?) { // {{{
+		if name ?= this._scopeParent?.acquireTempNameFromKid() {
 			this._tempParentNames[name] = true
 			
 			return name
@@ -162,7 +162,7 @@ class Scope extends AbstractScope {
 		return name
 	} // }}}
 	private acquireTempNameFromKid() { // {{{
-		if this._parent && (name ?= this._parent.acquireTempNameFromKid()) {
+		if name ?= this._parent?.acquireTempNameFromKid() {
 			return name
 		}
 		
@@ -234,8 +234,8 @@ class Scope extends AbstractScope {
 }
 
 class XScope extends AbstractScope {
-	acquireTempName(statement: Statement?, assignment = false) { // {{{
-		return this._parent.acquireTempName(statement, assignment)
+	acquireTempName(statement: Statement?) { // {{{
+		return this._parent.acquireTempName(statement)
 	} // }}}
 	getRenamedVariable(name) { // {{{
 		if this._renamedVariables[name] {

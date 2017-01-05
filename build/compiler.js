@@ -1361,7 +1361,7 @@ module.exports = function() {
 			throw new Error("Wrong number of arguments");
 		},
 		__ks_func_newScope_0: function() {
-			if(this._options.variables === "es6") {
+			if(this._options.format.variables === "es6") {
 				return new Scope(this._scope);
 			}
 			else {
@@ -1372,7 +1372,7 @@ module.exports = function() {
 			if(scope === undefined || scope === null) {
 				throw new Error("Missing parameter 'scope'");
 			}
-			if(this._options.variables === "es6") {
+			if(this._options.format.variables === "es6") {
 				return new Scope(scope);
 			}
 			else {
@@ -4454,18 +4454,15 @@ module.exports = function() {
 				AbstractScope.prototype.__ks_cons.call(this, args);
 			}
 		},
-		__ks_func_acquireTempName_0: function(statement, assignment) {
+		__ks_func_acquireTempName_0: function(statement) {
 			if(statement === undefined) {
 				statement = null;
 			}
 			if(statement !== null && !Type.is(statement, Statement)) {
 				throw new Error("Invalid type for parameter 'statement'");
 			}
-			if(assignment === undefined || assignment === null) {
-				assignment = false;
-			}
 			var name, __ks_0;
-			if(this._scopeParent && (Type.isValue(__ks_0 = this._scopeParent.acquireTempNameFromKid()) ? (name = __ks_0, true) : false)) {
+			if(Type.isValue(this._scopeParent) && Type.isValue(__ks_0 = this._scopeParent.acquireTempNameFromKid()) ? (name = __ks_0, true) : false) {
 				this._tempParentNames[name] = true;
 				return name;
 			}
@@ -4485,14 +4482,14 @@ module.exports = function() {
 			return name;
 		},
 		acquireTempName: function() {
-			if(arguments.length >= 0 && arguments.length <= 2) {
+			if(arguments.length >= 0 && arguments.length <= 1) {
 				return Scope.prototype.__ks_func_acquireTempName_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		},
 		__ks_func_acquireTempNameFromKid_0: function() {
 			var name, __ks_0;
-			if(this._parent && (Type.isValue(__ks_0 = this._parent.acquireTempNameFromKid()) ? (name = __ks_0, true) : false)) {
+			if(Type.isValue(this._parent) && Type.isValue(__ks_0 = this._parent.acquireTempNameFromKid()) ? (name = __ks_0, true) : false) {
 				return name;
 			}
 			for(name in this._tempNames) {
@@ -4662,15 +4659,10 @@ module.exports = function() {
 				{
 					access: 3,
 					min: 0,
-					max: 2,
+					max: 1,
 					parameters: [
 						{
 							type: "#Statement",
-							min: 0,
-							max: 1
-						},
-						{
-							type: "Any",
 							min: 0,
 							max: 1
 						}
@@ -4761,20 +4753,17 @@ module.exports = function() {
 		__ks_cons: function(args) {
 			AbstractScope.prototype.__ks_cons.call(this, args);
 		},
-		__ks_func_acquireTempName_0: function(statement, assignment) {
+		__ks_func_acquireTempName_0: function(statement) {
 			if(statement === undefined) {
 				statement = null;
 			}
 			if(statement !== null && !Type.is(statement, Statement)) {
 				throw new Error("Invalid type for parameter 'statement'");
 			}
-			if(assignment === undefined || assignment === null) {
-				assignment = false;
-			}
-			return this._parent.acquireTempName(statement, assignment);
+			return this._parent.acquireTempName(statement);
 		},
 		acquireTempName: function() {
-			if(arguments.length >= 0 && arguments.length <= 2) {
+			if(arguments.length >= 0 && arguments.length <= 1) {
 				return XScope.prototype.__ks_func_acquireTempName_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
@@ -4867,15 +4856,10 @@ module.exports = function() {
 				{
 					access: 3,
 					min: 0,
-					max: 2,
+					max: 1,
 					parameters: [
 						{
 							type: "#Statement",
-							min: 0,
-							max: 1
-						},
-						{
-							type: "Any",
 							min: 0,
 							max: 1
 						}
