@@ -1382,6 +1382,7 @@ const $expressions = {
 	`\(Kind::RegularExpression)`			: RegularExpression
 	`\(Kind::TemplateExpression)`			: TemplateExpression
 	`\(Kind::TernaryConditionalExpression)`	: TernaryConditionalExpression
+	`\(Kind::ThisExpression)`				: ThisExpression
 	`\(Kind::UnlessExpression)`				: UnlessExpression
 }
 

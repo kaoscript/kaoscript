@@ -42,6 +42,7 @@ include {
 	../expression/object
 	../expression/omitted
 	../expression/regex
+	../expression/this
 	../expression/ternary
 	../expression/template
 	../expression/unless

@@ -24712,6 +24712,159 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
+	var ThisExpression = Helper.class({
+		$name: "ThisExpression",
+		$extends: Expression,
+		__ks_init: function() {
+			Expression.prototype.__ks_init.call(this);
+		},
+		__ks_cons_0: function(data, parent, scope) {
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(parent === undefined || parent === null) {
+				throw new Error("Missing parameter 'parent'");
+			}
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			Expression.prototype.__ks_cons.call(this, [data, parent, scope]);
+			var __ks_0;
+			do {
+				if(Type.is(parent, ClassDeclaration)) {
+					this._class = this._scope.getVariable(parent._name);
+					break;
+				}
+				else if(Type.is(parent, ImplementClassMethodDeclaration)) {
+					this._class = parent._variable;
+					break;
+				}
+			}
+			while(Type.isValue(__ks_0 = parent.parent()) ? (parent = __ks_0, true) : false)
+			if(!Type.isValue(parent)) {
+				$throw("The alias @" + data.name.name + " must be inside a class, line " + data.start.line, this);
+			}
+		},
+		__ks_cons: function(args) {
+			if(args.length === 3) {
+				ThisExpression.prototype.__ks_cons_0.apply(this, args);
+			}
+			else {
+				Expression.prototype.__ks_cons.call(this, args);
+			}
+		},
+		__ks_func_analyse_0: function() {
+		},
+		analyse: function() {
+			if(arguments.length === 0) {
+				return ThisExpression.prototype.__ks_func_analyse_0.apply(this);
+			}
+			else if(Expression.prototype.analyse) {
+				return Expression.prototype.analyse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_fuse_0: function() {
+		},
+		fuse: function() {
+			if(arguments.length === 0) {
+				return ThisExpression.prototype.__ks_func_fuse_0.apply(this);
+			}
+			else if(Expression.prototype.fuse) {
+				return Expression.prototype.fuse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_toFragments_0: function(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			var name = this._data.name.name;
+			if(Type.isValue(this._class.instanceVariables[name]) || Type.isValue(this._class.instanceMethods[name])) {
+				fragments.code("this.", name);
+			}
+			else if(Type.isValue(this._class.instanceVariables["_" + name])) {
+				fragments.code("this._", name);
+			}
+			else {
+				$throw("Unknown member '" + name + "' at line " + this._data.start.line, this);
+			}
+		},
+		toFragments: function() {
+			if(arguments.length === 2) {
+				return ThisExpression.prototype.__ks_func_toFragments_0.apply(this, arguments);
+			}
+			else if(Expression.prototype.toFragments) {
+				return Expression.prototype.toFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	});
+	ThisExpression.__ks_reflect = {
+		inits: 0,
+		constructors: [
+			{
+				access: 3,
+				min: 3,
+				max: 3,
+				parameters: [
+					{
+						type: "Any",
+						min: 3,
+						max: 3
+					}
+				]
+			}
+		],
+		destructors: 0,
+		instanceVariables: {
+			_class: {
+				access: 1,
+				type: "Any"
+			},
+			_variable: {
+				access: 1,
+				type: "Any"
+			}
+		},
+		classVariables: {},
+		instanceMethods: {
+			analyse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			fuse: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			toFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
 	var TernaryConditionalExpression = Helper.class({
 		$name: "TernaryConditionalExpression",
 		$extends: Expression,
@@ -29557,6 +29710,7 @@ module.exports = function() {
 	$expressions[Kind.RegularExpression] = RegularExpression;
 	$expressions[Kind.TemplateExpression] = TemplateExpression;
 	$expressions[Kind.TernaryConditionalExpression] = TernaryConditionalExpression;
+	$expressions[Kind.ThisExpression] = ThisExpression;
 	$expressions[Kind.UnlessExpression] = UnlessExpression;
 	var $statements = {};
 	$statements[Kind.BreakStatement] = BreakStatement;
