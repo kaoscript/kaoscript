@@ -50,6 +50,10 @@ class CallExpression extends Expression {
 			this._callee = new MemberExpression(this._data.callee, this, this.scope())
 			this._callee.analyse()
 		}
+		else if this._data.callee.kind == Kind::ThisExpression {
+			this._callee = new ThisExpression(this._data.callee, this, this.scope())
+			this._callee.isMethod(true).analyse()
+		}
 		else {
 			this._callee = $compile.expression(this._data.callee, this, false)
 		}

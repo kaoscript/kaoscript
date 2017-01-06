@@ -8143,7 +8143,7 @@ module.exports = function() {
 				if(!(Type.isValue(__ks_0 = this._scope.getVariable(data.extends.name)) ? (this._extendsVariable = __ks_0, true) : false)) {
 					$throw("Undefined class " + data.extends.name + " at line " + data.extends.start.line, this);
 				}
-				this._extendsName = data.extends.name;
+				this._variable.extends = this._extendsName = data.extends.name;
 				var extname = data.extends;
 				var superVariable = $variable.define(this, this._constructorScope, {
 					kind: Kind.Identifier,
@@ -21691,6 +21691,10 @@ module.exports = function() {
 				this._callee = new MemberExpression(this._data.callee, this, this.scope());
 				this._callee.analyse();
 			}
+			else if(this._data.callee.kind === Kind.ThisExpression) {
+				this._callee = new ThisExpression(this._data.callee, this, this.scope());
+				this._callee.isMethod(true).analyse();
+			}
 			else {
 				this._callee = $compile.expression(this._data.callee, this, false);
 			}
@@ -24715,8 +24719,12 @@ module.exports = function() {
 	var ThisExpression = Helper.class({
 		$name: "ThisExpression",
 		$extends: Expression,
+		__ks_init_1: function() {
+			this._method = false;
+		},
 		__ks_init: function() {
 			Expression.prototype.__ks_init.call(this);
+			ThisExpression.prototype.__ks_init_1.call(this);
 		},
 		__ks_cons_0: function(data, parent, scope) {
 			if(data === undefined || data === null) {
@@ -24775,6 +24783,70 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		},
+		__ks_func_isInstanceMethod_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(Type.isValue(variable.instanceMethods[name])) {
+				return true;
+			}
+			if(Type.isValue(variable.extends)) {
+				return this.isInstanceMethod(name, this._scope.getVariable(variable.extends));
+			}
+			return false;
+		},
+		isInstanceMethod: function() {
+			if(arguments.length === 2) {
+				return ThisExpression.prototype.__ks_func_isInstanceMethod_0.apply(this, arguments);
+			}
+			else if(Expression.prototype.isInstanceMethod) {
+				return Expression.prototype.isInstanceMethod.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_isInstanceVariable_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(Type.isValue(variable.instanceVariables[name])) {
+				return true;
+			}
+			if(Type.isValue(variable.extends)) {
+				return this.isInstanceVariable(name, this._scope.getVariable(variable.extends));
+			}
+			return false;
+		},
+		isInstanceVariable: function() {
+			if(arguments.length === 2) {
+				return ThisExpression.prototype.__ks_func_isInstanceVariable_0.apply(this, arguments);
+			}
+			else if(Expression.prototype.isInstanceVariable) {
+				return Expression.prototype.isInstanceVariable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_isMethod_0: function(method) {
+			if(method === undefined || method === null) {
+				throw new Error("Missing parameter 'method'");
+			}
+			this._method = method;
+			return this;
+		},
+		isMethod: function() {
+			if(arguments.length === 1) {
+				return ThisExpression.prototype.__ks_func_isMethod_0.apply(this, arguments);
+			}
+			else if(Expression.prototype.isMethod) {
+				return Expression.prototype.isMethod.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
 		__ks_func_toFragments_0: function(fragments, mode) {
 			if(fragments === undefined || fragments === null) {
 				throw new Error("Missing parameter 'fragments'");
@@ -24783,14 +24855,27 @@ module.exports = function() {
 				throw new Error("Missing parameter 'mode'");
 			}
 			var name = this._data.name.name;
-			if(Type.isValue(this._class.instanceVariables[name]) || Type.isValue(this._class.instanceMethods[name])) {
-				fragments.code("this.", name);
-			}
-			else if(Type.isValue(this._class.instanceVariables["_" + name])) {
-				fragments.code("this._", name);
+			if(this._method) {
+				if(this.isInstanceMethod(name, this._class)) {
+					fragments.code("this.", name);
+				}
+				else if(this.isInstanceMethod("_" + name, this._class)) {
+					fragments.code("this._", name);
+				}
+				else {
+					$throw("Unknown method '" + name + "' at line " + this._data.start.line, this);
+				}
 			}
 			else {
-				$throw("Unknown member '" + name + "' at line " + this._data.start.line, this);
+				if(this.isInstanceVariable(name, this._class)) {
+					fragments.code("this.", name);
+				}
+				else if(this.isInstanceVariable("_" + name, this._class)) {
+					fragments.code("this._", name);
+				}
+				else {
+					$throw("Unknown field '" + name + "' at line " + this._data.start.line, this);
+				}
 			}
 		},
 		toFragments: function() {
@@ -24804,7 +24889,7 @@ module.exports = function() {
 		}
 	});
 	ThisExpression.__ks_reflect = {
-		inits: 0,
+		inits: 1,
 		constructors: [
 			{
 				access: 3,
@@ -24822,6 +24907,10 @@ module.exports = function() {
 		destructors: 0,
 		instanceVariables: {
 			_class: {
+				access: 1,
+				type: "Any"
+			},
+			_method: {
 				access: 1,
 				type: "Any"
 			},
@@ -24846,6 +24935,48 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			],
+			isInstanceMethod: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
+			isInstanceVariable: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
+			isMethod: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
 				}
 			],
 			toFragments: [

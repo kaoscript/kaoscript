@@ -1,6 +1,7 @@
 class ThisExpression extends Expression {
 	private {
 		_class
+		_method		= false
 		_variable
 	}
 	$create(data, parent, scope) { // {{{
@@ -8,11 +9,11 @@ class ThisExpression extends Expression {
 		
 		do {
 			if parent is ClassDeclaration {
-				this._class = this._scope.getVariable(parent._name)
+				@class = this._scope.getVariable(parent._name)
 				break
 			}
 			else if parent is ImplementClassMethodDeclaration {
-				this._class = parent._variable
+				@class = parent._variable
 				break
 			}
 		}
@@ -26,17 +27,49 @@ class ThisExpression extends Expression {
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	toFragments(fragments, mode) { // {{{
-		let name = this._data.name.name
+	isInstanceMethod(name, variable) { // {{{
+		return true if variable.instanceMethods[name]?
 		
-		if this._class.instanceVariables[name]? || this._class.instanceMethods[name]? {
-			fragments.code('this.', name)
+		if variable.extends? {
+			return @isInstanceMethod(name, @scope.getVariable(variable.extends))
 		}
-		else if this._class.instanceVariables['_' + name]? {
-			fragments.code('this._', name)
+		
+		return false
+	} // }}}
+	isInstanceVariable(name, variable) { // {{{
+		return true if variable.instanceVariables[name]?
+		
+		if variable.extends? {
+			return @isInstanceVariable(name, @scope.getVariable(variable.extends))
+		}
+		
+		return false
+	} // }}}
+	isMethod(@method) => this
+	toFragments(fragments, mode) { // {{{
+		let name = @data.name.name
+		
+		if @method {
+			if @isInstanceMethod(name, @class) {
+				fragments.code('this.', name)
+			}
+			else if @isInstanceMethod('_' + name, @class) {
+				fragments.code('this._', name)
+			}
+			else {
+				$throw(`Unknown method '\(name)' at line \(@data.start.line)`, this)
+			}
 		}
 		else {
-			$throw(`Unknown member '\(name)' at line \(this._data.start.line)`, this)
+			if @isInstanceVariable(name, @class) {
+				fragments.code('this.', name)
+			}
+			else if @isInstanceVariable('_' + name, @class) {
+				fragments.code('this._', name)
+			}
+			else {
+				$throw(`Unknown field '\(name)' at line \(@data.start.line)`, this)
+			}
 		}
 	} // }}}
 }

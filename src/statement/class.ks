@@ -1318,7 +1318,7 @@ class ClassDeclaration extends Statement {
 				$throw(`Undefined class \(data.extends.name) at line \(data.extends.start.line)`, this)
 			}
 			
-			this._extendsName = data.extends.name
+			this._variable.extends = this._extendsName = data.extends.name
 			
 			let extname = data.extends
 			
