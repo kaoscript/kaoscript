@@ -882,8 +882,24 @@ const $function = {
 			}
 			Kind::EnumExpression => return false
 			Kind::Identifier => return data.name == 'this'
+			Kind::IfStatement => {
+				if $function.useThisVariable(data.condition) || $function.useThisVariable(data.then) {
+					return true
+				}
+				
+				for value in data.elseifs {
+					if $function.useThisVariable(value) {
+						return true
+					}
+				}
+				
+				if data.else? && data.$function.useThisVariable(data.else) {
+					return true
+				}
+			}
 			Kind::Literal => return false
 			Kind::MemberExpression => return $function.useThisVariable(data.object)
+			Kind::NumericExpression => return false
 			Kind::ObjectExpression => {
 				for property in data.properties {
 					if $function.useThisVariable(property.value) {
@@ -892,6 +908,7 @@ const $function = {
 				}
 			}
 			Kind::ReturnStatement => return $function.useThisVariable(data.value)
+			Kind::UnaryExpression => return $function.useThisVariable(data.argument)
 			=> {
 				console.error(data)
 				$throw('Unknow kind ' + data.kind)

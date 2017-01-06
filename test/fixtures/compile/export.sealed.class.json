@@ -59,7 +59,7 @@
       "instanceMethods": {
         "draw": [
           {
-            "kind": 56,
+            "kind": 57,
             "name": "draw",
             "signature": {
               "access": 3,

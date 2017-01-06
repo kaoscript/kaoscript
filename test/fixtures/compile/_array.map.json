@@ -17,7 +17,7 @@
       "classMethods": {
         "map": [
           {
-            "kind": 56,
+            "kind": 57,
             "name": "map",
             "signature": {
               "access": 3,
@@ -38,7 +38,7 @@
             }
           },
           {
-            "kind": 56,
+            "kind": 57,
             "name": "map",
             "signature": {
               "access": 3,

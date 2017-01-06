@@ -18,4 +18,4 @@ console.log({
 	leto: 'spice'
 	paul: 'chani'
 	duncan: 'murbella'
-}.map((item, name) => {name: name, item: item}))
+}.map((item, name) => ({name: name, item: item})))

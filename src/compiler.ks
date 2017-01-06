@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.5.1
+ * Version 0.6.0
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -885,6 +885,18 @@ const $variable = {
 					return node.scope().getVariable(data.name)
 				}
 			}
+			Kind::LambdaExpression => {
+				return {
+					kind: VariableKind::Variable
+					type: {
+						kind: Kind::TypeReference
+						typeName: {
+							kind: Kind::Identifier
+							name: 'Function'
+						}
+					}
+				}
+			}
 			Kind::Literal => {
 				return {
 					kind: VariableKind::Variable
@@ -1352,6 +1364,7 @@ const $expressions = {
 	`\(Kind::FunctionExpression)`			: FunctionExpression
 	`\(Kind::Identifier)`					: IdentifierLiteral
 	`\(Kind::IfExpression)`					: IfExpression
+	`\(Kind::LambdaExpression)`				: LambdaExpression
 	`\(Kind::Literal)`						: StringLiteral
 	`\(Kind::MemberExpression)`				: func(data, parent, scope) {
 		if callee = $sealed.callee(data, parent) {

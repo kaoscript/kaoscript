@@ -17,7 +17,7 @@
       "instanceMethods": {
         "luma": [
           {
-            "kind": 56,
+            "kind": 57,
             "name": "luma",
             "signature": {
               "access": 3,
@@ -33,7 +33,7 @@
             }
           },
           {
-            "kind": 56,
+            "kind": 57,
             "name": "luma",
             "signature": {
               "access": 3,
