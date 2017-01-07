@@ -3,14 +3,20 @@ class Statement extends AbstractNode {
 		_afterwards	: Array	= []
 		_variables	: Array	= []
 	}
+	$create(data, parent, scope = parent.scope()) { // {{{
+		@data = data
+		@parent = parent
+		@scope = scope
+		@options = $attribute.apply(data, parent._options)
+	} // }}}
 	afterward(node) { // {{{
-		this._afterwards.push(node)
+		@afterwards.push(node)
 	} // }}}
 	assignment(data, allowAssignement = false) { // {{{
-		if data.left.kind == Kind::Identifier && !this._scope.hasVariable(data.left.name) {
-			this._variables.push(data.left.name)
+		if data.left.kind == Kind::Identifier && !@scope.hasVariable(data.left.name) {
+			@variables.push(data.left.name)
 			
-			$variable.define(this, this._scope, data.left, $variable.kind(data.right.type), data.right.type)
+			$variable.define(this, @scope, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
 	compile(statements) { // {{{
@@ -25,17 +31,17 @@ class Statement extends AbstractNode {
 	isAsync() => false
 	statement() => this
 	toFragments(fragments, mode) { // {{{
-		if this._variables.length {
-			fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
+		if @variables.length {
+			fragments.newLine().code($variable.scope(this) + @variables.join(', ')).done()
 		}
 		
 		if r ?= this.toStatementFragments(fragments, mode) {
-			r.afterwards = this._afterwards
+			r.afterwards = @afterwards
 			
 			return r
 		}
 		else {
-			for afterward in this._afterwards {
+			for afterward in @afterwards {
 				afterward.toAfterwardFragments(fragments)
 			}
 		}

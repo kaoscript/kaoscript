@@ -553,9 +553,11 @@ class ModuleBlock extends AbstractNode {
 	} // }}}
 	analyse() { // {{{
 		for statement in this._data.body {
-			this._body.push(statement = $compile.statement(statement, this))
-			
-			statement.analyse()
+			if statement ?= $compile.statement(statement, this) {
+				this._body.push(statement)
+				
+				statement.analyse()
+			}
 		}
 	} // }}}
 	directory() => this._module.directory()

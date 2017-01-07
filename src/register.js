@@ -12,7 +12,7 @@ var fs = require('./fs.js');
 var path = require('path');
 
 var Compiler = _.Compiler;
-var target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'es6' : 'es5';
+var target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5';
 
 var loadFile = function(module, filename) { // {{{
 	try {

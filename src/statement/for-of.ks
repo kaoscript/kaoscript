@@ -36,6 +36,12 @@ class ForOfStatement extends Statement {
 			this._index = $compile.expression(data.index, this)
 		}
 		
+		if this._value.isEntangled() {
+			this._valueName = this.greatScope().acquireTempName()
+			
+			this._scope.updateTempNames()
+		}
+		
 		if data.until {
 			this._until = $compile.expression(data.until, this)
 		}
@@ -45,12 +51,6 @@ class ForOfStatement extends Statement {
 		
 		if data.when {
 			this._when = $compile.expression(data.when, this)
-		}
-		
-		if this._value.isEntangled() {
-			this._valueName = this.greatScope().acquireTempName()
-			
-			this._scope.updateTempNames()
 		}
 		
 		this._body = $compile.expression($block(data.body), this)

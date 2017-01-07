@@ -152,6 +152,62 @@ class AssignmentOperatorMultiplication extends AssignmentOperatorExpression {
 	} // }}}
 }
 
+class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
+	acquireReusable(acquire) { // {{{
+		this._right.acquireReusable(true)
+	} // }}}
+	releaseReusable() { // {{{
+		this._right.releaseReusable()
+	} // }}}
+	isAssignable() => false
+	toFragments(fragments, mode) { // {{{
+		if this._right.isNullable() {
+			fragments
+				.wrapNullable(this._right)
+				.code(' && ')
+				.code($runtime.type(this) + '.isValue(', this._data.operator)
+				.compileReusable(this._right)
+				.code(')', this._data.operator)
+		}
+		else {
+			fragments
+				.code($runtime.type(this) + '.isValue(', this._data.operator)
+				.compileReusable(this._right)
+				.code(')', this._data.operator)
+		}
+		
+		fragments
+			.code(' ? ')
+			.compile(this._left)
+			.code($equals)
+			.wrap(this._right)
+			.code(' : undefined')
+	} // }}}
+	toBooleanFragments(fragments, mode) { // {{{
+		if this._right.isNullable() {
+			fragments
+				.wrapNullable(this._right)
+				.code(' && ')
+				.code($runtime.type(this) + '.isValue(', this._data.operator)
+				.compileReusable(this._right)
+				.code(')', this._data.operator)
+		}
+		else {
+			fragments
+				.code($runtime.type(this) + '.isValue(', this._data.operator)
+				.compileReusable(this._right)
+				.code(')', this._data.operator)
+		}
+		
+		fragments
+			.code(' ? (')
+			.compile(this._left)
+			.code($equals)
+			.wrap(this._right)
+			.code(', false) : true')
+	} // }}}
+}
+
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	isAssignable() => false
 	toFragments(fragments, mode) { // {{{

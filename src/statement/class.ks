@@ -1689,9 +1689,9 @@ class MethodDeclaration extends Statement {
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
+		@parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
 		
-		if this._data.body? {
+		if @data.body? {
 			this._statements = [$compile.statement(statement, this) for statement in $body(this._data.body)]
 		}
 		else {
@@ -1703,6 +1703,24 @@ class MethodDeclaration extends Statement {
 		this.compile(this._statements)
 	} // }}}
 	instance(@instance) => this
+	isInstanceMethod(name, variable) { // {{{
+		return true if variable.instanceMethods[name]?['1']?
+		
+		if variable.extends? {
+			return @isInstanceMethod(name, @scope.getVariable(variable.extends))
+		}
+		
+		return false
+	} // }}}
+	isInstanceVariable(name, variable) { // {{{
+		return true if variable.instanceVariables[name]?
+		
+		if variable.extends? {
+			return @isInstanceVariable(name, @scope.getVariable(variable.extends))
+		}
+		
+		return false
+	} // }}}
 	name(@name) => this
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
@@ -1730,17 +1748,17 @@ class MethodDeclaration extends Statement {
 				if modifier.kind == ParameterModifier::Member {
 					let name = parameter.name.name
 					
-					if variable.instanceVariables[name] {
+					if @isInstanceVariable(name, variable) {
 						ctrl.newLine().code('this.' + name + ' = ').compile(this._parameters[p]).done()
 					}
-					else if variable.instanceVariables['_' + name] {
+					else if @isInstanceVariable('_' + name, variable) {
 						ctrl.newLine().code('this._' + name + ' = ').compile(this._parameters[p]).done()
 					}
-					else if variable.instanceMethods[name] && variable.instanceMethods[name]['1'] {
+					else if @isInstanceMethod(name, variable) {
 						ctrl.newLine().code('this.' + name + '(').compile(this._parameters[p]).code(')').done()
 					}
 					else {
-						$throw('Can\'t set member ' + name + ' (line ' + parameter.start.line + ')', this)
+						$throw(`Can't set member '\(name)' (line \(parameter.start.line))`, this)
 					}
 					
 					nf = false

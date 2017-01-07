@@ -75,6 +75,7 @@ module.exports = function() {
 	$operator.numerics[BinaryOperator.Modulo] = true;
 	$operator.numerics[BinaryOperator.Multiplication] = true;
 	$operator.numerics[BinaryOperator.Subtraction] = true;
+	var $targetRegex = /^(\w+)-v(\d+)(?:\.\d+)?(?:\.\d+)?$/;
 	var $types = {
 		any: "Any",
 		array: "Array",
@@ -110,7 +111,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'options'");
 			}
 			var nc = true;
-			if(data.attributes && data.attributes.length) {
+			if(Type.isValue(data.attributes) ? data.attributes.length > 0 : false) {
 				for(var __ks_0 = 0, __ks_1 = data.attributes.length, attr; __ks_0 < __ks_1; ++__ks_0) {
 					attr = data.attributes[__ks_0];
 					if((attr.declaration.kind === Kind.AttributeExpression) && (attr.declaration.name.name === "cfg")) {
@@ -118,13 +119,81 @@ module.exports = function() {
 							options = __ks_Object._cm_clone(options);
 							nc = false;
 						}
-						$attribute.expression(attr.declaration, options);
+						$attribute.configure(attr.declaration, options);
 					}
 				}
 			}
 			return options;
 		},
-		expression: function(attr, options) {
+		cc: function(data, target) {
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(target === undefined || target === null) {
+				throw new Error("Missing parameter 'target'");
+			}
+			if(data.kind === Kind.AttributeExpression) {
+				if(data.name.name === "all") {
+					for(var __ks_0 = 0, __ks_1 = data.arguments.length, arg; __ks_0 < __ks_1; ++__ks_0) {
+						arg = data.arguments[__ks_0];
+						if(!$attribute.cc(arg, target)) {
+							return false;
+						}
+					}
+					return true;
+				}
+				else if(data.name.name === "any") {
+					for(var __ks_0 = 0, __ks_1 = data.arguments.length, arg; __ks_0 < __ks_1; ++__ks_0) {
+						arg = data.arguments[__ks_0];
+						if($attribute.cc(arg, target)) {
+							return true;
+						}
+					}
+					return false;
+				}
+				else {
+					console.error(data);
+					$throw("Not Implemented");
+				}
+			}
+			else if(data.kind === Kind.AttributeOperator) {
+				if(data.name.name === "target_version") {
+					return target.version === data.value.value;
+				}
+				else {
+					console.error(data);
+					$throw("Not Implemented");
+				}
+			}
+			else if(data.kind === Kind.Identifier) {
+				return target.name === data.name;
+			}
+			else {
+				console.error(data);
+				$throw("Not Implemented");
+			}
+		},
+		conditionalCompilation: function(data, target) {
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(target === undefined || target === null) {
+				throw new Error("Missing parameter 'target'");
+			}
+			if(Type.isValue(data.attributes) ? data.attributes.length > 0 : false) {
+				for(var __ks_0 = 0, __ks_1 = data.attributes.length, attr; __ks_0 < __ks_1; ++__ks_0) {
+					attr = data.attributes[__ks_0];
+					if((attr.declaration.kind === Kind.AttributeExpression) && (attr.declaration.name.name === "cc")) {
+						if(attr.declaration.arguments.length !== 1) {
+							$throw("Expected 1 argument for cc() at line " + data.start.line);
+						}
+						return $attribute.cc(attr.declaration.arguments[0], target);
+					}
+				}
+			}
+			return true;
+		},
+		configure: function(attr, options) {
 			if(attr === undefined || attr === null) {
 				throw new Error("Missing parameter 'attr'");
 			}
@@ -137,7 +206,7 @@ module.exports = function() {
 					if(!Type.isValue(options[arg.name.name])) {
 						options[arg.name.name] = {};
 					}
-					$attribute.expression(arg, options[arg.name.name]);
+					$attribute.configure(arg, options[arg.name.name]);
 				}
 				else if(arg.kind === Kind.AttributeOperator) {
 					options[arg.name.name] = arg.value.value;
@@ -521,6 +590,12 @@ module.exports = function() {
 					};
 				}
 			}
+			else if(__ks_0 === Kind.CallExpression) {
+				var variable, __ks_1;
+				if((Type.isValue(__ks_1 = $variable.fromAST(data, node)) ? (variable = __ks_1, true) : false) && Type.isValue(variable.type)) {
+					return variable.type;
+				}
+			}
 			else if(__ks_0 === Kind.CreateExpression) {
 				return {
 					typeName: data.class
@@ -539,6 +614,12 @@ module.exports = function() {
 						name: $literalTypes[data.value] || "String"
 					}
 				};
+			}
+			else if(__ks_0 === Kind.MemberExpression) {
+				var variable;
+				if((Type.isValue(__ks_1 = $variable.fromAST(data, node)) ? (variable = __ks_1, true) : false) && Type.isValue(variable.type)) {
+					return variable.type;
+				}
 			}
 			else if(__ks_0 === Kind.NumericExpression) {
 				return {
@@ -1317,7 +1398,7 @@ module.exports = function() {
 			this._data = data;
 			this._parent = parent;
 			this._scope = scope;
-			this._options = $attribute.apply(data, parent._options);
+			this._options = parent._options;
 		},
 		__ks_cons: function(args) {
 			if(args.length >= 2 && args.length <= 3) {
@@ -6026,8 +6107,11 @@ module.exports = function() {
 		__ks_func_analyse_0: function() {
 			for(var __ks_0 = 0, __ks_1 = this._data.body.length, statement; __ks_0 < __ks_1; ++__ks_0) {
 				statement = this._data.body[__ks_0];
-				this._body.push(statement = $compile.statement(statement, this));
-				statement.analyse();
+				var __ks_2;
+				if(Type.isValue(__ks_2 = $compile.statement(statement, this)) ? (statement = __ks_2, true) : false) {
+					this._body.push(statement);
+					statement.analyse();
+				}
 			}
 		},
 		analyse: function() {
@@ -6346,8 +6430,31 @@ module.exports = function() {
 			AbstractNode.prototype.__ks_init.call(this);
 			Statement.prototype.__ks_init_1.call(this);
 		},
+		__ks_cons_0: function() {
+			if(arguments.length < 2) {
+				throw new Error("Wrong number of arguments");
+			}
+			var __ks_i = -1;
+			var data = arguments[++__ks_i];
+			var parent = arguments[++__ks_i];
+			if(arguments.length > 2) {
+				var scope = arguments[++__ks_i];
+			}
+			else {
+				var scope = parent.scope();
+			}
+			this._data = data;
+			this._parent = parent;
+			this._scope = scope;
+			this._options = $attribute.apply(data, parent._options);
+		},
 		__ks_cons: function(args) {
-			AbstractNode.prototype.__ks_cons.call(this, args);
+			if(args.length >= 2 && args.length <= 3) {
+				Statement.prototype.__ks_cons_0.apply(this, args);
+			}
+			else {
+				throw new Error("Wrong number of arguments");
+			}
 		},
 		__ks_func_afterward_0: function(node) {
 			if(node === undefined || node === null) {
@@ -6446,8 +6553,9 @@ module.exports = function() {
 				return r;
 			}
 			else {
-				for(var __ks_0 = 0, __ks_1 = this._afterwards.length, afterward; __ks_0 < __ks_1; ++__ks_0) {
-					afterward = this._afterwards[__ks_0];
+				var __ks_0 = this._afterwards;
+				for(var __ks_1 = 0, __ks_2 = __ks_0.length, afterward; __ks_1 < __ks_2; ++__ks_1) {
+					afterward = __ks_0[__ks_1];
 					afterward.toAfterwardFragments(fragments);
 				}
 			}
@@ -6464,7 +6572,20 @@ module.exports = function() {
 	});
 	Statement.__ks_reflect = {
 		inits: 1,
-		constructors: [],
+		constructors: [
+			{
+				access: 3,
+				min: 2,
+				max: 3,
+				parameters: [
+					{
+						type: "Any",
+						min: 2,
+						max: 3
+					}
+				]
+			}
+		],
 		destructors: 0,
 		instanceVariables: {
 			_afterwards: {
@@ -8747,6 +8868,54 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		},
+		__ks_func_isInstanceMethod_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(Type.isValue(variable.instanceMethods[name]) && Type.isValue(variable.instanceMethods[name]["1"])) {
+				return true;
+			}
+			if(Type.isValue(variable.extends)) {
+				return this.isInstanceMethod(name, this._scope.getVariable(variable.extends));
+			}
+			return false;
+		},
+		isInstanceMethod: function() {
+			if(arguments.length === 2) {
+				return MethodDeclaration.prototype.__ks_func_isInstanceMethod_0.apply(this, arguments);
+			}
+			else if(Statement.prototype.isInstanceMethod) {
+				return Statement.prototype.isInstanceMethod.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_isInstanceVariable_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(Type.isValue(variable.instanceVariables[name])) {
+				return true;
+			}
+			if(Type.isValue(variable.extends)) {
+				return this.isInstanceVariable(name, this._scope.getVariable(variable.extends));
+			}
+			return false;
+		},
+		isInstanceVariable: function() {
+			if(arguments.length === 2) {
+				return MethodDeclaration.prototype.__ks_func_isInstanceVariable_0.apply(this, arguments);
+			}
+			else if(Statement.prototype.isInstanceVariable) {
+				return Statement.prototype.isInstanceVariable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
 		__ks_func_name_0: function(name) {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
@@ -8795,17 +8964,17 @@ module.exports = function() {
 					modifier = parameter.modifiers[__ks_1];
 					if(modifier.kind === ParameterModifier.Member) {
 						var name = parameter.name.name;
-						if(variable.instanceVariables[name]) {
+						if(this.isInstanceVariable(name, variable)) {
 							ctrl.newLine().code("this." + name + " = ").compile(this._parameters[p]).done();
 						}
-						else if(variable.instanceVariables["_" + name]) {
+						else if(this.isInstanceVariable("_" + name, variable)) {
 							ctrl.newLine().code("this._" + name + " = ").compile(this._parameters[p]).done();
 						}
-						else if(variable.instanceMethods[name] && variable.instanceMethods[name]["1"]) {
+						else if(this.isInstanceMethod(name, variable)) {
 							ctrl.newLine().code("this." + name + "(").compile(this._parameters[p]).code(")").done();
 						}
 						else {
-							$throw("Can't set member " + name + " (line " + parameter.start.line + ")", this);
+							$throw("Can't set member '" + name + "' (line " + parameter.start.line + ")", this);
 						}
 						nf = false;
 					}
@@ -8892,6 +9061,34 @@ module.exports = function() {
 							type: "Any",
 							min: 1,
 							max: 1
+						}
+					]
+				}
+			],
+			isInstanceMethod: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
+			isInstanceVariable: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
 						}
 					]
 				}
@@ -10498,15 +10695,6 @@ module.exports = function() {
 				}
 				this._index = $compile.expression(data.index, this);
 			}
-			if(data.until) {
-				this._until = $compile.expression(data.until, this);
-			}
-			else if(data.while) {
-				this._while = $compile.expression(data.while, this);
-			}
-			if(data.when) {
-				this._when = $compile.expression(data.when, this);
-			}
 			if(this._value.isEntangled()) {
 				this._valueName = this.greatScope().acquireTempName();
 				this._scope.updateTempNames();
@@ -10516,6 +10704,15 @@ module.exports = function() {
 			}
 			if(!data.desc) {
 				this._boundName = this._scope.acquireTempName();
+			}
+			if(data.until) {
+				this._until = $compile.expression(data.until, this);
+			}
+			else if(data.while) {
+				this._while = $compile.expression(data.while, this);
+			}
+			if(data.when) {
+				this._when = $compile.expression(data.when, this);
 			}
 			this._body = $compile.expression($block(data.body), this);
 			if(Type.isValue(this._valueName)) {
@@ -10755,6 +10952,10 @@ module.exports = function() {
 				}
 				this._index = $compile.expression(data.index, this);
 			}
+			if(this._value.isEntangled()) {
+				this._valueName = this.greatScope().acquireTempName();
+				this._scope.updateTempNames();
+			}
 			if(data.until) {
 				this._until = $compile.expression(data.until, this);
 			}
@@ -10763,10 +10964,6 @@ module.exports = function() {
 			}
 			if(data.when) {
 				this._when = $compile.expression(data.when, this);
-			}
-			if(this._value.isEntangled()) {
-				this._valueName = this.greatScope().acquireTempName();
-				this._scope.updateTempNames();
 			}
 			this._body = $compile.expression($block(data.body), this);
 			if(Type.isValue(this._valueName)) {
@@ -15256,10 +15453,13 @@ module.exports = function() {
 							error.filename = path;
 							throw error;
 						}
+						var __ks_4;
 						for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 							statement = data.body[__ks_2];
-							this._statements.push(statement = $compile.statement(statement, declarator));
-							statement.analyse();
+							if(Type.isValue(__ks_4 = $compile.statement(statement, declarator)) ? (statement = __ks_4, true) : false) {
+								this._statements.push(statement);
+								statement.analyse();
+							}
 						}
 					}
 					else {
@@ -15268,9 +15468,9 @@ module.exports = function() {
 				}
 				else {
 					var nf = true;
-					var __ks_2 = $import.nodeModulesPaths(directory);
-					for(var __ks_3 = 0, __ks_4 = __ks_2.length, dir; nf && __ks_3 < __ks_4; ++__ks_3) {
-						dir = __ks_2[__ks_3];
+					var __ks_4 = $import.nodeModulesPaths(directory);
+					for(var __ks_2 = 0, __ks_3 = __ks_4.length, dir; nf && __ks_2 < __ks_3; ++__ks_2) {
+						dir = __ks_4[__ks_2];
 						path = fs.resolve(dir, file);
 						if(fs.isFile(path) || fs.isFile(path += $extensions.source)) {
 							nf = false;
@@ -15290,10 +15490,12 @@ module.exports = function() {
 						error.filename = path;
 						throw error;
 					}
-					for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
-						statement = data.body[__ks_2];
-						this._statements.push(statement = $compile.statement(statement, declarator));
-						statement.analyse();
+					for(var __ks_4 = 0, __ks_2 = data.body.length, statement; __ks_4 < __ks_2; ++__ks_4) {
+						statement = data.body[__ks_4];
+						if(Type.isValue(__ks_3 = $compile.statement(statement, declarator)) ? (statement = __ks_3, true) : false) {
+							this._statements.push(statement);
+							statement.analyse();
+						}
 					}
 				}
 			}
@@ -15421,10 +15623,13 @@ module.exports = function() {
 								error.filename = path;
 								throw error;
 							}
+							var __ks_4;
 							for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
 								statement = data.body[__ks_2];
-								this._statements.push(statement = $compile.statement(statement, declarator));
-								statement.analyse();
+								if(Type.isValue(__ks_4 = $compile.statement(statement, declarator)) ? (statement = __ks_4, true) : false) {
+									this._statements.push(statement);
+									statement.analyse();
+								}
 							}
 						}
 					}
@@ -15434,9 +15639,9 @@ module.exports = function() {
 				}
 				else {
 					var nf = true;
-					var __ks_2 = $import.nodeModulesPaths(directory);
-					for(var __ks_3 = 0, __ks_4 = __ks_2.length, dir; nf && __ks_3 < __ks_4; ++__ks_3) {
-						dir = __ks_2[__ks_3];
+					var __ks_4 = $import.nodeModulesPaths(directory);
+					for(var __ks_2 = 0, __ks_3 = __ks_4.length, dir; nf && __ks_2 < __ks_3; ++__ks_2) {
+						dir = __ks_4[__ks_2];
 						path = fs.resolve(dir, file);
 						if(fs.isFile(path) || fs.isFile(path += $extensions.source)) {
 							nf = false;
@@ -15457,10 +15662,12 @@ module.exports = function() {
 							error.filename = path;
 							throw error;
 						}
-						for(var __ks_2 = 0, __ks_3 = data.body.length, statement; __ks_2 < __ks_3; ++__ks_2) {
-							statement = data.body[__ks_2];
-							this._statements.push(statement = $compile.statement(statement, declarator));
-							statement.analyse();
+						for(var __ks_4 = 0, __ks_2 = data.body.length, statement; __ks_4 < __ks_2; ++__ks_4) {
+							statement = data.body[__ks_4];
+							if(Type.isValue(__ks_3 = $compile.statement(statement, declarator)) ? (statement = __ks_3, true) : false) {
+								this._statements.push(statement);
+								statement.analyse();
+							}
 						}
 					}
 				}
@@ -18050,6 +18257,18 @@ module.exports = function() {
 			}
 			return Statement.prototype.isAsync.apply(this, arguments);
 		},
+		__ks_func_isConst_0: function() {
+			return this._data.modifiers.kind === VariableModifier.Const;
+		},
+		isConst: function() {
+			if(arguments.length === 0) {
+				return VariableDeclaration.prototype.__ks_func_isConst_0.apply(this);
+			}
+			else if(Statement.prototype.isConst) {
+				return Statement.prototype.isConst.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
 		__ks_func_modifier_0: function(data) {
 			if(data === undefined || data === null) {
 				throw new Error("Missing parameter 'data'");
@@ -18149,6 +18368,14 @@ module.exports = function() {
 				}
 			],
 			isAsync: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			isConst: [
 				{
 					access: 3,
 					min: 0,
@@ -18396,7 +18623,7 @@ module.exports = function() {
 					this._declare = false;
 				}
 			}
-			if(data.autotype) {
+			if(data.autotype || this._parent.isConst()) {
 				var type = data.type;
 				if(!type && data.init) {
 					type = data.init;
@@ -21532,8 +21759,11 @@ module.exports = function() {
 			if(this._data.statements) {
 				for(var __ks_0 = 0, __ks_1 = this._data.statements.length, statement; __ks_0 < __ks_1; ++__ks_0) {
 					statement = this._data.statements[__ks_0];
-					this._body.push(statement = $compile.statement(statement, this));
-					statement.analyse();
+					var __ks_2;
+					if(Type.isValue(__ks_2 = $compile.statement(statement, this)) ? (statement = __ks_2, true) : false) {
+						this._body.push(statement);
+						statement.analyse();
+					}
 				}
 			}
 		},
@@ -26289,6 +26519,168 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
+	var AssignmentOperatorNonExistential = Helper.class({
+		$name: "AssignmentOperatorNonExistential",
+		$extends: AssignmentOperatorExpression,
+		__ks_init: function() {
+			AssignmentOperatorExpression.prototype.__ks_init.call(this);
+		},
+		__ks_cons: function(args) {
+			AssignmentOperatorExpression.prototype.__ks_cons.call(this, args);
+		},
+		__ks_func_acquireReusable_0: function(acquire) {
+			if(acquire === undefined || acquire === null) {
+				throw new Error("Missing parameter 'acquire'");
+			}
+			this._right.acquireReusable(true);
+		},
+		acquireReusable: function() {
+			if(arguments.length === 1) {
+				return AssignmentOperatorNonExistential.prototype.__ks_func_acquireReusable_0.apply(this, arguments);
+			}
+			else if(AssignmentOperatorExpression.prototype.acquireReusable) {
+				return AssignmentOperatorExpression.prototype.acquireReusable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_releaseReusable_0: function() {
+			this._right.releaseReusable();
+		},
+		releaseReusable: function() {
+			if(arguments.length === 0) {
+				return AssignmentOperatorNonExistential.prototype.__ks_func_releaseReusable_0.apply(this);
+			}
+			else if(AssignmentOperatorExpression.prototype.releaseReusable) {
+				return AssignmentOperatorExpression.prototype.releaseReusable.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_isAssignable_0: function() {
+			return false;
+		},
+		isAssignable: function() {
+			if(arguments.length === 0) {
+				return AssignmentOperatorNonExistential.prototype.__ks_func_isAssignable_0.apply(this);
+			}
+			return AssignmentOperatorExpression.prototype.isAssignable.apply(this, arguments);
+		},
+		__ks_func_toFragments_0: function(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			if(this._right.isNullable()) {
+				fragments.wrapNullable(this._right).code(" && ").code($runtime.type(this) + ".isValue(", this._data.operator).compileReusable(this._right).code(")", this._data.operator);
+			}
+			else {
+				fragments.code($runtime.type(this) + ".isValue(", this._data.operator).compileReusable(this._right).code(")", this._data.operator);
+			}
+			fragments.code(" ? ").compile(this._left).code($equals).wrap(this._right).code(" : undefined");
+		},
+		toFragments: function() {
+			if(arguments.length === 2) {
+				return AssignmentOperatorNonExistential.prototype.__ks_func_toFragments_0.apply(this, arguments);
+			}
+			else if(AssignmentOperatorExpression.prototype.toFragments) {
+				return AssignmentOperatorExpression.prototype.toFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_toBooleanFragments_0: function(fragments, mode) {
+			if(fragments === undefined || fragments === null) {
+				throw new Error("Missing parameter 'fragments'");
+			}
+			if(mode === undefined || mode === null) {
+				throw new Error("Missing parameter 'mode'");
+			}
+			if(this._right.isNullable()) {
+				fragments.wrapNullable(this._right).code(" && ").code($runtime.type(this) + ".isValue(", this._data.operator).compileReusable(this._right).code(")", this._data.operator);
+			}
+			else {
+				fragments.code($runtime.type(this) + ".isValue(", this._data.operator).compileReusable(this._right).code(")", this._data.operator);
+			}
+			fragments.code(" ? (").compile(this._left).code($equals).wrap(this._right).code(", false) : true");
+		},
+		toBooleanFragments: function() {
+			if(arguments.length === 2) {
+				return AssignmentOperatorNonExistential.prototype.__ks_func_toBooleanFragments_0.apply(this, arguments);
+			}
+			else if(AssignmentOperatorExpression.prototype.toBooleanFragments) {
+				return AssignmentOperatorExpression.prototype.toBooleanFragments.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		}
+	});
+	AssignmentOperatorNonExistential.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		destructors: 0,
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			acquireReusable: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			],
+			releaseReusable: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			isAssignable: [
+				{
+					access: 3,
+					min: 0,
+					max: 0,
+					parameters: []
+				}
+			],
+			toFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
+			toBooleanFragments: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
 	var AssignmentOperatorNullCoalescing = Helper.class({
 		$name: "AssignmentOperatorNullCoalescing",
 		$extends: AssignmentOperatorExpression,
@@ -29717,8 +30109,13 @@ module.exports = function() {
 			if(parent === undefined || parent === null) {
 				throw new Error("Missing parameter 'parent'");
 			}
-			var clazz = Type.isValue($statements[data.kind]) ? $statements[data.kind] : $statements.default;
-			return new clazz(data, parent);
+			if($attribute.conditionalCompilation(data, parent.module()._compiler._target)) {
+				var clazz = Type.isValue($statements[data.kind]) ? $statements[data.kind] : $statements.default;
+				return new clazz(data, parent);
+			}
+			else {
+				return null;
+			}
 		}
 	};
 	var $assignmentOperators = {};
@@ -29732,6 +30129,7 @@ module.exports = function() {
 	$assignmentOperators[AssignmentOperator.Existential] = AssignmentOperatorExistential;
 	$assignmentOperators[AssignmentOperator.Modulo] = AssignmentOperatorModulo;
 	$assignmentOperators[AssignmentOperator.Multiplication] = AssignmentOperatorMultiplication;
+	$assignmentOperators[AssignmentOperator.NonExistential] = AssignmentOperatorNonExistential;
 	$assignmentOperators[AssignmentOperator.NullCoalescing] = AssignmentOperatorNullCoalescing;
 	$assignmentOperators[AssignmentOperator.Subtraction] = AssignmentOperatorSubtraction;
 	var $binaryOperators = {};
@@ -29902,29 +30300,86 @@ module.exports = function() {
 	$unaryOperators[UnaryOperator.Negation] = UnaryOperatorNegation;
 	$unaryOperators[UnaryOperator.Negative] = UnaryOperatorNegative;
 	var $targets = {
-		es5: {
-			format: {
-				classes: "es5",
-				destructuring: "es5",
-				functions: "es5",
-				parameters: "es5",
-				spreads: "es5",
-				variables: "es5"
-			}
-		},
-		es6: {
-			format: {
-				classes: "es6",
-				destructuring: "es6",
-				functions: "es6",
-				parameters: "es6",
-				spreads: "es6",
-				variables: "es6"
+		ecma: {
+			"5": {
+				format: {
+					classes: "es5",
+					destructuring: "es5",
+					functions: "es5",
+					parameters: "es5",
+					spreads: "es5",
+					variables: "es5"
+				}
+			},
+			"6": {
+				format: {
+					classes: "es6",
+					destructuring: "es6",
+					functions: "es6",
+					parameters: "es6",
+					spreads: "es6",
+					variables: "es6"
+				}
 			}
 		}
 	};
 	var Compiler = Helper.class({
 		$name: "Compiler",
+		$static: {
+			__ks_sttc_registerTarget_0: function(target, options) {
+				if(target === undefined || target === null) {
+					throw new Error("Missing parameter 'target'");
+				}
+				if(options === undefined || options === null) {
+					throw new Error("Missing parameter 'options'");
+				}
+				var __ks_0;
+				if(Type.isValue(__ks_0 = $targetRegex.exec(target)) ? (target = __ks_0, false) : true) {
+					throw new Error("Invalid target syntax: " + target);
+				}
+				if(!Type.isValue($targets[target[1]])) {
+					$targets[target[1]] = {};
+				}
+				$targets[target[1]][target[2]] = options;
+			},
+			registerTarget: function() {
+				if(arguments.length === 2) {
+					return Compiler.__ks_sttc_registerTarget_0.apply(this, arguments);
+				}
+				throw new Error("Wrong number of arguments");
+			},
+			__ks_sttc_registerTargetAlias_0: function(target, alias) {
+				if(target === undefined || target === null) {
+					throw new Error("Missing parameter 'target'");
+				}
+				if(alias === undefined || alias === null) {
+					throw new Error("Missing parameter 'alias'");
+				}
+				var __ks_0;
+				if(Type.isValue(__ks_0 = $targetRegex.exec(target)) ? (target = __ks_0, false) : true) {
+					throw new Error("Invalid target syntax: " + target);
+				}
+				if(Type.isValue(__ks_0 = $targetRegex.exec(alias)) ? (alias = __ks_0, false) : true) {
+					throw new Error("Invalid target syntax: " + alias);
+				}
+				if(!Type.isValue($targets[alias[1]])) {
+					throw new Error("Undefined target '" + alias[1] + "'");
+				}
+				else if(!Type.isValue($targets[alias[1]][alias[2]])) {
+					throw new Error("Undefined target's version '" + alias[2] + "'");
+				}
+				if(!Type.isValue($targets[target[1]])) {
+					$targets[target[1]] = {};
+				}
+				$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]];
+			},
+			registerTargetAlias: function() {
+				if(arguments.length === 2) {
+					return Compiler.__ks_sttc_registerTargetAlias_0.apply(this, arguments);
+				}
+				throw new Error("Wrong number of arguments");
+			}
+		},
 		$create: function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
@@ -29952,7 +30407,7 @@ module.exports = function() {
 			this._file = file;
 			this._hashes = hashes;
 			this._options = __ks_Object._cm_merge({
-				target: "es6",
+				target: "ecma-v6",
 				register: true,
 				config: {
 					header: true,
@@ -29967,7 +30422,22 @@ module.exports = function() {
 					}
 				}
 			}, options);
-			this._options.config = __ks_Object._cm_defaults($targets[this._options.target], this._options.config);
+			var target, __ks_0;
+			if(Type.isValue(__ks_0 = $targetRegex.exec(this._options.target)) ? (target = __ks_0, false) : true) {
+				throw new Error("Invalid target syntax: " + this._options.target);
+			}
+			this._target = {
+				name: target[1],
+				version: target[2]
+			};
+			if(!Type.isValue($targets[this._target.name])) {
+				throw new Error("Undefined target '" + this._target.name + "'");
+			}
+			else if(!Type.isValue($targets[this._target.name][this._target.version])) {
+				throw new Error("Undefined target's version '" + this._target.version + "'");
+			}
+			this._options.target = this._target.name + "-v" + this._target.version;
+			this._options.config = __ks_Object._cm_defaults($targets[this._target.name][this._target.version], this._options.config);
 		},
 		__ks_cons: function(args) {
 			if(args.length >= 1 && args.length <= 3) {
@@ -30140,6 +30610,10 @@ module.exports = function() {
 			_options: {
 				access: 1,
 				type: "Any"
+			},
+			_target: {
+				access: 1,
+				type: "Any"
 			}
 		},
 		classVariables: {},
@@ -30235,7 +30709,36 @@ module.exports = function() {
 				}
 			]
 		},
-		classMethods: {}
+		classMethods: {
+			registerTarget: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			],
+			registerTargetAlias: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
+				}
+			]
+		}
 	};
 	Module.__ks_reflect.instanceVariables._compiler.type = Compiler;
 	function compileFile() {

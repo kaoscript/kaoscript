@@ -49,17 +49,6 @@ class ForInStatement extends Statement {
 			this._index = $compile.expression(data.index, this)
 		}
 		
-		if data.until {
-			this._until = $compile.expression(data.until, this)
-		}
-		else if data.while {
-			this._while = $compile.expression(data.while, this)
-		}
-		
-		if data.when {
-			this._when = $compile.expression(data.when, this)
-		}
-		
 		if this._value.isEntangled() {
 			this._valueName = this.greatScope().acquireTempName()
 			
@@ -72,6 +61,17 @@ class ForInStatement extends Statement {
 		
 		if !data.desc {
 			this._boundName = this._scope.acquireTempName()
+		}
+		
+		if data.until {
+			this._until = $compile.expression(data.until, this)
+		}
+		else if data.while {
+			this._while = $compile.expression(data.while, this)
+		}
+		
+		if data.when {
+			this._when = $compile.expression(data.when, this)
 		}
 		
 		this._body = $compile.expression($block(data.body), this)

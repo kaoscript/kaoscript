@@ -29,8 +29,8 @@ class IncludeDeclaration extends Statement {
 						throw error
 					}
 					
-					for statement in data.body {
-						this._statements.push(statement = $compile.statement(statement, declarator))
+					for statement in data.body when statement ?= $compile.statement(statement, declarator) {
+						this._statements.push(statement)
 						
 						statement.analyse()
 					}
@@ -69,8 +69,8 @@ class IncludeDeclaration extends Statement {
 					throw error
 				}
 				
-				for statement in data.body {
-					this._statements.push(statement = $compile.statement(statement, declarator))
+				for statement in data.body when statement ?= $compile.statement(statement, declarator) {
+					this._statements.push(statement)
 					
 					statement.analyse()
 				}
@@ -121,8 +121,8 @@ class IncludeOnceDeclaration extends Statement {
 							throw error
 						}
 						
-						for statement in data.body {
-							this._statements.push(statement = $compile.statement(statement, declarator))
+						for statement in data.body when statement ?= $compile.statement(statement, declarator) {
+							this._statements.push(statement)
 							
 							statement.analyse()
 						}
@@ -163,8 +163,8 @@ class IncludeOnceDeclaration extends Statement {
 						throw error
 					}
 					
-					for statement in data.body {
-						this._statements.push(statement = $compile.statement(statement, declarator))
+					for statement in data.body when statement ?= $compile.statement(statement, declarator) {
+						this._statements.push(statement)
 						
 						statement.analyse()
 					}

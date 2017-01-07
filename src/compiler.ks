@@ -95,6 +95,8 @@ const $operator = { // {{{
 	}
 } // }}}
 
+const $targetRegex = /^(\w+)-v(\d+)(?:\.\d+)?(?:\.\d+)?$/
+
 const $types = { // {{{
 	any: 'Any'
 	array: 'Array'
@@ -128,7 +130,7 @@ const $attribute = {
 	apply(data, options) { // {{{
 		let nc = true
 		
-		if data.attributes && data.attributes.length {
+		if data.attributes?.length > 0 {
 			for attr in data.attributes {
 				if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cfg' {
 					if nc {
@@ -137,19 +139,72 @@ const $attribute = {
 						nc = false
 					}
 					
-					$attribute.expression(attr.declaration, options)
+					$attribute.configure(attr.declaration, options)
 				}
 			}
 		}
 		
 		return options
 	} // }}}
-	expression(attr, options) { // {{{
+	cc(data, target) { // {{{
+		if data.kind == Kind::AttributeExpression {
+			if data.name.name == 'all' {
+				for arg in data.arguments when !$attribute.cc(arg, target) {
+					return false
+				}
+				
+				return true
+			}
+			else if data.name.name == 'any' {
+				for arg in data.arguments when $attribute.cc(arg, target) {
+					return true
+				}
+				
+				return false
+			}
+			else {
+				console.error(data)
+				$throw('Not Implemented')
+			}
+		}
+		else if data.kind == Kind::AttributeOperator {
+			if data.name.name == 'target_version' {
+				return target.version == data.value.value
+			}
+			else {
+				console.error(data)
+				$throw('Not Implemented')
+			}
+		}
+		else if data.kind == Kind::Identifier {
+			return target.name == data.name
+		}
+		else {
+			console.error(data)
+			$throw('Not Implemented')
+		}
+	} // }}}
+	conditionalCompilation(data, target) { // {{{
+		if data.attributes?.length > 0 {
+			for attr in data.attributes {
+				if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cc' {
+					if attr.declaration.arguments.length != 1 {
+						$throw(`Expected 1 argument for cc() at line \(data.start.line)`)
+					}
+					
+					return $attribute.cc(attr.declaration.arguments[0], target)
+				}
+			}
+		}
+		
+		return true
+	} // }}}
+	configure(attr, options) { // {{{
 		for arg in attr.arguments {
 			if arg.kind == Kind::AttributeExpression {
 				options[arg.name.name] ??= {}
 				
-				$attribute.expression(arg, options[arg.name.name])
+				$attribute.configure(arg, options[arg.name.name])
 			}
 			else if arg.kind == Kind::AttributeOperator {
 				options[arg.name.name] = arg.value.value
@@ -457,6 +512,11 @@ const $type = {
 					}
 				}
 			}
+			Kind::CallExpression => {
+				if (variable ?= $variable.fromAST(data, node)) && variable.type? {
+					return variable.type
+				}
+			}
 			Kind::CreateExpression => {
 				return {
 					typeName: data.class
@@ -475,6 +535,11 @@ const $type = {
 						kind: Kind::Identifier
 						name: $literalTypes[data.value] || 'String'
 					}
+				}
+			}
+			Kind::MemberExpression => {
+				if (variable ?= $variable.fromAST(data, node)) && variable.type? {
+					return variable.type
 				}
 			}
 			Kind::NumericExpression => {
@@ -1169,7 +1234,7 @@ class AbstractNode {
 		_scope = null
 	}
 	$create(@data, @parent, @scope = parent.scope()) { // {{{
-		this._options = $attribute.apply(data, parent._options)
+		this._options = parent._options
 	} // }}}
 	directory() => this._parent.directory()
 	file() => this._parent.file()
@@ -1281,9 +1346,14 @@ const $compile = {
 		return expression
 	} // }}}
 	statement(data, parent) { // {{{
-		let clazz = $statements[data.kind] ?? $statements.default
-		
-		return new clazz(data, parent)
+		if $attribute.conditionalCompilation(data, parent.module()._compiler._target) {
+			let clazz = $statements[data.kind] ?? $statements.default
+			
+			return new clazz(data, parent)
+		}
+		else {
+			return null
+		}
 	} // }}}
 }
 
@@ -1298,6 +1368,7 @@ const $assignmentOperators = {
 	`\(AssignmentOperator::Existential)`		: AssignmentOperatorExistential
 	`\(AssignmentOperator::Modulo)`				: AssignmentOperatorModulo
 	`\(AssignmentOperator::Multiplication)`		: AssignmentOperatorMultiplication
+	`\(AssignmentOperator::NonExistential)`		: AssignmentOperatorNonExistential
 	`\(AssignmentOperator::NullCoalescing)`		: AssignmentOperatorNullCoalescing
 	`\(AssignmentOperator::Subtraction)`		: AssignmentOperatorSubtraction
 }
@@ -1451,24 +1522,26 @@ const $unaryOperators = {
 }
 
 const $targets = {
-	es5: { // {{{
-		format: {
-			classes: 'es5'
-			destructuring: 'es5'
-			functions: 'es5'
-			parameters: 'es5'
-			spreads: 'es5'
-			variables: 'es5'
+	ecma: { // {{{
+		'5': {
+			format: {
+				classes: 'es5'
+				destructuring: 'es5'
+				functions: 'es5'
+				parameters: 'es5'
+				spreads: 'es5'
+				variables: 'es5'
+			}
 		}
-	} // }}}
-	es6: { // {{{
-		format: {
-			classes: 'es6'
-			destructuring: 'es6'
-			functions: 'es6'
-			parameters: 'es6'
-			spreads: 'es6'
-			variables: 'es6'
+		'6': {
+			format: {
+				classes: 'es6'
+				destructuring: 'es6'
+				functions: 'es6'
+				parameters: 'es6'
+				spreads: 'es6'
+				variables: 'es6'
+			}
 		}
 	} // }}}
 }
@@ -1480,10 +1553,39 @@ export class Compiler {
 		_hashes
 		_module
 		_options
+		_target
+	}
+	static {
+		registerTarget(target, options) { // {{{
+			if target !?= $targetRegex.exec(target) {
+				throw new Error(`Invalid target syntax: \(target)`)
+			}
+			
+			$targets[target[1]] ??= {}
+			$targets[target[1]][target[2]] = options
+		} // }}}
+		registerTargetAlias(target, alias) { // {{{
+			if target !?= $targetRegex.exec(target) {
+				throw new Error(`Invalid target syntax: \(target)`)
+			}
+			if alias !?= $targetRegex.exec(alias) {
+				throw new Error(`Invalid target syntax: \(alias)`)
+			}
+			
+			if !?$targets[alias[1]] {
+				throw new Error(`Undefined target '\(alias[1])'`)
+			}
+			else if !?$targets[alias[1]][alias[2]] {
+				throw new Error(`Undefined target's version '\(alias[2])'`)
+			}
+			
+			$targets[target[1]] ??= {}
+			$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]]
+		} // }}}
 	}
 	$create(@file, options?, @hashes = {}) { // {{{
-		this._options = Object.merge({
-			target: 'es6'
+		@options = Object.merge({
+			target: 'ecma-v6'
 			register: true
 			config: {
 				header: true
@@ -1499,7 +1601,25 @@ export class Compiler {
 			}
 		}, options)
 		
-		this._options.config = Object.defaults($targets[this._options.target], this._options.config)
+		if target !?= $targetRegex.exec(@options.target) {
+			throw new Error(`Invalid target syntax: \(@options.target)`)
+		}
+		
+		@target = {
+			name: target[1],
+			version: target[2]
+		}
+		
+		if !?$targets[@target.name] {
+			throw new Error(`Undefined target '\(@target.name)'`)
+		}
+		else if !?$targets[@target.name][@target.version] {
+			throw new Error(`Undefined target's version '\(@target.version)'`)
+		}
+		
+		@options.target = `\(@target.name)-v\(@target.version)`
+		
+		@options.config = Object.defaults($targets[@target.name][@target.version], @options.config)
 	} // }}}
 	compile(data?) { // {{{
 		//console.time('parse')

@@ -5,9 +5,11 @@ class BlockExpression extends Expression {
 	analyse() { // {{{
 		if this._data.statements {
 			for statement in this._data.statements {
-				this._body.push(statement = $compile.statement(statement, this))
-				
-				statement.analyse()
+				if statement ?= $compile.statement(statement, this) {
+					this._body.push(statement)
+					
+					statement.analyse()
+				}
 			}
 		}
 	} // }}}

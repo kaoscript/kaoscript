@@ -25,7 +25,8 @@ class VariableDeclaration extends Statement {
 			declarator.fuse()
 		}
 	} // }}}
-	isAsync() => this._async
+	isAsync() => @async
+	isConst() => @data.modifiers.kind == VariableModifier::Const
 	modifier(data) { // {{{
 		if data.name.kind == Kind::ArrayBinding || data.name.kind == Kind::ObjectBinding || this._options.format.variables == 'es5' {
 			return $code('var')
@@ -152,17 +153,17 @@ class VariableDeclarator extends AbstractNode {
 			}
 		}
 		
-		if data.autotype {
+		if data.autotype || @parent.isConst() {
 			let type = data.type
 			
 			if !type && data.init {
 				type = data.init
 			}
 			
-			$variable.define(this, this._scope, data.name, $variable.kind(data.type), type)
+			$variable.define(this, @scope, data.name, $variable.kind(data.type), type)
 		}
 		else {
-			$variable.define(this, this._scope, data.name, $variable.kind(data.type), data.type)
+			$variable.define(this, @scope, data.name, $variable.kind(data.type), data.type)
 		}
 		
 		this._name = $compile.expression(data.name, this)
