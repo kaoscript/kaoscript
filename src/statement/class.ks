@@ -11,8 +11,36 @@ enum HelperTypeKind { // {{{
 } // }}}
 
 const $class = {
+	abstractMethod(node, fragments, statement, signature, parameters, reflect, name) { // {{{
+		if !(reflect.abstractMethods[name] is Array) {
+			reflect.abstractMethods[name] = []
+		}
+		let index = reflect.abstractMethods[name].length
+		
+		reflect.abstractMethods[name].push({
+			signature: signature
+			parameters: parameters
+		})
+	} // }}}
+	areAbstractMethodsImplemented(variable, parent, scope) { // {{{
+		for name, methods of parent.abstractMethods {
+			return false unless ?variable.instanceMethods[name]
+			
+			for method in methods {
+				return false unless $signature.match(method, variable.instanceMethods[name])
+			}
+		}
+		
+		if parent.extends? {
+			return $class.areAbstractMethodsImplemented(variable, scope.getVariable(parent.extends), scope)
+		}
+		else {
+			return true
+		}
+	} // }}}
 	continuous(node, fragments) { // {{{
 		let reflect = {
+			abstract: node._abstract
 			inits: 0
 			constructors: []
 			destructors: 0
@@ -20,6 +48,7 @@ const $class = {
 			classVariables: node._classVariables
 			instanceMethods: {}
 			classMethods: {}
+			abstractMethods: {}
 		}
 		
 		let noinit = Type.isEmptyObject(node._instanceVariables)
@@ -127,6 +156,12 @@ const $class = {
 				$helper.instanceMethod(node, clazz, reflect, name)
 			}
 			
+			for name, methods of node._abstractMethods {
+				for method in methods {
+					$class.abstractMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+				}
+			}
+			
 			clazz.done()
 			line.code(')').done()
 		}
@@ -212,6 +247,12 @@ const $class = {
 				}
 				
 				$helper.instanceMethod(node, clazz, reflect, name)
+			}
+			
+			for name, methods of node._abstractMethods {
+				for method in methods {
+					$class.abstractMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+				}
 			}
 			
 			for name, methods of node._classMethods {
@@ -308,6 +349,7 @@ const $class = {
 	} // }}}
 	sealed(node, fragments) { // {{{
 		let reflect = {
+			abstract: node._abstract
 			sealed: true
 			inits: 0
 			constructors: []
@@ -316,6 +358,7 @@ const $class = {
 			classVariables: node._classVariables
 			instanceMethods: {}
 			classMethods: {}
+			abstractMethods: {}
 		}
 		
 		let noinit = Type.isEmptyObject(node._instanceVariables)
@@ -414,6 +457,12 @@ const $class = {
 				$helper.instanceMethod(node, clazz, reflect, name)
 			}
 			
+			for name, methods of node._abstractMethods {
+				for method in methods {
+					$class.abstractMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+				}
+			}
+			
 			clazz.done()
 			line.code(')').done()
 		}
@@ -488,6 +537,12 @@ const $class = {
 				}
 				
 				$helper.instanceMethod(node, clazz, reflect, name)
+			}
+			
+			for name, methods of node._abstractMethods {
+				for method in methods {
+					$class.abstractMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+				}
 			}
 			
 			for name, methods of node._classMethods {
@@ -987,6 +1042,10 @@ const $helper = {
 			object.line('sealed: true')
 		}
 		
+		if reflect.abstract {
+			object.line('abstract: true')
+		}
+		
 		object.newLine().code('inits: ' + reflect.inits)
 		
 		a = object.newLine().code('constructors: ').newArray()
@@ -1223,6 +1282,8 @@ const $method = {
 
 class ClassDeclaration extends Statement {
 	private {
+		_abstract 			= false
+		_abstractMethods	= {}
 		_classMethods		= {}
 		_classVariables		= {}
 		_constructors		= []
@@ -1230,14 +1291,14 @@ class ClassDeclaration extends Statement {
 		_destructor			= null
 		_destructorScope
 		_es5				= false
-		_extends
+		_extends			= false
 		_extendsName
 		_extendsVariable
-		_sealed 			= false
 		_instanceMethods	= {}
 		_instanceVariables	= {}
 		_instanceVariableScope
 		_name
+		_sealed 			= false
 		_variable
 	}
 	$create(data, parent) { // {{{
@@ -1313,8 +1374,10 @@ class ClassDeclaration extends Statement {
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
 		
-		if this._extends = data.extends? {
-			if !(this._extendsVariable ?= this._scope.getVariable(data.extends.name)) {
+		if data.extends? {
+			@extends = true
+			
+			if this._extendsVariable !?= this._scope.getVariable(data.extends.name) {
 				$throw(`Undefined class \(data.extends.name) at line \(data.extends.start.line)`, this)
 			}
 			
@@ -1370,6 +1433,17 @@ class ClassDeclaration extends Statement {
 				kind: Kind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
+		}
+		
+		for modifier in data.modifiers {
+			if modifier.kind == ClassModifier::Abstract {
+				@variable.abstract = @abstract = true
+				
+				@variable.abstractMethods = {}
+			}
+			else if modifier.kind == ClassModifier::Sealed {
+				@sealed = true
+			}
 		}
 		
 		let signature, method
@@ -1475,28 +1549,45 @@ class ClassDeclaration extends Statement {
 						}
 						
 						if instance {
-							if !(this._instanceMethods[member.name.name] is Array) {
-								this._instanceMethods[member.name.name] = []
-								this._variable.instanceMethods[member.name.name] = []
+							if method.statement.isAbstract() {
+								if @abstract {
+									if !(@abstractMethods[member.name.name] is Array) {
+										@abstractMethods[member.name.name] = []
+										@variable.abstractMethods[member.name.name] = []
+									}
+									
+									@abstractMethods[member.name.name].push(method)
+									
+									@variable.abstractMethods[member.name.name].push(signature)
+								}
+								else {
+									$throw(`Can't have abstract method in non-abstract class at line \(member.start.line)`, this)
+								}
+							}
+							else {
+								if !(@instanceMethods[member.name.name] is Array) {
+									@instanceMethods[member.name.name] = []
+									@variable.instanceMethods[member.name.name] = []
+								}
+								
+								@instanceMethods[member.name.name].push(method)
+								
+								@variable.instanceMethods[member.name.name].push(signature)
 							}
 							
-							this._instanceMethods[member.name.name].push(method)
-							
-							this._variable.instanceMethods[member.name.name].push(signature)
-							
-							this._scope = scope
+							@scope = scope
 						}
 						else {
 							method.statement.instance(false)
 							
-							if !(this._classMethods[member.name.name] is Array) {
-								this._classMethods[member.name.name] = []
-								this._variable.classMethods[member.name.name] = []
+							if !(@classMethods[member.name.name] is Array) {
+								@classMethods[member.name.name] = []
+								@variable.classMethods[member.name.name] = []
 							}
 							
-							this._classMethods[member.name.name].push(method)
+							@classMethods[member.name.name].push(method)
 							
-							this._variable.classMethods[member.name.name].push(signature)
+							@variable.classMethods[member.name.name].push(signature)
 						}
 					}
 				}
@@ -1506,7 +1597,9 @@ class ClassDeclaration extends Statement {
 			}
 		}
 		
-		this._sealed = !!data.sealed
+		if @extends && !@abstract && !$class.areAbstractMethodsImplemented(@variable, @extendsVariable, @scope) {
+			$throw(`Not implemented abstract methods for class '\(@name)' at line \(@data.start.line)`, this)
+		}
 		
 		if this._sealed {
 			this._variable.sealed = {
@@ -1703,6 +1796,15 @@ class MethodDeclaration extends Statement {
 		this.compile(this._statements)
 	} // }}}
 	instance(@instance) => this
+	isAbstract() { // {{{
+		for modifier in @data.modifiers {
+			if modifier.kind == MethodModifier::Abstract {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
 	isInstanceMethod(name, variable) { // {{{
 		return true if variable.instanceMethods[name]?['1']?
 		

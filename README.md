@@ -459,7 +459,6 @@ Todo
 - full support of generics
 - full support of enum
 - double dot (Dart)
-- Exception management (Java)
 - boolean conditions
 - macro
 - full support of attributes

@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.6.0
+ * Version 0.7.0
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -277,6 +277,22 @@ const $runtime = {
 }
 
 const $signature = {
+	match(signature, methods) { // {{{
+		for method in methods {
+			return true if method.min == signature.min && method.max == signature.max && $signature.isMatchingParameters(method.parameters, signature.parameters)
+		}
+		
+		return false
+	} // }}}
+	isMatchingParameters(p1, p2) { // {{{
+		return false if p1.length != p2.length
+		
+		for i from 0 til p1.length {
+			return true if p1[i].min == p2[i].min && p1[i].max == p2[i].max && p1[i].type == p2[i].type
+		}
+		
+		return false
+	} // }}}
 	type(type?, scope) { // {{{
 		if type {
 			if type.typeName {
