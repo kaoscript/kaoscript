@@ -23,7 +23,6 @@ module.exports = function() {
 			}
 		},
 		__ks_func_draw_0: function() {
-			throw new Error("Not Implemented");
 		},
 		draw: function() {
 			if(arguments.length === 0) {

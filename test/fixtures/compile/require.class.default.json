@@ -23,7 +23,8 @@
               "access": 3,
               "min": 0,
               "max": 0,
-              "parameters": []
+              "parameters": [],
+              "throws": []
             },
             "type": {
               "typeName": {
@@ -45,7 +46,8 @@
                   "min": 1,
                   "max": 1
                 }
-              ]
+              ],
+              "throws": []
             }
           }
         ]

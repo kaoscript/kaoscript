@@ -5,6 +5,7 @@
       "name": "disks",
       "kind": 3,
       "new": true,
+      "throws": [],
       "async": true
     }
   }

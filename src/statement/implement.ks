@@ -107,72 +107,71 @@ class ImplementClassMethodDeclaration extends Statement {
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
-		let variable = this._variable
+		let name = @data.name.name
 		
-		if this._isContructor = data.name.kind == Kind::Identifier && $method.isConstructor(data.name.name, variable) {
+		if @isContructor = @data.name.kind == Kind::Identifier && $method.isConstructor(name, @variable) {
 			$throw('Not Implemented', this)
 		}
-		else if this._isDestructor = data.name.kind == Kind::Identifier && $method.isDestructor(data.name.name, variable) {
+		else if @isDestructor = @data.name.kind == Kind::Identifier && $method.isDestructor(name, @variable) {
 			$throw('Not Implemented', this)
 		}
 		else {
-			for i from 0 til data.modifiers.length while this._instance {
-				if data.modifiers[i].kind == MemberModifier::Static {
-					this._instance = false
+			for i from 0 til @data.modifiers.length while @instance {
+				if @data.modifiers[i].kind == MemberModifier::Static {
+					@instance = false
 				}
 			}
 			
-			if variable.sealed {
-				if this._instance {
-					if variable.sealed.instanceMethods[data.name.name] != true {
-						variable.sealed.instanceMethods[data.name.name] = true
+			if @variable.sealed? {
+				if @instance {
+					if @variable.sealed.instanceMethods[name] != true {
+						@variable.sealed.instanceMethods[name] = true
 					}
 				}
 				else {
-					if variable.sealed.classMethods[data.name.name] != true {
-						variable.sealed.classMethods[data.name.name] = true
+					if @variable.sealed.classMethods[name] != true {
+						@variable.sealed.classMethods[name] = true
 					}
 				}
 			}
 			
-			if data.name.kind == Kind::Identifier {
+			if @data.name.kind == Kind::Identifier {
 				let method = {
 					kind: Kind::MethodDeclaration
-					name: data.name.name
-					signature: $method.signature(data, this)
+					name: name
+					signature: $method.signature(@data, this)
 				}
 				
-				method.type = $type.type(data.type, this._scope, this) if data.type
+				method.type = $type.type(@data.type, @scope, this) if @data.type
 				
-				if this._instance {
-					if !(variable.instanceMethods[data.name.name] is Array) {
-						variable.instanceMethods[data.name.name] = []
+				if @instance {
+					if !(@variable.instanceMethods[name] is Array) {
+						@variable.instanceMethods[name] = []
 					}
 					
-					variable.instanceMethods[data.name.name].push(method)
+					@variable.instanceMethods[name].push(method)
 				}
 				else {
-					if !(variable.classMethods[data.name.name] is Array) {
-						variable.classMethods[data.name.name] = []
+					if !(@variable.classMethods[name] is Array) {
+						@variable.classMethods[name] = []
 					}
 					
-					variable.classMethods[data.name.name].push(method)
+					@variable.classMethods[name].push(method)
 				}
 			}
-			else if data.name.kind == Kind::TemplateExpression {
-				this._name = $compile.expression(data.name, this)
+			else if @data.name.kind == Kind::TemplateExpression {
+				@name = $compile.expression(@data.name, this)
 			}
 		}
 		
-		$variable.define(this, this._scope, {
+		$variable.define(this, @scope, {
 			kind: Kind::Identifier
 			name: 'this'
-		}, VariableKind::Variable, $type.reference(variable.name))
+		}, VariableKind::Variable, $type.reference(@variable.name))
 		
-		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
+		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
 		
-		this._statements = [$compile.statement(statement, this) for statement in $body(data.body)]
+		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
 	} // }}}
 	fuse() { // {{{
 		this.compile(this._parameters)

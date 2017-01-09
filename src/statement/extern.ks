@@ -56,22 +56,33 @@ class ExternDeclaration extends Statement {
 		_lines = []
 	}
 	analyse() { // {{{
-		let data = this._data
-		
-		for declaration in data.declarations {
+		for declaration in @data.declarations {
 			switch declaration.kind {
 				Kind::ClassDeclaration => {
 					variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
-					if declaration.sealed {
-						variable.sealed = {
-							name: '__ks_' + variable.name.name
-							constructors: false
-							instanceMethods: {}
-							classMethods: {}
+					if declaration.extends? {
+						if !@scope.hasVariable(declaration.extends.name) {
+							$throw(`Undefined class \(declaration.extends.name) at line \(declaration.extends.start.line)`, this)
 						}
 						
-						this._lines.push('var ' + variable.sealed.name + ' = {}')
+						variable.extends = declaration.extends.name
+					}
+					
+					for modifier in declaration.modifiers {
+						if modifier.kind == ClassModifier::Abstract {
+							variable.abstract = true
+						}
+						else if modifier.kind == ClassModifier::Sealed {
+							variable.sealed = {
+								name: '__ks_' + variable.name.name
+								constructors: false
+								instanceMethods: {}
+								classMethods: {}
+							}
+							
+							@lines.push('var ' + variable.sealed.name + ' = {}')
+						}
 					}
 					
 					for i from 0 til declaration.members.length {
@@ -87,7 +98,7 @@ class ExternDeclaration extends Statement {
 							properties: {}
 						}
 						
-						this._lines.push('var ' + variable.sealed.name + ' = {}')
+						@lines.push('var ' + variable.sealed.name + ' = {}')
 					}
 				}
 				=> {
@@ -99,7 +110,7 @@ class ExternDeclaration extends Statement {
 	fuse() { // {{{
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		for line in this._lines {
+		for line in @lines {
 			fragments.line(line)
 		}
 	} // }}}

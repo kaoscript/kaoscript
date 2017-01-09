@@ -6,34 +6,42 @@ class TryStatement extends Statement {
 		_finalizer
 	}
 	analyse() { // {{{
-		let data = this._data
-		let scope = this._scope
+		let scope = @scope
 		
-		this._body = $compile.expression(data.body, this)
-		if data.catchClauses? {
-			for clause in data.catchClauses {
-				if clause.binding? {
-					$variable.define(this, this._scope = new Scope(scope), clause.binding, VariableKind::Variable)
+		if @data.catchClauses? {
+			let variable
+			for clause in @data.catchClauses {
+				if variable !?= $variable.fromAST(clause.type, this) {
+					$throw(`Undefined variable '\(clause.type.name)' at line \(clause.type.start.line)`, this)
+				}
+				else if variable.kind != VariableKind::Class {
+					$throw(`Error '\(clause.type.name)' must be a class (line \(clause.type.start.line))`, this)
 				}
 				
-				this._catchClauses.push({
+				if clause.binding? {
+					$variable.define(this, @scope = new Scope(scope), clause.binding, VariableKind::Variable)
+				}
+				
+				@catchClauses.push({
 					body: $compile.expression(clause.body, this)
 					type: $compile.expression(clause.type, this)
 				})
 			}
 		}
 		
-		if data.catchClause? {
-			if this._data.catchClause.binding? {
-				$variable.define(this, this._scope = new Scope(scope), data.catchClause.binding, VariableKind::Variable)
+		if @data.catchClause? {
+			if @data.catchClause.binding? {
+				$variable.define(this, @scope = new Scope(scope), @data.catchClause.binding, VariableKind::Variable)
 			}
 			
-			this._catchClause = $compile.expression(data.catchClause.body, this)
+			@catchClause = $compile.expression(@data.catchClause.body, this)
 		}
 		
-		this._scope = scope
+		@scope = scope
 		
-		this._finalizer = $compile.expression(data.finalizer, this) if data.finalizer?
+		@body = $compile.expression(@data.body, this)
+		
+		@finalizer = $compile.expression(@data.finalizer, this) if @data.finalizer?
 	} // }}}
 	fuse() { // {{{
 		this._body.fuse()
@@ -44,6 +52,17 @@ class TryStatement extends Statement {
 		
 		this._catchClause.fuse() if this._catchClause?
 		this._finalizer.fuse() if this._finalizer?
+	} // }}}
+	isConsumedError(name, variable): Boolean { // {{{
+		if @data.catchClauses.length > 0 {
+			for clause in @data.catchClauses {
+				return true if $error.isConsumed(clause.type.name, name, variable, @scope)
+			}
+			
+			return false
+		}
+		
+		return true
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let finalizer = null

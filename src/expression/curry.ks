@@ -22,7 +22,7 @@ class CurryExpression extends Expression {
 		}
 		
 		if this._data.scope.kind == ScopeModifier::This {
-			this._caller = $caller(this._callee, this)
+			this._caller = $call.caller(this._callee, this)
 		}
 		else if this._data.scope.kind == ScopeModifier::Argument {
 			this._callScope = $compile.expression(this._data.scope.value, this)

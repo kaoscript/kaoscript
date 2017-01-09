@@ -1,3 +1,5 @@
-extern Error, foo
+extern class Error
 
-throw new Error() unless foo
+func foo(x) ~ Error {
+	throw new Error() unless x
+}

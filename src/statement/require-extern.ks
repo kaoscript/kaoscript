@@ -12,12 +12,17 @@ class RequireOrExternDeclaration extends Statement {
 					
 					variable.requirement = declaration.name.name
 					
-					if declaration.sealed {
-						variable.sealed = {
-							name: '__ks_' + variable.name.name
-							constructors: false
-							instanceMethods: {}
-							classMethods: {}
+					for modifier in declaration.modifiers {
+						if modifier.kind == ClassModifier::Abstract {
+							variable.abstract = true
+						}
+						else if modifier.kind == ClassModifier::Sealed {
+							variable.sealed = {
+								name: '__ks_' + variable.name.name
+								constructors: false
+								instanceMethods: {}
+								classMethods: {}
+							}
 						}
 					}
 					

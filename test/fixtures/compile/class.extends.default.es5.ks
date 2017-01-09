@@ -1,6 +1,6 @@
 #![cfg(format(classes='es5', functions='es5'))]
 
-extern console, Error
+extern console
 
 class Shape {
 	private {
@@ -10,7 +10,6 @@ class Shape {
 	$create(@color)
 	
 	draw(): string {
-		throw new Error('Not Implemented')
 	}
 }
 

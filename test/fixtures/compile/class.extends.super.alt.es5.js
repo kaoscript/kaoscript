@@ -78,7 +78,7 @@ module.exports = function() {
 			Shape.prototype.__ks_cons.call(this, args);
 		},
 		__ks_func_draw_0: function() {
-			return Shape.prototype.draw.apply(this, []) + " I'm drawing a " + this._color + " rectangle.";
+			return Shape.prototype.pen.apply(this, []) + " I'm drawing a " + this._color + " rectangle.";
 		},
 		draw: function() {
 			if(arguments.length === 0) {

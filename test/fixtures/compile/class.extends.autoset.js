@@ -21,7 +21,6 @@ module.exports = function() {
 			}
 		}
 		__ks_func_draw_0() {
-			throw new Error("Not Implemented");
 		}
 		draw() {
 			if(arguments.length === 0) {

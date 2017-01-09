@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-extern RangeError
+extern class RangeError
 
 try {
 	console.log('foobar')

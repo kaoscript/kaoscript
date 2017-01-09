@@ -1194,6 +1194,7 @@ const $method = {
 			min: 0,
 			max: 0,
 			parameters: []
+			throws: data.throws ? [t.name for t in data.throws] : []
 		}
 		
 		if data.modifiers {
@@ -1731,7 +1732,7 @@ class ClassDeclaration extends Statement {
 								computed: false
 								nullable: false
 							}
-							property: member.name
+							property: data.callee.property
 							computed: false
 							nullable: false
 						}
@@ -1800,6 +1801,15 @@ class MethodDeclaration extends Statement {
 		for modifier in @data.modifiers {
 			if modifier.kind == MethodModifier::Abstract {
 				return true
+			}
+		}
+		
+		return false
+	} // }}}
+	isConsumedError(name, variable): Boolean { // {{{
+		if @data.throws.length > 0 {
+			for x in @data.throws {
+				return true if $error.isConsumed(x.name, name, variable, @scope)
 			}
 		}
 		

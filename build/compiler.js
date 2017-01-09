@@ -238,6 +238,29 @@ module.exports = function() {
 			value: data
 		}];
 	}
+	var $error = {
+		isConsumed: function(error, name, variable, scope) {
+			if(error === undefined || error === null) {
+				throw new Error("Missing parameter 'error'");
+			}
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(scope === undefined || scope === null) {
+				throw new Error("Missing parameter 'scope'");
+			}
+			if(error === name) {
+				return true;
+			}
+			if(Type.isValue(variable.extends)) {
+				return (error === name) || $error.isConsumed(error, variable.extends, scope.getVariable(variable.extends), scope);
+			}
+			return false;
+		}
+	};
 	function $identifier(name) {
 		if(name === undefined || name === null) {
 			throw new Error("Missing parameter 'name'");
@@ -317,6 +340,18 @@ module.exports = function() {
 				}
 			}
 			return false;
+		},
+		matchArguments: function(signature, arguments) {
+			if(signature === undefined || signature === null) {
+				throw new Error("Missing parameter 'signature'");
+			}
+			if(arguments === undefined || arguments === null) {
+				throw new Error("Missing parameter 'arguments'");
+			}
+			if(!((arguments.length >= signature.min) && (arguments.length <= signature.max))) {
+				return false;
+			}
+			return true;
 		},
 		isMatchingParameters: function(p1, p2) {
 			if(p1 === undefined || p1 === null) {
@@ -837,11 +872,15 @@ module.exports = function() {
 				else if(kind === VariableKind.TypeAlias) {
 					variable.type = $type.type(type, scope, node);
 				}
-				else if(((kind === VariableKind.Function) || (kind === VariableKind.Variable)) && type) {
+				else if(kind === VariableKind.Function) {
 					var __ks_0;
-					if(Type.isValue(__ks_0 = $type.type(type, scope, node)) ? (type = __ks_0, true) : false) {
-						variable.type = type;
+					if(Type.isValue(type)) {
+						Type.isValue(__ks_0 = $type.type(type, scope, node)) ? variable.type = __ks_0 : undefined;
 					}
+					variable.throws = [];
+				}
+				else if((kind === VariableKind.Variable) && Type.isValue(type)) {
+					Type.isValue(__ks_0 = $type.type(type, scope, node)) ? variable.type = __ks_0 : undefined;
 				}
 			}
 			return variable;
@@ -1476,6 +1515,21 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		},
+		__ks_func_isConsumedError_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			return this._parent.isConsumedError(name, variable);
+		},
+		isConsumedError: function() {
+			if(arguments.length === 2) {
+				return AbstractNode.prototype.__ks_func_isConsumedError_0.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
 		__ks_func_module_0: function() {
 			return this._parent.module();
 		},
@@ -1565,6 +1619,7 @@ module.exports = function() {
 		}
 	});
 	AbstractNode.__ks_reflect = {
+		abstract: true,
 		inits: 1,
 		constructors: [
 			{
@@ -1635,6 +1690,20 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			],
+			isConsumedError: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
 				}
 			],
 			module: [
@@ -6188,6 +6257,21 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		},
+		__ks_func_isConsumedError_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			return false;
+		},
+		isConsumedError: function() {
+			if(arguments.length === 2) {
+				return ModuleBlock.prototype.__ks_func_isConsumedError_0.apply(this, arguments);
+			}
+			return AbstractNode.prototype.isConsumedError.apply(this, arguments);
+		},
 		__ks_func_module_0: function() {
 			return this._module;
 		},
@@ -6275,6 +6359,20 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			],
+			isConsumedError: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
 				}
 			],
 			module: [
@@ -8211,7 +8309,10 @@ module.exports = function() {
 				access: MemberAccess.Public,
 				min: 0,
 				max: 0,
-				parameters: []
+				parameters: [],
+				throws: data.throws ? Helper.mapArray(data.throws, function(t) {
+					return t.name;
+				}) : []
 			};
 			if(data.modifiers) {
 				for(var __ks_0 = 0, __ks_1 = data.modifiers.length, modifier; __ks_0 < __ks_1; ++__ks_0) {
@@ -8752,7 +8853,7 @@ module.exports = function() {
 									computed: false,
 									nullable: false
 								},
-								property: member.name,
+								property: data.callee.property,
 								computed: false,
 								nullable: false
 							},
@@ -9052,6 +9153,32 @@ module.exports = function() {
 			}
 			throw new Error("Wrong number of arguments");
 		},
+		__ks_func_isConsumedError_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(this._data.throws.length > 0) {
+				for(var __ks_0 = 0, __ks_1 = this._data.throws.length, x; __ks_0 < __ks_1; ++__ks_0) {
+					x = this._data.throws[__ks_0];
+					if($error.isConsumed(x.name, name, variable, this._scope)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
+		isConsumedError: function() {
+			if(arguments.length === 2) {
+				return MethodDeclaration.prototype.__ks_func_isConsumedError_0.apply(this, arguments);
+			}
+			else if(Statement.prototype.isConsumedError) {
+				return Statement.prototype.isConsumedError.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
 		__ks_func_isInstanceMethod_0: function(name, variable) {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
@@ -9255,6 +9382,20 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			],
+			isConsumedError: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
 				}
 			],
 			isInstanceMethod: [
@@ -10309,20 +10450,31 @@ module.exports = function() {
 			Statement.prototype.__ks_cons.call(this, args);
 		},
 		__ks_func_analyse_0: function() {
-			var data = this._data;
-			for(var __ks_0 = 0, __ks_1 = data.declarations.length, declaration; __ks_0 < __ks_1; ++__ks_0) {
-				declaration = data.declarations[__ks_0];
+			for(var __ks_0 = 0, __ks_1 = this._data.declarations.length, declaration; __ks_0 < __ks_1; ++__ks_0) {
+				declaration = this._data.declarations[__ks_0];
 				var __ks_2 = declaration.kind;
 				if(__ks_2 === Kind.ClassDeclaration) {
 					var variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind.Class, declaration);
-					if(declaration.sealed) {
-						variable.sealed = {
-							name: "__ks_" + variable.name.name,
-							constructors: false,
-							instanceMethods: {},
-							classMethods: {}
-						};
-						this._lines.push("var " + variable.sealed.name + " = {}");
+					if(Type.isValue(declaration.extends)) {
+						if(!this._scope.hasVariable(declaration.extends.name)) {
+							$throw("Undefined class " + declaration.extends.name + " at line " + declaration.extends.start.line, this);
+						}
+						variable.extends = declaration.extends.name;
+					}
+					for(var __ks_3 = 0, __ks_4 = declaration.modifiers.length, modifier; __ks_3 < __ks_4; ++__ks_3) {
+						modifier = declaration.modifiers[__ks_3];
+						if(modifier.kind === ClassModifier.Abstract) {
+							variable.abstract = true;
+						}
+						else if(modifier.kind === ClassModifier.Sealed) {
+							variable.sealed = {
+								name: "__ks_" + variable.name.name,
+								constructors: false,
+								instanceMethods: {},
+								classMethods: {}
+							};
+							this._lines.push("var " + variable.sealed.name + " = {}");
+						}
 					}
 					for(var i = 0, __ks_3 = declaration.members.length; i < __ks_3; ++i) {
 						$extern.classMember(declaration.members[i], variable, this);
@@ -10370,8 +10522,9 @@ module.exports = function() {
 			if(mode === undefined || mode === null) {
 				throw new Error("Missing parameter 'mode'");
 			}
-			for(var __ks_0 = 0, __ks_1 = this._lines.length, line; __ks_0 < __ks_1; ++__ks_0) {
-				line = this._lines[__ks_0];
+			var __ks_0 = this._lines;
+			for(var __ks_1 = 0, __ks_2 = __ks_0.length, line; __ks_1 < __ks_2; ++__ks_1) {
+				line = __ks_0[__ks_1];
 				fragments.line(line);
 			}
 		},
@@ -10449,13 +10602,19 @@ module.exports = function() {
 				if(__ks_2 === Kind.ClassDeclaration) {
 					var variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
-					if(declaration.sealed) {
-						variable.sealed = {
-							name: "__ks_" + variable.name.name,
-							constructors: false,
-							instanceMethods: {},
-							classMethods: {}
-						};
+					for(var __ks_3 = 0, __ks_4 = declaration.modifiers.length, modifier; __ks_3 < __ks_4; ++__ks_3) {
+						modifier = declaration.modifiers[__ks_3];
+						if(modifier.kind === ClassModifier.Abstract) {
+							variable.abstract = true;
+						}
+						else if(modifier.kind === ClassModifier.Sealed) {
+							variable.sealed = {
+								name: "__ks_" + variable.name.name,
+								constructors: false,
+								instanceMethods: {},
+								classMethods: {}
+							};
+						}
 					}
 					for(var i = 0, __ks_3 = declaration.members.length; i < __ks_3; ++i) {
 						$extern.classMember(declaration.members[i], variable, this);
@@ -12343,20 +12502,31 @@ module.exports = function() {
 				kind: Kind.Identifier,
 				name: "this"
 			}, VariableKind.Variable);
-			var data = this._data;
-			var variable = $variable.define(this, this.greatScope(), data.name, VariableKind.Function, data.type);
-			for(var __ks_0 = 0, __ks_1 = data.modifiers.length, modifier; __ks_0 < __ks_1; ++__ks_0) {
-				modifier = data.modifiers[__ks_0];
+			this._variable = $variable.define(this, this.greatScope(), this._data.name, VariableKind.Function, this._data.type);
+			for(var __ks_0 = 0, __ks_1 = this._data.modifiers.length, modifier; __ks_0 < __ks_1; ++__ks_0) {
+				modifier = this._data.modifiers[__ks_0];
 				if(modifier.kind === FunctionModifier.Async) {
-					variable.async = true;
+					this._variable.async = true;
 				}
 			}
-			this._parameters = Helper.mapArray(data.parameters, Helper.vcurry(function(parameter) {
+			this._parameters = Helper.mapArray(this._data.parameters, Helper.vcurry(function(parameter) {
 				return new Parameter(parameter, this);
 			}, this));
-			this._statements = Helper.mapArray($body(data.body), Helper.vcurry(function(statement) {
+			this._statements = Helper.mapArray($body(this._data.body), Helper.vcurry(function(statement) {
 				return $compile.statement(statement, this);
 			}, this));
+			var variable;
+			for(var __ks_0 = 0, __ks_1 = this._data.throws.length, error; __ks_0 < __ks_1; ++__ks_0) {
+				error = this._data.throws[__ks_0];
+				var __ks_2;
+				if(Type.isValue(__ks_2 = $variable.fromAST(error, this)) ? (variable = __ks_2, false) : true) {
+					$throw("Undefined variable '" + error.name + "' at line " + error.start.line, this);
+				}
+				else if(variable.kind !== VariableKind.Class) {
+					$throw("Error '" + error.name + "' must be a class (line " + error.start.line + ")", this);
+				}
+				this._variable.throws.push(error.name);
+			}
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -12391,6 +12561,32 @@ module.exports = function() {
 			}
 			else if(Statement.prototype.fuse) {
 				return Statement.prototype.fuse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_isConsumedError_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(this._variable.throws.length > 0) {
+				for(var __ks_0 = 0, __ks_1 = this._variable.throws.length, x; __ks_0 < __ks_1; ++__ks_0) {
+					x = this._variable.throws[__ks_0];
+					if($error.isConsumed(x, name, variable, this._scope)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
+		isConsumedError: function() {
+			if(arguments.length === 2) {
+				return FunctionDeclaration.prototype.__ks_func_isConsumedError_0.apply(this, arguments);
+			}
+			else if(Statement.prototype.isConsumedError) {
+				return Statement.prototype.isConsumedError.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		},
@@ -12475,6 +12671,10 @@ module.exports = function() {
 			_statements: {
 				access: 1,
 				type: "Any"
+			},
+			_variable: {
+				access: 1,
+				type: "Any"
 			}
 		},
 		classVariables: {},
@@ -12493,6 +12693,20 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			],
+			isConsumedError: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
 				}
 			],
 			toStatementFragments: [
@@ -13544,66 +13758,65 @@ module.exports = function() {
 			}
 		},
 		__ks_func_analyse_0: function() {
-			var data = this._data;
-			var variable = this._variable;
-			if((this._isContructor = ((data.name.kind === Kind.Identifier) && $method.isConstructor(data.name.name, variable)))) {
+			var name = this._data.name.name;
+			if((this._isContructor = ((this._data.name.kind === Kind.Identifier) && $method.isConstructor(name, this._variable)))) {
 				$throw("Not Implemented", this);
 			}
-			else if((this._isDestructor = ((data.name.kind === Kind.Identifier) && $method.isDestructor(data.name.name, variable)))) {
+			else if((this._isDestructor = ((this._data.name.kind === Kind.Identifier) && $method.isDestructor(name, this._variable)))) {
 				$throw("Not Implemented", this);
 			}
 			else {
-				for(var i = 0, __ks_0 = data.modifiers.length; this._instance && i < __ks_0; ++i) {
-					if(data.modifiers[i].kind === MemberModifier.Static) {
+				for(var i = 0, __ks_0 = this._data.modifiers.length; this._instance && i < __ks_0; ++i) {
+					if(this._data.modifiers[i].kind === MemberModifier.Static) {
 						this._instance = false;
 					}
 				}
-				if(variable.sealed) {
+				if(Type.isValue(this._variable.sealed)) {
 					if(this._instance) {
-						if(variable.sealed.instanceMethods[data.name.name] !== true) {
-							variable.sealed.instanceMethods[data.name.name] = true;
+						if(this._variable.sealed.instanceMethods[name] !== true) {
+							this._variable.sealed.instanceMethods[name] = true;
 						}
 					}
 					else {
-						if(variable.sealed.classMethods[data.name.name] !== true) {
-							variable.sealed.classMethods[data.name.name] = true;
+						if(this._variable.sealed.classMethods[name] !== true) {
+							this._variable.sealed.classMethods[name] = true;
 						}
 					}
 				}
-				if(data.name.kind === Kind.Identifier) {
+				if(this._data.name.kind === Kind.Identifier) {
 					var method = {
 						kind: Kind.MethodDeclaration,
-						name: data.name.name,
-						signature: $method.signature(data, this)
+						name: name,
+						signature: $method.signature(this._data, this)
 					};
-					if(data.type) {
-						method.type = $type.type(data.type, this._scope, this);
+					if(this._data.type) {
+						method.type = $type.type(this._data.type, this._scope, this);
 					}
 					if(this._instance) {
-						if(!Type.isArray(variable.instanceMethods[data.name.name])) {
-							variable.instanceMethods[data.name.name] = [];
+						if(!Type.isArray(this._variable.instanceMethods[name])) {
+							this._variable.instanceMethods[name] = [];
 						}
-						variable.instanceMethods[data.name.name].push(method);
+						this._variable.instanceMethods[name].push(method);
 					}
 					else {
-						if(!Type.isArray(variable.classMethods[data.name.name])) {
-							variable.classMethods[data.name.name] = [];
+						if(!Type.isArray(this._variable.classMethods[name])) {
+							this._variable.classMethods[name] = [];
 						}
-						variable.classMethods[data.name.name].push(method);
+						this._variable.classMethods[name].push(method);
 					}
 				}
-				else if(data.name.kind === Kind.TemplateExpression) {
-					this._name = $compile.expression(data.name, this);
+				else if(this._data.name.kind === Kind.TemplateExpression) {
+					this._name = $compile.expression(this._data.name, this);
 				}
 			}
 			$variable.define(this, this._scope, {
 				kind: Kind.Identifier,
 				name: "this"
-			}, VariableKind.Variable, $type.reference(variable.name));
-			this._parameters = Helper.mapArray(data.parameters, Helper.vcurry(function(parameter) {
+			}, VariableKind.Variable, $type.reference(this._variable.name));
+			this._parameters = Helper.mapArray(this._data.parameters, Helper.vcurry(function(parameter) {
 				return new Parameter(parameter, this);
 			}, this));
-			this._statements = Helper.mapArray($body(data.body), Helper.vcurry(function(statement) {
+			this._statements = Helper.mapArray($body(this._data.body), Helper.vcurry(function(statement) {
 				return $compile.statement(statement, this);
 			}, this));
 		},
@@ -16070,13 +16283,19 @@ module.exports = function() {
 				if(__ks_2 === Kind.ClassDeclaration) {
 					var variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
-					if(declaration.sealed) {
-						variable.sealed = {
-							name: "__ks_" + variable.name.name,
-							constructors: false,
-							instanceMethods: {},
-							classMethods: {}
-						};
+					for(var __ks_3 = 0, __ks_4 = declaration.modifiers.length, modifier; __ks_3 < __ks_4; ++__ks_3) {
+						modifier = declaration.modifiers[__ks_3];
+						if(modifier.kind === ClassModifier.Abstract) {
+							variable.abstract = true;
+						}
+						else if(modifier.kind === ClassModifier.Sealed) {
+							variable.sealed = {
+								name: "__ks_" + variable.name.name,
+								constructors: false,
+								instanceMethods: {},
+								classMethods: {}
+							};
+						}
 					}
 					for(var i = 0, __ks_3 = declaration.members.length; i < __ks_3; ++i) {
 						$extern.classMember(declaration.members[i], variable, this._parent);
@@ -16190,13 +16409,19 @@ module.exports = function() {
 				if(__ks_2 === Kind.ClassDeclaration) {
 					var variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind.Class, declaration);
 					variable.requirement = declaration.name.name;
-					if(declaration.sealed) {
-						variable.sealed = {
-							name: "__ks_" + variable.name.name,
-							constructors: false,
-							instanceMethods: {},
-							classMethods: {}
-						};
+					for(var __ks_3 = 0, __ks_4 = declaration.modifiers.length, modifier; __ks_3 < __ks_4; ++__ks_3) {
+						modifier = declaration.modifiers[__ks_3];
+						if(modifier.kind === ClassModifier.Abstract) {
+							variable.abstract = true;
+						}
+						else if(modifier.kind === ClassModifier.Sealed) {
+							variable.sealed = {
+								name: "__ks_" + variable.name.name,
+								constructors: false,
+								instanceMethods: {},
+								classMethods: {}
+							};
+						}
 					}
 					for(var i = 0, __ks_3 = declaration.members.length; i < __ks_3; ++i) {
 						$extern.classMember(declaration.members[i], variable, this);
@@ -17795,6 +18020,12 @@ module.exports = function() {
 		},
 		__ks_func_analyse_0: function() {
 			this._value = $compile.expression(this._data.value, this);
+			var variable, __ks_0;
+			if((this._options.error === "fatal") && (Type.isValue(__ks_0 = $variable.fromAST(this._data.value, this)) ? (variable = __ks_0, true) : false) && variable.type && (Type.isValue(__ks_0 = $variable.fromType(variable.type, this)) ? (variable = __ks_0, true) : false)) {
+				if(!this._parent.isConsumedError(variable.name.name, variable)) {
+					$throw("The error '" + variable.name.name + "' is not consumed at line " + this._data.start.line, this);
+				}
+			}
 		},
 		analyse: function() {
 			if(arguments.length === 0) {
@@ -17895,12 +18126,18 @@ module.exports = function() {
 			Statement.prototype.__ks_cons.call(this, args);
 		},
 		__ks_func_analyse_0: function() {
-			var data = this._data;
 			var scope = this._scope;
-			this._body = $compile.expression(data.body, this);
-			if(Type.isValue(data.catchClauses)) {
-				for(var __ks_0 = 0, __ks_1 = data.catchClauses.length, clause; __ks_0 < __ks_1; ++__ks_0) {
-					clause = data.catchClauses[__ks_0];
+			if(Type.isValue(this._data.catchClauses)) {
+				var variable;
+				for(var __ks_0 = 0, __ks_1 = this._data.catchClauses.length, clause; __ks_0 < __ks_1; ++__ks_0) {
+					clause = this._data.catchClauses[__ks_0];
+					var __ks_2;
+					if(Type.isValue(__ks_2 = $variable.fromAST(clause.type, this)) ? (variable = __ks_2, false) : true) {
+						$throw("Undefined variable '" + clause.type.name + "' at line " + clause.type.start.line, this);
+					}
+					else if(variable.kind !== VariableKind.Class) {
+						$throw("Error '" + clause.type.name + "' must be a class (line " + clause.type.start.line + ")", this);
+					}
 					if(Type.isValue(clause.binding)) {
 						$variable.define(this, this._scope = new Scope(scope), clause.binding, VariableKind.Variable);
 					}
@@ -17910,15 +18147,16 @@ module.exports = function() {
 					});
 				}
 			}
-			if(Type.isValue(data.catchClause)) {
+			if(Type.isValue(this._data.catchClause)) {
 				if(Type.isValue(this._data.catchClause.binding)) {
-					$variable.define(this, this._scope = new Scope(scope), data.catchClause.binding, VariableKind.Variable);
+					$variable.define(this, this._scope = new Scope(scope), this._data.catchClause.binding, VariableKind.Variable);
 				}
-				this._catchClause = $compile.expression(data.catchClause.body, this);
+				this._catchClause = $compile.expression(this._data.catchClause.body, this);
 			}
 			this._scope = scope;
-			if(Type.isValue(data.finalizer)) {
-				this._finalizer = $compile.expression(data.finalizer, this);
+			this._body = $compile.expression(this._data.body, this);
+			if(Type.isValue(this._data.finalizer)) {
+				this._finalizer = $compile.expression(this._data.finalizer, this);
 			}
 		},
 		analyse: function() {
@@ -17949,6 +18187,33 @@ module.exports = function() {
 			}
 			else if(Statement.prototype.fuse) {
 				return Statement.prototype.fuse.apply(this, arguments);
+			}
+			throw new Error("Wrong number of arguments");
+		},
+		__ks_func_isConsumedError_0: function(name, variable) {
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(this._data.catchClauses.length > 0) {
+				for(var __ks_0 = 0, __ks_1 = this._data.catchClauses.length, clause; __ks_0 < __ks_1; ++__ks_0) {
+					clause = this._data.catchClauses[__ks_0];
+					if($error.isConsumed(clause.type.name, name, variable, this._scope)) {
+						return true;
+					}
+				}
+				return false;
+			}
+			return true;
+		},
+		isConsumedError: function() {
+			if(arguments.length === 2) {
+				return TryStatement.prototype.__ks_func_isConsumedError_0.apply(this, arguments);
+			}
+			else if(Statement.prototype.isConsumedError) {
+				return Statement.prototype.isConsumedError.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		},
@@ -18072,6 +18337,20 @@ module.exports = function() {
 					min: 0,
 					max: 0,
 					parameters: []
+				}
+			],
+			isConsumedError: [
+				{
+					access: 3,
+					min: 2,
+					max: 2,
+					parameters: [
+						{
+							type: "Any",
+							min: 2,
+							max: 2
+						}
+					]
 				}
 			],
 			toStatementFragments: [
@@ -22050,24 +22329,170 @@ module.exports = function() {
 		},
 		classMethods: {}
 	};
-	function $caller(data, node) {
-		if(data === undefined || data === null) {
-			throw new Error("Missing parameter 'data'");
+	var $call = {
+		caller: function(data, node) {
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(Type.is(data, IdentifierLiteral)) {
+				return data;
+			}
+			else if(Type.is(data, MemberExpression)) {
+				return data._object;
+			}
+			else {
+				console.error(data);
+				$throw("Not Implemented", node);
+			}
+		},
+		filterMember: function(variable, name, data, node) {
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(variable.kind === VariableKind.Class) {
+				if(Type.isArray(variable.instanceMethods[name])) {
+					var variables = [];
+					for(var __ks_0 = 0, __ks_1 = variable.instanceMethods[name].length, method; __ks_0 < __ks_1; ++__ks_0) {
+						method = variable.instanceMethods[name][__ks_0];
+						if($signature.matchArguments(method, data.arguments)) {
+							variables.push(method);
+						}
+					}
+					if(variables.length === 1) {
+						return variables[0];
+					}
+					if(variables.length > 0) {
+						return variables;
+					}
+				}
+				else if(Type.isObject(variable.instanceVariables[name])) {
+					$throw("Not implemented", node);
+				}
+			}
+			else if(variable.kind === VariableKind.Enum) {
+				$throw("Not implemented", node);
+			}
+			else if(variable.kind === VariableKind.TypeAlias) {
+				$throw("Not implemented", node);
+			}
+			else if(variable.kind === VariableKind.Variable) {
+				$throw("Not implemented", node);
+			}
+			else {
+				$throw("Not implemented", node);
+			}
+			return null;
+		},
+		filterType: function(variable, name, data, node) {
+			if(variable === undefined || variable === null) {
+				throw new Error("Missing parameter 'variable'");
+			}
+			if(name === undefined || name === null) {
+				throw new Error("Missing parameter 'name'");
+			}
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(Type.isValue(variable.type)) {
+				if(variable.type.properties) {
+					if(Type.isObject(variable.type.properties[name])) {
+						return variable.type.properties[name];
+					}
+				}
+				else if(variable.type.typeName) {
+					var __ks_0;
+					if(Type.isValue(__ks_0 = $variable.fromType(variable.type, node)) ? (variable = __ks_0, true) : false) {
+						return $call.filterMember(variable, name, data, node);
+					}
+				}
+				else if(variable.type.types) {
+					var variables = [];
+					for(var __ks_0 = 0, __ks_1 = variable.type.types.length, type; __ks_0 < __ks_1; ++__ks_0) {
+						type = variable.type.types[__ks_0];
+						var v, __ks_2, __ks_3;
+						if(!((Type.isValue(__ks_2 = $variable.fromType(type, node)) ? (v = __ks_2, true) : false) && (Type.isValue(__ks_3 = $call.filterMember(v, name, data, node)) ? (v = __ks_3, true) : false))) {
+							return null;
+						}
+						$variable.push(variables, v);
+					}
+					if(variables.length === 1) {
+						return variables[0];
+					}
+					if(variables.length > 0) {
+						return variables;
+					}
+				}
+				else {
+					$throw("Not implemented", node);
+				}
+			}
+			return null;
+		},
+		variable: function(data, node) {
+			if(data === undefined || data === null) {
+				throw new Error("Missing parameter 'data'");
+			}
+			if(node === undefined || node === null) {
+				throw new Error("Missing parameter 'node'");
+			}
+			if(data.callee.kind === Kind.MemberExpression) {
+				var variable, __ks_0;
+				if(!data.callee.computed && (Type.isValue(__ks_0 = $variable.fromAST(data.callee.object, node)) ? (variable = __ks_0, true) : false)) {
+					if(variable.kind === VariableKind.TypeAlias) {
+						variable = $variable.fromType($type.unalias(variable.type, node.scope()), node);
+					}
+					var name = data.callee.property.name;
+					if(variable.kind === VariableKind.Class) {
+						if(data.callee.object.kind === Kind.Identifier) {
+							if(Type.isValue(variable.classMethods[name])) {
+								var variables = [];
+								for(var __ks_0 = 0, __ks_1 = variable.classMethods[name].length, method; __ks_0 < __ks_1; ++__ks_0) {
+									method = variable.classMethods[name][__ks_0];
+									if($signature.matchArguments(method, data.arguments)) {
+										variables.push(method);
+									}
+								}
+								if(variables.length === 1) {
+									return variables[0];
+								}
+								if(variables.length > 0) {
+									return variables;
+								}
+							}
+							else if(Type.isValue(variable.classVariables[name])) {
+								$throw("Not implemented", node);
+							}
+						}
+						else {
+							$throw("Not implemented", node);
+						}
+					}
+					else {
+						return $call.filterType(variable, name, data, node);
+					}
+				}
+				return null;
+			}
+			else {
+				return $variable.fromAST(data.callee, node);
+			}
 		}
-		if(node === undefined || node === null) {
-			throw new Error("Missing parameter 'node'");
-		}
-		if(Type.is(data, IdentifierLiteral)) {
-			return data;
-		}
-		else if(Type.is(data, MemberExpression)) {
-			return data._object;
-		}
-		else {
-			console.error(data);
-			$throw("Not Implemented", node);
-		}
-	}
+	};
 	var CallExpression = Helper.class({
 		$name: "CallExpression",
 		$extends: Expression,
@@ -22086,27 +22511,24 @@ module.exports = function() {
 			Expression.prototype.__ks_cons.call(this, args);
 		},
 		__ks_func_analyse_0: function() {
-			var callee, __ks_0;
-			if((Type.isValue(__ks_0 = $variable.fromAST(this._data.callee, this)) ? (callee = __ks_0, true) : false) && (callee.kind === VariableKind.Class)) {
+			var callee = $variable.fromAST(this._data.callee, this);
+			if(Type.isValue(callee) ? callee.kind === VariableKind.Class : false) {
 				$throw("A class is not a function, 'new' operator is required at line " + this._data.callee.start.line, this);
 			}
 			if(this._data.callee.kind === Kind.Identifier) {
-				var variable;
-				if(Type.isValue(__ks_0 = this._scope.getVariable(this._data.callee.name)) ? (variable = __ks_0, true) : false) {
-					if(Type.isValue(variable.callable)) {
-						variable.callable(this._data);
+				if(Type.isValue(callee)) {
+					if(Type.isValue(callee.callable)) {
+						callee.callable(this._data);
 					}
 				}
 				else {
 					$throw("Undefined variable " + this._data.callee.name + " at line " + this._data.callee.start.line, this);
 				}
 			}
-			else if((this._data.callee.kind === Kind.MemberExpression) && (this._data.callee.object.kind === Kind.Identifier)) {
-				var variable;
-				if(Type.isValue(__ks_0 = this._scope.getVariable(this._data.callee.object.name)) ? (variable = __ks_0, true) : false) {
-					if(Type.isValue(variable.reduce)) {
-						variable.reduce(this._data);
-					}
+			else if(this._data.callee.kind === Kind.MemberExpression) {
+				var variable, __ks_0;
+				if((Type.isValue(__ks_0 = $variable.fromAST(this._data.callee.object, this)) ? (variable = __ks_0, true) : false) && Type.isValue(variable.reduce)) {
+					variable.reduce(this._data);
 				}
 			}
 			if(this._data.callee.kind === Kind.MemberExpression) {
@@ -22134,7 +22556,19 @@ module.exports = function() {
 				this._callScope = $compile.expression(this._data.scope.value, this);
 			}
 			if(!this._list) {
-				this._caller = $caller(this._callee, this);
+				this._caller = $call.caller(this._callee, this);
+			}
+			var variable;
+			if((this._options.error === "fatal") && (Type.isValue(__ks_0 = $call.variable(this._data, this)) ? (variable = __ks_0, true) : false)) {
+				if(Type.isValue(variable.throws) ? variable.throws.length > 0 : false) {
+					for(var __ks_0 = 0, __ks_1 = variable.throws.length, name; __ks_0 < __ks_1; ++__ks_0) {
+						name = variable.throws[__ks_0];
+						var error, __ks_2;
+						if((Type.isValue(__ks_2 = this._scope.getVariable(name)) ? (error = __ks_2, true) : false) && !this._parent.isConsumedError(name, error)) {
+							$throw("The error '" + name + "' is not consumed at line " + this._data.start.line, this);
+						}
+					}
+				}
 			}
 		},
 		analyse: function() {
@@ -23098,7 +23532,7 @@ module.exports = function() {
 				}
 			}
 			if(this._data.scope.kind === ScopeModifier.This) {
-				this._caller = $caller(this._callee, this);
+				this._caller = $call.caller(this._callee, this);
 			}
 			else if(this._data.scope.kind === ScopeModifier.Argument) {
 				this._callScope = $compile.expression(this._data.scope.value, this);
@@ -30545,6 +30979,26 @@ module.exports = function() {
 				}
 				throw new Error("Wrong number of arguments");
 			},
+			__ks_sttc_registerTargets_0: function(targets) {
+				if(targets === undefined || targets === null) {
+					throw new Error("Missing parameter 'targets'");
+				}
+				for(var name in targets) {
+					var data = targets[name];
+					if(Type.isString(data)) {
+						Compiler.registerTargetAlias(name, data);
+					}
+					else {
+						Compiler.registerTarget(name, data);
+					}
+				}
+			},
+			registerTargets: function() {
+				if(arguments.length === 1) {
+					return Compiler.__ks_sttc_registerTargets_0.apply(this, arguments);
+				}
+				throw new Error("Wrong number of arguments");
+			},
 			__ks_sttc_registerTargetAlias_0: function(target, alias) {
 				if(target === undefined || target === null) {
 					throw new Error("Missing parameter 'target'");
@@ -30608,6 +31062,7 @@ module.exports = function() {
 				register: true,
 				config: {
 					header: true,
+					error: "fatal",
 					parse: {
 						parameters: "kaoscript"
 					},
@@ -30917,6 +31372,20 @@ module.exports = function() {
 							type: "Any",
 							min: 2,
 							max: 2
+						}
+					]
+				}
+			],
+			registerTargets: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
 						}
 					]
 				}

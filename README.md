@@ -50,6 +50,7 @@ Features
 - **extern**: explicit global scope
 - **attributes**
 - **advanced parameters**
+- **error handling**: by default, it's à la Java but it's configurable
 
 Getting Started
 ---------------
@@ -267,22 +268,22 @@ class Shape {
 	// constructor, automatically set the instance variable '_color' as the parameter 'color'
 	
 	$destroy() {
-		this._color = null
+		@color = null
 	}
 	// destructor
 	
 	// getter/setter
-	color() => this._color
+	color() => @color
 	color(@color) => this
     
     draw(): string {
-        return `I'm drawing with a \(this._color) pen.`
+        return `I'm drawing with a \(@color) pen.`
     }
 }
 
 class Rectangle extends Shape {
     draw() {
-        return `\(super()) I'm drawing a \(this._color) rectangle.`
+        return `\(super()) I'm drawing a \(@color) rectangle.`
     }
 }
 
@@ -294,7 +295,7 @@ console.log(r.draw())
 
 impl Shape {
 	draw(shape): string {
-		return `I'm drawing a \(this._color) \(shape).`
+		return `I'm drawing a \(@color) \(shape).`
 	}
 }
 // adds dynamically the method 'draw(shape)' to the class 'Shape'
@@ -314,9 +315,9 @@ Override core class
 ```kaoscript
 extern console, isNaN
 
-extern final class Number {
+extern sealed class Number {
 }
-// 'final' avoid to directly extends the class Number
+// 'sealed' avoid to directly extends the class Number
 
 impl Number {
 	mod(max): Number {
@@ -347,6 +348,29 @@ let j: Number = 42
 console.log(j.mod(2))
 // <- 0
 // javascript code: console.log(__ks_Number._im_mod(j, 2))
+```
+
+Abstract Class
+--------------
+
+```kaoscript
+abstract class AbstractGreetings {
+	private {
+		_message: string = ''
+	}
+	
+	$create() {
+		this('Hello!')
+	}
+	
+	$create(@message)
+	
+	abstract greet(name): String
+}
+
+class Greetings extends AbstractGreetings {
+	greet(name) => `\(@message)\nIt's nice to meet you, \(name).`
+}
 ```
 
 Parameters
@@ -417,6 +441,55 @@ switch number {
 	2, 3, 5, 7, 11  => console.log("This is a prime")
 	13..19          => console.log("A teen")
 	                => console.log("Ain't special")
+}
+```
+
+Error Handling
+--------------
+
+```
+try {
+	console.log('foobar')
+}
+on RangeError catch error {
+	console.log('RangeError', error)
+}
+catch error {
+	console.log('Error', error)
+}
+finally {
+	console.log('finally')
+}
+```
+
+```
+try {
+	console.log('foobar')
+}
+on RangeError {
+	console.log('RangeError')
+}
+catch {
+	console.log('Error')
+}
+```
+
+```kaoscript
+try {
+	foo()
+}
+
+func foo(name): String ~ Error {
+	if name == 'foobar' {
+		throw new Error(`Invalid name '\(name)'`) 
+	}
+	
+	return name
+}
+
+#[error='off']
+func bar() {
+	validate('toto')
 }
 ```
 

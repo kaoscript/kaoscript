@@ -3,16 +3,22 @@ class ThrowStatement extends Statement {
 		_value = null
 	}
 	analyse() { // {{{
-		this._value = $compile.expression(this._data.value, this)
+		@value = $compile.expression(@data.value, this)
+		
+		if @options.error == 'fatal' && (variable ?= $variable.fromAST(@data.value, this)) && variable.type && (variable ?= $variable.fromType(variable.type, this)) {
+			if !@parent.isConsumedError(variable.name.name, variable) {
+				$throw(`The error '\(variable.name.name)' is not consumed at line \(@data.start.line)`, this)
+			}
+		}
 	} // }}}
 	fuse() { // {{{
-		this._value.fuse()
+		@value.fuse()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newLine()
 			.code('throw ')
-			.compile(this._value)
+			.compile(@value)
 			.done()
 	} // }}}
 }

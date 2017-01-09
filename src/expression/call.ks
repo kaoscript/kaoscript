@@ -1,15 +1,121 @@
-func $caller(data, node) { // {{{
-	if data is IdentifierLiteral {
-		return data
-	}
-	else if data is MemberExpression {
-		return data._object
-	}
-	else {
-		console.error(data)
-		$throw('Not Implemented', node)
-	}
-} // }}}
+const $call = {
+	caller(data, node) { // {{{
+		if data is IdentifierLiteral {
+			return data
+		}
+		else if data is MemberExpression {
+			return data._object
+		}
+		else {
+			console.error(data)
+			$throw('Not Implemented', node)
+		}
+	} // }}}
+	filterMember(variable, name, data, node) { // {{{
+		if variable.kind == VariableKind::Class {
+			if variable.instanceMethods[name] is Array {
+				let variables: Array = []
+				
+				for method in variable.instanceMethods[name] {
+					if $signature.matchArguments(method, data.arguments) {
+						variables.push(method)
+					}
+				}
+				
+				return variables[0]	if variables.length == 1
+				return variables	if variables.length > 0
+			}
+			else if variable.instanceVariables[name] is Object {
+				$throw('Not implemented', node)
+			}
+		}
+		else if variable.kind == VariableKind::Enum {
+			$throw('Not implemented', node)
+		}
+		else if variable.kind == VariableKind::TypeAlias {
+			$throw('Not implemented', node)
+		}
+		else if variable.kind == VariableKind::Variable {
+			$throw('Not implemented', node)
+		}
+		else {
+			$throw('Not implemented', node)
+		}
+		
+		return null
+	} // }}}
+	filterType(variable, name, data, node) { // {{{
+		if variable.type? {
+			if variable.type.properties {
+				return variable.type.properties[name] if variable.type.properties[name] is Object
+			}
+			else if variable.type.typeName {
+				if variable ?= $variable.fromType(variable.type, node) {
+					return $call.filterMember(variable, name, data, node)
+				}
+			}
+			else if variable.type.types {
+				let variables: Array = []
+				
+				for type in variable.type.types {
+					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $call.filterMember(v, name, data, node))
+					
+					$variable.push(variables, v)
+				}
+				
+				return variables[0]	if variables.length == 1
+				return variables	if variables.length > 0
+			}
+			else {
+				$throw('Not implemented', node)
+			}
+		}
+		
+		return null
+	} // }}}
+	variable(data, node) { // {{{
+		if data.callee.kind == Kind::MemberExpression {
+			if !data.callee.computed && (variable ?= $variable.fromAST(data.callee.object, node)) {
+				if variable.kind == VariableKind::TypeAlias {
+					variable = $variable.fromType($type.unalias(variable.type, node.scope()), node)
+				}
+				
+				let name = data.callee.property.name
+				
+				if variable.kind == VariableKind::Class {
+					if data.callee.object.kind == Kind::Identifier {
+						if variable.classMethods[name]? {
+							let variables: Array = []
+							
+							for method in variable.classMethods[name] {
+								if $signature.matchArguments(method, data.arguments) {
+									variables.push(method)
+								}
+							}
+							
+							return variables[0]	if variables.length == 1
+							return variables	if variables.length > 0
+						}
+						else if variable.classVariables[name]? {
+							$throw('Not implemented', node)
+						}
+					}
+					else {
+						$throw('Not implemented', node)
+					}
+				}
+				else {
+					return $call.filterType(variable, name, data, node)
+				}
+			}
+			
+			return null
+		}
+		else {
+			return $variable.fromAST(data.callee, node)
+		}
+	} // }}}
+}
 
 class CallExpression extends Expression {
 	private {
@@ -24,57 +130,64 @@ class CallExpression extends Expression {
 		_type
 	}
 	analyse() { // {{{
-		if (callee ?= $variable.fromAST(this._data.callee, this)) && callee.kind == VariableKind::Class {
-			$throw(`A class is not a function, 'new' operator is required at line \(this._data.callee.start.line)`, this)
+		let callee = $variable.fromAST(@data.callee, this)
+		if callee?.kind == VariableKind::Class {
+			$throw(`A class is not a function, 'new' operator is required at line \(@data.callee.start.line)`, this)
 		}
 		
-		if this._data.callee.kind == Kind::Identifier {
-			if variable ?= this._scope.getVariable(this._data.callee.name) {
-				if variable.callable? {
-					variable.callable(this._data)
-				}
+		if @data.callee.kind == Kind::Identifier {
+			if callee? {
+				callee.callable(@data) if callee.callable?
 			}
 			else {
-				$throw(`Undefined variable \(this._data.callee.name) at line \(this._data.callee.start.line)`, this)
+				$throw(`Undefined variable \(@data.callee.name) at line \(@data.callee.start.line)`, this)
 			}
 		}
-		else if this._data.callee.kind == Kind::MemberExpression && this._data.callee.object.kind == Kind::Identifier {
-			if variable ?= this._scope.getVariable(this._data.callee.object.name) {
-				if variable.reduce? {
-					variable.reduce(this._data)
-				}
+		else if @data.callee.kind == Kind::MemberExpression {
+			if (variable ?= $variable.fromAST(@data.callee.object, this)) && variable.reduce? {
+				variable.reduce(@data)
 			}
 		}
 		
-		if this._data.callee.kind == Kind::MemberExpression {
-			this._callee = new MemberExpression(this._data.callee, this, this.scope())
-			this._callee.analyse()
+		if @data.callee.kind == Kind::MemberExpression {
+			@callee = new MemberExpression(@data.callee, this, this.scope())
+			@callee.analyse()
 		}
-		else if this._data.callee.kind == Kind::ThisExpression {
-			this._callee = new ThisExpression(this._data.callee, this, this.scope())
-			this._callee.isMethod(true).analyse()
+		else if @data.callee.kind == Kind::ThisExpression {
+			@callee = new ThisExpression(@data.callee, this, this.scope())
+			@callee.isMethod(true).analyse()
 		}
 		else {
-			this._callee = $compile.expression(this._data.callee, this, false)
+			@callee = $compile.expression(@data.callee, this, false)
 		}
 		
-		for argument in this._data.arguments {
+		for argument in @data.arguments {
 			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
-				this._arguments.push($compile.expression(argument.argument, this))
+				@arguments.push($compile.expression(argument.argument, this))
 				
-				this._list = false
+				@list = false
 			}
 			else {
-				this._arguments.push($compile.expression(argument, this))
+				@arguments.push($compile.expression(argument, this))
 			}
 		}
 		
-		if this._data.scope.kind == ScopeModifier::Argument {
-			this._callScope = $compile.expression(this._data.scope.value, this)
+		if @data.scope.kind == ScopeModifier::Argument {
+			@callScope = $compile.expression(@data.scope.value, this)
 		}
 		
-		if !this._list {
-			this._caller = $caller(this._callee, this)
+		if !@list {
+			@caller = $call.caller(@callee, this)
+		}
+		
+		if @options.error == 'fatal' && (variable ?= $call.variable(@data, this)) {
+			if variable.throws?.length > 0 {
+				for name in variable.throws {
+					if (error ?= @scope.getVariable(name)) && !@parent.isConsumedError(name, error) {
+						$throw(`The error '\(name)' is not consumed at line \(@data.start.line)`, this)
+					}
+				}
+			}
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{

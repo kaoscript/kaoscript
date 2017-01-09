@@ -7,6 +7,8 @@
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
+#![cfg(error='off')]
+
 import {
 	*				from @kaoscript/ast
 	* as fs			from ./fs.js
@@ -15,7 +17,7 @@ import {
 	* as path		from path
 }
 
-extern console, Error, JSON, process, require
+extern console, Error: class, JSON, process, require
 
 enum Mode {
 	None
@@ -235,6 +237,18 @@ func $body(data) { // {{{
 	]
 } // }}}
 
+const $error = {
+	isConsumed(error, name, variable, scope) { // {{{
+		return true if error == name
+		
+		if variable.extends? {
+			return error == name || $error.isConsumed(error, variable.extends, scope.getVariable(variable.extends), scope)
+		}
+		
+		return false
+	} // }}}
+}
+
 func $identifier(name) { // {{{
 	if name is String {
 		return {
@@ -284,6 +298,13 @@ const $signature = {
 		
 		return false
 	} // }}}
+	matchArguments(signature, arguments) { // {{{
+		return false unless arguments.length >= signature.min && arguments.length <= signature.max
+		
+		
+		
+		return true
+	} // }}}
 	isMatchingParameters(p1, p2) { // {{{
 		return false if p1.length != p2.length
 		
@@ -323,7 +344,7 @@ const $signature = {
 	} // }}}
 }
 
-func $throw(message, node?) { // {{{
+func $throw(message, node?) ~ Error { // {{{
 	let error = new Error(message)
 	
 	if node? {
@@ -731,8 +752,13 @@ const $variable = {
 			else if kind == VariableKind::TypeAlias {
 				variable.type = $type.type(type, scope, node)
 			}
-			else if (kind == VariableKind::Function || kind == VariableKind::Variable) && type {
-				variable.type = type if type ?= $type.type(type, scope, node)
+			else if kind == VariableKind::Function {
+				variable.type ?= $type.type(type, scope, node) if type?
+				
+				variable.throws = []
+			}
+			else if kind == VariableKind::Variable && type? {
+				variable.type ?= $type.type(type, scope, node)
 			}
 		}
 		
@@ -1241,7 +1267,7 @@ const $variable = {
 	} // }}}
 }
 
-class AbstractNode {
+abstract class AbstractNode {
 	private {
 		_data
 		_options
@@ -1256,6 +1282,7 @@ class AbstractNode {
 	file() => this._parent.file()
 	greatParent() => this._parent?._parent
 	greatScope() => this._parent?._scope
+	isConsumedError(name, variable): Boolean => @parent.isConsumedError(name, variable)
 	module() => this._parent.module()
 	newScope() { // {{{
 		if this._options.format.variables == 'es6' {
@@ -1580,6 +1607,16 @@ export class Compiler {
 			$targets[target[1]] ??= {}
 			$targets[target[1]][target[2]] = options
 		} // }}}
+		registerTargets(targets) { // {{{
+			for name, data of targets {
+				if data is String {
+					Compiler.registerTargetAlias(name, data)
+				}
+				else {
+					Compiler.registerTarget(name, data)
+				}
+			}
+		} // }}}
 		registerTargetAlias(target, alias) { // {{{
 			if target !?= $targetRegex.exec(target) {
 				throw new Error(`Invalid target syntax: \(target)`)
@@ -1605,6 +1642,7 @@ export class Compiler {
 			register: true
 			config: {
 				header: true
+				error: 'fatal'
 				parse: {
 					parameters: 'kaoscript'
 				}

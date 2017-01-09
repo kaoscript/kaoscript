@@ -924,29 +924,40 @@ class FunctionDeclaration extends Statement {
 		_async		= false
 		_parameters
 		_statements
+		_variable
 	}
 	$create(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this, this._scope, {
+		$variable.define(this, @scope, {
 			kind: Kind::Identifier,
 			name: 'this'
 		}, VariableKind::Variable)
 		
-		let data = this._data
+		@variable = $variable.define(this, this.greatScope(), @data.name, VariableKind::Function, @data.type)
 		
-		variable = $variable.define(this, this.greatScope(), data.name, VariableKind::Function, data.type)
-		
-		for modifier in data.modifiers {
+		for modifier in @data.modifiers {
 			if modifier.kind == FunctionModifier::Async {
-				variable.async = true
+				@variable.async = true
 			}
 		}
 		
-		this._parameters = [new Parameter(parameter, this) for parameter in data.parameters]
+		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
 		
-		this._statements = [$compile.statement(statement, this) for statement in $body(data.body)]
+		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
+		
+		let variable
+		for error in @data.throws {
+			if variable !?= $variable.fromAST(error, this) {
+				$throw(`Undefined variable '\(error.name)' at line \(error.start.line)`, this)
+			}
+			else if variable.kind != VariableKind::Class {
+				$throw(`Error '\(error.name)' must be a class (line \(error.start.line))`, this)
+			}
+			
+			@variable.throws.push(error.name)
+		}
 	} // }}}
 	fuse() { // {{{
 		for parameter in this._parameters {
@@ -963,6 +974,15 @@ class FunctionDeclaration extends Statement {
 		for statement in this._statements {
 			statement.fuse()
 		}
+	} // }}}
+	isConsumedError(name, variable): Boolean { // {{{
+		if @variable.throws.length > 0 {
+			for x in @variable.throws {
+				return true if $error.isConsumed(x, name, variable, @scope)
+			}
+		}
+		
+		return false
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()

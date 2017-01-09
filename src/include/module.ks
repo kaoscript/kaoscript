@@ -567,6 +567,7 @@ class ModuleBlock extends AbstractNode {
 			statement.fuse()
 		}
 	} // }}}
+	isConsumedError(name, variable): Boolean => false
 	module() => this._module
 	toFragments(fragments) { // {{{
 		for statement in this._body {
