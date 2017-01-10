@@ -5572,7 +5572,7 @@ module.exports = function() {
 					fragments.push($code("var " + helper + " = require(\"" + $runtime.package(this) + "\").Helper;\n"));
 				}
 				else if(this._options.format.destructuring === "es5") {
-					fragments.push($code("var __ks__ = require(\"@kaoscript/runtime\");\n"));
+					fragments.push($code("var __ks__ = require(\"" + $runtime.package(this) + "\");\n"));
 					fragments.push($code("var " + helper + " = __ks__.Helper, " + type + " = __ks__.Type;\n"));
 				}
 				else {
@@ -31120,6 +31120,7 @@ module.exports = function() {
 				throw new Error("Missing parameter 'file'");
 			}
 			return new Compiler(file, {
+				config: this._options.config,
 				register: false,
 				target: this._options.target
 			}, this._hashes);

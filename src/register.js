@@ -1,6 +1,6 @@
 /**
  * register.js
- * Version 0.5.0
+ * Version 0.7.1
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -22,10 +22,21 @@ var loadFile = function(module, filename) { // {{{
 			var data = fs.readFile(_.getBinaryPath(filename, target));
 		}
 		else {
-			var compiler = new Compiler(filename, {
+			var options = {
 				register: false,
 				target: target
-			});
+			};
+			
+			var root = path.join(__dirname, '..')
+			if(!(filename.length > root.length && filename.substr(0, root.length) === root) && fs.exists(root, 'node_modules', '@kaoscript', 'runtime')) {
+				options.config = {
+					runtime: {
+						package: 'kaoscript/node_modules/@kaoscript/runtime'
+					}
+				};
+			}
+			
+			var compiler = new Compiler(filename, options);
 			
 			compiler.compile(source);
 			

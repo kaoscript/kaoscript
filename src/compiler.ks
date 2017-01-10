@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.7.0
+ * Version 0.7.1
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -1692,9 +1692,10 @@ export class Compiler {
 	} // }}}
 	createServant(file) { // {{{
 		return new Compiler(file, {
+			config: @options.config
 			register: false
-			target: this._options.target
-		}, this._hashes)
+			target: @options.target
+		}, @hashes)
 	} // }}}
 	sha256(file, data?) { // {{{
 		return this._hashes[file] ?? (this._hashes[file] = fs.sha256(data ?? fs.readFile(file)))
