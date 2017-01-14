@@ -1,3 +1,4 @@
+require("kaoscript/register");
 module.exports = function() {
 	var {Math, __ks_Math} = require("./export.sealed.variable.ks")();
 	__ks_Math.pi = function() {

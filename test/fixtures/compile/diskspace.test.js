@@ -1,3 +1,4 @@
+require("kaoscript/register");
 var expect = require("chai").expect;
 var disks = require("./diskspace.module.ks")().disks;
 describe("diskspace", function() {

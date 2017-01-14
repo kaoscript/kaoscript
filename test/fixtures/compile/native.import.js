@@ -1,3 +1,4 @@
+require("kaoscript/register");
 module.exports = function() {
 	var {String, __ks_String} = require("./_string.ks")();
 	let foo = "HELLO!";

@@ -73,11 +73,13 @@ const $import = {
 				pkg = JSON.parse(fs.readFile(pkgfile))
 			}
 			
-			if pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node) {
-				return true
-			}
-			else if pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node)) {
-				return true
+			if pkg? {
+				if pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node) {
+					return true
+				}
+				else if pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node)) {
+					return true
+				}
 			}
 		}
 		
@@ -94,7 +96,7 @@ const $import = {
 		}
 		
 		if fs.isFile(x + $extensions.source) {
-			return $import.loadKSFile(x + $extensions.source, moduleName, module, data, node)
+			return $import.loadKSFile(x + $extensions.source, moduleName!= null ? moduleName + $extensions.source : moduleName, module, data, node)
 		}
 		else {
 			for ext of require.extensions {
@@ -107,10 +109,7 @@ const $import = {
 		return false
 	} // }}}
 	loadKSFile(x, moduleName?, module, data, node) { // {{{
-		let file = null
-		if !moduleName {
-			file = moduleName = module.path(x, data.module)
-		}
+		moduleName ??= module.path(x, data.module)
 		
 		let metadata, name, alias, variable, hashes
 		
@@ -192,22 +191,22 @@ const $import = {
 			for name, alias of importVariables {
 			}
 			
-			$throw(`Undefined variable \(name) in the imported module at line \(data.start.line)`, node) unless variable ?= exports[name]
+			$throw(`Undefined variable '\(name)' in the imported module at line \(data.start.line)`, node) unless variable ?= exports[name]
 			
-			$import.addVariable(module, file, node, alias, variable, data)
+			$import.addVariable(module, moduleName, node, alias, variable, data)
 		}
 		else if importVarCount {
 			nf = false
 			for name, alias of importVariables {
-				$throw(`Undefined variable \(name) in the imported module at line \(data.start.line)`, node) unless variable ?= exports[name]
+				$throw(`Undefined variable '\(name)' in the imported module at line \(data.start.line)`, node) unless variable ?= exports[name]
 				
-				$import.addVariable(module, file, node, alias, variable, data)
+				$import.addVariable(module, moduleName, node, alias, variable, data)
 			}
 		}
 		
 		if importAll {
 			for name, variable of exports {
-				$import.addVariable(module, file, node, name, variable, data)
+				$import.addVariable(module, moduleName, node, name, variable, data)
 			}
 		}
 		
@@ -228,6 +227,8 @@ const $import = {
 				kind: Kind::Identifier
 				name: importAlias
 			}, VariableKind::Variable, type)
+			
+			module.import(importAlias, moduleName)
 		}
 		
 		node._kind = ImportKind::KSFile
@@ -265,7 +266,7 @@ const $import = {
 					$import.define(module, file, node, specifier.local, VariableKind::Variable)
 				}
 				else {
-					$throw('Wilcard import is only suppoted for ks files', node)
+					$throw(`Wilcard import is only supported for kaoscript files (line \(data.start.line))`, node)
 				}
 			}
 			else {

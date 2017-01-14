@@ -1,25 +1,25 @@
 class ImplementDeclaration extends Statement {
 	private {
 		_properties = []
+		_variable
 	}
 	analyse() { // {{{
-		let data = this._data
-		this._variable = this._scope.getVariable(data.variable.name)
+		@variable = @scope.getVariable(@data.variable.name)
 		
-		if this._variable.kind == VariableKind::Class {
-			for property in data.properties {
+		if @variable.kind == VariableKind::Class {
+			for property in @data.properties {
 				switch property.kind {
 					Kind::FieldDeclaration => {
-						property = new ImplementClassFieldDeclaration(property, this, this._variable)
+						property = new ImplementClassFieldDeclaration(property, this, @variable)
 					}
 					Kind::MethodAliasDeclaration => {
-						property = new ImplementClassMethodAliasDeclaration(property, this, this._variable)
+						property = new ImplementClassMethodAliasDeclaration(property, this, @variable)
 					}
 					Kind::MethodDeclaration => {
-						property = new ImplementClassMethodDeclaration(property, this, this._variable)
+						property = new ImplementClassMethodDeclaration(property, this, @variable)
 					}
 					Kind::MethodLinkDeclaration => {
-						property = new ImplementClassMethodLinkDeclaration(property, this, this._variable)
+						property = new ImplementClassMethodLinkDeclaration(property, this, @variable)
 					}
 					=> {
 						$throw('Unknow kind ' + property.kind, this)
@@ -28,17 +28,17 @@ class ImplementDeclaration extends Statement {
 				
 				property.analyse()
 				
-				this._properties.push(property)
+				@properties.push(property)
 			}
 		}
-		else if this._variable.kind == VariableKind::Variable {
-			for property in data.properties {
+		else if @variable.kind == VariableKind::Variable {
+			for property in @data.properties {
 				switch property.kind {
 					Kind::FieldDeclaration => {
-						property = new ImplementVariableFieldDeclaration(property, this, this._variable)
+						property = new ImplementVariableFieldDeclaration(property, this, @variable)
 					}
 					Kind::MethodDeclaration => {
-						property = new ImplementVariableMethodDeclaration(property, this, this._variable)
+						property = new ImplementVariableMethodDeclaration(property, this, @variable)
 					}
 					=> {
 						$throw('Unknow kind ' + property.kind, this)
@@ -47,20 +47,20 @@ class ImplementDeclaration extends Statement {
 				
 				property.analyse()
 				
-				this._properties.push(property)
+				@properties.push(property)
 			}
 		}
 		else {
-			$throw('Invalid class/variable for impl at line ' + data.start.line, this)
+			$throw('Invalid class/variable for impl at line ' + @data.start.line, this)
 		}
 	} // }}}
 	fuse() { // {{{
-		for property in this._properties {
+		for property in @properties {
 			property.fuse()
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		for property in this._properties {
+		for property in @properties {
 			property.toFragments(fragments, Mode::None)
 		}
 	} // }}}
@@ -197,7 +197,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			
 			let object = line.newObject()
 			
-			object.newLine().code('class: ' + variable.name.name)
+			object.newLine().code('class: ', variable.name is String ? variable.name : variable.name.name)
 			
 			if data.name.kind == Kind::Identifier {
 				object.newLine().code('name: ' + $quote(data.name.name))
@@ -317,7 +317,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		
 		let object = line.newObject()
 		
-		object.line('class: ', variable.name.name)
+		object.line('class: ', variable.name is String ? variable.name : variable.name.name)
 		
 		if data.name.kind == Kind::TemplateExpression {
 			object.newLine().code('name: ').compile(this._name).done()
@@ -438,7 +438,7 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		
 		let object = line.newObject()
 		
-		object.line('class: ', variable.name.name)
+		object.line('class: ', variable.name is String ? variable.name : variable.name.name)
 		
 		if data.name.kind == Kind::TemplateExpression {
 			object.newLine().code('name: ').compile(this._name).done()

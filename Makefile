@@ -1,12 +1,12 @@
 bin:
-	./bin/kaoscript -c -t ecma-v5 -o build -r src/compiler.ks=build/compiler.js src/bin.ks
+	./bin/kaoscript -c -t ecma-v5 -o lib -r src/compiler.ks=lib/compiler.js src/bin.ks
 
 comp:
-	./bin/kaoscript -c -t ecma-v5 -o build src/compiler.ks
+	./bin/kaoscript -c -t ecma-v5 -o lib src/compiler.ks
 
 build:
-	./bin/kaoscript -c -t ecma-v5 -o build src/compiler.ks
-	./bin/kaoscript -c -t ecma-v5 -o build -r src/compiler.ks=build/compiler.js src/bin.ks
+	./bin/kaoscript -c -t ecma-v5 -o lib src/compiler.ks
+	./bin/kaoscript -c -t ecma-v5 -o lib -r src/compiler.ks=lib/compiler.js src/bin.ks
 
 test:
 ifeq ($(g),)

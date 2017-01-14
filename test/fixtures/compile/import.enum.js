@@ -1,3 +1,4 @@
+require("kaoscript/register");
 module.exports = function() {
 	var Color = require("./export.enum.ks")().Color;
 	let color = Color.Red;

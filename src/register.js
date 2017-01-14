@@ -7,7 +7,7 @@
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-var _ = require('../build/compiler.js')();
+var _ = require('..')();
 var fs = require('./fs.js');
 var path = require('path');
 

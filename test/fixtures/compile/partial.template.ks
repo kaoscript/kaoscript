@@ -6,7 +6,7 @@ class Shape {
 	$create(@color: string)
 }
 
-let name = 'draw'
+let name := 'draw'
 
 impl Shape {
 	`\(name)`(canvas): string {

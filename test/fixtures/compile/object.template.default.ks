@@ -1,4 +1,4 @@
-let x = 'y'
+let x := 'y'
 
 let foo = {
 	`\(x)`: 42

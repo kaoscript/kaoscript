@@ -6,7 +6,7 @@ class Shape {
 	}
 }
 
-let shape = 'rectangle'
+let shape := 'rectangle'
 let color = 'blue'
 
 impl Shape {

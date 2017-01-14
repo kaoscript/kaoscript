@@ -1,3 +1,4 @@
+require("kaoscript/register");
 var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {Array, __ks_Array} = require("./_array.ks")();

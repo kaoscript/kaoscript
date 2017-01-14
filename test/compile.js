@@ -1,5 +1,5 @@
 var chai = require('chai');
-var Compiler = require('../build/compiler.js')().Compiler;
+var Compiler = require('..')().Compiler;
 var expect = require('chai').expect;
 var fs = require('fs');
 var path = require('path');

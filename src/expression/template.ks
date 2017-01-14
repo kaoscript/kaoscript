@@ -3,16 +3,27 @@ class TemplateExpression extends Expression {
 		_elements
 	}
 	analyse() { // {{{
-		this._elements = [$compile.expression(element, this) for element in this._data.elements]
+		@elements = [$compile.expression(element, this) for element in @data.elements]
 	} // }}}
 	fuse() { // {{{
 	} // }}}
-	isComputed() => this._elements.length > 1
+	isComputed() => @elements.length > 1
 	toFragments(fragments, mode) { // {{{
-		for element, index in this._elements {
-			fragments.code(' + ') if index
-			
-			fragments.compile(element)
+		for element, index in @elements {
+			if index == 0 {
+				/* const type = $type.type(@data.elements[index], @scope, this)
+				
+				if type?.typeName?.kind == Kind::Identifier && (type.typeName.name == 'String' || type.typeName.name == 'string') {
+					fragments.wrap(element)
+				}
+				else {
+					fragments.code('"" + ').wrap(element)
+				} */
+				fragments.wrap(element)
+			}
+			else {
+				fragments.code(' + ').wrap(element)
+			}
 		}
 	} // }}}
 }

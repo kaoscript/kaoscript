@@ -1,3 +1,4 @@
+require("kaoscript/register");
 module.exports = function() {
 	var {Color: C, Space: S} = require("./_color.ks")();
 	console.log(C, S);

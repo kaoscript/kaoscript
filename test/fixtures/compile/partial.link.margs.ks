@@ -1,7 +1,7 @@
 class Shape {
 }
 
-let name = 'draw'
+let name := 'draw'
 let shape = 'rectangle'
 let color = 'blue'
 

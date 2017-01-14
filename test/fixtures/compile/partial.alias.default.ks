@@ -10,7 +10,7 @@ class Shape {
 	}
 }
 
-let shape = 'rectangle'
+let shape := 'rectangle'
 
 impl Shape {
 	`\(shape)`(canvas) as draw with shape

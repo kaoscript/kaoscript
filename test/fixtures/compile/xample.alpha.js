@@ -1,3 +1,4 @@
+require("kaoscript/register");
 module.exports = function() {
 	var Float = require("./_float.ks")().Float;
 	var {Number, __ks_Number} = require("./_number.ks")();

@@ -1,6 +1,6 @@
 const $indentations = []
 
-class CodeFragment {
+export class CodeFragment {
 	private {
 		end		= null
 		code
@@ -53,7 +53,7 @@ const $equals = $code(' = ')
 const $space = $code(' ')
 const $terminator = $code(';\n')
 
-class FragmentBuilder {
+export class FragmentBuilder {
 	private {
 		_arrays			= {}
 		_blocks			= {}
@@ -87,7 +87,7 @@ class FragmentBuilder {
 	toArray() => this._fragments
 }
 
-class ControlBuilder {
+export class ControlBuilder {
 	private {
 		_addLastNewLine
 		_builder
@@ -174,7 +174,7 @@ class ControlBuilder {
 	} // }}}
 }
 
-class BlockBuilder {
+export class BlockBuilder {
 	static create(builder, indent) { // {{{
 		builder._blocks[indent] ??= new BlockBuilder(builder, indent)
 	
@@ -225,7 +225,7 @@ class BlockBuilder {
 	} // }}}
 }
 
-class ExpressionBuilder {
+export class ExpressionBuilder {
 	static create(builder, indent) { // {{{
 		builder._expressions[indent] ??= new ExpressionBuilder(builder, indent)
 	
@@ -372,7 +372,7 @@ class ExpressionBuilder {
 	} // }}}
 }
 
-class LineBuilder extends ExpressionBuilder {
+export class LineBuilder extends ExpressionBuilder {
 	static create(builder, indent) { // {{{
 		builder._lines[indent] ??= new LineBuilder(builder, indent)
 	
@@ -383,7 +383,7 @@ class LineBuilder extends ExpressionBuilder {
 	} // }}}
 }
 
-class ObjectBuilder {
+export class ObjectBuilder {
 	static create(builder, indent) { // {{{
 		builder._objects[indent] ??= new ObjectBuilder(builder, indent)
 	
@@ -447,7 +447,7 @@ class ObjectBuilder {
 	} // }}}
 }
 
-class ArrayBuilder {
+export class ArrayBuilder {
 	static create(builder, indent) { // {{{
 		builder._arrays[indent] ??= new ArrayBuilder(builder, indent)
 	

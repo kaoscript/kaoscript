@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.7.2
+ * Version 0.8.0
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -8,7 +8,14 @@
  * http://www.opensource.org/licenses/mit-license.php
  **/
 #![cfg(error='off')]
+/* 
+#![error(off)]
+#![error(ignore(Error))]
+#![error(ignore='Error')]
 
+#[cfg(format(classes='es5'))]
+#[cfg(format(classes(es5)))]
+ */
 import {
 	*				from @kaoscript/ast
 	* as fs			from ./fs.js
@@ -630,6 +637,11 @@ const $type = {
 					}
 				}
 			}
+			Kind::ThisExpression => {
+				if (variable ?= $variable.fromAST(data, node)) && variable.type? {
+					return variable.type
+				}
+			}
 			Kind::TypeReference => {
 				if data.typeName {
 					if data.properties {
@@ -1128,6 +1140,9 @@ const $variable = {
 					}
 				}
 			}
+			/* Kind::ThisExpression => {
+				 node.scope().getVariable('this')
+			} */
 			Kind::TypeReference => {
 				if data.typeName {
 					return node.scope().getVariable($types[data.typeName.name] || data.typeName.name)
@@ -1522,7 +1537,6 @@ const $statements = {
 	`\(Kind::IncludeDeclaration)`			: IncludeDeclaration
 	`\(Kind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration
 	`\(Kind::MethodDeclaration)`			: MethodDeclaration
-	`\(Kind::Module)`						: Module
 	`\(Kind::RequireDeclaration)`			: RequireDeclaration
 	`\(Kind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(Kind::ReturnStatement)`				: ReturnStatement
@@ -1677,7 +1691,7 @@ export class Compiler {
 	} // }}}
 	compile(data?) { // {{{
 		//console.time('parse')
-		this._module = new $statements[Kind::Module](data ?? fs.readFile(this._file), this, this._file)
+		this._module = new Module(data ?? fs.readFile(this._file), this, this._file)
 		//console.timeEnd('parse')
 		
 		//console.time('compile')
@@ -1724,6 +1738,8 @@ export class Compiler {
 		return this._module.toSourceMap()
 	} // }}}
 	writeFiles() { // {{{
+		fs.mkdir(path.dirname(this._file))
+		
 		fs.writeFile(getBinaryPath(this._file, this._options.target), this.toSource())
 		
 		if !this._module._binary {
@@ -1738,6 +1754,8 @@ export class Compiler {
 		if !this._options.output {
 			throw new Error('Undefined option: output')
 		}
+		
+		fs.mkdir(this._options.output)
 		
 		let filename = path.join(this._options.output, path.basename(this._file)).slice(0, -3) + '.js'
 		

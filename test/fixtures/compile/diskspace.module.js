@@ -1,3 +1,4 @@
+require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	var {String, __ks_String} = require("./_string.ks")();

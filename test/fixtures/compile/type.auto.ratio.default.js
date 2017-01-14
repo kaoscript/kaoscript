@@ -1,3 +1,4 @@
+require("kaoscript/register");
 module.exports = function() {
 	var {Number, __ks_Number} = require("./_number.ks")();
 	function foo() {

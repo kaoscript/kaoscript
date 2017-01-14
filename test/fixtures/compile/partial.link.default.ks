@@ -6,7 +6,7 @@ class Shape {
 	$create(@color: string)
 }
 
-let name = 'draw'
+let name := 'draw'
 let shape = 'rectangle'
 
 func draw(shape, canvas): string {

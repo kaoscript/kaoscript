@@ -140,7 +140,7 @@ class CallExpression extends Expression {
 				callee.callable(@data) if callee.callable?
 			}
 			else {
-				$throw(`Undefined variable \(@data.callee.name) at line \(@data.callee.start.line)`, this)
+				$throw(`Undefined variable '\(@data.callee.name)' at line \(@data.callee.start.line)`, this)
 			}
 		}
 		else if @data.callee.kind == Kind::MemberExpression {
