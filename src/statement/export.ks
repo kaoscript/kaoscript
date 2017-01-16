@@ -9,39 +9,39 @@ class ExportDeclaration extends Statement {
 		let statement
 		for declaration in data.declarations {
 			switch declaration.kind {
-				Kind::ClassDeclaration => {
+				NodeKind::ClassDeclaration => {
 					this._declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
 					module.export(declaration.name)
 				}
-				Kind::ExportAlias => {
+				NodeKind::ExportAlias => {
 					module.export(declaration.name, declaration.alias)
 				}
-				Kind::EnumDeclaration => {
+				NodeKind::EnumDeclaration => {
 					this._declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
 					module.export(declaration.name)
 				}
-				Kind::FunctionDeclaration => {
+				NodeKind::FunctionDeclaration => {
 					this._declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
 					module.export(declaration.name)
 				}
-				Kind::Identifier => {
+				NodeKind::Identifier => {
 					module.export(declaration)
 				}
-				Kind::TypeAliasDeclaration => {
+				NodeKind::TypeAliasDeclaration => {
 					$variable.define(this, this._scope, declaration.name, VariableKind::TypeAlias, declaration.type)
 					
 					module.export(declaration.name)
 				}
-				Kind::VariableDeclaration => {
+				NodeKind::VariableDeclaration => {
 					this._declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()

@@ -1,44 +1,31 @@
 class UnlessExpression extends Expression {
 	private {
 		_condition
-		_else
-		_then
+		_whenFalse
 	}
 	analyse() { // {{{
-		this._condition = $compile.expression(this._data.condition, this)
-		this._then = $compile.expression(this._data.then, this)
-		this._else = $compile.expression(this._data.else, this) if this._data.else?
+		@condition = $compile.expression(@data.condition, this)
+		@whenFalse = $compile.expression(@data.whenFalse, this)
 	} // }}}
 	fuse() { // {{{
-		this._condition.fuse()
-		this._then.fuse()
-		this._else.fuse() if this._else?
+		@condition.fuse()
+		@whenFalse.fuse()
 	} // }}}
 	isComputed() => true
 	toFragments(fragments, mode) { // {{{
-		if this._else? {
-			fragments
-				.wrapBoolean(this._condition)
-				.code(' ? ')
-				.compile(this._else)
-				.code(' : ')
-				.compile(this._then)
-		}
-		else {
-			fragments
-				.wrapBoolean(this._condition)
-				.code(' ? undefined : ')
-				.compile(this._then)
-		}
+		fragments
+			.wrapBoolean(@condition)
+			.code(' ? undefined : ')
+			.compile(@whenFalse)
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('if(!')
-			.wrapBoolean(this._condition)
+			.wrapBoolean(@condition)
 			.code(')')
 			.step()
-			.line(this._then)
+			.line(@whenFalse)
 			.done()
 	} // }}}
 }

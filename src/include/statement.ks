@@ -13,7 +13,7 @@ class Statement extends AbstractNode {
 		@afterwards.push(node)
 	} // }}}
 	assignment(data, allowAssignement = false) { // {{{
-		if data.left.kind == Kind::Identifier && !@scope.hasVariable(data.left.name) {
+		if data.left.kind == NodeKind::Identifier && !@scope.hasVariable(data.left.name) {
 			@variables.push(data.left.name)
 			
 			$variable.define(this, @scope, data.left, $variable.kind(data.right.type), data.right.type)

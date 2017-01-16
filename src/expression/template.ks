@@ -13,7 +13,7 @@ class TemplateExpression extends Expression {
 			if index == 0 {
 				/* const type = $type.type(@data.elements[index], @scope, this)
 				
-				if type?.typeName?.kind == Kind::Identifier && (type.typeName.name == 'String' || type.typeName.name == 'string') {
+				if type?.typeName?.kind == NodeKind::Identifier && (type.typeName.name == 'String' || type.typeName.name == 'string') {
 					fragments.wrap(element)
 				}
 				else {

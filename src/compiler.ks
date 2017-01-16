@@ -75,32 +75,32 @@ const $literalTypes = { // {{{
 
 const $operator = { // {{{
 	binaries: {
-		`\(BinaryOperator::And)`: true
-		`\(BinaryOperator::Equality)`: true
-		`\(BinaryOperator::GreaterThan)`: true
-		`\(BinaryOperator::GreaterThanOrEqual)`: true
-		`\(BinaryOperator::Inequality)`: true
-		`\(BinaryOperator::LessThan)`: true
-		`\(BinaryOperator::LessThanOrEqual)`: true
-		`\(BinaryOperator::NullCoalescing)`: true
-		`\(BinaryOperator::Or)`: true
-		`\(BinaryOperator::TypeEquality)`: true
-		`\(BinaryOperator::TypeInequality)`: true
+		`\(BinaryOperatorKind::And)`: true
+		`\(BinaryOperatorKind::Equality)`: true
+		`\(BinaryOperatorKind::GreaterThan)`: true
+		`\(BinaryOperatorKind::GreaterThanOrEqual)`: true
+		`\(BinaryOperatorKind::Inequality)`: true
+		`\(BinaryOperatorKind::LessThan)`: true
+		`\(BinaryOperatorKind::LessThanOrEqual)`: true
+		`\(BinaryOperatorKind::NullCoalescing)`: true
+		`\(BinaryOperatorKind::Or)`: true
+		`\(BinaryOperatorKind::TypeEquality)`: true
+		`\(BinaryOperatorKind::TypeInequality)`: true
 	}
 	lefts: {
-		`\(BinaryOperator::Addition)`: true
-		`\(BinaryOperator::Assignment)`: true
+		`\(BinaryOperatorKind::Addition)`: true
+		`\(BinaryOperatorKind::Assignment)`: true
 	}
 	numerics: {
-		`\(BinaryOperator::BitwiseAnd)`: true
-		`\(BinaryOperator::BitwiseLeftShift)`: true
-		`\(BinaryOperator::BitwiseOr)`: true
-		`\(BinaryOperator::BitwiseRightShift)`: true
-		`\(BinaryOperator::BitwiseXor)`: true
-		`\(BinaryOperator::Division)`: true
-		`\(BinaryOperator::Modulo)`: true
-		`\(BinaryOperator::Multiplication)`: true
-		`\(BinaryOperator::Subtraction)`: true
+		`\(BinaryOperatorKind::BitwiseAnd)`: true
+		`\(BinaryOperatorKind::BitwiseLeftShift)`: true
+		`\(BinaryOperatorKind::BitwiseOr)`: true
+		`\(BinaryOperatorKind::BitwiseRightShift)`: true
+		`\(BinaryOperatorKind::BitwiseXor)`: true
+		`\(BinaryOperatorKind::Division)`: true
+		`\(BinaryOperatorKind::Modulo)`: true
+		`\(BinaryOperatorKind::Multiplication)`: true
+		`\(BinaryOperatorKind::Subtraction)`: true
 	}
 } // }}}
 
@@ -141,7 +141,7 @@ const $attribute = {
 		
 		if data.attributes?.length > 0 {
 			for attr in data.attributes {
-				if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cfg' {
+				if attr.declaration.kind == NodeKind::AttributeExpression && attr.declaration.name.name == 'cfg' {
 					if nc {
 						options = Object.clone(options)
 						
@@ -156,7 +156,7 @@ const $attribute = {
 		return options
 	} // }}}
 	cc(data, target) { // {{{
-		if data.kind == Kind::AttributeExpression {
+		if data.kind == NodeKind::AttributeExpression {
 			if data.name.name == 'all' {
 				for arg in data.arguments when !$attribute.cc(arg, target) {
 					return false
@@ -176,7 +176,7 @@ const $attribute = {
 				$throw('Not Implemented')
 			}
 		}
-		else if data.kind == Kind::AttributeOperator {
+		else if data.kind == NodeKind::AttributeOperator {
 			if data.name.name == 'target_version' {
 				return target.version == data.value.value
 			}
@@ -185,7 +185,7 @@ const $attribute = {
 				$throw('Not Implemented')
 			}
 		}
-		else if data.kind == Kind::Identifier {
+		else if data.kind == NodeKind::Identifier {
 			return target.name == data.name
 		}
 		else {
@@ -196,7 +196,7 @@ const $attribute = {
 	conditionalCompilation(data, target) { // {{{
 		if data.attributes?.length > 0 {
 			for attr in data.attributes {
-				if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cc' {
+				if attr.declaration.kind == NodeKind::AttributeExpression && attr.declaration.name.name == 'cc' {
 					if attr.declaration.arguments.length != 1 {
 						$throw(`Expected 1 argument for cc() at line \(data.start.line)`)
 					}
@@ -210,12 +210,12 @@ const $attribute = {
 	} // }}}
 	configure(attr, options) { // {{{
 		for arg in attr.arguments {
-			if arg.kind == Kind::AttributeExpression {
+			if arg.kind == NodeKind::AttributeExpression {
 				options[arg.name.name] ??= {}
 				
 				$attribute.configure(arg, options[arg.name.name])
 			}
-			else if arg.kind == Kind::AttributeOperator {
+			else if arg.kind == NodeKind::AttributeOperator {
 				options[arg.name.name] = arg.value.value
 			}
 		}
@@ -223,10 +223,10 @@ const $attribute = {
 }
 
 func $block(data) { // {{{
-	return data if data.kind == Kind::Block
+	return data if data.kind == NodeKind::Block
 	
 	return {
-		kind: Kind::Block
+		kind: NodeKind::Block
 		statements: [
 			data
 		]
@@ -234,11 +234,11 @@ func $block(data) { // {{{
 } // }}}
 
 func $body(data) { // {{{
-	return data.statements if data.kind == Kind::Block
+	return data.statements if data.kind == NodeKind::Block
 	
 	return [
 		{
-			kind: Kind::ReturnStatement
+			kind: NodeKind::ReturnStatement
 			value: data
 		}
 	]
@@ -259,7 +259,7 @@ const $error = {
 func $identifier(name) { // {{{
 	if name is String {
 		return {
-			kind: Kind::Identifier
+			kind: NodeKind::Identifier
 			name: name
 		}
 	}
@@ -363,14 +363,14 @@ func $throw(message, node?) ~ Error { // {{{
 
 func $toInt(data, defaultValue) { // {{{
 	switch data.kind {
-		Kind::NumericExpression	=> return data.value
-								=> return defaultValue
+		NodeKind::NumericExpression	=> return data.value
+									=> return defaultValue
 	}
 } // }}}
 
 const $type = {
 	check(node, fragments, name, type) { // {{{
-		if type.kind == Kind::TypeReference {
+		if type.kind == NodeKind::TypeReference {
 			type = $type.unalias(type, node.scope())
 			
 			if type.typeParameters {
@@ -450,14 +450,14 @@ const $type = {
 	} // }}}
 	compile(data, fragments) { // {{{
 		switch(data.kind) {
-			Kind::TypeReference => fragments.code($types[data.typeName.name] ?? data.typeName.name)
+			NodeKind::TypeReference => fragments.code($types[data.typeName.name] ?? data.typeName.name)
 		}
 	} // }}}
 	fromAST(type?) { // {{{
 		return VariableKind::Variable	if !?type
-		return VariableKind::Class		if type.kind == Kind::ClassDeclaration
-		return VariableKind::Enum		if type.kind == Kind::EnumDeclaration
-		return VariableKind::Function	if type.kind == Kind::FunctionExpression
+		return VariableKind::Class		if type.kind == NodeKind::ClassDeclaration
+		return VariableKind::Enum		if type.kind == NodeKind::EnumDeclaration
+		return VariableKind::Function	if type.kind == NodeKind::FunctionExpression
 		return VariableKind::Variable
 	} // }}}
 	isAny(type?) { // {{{
@@ -465,7 +465,7 @@ const $type = {
 			return true
 		}
 		
-		if type.kind == Kind::TypeReference && type.typeName.kind == Kind::Identifier && (type.typeName.name == 'any' || type.typeName.name == 'Any') {
+		if type.kind == NodeKind::TypeReference && type.typeName.kind == NodeKind::Identifier && (type.typeName.name == 'any' || type.typeName.name == 'Any') {
 			return true
 		}
 		
@@ -474,16 +474,16 @@ const $type = {
 	reference(name) { // {{{
 		if name is string {
 			return {
-				kind: Kind::TypeReference
+				kind: NodeKind::TypeReference
 				typeName: {
-					kind: Kind::Identifier
+					kind: NodeKind::Identifier
 					name: name
 				}
 			}
 		}
 		else {
 			return {
-				kind: Kind::TypeReference
+				kind: NodeKind::TypeReference
 				typeName: name
 			}
 		}
@@ -491,10 +491,10 @@ const $type = {
 	same(a, b) { // {{{
 		return false if a.kind != b.kind
 		
-		if a.kind == Kind::TypeReference {
+		if a.kind == NodeKind::TypeReference {
 			return false if a.typeName.kind != b.typeName.kind
 			
-			if a.typeName.kind == Kind::Identifier {
+			if a.typeName.kind == NodeKind::Identifier {
 				return false if a.typeName.name != b.typeName.name
 			}
 		}
@@ -508,38 +508,38 @@ const $type = {
 		let type = null
 		
 		switch data.kind {
-			Kind::ArrayComprehension => {
+			NodeKind::ArrayComprehension => {
 				return {
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'Array'
 					}
 				}
 			}
-			Kind::ArrayExpression => {
+			NodeKind::ArrayExpression => {
 				return {
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'Array'
 					}
 				}
 			}
-			Kind::ArrayRange => {
+			NodeKind::ArrayRange => {
 				return {
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'Array'
 					}
 				}
 			}
-			Kind::BinaryOperator => {
-				if data.operator.kind == BinaryOperator::TypeCasting {
+			NodeKind::BinaryOperator => {
+				if data.operator.kind == BinaryOperatorKind::TypeCasting {
 					return $type.type(data.right, scope, node)
 				}
 				else if $operator.binaries[data.operator.kind] {
 					return {
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'Boolean'
 						}
 					}
@@ -550,54 +550,54 @@ const $type = {
 				else if $operator.numerics[data.operator.kind] {
 					return {
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'Number'
 						}
 					}
 				}
 			}
-			Kind::CallExpression => {
+			NodeKind::CallExpression => {
 				if (variable ?= $variable.fromAST(data, node)) && variable.type? {
 					return variable.type
 				}
 			}
-			Kind::CreateExpression => {
+			NodeKind::CreateExpression => {
 				return {
 					typeName: data.class
 				}
 			}
-			Kind::Identifier => {
+			NodeKind::Identifier => {
 				let variable = scope.getVariable(data.name)
 				
 				if variable && variable.type {
 					return variable.type
 				}
 			}
-			Kind::Literal => {
+			NodeKind::Literal => {
 				return {
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: $literalTypes[data.value] || 'String'
 					}
 				}
 			}
-			Kind::MemberExpression => {
+			NodeKind::MemberExpression => {
 				if (variable ?= $variable.fromAST(data, node)) && variable.type? {
 					return variable.type
 				}
 			}
-			Kind::NumericExpression => {
+			NodeKind::NumericExpression => {
 				return {
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'Number'
 					}
 				}
 			}
-			Kind::ObjectExpression => {
+			NodeKind::ObjectExpression => {
 				type = {
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'Object'
 					}
 					properties: {}
@@ -610,7 +610,7 @@ const $type = {
 						name: property.name.name
 					}
 					
-					if property.value.kind == Kind::FunctionExpression {
+					if property.value.kind == NodeKind::FunctionExpression {
 						prop.signature = $function.signature(property.value, node)
 						
 						if property.value.type {
@@ -621,33 +621,33 @@ const $type = {
 					type.properties[property.name.name] = prop
 				}
 			}
-			Kind::RegularExpression => {
+			NodeKind::RegularExpression => {
 				return {
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'RegExp'
 					}
 				}
 			}
-			Kind::Template => {
+			NodeKind::Template => {
 				return {
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'String'
 					}
 				}
 			}
-			Kind::ThisExpression => {
+			NodeKind::ThisExpression => {
 				if (variable ?= $variable.fromAST(data, node)) && variable.type? {
 					return variable.type
 				}
 			}
-			Kind::TypeReference => {
+			NodeKind::TypeReference => {
 				if data.typeName {
 					if data.properties {
 						type = {
 							typeName: {
-								kind: Kind::Identifier
+								kind: NodeKind::Identifier
 								name: 'Object'
 							}
 							properties: {}
@@ -661,7 +661,7 @@ const $type = {
 							}
 							
 							if property.type? {
-								if property.type.kind == Kind::FunctionExpression {
+								if property.type.kind == NodeKind::FunctionExpression {
 									prop.signature = $function.signature(property.type, node)
 									
 									if property.type.type {
@@ -691,7 +691,7 @@ const $type = {
 					}
 				}
 			}
-			Kind::UnionType => {
+			NodeKind::UnionType => {
 				return {
 					types: [$type.type(type, scope, node) for type in data.types]
 				}
@@ -702,15 +702,15 @@ const $type = {
 		return type
 	} // }}}
 	typeName(data) { // {{{
-		if data.kind == Kind::Identifier {
+		if data.kind == NodeKind::Identifier {
 			return {
-				kind: Kind::Identifier
+				kind: NodeKind::Identifier
 				name: data.name
 			}
 		}
 		else {
 			return {
-				kind: Kind::MemberExpression
+				kind: NodeKind::MemberExpression
 				object: $type.typeName(data.object)
 				property: $type.typeName(data.property)
 				computed: false
@@ -804,9 +804,9 @@ const $variable = {
 					return {
 						kind: VariableKind::Variable
 						type: {
-							kind: Kind::TypeReference
+							kind: NodeKind::TypeReference
 							typeName: {
-								kind: Kind::Identifier
+								kind: NodeKind::Identifier
 								name: variable.instanceVariables[name].type
 							}
 						}
@@ -882,20 +882,20 @@ const $variable = {
 	fromAST(data, node) { // {{{
 		//console.log(data)
 		switch data.kind {
-			Kind::ArrayComprehension, Kind::ArrayExpression, Kind::ArrayRange => {
+			NodeKind::ArrayComprehension, NodeKind::ArrayExpression, NodeKind::ArrayRange => {
 				return {
 					kind: VariableKind::Variable
 					type: {
-						kind: Kind::TypeReference
+						kind: NodeKind::TypeReference
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'Array'
 						}
 					}
 				}
 			}
-			Kind::BinaryOperator => {
-				if data.operator.kind == BinaryOperator::TypeCasting {
+			NodeKind::BinaryOperator => {
+				if data.operator.kind == BinaryOperatorKind::TypeCasting {
 					return {
 						kind: VariableKind::Variable
 						type: data.right
@@ -905,9 +905,9 @@ const $variable = {
 					return {
 						kind: VariableKind::Variable
 						type: {
-							kind: Kind::TypeReference
+							kind: NodeKind::TypeReference
 							typeName: {
-								kind: Kind::Identifier
+								kind: NodeKind::Identifier
 								name: 'Boolean'
 							}
 						}
@@ -927,16 +927,16 @@ const $variable = {
 					return {
 						kind: VariableKind::Variable
 						type: {
-							kind: Kind::TypeReference
+							kind: NodeKind::TypeReference
 							typeName: {
-								kind: Kind::Identifier
+								kind: NodeKind::Identifier
 								name: 'Number'
 							}
 						}
 					}
 				}
 			}
-			Kind::CallExpression => {
+			NodeKind::CallExpression => {
 				let variable = $variable.fromAST(data.callee, node)
 				//console.log('getVariable.call.data', data)
 				//console.log('getVariable.call.variable', variable)
@@ -946,7 +946,7 @@ const $variable = {
 						return {
 							kind: VariableKind::Variable
 							type: {
-								kind: Kind::TypeReference
+								kind: NodeKind::TypeReference
 								typeName: $identifier(variable.name)
 							}
 						}
@@ -964,37 +964,48 @@ const $variable = {
 					}
 				}
 			}
-			Kind::CreateExpression => {
+			NodeKind::ConditionalExpression => {
+				let a = $type.type(data.whenTrue, node.scope(), node)
+				let b = $type.type(data.whenFalse, node.scope(), node)
+				
+				if a && b && $type.same(a, b) {
+					return {
+						kind: VariableKind::Variable
+						type: a
+					}
+				}
+			}
+			NodeKind::CreateExpression => {
 				if variable ?= $variable.fromAST(data.class, node) {
 					return {
 						kind: VariableKind::Variable
 						type: {
-							kind: Kind::TypeReference
+							kind: NodeKind::TypeReference
 							typeName: $identifier(variable.name)
 						}
 					}
 				}
 			}
-			Kind::FunctionExpression => {
+			NodeKind::FunctionExpression => {
 				return {
 					kind: VariableKind::Variable
 					type: {
-						kind: Kind::TypeReference
+						kind: NodeKind::TypeReference
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'Function'
 						}
 					}
 				}
 			}
-			Kind::Identifier => {
+			NodeKind::Identifier => {
 				if $literalTypes[data.name] is String {
 					return {
 						kind: VariableKind::Variable
 						type: {
-							kind: Kind::TypeReference
+							kind: NodeKind::TypeReference
 							typeName: {
-								kind: Kind::Identifier
+								kind: NodeKind::Identifier
 								name: $literalTypes[data.name]
 							}
 						}
@@ -1004,31 +1015,31 @@ const $variable = {
 					return node.scope().getVariable(data.name)
 				}
 			}
-			Kind::LambdaExpression => {
+			NodeKind::LambdaExpression => {
 				return {
 					kind: VariableKind::Variable
 					type: {
-						kind: Kind::TypeReference
+						kind: NodeKind::TypeReference
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'Function'
 						}
 					}
 				}
 			}
-			Kind::Literal => {
+			NodeKind::Literal => {
 				return {
 					kind: VariableKind::Variable
 					type: {
-						kind: Kind::TypeReference
+						kind: NodeKind::TypeReference
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'String'
 						}
 					}
 				}
 			}
-			Kind::MemberExpression => {
+			NodeKind::MemberExpression => {
 				let variable = $variable.fromAST(data.object, node)
 				//console.log('getVariable.member.data', data)
 				//console.log('getVariable.member.variable', variable)
@@ -1046,7 +1057,7 @@ const $variable = {
 								return {
 									kind: VariableKind::Variable
 									type: {
-										kind: Kind::TypeReference
+										kind: NodeKind::TypeReference
 										typeName: $identifier(variable.name)
 									}
 								}
@@ -1057,7 +1068,7 @@ const $variable = {
 						let name = data.property.name
 						
 						if variable.kind == VariableKind::Class {
-							if data.object.kind == Kind::Identifier {
+							if data.object.kind == NodeKind::Identifier {
 								if variable.classMethods[name]? {
 									let variables: Array = []
 									
@@ -1066,7 +1077,7 @@ const $variable = {
 											$variable.push(variables, {
 												kind: VariableKind::Variable
 												type: {
-													kind: Kind::TypeReference
+													kind: NodeKind::TypeReference
 													typeName: method.type.typeName
 												}
 											})
@@ -1093,57 +1104,46 @@ const $variable = {
 					}
 				}
 			}
-			Kind::NumericExpression => {
+			NodeKind::NumericExpression => {
 				return {
 					kind: VariableKind::Variable
 					type: {
-						kind: Kind::TypeReference
+						kind: NodeKind::TypeReference
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'Number'
 						}
 					}
 				}
 			}
-			Kind::ObjectExpression => {
+			NodeKind::ObjectExpression => {
 				return {
 					kind: VariableKind::Variable
 					type: {
-						kind: Kind::TypeReference
+						kind: NodeKind::TypeReference
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'Object'
 						}
 					}
 				}
 			}
-			Kind::TernaryConditionalExpression => {
-				let a = $type.type(data.then, node.scope(), node)
-				let b = $type.type(data.else, node.scope(), node)
-				
-				if a && b && $type.same(a, b) {
-					return {
-						kind: VariableKind::Variable
-						type: a
-					}
-				}
-			}
-			Kind::TemplateExpression => {
+			NodeKind::TemplateExpression => {
 				return {
 					kind: VariableKind::Variable
 					type: {
-						kind: Kind::TypeReference
+						kind: NodeKind::TypeReference
 						typeName: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'String'
 						}
 					}
 				}
 			}
-			/* Kind::ThisExpression => {
+			/* NodeKind::ThisExpression => {
 				 node.scope().getVariable('this')
 			} */
-			Kind::TypeReference => {
+			NodeKind::TypeReference => {
 				if data.typeName {
 					return node.scope().getVariable($types[data.typeName.name] || data.typeName.name)
 				}
@@ -1156,7 +1156,7 @@ const $variable = {
 		//console.log('fromType', data)
 		
 		if data.typeName? {
-			if data.typeName.kind == Kind::Identifier {
+			if data.typeName.kind == NodeKind::Identifier {
 				let name = $types[data.typeName.name] || data.typeName.name
 				let variable = node.scope().getVariable(name)
 				
@@ -1215,9 +1215,9 @@ const $variable = {
 	kind(type?) { // {{{
 		if type {
 			switch type.kind {
-				Kind::TypeReference => {
+				NodeKind::TypeReference => {
 					if type.typeName {
-						if type.typeName.kind == Kind::Identifier {
+						if type.typeName.kind == NodeKind::Identifier {
 							let name = $types[type.typeName.name] || type.typeName.name
 							
 							return $typekinds[name] || VariableKind::Variable
@@ -1352,11 +1352,11 @@ const $compile = {
 		if clazz? {
 			expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 		}
-		else if data.kind == Kind::BinaryOperator {
+		else if data.kind == NodeKind::BinaryOperator {
 			if clazz ?= $binaryOperators[data.operator.kind] {
 				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
-			else if data.operator.kind == BinaryOperator::Assignment {
+			else if data.operator.kind == BinaryOperatorKind::Assignment {
 				if clazz = $assignmentOperators[data.operator.assignment] {
 					expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 				}
@@ -1370,7 +1370,7 @@ const $compile = {
 				$throw('Unknow binary operator ' + data.operator.kind, parent)
 			}
 		}
-		else if data.kind == Kind::PolyadicOperator {
+		else if data.kind == NodeKind::PolyadicOperator {
 			if clazz ?= $polyadicOperators[data.operator.kind] {
 				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
@@ -1379,7 +1379,7 @@ const $compile = {
 				$throw('Unknow polyadic operator ' + data.operator.kind, parent)
 			}
 		}
-		else if data.kind == Kind::UnaryExpression {
+		else if data.kind == NodeKind::UnaryExpression {
 			if clazz ?= $unaryOperators[data.operator.kind] {
 				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
@@ -1416,86 +1416,87 @@ const $compile = {
 }
 
 const $assignmentOperators = {
-	`\(AssignmentOperator::Addition)`			: AssignmentOperatorAddition
-	`\(AssignmentOperator::BitwiseAnd)`			: AssignmentOperatorBitwiseAnd
-	`\(AssignmentOperator::BitwiseLeftShift)`	: AssignmentOperatorBitwiseLeftShift
-	`\(AssignmentOperator::BitwiseOr)`			: AssignmentOperatorBitwiseOr
-	`\(AssignmentOperator::BitwiseRightShift)`	: AssignmentOperatorBitwiseRightShift
-	`\(AssignmentOperator::BitwiseXor)`			: AssignmentOperatorBitwiseXor
-	`\(AssignmentOperator::Equality)`			: AssignmentOperatorEquality
-	`\(AssignmentOperator::Existential)`		: AssignmentOperatorExistential
-	`\(AssignmentOperator::Modulo)`				: AssignmentOperatorModulo
-	`\(AssignmentOperator::Multiplication)`		: AssignmentOperatorMultiplication
-	`\(AssignmentOperator::NonExistential)`		: AssignmentOperatorNonExistential
-	`\(AssignmentOperator::NullCoalescing)`		: AssignmentOperatorNullCoalescing
-	`\(AssignmentOperator::Subtraction)`		: AssignmentOperatorSubtraction
+	`\(AssignmentOperatorKind::Addition)`			: AssignmentOperatorAddition
+	`\(AssignmentOperatorKind::BitwiseAnd)`			: AssignmentOperatorBitwiseAnd
+	`\(AssignmentOperatorKind::BitwiseLeftShift)`	: AssignmentOperatorBitwiseLeftShift
+	`\(AssignmentOperatorKind::BitwiseOr)`			: AssignmentOperatorBitwiseOr
+	`\(AssignmentOperatorKind::BitwiseRightShift)`	: AssignmentOperatorBitwiseRightShift
+	`\(AssignmentOperatorKind::BitwiseXor)`			: AssignmentOperatorBitwiseXor
+	`\(AssignmentOperatorKind::Equality)`			: AssignmentOperatorEquality
+	`\(AssignmentOperatorKind::Existential)`		: AssignmentOperatorExistential
+	`\(AssignmentOperatorKind::Modulo)`				: AssignmentOperatorModulo
+	`\(AssignmentOperatorKind::Multiplication)`		: AssignmentOperatorMultiplication
+	`\(AssignmentOperatorKind::NonExistential)`		: AssignmentOperatorNonExistential
+	`\(AssignmentOperatorKind::NullCoalescing)`		: AssignmentOperatorNullCoalescing
+	`\(AssignmentOperatorKind::Subtraction)`		: AssignmentOperatorSubtraction
 }
 
 const $binaryOperators = {
-	`\(BinaryOperator::Addition)`			: BinaryOperatorAddition
-	`\(BinaryOperator::And)`				: BinaryOperatorAnd
-	`\(BinaryOperator::BitwiseAnd)`			: BinaryOperatorBitwiseAnd
-	`\(BinaryOperator::BitwiseLeftShift)`	: BinaryOperatorBitwiseLeftShift
-	`\(BinaryOperator::BitwiseOr)`			: BinaryOperatorBitwiseOr
-	`\(BinaryOperator::BitwiseRightShift)`	: BinaryOperatorBitwiseRightShift
-	`\(BinaryOperator::BitwiseXor)`			: BinaryOperatorBitwiseXor
-	`\(BinaryOperator::Division)`			: BinaryOperatorDivision
-	`\(BinaryOperator::Equality)`			: BinaryOperatorEquality
-	`\(BinaryOperator::GreaterThan)`		: BinaryOperatorGreaterThan
-	`\(BinaryOperator::GreaterThanOrEqual)`	: BinaryOperatorGreaterThanOrEqual
-	`\(BinaryOperator::Inequality)`			: BinaryOperatorInequality
-	`\(BinaryOperator::LessThan)`			: BinaryOperatorLessThan
-	`\(BinaryOperator::LessThanOrEqual)`	: BinaryOperatorLessThanOrEqual
-	`\(BinaryOperator::Modulo)`				: BinaryOperatorModulo
-	`\(BinaryOperator::Multiplication)`		: BinaryOperatorMultiplication
-	`\(BinaryOperator::NullCoalescing)`		: BinaryOperatorNullCoalescing
-	`\(BinaryOperator::Or)`					: BinaryOperatorOr
-	`\(BinaryOperator::Subtraction)`		: BinaryOperatorSubtraction
-	`\(BinaryOperator::TypeCasting)`		: BinaryOperatorTypeCasting
-	`\(BinaryOperator::TypeEquality)`		: BinaryOperatorTypeEquality
-	`\(BinaryOperator::TypeInequality)`		: BinaryOperatorTypeInequality
+	`\(BinaryOperatorKind::Addition)`			: BinaryOperatorAddition
+	`\(BinaryOperatorKind::And)`				: BinaryOperatorAnd
+	`\(BinaryOperatorKind::BitwiseAnd)`			: BinaryOperatorBitwiseAnd
+	`\(BinaryOperatorKind::BitwiseLeftShift)`	: BinaryOperatorBitwiseLeftShift
+	`\(BinaryOperatorKind::BitwiseOr)`			: BinaryOperatorBitwiseOr
+	`\(BinaryOperatorKind::BitwiseRightShift)`	: BinaryOperatorBitwiseRightShift
+	`\(BinaryOperatorKind::BitwiseXor)`			: BinaryOperatorBitwiseXor
+	`\(BinaryOperatorKind::Division)`			: BinaryOperatorDivision
+	`\(BinaryOperatorKind::Equality)`			: BinaryOperatorEquality
+	`\(BinaryOperatorKind::GreaterThan)`		: BinaryOperatorGreaterThan
+	`\(BinaryOperatorKind::GreaterThanOrEqual)`	: BinaryOperatorGreaterThanOrEqual
+	`\(BinaryOperatorKind::Inequality)`			: BinaryOperatorInequality
+	`\(BinaryOperatorKind::LessThan)`			: BinaryOperatorLessThan
+	`\(BinaryOperatorKind::LessThanOrEqual)`	: BinaryOperatorLessThanOrEqual
+	`\(BinaryOperatorKind::Modulo)`				: BinaryOperatorModulo
+	`\(BinaryOperatorKind::Multiplication)`		: BinaryOperatorMultiplication
+	`\(BinaryOperatorKind::NullCoalescing)`		: BinaryOperatorNullCoalescing
+	`\(BinaryOperatorKind::Or)`					: BinaryOperatorOr
+	`\(BinaryOperatorKind::Subtraction)`		: BinaryOperatorSubtraction
+	`\(BinaryOperatorKind::TypeCasting)`		: BinaryOperatorTypeCasting
+	`\(BinaryOperatorKind::TypeEquality)`		: BinaryOperatorTypeEquality
+	`\(BinaryOperatorKind::TypeInequality)`		: BinaryOperatorTypeInequality
 }
 
 const $expressions = {
-	`\(Kind::ArrayBinding)`					: ArrayBinding
-	`\(Kind::ArrayComprehension)`			: func(data, parent, scope) {
-		if data.loop.kind == Kind::ForFromStatement {
+	`\(NodeKind::ArrayBinding)`					: ArrayBinding
+	`\(NodeKind::ArrayComprehension)`			: func(data, parent, scope) {
+		if data.loop.kind == NodeKind::ForFromStatement {
 			return new ArrayComprehensionForFrom(data, parent, scope)
 		}
-		else if data.loop.kind == Kind::ForInStatement {
+		else if data.loop.kind == NodeKind::ForInStatement {
 			return new ArrayComprehensionForIn(data, parent, scope)
 		}
-		else if data.loop.kind == Kind::ForOfStatement {
+		else if data.loop.kind == NodeKind::ForOfStatement {
 			return new ArrayComprehensionForOf(data, parent, scope)
 		}
-		else if data.loop.kind == Kind::ForRangeStatement {
+		else if data.loop.kind == NodeKind::ForRangeStatement {
 			return new ArrayComprehensionForRange(data, parent, scope)
 		}
 		else {
 			$throw('Not Implemented', parent)
 		}
 	}
-	`\(Kind::ArrayExpression)`				: ArrayExpression
-	`\(Kind::ArrayRange)`					: ArrayRange
-	`\(Kind::BindingElement)`				: BindingElement
-	`\(Kind::Block)`						: BlockExpression
-	`\(Kind::CallExpression)`				: func(data, parent, scope) {
-		if data.callee.kind == Kind::MemberExpression && !data.callee.computed && (callee = $sealed.callee(data.callee, parent)) {
+	`\(NodeKind::ArrayExpression)`				: ArrayExpression
+	`\(NodeKind::ArrayRange)`					: ArrayRange
+	`\(NodeKind::BindingElement)`				: BindingElement
+	`\(NodeKind::Block)`						: BlockExpression
+	`\(NodeKind::CallExpression)`				: func(data, parent, scope) {
+		if data.callee.kind == NodeKind::MemberExpression && !data.callee.computed && (callee = $sealed.callee(data.callee, parent)) {
 			return new CallSealedExpression(data, parent, scope, callee)
 		}
 		else {
 			return new CallExpression(data, parent, scope)
 		}
 	}
-	`\(Kind::CreateExpression)`				: CreateExpression
-	`\(Kind::CurryExpression)`				: CurryExpression
-	`\(Kind::EnumExpression)`				: EnumExpression
-	`\(Kind::FunctionExpression)`			: FunctionExpression
-	`\(Kind::Identifier)`					: IdentifierLiteral
-	`\(Kind::IfExpression)`					: IfExpression
-	`\(Kind::LambdaExpression)`				: LambdaExpression
-	`\(Kind::Literal)`						: StringLiteral
-	`\(Kind::MemberExpression)`				: func(data, parent, scope) {
+	`\(NodeKind::ConditionalExpression)`		: ConditionalExpression
+	`\(NodeKind::CreateExpression)`				: CreateExpression
+	`\(NodeKind::CurryExpression)`				: CurryExpression
+	`\(NodeKind::EnumExpression)`				: EnumExpression
+	`\(NodeKind::FunctionExpression)`			: FunctionExpression
+	`\(NodeKind::Identifier)`					: IdentifierLiteral
+	`\(NodeKind::IfExpression)`					: IfExpression
+	`\(NodeKind::LambdaExpression)`				: LambdaExpression
+	`\(NodeKind::Literal)`						: StringLiteral
+	`\(NodeKind::MemberExpression)`				: func(data, parent, scope) {
 		if callee = $sealed.callee(data, parent) {
 			return new MemberSealedExpression(data, parent, scope, callee)
 		}
@@ -1503,79 +1504,78 @@ const $expressions = {
 			return new MemberExpression(data, parent, scope)
 		}
 	}
-	`\(Kind::NumericExpression)`			: NumberLiteral
-	`\(Kind::ObjectBinding)`				: ObjectBinding
-	`\(Kind::ObjectExpression)`				: ObjectExpression
-	`\(Kind::ObjectMember)`					: ObjectMember
-	`\(Kind::OmittedExpression)`			: OmittedExpression
-	`\(Kind::RegularExpression)`			: RegularExpression
-	`\(Kind::TemplateExpression)`			: TemplateExpression
-	`\(Kind::TernaryConditionalExpression)`	: TernaryConditionalExpression
-	`\(Kind::ThisExpression)`				: ThisExpression
-	`\(Kind::UnlessExpression)`				: UnlessExpression
+	`\(NodeKind::NumericExpression)`			: NumberLiteral
+	`\(NodeKind::ObjectBinding)`				: ObjectBinding
+	`\(NodeKind::ObjectExpression)`				: ObjectExpression
+	`\(NodeKind::ObjectMember)`					: ObjectMember
+	`\(NodeKind::OmittedExpression)`			: OmittedExpression
+	`\(NodeKind::RegularExpression)`			: RegularExpression
+	`\(NodeKind::TemplateExpression)`			: TemplateExpression
+	`\(NodeKind::ThisExpression)`				: ThisExpression
+	`\(NodeKind::UnlessExpression)`				: UnlessExpression
 }
 
 const $statements = {
-	`\(Kind::BreakStatement)`				: BreakStatement
-	`\(Kind::ClassDeclaration)`				: ClassDeclaration
-	`\(Kind::ContinueStatement)`			: ContinueStatement
-	`\(Kind::DestroyStatement)`				: DestroyStatement
-	`\(Kind::DoUntilStatement)`				: DoUntilStatement
-	`\(Kind::DoWhileStatement)`				: DoWhileStatement
-	`\(Kind::EnumDeclaration)`				: EnumDeclaration
-	`\(Kind::ExportDeclaration)`			: ExportDeclaration
-	`\(Kind::ExternDeclaration)`			: ExternDeclaration
-	`\(Kind::ExternOrRequireDeclaration)`	: ExternOrRequireDeclaration
-	`\(Kind::ForFromStatement)`				: ForFromStatement
-	`\(Kind::ForInStatement)`				: ForInStatement
-	`\(Kind::ForOfStatement)`				: ForOfStatement
-	`\(Kind::ForRangeStatement)`			: ForRangeStatement
-	`\(Kind::FunctionDeclaration)`			: FunctionDeclaration
-	`\(Kind::IfStatement)`					: IfStatement
-	`\(Kind::ImplementDeclaration)`			: ImplementDeclaration
-	`\(Kind::ImportDeclaration)`			: ImportDeclaration
-	`\(Kind::IncludeDeclaration)`			: IncludeDeclaration
-	`\(Kind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration
-	`\(Kind::MethodDeclaration)`			: MethodDeclaration
-	`\(Kind::RequireDeclaration)`			: RequireDeclaration
-	`\(Kind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
-	`\(Kind::ReturnStatement)`				: ReturnStatement
-	`\(Kind::SwitchStatement)`				: SwitchStatement
-	`\(Kind::ThrowStatement)`				: ThrowStatement
-	`\(Kind::TryStatement)`					: TryStatement
-	`\(Kind::TypeAliasDeclaration)`			: TypeAliasDeclaration
-	`\(Kind::UnlessStatement)`				: UnlessStatement
-	`\(Kind::UntilStatement)`				: UntilStatement
-	`\(Kind::VariableDeclaration)`			: VariableDeclaration
-	`\(Kind::WhileStatement)`				: WhileStatement
+	`\(NodeKind::BreakStatement)`				: BreakStatement
+	`\(NodeKind::ClassDeclaration)`				: ClassDeclaration
+	`\(NodeKind::ContinueStatement)`			: ContinueStatement
+	`\(NodeKind::DestroyStatement)`				: DestroyStatement
+	`\(NodeKind::DoUntilStatement)`				: DoUntilStatement
+	`\(NodeKind::DoWhileStatement)`				: DoWhileStatement
+	`\(NodeKind::EnumDeclaration)`				: EnumDeclaration
+	`\(NodeKind::ExportDeclaration)`			: ExportDeclaration
+	`\(NodeKind::ExternDeclaration)`			: ExternDeclaration
+	`\(NodeKind::ExternOrRequireDeclaration)`	: ExternOrRequireDeclaration
+	`\(NodeKind::ForFromStatement)`				: ForFromStatement
+	`\(NodeKind::ForInStatement)`				: ForInStatement
+	`\(NodeKind::ForOfStatement)`				: ForOfStatement
+	`\(NodeKind::ForRangeStatement)`			: ForRangeStatement
+	`\(NodeKind::FunctionDeclaration)`			: FunctionDeclaration
+	`\(NodeKind::IfStatement)`					: IfStatement
+	`\(NodeKind::ImplementDeclaration)`			: ImplementDeclaration
+	`\(NodeKind::ImportDeclaration)`			: ImportDeclaration
+	`\(NodeKind::IncludeDeclaration)`			: IncludeDeclaration
+	`\(NodeKind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration
+	`\(NodeKind::MethodDeclaration)`			: MethodDeclaration
+	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
+	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
+	`\(NodeKind::ReturnStatement)`				: ReturnStatement
+	`\(NodeKind::SwitchStatement)`				: SwitchStatement
+	`\(NodeKind::ThrowStatement)`				: ThrowStatement
+	`\(NodeKind::TryStatement)`					: TryStatement
+	`\(NodeKind::TypeAliasDeclaration)`			: TypeAliasDeclaration
+	`\(NodeKind::UnlessStatement)`				: UnlessStatement
+	`\(NodeKind::UntilStatement)`				: UntilStatement
+	`\(NodeKind::VariableDeclaration)`			: VariableDeclaration
+	`\(NodeKind::WhileStatement)`				: WhileStatement
 	`default`								: ExpressionStatement
 }
 
 const $polyadicOperators = {
-	`\(BinaryOperator::Addition)`			: PolyadicOperatorAddition
-	`\(BinaryOperator::And)`				: PolyadicOperatorAnd
-	`\(BinaryOperator::Division)`			: PolyadicOperatorDivision
-	`\(BinaryOperator::Equality)`			: PolyadicOperatorEquality
-	`\(BinaryOperator::GreaterThan)`		: PolyadicOperatorGreaterThan
-	`\(BinaryOperator::GreaterThanOrEqual)`	: PolyadicOperatorGreaterThanOrEqual
-	`\(BinaryOperator::LessThan)`			: PolyadicOperatorLessThan
-	`\(BinaryOperator::LessThanOrEqual)`	: PolyadicOperatorLessThanOrEqual
-	`\(BinaryOperator::Modulo)`				: PolyadicOperatorModulo
-	`\(BinaryOperator::Multiplication)`		: PolyadicOperatorMultiplication
-	`\(BinaryOperator::NullCoalescing)`		: PolyadicOperatorNullCoalescing
-	`\(BinaryOperator::Or)`					: PolyadicOperatorOr
-	`\(BinaryOperator::Subtraction)`		: PolyadicOperatorSubtraction
+	`\(BinaryOperatorKind::Addition)`			: PolyadicOperatorAddition
+	`\(BinaryOperatorKind::And)`				: PolyadicOperatorAnd
+	`\(BinaryOperatorKind::Division)`			: PolyadicOperatorDivision
+	`\(BinaryOperatorKind::Equality)`			: PolyadicOperatorEquality
+	`\(BinaryOperatorKind::GreaterThan)`		: PolyadicOperatorGreaterThan
+	`\(BinaryOperatorKind::GreaterThanOrEqual)`	: PolyadicOperatorGreaterThanOrEqual
+	`\(BinaryOperatorKind::LessThan)`			: PolyadicOperatorLessThan
+	`\(BinaryOperatorKind::LessThanOrEqual)`	: PolyadicOperatorLessThanOrEqual
+	`\(BinaryOperatorKind::Modulo)`				: PolyadicOperatorModulo
+	`\(BinaryOperatorKind::Multiplication)`		: PolyadicOperatorMultiplication
+	`\(BinaryOperatorKind::NullCoalescing)`		: PolyadicOperatorNullCoalescing
+	`\(BinaryOperatorKind::Or)`					: PolyadicOperatorOr
+	`\(BinaryOperatorKind::Subtraction)`		: PolyadicOperatorSubtraction
 }
 
 const $unaryOperators = {
-	`\(UnaryOperator::BitwiseNot)`			: UnaryOperatorBitwiseNot
-	`\(UnaryOperator::DecrementPostfix)`	: UnaryOperatorDecrementPostfix
-	`\(UnaryOperator::DecrementPrefix)`		: UnaryOperatorDecrementPrefix
-	`\(UnaryOperator::Existential)`			: UnaryOperatorExistential
-	`\(UnaryOperator::IncrementPostfix)`	: UnaryOperatorIncrementPostfix
-	`\(UnaryOperator::IncrementPrefix)`		: UnaryOperatorIncrementPrefix
-	`\(UnaryOperator::Negation)`			: UnaryOperatorNegation
-	`\(UnaryOperator::Negative)`			: UnaryOperatorNegative
+	`\(UnaryOperatorKind::BitwiseNot)`			: UnaryOperatorBitwiseNot
+	`\(UnaryOperatorKind::DecrementPostfix)`	: UnaryOperatorDecrementPostfix
+	`\(UnaryOperatorKind::DecrementPrefix)`		: UnaryOperatorDecrementPrefix
+	`\(UnaryOperatorKind::Existential)`			: UnaryOperatorExistential
+	`\(UnaryOperatorKind::IncrementPostfix)`	: UnaryOperatorIncrementPostfix
+	`\(UnaryOperatorKind::IncrementPrefix)`		: UnaryOperatorIncrementPrefix
+	`\(UnaryOperatorKind::Negation)`			: UnaryOperatorNegation
+	`\(UnaryOperatorKind::Negative)`			: UnaryOperatorNegative
 }
 
 const $targets = {
@@ -1691,15 +1691,15 @@ export class Compiler {
 	} // }}}
 	compile(data?) { // {{{
 		//console.time('parse')
-		this._module = new Module(data ?? fs.readFile(this._file), this, this._file)
+		@module = new Module(data ?? fs.readFile(@file), this, @file)
 		//console.timeEnd('parse')
 		
 		//console.time('compile')
-		this._module.analyse()
+		@module.analyse()
 		
-		this._module.fuse()
+		@module.fuse()
 		
-		this._fragments = this._module.toFragments()
+		@fragments = @module.toFragments()
 		//console.timeEnd('compile')
 		
 		return this
@@ -1711,6 +1711,7 @@ export class Compiler {
 			target: @options.target
 		}, @hashes)
 	} // }}}
+	readFile() => fs.readFile(@file)
 	sha256(file, data?) { // {{{
 		return this._hashes[file] ?? (this._hashes[file] = fs.sha256(data ?? fs.readFile(file)))
 	} // }}}

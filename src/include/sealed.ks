@@ -38,9 +38,9 @@ const $sealed = {
 			}
 			else if variable.kind == VariableKind::Function {
 				return $sealed.filterType({
-					kind: Kind::TypeReference
+					kind: NodeKind::TypeReference
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'Function'
 					}
 				}, name, data, node)

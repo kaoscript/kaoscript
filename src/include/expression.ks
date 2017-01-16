@@ -33,6 +33,7 @@ include {
 	../expression/binding
 	../expression/block
 	../expression/call
+	../expression/conditional
 	../expression/create
 	../expression/curry
 	../expression/enum
@@ -43,7 +44,6 @@ include {
 	../expression/omitted
 	../expression/regex
 	../expression/this
-	../expression/ternary
 	../expression/template
 	../expression/unless
 }

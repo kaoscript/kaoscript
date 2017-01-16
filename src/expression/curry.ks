@@ -11,7 +11,7 @@ class CurryExpression extends Expression {
 		this._callee = $compile.expression(this._data.callee, this)
 		
 		for argument in this._data.arguments {
-			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
+			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
 				this._arguments.push($compile.expression(argument.argument, this))
 				
 				this._list = false
@@ -21,10 +21,10 @@ class CurryExpression extends Expression {
 			}
 		}
 		
-		if this._data.scope.kind == ScopeModifier::This {
+		if this._data.scope.kind == ScopeKind::This {
 			this._caller = $call.caller(this._callee, this)
 		}
-		else if this._data.scope.kind == ScopeModifier::Argument {
+		else if this._data.scope.kind == ScopeKind::Argument {
 			this._callScope = $compile.expression(this._data.scope.value, this)
 		}
 	} // }}}
@@ -55,7 +55,7 @@ class CurryExpression extends Expression {
 			
 			let kind = this._data.scope.kind
 			
-			if kind == ScopeModifier::This {
+			if kind == ScopeKind::This {
 				fragments
 					.code($runtime.helper(this), '.vcurry(')
 					.compile(this._callee)
@@ -74,7 +74,7 @@ class CurryExpression extends Expression {
 				
 				fragments.code(')')
 			}
-			else if kind == ScopeModifier::Null {
+			else if kind == ScopeKind::Null {
 				fragments
 					.code($runtime.helper(this), '.vcurry(')
 					.compile(this._callee)
@@ -105,7 +105,7 @@ class CurryExpression extends Expression {
 			
 			let kind = this._data.scope.kind
 			
-			if kind == ScopeModifier::This {
+			if kind == ScopeKind::This {
 				fragments
 					.code($runtime.helper(this), '.curry(')
 					.compile(this._callee)
@@ -137,7 +137,7 @@ class CurryExpression extends Expression {
 					
 				fragments.code(')')
 			}
-			else if kind == ScopeModifier::Null {
+			else if kind == ScopeKind::Null {
 				fragments
 					.code($runtime.helper(this), '.curry(')
 					.compile(this._callee)

@@ -36,7 +36,7 @@ class MemberExpression extends Expression {
 			}
 		}
 		else {
-			if this._object.isComputed() || this._object._data.kind == Kind::NumericExpression {
+			if this._object.isComputed() || this._object._data.kind == NodeKind::NumericExpression {
 				fragments.code('(').compile(this._object).code(')')
 			}
 			else {

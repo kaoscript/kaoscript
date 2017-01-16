@@ -328,7 +328,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		this._left.fuse()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this._data.right.kind == Kind::TypeReference {
+		if this._data.right.kind == NodeKind::TypeReference {
 			fragments.code('!')
 			
 			$type.check(this, fragments, this._left, this._data.right)

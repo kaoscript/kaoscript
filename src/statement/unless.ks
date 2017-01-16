@@ -1,24 +1,24 @@
 class UnlessStatement extends Statement {
 	private {
-		_body
-		_then
+		_condition
+		_whenFalse
 	}
 	analyse() { // {{{
-		this._condition = $compile.expression(this._data.condition, this)
-		this._then = $compile.expression($block(this._data.then), this)
+		@condition = $compile.expression(@data.condition, this)
+		@whenFalse = $compile.expression($block(@data.whenFalse), this)
 	} // }}}
 	fuse() { // {{{
-		this._condition.fuse()
-		this._then.fuse()
+		@condition.fuse()
+		@whenFalse.fuse()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('if(!')
-			.wrapBoolean(this._condition)
+			.wrapBoolean(@condition)
 			.code(')')
 			.step()
-			.compile(this._then)
+			.compile(@whenFalse)
 			.done()
 	} // }}}
 }

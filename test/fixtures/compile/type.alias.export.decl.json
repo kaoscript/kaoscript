@@ -9,13 +9,13 @@
         "types": [
           {
             "typeName": {
-              "kind": 41,
+              "kind": 40,
               "name": "number"
             }
           },
           {
             "typeName": {
-              "kind": 41,
+              "kind": 40,
               "name": "string"
             }
           }

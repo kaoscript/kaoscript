@@ -29,7 +29,7 @@ class SwitchStatement extends Statement {
 	analyse() { // {{{
 		let scope = this._scope
 		
-		if this._data.expression.kind == Kind::Identifier {
+		if this._data.expression.kind == NodeKind::Identifier {
 			this._name = this._data.expression.name
 		}
 		else {
@@ -49,19 +49,19 @@ class SwitchStatement extends Statement {
 			this._scope = clause.scope
 			
 			for condition, conditionIdx in data.conditions {
-				if condition.kind == Kind::SwitchConditionArray {
+				if condition.kind == NodeKind::SwitchConditionArray {
 					condition = new SwitchConditionArray(condition, this)
 				}
-				else if condition.kind == Kind::SwitchConditionEnum {
+				else if condition.kind == NodeKind::SwitchConditionEnum {
 					$throw('Not Implemented', this)
 				}
-				else if condition.kind == Kind::SwitchConditionObject {
+				else if condition.kind == NodeKind::SwitchConditionObject {
 					$throw('Not Implemented', this)
 				}
-				else if condition.kind == Kind::SwitchConditionRange {
+				else if condition.kind == NodeKind::SwitchConditionRange {
 					condition = new SwitchConditionRange(condition, this)
 				}
-				else if condition.kind == Kind::SwitchConditionType {
+				else if condition.kind == NodeKind::SwitchConditionType {
 					condition = new SwitchConditionType(condition, this)
 				}
 				else {
@@ -74,17 +74,17 @@ class SwitchStatement extends Statement {
 			}
 			
 			for binding in data.bindings {
-				if binding.kind == Kind::ArrayBinding {
+				if binding.kind == NodeKind::ArrayBinding {
 					binding = new SwitchBindingArray(binding, this)
 					
 					clause.hasTest = true
 				}
-				else if binding.kind == Kind::ObjectBinding {
+				else if binding.kind == NodeKind::ObjectBinding {
 					$throw('Not Implemented', this)
 					
 					clause.hasTest = true
 				}
-				else if binding.kind == Kind::SwitchTypeCasting {
+				else if binding.kind == NodeKind::SwitchTypeCasting {
 					binding = new SwitchBindingType(binding, this)
 				}
 				else {
@@ -263,7 +263,7 @@ class SwitchConditionArray extends AbstractNode {
 	analyse() { // {{{
 		let nv = true
 		for i from 0 til this._data.values.length while nv {
-			if this._data.values[i].kind != Kind::OmittedExpression {
+			if this._data.values[i].kind != NodeKind::OmittedExpression {
 				nv = false
 			}
 		}
@@ -272,8 +272,8 @@ class SwitchConditionArray extends AbstractNode {
 			this._name = this._scope.parent().acquireTempName()
 			
 			for value in this._data.values {
-				if value.kind != Kind::OmittedExpression {
-					if value.kind == Kind::SwitchConditionRange {
+				if value.kind != NodeKind::OmittedExpression {
+					if value.kind == NodeKind::SwitchConditionRange {
 						value = new SwitchConditionRange(value, this)
 					}
 					else {
@@ -328,7 +328,7 @@ class SwitchConditionArray extends AbstractNode {
 			for value, i in this._data.values {
 				line.code(', ') if i
 				
-				if value.kind == Kind::OmittedExpression {
+				if value.kind == NodeKind::OmittedExpression {
 					if value.spread {
 						line.code('...')
 					}
@@ -342,7 +342,7 @@ class SwitchConditionArray extends AbstractNode {
 			
 			let index = 0
 			for value, i in this._data.values {
-				if value.kind != Kind::OmittedExpression {
+				if value.kind != NodeKind::OmittedExpression {
 					line.code(' && ') if index
 					
 					this._values[index].toBooleanFragments(line, '__ks_' + i)
@@ -452,7 +452,7 @@ class SwitchFilter extends AbstractNode {
 	toBooleanFragments(fragments, nf) { // {{{
 		let mm
 		for binding in this._data.bindings {
-			if binding.kind == Kind::ArrayBinding {
+			if binding.kind == NodeKind::ArrayBinding {
 				this.module().flag('Type')
 				
 				if nf {

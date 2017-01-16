@@ -582,10 +582,10 @@ const $field = {
 		
 		if data.modifiers {
 			for modifier in data.modifiers {
-				if modifier.kind == MemberModifier::Private {
+				if modifier.kind == ModifierKind::Private {
 					signature.access = MemberAccess::Private
 				}
-				else if modifier.kind == MemberModifier::Protected {
+				else if modifier.kind == ModifierKind::Protected {
 					signature.access = MemberAccess::Protected
 				}
 			}
@@ -1199,13 +1199,13 @@ const $method = {
 		
 		if data.modifiers {
 			for modifier in data.modifiers {
-				if modifier.kind == FunctionModifier::Async {
+				if modifier.kind == ModifierKind::Async {
 					signature.async = true
 				}
-				else if modifier.kind == MemberModifier::Private {
+				else if modifier.kind == ModifierKind::Private {
 					signature.access = MemberAccess::Private
 				}
-				else if modifier.kind == MemberModifier::Protected {
+				else if modifier.kind == ModifierKind::Protected {
 					signature.access = MemberAccess::Protected
 				}
 			}
@@ -1229,7 +1229,7 @@ const $method = {
 				
 				if parameter.modifiers {
 					for modifier in parameter.modifiers {
-						if modifier.kind == ParameterModifier::Rest {
+						if modifier.kind == ModifierKind::Rest {
 							if modifier.arity {
 								last.min += modifier.arity.min
 								last.max += modifier.arity.max
@@ -1248,7 +1248,7 @@ const $method = {
 				
 				if parameter.modifiers {
 					for modifier in parameter.modifiers {
-						if modifier.kind == ParameterModifier::Rest {
+						if modifier.kind == ModifierKind::Rest {
 							if modifier.arity {
 								last.min += modifier.arity.min
 								last.max += modifier.arity.max
@@ -1320,42 +1320,42 @@ class ClassDeclaration extends Statement {
 		let classname = data.name
 		
 		let thisVariable = $variable.define(this, this._constructorScope, {
-			kind: Kind::Identifier
+			kind: NodeKind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
 		
 		thisVariable.callable = func(data) {
 			data.arguments = [{
-				kind: Kind::Identifier
+				kind: NodeKind::Identifier
 				name: 'this'
 			}, {
-				kind: Kind::ArrayExpression
+				kind: NodeKind::ArrayExpression
 				values: data.arguments
 			}]
 			
 			data.callee = {
-				kind: Kind::MemberExpression
+				kind: NodeKind::MemberExpression
 				object: {
-					kind: Kind::MemberExpression
+					kind: NodeKind::MemberExpression
 					object: {
-						kind: Kind::MemberExpression
+						kind: NodeKind::MemberExpression
 						object: classname
 						property: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'prototype'
 						}
 						computed: false
 						nullable: false
 					}
 					property: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: '__ks_cons'
 					}
 					computed: false
 					nullable: false
 				}
 				property: {
-					kind: Kind::Identifier
+					kind: NodeKind::Identifier
 					name: 'call'
 				}
 				computed: false
@@ -1364,14 +1364,14 @@ class ClassDeclaration extends Statement {
 		}
 		
 		thisVariable = $variable.define(this, this._destructorScope, {
-			kind: Kind::Identifier
+			kind: NodeKind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
 		
 		this._destructorScope.rename('this', 'that')
 		
 		$variable.define(this, this._instanceVariableScope, {
-			kind: Kind::Identifier
+			kind: NodeKind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
 		
@@ -1387,42 +1387,42 @@ class ClassDeclaration extends Statement {
 			let extname = data.extends
 			
 			let superVariable = $variable.define(this, this._constructorScope, {
-				kind: Kind::Identifier
+				kind: NodeKind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
 			
 			superVariable.callable = func(data) {
 				data.arguments = [{
-					kind: Kind::Identifier
+					kind: NodeKind::Identifier
 					name: 'this'
 				}, {
-					kind: Kind::ArrayExpression
+					kind: NodeKind::ArrayExpression
 					values: data.arguments
 				}]
 				
 				data.callee = {
-					kind: Kind::MemberExpression
+					kind: NodeKind::MemberExpression
 					object: {
-						kind: Kind::MemberExpression
+						kind: NodeKind::MemberExpression
 						object: {
-							kind: Kind::MemberExpression
+							kind: NodeKind::MemberExpression
 							object: extname
 							property: {
-								kind: Kind::Identifier
+								kind: NodeKind::Identifier
 								name: 'prototype'
 							}
 							computed: false
 							nullable: false
 						}
 						property: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: '__ks_cons'
 						}
 						computed: false
 						nullable: false
 					}
 					property: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'call'
 					}
 					computed: false
@@ -1431,18 +1431,18 @@ class ClassDeclaration extends Statement {
 			}
 			
 			$variable.define(this, this._instanceVariableScope, {
-				kind: Kind::Identifier
+				kind: NodeKind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
 		}
 		
 		for modifier in data.modifiers {
-			if modifier.kind == ClassModifier::Abstract {
+			if modifier.kind == ModifierKind::Abstract {
 				@variable.abstract = @abstract = true
 				
 				@variable.abstractMethods = {}
 			}
-			else if modifier.kind == ClassModifier::Sealed {
+			else if modifier.kind == ModifierKind::Sealed {
 				@sealed = true
 			}
 		}
@@ -1450,14 +1450,14 @@ class ClassDeclaration extends Statement {
 		let signature, method
 		for member in data.members {
 			switch member.kind {
-				Kind::CommentBlock => {
+				NodeKind::CommentBlock => {
 				}
-				Kind::CommentLine => {
+				NodeKind::CommentLine => {
 				}
-				Kind::FieldDeclaration => {
+				NodeKind::FieldDeclaration => {
 					let instance = true
 					for i from 0 til member.modifiers.length while instance {
-						if member.modifiers[i].kind == MemberModifier::Static {
+						if member.modifiers[i].kind == ModifierKind::Static {
 							instance = false
 						}
 					}
@@ -1489,7 +1489,7 @@ class ClassDeclaration extends Statement {
 						this._variable.classVariables[member.name.name] = signature
 					}
 				}
-				Kind::MethodDeclaration => {
+				NodeKind::MethodDeclaration => {
 					if $method.isConstructor(member.name.name, this._variable) {
 						this._scope = this._constructorScope
 						
@@ -1512,7 +1512,7 @@ class ClassDeclaration extends Statement {
 						this._scope = this._destructorScope
 						
 						member.parameters.push({
-							kind: Kind::Parameter
+							kind: NodeKind::Parameter
 							modifiers: []
 							name: $identifier('that')
 						})
@@ -1533,7 +1533,7 @@ class ClassDeclaration extends Statement {
 					else {
 						let instance = true
 						for i from 0 til member.modifiers.length while instance {
-							if member.modifiers[i].kind == MemberModifier::Static {
+							if member.modifiers[i].kind == ModifierKind::Static {
 								instance = false
 							}
 						}
@@ -1660,13 +1660,13 @@ class ClassDeclaration extends Statement {
 		let scope = new Scope(this._scope)
 		
 		$variable.define(this, scope, {
-			kind: Kind::Identifier
+			kind: NodeKind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(data.name.name))
 		
 		if this._extends {
 			let variable = $variable.define(this, scope, {
-				kind: Kind::Identifier
+				kind: NodeKind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
 			
@@ -1675,22 +1675,22 @@ class ClassDeclaration extends Statement {
 				
 				variable.callable = func(data) {
 					data.arguments = [{
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'this'
 					}, {
-						kind: Kind::ArrayExpression
+						kind: NodeKind::ArrayExpression
 						values: data.arguments
 					}]
 					
 					data.callee = {
-						kind: Kind::MemberExpression
+						kind: NodeKind::MemberExpression
 						object: {
-							kind: Kind::MemberExpression
+							kind: NodeKind::MemberExpression
 							object: {
-								kind: Kind::MemberExpression
+								kind: NodeKind::MemberExpression
 								object: extname
 								property: {
-									kind: Kind::Identifier
+									kind: NodeKind::Identifier
 									name: 'prototype'
 								}
 								computed: false
@@ -1701,7 +1701,7 @@ class ClassDeclaration extends Statement {
 							nullable: false
 						}
 						property: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'call'
 						}
 						computed: false
@@ -1711,22 +1711,22 @@ class ClassDeclaration extends Statement {
 				
 				variable.reduce = func(data) {
 					data.arguments = [{
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'this'
 					}, {
-						kind: Kind::ArrayExpression
+						kind: NodeKind::ArrayExpression
 						values: data.arguments
 					}]
 					
 					data.callee = {
-						kind: Kind::MemberExpression
+						kind: NodeKind::MemberExpression
 						object: {
-							kind: Kind::MemberExpression
+							kind: NodeKind::MemberExpression
 							object: {
-								kind: Kind::MemberExpression
+								kind: NodeKind::MemberExpression
 								object: extname
 								property: {
-									kind: Kind::Identifier
+									kind: NodeKind::Identifier
 									name: 'prototype'
 								}
 								computed: false
@@ -1737,7 +1737,7 @@ class ClassDeclaration extends Statement {
 							nullable: false
 						}
 						property: {
-							kind: Kind::Identifier
+							kind: NodeKind::Identifier
 							name: 'apply'
 						}
 						computed: false
@@ -1748,7 +1748,7 @@ class ClassDeclaration extends Statement {
 			else {
 				variable.callable = func(data) {
 					data.callee = {
-						kind: Kind::MemberExpression
+						kind: NodeKind::MemberExpression
 						object: data.callee
 						property: member.name
 						computed: false
@@ -1799,7 +1799,7 @@ class MethodDeclaration extends Statement {
 	instance(@instance) => this
 	isAbstract() { // {{{
 		for modifier in @data.modifiers {
-			if modifier.kind == MethodModifier::Abstract {
+			if modifier.kind == ModifierKind::Abstract {
 				return true
 			}
 		}
@@ -1857,7 +1857,7 @@ class MethodDeclaration extends Statement {
 			nf = true
 			
 			for modifier in parameter.modifiers while nf {
-				if modifier.kind == ParameterModifier::Member {
+				if modifier.kind == ModifierKind::Alias {
 					let name = parameter.name.name
 					
 					if @isInstanceVariable(name, variable) {

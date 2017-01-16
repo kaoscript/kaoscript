@@ -9,7 +9,7 @@ class ArrayBinding extends Expression {
 	}
 	analyse() { // {{{
 		for element, index in this._data.elements {
-			if element.kind == Kind::BindingElement && !element.name.computed {
+			if element.kind == NodeKind::BindingElement && !element.name.computed {
 				if this._scope.hasVariable(element.name.name) {
 					this._existing[element.name.name] = true
 					++this._existingCount
@@ -40,7 +40,7 @@ class ArrayBinding extends Expression {
 			for element, i in this._data.elements {
 				fragments.code(', ') if i
 				
-				if element.kind == Kind::BindingElement && !element.name.computed && this._existing[element.name.name] {
+				if element.kind == NodeKind::BindingElement && !element.name.computed && this._existing[element.name.name] {
 					name = this._scope.acquireTempName()
 					
 					this._elements[i].toExistFragments(fragments, name)
@@ -97,7 +97,7 @@ class ArrayBinding extends Expression {
 			}
 			else {
 				let variable = new IdentifierLiteral({
-					kind: Kind::Identifier
+					kind: NodeKind::Identifier
 					name: this._name
 				}, this, this._scope, false)
 				
@@ -209,7 +209,7 @@ class BindingElement extends Expression {
 		}
 		else if this._defaultValue? {
 			let variable = new IdentifierLiteral({
-				kind: Kind::Identifier
+				kind: NodeKind::Identifier
 				name: this._variable
 			}, this, this._scope, false)
 			
@@ -353,7 +353,7 @@ class ObjectBinding extends Expression {
 			}
 			else {
 				let variable = new IdentifierLiteral({
-					kind: Kind::Identifier
+					kind: NodeKind::Identifier
 					name: this._name
 				}, this, this._scope, false)
 				

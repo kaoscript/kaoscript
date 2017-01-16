@@ -74,7 +74,7 @@ const $call = {
 		return null
 	} // }}}
 	variable(data, node) { // {{{
-		if data.callee.kind == Kind::MemberExpression {
+		if data.callee.kind == NodeKind::MemberExpression {
 			if !data.callee.computed && (variable ?= $variable.fromAST(data.callee.object, node)) {
 				if variable.kind == VariableKind::TypeAlias {
 					variable = $variable.fromType($type.unalias(variable.type, node.scope()), node)
@@ -83,7 +83,7 @@ const $call = {
 				let name = data.callee.property.name
 				
 				if variable.kind == VariableKind::Class {
-					if data.callee.object.kind == Kind::Identifier {
+					if data.callee.object.kind == NodeKind::Identifier {
 						if variable.classMethods[name]? {
 							let variables: Array = []
 							
@@ -135,7 +135,7 @@ class CallExpression extends Expression {
 			$throw(`A class is not a function, 'new' operator is required at line \(@data.callee.start.line)`, this)
 		}
 		
-		if @data.callee.kind == Kind::Identifier {
+		if @data.callee.kind == NodeKind::Identifier {
 			if callee? {
 				callee.callable(@data) if callee.callable?
 			}
@@ -143,17 +143,17 @@ class CallExpression extends Expression {
 				$throw(`Undefined variable '\(@data.callee.name)' at line \(@data.callee.start.line)`, this)
 			}
 		}
-		else if @data.callee.kind == Kind::MemberExpression {
+		else if @data.callee.kind == NodeKind::MemberExpression {
 			if (variable ?= $variable.fromAST(@data.callee.object, this)) && variable.reduce? {
 				variable.reduce(@data)
 			}
 		}
 		
-		if @data.callee.kind == Kind::MemberExpression {
+		if @data.callee.kind == NodeKind::MemberExpression {
 			@callee = new MemberExpression(@data.callee, this, this.scope())
 			@callee.analyse()
 		}
-		else if @data.callee.kind == Kind::ThisExpression {
+		else if @data.callee.kind == NodeKind::ThisExpression {
 			@callee = new ThisExpression(@data.callee, this, this.scope())
 			@callee.isMethod(true).analyse()
 		}
@@ -162,7 +162,7 @@ class CallExpression extends Expression {
 		}
 		
 		for argument in @data.arguments {
-			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
+			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
 				@arguments.push($compile.expression(argument.argument, this))
 				
 				@list = false
@@ -172,7 +172,7 @@ class CallExpression extends Expression {
 			}
 		}
 		
-		if @data.scope.kind == ScopeModifier::Argument {
+		if @data.scope.kind == ScopeKind::Argument {
 			@callScope = $compile.expression(@data.scope.value, this)
 		}
 		
@@ -195,7 +195,7 @@ class CallExpression extends Expression {
 			this._reuseName = this.statement().scope().acquireTempName(this.statement())
 		}
 		
-		this._callee.acquireReusable(this._data.nullable || (!this._list && this._data.scope.kind == ScopeModifier::This))
+		this._callee.acquireReusable(this._data.nullable || (!this._list && this._data.scope.kind == ScopeKind::This))
 	} // }}}
 	releaseReusable() { // {{{
 		this.statement().scope().releaseTempName(this._reuseName) if this._reuseName?
@@ -271,7 +271,7 @@ class CallExpression extends Expression {
 		let data = this._data
 		
 		if this._list {
-			if data.scope.kind == ScopeModifier::This {
+			if data.scope.kind == ScopeKind::This {
 				fragments.compile(this._callee, mode).code('(')
 				
 				for argument, index in this._arguments {
@@ -280,7 +280,7 @@ class CallExpression extends Expression {
 					fragments.compile(argument, mode)
 				}
 			}
-			else if data.scope.kind == ScopeModifier::Null {
+			else if data.scope.kind == ScopeKind::Null {
 				fragments.compile(this._callee, mode).code('.call(null')
 				
 				for argument in this._arguments {
@@ -296,12 +296,12 @@ class CallExpression extends Expression {
 			}
 		}
 		else {
-			if data.scope.kind == ScopeModifier::Null {
+			if data.scope.kind == ScopeKind::Null {
 				fragments
 					.compile(this._callee, mode)
 					.code('.apply(null')
 			}
-			else if data.scope.kind == ScopeModifier::This {
+			else if data.scope.kind == ScopeKind::This {
 				fragments
 					.compileReusable(this._callee)
 					.code('.apply(')
@@ -381,7 +381,7 @@ class CallSealedExpression extends Expression {
 		this._object = $compile.expression(this._data.callee.object, this)
 		
 		for argument in this._data.arguments {
-			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
+			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
 				this._arguments.push($compile.expression(argument.argument, this))
 				
 				this._list = false
@@ -411,7 +411,7 @@ class CallSealedExpression extends Expression {
 				this.module().flag('Type')
 				
 				let name = null
-				if data.callee.object.kind == Kind::Identifier {
+				if data.callee.object.kind == NodeKind::Identifier {
 					if tof = $runtime.typeof(callee[0].variable.name, this) {
 						fragments.code(tof, '(').compile(this._object).code(')')
 					}

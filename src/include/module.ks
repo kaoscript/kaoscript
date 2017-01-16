@@ -34,12 +34,12 @@ export class Module {
 		this._options = $attribute.apply(this._data, this._compiler._options.config)
 		
 		for attr in this._data.attributes {
-			if attr.declaration.kind == Kind::Identifier &&	attr.declaration.name == 'bin' {
+			if attr.declaration.kind == NodeKind::Identifier &&	attr.declaration.name == 'bin' {
 				this._binary = true
 			}
-			else if attr.declaration.kind == Kind::AttributeExpression && attr.declaration.name.name == 'cfg' {
+			else if attr.declaration.kind == NodeKind::AttributeExpression && attr.declaration.name.name == 'cfg' {
 				for arg in attr.declaration.arguments {
-					if arg.kind == Kind::AttributeOperator {
+					if arg.kind == NodeKind::AttributeOperator {
 						this._options[arg.name.name] = arg.value.value
 					}
 				}

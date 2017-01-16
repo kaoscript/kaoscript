@@ -1,13 +1,13 @@
 const $extern = {
 	classMember(data, variable, node) { // {{{
 		switch(data.kind) {
-			Kind::FieldDeclaration => {
+			NodeKind::FieldDeclaration => {
 				$throw('Not Implemented', node)
 			}
-			Kind::MethodAliasDeclaration => {
+			NodeKind::MethodAliasDeclaration => {
 				$throw('Not Implemented', node)
 			}
-			Kind::MethodDeclaration => {
+			NodeKind::MethodDeclaration => {
 				if $method.isConstructor(data.name.name, variable) {
 					variable.constructors.push($function.signature(data, node))
 				}
@@ -16,7 +16,7 @@ const $extern = {
 				}
 				else {
 					let method = {
-						kind: Kind::MethodDeclaration
+						kind: NodeKind::MethodDeclaration
 						name: data.name.name
 						signature: $method.signature(data, node)
 					}
@@ -25,7 +25,7 @@ const $extern = {
 					
 					let instance = true
 					for i from 0 til data.modifiers.length while instance {
-						instance = false if data.modifiers[i].kind == MemberModifier::Static
+						instance = false if data.modifiers[i].kind == ModifierKind::Static
 					}
 					
 					if instance {
@@ -58,7 +58,7 @@ class ExternDeclaration extends Statement {
 	analyse() { // {{{
 		for declaration in @data.declarations {
 			switch declaration.kind {
-				Kind::ClassDeclaration => {
+				NodeKind::ClassDeclaration => {
 					variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					if declaration.extends? {
@@ -70,10 +70,10 @@ class ExternDeclaration extends Statement {
 					}
 					
 					for modifier in declaration.modifiers {
-						if modifier.kind == ClassModifier::Abstract {
+						if modifier.kind == ModifierKind::Abstract {
 							variable.abstract = true
 						}
-						else if modifier.kind == ClassModifier::Sealed {
+						else if modifier.kind == ModifierKind::Sealed {
 							variable.sealed = {
 								name: '__ks_' + variable.name.name
 								constructors: false
@@ -89,7 +89,7 @@ class ExternDeclaration extends Statement {
 						$extern.classMember(declaration.members[i], variable, this)
 					}
 				}
-				Kind::VariableDeclarator => {
+				NodeKind::VariableDeclarator => {
 					variable = $variable.define(this, this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type)
 					
 					if declaration.sealed {

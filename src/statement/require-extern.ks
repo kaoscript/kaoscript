@@ -7,16 +7,16 @@ class RequireOrExternDeclaration extends Statement {
 		
 		for declaration in data.declarations {
 			switch declaration.kind {
-				Kind::ClassDeclaration => {
+				NodeKind::ClassDeclaration => {
 					variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					variable.requirement = declaration.name.name
 					
 					for modifier in declaration.modifiers {
-						if modifier.kind == ClassModifier::Abstract {
+						if modifier.kind == ModifierKind::Abstract {
 							variable.abstract = true
 						}
-						else if modifier.kind == ClassModifier::Sealed {
+						else if modifier.kind == ModifierKind::Sealed {
 							variable.sealed = {
 								name: '__ks_' + variable.name.name
 								constructors: false
@@ -32,7 +32,7 @@ class RequireOrExternDeclaration extends Statement {
 					
 					module.require(variable, true)
 				}
-				Kind::VariableDeclarator => {
+				NodeKind::VariableDeclarator => {
 					variable = $variable.define(this, this.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type)
 					
 					variable.requirement = declaration.name.name

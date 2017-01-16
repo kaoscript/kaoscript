@@ -9,16 +9,16 @@ class ImplementDeclaration extends Statement {
 		if @variable.kind == VariableKind::Class {
 			for property in @data.properties {
 				switch property.kind {
-					Kind::FieldDeclaration => {
+					NodeKind::FieldDeclaration => {
 						property = new ImplementClassFieldDeclaration(property, this, @variable)
 					}
-					Kind::MethodAliasDeclaration => {
+					NodeKind::MethodAliasDeclaration => {
 						property = new ImplementClassMethodAliasDeclaration(property, this, @variable)
 					}
-					Kind::MethodDeclaration => {
+					NodeKind::MethodDeclaration => {
 						property = new ImplementClassMethodDeclaration(property, this, @variable)
 					}
-					Kind::MethodLinkDeclaration => {
+					NodeKind::MethodLinkDeclaration => {
 						property = new ImplementClassMethodLinkDeclaration(property, this, @variable)
 					}
 					=> {
@@ -34,10 +34,10 @@ class ImplementDeclaration extends Statement {
 		else if @variable.kind == VariableKind::Variable {
 			for property in @data.properties {
 				switch property.kind {
-					Kind::FieldDeclaration => {
+					NodeKind::FieldDeclaration => {
 						property = new ImplementVariableFieldDeclaration(property, this, @variable)
 					}
-					Kind::MethodDeclaration => {
+					NodeKind::MethodDeclaration => {
 						property = new ImplementVariableMethodDeclaration(property, this, @variable)
 					}
 					=> {
@@ -109,15 +109,15 @@ class ImplementClassMethodDeclaration extends Statement {
 	analyse() { // {{{
 		let name = @data.name.name
 		
-		if @isContructor = @data.name.kind == Kind::Identifier && $method.isConstructor(name, @variable) {
+		if @isContructor = @data.name.kind == NodeKind::Identifier && $method.isConstructor(name, @variable) {
 			$throw('Not Implemented', this)
 		}
-		else if @isDestructor = @data.name.kind == Kind::Identifier && $method.isDestructor(name, @variable) {
+		else if @isDestructor = @data.name.kind == NodeKind::Identifier && $method.isDestructor(name, @variable) {
 			$throw('Not Implemented', this)
 		}
 		else {
 			for i from 0 til @data.modifiers.length while @instance {
-				if @data.modifiers[i].kind == MemberModifier::Static {
+				if @data.modifiers[i].kind == ModifierKind::Static {
 					@instance = false
 				}
 			}
@@ -135,9 +135,9 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 			}
 			
-			if @data.name.kind == Kind::Identifier {
+			if @data.name.kind == NodeKind::Identifier {
 				let method = {
-					kind: Kind::MethodDeclaration
+					kind: NodeKind::MethodDeclaration
 					name: name
 					signature: $method.signature(@data, this)
 				}
@@ -159,13 +159,13 @@ class ImplementClassMethodDeclaration extends Statement {
 					@variable.classMethods[name].push(method)
 				}
 			}
-			else if @data.name.kind == Kind::TemplateExpression {
+			else if @data.name.kind == NodeKind::TemplateExpression {
 				@name = $compile.expression(@data.name, this)
 			}
 		}
 		
 		$variable.define(this, @scope, {
-			kind: Kind::Identifier
+			kind: NodeKind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(@variable.name))
 		
@@ -199,10 +199,10 @@ class ImplementClassMethodDeclaration extends Statement {
 			
 			object.newLine().code('class: ', variable.name is String ? variable.name : variable.name.name)
 			
-			if data.name.kind == Kind::Identifier {
+			if data.name.kind == NodeKind::Identifier {
 				object.newLine().code('name: ' + $quote(data.name.name))
 			}
-			else if data.name.kind == Kind::TemplateExpression {
+			else if data.name.kind == NodeKind::TemplateExpression {
 				object.newLine().code('name: ').compile(this._name)
 			}
 			else {
@@ -250,19 +250,19 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		let data = this._data
 		let variable = this._variable
 		
-		if this._isContructor = data.name.kind == Kind::Identifier && $method.isConstructor(data.name.name, variable) {
+		if this._isContructor = data.name.kind == NodeKind::Identifier && $method.isConstructor(data.name.name, variable) {
 			$throw('Not Implemented', this)
 		}
-		else if this._isDestructor = data.name.kind == Kind::Identifier && $method.isDestructor(data.name.name, variable) {
+		else if this._isDestructor = data.name.kind == NodeKind::Identifier && $method.isDestructor(data.name.name, variable) {
 			$throw('Not Implemented', this)
 		}
 		else {
-			if data.name.kind == Kind::TemplateExpression {
+			if data.name.kind == NodeKind::TemplateExpression {
 				this._name = $compile.expression(data.name, this)
 			}
 			
 			for i from 0 til data.modifiers.length while this._instance {
-				if data.modifiers[i].kind == MemberModifier::Static {
+				if data.modifiers[i].kind == ModifierKind::Static {
 					this._instance = false
 				}
 			}
@@ -280,7 +280,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 				}
 			}
 			
-			if data.name.kind == Kind::Identifier {
+			if data.name.kind == NodeKind::Identifier {
 				if this._instance {
 					variable.instanceMethods[data.name.name] = variable.instanceMethods[data.alias.name]
 				}
@@ -319,10 +319,10 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		
 		object.line('class: ', variable.name is String ? variable.name : variable.name.name)
 		
-		if data.name.kind == Kind::TemplateExpression {
+		if data.name.kind == NodeKind::TemplateExpression {
 			object.newLine().code('name: ').compile(this._name).done()
 		}
-		else if data.name.kind == Kind::Identifier {
+		else if data.name.kind == NodeKind::Identifier {
 			object.line('name: ', $quote(data.name.name))
 		}
 		else {
@@ -378,19 +378,19 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		let data = this._data
 		let variable = this._variable
 		
-		if this._isContructor = data.name.kind == Kind::Identifier && $method.isConstructor(data.name.name, variable) {
+		if this._isContructor = data.name.kind == NodeKind::Identifier && $method.isConstructor(data.name.name, variable) {
 			$throw('Not Implemented', this)
 		}
-		else if this._isDestructor = data.name.kind == Kind::Identifier && $method.isDestructor(data.name.name, variable) {
+		else if this._isDestructor = data.name.kind == NodeKind::Identifier && $method.isDestructor(data.name.name, variable) {
 			$throw('Not Implemented', this)
 		}
 		else {
-			if data.name.kind == Kind::TemplateExpression {
+			if data.name.kind == NodeKind::TemplateExpression {
 				this._name = $compile.expression(data.name, this)
 			}
 			
 			for i from 0 til data.modifiers.length while this._instance {
-				if data.modifiers[i].kind == MemberModifier::Static {
+				if data.modifiers[i].kind == ModifierKind::Static {
 					this._instance = false
 				}
 			}
@@ -440,10 +440,10 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		
 		object.line('class: ', variable.name is String ? variable.name : variable.name.name)
 		
-		if data.name.kind == Kind::TemplateExpression {
+		if data.name.kind == NodeKind::TemplateExpression {
 			object.newLine().code('name: ').compile(this._name).done()
 		}
-		else if data.name.kind == Kind::Identifier {
+		else if data.name.kind == NodeKind::Identifier {
 			object.line('name: ', $quote(data.name.name))
 		}
 		else {

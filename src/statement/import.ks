@@ -140,7 +140,7 @@ const $import = {
 		let importAlias = ''
 		
 		for specifier in data.specifiers {
-			if specifier.kind == Kind::ImportWildcardSpecifier {
+			if specifier.kind == NodeKind::ImportWildcardSpecifier {
 				if specifier.local {
 					importAlias = specifier.local.name
 				}
@@ -213,7 +213,7 @@ const $import = {
 		if importAlias.length {
 			type = {
 				typeName: {
-					kind: Kind::Identifier
+					kind: NodeKind::Identifier
 					name: 'Object'
 				}
 				properties: {}
@@ -224,7 +224,7 @@ const $import = {
 			}
 			
 			variable = $variable.define(node, node.scope(), {
-				kind: Kind::Identifier
+				kind: NodeKind::Identifier
 				name: importAlias
 			}, VariableKind::Variable, type)
 			
@@ -259,7 +259,7 @@ const $import = {
 		let count = 0
 		
 		for specifier in data.specifiers {
-			if specifier.kind == Kind::ImportWildcardSpecifier {
+			if specifier.kind == NodeKind::ImportWildcardSpecifier {
 				if specifier.local {
 					node._metadata.wilcard = specifier.local.name
 					
@@ -354,10 +354,10 @@ const $import = {
 	use(data, node) { // {{{
 		if data is Array {
 			for item in data {
-				$throw(`Undefined variable '\(item.name)' at line \(item.start.line)`, node) if item.kind == Kind::Identifier && !node.scope().hasVariable(item.name)
+				$throw(`Undefined variable '\(item.name)' at line \(item.start.line)`, node) if item.kind == NodeKind::Identifier && !node.scope().hasVariable(item.name)
 			}
 		}
-		else if data.kind == Kind::Identifier {
+		else if data.kind == NodeKind::Identifier {
 			$throw(`Undefined variable '\(data.name)' at line \(data.start.line)`, node) if !node.scope().hasVariable(data.name)
 		}
 	} // }}}

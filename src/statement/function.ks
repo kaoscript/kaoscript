@@ -1,7 +1,7 @@
 const $function = {
 	arity(parameter) { // {{{
 		for i from 0 til parameter.modifiers.length {
-			if parameter.modifiers[i].kind == ParameterModifier::Rest {
+			if parameter.modifiers[i].kind == ModifierKind::Rest {
 				return parameter.modifiers[i].arity
 			}
 		}
@@ -9,7 +9,7 @@ const $function = {
 		return null
 	} // }}}
 	isArgumentsRequired(node) { // {{{
-		if node._data.kind == Kind::ArrayComprehension {
+		if node._data.kind == NodeKind::ArrayComprehension {
 			return false
 		}
 		
@@ -734,7 +734,7 @@ const $function = {
 		
 		if data.modifiers {
 			for modifier in data.modifiers {
-				if modifier.kind == FunctionModifier::Async {
+				if modifier.kind == ModifierKind::Async {
 					signature.async = true
 				}
 			}
@@ -781,7 +781,7 @@ const $function = {
 		
 		if parameter.modifiers {
 			for modifier in parameter.modifiers {
-				if modifier.kind == ParameterModifier::Rest {
+				if modifier.kind == ModifierKind::Rest {
 					signature.rest = true
 					
 					if modifier.arity {
@@ -839,26 +839,26 @@ const $function = {
 	} // }}}
 	useThisVariable(data) { // {{{
 		switch data.kind {
-			Kind::ArrayExpression => {
+			NodeKind::ArrayExpression => {
 				for value in data.values {
 					if $function.useThisVariable(value) {
 						return true
 					}
 				}
 			}
-			Kind::BinaryOperator => {
+			NodeKind::BinaryOperator => {
 				if $function.useThisVariable(data.left) || $function.useThisVariable(data.right) {
 					return true
 				}
 			}
-			Kind::Block => {
+			NodeKind::Block => {
 				for statement in data.statements {
 					if $function.useThisVariable(statement) {
 						return true
 					}
 				}
 			}
-			Kind::CallExpression => {
+			NodeKind::CallExpression => {
 				if $function.useThisVariable(data.callee) {
 					return true
 				}
@@ -869,7 +869,7 @@ const $function = {
 					}
 				}
 			}
-			Kind::CreateExpression => {
+			NodeKind::CreateExpression => {
 				if $function.useThisVariable(data.class) {
 					return true
 				}
@@ -880,35 +880,35 @@ const $function = {
 					}
 				}
 			}
-			Kind::EnumExpression => return false
-			Kind::Identifier => return data.name == 'this'
-			Kind::IfStatement => {
-				if $function.useThisVariable(data.condition) || $function.useThisVariable(data.then) {
+			NodeKind::EnumExpression => return false
+			NodeKind::Identifier => return data.name == 'this'
+			NodeKind::IfStatement => {
+				if $function.useThisVariable(data.condition) || $function.useThisVariable(data.whenTrue) {
 					return true
 				}
 				
-				for value in data.elseifs {
+				/* for value in data.elseifs {
 					if $function.useThisVariable(value) {
 						return true
 					}
-				}
+				} */
 				
-				if data.else? && data.$function.useThisVariable(data.else) {
+				if data.whenFalse? && data.$function.useThisVariable(data.whenFalse) {
 					return true
 				}
 			}
-			Kind::Literal => return false
-			Kind::MemberExpression => return $function.useThisVariable(data.object)
-			Kind::NumericExpression => return false
-			Kind::ObjectExpression => {
+			NodeKind::Literal => return false
+			NodeKind::MemberExpression => return $function.useThisVariable(data.object)
+			NodeKind::NumericExpression => return false
+			NodeKind::ObjectExpression => {
 				for property in data.properties {
 					if $function.useThisVariable(property.value) {
 						return true
 					}
 				}
 			}
-			Kind::ReturnStatement => return $function.useThisVariable(data.value)
-			Kind::UnaryExpression => return $function.useThisVariable(data.argument)
+			NodeKind::ReturnStatement => return $function.useThisVariable(data.value)
+			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument)
 			=> {
 				console.error(data)
 				$throw('Unknow kind ' + data.kind)
@@ -931,14 +931,14 @@ class FunctionDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		$variable.define(this, @scope, {
-			kind: Kind::Identifier,
+			kind: NodeKind::Identifier,
 			name: 'this'
 		}, VariableKind::Variable)
 		
 		@variable = $variable.define(this, this.greatScope(), @data.name, VariableKind::Function, @data.type)
 		
 		for modifier in @data.modifiers {
-			if modifier.kind == FunctionModifier::Async {
+			if modifier.kind == ModifierKind::Async {
 				@variable.async = true
 			}
 		}
@@ -1043,9 +1043,9 @@ class Parameter extends AbstractNode {
 			
 			if signature.rest {
 				$variable.define(this, this._scope, data.name, VariableKind::Variable, {
-					kind: Kind::TypeReference
+					kind: NodeKind::TypeReference
 					typeName: {
-						kind: Kind::Identifier
+						kind: NodeKind::Identifier
 						name: 'Array'
 					}
 				})
@@ -1058,7 +1058,7 @@ class Parameter extends AbstractNode {
 		}
 		else {
 			let name = {
-				kind: Kind::Identifier
+				kind: NodeKind::Identifier
 				name: this._scope.acquireTempName()
 			}
 			

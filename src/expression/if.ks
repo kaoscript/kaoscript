@@ -1,34 +1,34 @@
 class IfExpression extends Expression {
 	private {
 		_condition
-		_else
-		_then
+		_whenFalse
+		_whenTrue
 	}
 	analyse() { // {{{
 		this._condition = $compile.expression(this._data.condition, this)
-		this._then = $compile.expression(this._data.then, this)
-		this._else = $compile.expression(this._data.else, this) if this._data.else?
+		this._whenTrue = $compile.expression(this._data.whenTrue, this)
+		this._whenFalse = $compile.expression(this._data.whenFalse, this) if this._data.whenFalse?
 	} // }}}
 	fuse() { // {{{
 		this._condition.fuse()
-		this._then.fuse()
-		this._else.fuse() if this._else?
+		this._whenTrue.fuse()
+		this._whenFalse.fuse() if this._whenFalse?
 	} // }}}
 	isComputed() => true
 	toFragments(fragments, mode) { // {{{
-		if this._else? {
+		if this._whenFalse? {
 			fragments
 				.wrapBoolean(this._condition)
 				.code(' ? ')
-				.compile(this._then)
+				.compile(this._whenTrue)
 				.code(' : ')
-				.compile(this._else)
+				.compile(this._whenFalse)
 		}
 		else {
 			fragments
 				.wrapBoolean(this._condition)
 				.code(' ? ')
-				.compile(this._then)
+				.compile(this._whenTrue)
 				.code(' : undefined')
 		}
 	} // }}}
@@ -44,6 +44,6 @@ class IfExpression extends Expression {
 			ctrl.compileBoolean(this._condition)
 		}
 		
-		ctrl.code(')').step().line(this._then).done()
+		ctrl.code(')').step().line(this._whenTrue).done()
 	} // }}}
 }

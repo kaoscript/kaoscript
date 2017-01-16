@@ -1,4 +1,4 @@
-var Compiler = require('./build/compiler.js')().Compiler;
+var Compiler = require('./lib/compiler.js')().Compiler;
 var fs = require('fs');
 var path = require('path');
 

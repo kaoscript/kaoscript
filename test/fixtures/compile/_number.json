@@ -12,7 +12,7 @@
       "instanceMethods": {
         "limit": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "limit",
             "signature": {
               "access": 3,
@@ -29,7 +29,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "Number"
               }
             }
@@ -37,7 +37,7 @@
         ],
         "mod": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "mod",
             "signature": {
               "access": 3,
@@ -54,7 +54,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "Number"
               }
             }
@@ -62,7 +62,7 @@
         ],
         "round": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "round",
             "signature": {
               "access": 3,
@@ -79,7 +79,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "Number"
               }
             }
@@ -87,7 +87,7 @@
         ],
         "toFloat": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "toFloat",
             "signature": {
               "access": 3,
@@ -98,7 +98,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "Number"
               }
             }
@@ -106,7 +106,7 @@
         ],
         "toInt": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "toInt",
             "signature": {
               "access": 3,
@@ -123,7 +123,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "Number"
               }
             }

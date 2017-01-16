@@ -82,7 +82,7 @@ class ForRangeStatement extends Statement {
 		ctrl.compile(this._variable).code(' <= ').compile(this._boundName ?? this._to).code('; ')
 		
 		if data.by {
-			if data.by.kind == Kind::NumericExpression {
+			if data.by.kind == NodeKind::NumericExpression {
 				if data.by.value == 1 {
 					ctrl.code('++').compile(this._variable)
 				}

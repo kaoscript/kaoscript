@@ -3,17 +3,17 @@ class ArrayExpression extends Expression {
 		_values
 	}
 	analyse() { // {{{
-		this._values = [$compile.expression(value, this) for value in this._data.values]
+		@values = [$compile.expression(value, this) for value in @data.values]
 	} // }}}
 	fuse() { // {{{
-		for value in this._values {
+		for value in @values {
 			value.fuse()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.code('[')
 		
-		for value, index in this._values {
+		for value, index in @values {
 			fragments.code($comma) if index
 			
 			fragments.compile(value)
@@ -30,11 +30,9 @@ class ArrayRange extends Expression {
 		_to
 	}
 	analyse() { // {{{
-		let data = this._data
-		
-		this._from = $compile.expression(data.from ?? data.then, this)
-		this._to = $compile.expression(data.to ?? data.til, this)
-		this._by = $compile.expression(data.by, this) if data.by?
+		@from = $compile.expression(@data.from ?? @data.then, this)
+		@to = $compile.expression(@data.to ?? @data.til, this)
+		@by = $compile.expression(@data.by, this) if @data.by?
 	} // }}}
 	fuse() { // {{{
 	} // }}}
@@ -43,17 +41,17 @@ class ArrayRange extends Expression {
 		
 		fragments
 			.code($runtime.helper(this), '.newArrayRange(')
-			.compile(this._from)
+			.compile(@from)
 			.code($comma)
-			.compile(this._to)
+			.compile(@to)
 		
-		if this._by == null {
+		if @by == null {
 			fragments.code(', 1')
 		}
 		else {
-			fragments.code(', ').compile(this._by)
+			fragments.code(', ').compile(@by)
 		}
 		
-		fragments.code($comma, this._data.from?, $comma, this._data.to?, ')')
+		fragments.code($comma, @data.from?, $comma, @data.to?, ')')
 	} // }}}
 }

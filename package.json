@@ -24,18 +24,17 @@
 		"node": ">= 4.0.0"
 	},
 	"files": [
+		"register.js",
 		"bin",
-		"build",
-		"src",
-		"register.js"
+		"lib"
 	],
 	"main": "lib/compiler.js",
 	"bin": {
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
-		"@kaoscript/ast": "0.5.x",
-		"@kaoscript/parser": "0.5.x",
+		"@kaoscript/ast": "0.6.x",
+		"@kaoscript/parser": "0.6.x",
 		"@kaoscript/runtime": "0.5.x",
 		"commander": "2.9.x"
 	},
@@ -46,7 +45,7 @@
 		"rimraf": "2.5.x"
 	},
 	"scripts": {
-		"test": "mocha --colors --reporter spec --compilers ks:./register.js"
+		"test": "mocha --colors --check-leaks --reporter spec --compilers ks:./register.js"
 	},
 	"keywords": [
 		"kaoscript",

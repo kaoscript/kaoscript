@@ -5,7 +5,7 @@ class ObjectExpression extends Expression {
 	}
 	analyse() { // {{{
 		for property in this._data.properties {
-			if property.name.kind == Kind::Identifier || property.name.kind == Kind::Literal {
+			if property.name.kind == NodeKind::Identifier || property.name.kind == NodeKind::Literal {
 				this._properties.push(property = new ObjectMember(property, this))
 			}
 			else {
@@ -47,7 +47,7 @@ class ObjectMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		if this._data.name.kind == Kind::Identifier	{
+		if this._data.name.kind == NodeKind::Identifier	{
 			this._name = new IdentifierLiteral(this._data.name, this, this.scope(), false)
 			
 			this.reference('.' + this._data.name.name)
@@ -68,7 +68,7 @@ class ObjectMember extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(this._name)
 		
-		if this._data.value.kind != Kind::FunctionExpression {
+		if this._data.value.kind != NodeKind::FunctionExpression {
 			fragments.code(': ')
 		}
 		

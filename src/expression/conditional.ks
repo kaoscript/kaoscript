@@ -1,26 +1,26 @@
-class TernaryConditionalExpression extends Expression {
+class ConditionalExpression extends Expression {
 	private {
 		_condition
-		_else
-		_then
+		_whenFalse
+		_whenTrue
 	}
 	analyse() { // {{{
 		this._condition = $compile.expression(this._data.condition, this)
-		this._then = $compile.expression(this._data.then, this)
-		this._else = $compile.expression(this._data.else, this)
+		this._whenTrue = $compile.expression(this._data.whenTrue, this)
+		this._whenFalse = $compile.expression(this._data.whenFalse, this)
 	} // }}}
 	fuse() { // {{{
 		this._condition.fuse()
-		this._then.fuse()
-		this._else.fuse()
+		this._whenTrue.fuse()
+		this._whenFalse.fuse()
 	} // }}}
 	isComputed() => true
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(this._condition)
 			.code(' ? ')
-			.compile(this._then)
+			.compile(this._whenTrue)
 			.code(' : ')
-			.compile(this._else)
+			.compile(this._whenFalse)
 	} // }}}
 }

@@ -10,7 +10,7 @@ class FunctionExpression extends Expression {
 	} // }}}
 	analyse() { // {{{
 		$variable.define(this, this._scope, {
-			kind: Kind::Identifier,
+			kind: NodeKind::Identifier,
 			name: 'this'
 		}, VariableKind::Variable)
 		

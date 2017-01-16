@@ -7,7 +7,7 @@ class ExpressionStatement extends Statement {
 		this._expression = $compile.expression(this._data, this)
 	} // }}}
 	assignment(data, expression) { // {{{
-		if data.left.kind == Kind::Identifier && !this._scope.hasVariable(data.left.name) {
+		if data.left.kind == NodeKind::Identifier && !this._scope.hasVariable(data.left.name) {
 			if !expression.isAssignable() || this._variable.length {
 				this._variables.push(data.left.name)
 			}

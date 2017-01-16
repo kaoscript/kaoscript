@@ -12,7 +12,7 @@
       "instanceMethods": {
         "toLowerCase": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "toLowerCase",
             "signature": {
               "access": 3,
@@ -23,7 +23,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "string"
               }
             }
@@ -31,7 +31,7 @@
         ],
         "lines": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "lines",
             "signature": {
               "access": 3,
@@ -48,7 +48,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "Array"
               }
             }
@@ -56,7 +56,7 @@
         ],
         "lower": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "toLowerCase",
             "signature": {
               "access": 3,
@@ -67,7 +67,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "string"
               }
             }
@@ -75,7 +75,7 @@
         ],
         "toFloat": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "toFloat",
             "signature": {
               "access": 3,
@@ -86,7 +86,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "Number"
               }
             }
@@ -94,7 +94,7 @@
         ],
         "toInt": [
           {
-            "kind": 56,
+            "kind": 55,
             "name": "toInt",
             "signature": {
               "access": 3,
@@ -111,7 +111,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 41,
+                "kind": 40,
                 "name": "Number"
               }
             }

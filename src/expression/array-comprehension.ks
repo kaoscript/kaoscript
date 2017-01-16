@@ -1,6 +1,6 @@
 func $return(data?) { // {{{
 	return {
-		kind: Kind::ReturnStatement
+		kind: NodeKind::ReturnStatement
 		value: data
 	}
 } // }}}

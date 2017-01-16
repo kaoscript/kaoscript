@@ -6,7 +6,7 @@ class DestroyStatement extends Statement {
 	analyse() { // {{{
 		this._expression = $compile.expression(this._data.variable, this)
 		
-		if this._data.variable.kind == Kind::Identifier {
+		if this._data.variable.kind == NodeKind::Identifier {
 			this._variable = this._scope.getVariable(this._data.variable.name)
 			
 			this._scope.removeVariable(this._data.variable.name)

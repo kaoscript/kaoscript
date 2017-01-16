@@ -12,7 +12,7 @@ class CreateExpression extends Expression {
 		@class = $compile.expression(@data.class, this)
 		
 		for argument in @data.arguments {
-			if argument.kind == Kind::UnaryExpression && argument.operator.kind == UnaryOperator::Spread {
+			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
 				@arguments.push($compile.expression(argument.argument, this))
 				
 				@list = false
