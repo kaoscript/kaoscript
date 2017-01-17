@@ -22,7 +22,7 @@ export class Module {
 	}
 	$create(data, @compiler, @file) { // {{{
 		try {
-			this._data = parse(data)
+			@data = @parse(data, file)
 		}
 		catch error {
 			error.filename = file
@@ -30,37 +30,37 @@ export class Module {
 			throw error
 		}
 		
-		this._directory = path.dirname(file)
-		this._options = $attribute.apply(this._data, this._compiler._options.config)
+		@directory = path.dirname(file)
+		@options = $attribute.apply(@data, @compiler._options.config)
 		
-		for attr in this._data.attributes {
+		for attr in @data.attributes {
 			if attr.declaration.kind == NodeKind::Identifier &&	attr.declaration.name == 'bin' {
-				this._binary = true
+				@binary = true
 			}
 			else if attr.declaration.kind == NodeKind::AttributeExpression && attr.declaration.name.name == 'cfg' {
 				for arg in attr.declaration.arguments {
 					if arg.kind == NodeKind::AttributeOperator {
-						this._options[arg.name.name] = arg.value.value
+						@options[arg.name.name] = arg.value.value
 					}
 				}
 			}
 		}
 		
-		if this._compiler._options.output {
-			this._output = this._compiler._options.output
+		if @compiler._options.output {
+			@output = @compiler._options.output
 		
-			if this._compiler._options.rewire is Array {
-				this._rewire = this._compiler._options.rewire
+			if @compiler._options.rewire is Array {
+				@rewire = @compiler._options.rewire
 			}
 			else {
-				this._rewire = []
+				@rewire = []
 			}
 		}
 		else {
-			this._output = null
+			@output = null
 		}
 		
-		this._hashes['.'] = this._compiler.sha256(file, data)
+		@hashes['.'] = @compiler.sha256(file, data)
 	} // }}}
 	addHash(file, hash) { // {{{
 		this._hashes[path.relative(this._directory, file)] = hash
@@ -180,6 +180,7 @@ export class Module {
 			return null
 		}
 	} // }}}
+	parse(data, file) => parse(data)
 	path(x?, name) { // {{{
 		if !?x || !?this._output {
 			return name

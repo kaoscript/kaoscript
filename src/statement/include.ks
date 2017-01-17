@@ -21,7 +21,7 @@ class IncludeDeclaration extends Statement {
 					module.addInclude(path)
 					
 					try {
-						data = parse(data)
+						data = module.parse(data, path)
 					}
 					catch error {
 						error.filename = path
@@ -61,7 +61,7 @@ class IncludeDeclaration extends Statement {
 				module.addInclude(path)
 				
 				try {
-					data = parse(data)
+					data = module.parse(data, path)
 				}
 				catch error {
 					error.filename = path
@@ -113,7 +113,7 @@ class IncludeOnceDeclaration extends Statement {
 						module.addInclude(path)
 						
 						try {
-							data = parse(data)
+							data = module.parse(data, path)
 						}
 						catch error {
 							error.filename = path
@@ -155,7 +155,7 @@ class IncludeOnceDeclaration extends Statement {
 					module.addInclude(path)
 					
 					try {
-						data = parse(data)
+						data = module.parse(data, path)
 					}
 					catch error {
 						error.filename = path

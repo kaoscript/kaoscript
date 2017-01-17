@@ -272,7 +272,7 @@ class CallExpression extends Expression {
 		
 		if this._list {
 			if data.scope.kind == ScopeKind::This {
-				fragments.compile(this._callee, mode).code('(')
+				fragments.wrap(this._callee, mode).code('(')
 				
 				for argument, index in this._arguments {
 					fragments.code($comma) if index
@@ -281,14 +281,14 @@ class CallExpression extends Expression {
 				}
 			}
 			else if data.scope.kind == ScopeKind::Null {
-				fragments.compile(this._callee, mode).code('.call(null')
+				fragments.wrap(this._callee, mode).code('.call(null')
 				
 				for argument in this._arguments {
 					fragments.code($comma).compile(argument, mode)
 				}
 			}
 			else {
-				fragments.compile(this._callee, mode).code('.call(').compile(this._callScope, mode)
+				fragments.wrap(this._callee, mode).code('.call(').compile(this._callScope, mode)
 				
 				for argument in this._arguments {
 					fragments.code($comma).compile(argument, mode)
@@ -298,7 +298,7 @@ class CallExpression extends Expression {
 		else {
 			if data.scope.kind == ScopeKind::Null {
 				fragments
-					.compile(this._callee, mode)
+					.wrap(this._callee, mode)
 					.code('.apply(null')
 			}
 			else if data.scope.kind == ScopeKind::This {
@@ -309,7 +309,7 @@ class CallExpression extends Expression {
 			}
 			else {
 				fragments
-					.compile(this._callee, mode)
+					.wrap(this._callee, mode)
 					.code('.apply(')
 					.compile(this._callScope, mode)
 			}
