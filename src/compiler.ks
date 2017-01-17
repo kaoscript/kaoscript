@@ -532,7 +532,7 @@ const $type = {
 					}
 				}
 			}
-			NodeKind::BinaryOperator => {
+			NodeKind::BinaryExpression => {
 				if data.operator.kind == BinaryOperatorKind::TypeCasting {
 					return $type.type(data.right, scope, node)
 				}
@@ -894,7 +894,7 @@ const $variable = {
 					}
 				}
 			}
-			NodeKind::BinaryOperator => {
+			NodeKind::BinaryExpression => {
 				if data.operator.kind == BinaryOperatorKind::TypeCasting {
 					return {
 						kind: VariableKind::Variable
@@ -1352,7 +1352,7 @@ const $compile = {
 		if clazz? {
 			expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 		}
-		else if data.kind == NodeKind::BinaryOperator {
+		else if data.kind == NodeKind::BinaryExpression {
 			if clazz ?= $binaryOperators[data.operator.kind] {
 				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
@@ -1370,7 +1370,7 @@ const $compile = {
 				$throw('Unknow binary operator ' + data.operator.kind, parent)
 			}
 		}
-		else if data.kind == NodeKind::PolyadicOperator {
+		else if data.kind == NodeKind::PolyadicExpression {
 			if clazz ?= $polyadicOperators[data.operator.kind] {
 				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
@@ -1510,6 +1510,7 @@ const $expressions = {
 	`\(NodeKind::ObjectMember)`					: ObjectMember
 	`\(NodeKind::OmittedExpression)`			: OmittedExpression
 	`\(NodeKind::RegularExpression)`			: RegularExpression
+	`\(NodeKind::SequenceExpression)`			: SequenceExpression
 	`\(NodeKind::TemplateExpression)`			: TemplateExpression
 	`\(NodeKind::ThisExpression)`				: ThisExpression
 	`\(NodeKind::UnlessExpression)`				: UnlessExpression

@@ -26,7 +26,8 @@
 	"files": [
 		"register.js",
 		"bin",
-		"lib"
+		"lib",
+		"src"
 	],
 	"main": "lib/compiler.js",
 	"bin": {
@@ -46,6 +47,9 @@
 	},
 	"scripts": {
 		"test": "mocha --colors --check-leaks --reporter spec --compilers ks:./register.js"
+	},
+	"kaoscript": {
+		"main": "src/compiler.ks"
 	},
 	"keywords": [
 		"kaoscript",

@@ -846,7 +846,7 @@ const $function = {
 					}
 				}
 			}
-			NodeKind::BinaryOperator => {
+			NodeKind::BinaryExpression => {
 				if $function.useThisVariable(data.left) || $function.useThisVariable(data.right) {
 					return true
 				}
@@ -886,12 +886,6 @@ const $function = {
 				if $function.useThisVariable(data.condition) || $function.useThisVariable(data.whenTrue) {
 					return true
 				}
-				
-				/* for value in data.elseifs {
-					if $function.useThisVariable(value) {
-						return true
-					}
-				} */
 				
 				if data.whenFalse? && data.$function.useThisVariable(data.whenFalse) {
 					return true

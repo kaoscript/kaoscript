@@ -31,8 +31,9 @@ class Statement extends AbstractNode {
 	isAsync() => false
 	statement() => this
 	toFragments(fragments, mode) { // {{{
-		if @variables.length {
-			fragments.newLine().code($variable.scope(this) + @variables.join(', ')).done()
+		let variables = @variables()
+		if variables.length {
+			fragments.newLine().code($variable.scope(this) + variables.join(', ')).done()
 		}
 		
 		if r ?= this.toStatementFragments(fragments, mode) {
@@ -46,6 +47,7 @@ class Statement extends AbstractNode {
 			}
 		}
 	} // }}}
+	variables() => @variables
 }
 
 include {
