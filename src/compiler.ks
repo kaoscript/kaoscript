@@ -1540,6 +1540,7 @@ const $statements = {
 	`\(NodeKind::MethodDeclaration)`			: MethodDeclaration
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
+	`\(NodeKind::RequireOrImportDeclaration)`	: RequireOrImportDeclaration
 	`\(NodeKind::ReturnStatement)`				: ReturnStatement
 	`\(NodeKind::SwitchStatement)`				: SwitchStatement
 	`\(NodeKind::ThrowStatement)`				: ThrowStatement
@@ -1549,7 +1550,7 @@ const $statements = {
 	`\(NodeKind::UntilStatement)`				: UntilStatement
 	`\(NodeKind::VariableDeclaration)`			: VariableDeclaration
 	`\(NodeKind::WhileStatement)`				: WhileStatement
-	`default`								: ExpressionStatement
+	`default`									: ExpressionStatement
 }
 
 const $polyadicOperators = {

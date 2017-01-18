@@ -63,7 +63,7 @@ const $import = {
 			return $import.loadNodeFile(null, x, module, data, node)
 		}
 		
-		return false
+		return null
 	}, // }}}
 	loadDirectory(x, moduleName?, module, data, node) { // {{{
 		let pkgfile = path.join(x, 'package.json')
@@ -74,11 +74,11 @@ const $import = {
 			}
 			
 			if pkg? {
-				if pkg.kaoscript && $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node) {
-					return true
+				if pkg.kaoscript && (metadata ?= $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node)) {
+					return metadata
 				}
-				else if pkg.main && ($import.loadFile(path.join(x, pkg.main), moduleName, module, data, node) || $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node)) {
-					return true
+				else if pkg.main && ((metadata ?= $import.loadFile(path.join(x, pkg.main), moduleName, module, data, node)) || (metadata ?= $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node))) {
+					return metadata
 				}
 			}
 		}
@@ -106,7 +106,7 @@ const $import = {
 			}
 		}
 		
-		return false
+		return null
 	} // }}}
 	loadKSFile(x, moduleName?, module, data, node) { // {{{
 		moduleName ??= module.path(x, data.module)
@@ -231,8 +231,8 @@ const $import = {
 			module.import(importAlias, moduleName)
 		}
 		
-		node._kind = ImportKind::KSFile
-		node._metadata = {
+		return {
+			kind: ImportKind::KSFile
 			moduleName: moduleName
 			exports: exports
 			requirements: requirements
@@ -241,8 +241,6 @@ const $import = {
 			importAll: importAll
 			importAlias: importAlias
 		}
-		
-		return true
 	} // }}}
 	loadNodeFile(x?, moduleName?, module, data, node) { // {{{
 		let file = null
@@ -250,18 +248,18 @@ const $import = {
 			file = moduleName = module.path(x, data.module)
 		}
 		
-		node._kind = ImportKind::NodeFile
-		node._metadata = {
+		let metadata = {
+			kind: ImportKind::NodeFile
 			moduleName: moduleName
 		}
 		
-		let variables = node._metadata.variables = {}
+		let variables = metadata.variables = {}
 		let count = 0
 		
 		for specifier in data.specifiers {
 			if specifier.kind == NodeKind::ImportWildcardSpecifier {
 				if specifier.local {
-					node._metadata.wilcard = specifier.local.name
+					metadata.wilcard = specifier.local.name
 					
 					$import.define(module, file, node, specifier.local, VariableKind::Variable)
 				}
@@ -275,13 +273,13 @@ const $import = {
 			}
 		}
 		
-		node._metadata.count = count
+		metadata.count = count
 		
 		for alias of variables {
 			$import.define(module, file, node, variables[alias], VariableKind::Variable)
 		}
 		
-		return true
+		return metadata
 	} // }}}
 	loadNodeModule(x, start, module, data, node) { // {{{
 		let dirs = $import.nodeModulesPaths(start)
@@ -290,12 +288,12 @@ const $import = {
 		for dir in dirs {
 			file = path.join(dir, x)
 			
-			if $import.loadFile(file, x, module, data, node) || $import.loadDirectory(file, x, module, data, node) {
-				return true
+			if (metadata ?= $import.loadFile(file, x, module, data, node)) || (metadata ?= $import.loadDirectory(file, x, module, data, node)) {
+				return metadata
 			}
 		}
 		
-		return false
+		return null
 	} // }}}
 	nodeModulesPaths(start) { // {{{
 		start = fs.resolve(start)
@@ -341,15 +339,17 @@ const $import = {
 		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
 			x = fs.resolve(y, x)
 			
-			if !($import.loadFile(x, null, module, data, node) || $import.loadDirectory(x, null, module, data, node)) {
-				$throw("Cannot find module '" + x + "' from '" + y + "'", node)
+			if (metadata ?= $import.loadFile(x, null, module, data, node)) || (metadata ?= $import.loadDirectory(x, null, module, data, node)) {
+				return metadata
 			}
 		}
 		else {
-			if !($import.loadNodeModule(x, y, module, data, node) || $import.loadCoreModule(x, module, data, node)) {
-				$throw("Cannot find module '" + x + "' from '" + y + "'", node)
+			if (metadata ?= $import.loadNodeModule(x, y, module, data, node)) || (metadata ?= $import.loadCoreModule(x, module, data, node)) {
+				return metadata
 			}
 		}
+		
+		$throw("Cannot find module '" + x + "' from '" + y + "'", node)
 	} // }}}
 	use(data, node) { // {{{
 		if data is Array {
@@ -361,14 +361,14 @@ const $import = {
 			$throw(`Undefined variable '\(data.name)' at line \(data.start.line)`, node) if !node.scope().hasVariable(data.name)
 		}
 	} // }}}
-	toKSFileFragments(node, fragments, data, metadata) { // {{{
+	toKSFileFragments(fragments, metadata, data, node) { // {{{
 		let {moduleName, exports, requirements, importVariables, importVarCount, importAll, importAlias} = metadata
 		
 		let name, alias, variable, importCode
 		let importCodeVariable = false
 		
 		if (importVarCount && importAll) || (importVarCount && importAlias.length) || (importAll && importAlias.length) {
-			importCode = node.scope().acquireTempName()
+			importCode = node._scope.acquireTempName()
 			importCodeVariable = true
 			
 			let line = fragments
@@ -705,9 +705,9 @@ const $import = {
 			fragments.newLine().code('var ', importAlias, ' = ', importCode).done()
 		}
 		
-		node.scope().releaseTempName(importCode)
+		node._scope.releaseTempName(importCode)
 	} // }}}
-	toNodeFileFragments(node, fragments, data, metadata) { // {{{
+	toNodeFileFragments(fragments, metadata, data, node) { // {{{
 		let moduleName = metadata.moduleName
 		
 		if metadata.wilcard? {
@@ -777,8 +777,8 @@ class ImportDeclaration extends Statement {
 		_declarators = []
 	}
 	analyse() { // {{{
-		for declarator in this._data.declarations {
-			this._declarators.push(declarator = new ImportDeclarator(declarator, this))
+		for declarator in @data.declarations {
+			@declarators.push(declarator = new ImportDeclarator(declarator, this))
 			
 			declarator.analyse()
 		}
@@ -786,7 +786,7 @@ class ImportDeclaration extends Statement {
 	fuse() { // {{{
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		for declarator in this._declarators {
+		for declarator in @declarators {
 			declarator.toFragments(fragments, mode)
 		}
 	} // }}}
@@ -795,20 +795,16 @@ class ImportDeclaration extends Statement {
 class ImportDeclarator extends Statement {
 	private {
 		_metadata
-		_kind
 	}
 	analyse() { // {{{
-		$import.resolve(this._data, this.directory(), this.module(), this)
+		@metadata = $import.resolve(@data, this.directory(), this.module(), this)
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if this._kind == ImportKind::KSFile {
-			$import.toKSFileFragments(this, fragments, this._data, this._metadata)
-		}
-		else if this._kind == ImportKind::NodeFile {
-			$import.toNodeFileFragments(this, fragments, this._data, this._metadata)
+		if @metadata.kind == ImportKind::KSFile {
+			$import.toKSFileFragments(fragments, @metadata, @data, this)
 		}
 		else {
-			$throw('Not Implemented', this)
+			$import.toNodeFileFragments(fragments, @metadata, @data, this)
 		}
 	} // }}}
 }

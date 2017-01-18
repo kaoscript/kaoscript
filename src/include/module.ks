@@ -204,32 +204,36 @@ export class Module {
 		
 		return output
 	} // }}}
-	require(variable) { // {{{
+	require(variable, kind, data?) { // {{{
 		if this._binary {
 			$throw('Binary file can\'t require', this)
 		}
 		
-		this._requirements[variable.requirement] = {
-			name: variable.requirement
-			extendable: variable.kind == VariableKind::Class || variable.sealed
-			requireFirst: false
+		if kind == RequireKind::Require {
+			this._requirements[variable.requirement] = {
+				kind: kind
+				name: variable.requirement
+				extendable: variable.kind == VariableKind::Class || variable.sealed
+			}
 		}
-	} // }}}
-	require(variable, requireFirst) { // {{{
-		if this._binary {
-			$throw('Binary file can\'t require', this)
+		else {
+			let requirement = {
+				kind: kind
+				name: variable.requirement
+				extendable: variable.kind == VariableKind::Class || variable.sealed
+				parameter: this._body.scope().acquireTempName()
+			}
+			
+			if data? {
+				for name of data {
+					requirement[name] = data[name]
+				}
+			}
+			
+			this._requirements[requirement.parameter] = requirement
+			
+			this._dynamicRequirements.push(requirement)
 		}
-		
-		let requirement = {
-			name: variable.requirement
-			extendable: variable.kind == VariableKind::Class || variable.sealed
-			parameter: this._body.scope().acquireTempName()
-			requireFirst: requireFirst
-		}
-		
-		this._requirements[requirement.parameter] = requirement
-		
-		this._dynamicRequirements.push(requirement)
 	} // }}}
 	toHashes() => this._hashes
 	toFragments() { // {{{
@@ -296,40 +300,84 @@ export class Module {
 				if this._dynamicRequirements.length == 1 {
 					requirement = this._dynamicRequirements[0]
 					
-					if requirement.requireFirst {
-						fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
-						
-						if requirement.extendable {
-							fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
-							fragments.push($code('\t}\n'))
-							fragments.push($code('\telse {\n'))
-							fragments.push($code('\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'))
-							fragments.push($code('\t}\n'))
+					switch requirement.kind {
+						RequireKind::ExternOrRequire => {
+							fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
+							
+							if requirement.extendable {
+								fragments.push($code('\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
+								fragments.push($code('\t}\n'))
+							}
+							else {
+								fragments.push($code('\t\treturn [' + requirement.name + '];\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								fragments.push($code('\t\treturn [' + requirement.parameter + '];\n'))
+								fragments.push($code('\t}\n'))
+							}
 						}
-						else {
-							fragments.push($code('\t\treturn [' + requirement.parameter + '];\n'))
-							fragments.push($code('\t}\n'))
-							fragments.push($code('\telse {\n'))
-							fragments.push($code('\t\treturn [' + requirement.name + '];\n'))
-							fragments.push($code('\t}\n'))
+						RequireKind::RequireOrExtern => {
+							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
+							
+							if requirement.extendable {
+								fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								fragments.push($code('\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'))
+								fragments.push($code('\t}\n'))
+							}
+							else {
+								fragments.push($code('\t\treturn [' + requirement.parameter + '];\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								fragments.push($code('\t\treturn [' + requirement.name + '];\n'))
+								fragments.push($code('\t}\n'))
+							}
 						}
-					}
-					else {
-						fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
-						
-						if requirement.extendable {
-							fragments.push($code('\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'))
-							fragments.push($code('\t}\n'))
-							fragments.push($code('\telse {\n'))
-							fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
-							fragments.push($code('\t}\n'))
-						}
-						else {
-							fragments.push($code('\t\treturn [' + requirement.name + '];\n'))
-							fragments.push($code('\t}\n'))
-							fragments.push($code('\telse {\n'))
-							fragments.push($code('\t\treturn [' + requirement.parameter + '];\n'))
-							fragments.push($code('\t}\n'))
+						RequireKind::RequireOrImport => {
+							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
+							
+							if requirement.extendable {
+								fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								
+								const builder = new FragmentBuilder(2)
+								
+								if requirement.metadata.kind == ImportKind::KSFile {
+									$import.toKSFileFragments(builder, requirement.metadata, requirement.data, requirement.node)
+								}
+								else {
+									$import.toNodeFileFragments(builder, requirement.metadata, requirement.data, requirement.node)
+								}
+								
+								fragments.append(builder.toArray())
+								
+								fragments.push($code('\t\treturn [' + requirement.name + ', __ks_' + requirement.name + '];\n'))
+								
+								fragments.push($code('\t}\n'))
+							}
+							else {
+								fragments.push($code('\t\treturn [' + requirement.parameter + '];\n'))
+								fragments.push($code('\t}\n'))
+								fragments.push($code('\telse {\n'))
+								
+								const builder = new FragmentBuilder(2)
+								
+								if requirement.metadata.kind == ImportKind::KSFile {
+									$import.toKSFileFragments(builder, requirement.metadata, requirement.data, requirement.node)
+								}
+								else {
+									$import.toNodeFileFragments(builder, requirement.metadata, requirement.data, requirement.node)
+								}
+								
+								fragments.push($code('\t\treturn [' + requirement.name + '];\n'))
+								
+								fragments.push($code('\t}\n'))
+							}
 						}
 					}
 				}
@@ -337,40 +385,84 @@ export class Module {
 					fragments.push($code('\tvar req = [];\n'))
 					
 					for requirement in this._dynamicRequirements {
-						if requirement.requireFirst {
-							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
-							
-							if requirement.extendable {
-								fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
-								fragments.push($code('\t}\n'))
-								fragments.push($code('\telse {\n'))
-								fragments.push($code('\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'))
-								fragments.push($code('\t}\n'))
+						switch requirement.kind {
+							RequireKind::ExternOrRequire => {
+								fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
+								
+								if requirement.extendable {
+									fragments.push($code('\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'))
+									fragments.push($code('\t}\n'))
+									fragments.push($code('\telse {\n'))
+									fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
+									fragments.push($code('\t}\n'))
+								}
+								else {
+									fragments.push($code('\t\treq.push(' + requirement.name + ');\n'))
+									fragments.push($code('\t}\n'))
+									fragments.push($code('\telse {\n'))
+									fragments.push($code('\t\treq.push(' + requirement.parameter + ');\n'))
+									fragments.push($code('\t}\n'))
+								}
 							}
-							else {
-								fragments.push($code('\t\treq.push(' + requirement.parameter + ');\n'))
-								fragments.push($code('\t}\n'))
-								fragments.push($code('\telse {\n'))
-								fragments.push($code('\t\treq.push(' + requirement.name + ');\n'))
-								fragments.push($code('\t}\n'))
+							RequireKind::RequireOrExtern => {
+								fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
+								
+								if requirement.extendable {
+									fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
+									fragments.push($code('\t}\n'))
+									fragments.push($code('\telse {\n'))
+									fragments.push($code('\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'))
+									fragments.push($code('\t}\n'))
+								}
+								else {
+									fragments.push($code('\t\treq.push(' + requirement.parameter + ');\n'))
+									fragments.push($code('\t}\n'))
+									fragments.push($code('\telse {\n'))
+									fragments.push($code('\t\treq.push(' + requirement.name + ');\n'))
+									fragments.push($code('\t}\n'))
+								}
 							}
-						}
-						else {
-							fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
-							
-							if requirement.extendable {
-								fragments.push($code('\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'))
-								fragments.push($code('\t}\n'))
-								fragments.push($code('\telse {\n'))
-								fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
-								fragments.push($code('\t}\n'))
-							}
-							else {
-								fragments.push($code('\t\treq.push(' + requirement.name + ');\n'))
-								fragments.push($code('\t}\n'))
-								fragments.push($code('\telse {\n'))
-								fragments.push($code('\t\treq.push(' + requirement.parameter + ');\n'))
-								fragments.push($code('\t}\n'))
+							RequireKind::RequireOrImport => {
+								fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
+								
+								if requirement.extendable {
+									fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
+									fragments.push($code('\t}\n'))
+									fragments.push($code('\telse {\n'))
+									
+									const builder = new FragmentBuilder(2)
+									
+									if requirement.metadata.kind == ImportKind::KSFile {
+										$import.toKSFileFragments(builder, requirement.metadata, requirement.data, requirement.node)
+									}
+									else {
+										$import.toNodeFileFragments(builder, requirement.metadata, requirement.data, requirement.node)
+									}
+									
+									fragments.append(builder.toArray())
+									
+									fragments.push($code('\t\treq.push(' + requirement.name + ', __ks_' + requirement.name + ');\n'))
+									
+									fragments.push($code('\t}\n'))
+								}
+								else {
+									fragments.push($code('\t\treq.push(' + requirement.parameter + ');\n'))
+									fragments.push($code('\t}\n'))
+									fragments.push($code('\telse {\n'))
+									
+									const builder = new FragmentBuilder(2)
+									
+									if requirement.metadata.kind == ImportKind::KSFile {
+										$import.toKSFileFragments(builder, requirement.metadata, requirement.data, requirement.node)
+									}
+									else {
+										$import.toNodeFileFragments(builder, requirement.metadata, requirement.data, requirement.node)
+									}
+									
+									fragments.push($code('\t\treq.push(' + requirement.name + ');\n'))
+									
+									fragments.push($code('\t}\n'))
+								}
 							}
 						}
 					}

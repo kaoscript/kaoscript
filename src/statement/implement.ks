@@ -4,7 +4,9 @@ class ImplementDeclaration extends Statement {
 		_variable
 	}
 	analyse() { // {{{
-		@variable = @scope.getVariable(@data.variable.name)
+		if @variable !?= @scope.getVariable(@data.variable.name) {
+			$throw(`Undefined variable '\(@data.variable.name)' at line \(@data.start.line)`, this)
+		}
 		
 		if @variable.kind == VariableKind::Class {
 			for property in @data.properties {

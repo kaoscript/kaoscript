@@ -61,7 +61,6 @@ include {
 	../statement/export
 	../statement/expression
 	../statement/extern
-	../statement/extern-require
 	../statement/for-from
 	../statement/for-in
 	../statement/for-of
@@ -72,7 +71,7 @@ include {
 	../statement/import
 	../statement/include
 	../statement/require
-	../statement/require-extern
+	../statement/require-import
 	../statement/return
 	../statement/switch
 	../statement/throw
