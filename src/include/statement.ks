@@ -54,13 +54,13 @@ include {
 	../statement/break
 	../statement/class
 	../statement/continue
+	../statement/dependency
 	../statement/destroy
 	../statement/do-until
 	../statement/do-while
 	../statement/enum
 	../statement/export
 	../statement/expression
-	../statement/extern
 	../statement/for-from
 	../statement/for-in
 	../statement/for-of
@@ -70,8 +70,6 @@ include {
 	../statement/implement
 	../statement/import
 	../statement/include
-	../statement/require
-	../statement/require-import
 	../statement/return
 	../statement/switch
 	../statement/throw

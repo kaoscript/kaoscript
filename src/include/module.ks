@@ -211,7 +211,7 @@ export class Module {
 			SyntaxException.throwNotBinary('require', this)
 		}
 		
-		if kind == RequireKind::Require {
+		if kind == DependencyKind::Require {
 			this._requirements[variable.requirement] = {
 				kind: kind
 				name: variable.requirement
@@ -303,7 +303,7 @@ export class Module {
 					requirement = this._dynamicRequirements[0]
 					
 					switch requirement.kind {
-						RequireKind::ExternOrRequire => {
+						DependencyKind::ExternOrRequire => {
 							fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
 							
 							if requirement.extendable {
@@ -321,7 +321,7 @@ export class Module {
 								fragments.push($code('\t}\n'))
 							}
 						}
-						RequireKind::RequireOrExtern => {
+						DependencyKind::RequireOrExtern => {
 							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 							
 							if requirement.extendable {
@@ -339,7 +339,7 @@ export class Module {
 								fragments.push($code('\t}\n'))
 							}
 						}
-						RequireKind::RequireOrImport => {
+						DependencyKind::RequireOrImport => {
 							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 							
 							if requirement.extendable {
@@ -388,7 +388,7 @@ export class Module {
 					
 					for requirement in this._dynamicRequirements {
 						switch requirement.kind {
-							RequireKind::ExternOrRequire => {
+							DependencyKind::ExternOrRequire => {
 								fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
 								
 								if requirement.extendable {
@@ -406,7 +406,7 @@ export class Module {
 									fragments.push($code('\t}\n'))
 								}
 							}
-							RequireKind::RequireOrExtern => {
+							DependencyKind::RequireOrExtern => {
 								fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 								
 								if requirement.extendable {
@@ -424,7 +424,7 @@ export class Module {
 									fragments.push($code('\t}\n'))
 								}
 							}
-							RequireKind::RequireOrImport => {
+							DependencyKind::RequireOrImport => {
 								fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 								
 								if requirement.extendable {
