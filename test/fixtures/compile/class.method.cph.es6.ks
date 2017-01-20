@@ -5,7 +5,7 @@ class LetterBox {
 		_messages: Array<String>
 	}
 	
-	$create(@messages)
+	constructor(@messages)
 	
 	build() => [this.format(message) for message in this._messages]
 	

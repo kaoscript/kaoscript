@@ -1295,7 +1295,7 @@ abstract class AbstractNode {
 		_reference
 		_scope = null
 	}
-	$create(@data, @parent, @scope = parent.scope()) { // {{{
+	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		this._options = parent._options
 	} // }}}
 	directory() => this._parent.directory()
@@ -1652,7 +1652,7 @@ export class Compiler {
 			$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]]
 		} // }}}
 	}
-	$create(@file, options?, @hashes = {}) { // {{{
+	constructor(@file, options?, @hashes = {}) { // {{{
 		@options = Object.merge({
 			target: 'ecma-v6'
 			register: true

@@ -3,9 +3,9 @@ class Shape {
 		_color: string = 'black'
 	}
 	
-	$create(@color)
+	constructor(@color)
 	
-	$destroy() {
+	destructor() {
 		this._color = null
 	}
 	
@@ -19,11 +19,11 @@ class Rectangle extends Shape {
 		_foo: string = 'bar'
 	}
 	
-	$create(color) {
+	constructor(color) {
 		super(color)
 	}
 	
-	$destroy() {
+	destructor() {
 		this._foo = null
 	}
 	

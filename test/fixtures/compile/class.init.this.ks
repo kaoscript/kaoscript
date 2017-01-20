@@ -1,5 +1,5 @@
 class Foo {
-	$create(bar) {
+	constructor(bar) {
 	}
 }
 

@@ -3,7 +3,7 @@ class Statement extends AbstractNode {
 		_afterwards	: Array	= []
 		_variables	: Array	= []
 	}
-	$create(data, parent, scope = parent.scope()) { // {{{
+	constructor(data, parent, scope = parent.scope()) { // {{{
 		@data = data
 		@parent = parent
 		@scope = scope

@@ -7,17 +7,17 @@ class Exception extends Error {
 		message: String
 	}
 	
-	$create(@message, @fileName: String, @lineNumber: Number) { // {{{
+	constructor(@message, @fileName: String, @lineNumber: Number) { // {{{
 		if !?this.stack {
 			@captureStackTrace()
 		}
 	} // }}}
 	
-	$create(message, node: AbstractNode) { // {{{
+	constructor(message, node: AbstractNode) { // {{{
 		this(message, node.file(), node._data.start.line)
 	} // }}}
 	
-	$create(message, node: AbstractNode, data) { // {{{
+	constructor(message, node: AbstractNode, data) { // {{{
 		this(message, node.file(), data.start.line)
 	} // }}}
 	
@@ -58,19 +58,19 @@ class IOException extends Exception {
 }
 
 class NotImplementedException extends Exception {
-	$create(message = 'Not Implemented', node: AbstractNode) { // {{{
+	constructor(message = 'Not Implemented', node: AbstractNode) { // {{{
 		super(message, node)
 	} // }}}
-	/* $create(message = 'Not Implemented', node: AbstractNode, data) {
+	/* constructor(message = 'Not Implemented', node: AbstractNode, data) {
 		super(message, node, data)
 	}
-	$create(message = 'Not Implemented', fileName: String, lineNumber: Number) {
+	constructor(message = 'Not Implemented', fileName: String, lineNumber: Number) {
 		super(message, fileName, lineNumber)
 	} */
 }
 
 class NotSupportedException extends Exception {
-	$create(message = 'Not Supported', node: AbstractNode) { // {{{
+	constructor(message = 'Not Supported', node: AbstractNode) { // {{{
 		super(message, node)
 	} // }}}
 }

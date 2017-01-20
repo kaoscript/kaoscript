@@ -128,7 +128,7 @@ class BindingElement extends Expression {
 		_name
 		_variable
 	}
-	$create(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
@@ -247,7 +247,7 @@ class FlatBindingElement extends Expression {
 		_item
 		_property
 	}
-	$create(@item, @property, parent) { // {{{
+	constructor(@item, @property, parent) { // {{{
 		super({}, parent)
 	} // }}}
 	isComposite() => false
@@ -381,7 +381,7 @@ class TempBinding extends Expression {
 		_name
 		_value
 	}
-	$create(@name, @value, parent) { // {{{
+	constructor(@name, @value, parent) { // {{{
 		super({}, parent)
 	} // }}}
 	isComputed() => true

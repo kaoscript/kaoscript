@@ -5,7 +5,7 @@ class Shape {
 		_shape: string = ''
 	}
 	
-	$create(@shape: string)
+	constructor(@shape: string)
 	
 	shape() => this._shape
 }
@@ -15,7 +15,7 @@ class Action {
 		_color: string = ''
 	}
 	
-	$create(@color: string)
+	constructor(@color: string)
 }
 
 impl Action {

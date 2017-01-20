@@ -4,7 +4,7 @@ class ThisExpression extends Expression {
 		_method		= false
 		_variable
 	}
-	$create(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { // {{{
 		super(data, parent, scope)
 		
 		do {

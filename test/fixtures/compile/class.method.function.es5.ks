@@ -9,7 +9,7 @@ class LetterBox {
 		_messages: Array<String>
 	}
 	
-	$create(@messages)
+	constructor(@messages)
 	
 	build_01() => this._messages.map(message => this.format(message))
 	

@@ -5,14 +5,14 @@ class Shape {
 		_color: string
 	}
 	
-	$create(@color)
+	constructor(@color)
 	
 	draw(): string {
 	}
 }
 
 class Rectangle extends Shape {
-	$create(color) {
+	constructor(color) {
 		super(color)
 	}
 	

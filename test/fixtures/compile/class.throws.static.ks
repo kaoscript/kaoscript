@@ -7,7 +7,7 @@ class Exception extends Error {
 		}
 	}
 	
-	$create(message) {
+	constructor(message) {
 		this.message = message
 	}
 }

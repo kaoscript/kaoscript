@@ -1,5 +1,5 @@
 class Shape {
-	$create()
+	constructor()
 	
 	draw(shape, color, canvas): string {
 		return `I'm drawing a \(color) \(shape).`

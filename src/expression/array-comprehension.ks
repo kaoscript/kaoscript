@@ -14,7 +14,7 @@ class ArrayComprehensionForFrom extends Expression {
 		_variable
 		_body
 	}
-	$create(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { // {{{
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
@@ -95,7 +95,7 @@ class ArrayComprehensionForIn extends Expression {
 		_variable
 		_when
 	}
-	$create(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { // {{{
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
@@ -182,7 +182,7 @@ class ArrayComprehensionForOf extends Expression {
 		_variable
 		_when
 	}
-	$create(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { // {{{
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
@@ -264,7 +264,7 @@ class ArrayComprehensionForRange extends Expression {
 		_variable
 		_when
 	}
-	$create(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { // {{{
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{

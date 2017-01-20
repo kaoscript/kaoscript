@@ -7,7 +7,7 @@ sealed class Shape {
 		_color: string = ''
 	}
 	
-	$create(@color: string)
+	constructor(@color: string)
 	
 	draw(): string {
 		return `I'm drawing with a \(this._color) pencil.`
@@ -30,7 +30,7 @@ class Proxy {
 		_shape: Shape
 	}
 	
-	$create(color) {
+	constructor(color) {
 		this._shape = new Shape(color)
 	}
 	

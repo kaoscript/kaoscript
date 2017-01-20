@@ -72,7 +72,7 @@ class ImplementClassFieldDeclaration extends Statement {
 	private {
 		_variable
 	}
-	$create(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent)
 		
 		if variable.sealed {
@@ -105,7 +105,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_statements
 		_variable
 	}
-	$create(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -245,7 +245,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		_signature
 		_variable
 	}
-	$create(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -373,7 +373,7 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		_signature
 		_variable
 	}
-	$create(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -488,7 +488,7 @@ class ImplementVariableFieldDeclaration extends Statement {
 		_value
 		_variable
 	}
-	$create(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
@@ -524,7 +524,7 @@ class ImplementVariableMethodDeclaration extends Statement {
 		_statements
 		_variable
 	}
-	$create(data, parent, @variable) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{

@@ -3,15 +3,15 @@ class Greetings {
 		_message: string = ''
 	}
 	
-	$create() {
+	constructor() {
 		this('Hello!')
 	}
 	
-	$create(message?) {
+	constructor(message?) {
 		this._message = message
 	}
 	
-	$destroy() {
+	destructor() {
 		this._message = null
 	}
 	

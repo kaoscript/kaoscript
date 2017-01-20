@@ -9,7 +9,7 @@ class Shape {
 		return new Shape('blue')
 	}
 	
-	$create(@color: string)
+	constructor(@color: string)
 	
 	draw(): string {
 		return `I'm drawing a \(this._color) rectangle.`

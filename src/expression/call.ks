@@ -373,7 +373,7 @@ class CallSealedExpression extends Expression {
 		_object
 		_tested		= false
 	}
-	$create(data, parent, scope, @callee) { // {{{
+	constructor(data, parent, scope, @callee) { // {{{
 		super(data, parent, scope)
 	} // }}}
 	analyse() { // {{{

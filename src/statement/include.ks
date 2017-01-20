@@ -189,7 +189,7 @@ class IncludeDeclarator extends Statement {
 		_directory
 		_file
 	}
-	$create(@file, parent) { // {{{
+	constructor(@file, parent) { // {{{
 		super({}, parent)
 		
 		this._directory = path.dirname(file)

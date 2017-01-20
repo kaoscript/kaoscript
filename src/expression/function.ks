@@ -5,7 +5,7 @@ class FunctionExpression extends Expression {
 		_parameters
 		_statements
 	}
-	$create(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
@@ -109,7 +109,7 @@ class LambdaExpression extends Expression {
 		_parameters
 		_statements
 	}
-	$create(data, parent, scope) { // {{{
+	constructor(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{

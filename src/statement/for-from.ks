@@ -10,7 +10,7 @@ class ForFromStatement extends Statement {
 		_when
 		_while
 	}
-	$create(data, parent) { // {{{
+	constructor(data, parent) { // {{{
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{

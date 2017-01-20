@@ -7,7 +7,7 @@ class Shape {
 		_color: string = ''
 	}
 	
-	$create(@color: string)
+	constructor(@color: string)
 	
 	color(): string => this._color
 	

@@ -3,11 +3,11 @@ class Greetings {
 		_message: string = ''
 	}
 	
-	$create() {
+	constructor() {
 		this('Hello!')
 	}
 	
-	$create(@message)
+	constructor(@message)
 	
 	abstract greet(name): String
 }

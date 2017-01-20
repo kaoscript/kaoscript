@@ -5,7 +5,7 @@ class Shape {
 		_color: string = ''
 	}
 	
-	$create(@color: string)
+	constructor(@color: string)
 }
 
 impl Shape {

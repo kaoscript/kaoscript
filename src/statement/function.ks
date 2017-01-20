@@ -919,7 +919,7 @@ class FunctionDeclaration extends Statement {
 		_statements
 		_variable
 	}
-	$create(data, parent) { // {{{
+	constructor(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{

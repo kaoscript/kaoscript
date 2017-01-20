@@ -729,7 +729,7 @@ export class Color {
 		} // }}}
 	}
 	
-	$create(...args) { // {{{
+	constructor(...args) { // {{{
 		$from(this, args)
 	} // }}}
 	

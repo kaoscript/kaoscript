@@ -64,7 +64,7 @@ class AbstractScope {
 		_renamedVariables	= {}
 		_variables			= {}
 	}
-	$create(@parent = null)
+	constructor(@parent = null)
 	addVariable(name, definition) { // {{{
 		if $keywords[name] == true {
 			let index = this._renamedIndexes[name] ? this._renamedIndexes[name] : 0
@@ -126,7 +126,7 @@ class Scope extends AbstractScope {
 		_tempNames			= {}
 		_tempParentNames	= {}
 	}
-	$create(parent) { // {{{
+	constructor(parent) { // {{{
 		super(parent)
 		
 		while parent? && !(parent is Scope) {

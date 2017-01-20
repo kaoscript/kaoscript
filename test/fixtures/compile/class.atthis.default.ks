@@ -7,11 +7,11 @@ class Greetings {
 		_message: string = ''
 	}
 	
-	$create() {
+	constructor() {
 		this('Hello!')
 	}
 	
-	$create(@message)
+	constructor(@message)
 	
 	greet(name) {
 		return @message + '\nIt\'s nice to meet you, ' + name + '.'

@@ -7,11 +7,11 @@ class Greetings {
 		_message = ''
 	}
 	
-	$create() {
+	constructor() {
 		this('Hello!')
 	}
 	
-	$create(message) {
+	constructor(message) {
 		this._message = message
 	}
 	

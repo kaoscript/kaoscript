@@ -3,6 +3,6 @@ class Foo {
 		_bar: string
 	}
 	
-	$create() {
+	constructor() {
 	}
 }

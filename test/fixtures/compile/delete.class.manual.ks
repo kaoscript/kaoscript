@@ -1,5 +1,5 @@
 class Foo {
-	$destroy() {
+	destructor() {
 	}
 }
 

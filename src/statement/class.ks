@@ -1196,8 +1196,8 @@ const $helper = {
 }
 
 const $method = {
-	isConstructor(name, variable) => name == '$create'
-	isDestructor(name, variable) => name == '$destroy'
+	isConstructor(name, variable) => name == 'constructor'
+	isDestructor(name, variable) => name == 'destructor'
 	sameType(s1, s2) { // {{{
 		if s1 is Array {
 			if s2 is Array && s1.length == s2.length {
@@ -1331,7 +1331,7 @@ class ClassDeclaration extends Statement {
 		_sealed 			= false
 		_variable
 	}
-	$create(data, parent) { // {{{
+	constructor(data, parent) { // {{{
 		super(data, parent)
 		
 		this._constructorScope = new Scope(parent.scope())
@@ -1818,7 +1818,7 @@ class MethodDeclaration extends Statement {
 		_statements
 		_instance		= true
 	}
-	$create(data, parent) { // {{{
+	constructor(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
