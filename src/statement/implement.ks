@@ -5,7 +5,7 @@ class ImplementDeclaration extends Statement {
 	}
 	analyse() { // {{{
 		if @variable !?= @scope.getVariable(@data.variable.name) {
-			$throw(`Undefined variable '\(@data.variable.name)' at line \(@data.start.line)`, this)
+			ReferenceException.throwNotDefined(@data.variable.name, this)
 		}
 		
 		if @variable.kind == VariableKind::Class {
@@ -24,7 +24,7 @@ class ImplementDeclaration extends Statement {
 						property = new ImplementClassMethodLinkDeclaration(property, this, @variable)
 					}
 					=> {
-						$throw('Unknow kind ' + property.kind, this)
+						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
 					}
 				}
 				
@@ -43,7 +43,7 @@ class ImplementDeclaration extends Statement {
 						property = new ImplementVariableMethodDeclaration(property, this, @variable)
 					}
 					=> {
-						$throw('Unknow kind ' + property.kind, this)
+						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
 					}
 				}
 				
@@ -53,7 +53,7 @@ class ImplementDeclaration extends Statement {
 			}
 		}
 		else {
-			$throw('Invalid class/variable for impl at line ' + @data.start.line, this)
+			TypeException.throwImplInvalidType(this)
 		}
 	} // }}}
 	fuse() { // {{{
@@ -76,15 +76,15 @@ class ImplementClassFieldDeclaration extends Statement {
 		super(data, parent)
 		
 		if variable.sealed {
-			$throw('Can\'t add a field to a sealed class', this)
+			TypeException.throwImplFieldToSealedType(this)
 		}
 	} // }}}
 	analyse() { // {{{
 		this._type = $helper.analyseType($signature.type(this._data.type, this._scope), this)
 		
-		if this._type.kind == HelperTypeKind::Unreferenced {
-			$throw(`Invalid type \(this._type.type) at line \(this._data.start.line)`, this)
-		}
+		/* if this._type.kind == HelperTypeKind::Unreferenced {
+			throw(`Invalid type \(this._type.type) at line \(this._data.start.line)`, this)
+		} */
 	} // }}}
 	fuse() { // {{{
 	} // }}}
@@ -112,10 +112,10 @@ class ImplementClassMethodDeclaration extends Statement {
 		let name = @data.name.name
 		
 		if @isContructor = @data.name.kind == NodeKind::Identifier && $method.isConstructor(name, @variable) {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		else if @isDestructor = @data.name.kind == NodeKind::Identifier && $method.isDestructor(name, @variable) {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		else {
 			for i from 0 til @data.modifiers.length while @instance {
@@ -187,10 +187,10 @@ class ImplementClassMethodDeclaration extends Statement {
 		let variable = this._variable
 		
 		if this._isContructor {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		else if this._isDestructor {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		else {
 			let line = fragments
@@ -208,7 +208,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				object.newLine().code('name: ').compile(this._name)
 			}
 			else {
-				$throw('Not Implemented', this)
+				throw new NotImplementedException(this)
 			}
 			
 			if variable.sealed {
@@ -253,10 +253,10 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		let variable = this._variable
 		
 		if this._isContructor = data.name.kind == NodeKind::Identifier && $method.isConstructor(data.name.name, variable) {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		else if this._isDestructor = data.name.kind == NodeKind::Identifier && $method.isDestructor(data.name.name, variable) {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		else {
 			if data.name.kind == NodeKind::TemplateExpression {
@@ -328,7 +328,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 			object.line('name: ', $quote(data.name.name))
 		}
 		else {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		
 		if variable.sealed {
@@ -381,10 +381,10 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		let variable = this._variable
 		
 		if this._isContructor = data.name.kind == NodeKind::Identifier && $method.isConstructor(data.name.name, variable) {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		else if this._isDestructor = data.name.kind == NodeKind::Identifier && $method.isDestructor(data.name.name, variable) {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		else {
 			if data.name.kind == NodeKind::TemplateExpression {
@@ -449,7 +449,7 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 			object.line('name: ', $quote(data.name.name))
 		}
 		else {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 		
 		if variable.sealed {

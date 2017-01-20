@@ -7,8 +7,7 @@ const $call = {
 			return data._object
 		}
 		else {
-			console.error(data)
-			$throw('Not Implemented', node)
+			throw new NotImplementedException(node)
 		}
 	} // }}}
 	filterMember(variable, name, data, node) { // {{{
@@ -26,20 +25,20 @@ const $call = {
 				return variables	if variables.length > 0
 			}
 			else if variable.instanceVariables[name] is Object {
-				$throw('Not implemented', node)
+				throw new NotImplementedException(node)
 			}
 		}
 		else if variable.kind == VariableKind::Enum {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 		else if variable.kind == VariableKind::TypeAlias {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 		else if variable.kind == VariableKind::Variable {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 		else {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 		
 		return null
@@ -67,7 +66,7 @@ const $call = {
 				return variables	if variables.length > 0
 			}
 			else {
-				$throw('Not implemented', node)
+				throw new NotImplementedException(node)
 			}
 		}
 		
@@ -97,11 +96,11 @@ const $call = {
 							return variables	if variables.length > 0
 						}
 						else if variable.classVariables[name]? {
-							$throw('Not implemented', node)
+							throw new NotImplementedException(node)
 						}
 					}
 					else {
-						$throw('Not implemented', node)
+						throw new NotImplementedException(node)
 					}
 				}
 				else {
@@ -132,7 +131,7 @@ class CallExpression extends Expression {
 	analyse() { // {{{
 		let callee = $variable.fromAST(@data.callee, this)
 		if callee?.kind == VariableKind::Class {
-			$throw(`A class is not a function, 'new' operator is required at line \(@data.callee.start.line)`, this)
+			TypeException.throwConstructorWithoutNew(callee.name.name, this)
 		}
 		
 		if @data.callee.kind == NodeKind::Identifier {
@@ -140,7 +139,7 @@ class CallExpression extends Expression {
 				callee.callable(@data) if callee.callable?
 			}
 			else {
-				$throw(`Undefined variable '\(@data.callee.name)' at line \(@data.callee.start.line)`, this)
+				ReferenceException.throwNotDefined(@data.callee.name, this)
 			}
 		}
 		else if @data.callee.kind == NodeKind::MemberExpression {
@@ -184,7 +183,7 @@ class CallExpression extends Expression {
 			if variable.throws?.length > 0 {
 				for name in variable.throws {
 					if (error ?= @scope.getVariable(name)) && !@parent.isConsumedError(name, error) {
-						$throw(`The error '\(name)' is not consumed at line \(@data.start.line)`, this)
+						SyntaxException.throwUnreportedError(name, this)
 					}
 				}
 			}
@@ -465,7 +464,7 @@ class CallSealedExpression extends Expression {
 				this._scope.releaseTempName(name) if name?
 			}
 			else {
-				$throw('Not Implemented', this)
+				throw new NotImplementedException(this)
 			}
 		}
 		else {

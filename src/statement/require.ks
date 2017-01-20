@@ -46,7 +46,7 @@ const $require = {
 				}
 			}
 			=> {
-				$throw('Unknow kind ' + declaration.kind, node)
+				throw new NotSupportedException(`Unexpected kind \(declaration.kind)`, node)
 			}
 		}
 		

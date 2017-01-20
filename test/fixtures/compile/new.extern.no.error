@@ -1,1 +1,1 @@
-A class is not a function, 'new' operator is required at line 3
+TypeException: Class constructor "Foo" cannot be invoked without 'new' (line 3, file "fixtures/compile/new.extern.no.ks")

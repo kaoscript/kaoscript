@@ -12,10 +12,10 @@ class TryStatement extends Statement {
 			let variable
 			for clause in @data.catchClauses {
 				if variable !?= $variable.fromAST(clause.type, this) {
-					$throw(`Undefined variable '\(clause.type.name)' at line \(clause.type.start.line)`, this)
+					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
 				else if variable.kind != VariableKind::Class {
-					$throw(`Error '\(clause.type.name)' must be a class (line \(clause.type.start.line))`, this)
+					TypeException.throwNotClass(clause.type.name, this)
 				}
 				
 				if clause.binding? {

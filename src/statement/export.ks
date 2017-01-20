@@ -51,7 +51,7 @@ class ExportDeclaration extends Statement {
 					}
 				}
 				=> {
-					$throw('Not Implemented', this)
+					throw new NotImplementedException(this)
 				}
 			}
 		}

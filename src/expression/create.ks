@@ -6,7 +6,7 @@ class CreateExpression extends Expression {
 	}
 	analyse() { // {{{
 		if (variable ?= $variable.fromAST(@data.class, this)) && variable.abstract {
-			$throw(`Can't instantiate class at line \(@data.start.line)`, this)
+			TypeException.throwCannotBeInstantiated(variable.name.name, this)
 		}
 		
 		@class = $compile.expression(@data.class, this)
@@ -42,7 +42,7 @@ class CreateExpression extends Expression {
 			fragments.code(')')
 		}
 		else {
-			$throw('Not Implemted')
+			throw new NotImplementedException(this)
 		}
 	} // }}}
 }

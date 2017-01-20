@@ -36,7 +36,7 @@ class IncludeDeclaration extends Statement {
 					}
 				}
 				else {
-					$throw(`Cannot find file '\(file)' from '\(directory)'`, this)
+					IOException.throwNotFoundFile(file, directory, this)
 				}
 			}
 			else {
@@ -50,7 +50,7 @@ class IncludeDeclaration extends Statement {
 				}
 				
 				if nf {
-					$throw(`Cannot find module '\(file)' from '\(directory)'`, this)
+					IOException.throwNotFoundModule(file, directory, this)
 				}
 				
 				declarator = new IncludeDeclarator(path, this)
@@ -129,7 +129,7 @@ class IncludeOnceDeclaration extends Statement {
 					}
 				}
 				else {
-					$throw(`Cannot find file '\(file)' from '\(directory)'`, this)
+					IOException.throwNotFoundFile(file, directory, this)
 				}
 			}
 			else {
@@ -143,7 +143,7 @@ class IncludeOnceDeclaration extends Statement {
 				}
 				
 				if nf {
-					$throw(`Cannot find module '\(file)' from '\(directory)'`, this)
+					IOException.throwNotFoundModule(file, directory, this)
 				}
 				
 				if !module.hasInclude(path) {

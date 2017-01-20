@@ -1,1 +1,1 @@
-Not implemented abstract methods for class 'Greetings' at line 15
+SyntaxException: Class "Greetings" is not abstract and does not override all abstract methods (line 15, file "fixtures/compile/class.abstract.error.noimpl.ks")

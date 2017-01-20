@@ -53,10 +53,10 @@ class SwitchStatement extends Statement {
 					condition = new SwitchConditionArray(condition, this)
 				}
 				else if condition.kind == NodeKind::SwitchConditionEnum {
-					$throw('Not Implemented', this)
+					throw new NotImplementedException(this)
 				}
 				else if condition.kind == NodeKind::SwitchConditionObject {
-					$throw('Not Implemented', this)
+					throw new NotImplementedException(this)
 				}
 				else if condition.kind == NodeKind::SwitchConditionRange {
 					condition = new SwitchConditionRange(condition, this)
@@ -80,7 +80,7 @@ class SwitchStatement extends Statement {
 					clause.hasTest = true
 				}
 				else if binding.kind == NodeKind::ObjectBinding {
-					$throw('Not Implemented', this)
+					throw new NotImplementedException(this)
 					
 					clause.hasTest = true
 				}
@@ -144,7 +144,7 @@ class SwitchStatement extends Statement {
 		for clause, clauseIdx in this._clauses {
 			if clause.conditions.length {
 				if we {
-					$throw('The default clause is before this clause', this)
+					SyntaxException.throwAfterDefaultClause(this)
 				}
 				
 				if clauseIdx {

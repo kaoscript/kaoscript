@@ -341,7 +341,7 @@ class BinaryOperatorTypeInequality extends Expression {
 			fragments.code(')')
 		}
 		else {
-			$throw('Not Implemented', this)
+			throw new NotImplementedException(this)
 		}
 	} // }}}
 }

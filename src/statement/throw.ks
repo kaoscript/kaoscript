@@ -7,7 +7,7 @@ class ThrowStatement extends Statement {
 		
 		if @options.error == 'fatal' && (variable ?= $variable.fromAST(@data.value, this)) && variable.type && (variable ?= $variable.fromType(variable.type, this)) {
 			if !@parent.isConsumedError(variable.name.name, variable) {
-				$throw(`The error '\(variable.name.name)' is not consumed at line \(@data.start.line)`, this)
+				SyntaxException.throwUnreportedError(variable.name.name, this)
 			}
 		}
 	} // }}}

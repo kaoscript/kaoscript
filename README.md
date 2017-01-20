@@ -52,6 +52,7 @@ Features
 - **attributes**
 - **advanced parameters**
 - **error handling**: by default, it's à la Java but it's configurable
+- **conditional compilation**
 
 Getting Started
 ---------------
@@ -491,6 +492,16 @@ func foo(name): String ~ Error {
 #[error='off']
 func bar() {
 	validate('toto')
+}
+```
+
+Conditional Compilation
+-----------------------
+
+```kaoscript
+#[cc(any(trident, all(safari, target_version='8')))]
+impl String {
+	startsWith(value: String): Boolean => this.length >= value.length && this.slice(0, value.length) == value
 }
 ```
 

@@ -98,11 +98,13 @@ export class Module {
 	compiler() => this._compiler
 	directory() => this._directory
 	export(name, alias = false) { // {{{
-		$throw('Binary file can\'t export', this) if this._binary
+		if this._binary {
+			SyntaxException.throwNotBinary('export', this)
+		}
 		
 		let variable = this._body.scope().getVariable(name.name)
 		
-		$throw(`Undefined variable '\(name.name)'`, this) unless variable
+		ReferenceException.throwNotDefined(name.name, this) unless variable
 		
 		if variable.kind != VariableKind::TypeAlias {
 			if alias {
@@ -206,7 +208,7 @@ export class Module {
 	} // }}}
 	require(variable, kind, data?) { // {{{
 		if this._binary {
-			$throw('Binary file can\'t require', this)
+			SyntaxException.throwNotBinary('require', this)
 		}
 		
 		if kind == RequireKind::Require {

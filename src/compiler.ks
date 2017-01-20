@@ -13,6 +13,9 @@
 #![error(ignore(Error))]
 #![error(ignore='Error')]
 
+#![error(ignore(NotImplementedException))]
+#![error(ignore='NotImplementedException')]
+
 #[cfg(format(classes='es5'))]
 #[cfg(format(classes(es5)))]
  */
@@ -24,7 +27,9 @@ import {
 	* as path		from path
 }
 
-extern console, Error: class, JSON, process, require
+extern console, JSON
+
+include ./include/error
 
 enum Mode {
 	None
@@ -407,7 +412,7 @@ const $type = {
 					}
 				}
 				else {
-					$throw('Generic on primitive at line ' + type.start.line, node)
+					throw new NotSupportedException(node)
 				}
 			}
 			else {
@@ -445,7 +450,7 @@ const $type = {
 			fragments.code(')')
 		}
 		else {
-			$throw('Not Implemented', node)
+			throw new NotImplementedException(node)
 		}
 	} // }}}
 	compile(data, fragments) { // {{{
@@ -815,7 +820,7 @@ const $variable = {
 			}
 		}
 		else if variable.kind == VariableKind::Enum {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 		else if variable.kind == VariableKind::TypeAlias {
 			if variable.type.types {
@@ -840,10 +845,10 @@ const $variable = {
 			}
 		}
 		else if variable.kind == VariableKind::Variable {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 		else {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 		
 		return null
@@ -873,7 +878,7 @@ const $variable = {
 				return variables	if variables.length > 0
 			}
 			else {
-				$throw('Not implemented', node)
+				throw new NotImplementedException(node)
 			}
 		}
 		
@@ -960,7 +965,7 @@ const $variable = {
 						}
 					}
 					else {
-						$throw('Not implemented', node)
+						throw new NotImplementedException(node)
 					}
 				}
 			}
@@ -1194,7 +1199,7 @@ const $variable = {
 					}
 				}
 				else {
-					$throw('Not implemented', node)
+					throw new NotImplementedException(node)
 				}
 			}
 		}
@@ -1209,7 +1214,7 @@ const $variable = {
 			return node.scope().getVariable(type)
 		}
 		else {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 	} // }}}
 	kind(type?) { // {{{
@@ -1361,13 +1366,11 @@ const $compile = {
 					expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 				}
 				else {
-					console.error(data)
-					$throw('Unknow assignment operator ' + data.operator.assignment, parent)
+					throw new NotSupportedException(`Unexpected assignment operator \(data.operator.assignment)`, parent)
 				}
 			}
 			else {
-				console.error(data)
-				$throw('Unknow binary operator ' + data.operator.kind, parent)
+				throw new NotSupportedException(`Unexpected binary operator \(data.operator.kind)`, parent)
 			}
 		}
 		else if data.kind == NodeKind::PolyadicExpression {
@@ -1375,8 +1378,7 @@ const $compile = {
 				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
 			else {
-				console.error(data)
-				$throw('Unknow polyadic operator ' + data.operator.kind, parent)
+				throw new NotSupportedException(`Unexpected polyadic operator \(data.operator.kind)`, parent)
 			}
 		}
 		else if data.kind == NodeKind::UnaryExpression {
@@ -1384,13 +1386,11 @@ const $compile = {
 				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
 			else {
-				console.error(data)
-				$throw('Unknow unary operator ' + data.operator.kind, parent)
+				throw new NotSupportedException(`Unexpected assignment operator \(data.operator.kind)`, parent)
 			}
 		}
 		else {
-			console.error(data)
-			$throw('Unknow kind ' + data.kind, parent)
+			throw new NotSupportedException(`Unexpected assignment operator \(data.kind)`, parent)
 		}
 		
 		//console.log(expression)
@@ -1472,7 +1472,7 @@ const $expressions = {
 			return new ArrayComprehensionForRange(data, parent, scope)
 		}
 		else {
-			$throw('Not Implemented', parent)
+			throw new NotSupportedException(parent, `Unexpected kind \(data.loop.kind)`)
 		}
 	}
 	`\(NodeKind::ArrayExpression)`				: ArrayExpression

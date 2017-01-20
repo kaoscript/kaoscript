@@ -96,7 +96,7 @@ const $class = {
 				ctrl.done()
 			}
 			
-			if !node._extends {
+			if !node._extends || node._extendsVariable.sealed?.extern {
 				clazz
 					.newControl()
 					.code($class.methodHeader('$create', node), '()')
@@ -107,11 +107,19 @@ const $class = {
 			
 			if noinit {
 				if node._extends {
-					clazz
-						.newControl()
-						.code($class.methodHeader('__ks_init', node), '()')
-						.step()
-						.line(node._extendsName + '.prototype.__ks_init.call(this)')
+					if node._extendsVariable.sealed?.extern {
+						clazz
+							.newControl()
+							.code($class.methodHeader('__ks_init', node), '()')
+							.step()
+					}
+					else {
+						clazz
+							.newControl()
+							.code($class.methodHeader('__ks_init', node), '()')
+							.step()
+							.line(node._extendsName + '.prototype.__ks_init.call(this)')
+					}
 				}
 				else {
 					clazz.newControl().code($class.methodHeader('__ks_init', node), '()').step()
@@ -186,15 +194,34 @@ const $class = {
 					.line('this.__ks_cons(arguments)')
 					.done()
 			}
+			else if node._extendsVariable.sealed?.extern {
+				clazz
+					.newControl()
+					.code('constructor()')
+					.step()
+					.line('super()')
+					.line('this.__ks_init()')
+					.line('this.__ks_cons(arguments)')
+					.done()
+			}
 			
 			if noinit {
 				if node._extends {
-					clazz
-						.newControl()
-						.code('__ks_init()')
-						.step()
-						.line(node._extendsName + '.prototype.__ks_init.call(this)')
-						.done()
+					if node._extendsVariable.sealed?.extern {
+						clazz
+							.newControl()
+							.code('__ks_init()')
+							.step()
+							.done()
+					}
+					else {
+						clazz
+							.newControl()
+							.code('__ks_init()')
+							.step()
+							.line(node._extendsName + '.prototype.__ks_init.call(this)')
+							.done()
+					}
 				}
 				else {
 					clazz.newControl().code('__ks_init()').step().done()
@@ -643,7 +670,7 @@ const $helper = {
 						.step()
 						.code('else if(' + node._extendsName + '.' + name + ')')
 						.step()
-						.code('return ' + node._extendsName + '.' + name + '.apply(null, arguments)')
+						.line('return ' + node._extendsName + '.' + name + '.apply(null, arguments)')
 						.done()
 					
 					fragments.line('throw new Error("Wrong number of arguments")')
@@ -657,16 +684,18 @@ const $helper = {
 		let extend = false
 		if node._extends {
 			extend = func(node, fragments, ctrl?) {
+				let constructorName = node._extendsVariable.sealed?.extern ? 'constructor' : '__ks_cons'
+				
 				if ctrl? {
 					ctrl
 						.step()
 						.code('else')
 						.step()
-						.line(node._extendsName + '.prototype.__ks_cons.call(this, args)')
+						.line(`\(node._extendsName).prototype.\(constructorName).call(this, args)`)
 						.done()
 				}
 				else {
-					fragments.line(node._extendsName + '.prototype.__ks_cons.call(this, args)')
+					fragments.line(`\(node._extendsName).prototype.\(constructorName).call(this, args)`)
 				}
 			}
 		}
@@ -989,7 +1018,7 @@ const $helper = {
 					}
 				}
 				else {
-					$throw('Not Implemented', node)
+					throw new NotImplementedException(node)
 				}
 			}
 			
@@ -1050,7 +1079,7 @@ const $helper = {
 		
 		a = object.newLine().code('constructors: ').newArray()
 		for i from 0 til reflect.constructors.length {
-			$helper.reflectMethod(node, a.newLine(), reflect.constructors[i].signature, reflect.constructors[i].parameters, classname + '.__ks_reflect.constructors[' + i + '].type')
+			$helper.reflectMethod(node, a.newLine(), reflect.constructors[i].signature, reflect.constructors[i].parameters, classname + '.__ks_reflect.constructors[' + i + ']')
 		}
 		a.done()
 		
@@ -1160,7 +1189,7 @@ const $helper = {
 				return $quote('#' + type.type)
 			}
 			else {
-				$throw(`Invalid type \(type.type)`, node)
+				TypeException.throwInvalid(type.type, node)
 			}
 		}
 	} // }}}
@@ -1311,15 +1340,15 @@ class ClassDeclaration extends Statement {
 		this._es5 = this._options.format.classes == 'es5'
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
-		let scope = this._scope
+		let data = @data
+		let scope = @scope
 		
-		this._name = data.name.name
-		this._variable = $variable.define(this, scope, data.name, VariableKind::Class, data.type)
+		@name = data.name.name
+		@variable = $variable.define(this, scope, data.name, VariableKind::Class, data.type)
 		
 		let classname = data.name
 		
-		let thisVariable = $variable.define(this, this._constructorScope, {
+		let thisVariable = $variable.define(this, @constructorScope, {
 			kind: NodeKind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
@@ -1363,14 +1392,14 @@ class ClassDeclaration extends Statement {
 			}
 		}
 		
-		thisVariable = $variable.define(this, this._destructorScope, {
+		thisVariable = $variable.define(this, @destructorScope, {
 			kind: NodeKind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
 		
-		this._destructorScope.rename('this', 'that')
+		@destructorScope.rename('this', 'that')
 		
-		$variable.define(this, this._instanceVariableScope, {
+		$variable.define(this, @instanceVariableScope, {
 			kind: NodeKind::Identifier
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
@@ -1378,59 +1407,69 @@ class ClassDeclaration extends Statement {
 		if data.extends? {
 			@extends = true
 			
-			if this._extendsVariable !?= this._scope.getVariable(data.extends.name) {
-				$throw(`Undefined class \(data.extends.name) at line \(data.extends.start.line)`, this)
+			if @extendsVariable !?= @scope.getVariable(data.extends.name) {
+				ReferenceException.throwNotDefined(data.extends.name, this)
+			}
+			else if @extendsVariable.kind != VariableKind::Class {
+				TypeException.throwNotClass(data.extends.name, this)
 			}
 			
-			this._variable.extends = this._extendsName = data.extends.name
+			@variable.extends = @extendsName = data.extends.name
 			
 			let extname = data.extends
 			
-			let superVariable = $variable.define(this, this._constructorScope, {
+			let superVariable = $variable.define(this, @constructorScope, {
 				kind: NodeKind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
 			
-			superVariable.callable = func(data) {
-				data.arguments = [{
-					kind: NodeKind::Identifier
-					name: 'this'
-				}, {
-					kind: NodeKind::ArrayExpression
-					values: data.arguments
-				}]
-				
-				data.callee = {
-					kind: NodeKind::MemberExpression
-					object: {
+			if @extendsVariable.sealed?.extern {
+				superVariable.callable = (data) => {
+					SyntaxException.throwNotCompatibleConstructor(classname, this)
+				}
+			}
+			else {
+				superVariable.callable = func(data) {
+					data.arguments = [{
+						kind: NodeKind::Identifier
+						name: 'this'
+					}, {
+						kind: NodeKind::ArrayExpression
+						values: data.arguments
+					}]
+					
+					data.callee = {
 						kind: NodeKind::MemberExpression
 						object: {
 							kind: NodeKind::MemberExpression
-							object: extname
+							object: {
+								kind: NodeKind::MemberExpression
+								object: extname
+								property: {
+									kind: NodeKind::Identifier
+									name: 'prototype'
+								}
+								computed: false
+								nullable: false
+							}
 							property: {
 								kind: NodeKind::Identifier
-								name: 'prototype'
+								name: '__ks_cons'
 							}
 							computed: false
 							nullable: false
 						}
 						property: {
 							kind: NodeKind::Identifier
-							name: '__ks_cons'
+							name: 'call'
 						}
 						computed: false
 						nullable: false
 					}
-					property: {
-						kind: NodeKind::Identifier
-						name: 'call'
-					}
-					computed: false
-					nullable: false
 				}
 			}
 			
-			$variable.define(this, this._instanceVariableScope, {
+			$variable.define(this, @instanceVariableScope, {
 				kind: NodeKind::Identifier
 				name: 'super'
 			}, VariableKind::Variable)
@@ -1471,45 +1510,45 @@ class ClassDeclaration extends Statement {
 					}
 					
 					if member.defaultValue? {
-						this._scope = this._instanceVariableScope if instance
+						@scope = @instanceVariableScope if instance
 						
 						variable.defaultValue = $compile.expression(member.defaultValue, this)
 						
-						this._scope = scope if instance
+						@scope = scope if instance
 					}
 					
 					if instance {
-						this._instanceVariables[member.name.name] = variable
+						@instanceVariables[member.name.name] = variable
 						
-						this._variable.instanceVariables[member.name.name] = signature
+						@variable.instanceVariables[member.name.name] = signature
 					}
 					else {
-						this._classVariables[member.name.name] = variable
+						@classVariables[member.name.name] = variable
 						
-						this._variable.classVariables[member.name.name] = signature
+						@variable.classVariables[member.name.name] = signature
 					}
 				}
 				NodeKind::MethodDeclaration => {
-					if $method.isConstructor(member.name.name, this._variable) {
-						this._scope = this._constructorScope
+					if $method.isConstructor(member.name.name, @variable) {
+						@scope = @constructorScope
 						
 						method = $compile.statement(member, this)
 						
 						signature = $method.signature(member, this)
 						
-						this._constructors.push({
+						@constructors.push({
 							data: member
 							signature: signature
 							statement: method
 							parameters: [$helper.analyseType(parameter.type, this) for parameter in signature.parameters]
 						})
 						
-						this._variable.constructors.push(signature)
+						@variable.constructors.push(signature)
 						
-						this._scope = scope
+						@scope = scope
 					}
-					else if $method.isDestructor(member.name.name, this._variable) {
-						this._scope = this._destructorScope
+					else if $method.isDestructor(member.name.name, @variable) {
+						@scope = @destructorScope
 						
 						member.parameters.push({
 							kind: NodeKind::Parameter
@@ -1521,14 +1560,14 @@ class ClassDeclaration extends Statement {
 						
 						method.instance(false)
 						
-						this._destructor = {
+						@destructor = {
 							data: member
 							statement: method
 						}
 						
-						this._variable.destructors++
+						@variable.destructors++
 						
-						this._scope = scope
+						@scope = scope
 					}
 					else {
 						let instance = true
@@ -1538,7 +1577,7 @@ class ClassDeclaration extends Statement {
 							}
 						}
 						
-						this._scope = this.newInstanceMethodScope(data, member) if instance
+						@scope = this.newInstanceMethodScope(data, member) if instance
 						
 						signature = $method.signature(member, this)
 						
@@ -1562,7 +1601,7 @@ class ClassDeclaration extends Statement {
 									@variable.abstractMethods[member.name.name].push(signature)
 								}
 								else {
-									$throw(`Can't have abstract method in non-abstract class at line \(member.start.line)`, this)
+									SyntaxException.throwNotAbstractClass(@name, member.name.name, this)
 								}
 							}
 							else {
@@ -1593,18 +1632,18 @@ class ClassDeclaration extends Statement {
 					}
 				}
 				=> {
-					$throw('Unknow kind ' + member.kind, this)
+					throw new NotSupportedException(`Unknow kind \(member.kind)`, this)
 				}
 			}
 		}
 		
 		if @extends && !@abstract && !$class.areAbstractMethodsImplemented(@variable, @extendsVariable, @scope) {
-			$throw(`Not implemented abstract methods for class '\(@name)' at line \(@data.start.line)`, this)
+			SyntaxException.throwMissingAbstractMethods(@name, this)
 		}
 		
-		if this._sealed {
-			this._variable.sealed = {
-				name: '__ks_' + this._variable.name.name
+		if @sealed {
+			@variable.sealed = {
+				name: '__ks_' + @variable.name.name
 				constructors: false
 				instanceMethods: {}
 				classMethods: {}
@@ -1761,10 +1800,10 @@ class ClassDeclaration extends Statement {
 		return scope
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if this._sealed {
+		if @sealed {
 			$class.sealed(this, fragments)
 			
-			fragments.line('var ' + this._variable.sealed.name + ' = {}')
+			fragments.line('var ' + @variable.sealed.name + ' = {}')
 		}
 		else {
 			$class.continuous(this, fragments)
@@ -1870,7 +1909,7 @@ class MethodDeclaration extends Statement {
 						ctrl.newLine().code('this.' + name + '(').compile(this._parameters[p]).code(')').done()
 					}
 					else {
-						$throw(`Can't set member '\(name)' (line \(parameter.start.line))`, this)
+						ReferenceException.throwNotDefinedMember(name, this)
 					}
 					
 					nf = false

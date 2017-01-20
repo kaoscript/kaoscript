@@ -37,7 +37,13 @@ describe('compile', function() {
 			
 			if(error) {
 				expect(function() {
-					compiler.compile().toSource();
+					try {
+						compiler.compile().toSource();
+					}
+					catch(ex) {
+						ex.fileName = path.relative(__dirname, ex.fileName)
+						throw ex.toString();
+					}
 				}).to.throw(error);
 			}
 			else {

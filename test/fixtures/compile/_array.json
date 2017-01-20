@@ -86,7 +86,8 @@
         },
         "classMethods": {
           "map": true
-        }
+        },
+        "extern": true
       }
     }
   }

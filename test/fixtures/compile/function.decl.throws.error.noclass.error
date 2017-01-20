@@ -1,1 +1,1 @@
-Error 'BadError' must be a class (line 3)
+TypeException: Identifier "BadError" is not a class (line 3, file "fixtures/compile/function.decl.throws.error.noclass.ks")

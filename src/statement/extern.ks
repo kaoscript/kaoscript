@@ -2,17 +2,17 @@ const $extern = {
 	classMember(data, variable, node) { // {{{
 		switch(data.kind) {
 			NodeKind::FieldDeclaration => {
-				$throw('Not Implemented', node)
+				throw new NotImplementedException(node)
 			}
 			NodeKind::MethodAliasDeclaration => {
-				$throw('Not Implemented', node)
+				throw new NotImplementedException(node)
 			}
 			NodeKind::MethodDeclaration => {
 				if $method.isConstructor(data.name.name, variable) {
 					variable.constructors.push($function.signature(data, node))
 				}
 				else if $method.isDestructor(data.name.name, variable) {
-					$throw('Not Implemented', node)
+					throw new NotImplementedException(node)
 				}
 				else {
 					let method = {
@@ -45,7 +45,7 @@ const $extern = {
 				}
 			}
 			=> {
-				$throw('Unknow kind ' + data.kind, node)
+				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
 			}
 		}
 	} // }}}
@@ -62,8 +62,11 @@ class ExternDeclaration extends Statement {
 					variable = $variable.define(this, this.greatScope(), declaration.name, VariableKind::Class, declaration)
 					
 					if declaration.extends? {
-						if !@scope.hasVariable(declaration.extends.name) {
-							$throw(`Undefined class \(declaration.extends.name) at line \(declaration.extends.start.line)`, this)
+						if superVar !?= @scope.getVariable(declaration.extends.name) {
+							ReferenceException.throwNotDefined(declaration.extends.name, this)
+						}
+						else if variable.kind != VariableKind::Class {
+							TypeException.throwNotClass(declaration.extends.name, this)
 						}
 						
 						variable.extends = declaration.extends.name
@@ -79,6 +82,7 @@ class ExternDeclaration extends Statement {
 								constructors: false
 								instanceMethods: {}
 								classMethods: {}
+								extern: true
 							}
 							
 							@lines.push('var ' + variable.sealed.name + ' = {}')
@@ -96,13 +100,14 @@ class ExternDeclaration extends Statement {
 						variable.sealed = {
 							name: '__ks_' + variable.name.name
 							properties: {}
+							extern: true
 						}
 						
 						@lines.push('var ' + variable.sealed.name + ' = {}')
 					}
 				}
 				=> {
-					$throw('Unknow kind ' + declaration.kind, this)
+					throw new NotSupportedException(`Unknow kind \(declaration.kind)`, this)
 				}
 			}
 		}

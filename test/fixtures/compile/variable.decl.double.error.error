@@ -1,1 +1,1 @@
-Already declared variable 'foo' at line 3
+SyntaxException: Identifier "foo" has already been declared (line 3, file "fixtures/compile/variable.decl.double.error.ks")

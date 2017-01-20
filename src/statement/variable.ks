@@ -144,7 +144,7 @@ class VariableDeclarator extends AbstractNode {
 			}
 			
 			if @scope.hasVariable(@data.name.name, false) {
-				$throw(`Already declared variable '\(@data.name.name)' at line \(@data.name.start.line)`, this)
+				SyntaxException.throwAlreadyDeclared(@data.name.name, this)
 			}
 			
 			if @scope.isDeclaredVariable(@data.name.name, false) {

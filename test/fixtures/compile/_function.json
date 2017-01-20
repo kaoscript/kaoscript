@@ -45,7 +45,8 @@
         "instanceMethods": {},
         "classMethods": {
           "vcurry": true
-        }
+        },
+        "extern": true
       }
     }
   }

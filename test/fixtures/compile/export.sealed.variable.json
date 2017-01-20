@@ -47,7 +47,8 @@
       },
       "sealed": {
         "name": "__ks_Math",
-        "properties": {}
+        "properties": {},
+        "extern": true
       }
     }
   }

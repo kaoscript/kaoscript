@@ -46,16 +46,16 @@ const $function = {
 		
 		for parameter, i in node._parameters {
 			if signature.parameters[i].rest {
-				$throw(`Parameter can't be a rest parameter at line \(parameter.start.line)`, node)
+				SyntaxException.throwNoRestParameter(node)
 			}
 			else if parameter._defaultValue != null {
-				$throw(`Parameter can't have a default value at line \(parameter.start.line)`, node)
+				SyntaxException.throwNoDefaultParameter(node)
 			}
 			else if parameter._nullable {
-				$throw(`Parameter can't be nullable at line \(parameter.start.line)`, node)
+				SyntaxException.throwNoNullParameter(node)
 			}
 			else if parameter._anonymous {
-				$throw(`Parameter must be named at line \(parameter.start.line)`, node)
+				SyntaxException.throwNotNamedParameter(node)
 			}
 			
 			fragments.code($comma) if i
@@ -72,7 +72,7 @@ const $function = {
 		
 		for parameter, i in node._parameters {
 			if parameter._anonymous {
-				$throw(`Parameter must be named at line \(parameter.start.line)`, node)
+				SyntaxException.throwNotNamedParameter(node)
 			}
 			
 			fragments.code($comma) if i
@@ -85,7 +85,7 @@ const $function = {
 				rest = true
 			}
 			else if rest {
-				$throw(`Parameter must be before the rest parameter at line \(parameter.start.line)`, node)
+				SyntaxException.throwAfterRestParameter()
 			}
 			else {
 				parameter.toParameterFragments(fragments)
@@ -746,7 +746,7 @@ const $function = {
 			
 			if parameter.max == Infinity {
 				if signature.max == Infinity {
-					$throw('Function can have only one rest parameter', node)
+					SyntaxException.throwTooMuchRestParameter(node)
 				}
 				else {
 					signature.max = Infinity
@@ -806,7 +806,7 @@ const $function = {
 		
 		if parent?._instance {
 			if node._options.format.functions == 'es5' || $function.isArgumentsRequired(node) {
-				if $function.useThisVariable(node._data.body) {
+				if $function.useThisVariable(node._data.body, node) {
 					return {
 						beforeParameters: 'Helper.vcurry(function('
 						afterParameters: ')'
@@ -837,45 +837,45 @@ const $function = {
 			}
 		}
 	} // }}}
-	useThisVariable(data) { // {{{
+	useThisVariable(data, node) { // {{{
 		switch data.kind {
 			NodeKind::ArrayExpression => {
 				for value in data.values {
-					if $function.useThisVariable(value) {
+					if $function.useThisVariable(value, node) {
 						return true
 					}
 				}
 			}
 			NodeKind::BinaryExpression => {
-				if $function.useThisVariable(data.left) || $function.useThisVariable(data.right) {
+				if $function.useThisVariable(data.left, node) || $function.useThisVariable(data.right, node) {
 					return true
 				}
 			}
 			NodeKind::Block => {
 				for statement in data.statements {
-					if $function.useThisVariable(statement) {
+					if $function.useThisVariable(statement, node) {
 						return true
 					}
 				}
 			}
 			NodeKind::CallExpression => {
-				if $function.useThisVariable(data.callee) {
+				if $function.useThisVariable(data.callee, node) {
 					return true
 				}
 				
 				for arg in data.arguments {
-					if $function.useThisVariable(arg) {
+					if $function.useThisVariable(arg, node) {
 						return true
 					}
 				}
 			}
 			NodeKind::CreateExpression => {
-				if $function.useThisVariable(data.class) {
+				if $function.useThisVariable(data.class, node) {
 					return true
 				}
 				
 				for arg in data.arguments {
-					if $function.useThisVariable(arg) {
+					if $function.useThisVariable(arg, node) {
 						return true
 					}
 				}
@@ -883,29 +883,28 @@ const $function = {
 			NodeKind::EnumExpression => return false
 			NodeKind::Identifier => return data.name == 'this'
 			NodeKind::IfStatement => {
-				if $function.useThisVariable(data.condition) || $function.useThisVariable(data.whenTrue) {
+				if $function.useThisVariable(data.condition, node) || $function.useThisVariable(data.whenTrue, node) {
 					return true
 				}
 				
-				if data.whenFalse? && data.$function.useThisVariable(data.whenFalse) {
+				if data.whenFalse? && data.$function.useThisVariable(data.whenFalse, node) {
 					return true
 				}
 			}
 			NodeKind::Literal => return false
-			NodeKind::MemberExpression => return $function.useThisVariable(data.object)
+			NodeKind::MemberExpression => return $function.useThisVariable(data.object, node)
 			NodeKind::NumericExpression => return false
 			NodeKind::ObjectExpression => {
 				for property in data.properties {
-					if $function.useThisVariable(property.value) {
+					if $function.useThisVariable(property.value, node) {
 						return true
 					}
 				}
 			}
-			NodeKind::ReturnStatement => return $function.useThisVariable(data.value)
-			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument)
+			NodeKind::ReturnStatement => return $function.useThisVariable(data.value, node)
+			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument, node)
 			=> {
-				console.error(data)
-				$throw('Unknow kind ' + data.kind)
+				throw new NotSupportedException(`Unknow kind \(data.kind)`, node)
 			}
 		}
 		
@@ -944,10 +943,10 @@ class FunctionDeclaration extends Statement {
 		let variable
 		for error in @data.throws {
 			if variable !?= $variable.fromAST(error, this) {
-				$throw(`Undefined variable '\(error.name)' at line \(error.start.line)`, this)
+				ReferenceException.throwNotDefined(error.name, this)
 			}
 			else if variable.kind != VariableKind::Class {
-				$throw(`Error '\(error.name)' must be a class (line \(error.start.line))`, this)
+				TypeException.throwNotClass(error.name, this)
 			}
 			
 			@variable.throws.push(error.name)

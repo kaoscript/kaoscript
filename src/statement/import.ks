@@ -1,3 +1,5 @@
+extern process, require
+
 enum ImportKind {
 	KSFile
 	NodeFile
@@ -157,7 +159,7 @@ const $import = {
 		if importVarCount || importAll || importAlias.length {
 			let nf
 			for name, requirement of requirements {
-				$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node) if !requirement.nullable && (!?data.references || data.references.length == 0)
+				SyntaxException.throwMissingRequirement(name, node) if !requirement.nullable && (!?data.references || data.references.length == 0)
 				
 				nf = true
 				if data.references {
@@ -181,7 +183,7 @@ const $import = {
 				
 				if nf {
 					if !requirement.nullable {
-						$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node)
+						SyntaxException.throwMissingRequirement(name, node)
 					}
 				}
 			}
@@ -191,14 +193,14 @@ const $import = {
 			for name, alias of importVariables {
 			}
 			
-			$throw(`Undefined variable '\(name)' in the imported module at line \(data.start.line)`, node) unless variable ?= exports[name]
+			ReferenceException.throwNotDefinedInModule(name, data.module, node) unless variable ?= exports[name]
 			
 			$import.addVariable(module, moduleName, node, alias, variable, data)
 		}
 		else if importVarCount {
 			nf = false
 			for name, alias of importVariables {
-				$throw(`Undefined variable '\(name)' in the imported module at line \(data.start.line)`, node) unless variable ?= exports[name]
+				ReferenceException.throwNotDefinedInModule(name, data.module, node) unless variable ?= exports[name]
 				
 				$import.addVariable(module, moduleName, node, alias, variable, data)
 			}
@@ -264,7 +266,7 @@ const $import = {
 					$import.define(module, file, node, specifier.local, VariableKind::Variable)
 				}
 				else {
-					$throw(`Wilcard import is only supported for kaoscript files (line \(data.start.line))`, node)
+					SyntaxException.throwExclusiveWildcardImport(node)
 				}
 			}
 			else {
@@ -349,16 +351,16 @@ const $import = {
 			}
 		}
 		
-		$throw("Cannot find module '" + x + "' from '" + y + "'", node)
+		IOException.throwNotFoundModule(x, y, node)
 	} // }}}
 	use(data, node) { // {{{
 		if data is Array {
 			for item in data {
-				$throw(`Undefined variable '\(item.name)' at line \(item.start.line)`, node) if item.kind == NodeKind::Identifier && !node.scope().hasVariable(item.name)
+				ReferenceException.throwNotDefined(item.name, node) if item.kind == NodeKind::Identifier && !node.scope().hasVariable(item.name)
 			}
 		}
 		else if data.kind == NodeKind::Identifier {
-			$throw(`Undefined variable '\(data.name)' at line \(data.start.line)`, node) if !node.scope().hasVariable(data.name)
+			ReferenceException.throwNotDefined(data.name, node) if !node.scope().hasVariable(data.name)
 		}
 	} // }}}
 	toKSFileFragments(fragments, metadata, data, node) { // {{{
@@ -443,7 +445,7 @@ const $import = {
 						++nc if requirement.class
 					}
 					else {
-						$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node)
+						SyntaxException.throwMissingRequirement(name, node)
 					}
 				}
 			}
@@ -457,7 +459,7 @@ const $import = {
 			let first = true
 			let nc = 0
 			for name, requirement of requirements {
-				$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node) if !requirement.nullable && (!?data.references || data.references.length == 0)
+				SyntaxException.throwMissingRequirement(name, node) if !requirement.nullable && (!?data.references || data.references.length == 0)
 				
 				nf = true
 				if data.references {
@@ -523,7 +525,7 @@ const $import = {
 						++nc if requirement.class
 					}
 					else {
-						$throw(`Missing requirement '\(name)' at line \(data.start.line)`, node)
+						SyntaxException.throwMissingRequirement(name, node)
 					}
 				}
 			}

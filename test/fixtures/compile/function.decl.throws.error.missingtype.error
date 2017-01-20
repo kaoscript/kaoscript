@@ -1,1 +1,1 @@
-The error 'RangeError' is not consumed at line 7
+SyntaxException: Error "RangeError" is unreported, it must be caught or declared to be thrown (line 7, file "fixtures/compile/function.decl.throws.error.missingtype.ks")

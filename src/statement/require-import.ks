@@ -36,7 +36,7 @@ class RequireOrImportDeclaration extends Statement {
 			}
 			
 			if metadata.importAlias.length {
-				$throw('Not Implemented')
+				throw new NotImplementedException(this)
 			}
 		}
 	} // }}}

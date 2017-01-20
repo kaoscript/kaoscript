@@ -34,7 +34,7 @@ const $sealed = {
 				}
 			}
 			else if variable.kind == VariableKind::Enum {
-				$throw('Invalid Enum syntax at line ' + data.start.line, node)
+				throw new NotSupportedException(node)
 			}
 			else if variable.kind == VariableKind::Function {
 				return $sealed.filterType({
@@ -75,7 +75,7 @@ const $sealed = {
 				}
 			}
 			else {
-				$throw('Not implemented', node)
+				throw new NotImplementedException(node)
 			}
 		}
 		
@@ -98,7 +98,7 @@ const $sealed = {
 			return variables	if variables.length > 0
 		}
 		else {
-			$throw('Not implemented', node)
+			throw new NotImplementedException(node)
 		}
 		
 		return false

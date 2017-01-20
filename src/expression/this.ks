@@ -20,7 +20,7 @@ class ThisExpression extends Expression {
 		while parent ?= parent.parent()
 		
 		if !?parent {
-			$throw(`The alias @\(data.name.name) must be inside a class, line \(data.start.line)`, this)
+			SyntaxException.throwOutOfClassAlias(data.name.name, this)
 		}
 	} // }}}
 	analyse() { // {{{
@@ -57,7 +57,7 @@ class ThisExpression extends Expression {
 				fragments.code('this._', name)
 			}
 			else {
-				$throw(`Unknown method '\(name)' at line \(@data.start.line)`, this)
+				ReferenceException.throwNotDefinedMethod(name, this)
 			}
 		}
 		else {
@@ -68,7 +68,7 @@ class ThisExpression extends Expression {
 				fragments.code('this._', name)
 			}
 			else {
-				$throw(`Unknown field '\(name)' at line \(@data.start.line)`, this)
+				ReferenceException.throwNotDefinedField(name, this)
 			}
 		}
 	} // }}}

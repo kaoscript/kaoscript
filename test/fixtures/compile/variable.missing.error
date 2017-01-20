@@ -1,1 +1,1 @@
-Undefined variable 'foo' at line 1
+ReferenceException: "foo" is not defined (line 1, file "fixtures/compile/variable.missing.ks")

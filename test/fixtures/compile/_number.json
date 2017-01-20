@@ -141,7 +141,8 @@
           "toFloat": true,
           "toInt": true
         },
-        "classMethods": {}
+        "classMethods": {},
+        "extern": true
       }
     }
   }

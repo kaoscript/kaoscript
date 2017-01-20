@@ -67,7 +67,8 @@
         "instanceMethods": {},
         "classMethods": {
           "map": true
-        }
+        },
+        "extern": true
       }
     }
   }

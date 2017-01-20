@@ -58,7 +58,7 @@ class IdentifierLiteral extends Literal {
 		}
 		
 		if this._isVariable && !this._scope.hasVariable(data.name) {
-			$throw(`Undefined variable '\(data.name)' at line \(data.start.line)`, this)
+			ReferenceException.throwNotDefined(data.name, this)
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
