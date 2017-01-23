@@ -130,6 +130,7 @@ const $typekinds = { // {{{
 } // }}}
 
 const $typeofs = { // {{{
+	Any: true
 	Array: true
 	Boolean: true
 	Function: true
@@ -327,7 +328,7 @@ const $signature = {
 		return false
 	} // }}}
 	type(type?, scope) { // {{{
-		if type {
+		if type? {
 			if type.typeName {
 				return $types[type.typeName.name] if $types[type.typeName.name]
 				

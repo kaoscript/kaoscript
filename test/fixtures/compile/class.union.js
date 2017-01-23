@@ -18,6 +18,9 @@ module.exports = function() {
 			if(message === undefined || message === null) {
 				throw new Error("Missing parameter 'message'");
 			}
+			if(!Type.isString(message)) {
+				throw new Error("Invalid type for parameter 'message'");
+			}
 			this._message = message;
 		}
 		__ks_cons(args) {
@@ -76,7 +79,7 @@ module.exports = function() {
 				max: 1,
 				parameters: [
 					{
-						type: "Any",
+						type: "String",
 						min: 1,
 						max: 1
 					}

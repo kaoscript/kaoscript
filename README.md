@@ -266,15 +266,13 @@ class Shape {
 		_color: string
 	}
 	
-    $create(@color)
-	// constructor, automatically set the instance variable '_color' as the parameter 'color'
+    constructor(@color)
+	// automatically set the instance variable '_color' as the parameter 'color'
 	
-	$destroy() {
+	destructor() {
 		@color = null
 	}
-	// destructor
 	
-	// getter/setter
 	color() => @color
 	color(@color) => this
     
@@ -361,11 +359,11 @@ abstract class AbstractGreetings {
 		_message: string = ''
 	}
 	
-	$create() {
+	constructor() {
 		this('Hello!')
 	}
 	
-	$create(@message)
+	constructor(@message)
 	
 	abstract greet(name): String
 }

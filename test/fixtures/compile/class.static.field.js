@@ -1,3 +1,4 @@
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Foo {
 		constructor() {
@@ -9,6 +10,9 @@ module.exports = function() {
 		__ks_cons_0(name) {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
+			}
+			if(!Type.isString(name)) {
+				throw new Error("Invalid type for parameter 'name'");
 			}
 			this.name = name;
 		}
@@ -43,7 +47,7 @@ module.exports = function() {
 				max: 1,
 				parameters: [
 					{
-						type: "Any",
+						type: "String",
 						min: 1,
 						max: 1
 					}

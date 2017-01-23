@@ -7,7 +7,7 @@ class Exception extends Error {
 		message: String
 	}
 	
-	constructor(@message, @fileName: String, @lineNumber: Number) { // {{{
+	constructor(@message, @fileName, @lineNumber) { // {{{
 		if !?this.stack {
 			@captureStackTrace()
 		}
@@ -61,12 +61,12 @@ class NotImplementedException extends Exception {
 	constructor(message = 'Not Implemented', node: AbstractNode) { // {{{
 		super(message, node)
 	} // }}}
-	/* constructor(message = 'Not Implemented', node: AbstractNode, data) {
+	constructor(message = 'Not Implemented', node: AbstractNode, data) { // {{{
 		super(message, node, data)
-	}
-	constructor(message = 'Not Implemented', fileName: String, lineNumber: Number) {
+	} // }}}
+	constructor(message = 'Not Implemented', fileName, lineNumber) { // {{{
 		super(message, fileName, lineNumber)
-	} */
+	} // }}}
 }
 
 class NotSupportedException extends Exception {

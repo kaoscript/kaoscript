@@ -926,14 +926,184 @@ const $helper = {
 		}
 	} // }}}
 	methodCheckTree(methods, index, node, fragments, call, argName, refName, returns) { // {{{
-		//console.log(index)
-		//console.log(JSON.stringify(methods, null, 2))
-		let tree = []
+		const tree = []
+		const usages = []
+		
+		let type, nf, tt, item, usage
+		for method in methods {
+			usages.push(usage = {
+				method: method,
+				types: []
+			})
+			
+			for type in $helper.methodTypes(method, index) {
+				nf = true
+				for tt in tree while nf {
+					/* if $method.sameType(type.type, tt.type) { */
+					if tt.type:Array.contains(type.type) {
+						item = tt
+						nf = false
+					}
+				}
+				
+				if nf {
+					tree.push(item = {
+						type: [type.type]
+						path: ['this.constructor.__ks_reflect.' + refName + '[' + method.index + '].parameters[' + type.index + ']' + type.path]
+						methods: [method]
+						usage: 1
+					})
+					
+					/* if item.type == 'Any' {
+						item.weight = 1
+					}
+					else if $typeofs[item.type] {
+						item.weight = 1_000_001
+					}
+					else {
+						item.weight = 1_001
+					} */
+					if type.type == 'Any' {
+						item.weight = 0
+					}
+					else {
+						item.weight = 1_000
+					}
+				}
+				else {
+					/* item.weight++ */
+					item.usage++
+					item.methods.push(method)
+				}
+				
+				usage.types.push(item)
+			}
+		}
+		
+		if tree.length == 1 {
+			item = tree[0]
+			
+			if item.methods.length == 1 {
+				call(fragments, item.methods[0], item.methods[0].index)
+				
+				return false
+			}
+			else {
+				return $helper.methodCheckTree(item.methods, index + 1, node, fragments, call, argName, refName, returns)
+			}
+		}
+		else {
+			/* console.log(JSON.stringify(tree, null, 2)) */
+			for usage in usages {
+				let count = usage.types.length
+				
+				for type in usage.types while count >= 0 {
+					count -= type.usage
+				}
+				
+				if count == 0 {
+					let item = {
+						type: [],
+						path: [],
+						methods: [usage.method]
+						usage: 0
+						weight: 0
+					}
+					
+					for type in usage.types {
+						item.type.push(...type.type)
+						item.path.push(...type.path)
+						item.usage += type.usage
+						item.weight += type.weight
+						
+						tree.remove(type)
+					}
+					
+					tree.push(item)
+				}
+			}
+			/* console.log(JSON.stringify(tree, null, 2)) */
+			tree.sort(func(a, b) {
+				if a.type.length == b.type.length {
+					if a.usage == b.usage {
+						return b.weight - a.weight
+					}
+					else {
+						return b.usage - a.usage
+					}
+				}
+				else {
+					return a.type.length - b.type.length
+				}
+			})
+			/* console.log(JSON.stringify(tree, null, 2)) */
+			
+			/* let recipient = []
+			for item in tree {
+				nf = true
+				
+				for r in recipient while nf {
+					if r.methods.length == item.methods.length {
+						length = r.methods.length - 1
+						
+						for i from 0 to length {
+							if r.methods[i] == item.methods[i] {
+								nf = false if i == length
+							}
+							else {
+								break
+							}
+						}
+					}
+				}
+				
+				if nf {
+					recipient.push(item)
+				}
+			} */
+			
+			let ctrl = fragments.newControl()
+			let ne = true
+			
+			for item, i in tree {
+				if i + 1 == tree.length {
+					if !ctrl.isFirstStep() {
+						ctrl.step().code('else')
+						
+						ne = false
+					}
+				}
+				else {
+					ctrl.step().code('else') if !ctrl.isFirstStep()
+					
+					ctrl.code('if(')
+					
+					$helper.decide(node, ctrl, item.type[0], index, item.path[0], argName)
+					
+					ctrl.code(')')
+				}
+				
+				ctrl.step()
+				
+				if item.methods.length == 1 {
+					call(ctrl, item.methods[0], item.methods[0].index)
+				}
+				else {
+					$helper.methodCheckTree(item.methods, index + 1, node, ctrl, call, argName, refName, returns)
+				}
+			}
+			
+			ctrl.done()
+			
+			return ne
+		}
+		/* let tree = []
 		let usages = []
 		
 		let types, usage, type, nf, t, item
 		for i from 0 til methods.length {
 			types = $helper.methodTypes(methods[i], index)
+			console.log(types)
 			usage = {
 				method: methods[i],
 				usage: 0,
@@ -965,6 +1135,7 @@ const $helper = {
 			
 			usages.push(usage)
 		}
+		console.log(tree)
 		
 		if tree.length == 1 {
 			let item = tree[0]
@@ -985,7 +1156,7 @@ const $helper = {
 			usages.sort(func(a, b) {
 				return a.usage - b.usage
 			})
-			//console.log(JSON.stringify(usages, null, 2))
+			console.log(JSON.stringify(usages, null, 2))
 			
 			for usage, u in usages {
 				if usage.tree.length == usage.usage {
@@ -1001,11 +1172,13 @@ const $helper = {
 					else {
 						ctrl.step().code('else') if !ctrl.isFirstStep()
 						
-						ctrl.code('if(')
-						
-						$helper.decide(node, ctrl, item.type, index, item.path, argName)
-						
-						ctrl.code(')')
+						if item.type != 'Any' {
+							ctrl.code('if(')
+							
+							$helper.decide(node, ctrl, item.type, index, item.path, argName)
+							
+							ctrl.code(')')
+						}
 					}
 					
 					ctrl.step()
@@ -1025,7 +1198,7 @@ const $helper = {
 			ctrl.done()
 			
 			return ne
-		}
+		} */
 	} // }}}
 	methodTypes(method, index) { // {{{
 		let types = []
@@ -1242,7 +1415,7 @@ const $method = {
 		
 		let type, last, nf
 		for parameter in data.parameters {
-			type = $signature.type(parameter.type, node.scope())
+			type = $parameter.type(parameter, node)
 			
 			if !last || !$method.sameType(type, last.type) {
 				if last {
@@ -1251,8 +1424,8 @@ const $method = {
 				}
 				
 				last = {
-					type: $signature.type(parameter.type, node.scope()),
-					min: parameter.defaultValue || (parameter.type && parameter.type.nullable) ? 0 : 1,
+					type: type,
+					min: (parameter.defaultValue || parameter.type?.nullable) ? 0 : 1,
 					max: 1
 				}
 				
@@ -1292,7 +1465,7 @@ const $method = {
 				}
 				
 				if nf {
-					if !(parameter.defaultValue || (parameter.type && parameter.type.nullable)) {
+					if !(parameter.defaultValue || parameter.type?.nullable) {
 						++last.min
 					}
 					
@@ -1307,6 +1480,36 @@ const $method = {
 		}
 		
 		return signature
+	} // }}}
+}
+
+const $parameter = {
+	type(data, node) { // {{{
+		if data.name? {
+			let nf = true
+			let name = data.name.name
+			
+			for modifier in data.modifiers while nf {
+				if modifier.kind == ModifierKind::Alias {
+					if variable ?= node.getInstanceVariable(name) {
+						return variable.type if variable.type?
+					}
+					else if variable ?= node.getInstanceVariable('_' + name) {
+						return variable.type if variable.type?
+					}
+					else if variable ?= node.getInstanceMethod(name) {
+						return variable.type if variable.type?
+					}
+					else {
+						ReferenceException.throwNotDefinedMember(name, node)
+					}
+					
+					nf = false
+				}
+			}
+		}
+		
+		return $signature.type(data.type, node.scope())
 	} // }}}
 }
 
@@ -1695,6 +1898,46 @@ class ClassDeclaration extends Statement {
 			}
 		}
 	} // }}}
+	getInstanceMethod(name, variable = @variable) { // {{{
+		if variable.instanceMethods[name]?['1']? {
+			throw new NotImplementedException()
+		}
+		else if variable.extends? {
+			return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
+		}
+		
+		return null
+	} // }}}
+	getInstanceVariable(name, variable = @variable) { // {{{
+		if variable.instanceVariables[name]? {
+			return variable.instanceVariables[name]
+		}
+		else if variable.extends? {
+			return this.getInstanceVariable(name, @scope.getVariable(variable.extends))
+		}
+		
+		return null
+	} // }}}
+	isInstanceMethod(name, variable = @variable) { // {{{
+		if variable.instanceMethods[name]?['1']? {
+			return true
+		}
+		else if variable.extends? {
+			return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
+		}
+		
+		return false
+	} // }}}
+	isInstanceVariable(name, variable = @variable) { // {{{
+		if variable.instanceVariables[name]? {
+			return true
+		}
+		else if variable.extends? {
+			return this.isInstanceVariable(name, @scope.getVariable(variable.extends))
+		}
+		
+		return false
+	} // }}}
 	newInstanceMethodScope(data, member) { // {{{
 		let scope = new Scope(this._scope)
 		
@@ -1825,16 +2068,18 @@ class MethodDeclaration extends Statement {
 		@parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
 		
 		if @data.body? {
-			this._statements = [$compile.statement(statement, this) for statement in $body(this._data.body)]
+			@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
 		}
 		else {
-			this._statements = []
+			@statements = []
 		}
 	} // }}}
 	fuse() { // {{{
-		this.compile(this._parameters)
-		this.compile(this._statements)
+		this.compile(@parameters)
+		this.compile(@statements)
 	} // }}}
+	getInstanceMethod(name) => @parent.getInstanceMethod(name)
+	getInstanceVariable(name) => @parent.getInstanceVariable(name)
 	instance(@instance) => this
 	isAbstract() { // {{{
 		for modifier in @data.modifiers {
@@ -1854,59 +2099,42 @@ class MethodDeclaration extends Statement {
 		
 		return false
 	} // }}}
-	isInstanceMethod(name, variable) { // {{{
-		return true if variable.instanceMethods[name]?['1']?
-		
-		if variable.extends? {
-			return @isInstanceMethod(name, @scope.getVariable(variable.extends))
-		}
-		
-		return false
-	} // }}}
-	isInstanceVariable(name, variable) { // {{{
-		return true if variable.instanceVariables[name]?
-		
-		if variable.extends? {
-			return @isInstanceVariable(name, @scope.getVariable(variable.extends))
-		}
-		
-		return false
-	} // }}}
+	isInstanceMethod(name) => @parent.isInstanceMethod(name)
+	isInstanceVariable(name) => @parent.isInstanceVariable(name)
+	isMethod() => true
 	name(@name) => this
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
-		if this._parent._es5 {
-			ctrl.code($class.methodHeader(this._name, this._parent) + '(')
+		if @parent._es5 {
+			ctrl.code($class.methodHeader(@name, @parent) + '(')
 		}
 		else {
-			ctrl.code('static ') if !this._instance
+			ctrl.code('static ') if !@instance
 			
-			ctrl.code(this._name + '(')
+			ctrl.code(@name + '(')
 		}
 		
 		$function.parameters(this, ctrl, func(node) {
 			return node.code(')').step()
 		})
 		
-		let variable = this._parent._variable
-		
-		let nf, modifier
-		for parameter, p in this._data.parameters {
+		let nf, modifier, name
+		for parameter, p in @data.parameters {
 			nf = true
 			
 			for modifier in parameter.modifiers while nf {
 				if modifier.kind == ModifierKind::Alias {
-					let name = parameter.name.name
+					name = parameter.name.name
 					
-					if @isInstanceVariable(name, variable) {
-						ctrl.newLine().code('this.' + name + ' = ').compile(this._parameters[p]).done()
+					if this.isInstanceVariable(name) {
+						ctrl.newLine().code('this.' + name + ' = ').compile(@parameters[p]).done()
 					}
-					else if @isInstanceVariable('_' + name, variable) {
-						ctrl.newLine().code('this._' + name + ' = ').compile(this._parameters[p]).done()
+					else if this.isInstanceVariable('_' + name) {
+						ctrl.newLine().code('this._' + name + ' = ').compile(@parameters[p]).done()
 					}
-					else if @isInstanceMethod(name, variable) {
-						ctrl.newLine().code('this.' + name + '(').compile(this._parameters[p]).code(')').done()
+					else if this.isInstanceMethod(name) {
+						ctrl.newLine().code('this.' + name + '(').compile(@parameters[p]).code(')').done()
 					}
 					else {
 						ReferenceException.throwNotDefinedMember(name, this)
@@ -1917,10 +2145,10 @@ class MethodDeclaration extends Statement {
 			}
 		}
 		
-		for statement in this._statements {
+		for statement in @statements {
 			ctrl.compile(statement)
 		}
 		
-		ctrl.done() unless this._parent._es5
+		ctrl.done() unless @parent._es5
 	} // }}}
 }

@@ -12,7 +12,12 @@
       "new": true,
       "constructors": [],
       "destructors": 0,
-      "instanceVariables": {},
+      "instanceVariables": {
+        "_luma": {
+          "access": 1,
+          "type": "Number"
+        }
+      },
       "classVariables": {},
       "instanceMethods": {
         "luma": [

@@ -70,6 +70,9 @@ class ImplementDeclaration extends Statement {
 
 class ImplementClassFieldDeclaration extends Statement {
 	private {
+		_instance		= true
+		_name
+		_type
 		_variable
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -80,18 +83,49 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		this._type = $helper.analyseType($signature.type(this._data.type, this._scope), this)
+		@type = $helper.analyseType($signature.type(@data.type, @scope), this)
 		
-		/* if this._type.kind == HelperTypeKind::Unreferenced {
-			throw(`Invalid type \(this._type.type) at line \(this._data.start.line)`, this)
-		} */
+		for i from 0 til @data.modifiers.length while @instance {
+			if @data.modifiers[i].kind == ModifierKind::Static {
+				@instance = false
+			}
+		}
+		
+		@name = @data.name.name
+		
+		let signature = $field.signature(@data, this)
+		
+		if @instance {
+			@variable.instanceVariables[@name] = signature
+		}
+		else {
+			@variable.classVariables[@name] = signature
+		}
+		
+		if @variable.sealed? {
+			if @instance {
+				if @variable.sealed.instanceVariables[@name] != true {
+					@variable.sealed.instanceVariables[@name] = true
+				}
+			}
+			else {
+				if @variable.sealed.classVariables[@name] != true {
+					@variable.sealed.classVariables[@name] = true
+				}
+			}
+		}
 	} // }}}
 	fuse() { // {{{
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		this.module().flag('Helper')
-		
-		fragments.line($runtime.helper(this), '.newField(' + $quote(this._data.name.name) + ', ' + $helper.type(this._type, this) + ')')
+		if @instance {
+			this.module().flag('Helper')
+			
+			fragments.line($runtime.helper(this), '.newField(' + $quote(@name) + ', ' + $helper.type(@type, this) + ')')
+		}
+		else {
+			throw new NotImplementedException(this)
+		}
 	} // }}}
 }
 
@@ -180,6 +214,47 @@ class ImplementClassMethodDeclaration extends Statement {
 		
 		this.compile(this._statements)
 	} // }}}
+	getInstanceMethod(name, variable = @variable) { // {{{
+		if variable.instanceMethods[name]?['1']? {
+			throw new NotImplementedException()
+		}
+		else if variable.extends? {
+			return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
+		}
+		
+		return null
+	} // }}}
+	getInstanceVariable(name, variable = @variable) { // {{{
+		if variable.instanceVariables[name]? {
+			return variable.instanceVariables[name]
+		}
+		else if variable.extends? {
+			return this.getInstanceVariable(name, @scope.getVariable(variable.extends))
+		}
+		
+		return null
+	} // }}}
+	isInstanceMethod(name, variable = @variable) { // {{{
+		if variable.instanceMethods[name]?['1']? {
+			return true
+		}
+		else if variable.extends? {
+			return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
+		}
+		
+		return false
+	} // }}}
+	isInstanceVariable(name, variable = @variable) { // {{{
+		if variable.instanceVariables[name]? {
+			return true
+		}
+		else if variable.extends? {
+			return this.isInstanceVariable(name, @scope.getVariable(variable.extends))
+		}
+		
+		return false
+	} // }}}
+	isMethod() => true
 	toStatementFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
@@ -554,6 +629,7 @@ class ImplementVariableMethodDeclaration extends Statement {
 		
 		this.compile(this._statements)
 	} // }}}
+	isMethod() => false
 	toFragments(fragments, mode) { // {{{
 		let line = fragments.newLine().code(this._variable.sealed.name, '.', this._data.name.name, ' = function(')
 		

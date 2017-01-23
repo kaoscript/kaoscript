@@ -977,6 +977,7 @@ class FunctionDeclaration extends Statement {
 		
 		return false
 	} // }}}
+	isMethod() => false
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
@@ -1022,20 +1023,52 @@ class Parameter extends AbstractNode {
 		_defaultValue	= null
 		_name			= null
 		_nullable		= false
-		_type
+		_type			= null
 		_variable		= null
 	}
 	analyse() { // {{{
-		let data = this._data
-		let parent = this._parent
+		if @parent.isMethod() {
+			if @data.name? {
+				let nf = true
+				let name = @data.name.name
+				
+				for modifier in @data.modifiers while nf {
+					if modifier.kind == ModifierKind::Alias {
+						if variable ?= @parent.getInstanceVariable(name) {
+							@type = $type.reference(variable.type) if variable.type?
+						}
+						else if variable ?= @parent.getInstanceVariable('_' + name) {
+							@type = $type.reference(variable.type) if variable.type?
+						}
+						else if variable ?= @parent.getInstanceMethod(name) {
+							@type = $type.reference(variable.type) if variable.type?
+						}
+						else {
+							ReferenceException.throwNotDefinedMember(name, this)
+						}
+						
+						nf = false
+					}
+				}
+			}
+			
+			@type ??= @data.type
+		}
+		else {
+			for modifier in @data.modifiers {
+				if modifier.kind == ModifierKind::Alias {
+					SyntaxException.throwOutOfClassAlias(this)
+				}
+			}
+			
+			@type = @data.type
+		}
 		
-		this._type = data.type
-		
-		if data.name? {
-			let signature = $function.signatureParameter(data, this._scope)
+		if @data.name? {
+			let signature = $function.signatureParameter(@data, @scope)
 			
 			if signature.rest {
-				$variable.define(this, this._scope, data.name, VariableKind::Variable, {
+				$variable.define(this, @scope, @data.name, VariableKind::Variable, {
 					kind: NodeKind::TypeReference
 					typeName: {
 						kind: NodeKind::Identifier
@@ -1044,41 +1077,41 @@ class Parameter extends AbstractNode {
 				})
 			}
 			else {
-				$variable.define(this, this._scope, data.name, $variable.kind(data.type), data.type)
+				$variable.define(this, @scope, @data.name, $variable.kind(@type), @type)
 			}
 			
-			this._variable = $compile.expression(data.name, parent)
+			@variable = $compile.expression(@data.name, @parent)
 		}
 		else {
 			let name = {
 				kind: NodeKind::Identifier
-				name: this._scope.acquireTempName()
+				name: @scope.acquireTempName()
 			}
 			
-			$variable.define(this, this._scope, name, VariableKind::Variable)
+			$variable.define(this, @scope, name, VariableKind::Variable)
 			
-			this._variable = $compile.expression(name, parent)
-			this._anonymous = true
+			@variable = $compile.expression(name, @parent)
+			@anonymous = true
 		}
 		
-		if data.defaultValue? {
-			this._defaultValue = $compile.expression(data.defaultValue, parent)
+		if @data.defaultValue? {
+			@defaultValue = $compile.expression(@data.defaultValue, @parent)
 		}
 		
-		this._name = this._variable._value
-		this._nullable = this._data.type?.nullable
+		@name = @variable._value
+		@nullable = @type?.nullable
 	} // }}}
 	fuse() {// {{{
-		if this._defaultValue != null {
-			this._defaultValue.fuse()
+		if @defaultValue != null {
+			@defaultValue.fuse()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._variable)
+		fragments.compile(@variable)
 	} // }}}
 	toParameterFragments(fragments) { // {{{
-		fragments.compile(this._variable)
+		fragments.compile(@variable)
 		
-		fragments.code(' = null') if this._nullable && !?this._data.defaultValue && this._options.format.parameters == 'es6'
+		fragments.code(' = null') if @nullable && !?@data.defaultValue && @options.format.parameters == 'es6'
 	} // }}}
 }

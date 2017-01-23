@@ -1,3 +1,4 @@
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class AbstractGreetings {
 		constructor() {
@@ -16,6 +17,9 @@ module.exports = function() {
 		__ks_cons_1(message) {
 			if(message === undefined || message === null) {
 				throw new Error("Missing parameter 'message'");
+			}
+			if(!Type.isString(message)) {
+				throw new Error("Invalid type for parameter 'message'");
 			}
 			this._message = message;
 		}
@@ -47,7 +51,7 @@ module.exports = function() {
 				max: 1,
 				parameters: [
 					{
-						type: "Any",
+						type: "String",
 						min: 1,
 						max: 1
 					}

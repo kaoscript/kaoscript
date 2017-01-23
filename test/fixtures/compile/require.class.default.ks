@@ -5,7 +5,7 @@ impl Color {
 	
 	luma(): Number => this._luma
 	
-	luma(@luma: Number) => this
+	luma(@luma) => this
 }
 
 export Color, Space

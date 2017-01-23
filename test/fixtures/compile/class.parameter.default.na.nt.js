@@ -6,45 +6,43 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_init_1() {
-			this._message = "";
+			this._message = "Hello!";
 		}
 		__ks_init() {
 			Greetings.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0() {
-			Greetings.prototype.__ks_cons.call(this, ["Hello!"]);
 		}
 		__ks_cons_1(message) {
 			if(message === undefined || message === null) {
 				throw new Error("Missing parameter 'message'");
 			}
-			if(!Type.isString(message)) {
-				throw new Error("Invalid type for parameter 'message'");
-			}
 			this._message = message;
+		}
+		__ks_cons_2(number) {
+			if(number === undefined || number === null) {
+				throw new Error("Missing parameter 'number'");
+			}
+			if(!Type.isNumber(number)) {
+				throw new Error("Invalid type for parameter 'number'");
+			}
+			Greetings.prototype.__ks_cons.call(this, [number]);
 		}
 		__ks_cons(args) {
 			if(args.length === 0) {
 				Greetings.prototype.__ks_cons_0.apply(this);
 			}
 			else if(args.length === 1) {
-				Greetings.prototype.__ks_cons_1.apply(this, args);
+				if(Type.isNumber(args[0])) {
+					Greetings.prototype.__ks_cons_2.apply(this, args);
+				}
+				else {
+					Greetings.prototype.__ks_cons_1.apply(this, args);
+				}
 			}
 			else {
 				throw new Error("Wrong number of arguments");
 			}
-		}
-		__ks_func_greet_0(name) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
-			}
-			return this._message + "\nIt's nice to meet you, " + name + ".";
-		}
-		greet() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_greet_0.apply(this, arguments);
-			}
-			throw new Error("Wrong number of arguments");
 		}
 	}
 	Greetings.__ks_reflect = {
@@ -62,7 +60,19 @@ module.exports = function() {
 				max: 1,
 				parameters: [
 					{
-						type: "String",
+						type: "Any",
+						min: 1,
+						max: 1
+					}
+				]
+			},
+			{
+				access: 3,
+				min: 1,
+				max: 1,
+				parameters: [
+					{
+						type: "Number",
 						min: 1,
 						max: 1
 					}
@@ -77,28 +87,7 @@ module.exports = function() {
 			}
 		},
 		classVariables: {},
-		instanceMethods: {
-			greet: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
+		instanceMethods: {},
 		classMethods: {}
 	};
-	try {
-		const hello = new Greetings("Hello world!");
-		console.log(hello.greet("miss White"));
-	}
-	catch(__ks_0) {
-	}
 }

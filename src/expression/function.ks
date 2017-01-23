@@ -36,6 +36,7 @@ class FunctionExpression extends Expression {
 			statement.fuse()
 		}
 	} // }}}
+	isMethod() => false
 	toFragments(fragments, mode) { // {{{
 		let surround
 		
@@ -133,6 +134,7 @@ class LambdaExpression extends Expression {
 			statement.fuse()
 		}
 	} // }}}
+	isMethod() => false
 	toFragments(fragments, mode) { // {{{
 		let surround = $function.surround(this)
 		

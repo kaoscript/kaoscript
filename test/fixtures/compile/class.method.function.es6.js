@@ -20,6 +20,9 @@ module.exports = function() {
 			if(messages === undefined || messages === null) {
 				throw new Error("Missing parameter 'messages'");
 			}
+			if(!Type.isArray(messages)) {
+				throw new Error("Invalid type for parameter 'messages'");
+			}
 			this._messages = messages;
 		}
 		__ks_cons(args) {
@@ -195,7 +198,7 @@ module.exports = function() {
 				max: 1,
 				parameters: [
 					{
-						type: "Any",
+						type: "Array",
 						min: 1,
 						max: 1
 					}
