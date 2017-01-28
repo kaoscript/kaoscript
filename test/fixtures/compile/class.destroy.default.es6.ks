@@ -7,9 +7,7 @@ class Greetings {
 		this('Hello!')
 	}
 	
-	constructor(message?) {
-		this._message = message
-	}
+	constructor(@message)
 	
 	destructor() {
 		this._message = null

@@ -109,7 +109,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Greetings.prototype.__ks_func_corge_0.apply(this, arguments);
 			}
-			else if(arguments.length >= 2 && arguments.length <= 3) {
+			else if(arguments.length === 2 || arguments.length === 3) {
 				return Greetings.prototype.__ks_func_corge_1.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
@@ -139,7 +139,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Greetings.prototype.__ks_func_grault_0.apply(this, arguments);
 			}
-			else if(arguments.length >= 2 && arguments.length <= 3) {
+			else if(arguments.length === 2 || arguments.length === 3) {
 				return Greetings.prototype.__ks_func_grault_1.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
@@ -209,7 +209,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Greetings.prototype.__ks_func_garply_0.apply(this, arguments);
 			}
-			else if(arguments.length >= 2 && arguments.length <= 3) {
+			else if(arguments.length === 2 || arguments.length === 3) {
 				if(Type.isString(arguments[1])) {
 					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
 				}

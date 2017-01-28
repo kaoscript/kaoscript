@@ -48,11 +48,11 @@ module.exports = function() {
 			return this._message;
 		}
 		message() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_message_0.apply(this, arguments);
-			}
-			else if(arguments.length === 0) {
+			if(arguments.length === 0) {
 				return Greetings.prototype.__ks_func_message_1.apply(this);
+			}
+			else if(arguments.length === 1) {
+				return Greetings.prototype.__ks_func_message_0.apply(this, arguments);
 			}
 			throw new Error("Wrong number of arguments");
 		}

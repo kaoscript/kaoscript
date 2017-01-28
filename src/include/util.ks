@@ -106,7 +106,7 @@ impl Array {
 	last(index = 1) { // {{{
 		return this.length ? this[this.length - index] : null
 	} // }}}
-	remove(...items): Array {
+	remove(...items): Array { // {{{
 		if items.length == 1 {
 			let item = items[0]
 			
@@ -123,7 +123,7 @@ impl Array {
 		}
 		
 		return this
-	}
+	} // }}}
 	static merge(...args) { // {{{
 		let source
 		
@@ -160,6 +160,19 @@ impl Array {
 			}
 		}
 		return this
+	} // }}}
+	static same(a, b) { // {{{
+		if a.length != b.length {
+			return false
+		}
+		
+		for i from 0 til a.length {
+			if a[i] != b[i] {
+				return false
+			}
+		}
+		
+		return true
 	} // }}}
 }
 

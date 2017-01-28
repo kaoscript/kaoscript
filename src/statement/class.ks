@@ -828,155 +828,185 @@ const $helper = {
 			}
 		}
 		else {
-			let groups = []
+			let groups = {}
+			let infinities = []
+			let min = Infinity
+			let max = 0
 			
-			let nf, group
 			for index from 0 til methods.length {
 				method = methods[index].signature
 				method.index = index
 				
-				nf = true
-				for group in groups while nf {
-					if (method.min <= group.min && method.max >= group.min) || (method.min >= group.min && method.max <= group.max) || (method.min <= group.max && method.max >= group.max) {
-						nf = false
+				if method.max == Infinity {
+					infinities.push(method)
+				}
+				else {
+					for n from method.min to method.max {
+						if groups[n]? {
+							groups[n].methods.push(method)
+						}
+						else {
+							groups[n] = {
+								n: n
+								methods: [method]
+							}
+						}
+					}
+					
+					min = Math.min(min, method.min)
+					max = Math.max(max, method.max)
+				}
+			}
+			
+			if infinities.length {
+				for method in infinities {
+					for group of groups when method.min >= group.n {
+						group.methods.push(method)
+					}
+				}
+			}
+			
+			if min == Infinity {
+				throw new NotImplementedException(node)
+			}
+			else {
+				for i from min to max {
+					if group ?= groups[i] {
+						for j from i + 1 to max while (gg ?= groups[j]) && Array.same(gg.methods, group.methods) {
+							if group.n is Array {
+								group.n.push(j)
+							}
+							else {
+								group.n = [i, j]
+							}
+							
+							delete groups[j]
+						}
 					}
 				}
 				
-				if nf {
-					groups.push({
-						min: method.min,
-						max: method.max,
-						methods: [method]
-					})
-				}
-				else {
-					group.min = Math.min(group.min, method.min)
-					group.max = Math.max(group.max, method.max)
-					group.methods.push(method)
-				}
-			}
-			
-			let ctrl = fragments.newControl()
-			nf = true
-			
-			for group in groups {
-				if group.min == group.max {
-					ctrl.step().code('else ') if !ctrl.isFirstStep()
+				let ctrl = fragments.newControl()
+				
+				for k, group of groups {
+					ctrl.step().code('else ') unless ctrl.isFirstStep()
 					
-					ctrl.code('if(' + argName + '.length === ' + group.min + ')').step()
+					if group.n is Array {
+						if group.n.length == 2 {
+							ctrl.code(`if(\(argName).length === \(group.n[0]) || \(argName).length === \(group.n[1]))`).step()
+						}
+						else {
+							ctrl.code(`if(\(argName).length >= \(group.n[0]) && \(argName).length <= \(group.n[group.n.length - 1]))`).step()
+						}
+					}
+					else {
+						ctrl.code(`if(\(argName).length === \(group.n))`).step()
+					}
 					
 					if group.methods.length == 1 {
 						call(ctrl, group.methods[0], group.methods[0].index)
 					}
 					else {
-						$helper.methodCheck(node, ctrl, group, call, argName, refName, returns)
+						let types = {}
+						for method in group.methods {
+							$helper.methodTypes(node, method, group.n, types)
+						}
+						
+						let indexes = []
+						for p, parameter of types {
+							for t, type of parameter.types {
+								type.methods:Array.remove(...indexes)
+								
+								if type.methods.length == 0 {
+									delete parameter.types[t]
+								}
+							}
+							
+							for t, type of parameter.types {
+								if type.methods.length == 1 {
+									indexes:Array.pushUniq(type.methods[0])
+								}
+							}
+						}
+						
+						if $helper.methodCheckTree(methods, types, 0, node, ctrl, call, argName, refName, returns) {
+							if returns {
+								fragments.line('throw new Error("Wrong type of arguments")')
+							}
+							else {
+								fragments.step().code('else').step().code('throw new Error("Wrong type of arguments")')
+							}
+						}
 					}
 				}
-				else if group.max < Infinity {
-					ctrl.step().code('else ') if !ctrl.isFirstStep()
-					
-					ctrl.code('if(' + argName + '.length >= ' + group.min + ' && arguments.length <= ' + group.max + ')').step()
-					
-					if group.methods.length == 1 {
-						call(ctrl, group.methods[0], group.methods[0].index)
+				
+				if infinities.length == 0 {
+					if returns {
+						ctrl.done()
+						
+						fragments.line('throw new Error("Wrong number of arguments")')
 					}
 					else {
-						$helper.methodCheck(node, ctrl, group, call, argName, refName, returns)
+						ctrl.step().code('else').step().line('throw new Error("Wrong number of arguments")').done()
 					}
 				}
-				else {
-					ctrl.step().code('else').step() if !ctrl.isFirstStep()
+				else if infinities.length == 1 {
+					ctrl.step().code('else').step()
 					
-					nf = false
+					call(ctrl, infinities[0], infinities[0].index)
 					
-					if group.methods.length == 1 {
-						call(ctrl, group.methods[0], group.methods[0].index)
-					}
-					else {
-						$helper.methodCheck(node, ctrl, group, call, argName, refName, returns)
-					}
-				}
-			}
-			
-			if nf {
-				if returns {
 					ctrl.done()
-					
-					fragments.line('throw new Error("Wrong number of arguments")')
 				}
 				else {
-					ctrl.step().code('else').step().line('throw new Error("Wrong number of arguments")').done()
+					throw new NotImplementedException(node)
 				}
-			}
-			else {
-				ctrl.done()
 			}
 		}
 		
 		fragments.done() unless node._es5
 	} // }}}
-	methodCheck(node, fragments, group, call, argName, refName, returns) { // {{{
-		if $helper.methodCheckTree(group.methods, 0, node, fragments, call, argName, refName, returns) {
-			if returns {
-				fragments.line('throw new Error("Wrong type of arguments")')
-			}
-			else {
-				fragments.step().code('else').step().code('throw new Error("Wrong type of arguments")')
-			}
+	methodCheckTree(methods, types, index, node, fragments, call, argName, refName, returns) { // {{{
+		if !?types[index + 1] {
+			SyntaxException.throwNotDifferentiableMethods(node)
 		}
-	} // }}}
-	methodCheckTree(methods, index, node, fragments, call, argName, refName, returns) { // {{{
+		
 		const tree = []
 		const usages = []
 		
-		let type, nf, tt, item, usage
-		for method in methods {
-			usages.push(usage = {
-				method: method,
-				types: []
+		let type, nf, item, usage
+		for name, type of types[index + 1].types {
+			tree.push(item = {
+				type: [name]
+				path: [`this.constructor.__ks_reflect.\(refName)\(type.path)`]
+				methods: [methods[i].signature for i in type.methods]
+				usage: type.methods.length
 			})
 			
-			for type in $helper.methodTypes(method, index) {
+			if name == 'Any' {
+				item.weight = 0
+			}
+			else {
+				item.weight = 1_000
+			}
+			
+			for i in type.methods {
+				method = methods[i].signature
+				
 				nf = true
-				for tt in tree while nf {
-					/* if $method.sameType(type.type, tt.type) { */
-					if tt.type:Array.contains(type.type) {
-						item = tt
+				for usage in usages while nf {
+					if usage.method == method {
 						nf = false
 					}
 				}
 				
 				if nf {
-					tree.push(item = {
-						type: [type.type]
-						path: ['this.constructor.__ks_reflect.' + refName + '[' + method.index + '].parameters[' + type.index + ']' + type.path]
-						methods: [method]
-						usage: 1
+					usages.push(usage = {
+						method: method,
+						types: [item]
 					})
-					
-					/* if item.type == 'Any' {
-						item.weight = 1
-					}
-					else if $typeofs[item.type] {
-						item.weight = 1_000_001
-					}
-					else {
-						item.weight = 1_001
-					} */
-					if type.type == 'Any' {
-						item.weight = 0
-					}
-					else {
-						item.weight = 1_000
-					}
 				}
 				else {
-					/* item.weight++ */
-					item.usage++
-					item.methods.push(method)
+					usage.types.push(item)
 				}
-				
-				usage.types.push(item)
 			}
 		}
 		
@@ -989,11 +1019,10 @@ const $helper = {
 				return false
 			}
 			else {
-				return $helper.methodCheckTree(item.methods, index + 1, node, fragments, call, argName, refName, returns)
+				return $helper.methodCheckTree(methods, types, index + 1, node, fragments, call, argName, refName, returns)
 			}
 		}
 		else {
-			/* console.log(JSON.stringify(tree, null, 2)) */
 			for usage in usages {
 				let count = usage.types.length
 				
@@ -1022,9 +1051,15 @@ const $helper = {
 					tree.push(item)
 				}
 			}
-			/* console.log(JSON.stringify(tree, null, 2)) */
+			
 			tree.sort(func(a, b) {
-				if a.type.length == b.type.length {
+				if a.weight == 0 && b.weight != 0 {
+					return 1
+				}
+				else if b.weight == 0 {
+					return -1
+				}
+				else if a.type.length == b.type.length {
 					if a.usage == b.usage {
 						return b.weight - a.weight
 					}
@@ -1036,31 +1071,6 @@ const $helper = {
 					return a.type.length - b.type.length
 				}
 			})
-			/* console.log(JSON.stringify(tree, null, 2)) */
-			
-			/* let recipient = []
-			for item in tree {
-				nf = true
-				
-				for r in recipient while nf {
-					if r.methods.length == item.methods.length {
-						length = r.methods.length - 1
-						
-						for i from 0 to length {
-							if r.methods[i] == item.methods[i] {
-								nf = false if i == length
-							}
-							else {
-								break
-							}
-						}
-					}
-				}
-				
-				if nf {
-					recipient.push(item)
-				}
-			} */
 			
 			let ctrl = fragments.newControl()
 			let ne = true
@@ -1089,7 +1099,7 @@ const $helper = {
 					call(ctrl, item.methods[0], item.methods[0].index)
 				}
 				else {
-					$helper.methodCheckTree(item.methods, index + 1, node, ctrl, call, argName, refName, returns)
+					$helper.methodCheckTree(methods, types, index + 1, node, ctrl, call, argName, refName, returns)
 				}
 			}
 			
@@ -1097,139 +1107,88 @@ const $helper = {
 			
 			return ne
 		}
-		/* let tree = []
-		let usages = []
-		
-		let types, usage, type, nf, t, item
-		for i from 0 til methods.length {
-			types = $helper.methodTypes(methods[i], index)
-			console.log(types)
-			usage = {
-				method: methods[i],
-				usage: 0,
-				tree: []
-			}
-			
-			for type in types {
-				nf = true
-				for tt in tree while nf {
-					if $method.sameType(type.type, tt.type) {
-						tt.methods.push(methods[i])
-						nf = false
-					}
-				}
-				
-				if nf {
-					item = {
-						type: type.type,
-						path: 'this.constructor.__ks_reflect.' + refName + '[' + methods[i].index + '].parameters[' + type.index + ']' + type.path,
-						methods: [methods[i]]
-					}
-					
-					tree.push(item)
-					usage.tree.push(item)
-					
-					++usage.usage
-				}
-			}
-			
-			usages.push(usage)
-		}
-		console.log(tree)
-		
-		if tree.length == 1 {
-			let item = tree[0]
-			
-			if item.methods.length == 1 {
-				call(fragments, item.methods[0], item.methods[0].index)
-				
-				return false
-			}
-			else {
-				return $helper.methodCheckTree(item.methods, index + 1, node, fragments, call, argName, refName, returns)
-			}
-		}
-		else {
-			let ctrl = fragments.newControl()
-			let ne = true
-			
-			usages.sort(func(a, b) {
-				return a.usage - b.usage
-			})
-			console.log(JSON.stringify(usages, null, 2))
-			
-			for usage, u in usages {
-				if usage.tree.length == usage.usage {
-					item = usage.tree[0]
-					
-					if u + 1 == usages.length {
-						if !ctrl.isFirstStep() {
-							ctrl.step().code('else')
-							
-							ne = false
-						}
-					}
-					else {
-						ctrl.step().code('else') if !ctrl.isFirstStep()
-						
-						if item.type != 'Any' {
-							ctrl.code('if(')
-							
-							$helper.decide(node, ctrl, item.type, index, item.path, argName)
-							
-							ctrl.code(')')
-						}
-					}
-					
-					ctrl.step()
-					
-					if item.methods.length == 1 {
-						call(ctrl, item.methods[0], item.methods[0].index)
-					}
-					else {
-						$helper.methodCheckTree(item.methods, index + 1, node, ctrl, call, argName, refName, returns)
-					}
-				}
-				else {
-					throw new NotImplementedException(node)
-				}
-			}
-			
-			ctrl.done()
-			
-			return ne
-		} */
 	} // }}}
-	methodTypes(method, index) { // {{{
-		let types = []
-		
-		let k = -1
-		
-		let parameter
-		for parameter, i in method.parameters when k < index {
-			if k + parameter.max >= index {
+	methodTypes(node, method, target, types) { // {{{
+		let index = 1
+		let count = method.min
+		for parameter, p in method.parameters {
+			for i from 1 to parameter.min {
+				if type !?= types[index] {
+					type = types[index] = {
+						index: index
+						types: {}
+					}
+				}
+				
 				if parameter.type is Array {
 					for j from 0 til parameter.type.length {
-						types.push({
-							type: parameter.type[j],
-							index: i,
-							path: '.type[' + j + ']'
-						})
+						if type.types[parameter.type[j]] {
+							type.types[parameter.type[j]].methods.push(method.index)
+						}
+						else {
+							type.types[parameter.type[j]] = {
+								name: parameter.type[j]
+								path: `[\(method.index)].parameters[\(p)].type`
+								methods: [method.index]
+							}
+						}
 					}
 				}
 				else {
-					types.push({
-						type: parameter.type,
-						index: i,
-						path: '.type'
-					})
+					if type.types[parameter.type] {
+						type.types[parameter.type].methods.push(method.index)
+					}
+					else {
+						type.types[parameter.type] = {
+							name: parameter.type
+							path: `[\(method.index)].parameters[\(p)].type`
+							methods: [method.index]
+						}
+					}
 				}
+				
+				++index
 			}
 			
-			k += parameter.min
+			for i from parameter.min + 1 to parameter.max while count < target {
+				if type !?= types[index] {
+					type = types[index] = {
+						index: index
+						types: {}
+					}
+				}
+				
+				if parameter.type is Array {
+					for j from 0 til parameter.type.length {
+						if type.types[parameter.type[j]] {
+							type.types[parameter.type[j]].methods.push(method.index)
+						}
+						else {
+							type.types[parameter.type[j]] = {
+								name: parameter.type[j]
+								path: `[\(method.index)].parameters[\(p)].type`
+								methods: [method.index]
+							}
+						}
+					}
+				}
+				else {
+					if type.types[parameter.type] {
+						type.types[parameter.type].methods.push(method.index)
+					}
+					else {
+						type.types[parameter.type] = {
+							name: parameter.type
+							path: `[\(method.index)].parameters[\(p)].type`
+							methods: [method.index]
+						}
+					}
+				}
+				
+				++index
+				++count
+			}
 		}
-		
-		return types
 	} // }}}
 	reflect(node, fragments, reflect) { // {{{
 		let classname = node._name

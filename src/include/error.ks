@@ -118,6 +118,9 @@ class SyntaxException extends Exception {
 		throwNoDefaultParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't have a default value`, node)
 		} // }}}
+		throwNotDifferentiableMethods(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Can't differentiate methods`, node)
+		} // }}}
 		throwNoRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't be a rest parameter`, node)
 		} // }}}

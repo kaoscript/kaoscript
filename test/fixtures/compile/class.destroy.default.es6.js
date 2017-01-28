@@ -1,3 +1,4 @@
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Greetings {
 		constructor() {
@@ -13,11 +14,20 @@ module.exports = function() {
 		__ks_cons_0() {
 			Greetings.prototype.__ks_cons.call(this, ["Hello!"]);
 		}
-		__ks_cons_1(message = null) {
+		__ks_cons_1(message) {
+			if(message === undefined || message === null) {
+				throw new Error("Missing parameter 'message'");
+			}
+			if(!Type.isString(message)) {
+				throw new Error("Invalid type for parameter 'message'");
+			}
 			this._message = message;
 		}
 		__ks_cons(args) {
-			if(args.length >= 0 && arguments.length <= 1) {
+			if(args.length === 0) {
+				Greetings.prototype.__ks_cons_0.apply(this);
+			}
+			else if(args.length === 1) {
 				Greetings.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
@@ -57,12 +67,12 @@ module.exports = function() {
 			},
 			{
 				access: 3,
-				min: 0,
+				min: 1,
 				max: 1,
 				parameters: [
 					{
-						type: "Any",
-						min: 0,
+						type: "String",
+						min: 1,
 						max: 1
 					}
 				]
