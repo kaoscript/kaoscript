@@ -31,18 +31,11 @@ export class Module {
 		}
 		
 		@directory = path.dirname(file)
-		@options = $attribute.apply(@data, @compiler._options.config)
+		@options = Attribute.configure(@data, @compiler._options.config, AttributeTarget::Global)
 		
 		for attr in @data.attributes {
 			if attr.declaration.kind == NodeKind::Identifier &&	attr.declaration.name == 'bin' {
 				@binary = true
-			}
-			else if attr.declaration.kind == NodeKind::AttributeExpression && attr.declaration.name.name == 'cfg' {
-				for arg in attr.declaration.arguments {
-					if arg.kind == NodeKind::AttributeOperator {
-						@options[arg.name.name] = arg.value.value
-					}
-				}
 			}
 		}
 		
@@ -261,20 +254,26 @@ export class Module {
 		
 		if !hasHelper || !hasType {
 			if hasHelper {
-				fragments.push($code('var ' + type + ' = require("' + $runtime.package(this) + '").Type;\n'))
+				fragments.push($code(`var \(type) = require("\(@options.runtime.type.package)").\(@options.runtime.type.member);\n`))
 			}
 			else if hasType {
-				fragments.push($code('var ' + helper + ' = require("' + $runtime.package(this) + '").Helper;\n'))
+				fragments.push($code(`var \(helper) = require("\(@options.runtime.helper.package)").\(@options.runtime.helper.member);\n`))
 			}
-			else if this._options.format.destructuring == 'es5' {
-				fragments.push($code(`var __ks__ = require("\($runtime.package(this))");\n`))
-				fragments.push($code(`var \(helper) = __ks__.Helper, \(type) = __ks__.Type;\n`))
+			else if @options.runtime.helper.package == @options.runtime.type.package {
+				if this._options.format.destructuring == 'es5' {
+					fragments.push($code(`var __ks__ = require("\(@options.runtime.helper.package)");\n`))
+					fragments.push($code(`var \(helper) = __ks__.\(@options.runtime.helper.member), \(type) = __ks__.\(@options.runtime.type.member);\n`))
+				}
+				else {
+					helper = `\(@options.runtime.helper.member): \(helper)` unless helper == @options.runtime.helper.member
+					type = `\(@options.runtime.type.member): \(type)` unless type == @options.runtime.type.member
+					
+					fragments.push($code(`var {\(helper), \(type)} = require("\(@options.runtime.helper.package)");\n`))
+				}
 			}
 			else {
-				helper = `Helper: \(helper)` unless helper == 'Helper'
-				type = `Type: \(type)` unless type == 'Type'
-				
-				fragments.push($code(`var {\(helper), \(type)} = require("\($runtime.package(this))");\n`))
+				fragments.push($code(`var \(helper) = require("\(@options.runtime.helper.package)").\(@options.runtime.helper.member);\n`))
+				fragments.push($code(`var \(type) = require("\(@options.runtime.type.package)").\(@options.runtime.type.member);\n`))
 			}
 		}
 		
@@ -643,7 +642,7 @@ class ModuleBlock extends AbstractNode {
 	}
 	constructor(data, @module) { // {{{
 		this._data = data
-		this._options = $attribute.apply(data, module._options)
+		this._options = module._options
 		this._scope = new Scope()
 	} // }}}
 	analyse() { // {{{

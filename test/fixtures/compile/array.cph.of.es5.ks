@@ -1,4 +1,4 @@
-#![cfg(format(functions='es5'))]
+#![format(functions='es5')]
 
 likes = {
 	leto: 'spice'

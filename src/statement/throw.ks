@@ -5,10 +5,8 @@ class ThrowStatement extends Statement {
 	analyse() { // {{{
 		@value = $compile.expression(@data.value, this)
 		
-		if @options.error == 'fatal' && (variable ?= $variable.fromAST(@data.value, this)) && variable.type && (variable ?= $variable.fromType(variable.type, this)) {
-			if !@parent.isConsumedError(variable.name.name, variable) {
-				SyntaxException.throwUnreportedError(variable.name.name, this)
-			}
+		if (variable ?= $variable.fromAST(@data.value, this)) && variable.type && (variable ?= $variable.fromType(variable.type, this)) {
+			Exception.validateReportedError(variable, this)
 		}
 	} // }}}
 	fuse() { // {{{

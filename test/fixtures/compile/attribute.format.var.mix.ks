@@ -1,4 +1,4 @@
-#![cfg(format(variables='es6'))]
+#![format(variables='es6')]
 
 extern console: {
 	log(...args)
@@ -14,7 +14,7 @@ if true {
 
 console.log(x)
 
-#[cfg(format(variables='es5'))]
+#[format(variables='es5')]
 if true {
 	let x = 24
 	console.log(x)

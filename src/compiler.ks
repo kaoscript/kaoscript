@@ -7,18 +7,8 @@
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-#![cfg(error='off')]
-/* 
 #![error(off)]
-#![error(ignore(Error))]
-#![error(ignore='Error')]
 
-#![error(ignore(NotImplementedException))]
-#![error(ignore='NotImplementedException')]
-
-#[cfg(format(classes='es5'))]
-#[cfg(format(classes(es5)))]
- */
 import {
 	*				from @kaoscript/ast
 	* as fs			from ./fs.js
@@ -141,93 +131,6 @@ const $typeofs = { // {{{
 	String: true
 } // }}}
 
-const $attribute = {
-	apply(data, options) { // {{{
-		let nc = true
-		
-		if data.attributes?.length > 0 {
-			for attr in data.attributes {
-				if attr.declaration.kind == NodeKind::AttributeExpression && attr.declaration.name.name == 'cfg' {
-					if nc {
-						options = Object.clone(options)
-						
-						nc = false
-					}
-					
-					$attribute.configure(attr.declaration, options)
-				}
-			}
-		}
-		
-		return options
-	} // }}}
-	cc(data, target) { // {{{
-		if data.kind == NodeKind::AttributeExpression {
-			if data.name.name == 'all' {
-				for arg in data.arguments when !$attribute.cc(arg, target) {
-					return false
-				}
-				
-				return true
-			}
-			else if data.name.name == 'any' {
-				for arg in data.arguments when $attribute.cc(arg, target) {
-					return true
-				}
-				
-				return false
-			}
-			else {
-				console.error(data)
-				$throw('Not Implemented')
-			}
-		}
-		else if data.kind == NodeKind::AttributeOperator {
-			if data.name.name == 'target_version' {
-				return target.version == data.value.value
-			}
-			else {
-				console.error(data)
-				$throw('Not Implemented')
-			}
-		}
-		else if data.kind == NodeKind::Identifier {
-			return target.name == data.name
-		}
-		else {
-			console.error(data)
-			$throw('Not Implemented')
-		}
-	} // }}}
-	conditionalCompilation(data, target) { // {{{
-		if data.attributes?.length > 0 {
-			for attr in data.attributes {
-				if attr.declaration.kind == NodeKind::AttributeExpression && attr.declaration.name.name == 'cc' {
-					if attr.declaration.arguments.length != 1 {
-						$throw(`Expected 1 argument for cc() at line \(data.start.line)`)
-					}
-					
-					return $attribute.cc(attr.declaration.arguments[0], target)
-				}
-			}
-		}
-		
-		return true
-	} // }}}
-	configure(attr, options) { // {{{
-		for arg in attr.arguments {
-			if arg.kind == NodeKind::AttributeExpression {
-				options[arg.name.name] ??= {}
-				
-				$attribute.configure(arg, options[arg.name.name])
-			}
-			else if arg.kind == NodeKind::AttributeOperator {
-				options[arg.name.name] = arg.value.value
-			}
-		}
-	} // }}}
-}
-
 func $block(data) { // {{{
 	return data if data.kind == NodeKind::Block
 	
@@ -276,15 +179,14 @@ func $identifier(name) { // {{{
 
 const $runtime = {
 	helper(node) { // {{{
-		return node._options.runtime.Helper
-	} // }}}
-	package(node) { // {{{
-		return node._options.runtime.package
+		node.module?().flag('Helper')
+		
+		return node._options.runtime.helper.alias
 	} // }}}
 	type(node) { // {{{
-		node.module().flag('Type') if node.module?
+		node.module?().flag('Type')
 		
-		return node._options.runtime.Type
+		return node._options.runtime.type.alias
 	} // }}}
 	typeof(type, node?) { // {{{
 		if node? {
@@ -1338,6 +1240,7 @@ abstract class AbstractNode {
 
 include {
 	./include/util
+	./include/attribute
 	./include/fragment
 	./include/scope
 	./include/module
@@ -1405,7 +1308,7 @@ const $compile = {
 		return expression
 	} // }}}
 	statement(data, parent) { // {{{
-		if $attribute.conditionalCompilation(data, parent.module()._compiler._target) {
+		if Attribute.conditional(data, parent.module()._compiler._target) {
 			let clazz = $statements[data.kind] ?? $statements.default
 			
 			return new clazz(data, parent)
@@ -1659,15 +1562,26 @@ export class Compiler {
 			register: true
 			config: {
 				header: true
-				error: 'fatal'
+				error: {
+					level: 'fatal'
+					ignore: []
+					raise: []
+				}
 				parse: {
 					parameters: 'kaoscript'
 				}
 				format: {}
 				runtime: {
-					Helper: 'Helper'
-					Type: 'Type'
-					package: '@kaoscript/runtime'
+					helper: {
+						alias: 'Helper'
+						member: 'Helper'
+						package: '@kaoscript/runtime'
+					}
+					type: {
+						alias: 'Type'
+						member: 'Type'
+						package: '@kaoscript/runtime'
+					}
 				}
 			}
 		}, options)

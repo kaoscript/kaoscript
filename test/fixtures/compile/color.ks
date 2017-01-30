@@ -1,4 +1,4 @@
-extern class Error
+extern sealed class Error
 
 import * from ./_array.ks
 import * from ./_float.ks
@@ -841,7 +841,7 @@ export class Color {
 		}
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	copy(target: Color): Color { // {{{
 		let s1 = this._space
 		let s2 = target._space
@@ -861,7 +861,7 @@ export class Color {
 		return target
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	distance(color: Color): float { // {{{
 		that = this.like(Space::SRGB)
 		color = color.like(Space::SRGB)
@@ -887,7 +887,7 @@ export class Color {
 		return $from(this, args)
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	gradient(endColor: Color, length: int): array<Color> { // {{{
 		let gradient: array<Color> = [this]
 		
@@ -917,7 +917,7 @@ export class Color {
 		return gradient
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	greyscale(model: string = 'BT709'): Color { // {{{
 		this.space(Space::SRGB)
 		
@@ -940,18 +940,18 @@ export class Color {
 		return this
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	hex(): string { // {{{
 		return $hex(this.like(Space::SRGB))
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	isBlack(): bool { // {{{
 		let that = this.like(Space::SRGB)
 		return that._red == 0 && that._green == 0 && that._blue == 0
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	isTransparent(): bool { // {{{
 		if this._alpha == 0 {
 			let that = this.like(Space::SRGB)
@@ -962,7 +962,7 @@ export class Color {
 		}
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	isWhite(): bool { // {{{
 		let that = this.like(Space::SRGB)
 		return that._red == 255 && that._green == 255 && that._blue == 255
@@ -974,7 +974,7 @@ export class Color {
 		return this if this._space == space || ?$spaces[this._space][space] else $convert(this, space)
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	luminance(): Number { // {{{
 		let that = this.like(Space::SRGB)
 	
@@ -988,7 +988,7 @@ export class Color {
 		return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	negative(): Color { // {{{
 		this.space(Space::SRGB)
 		
@@ -1021,7 +1021,7 @@ export class Color {
 		return [fn(this.clone()) for fn in functions]
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	shade(percentage: float): Color { // {{{
 		return this.blend($static.black, percentage)
 	} // }}}
@@ -1050,12 +1050,12 @@ export class Color {
 		return this
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	tint(percentage: float): Color { // {{{
 		return this.blend($static.white, percentage)
 	} // }}}
 	
-	#[cfg(error='off')]
+	#[error(off)]
 	tone(percentage: float): Color { // {{{
 		return this.blend($static.gray, percentage)
 	} // }}}

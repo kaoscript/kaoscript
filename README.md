@@ -487,7 +487,7 @@ func foo(name): String ~ Error {
 	return name
 }
 
-#[error='off']
+#[error(off)]
 func bar() {
 	validate('toto')
 }
@@ -497,7 +497,7 @@ Conditional Compilation
 -----------------------
 
 ```kaoscript
-#[cc(any(trident, all(safari, target_version='8')))]
+#[if(any(trident, safari-v8))]
 impl String {
 	startsWith(value: String): Boolean => this.length >= value.length && this.slice(0, value.length) == value
 }
@@ -506,13 +506,13 @@ impl String {
 Runtime
 -------
 
-Kaoscript needs a runtime to add dynamics functions on classes and to do type checking.
+Kaoscript needs a runtime to add dynamics functions on classes (`Helper`) and to do type checking (`Type`).
+
 The runtime is imported only when it's needed.
 
-The default runtime (`@kaoscript/runtime`) has only the bare minimum.
+It can be configured with global attributes like `#![runtime(package="yourpackage")]`.
 
-You can use your own runtime with a global attribute like `#![cfg(runtime(package="yourpackage"))]`.
-Or configure the name of the runtime's variables like `#![cfg(runtime(Type="YourType"))]`.
+The default runtime (`@kaoscript/runtime`) has only the bare minimum.
 
 Syntax Highlighting
 -------------------

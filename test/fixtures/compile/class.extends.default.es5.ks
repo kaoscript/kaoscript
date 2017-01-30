@@ -1,4 +1,4 @@
-#![cfg(format(classes='es5', functions='es5'))]
+#![format(classes='es5', functions='es5')]
 
 extern console
 

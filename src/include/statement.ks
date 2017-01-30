@@ -7,7 +7,7 @@ class Statement extends AbstractNode {
 		@data = data
 		@parent = parent
 		@scope = scope
-		@options = $attribute.apply(data, parent._options)
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
 	} // }}}
 	afterward(node) { // {{{
 		@afterwards.push(node)

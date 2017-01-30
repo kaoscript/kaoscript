@@ -31,7 +31,12 @@ var loadFile = function(module, filename) { // {{{
 			if(!(filename.length > root.length && filename.substr(0, root.length) === root) && fs.exists(path.join(root, 'node_modules', '@kaoscript', 'runtime'))) {
 				options.config = {
 					runtime: {
-						package: 'kaoscript/node_modules/@kaoscript/runtime'
+						helper: {
+							package: 'kaoscript/node_modules/@kaoscript/runtime'
+						},
+						type: {
+							package: 'kaoscript/node_modules/@kaoscript/runtime'
+						}
 					}
 				};
 			}
@@ -46,6 +51,7 @@ var loadFile = function(module, filename) { // {{{
 		}
 	}
 	catch(error) {
+		console.log(error)
 		if(!error.message.startsWith('/')) {
 			error.message = (error.filename || filename) + ': '+ error.message;
 		}

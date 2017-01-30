@@ -1,4 +1,4 @@
-#![cfg(format(destructuring='es5'))]
+#![format(destructuring='es5')]
 
 extern|require sealed class Array
 

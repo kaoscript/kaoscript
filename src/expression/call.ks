@@ -179,12 +179,10 @@ class CallExpression extends Expression {
 			@caller = $call.caller(@callee, this)
 		}
 		
-		if @options.error == 'fatal' && (variable ?= $call.variable(@data, this)) {
-			if variable.throws?.length > 0 {
-				for name in variable.throws {
-					if (error ?= @scope.getVariable(name)) && !@parent.isConsumedError(name, error) {
-						SyntaxException.throwUnreportedError(name, this)
-					}
+		if (variable ?= $call.variable(@data, this)) && variable.throws?.length > 0 {
+			for name in variable.throws {
+				if error ?= @scope.getVariable(name) {
+					Exception.validateReportedError(error, this)
 				}
 			}
 		}

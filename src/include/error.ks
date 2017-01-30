@@ -7,6 +7,41 @@ class Exception extends Error {
 		message: String
 	}
 	
+	static {
+		validateReportedError(variable, node) { // {{{
+			let options = node._options.error
+			
+			if options.level == 'fatal' {
+				if !node.parent().isConsumedError(variable.name.name, variable) {
+					if options.ignore.length != 0 {
+						let hierarchy = $class.hierarchy(variable, node)
+						let nf = true
+						
+						for name in hierarchy while nf {
+							if options.ignore:Array.contains(name) {
+								nf = false
+							}
+						}
+						
+						if nf {
+							SyntaxException.throwUnreportedError(variable.name.name, node)
+						}
+						else if options.raise.length != 0 {
+							for name in hierarchy {
+								if options.raise:Array.contains(name) {
+									SyntaxException.throwUnreportedError(variable.name.name, node)
+								}
+							}
+						}
+					}
+					else {
+						SyntaxException.throwUnreportedError(variable.name.name, node)
+					}
+				}
+			}
+		} // }}}
+	}
+	
 	constructor(@message, @fileName, @lineNumber) { // {{{
 		if !?this.stack {
 			@captureStackTrace()

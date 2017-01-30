@@ -1,4 +1,4 @@
-#![cfg(format(classes='es5', destructuring='es5', functions='es5'))]
+#![format(classes='es5', destructuring='es5', functions='es5')]
 
 class Shape {
 	private {

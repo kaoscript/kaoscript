@@ -1,6 +1,7 @@
 require("kaoscript/register");
 var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	var __ks_Error = {};
 	var {Array, __ks_Array} = require("./_array.ks")();
 	var Float = require("./_float.ks")().Float;
 	var Integer = require("./_integer.ks")().Integer;

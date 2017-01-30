@@ -343,6 +343,16 @@ const $class = {
 		
 		reflect.destructors++
 	} // }}}
+	hierarchy(variable, node, hierarchy = []) { // {{{
+		hierarchy.push(variable.name.name)
+		
+		if variable.extends? && (variable ?= node.scope().getVariable(variable.extends)) {
+			return $class.hierarchy(variable, node, hierarchy)
+		}
+		else {
+			return hierarchy
+		}
+	} // }}}
 	instanceMethod(node, fragments, statement, signature, parameters, reflect, name) { // {{{
 		if !(reflect.instanceMethods[name] is Array) {
 			reflect.instanceMethods[name] = []
