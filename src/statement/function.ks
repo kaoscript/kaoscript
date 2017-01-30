@@ -236,7 +236,7 @@ const $function = {
 					
 					ctrl.code('!')
 					
-					$type.check(node, ctrl, names[i], parameter._type)
+					$type.check(node, ctrl, node.scope().getRenamedVariable(names[i]), parameter._type)
 					
 					ctrl
 						.code(')')

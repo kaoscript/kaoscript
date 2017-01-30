@@ -55,24 +55,14 @@ class Attribute {
 				return null
 			}
 		} // }}}
-		/* register(class: Class) {
-			console.log(class.name)
-			let name = clazz.name.toLowerCase()
+		register(class: Class) { // {{{
+			let name = class.name.toLowerCase()
 			
 			if name.length > 9 && name.substr(-9) == 'attribute' {
 				name = name.substr(0, name.length - 9)
 			}
 			
-			$attributes[name] = clazz
-		} */
-		register(clazz) { // {{{
-			let name = clazz.name.toLowerCase()
-			
-			if name.length > 9 && name.substr(-9) == 'attribute' {
-				name = name.substr(0, name.length - 9)
-			}
-			
-			$attributes[name] = clazz
+			$attributes[name] = class
 		} // }}}
 	}
 }

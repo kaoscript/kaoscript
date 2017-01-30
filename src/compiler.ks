@@ -123,6 +123,7 @@ const $typeofs = { // {{{
 	Any: true
 	Array: true
 	Boolean: true
+	Class: true
 	Function: true
 	NaN: true
 	Number: true
