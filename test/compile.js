@@ -36,15 +36,14 @@ describe('compile', function() {
 			}
 			
 			if(error) {
-				expect(function() {
-					try {
-						compiler.compile().toSource();
-					}
-					catch(ex) {
-						ex.fileName = path.relative(__dirname, ex.fileName)
-						throw ex.toString();
-					}
-				}).to.throw(error);
+				try {
+					compiler.compile().toSource();
+				}
+				catch(ex) {
+					ex.fileName = path.relative(__dirname, ex.fileName);
+					
+					expect(ex.toString()).to.equal(error);
+				}
 			}
 			else {
 				var data = compiler.compile().toSource();

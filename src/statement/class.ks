@@ -71,11 +71,15 @@ const $class = {
 			
 			clazz.line('$name: ' + $quote(node._name))
 			
-			let ctrl
+			if node._data.version? {
+				clazz.line(`$version: [\(node._data.version.major), \(node._data.version.minor), \(node._data.version.patch)]`)
+			}
+			
 			if node._extends {
 				clazz.line('$extends: ', node._extendsName)
 			}
 			
+			let ctrl
 			if node._destructor? || !Object.isEmpty(node._classMethods) {
 				ctrl = clazz.newLine().code('$static: ').newObject()
 				
@@ -293,21 +297,7 @@ const $class = {
 			clazz.done()
 		}
 		
-		for name, field of node._classVariables when field.defaultValue? {
-			fragments
-				.newLine()
-				.code(`\(node._name).\(name) = `)
-				.compile(field.defaultValue)
-				.done()
-		}
-		
-		$helper.reflect(node, fragments, reflect)
-		
-		if references ?= node.module().listReferences(node._name) {
-			for ref in references {
-				fragments.line(ref)
-			}
-		}
+		return reflect
 	} // }}}
 	classMethod(node, fragments, statement, signature, parameters, reflect, name) { // {{{
 		if !(reflect.classMethods[name] is Array) {
@@ -417,6 +407,10 @@ const $class = {
 			let clazz = line.newObject()
 			
 			clazz.line('$name: ' + $quote(node._name))
+			
+			if node._data.version? {
+				clazz.line(`$version: [\(node._data.version.major), \(node._data.version.minor), \(node._data.version.patch)]`)
+			}
 			
 			if node._extends {
 				clazz.line('$extends: ', node._extendsName)
@@ -593,21 +587,7 @@ const $class = {
 			clazz.done()
 		}
 		
-		for name, field of node._classVariables when field.defaultValue? {
-			fragments
-				.newLine()
-				.code(`\(node._name).\(name) = `)
-				.compile(field.defaultValue)
-				.done()
-		}
-		
-		$helper.reflect(node, fragments, reflect)
-		
-		if references ?= node.module().listReferences(node._name) {
-			for ref in references {
-				fragments.line(ref)
-			}
-		}
+		return reflect
 	} // }}}
 }
 
@@ -1694,6 +1674,9 @@ class ClassDeclaration extends Statement {
 						
 						@variable.instanceVariables[member.name.name] = signature
 					}
+					else if member.name.name == 'name' || member.name.name == 'version' {
+						SyntaxException.throwReservedClassVariable(member.name.name, this)
+					}
 					else {
 						@classVariables[member.name.name] = variable
 						
@@ -1788,6 +1771,9 @@ class ClassDeclaration extends Statement {
 							}
 							
 							@scope = scope
+						}
+						else if member.name.name == 'name' || member.name.name == 'version' {
+							SyntaxException.throwReservedClassMethod(member.name.name, this)
 						}
 						else {
 							method.statement.instance(false)
@@ -2012,13 +1998,38 @@ class ClassDeclaration extends Statement {
 		return scope
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if @sealed {
-			$class.sealed(this, fragments)
-			
-			fragments.line('var ' + @variable.sealed.name + ' = {}')
+		let reflect = @sealed ? $class.sealed(this, fragments) : $class.continuous(this, fragments)
+		
+		for name, field of @classVariables when field.defaultValue? {
+			fragments
+				.newLine()
+				.code(`\(@name).\(name) = `)
+				.compile(field.defaultValue)
+				.done()
 		}
-		else {
-			$class.continuous(this, fragments)
+		
+		if !@es5 && @data.version? {
+			let line = fragments.newLine()
+			
+			line
+				.code(`Object.defineProperty(\(@name), 'version', `)
+				.newObject()
+				.line(`value: [\(@data.version.major), \(@data.version.minor), \(@data.version.patch)]`)
+				.done()
+			
+			line.code(')').done()
+		}
+		
+		$helper.reflect(this, fragments, reflect)
+		
+		if references ?= this.module().listReferences(@name) {
+			for ref in references {
+				fragments.line(ref)
+			}
+		}
+		
+		if @sealed {
+			fragments.line('var ' + @variable.sealed.name + ' = {}')
 		}
 	} // }}}
 }

@@ -177,6 +177,12 @@ class SyntaxException extends Exception {
 		throwOutOfClassAlias(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Alias "@\(name)" must be inside a class`, node)
 		} // }}}
+		throwReservedClassMethod(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Class method "\(name)" is reserved`, node)
+		} // }}}
+		throwReservedClassVariable(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Class variable "\(name)" is reserved`, node)
+		} // }}}
 		throwTooMuchRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Rest parameter has already been declared`, node)
 		} // }}}
