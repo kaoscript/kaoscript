@@ -1170,25 +1170,6 @@ const $variable = {
 	scope(node) { // {{{
 		return node._options.format.variables == 'es5' ? 'var ' : 'let '
 	} // }}}
-	value(variable, data) { // {{{
-		if variable.kind == VariableKind::Enum {
-			if variable.type == 'number' {
-				if data.value {
-					variable.counter = $toInt(data.value, variable.counter)
-				}
-				else {
-					++variable.counter
-				}
-				
-				return variable.counter
-			}
-			else if variable.type == 'string' {
-				return $quote(data.name.name.toLowerCase())
-			}
-		}
-		
-		return ''
-	} // }}}
 }
 
 abstract class AbstractNode {
@@ -1461,6 +1442,11 @@ const $statements = {
 const $polyadicOperators = {
 	`\(BinaryOperatorKind::Addition)`			: PolyadicOperatorAddition
 	`\(BinaryOperatorKind::And)`				: PolyadicOperatorAnd
+	`\(BinaryOperatorKind::BitwiseAnd)`			: PolyadicOperatorBitwiseAnd
+	`\(BinaryOperatorKind::BitwiseLeftShift)`	: PolyadicOperatorBitwiseLeftShift
+	`\(BinaryOperatorKind::BitwiseOr)`			: PolyadicOperatorBitwiseOr
+	`\(BinaryOperatorKind::BitwiseRightShift)`	: PolyadicOperatorBitwiseRightShift
+	`\(BinaryOperatorKind::BitwiseXor)`			: PolyadicOperatorBitwiseXor
 	`\(BinaryOperatorKind::Division)`			: PolyadicOperatorDivision
 	`\(BinaryOperatorKind::Equality)`			: PolyadicOperatorEquality
 	`\(BinaryOperatorKind::GreaterThan)`		: PolyadicOperatorGreaterThan

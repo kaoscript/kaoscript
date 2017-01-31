@@ -92,6 +92,101 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	} // }}}
 }
 
+class PolyadicOperatorBitwiseAnd extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('&', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
+		}
+	} // }}}
+}
+
+class PolyadicOperatorBitwiseLeftShift extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('<<', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
+		}
+	} // }}}
+}
+
+class PolyadicOperatorBitwiseOr extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('|', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
+		}
+	} // }}}
+}
+
+class PolyadicOperatorBitwiseRightShift extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('>>', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
+		}
+	} // }}}
+}
+
+class PolyadicOperatorBitwiseXor extends PolyadicOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		let nf = false
+		for operand in this._operands {
+			if nf {
+				fragments
+					.code($space)
+					.code('^', this._data.operator)
+					.code($space)
+			}
+			else {
+				nf = true
+			}
+			
+			fragments.wrap(operand)
+		}
+	} // }}}
+}
+
 class PolyadicOperatorDivision extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false

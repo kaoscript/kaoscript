@@ -392,7 +392,7 @@ module.exports = function() {
 		let g2 = that._green & 15;
 		let b2 = that._blue & 15;
 		if(that._alpha === 1) {
-			if((((r1 ^ r2) | (g1 ^ g2)) | (b1 ^ b2)) === 0) {
+			if(((r1 ^ r2) | (g1 ^ g2) | (b1 ^ b2)) === 0) {
 				return "#" + chars.charAt(r1) + chars.charAt(g1) + chars.charAt(b1);
 			}
 			return "#" + chars.charAt(r1) + chars.charAt(r2) + chars.charAt(g1) + chars.charAt(g2) + chars.charAt(b1) + chars.charAt(b2);
@@ -401,7 +401,7 @@ module.exports = function() {
 			let a = Math.round(that._alpha * 255);
 			let a1 = a >> 4;
 			let a2 = a & 15;
-			if(((((r1 ^ r2) | (g1 ^ g2)) | (b1 ^ b2)) | (a1 ^ a2)) === 0) {
+			if(((r1 ^ r2) | (g1 ^ g2) | (b1 ^ b2) | (a1 ^ a2)) === 0) {
 				return "#" + chars.charAt(r1) + chars.charAt(g1) + chars.charAt(b1) + chars.charAt(a1);
 			}
 			return "#" + chars.charAt(r1) + chars.charAt(r2) + chars.charAt(g1) + chars.charAt(g2) + chars.charAt(b1) + chars.charAt(b2) + chars.charAt(a1) + chars.charAt(a2);

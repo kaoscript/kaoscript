@@ -1,12 +1,13 @@
+#[Flags]
 enum AttributeTarget {
-	Class			= 1
-	Conditional		= 2
-	Constructor		= 4
-	Field			= 8
-	Global			= 16
-	Method			= 32
-	Property		= 64
-	Statement		= 128
+	Class			= 0
+	Conditional
+	Constructor
+	Field
+	Global
+	Method
+	Property
+	Statement
 }
 
 const $attributes = {}
