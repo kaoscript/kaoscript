@@ -1,10 +1,21 @@
 extern sealed class Error
 
+Error.prepareStackTrace = func(error: Error, stack: Array) { // {{{
+	let message = error.toString()
+	
+	for i from 0 til stack.length {
+		message += '\n    ' + stack[i].toString()
+	}
+	
+	return message
+} // }}}
+
 class Exception extends Error {
 	public {
 		fileName: String
 		lineNumber: Number
 		message: String
+		name: String
 	}
 	
 	static {
@@ -43,6 +54,8 @@ class Exception extends Error {
 	}
 	
 	constructor(@message, @fileName, @lineNumber) { // {{{
+		@name = this.constructor.name
+		
 		if !?this.stack {
 			@captureStackTrace()
 		}

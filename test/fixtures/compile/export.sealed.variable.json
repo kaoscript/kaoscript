@@ -7,7 +7,7 @@
       "new": true,
       "type": {
         "typeName": {
-          "kind": 40,
+          "kind": 41,
           "name": "Object"
         },
         "properties": {
@@ -16,7 +16,7 @@
             "name": "PI",
             "type": {
               "typeName": {
-                "kind": 40,
+                "kind": 41,
                 "name": "Number"
               }
             }
@@ -38,7 +38,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 40,
+                "kind": 41,
                 "name": "Number"
               }
             }

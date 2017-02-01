@@ -16,7 +16,7 @@
       "classMethods": {
         "vcurry": [
           {
-            "kind": 55,
+            "kind": 56,
             "name": "vcurry",
             "signature": {
               "access": 3,

@@ -7,7 +7,7 @@
       "new": true,
       "type": {
         "typeName": {
-          "kind": 40,
+          "kind": 41,
           "name": "Object"
         },
         "properties": {
@@ -60,7 +60,7 @@
       "instanceMethods": {
         "draw": [
           {
-            "kind": 55,
+            "kind": 56,
             "name": "draw",
             "signature": {
               "access": 3,
@@ -77,7 +77,7 @@
             },
             "type": {
               "typeName": {
-                "kind": 40,
+                "kind": 41,
                 "name": "string"
               }
             }

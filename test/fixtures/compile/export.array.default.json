@@ -12,7 +12,7 @@
       "instanceMethods": {
         "last": [
           {
-            "kind": 55,
+            "kind": 56,
             "name": "last",
             "signature": {
               "access": 3,
@@ -33,7 +33,7 @@
       "classMethods": {
         "map": [
           {
-            "kind": 55,
+            "kind": 56,
             "name": "map",
             "signature": {
               "access": 3,
@@ -55,7 +55,7 @@
             }
           },
           {
-            "kind": 55,
+            "kind": 56,
             "name": "map",
             "signature": {
               "access": 3,
