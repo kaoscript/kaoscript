@@ -1,4 +1,4 @@
-#[Flags]
+#[flags]
 enum AttributeTarget {
 	Class			= 0
 	Conditional

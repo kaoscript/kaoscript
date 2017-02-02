@@ -1,6 +1,6 @@
 extern console
 
-#[Flags]
+#[flags]
 enum AnimalFlags {
 	None
 	HasClaws

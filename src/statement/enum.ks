@@ -24,7 +24,7 @@ class EnumDeclaration extends Statement {
 		else if @data.attributes? {
 			let nf = true
 			for attr in @data.attributes while nf {
-				if attr.kind == NodeKind::AttributeDeclaration && attr.declaration.kind == NodeKind::Identifier && attr.declaration.name == 'Flags' {
+				if attr.kind == NodeKind::AttributeDeclaration && attr.declaration.kind == NodeKind::Identifier && attr.declaration.name == 'flags' {
 					nf = false
 					
 					@kind = EnumKind::Flags

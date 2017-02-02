@@ -4,52 +4,53 @@ class UnaryOperatorExpression extends Expression {
 		_right
 	}
 	analyse() { // {{{
-		this._argument = $compile.expression(this._data.argument, this)
+		@argument = $compile.expression(@data.argument, this)
 	} // }}}
 	fuse() { // {{{
-		this._argument.fuse()
+		@argument.fuse()
 	} // }}}
 }
 
 class UnaryOperatorBitwiseNot extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.code('~', this._data.operator)
-			.wrap(this._argument)
+			.code('~', @data.operator)
+			.wrap(@argument)
 	} // }}}
 }
 
 class UnaryOperatorDecrementPostfix extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.wrap(this._argument)
-			.code('--', this._data.operator)
+			.wrap(@argument)
+			.code('--', @data.operator)
 	} // }}}
 }
 
 class UnaryOperatorDecrementPrefix extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.code('--', this._data.operator)
-			.wrap(this._argument)
+			.code('--', @data.operator)
+			.wrap(@argument)
 	} // }}}
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
+	isComputed() => @argument.isNullable()
 	toFragments(fragments, mode) { // {{{
-		if this._argument.isNullable() {
+		if @argument.isNullable() {
 			fragments
-				.wrapNullable(this._argument)
+				.wrapNullable(@argument)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(',  this._data.operator)
-				.compile(this._argument)
-				.code(')',  this._data.operator)
+				.code($runtime.type(this) + '.isValue(',  @data.operator)
+				.compile(@argument)
+				.code(')',  @data.operator)
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isValue(',  this._data.operator)
-				.compile(this._argument)
-				.code(')',  this._data.operator)
+				.code($runtime.type(this) + '.isValue(',  @data.operator)
+				.compile(@argument)
+				.code(')',  @data.operator)
 		}
 	} // }}}
 }
@@ -57,31 +58,31 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 class UnaryOperatorIncrementPostfix extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.wrap(this._argument)
-			.code('++', this._data.operator)
+			.wrap(@argument)
+			.code('++', @data.operator)
 	} // }}}
 }
 
 class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.code('++', this._data.operator)
-			.wrap(this._argument)
+			.code('++', @data.operator)
+			.wrap(@argument)
 	} // }}}
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.code('!', this._data.operator)
-			.wrapBoolean(this._argument)
+			.code('!', @data.operator)
+			.wrapBoolean(@argument)
 	} // }}}
 }
 
 class UnaryOperatorNegative extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.code('-', this._data.operator)
-			.wrap(this._argument)
+			.code('-', @data.operator)
+			.wrap(@argument)
 	} // }}}
 }
