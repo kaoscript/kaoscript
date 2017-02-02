@@ -1,12 +1,15 @@
 class ForRangeStatement extends Statement {
 	private {
 		_body
+		_boundName
 		_by
-		_defineVariable	= false
+		_byName
+		_defineValue	= false
+		_from
 		_til
 		_to
 		_until
-		_variable
+		_value
 		_when
 		_while
 	}
@@ -14,104 +17,100 @@ class ForRangeStatement extends Statement {
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
-		
-		if !this._scope.hasVariable(data.variable.name) {
-			$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+		if !@scope.hasVariable(@data.value.name) {
+			$variable.define(this, @scope, @data.value.name, $variable.kind(@data.value.type), @data.value.type)
 			
-			this._defineVariable = true
+			@defineValue = true
 		}
 		
-		this._variable = $compile.expression(data.variable, this)
-		this._from = $compile.expression(data.from, this)
+		@value = $compile.expression(@data.value, this)
+		@from = $compile.expression(@data.from, this)
 		
-		this._to = $compile.expression(data.to, this)
-		this._boundName = this._scope.acquireTempName() if this._to.isComposite()
+		@to = $compile.expression(@data.to, this)
+		@boundName = @scope.acquireTempName() if @to.isComposite()
 		
-		if data.by {
-			this._by = $compile.expression(data.by, this)
+		if @data.by {
+			@by = $compile.expression(@data.by, this)
 			
-			this._byName = this._scope.acquireTempName() if this._by.isComposite()
+			@byName = @scope.acquireTempName() if @by.isComposite()
 		}
 		
-		if data.until {
-			this._until = $compile.expression(data.until, this)
+		if @data.until {
+			@until = $compile.expression(@data.until, this)
 		}
-		else if data.while {
-			this._while = $compile.expression(data.while, this)
-		}
-		
-		if data.when {
-			this._when = $compile.expression(data.when, this)
+		else if @data.while {
+			@while = $compile.expression(@data.while, this)
 		}
 		
-		this._body = $compile.expression($block(data.body), this)
+		if @data.when {
+			@when = $compile.expression(@data.when, this)
+		}
 		
-		this._scope.releaseTempName(this._boundName) if this._boundName?
-		this._scope.releaseTempName(this._byName) if this._byName?
+		@body = $compile.expression($block(@data.body), this)
+		
+		@scope.releaseTempName(@boundName) if @boundName?
+		@scope.releaseTempName(@byName) if @byName?
 	} // }}}
 	fuse() { // {{{
-		this._body.fuse()
+		@body.fuse()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		let data = this._data
-		
 		let ctrl = fragments.newControl().code('for(')
-		if data.declaration || this._defineVariable {
+		if @data.declaration || @defineValue {
 			ctrl.code($variable.scope(this))
 		}
-		ctrl.compile(this._variable).code($equals).compile(this._from)
+		ctrl.compile(@value).code($equals).compile(@from)
 		
-		if this._boundName? {
-			ctrl.code(this._boundName, $equals).compile(this._to)
+		if @boundName? {
+			ctrl.code(@boundName, $equals).compile(@to)
 		}
 		
-		if this._byName? {
-			ctrl.code($comma, this._byName, $equals).compile(this._by)
+		if @byName? {
+			ctrl.code($comma, @byName, $equals).compile(@by)
 		}
 		
 		ctrl.code('; ')
 		
-		if data.until {
-			ctrl.code('!(').compile(this._until).code(') && ')
+		if @data.until {
+			ctrl.code('!(').compile(@until).code(') && ')
 		}
-		else if data.while {
-			ctrl.compile(this._while).code(' && ')
+		else if @data.while {
+			ctrl.compile(@while).code(' && ')
 		}
 		
-		ctrl.compile(this._variable).code(' <= ').compile(this._boundName ?? this._to).code('; ')
+		ctrl.compile(@value).code(' <= ').compile(@boundName ?? @to).code('; ')
 		
-		if data.by {
-			if data.by.kind == NodeKind::NumericExpression {
-				if data.by.value == 1 {
-					ctrl.code('++').compile(this._variable)
+		if @data.by {
+			if @data.by.kind == NodeKind::NumericExpression {
+				if @data.by.value == 1 {
+					ctrl.code('++').compile(@value)
 				}
 				else {
-					ctrl.compile(this._variable).code(' += ').compile(this._by)
+					ctrl.compile(@value).code(' += ').compile(@by)
 				}
 			}
 			else {
-				ctrl.compile(this._variable).code(' += ').compile(this._byName ?? this._by)
+				ctrl.compile(@value).code(' += ').compile(@byName ?? @by)
 			}
 		}
 		else {
-			ctrl.code('++').compile(this._variable)
+			ctrl.code('++').compile(@value)
 		}
 		
 		ctrl.code(')').step()
 		
-		if data.when {
+		if @data.when {
 			ctrl
 				.newControl()
 				.code('if(')
-				.compileBoolean(this._when)
+				.compileBoolean(@when)
 				.code(')')
 				.step()
-				.compile(this._body)
+				.compile(@body)
 				.done()
 		}
 		else {
-			ctrl.compile(this._body)
+			ctrl.compile(@body)
 		}
 		
 		ctrl.done()

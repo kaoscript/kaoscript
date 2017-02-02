@@ -4,6 +4,6 @@ extern console: {
 
 heroes = ['leto', 'duncan', 'goku']
 
-for hero, index in heroes {
-	console.log('The hero at index %d is %s', index, hero)
+for :index in heroes {
+	console.log(index)
 }

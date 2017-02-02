@@ -12,33 +12,31 @@ class ArrayComprehensionForFrom extends Expression {
 		_from
 		_to
 		_variable
-		_body
+		_when
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
+		$variable.define(this, @scope, @data.loop.variable.name, VariableKind::Variable)
 		
-		$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
+		@variable = $compile.expression(@data.loop.variable, this)
 		
-		this._variable = $compile.expression(data.loop.variable, this)
+		@from = $compile.expression(@data.loop.from, this)
+		@to = $compile.expression(@data.loop.to ?? @data.loop.til, this)
+		@by = $compile.expression(@data.loop.by, this) if @data.loop.by?
 		
-		this._from = $compile.expression(data.loop.from, this)
-		this._to = $compile.expression(data.loop.to ?? data.loop.til, this)
-		this._by = $compile.expression(data.loop.by, this) if data.loop.by?
+		@body = $compile.statement($return(@data.body), this)
+		@body.analyse()
 		
-		this._body = $compile.statement($return(data.body), this)
-		this._body.analyse()
-		
-		if data.loop.when? {
-			this._when = $compile.statement($return(data.loop.when), this)
-			this._when.analyse()
+		if @data.loop.when? {
+			@when = $compile.statement($return(@data.loop.when), this)
+			@when.analyse()
 		}
 	} // }}}
 	fuse() { // {{{
-		this._body.fuse()
-		this._when.fuse() if this._when?
+		@body.fuse()
+		@when.fuse() if @when?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
@@ -47,37 +45,37 @@ class ArrayComprehensionForFrom extends Expression {
 		
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
-			.compile(this._from)
+			.compile(@from)
 			.code($comma)
-			.compile(this._to)
+			.compile(@to)
 		
-		if this._by == null {
+		if @by == null {
 			fragments.code(', 1')
 		}
 		else {
-			fragments.code($comma).compile(this._by)
+			fragments.code($comma).compile(@by)
 		}
 		
-		fragments.code($comma, this._data.loop.from?, $comma, this._data.loop.to?, $comma)
+		fragments.code($comma, @data.loop.from?, $comma, @data.loop.to?, $comma)
 		
 		fragments
 			.code(surround.beforeParameters)
-			.compile(this._variable)
+			.compile(@variable)
 			.code(surround.afterParameters)
 			.newBlock()
-			.compile(this._body)
+			.compile(@body)
 			.done()
 		
 		fragments.code(surround.footer)
 		
-		if this._when? {
+		if @when? {
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
-				.compile(this._variable)
+				.compile(@variable)
 				.code(surround.afterParameters)
 				.newBlock()
-				.compile(this._when)
+				.compile(@when)
 				.done()
 			
 			fragments.code(surround.footer)
@@ -90,44 +88,54 @@ class ArrayComprehensionForFrom extends Expression {
 class ArrayComprehensionForIn extends Expression {
 	private {
 		_body
+		_expression
 		_index
 		_value
-		_variable
+		_valueName
 		_when
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
+		@expression = $compile.expression(@data.loop.expression, this)
 		
-		if (variable ?= $variable.fromAST(data.loop.value, this)) && variable.type?.typeName?.name == 'Array' && variable.type.typeParameters?.length == 1 {
-			$variable.define(this, this._scope, data.loop.variable.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
+		if @data.loop.value? {
+			if (variable ?= $variable.fromAST(@data.loop.expression, this)) && variable.type?.typeName?.name == 'Array' && variable.type.typeParameters?.length == 1 {
+				$variable.define(this, @scope, @data.loop.value.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
+			}
+			else {
+				$variable.define(this, @scope, @data.loop.value.name, VariableKind::Variable)
+			}
+			
+			@value = $compile.expression(@data.loop.value, this)
 		}
 		else {
-			$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
+			@valueName = @scope.acquireTempName()
 		}
 		
-		$variable.define(this, this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
-		
-		this._variable = $compile.expression(data.loop.variable, this)
-		this._value = $compile.expression(data.loop.value, this)
-		this._index = $compile.expression(data.loop.index, this) if data.loop.index?
-		
-		this._body = $compile.statement($return(data.body), this)
-		this._body.analyse()
-		
-		if data.loop.when? {
-			this._when = $compile.statement($return(data.loop.when), this)
-			this._when.analyse()
+		if @data.loop.index? {
+			$variable.define(this, @scope, @data.loop.index.name, VariableKind::Variable)
+			
+			@index = $compile.expression(@data.loop.index, this)
 		}
+		
+		@body = $compile.statement($return(@data.body), this)
+		@body.analyse()
+		
+		if @data.loop.when? {
+			@when = $compile.statement($return(@data.loop.when), this)
+			@when.analyse()
+		}
+		
+		@scope.releaseTempName(@valueName) if @valueName?
 	} // }}}
 	fuse() { // {{{
-		this._variable.fuse()
-		this._value.fuse()
-		this._index.fuse() if this._index?
-		this._body.fuse()
-		this._when.fuse() if this._when?
+		@expression.fuse()
+		@value.fuse() if @value?
+		@index.fuse() if @index?
+		@body.fuse()
+		@when.fuse() if @when?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
@@ -136,35 +144,35 @@ class ArrayComprehensionForIn extends Expression {
 		
 		fragments
 			.code($runtime.helper(this), '.mapArray(')
-			.compile(this._value)
+			.compile(@expression)
 			.code(', ')
 		
 		fragments
 			.code(surround.beforeParameters)
-			.compile(this._variable)
+			.compile(@value ?? @valueName)
 		
-		fragments.code($comma).compile(this._index) if this._index?
+		fragments.code($comma).compile(@index) if @index?
 		
 		fragments
 			.code(surround.afterParameters)
 			.newBlock()
-			.compile(this._body)
+			.compile(@body)
 			.done()
 		
 		fragments.code(surround.footer)
 		
-		if this._when? {
+		if @when? {
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
-				.compile(this._variable)
+				.compile(@value ?? @valueName)
 			
-			fragments.code($comma).compile(this._index) if this._index?
+			fragments.code($comma).compile(@index) if @index?
 			
 			fragments
 				.code(surround.afterParameters)
 				.newBlock()
-				.compile(this._when)
+				.compile(@when)
 				.done()
 			
 			fragments.code(surround.footer)
@@ -177,38 +185,49 @@ class ArrayComprehensionForIn extends Expression {
 class ArrayComprehensionForOf extends Expression {
 	private {
 		_body
-		_index
+		_expression
+		_key
+		_keyName
 		_value
-		_variable
 		_when
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
+		@expression = $compile.expression(@data.loop.expression, this)
 		
-		$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
-		$variable.define(this, this._scope, data.loop.index.name, VariableKind::Variable) if data.loop.index?
-		
-		this._variable = $compile.expression(data.loop.variable, this)
-		this._value = $compile.expression(data.loop.value, this)
-		this._index = $compile.expression(data.loop.index, this) if data.loop.index?
-		
-		this._body = $compile.statement($return(data.body), this)
-		this._body.analyse()
-		
-		if data.loop.when? {
-			this._when = $compile.statement($return(data.loop.when), this)
-			this._when.analyse()
+		if @data.loop.key? {
+			$variable.define(this, @scope, @data.loop.key.name, VariableKind::Variable)
+			
+			@key = $compile.expression(@data.loop.key, this)
 		}
+		else {
+			@keyName = @scope.acquireTempName()
+		}
+		
+		if @data.loop.value? {
+			$variable.define(this, @scope, @data.loop.value.name, VariableKind::Variable)
+			
+			@value = $compile.expression(@data.loop.value, this)
+		}
+		
+		@body = $compile.statement($return(@data.body), this)
+		@body.analyse()
+		
+		if @data.loop.when? {
+			@when = $compile.statement($return(@data.loop.when), this)
+			@when.analyse()
+		}
+		
+		@scope.releaseTempName(@keyName) if @keyName?
 	} // }}}
 	fuse() { // {{{
-		this._variable.fuse()
-		this._value.fuse()
-		this._index.fuse() if this._index?
-		this._body.fuse()
-		this._when.fuse() if this._when?
+		@expression.fuse()
+		@key.fuse() if @key?
+		@value.fuse() if @value?
+		@body.fuse()
+		@when.fuse() if @when?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
@@ -217,35 +236,35 @@ class ArrayComprehensionForOf extends Expression {
 		
 		fragments
 			.code($runtime.helper(this), '.mapObject(')
-			.compile(this._value)
+			.compile(@expression)
 			.code(', ')
 		
 		fragments
 			.code(surround.beforeParameters)
-			.compile(this._variable)
+			.compile(@key ?? @keyName)
 		
-		fragments.code($comma).compile(this._index) if this._index?
+		fragments.code($comma).compile(@value) if @value?
 		
 		fragments
 			.code(surround.afterParameters)
 			.newBlock()
-			.compile(this._body)
+			.compile(@body)
 			.done()
 		
 		fragments.code(surround.footer)
 		
-		if this._when? {
+		if @when? {
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
-				.compile(this._variable)
+				.compile(@key ?? @keyName)
 			
-			fragments.code($comma).compile(this._index) if this._index?
+			fragments.code($comma).compile(@value) if @value?
 			
 			fragments
 				.code(surround.afterParameters)
 				.newBlock()
-				.compile(this._when)
+				.compile(@when)
 				.done()
 			
 			fragments.code(surround.footer)
@@ -261,37 +280,35 @@ class ArrayComprehensionForRange extends Expression {
 		_by
 		_from
 		_to
-		_variable
+		_value
 		_when
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
+		$variable.define(this, @scope, @data.loop.value.name, VariableKind::Variable)
 		
-		$variable.define(this, this._scope, data.loop.variable.name, VariableKind::Variable)
+		@value = $compile.expression(@data.loop.value, this)
+		@from = $compile.expression(@data.loop.from, this)
+		@to = $compile.expression(@data.loop.to, this)
+		@by = $compile.expression(@data.loop.by, this) if @data.loop.by?
 		
-		this._variable = $compile.expression(data.loop.variable, this)
-		this._from = $compile.expression(data.loop.from, this)
-		this._to = $compile.expression(data.loop.to, this)
-		this._by = $compile.expression(data.loop.by, this) if data.loop.by?
+		@body = $compile.statement($return(@data.body), this)
+		@body.analyse()
 		
-		this._body = $compile.statement($return(data.body), this)
-		this._body.analyse()
-		
-		if data.loop.when? {
-			this._when = $compile.statement($return(data.loop.when), this)
-			this._when.analyse()
+		if @data.loop.when? {
+			@when = $compile.statement($return(@data.loop.when), this)
+			@when.analyse()
 		}
 	} // }}}
 	fuse() { // {{{
-		this._variable.fuse()
-		this._from.fuse()
-		this._to.fuse()
-		this._by.fuse() if this._by?
-		this._body.fuse()
-		this._when.fuse() if this._when?
+		@value.fuse()
+		@from.fuse()
+		@to.fuse()
+		@by.fuse() if @by?
+		@body.fuse()
+		@when.fuse() if @when?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
@@ -300,12 +317,12 @@ class ArrayComprehensionForRange extends Expression {
 		
 		fragments
 			.code($runtime.helper(this), '.mapRange(')
-			.compile(this._from)
+			.compile(@from)
 			.code($comma)
-			.compile(this._to)
+			.compile(@to)
 		
-		if this._by? {
-			fragments.code(', ').compile(this._by)
+		if @by? {
+			fragments.code(', ').compile(@by)
 		}
 		else {
 			fragments.code(', 1')
@@ -314,22 +331,22 @@ class ArrayComprehensionForRange extends Expression {
 		fragments
 			.code($comma, 'true', $comma, 'true', $comma)
 			.code(surround.beforeParameters)
-			.compile(this._variable)
+			.compile(@value)
 			.code(surround.afterParameters)
 			.newBlock()
-			.compile(this._body)
+			.compile(@body)
 			.done()
 		
 		fragments.code(surround.footer)
 		
-		if this._when? {
+		if @when? {
 			fragments
 				.code($comma)
 				.code(surround.beforeParameters)
-				.compile(this._variable)
+				.compile(@value)
 				.code(surround.afterParameters)
 				.newBlock()
-				.compile(this._when)
+				.compile(@when)
 				.done()
 			
 			fragments.code(surround.footer)

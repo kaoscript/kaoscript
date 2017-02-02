@@ -1,12 +1,14 @@
 class ForOfStatement extends Statement {
 	private {
 		_body
-		_defineIndex	= false
-		_defineVariable	= false
-		_index
+		_defineKey		= false
+		_defineValue	= false
+		_expression
+		_expressionName
+		_key
+		_keyName
 		_until
 		_value
-		_variable
 		_when
 		_while
 	}
@@ -14,118 +16,128 @@ class ForOfStatement extends Statement {
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
+		@expression = $compile.expression(@data.expression, this)
 		
-		this._value = $compile.expression(data.value, this)
-		
-		if !this._scope.hasVariable(data.variable.name) {
-			$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+		if @expression.isEntangled() {
+			@expressionName = this.greatScope().acquireTempName()
 			
-			this._defineVariable = true
+			@scope.updateTempNames()
 		}
 		
-		this._variable = $compile.expression(data.variable, this)
-		
-		if data.index {
-			if data.index && (data.declaration || !this._scope.hasVariable(data.index.name)) {
-				$variable.define(this, this._scope, data.index.name, $variable.kind(data.index.type), data.index.type)
+		if @data.key? {
+			if @data.declaration || !@scope.hasVariable(@data.key.name) {
+				$variable.define(this, @scope, @data.key.name, $variable.kind(@data.key.type), @data.key.type)
 				
-				this._defineIndex = true
+				@defineKey = true
 			}
 			
-			this._index = $compile.expression(data.index, this)
+			@key = $compile.expression(@data.key, this)
+		}
+		else {
+			@keyName = @scope.acquireTempName()
 		}
 		
-		if this._value.isEntangled() {
-			this._valueName = this.greatScope().acquireTempName()
-			
-			this._scope.updateTempNames()
+		if @data.value? {
+			if @data.declaration || !@scope.hasVariable(@data.value.name) {
+				$variable.define(this, @scope, @data.value.name, $variable.kind(@data.value.type), @data.value.type)
+				
+				@defineValue = true
+			}
+		
+			@value = $compile.expression(@data.value, this)
 		}
 		
-		if data.until {
-			this._until = $compile.expression(data.until, this)
+		if @data.until {
+			@until = $compile.expression(@data.until, this)
 		}
-		else if data.while {
-			this._while = $compile.expression(data.while, this)
-		}
-		
-		if data.when {
-			this._when = $compile.expression(data.when, this)
+		else if @data.while {
+			@while = $compile.expression(@data.while, this)
 		}
 		
-		this._body = $compile.expression($block(data.body), this)
+		if @data.when {
+			@when = $compile.expression(@data.when, this)
+		}
 		
-		this.greatScope().releaseTempName(this._valueName) if this._valueName?
+		@body = $compile.expression($block(@data.body), this)
+		
+		this.greatScope().releaseTempName(@expressionName) if @expressionName?
+		@scope.releaseTempName(@keyName) if @keyName?
 	} // }}}
 	fuse() { // {{{
-		this._value.fuse()
-		this._body.fuse()
+		@expression.fuse()
+		@body.fuse()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		let data = this._data
-		
-		if this._valueName? {
+		if @expressionName? {
 			let line = fragments.newLine()
 			
-			if !this.greatScope().hasVariable(this._valueName) {
+			if !this.greatScope().hasVariable(@expressionName) {
 				line.code($variable.scope(this))
 				
-				$variable.define(this, this.greatScope(), this._valueName, VariableKind::Variable)
+				$variable.define(this, this.greatScope(), @expressionName, VariableKind::Variable)
 			}
 			
-			line.code(this._valueName, $equals).compile(this._value).done()
+			line.code(@expressionName, $equals).compile(@expression).done()
 		}
 		
 		let ctrl = fragments.newControl().code('for(')
 		
-		if data.declaration || this._defineVariable {
-			ctrl.code($variable.scope(this))
+		if @key? {
+			if @data.declaration || @defineKey {
+				ctrl.code($variable.scope(this))
+			}
+			
+			ctrl.compile(@key)
 		}
-		ctrl.compile(this._variable).code(' in ').compile(this._valueName ?? this._value).code(')').step()
+		else {
+			ctrl.code($variable.scope(this), @keyName)
+		}
 		
-		if data.index {
+		ctrl.code(' in ').compile(@expressionName ?? @expression).code(')').step()
+		
+		if @value? {
 			let line = ctrl.newLine()
 			
-			if data.declaration || this._defineIndex {
+			if @data.declaration || @defineValue {
 				line.code($variable.scope(this))
 			}
 			
-			line.compile(this._index).code($equals).compile(this._valueName ?? this._value).code('[').compile(this._variable).code(']').done()
+			line.compile(@value).code($equals).compile(@expressionName ?? @expression).code('[').compile(@key ?? @keyName).code(']').done()
 		}
 		
-		if data.until {
+		if @until? {
 			ctrl
 				.newControl()
 				.code('if(')
-				.compile(this._until)
+				.compile(@until)
 				.code(')')
 				.step()
 				.line('break')
 				.done()
 		}
-		else if data.while {
+		else if @while? {
 			ctrl
 				.newControl()
 				.code('if(!(')
-				.compile(this._while)
+				.compile(@while)
 				.code('))')
 				.step()
 				.line('break')
 				.done()
 		}
 		
-		if data.when {
+		if @when? {
 			ctrl
 				.newControl()
 				.code('if(')
-				.compileBoolean(this._when)
+				.compileBoolean(@when)
 				.code(')')
 				.step()
-				.compile(this._body)
+				.compile(@body)
 				.done()
 		}
 		else {
-			ctrl.compile(this._body)
+			ctrl.compile(@body)
 		}
 		
 		ctrl.done()
