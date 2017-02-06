@@ -10,7 +10,6 @@ const $predefined = { // {{{
 	NaN: true
 	Object: true
 	String: true
-	Type: true
 } // }}}
 
 class Literal extends Expression {
@@ -43,7 +42,7 @@ class IdentifierLiteral extends Literal {
 	constructor(data, parent, scope = parent.scope(), variable = true) { // {{{
 		super(data, parent, scope, data.name)
 		
-		if variable && $predefined[data.name] != true {
+		if variable && !($predefined[data.name] == true || $runtime.isDefined(data.name, parent)) {
 			if parent is MemberExpression {
 				if parent._data.object == data {
 					this._isVariable = true

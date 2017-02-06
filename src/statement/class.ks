@@ -51,7 +51,7 @@ const $class = {
 			abstractMethods: {}
 		}
 		
-		let noinit = Type.isEmptyObject(node._instanceVariables)
+		let noinit = KSType.isEmptyObject(node._instanceVariables)
 		
 		if !noinit {
 			noinit = true
@@ -388,7 +388,7 @@ const $class = {
 			abstractMethods: {}
 		}
 		
-		let noinit = Type.isEmptyObject(node._instanceVariables)
+		let noinit = KSType.isEmptyObject(node._instanceVariables)
 		
 		if !noinit {
 			noinit = true

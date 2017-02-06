@@ -8,6 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  **/
 #![error(off)]
+#![runtime(type(alias='KSType'))]
 
 import {
 	*				from @kaoscript/ast
@@ -183,6 +184,21 @@ const $runtime = {
 		node.module?().flag('Helper')
 		
 		return node._options.runtime.helper.alias
+	} // }}}
+	isDefined(name, node) { // {{{
+		if node._options.runtime.helper.alias == name {
+			node.module?().flag('Helper')
+			
+			return true
+		}
+		else if node._options.runtime.type.alias == name {
+			node.module?().flag('Type')
+			
+			return true
+		}
+		else {
+			return false
+		}
 	} // }}}
 	type(node) { // {{{
 		node.module?().flag('Type')
@@ -1241,15 +1257,15 @@ const $compile = {
 		
 		let clazz = $expressions[data.kind]
 		if clazz? {
-			expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+			expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 		}
 		else if data.kind == NodeKind::BinaryExpression {
 			if clazz ?= $binaryOperators[data.operator.kind] {
-				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+				expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
 			else if data.operator.kind == BinaryOperatorKind::Assignment {
 				if clazz = $assignmentOperators[data.operator.assignment] {
-					expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+					expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 				}
 				else {
 					throw new NotSupportedException(`Unexpected assignment operator \(data.operator.assignment)`, parent)
@@ -1261,7 +1277,7 @@ const $compile = {
 		}
 		else if data.kind == NodeKind::PolyadicExpression {
 			if clazz ?= $polyadicOperators[data.operator.kind] {
-				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+				expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
 			else {
 				throw new NotSupportedException(`Unexpected polyadic operator \(data.operator.kind)`, parent)
@@ -1269,7 +1285,7 @@ const $compile = {
 		}
 		else if data.kind == NodeKind::UnaryExpression {
 			if clazz ?= $unaryOperators[data.operator.kind] {
-				expression = Type.isConstructor(clazz) ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+				expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 			}
 			else {
 				throw new NotSupportedException(`Unexpected assignment operator \(data.operator.kind)`, parent)

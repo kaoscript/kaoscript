@@ -96,7 +96,7 @@ impl Array {
 		return this.indexOf(item, from) != -1
 	} // }}}
 	static from(item) { // {{{
-		if Type.isEnumerable(item) && !Type.isString(item) {
+		if KSType.isEnumerable(item) && !KSType.isString(item) {
 			return (item is array) ? item : Array.prototype.slice.call(item)
 		}
 		else {
