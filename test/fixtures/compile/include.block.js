@@ -9,13 +9,13 @@ module.exports = function() {
 			if(array === undefined || array === null) {
 				throw new Error("Missing parameter 'array'");
 			}
-			if(!Type.isArray(array)) {
+			else if(!Type.isArray(array)) {
 				throw new Error("Invalid type for parameter 'array'");
 			}
 			if(iterator === undefined || iterator === null) {
 				throw new Error("Missing parameter 'iterator'");
 			}
-			if(!Type.isFunction(iterator)) {
+			else if(!Type.isFunction(iterator)) {
 				throw new Error("Invalid type for parameter 'iterator'");
 			}
 			let results = [];
@@ -51,19 +51,19 @@ module.exports = function() {
 			if(array === undefined || array === null) {
 				throw new Error("Missing parameter 'array'");
 			}
-			if(!Type.isArray(array)) {
+			else if(!Type.isArray(array)) {
 				throw new Error("Invalid type for parameter 'array'");
 			}
 			if(iterator === undefined || iterator === null) {
 				throw new Error("Missing parameter 'iterator'");
 			}
-			if(!Type.isFunction(iterator)) {
+			else if(!Type.isFunction(iterator)) {
 				throw new Error("Invalid type for parameter 'iterator'");
 			}
 			if(condition === undefined || condition === null) {
 				throw new Error("Missing parameter 'condition'");
 			}
-			if(!Type.isFunction(condition)) {
+			else if(!Type.isFunction(condition)) {
 				throw new Error("Invalid type for parameter 'condition'");
 			}
 			let results = [];

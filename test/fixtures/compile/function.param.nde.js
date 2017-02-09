@@ -1,10 +1,7 @@
-module.exports = function(expect, Helper, Type) {
-	function foo(x) {
-		if(x === undefined) {
-			x = 42;
-		}
+module.exports = function(expect) {
+	function foo(x = null) {
 		return [x];
 	}
-	expect(foo()).to.eql([42]);
+	expect(foo()).to.eql([null]);
 	expect(foo(1)).to.eql([1]);
 }

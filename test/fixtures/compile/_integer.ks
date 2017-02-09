@@ -1,7 +1,7 @@
 extern parseInt
 
 export let Integer := {
-	parse(value?, radix?) {
+	parse(value = null, radix = null) {
 		return parseInt(value, radix)
 	}
 }

@@ -8,13 +8,13 @@ module.exports = function(Helper, Type) {
 			if(object === undefined || object === null) {
 				throw new Error("Missing parameter 'object'");
 			}
-			if(!Type.isObject(object)) {
+			else if(!Type.isObject(object)) {
 				throw new Error("Invalid type for parameter 'object'");
 			}
 			if(iterator === undefined || iterator === null) {
 				throw new Error("Missing parameter 'iterator'");
 			}
-			if(!Type.isFunction(iterator)) {
+			else if(!Type.isFunction(iterator)) {
 				throw new Error("Invalid type for parameter 'iterator'");
 			}
 			let results = [];
@@ -50,19 +50,19 @@ module.exports = function(Helper, Type) {
 			if(object === undefined || object === null) {
 				throw new Error("Missing parameter 'object'");
 			}
-			if(!Type.isObject(object)) {
+			else if(!Type.isObject(object)) {
 				throw new Error("Invalid type for parameter 'object'");
 			}
 			if(iterator === undefined || iterator === null) {
 				throw new Error("Missing parameter 'iterator'");
 			}
-			if(!Type.isFunction(iterator)) {
+			else if(!Type.isFunction(iterator)) {
 				throw new Error("Invalid type for parameter 'iterator'");
 			}
 			if(condition === undefined || condition === null) {
 				throw new Error("Missing parameter 'condition'");
 			}
-			if(!Type.isFunction(condition)) {
+			else if(!Type.isFunction(condition)) {
 				throw new Error("Invalid type for parameter 'condition'");
 			}
 			let results = [];

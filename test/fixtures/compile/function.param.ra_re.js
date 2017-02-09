@@ -1,4 +1,4 @@
-module.exports = function(expect, Helper, Type) {
+module.exports = function(expect) {
 	function foo() {
 		if(arguments.length < 1) {
 			throw new Error("Wrong number of arguments");

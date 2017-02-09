@@ -14,13 +14,13 @@ module.exports = function() {
 		if(fg === undefined || fg === null) {
 			throw new Error("Missing parameter 'fg'");
 		}
-		if(!Type.is(fg, ANSIColor)) {
+		else if(!Type.is(fg, ANSIColor)) {
 			throw new Error("Invalid type for parameter 'fg'");
 		}
 		if(bg === undefined || bg === null) {
 			throw new Error("Missing parameter 'bg'");
 		}
-		if(!Type.is(bg, ANSIColor)) {
+		else if(!Type.is(bg, ANSIColor)) {
 			throw new Error("Invalid type for parameter 'bg'");
 		}
 		let fg_code;

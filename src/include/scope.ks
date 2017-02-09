@@ -138,7 +138,7 @@ class Scope extends AbstractScope {
 			this._tempNextIndex = parent._tempNextIndex
 		}
 	} // }}}
-	acquireTempName(statement: Statement?) { // {{{
+	acquireTempName(statement: Statement = null) { // {{{
 		if name ?= this._scopeParent?.acquireTempNameFromKid() {
 			this._tempParentNames[name] = true
 			
@@ -234,7 +234,7 @@ class Scope extends AbstractScope {
 }
 
 class XScope extends AbstractScope {
-	acquireTempName(statement: Statement?) { // {{{
+	acquireTempName(statement: Statement = null) { // {{{
 		return this._parent.acquireTempName(statement)
 	} // }}}
 	getRenamedVariable(name) { // {{{

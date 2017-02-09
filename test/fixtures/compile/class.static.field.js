@@ -11,7 +11,7 @@ module.exports = function() {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
 			}
-			if(!Type.isString(name)) {
+			else if(!Type.isString(name)) {
 				throw new Error("Invalid type for parameter 'name'");
 			}
 			this.name = name;

@@ -165,19 +165,19 @@ module.exports = function() {
 		if(x === undefined || x === null) {
 			throw new Error("Missing parameter 'x'");
 		}
-		if(!Type.isNumber(x)) {
+		else if(!Type.isNumber(x)) {
 			throw new Error("Invalid type for parameter 'x'");
 		}
 		if(y === undefined || y === null) {
 			throw new Error("Missing parameter 'y'");
 		}
-		if(!Type.isNumber(y)) {
+		else if(!Type.isNumber(y)) {
 			throw new Error("Invalid type for parameter 'y'");
 		}
 		if(percentage === undefined || percentage === null) {
 			throw new Error("Missing parameter 'percentage'");
 		}
-		if(!Type.isNumber(percentage)) {
+		else if(!Type.isNumber(percentage)) {
 			throw new Error("Invalid type for parameter 'percentage'");
 		}
 		return ((1 - percentage) * x) + (percentage * y);
@@ -186,7 +186,7 @@ module.exports = function() {
 		if(last === undefined || last === null) {
 			throw new Error("Missing parameter 'last'");
 		}
-		if(!Type.isFunction(last)) {
+		else if(!Type.isFunction(last)) {
 			throw new Error("Invalid type for parameter 'last'");
 		}
 		if(components === undefined || components === null) {
@@ -195,7 +195,7 @@ module.exports = function() {
 		if(first === undefined || first === null) {
 			throw new Error("Missing parameter 'first'");
 		}
-		if(!Type.isFunction(first)) {
+		else if(!Type.isFunction(first)) {
 			throw new Error("Invalid type for parameter 'first'");
 		}
 		let that = first.apply(null, firstArgs);
@@ -233,13 +233,13 @@ module.exports = function() {
 		if(name === undefined || name === null) {
 			throw new Error("Missing parameter 'name'");
 		}
-		if(!Type.isString(name)) {
+		else if(!Type.isString(name)) {
 			throw new Error("Invalid type for parameter 'name'");
 		}
 		if(space === undefined || space === null) {
 			throw new Error("Missing parameter 'space'");
 		}
-		if(!Type.isString(space)) {
+		else if(!Type.isString(space)) {
 			throw new Error("Invalid type for parameter 'space'");
 		}
 		component.field = "_" + name;
@@ -297,13 +297,13 @@ module.exports = function() {
 		if(from === undefined || from === null) {
 			throw new Error("Missing parameter 'from'");
 		}
-		if(!Type.isString(from)) {
+		else if(!Type.isString(from)) {
 			throw new Error("Invalid type for parameter 'from'");
 		}
 		if(to === undefined || to === null) {
 			throw new Error("Missing parameter 'to'");
 		}
-		if(!Type.isString(to)) {
+		else if(!Type.isString(to)) {
 			throw new Error("Invalid type for parameter 'to'");
 		}
 		for(let name in $spaces[from].converters) {
@@ -317,13 +317,13 @@ module.exports = function() {
 		if(that === undefined || that === null) {
 			throw new Error("Missing parameter 'that'");
 		}
-		if(!Type.is(that, Color)) {
+		else if(!Type.is(that, Color)) {
 			throw new Error("Invalid type for parameter 'that'");
 		}
 		if(args === undefined || args === null) {
 			throw new Error("Missing parameter 'args'");
 		}
-		if(!Type.isArray(args)) {
+		else if(!Type.isArray(args)) {
 			throw new Error("Invalid type for parameter 'args'");
 		}
 		that._dummy = false;
@@ -381,7 +381,7 @@ module.exports = function() {
 		if(that === undefined || that === null) {
 			throw new Error("Missing parameter 'that'");
 		}
-		if(!Type.is(that, Color)) {
+		else if(!Type.is(that, Color)) {
 			throw new Error("Invalid type for parameter 'that'");
 		}
 		let chars = "0123456789abcdef";
@@ -412,13 +412,13 @@ module.exports = function() {
 			if(that === undefined || that === null) {
 				throw new Error("Missing parameter 'that'");
 			}
-			if(!Type.is(that, Color)) {
+			else if(!Type.is(that, Color)) {
 				throw new Error("Invalid type for parameter 'that'");
 			}
 			if(args === undefined || args === null) {
 				throw new Error("Missing parameter 'args'");
 			}
-			if(!Type.isArray(args)) {
+			else if(!Type.isArray(args)) {
 				throw new Error("Invalid type for parameter 'args'");
 			}
 			if(args.length === 1) {
@@ -563,13 +563,13 @@ module.exports = function() {
 			if(that === undefined || that === null) {
 				throw new Error("Missing parameter 'that'");
 			}
-			if(!Type.is(that, Color)) {
+			else if(!Type.is(that, Color)) {
 				throw new Error("Invalid type for parameter 'that'");
 			}
 			if(args === undefined || args === null) {
 				throw new Error("Missing parameter 'args'");
 			}
-			if(!Type.isArray(args)) {
+			else if(!Type.isArray(args)) {
 				throw new Error("Invalid type for parameter 'args'");
 			}
 			if(args.length === 1) {
@@ -612,7 +612,7 @@ module.exports = function() {
 		if(value === undefined || value === null) {
 			throw new Error("Missing parameter 'value'");
 		}
-		if(!(Type.isNumber(value) || Type.isString(value))) {
+		else if(!(Type.isNumber(value) || Type.isString(value))) {
 			throw new Error("Invalid type for parameter 'value'");
 		}
 		if(Type.isValue($components[name].spaces[this._space])) {
@@ -650,7 +650,7 @@ module.exports = function() {
 		if(value === undefined || value === null) {
 			throw new Error("Missing parameter 'value'");
 		}
-		if(!(Type.isNumber(value) || Type.isString(value))) {
+		else if(!(Type.isNumber(value) || Type.isString(value))) {
 			throw new Error("Invalid type for parameter 'value'");
 		}
 		if(Type.isValue($components[name].spaces[this._space])) {
@@ -674,7 +674,7 @@ module.exports = function() {
 		if(name === undefined || name === null) {
 			throw new Error("Missing parameter 'name'");
 		}
-		if(!Type.isString(name)) {
+		else if(!Type.isString(name)) {
 			throw new Error("Invalid type for parameter 'name'");
 		}
 		$spaces[name] = Type.isValue($spaces[name]) ? $spaces[name] : {
@@ -716,7 +716,7 @@ module.exports = function() {
 			if(value === undefined || value === null) {
 				throw new Error("Missing parameter 'value'");
 			}
-			if(!(Type.isString(value) || Type.isNumber(value))) {
+			else if(!(Type.isString(value) || Type.isNumber(value))) {
 				throw new Error("Invalid type for parameter 'value'");
 			}
 			this._alpha = $caster.alpha(value);
@@ -806,7 +806,7 @@ module.exports = function() {
 			if(value === undefined || value === null) {
 				throw new Error("Missing parameter 'value'");
 			}
-			if(!(Type.isString(value) || Type.isNumber(value))) {
+			else if(!(Type.isString(value) || Type.isNumber(value))) {
 				throw new Error("Invalid type for parameter 'value'");
 			}
 			if(Type.isString(value) && value.endsWith("%")) {
@@ -835,7 +835,7 @@ module.exports = function() {
 			if(color === undefined || color === null) {
 				throw new Error("Missing parameter 'color'");
 			}
-			if(!Type.is(color, Color)) {
+			else if(!Type.is(color, Color)) {
 				throw new Error("Invalid type for parameter 'color'");
 			}
 			let a = this._alpha;
@@ -881,7 +881,7 @@ module.exports = function() {
 			if(target === undefined || target === null) {
 				throw new Error("Missing parameter 'target'");
 			}
-			if(!Type.is(target, Color)) {
+			else if(!Type.is(target, Color)) {
 				throw new Error("Invalid type for parameter 'target'");
 			}
 			let s1 = this._space;
@@ -907,7 +907,7 @@ module.exports = function() {
 			if(color === undefined || color === null) {
 				throw new Error("Missing parameter 'color'");
 			}
-			if(!Type.is(color, Color)) {
+			else if(!Type.is(color, Color)) {
 				throw new Error("Invalid type for parameter 'color'");
 			}
 			let that = this.like(Space.SRGB);
@@ -924,7 +924,7 @@ module.exports = function() {
 			if(color === undefined || color === null) {
 				throw new Error("Missing parameter 'color'");
 			}
-			if(!Type.is(color, Color)) {
+			else if(!Type.is(color, Color)) {
 				throw new Error("Invalid type for parameter 'color'");
 			}
 			return this.hex() === color.hex();
@@ -939,7 +939,7 @@ module.exports = function() {
 			if(format === undefined || format === null) {
 				format = this._space;
 			}
-			if(!Type.isString(format)) {
+			else if(!Type.isString(format)) {
 				throw new Error("Invalid type for parameter 'format'");
 			}
 			if(Type.isValue($formatters[format]) ? (format = $formatters[format], true) : false) {
@@ -965,13 +965,13 @@ module.exports = function() {
 			if(endColor === undefined || endColor === null) {
 				throw new Error("Missing parameter 'endColor'");
 			}
-			if(!Type.is(endColor, Color)) {
+			else if(!Type.is(endColor, Color)) {
 				throw new Error("Invalid type for parameter 'endColor'");
 			}
 			if(length === undefined || length === null) {
 				throw new Error("Missing parameter 'length'");
 			}
-			if(!Type.isNumber(length)) {
+			else if(!Type.isNumber(length)) {
 				throw new Error("Invalid type for parameter 'length'");
 			}
 			let gradient = [this];
@@ -1004,7 +1004,7 @@ module.exports = function() {
 			if(model === undefined || model === null) {
 				model = "BT709";
 			}
-			if(!Type.isString(model)) {
+			else if(!Type.isString(model)) {
 				throw new Error("Invalid type for parameter 'model'");
 			}
 			this.space(Space.SRGB);
@@ -1079,7 +1079,7 @@ module.exports = function() {
 			if(space === undefined || space === null) {
 				throw new Error("Missing parameter 'space'");
 			}
-			if(!Type.isString(space)) {
+			else if(!Type.isString(space)) {
 				throw new Error("Invalid type for parameter 'space'");
 			}
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
@@ -1124,7 +1124,7 @@ module.exports = function() {
 			if(value === undefined || value === null) {
 				throw new Error("Missing parameter 'value'");
 			}
-			if(!(Type.isString(value) || Type.isNumber(value))) {
+			else if(!(Type.isString(value) || Type.isNumber(value))) {
 				throw new Error("Invalid type for parameter 'value'");
 			}
 			if(Type.isString(value) && value.endsWith("%")) {
@@ -1177,7 +1177,7 @@ module.exports = function() {
 			if(functions === undefined || functions === null) {
 				throw new Error("Missing parameter 'functions'");
 			}
-			if(!Type.isArray(functions, Function)) {
+			else if(!Type.isArray(functions, Function)) {
 				throw new Error("Invalid type for parameter 'functions'");
 			}
 			return Helper.mapArray(functions, (fn) => {
@@ -1194,7 +1194,7 @@ module.exports = function() {
 			if(percentage === undefined || percentage === null) {
 				throw new Error("Missing parameter 'percentage'");
 			}
-			if(!Type.isNumber(percentage)) {
+			else if(!Type.isNumber(percentage)) {
 				throw new Error("Invalid type for parameter 'percentage'");
 			}
 			return this.blend($static.black, percentage);
@@ -1212,7 +1212,7 @@ module.exports = function() {
 			if(space === undefined || space === null) {
 				throw new Error("Missing parameter 'space'");
 			}
-			if(!Type.isString(space)) {
+			else if(!Type.isString(space)) {
 				throw new Error("Invalid type for parameter 'space'");
 			}
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
@@ -1245,7 +1245,7 @@ module.exports = function() {
 			if(percentage === undefined || percentage === null) {
 				throw new Error("Missing parameter 'percentage'");
 			}
-			if(!Type.isNumber(percentage)) {
+			else if(!Type.isNumber(percentage)) {
 				throw new Error("Invalid type for parameter 'percentage'");
 			}
 			return this.blend($static.white, percentage);
@@ -1260,7 +1260,7 @@ module.exports = function() {
 			if(percentage === undefined || percentage === null) {
 				throw new Error("Missing parameter 'percentage'");
 			}
-			if(!Type.isNumber(percentage)) {
+			else if(!Type.isNumber(percentage)) {
 				throw new Error("Invalid type for parameter 'percentage'");
 			}
 			return this.blend($static.gray, percentage);
@@ -1310,13 +1310,13 @@ module.exports = function() {
 			if(format === undefined || format === null) {
 				throw new Error("Missing parameter 'format'");
 			}
-			if(!Type.isString(format)) {
+			else if(!Type.isString(format)) {
 				throw new Error("Invalid type for parameter 'format'");
 			}
 			if(formatter === undefined || formatter === null) {
 				throw new Error("Missing parameter 'formatter'");
 			}
-			if(!Type.isFunction(formatter)) {
+			else if(!Type.isFunction(formatter)) {
 				throw new Error("Invalid type for parameter 'formatter'");
 			}
 			$formatters[format] = {
@@ -1333,13 +1333,13 @@ module.exports = function() {
 			if(format === undefined || format === null) {
 				throw new Error("Missing parameter 'format'");
 			}
-			if(!Type.isString(format)) {
+			else if(!Type.isString(format)) {
 				throw new Error("Invalid type for parameter 'format'");
 			}
 			if(parser === undefined || parser === null) {
 				throw new Error("Missing parameter 'parser'");
 			}
-			if(!Type.isFunction(parser)) {
+			else if(!Type.isFunction(parser)) {
 				throw new Error("Invalid type for parameter 'parser'");
 			}
 			$parsers[format] = parser;
@@ -1354,7 +1354,7 @@ module.exports = function() {
 			if(space === undefined || space === null) {
 				throw new Error("Missing parameter 'space'");
 			}
-			if(!Type.isObject(space)) {
+			else if(!Type.isObject(space)) {
 				throw new Error("Invalid type for parameter 'space'");
 			}
 			let spaces = Object.keys($spaces);
@@ -2138,7 +2138,7 @@ module.exports = function() {
 				if(that === undefined || that === null) {
 					throw new Error("Missing parameter 'that'");
 				}
-				if(!Type.is(that, Color)) {
+				else if(!Type.is(that, Color)) {
 					throw new Error("Invalid type for parameter 'that'");
 				}
 				return $hex(that);
@@ -2147,7 +2147,7 @@ module.exports = function() {
 				if(that === undefined || that === null) {
 					throw new Error("Missing parameter 'that'");
 				}
-				if(!Type.is(that, Color)) {
+				else if(!Type.is(that, Color)) {
 					throw new Error("Invalid type for parameter 'that'");
 				}
 				if(that._alpha === 1) {

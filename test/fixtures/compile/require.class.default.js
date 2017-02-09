@@ -21,7 +21,7 @@ module.exports = function(Color, __ks_Color, Space) {
 			if(luma === undefined || luma === null) {
 				throw new Error("Missing parameter 'luma'");
 			}
-			if(!Type.isNumber(luma)) {
+			else if(!Type.isNumber(luma)) {
 				throw new Error("Invalid type for parameter 'luma'");
 			}
 			return this;

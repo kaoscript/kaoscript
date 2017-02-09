@@ -15,7 +15,7 @@ class LetterBox {
 	
 	build_02() => this._messages.map((message, foo = 42, bar) => this.format(message))
 	
-	build_03() => this._messages.map((message, foo?, bar) => this.format(message))
+	build_03() => this._messages.map((message, foo = null, bar) => this.format(message))
 	
 	build_04() => this._messages.map((message, ...foo, bar) => this.format(message))
 	

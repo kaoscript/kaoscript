@@ -1,4 +1,4 @@
-require expect: func, Helper, Type
+require expect: func
 
 func foo(x = null) {
 	return [x]

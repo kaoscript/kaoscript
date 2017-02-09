@@ -615,7 +615,7 @@ const $field = {
 }
 
 const $helper = {
-	analyseType(type?, node) { // {{{
+	analyseType(type = null, node) { // {{{
 		if !?type {
 			return {
 				kind: HelperTypeKind::Native
@@ -673,7 +673,7 @@ const $helper = {
 	constructor(node, fragments, reflect) { // {{{
 		let extend = false
 		if node._extends {
-			extend = func(node, fragments, ctrl?) {
+			extend = func(node, fragments, ctrl = null) {
 				let constructorName = node._extendsVariable.sealed?.extern ? 'constructor' : '__ks_cons'
 				
 				if ctrl? {
@@ -1247,7 +1247,7 @@ const $helper = {
 		
 		line.done()
 	} // }}}
-	reflectMethod(node, fragments, signature, parameters, path?) { // {{{
+	reflectMethod(node, fragments, signature, parameters, path = null) { // {{{
 		let object = fragments.newObject()
 		
 		object.newLine().code('access: ' + signature.access)
@@ -1264,7 +1264,7 @@ const $helper = {
 		
 		object.done()
 	} // }}}
-	reflectParameter(node, fragments, signature, type, path?) { // {{{
+	reflectParameter(node, fragments, signature, type, path = null) { // {{{
 		let object = fragments.newObject()
 		
 		object.newLine().code('type: ' + $helper.type(type, node, path))
@@ -1273,7 +1273,7 @@ const $helper = {
 		
 		object.done()
 	} // }}}
-	reflectVariable(node, fragments, name, signature, type?, path?) { // {{{
+	reflectVariable(node, fragments, name, signature, type = null, path = null) { // {{{
 		let object = fragments.code(name, ': ').newObject()
 		
 		object.line('access: ' + signature.access)
@@ -1284,7 +1284,7 @@ const $helper = {
 		
 		object.done()
 	} // }}}
-	type(type, node, path?) { // {{{
+	type(type, node, path = null) { // {{{
 		if type is Array {
 			let src = ''
 			
@@ -1374,7 +1374,7 @@ const $method = {
 				
 				last = {
 					type: type,
-					min: (parameter.defaultValue || parameter.type?.nullable) ? 0 : 1,
+					min: parameter.defaultValue? ? 0 : 1,
 					max: 1
 				}
 				
@@ -1414,7 +1414,7 @@ const $method = {
 				}
 				
 				if nf {
-					if !(parameter.defaultValue || parameter.type?.nullable) {
+					if !?parameter.defaultValue {
 						++last.min
 					}
 					

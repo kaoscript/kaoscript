@@ -1,4 +1,4 @@
-func $return(data?) { // {{{
+func $return(data = null) { // {{{
 	return {
 		kind: NodeKind::ReturnStatement
 		value: data

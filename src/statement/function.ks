@@ -101,7 +101,6 @@ const $function = {
 	parametersKS(node, fragments, fn) { // {{{
 		let data = node._data
 		let signature = $function.signature(data, node)
-		//console.log(signature)
 		
 		let parameter, ctrl
 		let maxb = 0
@@ -115,7 +114,7 @@ const $function = {
 		let rest = -1
 		for parameter, i in signature.parameters {
 			if rest != -1 {
-				if parameter.min {
+				if parameter.min != 0 {
 					ra += parameter.min
 				}
 				
@@ -159,7 +158,7 @@ const $function = {
 				names.push(parameter._name)
 			}
 			
-			if !ra && rest != -1 && (signature.parameters[rest].type == 'Any' || !maxa) && node._options.format.parameters == 'es6' {
+			if ra == 0 && rest != -1 && (signature.parameters[rest].type == 'Any' || !maxa) && node._options.format.parameters == 'es6' {
 				parameter = node._parameters[rest]
 				
 				if rest {
@@ -172,7 +171,7 @@ const $function = {
 				
 				names.push(parameter._name)
 			}
-			else if signature.async && !ra {
+			else if signature.async && ra == 0 {
 				if l {
 					fragments.code(', ')
 				}
@@ -182,7 +181,7 @@ const $function = {
 			
 			fragments = fn(fragments)
 			
-			if ra {
+			if ra > 0 {
 				fragments
 					.newControl()
 					.code('if(arguments.length < ', signature.min, ')')
@@ -191,59 +190,73 @@ const $function = {
 					.done()
 			}
 			
+			let ni
 			for parameter, i in node._parameters while i < l {
-				if !parameter._anonymous && (node._options.format.parameters == 'es5' || (node._options.format.parameters == 'es6' && !parameter._nullable) || parameter._defaultValue != null) {
-					ctrl = fragments
-						.newControl()
-						.code('if(').compile(parameter).code(' === undefined')
-					
-					if !parameter._nullable {
-						ctrl.code(' || ').compile(parameter).code(' === null')
-					}
-					
-					ctrl.code(')').step()
-					
-					if parameter._defaultValue != null {
-						ctrl
-							.newLine()
-							.compile(parameter)
-							.code($equals)
-							.compile(parameter._defaultValue)
-							.done()
-					}
-					else if parameter._nullable {
-						ctrl
-							.newLine()
-							.compile(parameter)
-							.code($equals, 'null')
-							.done()
+				if !parameter._anonymous {
+					if parameter._defaultValue? {
+						if !parameter._hasDefaultValueDeclaration {
+							ctrl = fragments
+								.newControl()
+								.code('if(').compile(parameter).code(' === undefined')
+							
+							if !parameter._nullable {
+								ctrl.code(' || ').compile(parameter).code(' === null')
+							}
+							
+							ctrl.code(')').step()
+							
+							ctrl
+								.newLine()
+								.compile(parameter)
+								.code($equals)
+								.compile(parameter._defaultValue)
+								.done()
+							
+							ctrl.done()
+							
+							ni = false
+						}
+						else {
+							ni = true
+						}
 					}
 					else {
-						ctrl.line('throw new Error("Missing parameter \'', parameter._name, '\'")')
+						ctrl = fragments
+							.newControl()
+							.code('if(').compile(parameter).code(' === undefined')
+						
+						if !parameter._nullable {
+							ctrl.code(' || ').compile(parameter).code(' === null')
+						}
+						
+						ctrl.code(')')
+							.step()
+							.line('throw new Error("Missing parameter \'', parameter._name, '\'")')
+							.done()
+						
+						ni = false
 					}
 					
-					ctrl.done()
-				}
-				
-				if !$type.isAny(parameter._type) {
-					ctrl = fragments
-						.newControl()
-						.code('if(')
-					
-					if parameter._nullable {
-						ctrl.code(names[i], ' !== null && ')
+					if !$type.isAny(parameter._type) {
+						ctrl = fragments
+							.newControl()
+							.code(ni ? 'if(' : 'else if(')
+						
+						if parameter._nullable {
+							ctrl.code(names[i], ' !== null && ')
+						}
+						
+						ctrl.code('!')
+						
+						$type.check(node, ctrl, node.scope().getRenamedVariable(names[i]), parameter._type)
+						
+						ctrl
+							.code(')')
+							.step()
+							.line('throw new Error("Invalid type for parameter \'', parameter._name, '\'")')
+						
+						ctrl.done()
 					}
-					
-					ctrl.code('!')
-					
-					$type.check(node, ctrl, node.scope().getRenamedVariable(names[i]), parameter._type)
-					
-					ctrl
-						.code(')')
-						.step()
-						.line('throw new Error("Invalid type for parameter \'', parameter._name, '\'")')
-					
-					ctrl.done()
 				}
 			}
 			
@@ -775,7 +788,7 @@ const $function = {
 	signatureParameter(parameter, scope) { // {{{
 		let signature = {
 			type: $signature.type(parameter.type, scope),
-			min: parameter.defaultValue || (parameter.type && parameter.type.nullable) ? 0 : 1,
+			min: parameter.defaultValue? ? 0 : 1,
 			max: 1
 		}
 		
@@ -1019,12 +1032,13 @@ class FunctionDeclaration extends Statement {
 
 class Parameter extends AbstractNode {
 	private {
-		_anonymous		= false
-		_defaultValue	= null
-		_name			= null
-		_nullable		= false
-		_type			= null
-		_variable		= null
+		_anonymous						= false
+		_defaultValue					= null
+		_hasDefaultValueDeclaration		= false
+		_name							= null
+		_nullable						= false
+		_type							= null
+		_variable						= null
 	}
 	analyse() { // {{{
 		if @parent.isMethod() {
@@ -1094,12 +1108,18 @@ class Parameter extends AbstractNode {
 			@anonymous = true
 		}
 		
-		if @data.defaultValue? {
-			@defaultValue = $compile.expression(@data.defaultValue, @parent)
-		}
-		
 		@name = @variable._value
 		@nullable = @type?.nullable
+		
+		if @data.defaultValue? {
+			@defaultValue = $compile.expression(@data.defaultValue, @parent)
+			
+			if !@nullable && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+				@nullable = true
+			}
+			
+			@hasDefaultValueDeclaration = @options.format.parameters == 'es6' && @nullable
+		}
 	} // }}}
 	fuse() {// {{{
 		if @defaultValue != null {
@@ -1112,6 +1132,13 @@ class Parameter extends AbstractNode {
 	toParameterFragments(fragments) { // {{{
 		fragments.compile(@variable)
 		
-		fragments.code(' = null') if @nullable && !?@data.defaultValue && @options.format.parameters == 'es6'
+		if @hasDefaultValueDeclaration {
+			if @defaultValue? {
+				fragments.code($equals).compile(@defaultValue)
+			}
+			else {
+				fragments.code(' = null')
+			}
+		}
 	} // }}}
 }

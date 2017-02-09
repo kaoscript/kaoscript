@@ -39,7 +39,7 @@ const $nodeModules = { // {{{
 } // }}}
 
 const $import = {
-	addVariable(module, file?, node, name, variable, data) { // {{{
+	addVariable(module, file = null, node, name, variable, data) { // {{{
 		if variable.requirement? && data.references? {
 			let nf = true
 			for reference in data.references while nf {
@@ -55,7 +55,7 @@ const $import = {
 		
 		module.import(name, file)
 	} // }}}
-	define(module, file?, node, name, kind, type?) { // {{{
+	define(module, file = null, node, name, kind, type = null) { // {{{
 		$variable.define(node, node.scope(), name, kind, type)
 		
 		module.import(name.name || name, file)
@@ -67,7 +67,7 @@ const $import = {
 		
 		return null
 	}, // }}}
-	loadDirectory(x, moduleName?, module, data, node) { // {{{
+	loadDirectory(x, moduleName = null, module, data, node) { // {{{
 		let pkgfile = path.join(x, 'package.json')
 		if fs.isFile(pkgfile) {
 			let pkg
@@ -87,7 +87,7 @@ const $import = {
 		
 		return $import.loadFile(path.join(x, 'index'), moduleName, module, data, node)
 	} // }}}
-	loadFile(x, moduleName?, module, data, node) { // {{{
+	loadFile(x, moduleName = null, module, data, node) { // {{{
 		if fs.isFile(x) {
 			if x.endsWith($extensions.source) {
 				return $import.loadKSFile(x, moduleName, module, data, node)
@@ -110,7 +110,7 @@ const $import = {
 		
 		return null
 	} // }}}
-	loadKSFile(x, moduleName?, module, data, node) { // {{{
+	loadKSFile(x, moduleName = null, module, data, node) { // {{{
 		moduleName ??= module.path(x, data.module)
 		
 		let metadata, name, alias, variable, hashes
@@ -244,7 +244,7 @@ const $import = {
 			importAlias: importAlias
 		}
 	} // }}}
-	loadNodeFile(x?, moduleName?, module, data, node) { // {{{
+	loadNodeFile(x = null, moduleName = null, module, data, node) { // {{{
 		let file = null
 		if !moduleName {
 			file = moduleName = module.path(x, data.module)

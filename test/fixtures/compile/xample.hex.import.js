@@ -7,7 +7,7 @@ module.exports = function() {
 		if(n === undefined || n === null) {
 			throw new Error("Missing parameter 'n'");
 		}
-		if(!(Type.isString(n) || Type.isNumber(n))) {
+		else if(!(Type.isString(n) || Type.isNumber(n))) {
 			throw new Error("Invalid type for parameter 'n'");
 		}
 		return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 255));

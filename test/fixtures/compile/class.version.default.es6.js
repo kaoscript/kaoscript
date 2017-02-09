@@ -16,7 +16,7 @@ module.exports = function() {
 			if(color === undefined || color === null) {
 				color = "black";
 			}
-			if(!Type.isString(color)) {
+			else if(!Type.isString(color)) {
 				throw new Error("Invalid type for parameter 'color'");
 			}
 			this._color = color;

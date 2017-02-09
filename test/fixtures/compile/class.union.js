@@ -18,7 +18,7 @@ module.exports = function() {
 			if(message === undefined || message === null) {
 				throw new Error("Missing parameter 'message'");
 			}
-			if(!Type.isString(message)) {
+			else if(!Type.isString(message)) {
 				throw new Error("Invalid type for parameter 'message'");
 			}
 			this._message = message;
@@ -38,7 +38,7 @@ module.exports = function() {
 			if(name === undefined || name === null) {
 				throw new Error("Missing parameter 'name'");
 			}
-			if(!(Type.isString(name) || Type.isNumber(name))) {
+			else if(!(Type.isString(name) || Type.isNumber(name))) {
 				throw new Error("Invalid type for parameter 'name'");
 			}
 			return this._message + "\nIt's nice to meet you, " + name + ".";
@@ -47,7 +47,7 @@ module.exports = function() {
 			if(person === undefined || person === null) {
 				throw new Error("Missing parameter 'person'");
 			}
-			if(!Type.is(person, Person)) {
+			else if(!Type.is(person, Person)) {
 				throw new Error("Invalid type for parameter 'person'");
 			}
 			this.greet(person.name());

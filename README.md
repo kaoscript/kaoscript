@@ -1,5 +1,5 @@
 [kaoscript](https://github.com/kaoscript/kaoscript)
-=================================================================
+===================================================
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 ![Dependencies](https://img.shields.io/david/kaoscript/kaoscript.svg)
@@ -148,7 +148,7 @@ import * from ./_number.ks
 
 extern console, parseFoat
 
-func alpha(n?, percentage = false): float {
+func alpha(n: Number, percentage = false): float {
 	let i: Number = parseFoat(n)
 	
 	return 1 if i is NaN else (percentage ? i / 100 : i).limit(0, 1).round(3)
@@ -263,7 +263,7 @@ extern console: {
 
 class Shape {
 	private {
-		_color: string
+		_color: String
 	}
 	
     constructor(@color)
@@ -276,7 +276,7 @@ class Shape {
 	color() => @color
 	color(@color) => this
     
-    draw(): string {
+    draw(): String {
         return `I'm drawing with a \(@color) pen.`
     }
 }
@@ -294,7 +294,7 @@ console.log(r.draw())
 
 
 impl Shape {
-	draw(shape): string {
+	draw(shape): String {
 		return `I'm drawing a \(@color) \(shape).`
 	}
 }
@@ -309,14 +309,13 @@ console.log(s.draw('circle'))
 // I'm drawing a red circle.
 ```
 
-Override core class
--------------------
+Override native class
+---------------------
 
 ```kaoscript
 extern console, isNaN
 
-extern sealed class Number {
-}
+extern sealed class Number
 // 'sealed' avoid to directly extends the class Number
 
 impl Number {
@@ -350,13 +349,13 @@ console.log(j.mod(2))
 // javascript code: console.log(__ks_Number._im_mod(j, 2))
 ```
 
-Abstract Class
+Abstract class
 --------------
 
 ```kaoscript
 abstract class AbstractGreetings {
 	private {
-		_message: string = ''
+		_message: String: '' 
 	}
 	
 	constructor() {
@@ -379,7 +378,7 @@ Parameters
 ```kaoscript
 require expect: func
 
-func foo(u?, v, x, y?, z?) {
+func foo(u = null, v, x, y = null, z = null) {
 	return [u, v, x, y, z]
 }
 
@@ -395,6 +394,19 @@ expect(foo(1, 2, 3, 4)).to.eql([1, 2, 3, 4, null])
 
 expect(foo(1, 2, 3, 4, 5)).to.eql([1, 2, 3, 4, 5])
 ```
+
+|                              | Required | Nullable | Typed | Default Value |
+| ---------------------------- | -------- | -------- | ----- | ------------- |
+| `foo(x)`                     | YES      |          |       |               |
+| `foo(x?)`                    | YES      | YES      |       |               |
+| `foo(x = null)`              |          | YES      |       | YES           |
+| `foo(x = 'foobar')`          |          |          |       | YES           |
+| `foo(x: String)`             | YES      |          | YES   |               |
+| `foo(x: String?)`            | YES      | YES      | YES   |               |
+| `foo(x: String = null)`      |          | YES      | YES   | YES           |
+| `foo(x: String = 'foobar')`  |          |          | YES   | YES           |
+| `foo(x: String? = null)`     |          | YES      | YES   | YES           |
+| `foo(x: String? = 'foobar')` |          | YES      | YES   | YES           |
 
 Enum
 ----
@@ -415,7 +427,7 @@ console.log(color)
 ```
 
 ```kaoscript
-enum CardSuit<string> {
+enum CardSuit<String> {
 	Clubs
 	Diamonds
 	Hearts
@@ -544,7 +556,6 @@ Todo
 - double dot (Dart)
 - boolean conditions
 - macro
-- full support of attributes
 - coverage
 
 License

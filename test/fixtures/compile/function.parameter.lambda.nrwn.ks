@@ -1,0 +1,1 @@
+let foo = (x = null, y) => [x, y]

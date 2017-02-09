@@ -4,7 +4,7 @@ module.exports = function() {
 		if(message === undefined || message === null) {
 			throw new Error("Missing parameter 'message'");
 		}
-		if(!Type.isString(message)) {
+		else if(!Type.isString(message)) {
 			throw new Error("Invalid type for parameter 'message'");
 		}
 		return message.toUpperCase();
@@ -20,7 +20,7 @@ module.exports = function() {
 			if(messages === undefined || messages === null) {
 				throw new Error("Missing parameter 'messages'");
 			}
-			if(!Type.isArray(messages)) {
+			else if(!Type.isArray(messages)) {
 				throw new Error("Invalid type for parameter 'messages'");
 			}
 			this._messages = messages;
@@ -137,7 +137,7 @@ module.exports = function() {
 			if(message === undefined || message === null) {
 				throw new Error("Missing parameter 'message'");
 			}
-			if(!Type.isString(message)) {
+			else if(!Type.isString(message)) {
 				throw new Error("Invalid type for parameter 'message'");
 			}
 			return message.toUpperCase();

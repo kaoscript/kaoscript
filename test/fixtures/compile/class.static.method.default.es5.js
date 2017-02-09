@@ -8,7 +8,7 @@ module.exports = function() {
 				if(color === undefined || color === null) {
 					throw new Error("Missing parameter 'color'");
 				}
-				if(!Type.isString(color)) {
+				else if(!Type.isString(color)) {
 					throw new Error("Invalid type for parameter 'color'");
 				}
 				return new Shape("circle", color);
@@ -23,7 +23,7 @@ module.exports = function() {
 				if(color === undefined || color === null) {
 					throw new Error("Missing parameter 'color'");
 				}
-				if(!Type.isString(color)) {
+				else if(!Type.isString(color)) {
 					throw new Error("Invalid type for parameter 'color'");
 				}
 				return new Shape("rectangle", color);
@@ -50,13 +50,13 @@ module.exports = function() {
 			if(type === undefined || type === null) {
 				throw new Error("Missing parameter 'type'");
 			}
-			if(!Type.isString(type)) {
+			else if(!Type.isString(type)) {
 				throw new Error("Invalid type for parameter 'type'");
 			}
 			if(color === undefined || color === null) {
 				throw new Error("Missing parameter 'color'");
 			}
-			if(!Type.isString(color)) {
+			else if(!Type.isString(color)) {
 				throw new Error("Invalid type for parameter 'color'");
 			}
 			this._type = type;

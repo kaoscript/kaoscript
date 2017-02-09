@@ -1,5 +1,5 @@
 let foo = {
-	bar(name: string?) {
+	bar(name: string = null) {
 		n = 0
 	}
 }

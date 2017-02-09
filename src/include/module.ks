@@ -134,7 +134,7 @@ export class Module {
 	hasInclude(path) { // {{{
 		return this._includes?[path]
 	} // }}}
-	import(name, file?) { // {{{
+	import(name, file = null) { // {{{
 		this._imports[name] = true
 		
 		if file && file.slice(-$extensions.source.length).toLowerCase() == $extensions.source {
@@ -176,7 +176,7 @@ export class Module {
 		}
 	} // }}}
 	parse(data, file) => parse(data)
-	path(x?, name) { // {{{
+	path(x = null, name) { // {{{
 		if !?x || !?this._output {
 			return name
 		}
@@ -199,7 +199,7 @@ export class Module {
 		
 		return output
 	} // }}}
-	require(variable, kind, data?) { // {{{
+	require(variable, kind, data = null) { // {{{
 		if this._binary {
 			SyntaxException.throwNotBinary('require', this)
 		}

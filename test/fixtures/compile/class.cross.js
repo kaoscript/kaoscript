@@ -19,7 +19,7 @@ module.exports = function() {
 			if(bar === undefined || bar === null) {
 				throw new Error("Missing parameter 'bar'");
 			}
-			if(!Type.is(bar, Bar)) {
+			else if(!Type.is(bar, Bar)) {
 				throw new Error("Invalid type for parameter 'bar'");
 			}
 			this._bar = bar;
@@ -89,7 +89,7 @@ module.exports = function() {
 			if(foo === undefined || foo === null) {
 				throw new Error("Missing parameter 'foo'");
 			}
-			if(!Type.is(foo, Foo)) {
+			else if(!Type.is(foo, Foo)) {
 				throw new Error("Invalid type for parameter 'foo'");
 			}
 			this._foo = foo;

@@ -1,4 +1,4 @@
-func $clone(value?) { // {{{
+func $clone(value = null) { // {{{
 	if value == null {
 		return null
 	}

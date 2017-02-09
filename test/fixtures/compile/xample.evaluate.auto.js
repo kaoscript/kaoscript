@@ -29,7 +29,7 @@ module.exports = function() {
 			if(value === undefined || value === null) {
 				throw new Error("Missing parameter 'value'");
 			}
-			if(!Type.isString(value)) {
+			else if(!Type.isString(value)) {
 				throw new Error("Invalid type for parameter 'value'");
 			}
 			return (this.length >= value.length) && (this.slice(0, value.length) === value);

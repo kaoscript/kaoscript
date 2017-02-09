@@ -1,2 +1,2 @@
-func foo(bar?, qux?) {
+func foo(bar = null, qux = null) {
 }

@@ -12,7 +12,7 @@ module.exports = function() {
 			if(color === undefined || color === null) {
 				throw new Error("Missing parameter 'color'");
 			}
-			if(!Type.isString(color)) {
+			else if(!Type.isString(color)) {
 				throw new Error("Invalid type for parameter 'color'");
 			}
 			this._color = color;

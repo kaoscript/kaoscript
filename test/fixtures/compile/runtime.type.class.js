@@ -4,7 +4,7 @@ module.exports = function() {
 		if(__ks_class_1 === undefined || __ks_class_1 === null) {
 			throw new Error("Missing parameter 'class'");
 		}
-		if(!Type.isClass(__ks_class_1)) {
+		else if(!Type.isClass(__ks_class_1)) {
 			throw new Error("Invalid type for parameter 'class'");
 		}
 		console.log(__ks_class_1);

@@ -1,9 +1,9 @@
 require expect: func
 
-func foo(x: any? = 42) {
+func foo(x = null) {
 	return [x]
 }
 
-expect(foo()).to.eql([42])
+expect(foo()).to.eql([null])
 
 expect(foo(1)).to.eql([1])

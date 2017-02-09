@@ -1,9 +1,10 @@
-module.exports = function(expect, Helper, Type) {
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function(expect) {
 	function foo(x) {
 		if(x === undefined || x === null) {
 			throw new Error("Missing parameter 'x'");
 		}
-		if(!Type.isNumber(x)) {
+		else if(!Type.isNumber(x)) {
 			throw new Error("Invalid type for parameter 'x'");
 		}
 		return [x];

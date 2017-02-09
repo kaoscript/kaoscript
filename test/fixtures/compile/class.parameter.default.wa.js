@@ -17,7 +17,7 @@ module.exports = function() {
 			if(message === undefined || message === null) {
 				throw new Error("Missing parameter 'message'");
 			}
-			if(!Type.isString(message)) {
+			else if(!Type.isString(message)) {
 				throw new Error("Invalid type for parameter 'message'");
 			}
 			this._message = message;
@@ -26,7 +26,7 @@ module.exports = function() {
 			if(number === undefined || number === null) {
 				throw new Error("Missing parameter 'number'");
 			}
-			if(!Type.isNumber(number)) {
+			else if(!Type.isNumber(number)) {
 				throw new Error("Invalid type for parameter 'number'");
 			}
 			Greetings.prototype.__ks_cons.call(this, [number]);

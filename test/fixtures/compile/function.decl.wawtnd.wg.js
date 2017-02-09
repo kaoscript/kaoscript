@@ -4,7 +4,7 @@ module.exports = function() {
 		if(bar === undefined || bar === null) {
 			throw new Error("Missing parameter 'bar'");
 		}
-		if(!Type.isArray(bar, String)) {
+		else if(!Type.isArray(bar, String)) {
 			throw new Error("Invalid type for parameter 'bar'");
 		}
 	}

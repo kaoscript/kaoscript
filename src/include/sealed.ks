@@ -11,7 +11,7 @@ const $sealed = {
 			return $sealed.filter(variable, data.property.name, data, node)
 		}
 	} // }}}
-	filter(variable?, name, data, node, instance = false) { // {{{
+	filter(variable = null, name, data, node, instance = false) { // {{{
 		if variable? {
 			if variable.kind == VariableKind::Class {
 				if variable.sealed? {

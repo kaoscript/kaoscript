@@ -23,7 +23,7 @@ module.exports = function() {
 			if(number === undefined || number === null) {
 				throw new Error("Missing parameter 'number'");
 			}
-			if(!Type.isNumber(number)) {
+			else if(!Type.isNumber(number)) {
 				throw new Error("Invalid type for parameter 'number'");
 			}
 			Greetings.prototype.__ks_cons.call(this, [number]);

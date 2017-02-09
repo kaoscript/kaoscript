@@ -18,7 +18,7 @@ module.exports = function() {
 			if(message === undefined || message === null) {
 				throw new Error("Missing parameter 'message'");
 			}
-			if(!Type.isString(message)) {
+			else if(!Type.isString(message)) {
 				throw new Error("Invalid type for parameter 'message'");
 			}
 			this._message = message;

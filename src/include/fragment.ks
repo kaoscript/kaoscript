@@ -34,7 +34,7 @@ func $indent(indent) { // {{{
 	return $indentations[indent] ?? ($indentations[indent] = $code('\t'.repeat(indent)))
 } // }}}
 
-func $locationDataToString(location?) { // {{{
+func $locationDataToString(location = null) { // {{{
 	if location? {
 		return `\(location.first_line + 1):\(location.first_column + 1)-\(location.last_line + 1):\(location.last_column + 1)`
 	}

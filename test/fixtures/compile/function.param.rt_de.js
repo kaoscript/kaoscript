@@ -1,4 +1,5 @@
-module.exports = function(expect, Helper, Type) {
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function(expect) {
 	function foo() {
 		let __ks_i = -1;
 		let items = [];

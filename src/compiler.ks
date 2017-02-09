@@ -205,7 +205,7 @@ const $runtime = {
 		
 		return node._options.runtime.type.alias
 	} // }}}
-	typeof(type, node?) { // {{{
+	typeof(type, node = null) { // {{{
 		if node? {
 			return false unless $typeofs[type]
 			
@@ -246,7 +246,7 @@ const $signature = {
 		
 		return false
 	} // }}}
-	type(type?, scope) { // {{{
+	type(type = null, scope) { // {{{
 		if type? {
 			if type.typeName {
 				return $types[type.typeName.name] if $types[type.typeName.name]
@@ -276,7 +276,7 @@ const $signature = {
 	} // }}}
 }
 
-func $throw(message, node?) ~ Error { // {{{
+func $throw(message, node = null) ~ Error { // {{{
 	let error = new Error(message)
 	
 	if node? {
@@ -378,14 +378,14 @@ const $type = {
 			NodeKind::TypeReference => fragments.code($types[data.typeName.name] ?? data.typeName.name)
 		}
 	} // }}}
-	fromAST(type?) { // {{{
+	fromAST(type = null) { // {{{
 		return VariableKind::Variable	if !?type
 		return VariableKind::Class		if type.kind == NodeKind::ClassDeclaration
 		return VariableKind::Enum		if type.kind == NodeKind::EnumDeclaration
 		return VariableKind::Function	if type.kind == NodeKind::FunctionExpression
 		return VariableKind::Variable
 	} // }}}
-	isAny(type?) { // {{{
+	isAny(type = null) { // {{{
 		if !type {
 			return true
 		}
@@ -654,7 +654,7 @@ const $type = {
 }
 
 const $variable = {
-	define(node, scope, name, kind, type?) { // {{{
+	define(node, scope, name, kind, type = null) { // {{{
 		let variable = scope.getVariable(name.name || name)
 		if variable && variable.kind == kind {
 			variable.new = false
@@ -1137,7 +1137,7 @@ const $variable = {
 			throw new NotImplementedException(node)
 		}
 	} // }}}
-	kind(type?) { // {{{
+	kind(type = null) { // {{{
 		if type {
 			switch type.kind {
 				NodeKind::TypeReference => {
@@ -1559,7 +1559,7 @@ export class Compiler {
 			$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]]
 		} // }}}
 	}
-	constructor(@file, options?, @hashes = {}) { // {{{
+	constructor(@file, options = null, @hashes = {}) { // {{{
 		@options = Object.merge({
 			target: 'ecma-v6'
 			register: true
@@ -1609,7 +1609,7 @@ export class Compiler {
 		
 		@options.config = Object.defaults($targets[@target.name][@target.version], @options.config)
 	} // }}}
-	compile(data?) { // {{{
+	compile(data = null) { // {{{
 		//console.time('parse')
 		@module = new Module(data ?? fs.readFile(@file), this, @file)
 		//console.timeEnd('parse')
@@ -1632,7 +1632,7 @@ export class Compiler {
 		}, @hashes)
 	} // }}}
 	readFile() => fs.readFile(@file)
-	sha256(file, data?) { // {{{
+	sha256(file, data = null) { // {{{
 		return this._hashes[file] ?? (this._hashes[file] = fs.sha256(data ?? fs.readFile(file)))
 	} // }}}
 	toHashes() { // {{{
@@ -1686,7 +1686,7 @@ export class Compiler {
 	} // }}}
 }
 
-export func compileFile(file, options?) { // {{{
+export func compileFile(file, options = null) { // {{{
 	let compiler = new Compiler(file, options)
 	
 	return compiler.compile().toSource()

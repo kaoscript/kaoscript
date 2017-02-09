@@ -1,8 +1,6 @@
 require expect: func
 
-type int = Number
-
-func foo(x: int) {
+func foo(x: Number) {
 	return [x]
 }
 

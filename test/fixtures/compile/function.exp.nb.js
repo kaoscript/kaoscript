@@ -4,13 +4,13 @@ module.exports = function() {
 		if(a === undefined || a === null) {
 			throw new Error("Missing parameter 'a'");
 		}
-		if(!Type.isNumber(a)) {
+		else if(!Type.isNumber(a)) {
 			throw new Error("Invalid type for parameter 'a'");
 		}
 		if(b === undefined || b === null) {
 			throw new Error("Missing parameter 'b'");
 		}
-		if(!Type.isNumber(b)) {
+		else if(!Type.isNumber(b)) {
 			throw new Error("Invalid type for parameter 'b'");
 		}
 		return a - b;

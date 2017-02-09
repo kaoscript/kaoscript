@@ -8,7 +8,7 @@ module.exports = function(Helper, Type) {
 			if(self === undefined || self === null) {
 				throw new Error("Missing parameter 'self'");
 			}
-			if(!Type.isFunction(self)) {
+			else if(!Type.isFunction(self)) {
 				throw new Error("Invalid type for parameter 'self'");
 			}
 			return function(...additionals) {

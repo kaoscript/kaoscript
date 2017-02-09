@@ -9,7 +9,7 @@ module.exports = function() {
 			if(iterator === undefined || iterator === null) {
 				throw new Error("Missing parameter 'iterator'");
 			}
-			if(!Type.isFunction(iterator)) {
+			else if(!Type.isFunction(iterator)) {
 				throw new Error("Invalid type for parameter 'iterator'");
 			}
 			let results = [];

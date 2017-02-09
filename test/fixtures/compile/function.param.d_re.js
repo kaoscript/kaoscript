@@ -1,4 +1,4 @@
-module.exports = function(expect, Helper, Type) {
+module.exports = function(expect) {
 	function foo() {
 		let __ks_i = -1;
 		if(arguments.length > 0) {

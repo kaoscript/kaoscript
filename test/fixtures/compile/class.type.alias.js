@@ -24,7 +24,7 @@ module.exports = function() {
 			if(height === undefined || height === null) {
 				throw new Error("Missing parameter 'height'");
 			}
-			if(!Type.isNumber(height)) {
+			else if(!Type.isNumber(height)) {
 				throw new Error("Invalid type for parameter 'height'");
 			}
 			this._height = height;

@@ -1,4 +1,4 @@
 #![format(parameters='es5')]
 
-func foo(bar?, qux?) {
+func foo(bar = null, qux = null) {
 }
