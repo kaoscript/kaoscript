@@ -6,11 +6,14 @@ module.exports = function() {
 		name: "limit",
 		sealed: __ks_Number,
 		function: function(min, max) {
-			if(min === undefined || min === null) {
-				throw new Error("Missing parameter 'min'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			if(max === undefined || max === null) {
-				throw new Error("Missing parameter 'max'");
+			if(min === void 0 || min === null) {
+				throw new TypeError("'min' is not nullable");
+			}
+			if(max === void 0 || max === null) {
+				throw new TypeError("'max' is not nullable");
 			}
 			return isNaN(this) ? min : Math.min(max, Math.max(min, this));
 		},
@@ -32,8 +35,11 @@ module.exports = function() {
 		name: "mod",
 		sealed: __ks_Number,
 		function: function(max) {
-			if(max === undefined || max === null) {
-				throw new Error("Missing parameter 'max'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(max === void 0 || max === null) {
+				throw new TypeError("'max' is not nullable");
 			}
 			if(isNaN(this)) {
 				return 0;
@@ -66,7 +72,7 @@ module.exports = function() {
 		name: "round",
 		sealed: __ks_Number,
 		function: function(precision) {
-			if(precision === undefined || precision === null) {
+			if(precision === void 0 || precision === null) {
 				precision = 0;
 			}
 			precision = Math.pow(10, precision).toFixed(0);
@@ -104,7 +110,7 @@ module.exports = function() {
 		name: "toInt",
 		sealed: __ks_Number,
 		function: function(base) {
-			if(base === undefined || base === null) {
+			if(base === void 0 || base === null) {
 				base = 10;
 			}
 			return parseInt(this, base);

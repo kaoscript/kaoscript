@@ -1,9 +1,12 @@
 module.exports = function(expect) {
 	function foo(x, ...items) {
-		if(x === undefined || x === null) {
-			throw new Error("Missing parameter 'x'");
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
-		var y = 42;
+		if(x === void 0 || x === null) {
+			throw new TypeError("'x' is not nullable");
+		}
+		let y = 42;
 		return [x, items, y];
 	}
 	expect(function() {

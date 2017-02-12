@@ -13,7 +13,7 @@ module.exports = function() {
 				Foo.prototype.__ks_cons_0.apply(this);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}

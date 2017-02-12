@@ -4,8 +4,11 @@ module.exports = function() {
 		$name: "Greetings",
 		$static: {
 			__ks_destroy_0: function(that) {
-				if(that === undefined || that === null) {
-					throw new Error("Missing parameter 'that'");
+				if(arguments.length < 1) {
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				}
+				if(that === void 0 || that === null) {
+					throw new TypeError("'that' is not nullable");
 				}
 				that._message = null;
 			},
@@ -27,11 +30,14 @@ module.exports = function() {
 			Greetings.prototype.__ks_cons.call(this, ["Hello!"]);
 		},
 		__ks_cons_1: function(message) {
-			if(message === undefined || message === null) {
-				throw new Error("Missing parameter 'message'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(message === void 0 || message === null) {
+				throw new TypeError("'message' is not nullable");
 			}
 			else if(!Type.isString(message)) {
-				throw new Error("Invalid type for parameter 'message'");
+				throw new TypeError("'message' is not of type 'String'");
 			}
 			this._message = message;
 		},
@@ -43,12 +49,15 @@ module.exports = function() {
 				Greetings.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		},
 		__ks_func_greet_0: function(name) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
 			}
 			return this._message + "\nIt's nice to meet you, " + name + ".";
 		},
@@ -56,7 +65,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Greetings.prototype.__ks_func_greet_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	});
 	Greetings.__ks_reflect = {

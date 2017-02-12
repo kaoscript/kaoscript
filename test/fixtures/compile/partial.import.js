@@ -6,8 +6,11 @@ module.exports = function() {
 		class: Shape,
 		name: "draw",
 		function: function(canvas) {
-			if(canvas === undefined || canvas === null) {
-				throw new Error("Missing parameter 'canvas'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(canvas === void 0 || canvas === null) {
+				throw new TypeError("'canvas' is not nullable");
 			}
 			return "I'm drawing a " + this._color + " rectangle.";
 		},

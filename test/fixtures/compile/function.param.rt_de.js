@@ -7,12 +7,8 @@ module.exports = function(expect) {
 			items.push(arguments[__ks_i]);
 		}
 		let __ks_m = __ks_i;
-		if(arguments.length > __ks_m) {
-			var x = arguments[__ks_i];
-		}
-		else {
-			var x = 42;
-		}
+		let __ks__;
+		let x = arguments.length > __ks_m && (__ks__ = arguments[__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 42;
 		return [items, x];
 	}
 	expect(foo()).to.eql([[], 42]);

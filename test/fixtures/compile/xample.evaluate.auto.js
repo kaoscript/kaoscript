@@ -26,11 +26,14 @@ module.exports = function() {
 		name: "startsWith",
 		sealed: __ks_String,
 		function: function(value) {
-			if(value === undefined || value === null) {
-				throw new Error("Missing parameter 'value'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(value === void 0 || value === null) {
+				throw new TypeError("'value' is not nullable");
 			}
 			else if(!Type.isString(value)) {
-				throw new Error("Invalid type for parameter 'value'");
+				throw new TypeError("'value' is not of type 'String'");
 			}
 			return (this.length >= value.length) && (this.slice(0, value.length) === value);
 		},

@@ -6,17 +6,20 @@ module.exports = function() {
 		name: "map",
 		sealed: __ks_Array,
 		function: function(array, iterator) {
-			if(array === undefined || array === null) {
-				throw new Error("Missing parameter 'array'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(array === void 0 || array === null) {
+				throw new TypeError("'array' is not nullable");
 			}
 			else if(!Type.isArray(array)) {
-				throw new Error("Invalid type for parameter 'array'");
+				throw new TypeError("'array' is not of type 'Array'");
 			}
-			if(iterator === undefined || iterator === null) {
-				throw new Error("Missing parameter 'iterator'");
+			if(iterator === void 0 || iterator === null) {
+				throw new TypeError("'iterator' is not nullable");
 			}
 			else if(!Type.isFunction(iterator)) {
-				throw new Error("Invalid type for parameter 'iterator'");
+				throw new TypeError("'iterator' is not of type 'Function'");
 			}
 			let results = [];
 			for(let index = 0, __ks_0 = array.length, item; index < __ks_0; ++index) {
@@ -48,23 +51,26 @@ module.exports = function() {
 		name: "map",
 		sealed: __ks_Array,
 		function: function(array, iterator, condition) {
-			if(array === undefined || array === null) {
-				throw new Error("Missing parameter 'array'");
+			if(arguments.length < 3) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+			}
+			if(array === void 0 || array === null) {
+				throw new TypeError("'array' is not nullable");
 			}
 			else if(!Type.isArray(array)) {
-				throw new Error("Invalid type for parameter 'array'");
+				throw new TypeError("'array' is not of type 'Array'");
 			}
-			if(iterator === undefined || iterator === null) {
-				throw new Error("Missing parameter 'iterator'");
+			if(iterator === void 0 || iterator === null) {
+				throw new TypeError("'iterator' is not nullable");
 			}
 			else if(!Type.isFunction(iterator)) {
-				throw new Error("Invalid type for parameter 'iterator'");
+				throw new TypeError("'iterator' is not of type 'Function'");
 			}
-			if(condition === undefined || condition === null) {
-				throw new Error("Missing parameter 'condition'");
+			if(condition === void 0 || condition === null) {
+				throw new TypeError("'condition' is not nullable");
 			}
 			else if(!Type.isFunction(condition)) {
-				throw new Error("Invalid type for parameter 'condition'");
+				throw new TypeError("'condition' is not of type 'Function'");
 			}
 			let results = [];
 			for(let index = 0, __ks_0 = array.length, item; index < __ks_0; ++index) {
@@ -98,7 +104,7 @@ module.exports = function() {
 		name: "last",
 		sealed: __ks_Array,
 		function: function(index) {
-			if(index === undefined || index === null) {
+			if(index === void 0 || index === null) {
 				index = 1;
 			}
 			return this.length ? this[this.length - index] : null;
@@ -122,7 +128,7 @@ module.exports = function() {
 		name: "lines",
 		sealed: __ks_String,
 		function: function(emptyLines) {
-			if(emptyLines === undefined || emptyLines === null) {
+			if(emptyLines === void 0 || emptyLines === null) {
 				emptyLines = false;
 			}
 			if(this.length === 0) {
@@ -179,7 +185,7 @@ module.exports = function() {
 		name: "toInt",
 		sealed: __ks_String,
 		function: function(base) {
-			if(base === undefined || base === null) {
+			if(base === void 0 || base === null) {
 				base = 10;
 			}
 			return parseInt(this, base);

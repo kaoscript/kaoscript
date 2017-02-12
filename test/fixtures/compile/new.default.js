@@ -8,7 +8,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}

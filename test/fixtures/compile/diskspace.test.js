@@ -3,8 +3,11 @@ var expect = require("chai").expect;
 var disks = require("./diskspace.module.ks")().disks;
 describe("diskspace", function() {
 	it("print", function(done) {
-		if(done === undefined || done === null) {
-			throw new Error("Missing parameter 'done'");
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(done === void 0 || done === null) {
+			throw new TypeError("'done' is not nullable");
 		}
 		disks((__ks_e, d) => {
 			if(__ks_e) {

@@ -1,13 +1,19 @@
 module.exports = function(expect) {
 	function foo() {
 		if(arguments.length < 2) {
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		let __ks_i;
 		let items = arguments.length > 2 ? Array.prototype.slice.call(arguments, 0, __ks_i = arguments.length - 2) : (__ks_i = 0, []);
-		var x = arguments[__ks_i];
-		var y = 42;
-		var z = arguments[++__ks_i];
+		let x = arguments[__ks_i];
+		if(x === void 0 || x === null) {
+			throw new TypeError("'x' is not nullable");
+		}
+		let y = 42;
+		let z = arguments[++__ks_i];
+		if(z === void 0 || z === null) {
+			throw new TypeError("'z' is not nullable");
+		}
 		return [items, x, y, z];
 	}
 	expect(function() {

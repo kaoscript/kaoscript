@@ -1,6 +1,6 @@
 module.exports = function(expect) {
 	function foo(x) {
-		if(x === undefined || x === null) {
+		if(x === void 0 || x === null) {
 			x = 42;
 		}
 		return [x];

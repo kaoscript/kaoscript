@@ -14,18 +14,21 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_draw_0(shape, color, canvas) {
-			if(shape === undefined || shape === null) {
-				throw new Error("Missing parameter 'shape'");
+			if(arguments.length < 3) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
 			}
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(shape === void 0 || shape === null) {
+				throw new TypeError("'shape' is not nullable");
 			}
-			if(canvas === undefined || canvas === null) {
-				throw new Error("Missing parameter 'canvas'");
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
+			}
+			if(canvas === void 0 || canvas === null) {
+				throw new TypeError("'canvas' is not nullable");
 			}
 			return "I'm drawing a " + color + " " + shape + ".";
 		}
@@ -33,7 +36,7 @@ module.exports = function() {
 			if(arguments.length === 3) {
 				return Shape.prototype.__ks_func_draw_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Shape.__ks_reflect = {

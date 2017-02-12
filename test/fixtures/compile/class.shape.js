@@ -12,11 +12,14 @@ module.exports = function() {
 			Shape.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.isString(color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'String'");
 			}
 			this._color = color;
 		}
@@ -25,28 +28,34 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_color_0() {
 			return this._color;
 		}
 		__ks_func_color_1(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.isString(color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'String'");
 			}
 			this._color = color;
 			return this;
 		}
 		__ks_func_color_2(shape) {
-			if(shape === undefined || shape === null) {
-				throw new Error("Missing parameter 'shape'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(shape === void 0 || shape === null) {
+				throw new TypeError("'shape' is not nullable");
 			}
 			else if(!Type.is(shape, Shape)) {
-				throw new Error("Invalid type for parameter 'shape'");
+				throw new TypeError("'shape' is not of type 'Shape'");
 			}
 			this._color = shape.color();
 			return this;
@@ -63,7 +72,7 @@ module.exports = function() {
 					return Shape.prototype.__ks_func_color_2.apply(this, arguments);
 				}
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Shape.__ks_reflect = {

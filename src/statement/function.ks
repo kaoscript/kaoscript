@@ -13,7 +13,7 @@ const $function = {
 			return false
 		}
 		
-		let signature = $function.signature(node._data, node)
+		let signature = node._signature
 		
 		let optional = false
 		for parameter, i in signature.parameters {
@@ -42,7 +42,7 @@ const $function = {
 	} // }}}
 	parametersES5(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = $function.signature(data, node)
+		let signature = node._signature
 		
 		for parameter, i in node._parameters {
 			if signature.parameters[i].rest {
@@ -67,7 +67,7 @@ const $function = {
 	} // }}}
 	parametersES6(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = $function.signature(data, node)
+		let signature = node._signature
 		let rest = false
 		
 		for parameter, i in node._parameters {
@@ -78,8 +78,6 @@ const $function = {
 			fragments.code($comma) if i
 			
 			if signature.parameters[i].rest {
-				fragments.code('...')
-				
 				parameter.toParameterFragments(fragments)
 				
 				rest = true
@@ -100,7 +98,7 @@ const $function = {
 	} // }}}
 	parametersKS(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = $function.signature(data, node)
+		let signature = node._signature
 		
 		let parameter, ctrl
 		let maxb = 0
@@ -144,429 +142,249 @@ const $function = {
 			}
 		}
 		
-		let inc = false
 		let l = rest != -1 ? rest : node._parameters.length
+		let context
 		
 		if (rest != -1 && !fr && (db == 0 || db + 1 == rest)) || (rest == -1 && ((!signature.async && signature.max == l && (db == 0 || db == l)) || (signature.async && signature.max == l + 1 && (db == 0 || db == l + 1)))) { // {{{
-			let names = []
-			
 			for parameter, i in node._parameters while i < l {
-				fragments.code($comma) if i
+				fragments.code($comma) if i > 0
 				
 				parameter.toParameterFragments(fragments)
-				
-				names.push(parameter._name)
 			}
 			
-			if ra == 0 && rest != -1 && (signature.parameters[rest].type == 'Any' || !maxa) && node._options.format.parameters == 'es6' {
+			if ra == 0 && rest != -1 && (signature.parameters[rest].type == 'Any' || maxa == 0) && node._options.format.parameters == 'es6' {
 				parameter = node._parameters[rest]
 				
-				if rest {
-					fragments.code(', ')
-				}
-				
-				fragments.code('...')
+				fragments.code($comma) if rest > 0
 				
 				parameter.toParameterFragments(fragments)
-				
-				names.push(parameter._name)
 			}
 			else if signature.async && ra == 0 {
-				if l {
-					fragments.code(', ')
-				}
+				fragments.code($comma) if l > 0
 				
 				fragments.code('__ks_cb')
 			}
 			
 			fragments = fn(fragments)
 			
-			if ra > 0 {
+			if rb + ra > 0 {
 				fragments
 					.newControl()
-					.code('if(arguments.length < ', signature.min, ')')
+					.code(`if(arguments.length < \(signature.min))`)
 					.step()
-					.line('throw new Error("Wrong number of arguments")')
+					.line(`throw new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min))")`)
 					.done()
 			}
 			
-			let ni
 			for parameter, i in node._parameters while i < l {
-				if !parameter._anonymous {
-					if parameter._defaultValue? {
-						if !parameter._hasDefaultValueDeclaration {
-							ctrl = fragments
-								.newControl()
-								.code('if(').compile(parameter).code(' === undefined')
-							
-							if !parameter._nullable {
-								ctrl.code(' || ').compile(parameter).code(' === null')
-							}
-							
-							ctrl.code(')').step()
-							
-							ctrl
-								.newLine()
-								.compile(parameter)
-								.code($equals)
-								.compile(parameter._defaultValue)
-								.done()
-							
-							ctrl.done()
-							
-							ni = false
-						}
-						else {
-							ni = true
-						}
+				parameter.toValidationFragments(fragments)
+			}
+			
+			if rest != -1 {
+				parameter = node._parameters[rest]
+				
+				if ra > 0 {
+					if parameter._anonymous {
+						fragments.line(`\($variable.scope(node)) __ks_i = arguments.length > \(maxb + ra) ? arguments.length - \(ra) : \(maxb)`)
 					}
 					else {
-						ctrl = fragments
-							.newControl()
-							.code('if(').compile(parameter).code(' === undefined')
+						fragments.line($variable.scope(node), '__ks_i')
 						
-						if !parameter._nullable {
-							ctrl.code(' || ').compile(parameter).code(' === null')
+						if parameter._signature.type == 'Any' {
+							fragments
+								.newLine()
+								.code($variable.scope(node))
+								.compile(parameter)
+								.code(` = arguments.length > \(maxb + ra) ? Array.prototype.slice.call(arguments, \(maxb), __ks_i = arguments.length - \(ra)) : (__ks_i = \(maxb), [])`)
+								.done()
 						}
-						
-						ctrl.code(')')
-							.step()
-							.line('throw new Error("Missing parameter \'', parameter._name, '\'")')
-							.done()
-						
-						ni = false
+						else {
+							fragments
+								.newLine()
+								.code($variable.scope(node))
+								.compile(parameter)
+								.code(' = []')
+								.done()
+						}
 					}
-					
-					if !$type.isAny(parameter._type) {
+				}
+				else if parameter._signature.type != 'Any' && maxa > 0 {
+					if maxb > 0 {
+						throw new NotImplementedException(node)
+					}
+					else {
+						fragments.line($variable.scope(node), '__ks_i = -1')
+					}
+				
+					if parameter._anonymous {
 						ctrl = fragments
 							.newControl()
-							.code(ni ? 'if(' : 'else if(')
+							.code('while(')
 						
-						if parameter._nullable {
-							ctrl.code(names[i], ' !== null && ')
-						}
-						
-						ctrl.code('!')
-						
-						$type.check(node, ctrl, node.scope().getRenamedVariable(names[i]), parameter._type)
+						$type.check(node, ctrl, 'arguments[++__ks_i]', parameter._type)
 						
 						ctrl
 							.code(')')
 							.step()
-							.line('throw new Error("Invalid type for parameter \'', parameter._name, '\'")')
+							.done()
+					}
+					else {
+						fragments
+							.newLine()
+							.code($variable.scope(node))
+							.compile(parameter)
+							.code(' = []')
+							.done()
+						
+						ctrl = fragments
+							.newControl()
+							.code('while(')
+						
+						$type.check(node, ctrl, 'arguments[++__ks_i]', parameter._type)
+						
+						ctrl
+							.code(')')
+							.step()
+						
+						ctrl
+							.newLine()
+							.compile(parameter)
+							.code('.push(arguments[__ks_i])')
+							.done()
 						
 						ctrl.done()
 					}
 				}
-			}
-			
-			if ra {
-				parameter = data.parameters[rest]
-				
-				if signature.parameters[rest].type == 'Any' {
-					if parameter.name {
-						fragments.line($variable.scope(node), '__ks_i')
-						
-						fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = arguments.length > ' + (maxb + ra) + ' ? Array.prototype.slice.call(arguments, ' + maxb + ', __ks_i = arguments.length - ' + ra + ') : (__ks_i = ' + maxb + ', [])')
-					}
-					else {
-						fragments.line($variable.scope(node), '__ks_i = arguments.length > ' + (maxb + ra) + ' ? arguments.length - ' + ra + ' : ' + maxb)
-					}
-				}
-				else {
-					fragments.line($variable.scope(node), '__ks_i')
-					
-					if parameter.name {
-						fragments.line($variable.scope(node), parameter.name, parameter.name.name, ' = []')
-					}
-				}
-			}
-			else if rest != -1 && signature.parameters[rest].type != 'Any' && maxa {
-				parameter = data.parameters[rest]
-				
-				if maxb {
-				}
-				else {
-					fragments.line($variable.scope(node), '__ks_i = -1')
-				}
-			
-				if parameter.name {
-					fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = []')
-				}
-				
-				ctrl = fragments
-					.newControl()
-					.code('while(')
-				
-				$type.check(node, ctrl, 'arguments[++__ks_i]', parameter.type)
-				
-				ctrl
-					.code(')')
-					.step()
-				
-				if parameter.name {
-					ctrl.line(parameter.name.name, parameter.name, '.push(arguments[__ks_i])')
-				}
-				
-				ctrl.done()
-			}
-			else if rest != -1 && node._options.format.parameters == 'es5' {
-				parameter = node._parameters[rest]
-				
-				fragments
-					.newLine()
-					.code($variable.scope(node))
-					.compile(parameter)
-					.code($equals, `Array.prototype.slice.call(arguments, \(maxb), arguments.length)`)
-					.done()
-			}
-			
-			if rest != -1 && (parameter = node._parameters[rest])._defaultValue != null {
-				ctrl = fragments
-					.newControl()
-					.code('if(')
-					.compile(parameter)
-					.code('.length === 0)')
-					.step()
-				
-				ctrl
-					.newLine()
-					.compile(parameter)
-					.code($equals)
-					.compile(parameter._defaultValue)
-					.done()
-				
-				ctrl.done()
-			}
-			
-			if rest != -1 {
-				parameter = data.parameters[rest]
-				
-				if (arity = $function.arity(parameter)) && arity.min {
+				else if node._options.format.parameters == 'es5' {
 					fragments
-						.newControl()
-						.code('if(', parameter.name.name, parameter.name, '.length < ', arity.min, ')')
-						.step()
-						.line('throw new Error("Wrong number of arguments")')
+						.newLine()
+						.code($variable.scope(node))
+						.compile(parameter)
+						.code($equals, `Array.prototype.slice.call(arguments, \(maxb), arguments.length)`)
 						.done()
 				}
+				
+				if parameter._hasDefaultValue {
+					ctrl = fragments
+						.newControl()
+						.code('if(')
+						.compile(parameter)
+						.code('.length === 0)')
+						.step()
+					
+					ctrl
+						.newLine()
+						.compile(parameter)
+						.code($equals)
+						.compile(parameter._defaultValue)
+						.done()
+					
+					ctrl.done()
+				}
+				
+				if (arity ?= parameter.arity()) && arity.min > 0 {
+					ctrl = fragments
+						.newControl()
+						.code(`if(`)
+						.compile(parameter)
+						.code(`.length < \(arity.min))`)
+						.step()
+					
+					ctrl
+						.newLine()
+						.code(`throw new SyntaxError("wrong number of rest values (" + `)
+						.compile(parameter)
+						.code(`.length + " for at least \(arity.min))")`)
+						.done()
+					
+					ctrl.done()
+				}
 			}
-			else if signature.async && !ra {
+			
+			if signature.async && ra == 0 {
 				node.module().flag('Type')
 				
 				fragments
 					.newControl()
 					.code('if(!', $runtime.type(node), '.isFunction(__ks_cb))')
 					.step()
-					.line('throw new Error("Invalid callback")')
+					.line(`throw new TypeError("'callback' must be a function")`)
 					.done()
 			}
 		} // }}}
 		else { // {{{
 			fragments = fn(fragments)
 			
-			if signature.min {
+			if rb + ra > 0 {
 				fragments
 					.newControl()
-					.code('if(arguments.length < ', signature.min, ')')
+					.code(`if(arguments.length < \(signature.min))`)
 					.step()
-					.line('throw new Error("Wrong number of arguments")')
+					.line(`throw new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min))")`)
 					.done()
 			}
 				
 			fragments.line($variable.scope(node), '__ks_i = -1')
 			
-			let required = rb
-			let optional = 0
+			context = {
+				required: rb
+				optional: signature.min
+				temp: false
+				length: data.parameters.length
+			}
 			
 			for i from 0 til l {
-				parameter = data.parameters[i]
+				node._parameters[i].toBeforeRestFragments(fragments, context, i)
+			}
+			
+			if rest != -1 { // {{{
+				parameter = node._parameters[rest]
 				
-				if arity = $function.arity(parameter) { // {{{
-					required -= arity.min
-					
-					if parameter.name {
-						if $type.isAny(parameter.type) {
-							if required {
-								fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - ', required, ', __ks_i + ', arity.max + 1, '))')
-								
-								if i + 1 < data.parameters.length {
-									fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
-								}
-							}
-							else {
-								fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + ', arity.max + 1, '))')
-								
-								if i + 1 < data.parameters.length {
-									fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
-								}
-							}
-						}
-						else {
-							fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = []')
-							
-							ctrl = fragments.newControl()
-							
-							if required {
-								ctrl.code('while(__ks_i < arguments.length - ', required, ' && ')
-							}
-							else {
-								ctrl.code('while(__ks_i + 1 < arguments.length && ')
-							}
-							
-							ctrl
-								.code(parameter.name.name, parameter.name, '.length < ', arity.max, ' )')
+				if ra > 0 {
+					if parameter._anonymous {
+						if l + 1 < data.parameters.length {
+							fragments
+								.newControl()
+								.code(`if(arguments.length > __ks_i + \(ra + 1))`)
 								.step()
+								.line(`__ks_i = arguments.length - \(ra + 1)`)
 								.done()
 						}
 					}
 					else {
-					}
-					
-					optional += arity.max - arity.min
-				} // }}}
-				else { // {{{
-					if (parameter.type && parameter.type.nullable) || parameter.defaultValue {
-						ctrl = fragments
-							.newControl()
-							.code('if(arguments.length > ', signature.min + optional, ')')
-							.step()
-						
-						if $type.isAny(parameter.type) {
-							if parameter.name {
-								ctrl.line('var ', parameter.name.name, parameter.name, ' = arguments[++__ks_i]')
-							}
-							else {
-								ctrl.line('++__ks_i')
-							}
-						}
-						else {
-							ctrl2 = ctrl
-								.newControl()
-								.code('if(')
-							
-							$type.check(node, ctrl2, 'arguments[__ks_i + 1]', parameter.type)
-							
-							ctrl2
-								.code(')')
-								.step()
-								.line('var ', parameter.name.name, parameter.name, ' = arguments[++__ks_i]')
-							
-							ctrl2
-								.step()
-								.code('else')
-								.step()
-							
-							if rest == -1 {
-								ctrl2.line('throw new Error("Invalid type for parameter \'', parameter.name.name, parameter.name, '\'")')
-							}
-							else if parameter.defaultValue {
-								ctrl2
-									.newLine()
-									.code('var ', parameter.name.name, parameter.name, ' = ')
-									.compile(node._parameters[i]._defaultValue)
-									.done()
-							}
-							else {
-								ctrl2.line('var ', parameter.name.name, parameter.name, ' = null')
-							}
-							
-							ctrl2.done()
-						}
-						
-						if parameter.name {
-							ctrl.step().code('else').step()
-						
-							if parameter.defaultValue {
-								ctrl
-									.newLine()
-									.code('var ', parameter.name.name, parameter.name, ' = ')
-									.compile(node._parameters[i]._defaultValue)
-									.done()
-							}
-							else {
-								ctrl.line('var ', parameter.name.name, parameter.name, ' = null')
-							}
-						}
-						
-						ctrl.done()
-						
-						++optional
-					}
-					else {
-						if $type.isAny(parameter.type) {
-							if parameter.name {
-								fragments.line('var ', parameter.name.name, parameter.name, ' = arguments[++__ks_i]')
-							}
-							else {
-								fragments.line('++__ks_i')
-							}
-						}
-						else {
-							if parameter.name {
-								ctrl = fragments
-									.newControl()
-									.code('if(')
-								
-								$type.check(node, ctrl, 'arguments[++__ks_i]', parameter.type)
-								
-								ctrl
-									.code(')')
-									.step()
-									.line('var ', parameter.name.name, parameter.name, ' = arguments[__ks_i]')
-								
-								ctrl
-									.step()
-									.code('else throw new Error("Invalid type for parameter \'', parameter.name.name, parameter.name, '\'")')
-									.done()
-							}
-							else {
-								ctrl = fragments
-									.newControl()
-									.code('if(!')
-								
-								$type.check(node, ctrl, 'arguments[++__ks_i]', parameter.type)
-								
-								ctrl
-									.code(')')
-									.step()
-									.line('throw new Error("Wrong type of arguments")')
-									.done()
-							}
-						}
-						
-						--required
-					}
-				}
-				// }}}
-			}
-			
-			if rest != -1 { // {{{
-				parameter = data.parameters[rest]
-				
-				if ra {
-					if parameter.name {
-						fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = arguments.length > __ks_i + ', ra + 1, ' ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - ' + ra + ') : []')
+						fragments
+							.newLine()
+							.code($variable.scope(node))
+							.compile(parameter)
+							.code(` = arguments.length > __ks_i + \(ra + 1) ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - \(ra)) : []`)
+							.done()
 						
 						if l + 1 < data.parameters.length {
-							fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
+							fragments
+								.newLine()
+								.code('__ks_i += ')
+								.compile(parameter)
+								.code('.length')
+								.done()
 						}
-					}
-					else if l + 1 < data.parameters.length {
-						fragments
-							.newControl()
-							.code('if(arguments.length > __ks_i + ' , ra + 1, ')')
-							.step()
-							.line('__ks_i = arguments.length - ', ra + 1)
-							.done()
 					}
 				}
 				else {
-					if parameter.name {
-						fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : []')
+					if !parameter._anonymous {
+						fragments
+							.newLine()
+							.code($variable.scope(node))
+							.compile(parameter)
+							.code(' = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : []')
+							.done()
 						
-						if l + 1 < data.parameters.length {
-							fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
+						if signature.parameters[rest].type != 'Any' && l + 1 < data.parameters.length {
+							fragments
+								.newLine()
+								.code('__ks_i += ')
+								.compile(parameter)
+								.code('.length')
+								.done()
 						}
 					}
 				}
@@ -583,156 +401,15 @@ const $function = {
 				}
 			}
 			
+			context = {
+				any: signature.parameters[rest].type == 'Any'
+				increment: false
+				temp: context? ? context.temp : false
+				length: data.parameters.length
+			}
+			
 			for i from rest + 1 til data.parameters.length {
-				parameter = data.parameters[i]
-				
-				if arity = $function.arity(parameter) {
-					if arity.min {
-						if parameter.name {
-							if $type.isAny(parameter.type) {
-								fragments.line($variable.scope(node), parameter.name.name, parameter.name, ' = Array.prototype.slice.call(arguments, __ks_i + 1, __ks_i + ', arity.min + 1, ')')
-								
-								if i + 1 < data.parameters.length {
-									fragments.line('__ks_i += ', parameter.name.name, parameter.name, '.length')
-								}
-							}
-							else {
-							}
-						}
-						else {
-						}
-					}
-					else {
-					}
-				}
-				else if (parameter.type && parameter.type.nullable) || parameter.defaultValue {
-					if signature.parameters[rest].type == 'Any' {
-						if parameter.name {
-							if parameter.defaultValue {
-								fragments
-									.newLine()
-									.code('var ', parameter.name.name, parameter.name, ' = ')
-									.compile(node._parameters[i]._defaultValue)
-									.done()
-							}
-							else {
-								fragments.line('var ', parameter.name.name, parameter.name, ' = null')
-							}
-						}
-					}
-					else {
-						ctrl = fragments
-							.newControl()
-							.code('if(arguments.length > __ks_m)')
-							.step()
-						
-						if $type.isAny(parameter.type) {
-							if parameter.name {
-								ctrl.line('var ', parameter.name.name, parameter.name, ' = arguments[', inc ? '++' : '', '__ks_i]')
-							}
-							else {
-								ctrl.line('++__ks_i')
-							}
-						}
-						else {
-							ctrl2 = ctrl
-								.newControl()
-								.code('if(')
-							
-							$type.check(node, ctrl2, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type)
-							
-							ctrl2
-								.code(')')
-								.step()
-								.line('var ', parameter.name.name, parameter.name, ' = arguments[__ks_i]')
-							
-							ctrl2
-								.step()
-								.code('else')
-								.step()
-							
-							if parameter.defaultValue {
-								ctrl2
-									.newLine()
-									.code('var ', parameter.name.name, parameter.name, ' = ')
-									.compile(node._parameters[i]._defaultValue)
-									.done()
-							}
-							else {
-								ctrl2.line('var ', parameter.name.name, parameter.name, ' = null')
-							}
-							
-							ctrl2.done()
-						}
-						
-						if parameter.name {
-							ctrl.step().code('else').step()
-						
-							if parameter.defaultValue {
-								ctrl
-									.newLine()
-									.code('var ', parameter.name.name, parameter.name, ' = ')
-									.compile(node._parameters[i]._defaultValue)
-									.done()
-							}
-							else {
-								ctrl.line('var ', parameter.name.name, parameter.name, ' = null')
-							}
-						}
-						
-						ctrl.done()
-						
-						if !inc {
-							inc = true
-						}
-					}
-				}
-				else {
-					if $type.isAny(parameter.type) {
-						if parameter.name {
-							fragments.line('var ', parameter.name.name, parameter.name, ' = arguments[', inc ? '++' : '', '__ks_i]')
-						}
-						else {
-							fragments.line(inc ? '++' : '', '__ks_i')
-						}
-					}
-					else {
-						if parameter.name {
-							ctrl = fragments
-								.newControl()
-								.code('if(')
-							
-							$type.check(node, ctrl, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type)
-							
-							ctrl
-								.code(')')
-								.step()
-								.line('var ', parameter.name.name, parameter.name, ' = arguments[__ks_i]')
-							
-							ctrl
-								.step()
-								.code('else throw new Error("Invalid type for parameter \'', parameter.name.name, parameter.name, '\'")')
-								.done()
-						}
-						else {
-							ctrl = fragments
-								.newControl()
-								.code('if(!')
-							
-							$type.check(node, ctrl, 'arguments[' + (inc ? '++' : '') + '__ks_i]', parameter.type)
-							
-							ctrl
-								.code(')')
-								.step()
-								.line('throw new Error("Wrong type of arguments")')
-								.done()
-						}
-					}
-					
-					if !inc {
-						inc = true
-					}
-				}
+				node._parameters[i].toAfterRestFragments(fragments, context, i)
 			}
 		} // }}}
 		
@@ -927,8 +604,9 @@ const $function = {
 
 class FunctionDeclaration extends Statement {
 	private {
-		_async		= false
+		_await: Boolean		= false
 		_parameters
+		_signature
 		_statements
 		_variable
 	}
@@ -966,20 +644,15 @@ class FunctionDeclaration extends Statement {
 		}
 	} // }}}
 	fuse() { // {{{
-		for parameter in this._parameters {
-			parameter.analyse()
-			parameter.fuse()
+		this.compile(@parameters)
+		
+		this.compile(@statements)
+		
+		for statement in @statements while !@await {
+			@await = statement.isAwait()
 		}
 		
-		for statement in this._statements {
-			statement.analyse()
-			
-			this._async = statement.isAsync() if !this._async
-		}
-		
-		for statement in this._statements {
-			statement.fuse()
-		}
+		@signature = new Signature(this)
 	} // }}}
 	isConsumedError(name, variable): Boolean { // {{{
 		if @variable.throws.length > 0 {
@@ -1000,7 +673,7 @@ class FunctionDeclaration extends Statement {
 			return node.code(')').step()
 		})
 		
-		if this._async {
+		if @await {
 			let stack = []
 			
 			let f = ctrl
@@ -1032,17 +705,23 @@ class FunctionDeclaration extends Statement {
 
 class Parameter extends AbstractNode {
 	private {
-		_anonymous						= false
-		_defaultValue					= null
-		_hasDefaultValueDeclaration		= false
-		_name							= null
-		_nullable						= false
-		_type							= null
-		_variable						= null
+		_anonymous: Boolean
+		_defaultValue						= null
+		_hasDefaultValue: Boolean			= false
+		_header: Boolean					= false
+		_maybeHeadedDefaultValue: Boolean	= false
+		_name: String						= null
+		_nullable: Boolean					= false
+		_rest: Boolean						= false
+		_signature
+		_type								= null
+		_variable							= null
 	}
 	analyse() { // {{{
+		@anonymous = !?@data.name
+		
 		if @parent.isMethod() {
-			if @data.name? {
+			if !@anonymous {
 				let nf = true
 				let name = @data.name.name
 				
@@ -1078,10 +757,55 @@ class Parameter extends AbstractNode {
 			@type = @data.type
 		}
 		
-		if @data.name? {
-			let signature = $function.signatureParameter(@data, @scope)
+		@nullable = @type?.nullable
+		
+		if @data.defaultValue? {
+			@defaultValue = $compile.expression(@data.defaultValue, @parent)
+			@hasDefaultValue = true
 			
-			if signature.rest {
+			if !@nullable && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+				@nullable = true
+			}
+			
+			@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && @nullable
+		}
+		
+		@signature = {
+			type: $signature.type(@type, @scope)
+			min: @hasDefaultValue ? 0 : 1
+			max: 1
+		}
+		
+		let nf = true
+		for modifier in @data.modifiers while nf {
+			if modifier.kind == ModifierKind::Rest {
+				@rest = @signature.rest = true
+				
+				if modifier.arity {
+					@signature.min = modifier.arity.min
+					@signature.max = modifier.arity.max
+				}
+				else {
+					@signature.min = 0
+					@signature.max = Infinity
+				}
+				
+				nf = true
+			}
+		}
+		
+		if @anonymous {
+			let name = {
+				kind: NodeKind::Identifier
+				name: @scope.acquireTempName()
+			}
+			
+			$variable.define(this, @scope, name, VariableKind::Variable)
+			
+			@variable = $compile.expression(name, @parent)
+		}
+		else {
+			if @rest {
 				$variable.define(this, @scope, @data.name, VariableKind::Variable, {
 					kind: NodeKind::TypeReference
 					typeName: {
@@ -1096,30 +820,19 @@ class Parameter extends AbstractNode {
 			
 			@variable = $compile.expression(@data.name, @parent)
 		}
-		else {
-			let name = {
-				kind: NodeKind::Identifier
-				name: @scope.acquireTempName()
-			}
-			
-			$variable.define(this, @scope, name, VariableKind::Variable)
-			
-			@variable = $compile.expression(name, @parent)
-			@anonymous = true
-		}
 		
 		@name = @variable._value
-		@nullable = @type?.nullable
-		
-		if @data.defaultValue? {
-			@defaultValue = $compile.expression(@data.defaultValue, @parent)
-			
-			if !@nullable && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
-				@nullable = true
+	} // }}}
+	arity() { // {{{
+		if @rest {
+			for i from 0 til @data.modifiers.length {
+				if @data.modifiers[i].kind == ModifierKind::Rest {
+					return @data.modifiers[i].arity
+				}
 			}
-			
-			@hasDefaultValueDeclaration = @options.format.parameters == 'es6' && @nullable
 		}
+		
+		return null
 	} // }}}
 	fuse() {// {{{
 		if @defaultValue != null {
@@ -1130,15 +843,428 @@ class Parameter extends AbstractNode {
 		fragments.compile(@variable)
 	} // }}}
 	toParameterFragments(fragments) { // {{{
+		fragments.code('...') if @rest
+		
 		fragments.compile(@variable)
 		
-		if @hasDefaultValueDeclaration {
-			if @defaultValue? {
+		if @maybeHeadedDefaultValue {
+			if @hasDefaultValue {
 				fragments.code($equals).compile(@defaultValue)
 			}
 			else {
 				fragments.code(' = null')
 			}
+		}
+		
+		@header = true
+	} // }}}
+	toValidationFragments(fragments) { // {{{
+		if @anonymous {
+			if @signature.type != 'Any' && !@hasDefaultValue {
+				let ctrl = fragments
+					.newControl()
+					.code('if(')
+				
+				if @nullable {
+					ctrl.compile(@variable).code(' !== null && ')
+				}
+				
+				ctrl.code('!')
+				
+				$type.check(this, ctrl, @scope.getRenamedVariable(@name), @type)
+				
+				ctrl
+					.code(')')
+					.step()
+					.line(`throw new TypeError("anonymous argument is not of type '\(@signature.type)'")`)
+					.done()
+			}
+		}
+		else {
+			let ctrl
+			
+			if @hasDefaultValue {
+				if !@header || !@maybeHeadedDefaultValue {
+					ctrl = fragments
+						.newControl()
+						.code('if(').compile(@variable).code(' === void 0')
+					
+					if !@nullable {
+						ctrl.code(' || ').compile(@variable).code(' === null')
+					}
+					
+					ctrl.code(')').step()
+					
+					ctrl
+						.newLine()
+						.compile(@variable)
+						.code($equals)
+						.compile(@defaultValue)
+						.done()
+				}
+			}
+			else {
+				ctrl = fragments.newControl()
+				
+				if @nullable {
+					ctrl.code('if(').compile(@variable).code(' === void 0').code(')')
+						.step()
+						.newLine()
+						.compile(@variable).code(' = null')
+						.done()
+				}
+				else {
+					ctrl
+						.code('if(').compile(@variable).code(' === void 0').code(' || ').compile(@variable).code(' === null').code(')')
+						.step()
+						.line(`throw new TypeError("'\(@name)' is not nullable")`)
+				}
+			}
+			
+			if @signature.type != 'Any' {
+				if ctrl? {
+					ctrl.step().code('else ')
+				}
+				else {
+					ctrl = fragments.newControl()
+				}
+				
+				ctrl.code('if(')
+				
+				if @nullable {
+					ctrl.compile(@variable).code(' !== null && ')
+				}
+				
+				ctrl.code('!')
+				
+				$type.check(this, ctrl, @scope.getRenamedVariable(@name), @type)
+				
+				ctrl
+					.code(')')
+					.step()
+					.line(`throw new TypeError("'\(@name)' is not of type \($type.toQuote(@signature.type))")`)
+			}
+			
+			ctrl.done() if ctrl?
+		}
+	} // }}}
+	toAfterRestFragments(fragments, context, index) { // {{{
+		if arity ?= this.arity() {
+			if @anonymous {
+				throw new NotImplementedException(this)
+			}
+			else {
+				if @signature.type == 'Any' {
+					fragments
+						.newLine()
+						.code($variable.scope(this))
+						.compile(@variable)
+						.code(` = Array.prototype.slice.call(arguments, __ks_i + 1, __ks_i + \(arity.min + 1))`)
+						.done()
+					
+					if index + 1 < context.length {
+						fragments
+							.newLine()
+							.code('__ks_i += ')
+							.compile(@variable)
+							.code('.length')
+							.done()
+					}
+				}
+				else {
+					throw new NotImplementedException(this)
+				}
+			}
+		}
+		else if @hasDefaultValue {
+			if context.any {
+				if !@anonymous {
+					fragments
+						.newLine()
+						.code($variable.scope(this))
+						.compile(@variable)
+						.code($equals)
+						.compile(@defaultValue)
+						.done()
+				}
+			}
+			else {
+				if @signature.type == 'Any' {
+					if !context.temp {
+						fragments.line(`\($variable.scope(this))__ks__`)
+						
+						context.temp = true
+					}
+					
+					let line = fragments
+						.newLine()
+						.code($variable.scope(this))
+						.compile(@variable)
+						.code(` = arguments.length > __ks_m && (__ks__ = arguments[\(context.increment ? '++' : '')__ks_i]) !== void 0`)
+					
+					if !@nullable {
+						line.code(' && __ks__ !== null')
+					}
+					
+					line
+						.code(' ? __ks__ : ')
+						.compile(@defaultValue)
+						.done()
+				}
+				else {
+					if !context.temp {
+						fragments.line(`\($variable.scope(this))__ks__`)
+						
+						context.temp = true
+					}
+					
+					let line = fragments
+						.newLine()
+						.code($variable.scope(this))
+						.compile(@variable)
+						.code(` = arguments.length > __ks_m && (__ks__ = arguments[__ks_i\(context.increment ? ' + 1' : '')]) !== void 0 && `)
+					
+					if @nullable {
+						line.code('(__ks__ === null || ')
+						
+						$type.check(this, line, '__ks__', @type)
+						
+						line.code(')')
+					}
+					else {
+						$type.check(this, line, '__ks__', @type)
+					}
+					
+					line
+						.code(context.increment ? ' ? (++__ks_i, __ks__) : ' : ' ? __ks__ : ')
+						.compile(@defaultValue)
+						.done()
+				}
+				
+				context.increment = true
+			}
+		}
+		else {
+			if @anonymous {
+				fragments.line('++__ks_i') if context.increment
+			}
+			else {
+				fragments
+					.newLine()
+					.code($variable.scope(this))
+					.compile(@variable)
+					.code(' = arguments[', context.increment ? '++' : '', '__ks_i]')
+					.done()
+				
+				this.toValidationFragments(fragments)
+			}
+			
+			context.increment = true
+		}
+	} // }}}
+	toBeforeRestFragments(fragments, context, index) { // {{{
+		if arity ?= this.arity() {
+			context.required -= arity.min
+			
+			if @anonymous {
+				throw new NotImplementedException(this)
+			}
+			else {
+				if @signature.type == 'Any' {
+					if context.required > 0 {
+						fragments
+							.newLine()
+							.code($variable.scope(this))
+							.compile(@variable)
+							.code(` = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - \(context.required), __ks_i + \(arity.max + 1)))`)
+							.done()
+					}
+					else {
+						fragments
+							.newLine()
+							.code($variable.scope(this))
+							.compile(@variable)
+							.code(` = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + \(arity.max + 1)))`)
+							.done()
+					}
+					
+					if index + 1 < context.length {
+						fragments
+							.newLine()
+							.code('__ks_i += ')
+							.compile(@variable)
+							.code('.length')
+							.done()
+					}
+				}
+				else {
+					throw new NotImplementedException(this)
+				}
+			}
+			
+			context.optional += arity.max - arity.min
+		}
+		else {
+			if @hasDefaultValue {
+				if @signature.type == 'Any' {
+					if !context.temp {
+						fragments.line(`\($variable.scope(this))__ks__`)
+						
+						context.temp = true
+					}
+					
+					let line = fragments
+						.newLine()
+						.code($variable.scope(this))
+						.compile(@variable)
+						.code(` = arguments.length > \(context.optional) && (__ks__ = arguments[++__ks_i]) !== void 0`)
+					
+					if !@nullable {
+						line.code(' && __ks__ !== null')
+					}
+					
+					line
+						.code(' ? __ks__ : ')
+						.compile(@defaultValue)
+						.done()
+				}
+				else {
+					fragments
+						.newLine()
+						.code($variable.scope(this))
+						.compile(@variable)
+						.done()
+					
+					let ctrl = fragments
+						.newControl()
+						.code(`if(arguments.length > \(context.optional) && (`)
+						.compile(@variable)
+						.code(' = arguments[++__ks_i]) !== void 0')
+					
+					if !@nullable {
+						ctrl.code(' && ').compile(@variable).code(' !== null')
+					}
+					
+					ctrl.code(')').step()
+					
+					if @nullable {
+						let ctrl2 =	ctrl
+							.newControl()
+							.code('if(')
+							.compile(@variable)
+							.code(' !== null && !')
+						
+						$type.check(this, ctrl2, @scope.getRenamedVariable(@name), @type)
+						
+						ctrl2
+							.code(')')
+							.step()
+							.line(`throw new TypeError("'\(@name)' is not of type \($type.toQuote(@signature.type))")`)
+							.done()
+					}
+					else {
+						let ctrl2 =	ctrl
+							.newControl()
+							.code('if(!')
+						
+						$type.check(this, ctrl2, @scope.getRenamedVariable(@name), @type)
+						
+						ctrl2
+							.code(')')
+							.step()
+							.line(`throw new TypeError("'\(@name)' is not of type \($type.toQuote(@signature.type))")`)
+							.done()
+					}
+					
+					ctrl.step().code('else').step()
+					
+					ctrl
+						.newLine()
+						.compile(@variable)
+						.code($equals)
+						.compile(@defaultValue)
+						.done()
+						
+					ctrl.done()
+				}
+				
+				++context.optional
+			}
+			else {
+				if @signature.type == 'Any' {
+					if @anonymous {
+						fragments.line('++__ks_i')
+					}
+					else {
+						fragments
+							.newLine()
+							.code($variable.scope(this))
+							.compile(@variable)
+							.code(' = arguments[++__ks_i]')
+							.done()
+						
+						this.toValidationFragments(fragments)
+					}
+				}
+				else {
+					fragments
+						.newLine()
+						.code($variable.scope(this))
+						.compile(@variable)
+						.code(' = arguments[++__ks_i]')
+						.done()
+					
+					this.toValidationFragments(fragments)
+				}
+				
+				--context.required
+			}
+		}
+	} // }}}
+}
+
+class Signature {
+	public {
+		async: Boolean	= false
+		min: Number		= 0
+		max: Number		= 0
+		parameters		= []
+	}
+	constructor(parent) { // {{{
+		let signature
+		for parameter in parent._parameters {
+			@parameters.push(signature = parameter._signature)
+			
+			if signature.max == Infinity {
+				if @max == Infinity {
+					SyntaxException.throwTooMuchRestParameter(this)
+				}
+				else {
+					@max = Infinity
+				}
+			}
+			else {
+				@max += signature.max
+			}
+			
+			@min += signature.min
+		}
+		
+		for modifier in parent._data.modifiers while !@async {
+			if modifier.kind == ModifierKind::Async {
+				@async = true
+			}
+		}
+		
+		if @async {
+			@parameters.push({
+				type: 'Function'
+				min: 1
+				max: 1
+			})
+			
+			++@min
+			++@max
 		}
 	} // }}}
 }

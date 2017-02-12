@@ -1,17 +1,13 @@
 module.exports = function(expect) {
 	function foo() {
 		if(arguments.length < 2) {
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		let __ks_i = -1;
 		let items = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - 1, __ks_i + 4));
 		__ks_i += items.length;
-		if(arguments.length > 4) {
-			var x = arguments[++__ks_i];
-		}
-		else {
-			var x = 42;
-		}
+		let __ks__;
+		let x = arguments.length > 4 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 42;
 		let values = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + 4));
 		return [items, x, values];
 	}

@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}
@@ -26,14 +26,17 @@ module.exports = function() {
 	let shape = "rectangle";
 	let color = "blue";
 	function draw(shape, color, canvas) {
-		if(shape === undefined || shape === null) {
-			throw new Error("Missing parameter 'shape'");
+		if(arguments.length < 3) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
 		}
-		if(color === undefined || color === null) {
-			throw new Error("Missing parameter 'color'");
+		if(shape === void 0 || shape === null) {
+			throw new TypeError("'shape' is not nullable");
 		}
-		if(canvas === undefined || canvas === null) {
-			throw new Error("Missing parameter 'canvas'");
+		if(color === void 0 || color === null) {
+			throw new TypeError("'color' is not nullable");
+		}
+		if(canvas === void 0 || canvas === null) {
+			throw new TypeError("'canvas' is not nullable");
 		}
 		return "I'm drawing a " + color + " " + shape + ".";
 	}

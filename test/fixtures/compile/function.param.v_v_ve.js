@@ -1,13 +1,16 @@
 module.exports = function(expect) {
 	function foo(x, y, z) {
-		if(x === undefined || x === null) {
-			throw new Error("Missing parameter 'x'");
+		if(arguments.length < 3) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
 		}
-		if(y === undefined || y === null) {
-			throw new Error("Missing parameter 'y'");
+		if(x === void 0 || x === null) {
+			throw new TypeError("'x' is not nullable");
 		}
-		if(z === undefined || z === null) {
-			throw new Error("Missing parameter 'z'");
+		if(y === void 0 || y === null) {
+			throw new TypeError("'y' is not nullable");
+		}
+		if(z === void 0 || z === null) {
+			throw new TypeError("'z' is not nullable");
 		}
 		return [x, y, z];
 	}

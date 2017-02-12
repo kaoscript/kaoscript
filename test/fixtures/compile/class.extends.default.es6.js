@@ -8,11 +8,14 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.isString(color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'String'");
 			}
 			this._color = color;
 		}
@@ -21,7 +24,7 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_draw_0() {
@@ -30,7 +33,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Shape.prototype.__ks_func_draw_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Shape.__ks_reflect = {
@@ -74,8 +77,11 @@ module.exports = function() {
 			Shape.prototype.__ks_init.call(this);
 		}
 		__ks_cons_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			Shape.prototype.__ks_cons.call(this, [color]);
 		}

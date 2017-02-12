@@ -1,10 +1,13 @@
 module.exports = function() {
 	let foo = function(x, y) {
-		if(x === undefined) {
-			throw new Error("Missing parameter 'x'");
+		if(arguments.length < 2) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 		}
-		if(y === undefined || y === null) {
-			throw new Error("Missing parameter 'y'");
+		if(x === void 0) {
+			x = null;
+		}
+		if(y === void 0 || y === null) {
+			throw new TypeError("'y' is not nullable");
 		}
 		return [x, y];
 	};

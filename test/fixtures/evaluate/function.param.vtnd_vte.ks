@@ -1,6 +1,6 @@
 require expect: func
 
-func foo(x: Number = null, y: string) {
+func foo(x: Number = null, y: String) {
 	return [x, y]
 }
 

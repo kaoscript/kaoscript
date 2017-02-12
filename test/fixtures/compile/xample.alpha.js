@@ -3,7 +3,7 @@ module.exports = function() {
 	var Float = require("./_float.ks")().Float;
 	var {Number, __ks_Number} = require("./_number.ks")();
 	function alpha(n = null, percentage) {
-		if(percentage === undefined || percentage === null) {
+		if(percentage === void 0 || percentage === null) {
 			percentage = false;
 		}
 		let i = Float.parse(n);

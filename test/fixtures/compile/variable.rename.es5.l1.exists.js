@@ -1,7 +1,7 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function foobar(x) {
-		if(x === undefined || x === null) {
+		if(x === void 0 || x === null) {
 			x = "jane";
 		}
 		if(true) {

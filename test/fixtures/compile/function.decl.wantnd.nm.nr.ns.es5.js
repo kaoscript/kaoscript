@@ -1,9 +1,9 @@
 module.exports = function() {
 	function foo(bar, qux) {
-		if(bar === undefined) {
+		if(bar === void 0) {
 			bar = null;
 		}
-		if(qux === undefined) {
+		if(qux === void 0) {
 			qux = null;
 		}
 	}

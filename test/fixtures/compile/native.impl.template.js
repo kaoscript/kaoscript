@@ -6,7 +6,7 @@ module.exports = function() {
 		name: "toInt",
 		sealed: __ks_String,
 		function: function(base) {
-			if(base === undefined || base === null) {
+			if(base === void 0 || base === null) {
 				base = 10;
 			}
 			return parseInt(this, base);

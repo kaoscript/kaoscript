@@ -1,12 +1,8 @@
 module.exports = function(expect) {
 	function foo() {
 		let __ks_i = -1;
-		if(arguments.length > 0) {
-			var x = arguments[++__ks_i];
-		}
-		else {
-			var x = 42;
-		}
+		let __ks__;
+		let x = arguments.length > 0 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 42;
 		let items = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
 		return [x, items];
 	}

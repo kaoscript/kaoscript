@@ -6,8 +6,11 @@ module.exports = function() {
 		name: "clone",
 		sealed: __ks_Object,
 		function: function(object) {
-			if(object === undefined || object === null) {
-				throw new Error("Missing parameter 'object'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(object === void 0 || object === null) {
+				throw new TypeError("'object' is not nullable");
 			}
 			if(Type.isFunction(object.constructor.clone) && (object.constructor.clone !== this)) {
 				return object.constructor.clone(object);

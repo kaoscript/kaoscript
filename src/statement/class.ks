@@ -663,7 +663,7 @@ const $helper = {
 						.line('return ' + node._extendsName + '.' + name + '.apply(null, arguments)')
 						.done()
 					
-					fragments.line('throw new Error("Wrong number of arguments")')
+					fragments.line('throw new SyntaxError("wrong number of arguments")')
 				}
 			}
 		}
@@ -741,7 +741,7 @@ const $helper = {
 						.line('return ' + node._extendsName + '.prototype.' + name + '.apply(this, arguments)')
 						.done()
 					
-					fragments.line('throw new Error("Wrong number of arguments")')
+					fragments.line('throw new SyntaxError("wrong number of arguments")')
 				}
 			}
 		}
@@ -761,7 +761,7 @@ const $helper = {
 					.newControl()
 					.code('if(' + argName + '.length !== 0)')
 					.step()
-					.line('throw new Error("Wrong number of arguments")')
+					.line('throw new SyntaxError("wrong number of arguments")')
 					.done()
 			}
 		}
@@ -785,7 +785,7 @@ const $helper = {
 					else {
 						ctrl.done()
 						
-						fragments.line('throw new Error("Wrong number of arguments")')
+						fragments.line('throw new SyntaxError("wrong number of arguments")')
 					}
 				}
 				else {
@@ -793,7 +793,7 @@ const $helper = {
 						extend(node, fragments, ctrl)
 					}
 					else {
-						ctrl.step().code('else').step().line('throw new Error("Wrong number of arguments")').done()
+						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
 					}
 				}
 			}
@@ -807,10 +807,10 @@ const $helper = {
 				if returns {
 					ctrl.done()
 					
-					fragments.line('throw new Error("Wrong number of arguments")')
+					fragments.line('throw new SyntaxError("wrong number of arguments")')
 				}
 				else {
-					ctrl.step().code('else').step().line('throw new Error("Wrong number of arguments")').done()
+					ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
 				}
 			}
 			else {
@@ -933,10 +933,10 @@ const $helper = {
 					if returns {
 						ctrl.done()
 						
-						fragments.line('throw new Error("Wrong number of arguments")')
+						fragments.line('throw new SyntaxError("wrong number of arguments")')
 					}
 					else {
-						ctrl.step().code('else').step().line('throw new Error("Wrong number of arguments")').done()
+						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
 					}
 				}
 				else if infinities.length == 1 {
@@ -2038,6 +2038,7 @@ class MethodDeclaration extends Statement {
 	private {
 		_name
 		_parameters
+		_signature
 		_statements
 		_instance		= true
 	}
@@ -2056,7 +2057,10 @@ class MethodDeclaration extends Statement {
 	} // }}}
 	fuse() { // {{{
 		this.compile(@parameters)
+		
 		this.compile(@statements)
+		
+		@signature = new Signature(this)
 	} // }}}
 	getInstanceMethod(name) => @parent.getInstanceMethod(name)
 	getInstanceVariable(name) => @parent.getInstanceVariable(name)

@@ -14,18 +14,21 @@ module.exports = function() {
 				Person.prototype.__ks_cons_0.apply(this);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_height_0() {
 			return this._float;
 		}
 		__ks_func_height_1(height) {
-			if(height === undefined || height === null) {
-				throw new Error("Missing parameter 'height'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(height === void 0 || height === null) {
+				throw new TypeError("'height' is not nullable");
 			}
 			else if(!Type.isNumber(height)) {
-				throw new Error("Invalid type for parameter 'height'");
+				throw new TypeError("'height' is not of type 'Number'");
 			}
 			this._height = height;
 			return this;
@@ -37,7 +40,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Person.prototype.__ks_func_height_1.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Person.__ks_reflect = {

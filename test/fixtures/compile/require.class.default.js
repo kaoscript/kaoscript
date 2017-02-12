@@ -18,11 +18,14 @@ module.exports = function(Color, __ks_Color, Space) {
 		class: Color,
 		name: "luma",
 		function: function(luma) {
-			if(luma === undefined || luma === null) {
-				throw new Error("Missing parameter 'luma'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(luma === void 0 || luma === null) {
+				throw new TypeError("'luma' is not nullable");
 			}
 			else if(!Type.isNumber(luma)) {
-				throw new Error("Invalid type for parameter 'luma'");
+				throw new TypeError("'luma' is not of type 'Number'");
 			}
 			return this;
 		},

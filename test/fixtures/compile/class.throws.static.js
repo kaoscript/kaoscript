@@ -9,8 +9,11 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(message) {
-			if(message === undefined || message === null) {
-				throw new Error("Missing parameter 'message'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(message === void 0 || message === null) {
+				throw new TypeError("'message' is not nullable");
 			}
 			this.message = message;
 		}
@@ -23,8 +26,11 @@ module.exports = function() {
 			}
 		}
 		static __ks_sttc_throw_0(message) {
-			if(message === undefined || message === null) {
-				throw new Error("Missing parameter 'message'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(message === void 0 || message === null) {
+				throw new TypeError("'message' is not nullable");
 			}
 			throw new Exception(message);
 		}
@@ -35,7 +41,7 @@ module.exports = function() {
 			else if(Error.throw) {
 				return Error.throw.apply(null, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Exception.__ks_reflect = {

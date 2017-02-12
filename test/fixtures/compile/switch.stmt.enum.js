@@ -11,13 +11,13 @@ module.exports = function() {
 		default: 8
 	};
 	function color(fg, bg) {
-		if(fg === undefined || fg === null) {
+		if(fg === void 0 || fg === null) {
 			throw new Error("Missing parameter 'fg'");
 		}
 		else if(!Type.is(fg, ANSIColor)) {
 			throw new Error("Invalid type for parameter 'fg'");
 		}
-		if(bg === undefined || bg === null) {
+		if(bg === void 0 || bg === null) {
 			throw new Error("Missing parameter 'bg'");
 		}
 		else if(!Type.is(bg, ANSIColor)) {

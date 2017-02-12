@@ -6,11 +6,14 @@ module.exports = function() {
 		name: "map",
 		sealed: __ks_Object,
 		function: function(iterator) {
-			if(iterator === undefined || iterator === null) {
-				throw new Error("Missing parameter 'iterator'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(iterator === void 0 || iterator === null) {
+				throw new TypeError("'iterator' is not nullable");
 			}
 			else if(!Type.isFunction(iterator)) {
-				throw new Error("Invalid type for parameter 'iterator'");
+				throw new TypeError("'iterator' is not of type 'Function'");
 			}
 			let results = [];
 			for(let item in this) {
@@ -37,11 +40,14 @@ module.exports = function() {
 		paul: "chani",
 		duncan: "murbella"
 	}, function(item, name) {
-		if(item === undefined || item === null) {
-			throw new Error("Missing parameter 'item'");
+		if(arguments.length < 2) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 		}
-		if(name === undefined || name === null) {
-			throw new Error("Missing parameter 'name'");
+		if(item === void 0 || item === null) {
+			throw new TypeError("'item' is not nullable");
+		}
+		if(name === void 0 || name === null) {
+			throw new TypeError("'name' is not nullable");
 		}
 		return {
 			name: name,

@@ -14,20 +14,26 @@ module.exports = function() {
 		__ks_cons_0() {
 		}
 		__ks_cons_1(message) {
-			if(message === undefined || message === null) {
-				throw new Error("Missing parameter 'message'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(message === void 0 || message === null) {
+				throw new TypeError("'message' is not nullable");
 			}
 			else if(!Type.isString(message)) {
-				throw new Error("Invalid type for parameter 'message'");
+				throw new TypeError("'message' is not of type 'String'");
 			}
 			this._message = message;
 		}
 		__ks_cons_2(number) {
-			if(number === undefined || number === null) {
-				throw new Error("Missing parameter 'number'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(number === void 0 || number === null) {
+				throw new TypeError("'number' is not nullable");
 			}
 			else if(!Type.isNumber(number)) {
-				throw new Error("Invalid type for parameter 'number'");
+				throw new TypeError("'number' is not of type 'Number'");
 			}
 			Greetings.prototype.__ks_cons.call(this, [number]);
 		}
@@ -44,7 +50,7 @@ module.exports = function() {
 				}
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}

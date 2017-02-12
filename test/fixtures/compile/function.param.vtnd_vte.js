@@ -2,24 +2,25 @@ var Type = require("@kaoscript/runtime").Type;
 module.exports = function(expect) {
 	function foo() {
 		if(arguments.length < 1) {
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		let __ks_i = -1;
-		if(arguments.length > 1) {
-			if(Type.isNumber(arguments[__ks_i + 1])) {
-				var x = arguments[++__ks_i];
-			}
-			else {
-				throw new Error("Invalid type for parameter 'x'");
+		let x;
+		if(arguments.length > 1 && (x = arguments[++__ks_i]) !== void 0) {
+			if(x !== null && !Type.isNumber(x)) {
+				throw new TypeError("'x' is not of type 'Number'");
 			}
 		}
 		else {
-			var x = null;
+			x = null;
 		}
-		if(Type.isString(arguments[++__ks_i])) {
-			var y = arguments[__ks_i];
+		let y = arguments[++__ks_i];
+		if(y === void 0 || y === null) {
+			throw new TypeError("'y' is not nullable");
 		}
-		else throw new Error("Invalid type for parameter 'y'")
+		else if(!Type.isString(y)) {
+			throw new TypeError("'y' is not of type 'String'");
+		}
 		return [x, y];
 	}
 	expect(function() {

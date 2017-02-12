@@ -1,15 +1,15 @@
 class VariableDeclaration extends Statement {
 	private {
-		_async = false
-		_declarators = []
-		_init = false
+		_await: Boolean		= false
+		_declarators		= []
+		_init: Boolean		= false
 	}
 	analyse() { // {{{
 		for declarator in @data.declarations {
 			if declarator.kind == NodeKind::AwaitExpression {
 				declarator = new AwaitDeclarator(declarator, this)
 				
-				@async = true
+				@await = true
 			}
 			else {
 				declarator = new VariableDeclarator(declarator, this)
@@ -25,7 +25,7 @@ class VariableDeclaration extends Statement {
 			declarator.fuse()
 		}
 	} // }}}
-	isAsync() => @async
+	isAwait() => @await
 	isRooted() => !@data.rebindable
 	modifier(data) { // {{{
 		if data.name.kind == NodeKind::ArrayBinding || data.name.kind == NodeKind::ObjectBinding || @options.format.variables == 'es5' {
@@ -42,7 +42,7 @@ class VariableDeclaration extends Statement {
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @declarators.length == 1 {
-			if @async {
+			if @await {
 				return @declarators[0].toFragments(fragments)
 			}
 			else {

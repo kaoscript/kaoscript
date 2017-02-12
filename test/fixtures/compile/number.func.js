@@ -1,10 +1,13 @@
 module.exports = function() {
 	function ratio(min, max) {
-		if(min === undefined || min === null) {
-			throw new Error("Missing parameter 'min'");
+		if(arguments.length < 2) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 		}
-		if(max === undefined || max === null) {
-			throw new Error("Missing parameter 'max'");
+		if(min === void 0 || min === null) {
+			throw new TypeError("'min' is not nullable");
+		}
+		if(max === void 0 || max === null) {
+			throw new TypeError("'max' is not nullable");
 		}
 		return ((min + max) / 2).round(2);
 	}

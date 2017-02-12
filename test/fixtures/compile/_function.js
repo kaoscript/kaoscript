@@ -5,11 +5,14 @@ module.exports = function(Helper, Type) {
 		name: "vcurry",
 		sealed: __ks_Function,
 		function: function(self, bind = null, ...args) {
-			if(self === undefined || self === null) {
-				throw new Error("Missing parameter 'self'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(self === void 0 || self === null) {
+				throw new TypeError("'self' is not nullable");
 			}
 			else if(!Type.isFunction(self)) {
-				throw new Error("Invalid type for parameter 'self'");
+				throw new TypeError("'self' is not of type 'Function'");
 			}
 			return function(...additionals) {
 				return self.apply(bind, args.concat(additionals));

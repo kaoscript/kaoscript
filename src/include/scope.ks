@@ -1,5 +1,6 @@
 let $keywords = { // {{{
 	abstract: true
+	arguments: true
 	boolean: true
 	break: true
 	byte: true

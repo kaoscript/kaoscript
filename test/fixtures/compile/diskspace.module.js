@@ -5,8 +5,11 @@ module.exports = function() {
 	var exec = require("child_process").exec;
 	const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i;
 	function disks(__ks_cb) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
 		if(!Type.isFunction(__ks_cb)) {
-			throw new Error("Invalid callback");
+			throw new TypeError("'callback' must be a function");
 		}
 		exec("df -k", (__ks_e, stdout, stderr) => {
 			if(__ks_e) {

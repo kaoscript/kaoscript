@@ -9,18 +9,21 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_bar_0() {
 			return this._bar;
 		}
 		__ks_func_bar_1(bar) {
-			if(bar === undefined || bar === null) {
-				throw new Error("Missing parameter 'bar'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(bar === void 0 || bar === null) {
+				throw new TypeError("'bar' is not nullable");
 			}
 			else if(!Type.is(bar, Bar)) {
-				throw new Error("Invalid type for parameter 'bar'");
+				throw new TypeError("'bar' is not of type 'Bar'");
 			}
 			this._bar = bar;
 			return this;
@@ -32,7 +35,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Foo.prototype.__ks_func_bar_1.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Foo.__ks_reflect = {
@@ -79,18 +82,21 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_foo_0() {
 			return this._foo;
 		}
 		__ks_func_foo_1(foo) {
-			if(foo === undefined || foo === null) {
-				throw new Error("Missing parameter 'foo'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(foo === void 0 || foo === null) {
+				throw new TypeError("'foo' is not nullable");
 			}
 			else if(!Type.is(foo, Foo)) {
-				throw new Error("Invalid type for parameter 'foo'");
+				throw new TypeError("'foo' is not of type 'Foo'");
 			}
 			this._foo = foo;
 			return this;
@@ -102,7 +108,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Bar.prototype.__ks_func_foo_1.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Bar.__ks_reflect = {

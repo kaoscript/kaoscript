@@ -9,15 +9,15 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_Rectangle_0(color) {
-			if(color === undefined || color === null) {
+			if(color === void 0 || color === null) {
 				color = "black";
 			}
 			else if(!Type.isString(color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'String'");
 			}
 			this._color = color;
 		}
@@ -25,11 +25,14 @@ module.exports = function() {
 			if(arguments.length >= 0 && arguments.length <= 1) {
 				return Rectangle.prototype.__ks_func_Rectangle_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_draw_0(canvas) {
-			if(canvas === undefined || canvas === null) {
-				throw new Error("Missing parameter 'canvas'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(canvas === void 0 || canvas === null) {
+				throw new TypeError("'canvas' is not nullable");
 			}
 			return "I'm drawing a " + this._color + " rectangle.";
 		}
@@ -37,7 +40,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Rectangle.prototype.__ks_func_draw_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Object.defineProperty(Rectangle, 'version', {

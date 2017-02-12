@@ -8,11 +8,14 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(name) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
 			}
 			else if(!Type.isString(name)) {
-				throw new Error("Invalid type for parameter 'name'");
+				throw new TypeError("'name' is not of type 'String'");
 			}
 			this.name = name;
 		}
@@ -21,12 +24,15 @@ module.exports = function() {
 				Foo.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_qux_0(name) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
 			}
 			this.bar = "Hello " + name;
 		}
@@ -34,7 +40,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Foo.prototype.__ks_func_qux_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Foo.bar = "Hello world!";

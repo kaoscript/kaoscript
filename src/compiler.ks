@@ -241,10 +241,10 @@ const $signature = {
 		return false if p1.length != p2.length
 		
 		for i from 0 til p1.length {
-			return true if p1[i].min == p2[i].min && p1[i].max == p2[i].max && p1[i].type == p2[i].type
+			return false if p1[i].min != p2[i].min || p1[i].max != p2[i].max || p1[i].type != p2[i].type
 		}
 		
-		return false
+		return true
 	} // }}}
 	type(type = null, scope) { // {{{
 		if type? {
@@ -300,7 +300,11 @@ const $type = {
 			
 			if type.typeParameters {
 				if $generics[type.typeName.name] || !$types[type.typeName.name] || $generics[$types[type.typeName.name]] {
-					let tof = $runtime.typeof(type.typeName.name, node) || $runtime.typeof($types[type.typeName.name], node)
+					let tof = $runtime.typeof(type.typeName.name, node)
+					
+					if !tof && $types[type.typeName.name]? {
+						tof = $runtime.typeof($types[type.typeName.name], node)
+					}
 					
 					if tof {
 						fragments
@@ -336,7 +340,11 @@ const $type = {
 				}
 			}
 			else {
-				let tof = $runtime.typeof(type.typeName.name, node) || $runtime.typeof($types[type.typeName.name], node)
+				let tof = $runtime.typeof(type.typeName.name, node)
+				
+				if !tof && $types[type.typeName.name]? {
+					tof = $runtime.typeof($types[type.typeName.name], node)
+				}
 				
 				if tof {
 					fragments
@@ -425,6 +433,19 @@ const $type = {
 		}
 		
 		return true
+	} // }}}
+	toQuote(type) { // {{{
+		if type is Array {
+			if type.length == 1 {
+				return `'\(type[0])'`
+			}
+			else {
+				return `'\(type.slice(0, type.length - 1).join("', '"))' or '\(type[type.length - 1])'`
+			}
+		}
+		else {
+			return `'\(type)'`
+		}
 	} // }}}
 	type(data, scope, node) { // {{{
 		//console.log('type.data', data)

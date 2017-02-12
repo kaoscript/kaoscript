@@ -6,8 +6,11 @@ module.exports = function() {
 		name: "mod",
 		sealed: __ks_Number,
 		function: function(max) {
-			if(max === undefined || max === null) {
-				throw new Error("Missing parameter 'max'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(max === void 0 || max === null) {
+				throw new TypeError("'max' is not nullable");
 			}
 			if(isNaN(this)) {
 				return 0;

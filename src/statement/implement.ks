@@ -136,6 +136,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_instance		= true
 		_name
 		_parameters
+		_signature
 		_statements
 		_variable
 	}
@@ -213,6 +214,8 @@ class ImplementClassMethodDeclaration extends Statement {
 		this.compile(this._parameters)
 		
 		this.compile(this._statements)
+		
+		@signature = new Signature(this)
 	} // }}}
 	getInstanceMethod(name, variable = @variable) { // {{{
 		if variable.instanceMethods[name]?['1']? {
@@ -596,6 +599,7 @@ class ImplementVariableFieldDeclaration extends Statement {
 class ImplementVariableMethodDeclaration extends Statement {
 	private {
 		_parameters
+		_signature
 		_statements
 		_variable
 	}
@@ -628,6 +632,8 @@ class ImplementVariableMethodDeclaration extends Statement {
 		this.compile(this._parameters)
 		
 		this.compile(this._statements)
+		
+		@signature = new Signature(this)
 	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{

@@ -28,7 +28,7 @@ class Statement extends AbstractNode {
 			statement.fuse()
 		}
 	} // }}}
-	isAsync() => false
+	isAwait() => false
 	statement() => this
 	toFragments(fragments, mode) { // {{{
 		let variables = @variables()

@@ -1,47 +1,49 @@
 class FunctionExpression extends Expression {
 	private {
-		_async			= false
-		_isObjectMember	= false
+		_await: Boolean		= false
+		_isObjectMember		= false
 		_parameters
+		_signature
 		_statements
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this, this._scope, {
+		$variable.define(this, @scope, {
 			kind: NodeKind::Identifier,
 			name: 'this'
 		}, VariableKind::Variable)
 		
-		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
+		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
 		
-		this._statements = [$compile.statement(statement, this) for statement in $body(this._data.body)]
+		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
 		
-		this._isObjectMember = this._parent is ObjectMember
+		@isObjectMember = @parent is ObjectMember
 	} // }}}
 	fuse() { // {{{
-		for parameter in this._parameters {
+		for parameter in @parameters {
 			parameter.analyse()
 			parameter.fuse()
 		}
 		
-		for statement in this._statements {
+		for statement in @statements {
 			statement.analyse()
+			statement.fuse()
 			
-			this._async = statement.isAsync() if !this._async
+			if !@await {
+				@await = statement.isAwait()
+			}
 		}
 		
-		for statement in this._statements {
-			statement.fuse()
-		}
+		@signature = new Signature(this)
 	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{
 		let surround
 		
-		if this._isObjectMember {
-			if this._options.format.functions == 'es5' {
+		if @isObjectMember {
+			if @options.format.functions == 'es5' {
 				surround = {
 					beforeParameters: ': function('
 					afterParameters: ')'
@@ -70,14 +72,14 @@ class FunctionExpression extends Expression {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 		
-		if this._async {
+		if @await {
 			let stack = []
 			
 			let f = block
 			let m = Mode::None
 			
 			let item
-			for statement in this._statements {
+			for statement in @statements {
 				if item ?= statement.toFragments(f, m) {
 					f = item.fragments
 					m = item.mode
@@ -91,7 +93,7 @@ class FunctionExpression extends Expression {
 			}
 		}
 		else {
-			for statement in this._statements {
+			for statement in @statements {
 				block.compile(statement)
 			}
 		}
@@ -106,33 +108,35 @@ class FunctionExpression extends Expression {
 
 class LambdaExpression extends Expression {
 	private {
-		_async			= false
+		_await: Boolean		= false
 		_parameters
+		_signature
 		_statements
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
-		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
+		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
 		
-		this._statements = [$compile.statement(statement, this) for statement in $body(this._data.body)]
+		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
 	} // }}}
 	fuse() { // {{{
-		for parameter in this._parameters {
+		for parameter in @parameters {
 			parameter.analyse()
 			parameter.fuse()
 		}
 		
-		for statement in this._statements {
+		for statement in @statements {
 			statement.analyse()
+			statement.fuse()
 			
-			this._async = statement.isAsync() if !this._async
+			if !@await {
+				@await = statement.isAwait()
+			}
 		}
 		
-		for statement in this._statements {
-			statement.fuse()
-		}
+		@signature = new Signature(this)
 	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{
@@ -144,14 +148,14 @@ class LambdaExpression extends Expression {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 		
-		if this._async {
+		if @await {
 			let stack = []
 			
 			let f = block
 			let m = Mode::None
 			
 			let item
-			for statement in this._statements {
+			for statement in @statements {
 				if item ?= statement.toFragments(f, m) {
 					f = item.fragments
 					m = item.mode
@@ -165,7 +169,7 @@ class LambdaExpression extends Expression {
 			}
 		}
 		else {
-			for statement in this._statements {
+			for statement in @statements {
 				block.compile(statement)
 			}
 		}

@@ -8,8 +8,11 @@ module.exports = function() {
 	};
 	AnimalFlags.EndangeredFlyingClawedFishEating = AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.EatsFish | AnimalFlags.Endangered;
 	function printAnimalAbilities(animal) {
-		if(animal === undefined || animal === null) {
-			throw new Error("Missing parameter 'animal'");
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(animal === void 0 || animal === null) {
+			throw new TypeError("'animal' is not nullable");
 		}
 		let animalFlags = animal.flags;
 		if(animalFlags & AnimalFlags.HasClaws) {

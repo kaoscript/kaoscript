@@ -7,22 +7,28 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(foo, bar) {
-			if(foo === undefined || foo === null) {
-				throw new Error("Missing parameter 'foo'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			if(bar === undefined || bar === null) {
-				throw new Error("Missing parameter 'bar'");
+			if(foo === void 0 || foo === null) {
+				throw new TypeError("'foo' is not nullable");
+			}
+			if(bar === void 0 || bar === null) {
+				throw new TypeError("'bar' is not nullable");
 			}
 		}
 		__ks_cons_1(foo, bar, qux) {
-			if(foo === undefined || foo === null) {
-				throw new Error("Missing parameter 'foo'");
+			if(arguments.length < 3) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
 			}
-			if(bar === undefined || bar === null) {
-				throw new Error("Missing parameter 'bar'");
+			if(foo === void 0 || foo === null) {
+				throw new TypeError("'foo' is not nullable");
 			}
-			if(qux === undefined || qux === null) {
-				throw new Error("Missing parameter 'qux'");
+			if(bar === void 0 || bar === null) {
+				throw new TypeError("'bar' is not nullable");
+			}
+			if(qux === void 0 || qux === null) {
+				throw new TypeError("'qux' is not nullable");
 			}
 		}
 		__ks_cons(args) {
@@ -33,7 +39,7 @@ module.exports = function() {
 				Foo.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}

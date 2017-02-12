@@ -3,7 +3,7 @@ module.exports = function() {
 	let foo = {
 		bar(name = null) {
 			if(name !== null && !Type.isString(name)) {
-				throw new Error("Invalid type for parameter 'name'");
+				throw new TypeError("'name' is not of type 'String'");
 			}
 			let n = 0;
 		}

@@ -5,17 +5,20 @@ module.exports = function(Helper, Type) {
 		name: "map",
 		sealed: __ks_Object,
 		function: function(object, iterator) {
-			if(object === undefined || object === null) {
-				throw new Error("Missing parameter 'object'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(object === void 0 || object === null) {
+				throw new TypeError("'object' is not nullable");
 			}
 			else if(!Type.isObject(object)) {
-				throw new Error("Invalid type for parameter 'object'");
+				throw new TypeError("'object' is not of type 'Object'");
 			}
-			if(iterator === undefined || iterator === null) {
-				throw new Error("Missing parameter 'iterator'");
+			if(iterator === void 0 || iterator === null) {
+				throw new TypeError("'iterator' is not nullable");
 			}
 			else if(!Type.isFunction(iterator)) {
-				throw new Error("Invalid type for parameter 'iterator'");
+				throw new TypeError("'iterator' is not of type 'Function'");
 			}
 			let results = [];
 			for(let item in object) {
@@ -47,23 +50,26 @@ module.exports = function(Helper, Type) {
 		name: "map",
 		sealed: __ks_Object,
 		function: function(object, iterator, condition) {
-			if(object === undefined || object === null) {
-				throw new Error("Missing parameter 'object'");
+			if(arguments.length < 3) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+			}
+			if(object === void 0 || object === null) {
+				throw new TypeError("'object' is not nullable");
 			}
 			else if(!Type.isObject(object)) {
-				throw new Error("Invalid type for parameter 'object'");
+				throw new TypeError("'object' is not of type 'Object'");
 			}
-			if(iterator === undefined || iterator === null) {
-				throw new Error("Missing parameter 'iterator'");
+			if(iterator === void 0 || iterator === null) {
+				throw new TypeError("'iterator' is not nullable");
 			}
 			else if(!Type.isFunction(iterator)) {
-				throw new Error("Invalid type for parameter 'iterator'");
+				throw new TypeError("'iterator' is not of type 'Function'");
 			}
-			if(condition === undefined || condition === null) {
-				throw new Error("Missing parameter 'condition'");
+			if(condition === void 0 || condition === null) {
+				throw new TypeError("'condition' is not nullable");
 			}
 			else if(!Type.isFunction(condition)) {
-				throw new Error("Invalid type for parameter 'condition'");
+				throw new TypeError("'condition' is not of type 'Function'");
 			}
 			let results = [];
 			for(let item in object) {

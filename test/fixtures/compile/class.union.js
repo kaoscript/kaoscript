@@ -15,11 +15,14 @@ module.exports = function() {
 			Greetings.prototype.__ks_cons.call(this, ["Hello!"]);
 		}
 		__ks_cons_1(message) {
-			if(message === undefined || message === null) {
-				throw new Error("Missing parameter 'message'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(message === void 0 || message === null) {
+				throw new TypeError("'message' is not nullable");
 			}
 			else if(!Type.isString(message)) {
-				throw new Error("Invalid type for parameter 'message'");
+				throw new TypeError("'message' is not of type 'String'");
 			}
 			this._message = message;
 		}
@@ -31,24 +34,30 @@ module.exports = function() {
 				Greetings.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_greet_0(name) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
 			}
 			else if(!(Type.isString(name) || Type.isNumber(name))) {
-				throw new Error("Invalid type for parameter 'name'");
+				throw new TypeError("'name' is not of type 'String' or 'Number'");
 			}
 			return this._message + "\nIt's nice to meet you, " + name + ".";
 		}
 		__ks_func_greet_1(person) {
-			if(person === undefined || person === null) {
-				throw new Error("Missing parameter 'person'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(person === void 0 || person === null) {
+				throw new TypeError("'person' is not nullable");
 			}
 			else if(!Type.is(person, Person)) {
-				throw new Error("Invalid type for parameter 'person'");
+				throw new TypeError("'person' is not of type 'Person'");
 			}
 			this.greet(person.name());
 		}
@@ -61,7 +70,7 @@ module.exports = function() {
 					return Greetings.prototype.__ks_func_greet_0.apply(this, arguments);
 				}
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Greetings.__ks_reflect = {

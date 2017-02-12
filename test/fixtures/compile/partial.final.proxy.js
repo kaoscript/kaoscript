@@ -6,11 +6,14 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_cons_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.isString(color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'String'");
 			}
 			this._color = color;
 		}
@@ -19,15 +22,18 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_draw_0() {
 			return "I'm drawing with a " + this._color + " pencil.";
 		}
 		__ks_func_draw_1(shape) {
-			if(shape === undefined || shape === null) {
-				throw new Error("Missing parameter 'shape'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(shape === void 0 || shape === null) {
+				throw new TypeError("'shape' is not nullable");
 			}
 			return "I'm drawing a " + this._color + " " + shape + ".";
 		}
@@ -38,7 +44,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Shape.prototype.__ks_func_draw_1.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Shape.__ks_reflect = {
@@ -96,11 +102,14 @@ module.exports = function() {
 		name: "draw",
 		sealed: __ks_Shape,
 		function: function(color, shape) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			if(shape === undefined || shape === null) {
-				throw new Error("Missing parameter 'shape'");
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
+			}
+			if(shape === void 0 || shape === null) {
+				throw new TypeError("'shape' is not nullable");
 			}
 			return "I'm drawing a " + color + " " + shape + ".";
 		},
@@ -125,8 +134,11 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			this._shape = new Shape(color);
 		}
@@ -135,24 +147,30 @@ module.exports = function() {
 				Proxy.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_draw_0() {
 			return __ks_Shape._im_draw(this._shape);
 		}
 		__ks_func_draw_1(shape) {
-			if(shape === undefined || shape === null) {
-				throw new Error("Missing parameter 'shape'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(shape === void 0 || shape === null) {
+				throw new TypeError("'shape' is not nullable");
 			}
 			return __ks_Shape._im_draw(this._shape, shape);
 		}
 		__ks_func_draw_2(color, shape) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			if(shape === undefined || shape === null) {
-				throw new Error("Missing parameter 'shape'");
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
+			}
+			if(shape === void 0 || shape === null) {
+				throw new TypeError("'shape' is not nullable");
 			}
 			return __ks_Shape._im_draw(this._shape, color, shape);
 		}
@@ -166,7 +184,7 @@ module.exports = function() {
 			else if(arguments.length === 2) {
 				return Proxy.prototype.__ks_func_draw_2.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Proxy.__ks_reflect = {

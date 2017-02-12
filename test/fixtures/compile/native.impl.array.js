@@ -6,7 +6,7 @@ module.exports = function() {
 		name: "last",
 		sealed: __ks_Array,
 		function: function(index) {
-			if(index === undefined || index === null) {
+			if(index === void 0 || index === null) {
 				index = 1;
 			}
 			return this.length ? this[this.length - index] : null;

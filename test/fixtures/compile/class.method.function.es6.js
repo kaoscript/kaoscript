@@ -1,11 +1,14 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function $format(message) {
-		if(message === undefined || message === null) {
-			throw new Error("Missing parameter 'message'");
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(message === void 0 || message === null) {
+			throw new TypeError("'message' is not nullable");
 		}
 		else if(!Type.isString(message)) {
-			throw new Error("Invalid type for parameter 'message'");
+			throw new TypeError("'message' is not of type 'String'");
 		}
 		return message.toUpperCase();
 	}
@@ -17,11 +20,14 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(messages) {
-			if(messages === undefined || messages === null) {
-				throw new Error("Missing parameter 'messages'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(messages === void 0 || messages === null) {
+				throw new TypeError("'messages' is not nullable");
 			}
 			else if(!Type.isArray(messages)) {
-				throw new Error("Invalid type for parameter 'messages'");
+				throw new TypeError("'messages' is not of type 'Array'");
 			}
 			this._messages = messages;
 		}
@@ -30,13 +36,16 @@ module.exports = function() {
 				LetterBox.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_build_01_0() {
 			return this._messages.map((message) => {
-				if(message === undefined || message === null) {
-					throw new Error("Missing parameter 'message'");
+				if(arguments.length < 1) {
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				}
+				if(message === void 0 || message === null) {
+					throw new TypeError("'message' is not nullable");
 				}
 				return this.format(message);
 			});
@@ -45,22 +54,24 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_01_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_build_02_0() {
 			return this._messages.map(Helper.vcurry(function() {
 				if(arguments.length < 2) {
-					throw new Error("Wrong number of arguments");
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				let __ks_i = -1;
-				var message = arguments[++__ks_i];
-				if(arguments.length > 2) {
-					var foo = arguments[++__ks_i];
+				let message = arguments[++__ks_i];
+				if(message === void 0 || message === null) {
+					throw new TypeError("'message' is not nullable");
 				}
-				else {
-					var foo = 42;
+				let __ks__;
+				let foo = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 42;
+				let bar = arguments[++__ks_i];
+				if(bar === void 0 || bar === null) {
+					throw new TypeError("'bar' is not nullable");
 				}
-				var bar = arguments[++__ks_i];
 				return this.format(message);
 			}, this));
 		}
@@ -68,22 +79,24 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_02_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_build_03_0() {
 			return this._messages.map(Helper.vcurry(function() {
 				if(arguments.length < 2) {
-					throw new Error("Wrong number of arguments");
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				let __ks_i = -1;
-				var message = arguments[++__ks_i];
-				if(arguments.length > 2) {
-					var foo = arguments[++__ks_i];
+				let message = arguments[++__ks_i];
+				if(message === void 0 || message === null) {
+					throw new TypeError("'message' is not nullable");
 				}
-				else {
-					var foo = null;
+				let __ks__;
+				let foo = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
+				let bar = arguments[++__ks_i];
+				if(bar === void 0 || bar === null) {
+					throw new TypeError("'bar' is not nullable");
 				}
-				var bar = arguments[++__ks_i];
 				return this.format(message);
 			}, this));
 		}
@@ -91,19 +104,22 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_03_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_build_04_0() {
 			return this._messages.map(Helper.vcurry(function(message) {
 				if(arguments.length < 2) {
-					throw new Error("Wrong number of arguments");
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 				}
-				if(message === undefined || message === null) {
-					throw new Error("Missing parameter 'message'");
+				if(message === void 0 || message === null) {
+					throw new TypeError("'message' is not nullable");
 				}
 				let __ks_i;
 				let foo = arguments.length > 2 ? Array.prototype.slice.call(arguments, 1, __ks_i = arguments.length - 1) : (__ks_i = 1, []);
-				var bar = arguments[__ks_i];
+				let bar = arguments[__ks_i];
+				if(bar === void 0 || bar === null) {
+					throw new TypeError("'bar' is not nullable");
+				}
 				return this.format(message);
 			}, this));
 		}
@@ -111,19 +127,22 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_04_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_build_05_0() {
 			return this._messages.map(function(message) {
 				if(arguments.length < 2) {
-					throw new Error("Wrong number of arguments");
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 				}
-				if(message === undefined || message === null) {
-					throw new Error("Missing parameter 'message'");
+				if(message === void 0 || message === null) {
+					throw new TypeError("'message' is not nullable");
 				}
 				let __ks_i;
 				let foo = arguments.length > 2 ? Array.prototype.slice.call(arguments, 1, __ks_i = arguments.length - 1) : (__ks_i = 1, []);
-				var bar = arguments[__ks_i];
+				let bar = arguments[__ks_i];
+				if(bar === void 0 || bar === null) {
+					throw new TypeError("'bar' is not nullable");
+				}
 				return $format(message);
 			});
 		}
@@ -131,14 +150,17 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_05_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_format_0(message) {
-			if(message === undefined || message === null) {
-				throw new Error("Missing parameter 'message'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(message === void 0 || message === null) {
+				throw new TypeError("'message' is not nullable");
 			}
 			else if(!Type.isString(message)) {
-				throw new Error("Invalid type for parameter 'message'");
+				throw new TypeError("'message' is not of type 'String'");
 			}
 			return message.toUpperCase();
 		}
@@ -146,15 +168,21 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return LetterBox.prototype.__ks_func_format_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		static __ks_sttc_compose_00_0(box) {
-			if(box === undefined || box === null) {
-				throw new Error("Missing parameter 'box'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(box === void 0 || box === null) {
+				throw new TypeError("'box' is not nullable");
 			}
 			return box._messages.map(function(message) {
-				if(message === undefined || message === null) {
-					throw new Error("Missing parameter 'message'");
+				if(arguments.length < 1) {
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				}
+				if(message === void 0 || message === null) {
+					throw new TypeError("'message' is not nullable");
 				}
 				return box.format(message);
 			});
@@ -163,22 +191,28 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return LetterBox.__ks_sttc_compose_00_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		static __ks_sttc_compose_01_0(box) {
-			if(box === undefined || box === null) {
-				throw new Error("Missing parameter 'box'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(box === void 0 || box === null) {
+				throw new TypeError("'box' is not nullable");
 			}
 			return box._messages.map(function(message) {
 				if(arguments.length < 2) {
-					throw new Error("Wrong number of arguments");
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 				}
-				if(message === undefined || message === null) {
-					throw new Error("Missing parameter 'message'");
+				if(message === void 0 || message === null) {
+					throw new TypeError("'message' is not nullable");
 				}
 				let __ks_i;
 				let foo = arguments.length > 2 ? Array.prototype.slice.call(arguments, 1, __ks_i = arguments.length - 1) : (__ks_i = 1, []);
-				var bar = arguments[__ks_i];
+				let bar = arguments[__ks_i];
+				if(bar === void 0 || bar === null) {
+					throw new TypeError("'bar' is not nullable");
+				}
 				return box.format(message);
 			});
 		}
@@ -186,7 +220,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return LetterBox.__ks_sttc_compose_01_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	LetterBox.__ks_reflect = {

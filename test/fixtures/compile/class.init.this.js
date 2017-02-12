@@ -7,8 +7,11 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(bar) {
-			if(bar === undefined || bar === null) {
-				throw new Error("Missing parameter 'bar'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(bar === void 0 || bar === null) {
+				throw new TypeError("'bar' is not nullable");
 			}
 		}
 		__ks_cons(args) {
@@ -16,7 +19,7 @@ module.exports = function() {
 				Foo.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}
@@ -55,7 +58,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}

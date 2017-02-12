@@ -1,6 +1,6 @@
 module.exports = function(expect) {
 	function foo(...items) {
-		var x = 42;
+		let x = 42;
 		return [items, x];
 	}
 	expect(foo()).to.eql([[], 42]);

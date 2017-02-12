@@ -9,36 +9,37 @@ module.exports = function() {
 		}
 		__ks_cons_0() {
 			if(arguments.length < 1) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			let __ks_i = -1;
-			if(arguments.length > 1) {
-				var foo = arguments[++__ks_i];
+			let __ks__;
+			let foo = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "hello";
+			let bar = arguments[++__ks_i];
+			if(bar === void 0 || bar === null) {
+				throw new TypeError("'bar' is not nullable");
 			}
-			else {
-				var foo = "hello";
+			else if(!Type.isString(bar)) {
+				throw new TypeError("'bar' is not of type 'String'");
 			}
-			if(Type.isString(arguments[++__ks_i])) {
-				var bar = arguments[__ks_i];
-			}
-			else throw new Error("Invalid type for parameter 'bar'")
 		}
 		__ks_cons_1() {
 			if(arguments.length < 2) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			let __ks_i = -1;
-			if(arguments.length > 2) {
-				var foo = arguments[++__ks_i];
+			let __ks__;
+			let foo = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "hello";
+			let bar = arguments[++__ks_i];
+			if(bar === void 0 || bar === null) {
+				throw new TypeError("'bar' is not nullable");
 			}
-			else {
-				var foo = "hello";
+			else if(!Type.isString(bar)) {
+				throw new TypeError("'bar' is not of type 'String'");
 			}
-			if(Type.isString(arguments[++__ks_i])) {
-				var bar = arguments[__ks_i];
+			let qux = arguments[++__ks_i];
+			if(qux === void 0 || qux === null) {
+				throw new TypeError("'qux' is not nullable");
 			}
-			else throw new Error("Invalid type for parameter 'bar'")
-			var qux = arguments[++__ks_i];
 		}
 		__ks_cons(args) {
 			if(args.length === 1) {
@@ -56,7 +57,7 @@ module.exports = function() {
 				Foo.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}

@@ -2,16 +2,14 @@ var Type = require("@kaoscript/runtime").Type;
 module.exports = function(expect) {
 	function foo() {
 		let __ks_i = -1;
-		if(arguments.length > 0) {
-			if(Type.isNumber(arguments[__ks_i + 1])) {
-				var x = arguments[++__ks_i];
-			}
-			else {
-				var x = null;
+		let x;
+		if(arguments.length > 0 && (x = arguments[++__ks_i]) !== void 0) {
+			if(x !== null && !Type.isNumber(x)) {
+				throw new TypeError("'x' is not of type 'Number'");
 			}
 		}
 		else {
-			var x = null;
+			x = null;
 		}
 		let items = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
 		return [x, items];

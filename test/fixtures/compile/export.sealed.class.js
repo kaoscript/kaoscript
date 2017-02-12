@@ -6,11 +6,14 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_cons_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.isString(color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'String'");
 			}
 			this._color = color;
 		}
@@ -19,7 +22,7 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}
@@ -57,8 +60,11 @@ module.exports = function() {
 		name: "draw",
 		sealed: __ks_Shape,
 		function: function(shape) {
-			if(shape === undefined || shape === null) {
-				throw new Error("Missing parameter 'shape'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(shape === void 0 || shape === null) {
+				throw new TypeError("'shape' is not nullable");
 			}
 			return "I'm drawing a " + this._color + " " + shape + ".";
 		},

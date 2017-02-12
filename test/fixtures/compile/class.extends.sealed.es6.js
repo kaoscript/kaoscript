@@ -9,7 +9,7 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0(message) {
-			if(message === undefined || message === null) {
+			if(message === void 0 || message === null) {
 				message = "Not Implemented";
 			}
 			this.message = message;
@@ -19,7 +19,7 @@ module.exports = function() {
 				NotImplementedError.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}

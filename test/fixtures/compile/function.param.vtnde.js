@@ -2,7 +2,7 @@ var Type = require("@kaoscript/runtime").Type;
 module.exports = function(expect) {
 	function foo(x = null) {
 		if(x !== null && !Type.isNumber(x)) {
-			throw new Error("Invalid type for parameter 'x'");
+			throw new TypeError("'x' is not of type 'Number'");
 		}
 		return [x];
 	}

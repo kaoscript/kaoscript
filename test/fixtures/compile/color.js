@@ -162,41 +162,47 @@ module.exports = function() {
 		"yellowgreen": "9acd32"
 	};
 	function $blend(x, y, percentage) {
-		if(x === undefined || x === null) {
-			throw new Error("Missing parameter 'x'");
+		if(arguments.length < 3) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+		}
+		if(x === void 0 || x === null) {
+			throw new TypeError("'x' is not nullable");
 		}
 		else if(!Type.isNumber(x)) {
-			throw new Error("Invalid type for parameter 'x'");
+			throw new TypeError("'x' is not of type 'Number'");
 		}
-		if(y === undefined || y === null) {
-			throw new Error("Missing parameter 'y'");
+		if(y === void 0 || y === null) {
+			throw new TypeError("'y' is not nullable");
 		}
 		else if(!Type.isNumber(y)) {
-			throw new Error("Invalid type for parameter 'y'");
+			throw new TypeError("'y' is not of type 'Number'");
 		}
-		if(percentage === undefined || percentage === null) {
-			throw new Error("Missing parameter 'percentage'");
+		if(percentage === void 0 || percentage === null) {
+			throw new TypeError("'percentage' is not nullable");
 		}
 		else if(!Type.isNumber(percentage)) {
-			throw new Error("Invalid type for parameter 'percentage'");
+			throw new TypeError("'percentage' is not of type 'Number'");
 		}
 		return ((1 - percentage) * x) + (percentage * y);
 	}
 	function $binder(last, components, first, ...firstArgs) {
-		if(last === undefined || last === null) {
-			throw new Error("Missing parameter 'last'");
+		if(arguments.length < 3) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+		}
+		if(last === void 0 || last === null) {
+			throw new TypeError("'last' is not nullable");
 		}
 		else if(!Type.isFunction(last)) {
-			throw new Error("Invalid type for parameter 'last'");
+			throw new TypeError("'last' is not of type 'Function'");
 		}
-		if(components === undefined || components === null) {
-			throw new Error("Missing parameter 'components'");
+		if(components === void 0 || components === null) {
+			throw new TypeError("'components' is not nullable");
 		}
-		if(first === undefined || first === null) {
-			throw new Error("Missing parameter 'first'");
+		if(first === void 0 || first === null) {
+			throw new TypeError("'first' is not nullable");
 		}
 		else if(!Type.isFunction(first)) {
-			throw new Error("Invalid type for parameter 'first'");
+			throw new TypeError("'first' is not of type 'Function'");
 		}
 		let that = first.apply(null, firstArgs);
 		let lastArgs = Helper.mapObject(components, function(name, component) {
@@ -207,40 +213,49 @@ module.exports = function() {
 	}
 	let $caster = {
 		alpha(n = null, percentage) {
-			if(percentage === undefined || percentage === null) {
+			if(percentage === void 0 || percentage === null) {
 				percentage = false;
 			}
 			let i = Float.parse(n);
 			return isNaN(i) ? 1 : __ks_Number._im_round(__ks_Number._im_limit(percentage ? i / 100 : i, 0, 1), 3);
 		},
 		ff(n) {
-			if(n === undefined || n === null) {
-				throw new Error("Missing parameter 'n'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(n === void 0 || n === null) {
+				throw new TypeError("'n' is not nullable");
 			}
 			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 255));
 		},
 		percentage(n) {
-			if(n === undefined || n === null) {
-				throw new Error("Missing parameter 'n'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(n === void 0 || n === null) {
+				throw new TypeError("'n' is not nullable");
 			}
 			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 100), 1);
 		}
 	};
 	function $component(component, name, space) {
-		if(component === undefined || component === null) {
-			throw new Error("Missing parameter 'component'");
+		if(arguments.length < 3) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
 		}
-		if(name === undefined || name === null) {
-			throw new Error("Missing parameter 'name'");
+		if(component === void 0 || component === null) {
+			throw new TypeError("'component' is not nullable");
+		}
+		if(name === void 0 || name === null) {
+			throw new TypeError("'name' is not nullable");
 		}
 		else if(!Type.isString(name)) {
-			throw new Error("Invalid type for parameter 'name'");
+			throw new TypeError("'name' is not of type 'String'");
 		}
-		if(space === undefined || space === null) {
-			throw new Error("Missing parameter 'space'");
+		if(space === void 0 || space === null) {
+			throw new TypeError("'space' is not nullable");
 		}
 		else if(!Type.isString(space)) {
-			throw new Error("Invalid type for parameter 'space'");
+			throw new TypeError("'space' is not of type 'String'");
 		}
 		component.field = "_" + name;
 		$spaces[space].components[name] = component;
@@ -255,27 +270,31 @@ module.exports = function() {
 	}
 	function $convert() {
 		if(arguments.length < 2) {
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		let __ks_i = -1;
-		if(Type.is(arguments[++__ks_i], Color)) {
-			var that = arguments[__ks_i];
+		let that = arguments[++__ks_i];
+		if(that === void 0 || that === null) {
+			throw new TypeError("'that' is not nullable");
 		}
-		else throw new Error("Invalid type for parameter 'that'")
-		if(Type.isString(arguments[++__ks_i])) {
-			var space = arguments[__ks_i];
+		else if(!Type.is(that, Color)) {
+			throw new TypeError("'that' is not of type 'Color'");
 		}
-		else throw new Error("Invalid type for parameter 'space'")
-		if(arguments.length > 2) {
-			if(Type.isObject(arguments[__ks_i + 1])) {
-				var result = arguments[++__ks_i];
-			}
-			else {
-				throw new Error("Invalid type for parameter 'result'");
+		let space = arguments[++__ks_i];
+		if(space === void 0 || space === null) {
+			throw new TypeError("'space' is not nullable");
+		}
+		else if(!Type.isString(space)) {
+			throw new TypeError("'space' is not of type 'String'");
+		}
+		let result;
+		if(arguments.length > 2 && (result = arguments[++__ks_i]) !== void 0 && result !== null) {
+			if(!Type.isObject(result)) {
+				throw new TypeError("'result' is not of type 'Object'");
 			}
 		}
 		else {
-			var result = {
+			result = {
 				_alpha: 0
 			};
 		}
@@ -294,17 +313,20 @@ module.exports = function() {
 		}
 	}
 	function $find(from, to) {
-		if(from === undefined || from === null) {
-			throw new Error("Missing parameter 'from'");
+		if(arguments.length < 2) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+		}
+		if(from === void 0 || from === null) {
+			throw new TypeError("'from' is not nullable");
 		}
 		else if(!Type.isString(from)) {
-			throw new Error("Invalid type for parameter 'from'");
+			throw new TypeError("'from' is not of type 'String'");
 		}
-		if(to === undefined || to === null) {
-			throw new Error("Missing parameter 'to'");
+		if(to === void 0 || to === null) {
+			throw new TypeError("'to' is not nullable");
 		}
 		else if(!Type.isString(to)) {
-			throw new Error("Invalid type for parameter 'to'");
+			throw new TypeError("'to' is not of type 'String'");
 		}
 		for(let name in $spaces[from].converters) {
 			if($spaces[name].converters[to]) {
@@ -314,17 +336,20 @@ module.exports = function() {
 		}
 	}
 	function $from(that, args) {
-		if(that === undefined || that === null) {
-			throw new Error("Missing parameter 'that'");
+		if(arguments.length < 2) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+		}
+		if(that === void 0 || that === null) {
+			throw new TypeError("'that' is not nullable");
 		}
 		else if(!Type.is(that, Color)) {
-			throw new Error("Invalid type for parameter 'that'");
+			throw new TypeError("'that' is not of type 'Color'");
 		}
-		if(args === undefined || args === null) {
-			throw new Error("Missing parameter 'args'");
+		if(args === void 0 || args === null) {
+			throw new TypeError("'args' is not nullable");
 		}
 		else if(!Type.isArray(args)) {
-			throw new Error("Invalid type for parameter 'args'");
+			throw new TypeError("'args' is not of type 'Array'");
 		}
 		that._dummy = false;
 		if(args.length === 0) {
@@ -347,14 +372,17 @@ module.exports = function() {
 		return that;
 	}
 	function $getFieldWithCasting(name, component, space) {
-		if(name === undefined || name === null) {
-			throw new Error("Missing parameter 'name'");
+		if(arguments.length < 3) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
 		}
-		if(component === undefined || component === null) {
-			throw new Error("Missing parameter 'component'");
+		if(name === void 0 || name === null) {
+			throw new TypeError("'name' is not nullable");
 		}
-		if(space === undefined || space === null) {
-			throw new Error("Missing parameter 'space'");
+		if(component === void 0 || component === null) {
+			throw new TypeError("'component' is not nullable");
+		}
+		if(space === void 0 || space === null) {
+			throw new TypeError("'space' is not nullable");
 		}
 		if(Type.isValue($components[name].spaces[this._space])) {
 			return this[component.field];
@@ -364,11 +392,14 @@ module.exports = function() {
 		}
 	}
 	function $getFieldWithoutCasting(name, field) {
-		if(name === undefined || name === null) {
-			throw new Error("Missing parameter 'name'");
+		if(arguments.length < 2) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 		}
-		if(field === undefined || field === null) {
-			throw new Error("Missing parameter 'field'");
+		if(name === void 0 || name === null) {
+			throw new TypeError("'name' is not nullable");
+		}
+		if(field === void 0 || field === null) {
+			throw new TypeError("'field' is not nullable");
 		}
 		if(Type.isValue($components[name].spaces[this._space])) {
 			return this[field];
@@ -378,11 +409,14 @@ module.exports = function() {
 		}
 	}
 	function $hex(that) {
-		if(that === undefined || that === null) {
-			throw new Error("Missing parameter 'that'");
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(that === void 0 || that === null) {
+			throw new TypeError("'that' is not nullable");
 		}
 		else if(!Type.is(that, Color)) {
-			throw new Error("Invalid type for parameter 'that'");
+			throw new TypeError("'that' is not of type 'Color'");
 		}
 		let chars = "0123456789abcdef";
 		let r1 = that._red >> 4;
@@ -409,17 +443,20 @@ module.exports = function() {
 	}
 	let $parsers = {
 		srgb(that, args) {
-			if(that === undefined || that === null) {
-				throw new Error("Missing parameter 'that'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(that === void 0 || that === null) {
+				throw new TypeError("'that' is not nullable");
 			}
 			else if(!Type.is(that, Color)) {
-				throw new Error("Invalid type for parameter 'that'");
+				throw new TypeError("'that' is not of type 'Color'");
 			}
-			if(args === undefined || args === null) {
-				throw new Error("Missing parameter 'args'");
+			if(args === void 0 || args === null) {
+				throw new TypeError("'args' is not nullable");
 			}
 			else if(!Type.isArray(args)) {
-				throw new Error("Invalid type for parameter 'args'");
+				throw new TypeError("'args' is not of type 'Array'");
 			}
 			if(args.length === 1) {
 				if(Type.isNumber(args[0])) {
@@ -560,17 +597,20 @@ module.exports = function() {
 			return false;
 		},
 		gray(that, args) {
-			if(that === undefined || that === null) {
-				throw new Error("Missing parameter 'that'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(that === void 0 || that === null) {
+				throw new TypeError("'that' is not nullable");
 			}
 			else if(!Type.is(that, Color)) {
-				throw new Error("Invalid type for parameter 'that'");
+				throw new TypeError("'that' is not of type 'Color'");
 			}
-			if(args === undefined || args === null) {
-				throw new Error("Missing parameter 'args'");
+			if(args === void 0 || args === null) {
+				throw new TypeError("'args' is not nullable");
 			}
 			else if(!Type.isArray(args)) {
-				throw new Error("Invalid type for parameter 'args'");
+				throw new TypeError("'args' is not of type 'Array'");
 			}
 			if(args.length === 1) {
 				if(Type.isNumeric(args[0])) {
@@ -600,20 +640,23 @@ module.exports = function() {
 		}
 	};
 	function $setFieldWithCasting(name, component, space, value) {
-		if(name === undefined || name === null) {
-			throw new Error("Missing parameter 'name'");
+		if(arguments.length < 4) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 4)");
 		}
-		if(component === undefined || component === null) {
-			throw new Error("Missing parameter 'component'");
+		if(name === void 0 || name === null) {
+			throw new TypeError("'name' is not nullable");
 		}
-		if(space === undefined || space === null) {
-			throw new Error("Missing parameter 'space'");
+		if(component === void 0 || component === null) {
+			throw new TypeError("'component' is not nullable");
 		}
-		if(value === undefined || value === null) {
-			throw new Error("Missing parameter 'value'");
+		if(space === void 0 || space === null) {
+			throw new TypeError("'space' is not nullable");
+		}
+		if(value === void 0 || value === null) {
+			throw new TypeError("'value' is not nullable");
 		}
 		else if(!(Type.isNumber(value) || Type.isString(value))) {
-			throw new Error("Invalid type for parameter 'value'");
+			throw new TypeError("'value' is not of type 'Number' or 'String'");
 		}
 		if(Type.isValue($components[name].spaces[this._space])) {
 			if(Type.isValue(component.parser)) {
@@ -641,17 +684,20 @@ module.exports = function() {
 		return this;
 	}
 	function $setFieldWithoutCasting(name, field, value) {
-		if(name === undefined || name === null) {
-			throw new Error("Missing parameter 'name'");
+		if(arguments.length < 3) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
 		}
-		if(field === undefined || field === null) {
-			throw new Error("Missing parameter 'field'");
+		if(name === void 0 || name === null) {
+			throw new TypeError("'name' is not nullable");
 		}
-		if(value === undefined || value === null) {
-			throw new Error("Missing parameter 'value'");
+		if(field === void 0 || field === null) {
+			throw new TypeError("'field' is not nullable");
+		}
+		if(value === void 0 || value === null) {
+			throw new TypeError("'value' is not nullable");
 		}
 		else if(!(Type.isNumber(value) || Type.isString(value))) {
-			throw new Error("Invalid type for parameter 'value'");
+			throw new TypeError("'value' is not of type 'Number' or 'String'");
 		}
 		if(Type.isValue($components[name].spaces[this._space])) {
 			let component = $spaces[this._space].components[name];
@@ -671,11 +717,14 @@ module.exports = function() {
 		return this;
 	}
 	function $space(name) {
-		if(name === undefined || name === null) {
-			throw new Error("Missing parameter 'name'");
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(name === void 0 || name === null) {
+			throw new TypeError("'name' is not nullable");
 		}
 		else if(!Type.isString(name)) {
-			throw new Error("Invalid type for parameter 'name'");
+			throw new TypeError("'name' is not of type 'String'");
 		}
 		$spaces[name] = Type.isValue($spaces[name]) ? $spaces[name] : {
 			alias: {},
@@ -713,11 +762,14 @@ module.exports = function() {
 			return this._alpha;
 		}
 		__ks_func_alpha_1(value) {
-			if(value === undefined || value === null) {
-				throw new Error("Missing parameter 'value'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(value === void 0 || value === null) {
+				throw new TypeError("'value' is not nullable");
 			}
 			else if(!(Type.isString(value) || Type.isNumber(value))) {
-				throw new Error("Invalid type for parameter 'value'");
+				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			this._alpha = $caster.alpha(value);
 			return this;
@@ -729,42 +781,44 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Color.prototype.__ks_func_alpha_1.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_blend_0() {
 			if(arguments.length < 2) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			let __ks_i = -1;
-			if(Type.is(arguments[++__ks_i], Color)) {
-				var color = arguments[__ks_i];
+			let color = arguments[++__ks_i];
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
-			else throw new Error("Invalid type for parameter 'color'")
-			if(Type.isNumber(arguments[++__ks_i])) {
-				var percentage = arguments[__ks_i];
+			else if(!Type.is(color, Color)) {
+				throw new TypeError("'color' is not of type 'Color'");
 			}
-			else throw new Error("Invalid type for parameter 'percentage'")
-			if(arguments.length > 2) {
-				if(Type.is(arguments[__ks_i + 1], Space)) {
-					var space = arguments[++__ks_i];
-				}
-				else {
-					throw new Error("Invalid type for parameter 'space'");
-				}
+			let percentage = arguments[++__ks_i];
+			if(percentage === void 0 || percentage === null) {
+				throw new TypeError("'percentage' is not nullable");
 			}
-			else {
-				var space = Space.SRGB;
+			else if(!Type.isNumber(percentage)) {
+				throw new TypeError("'percentage' is not of type 'Number'");
 			}
-			if(arguments.length > 3) {
-				if(Type.isBoolean(arguments[__ks_i + 1])) {
-					var alpha = arguments[++__ks_i];
-				}
-				else {
-					throw new Error("Invalid type for parameter 'alpha'");
+			let space;
+			if(arguments.length > 2 && (space = arguments[++__ks_i]) !== void 0 && space !== null) {
+				if(!Type.is(space, Space)) {
+					throw new TypeError("'space' is not of type 'Space'");
 				}
 			}
 			else {
-				var alpha = false;
+				space = Space.SRGB;
+			}
+			let alpha;
+			if(arguments.length > 3 && (alpha = arguments[++__ks_i]) !== void 0 && alpha !== null) {
+				if(!Type.isBoolean(alpha)) {
+					throw new TypeError("'alpha' is not of type 'Boolean'");
+				}
+			}
+			else {
+				alpha = false;
 			}
 			if(alpha) {
 				let w = (percentage * 2) - 1;
@@ -800,14 +854,17 @@ module.exports = function() {
 			if(arguments.length >= 2 && arguments.length <= 4) {
 				return Color.prototype.__ks_func_blend_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_clearer_0(value) {
-			if(value === undefined || value === null) {
-				throw new Error("Missing parameter 'value'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(value === void 0 || value === null) {
+				throw new TypeError("'value' is not nullable");
 			}
 			else if(!(Type.isString(value) || Type.isNumber(value))) {
-				throw new Error("Invalid type for parameter 'value'");
+				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			if(Type.isString(value) && value.endsWith("%")) {
 				return this.alpha(this._alpha * ((100 - (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value))) / 100));
@@ -820,7 +877,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_clearer_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_clone_0() {
 			return this.copy(new Color());
@@ -829,14 +886,17 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_clone_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_contrast_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.is(color, Color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'Color'");
 			}
 			let a = this._alpha;
 			if(a === 1) {
@@ -875,14 +935,17 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_contrast_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_copy_0(target) {
-			if(target === undefined || target === null) {
-				throw new Error("Missing parameter 'target'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(target === void 0 || target === null) {
+				throw new TypeError("'target' is not nullable");
 			}
 			else if(!Type.is(target, Color)) {
-				throw new Error("Invalid type for parameter 'target'");
+				throw new TypeError("'target' is not of type 'Color'");
 			}
 			let s1 = this._space;
 			let s2 = target._space;
@@ -901,14 +964,17 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_copy_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_distance_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.is(color, Color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'Color'");
 			}
 			let that = this.like(Space.SRGB);
 			color = color.like(Space.SRGB);
@@ -918,14 +984,17 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_distance_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_equals_0(color) {
-			if(color === undefined || color === null) {
-				throw new Error("Missing parameter 'color'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.is(color, Color)) {
-				throw new Error("Invalid type for parameter 'color'");
+				throw new TypeError("'color' is not of type 'Color'");
 			}
 			return this.hex() === color.hex();
 		}
@@ -933,14 +1002,14 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_equals_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_format_0(format) {
-			if(format === undefined || format === null) {
+			if(format === void 0 || format === null) {
 				format = this._space;
 			}
 			else if(!Type.isString(format)) {
-				throw new Error("Invalid type for parameter 'format'");
+				throw new TypeError("'format' is not of type 'String'");
 			}
 			if(Type.isValue($formatters[format]) ? (format = $formatters[format], true) : false) {
 				return format.formatter(Type.isValue(format.space) ? this.like(format.space) : this);
@@ -953,7 +1022,7 @@ module.exports = function() {
 			if(arguments.length >= 0 && arguments.length <= 1) {
 				return Color.prototype.__ks_func_format_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_from_0(...args) {
 			return $from(this, args);
@@ -962,17 +1031,20 @@ module.exports = function() {
 			return Color.prototype.__ks_func_from_0.apply(this, arguments);
 		}
 		__ks_func_gradient_0(endColor, length) {
-			if(endColor === undefined || endColor === null) {
-				throw new Error("Missing parameter 'endColor'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(endColor === void 0 || endColor === null) {
+				throw new TypeError("'endColor' is not nullable");
 			}
 			else if(!Type.is(endColor, Color)) {
-				throw new Error("Invalid type for parameter 'endColor'");
+				throw new TypeError("'endColor' is not of type 'Color'");
 			}
-			if(length === undefined || length === null) {
-				throw new Error("Missing parameter 'length'");
+			if(length === void 0 || length === null) {
+				throw new TypeError("'length' is not nullable");
 			}
 			else if(!Type.isNumber(length)) {
-				throw new Error("Invalid type for parameter 'length'");
+				throw new TypeError("'length' is not of type 'Number'");
 			}
 			let gradient = [this];
 			if(length > 0) {
@@ -998,14 +1070,14 @@ module.exports = function() {
 			if(arguments.length === 2) {
 				return Color.prototype.__ks_func_gradient_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_greyscale_0(model) {
-			if(model === undefined || model === null) {
+			if(model === void 0 || model === null) {
 				model = "BT709";
 			}
 			else if(!Type.isString(model)) {
-				throw new Error("Invalid type for parameter 'model'");
+				throw new TypeError("'model' is not of type 'String'");
 			}
 			this.space(Space.SRGB);
 			if(model === "BT709") {
@@ -1029,7 +1101,7 @@ module.exports = function() {
 			if(arguments.length >= 0 && arguments.length <= 1) {
 				return Color.prototype.__ks_func_greyscale_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_hex_0() {
 			return $hex(this.like(Space.SRGB));
@@ -1038,7 +1110,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_hex_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_isBlack_0() {
 			let that = this.like(Space.SRGB);
@@ -1048,7 +1120,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_isBlack_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_isTransparent_0() {
 			if(this._alpha === 0) {
@@ -1063,7 +1135,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_isTransparent_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_isWhite_0() {
 			let that = this.like(Space.SRGB);
@@ -1073,14 +1145,17 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_isWhite_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_like_0(space) {
-			if(space === undefined || space === null) {
-				throw new Error("Missing parameter 'space'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(space === void 0 || space === null) {
+				throw new TypeError("'space' is not nullable");
 			}
 			else if(!Type.isString(space)) {
-				throw new Error("Invalid type for parameter 'space'");
+				throw new TypeError("'space' is not of type 'String'");
 			}
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
 			return ((this._space === space) || Type.isValue($spaces[this._space][space])) ? this : $convert(this, space);
@@ -1089,7 +1164,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_like_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_luminance_0() {
 			let that = this.like(Space.SRGB);
@@ -1105,7 +1180,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_luminance_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_negative_0() {
 			this.space(Space.SRGB);
@@ -1118,14 +1193,17 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_negative_0.apply(this);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_opaquer_0(value) {
-			if(value === undefined || value === null) {
-				throw new Error("Missing parameter 'value'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(value === void 0 || value === null) {
+				throw new TypeError("'value' is not nullable");
 			}
 			else if(!(Type.isString(value) || Type.isNumber(value))) {
-				throw new Error("Invalid type for parameter 'value'");
+				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			if(Type.isString(value) && value.endsWith("%")) {
 				return this.alpha(this._alpha * ((100 + (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value))) / 100));
@@ -1138,27 +1216,28 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_opaquer_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_readable_0() {
 			if(arguments.length < 1) {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			let __ks_i = -1;
-			if(Type.is(arguments[++__ks_i], Color)) {
-				var color = arguments[__ks_i];
+			let color = arguments[++__ks_i];
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
-			else throw new Error("Invalid type for parameter 'color'")
-			if(arguments.length > 1) {
-				if(Type.isBoolean(arguments[__ks_i + 1])) {
-					var tripleA = arguments[++__ks_i];
-				}
-				else {
-					throw new Error("Invalid type for parameter 'tripleA'");
+			else if(!Type.is(color, Color)) {
+				throw new TypeError("'color' is not of type 'Color'");
+			}
+			let tripleA;
+			if(arguments.length > 1 && (tripleA = arguments[++__ks_i]) !== void 0 && tripleA !== null) {
+				if(!Type.isBoolean(tripleA)) {
+					throw new TypeError("'tripleA' is not of type 'Boolean'");
 				}
 			}
 			else {
-				var tripleA = false;
+				tripleA = false;
 			}
 			if(tripleA) {
 				return this.contrast(color).ratio >= 7;
@@ -1171,14 +1250,17 @@ module.exports = function() {
 			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Color.prototype.__ks_func_readable_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_scheme_0(functions) {
-			if(functions === undefined || functions === null) {
-				throw new Error("Missing parameter 'functions'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(functions === void 0 || functions === null) {
+				throw new TypeError("'functions' is not nullable");
 			}
 			else if(!Type.isArray(functions, Function)) {
-				throw new Error("Invalid type for parameter 'functions'");
+				throw new TypeError("'functions' is not of type 'Array'");
 			}
 			return Helper.mapArray(functions, (fn) => {
 				return fn(this.clone());
@@ -1188,14 +1270,17 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_scheme_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_shade_0(percentage) {
-			if(percentage === undefined || percentage === null) {
-				throw new Error("Missing parameter 'percentage'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(percentage === void 0 || percentage === null) {
+				throw new TypeError("'percentage' is not nullable");
 			}
 			else if(!Type.isNumber(percentage)) {
-				throw new Error("Invalid type for parameter 'percentage'");
+				throw new TypeError("'percentage' is not of type 'Number'");
 			}
 			return this.blend($static.black, percentage);
 		}
@@ -1203,17 +1288,20 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_shade_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_space_0() {
 			return this._space;
 		}
 		__ks_func_space_1(space) {
-			if(space === undefined || space === null) {
-				throw new Error("Missing parameter 'space'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(space === void 0 || space === null) {
+				throw new TypeError("'space' is not nullable");
 			}
 			else if(!Type.isString(space)) {
-				throw new Error("Invalid type for parameter 'space'");
+				throw new TypeError("'space' is not of type 'String'");
 			}
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
 			if(!Type.isValue($spaces[space]) && Type.isValue($components[space])) {
@@ -1239,14 +1327,17 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Color.prototype.__ks_func_space_1.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_tint_0(percentage) {
-			if(percentage === undefined || percentage === null) {
-				throw new Error("Missing parameter 'percentage'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(percentage === void 0 || percentage === null) {
+				throw new TypeError("'percentage' is not nullable");
 			}
 			else if(!Type.isNumber(percentage)) {
-				throw new Error("Invalid type for parameter 'percentage'");
+				throw new TypeError("'percentage' is not of type 'Number'");
 			}
 			return this.blend($static.white, percentage);
 		}
@@ -1254,14 +1345,17 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_tint_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_tone_0(percentage) {
-			if(percentage === undefined || percentage === null) {
-				throw new Error("Missing parameter 'percentage'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(percentage === void 0 || percentage === null) {
+				throw new TypeError("'percentage' is not nullable");
 			}
 			else if(!Type.isNumber(percentage)) {
-				throw new Error("Invalid type for parameter 'percentage'");
+				throw new TypeError("'percentage' is not of type 'Number'");
 			}
 			return this.blend($static.gray, percentage);
 		}
@@ -1269,7 +1363,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_tone_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		static __ks_sttc_from_0(...args) {
 			let color = $from(new Color(), args);
@@ -1307,17 +1401,20 @@ module.exports = function() {
 			return Color.__ks_sttc_negative_0.apply(this, arguments);
 		}
 		static __ks_sttc_registerFormatter_0(format, formatter) {
-			if(format === undefined || format === null) {
-				throw new Error("Missing parameter 'format'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(format === void 0 || format === null) {
+				throw new TypeError("'format' is not nullable");
 			}
 			else if(!Type.isString(format)) {
-				throw new Error("Invalid type for parameter 'format'");
+				throw new TypeError("'format' is not of type 'String'");
 			}
-			if(formatter === undefined || formatter === null) {
-				throw new Error("Missing parameter 'formatter'");
+			if(formatter === void 0 || formatter === null) {
+				throw new TypeError("'formatter' is not nullable");
 			}
 			else if(!Type.isFunction(formatter)) {
-				throw new Error("Invalid type for parameter 'formatter'");
+				throw new TypeError("'formatter' is not of type 'Function'");
 			}
 			$formatters[format] = {
 				formatter: formatter
@@ -1327,20 +1424,23 @@ module.exports = function() {
 			if(arguments.length === 2) {
 				return Color.__ks_sttc_registerFormatter_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		static __ks_sttc_registerParser_0(format, parser) {
-			if(format === undefined || format === null) {
-				throw new Error("Missing parameter 'format'");
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(format === void 0 || format === null) {
+				throw new TypeError("'format' is not nullable");
 			}
 			else if(!Type.isString(format)) {
-				throw new Error("Invalid type for parameter 'format'");
+				throw new TypeError("'format' is not of type 'String'");
 			}
-			if(parser === undefined || parser === null) {
-				throw new Error("Missing parameter 'parser'");
+			if(parser === void 0 || parser === null) {
+				throw new TypeError("'parser' is not nullable");
 			}
 			else if(!Type.isFunction(parser)) {
-				throw new Error("Invalid type for parameter 'parser'");
+				throw new TypeError("'parser' is not of type 'Function'");
 			}
 			$parsers[format] = parser;
 		}
@@ -1348,14 +1448,17 @@ module.exports = function() {
 			if(arguments.length === 2) {
 				return Color.__ks_sttc_registerParser_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 		static __ks_sttc_registerSpace_0(space) {
-			if(space === undefined || space === null) {
-				throw new Error("Missing parameter 'space'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(space === void 0 || space === null) {
+				throw new TypeError("'space' is not nullable");
 			}
 			else if(!Type.isObject(space)) {
-				throw new Error("Invalid type for parameter 'space'");
+				throw new TypeError("'space' is not of type 'Object'");
 			}
 			let spaces = Object.keys($spaces);
 			$space(space.name);
@@ -1611,7 +1714,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.__ks_sttc_registerSpace_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Color.__ks_reflect = {
@@ -2135,20 +2238,26 @@ module.exports = function() {
 		alias: [Space.RGB],
 		formatters: {
 			hex(that) {
-				if(that === undefined || that === null) {
-					throw new Error("Missing parameter 'that'");
+				if(arguments.length < 1) {
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				}
+				if(that === void 0 || that === null) {
+					throw new TypeError("'that' is not nullable");
 				}
 				else if(!Type.is(that, Color)) {
-					throw new Error("Invalid type for parameter 'that'");
+					throw new TypeError("'that' is not of type 'Color'");
 				}
 				return $hex(that);
 			},
 			srgb(that) {
-				if(that === undefined || that === null) {
-					throw new Error("Missing parameter 'that'");
+				if(arguments.length < 1) {
+					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				}
+				if(that === void 0 || that === null) {
+					throw new TypeError("'that' is not nullable");
 				}
 				else if(!Type.is(that, Color)) {
-					throw new Error("Invalid type for parameter 'that'");
+					throw new TypeError("'that' is not of type 'Color'");
 				}
 				if(that._alpha === 1) {
 					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";

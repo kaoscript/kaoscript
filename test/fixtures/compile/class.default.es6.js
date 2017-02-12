@@ -14,8 +14,11 @@ module.exports = function() {
 			Greetings.prototype.__ks_cons.call(this, ["Hello!"]);
 		}
 		__ks_cons_1(message) {
-			if(message === undefined || message === null) {
-				throw new Error("Missing parameter 'message'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(message === void 0 || message === null) {
+				throw new TypeError("'message' is not nullable");
 			}
 			this._message = message;
 		}
@@ -27,12 +30,15 @@ module.exports = function() {
 				Greetings.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
-				throw new Error("Wrong number of arguments");
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 		__ks_func_greet_0(name) {
-			if(name === undefined || name === null) {
-				throw new Error("Missing parameter 'name'");
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
 			}
 			return this._message + "\nIt's nice to meet you, " + name + ".";
 		}
@@ -40,7 +46,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Greetings.prototype.__ks_func_greet_0.apply(this, arguments);
 			}
-			throw new Error("Wrong number of arguments");
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	Greetings.__ks_reflect = {
