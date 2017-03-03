@@ -3,10 +3,9 @@ class Statement extends AbstractNode {
 		_afterwards	: Array	= []
 		_variables	: Array	= []
 	}
-	constructor(data, parent, scope = parent.scope()) { // {{{
-		@data = data
-		@parent = parent
-		@scope = scope
+	constructor(@data, @parent, @scope = parent.scope()) { // {{{
+		super(data, parent, scope)
+		
 		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
 	} // }}}
 	afterward(node) { // {{{

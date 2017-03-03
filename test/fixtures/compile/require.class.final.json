@@ -1,14 +1,14 @@
 {
   "requirements": {
     "Array": {
-      "class": true
+      "class": "true"
     }
   },
   "exports": {
     "Array": {
       "name": "Array",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -16,40 +16,35 @@
       "instanceMethods": {
         "contains": [
           {
-            "kind": 56,
-            "name": "contains",
-            "signature": {
-              "access": 3,
-              "min": 1,
-              "max": 2,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 1,
-                  "max": 2
-                }
-              ],
-              "throws": []
-            }
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": 2
+              }
+            ],
+            "throws": []
           }
         ],
         "pushUniq": [
           {
-            "kind": 56,
-            "name": "pushUniq",
-            "signature": {
-              "access": 3,
-              "min": 1,
-              "max": "Infinity",
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 1,
-                  "max": "Infinity"
-                }
-              ],
-              "throws": []
-            }
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "rest": "true"
+              }
+            ],
+            "throws": []
           }
         ]
       },
@@ -57,10 +52,10 @@
       "requirement": "Array",
       "sealed": {
         "name": "__ks_Array",
-        "constructors": false,
+        "constructors": "false",
         "instanceMethods": {
-          "contains": true,
-          "pushUniq": true
+          "contains": "true",
+          "pushUniq": "true"
         },
         "classMethods": {}
       }

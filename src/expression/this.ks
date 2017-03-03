@@ -53,9 +53,6 @@ class ThisExpression extends Expression {
 			if @isInstanceMethod(name, @class) {
 				fragments.code('this.', name)
 			}
-			else if @isInstanceMethod('_' + name, @class) {
-				fragments.code('this._', name)
-			}
 			else {
 				ReferenceException.throwNotDefinedMethod(name, this)
 			}
@@ -68,7 +65,17 @@ class ThisExpression extends Expression {
 				fragments.code('this._', name)
 			}
 			else {
-				ReferenceException.throwNotDefinedField(name, this)
+				let parent = @parent
+				while parent? && parent is not ClassMethodDeclaration {
+					parent = parent.parent()
+				}
+				
+				if (!?parent || parent.name() != name || parent.length() != 0) && @isInstanceMethod(name, @class) {
+					fragments.code('this.', name, '()')
+				}
+				else {
+					ReferenceException.throwNotDefinedField(name, this)
+				}
 			}
 		}
 	} // }}}

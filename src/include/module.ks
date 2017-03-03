@@ -640,10 +640,11 @@ class ModuleBlock extends AbstractNode {
 		_body: Array		= []
 		_module
 	}
-	constructor(data, @module) { // {{{
-		this._data = data
-		this._options = module._options
-		this._scope = new Scope()
+	constructor(@data, @module) { // {{{
+		super()
+		
+		@options = module._options
+		@scope = new Scope()
 	} // }}}
 	analyse() { // {{{
 		for statement in this._data.body {

@@ -3,7 +3,7 @@ class Shape {
 		_color: string = ''
 	}
 	
-	constructor(@color: string)
+	constructor(@color)
 	
 	draw(shape, canvas): string {
 		return `I'm drawing a \(this._color) \(shape).`

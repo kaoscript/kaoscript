@@ -45,15 +45,20 @@ const $call = {
 	} // }}}
 	filterType(variable, name, data, node) { // {{{
 		if variable.type? {
-			if variable.type.properties {
+			if variable.type is String {
+				if variable ?= $variable.fromType({typeName: $identifier(variable.type)}, node) {
+					return $call.filterMember(variable, name, data, node)
+				}
+			}
+			else if variable.type.properties? {
 				return variable.type.properties[name] if variable.type.properties[name] is Object
 			}
-			else if variable.type.typeName {
+			else if variable.type.typeName? {
 				if variable ?= $variable.fromType(variable.type, node) {
 					return $call.filterMember(variable, name, data, node)
 				}
 			}
-			else if variable.type.types {
+			else if variable.type.types? {
 				let variables: Array = []
 				
 				for type in variable.type.types {

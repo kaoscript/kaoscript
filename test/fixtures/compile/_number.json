@@ -4,7 +4,7 @@
     "Number": {
       "name": "Number",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -12,137 +12,97 @@
       "instanceMethods": {
         "limit": [
           {
-            "kind": 56,
-            "name": "limit",
-            "signature": {
-              "access": 3,
-              "min": 2,
-              "max": 2,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 2,
-                  "max": 2
-                }
-              ],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
+            "access": 3,
+            "async": "false",
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 2,
+                "max": 2
               }
-            }
+            ],
+            "throws": [],
+            "type": "Number"
           }
         ],
         "mod": [
           {
-            "kind": 56,
-            "name": "mod",
-            "signature": {
-              "access": 3,
-              "min": 1,
-              "max": 1,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 1,
-                  "max": 1
-                }
-              ],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": 1
               }
-            }
+            ],
+            "throws": [],
+            "type": "Number"
           }
         ],
         "round": [
           {
-            "kind": 56,
-            "name": "round",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 1,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 0,
-                  "max": 1
-                }
-              ],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": 1
               }
-            }
+            ],
+            "throws": [],
+            "type": "Number"
           }
         ],
         "toFloat": [
           {
-            "kind": 56,
-            "name": "toFloat",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 0,
-              "parameters": [],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
-              }
-            }
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "throws": [],
+            "type": "Number"
           }
         ],
         "toInt": [
           {
-            "kind": 56,
-            "name": "toInt",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 1,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 0,
-                  "max": 1
-                }
-              ],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": 1
               }
-            }
+            ],
+            "throws": [],
+            "type": "Number"
           }
         ]
       },
       "classMethods": {},
       "sealed": {
         "name": "__ks_Number",
-        "constructors": false,
+        "constructors": "false",
         "instanceMethods": {
-          "limit": true,
-          "mod": true,
-          "round": true,
-          "toFloat": true,
-          "toInt": true
+          "limit": "true",
+          "mod": "true",
+          "round": "true",
+          "toFloat": "true",
+          "toInt": "true"
         },
         "classMethods": {},
-        "extern": true
+        "extern": "true"
       }
     }
   }

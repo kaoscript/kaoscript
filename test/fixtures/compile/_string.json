@@ -4,7 +4,7 @@
     "String": {
       "name": "String",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -12,124 +12,84 @@
       "instanceMethods": {
         "toLowerCase": [
           {
-            "kind": 56,
-            "name": "toLowerCase",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 0,
-              "parameters": [],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "string"
-              }
-            }
-          }
-        ],
-        "lines": [
-          {
-            "kind": 56,
-            "name": "lines",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 1,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 0,
-                  "max": 1
-                }
-              ],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Array"
-              }
-            }
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "throws": [],
+            "type": "String"
           }
         ],
         "lower": [
           {
-            "kind": 56,
-            "name": "toLowerCase",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 0,
-              "parameters": [],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "string"
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "throws": [],
+            "type": "String"
+          }
+        ],
+        "lines": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": 1
               }
-            }
+            ],
+            "throws": [],
+            "type": "Array"
           }
         ],
         "toFloat": [
           {
-            "kind": 56,
-            "name": "toFloat",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 0,
-              "parameters": [],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
-              }
-            }
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "throws": [],
+            "type": "Number"
           }
         ],
         "toInt": [
           {
-            "kind": 56,
-            "name": "toInt",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 1,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 0,
-                  "max": 1
-                }
-              ],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": 1
               }
-            }
+            ],
+            "throws": [],
+            "type": "Number"
           }
         ]
       },
       "classMethods": {},
       "sealed": {
         "name": "__ks_String",
-        "constructors": false,
+        "constructors": "false",
         "instanceMethods": {
-          "lines": true,
-          "lower": true,
-          "toFloat": true,
-          "toInt": true
+          "lines": "true",
+          "lower": "true",
+          "toFloat": "true",
+          "toInt": "true"
         },
         "classMethods": {},
-        "extern": true
+        "extern": "true"
       }
     }
   }

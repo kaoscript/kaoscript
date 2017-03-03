@@ -10,5 +10,5 @@ class Shape {
 		}
 	}
 	
-	constructor(@type: string, @color: string)
+	constructor(@type, @color)
 }

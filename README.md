@@ -28,6 +28,11 @@ So how *kaoscript* is different?
 
 Additionally, I don't mind callbacks but **async/await are easier to read** but it will be only available for ES7.
 
+Status
+------
+
+It is still in an **experimental state** due to **major missing features** (macro, trait, mixin and operator overloading).
+
 Features
 --------
 
@@ -539,24 +544,11 @@ Syntax Highlighting
 - [TextMate](https://github.com/kaoscript/highlight-textmate)
 - [VS Code](https://github.com/kaoscript/highlight-vscode)
 
-Todo
-----
+Future
+------
 
-- more tests
-- get more people involved ;)
-- better documentation
-- operator overloading
-- class: versioning
-- class: properties
-- mixins
-- traits
-- struct
-- full support of generics
-- full support of enum
-- double dot (Dart)
-- boolean conditions
-- macro
-- coverage
+- add JSX-like support
+- compile to another language (Rust or Go)
 
 License
 -------

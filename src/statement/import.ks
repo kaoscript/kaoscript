@@ -222,7 +222,7 @@ const $import = {
 			}
 			
 			for name, variable of exports {
-				type.properties[variable.name] = variable
+				type.properties[name] = variable
 			}
 			
 			variable = $variable.define(node, node.scope(), {

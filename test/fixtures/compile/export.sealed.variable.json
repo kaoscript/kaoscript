@@ -4,7 +4,7 @@
     "Math": {
       "name": "Math",
       "kind": 5,
-      "new": true,
+      "new": "true",
       "type": {
         "typeName": {
           "kind": 41,
@@ -32,7 +32,7 @@
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
-                  "rest": true
+                  "rest": "true"
                 }
               ]
             },
@@ -48,7 +48,7 @@
       "sealed": {
         "name": "__ks_Math",
         "properties": {},
-        "extern": true
+        "extern": "true"
       }
     }
   }

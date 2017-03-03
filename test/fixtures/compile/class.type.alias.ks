@@ -11,5 +11,5 @@ class Person {
 	
 	constructor()
 	height(): float => this._float
-	height(@height: float) => this
+	height(@height) => this
 }

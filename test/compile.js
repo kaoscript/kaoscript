@@ -62,12 +62,10 @@ describe('compile', function() {
 				}
 				
 				if(metadata) {
-					var data = compiler.toMetadata();
-					//console.log(JSON.stringify(data, function(key, value){return value == Infinity ? 'Infinity' : value;}, 2));
+					var data = JSON.stringify(compiler.toMetadata(), function(key, value){return value == Infinity ? 'Infinity' : value === true ? 'true' : value === false ? 'false' : value;}, 2);
+					//console.log(data);
 					
-					expect(data).to.eql(JSON.parse(metadata, function(key, value) {
-						return value === 'Infinity' ? Infinity : value;
-					}));
+					expect(JSON.parse(data)).to.eql(JSON.parse(metadata));
 				}
 			}
 		});

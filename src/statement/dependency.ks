@@ -17,38 +17,34 @@ const $dependency = {
 			}
 			NodeKind::MethodDeclaration => {
 				if $method.isConstructor(data.name.name, variable) {
-					variable.constructors.push($function.signature(data, node))
+					variable.constructors.push(Signature.fromAST(data, node))
 				}
 				else if $method.isDestructor(data.name.name, variable) {
 					throw new NotImplementedException(node)
 				}
 				else {
-					let method = {
-						kind: NodeKind::MethodDeclaration
-						name: data.name.name
-						signature: $method.signature(data, node)
-					}
-					
-					method.type = $type.type(data.type, node.scope(), node) if data.type
-					
 					let instance = true
 					for i from 0 til data.modifiers.length while instance {
 						instance = false if data.modifiers[i].kind == ModifierKind::Static
 					}
 					
+					let signature = Signature.fromAST(data, node)
+					
 					if instance {
-						if !(variable.instanceMethods[data.name.name] is Array) {
-							variable.instanceMethods[data.name.name] = []
+						if variable.instanceMethods[data.name.name] is Array {
+							variable.instanceMethods[data.name.name].push(signature)
 						}
-						
-						variable.instanceMethods[data.name.name].push(method)
+						else {
+							variable.instanceMethods[data.name.name] = [signature]
+						}
 					}
 					else {
-						if !(variable.classMethods[data.name.name] is Array) {
-							variable.classMethods[data.name.name] = []
+						if variable.classMethods[data.name.name] is Array {
+							variable.classMethods[data.name.name].push(signature)
 						}
-						
-						variable.classMethods[data.name.name].push(method)
+						else {
+							variable.classMethods[data.name.name] = [signature]
+						}
 					}
 				}
 			}

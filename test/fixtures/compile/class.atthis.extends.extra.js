@@ -76,9 +76,9 @@ module.exports = function() {
 		__ks_init() {
 			Shape.prototype.__ks_init.call(this);
 		}
-		__ks_cons_0(color) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_cons_0(color, backgroundColor) {
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
@@ -86,10 +86,14 @@ module.exports = function() {
 			else if(!Type.isString(color)) {
 				throw new TypeError("'color' is not of type 'String'");
 			}
-			this._color = color;
+			if(backgroundColor === void 0 || backgroundColor === null) {
+				throw new TypeError("'backgroundColor' is not nullable");
+			}
+			Shape.prototype.__ks_cons.call(this, [color]);
+			this._backgroundColor = backgroundColor;
 		}
 		__ks_cons(args) {
-			if(args.length === 1) {
+			if(args.length === 2) {
 				Rectangle.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
@@ -111,11 +115,16 @@ module.exports = function() {
 		constructors: [
 			{
 				access: 3,
-				min: 1,
-				max: 1,
+				min: 2,
+				max: 2,
 				parameters: [
 					{
 						type: "String",
+						min: 1,
+						max: 1
+					},
+					{
+						type: "Any",
 						min: 1,
 						max: 1
 					}
@@ -123,7 +132,12 @@ module.exports = function() {
 			}
 		],
 		destructors: 0,
-		instanceVariables: {},
+		instanceVariables: {
+			_backgroundColor: {
+				access: 1,
+				type: "Any"
+			}
+		},
 		classVariables: {},
 		instanceMethods: {
 			draw: [

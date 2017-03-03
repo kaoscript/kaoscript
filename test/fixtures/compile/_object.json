@@ -7,7 +7,7 @@
     "Object": {
       "name": "Object",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -16,59 +16,53 @@
       "classMethods": {
         "map": [
           {
-            "kind": 56,
-            "name": "map",
-            "signature": {
-              "access": 3,
-              "min": 2,
-              "max": 2,
-              "parameters": [
-                {
-                  "type": "Object",
-                  "min": 1,
-                  "max": 1
-                },
-                {
-                  "type": "Function",
-                  "min": 1,
-                  "max": 1
-                }
-              ],
-              "throws": []
-            }
+            "access": 3,
+            "async": "false",
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "Object",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Function",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "throws": []
           },
           {
-            "kind": 56,
-            "name": "map",
-            "signature": {
-              "access": 3,
-              "min": 3,
-              "max": 3,
-              "parameters": [
-                {
-                  "type": "Object",
-                  "min": 1,
-                  "max": 1
-                },
-                {
-                  "type": "Function",
-                  "min": 2,
-                  "max": 2
-                }
-              ],
-              "throws": []
-            }
+            "access": 3,
+            "async": "false",
+            "min": 3,
+            "max": 3,
+            "parameters": [
+              {
+                "type": "Object",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Function",
+                "min": 2,
+                "max": 2
+              }
+            ],
+            "throws": []
           }
         ]
       },
       "sealed": {
         "name": "__ks_Object",
-        "constructors": false,
+        "constructors": "false",
         "instanceMethods": {},
         "classMethods": {
-          "map": true
+          "map": "true"
         },
-        "extern": true
+        "extern": "true"
       }
     }
   }

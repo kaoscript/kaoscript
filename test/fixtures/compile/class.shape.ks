@@ -7,11 +7,11 @@ class Shape {
 		_color: string = ''
 	}
 	
-	constructor(@color: string)
+	constructor(@color)
 	
 	color(): string => this._color
 	
-	color(@color: string): Shape => this
+	color(@color): Shape => this
 	
 	color(shape: Shape): Shape {
 		this._color = shape.color()

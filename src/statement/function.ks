@@ -13,16 +13,14 @@ const $function = {
 			return false
 		}
 		
-		let signature = node._signature
-		
 		let optional = false
-		for parameter, i in signature.parameters {
+		for parameter, i in node._parameters {
 			if optional {
-				if parameter.min > 0 {
+				if parameter._signature.min > 0 {
 					return true
 				}
 			}
-			else if parameter.max == Infinity || parameter.min == 0 {
+			else if parameter._signature.max == Infinity || parameter._signature.min == 0 {
 				optional = true
 			}
 		}
@@ -45,7 +43,7 @@ const $function = {
 		let signature = node._signature
 		
 		for parameter, i in node._parameters {
-			if signature.parameters[i].rest {
+			if parameter._rest {
 				SyntaxException.throwNoRestParameter(node)
 			}
 			else if parameter._defaultValue != null {
@@ -67,7 +65,6 @@ const $function = {
 	} // }}}
 	parametersES6(node, fragments, fn) { // {{{
 		let data = node._data
-		let signature = node._signature
 		let rest = false
 		
 		for parameter, i in node._parameters {
@@ -77,7 +74,7 @@ const $function = {
 			
 			fragments.code($comma) if i
 			
-			if signature.parameters[i].rest {
+			if parameter._rest {
 				parameter.toParameterFragments(fragments)
 				
 				rest = true
@@ -98,6 +95,7 @@ const $function = {
 	} // }}}
 	parametersKS(node, fragments, fn) { // {{{
 		let data = node._data
+		let parameters = node._parameters
 		let signature = node._signature
 		
 		let parameter, ctrl
@@ -110,50 +108,61 @@ const $function = {
 		let fr = false
 		
 		let rest = -1
-		for parameter, i in signature.parameters {
+		for parameter, i in parameters {
 			if rest != -1 {
-				if parameter.min != 0 {
-					ra += parameter.min
+				if parameter._signature.min != 0 {
+					ra += parameter._signature.min
 				}
 				
-				maxa += parameter.max
+				maxa += parameter._signature.max
 				
-				if parameter.rest {
+				if parameter._rest {
 					fr = true
 				}
 			}
-			else if parameter.max == Infinity {
+			else if parameter._signature.max == Infinity {
 				rest = i
-				rr = parameter.min
+				rr = parameter._signature.min
 			}
 			else {
-				if parameter.min == 0 {
+				if parameter._signature.min == 0 {
 					++db
 				}
 				else {
-					rb += parameter.min
+					rb += parameter._signature.min
 				}
 				
-				maxb += parameter.max
+				maxb += parameter._signature.max
 				
-				if parameter.rest {
+				if parameter._signature.rest {
 					fr = true
 				}
 			}
 		}
 		
-		let l = rest != -1 ? rest : node._parameters.length
+		if signature.async {
+			if rest != -1 {
+				++ra
+				++maxa
+			}
+			else {
+				++rb
+				++maxb
+			}
+		}
+		
+		let l = rest != -1 ? rest : parameters.length
 		let context
 		
 		if (rest != -1 && !fr && (db == 0 || db + 1 == rest)) || (rest == -1 && ((!signature.async && signature.max == l && (db == 0 || db == l)) || (signature.async && signature.max == l + 1 && (db == 0 || db == l + 1)))) { // {{{
-			for parameter, i in node._parameters while i < l {
+			for parameter, i in parameters while i < l {
 				fragments.code($comma) if i > 0
 				
 				parameter.toParameterFragments(fragments)
 			}
 			
-			if ra == 0 && rest != -1 && (signature.parameters[rest].type == 'Any' || maxa == 0) && node._options.format.parameters == 'es6' {
-				parameter = node._parameters[rest]
+			if ra == 0 && rest != -1 && (parameters[rest]._signature.type == 'Any' || maxa == 0) && node._options.format.parameters == 'es6' {
+				parameter = parameters[rest]
 				
 				fragments.code($comma) if rest > 0
 				
@@ -176,12 +185,12 @@ const $function = {
 					.done()
 			}
 			
-			for parameter, i in node._parameters while i < l {
+			for parameter, i in parameters while i < l {
 				parameter.toValidationFragments(fragments)
 			}
 			
 			if rest != -1 {
-				parameter = node._parameters[rest]
+				parameter = parameters[rest]
 				
 				if ra > 0 {
 					if parameter._anonymous {
@@ -334,11 +343,11 @@ const $function = {
 			}
 			
 			for i from 0 til l {
-				node._parameters[i].toBeforeRestFragments(fragments, context, i)
+				parameters[i].toBeforeRestFragments(fragments, context, i)
 			}
 			
 			if rest != -1 { // {{{
-				parameter = node._parameters[rest]
+				parameter = parameters[rest]
 				
 				if ra > 0 {
 					if parameter._anonymous {
@@ -378,7 +387,7 @@ const $function = {
 							.code(' = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : []')
 							.done()
 						
-						if signature.parameters[rest].type != 'Any' && l + 1 < data.parameters.length {
+						if parameter._signature.type != 'Any' && l + 1 < data.parameters.length {
 							fragments
 								.newLine()
 								.code('__ks_i += ')
@@ -391,8 +400,10 @@ const $function = {
 			} // }}}
 		} // }}}
 		
-		if ra || maxa { // {{{
-			if ra != maxa && signature.parameters[rest].type != 'Any' {
+		if ra != 0 || maxa != 0 { // {{{
+			parameter = parameters[rest]
+			
+			if ra != maxa && parameter._signature.type != 'Any' {
 				if ra {
 					fragments.line($variable.scope(node), '__ks_m = __ks_i + ', ra)
 				}
@@ -402,14 +413,14 @@ const $function = {
 			}
 			
 			context = {
-				any: signature.parameters[rest].type == 'Any'
+				any: parameter._signature.type == 'Any'
 				increment: false
 				temp: context? ? context.temp : false
-				length: data.parameters.length
+				length: parameters.length
 			}
 			
-			for i from rest + 1 til data.parameters.length {
-				node._parameters[i].toAfterRestFragments(fragments, context, i)
+			for i from rest + 1 til parameters.length {
+				parameters[i].toAfterRestFragments(fragments, context, i)
 			}
 		} // }}}
 		
@@ -490,7 +501,7 @@ const $function = {
 	} // }}}
 	surround(node) { // {{{
 		let parent = node._parent
-		while parent? && !(parent is MethodDeclaration || parent is ImplementClassMethodDeclaration) {
+		while parent? && !(parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration) {
 			parent = parent.parent()
 		}
 		
@@ -652,7 +663,7 @@ class FunctionDeclaration extends Statement {
 			@await = statement.isAwait()
 		}
 		
-		@signature = new Signature(this)
+		@signature = Signature.fromNode(this)
 	} // }}}
 	isConsumedError(name, variable): Boolean { // {{{
 		if @variable.throws.length > 0 {
@@ -713,35 +724,49 @@ class Parameter extends AbstractNode {
 		_name: String						= null
 		_nullable: Boolean					= false
 		_rest: Boolean						= false
+		_setterAlias: Boolean				= false
 		_signature
+		_thisAlias: Boolean					= false
 		_type								= null
 		_variable							= null
 	}
+	static type(data, node) { // {{{
+		if node.isMethod() && data.name? {
+			let name = data.name.name
+			
+			let type
+			for modifier in data.modifiers {
+				if modifier.kind == ModifierKind::ThisAlias && (type ?= node.getAliasType(name, node)) {
+					return type
+				}
+			}
+		}
+		
+		return data.type
+	} // }}}
 	analyse() { // {{{
 		@anonymous = !?@data.name
 		
 		if @parent.isMethod() {
 			if !@anonymous {
-				let nf = true
-				let name = @data.name.name
+				/* let name = @data.name.name
 				
-				for modifier in @data.modifiers while nf {
-					if modifier.kind == ModifierKind::Alias {
-						if variable ?= @parent.getInstanceVariable(name) {
-							@type = $type.reference(variable.type) if variable.type?
-						}
-						else if variable ?= @parent.getInstanceVariable('_' + name) {
-							@type = $type.reference(variable.type) if variable.type?
-						}
-						else if variable ?= @parent.getInstanceMethod(name) {
-							@type = $type.reference(variable.type) if variable.type?
-						}
-						else {
-							ReferenceException.throwNotDefinedMember(name, this)
-						}
-						
-						nf = false
+				for modifier in @data.modifiers while @type == null {
+					if modifier.kind == ModifierKind::ThisAlias {
+						@type = @parent.getAliasType(name, this)
 					}
+				} */
+				for modifier in @data.modifiers {
+					if modifier.kind == ModifierKind::SetterAlias {
+						@setterAlias = true
+					}
+					else if modifier.kind == ModifierKind::ThisAlias {
+						@thisAlias = true
+					}
+				}
+				
+				if @thisAlias {
+					@type = @parent.getAliasType(@data.name.name, this)
 				}
 			}
 			
@@ -749,7 +774,7 @@ class Parameter extends AbstractNode {
 		}
 		else {
 			for modifier in @data.modifiers {
-				if modifier.kind == ModifierKind::Alias {
+				if modifier.kind == ModifierKind::ThisAlias {
 					SyntaxException.throwOutOfClassAlias(this)
 				}
 			}
@@ -757,7 +782,7 @@ class Parameter extends AbstractNode {
 			@type = @data.type
 		}
 		
-		@nullable = @type?.nullable
+		@nullable = !!@type?.nullable
 		
 		if @data.defaultValue? {
 			@defaultValue = $compile.expression(@data.defaultValue, @parent)
@@ -839,6 +864,9 @@ class Parameter extends AbstractNode {
 			@defaultValue.fuse()
 		}
 	} // }}}
+	isAnonymous() => @anonymous
+	isSetterAlias() => @setterAlias
+	name() => @name
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@variable)
 	} // }}}
@@ -876,7 +904,7 @@ class Parameter extends AbstractNode {
 				ctrl
 					.code(')')
 					.step()
-					.line(`throw new TypeError("anonymous argument is not of type '\(@signature.type)'")`)
+					.line(`throw new TypeError("anonymous argument is not of type \($type.toQuote(@signature.type))")`)
 					.done()
 			}
 		}
@@ -1221,50 +1249,222 @@ class Parameter extends AbstractNode {
 			}
 		}
 	} // }}}
+	type() => @type
 }
 
 class Signature {
 	public {
-		async: Boolean	= false
-		min: Number		= 0
-		max: Number		= 0
-		parameters		= []
+		access: MemberAccess	= MemberAccess::Public
+		async: Boolean			= false
+		min: Number				= 0
+		max: Number				= 0
+		parameters				= []
+		throws					= []
 	}
-	constructor(parent) { // {{{
-		let signature
-		for parameter in parent._parameters {
-			@parameters.push(signature = parameter._signature)
+	static fromAST(data, parent) { // {{{
+		let that = new Signature()
+		
+		let signature, last
+		for parameter in data.parameters {
+			signature = {
+				type: $signature.type(parameter.type, parent.scope())
+				min: parameter.defaultValue? ? 0 : 1
+				max: 1
+			}
 			
-			if signature.max == Infinity {
-				if @max == Infinity {
-					SyntaxException.throwTooMuchRestParameter(this)
+			let nf = true
+			for modifier in parameter.modifiers while nf {
+				if modifier.kind == ModifierKind::Rest {
+					if modifier.arity {
+						signature.min = modifier.arity.min
+						signature.max = modifier.arity.max
+					}
+					else {
+						signature.min = 0
+						signature.max = Infinity
+					}
+					
+					nf = true
+				}
+			}
+			
+			if !?last || !$method.sameType(signature.type, last.type) {
+				if last? {
+					if last.max == Infinity {
+						if that.max == Infinity {
+							SyntaxException.throwTooMuchRestParameter(parent)
+						}
+						else {
+							that.max = Infinity
+						}
+					}
+					else {
+						that.max += last.max
+					}
+					
+					that.min += last.min
+				}
+				
+				that.parameters.push(last = Object.clone(signature))
+			}
+			else {
+				if signature.max == Infinity {
+					last.max = Infinity
 				}
 				else {
-					@max = Infinity
+					last.max += signature.max
+				}
+				
+				last.min += signature.min
+			}
+		}
+		
+		if last? {
+			if last.max == Infinity {
+				if that.max == Infinity {
+					SyntaxException.throwTooMuchRestParameter(parent)
+				}
+				else {
+					that.max = Infinity
 				}
 			}
 			else {
-				@max += signature.max
+				that.max += last.max
 			}
 			
-			@min += signature.min
+			that.min += last.min
 		}
 		
-		for modifier in parent._data.modifiers while !@async {
+		for modifier in data.modifiers {
 			if modifier.kind == ModifierKind::Async {
-				@async = true
+				that.async = true
+			}
+			else if modifier.kind == ModifierKind::Private {
+				that.access = MemberAccess::Private
+			}
+			else if modifier.kind == ModifierKind::Protected {
+				that.access = MemberAccess::Protected
 			}
 		}
 		
-		if @async {
-			@parameters.push({
-				type: 'Function'
-				min: 1
-				max: 1
-			})
+		if that.async {
+			if signature?.type == 'Function' {
+				++signature.min
+				++signature.max
+			}
+			else {
+				that.parameters.push({
+					type: 'Function'
+					min: 1
+					max: 1
+				})
+			}
 			
-			++@min
-			++@max
+			++that.min
+			++that.max
 		}
+		
+		if data.type? {
+			that.type = $signature.type($type.type(data.type, parent.scope(), parent), parent.scope())
+		}
+		
+		if data.throws? {
+			that.throws = [t.name for t in data.throws]
+		}
+		
+		return that
+	} // }}}
+	static fromNode(parent) { // {{{
+		let that = new Signature()
+		
+		let signature, last
+		for parameter in parent._parameters {
+			signature = parameter._signature
+			
+			if !?last || !$method.sameType(signature.type, last.type) {
+				if last? {
+					if last.max == Infinity {
+						if that.max == Infinity {
+							SyntaxException.throwTooMuchRestParameter(parent)
+						}
+						else {
+							that.max = Infinity
+						}
+					}
+					else {
+						that.max += last.max
+					}
+					
+					that.min += last.min
+				}
+				
+				that.parameters.push(last = Object.clone(signature))
+			}
+			else {
+				if signature.max == Infinity {
+					last.max = Infinity
+				}
+				else {
+					last.max += signature.max
+				}
+				
+				last.min += signature.min
+			}
+		}
+		
+		if last? {
+			if last.max == Infinity {
+				if that.max == Infinity {
+					SyntaxException.throwTooMuchRestParameter(parent)
+				}
+				else {
+					that.max = Infinity
+				}
+			}
+			else {
+				that.max += last.max
+			}
+			
+			that.min += last.min
+		}
+		
+		for modifier in parent._data.modifiers {
+			if modifier.kind == ModifierKind::Async {
+				that.async = true
+			}
+			else if modifier.kind == ModifierKind::Private {
+				that.access = MemberAccess::Private
+			}
+			else if modifier.kind == ModifierKind::Protected {
+				that.access = MemberAccess::Protected
+			}
+		}
+		
+		if that.async {
+			if signature?.type == 'Function' {
+				++signature.min
+				++signature.max
+			}
+			else {
+				that.parameters.push({
+					type: 'Function'
+					min: 1
+					max: 1
+				})
+			}
+			
+			++that.min
+			++that.max
+		}
+		
+		if parent._data.type? {
+			that.type = $signature.type($type.type(parent._data.type, parent.scope(), parent), parent.scope())
+		}
+		
+		if parent._data.throws? {
+			that.throws = [t.name for t in parent._data.throws]
+		}
+		
+		return that
 	} // }}}
 }

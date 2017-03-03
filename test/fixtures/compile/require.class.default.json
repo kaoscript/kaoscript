@@ -1,7 +1,7 @@
 {
   "requirements": {
     "Color": {
-      "class": true
+      "class": "true"
     },
     "Space": {}
   },
@@ -9,7 +9,7 @@
     "Color": {
       "name": "Color",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {
@@ -22,38 +22,27 @@
       "instanceMethods": {
         "luma": [
           {
-            "kind": 56,
-            "name": "luma",
-            "signature": {
-              "access": 3,
-              "min": 0,
-              "max": 0,
-              "parameters": [],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
-              }
-            }
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "throws": [],
+            "type": "Number"
           },
           {
-            "kind": 56,
-            "name": "luma",
-            "signature": {
-              "access": 3,
-              "min": 1,
-              "max": 1,
-              "parameters": [
-                {
-                  "type": "Number",
-                  "min": 1,
-                  "max": 1
-                }
-              ],
-              "throws": []
-            }
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Number",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "throws": []
           }
         ]
       },
@@ -63,8 +52,8 @@
     "Space": {
       "name": "Space",
       "kind": 2,
-      "new": true,
-      "type": "number",
+      "new": "true",
+      "type": "Number",
       "counter": -1,
       "requirement": "Space"
     }

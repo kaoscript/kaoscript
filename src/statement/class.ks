@@ -1,5 +1,5 @@
 enum MemberAccess { // {{{
-	Private = 1
+	Private		= 1
 	Protected
 	Public
 } // }}}
@@ -10,17 +10,19 @@ enum HelperTypeKind { // {{{
 	Unreferenced
 } // }}}
 
+enum TypeStatus { // {{{
+	Native
+	Referenced
+	Unreferenced
+} // }}}
+
 const $class = {
-	abstractMethod(node, fragments, statement, signature, parameters, reflect, name) { // {{{
+	abstractMethod(node, fragments, statement, signature, reflect, name) { // {{{
 		if !(reflect.abstractMethods[name] is Array) {
 			reflect.abstractMethods[name] = []
 		}
-		let index = reflect.abstractMethods[name].length
 		
-		reflect.abstractMethods[name].push({
-			signature: signature
-			parameters: parameters
-		})
+		reflect.abstractMethods[name].push(signature)
 	} // }}}
 	areAbstractMethodsImplemented(variable, parent, scope) { // {{{
 		for name, methods of parent.abstractMethods {
@@ -44,23 +46,31 @@ const $class = {
 			inits: 0
 			constructors: []
 			destructors: 0
-			instanceVariables: node._instanceVariables
-			classVariables: node._classVariables
+			instanceVariables: {}
+			classVariables: {}
 			instanceMethods: {}
 			classMethods: {}
 			abstractMethods: {}
 		}
 		
-		let noinit = KSType.isEmptyObject(node._instanceVariables)
+		let noinit = Object.isEmpty(node._instanceVariables)
 		
 		if !noinit {
 			noinit = true
 			
 			for name, field of node._instanceVariables while noinit {
-				if field.data.defaultValue {
+				if field.hasDefaultValue() {
 					noinit = false
 				}
 			}
+		}
+		
+		for name, variable of node._instanceVariables {
+			reflect.instanceVariables[name] = variable.signature()
+		}
+		
+		for name, variable of node._classVariables {
+			reflect.classVariables[name] = variable.signature()
 		}
 		
 		if node._es5 {
@@ -84,14 +94,14 @@ const $class = {
 				ctrl = clazz.newLine().code('$static: ').newObject()
 				
 				if node._destructor? {
-					$class.destructor(node, ctrl, node._destructor.statement, reflect)
+					$class.destructor(node, ctrl, node._destructor, reflect)
 					
 					$helper.destructor(node, ctrl, reflect)
 				}
 				
 				for name, methods of node._classMethods {
 					for method in methods {
-						$class.classMethod(node, ctrl, method.statement, method.signature, method.parameters, reflect, name)
+						$class.classMethod(node, ctrl, method, method.signature(), reflect, name)
 					}
 					
 					$helper.classMethod(node, ctrl, reflect, name)
@@ -137,12 +147,8 @@ const $class = {
 					.code($class.methodHeader('__ks_init_1', node), '()')
 					.step()
 				
-				for name, field of node._instanceVariables when field.data.defaultValue? {
-					ctrl
-						.newLine()
-						.code('this.' + name + ' = ')
-						.compile(field.defaultValue)
-						.done()
+				for :field of node._instanceVariables {
+					field.toFragments(ctrl)
 				}
 				
 				ctrl = clazz.newControl().code($class.methodHeader('__ks_init', node), '()').step()
@@ -155,14 +161,14 @@ const $class = {
 			}
 			
 			for method in node._constructors {
-				$class.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect)
+				$class.constructor(node, clazz, method, method.signature(), reflect)
 			}
 			
 			$helper.constructor(node, clazz, reflect)
 			
 			for name, methods of node._instanceMethods {
 				for method in methods {
-					$class.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.instanceMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 				
 				$helper.instanceMethod(node, clazz, reflect, name)
@@ -170,7 +176,7 @@ const $class = {
 			
 			for name, methods of node._abstractMethods {
 				for method in methods {
-					$class.abstractMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.abstractMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 			}
 			
@@ -239,12 +245,8 @@ const $class = {
 					.code('__ks_init_1()')
 					.step()
 				
-				for name, field of node._instanceVariables when field.data.defaultValue? {
-					ctrl
-						.newLine()
-						.code('this.' + name + ' = ')
-						.compile(field.defaultValue)
-						.done()
+				for :field of node._instanceVariables {
+					field.toFragments(ctrl)
 				}
 				
 				ctrl.done()
@@ -261,20 +263,20 @@ const $class = {
 			}
 			
 			for method in node._constructors {
-				$class.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect)
+				$class.constructor(node, clazz, method, method.signature(), reflect)
 			}
 			
 			$helper.constructor(node, clazz, reflect)
 			
 			if node._destructor? {
-				$class.destructor(node, clazz, node._destructor.statement, reflect)
+				$class.destructor(node, clazz, node._destructor, reflect)
 				
 				$helper.destructor(node, clazz, reflect)
 			}
 			
 			for name, methods of node._instanceMethods {
 				for method in methods {
-					$class.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.instanceMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 				
 				$helper.instanceMethod(node, clazz, reflect, name)
@@ -282,13 +284,13 @@ const $class = {
 			
 			for name, methods of node._abstractMethods {
 				for method in methods {
-					$class.abstractMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.abstractMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 			}
 			
 			for name, methods of node._classMethods {
 				for method in methods {
-					$class.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.classMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 				
 				$helper.classMethod(node, clazz, reflect, name)
@@ -299,37 +301,24 @@ const $class = {
 		
 		return reflect
 	} // }}}
-	classMethod(node, fragments, statement, signature, parameters, reflect, name) { // {{{
-		if !(reflect.classMethods[name] is Array) {
+	classMethod(node, fragments, statement, signature, reflect, name) { // {{{
+		if reflect.classMethods[name] is not Array {
 			reflect.classMethods[name] = []
 		}
-		let index = reflect.classMethods[name].length
 		
-		reflect.classMethods[name].push({
-			signature: signature
-			parameters: parameters
-		})
+		reflect.classMethods[name].push(signature)
 		
-		statement
-			.name('__ks_sttc_' + name + '_' + index)
-			.toFragments(fragments, Mode::None)
+		statement.toFragments(fragments, Mode::None)
 	} // }}}
-	constructor(node, fragments, statement, signature, parameters, reflect) { // {{{
+	constructor(node, fragments, statement, signature, reflect) { // {{{
 		let index = reflect.constructors.length
 		
-		reflect.constructors.push({
-			signature: signature
-			parameters: parameters
-		})
+		reflect.constructors.push(signature)
 	
-		statement
-			.name('__ks_cons_' + index)
-			.toFragments(fragments, Mode::None)
+		statement.toFragments(fragments, Mode::None)
 	} // }}}
 	destructor(node, fragments, statement, reflect) { // {{{
-		statement
-			.name('__ks_destroy_' + reflect.destructors)
-			.toFragments(fragments, Mode::None)
+		statement.toFragments(fragments, Mode::None)
 		
 		reflect.destructors++
 	} // }}}
@@ -343,20 +332,14 @@ const $class = {
 			return hierarchy
 		}
 	} // }}}
-	instanceMethod(node, fragments, statement, signature, parameters, reflect, name) { // {{{
-		if !(reflect.instanceMethods[name] is Array) {
+	instanceMethod(node, fragments, statement, signature, reflect, name) { // {{{
+		if reflect.instanceMethods[name] is not Array {
 			reflect.instanceMethods[name] = []
 		}
-		let index = reflect.instanceMethods[name].length
 		
-		reflect.instanceMethods[name].push({
-			signature: signature
-			parameters: parameters
-		})
+		reflect.instanceMethods[name].push(signature)
 		
-		statement
-			.name('__ks_func_' + name + '_' + index)
-			.toFragments(fragments, Mode::None)
+		statement.toFragments(fragments, Mode::None)
 	} // }}}
 	methodCall(node, fnName, argName, retCode, fragments, method, index) { // {{{
 		if method.max == 0 {
@@ -381,23 +364,31 @@ const $class = {
 			inits: 0
 			constructors: []
 			destructors: 0
-			instanceVariables: node._instanceVariables
-			classVariables: node._classVariables
+			instanceVariables: {}
+			classVariables: {}
 			instanceMethods: {}
 			classMethods: {}
 			abstractMethods: {}
 		}
 		
-		let noinit = KSType.isEmptyObject(node._instanceVariables)
+		let noinit = Object.isEmpty(node._instanceVariables)
 		
 		if !noinit {
 			noinit = true
 			
 			for name, field of node._instanceVariables while noinit {
-				if field.data.defaultValue {
+				if field.hasDefaultValue {
 					noinit = false
 				}
 			}
+		}
+		
+		for name, variable of node._instanceVariables {
+			reflect.instanceVariables[name] = variable.signature()
+		}
+		
+		for name, variable of node._classVariables {
+			reflect.classVariables[name] = variable.signature()
 		}
 		
 		if node._es5 {
@@ -421,14 +412,14 @@ const $class = {
 				ctrl = clazz.newLine().code('$static: ').newObject()
 				
 				if node._destructor? {
-					$class.destructor(node, ctrl, node._destructor.statement, reflect)
+					$class.destructor(node, ctrl, node._destructor, reflect)
 					
 					$helper.destructor(node, ctrl, reflect)
 				}
 				
 				for name, methods of node._classMethods {
 					for method in methods {
-						$class.classMethod(node, ctrl, method.statement, method.signature, method.parameters, reflect, name)
+						$class.classMethod(node, ctrl, method, method.signature(), reflect, name)
 					}
 					
 					$helper.classMethod(node, ctrl, reflect, name)
@@ -446,12 +437,8 @@ const $class = {
 				ctrl.line(node._extendsName, '.prototype.__ks_init.call(this)')
 				
 				if !noinit {
-					for name, field of node._instanceVariables when field.data.defaultValue? {
-						ctrl
-							.newLine()
-							.code('this.' + name + ' = ')
-							.compile(field.defaultValue)
-							.done()
+					for :field of node._instanceVariables {
+						field.toFragments(ctrl)
 					}
 				}
 			}
@@ -462,12 +449,8 @@ const $class = {
 					.step()
 			
 				if !noinit {
-					for name, field of node._instanceVariables when field.data.defaultValue? {
-						ctrl
-							.newLine()
-							.code('this.' + name + ' = ')
-							.compile(field.defaultValue)
-							.done()
+					for :field of node._instanceVariables {
+						field.toFragments(ctrl)
 					}
 				}
 				
@@ -475,14 +458,14 @@ const $class = {
 			}
 			
 			for method in node._constructors {
-				$class.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect)
+				$class.constructor(node, clazz, method, method.signature(), reflect)
 			}
 			
 			$helper.constructor(node, clazz, reflect)
 			
 			for name, methods of node._instanceMethods {
 				for method in methods {
-					$class.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.instanceMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 				
 				$helper.instanceMethod(node, clazz, reflect, name)
@@ -490,7 +473,7 @@ const $class = {
 			
 			for name, methods of node._abstractMethods {
 				for method in methods {
-					$class.abstractMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.abstractMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 			}
 			
@@ -518,12 +501,8 @@ const $class = {
 				ctrl.line(node._extendsName, '.prototype.__ks_init.call(this)')
 				
 				if !noinit {
-					for name, field of node._instanceVariables when field.data.defaultValue? {
-						ctrl
-							.newLine()
-							.code('this.' + name + ' = ')
-							.compile(field.defaultValue)
-							.done()
+					for :field of node._instanceVariables {
+						field.toFragments(ctrl)
 					}
 				}
 				
@@ -536,12 +515,8 @@ const $class = {
 					.step()
 			
 				if !noinit {
-					for name, field of node._instanceVariables when field.data.defaultValue? {
-						ctrl
-							.newLine()
-							.code('this.' + name + ' = ')
-							.compile(field.defaultValue)
-							.done()
+					for :field of node._instanceVariables {
+						field.toFragments(ctrl)
 					}
 				}
 				
@@ -551,20 +526,20 @@ const $class = {
 			}
 			
 			for method in node._constructors {
-				$class.constructor(node, clazz, method.statement, method.signature, method.parameters, reflect)
+				$class.constructor(node, clazz, method, method.signature(), reflect)
 			}
 			
 			$helper.constructor(node, clazz, reflect)
 			
 			if node._destructor? {
-				$class.destructor(node, clazz, node._destructor.statement, reflect)
+				$class.destructor(node, clazz, node._destructor, reflect)
 				
 				$helper.destructor(node, clazz, reflect)
 			}
 			
 			for name, methods of node._instanceMethods {
 				for method in methods {
-					$class.instanceMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.instanceMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 				
 				$helper.instanceMethod(node, clazz, reflect, name)
@@ -572,13 +547,13 @@ const $class = {
 			
 			for name, methods of node._abstractMethods {
 				for method in methods {
-					$class.abstractMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.abstractMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 			}
 			
 			for name, methods of node._classMethods {
 				for method in methods {
-					$class.classMethod(node, clazz, method.statement, method.signature, method.parameters, reflect, name)
+					$class.classMethod(node, clazz, method, method.signature(), reflect, name)
 				}
 				
 				$helper.classMethod(node, clazz, reflect, name)
@@ -608,44 +583,22 @@ const $field = {
 			}
 		}
 		
-		signature.type = type if data.type && (type ?= $signature.type(data.type, node.scope()))
+		if data.type {
+			signature.type = $signature.type(data.type, node.scope())
+			
+			if data.type.nullable {
+				signature.nullable = true
+			}
+		}
+		else {
+			signature.type = 'Any'
+		}
 		
 		return signature
 	} // }}}
 }
 
 const $helper = {
-	analyseType(type = null, node) { // {{{
-		if !?type {
-			return {
-				kind: HelperTypeKind::Native
-				type: 'Any'
-			}
-		}
-		else if type is Array {
-			return [$helper.analyseType(t, node) for t in type]
-		}
-		else if type == 'Any' || type == '...'  || $typeofs[type] {
-			return {
-				kind: HelperTypeKind::Native
-				type: type
-			}
-		}
-		else {
-			if variable ?= $variable.fromReflectType(type, node) {
-				return {
-					kind: HelperTypeKind::Referenced
-					type: type
-				}
-			}
-			else {
-				return {
-					kind: HelperTypeKind::Unreferenced
-					type: type
-				}
-			}
-		}
-	} // }}}
 	classMethod(node, fragments, reflect, name) { // {{{
 		let extend = false
 		if node._extends {
@@ -766,7 +719,7 @@ const $helper = {
 			}
 		}
 		else if methods.length == 1 {
-			method = methods[0].signature
+			method = methods[0]
 			
 			if method.min == 0 && method.max >= Infinity {
 				call(fragments, method, 0)
@@ -824,7 +777,7 @@ const $helper = {
 			let max = 0
 			
 			for index from 0 til methods.length {
-				method = methods[index].signature
+				method = methods[index]
 				method.index = index
 				
 				if method.max == Infinity {
@@ -967,7 +920,7 @@ const $helper = {
 			tree.push(item = {
 				type: [name]
 				path: [`this.constructor.__ks_reflect.\(refName)\(type.path)`]
-				methods: [methods[i].signature for i in type.methods]
+				methods: [methods[i] for i in type.methods]
 				usage: type.methods.length
 			})
 			
@@ -979,7 +932,7 @@ const $helper = {
 			}
 			
 			for i in type.methods {
-				method = methods[i].signature
+				method = methods[i]
 				
 				nf = true
 				for usage in usages while nf {
@@ -1201,7 +1154,7 @@ const $helper = {
 		
 		a = object.newLine().code('constructors: ').newArray()
 		for i from 0 til reflect.constructors.length {
-			$helper.reflectMethod(node, a.newLine(), reflect.constructors[i].signature, reflect.constructors[i].parameters, classname + '.__ks_reflect.constructors[' + i + ']')
+			$helper.reflectMethod(node, a.newLine(), reflect.constructors[i], classname + '.__ks_reflect.constructors[' + i + ']')
 		}
 		a.done()
 		
@@ -1209,13 +1162,13 @@ const $helper = {
 		
 		o = object.newLine().code('instanceVariables: ').newObject()
 		for name, variable of reflect.instanceVariables {
-			$helper.reflectVariable(node, o.newLine(), name, variable.signature, variable.type, classname + '.__ks_reflect.instanceVariables.' + name)
+			$helper.reflectVariable(node, o.newLine(), name, variable, classname + '.__ks_reflect.instanceVariables.' + name)
 		}
 		o.done()
 		
 		o = object.newLine().code('classVariables: ').newObject()
 		for name, variable of reflect.classVariables {
-			$helper.reflectVariable(node, o.newLine(), name, variable.signature, variable.type, classname + '.__ks_reflect.classVariables.' + name)
+			$helper.reflectVariable(node, o.newLine(), name, variable, classname + '.__ks_reflect.classVariables.' + name)
 		}
 		o.done()
 		
@@ -1224,7 +1177,7 @@ const $helper = {
 			a = o.newLine().code(name + ': ').newArray()
 			
 			for i from 0 til methods.length {
-				$helper.reflectMethod(node, a.newLine(), methods[i].signature, methods[i].parameters, classname + '.__ks_reflect.instanceMethods.' + name + '[' + i + ']')
+				$helper.reflectMethod(node, a.newLine(), methods[i], classname + '.__ks_reflect.instanceMethods.' + name + '[' + i + ']')
 			}
 			
 			a.done()
@@ -1236,7 +1189,7 @@ const $helper = {
 			a = o.newLine().code(name + ': ').newArray()
 			
 			for i from 0 til methods.length {
-				$helper.reflectMethod(node, a.newLine(), methods[i].signature, methods[i].parameters, classname + '.__ks_reflect.classMethods.' + name + '[' + i + ']')
+				$helper.reflectMethod(node, a.newLine(), methods[i], classname + '.__ks_reflect.classMethods.' + name + '[' + i + ']')
 			}
 			
 			a.done()
@@ -1247,7 +1200,7 @@ const $helper = {
 		
 		line.done()
 	} // }}}
-	reflectMethod(node, fragments, signature, parameters, path = null) { // {{{
+	reflectMethod(node, fragments, signature, path = null) { // {{{
 		let object = fragments.newObject()
 		
 		object.newLine().code('access: ' + signature.access)
@@ -1257,69 +1210,77 @@ const $helper = {
 		let array = object.newLine().code('parameters: ').newArray()
 		
 		for i from 0 til signature.parameters.length {
-			$helper.reflectParameter(node, array.newLine(), signature.parameters[i], parameters[i], path + '.parameters[' + i + ']')
+			$helper.reflectParameter(node, array.newLine(), signature.parameters[i], path + '.parameters[' + i + ']')
 		}
 		
 		array.done()
 		
 		object.done()
 	} // }}}
-	reflectParameter(node, fragments, signature, type, path = null) { // {{{
+	reflectParameter(node, fragments, signature, path = null) { // {{{
 		let object = fragments.newObject()
 		
-		object.newLine().code('type: ' + $helper.type(type, node, path))
+		object.newLine().code('type: ' + node.toTypeString(signature.type, path))
 		object.newLine().code('min: ' + signature.min)
 		object.newLine().code('max: ' + signature.max)
 		
 		object.done()
 	} // }}}
-	reflectVariable(node, fragments, name, signature, type = null, path = null) { // {{{
+	reflectVariable(node, fragments, name, signature, path = null) { // {{{
 		let object = fragments.code(name, ': ').newObject()
 		
 		object.line('access: ' + signature.access)
 		
-		if type? {
-			object.line('type: ' + $helper.type(type, node, path))
+		object.line('type: ' + node.toTypeString(signature.type, path))
+		
+		if signature.nullable {
+			object.line('nullable: true')
 		}
 		
 		object.done()
-	} // }}}
-	type(type, node, path = null) { // {{{
-		if type is Array {
-			let src = ''
-			
-			for i from 0 til type.length {
-				if i {
-					src += ','
-				}
-				
-				src += $helper.type(type[i], node, path)
-			}
-			
-			return '[' + src + ']'
-		}
-		else if type.kind == HelperTypeKind::Native {
-			return $quote(type.type)
-		}
-		else if type.kind == HelperTypeKind::Referenced {
-			return type.type
-		}
-		else if type.kind == HelperTypeKind::Unreferenced {
-			if path? {
-				node.module().addReference(type.type, path + '.type = ' + type.type)
-				
-				return $quote('#' + type.type)
-			}
-			else {
-				TypeException.throwInvalid(type.type, node)
-			}
-		}
 	} // }}}
 }
 
 const $method = {
 	isConstructor(name, variable) => name == 'constructor'
 	isDestructor(name, variable) => name == 'destructor'
+	isUsingProperty(data, name) { // {{{
+		if data is Array {
+			for d in data {
+				if $method.isUsingProperty(d, name) {
+					return true
+				}
+			}
+		}
+		else {
+			switch data.kind {
+				NodeKind::BinaryExpression => {
+					if data.operator.kind == BinaryOperatorKind::Assignment {
+						if data.left.kind == NodeKind::ThisExpression && data.left.name.name == name {
+							return true
+						}
+						else if data.left.kind == NodeKind::MemberExpression && data.left.object.kind == NodeKind::Identifier && data.left.object.name == 'this' && data.left.property.kind == NodeKind::Identifier && (data.left.property.name == name || data.left.property.name == `_\(name)`) {
+							return true
+						}
+					}
+				}
+				NodeKind::CallExpression => {
+					if data.arguments.length == 2 && data.arguments[0].kind == NodeKind::Identifier && data.arguments[0].name == 'this' && data.arguments[1].kind == NodeKind::ArrayExpression && data.callee.kind == NodeKind::MemberExpression && data.callee.property.kind == NodeKind::Identifier && data.callee.property.name == 'call' && data.callee.object.kind == NodeKind::MemberExpression && data.callee.object.property.kind == NodeKind::Identifier && data.callee.object.property.name == '__ks_cons' {
+						for arg in data.arguments[1].values {
+							if arg.kind == NodeKind::Identifier && arg.name == name {
+								return true
+							}
+						}
+					}
+				}
+				NodeKind::ReturnStatement => {
+					return $method.isUsingProperty(data.value, name)
+				}
+			}
+		}
+		
+		return false
+	} // }}}
 	sameType(s1, s2) { // {{{
 		if s1 is Array {
 			if s2 is Array && s1.length == s2.length {
@@ -1338,127 +1299,6 @@ const $method = {
 		else {
 			return s1 == s2
 		}
-	} // }}}
-	signature(data, node) { // {{{
-		let signature = {
-			access: MemberAccess::Public
-			min: 0,
-			max: 0,
-			parameters: []
-			throws: data.throws ? [t.name for t in data.throws] : []
-		}
-		
-		if data.modifiers {
-			for modifier in data.modifiers {
-				if modifier.kind == ModifierKind::Async {
-					signature.async = true
-				}
-				else if modifier.kind == ModifierKind::Private {
-					signature.access = MemberAccess::Private
-				}
-				else if modifier.kind == ModifierKind::Protected {
-					signature.access = MemberAccess::Protected
-				}
-			}
-		}
-		
-		let type, last, nf
-		for parameter in data.parameters {
-			type = $parameter.type(parameter, node)
-			
-			if !last || !$method.sameType(type, last.type) {
-				if last {
-					signature.min += last.min
-					signature.max += last.max
-				}
-				
-				last = {
-					type: type,
-					min: parameter.defaultValue? ? 0 : 1,
-					max: 1
-				}
-				
-				if parameter.modifiers {
-					for modifier in parameter.modifiers {
-						if modifier.kind == ModifierKind::Rest {
-							if modifier.arity {
-								last.min += modifier.arity.min
-								last.max += modifier.arity.max
-							}
-							else {
-								last.max = Infinity
-							}
-						}
-					}
-				}
-				
-				signature.parameters.push(last)
-			}
-			else {
-				nf = true
-				
-				if parameter.modifiers {
-					for modifier in parameter.modifiers {
-						if modifier.kind == ModifierKind::Rest {
-							if modifier.arity {
-								last.min += modifier.arity.min
-								last.max += modifier.arity.max
-							}
-							else {
-								last.max = Infinity
-							}
-							
-							nf = false
-						}
-					}
-				}
-				
-				if nf {
-					if !?parameter.defaultValue {
-						++last.min
-					}
-					
-					++last.max
-				}
-			}
-		}
-		
-		if last {
-			signature.min += last.min
-			signature.max += last.max
-		}
-		
-		return signature
-	} // }}}
-}
-
-const $parameter = {
-	type(data, node) { // {{{
-		if data.name? {
-			let nf = true
-			let name = data.name.name
-			
-			for modifier in data.modifiers while nf {
-				if modifier.kind == ModifierKind::Alias {
-					if variable ?= node.getInstanceVariable(name) {
-						return variable.type if variable.type?
-					}
-					else if variable ?= node.getInstanceVariable('_' + name) {
-						return variable.type if variable.type?
-					}
-					else if variable ?= node.getInstanceMethod(name) {
-						return variable.type if variable.type?
-					}
-					else {
-						ReferenceException.throwNotDefinedMember(name, node)
-					}
-					
-					nf = false
-				}
-			}
-		}
-		
-		return $signature.type(data.type, node.scope())
 	} // }}}
 }
 
@@ -1480,6 +1320,7 @@ class ClassDeclaration extends Statement {
 		_instanceVariables	= {}
 		_instanceVariableScope
 		_name
+		_references			= {}
 		_sealed 			= false
 		_variable
 	}
@@ -1490,6 +1331,48 @@ class ClassDeclaration extends Statement {
 		this._destructorScope = new Scope(parent.scope())
 		this._instanceVariableScope = new Scope(parent.scope())
 		this._es5 = this._options.format.classes == 'es5'
+	} // }}}
+	addReference(type?, node) { // {{{
+		if type? {
+			if type is Array {
+				for item in type {
+					this.addReference(item, node)
+				}
+			}
+			else if type.typeName? {
+				let signature = $signature.type(type, @scope)
+				
+				if !?@references[signature] {
+					if signature == 'Any' || type.typeName.name == '...' || $typeofs[signature] == true {
+						@references[signature] = {
+							status: TypeStatus::Native
+							type: type
+						}
+					}
+					else if variable ?= @scope.getVariable(type.typeName.name) {
+						@references[signature] = {
+							status: TypeStatus::Referenced
+							type: type
+							variable: variable
+						}
+					}
+					else {
+						@references[signature] = {
+							status: TypeStatus::Unreferenced
+							type: type
+						}
+					}
+				}
+			}
+			else if type.types {
+				for item in type.types {
+					this.addReference(item, node)
+				}
+			}
+			else {
+				throw new NotImplementedException(node)
+			}
+		}
 	} // }}}
 	analyse() { // {{{
 		let data = @data
@@ -1646,147 +1529,17 @@ class ClassDeclaration extends Statement {
 				NodeKind::CommentLine => {
 				}
 				NodeKind::FieldDeclaration => {
-					let instance = true
-					for i from 0 til member.modifiers.length while instance {
-						if member.modifiers[i].kind == ModifierKind::Static {
-							instance = false
-						}
-					}
-					
-					signature = $field.signature(member, this)
-					
-					let variable = {
-						data: member
-						signature: signature
-						type: $helper.analyseType(signature.type, this)
-					}
-					
-					if member.defaultValue? {
-						@scope = @instanceVariableScope if instance
-						
-						variable.defaultValue = $compile.expression(member.defaultValue, this)
-						
-						@scope = scope if instance
-					}
-					
-					if instance {
-						@instanceVariables[member.name.name] = variable
-						
-						@variable.instanceVariables[member.name.name] = signature
-					}
-					else if member.name.name == 'name' || member.name.name == 'version' {
-						SyntaxException.throwReservedClassVariable(member.name.name, this)
-					}
-					else {
-						@classVariables[member.name.name] = variable
-						
-						@variable.classVariables[member.name.name] = signature
-					}
+					new ClassVariableDeclaration(member, this)
 				}
 				NodeKind::MethodDeclaration => {
 					if $method.isConstructor(member.name.name, @variable) {
-						@scope = @constructorScope
-						
-						method = $compile.statement(member, this)
-						
-						signature = $method.signature(member, this)
-						
-						@constructors.push({
-							data: member
-							signature: signature
-							statement: method
-							parameters: [$helper.analyseType(parameter.type, this) for parameter in signature.parameters]
-						})
-						
-						@variable.constructors.push(signature)
-						
-						@scope = scope
+						new ClassConstructorDeclaration(member, this)
 					}
 					else if $method.isDestructor(member.name.name, @variable) {
-						@scope = @destructorScope
-						
-						member.parameters.push({
-							kind: NodeKind::Parameter
-							modifiers: []
-							name: $identifier('that')
-						})
-						
-						method = $compile.statement(member, this)
-						
-						method.instance(false)
-						
-						@destructor = {
-							data: member
-							statement: method
-						}
-						
-						@variable.destructors++
-						
-						@scope = scope
+						new ClassDestructorDeclaration(member, this)
 					}
 					else {
-						let instance = true
-						for i from 0 til member.modifiers.length while instance {
-							if member.modifiers[i].kind == ModifierKind::Static {
-								instance = false
-							}
-						}
-						
-						@scope = this.newInstanceMethodScope(data, member) if instance
-						
-						signature = $method.signature(member, this)
-						
-						method = {
-							data: member,
-							signature: signature
-							statement: $compile.statement(member, this)
-							parameters: [$helper.analyseType(parameter.type, this) for parameter in signature.parameters]
-						}
-						
-						if instance {
-							if method.statement.isAbstract() {
-								if @abstract {
-									if !(@abstractMethods[member.name.name] is Array) {
-										@abstractMethods[member.name.name] = []
-										@variable.abstractMethods[member.name.name] = []
-									}
-									
-									@abstractMethods[member.name.name].push(method)
-									
-									@variable.abstractMethods[member.name.name].push(signature)
-								}
-								else {
-									SyntaxException.throwNotAbstractClass(@name, member.name.name, this)
-								}
-							}
-							else {
-								if !(@instanceMethods[member.name.name] is Array) {
-									@instanceMethods[member.name.name] = []
-									@variable.instanceMethods[member.name.name] = []
-								}
-								
-								@instanceMethods[member.name.name].push(method)
-								
-								@variable.instanceMethods[member.name.name].push(signature)
-							}
-							
-							@scope = scope
-						}
-						else if member.name.name == 'name' || member.name.name == 'version' {
-							SyntaxException.throwReservedClassMethod(member.name.name, this)
-						}
-						else {
-							method.statement.instance(false)
-							
-							if !(@classMethods[member.name.name] is Array) {
-								@classMethods[member.name.name] = []
-								@variable.classMethods[member.name.name] = []
-							}
-							
-							@classMethods[member.name.name].push(method)
-							
-							@variable.classMethods[member.name.name].push(signature)
-						}
+						new ClassMethodDeclaration(member, this)
 					}
 				}
 				=> {
@@ -1809,56 +1562,121 @@ class ClassDeclaration extends Statement {
 		}
 	} // }}}
 	fuse() { // {{{
-		for method in this._constructors {
-			method.statement.analyse()
+		for :variable of this._classVariables {
+			variable.analyse()
 		}
 		
-		this._destructor.statement.analyse() if this._destructor?
+		for :variable of this._instanceVariables {
+			variable.analyse()
+		}
+		
+		for method in this._constructors {
+			method.analyse()
+		}
+		
+		this._destructor.analyse() if this._destructor?
+		
+		for :methods of this._instanceMethods {
+			for method in methods {
+				method.analyse()
+			}
+		}
+		
+		for :methods of this._abstractMethods {
+			for method in methods {
+				method.analyse()
+			}
+		}
+		
+		for :methods of this._classMethods {
+			for method in methods {
+				method.analyse()
+			}
+		}
+		
+		for name, variable of this._classVariables {
+			variable.fuse()
+			
+			@variable.classVariables[name] = variable.signature()
+		}
+		
+		for name, variable of this._instanceVariables {
+			variable.fuse()
+			
+			@variable.instanceVariables[name] = variable.signature()
+		}
+		
+		for method in this._constructors {
+			method.fuse()
+			
+			@variable.constructors.push(method.signature())
+		}
+		
+		this._destructor.fuse() if this._destructor?
 		
 		for name, methods of this._instanceMethods {
 			for method in methods {
-				method.statement.analyse()
+				method.fuse()
+				
+				@variable.instanceMethods[name].push(method.signature())
+			}
+		}
+		
+		for name, methods of this._abstractMethods {
+			for method in methods {
+				method.fuse()
+				
+				@variable.abstractMethods[name].push(method.signature())
 			}
 		}
 		
 		for name, methods of this._classMethods {
 			for method in methods {
-				method.statement.analyse()
-			}
-		}
-		
-		for name, variable of this._instanceVariables when variable.defaultValue? {
-			variable.defaultValue.fuse()
-		}
-		
-		for name, variable of this._classVariables when variable.defaultValue? {
-			variable.defaultValue.fuse()
-		}
-		
-		for method in this._constructors {
-			method.statement.fuse()
-		}
-		
-		this._destructor.statement.fuse() if this._destructor?
-		
-		for name, methods of this._instanceMethods {
-			for method in methods {
-				method.statement.fuse()
-			}
-		}
-		
-		for name, methods of this._classMethods {
-			for method in methods {
-				method.statement.fuse()
+				method.fuse()
+				
+				@variable.classMethods[name].push(method.signature())
 			}
 		}
 	} // }}}
-	getInstanceMethod(name, variable = @variable) { // {{{
-		if variable.instanceMethods[name]?['1']? {
-			throw new NotImplementedException()
+	getAliasType(name, parameter) { // {{{
+		let variable
+		
+		if parameter._setterAlias {
+			variable = this.getInstanceMethod(name)
 		}
-		else if variable.extends? {
-			return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
+		else {
+			variable = this.getInstanceVariable(name) ?? this.getInstanceVariable('_' + name)
+		}
+		
+		if variable? {
+			let type = $type.reference(variable.type ?? 'Any')
+			
+			if variable.nullable {
+				type.nullable = true
+			}
+			
+			return type
+		}
+		
+		ReferenceException.throwNotDefinedMember(name, parameter)
+	} // }}}
+	getInstanceMethod(name, variable = null) { // {{{
+		if variable == null {
+			for method in @instanceMethods[name] {
+				signature = method.signature()
+				
+				if signature.min == 1 && signature.max == 1 {
+					return signature.parameters[0]
+				}
+			}
+		}
+		else {
+			if variable.instanceMethods[name]? {
+				throw new NotImplementedException()
+			}
+			else if variable.extends? {
+				return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
+			}
 		}
 		
 		return null
@@ -1893,13 +1711,14 @@ class ClassDeclaration extends Statement {
 		
 		return false
 	} // }}}
-	newInstanceMethodScope(data, member) { // {{{
+	name() => @name
+	newInstanceMethodScope(method) { // {{{
 		let scope = new Scope(this._scope)
 		
 		$variable.define(this, scope, {
 			kind: NodeKind::Identifier
 			name: 'this'
-		}, VariableKind::Variable, $type.reference(data.name.name))
+		}, VariableKind::Variable, $type.reference(@data.name.name))
 		
 		if this._extends {
 			let variable = $variable.define(this, scope, {
@@ -1908,7 +1727,7 @@ class ClassDeclaration extends Statement {
 			}, VariableKind::Variable)
 			
 			if this._es5 {
-				let extname = this._data.extends
+				let extname = @data.extends
 				
 				variable.callable = func(data) {
 					data.arguments = [{
@@ -1933,7 +1752,7 @@ class ClassDeclaration extends Statement {
 								computed: false
 								nullable: false
 							}
-							property: member.name
+							property: method.name
 							computed: false
 							nullable: false
 						}
@@ -1987,7 +1806,7 @@ class ClassDeclaration extends Statement {
 					data.callee = {
 						kind: NodeKind::MemberExpression
 						object: data.callee
-						property: member.name
+						property: method.name
 						computed: false
 						nullable: false
 					}
@@ -2000,12 +1819,8 @@ class ClassDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		let reflect = @sealed ? $class.sealed(this, fragments) : $class.continuous(this, fragments)
 		
-		for name, field of @classVariables when field.defaultValue? {
-			fragments
-				.newLine()
-				.code(`\(@name).\(name) = `)
-				.compile(field.defaultValue)
-				.done()
+		for :variable of @classVariables {
+			variable.toFragments(fragments)
 		}
 		
 		if !@es5 && @data.version? {
@@ -2032,48 +1847,159 @@ class ClassDeclaration extends Statement {
 			fragments.line('var ' + @variable.sealed.name + ' = {}')
 		}
 	} // }}}
+	toTypeString(type, path) { // {{{
+		if type is Array {
+			let src = ''
+			
+			for i from 0 til type.length {
+				if i {
+					src += ','
+				}
+				
+				src += this.toTypeString(type[i], path)
+			}
+			
+			return '[' + src + ']'
+		}
+		else if type is String {
+			if reference ?= @references[type] {
+				if reference.status == HelperTypeKind::Native {
+					return $quote(type)
+				}
+				else if reference.status == HelperTypeKind::Referenced {
+					return type
+				}
+				else if reference.status == HelperTypeKind::Unreferenced {
+					if path? {
+						this.module().addReference(type, path + '.type = ' + type)
+						
+						return $quote('#' + type)
+					}
+					else {
+						TypeException.throwInvalid(type, this)
+					}
+				}
+			}
+			else if type == 'Any' || $typeofs[type] == true {
+				return $quote(type)
+			}
+			else if @scope.hasVariable(type) {
+				return type
+			}
+			else {
+				if path? {
+					this.module().addReference(type, path + '.type = ' + type)
+					
+					return $quote('#' + type)
+				}
+				else {
+					TypeException.throwInvalid(type, this)
+				}
+			}
+		}
+		else if type.name? {
+			return this.toTypeString(type.name, path)
+		}
+		else {
+			throw new NotImplementedException(this)
+		}
+	} // }}}
 }
 
-class MethodDeclaration extends Statement {
+class ClassMethodDeclaration extends Statement {
 	private {
-		_name
+		_abstract: Boolean		= false
+		_instance: Boolean		= true
+		_internalName: String
+		_name: String
 		_parameters
 		_signature
 		_statements
-		_instance		= true
 	}
 	constructor(data, parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
-	} // }}}
-	analyse() { // {{{
-		@parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
+		super(data, parent, parent.newInstanceMethodScope(data))
 		
-		if @data.body? {
-			@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
-		}
-		else {
-			@statements = []
-		}
-	} // }}}
-	fuse() { // {{{
-		this.compile(@parameters)
+		@name = data.name.name
 		
-		this.compile(@statements)
-		
-		@signature = new Signature(this)
-	} // }}}
-	getInstanceMethod(name) => @parent.getInstanceMethod(name)
-	getInstanceVariable(name) => @parent.getInstanceVariable(name)
-	instance(@instance) => this
-	isAbstract() { // {{{
-		for modifier in @data.modifiers {
+		for modifier in data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
-				return true
+				@abstract = true
+			}
+			else if modifier.kind == ModifierKind::Static {
+				@instance = false
 			}
 		}
 		
-		return false
+		if @instance {
+			if @abstract {
+				if parent._abstract {
+					if parent._abstractMethods[@name] is Array {
+						parent._abstractMethods[@name].push(this)
+					}
+					else {
+						parent._abstractMethods[@name] = [this]
+					
+						parent._variable.abstractMethods[@name] = []
+					}
+				}
+				else {
+					SyntaxException.throwNotAbstractClass(parent._name, @name, parent)
+				}
+			}
+			else {
+				if parent._instanceMethods[@name] is Array {
+					@internalName = `__ks_func_\(@name)_\(parent._instanceMethods[@name].length)`
+					
+					parent._instanceMethods[@name].push(this)
+				}
+				else {
+					@internalName = `__ks_func_\(@name)_0`
+					
+					parent._instanceMethods[@name] = [this]
+					
+					parent._variable.instanceMethods[@name] = []
+				}
+			}
+		}
+		else if @name == 'name' || @name == 'version' {
+			SyntaxException.throwReservedClassMethod(@name, parent)
+		}
+		else {
+			if parent._classMethods[@name] is Array {
+				@internalName = `__ks_sttc_\(@name)_\(parent._classMethods[@name].length)`
+				
+				parent._classMethods[@name].push(this)
+			}
+			else {
+				@internalName = `__ks_sttc_\(@name)_0`
+				
+				parent._classMethods[@name] = [this]
+				
+				parent._variable.classMethods[@name] = []
+			}
+		}
+		
+		for parameter in @data.parameters {
+			@parent.addReference($type.type(parameter.type, @scope, this), this)
+		}
 	} // }}}
+	analyse() { // {{{
+		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
+		
+		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
+	} // }}}
+	fuse() { // {{{
+		this.fuseSignature() if !?@signature
+		
+		this.compile(@statements)
+	} // }}}
+	fuseSignature() { // {{{
+		this.compile(@parameters)
+		
+		return @signature = Signature.fromNode(this)
+	} // }}}
+	getAliasType(name, node) => @parent.getAliasType(name, node)
+	isAbstract() => @abstract
 	isConsumedError(name, variable): Boolean { // {{{
 		if @data.throws.length > 0 {
 			for x in @data.throws {
@@ -2083,48 +2009,52 @@ class MethodDeclaration extends Statement {
 		
 		return false
 	} // }}}
+	isInstance() => @instance
 	isInstanceMethod(name) => @parent.isInstanceMethod(name)
 	isInstanceVariable(name) => @parent.isInstanceVariable(name)
 	isMethod() => true
-	name(@name) => this
+	length() => @parameters.length
+	name() => @name
+	signature() => @signature ?? this.fuseSignature()
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		if @parent._es5 {
-			ctrl.code($class.methodHeader(@name, @parent) + '(')
+			ctrl.code($class.methodHeader(@internalName, @parent) + '(')
 		}
 		else {
 			ctrl.code('static ') if !@instance
 			
-			ctrl.code(@name + '(')
+			ctrl.code(@internalName + '(')
 		}
 		
 		$function.parameters(this, ctrl, func(node) {
 			return node.code(')').step()
 		})
 		
-		let nf, modifier, name
-		for parameter, p in @data.parameters {
-			nf = true
-			
-			for modifier in parameter.modifiers while nf {
-				if modifier.kind == ModifierKind::Alias {
-					name = parameter.name.name
-					
-					if this.isInstanceVariable(name) {
-						ctrl.newLine().code('this.' + name + ' = ').compile(@parameters[p]).done()
-					}
-					else if this.isInstanceVariable('_' + name) {
-						ctrl.newLine().code('this._' + name + ' = ').compile(@parameters[p]).done()
-					}
-					else if this.isInstanceMethod(name) {
-						ctrl.newLine().code('this.' + name + '(').compile(@parameters[p]).code(')').done()
+		for parameter in @parameters {
+			if parameter._thisAlias && !$method.isUsingProperty($body(@data.body), parameter._name) {
+				if parameter._setterAlias {
+					if (@name != parameter._name || @signature.min != 1 || @signature.max != 1) && this.isInstanceMethod(parameter._name) {
+						ctrl.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
 					}
 					else {
-						ReferenceException.throwNotDefinedMember(name, this)
+						ReferenceException.throwNotDefinedMember(parameter._name, this)
 					}
-					
-					nf = false
+				}
+				else {
+					if this.isInstanceVariable(parameter._name) {
+						ctrl.newLine().code('this.' + parameter._name + ' = ').compile(parameter).done()
+					}
+					else if this.isInstanceVariable('_' + parameter._name) {
+						ctrl.newLine().code('this._' + parameter._name + ' = ').compile(parameter).done()
+					}
+					else if (@name != parameter._name || @signature.min != 1 || @signature.max != 1) && this.isInstanceMethod(parameter._name) {
+						ctrl.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
+					}
+					else {
+						ReferenceException.throwNotDefinedMember(parameter._name, this)
+					}
 				}
 			}
 		}
@@ -2134,5 +2064,302 @@ class MethodDeclaration extends Statement {
 		}
 		
 		ctrl.done() unless @parent._es5
+	} // }}}
+}
+
+class ClassConstructorDeclaration extends Statement {
+	private {
+		_internalName
+		_parameters
+		_signature
+		_statements
+	}
+	constructor(data, parent) { // {{{
+		super(data, parent, new Scope(parent._constructorScope))
+		
+		@internalName = `__ks_cons_\(parent._constructors.length)`
+		
+		parent._constructors.push(this)
+		
+		for parameter in @data.parameters {
+			//console.log(Parameter.type(parameter, this))
+			@parent.addReference($type.type(parameter.type, @scope, this), this)
+		}
+	} // }}}
+	analyse() { // {{{
+		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
+	} // }}}
+	private callParentConstructor(body) { // {{{
+		// list maybe parent's variables
+		const instanceVariables = @parent._variable.instanceVariables
+		
+		let parameters = [
+			parameter
+			for parameter in @parameters
+			when	!parameter.isAnonymous() &&
+					!parameter.isSetterAlias() &&
+					!?instanceVariables[parameter.name()] &&
+					!?instanceVariables[`_\(parameter.name())`]
+		]
+		
+		if parameters.length == 0 {
+			const constructors = @parent._extendsVariable.constructors
+			
+			if constructors.length != 0 {
+				SyntaxException.throwNoSuperCall(this)
+			}
+		}
+		else {
+			// map parent's constructors
+			// select constructors with most match
+			// if only one, select it
+			// if multiple, throw an error (ConflictConstructor)
+			// if none, select empty constructor
+			// if no empty constructor, throw an error (NoEmptyConstructor)
+			// add call to parent's constructor
+			SyntaxException.throwNoSuperCall(this)
+		}
+	} // }}}
+	fuse() { // {{{
+		this.compile(@parameters)
+		
+		let body = $body(@data.body)
+		if @parent._extends && (!?@parent._extendsVariable.sealed || !@parent._extendsVariable.sealed.extern) {
+			if body.length == 0 {
+				this.callParentConstructor(body)
+			}
+			else if !this.isCallingParentConstructor(body) {
+				SyntaxException.throwNoSuperCall(this)
+			}
+		}
+		
+		@statements = [$compile.statement(statement, this) for statement in body]
+		
+		this.compile(@statements)
+		
+		@signature = Signature.fromNode(this)
+	} // }}}
+	getAliasType(name, node) => @parent.getAliasType(name, node)
+	isAbstract() { // {{{
+		for modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Abstract {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
+	private isCallingParentConstructor(body) { // {{{
+		// walk body to find super call
+		for statement in body {
+			if statement.kind == NodeKind::CallExpression {
+				if statement.callee.kind == NodeKind::Identifier && statement.callee.name == 'super' {
+					return true
+				}
+			}
+			else if statement.kind == NodeKind::IfStatement {
+				throw new NotImplementedException(this)
+			}
+		}
+		
+		return false
+	} // }}}
+	isInstanceMethod(name) => @parent.isInstanceMethod(name)
+	isInstanceVariable(name) => @parent.isInstanceVariable(name)
+	isMethod() => true
+	signature() => @signature
+	toStatementFragments(fragments, mode) { // {{{
+		let ctrl = fragments.newControl()
+		
+		if @parent._es5 {
+			ctrl.code($class.methodHeader(@internalName, @parent) + '(')
+		}
+		else {
+			ctrl.code(@internalName + '(')
+		}
+		
+		$function.parameters(this, ctrl, func(node) {
+			return node.code(')').step()
+		})
+		
+		for parameter in @parameters {
+			if parameter._thisAlias && !$method.isUsingProperty($body(@data.body), parameter._name) {
+				if parameter._setterAlias {
+					if this.isInstanceMethod(parameter._name) {
+						ctrl.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
+					}
+					else {
+						ReferenceException.throwNotDefinedMember(parameter._name, this)
+					}
+				}
+				else {
+					if this.isInstanceVariable(parameter._name) {
+						ctrl.newLine().code('this.' + parameter._name + ' = ').compile(parameter).done()
+					}
+					else if this.isInstanceVariable('_' + parameter._name) {
+						ctrl.newLine().code('this._' + parameter._name + ' = ').compile(parameter).done()
+					}
+					else if this.isInstanceMethod(parameter._name) {
+						ctrl.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
+					}
+					else {
+						ReferenceException.throwNotDefinedMember(parameter._name, this)
+					}
+				}
+			}
+		}
+		
+		for statement in @statements {
+			ctrl.compile(statement)
+		}
+		
+		ctrl.done() unless @parent._es5
+	} // }}}
+}
+
+class ClassDestructorDeclaration extends Statement {
+	private {
+		_internalName
+		_parameters		= []
+		_signature
+		_statements
+	}
+	constructor(data, parent) { // {{{
+		super(data, parent, new Scope(parent._destructorScope))
+		
+		@internalName = `__ks_destroy_0`
+		
+		parent._destructor = this
+		
+		parent._variable.destructors++
+	} // }}}
+	analyse() { // {{{
+		@parameters = [new Parameter({
+			kind: NodeKind::Parameter
+			modifiers: []
+			name: $identifier('that')
+		}, this)]
+		
+		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
+	} // }}}
+	fuse() { // {{{
+		this.compile(@parameters)
+		
+		this.compile(@statements)
+		
+		@signature = Signature.fromNode(this)
+	} // }}}
+	getAliasType(name, node) => @parent.getAliasType(name, node)
+	isAbstract() { // {{{
+		for modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Abstract {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
+	isInstance() => false
+	isInstanceMethod(name) => @parent.isInstanceMethod(name)
+	isInstanceVariable(name) => @parent.isInstanceVariable(name)
+	isMethod() => true
+	signature() => @signature
+	toStatementFragments(fragments, mode) { // {{{
+		let ctrl = fragments.newControl()
+		
+		if @parent._es5 {
+			ctrl.code($class.methodHeader(@internalName, @parent) + '(')
+		}
+		else {
+			ctrl.code(`static \(@internalName)(`)
+		}
+		
+		$function.parameters(this, ctrl, func(node) {
+			return node.code(')').step()
+		})
+		
+		for statement in @statements {
+			ctrl.compile(statement)
+		}
+		
+		ctrl.done() unless @parent._es5
+	} // }}}
+}
+
+class ClassVariableDeclaration extends AbstractNode {
+	private {
+		_defaultValue			= null
+		_hasDefaultValue		= false
+		_instance: Boolean		= true
+		_name
+		_signature
+	}
+	constructor(data, parent) { // {{{
+		super(data, parent)
+		
+		@name = data.name.name
+		
+		for i from 0 til data.modifiers.length while @instance {
+			if data.modifiers[i].kind == ModifierKind::Static {
+				@instance = false
+			}
+		}
+		
+		if @instance {
+			parent._instanceVariables[@name] = this
+		}
+		else if @name == 'name' || @name == 'version' {
+			SyntaxException.throwReservedClassVariable(@name, parent)
+		}
+		else {
+			parent._classVariables[@name] = this
+		}
+		
+		@parent.addReference($type.type(@data.type, @scope, this), this)
+	} // }}}
+	analyse() { // {{{
+		@signature = $field.signature(@data, @parent)
+		
+		if @data.defaultValue? {
+			@hasDefaultValue = true
+			
+			if @instance {
+				let scope = @scope
+				
+				@scope = @parent._instanceVariableScope
+				
+				@defaultValue = $compile.expression(@data.defaultValue, this)
+				
+				@scope = scope
+			}
+			else {
+				@defaultValue = $compile.expression(@data.defaultValue, this)
+			}
+		}
+	} // }}}
+	fuse() { // {{{
+		@defaultValue.fuse() if @defaultValue?
+	} // }}}
+	hasDefaultValue() => @hasDefaultValue
+	isInstance() => @instance
+	name() => @name
+	signature() => @signature
+	toFragments(fragments) { // {{{
+		if @hasDefaultValue {
+			if @instance {
+				fragments
+					.newLine()
+					.code(`this.\(@name) = `)
+					.compile(@defaultValue)
+					.done()
+			}
+			else {
+				fragments
+					.newLine()
+					.code(`\(@parent.name()).\(@name) = `)
+					.compile(@defaultValue)
+					.done()
+			}
+		}
 	} // }}}
 }

@@ -36,7 +36,7 @@ class FunctionExpression extends Expression {
 			}
 		}
 		
-		@signature = new Signature(this)
+		@signature = Signature.fromNode(this)
 	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{
@@ -136,7 +136,7 @@ class LambdaExpression extends Expression {
 			}
 		}
 		
-		@signature = new Signature(this)
+		@signature = Signature.fromNode(this)
 	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{

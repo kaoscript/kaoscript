@@ -1,0 +1,1 @@
+SyntaxException: Call "super()" is missing (line 19, file "fixtures/compile/class.atthis.auto.extends.ks")

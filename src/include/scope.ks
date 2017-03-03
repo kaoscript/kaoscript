@@ -9,10 +9,12 @@ let $keywords = { // {{{
 	char: true
 	class: true
 	const: true
+	constructor: true
 	continue: true
 	debugger: true
 	default: true
 	delete: true
+	destructor: true
 	do: true
 	double: true
 	else: true

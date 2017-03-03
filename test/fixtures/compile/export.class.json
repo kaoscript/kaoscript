@@ -4,10 +4,11 @@
     "Shape": {
       "name": "Shape",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [
         {
           "access": 3,
+          "async": "false",
           "min": 1,
           "max": 1,
           "parameters": [

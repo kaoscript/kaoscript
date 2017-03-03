@@ -61,12 +61,12 @@ module.exports = function(__ks_0, __ks___ks_0) {
 		},
 		signature: {
 			access: 3,
-			min: 1,
+			min: 0,
 			max: Infinity,
 			parameters: [
 				{
 					type: "Any",
-					min: 1,
+					min: 0,
 					max: Infinity
 				}
 			]

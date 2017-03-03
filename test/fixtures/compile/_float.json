@@ -4,7 +4,7 @@
     "Float": {
       "name": "Float",
       "kind": 5,
-      "new": true,
+      "new": "true",
       "type": {
         "typeName": {
           "kind": 41,

@@ -72,7 +72,7 @@ class ImplementClassFieldDeclaration extends Statement {
 	private {
 		_instance		= true
 		_name
-		_type
+		_signature
 		_variable
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -83,8 +83,6 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		@type = $helper.analyseType($signature.type(@data.type, @scope), this)
-		
 		for i from 0 til @data.modifiers.length while @instance {
 			if @data.modifiers[i].kind == ModifierKind::Static {
 				@instance = false
@@ -93,13 +91,13 @@ class ImplementClassFieldDeclaration extends Statement {
 		
 		@name = @data.name.name
 		
-		let signature = $field.signature(@data, this)
+		@signature = $field.signature(@data, this)
 		
 		if @instance {
-			@variable.instanceVariables[@name] = signature
+			@variable.instanceVariables[@name] = @signature
 		}
 		else {
-			@variable.classVariables[@name] = signature
+			@variable.classVariables[@name] = @signature
 		}
 		
 		if @variable.sealed? {
@@ -121,7 +119,43 @@ class ImplementClassFieldDeclaration extends Statement {
 		if @instance {
 			this.module().flag('Helper')
 			
-			fragments.line($runtime.helper(this), '.newField(' + $quote(@name) + ', ' + $helper.type(@type, this) + ')')
+			fragments.line($runtime.helper(this), '.newField(' + $quote(@name) + ', ' + this.toTypeString(@signature.type, '') + ')')
+		}
+		else {
+			throw new NotImplementedException(this)
+		}
+	} // }}}
+	toTypeString(type, path) { // {{{
+		if type is Array {
+			let src = ''
+			
+			for i from 0 til type.length {
+				if i {
+					src += ','
+				}
+				
+				src += this.toTypeString(type[i], path)
+			}
+			
+			return '[' + src + ']'
+		}
+		else if type is String {
+			if type == 'Any' || $typeofs[type] == true {
+				return $quote(type)
+			}
+			else if @scope.hasVariable(type) {
+				return type
+			}
+			else {
+				if path? {
+					this.module().addReference(type, path + '.type = ' + type)
+					
+					return $quote('#' + type)
+				}
+				else {
+					TypeException.throwInvalid(type, this)
+				}
+			}
 		}
 		else {
 			throw new NotImplementedException(this)
@@ -172,31 +206,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 			}
 			
-			if @data.name.kind == NodeKind::Identifier {
-				let method = {
-					kind: NodeKind::MethodDeclaration
-					name: name
-					signature: $method.signature(@data, this)
-				}
-				
-				method.type = $type.type(@data.type, @scope, this) if @data.type
-				
-				if @instance {
-					if !(@variable.instanceMethods[name] is Array) {
-						@variable.instanceMethods[name] = []
-					}
-					
-					@variable.instanceMethods[name].push(method)
-				}
-				else {
-					if !(@variable.classMethods[name] is Array) {
-						@variable.classMethods[name] = []
-					}
-					
-					@variable.classMethods[name].push(method)
-				}
-			}
-			else if @data.name.kind == NodeKind::TemplateExpression {
+			if @data.name.kind == NodeKind::TemplateExpression {
 				@name = $compile.expression(@data.name, this)
 			}
 		}
@@ -215,7 +225,45 @@ class ImplementClassMethodDeclaration extends Statement {
 		
 		this.compile(this._statements)
 		
-		@signature = new Signature(this)
+		@signature = Signature.fromNode(this)
+		
+		if @data.name.kind == NodeKind::Identifier {
+			let name = @data.name.name
+			
+			if @instance {
+				if @variable.instanceMethods[name] is Array {
+					@variable.instanceMethods[name].push(@signature)
+				}
+				else {
+					@variable.instanceMethods[name] = [@signature]
+				}
+			}
+			else {
+				if @variable.classMethods[name] is Array {
+					@variable.classMethods[name].push(@signature)
+				}
+				else {
+					@variable.classMethods[name] = [@signature]
+				}
+			}
+		}
+	} // }}}
+	getAliasType(name, node) { // {{{
+		if	(variable ?= this.getInstanceVariable(name)) ||
+			(variable ?= this.getInstanceMethod(name)) ||
+			(variable ?= this.getInstanceVariable('_' + name)) {
+			
+			let type = $type.reference(variable.type ?? 'Any')
+			
+			if variable.nullable {
+				type.nullable = true
+			}
+			
+			return type
+		}
+		else {
+			ReferenceException.throwNotDefinedMember(name, node)
+		}
 	} // }}}
 	getInstanceMethod(name, variable = @variable) { // {{{
 		if variable.instanceMethods[name]?['1']? {
@@ -303,11 +351,46 @@ class ImplementClassMethodDeclaration extends Statement {
 				ctrl.compile(statement)
 			}
 			
-			let signature = $method.signature(data, this)
-			$helper.reflectMethod(this, object.newLine().code('signature: '), signature, [$helper.analyseType(parameter.type, this) for parameter in signature.parameters])
+			$helper.reflectMethod(this, object.newLine().code('signature: '), @signature)
 			
 			object.done()
 			line.code(')').done()
+		}
+	} // }}}
+	toTypeString(type, path) { // {{{
+		if type is Array {
+			let src = ''
+			
+			for i from 0 til type.length {
+				if i {
+					src += ','
+				}
+				
+				src += this.toTypeString(type[i], path)
+			}
+			
+			return '[' + src + ']'
+		}
+		else if type is String {
+			if type == 'Any' || $typeofs[type] == true {
+				return $quote(type)
+			}
+			else if @scope.hasVariable(type) {
+				return type
+			}
+			else {
+				if path? {
+					this.module().addReference(type, path + '.type = ' + type)
+					
+					return $quote('#' + type)
+				}
+				else {
+					TypeException.throwInvalid(type, this)
+				}
+			}
+		}
+		else {
+			throw new NotImplementedException(this)
 		}
 	} // }}}
 }
@@ -369,9 +452,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 				}
 			}
 			
-			this._signature = $method.signature(data, this)
-			
-			this._parameters = [$helper.analyseType(parameter.type, this) for parameter in this._signature.parameters]
+			this._signature = Signature.fromAST(data, this)
 			
 			if data.arguments? {
 				this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
@@ -429,13 +510,49 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		
 		let signLine = object.newLine().code('signature: ')
 		
-		$helper.reflectMethod(this, signLine, this._signature, this._parameters)
+		$helper.reflectMethod(this, signLine, this._signature)
 		
 		signLine.done()
 		
 		object.done()
 		
 		line.code(')').done()
+	} // }}}
+	toTypeString(type, path) { // {{{
+		if type is Array {
+			let src = ''
+			
+			for i from 0 til type.length {
+				if i {
+					src += ','
+				}
+				
+				src += this.toTypeString(type[i], path)
+			}
+			
+			return '[' + src + ']'
+		}
+		else if type is String {
+			if type == 'Any' || $typeofs[type] == true {
+				return $quote(type)
+			}
+			else if @scope.hasVariable(type) {
+				return type
+			}
+			else {
+				if path? {
+					this.module().addReference(type, path + '.type = ' + type)
+					
+					return $quote('#' + type)
+				}
+				else {
+					TypeException.throwInvalid(type, this)
+				}
+			}
+		}
+		else {
+			throw new NotImplementedException(this)
+		}
 	} // }}}
 }
 
@@ -490,9 +607,7 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 			
 			this._functionName = $compile.expression(data.alias, this)
 			
-			this._signature = $method.signature(data, this)
-			
-			this._parameters = [$helper.analyseType(parameter.type, this) for parameter in this._signature.parameters]
+			this._signature = Signature.fromAST(data, this)
 			
 			if data.arguments? {
 				this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
@@ -550,7 +665,7 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		
 		let signLine = object.newLine().code('signature: ')
 		
-		$helper.reflectMethod(this, signLine, this._signature, this._parameters)
+		$helper.reflectMethod(this, signLine, this._signature)
 		
 		signLine.done()
 		
@@ -558,11 +673,46 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		
 		line.code(')').done()
 	} // }}}
+	toTypeString(type, path) { // {{{
+		if type is Array {
+			let src = ''
+			
+			for i from 0 til type.length {
+				if i {
+					src += ','
+				}
+				
+				src += this.toTypeString(type[i], path)
+			}
+			
+			return '[' + src + ']'
+		}
+		else if type is String {
+			if type == 'Any' || $typeofs[type] == true {
+				return $quote(type)
+			}
+			else if @scope.hasVariable(type) {
+				return type
+			}
+			else {
+				if path? {
+					this.module().addReference(type, path + '.type = ' + type)
+					
+					return $quote('#' + type)
+				}
+				else {
+					TypeException.throwInvalid(type, this)
+				}
+			}
+		}
+		else {
+			throw new NotImplementedException(this)
+		}
+	} // }}}
 }
 
 class ImplementVariableFieldDeclaration extends Statement {
 	private {
-		_type
 		_value
 		_variable
 	}
@@ -570,7 +720,6 @@ class ImplementVariableFieldDeclaration extends Statement {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		this._type = $helper.analyseType($signature.type(this._data.type, this._scope), this)
 		this._value = $compile.expression(this._data.defaultValue, this)
 		
 		let property = {
@@ -633,7 +782,7 @@ class ImplementVariableMethodDeclaration extends Statement {
 		
 		this.compile(this._statements)
 		
-		@signature = new Signature(this)
+		@signature = Signature.fromNode(this)
 	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{

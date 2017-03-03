@@ -7,13 +7,13 @@
     "Color": {
       "name": "Color",
       "kind": 5,
-      "new": true,
+      "new": "true",
       "requirement": "Color"
     },
     "Space": {
       "name": "Space",
       "kind": 5,
-      "new": true,
+      "new": "true",
       "requirement": "Space"
     }
   }

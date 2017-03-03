@@ -82,7 +82,10 @@ const $sealed = {
 		return false
 	} // }}}
 	filterType(type, name, data, node) { // {{{
-		if type.typeName? {
+		if type is String {
+			return $sealed.filter($variable.fromType({typeName: $identifier(type)}, node), name, data, node, true)
+		}
+		else if type.typeName? {
 			return $sealed.filter($variable.fromType(type, node), name, data, node, true)
 		}
 		else if type.types? {

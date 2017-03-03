@@ -4,8 +4,8 @@
     "Color": {
       "name": "Color",
       "kind": 2,
-      "new": true,
-      "type": "number",
+      "new": "true",
+      "type": "Number",
       "counter": 2
     }
   }

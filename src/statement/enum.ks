@@ -18,7 +18,7 @@ class EnumDeclaration extends Statement {
 		
 		@new = @variable.new
 		
-		if @variable.type == 'string' {
+		if @variable.type == 'String' {
 			@kind = EnumKind::String
 		}
 		else if @data.attributes? {

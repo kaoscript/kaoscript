@@ -4,7 +4,7 @@
     "Integer": {
       "name": "Integer",
       "kind": 5,
-      "new": true,
+      "new": "true",
       "type": {
         "typeName": {
           "kind": 41,

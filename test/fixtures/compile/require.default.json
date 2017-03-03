@@ -1,14 +1,14 @@
 {
   "requirements": {
     "Color": {
-      "class": true
+      "class": "true"
     }
   },
   "exports": {
     "Color": {
       "name": "Color",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},

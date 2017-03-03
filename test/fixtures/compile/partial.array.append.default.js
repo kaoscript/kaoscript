@@ -53,12 +53,12 @@ module.exports = function() {
 		},
 		signature: {
 			access: 3,
-			min: 1,
+			min: 0,
 			max: Infinity,
 			parameters: [
 				{
 					type: "Any",
-					min: 1,
+					min: 0,
 					max: Infinity
 				}
 			]
@@ -81,12 +81,12 @@ module.exports = function() {
 		},
 		signature: {
 			access: 3,
-			min: 1,
+			min: 0,
 			max: Infinity,
 			parameters: [
 				{
 					type: "Any",
-					min: 1,
+					min: 0,
 					max: Infinity
 				}
 			]

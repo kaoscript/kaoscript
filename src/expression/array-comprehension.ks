@@ -101,8 +101,21 @@ class ArrayComprehensionForIn extends Expression {
 		@expression = $compile.expression(@data.loop.expression, this)
 		
 		if @data.loop.value? {
-			if (variable ?= $variable.fromAST(@data.loop.expression, this)) && variable.type?.typeName?.name == 'Array' && variable.type.typeParameters?.length == 1 {
-				$variable.define(this, @scope, @data.loop.value.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
+			if (variable ?= $variable.fromAST(@data.loop.expression, this)) && variable.type? {
+				if variable.type.typeName? {
+					if variable.type.typeName.name == 'Array' && variable.type.typeParameters?.length == 1 {
+						$variable.define(this, @scope, @data.loop.value.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
+					}
+					else {
+						$variable.define(this, @scope, @data.loop.value.name, VariableKind::Variable)
+					}
+				}
+				else if variable.type.name == 'Array' && variable.type.parameters?.length == 1 {
+					$variable.define(this, @scope, @data.loop.value.name, $variable.kind(variable.type.parameters[0]), variable.type.parameters[0])
+				}
+				else {
+					$variable.define(this, @scope, @data.loop.value.name, VariableKind::Variable)
+				}
 			}
 			else {
 				$variable.define(this, @scope, @data.loop.value.name, VariableKind::Variable)

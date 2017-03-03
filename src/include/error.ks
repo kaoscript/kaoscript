@@ -169,11 +169,14 @@ class SyntaxException extends Exception {
 		throwNotDifferentiableMethods(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Can't differentiate methods`, node)
 		} // }}}
+		throwNoNullParameter(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Parameter can't be nullable`, node)
+		} // }}}
 		throwNoRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't be a rest parameter`, node)
 		} // }}}
-		throwNoNullParameter(node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Parameter can't be nullable`, node)
+		throwNoSuperCall(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Call "super()" is missing`, node)
 		} // }}}
 		throwNotAbstractClass(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" is abstract but the class "\(className)" is not`, node)

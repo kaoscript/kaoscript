@@ -793,7 +793,7 @@ export class Color {
 		return this.copy(new Color())
 	} // }}}
 	
-	contrast(color: Color): {ratio: float, error: float, min: float, max: float} { // {{{
+	contrast(color: Color): {ratio: float, error: float, min: float, max: float} ~ Error { // {{{
 		let a = this._alpha
 		
 		if a == 1 {
@@ -1008,7 +1008,7 @@ export class Color {
 		}
 	} // }}}
 	
-	readable(color: Color, tripleA: bool = false): bool { // {{{
+	readable(color: Color, tripleA: bool = false): bool ~ Error { // {{{
 		if tripleA {
 			return this.contrast(color).ratio >= 7
 		}

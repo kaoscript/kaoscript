@@ -11,7 +11,7 @@ sealed class Shape {
 		return new Shape('blue')
 	}
 	
-	constructor(@color: string)
+	constructor(@color)
 	
 	draw(): string {
 		return `I'm drawing a \(this._color) rectangle.`

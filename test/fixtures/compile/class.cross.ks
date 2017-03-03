@@ -8,7 +8,7 @@ class Foo {
 	}
 	
 	bar(): Bar => this._bar
-	bar(@bar: Bar) => this
+	bar(@bar) => this
 }
 
 class Bar {
@@ -16,5 +16,5 @@ class Bar {
 		_foo: Foo
 	}
 	foo(): Foo => this._foo
-	foo(@foo: Foo) => this
+	foo(@foo) => this
 }

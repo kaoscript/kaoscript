@@ -144,15 +144,21 @@ func $block(data) { // {{{
 	}
 } // }}}
 
-func $body(data) { // {{{
-	return data.statements if data.kind == NodeKind::Block
-	
-	return [
-		{
-			kind: NodeKind::ReturnStatement
-			value: data
-		}
-	]
+func $body(data?) { // {{{
+	if !?data {
+		return []
+	}
+	else if data.kind == NodeKind::Block {
+		return data.statements
+	}
+	else {
+		return [
+			{
+				kind: NodeKind::ReturnStatement
+				value: data
+			}
+		]
+	}
 } // }}}
 
 const $error = {
@@ -248,16 +254,35 @@ const $signature = {
 	} // }}}
 	type(type = null, scope) { // {{{
 		if type? {
-			if type.typeName {
-				return $types[type.typeName.name] if $types[type.typeName.name]
-				
-				if (variable ?= scope.getVariable(type.typeName.name)) && variable.kind == VariableKind::TypeAlias {
-					return $signature.type(variable.type, scope)
+			if type.typeName? {
+				if type.typeParameters? {
+					let signature = {
+						parameters: [$signature.type(item, scope) for item in type.typeParameters]
+					}
+					
+					if $types[type.typeName.name] {
+						signature.name = $types[type.typeName.name]
+					}
+					else if (variable ?= scope.getVariable(type.typeName.name)) && variable.kind == VariableKind::TypeAlias {
+						signature.name = $signature.type(variable.type, scope)
+					}
+					else {
+						signature.name = type.typeName.name
+					}
+					
+					return signature
 				}
-				
-				return type.typeName.name
+				else {
+					return $types[type.typeName.name] if $types[type.typeName.name]
+					
+					if (variable ?= scope.getVariable(type.typeName.name)) && variable.kind == VariableKind::TypeAlias {
+						return $signature.type(variable.type, scope)
+					}
+					
+					return type.typeName.name
+				}
 			}
-			else if type.types {
+			else if type.types? {
 				let types = []
 				
 				for i from 0 til type.types.length {
@@ -405,7 +430,7 @@ const $type = {
 		return false
 	} // }}}
 	reference(name) { // {{{
-		if name is string {
+		if name is String {
 			return {
 				kind: NodeKind::TypeReference
 				typeName: {
@@ -414,10 +439,19 @@ const $type = {
 				}
 			}
 		}
-		else {
+		else if name.kind? {
 			return {
 				kind: NodeKind::TypeReference
 				typeName: name
+			}
+		}
+		else {
+			return {
+				kind: NodeKind::TypeReference
+				typeName: {
+					kind: NodeKind::Identifier
+					name: name.name
+				}
 			}
 		}
 	} // }}}
@@ -443,13 +477,26 @@ const $type = {
 				return `'\(type.slice(0, type.length - 1).join("', '"))' or '\(type[type.length - 1])'`
 			}
 		}
-		else {
+		else if type is String {
 			return `'\(type)'`
 		}
+		else {
+			return `'\(type.name)'`
+		}
 	} // }}}
-	type(data, scope, node) { // {{{
+	type(data?, scope, node) { // {{{
 		//console.log('type.data', data)
-		return data if !data.kind
+		if !?data {
+			return {
+				typeName: {
+					kind: NodeKind::Identifier
+					name: 'Any'
+				}
+			}
+		}
+		else if !?data.kind {
+			return data
+		}
 		
 		let type = null
 		
@@ -697,13 +744,13 @@ const $variable = {
 			}
 			else if kind == VariableKind::Enum {
 				if type {
-					if type.typeName.name == 'string' {
-						variable.type = 'string'
+					if type.typeName.name == 'string' || type.typeName.name == 'String' {
+						variable.type = 'String'
 					}
 				}
 				
 				if !variable.type {
-					variable.type = 'number'
+					variable.type = 'Number'
 					variable.counter = -1
 				}
 			}
@@ -798,15 +845,20 @@ const $variable = {
 		//console.log('variable.filterType.variable', variable)
 		//console.log('variable.filterType.name', name)
 		if variable.type? {
-			if variable.type.properties {
+			if variable.type is String {
+				if variable ?= $variable.fromType({typeName: $identifier(variable.type)}, node) {
+					return $variable.filterMember(variable, name, node)
+				}
+			}
+			else if variable.type.properties? {
 				return variable.type.properties[name] if variable.type.properties[name] is Object
 			}
-			else if variable.type.typeName {
+			else if variable.type.typeName? {
 				if variable ?= $variable.fromType(variable.type, node) {
 					return $variable.filterMember(variable, name, node)
 				}
 			}
-			else if variable.type.types {
+			else if variable.type.types? {
 				let variables: Array = []
 				
 				for type in variable.type.types {
@@ -1019,14 +1071,37 @@ const $variable = {
 									let variables: Array = []
 									
 									for method in variable.classMethods[name] {
-										if method.type?.typeName? {
-											$variable.push(variables, {
-												kind: VariableKind::Variable
-												type: {
-													kind: NodeKind::TypeReference
-													typeName: method.type.typeName
-												}
-											})
+										if method.type? {
+											if method.type is String {
+												$variable.push(variables, {
+													kind: VariableKind::Variable
+													type: {
+														kind: NodeKind::TypeReference
+														typeName: $identifier(method.type)
+													}
+												})
+											}
+											else if method.type.typeName? {
+												$variable.push(variables, {
+													kind: VariableKind::Variable
+													type: {
+														kind: NodeKind::TypeReference
+														typeName: method.type.typeName
+													}
+												})
+											}
+											else if method.type.name? {
+												$variable.push(variables, {
+													kind: VariableKind::Variable
+													type: {
+														kind: NodeKind::TypeReference
+														typeName: $identifier(method.type.name)
+													}
+												})
+											}
+											else {
+												return null
+											}
 										}
 										else {
 											return null
@@ -1129,7 +1204,7 @@ const $variable = {
 			else {
 				let variable = $variable.fromAST(data.typeName.object, node)
 				
-				if variable && variable.kind == VariableKind::Variable && variable.type && variable.type.properties {
+				if variable?.kind == VariableKind::Variable && variable.type?.properties? {
 					let name = data.typeName.property.name
 					
 					let property = variable.type.properties[name]
@@ -1146,17 +1221,6 @@ const $variable = {
 		}
 		
 		return null
-	} // }}}
-	fromReflectType(type, node) { // {{{
-		if type == 'Any' {
-			return null
-		}
-		else if type is String {
-			return node.scope().getVariable(type)
-		}
-		else {
-			throw new NotImplementedException(node)
-		}
 	} // }}}
 	kind(type = null) { // {{{
 		if type {
@@ -1217,8 +1281,9 @@ abstract class AbstractNode {
 		_reference
 		_scope = null
 	}
+	constructor()
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
-		this._options = parent._options
+		@options = parent._options
 	} // }}}
 	directory() => this._parent.directory()
 	file() => this._parent.file()
@@ -1460,7 +1525,6 @@ const $statements = {
 	`\(NodeKind::ImportDeclaration)`			: ImportDeclaration
 	`\(NodeKind::IncludeDeclaration)`			: IncludeDeclaration
 	`\(NodeKind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration
-	`\(NodeKind::MethodDeclaration)`			: MethodDeclaration
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(NodeKind::RequireOrImportDeclaration)`	: RequireOrImportDeclaration

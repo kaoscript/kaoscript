@@ -4,7 +4,7 @@
     "console": {
       "name": "console",
       "kind": 5,
-      "new": true,
+      "new": "true",
       "type": {
         "typeName": {
           "kind": 41,
@@ -22,7 +22,7 @@
                   "type": "Any",
                   "min": 0,
                   "max": "Infinity",
-                  "rest": true
+                  "rest": "true"
                 }
               ]
             }
@@ -33,10 +33,11 @@
     "Shape": {
       "name": "Shape",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [
         {
           "access": 3,
+          "async": "false",
           "min": 1,
           "max": 1,
           "parameters": [
@@ -60,36 +61,28 @@
       "instanceMethods": {
         "draw": [
           {
-            "kind": 56,
-            "name": "draw",
-            "signature": {
-              "access": 3,
-              "min": 1,
-              "max": 1,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 1,
-                  "max": 1
-                }
-              ],
-              "throws": []
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "string"
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": 1
               }
-            }
+            ],
+            "throws": [],
+            "type": "String"
           }
         ]
       },
       "classMethods": {},
       "sealed": {
         "name": "__ks_Shape",
-        "constructors": false,
+        "constructors": "false",
         "instanceMethods": {
-          "draw": true
+          "draw": "true"
         },
         "classMethods": {}
       }

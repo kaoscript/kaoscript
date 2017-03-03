@@ -4,23 +4,25 @@
     "Space": {
       "name": "Space",
       "kind": 2,
-      "new": true,
-      "type": "string"
+      "new": "true",
+      "type": "String"
     },
     "Color": {
       "name": "Color",
       "kind": 1,
-      "new": true,
+      "new": "true",
       "constructors": [
         {
           "access": 3,
-          "min": 1,
+          "async": "false",
+          "min": 0,
           "max": "Infinity",
           "parameters": [
             {
               "type": "Any",
-              "min": 1,
-              "max": "Infinity"
+              "min": 0,
+              "max": "Infinity",
+              "rest": "true"
             }
           ],
           "throws": []
@@ -58,14 +60,17 @@
         "alpha": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
             "throws": [],
+            "type": "Number",
             "index": 0
           },
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -79,12 +84,14 @@
               }
             ],
             "throws": [],
+            "type": "Color",
             "index": 1
           }
         ],
         "blend": [
           {
             "access": 3,
+            "async": "false",
             "min": 2,
             "max": 4,
             "parameters": [
@@ -111,12 +118,14 @@
             ],
             "throws": [
               "Error"
-            ]
+            ],
+            "type": "Color"
           }
         ],
         "clearer": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -129,21 +138,25 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "clone": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "contrast": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -153,12 +166,16 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [
+              "Error"
+            ],
+            "type": "Object"
           }
         ],
         "copy": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -168,12 +185,14 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "distance": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -183,12 +202,14 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Number"
           }
         ],
         "equals": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -198,12 +219,14 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Boolean"
           }
         ],
         "format": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 1,
             "parameters": [
@@ -215,27 +238,32 @@
             ],
             "throws": [
               "Error"
-            ]
+            ],
+            "type": "String"
           }
         ],
         "from": [
           {
             "access": 3,
-            "min": 1,
+            "async": "false",
+            "min": 0,
             "max": "Infinity",
             "parameters": [
               {
                 "type": "Any",
-                "min": 1,
-                "max": "Infinity"
+                "min": 0,
+                "max": "Infinity",
+                "rest": "true"
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "gradient": [
           {
             "access": 3,
+            "async": "false",
             "min": 2,
             "max": 2,
             "parameters": [
@@ -250,12 +278,19 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": {
+              "parameters": [
+                "Color"
+              ],
+              "name": "Array"
+            }
           }
         ],
         "greyscale": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 1,
             "parameters": [
@@ -265,48 +300,58 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "hex": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": []
+            "throws": [],
+            "type": "String"
           }
         ],
         "isBlack": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": []
+            "throws": [],
+            "type": "Boolean"
           }
         ],
         "isTransparent": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": []
+            "throws": [],
+            "type": "Boolean"
           }
         ],
         "isWhite": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": []
+            "throws": [],
+            "type": "Boolean"
           }
         ],
         "like": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -318,30 +363,36 @@
             ],
             "throws": [
               "Error"
-            ]
+            ],
+            "type": "Object"
           }
         ],
         "luminance": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": []
+            "throws": [],
+            "type": "Number"
           }
         ],
         "negative": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "opaquer": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -354,12 +405,14 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "readable": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 2,
             "parameters": [
@@ -374,27 +427,43 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [
+              "Error"
+            ],
+            "type": "Boolean"
           }
         ],
         "scheme": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
               {
-                "type": "Array",
+                "type": {
+                  "parameters": [
+                    "Function"
+                  ],
+                  "name": "Array"
+                },
                 "min": 1,
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": {
+              "parameters": [
+                "Color"
+              ],
+              "name": "Array"
+            }
           }
         ],
         "shade": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -404,20 +473,24 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "space": [
           {
             "access": 3,
+            "async": "false",
             "min": 0,
             "max": 0,
             "parameters": [],
             "throws": [],
+            "type": "Space",
             "index": 0
           },
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -430,12 +503,14 @@
             "throws": [
               "Error"
             ],
+            "type": "Color",
             "index": 1
           }
         ],
         "tint": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -445,12 +520,14 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ],
         "tone": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
@@ -460,7 +537,8 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "Color"
           }
         ]
       },
@@ -468,66 +546,91 @@
         "from": [
           {
             "access": 3,
-            "min": 1,
+            "async": "false",
+            "min": 0,
             "max": "Infinity",
             "parameters": [
               {
                 "type": "Any",
-                "min": 1,
-                "max": "Infinity"
+                "min": 0,
+                "max": "Infinity",
+                "rest": "true"
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": [
+              "Color",
+              "Boolean"
+            ]
           }
         ],
         "greyscale": [
           {
             "access": 3,
-            "min": 1,
+            "async": "false",
+            "min": 0,
             "max": "Infinity",
             "parameters": [
               {
                 "type": "Any",
-                "min": 1,
-                "max": "Infinity"
+                "min": 0,
+                "max": "Infinity",
+                "rest": "true"
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": [
+              "Color",
+              "Boolean"
+            ]
           }
         ],
         "hex": [
           {
             "access": 3,
-            "min": 1,
+            "async": "false",
+            "min": 0,
             "max": "Infinity",
             "parameters": [
               {
                 "type": "Any",
-                "min": 1,
-                "max": "Infinity"
+                "min": 0,
+                "max": "Infinity",
+                "rest": "true"
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": [
+              "Color",
+              "Boolean"
+            ]
           }
         ],
         "negative": [
           {
             "access": 3,
-            "min": 1,
+            "async": "false",
+            "min": 0,
             "max": "Infinity",
             "parameters": [
               {
                 "type": "Any",
-                "min": 1,
-                "max": "Infinity"
+                "min": 0,
+                "max": "Infinity",
+                "rest": "true"
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": [
+              "Color",
+              "Boolean"
+            ]
           }
         ],
         "registerFormatter": [
           {
             "access": 3,
+            "async": "false",
             "min": 2,
             "max": 2,
             "parameters": [
@@ -542,12 +645,14 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "void"
           }
         ],
         "registerParser": [
           {
             "access": 3,
+            "async": "false",
             "min": 2,
             "max": 2,
             "parameters": [
@@ -562,12 +667,14 @@
                 "max": 1
               }
             ],
-            "throws": []
+            "throws": [],
+            "type": "void"
           }
         ],
         "registerSpace": [
           {
             "access": 3,
+            "async": "false",
             "min": 1,
             "max": 1,
             "parameters": [
