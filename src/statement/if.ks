@@ -8,10 +8,12 @@ class IfStatement extends Statement {
 		let scope = @scope
 		
 		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
 		
 		@scope = this.newScope(scope)
 		
 		@whenTrue = $compile.expression($block(@data.whenTrue), this)
+		@whenTrue.analyse()
 		
 		if @data.whenFalse? {
 			if @data.whenFalse.kind == NodeKind::IfStatement {
@@ -24,15 +26,25 @@ class IfStatement extends Statement {
 				@scope = this.newScope(scope)
 				
 				@whenFalse = $compile.expression($block(@data.whenFalse), this)
+				@whenFalse.analyse()
 			}
 		}
 		
 		@scope = scope
 	} // }}}
-	fuse() { // {{{
-		@condition.fuse()
-		@whenTrue.fuse()
-		@whenFalse.fuse() if @whenFalse?
+	prepare() { // {{{
+		@condition.prepare()
+		
+		@condition.acquireReusable(false)
+		@condition.releaseReusable()
+		
+		@whenTrue.prepare()
+		@whenFalse.prepare() if @whenFalse?
+	} // }}}
+	translate() { // {{{
+		@condition.translate()
+		@whenTrue.translate()
+		@whenFalse.translate() if @whenFalse?
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()

@@ -1,4 +1,4 @@
-class Statement extends AbstractNode {
+abstract class Statement extends AbstractNode {
 	private {
 		_afterwards	: Array	= []
 		_variables	: Array	= []
@@ -16,15 +16,6 @@ class Statement extends AbstractNode {
 			@variables.push(data.left.name)
 			
 			$variable.define(this, @scope, data.left, $variable.kind(data.right.type), data.right.type)
-		}
-	} // }}}
-	compile(statements) { // {{{
-		for statement in statements {
-			statement.analyse()
-		}
-		
-		for statement in statements {
-			statement.fuse()
 		}
 	} // }}}
 	isAwait() => false

@@ -56,9 +56,14 @@ class ImplementDeclaration extends Statement {
 			TypeException.throwImplInvalidType(this)
 		}
 	} // }}}
-	fuse() { // {{{
+	prepare() { // {{{
 		for property in @properties {
-			property.fuse()
+			property.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for property in @properties {
+			property.translate()
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
@@ -90,7 +95,8 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 		
 		@name = @data.name.name
-		
+	} // }}}
+	prepare() { // {{{
 		@signature = $field.signature(@data, this)
 		
 		if @instance {
@@ -113,8 +119,7 @@ class ImplementClassFieldDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	translate()
 	toFragments(fragments, mode) { // {{{
 		if @instance {
 			this.module().flag('Helper')
@@ -208,6 +213,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			
 			if @data.name.kind == NodeKind::TemplateExpression {
 				@name = $compile.expression(@data.name, this)
+				@name.analyse()
 			}
 		}
 		
@@ -216,14 +222,17 @@ class ImplementClassMethodDeclaration extends Statement {
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(@variable.name))
 		
-		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
-		
-		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
+			parameter.analyse()
+		}
 	} // }}}
-	fuse() { // {{{
-		this.compile(this._parameters)
-		
-		this.compile(this._statements)
+	prepare() { // {{{
+		for parameter in @parameters {
+			parameter.prepare()
+		}
 		
 		@signature = Signature.fromNode(this)
 		
@@ -247,6 +256,29 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 			}
 		}
+		
+		@name.prepare() if @name?
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+		
+		@statements = []
+		for statement in $body(@data.body) {
+			@statements.push(statement = $compile.statement(statement, this))
+			
+			statement.analyse()
+		}
+		
+		for statement in @statements {
+			statement.prepare()
+		}
+		
+		for statement in @statements {
+			statement.translate()
+		}
+		@name.translate() if @name?
 	} // }}}
 	getAliasType(name, node) { // {{{
 		if	(variable ?= this.getInstanceVariable(name)) ||
@@ -309,19 +341,19 @@ class ImplementClassMethodDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
-		let data = this._data
-		let variable = this._variable
+		let data = @data
+		let variable = @variable
 		
-		if this._isContructor {
+		if @isContructor {
 			throw new NotImplementedException(this)
 		}
-		else if this._isDestructor {
+		else if @isDestructor {
 			throw new NotImplementedException(this)
 		}
 		else {
 			let line = fragments
 				.newLine()
-				.code($runtime.helper(this), '.', this._instance ? 'newInstanceMethod' : 'newClassMethod', '(')
+				.code($runtime.helper(this), '.', @instance ? 'newInstanceMethod' : 'newClassMethod', '(')
 			
 			let object = line.newObject()
 			
@@ -331,7 +363,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				object.newLine().code('name: ' + $quote(data.name.name))
 			}
 			else if data.name.kind == NodeKind::TemplateExpression {
-				object.newLine().code('name: ').compile(this._name)
+				object.newLine().code('name: ').compile(@name)
 			}
 			else {
 				throw new NotImplementedException(this)
@@ -347,7 +379,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				return fragments.code(')').step()
 			})
 			
-			for statement in this._statements {
+			for statement in @statements {
 				ctrl.compile(statement)
 			}
 			
@@ -410,78 +442,88 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
-		let variable = this._variable
-		
-		if this._isContructor = data.name.kind == NodeKind::Identifier && $method.isConstructor(data.name.name, variable) {
+		if @isContructor = @data.name.kind == NodeKind::Identifier && $method.isConstructor(@data.name.name, @variable) {
 			throw new NotImplementedException(this)
 		}
-		else if this._isDestructor = data.name.kind == NodeKind::Identifier && $method.isDestructor(data.name.name, variable) {
+		else if @isDestructor = @data.name.kind == NodeKind::Identifier && $method.isDestructor(@data.name.name, @variable) {
 			throw new NotImplementedException(this)
 		}
 		else {
-			if data.name.kind == NodeKind::TemplateExpression {
-				this._name = $compile.expression(data.name, this)
+			if @data.name.kind == NodeKind::TemplateExpression {
+				@name = $compile.expression(@data.name, this)
+				@name.analyse()
 			}
 			
-			for i from 0 til data.modifiers.length while this._instance {
-				if data.modifiers[i].kind == ModifierKind::Static {
-					this._instance = false
+			for i from 0 til @data.modifiers.length while @instance {
+				if @data.modifiers[i].kind == ModifierKind::Static {
+					@instance = false
 				}
 			}
 			
-			if variable.sealed {
-				if this._instance {
-					if variable.sealed.instanceMethods[data.name.name] != true {
-						variable.sealed.instanceMethods[data.name.name] = true
+			if @variable.sealed {
+				if @instance {
+					if @variable.sealed.instanceMethods[@data.name.name] != true {
+						@variable.sealed.instanceMethods[@data.name.name] = true
 					}
 				}
 				else {
-					if variable.sealed.classMethods[data.name.name] != true {
-						variable.sealed.classMethods[data.name.name] = true
+					if @variable.sealed.classMethods[@data.name.name] != true {
+						@variable.sealed.classMethods[@data.name.name] = true
 					}
 				}
 			}
 			
-			if data.name.kind == NodeKind::Identifier {
-				if this._instance {
-					variable.instanceMethods[data.name.name] = variable.instanceMethods[data.alias.name]
+			if @data.name.kind == NodeKind::Identifier {
+				if @instance {
+					@variable.instanceMethods[@data.name.name] = @variable.instanceMethods[@data.alias.name]
 				}
 				else {
-					variable.classMethods[data.name.name] = variable.classMethods[data.alias.name]
+					@variable.classMethods[@data.name.name] = @variable.classMethods[@data.alias.name]
 				}
 			}
 			
-			this._signature = Signature.fromAST(data, this)
+			@signature = Signature.fromAST(@data, this)
 			
-			if data.arguments? {
-				this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
+			if @data.arguments? {
+				@arguments = []
+				for argument in @data.arguments {
+					@arguments.push(argument = $compile.expression(argument, this))
+					
+					argument.analyse()
+				}
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		if this._arguments? {
-			for argument in this._arguments {
-				argument.fuse()
+	prepare() { // {{{
+		if @arguments? {
+			for argument in @arguments {
+				argument.prepare()
+			}
+		}
+	} // }}}
+	translate() { // {{{
+		if @arguments? {
+			for argument in @arguments {
+				argument.translate()
 			}
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
-		let data = this._data
-		let variable = this._variable
+		let data = @data
+		let variable = @variable
 		
 		let line = fragments
 			.newLine()
-			.code($runtime.helper(this), '.', this._instance ? 'newInstanceMethod' : 'newClassMethod', '(')
+			.code($runtime.helper(this), '.', @instance ? 'newInstanceMethod' : 'newClassMethod', '(')
 		
 		let object = line.newObject()
 		
 		object.line('class: ', variable.name is String ? variable.name : variable.name.name)
 		
 		if data.name.kind == NodeKind::TemplateExpression {
-			object.newLine().code('name: ').compile(this._name).done()
+			object.newLine().code('name: ').compile(@name).done()
 		}
 		else if data.name.kind == NodeKind::Identifier {
 			object.line('name: ', $quote(data.name.name))
@@ -500,7 +542,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 			let argsLine = object.newLine().code('arguments: ')
 			let array = argsLine.newArray()
 			
-			for argument in this._arguments {
+			for argument in @arguments {
 				array.newLine().compile(argument).done()
 			}
 			
@@ -510,7 +552,7 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 		
 		let signLine = object.newLine().code('signature: ')
 		
-		$helper.reflectMethod(this, signLine, this._signature)
+		$helper.reflectMethod(this, signLine, @signature)
 		
 		signLine.done()
 		
@@ -572,71 +614,86 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
-		let variable = this._variable
-		
-		if this._isContructor = data.name.kind == NodeKind::Identifier && $method.isConstructor(data.name.name, variable) {
+		if @isContructor = @data.name.kind == NodeKind::Identifier && $method.isConstructor(@data.name.name, @variable) {
 			throw new NotImplementedException(this)
 		}
-		else if this._isDestructor = data.name.kind == NodeKind::Identifier && $method.isDestructor(data.name.name, variable) {
+		else if @isDestructor = @data.name.kind == NodeKind::Identifier && $method.isDestructor(@data.name.name, @variable) {
 			throw new NotImplementedException(this)
 		}
 		else {
-			if data.name.kind == NodeKind::TemplateExpression {
-				this._name = $compile.expression(data.name, this)
+			if @data.name.kind == NodeKind::TemplateExpression {
+				@name = $compile.expression(@data.name, this)
+				@name.analyse()
 			}
 			
-			for i from 0 til data.modifiers.length while this._instance {
-				if data.modifiers[i].kind == ModifierKind::Static {
-					this._instance = false
+			for i from 0 til @data.modifiers.length while @instance {
+				if @data.modifiers[i].kind == ModifierKind::Static {
+					@instance = false
 				}
 			}
 			
-			if variable.sealed {
-				if this._instance {
-					if variable.sealed.instanceMethods[data.name.name] != true {
-						variable.sealed.instanceMethods[data.name.name] = true
+			if @variable.sealed {
+				if @instance {
+					if @variable.sealed.instanceMethods[@data.name.name] != true {
+						@variable.sealed.instanceMethods[@data.name.name] = true
 					}
 				}
 				else {
-					if variable.sealed.classMethods[data.name.name] != true {
-						variable.sealed.classMethods[data.name.name] = true
+					if @variable.sealed.classMethods[@data.name.name] != true {
+						@variable.sealed.classMethods[@data.name.name] = true
 					}
 				}
 			}
 			
-			this._functionName = $compile.expression(data.alias, this)
+			@functionName = $compile.expression(@data.alias, this)
+			@functionName.analyse()
 			
-			this._signature = Signature.fromAST(data, this)
-			
-			if data.arguments? {
-				this._arguments = [$compile.expression(argument, this) for argument in data.arguments]
+			if @data.arguments? {
+				@arguments = []
+				for argument in @data.arguments {
+					@arguments.push(argument = $compile.expression(argument, this))
+					
+					argument.analyse()
+				}
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		if this._arguments? {
-			for argument in this._arguments {
-				argument.fuse()
+	prepare() { // {{{
+		@name.prepare() if @name?
+		
+		if @arguments? {
+			for argument in @arguments {
+				argument.prepare()
+			}
+		}
+		
+		@signature = Signature.fromAST(@data, this)
+	} // }}}
+	translate() { // {{{
+		@name.translate() if @name?
+		
+		if @arguments? {
+			for argument in @arguments {
+				argument.translate()
 			}
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
-		let data = this._data
-		let variable = this._variable
+		let data = @data
+		let variable = @variable
 		
 		let line = fragments
 			.newLine()
-			.code($runtime.helper(this), '.', this._instance ? 'newInstanceMethod' : 'newClassMethod', '(')
+			.code($runtime.helper(this), '.', @instance ? 'newInstanceMethod' : 'newClassMethod', '(')
 		
 		let object = line.newObject()
 		
 		object.line('class: ', variable.name is String ? variable.name : variable.name.name)
 		
 		if data.name.kind == NodeKind::TemplateExpression {
-			object.newLine().code('name: ').compile(this._name).done()
+			object.newLine().code('name: ').compile(@name).done()
 		}
 		else if data.name.kind == NodeKind::Identifier {
 			object.line('name: ', $quote(data.name.name))
@@ -649,13 +706,13 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 			object.line('sealed: ', variable.sealed.name)
 		}
 		
-		object.newLine().code('function: ').compile(this._functionName)
+		object.newLine().code('function: ').compile(@functionName)
 		
 		if data.arguments? {
 			let argsLine = object.newLine().code('arguments: ')
 			let array = argsLine.newArray()
 			
-			for argument in this._arguments {
+			for argument in @arguments {
 				array.newLine().compile(argument).done()
 			}
 			
@@ -665,7 +722,7 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 		
 		let signLine = object.newLine().code('signature: ')
 		
-		$helper.reflectMethod(this, signLine, this._signature)
+		$helper.reflectMethod(this, signLine, @signature)
 		
 		signLine.done()
 		
@@ -720,27 +777,31 @@ class ImplementVariableFieldDeclaration extends Statement {
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
-		this._value = $compile.expression(this._data.defaultValue, this)
+		@value = $compile.expression(@data.defaultValue, this)
+		@value.analyse()
 		
 		let property = {
 			kind: VariableKind::Variable
-			name: this._data.name.name
+			name: @data.name.name
 		}
 		
-		if this._data.type? {
-			property.type = $type.type(this._data.type, this._scope, this)
+		if @data.type? {
+			property.type = $type.type(@data.type, @scope, this)
 		}
 		
-		this._variable.sealed.properties[property.name] = property
+		@variable.sealed.properties[property.name] = property
 	} // }}}
-	fuse() { // {{{
-		this._value.fuse()
+	prepare() { // {{{
+		@value.prepare()
+	} // }}}
+	translate() { // {{{
+		@value.translate()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.newLine()
-			.code(this._variable.sealed.name, '.', this._data.name.name, ' = ')
-			.compile(this._value)
+			.code(@variable.sealed.name, '.', @data.name.name, ' = ')
+			.compile(@value)
 			.done()
 	} // }}}
 }
@@ -756,43 +817,62 @@ class ImplementVariableMethodDeclaration extends Statement {
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		this._parameters = [new Parameter(parameter, this) for parameter in this._data.parameters]
-		
-		if this._data.body? {
-			this._statements = [$compile.statement(statement, this) for statement in $body(this._data.body)]
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
+			parameter.analyse()
 		}
-		else {
-			this._statements = []
+	} // }}}
+	prepare() { // {{{
+		for parameter in @parameters {
+			parameter.prepare()
 		}
 		
 		let property = {
 			kind: VariableKind::Function
-			name: this._data.name.name
-			signature: $function.signature(this._data, this)
+			name: @data.name.name
+			signature: $function.signature(@data, this)
 		}
 		
-		if this._data.type? {
-			property.type = $type.type(this._data.type, this._scope, this)
+		if @data.type? {
+			property.type = $type.type(@data.type, @scope, this)
 		}
 		
-		this._variable.sealed.properties[property.name] = property
-	} // }}}
-	fuse() { // {{{
-		this.compile(this._parameters)
-		
-		this.compile(this._statements)
+		@variable.sealed.properties[property.name] = property
 		
 		@signature = Signature.fromNode(this)
 	} // }}}
+	translate() { // {{{
+		if @data.body? {
+			@statements = []
+			for statement in $body(@data.body) {
+				@statements.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
+			}
+			
+			for statement in @statements {
+				statement.prepare()
+			}
+			
+			for statement in @statements {
+				statement.translate()
+			}
+		}
+		else {
+			@statements = []
+		}
+	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{
-		let line = fragments.newLine().code(this._variable.sealed.name, '.', this._data.name.name, ' = function(')
+		let line = fragments.newLine().code(@variable.sealed.name, '.', @data.name.name, ' = function(')
 		
 		let block = $function.parameters(this, line, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 		
-		for statement in this._statements {
+		for statement in @statements {
 			block.compile(statement)
 		}
 		

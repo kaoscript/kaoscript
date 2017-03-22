@@ -1,9 +1,8 @@
 class TypeAliasDeclaration extends Statement {
 	analyse() { // {{{
-		$variable.define(this, this._scope, this._data.name, VariableKind::TypeAlias, this._data.type)
+		$variable.define(this, @scope, @data.name, VariableKind::TypeAlias, @data.type)
 	} // }}}
-	fuse() { // {{{
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
-	} // }}}
+	prepare()
+	translate()
+	toStatementFragments(fragments, mode)
 }

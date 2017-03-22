@@ -8,67 +8,79 @@ class CurryExpression extends Expression {
 		_tested		= false
 	}
 	analyse() { // {{{
-		this._callee = $compile.expression(this._data.callee, this)
+		@callee = $compile.expression(@data.callee, this)
+		@callee.analyse()
 		
-		for argument in this._data.arguments {
+		for argument in @data.arguments {
 			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
-				this._arguments.push($compile.expression(argument.argument, this))
+				@arguments.push(argument = $compile.expression(argument.argument, this))
 				
-				this._list = false
+				@list = false
 			}
 			else {
-				this._arguments.push($compile.expression(argument, this))
+				@arguments.push(argument = $compile.expression(argument, this))
 			}
-		}
-		
-		if this._data.scope.kind == ScopeKind::This {
-			this._caller = $call.caller(this._callee, this)
-		}
-		else if this._data.scope.kind == ScopeKind::Argument {
-			this._callScope = $compile.expression(this._data.scope.value, this)
+			
+			argument.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
-		this._callee.fuse()
-		this._caller.fuse() if this._caller?
-		this._callScope.fuse() if this._callScope?
+	prepare() { // {{{
+		@callee.prepare()
 		
-		for argument in this._arguments {
-			argument.fuse()
+		for argument in @arguments {
+			argument.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		@callee.translate()
+		
+		if @data.scope.kind == ScopeKind::This {
+			@caller = $call.caller(@callee, this)
+		}
+		else if @data.scope.kind == ScopeKind::Argument {
+			@callScope = $compile.expression(@data.scope.value, this)
+			
+			@callScope.analyse()
+			@callScope.prepare()
+			@callScope.translate()
+		}
+		
+		for argument in @arguments {
+			argument.translate()
 		}
 	} // }}}
 	isNullable() { // {{{
-		return this._data.nullable || this._callee.isNullable()
+		return @data.nullable || @callee.isNullable()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this.isNullable() && !this._tested {
+		if this.isNullable() && !@tested {
 			fragments.wrapNullable(this).code(' ? ')
 			
-			this._tested = true
+			@tested = true
 			
 			this.toFragments(fragments)
 			
 			fragments.code(' : undefined')
 		}
-		else if this._list {
+		else if @list {
 			this.module().flag('Helper')
 			
-			let kind = this._data.scope.kind
+			let kind = @data.scope.kind
 			
 			if kind == ScopeKind::This {
 				fragments
 					.code($runtime.helper(this), '.vcurry(')
-					.compile(this._callee)
+					.compile(@callee)
 					.code(', ')
 				
-				if this._caller? {
-					fragments.compile(this._caller)
+				if @caller? {
+					fragments.compile(@caller)
 				}
 				else {
 					fragments.code('null')
 				}
 				
-				for argument in this._arguments {
+				for argument in @arguments {
 					fragments.code($comma).compile(argument)
 				}
 				
@@ -77,10 +89,10 @@ class CurryExpression extends Expression {
 			else if kind == ScopeKind::Null {
 				fragments
 					.code($runtime.helper(this), '.vcurry(')
-					.compile(this._callee)
+					.compile(@callee)
 					.code(', null')
 				
-				for argument in this._arguments {
+				for argument in @arguments {
 					fragments.code($comma).compile(argument)
 				}
 				
@@ -89,11 +101,11 @@ class CurryExpression extends Expression {
 			else {
 				fragments
 					.code($runtime.helper(this), '.vcurry(')
-					.compile(this._callee)
+					.compile(@callee)
 					.code($comma)
-					.compile(this._callScope)
+					.compile(@callScope)
 				
-				for argument in this._arguments {
+				for argument in @arguments {
 					fragments.code($comma).compile(argument)
 				}
 				
@@ -103,16 +115,16 @@ class CurryExpression extends Expression {
 		else {
 			this.module().flag('Helper')
 			
-			let kind = this._data.scope.kind
+			let kind = @data.scope.kind
 			
 			if kind == ScopeKind::This {
 				fragments
 					.code($runtime.helper(this), '.curry(')
-					.compile(this._callee)
+					.compile(@callee)
 					.code($comma)
 				
-				if this._caller? {
-					fragments.compile(this._caller)
+				if @caller? {
+					fragments.compile(@caller)
 				}
 				else {
 					fragments.code('null')
@@ -120,16 +132,16 @@ class CurryExpression extends Expression {
 				
 				fragments.code($comma)
 				
-				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
-					fragments.compile(this._arguments[0])
+				if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
+					fragments.compile(@arguments[0])
 				}
 				else {
 					fragments.code('[].concat(')
 					
-					for i from 0 til this._arguments.length {
+					for i from 0 til @arguments.length {
 						fragments.code($comma) if i != 0
 						
-						fragments.compile(this._arguments[i])
+						fragments.compile(@arguments[i])
 					}
 					
 					fragments.code(')')
@@ -140,19 +152,19 @@ class CurryExpression extends Expression {
 			else if kind == ScopeKind::Null {
 				fragments
 					.code($runtime.helper(this), '.curry(')
-					.compile(this._callee)
+					.compile(@callee)
 					.code(', null, ')
 				
-				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
-					fragments.compile(this._arguments[0])
+				if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
+					fragments.compile(@arguments[0])
 				}
 				else {
 					fragments.code('[].concat(')
 					
-					for i from 0 til this._arguments.length {
+					for i from 0 til @arguments.length {
 						fragments.code($comma) if i != 0
 						
-						fragments.compile(this._arguments[i])
+						fragments.compile(@arguments[i])
 					}
 					
 					fragments.code(')')
@@ -163,21 +175,21 @@ class CurryExpression extends Expression {
 			else {
 				fragments
 					.code($runtime.helper(this), '.curry(')
-					.compile(this._callee)
+					.compile(@callee)
 					.code($comma)
-					.compile(this._callScope)
+					.compile(@callScope)
 					.code($comma)
 				
-				if this._arguments.length == 1 && $signature.type($type.type(this._data.arguments[0].argument, this._scope, this), this._scope) == 'Array' {
-					fragments.compile(this._arguments[0])
+				if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
+					fragments.compile(@arguments[0])
 				}
 				else {
 					fragments.code('[].concat(')
 					
-					for i from 0 til this._arguments.length {
+					for i from 0 til @arguments.length {
 						fragments.code($comma) if i != 0
 						
-						fragments.compile(this._arguments[i])
+						fragments.compile(@arguments[i])
 					}
 					
 					fragments.code(')')
@@ -188,24 +200,24 @@ class CurryExpression extends Expression {
 		}
 	} // }}}
 	toNullableFragments(fragments) { // {{{
-		if !this._tested {
-			this._tested = true
+		if !@tested {
+			@tested = true
 			
-			if this._data.nullable {
-				if this._callee.isNullable() {
+			if @data.nullable {
+				if @callee.isNullable() {
 					fragments
-						.wrapNullable(this._callee)
+						.wrapNullable(@callee)
 						.code(' && ')
 				}
 				
 				fragments
 					.code($runtime.type(this) + '.isFunction(')
-					.compileReusable(this._callee)
+					.compileReusable(@callee)
 					.code(')')
 			}
 			else {
-				if this._callee.isNullable() {
-					fragments.compileNullable(this._callee)
+				if @callee.isNullable() {
+					fragments.compileNullable(@callee)
 				}
 			}
 		}

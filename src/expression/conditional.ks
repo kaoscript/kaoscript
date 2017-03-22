@@ -5,22 +5,32 @@ class ConditionalExpression extends Expression {
 		_whenTrue
 	}
 	analyse() { // {{{
-		this._condition = $compile.expression(this._data.condition, this)
-		this._whenTrue = $compile.expression(this._data.whenTrue, this)
-		this._whenFalse = $compile.expression(this._data.whenFalse, this)
+		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
+		
+		@whenTrue = $compile.expression(@data.whenTrue, this)
+		@whenTrue.analyse()
+		
+		@whenFalse = $compile.expression(@data.whenFalse, this)
+		@whenFalse.analyse()
 	} // }}}
-	fuse() { // {{{
-		this._condition.fuse()
-		this._whenTrue.fuse()
-		this._whenFalse.fuse()
+	prepare() { // {{{
+		@condition.prepare()
+		@whenTrue.prepare()
+		@whenFalse.prepare()
+	} // }}}
+	translate() { // {{{
+		@condition.translate()
+		@whenTrue.translate()
+		@whenFalse.translate()
 	} // }}}
 	isComputed() => true
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.wrapBoolean(this._condition)
+			.wrapBoolean(@condition)
 			.code(' ? ')
-			.compile(this._whenTrue)
+			.compile(@whenTrue)
 			.code(' : ')
-			.compile(this._whenFalse)
+			.compile(@whenFalse)
 	} // }}}
 }

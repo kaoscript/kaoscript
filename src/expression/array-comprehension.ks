@@ -21,10 +21,18 @@ class ArrayComprehensionForFrom extends Expression {
 		$variable.define(this, @scope, @data.loop.variable.name, VariableKind::Variable)
 		
 		@variable = $compile.expression(@data.loop.variable, this)
+		@variable.analyse()
 		
 		@from = $compile.expression(@data.loop.from, this)
+		@from.analyse()
+		
 		@to = $compile.expression(@data.loop.to ?? @data.loop.til, this)
-		@by = $compile.expression(@data.loop.by, this) if @data.loop.by?
+		@to.analyse()
+		
+		if @data.loop.by? {
+			@by = $compile.expression(@data.loop.by, this)
+			@by.analyse()
+		}
 		
 		@body = $compile.statement($return(@data.body), this)
 		@body.analyse()
@@ -34,9 +42,21 @@ class ArrayComprehensionForFrom extends Expression {
 			@when.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
-		@body.fuse()
-		@when.fuse() if @when?
+	prepare() { // {{{
+		@variable.prepare()
+		@from.prepare()
+		@to.prepare()
+		@by.prepare() if @by?
+		@body.prepare()
+		@when.prepare() if @when?
+	} // }}}
+	translate() { // {{{
+		@variable.translate()
+		@from.translate()
+		@to.translate()
+		@by.translate() if @by?
+		@body.translate()
+		@when.translate() if @when?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
@@ -99,6 +119,7 @@ class ArrayComprehensionForIn extends Expression {
 	} // }}}
 	analyse() { // {{{
 		@expression = $compile.expression(@data.loop.expression, this)
+		@expression.analyse()
 		
 		if @data.loop.value? {
 			if (variable ?= $variable.fromAST(@data.loop.expression, this)) && variable.type? {
@@ -122,6 +143,7 @@ class ArrayComprehensionForIn extends Expression {
 			}
 			
 			@value = $compile.expression(@data.loop.value, this)
+			@value.analyse()
 		}
 		else {
 			@valueName = @scope.acquireTempName()
@@ -131,6 +153,7 @@ class ArrayComprehensionForIn extends Expression {
 			$variable.define(this, @scope, @data.loop.index.name, VariableKind::Variable)
 			
 			@index = $compile.expression(@data.loop.index, this)
+			@index.analyse()
 		}
 		
 		@body = $compile.statement($return(@data.body), this)
@@ -143,12 +166,19 @@ class ArrayComprehensionForIn extends Expression {
 		
 		@scope.releaseTempName(@valueName) if @valueName?
 	} // }}}
-	fuse() { // {{{
-		@expression.fuse()
-		@value.fuse() if @value?
-		@index.fuse() if @index?
-		@body.fuse()
-		@when.fuse() if @when?
+	prepare() { // {{{
+		@expression.prepare()
+		@value.prepare() if @value?
+		@index.prepare() if @index?
+		@body.prepare()
+		@when.prepare() if @when?
+	} // }}}
+	translate() { // {{{
+		@expression.translate()
+		@value.translate() if @value?
+		@index.translate() if @index?
+		@body.translate()
+		@when.translate() if @when?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
@@ -209,11 +239,13 @@ class ArrayComprehensionForOf extends Expression {
 	} // }}}
 	analyse() { // {{{
 		@expression = $compile.expression(@data.loop.expression, this)
+		@expression.analyse()
 		
 		if @data.loop.key? {
 			$variable.define(this, @scope, @data.loop.key.name, VariableKind::Variable)
 			
 			@key = $compile.expression(@data.loop.key, this)
+			@key.analyse()
 		}
 		else {
 			@keyName = @scope.acquireTempName()
@@ -223,6 +255,7 @@ class ArrayComprehensionForOf extends Expression {
 			$variable.define(this, @scope, @data.loop.value.name, VariableKind::Variable)
 			
 			@value = $compile.expression(@data.loop.value, this)
+			@value.analyse()
 		}
 		
 		@body = $compile.statement($return(@data.body), this)
@@ -235,12 +268,19 @@ class ArrayComprehensionForOf extends Expression {
 		
 		@scope.releaseTempName(@keyName) if @keyName?
 	} // }}}
-	fuse() { // {{{
-		@expression.fuse()
-		@key.fuse() if @key?
-		@value.fuse() if @value?
-		@body.fuse()
-		@when.fuse() if @when?
+	prepare() { // {{{
+		@expression.prepare()
+		@key.prepare() if @key?
+		@value.prepare() if @value?
+		@body.prepare()
+		@when.prepare() if @when?
+	} // }}}
+	translate() { // {{{
+		@expression.translate()
+		@key.translate() if @key?
+		@value.translate() if @value?
+		@body.translate()
+		@when.translate() if @when?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
@@ -303,9 +343,18 @@ class ArrayComprehensionForRange extends Expression {
 		$variable.define(this, @scope, @data.loop.value.name, VariableKind::Variable)
 		
 		@value = $compile.expression(@data.loop.value, this)
+		@value.analyse()
+		
 		@from = $compile.expression(@data.loop.from, this)
+		@from.analyse()
+		
 		@to = $compile.expression(@data.loop.to, this)
-		@by = $compile.expression(@data.loop.by, this) if @data.loop.by?
+		@to.analyse()
+		
+		if @data.loop.by? {
+			@by = $compile.expression(@data.loop.by, this)
+			@body.analyse()
+		}
 		
 		@body = $compile.statement($return(@data.body), this)
 		@body.analyse()
@@ -315,13 +364,21 @@ class ArrayComprehensionForRange extends Expression {
 			@when.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
-		@value.fuse()
-		@from.fuse()
-		@to.fuse()
-		@by.fuse() if @by?
-		@body.fuse()
-		@when.fuse() if @when?
+	prepare() { // {{{
+		@value.prepare()
+		@from.prepare()
+		@to.prepare()
+		@by.prepare() if @by?
+		@body.prepare()
+		@when.prepare() if @when?
+	} // }}}
+	translate() { // {{{
+		@value.translate()
+		@from.translate()
+		@to.translate()
+		@by.translate() if @by?
+		@body.translate()
+		@when.translate() if @when?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')

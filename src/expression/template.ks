@@ -3,9 +3,22 @@ class TemplateExpression extends Expression {
 		_elements
 	}
 	analyse() { // {{{
-		@elements = [$compile.expression(element, this) for element in @data.elements]
+		@elements = []
+		for element in @data.elements {
+			@elements.push(element = $compile.expression(element, this))
+			
+			element.analyse()
+		}
 	} // }}}
-	fuse() { // {{{
+	prepare() { // {{{
+		for element in @elements {
+			element.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for element in @elements {
+			element.translate()
+		}
 	} // }}}
 	isComputed() => @elements.length > 1
 	toFragments(fragments, mode) { // {{{

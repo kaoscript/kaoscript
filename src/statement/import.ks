@@ -785,8 +785,8 @@ class ImportDeclaration extends Statement {
 			declarator.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 		for declarator in @declarators {
 			declarator.toFragments(fragments, mode)
@@ -801,6 +801,8 @@ class ImportDeclarator extends Statement {
 	analyse() { // {{{
 		@metadata = $import.resolve(@data, this.directory(), this.module(), this)
 	} // }}}
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 		if @metadata.kind == ImportKind::KSFile {
 			$import.toKSFileFragments(fragments, @metadata, @data, this)

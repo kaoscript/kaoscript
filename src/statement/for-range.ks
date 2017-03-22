@@ -13,9 +13,6 @@ class ForRangeStatement extends Statement {
 		_when
 		_while
 	}
-	constructor(data, parent) { // {{{
-		super(data, parent, parent.newScope())
-	} // }}}
 	analyse() { // {{{
 		if !@scope.hasVariable(@data.value.name) {
 			$variable.define(this, @scope, @data.value.name, $variable.kind(@data.value.type), @data.value.type)
@@ -24,35 +21,80 @@ class ForRangeStatement extends Statement {
 		}
 		
 		@value = $compile.expression(@data.value, this)
+		@value.analyse()
+		
 		@from = $compile.expression(@data.from, this)
+		@from.analyse()
 		
 		@to = $compile.expression(@data.to, this)
-		@boundName = @scope.acquireTempName() if @to.isComposite()
+		@to.analyse()
 		
 		if @data.by {
 			@by = $compile.expression(@data.by, this)
-			
-			@byName = @scope.acquireTempName() if @by.isComposite()
+			@by.analyse()
 		}
 		
 		if @data.until {
 			@until = $compile.expression(@data.until, this)
+			@until.analyse()
 		}
 		else if @data.while {
 			@while = $compile.expression(@data.while, this)
+			@while.analyse()
 		}
 		
 		if @data.when {
 			@when = $compile.expression(@data.when, this)
+			@when.analyse()
 		}
 		
 		@body = $compile.expression($block(@data.body), this)
+		@body.analyse()
+	} // }}}
+	prepare() { // {{{
+		@value.prepare()
+		@from.prepare()
+		@to.prepare()
+		
+		@boundName = @scope.acquireTempName() if @to.isComposite()
+		
+		if @by? {
+			@by.prepare()
+			
+			@byName = @scope.acquireTempName() if @by.isComposite()
+		}
+		
+		if @until? {
+			@until.prepare()
+		}
+		else if @while? {
+			@while.prepare()
+		}
+		
+		@when.prepare() if @when?
+		
+		@body.prepare()
 		
 		@scope.releaseTempName(@boundName) if @boundName?
 		@scope.releaseTempName(@byName) if @byName?
 	} // }}}
-	fuse() { // {{{
-		@body.fuse()
+	translate() { // {{{
+		@value.translate()
+		@from.translate()
+		@to.translate()
+		
+		@by.translate() if @by?
+		
+		if @until? {
+			@until.translate()
+		}
+		else if @while? {
+			@while.translate()
+		}
+		
+		@when.translate() if @when?
+		
+		@body.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl().code('for(')

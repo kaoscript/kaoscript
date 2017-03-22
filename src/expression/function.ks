@@ -15,28 +15,45 @@ class FunctionExpression extends Expression {
 			name: 'this'
 		}, VariableKind::Variable)
 		
-		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
-		
-		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
+			parameter.analyse()
+		}
 		
 		@isObjectMember = @parent is ObjectMember
 	} // }}}
-	fuse() { // {{{
+	prepare() { // {{{
 		for parameter in @parameters {
-			parameter.analyse()
-			parameter.fuse()
+			parameter.prepare()
 		}
 		
-		for statement in @statements {
-			statement.analyse()
-			statement.fuse()
+		@statements = []
+		for statement in $body(@data.body) {
+			@statements.push(statement = $compile.statement(statement, this))
 			
-			if !@await {
-				@await = statement.isAwait()
+			statement.analyse()
+			
+			if statement.isAwait() {
+				@await = true
 			}
 		}
 		
+		for statement in @statements {
+			statement.prepare()
+		}
+		
 		@signature = Signature.fromNode(this)
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+		
+		for statement in @statements {
+			statement.translate()
+		}
 	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{
@@ -117,26 +134,43 @@ class LambdaExpression extends Expression {
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
-		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
-		
-		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
-	} // }}}
-	fuse() { // {{{
-		for parameter in @parameters {
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
 			parameter.analyse()
-			parameter.fuse()
+		}
+	} // }}}
+	prepare() { // {{{
+		for parameter in @parameters {
+			parameter.prepare()
 		}
 		
-		for statement in @statements {
-			statement.analyse()
-			statement.fuse()
+		@statements = []
+		for statement in $body(@data.body) {
+			@statements.push(statement = $compile.statement(statement, this))
 			
-			if !@await {
-				@await = statement.isAwait()
+			statement.analyse()
+			
+			if statement.isAwait() {
+				@await = true
 			}
 		}
 		
+		for statement in @statements {
+			statement.prepare()
+		}
+		
 		@signature = Signature.fromNode(this)
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+		
+		for statement in @statements {
+			statement.translate()
+		}
 	} // }}}
 	isMethod() => false
 	toFragments(fragments, mode) { // {{{

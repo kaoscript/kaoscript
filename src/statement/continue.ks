@@ -1,8 +1,7 @@
 class ContinueStatement extends Statement {
-	analyse() { // {{{
-	} // }}}
-	fuse() { // {{{
-	} // }}}
+	analyse()
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 		fragments.line('continue', this._data)
 	} // }}}

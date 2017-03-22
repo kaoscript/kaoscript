@@ -520,6 +520,20 @@ impl String {
 }
 ```
 
+Compilation Steps
+-----------------
+
+1. parsing
+2. analysing
+  - include files
+  - declare variables (type, class, import, extern, assignement, ...)
+  - validate variables are existing
+3. preparing
+  - generate signature
+  - acquire temp variables
+4. translating
+5. formatting
+
 Runtime
 -------
 

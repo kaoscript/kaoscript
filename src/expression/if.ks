@@ -5,30 +5,42 @@ class IfExpression extends Expression {
 		_whenTrue
 	}
 	analyse() { // {{{
-		this._condition = $compile.expression(this._data.condition, this)
-		this._whenTrue = $compile.expression(this._data.whenTrue, this)
-		this._whenFalse = $compile.expression(this._data.whenFalse, this) if this._data.whenFalse?
+		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
+		
+		@whenTrue = $compile.expression(@data.whenTrue, this)
+		@whenTrue.analyse()
+		
+		if @data.whenFalse? {
+			@whenFalse = $compile.expression(@data.whenFalse, this)
+			@whenFalse.analyse()
+		}
 	} // }}}
-	fuse() { // {{{
-		this._condition.fuse()
-		this._whenTrue.fuse()
-		this._whenFalse.fuse() if this._whenFalse?
+	prepare() { // {{{
+		@condition.prepare()
+		@whenTrue.prepare()
+		@whenFalse.prepare() if @whenFalse?
+	} // }}}
+	translate() { // {{{
+		@condition.translate()
+		@whenTrue.translate()
+		@whenFalse.translate() if @whenFalse?
 	} // }}}
 	isComputed() => true
 	toFragments(fragments, mode) { // {{{
-		if this._whenFalse? {
+		if @whenFalse? {
 			fragments
-				.wrapBoolean(this._condition)
+				.wrapBoolean(@condition)
 				.code(' ? ')
-				.compile(this._whenTrue)
+				.compile(@whenTrue)
 				.code(' : ')
-				.compile(this._whenFalse)
+				.compile(@whenFalse)
 		}
 		else {
 			fragments
-				.wrapBoolean(this._condition)
+				.wrapBoolean(@condition)
 				.code(' ? ')
-				.compile(this._whenTrue)
+				.compile(@whenTrue)
 				.code(' : undefined')
 		}
 	} // }}}
@@ -37,13 +49,13 @@ class IfExpression extends Expression {
 		
 		ctrl.code('if(')
 		
-		if this._condition.isAssignable() {
-			ctrl.code('(').compileBoolean(this._condition).code(')')
+		if @condition.isAssignable() {
+			ctrl.code('(').compileBoolean(@condition).code(')')
 		}
 		else {
-			ctrl.compileBoolean(this._condition)
+			ctrl.compileBoolean(@condition)
 		}
 		
-		ctrl.code(')').step().line(this._whenTrue).done()
+		ctrl.code(')').step().line(@whenTrue).done()
 	} // }}}
 }

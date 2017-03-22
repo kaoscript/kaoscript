@@ -18,12 +18,7 @@ class ForInStatement extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@expression = $compile.expression(@data.expression, this)
-		
-		if @expression.isEntangled() {
-			@expressionName = this.greatScope().acquireTempName()
-			
-			@scope.updateTempNames()
-		}
+		@expression.analyse()
 		
 		if @data.value? {
 			if !@scope.hasVariable(@data.value.name) {
@@ -46,6 +41,7 @@ class ForInStatement extends Statement {
 			}
 			
 			@value = $compile.expression(@data.value, this)
+			@value.analyse()
 		}
 		
 		if @data.index? {
@@ -56,7 +52,36 @@ class ForInStatement extends Statement {
 			}
 			
 			@index = $compile.expression(@data.index, this)
+			@index.analyse()
 		}
+		
+		if @data.until {
+			@until = $compile.expression(@data.until, this)
+			@until.analyse()
+		}
+		else if @data.while {
+			@while = $compile.expression(@data.while, this)
+			@while.analyse()
+		}
+		
+		if @data.when {
+			@when = $compile.expression(@data.when, this)
+			@when.analyse()
+		}
+		
+		@body = $compile.expression($block(@data.body), this)
+		@body.analyse()
+	} // }}}
+	prepare() { // {{{
+		@expression.prepare()
+		
+		if @expression.isEntangled() {
+			@expressionName = this.greatScope().acquireTempName()
+			
+			@scope.updateTempNames()
+		}
+		
+		@value.prepare() if @value?
 		
 		if !?@index && !(@data.index? && !@data.declaration && this.greatScope().hasVariable(@data.index.name)) {
 			@indexName = @scope.acquireTempName()
@@ -66,26 +91,41 @@ class ForInStatement extends Statement {
 			@boundName = @scope.acquireTempName()
 		}
 		
-		if @data.until {
-			@until = $compile.expression(@data.until, this)
+		if @until? {
+			@until.prepare()
 		}
-		else if @data.while {
-			@while = $compile.expression(@data.while, this)
-		}
-		
-		if @data.when {
-			@when = $compile.expression(@data.when, this)
+		else if @while? {
+			@while.prepare()
 		}
 		
-		@body = $compile.expression($block(@data.body), this)
+		if @when? {
+			@when.prepare()
+			
+			@when.acquireReusable(false)
+			@when.releaseReusable()
+		}
+		
+		@body.prepare()
 		
 		this.greatScope().releaseTempName(@expressionName) if @expressionName?
 		@scope.releaseTempName(@indexName) if @indexName?
 		@scope.releaseTempName(@boundName) if @boundName?
 	} // }}}
-	fuse() { // {{{
-		@expression.fuse()
-		@body.fuse()
+	translate() { // {{{
+		@expression.translate()
+		
+		@value.translate() if @value?
+		
+		if @until? {
+			@until.translate()
+		}
+		else if @while? {
+			@while.translate()
+		}
+		
+		@when.translate() if @when?
+		
+		@body.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {

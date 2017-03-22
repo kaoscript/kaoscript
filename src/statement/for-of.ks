@@ -17,12 +17,7 @@ class ForOfStatement extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@expression = $compile.expression(@data.expression, this)
-		
-		if @expression.isEntangled() {
-			@expressionName = this.greatScope().acquireTempName()
-			
-			@scope.updateTempNames()
-		}
+		@expression.analyse()
 		
 		if @data.key? {
 			if @data.declaration || !@scope.hasVariable(@data.key.name) {
@@ -32,9 +27,7 @@ class ForOfStatement extends Statement {
 			}
 			
 			@key = $compile.expression(@data.key, this)
-		}
-		else {
-			@keyName = @scope.acquireTempName()
+			@key.analyse()
 		}
 		
 		if @data.value? {
@@ -45,27 +38,71 @@ class ForOfStatement extends Statement {
 			}
 		
 			@value = $compile.expression(@data.value, this)
+			@value.analyse()
 		}
 		
 		if @data.until {
 			@until = $compile.expression(@data.until, this)
+			@until.analyse()
 		}
 		else if @data.while {
 			@while = $compile.expression(@data.while, this)
+			@while.analyse()
 		}
 		
 		if @data.when {
 			@when = $compile.expression(@data.when, this)
+			@when.analyse()
 		}
 		
 		@body = $compile.expression($block(@data.body), this)
+		@body.analyse()
+	} // }}}
+	prepare() { // {{{
+		@expression.prepare()
+		
+		if @expression.isEntangled() {
+			@expressionName = this.greatScope().acquireTempName()
+			
+			@scope.updateTempNames()
+		}
+		
+		if @key? {
+			@key.prepare()
+		}
+		else {
+			@keyName = @scope.acquireTempName()
+		}
+		
+		if @until? {
+			@until.prepare()
+		}
+		else if @while? {
+			@while.prepare()
+		}
+		
+		@when.prepare() if @when?
+		
+		@body.prepare()
 		
 		this.greatScope().releaseTempName(@expressionName) if @expressionName?
 		@scope.releaseTempName(@keyName) if @keyName?
 	} // }}}
-	fuse() { // {{{
-		@expression.fuse()
-		@body.fuse()
+	translate() { // {{{
+		@expression.translate()
+		
+		@key.translate() if @key?
+		
+		if @until? {
+			@until.translate()
+		}
+		else if @while? {
+			@while.translate()
+		}
+		
+		@when.translate() if @when?
+		
+		@body.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {

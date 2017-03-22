@@ -1,8 +1,7 @@
 class OmittedExpression extends Expression {
-	analyse() { // {{{
-	} // }}}
-	fuse() { // {{{
-	} // }}}
+	analyse()
+	prepare()
+	translate()
 	toFragments(fragments) { // {{{
 		if this._data.spread {
 			fragments.code('...')

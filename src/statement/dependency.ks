@@ -134,8 +134,8 @@ class ExternDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 		for line in @lines {
 			fragments.line(line)
@@ -151,8 +151,8 @@ class RequireDeclaration extends Statement {
 			module.require($dependency.define(declaration, this, DependencyKind::Require), DependencyKind::Require)
 		}
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
@@ -167,8 +167,8 @@ class ExternOrRequireDeclaration extends Statement {
 			module.require($dependency.define(declaration, this, DependencyKind::ExternOrRequire), DependencyKind::ExternOrRequire)
 		}
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
@@ -183,8 +183,8 @@ class RequireOrExternDeclaration extends Statement {
 			module.require($dependency.define(declaration, this, DependencyKind::RequireOrExtern), DependencyKind::RequireOrExtern)
 		}
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
@@ -231,8 +231,8 @@ class RequireOrImportDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }

@@ -8,7 +8,7 @@ class IncludeDeclaration extends Statement {
 		let compiler = module.compiler()
 		
 		let path, data, declarator
-		for file in this._data.files {
+		for file in @data.files {
 			if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(file) {
 				path = fs.resolve(directory, file)
 				
@@ -30,7 +30,7 @@ class IncludeDeclaration extends Statement {
 					}
 					
 					for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-						this._statements.push(statement)
+						@statements.push(statement)
 						
 						statement.analyse()
 					}
@@ -70,20 +70,25 @@ class IncludeDeclaration extends Statement {
 				}
 				
 				for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-					this._statements.push(statement)
+					@statements.push(statement)
 					
 					statement.analyse()
 				}
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		for statement in this._statements {
-			statement.fuse()
+	prepare() { // {{{
+		for statement in @statements {
+			statement.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for statement in @statements {
+			statement.translate()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		for statement in this._statements {
+		for statement in @statements {
 			statement.toFragments(fragments, mode)
 		}
 	} // }}}
@@ -99,7 +104,7 @@ class IncludeOnceDeclaration extends Statement {
 		let compiler = module.compiler()
 		
 		let path, data, declarator
-		for file in this._data.files {
+		for file in @data.files {
 			if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(file) {
 				path = fs.resolve(directory, file)
 				
@@ -122,7 +127,7 @@ class IncludeOnceDeclaration extends Statement {
 						}
 						
 						for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-							this._statements.push(statement)
+							@statements.push(statement)
 							
 							statement.analyse()
 						}
@@ -164,7 +169,7 @@ class IncludeOnceDeclaration extends Statement {
 					}
 					
 					for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-						this._statements.push(statement)
+						@statements.push(statement)
 						
 						statement.analyse()
 					}
@@ -172,13 +177,18 @@ class IncludeOnceDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		for statement in this._statements {
-			statement.fuse()
+	prepare() { // {{{
+		for statement in @statements {
+			statement.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for statement in @statements {
+			statement.translate()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		for statement in this._statements {
+		for statement in @statements {
 			statement.toFragments(fragments, mode)
 		}
 	} // }}}
@@ -192,8 +202,11 @@ class IncludeDeclarator extends Statement {
 	constructor(@file, parent) { // {{{
 		super({}, parent)
 		
-		this._directory = path.dirname(file)
+		@directory = path.dirname(file)
 	} // }}}
-	directory() => this._directory
-	file() => this._file
+	analyse()
+	prepare()
+	translate()
+	directory() => @directory
+	file() => @file
 }

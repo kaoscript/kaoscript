@@ -1,8 +1,11 @@
 class ForFromStatement extends Statement {
 	private {
 		_body
+		_boundName
 		_by
+		_byName
 		_defineVariable	= false
+		_from
 		_til
 		_to
 		_until
@@ -14,83 +17,136 @@ class ForFromStatement extends Statement {
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
-		let data = this._data
-		
-		if !this._scope.hasVariable(data.variable.name) {
-			$variable.define(this, this._scope, data.variable.name, $variable.kind(data.variable.type), data.variable.type)
+		if !@scope.hasVariable(@data.variable.name) {
+			$variable.define(this, @scope, @data.variable.name, $variable.kind(@data.variable.type), @data.variable.type)
 			
-			this._defineVariable = true
+			@defineVariable = true
 		}
 		
-		this._variable = $compile.expression(data.variable, this)
-		this._from = $compile.expression(data.from, this)
+		@variable = $compile.expression(@data.variable, this)
+		@variable.analyse()
 		
-		let context = this._defineVariable ? null : this
+		@from = $compile.expression(@data.from, this)
+		@from.analyse()
 		
-		if data.til {
-			this._til = $compile.expression(data.til, this)
-			
-			this._boundName = this._scope.acquireTempName(context) if this._til.isComposite()
+		if @data.til {
+			@til = $compile.expression(@data.til, this)
+			@til.analyse()
 		}
 		else {
-			this._to = $compile.expression(data.to, this)
-			
-			this._boundName = this._scope.acquireTempName(context) if this._to.isComposite()
+			@to = $compile.expression(@data.to, this)
+			@to.analyse()
 		}
 		
-		if data.by {
-			this._by = $compile.expression(data.by, this)
-			
-			this._byName = this._scope.acquireTempName(context) if this._by.isComposite()
+		if @data.by {
+			@by = $compile.expression(@data.by, this)
+			@by.analyse()
 		}
 		
-		if data.until {
-			this._until = $compile.expression(data.until, this)
+		if @data.until {
+			@until = $compile.expression(@data.until, this)
+			@until.analyse()
 		}
-		else if data.while {
-			this._while = $compile.expression(data.while, this)
-		}
-		
-		if data.when {
-			this._when = $compile.expression(data.when, this)
+		else if @data.while {
+			@while = $compile.expression(@data.while, this)
+			@while.analyse()
 		}
 		
-		this._body = $compile.expression($block(data.body), this)
+		if @data.when {
+			@when = $compile.expression(@data.when, this)
+			@when.analyse()
+		}
 		
-		this._scope.releaseTempName(this._boundName) if ?this._boundName
-		this._scope.releaseTempName(this._byName) if ?this._byName
+		@body = $compile.expression($block(@data.body), this)
+		@body.analyse()
 	} // }}}
-	fuse() { // {{{
-		this._body.fuse()
+	prepare() { // {{{
+		@from.prepare()
+		
+		let context = @defineVariable ? null : this
+		
+		if @til? {
+			@til.prepare()
+			
+			@boundName = @scope.acquireTempName(context) if @til.isComposite()
+		}
+		else {
+			@to.prepare()
+			
+			@boundName = @scope.acquireTempName(context) if @to.isComposite()
+		}
+		
+		if @by? {
+			@by.prepare()
+			
+			@byName = @scope.acquireTempName(context) if @by.isComposite()
+		}
+		
+		if @until? {
+			@until.prepare()
+		}
+		else if @while? {
+			@while.prepare()
+		}
+		
+		@when.prepare() if @when?
+		
+		@body.prepare()
+		
+		@scope.releaseTempName(@boundName) if ?@boundName
+		@scope.releaseTempName(@byName) if ?@byName
+	} // }}}
+	translate() { // {{{
+		@from.translate()
+		
+		if @til? {
+			@til.translate()
+		}
+		else {
+			@to.translate()
+		}
+		
+		@by.translate() if @by?
+		
+		if @until? {
+			@until.translate()
+		}
+		else if @while? {
+			@while.translate()
+		}
+		
+		@when.translate() if @when?
+		
+		@body.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		let data = this._data
+		let data = @data
 		
 		let ctrl = fragments.newControl().code('for(')
 		
-		if data.declaration || this._defineVariable {
+		if data.declaration || @defineVariable {
 			ctrl.code($variable.scope(this))
 		}
-		ctrl.compile(this._variable).code($equals).compile(this._from)
+		ctrl.compile(@variable).code($equals).compile(@from)
 		
-		if this._boundName? {
-			ctrl.code($comma, this._boundName, $equals).compile(this._til ?? this._to)
+		if @boundName? {
+			ctrl.code($comma, @boundName, $equals).compile(@til ?? @to)
 		}
 		
-		if this._byName? {
-			ctrl.code($comma, this._byName, $equals).compile(this._by)
+		if @byName? {
+			ctrl.code($comma, @byName, $equals).compile(@by)
 		}
 		
 		ctrl.code('; ')
 		
 		if data.until {
-			ctrl.code('!(').compileBoolean(this._until).code(') && ')
+			ctrl.code('!(').compileBoolean(@until).code(') && ')
 		}
 		else if data.while {
-			ctrl.compileBoolean(this._while).code(' && ')
+			ctrl.compileBoolean(@while).code(' && ')
 		}
 		
-		ctrl.compile(this._variable)
+		ctrl.compile(@variable)
 		
 		let desc = (data.by && data.by.kind == NodeKind::NumericExpression && data.by.value < 0) || (data.from.kind == NodeKind::NumericExpression && ((data.to && data.to.kind == NodeKind::NumericExpression && data.from.value > data.to.value) || (data.til && data.til.kind == NodeKind::NumericExpression && data.from.value > data.til.value)))
 		
@@ -102,7 +158,7 @@ class ForFromStatement extends Statement {
 				ctrl.code(' < ')
 			}
 			
-			ctrl.compile(this._boundName ?? this._til)
+			ctrl.compile(@boundName ?? @til)
 		}
 		else {
 			if desc {
@@ -112,7 +168,7 @@ class ForFromStatement extends Statement {
 				ctrl.code(' <= ')
 			}
 			
-			ctrl.compile(this._boundName ?? this._to)
+			ctrl.compile(@boundName ?? @to)
 		}
 		
 		ctrl.code('; ')
@@ -120,27 +176,27 @@ class ForFromStatement extends Statement {
 		if data.by {
 			if data.by.kind == NodeKind::NumericExpression {
 				if data.by.value == 1 {
-					ctrl.code('++').compile(this._variable)
+					ctrl.code('++').compile(@variable)
 				}
 				else if data.by.value == -1 {
-					ctrl.code('--').compile(this._variable)
+					ctrl.code('--').compile(@variable)
 				}
 				else if data.by.value >= 0 {
-					ctrl.compile(this._variable).code(' += ').compile(this._by)
+					ctrl.compile(@variable).code(' += ').compile(@by)
 				}
 				else {
-					ctrl.compile(this._variable).code(' -= ', -data.by.value)
+					ctrl.compile(@variable).code(' -= ', -data.by.value)
 				}
 			}
 			else {
-				ctrl.compile(this._variable).code(' += ').compile(this._byName ?? this._by)
+				ctrl.compile(@variable).code(' += ').compile(@byName ?? @by)
 			}
 		}
 		else if desc {
-			ctrl.code('--').compile(this._variable)
+			ctrl.code('--').compile(@variable)
 		}
 		else {
-			ctrl.code('++').compile(this._variable)
+			ctrl.code('++').compile(@variable)
 		}
 		
 		ctrl.code(')').step()
@@ -149,14 +205,14 @@ class ForFromStatement extends Statement {
 			ctrl
 				.newControl()
 				.code('if(')
-				.compileBoolean(this._when)
+				.compileBoolean(@when)
 				.code(')')
 				.step()
-				.compile(this._body)
+				.compile(@body)
 				.done()
 		}
 		else {
-			ctrl.compile(this._body)
+			ctrl.compile(@body)
 		}
 		
 		ctrl.done()

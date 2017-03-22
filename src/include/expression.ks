@@ -1,4 +1,4 @@
-class Expression extends AbstractNode {
+abstract class Expression extends AbstractNode {
 	acquireReusable(acquire) { // {{{
 	} // }}}
 	releaseReusable() { // {{{

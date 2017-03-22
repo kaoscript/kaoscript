@@ -10,23 +10,33 @@ class CreateExpression extends Expression {
 		}
 		
 		@class = $compile.expression(@data.class, this)
+		@class.analyse()
 		
 		for argument in @data.arguments {
 			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
-				@arguments.push($compile.expression(argument.argument, this))
+				@arguments.push(argument = $compile.expression(argument.argument, this))
 				
 				@list = false
 			}
 			else {
-				@arguments.push($compile.expression(argument, this))
+				@arguments.push(argument = $compile.expression(argument, this))
 			}
+			
+			argument.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
-		@class.fuse()
+	prepare() { // {{{
+		@class.prepare()
 		
 		for argument in @arguments {
-			argument.fuse()
+			argument.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		@class.translate()
+		
+		for argument in @arguments {
+			argument.translate()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{

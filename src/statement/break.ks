@@ -1,8 +1,7 @@
 class BreakStatement extends Statement {
-	analyse() { // {{{
-	} // }}}
-	fuse() { // {{{
-	} // }}}
+	analyse()
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 		fragments.line('break', this._data)
 	} // }}}

@@ -5,11 +5,18 @@ class UnlessStatement extends Statement {
 	}
 	analyse() { // {{{
 		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
+		
 		@whenFalse = $compile.expression($block(@data.whenFalse), this)
+		@whenFalse.analyse()
 	} // }}}
-	fuse() { // {{{
-		@condition.fuse()
-		@whenFalse.fuse()
+	prepare() { // {{{
+		@condition.prepare()
+		@whenFalse.prepare()
+	} // }}}
+	translate() { // {{{
+		@condition.translate()
+		@whenFalse.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments

@@ -56,89 +56,90 @@ export class Module {
 		@hashes['.'] = @compiler.sha256(file, data)
 	} // }}}
 	addHash(file, hash) { // {{{
-		this._hashes[path.relative(this._directory, file)] = hash
+		@hashes[path.relative(@directory, file)] = hash
 	} // }}}
 	addHashes(file, hashes) { // {{{
 		let root = path.dirname(file)
 		
 		for name, hash of hashes {
 			if name == '.' {
-				this._hashes[path.relative(this._directory, file)] = hash
+				@hashes[path.relative(@directory, file)] = hash
 			}
 			else {
-				this._hashes[path.relative(this._directory, path.join(root, name))] = hash
+				@hashes[path.relative(@directory, path.join(root, name))] = hash
 			}
 		}
 	} // }}}
 	addInclude(path) { // {{{
-		this._includes[path] = true
+		@includes[path] = true
 	} // }}}
 	addReference(key, code) { // {{{
-		if this._references[key] {
-			this._references[key].push(code)
+		if @references[key] {
+			@references[key].push(code)
 		}
 		else {
-			this._references[key] = [code]
+			@references[key] = [code]
 		}
 		
 		return this
 	} // }}}
-	analyse() { // {{{
+	compile() { // {{{
 		@body = new ModuleBlock(@data, this)
 		
 		@body.analyse()
+		
+		@body.prepare()
+		
+		@body.translate()
 	} // }}}
-	compiler() => this._compiler
-	directory() => this._directory
+	compiler() => @compiler
+	directory() => @directory
 	export(name, alias = false) { // {{{
-		if this._binary {
+		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
 		
-		let variable = this._body.scope().getVariable(name.name)
+		let variable = @body.scope().getVariable(name.name)
 		
 		ReferenceException.throwNotDefined(name.name, this) unless variable
 		
 		if variable.kind != VariableKind::TypeAlias {
 			if alias {
-				this._exportSource.push(`\(alias.name): \(name.name)`)
+				@exportSource.push(`\(alias.name): \(name.name)`)
 			}
 			else {
-				this._exportSource.push(`\(name.name): \(name.name)`)
+				@exportSource.push(`\(name.name): \(name.name)`)
 			}
 			
 			if variable.sealed {
 				if alias {
-					this._exportSource.push(`__ks_\(alias.name): \(variable.sealed.name)`)
+					@exportSource.push(`__ks_\(alias.name): \(variable.sealed.name)`)
 				}
 				else {
-					this._exportSource.push(`__ks_\(name.name): \(variable.sealed.name)`)
+					@exportSource.push(`__ks_\(name.name): \(variable.sealed.name)`)
 				}
 			}
 		}
 		
 		if alias {
-			this._exportMeta[alias.name] = variable
+			@exportMeta[alias.name] = variable
 		}
 		else {
-			this._exportMeta[name.name] = variable
+			@exportMeta[name.name] = variable
 		}
 	} // }}}
-	file() => this._file
+	file() => @file
 	flag(name) { // {{{
-		this._flags[name] = true
-	} // }}}
-	fuse() { // {{{
-		this._body.fuse()
+		@flags[name] = true
 	} // }}}
 	hasInclude(path) { // {{{
-		return this._includes?[path]
+		return @includes?[path]
 	} // }}}
 	import(name, file = null) { // {{{
-		this._imports[name] = true
+		@imports[name] = true
 		
 		if file && file.slice(-$extensions.source.length).toLowerCase() == $extensions.source {
-			this._register = true
+			@register = true
 		}
 	} // }}}
 	isUpToDate(file, target, data) { // {{{
@@ -154,20 +155,20 @@ export class Module {
 		
 		for name, hash of hashes {
 			if name == '.' {
-				return null if this._compiler.sha256(file, data) != hash
+				return null if @compiler.sha256(file, data) != hash
 			}
 			else {
-				return null if this._compiler.sha256(path.join(root, name)) != hash
+				return null if @compiler.sha256(path.join(root, name)) != hash
 			}
 		}
 		
 		return hashes
 	} // }}}
 	listReferences(key) { // {{{
-		if this._references[key] {
-			let references = this._references[key]
+		if @references[key] {
+			let references = @references[key]
 			
-			this._references[key] = null
+			@references[key] = null
 			
 			return references
 		}
@@ -177,20 +178,20 @@ export class Module {
 	} // }}}
 	parse(data, file) => parse(data)
 	path(x = null, name) { // {{{
-		if !?x || !?this._output {
+		if !?x || !?@output {
 			return name
 		}
 		
 		let output = null
-		for rewire in this._rewire {
+		for rewire in @rewire {
 			if rewire.input == x {
-				output = path.relative(this._output, rewire.output)
+				output = path.relative(@output, rewire.output)
 				break
 			}
 		}
 		
 		if !?output {
-			output = path.relative(this._output, x)
+			output = path.relative(@output, x)
 		}
 		
 		if output[0] != '.' {
@@ -200,12 +201,12 @@ export class Module {
 		return output
 	} // }}}
 	require(variable, kind, data = null) { // {{{
-		if this._binary {
+		if @binary {
 			SyntaxException.throwNotBinary('require', this)
 		}
 		
 		if kind == DependencyKind::Require {
-			this._requirements[variable.requirement] = {
+			@requirements[variable.requirement] = {
 				kind: kind
 				name: variable.requirement
 				extendable: variable.kind == VariableKind::Class || variable.sealed
@@ -216,7 +217,7 @@ export class Module {
 				kind: kind
 				name: variable.requirement
 				extendable: variable.kind == VariableKind::Class || variable.sealed
-				parameter: this._body.scope().acquireTempName()
+				parameter: @body.scope().acquireTempName()
 			}
 			
 			if data? {
@@ -225,32 +226,32 @@ export class Module {
 				}
 			}
 			
-			this._requirements[requirement.parameter] = requirement
+			@requirements[requirement.parameter] = requirement
 			
-			this._dynamicRequirements.push(requirement)
+			@dynamicRequirements.push(requirement)
 		}
 	} // }}}
-	toHashes() => this._hashes
+	toHashes() => @hashes
 	toFragments() { // {{{
-		let builder = new FragmentBuilder(this._binary ? 0 : 1)
+		let builder = new FragmentBuilder(@binary ? 0 : 1)
 		
-		this._body.toFragments(builder)
+		@body.toFragments(builder)
 		
 		let fragments: Array = []
 		
-		if this._options.header {
+		if @options.header {
 			fragments.push($code(`// Generated by kaoscript \(metadata.version)\n`))
 		}
 		
-		if this._register && this._compiler._options.register {
+		if @register && @compiler._options.register {
 			fragments.push($code('require("kaoscript/register");\n'))
 		}
 		
 		let helper = $runtime.helper(this)
 		let type = $runtime.type(this)
 		
-		let hasHelper = !this._flags.Helper || this._requirements[helper] || this._imports[helper]
-		let hasType = !this._flags.Type || this._requirements[type] || this._imports[type]
+		let hasHelper = !@flags.Helper || @requirements[helper] || @imports[helper]
+		let hasType = !@flags.Type || @requirements[type] || @imports[type]
 		
 		if !hasHelper || !hasType {
 			if hasHelper {
@@ -260,7 +261,7 @@ export class Module {
 				fragments.push($code(`var \(helper) = require("\(@options.runtime.helper.package)").\(@options.runtime.helper.member);\n`))
 			}
 			else if @options.runtime.helper.package == @options.runtime.type.package {
-				if this._options.format.destructuring == 'es5' {
+				if @options.format.destructuring == 'es5' {
 					fragments.push($code(`var __ks__ = require("\(@options.runtime.helper.package)");\n`))
 					fragments.push($code(`var \(helper) = __ks__.\(@options.runtime.helper.member), \(type) = __ks__.\(@options.runtime.type.member);\n`))
 				}
@@ -277,14 +278,14 @@ export class Module {
 			}
 		}
 		
-		if this._binary {
+		if @binary {
 			fragments.append(builder.toArray())
 		}
 		else {
-			if this._dynamicRequirements.length {
+			if @dynamicRequirements.length {
 				fragments.push($code('function __ks_require('))
 				
-				for requirement, i in this._dynamicRequirements {
+				for requirement, i in @dynamicRequirements {
 					if i {
 						fragments.push($comma)
 					}
@@ -298,8 +299,8 @@ export class Module {
 				
 				fragments.push($code(') {\n'))
 				
-				if this._dynamicRequirements.length == 1 {
-					requirement = this._dynamicRequirements[0]
+				if @dynamicRequirements.length == 1 {
+					requirement = @dynamicRequirements[0]
 					
 					switch requirement.kind {
 						DependencyKind::ExternOrRequire => {
@@ -385,7 +386,7 @@ export class Module {
 				else {
 					fragments.push($code('\tvar req = [];\n'))
 					
-					for requirement in this._dynamicRequirements {
+					for requirement in @dynamicRequirements {
 						switch requirement.kind {
 							DependencyKind::ExternOrRequire => {
 								fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
@@ -477,7 +478,7 @@ export class Module {
 			fragments.push($code('module.exports = function('))
 			
 			let nf = false
-			for name of this._requirements {
+			for name of @requirements {
 				if nf {
 					fragments.push($comma)
 				}
@@ -487,18 +488,18 @@ export class Module {
 				
 				fragments.push($code(name))
 				
-				if this._requirements[name].extendable {
+				if @requirements[name].extendable {
 					fragments.push($code(', __ks_' + name))
 				}
 			}
 			
 			fragments.push($code(') {\n'))
 			
-			if this._dynamicRequirements.length {
-				if this._options.format.destructuring == 'es5' {
+			if @dynamicRequirements.length {
+				if @options.format.destructuring == 'es5' {
 					fragments.push($code('\tvar __ks__ = __ks_require('))
 					
-					for requirement, i in this._dynamicRequirements {
+					for requirement, i in @dynamicRequirements {
 						if i {
 							fragments.push($comma)
 						}
@@ -515,7 +516,7 @@ export class Module {
 					fragments.push($code('\tvar '))
 					
 					let i = -1
-					for requirement in this._dynamicRequirements {
+					for requirement in @dynamicRequirements {
 						fragments.push($comma) if i != -1
 						
 						fragments.push($code(`\(requirement.name) = __ks__[\(++i)]`))
@@ -530,7 +531,7 @@ export class Module {
 				else {
 					fragments.push($code('\tvar ['))
 					
-					for requirement, i in this._dynamicRequirements {
+					for requirement, i in @dynamicRequirements {
 						fragments.push($comma) if i != 0
 						
 						fragments.push($code(requirement.name))
@@ -542,7 +543,7 @@ export class Module {
 					
 					fragments.push($code('] = __ks_require('))
 					
-					for requirement, i in this._dynamicRequirements {
+					for requirement, i in @dynamicRequirements {
 						if i {
 							fragments.push($comma)
 						}
@@ -560,11 +561,11 @@ export class Module {
 			
 			fragments.append(builder.toArray())
 			
-			if this._exportSource.length {
+			if @exportSource.length {
 				fragments.push($code('\treturn {'))
 				
 				nf = false
-				for src in this._exportSource {
+				for src in @exportSource {
 					if nf {
 						fragments.push($code(','))
 					}
@@ -589,7 +590,7 @@ export class Module {
 			exports: {}
 		}
 		
-		for name, variable of this._requirements {
+		for name, variable of @requirements {
 			if variable.parameter {
 				if variable.extendable {
 					data.requirements[variable.name] = {
@@ -616,7 +617,7 @@ export class Module {
 		}
 		
 		let d
-		for name, variable of this._exportMeta {
+		for name, variable of @exportMeta {
 			d = {}
 			
 			for n of variable {
@@ -647,25 +648,30 @@ class ModuleBlock extends AbstractNode {
 		@scope = new Scope()
 	} // }}}
 	analyse() { // {{{
-		for statement in this._data.body {
+		for statement in @data.body {
 			if statement ?= $compile.statement(statement, this) {
-				this._body.push(statement)
+				@body.push(statement)
 				
 				statement.analyse()
 			}
 		}
 	} // }}}
-	directory() => this._module.directory()
-	file() => this._module.file()
-	fuse() { // {{{
-		for statement in this._body {
-			statement.fuse()
+	prepare() { // {{{
+		for statement in @body {
+			statement.prepare()
 		}
 	} // }}}
+	translate() { // {{{
+		for statement in @body {
+			statement.translate()
+		}
+	} // }}}
+	directory() => @module.directory()
+	file() => @module.file()
 	isConsumedError(name, variable): Boolean => false
-	module() => this._module
+	module() => @module
 	toFragments(fragments) { // {{{
-		for statement in this._body {
+		for statement in @body {
 			statement.toFragments(fragments, Mode::None)
 		}
 	} // }}}

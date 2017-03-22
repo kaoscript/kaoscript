@@ -37,6 +37,7 @@ class EnumDeclaration extends Statement {
 		}
 		
 		@name = $compile.expression(@data.name, this)
+		@name.analyse()
 		
 		switch @kind {
 			EnumKind::Flags => {
@@ -93,8 +94,8 @@ class EnumDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toStatementFragments(fragments, mode) { // {{{
 		if @new {
 			let line = fragments.newLine().code($variable.scope(this), @variable.name.name, $equals)

@@ -3,11 +3,21 @@ class ArrayExpression extends Expression {
 		_values
 	}
 	analyse() { // {{{
-		@values = [$compile.expression(value, this) for value in @data.values]
+		@values = []
+		for value in @data.values {
+			@values.push(value = $compile.expression(value, this))
+			
+			value.analyse()
+		}
 	} // }}}
-	fuse() { // {{{
+	prepare() { // {{{
 		for value in @values {
-			value.fuse()
+			value.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for value in @values {
+			value.translate()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
@@ -31,10 +41,25 @@ class ArrayRange extends Expression {
 	}
 	analyse() { // {{{
 		@from = $compile.expression(@data.from ?? @data.then, this)
+		@from.analyse()
+		
 		@to = $compile.expression(@data.to ?? @data.til, this)
-		@by = $compile.expression(@data.by, this) if @data.by?
+		@to.analyse()
+		
+		if @data.by? {
+			@by = $compile.expression(@data.by, this)
+			@by.analyse()
+		}
 	} // }}}
-	fuse() { // {{{
+	prepare() { // {{{
+		@from.prepare()
+		@to.prepare()
+		@by.prepare() if @by?
+	} // }}}
+	translate() { // {{{
+		@from.translate()
+		@to.translate()
+		@by.translate() if @by?
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')

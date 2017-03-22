@@ -3,17 +3,26 @@ class AssignmentOperatorExpression extends Expression {
 		_left
 		_right
 	}
+	analyse() { // {{{
+		this.assignment(@data)
+		
+		@left = $compile.expression(@data.left, this)
+		@left.analyse()
+		
+		@right = $compile.expression(@data.right, this)
+		@right.analyse()
+	} // }}}
+	prepare() { // {{{
+		@left.prepare()
+		@right.prepare()
+	} // }}}
+	translate() { // {{{
+		@left.translate()
+		@right.translate()
+	} // }}}
 	isAssignable() => true
 	isComputed() => true
-	isNullable() => this._right.isNullable()
-	analyse() { // {{{
-		let data = this._data
-		
-		this.assignment(data)
-		
-		this._left = $compile.expression(data.left, this)
-		this._right = $compile.expression(data.right, this)
-	} // }}}
+	isNullable() => @right.isNullable()
 	assignment(data) { // {{{
 		let expression = this
 		while !(expression._parent is Statement) {
@@ -22,188 +31,191 @@ class AssignmentOperatorExpression extends Expression {
 		
 		expression._parent.assignment(data, expression)
 	} // }}}
-	fuse() { // {{{
-		this._left.fuse()
-		this._right.fuse()
-	} // }}}
 	toNullableFragments(fragments) { // {{{
-		fragments.compileNullable(this._right)
+		fragments.compileNullable(@right)
 	} // }}}
 }
 
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' += ').compile(this._right)
+		fragments.compile(@left).code(' += ').compile(@right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseAnd extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' &= ').compile(this._right)
+		fragments.compile(@left).code(' &= ').compile(@right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseLeftShift extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' <<= ').compile(this._right)
+		fragments.compile(@left).code(' <<= ').compile(@right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseOr extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' |= ').compile(this._right)
+		fragments.compile(@left).code(' |= ').compile(@right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseRightShift extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' >>= ').compile(this._right)
+		fragments.compile(@left).code(' >>= ').compile(@right)
 	} // }}}
 }
 
 class AssignmentOperatorBitwiseXor extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' ^= ').compile(this._right)
+		fragments.compile(@left).code(' ^= ').compile(@right)
 	} // }}}
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code($equals).compile(this._right)
+		fragments.compile(@left).code($equals).compile(@right)
 	} // }}}
 	toAssignmentFragments(fragments) { // {{{
-		if this._left.toAssignmentFragments? {
-			this._left.toAssignmentFragments(fragments, this._right)
+		if @left.toAssignmentFragments? {
+			@left.toAssignmentFragments(fragments, @right)
 		}
 		else {
-			fragments.compile(this._left).code($equals).compile(this._right)
+			fragments.compile(@left).code($equals).compile(@right)
 		}
 	} // }}}
 	toBooleanFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code($equals).wrap(this._right)
+		fragments.compile(@left).code($equals).wrap(@right)
 	} // }}}
 }
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
+	prepare() { // {{{
+		@left.prepare()
+		@right.prepare()
+		
+		@right.acquireReusable(true)
+		@right.releaseReusable()
+	} // }}}
 	acquireReusable(acquire) { // {{{
-		this._right.acquireReusable(true)
+		@right.acquireReusable(true)
 	} // }}}
 	releaseReusable() { // {{{
-		this._right.releaseReusable()
+		@right.releaseReusable()
 	} // }}}
 	isAssignable() => false
 	toFragments(fragments, mode) { // {{{
-		if this._right.isNullable() {
+		if @right.isNullable() {
 			fragments
-				.wrapNullable(this._right)
+				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compileReusable(this._right)
-				.code(')', this._data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compileReusable(@right)
+				.code(')', @data.operator)
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compileReusable(this._right)
-				.code(')', this._data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compileReusable(@right)
+				.code(')', @data.operator)
 		}
 		
 		fragments
 			.code(' ? ')
-			.compile(this._left)
+			.compile(@left)
 			.code($equals)
-			.wrap(this._right)
+			.wrap(@right)
 			.code(' : undefined')
 	} // }}}
 	toBooleanFragments(fragments, mode) { // {{{
-		if this._right.isNullable() {
+		if @right.isNullable() {
 			fragments
-				.wrapNullable(this._right)
+				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compileReusable(this._right)
-				.code(')', this._data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compileReusable(@right)
+				.code(')', @data.operator)
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compileReusable(this._right)
-				.code(')', this._data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compileReusable(@right)
+				.code(')', @data.operator)
 		}
 		
 		fragments
 			.code(' ? (')
-			.compile(this._left)
+			.compile(@left)
 			.code($equals)
-			.wrap(this._right)
+			.wrap(@right)
 			.code(', true) : false')
 	} // }}}
 }
 
 class AssignmentOperatorModulo extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' %= ').compile(this._right)
+		fragments.compile(@left).code(' %= ').compile(@right)
 	} // }}}
 }
 
 class AssignmentOperatorMultiplication extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' *= ').compile(this._right)
+		fragments.compile(@left).code(' *= ').compile(@right)
 	} // }}}
 }
 
 class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 	acquireReusable(acquire) { // {{{
-		this._right.acquireReusable(true)
+		@right.acquireReusable(true)
 	} // }}}
 	releaseReusable() { // {{{
-		this._right.releaseReusable()
+		@right.releaseReusable()
 	} // }}}
 	isAssignable() => false
 	toFragments(fragments, mode) { // {{{
-		if this._right.isNullable() {
+		if @right.isNullable() {
 			fragments
-				.wrapNullable(this._right)
+				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compileReusable(this._right)
-				.code(')', this._data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compileReusable(@right)
+				.code(')', @data.operator)
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compileReusable(this._right)
-				.code(')', this._data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compileReusable(@right)
+				.code(')', @data.operator)
 		}
 		
 		fragments
 			.code(' ? ')
-			.compile(this._left)
+			.compile(@left)
 			.code($equals)
-			.wrap(this._right)
+			.wrap(@right)
 			.code(' : undefined')
 	} // }}}
 	toBooleanFragments(fragments, mode) { // {{{
-		if this._right.isNullable() {
+		if @right.isNullable() {
 			fragments
-				.wrapNullable(this._right)
+				.wrapNullable(@right)
 				.code(' && ')
-				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compileReusable(this._right)
-				.code(')', this._data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compileReusable(@right)
+				.code(')', @data.operator)
 		}
 		else {
 			fragments
-				.code($runtime.type(this) + '.isValue(', this._data.operator)
-				.compileReusable(this._right)
-				.code(')', this._data.operator)
+				.code($runtime.type(this) + '.isValue(', @data.operator)
+				.compileReusable(@right)
+				.code(')', @data.operator)
 		}
 		
 		fragments
 			.code(' ? (')
-			.compile(this._left)
+			.compile(@left)
 			.code($equals)
-			.wrap(this._right)
+			.wrap(@right)
 			.code(', false) : true')
 	} // }}}
 }
@@ -211,48 +223,48 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	isAssignable() => false
 	toFragments(fragments, mode) { // {{{
-		if this._left.isNullable() {
+		if @left.isNullable() {
 			fragments.code('(')
 			
-			this._left.toNullableFragments(fragments)
+			@left.toNullableFragments(fragments)
 			
 			fragments
 				.code(' && ' + $runtime.type(this) + '.isValue(')
-				.compile(this._left)
+				.compile(@left)
 				.code('))')
 		}
 		else {
 			fragments
 				.code($runtime.type(this) + '.isValue(')
-				.compile(this._left)
+				.compile(@left)
 				.code(')')
 		}
 		
 		fragments
 			.code(' ? undefined : ')
-			.compile(this._left)
+			.compile(@left)
 			.code($equals)
-			.compile(this._right)
+			.compile(@right)
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		ctrl.code('if(!')
 		
-		if this._left.isNullable() {
+		if @left.isNullable() {
 			ctrl.code('(')
 			
-			this._left.toNullableFragments(ctrl)
+			@left.toNullableFragments(ctrl)
 			
 			ctrl
 				.code(' && ' + $runtime.type(this) + '.isValue(')
-				.compile(this._left)
+				.compile(@left)
 				.code('))')
 		}
 		else {
 			ctrl
 				.code($runtime.type(this) + '.isValue(')
-				.compile(this._left)
+				.compile(@left)
 				.code(')')
 		}
 		
@@ -260,9 +272,9 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 			.code(')')
 			.step()
 			.newLine()
-			.compile(this._left)
+			.compile(@left)
 			.code($equals)
-			.compile(this._right)
+			.compile(@right)
 			.done()
 		
 		ctrl.done()
@@ -271,6 +283,6 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 
 class AssignmentOperatorSubtraction extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left).code(' -= ').compile(this._right)
+		fragments.compile(@left).code(' -= ').compile(@right)
 	} // }}}
 }

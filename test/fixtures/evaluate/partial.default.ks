@@ -5,7 +5,7 @@ class Shape {
 		_color: string = ''
 	}
 	
-	constructor(@color: string)
+	constructor(@color)
 }
 
 impl Shape {

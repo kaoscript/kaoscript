@@ -3,24 +3,42 @@ class PolyadicOperatorExpression extends Expression {
 		_operands
 		_tested = false
 	}
+	analyse() { // {{{
+		@operands = []
+		for operand in @data.operands {
+			@operands.push(operand = $compile.expression(operand, this))
+			
+			operand.analyse()
+		}
+	} // }}}
+	prepare() { // {{{
+		for operand in @operands {
+			operand.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for operand in @operands {
+			operand.translate()
+		}
+	} // }}}
+	acquireReusable(acquire) { // {{{
+		for i from 0 til @operands.length {
+			@operands[i].acquireReusable(false)
+			@operands[i].releaseReusable()
+		}
+	} // }}}
+	releaseReusable() { // {{{
+	} // }}}
 	isComputed() => true
 	isNullable() { // {{{
-		for operand in this._operands {
+		for operand in @operands {
 			return true if operand.isNullable()
 		}
 		
 		return false
 	} // }}}
-	analyse() { // {{{
-		this._operands = [$compile.expression(operand, this) for operand in this._data.operands]
-	} // }}}
-	fuse() { // {{{
-		for operand in this._operands {
-			operand.fuse()
-		}
-	} // }}}
 	toFragments(fragments, mode) { // {{{
-		let test = this.isNullable() && !this._tested
+		let test = this.isNullable() && !@tested
 		if test {
 			fragments
 				.compileNullable(this)
@@ -34,9 +52,9 @@ class PolyadicOperatorExpression extends Expression {
 		}
 	} // }}}
 	toNullableFragments(fragments) { // {{{
-		if !this._tested {
+		if !@tested {
 			let nf = false
-			for operand in this._operands {
+			for operand in @operands {
 				if operand.isNullable() {
 					if nf {
 						fragments.code(' && ')
@@ -49,7 +67,7 @@ class PolyadicOperatorExpression extends Expression {
 				}
 			}
 			
-			this._tested = true
+			@tested = true
 		}
 	} // }}}
 }
@@ -57,11 +75,11 @@ class PolyadicOperatorExpression extends Expression {
 class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('+', this._data.operator)
+					.code('+', @data.operator)
 					.code($space)
 			}
 			else {
@@ -76,11 +94,11 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('&&', this._data.operator)
+					.code('&&', @data.operator)
 					.code($space)
 			}
 			else {
@@ -95,11 +113,11 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 class PolyadicOperatorBitwiseAnd extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('&', this._data.operator)
+					.code('&', @data.operator)
 					.code($space)
 			}
 			else {
@@ -114,11 +132,11 @@ class PolyadicOperatorBitwiseAnd extends PolyadicOperatorExpression {
 class PolyadicOperatorBitwiseLeftShift extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('<<', this._data.operator)
+					.code('<<', @data.operator)
 					.code($space)
 			}
 			else {
@@ -133,11 +151,11 @@ class PolyadicOperatorBitwiseLeftShift extends PolyadicOperatorExpression {
 class PolyadicOperatorBitwiseOr extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('|', this._data.operator)
+					.code('|', @data.operator)
 					.code($space)
 			}
 			else {
@@ -152,11 +170,11 @@ class PolyadicOperatorBitwiseOr extends PolyadicOperatorExpression {
 class PolyadicOperatorBitwiseRightShift extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('>>', this._data.operator)
+					.code('>>', @data.operator)
 					.code($space)
 			}
 			else {
@@ -171,11 +189,11 @@ class PolyadicOperatorBitwiseRightShift extends PolyadicOperatorExpression {
 class PolyadicOperatorBitwiseXor extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('^', this._data.operator)
+					.code('^', @data.operator)
 					.code($space)
 			}
 			else {
@@ -190,11 +208,11 @@ class PolyadicOperatorBitwiseXor extends PolyadicOperatorExpression {
 class PolyadicOperatorDivision extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('/', this._data.operator)
+					.code('/', @data.operator)
 					.code($space)
 			}
 			else {
@@ -208,75 +226,75 @@ class PolyadicOperatorDivision extends PolyadicOperatorExpression {
 
 class PolyadicOperatorEquality extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
-		let l = this._operands.length - 1
+		let l = @operands.length - 1
 		
 		for i from 0 til l {
 			fragments.code(' && ') if i
 			
 			fragments
-				.compile(this._operands[i])
+				.compile(@operands[i])
 				.code(' === ')
-				.compile(this._operands[i + 1])
+				.compile(@operands[i + 1])
 		}
 	} // }}}
 }
 
 class PolyadicOperatorGreaterThan extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
-		for i from 0 til this._operands.length - 1 {
+		for i from 0 til @operands.length - 1 {
 			fragments.code(' && ') if i
 			
 			fragments
-				.wrap(this._operands[i])
+				.wrap(@operands[i])
 				.code($space)
-				.code('>', this._data.operator)
+				.code('>', @data.operator)
 				.code($space)
-				.wrap(this._operands[i + 1])
+				.wrap(@operands[i + 1])
 		}
 	} // }}}
 }
 
 class PolyadicOperatorGreaterThanOrEqual extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
-		for i from 0 til this._operands.length - 1 {
+		for i from 0 til @operands.length - 1 {
 			fragments.code(' && ') if i
 			
 			fragments
-				.wrap(this._operands[i])
+				.wrap(@operands[i])
 				.code($space)
-				.code('>=', this._data.operator)
+				.code('>=', @data.operator)
 				.code($space)
-				.wrap(this._operands[i + 1])
+				.wrap(@operands[i + 1])
 		}
 	} // }}}
 }
 
 class PolyadicOperatorLessThan extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
-		for i from 0 til this._operands.length - 1 {
+		for i from 0 til @operands.length - 1 {
 			fragments.code(' && ') if i
 			
 			fragments
-				.wrap(this._operands[i])
+				.wrap(@operands[i])
 				.code($space)
-				.code('<', this._data.operator)
+				.code('<', @data.operator)
 				.code($space)
-				.wrap(this._operands[i + 1])
+				.wrap(@operands[i + 1])
 		}
 	} // }}}
 }
 
 class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
-		for i from 0 til this._operands.length - 1 {
+		for i from 0 til @operands.length - 1 {
 			fragments.code(' && ') if i
 			
 			fragments
-				.wrap(this._operands[i])
+				.wrap(@operands[i])
 				.code($space)
-				.code('<=', this._data.operator)
+				.code('<=', @data.operator)
 				.code($space)
-				.wrap(this._operands[i + 1])
+				.wrap(@operands[i + 1])
 		}
 	} // }}}
 }
@@ -284,11 +302,11 @@ class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
 class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('*', this._data.operator)
+					.code('*', @data.operator)
 					.code($space)
 			}
 			else {
@@ -302,11 +320,11 @@ class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
 class PolyadicOperatorModulo extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('%', this._data.operator)
+					.code('%', @data.operator)
 					.code($space)
 			}
 			else {
@@ -323,12 +341,25 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
-		this._operands = [$compile.expression(operand, this, this.newScope()) for operand in this._data.operands]
+		@operands = []
+		for operand in @data.operands {
+			@operands.push(operand = $compile.expression(operand, this, this.newScope()))
+			
+			operand.analyse()
+		}
+	} // }}}
+	prepare() { // {{{
+		for operand in @operands {
+			operand.prepare()
+			
+			operand.acquireReusable(true)
+			operand.releaseReusable()
+		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		for i from 0 to this._operands.length - 2 {
-			this._operands[i].acquireReusable(true)
-			this._operands[i].releaseReusable()
+		for i from 0 to @operands.length - 2 {
+			@operands[i].acquireReusable(true)
+			@operands[i].releaseReusable()
 		}
 	} // }}}
 	releaseReusable() { // {{{
@@ -336,11 +367,11 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Type')
 		
-		let l = this._operands.length - 1
+		let l = @operands.length - 1
 		
 		let operand
 		for i from 0 til l {
-			operand = this._operands[i]
+			operand = @operands[i]
 			
 			if operand.isNullable() {
 				fragments.code('(')
@@ -365,18 +396,18 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 				.code(' : ')
 		}
 		
-		fragments.compile(this._operands[l])
+		fragments.compile(@operands[l])
 	} // }}}
 }
 
 class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('||', this._data.operator)
+					.code('||', @data.operator)
 					.code($space)
 			}
 			else {
@@ -391,11 +422,11 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
-		for operand in this._operands {
+		for operand in @operands {
 			if nf {
 				fragments
 					.code($space)
-					.code('-', this._data.operator)
+					.code('-', @data.operator)
 					.code($space)
 			}
 			else {

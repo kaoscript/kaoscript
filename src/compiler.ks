@@ -1268,6 +1268,33 @@ const $variable = {
 		
 		variables.push(variable) if nf
 	} // }}}
+	retype(node, scope, name, kind, type = null) { // {{{
+		const variable = scope.getVariable(name.name || name)
+		
+		if kind == VariableKind::Variable {
+			variable.type ?= $type.type(type, scope, node) if type?
+		}
+		else if kind == VariableKind::Function {
+			variable.kind = kind
+			variable.type ?= $type.type(type, scope, node) if type?
+			
+			variable.throws = []
+		}
+		else if kind == VariableKind::Class {
+			variable.kind = kind
+			variable.constructors = []
+			variable.destructors = 0
+			variable.instanceVariables = {}
+			variable.classVariables = {}
+			variable.instanceMethods = {}
+			variable.classMethods = {}
+			
+			delete variable.type
+		}
+		else {
+			throw new NotImplementedException(node)
+		}
+	} // }}}
 	scope(node) { // {{{
 		return node._options.format.variables == 'es5' ? 'var ' : 'let '
 	} // }}}
@@ -1285,6 +1312,9 @@ abstract class AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		@options = parent._options
 	} // }}}
+	abstract analyse()
+	abstract prepare()
+	abstract translate()
 	directory() => this._parent.directory()
 	file() => this._parent.file()
 	greatParent() => this._parent?._parent
@@ -1338,7 +1368,7 @@ include {
 }
 
 const $compile = {
-	expression(data, parent, reusable = true, scope = parent.scope()) { // {{{
+	expression(data, parent, scope = parent.scope()) { // {{{
 		let expression
 		
 		let clazz = $expressions[data.kind]
@@ -1347,11 +1377,11 @@ const $compile = {
 		}
 		else if data.kind == NodeKind::BinaryExpression {
 			if clazz ?= $binaryOperators[data.operator.kind] {
-				expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+				expression = new clazz(data, parent, scope)
 			}
 			else if data.operator.kind == BinaryOperatorKind::Assignment {
 				if clazz = $assignmentOperators[data.operator.assignment] {
-					expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+					expression = new clazz(data, parent, scope)
 				}
 				else {
 					throw new NotSupportedException(`Unexpected assignment operator \(data.operator.assignment)`, parent)
@@ -1363,7 +1393,7 @@ const $compile = {
 		}
 		else if data.kind == NodeKind::PolyadicExpression {
 			if clazz ?= $polyadicOperators[data.operator.kind] {
-				expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+				expression = new clazz(data, parent, scope)
 			}
 			else {
 				throw new NotSupportedException(`Unexpected polyadic operator \(data.operator.kind)`, parent)
@@ -1371,7 +1401,7 @@ const $compile = {
 		}
 		else if data.kind == NodeKind::UnaryExpression {
 			if clazz ?= $unaryOperators[data.operator.kind] {
-				expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
+				expression = new clazz(data, parent, scope)
 			}
 			else {
 				throw new NotSupportedException(`Unexpected assignment operator \(data.operator.kind)`, parent)
@@ -1379,14 +1409,6 @@ const $compile = {
 		}
 		else {
 			throw new NotSupportedException(`Unexpected assignment operator \(data.kind)`, parent)
-		}
-		
-		//console.log(expression)
-		expression.analyse()
-		
-		if reusable {
-			expression.acquireReusable(false)
-			expression.releaseReusable()
 		}
 		
 		return expression
@@ -1467,14 +1489,7 @@ const $expressions = {
 	`\(NodeKind::ArrayRange)`					: ArrayRange
 	`\(NodeKind::BindingElement)`				: BindingElement
 	`\(NodeKind::Block)`						: BlockExpression
-	`\(NodeKind::CallExpression)`				: func(data, parent, scope) {
-		if data.callee.kind == NodeKind::MemberExpression && !data.callee.computed && (callee = $sealed.callee(data.callee, parent)) {
-			return new CallSealedExpression(data, parent, scope, callee)
-		}
-		else {
-			return new CallExpression(data, parent, scope)
-		}
-	}
+	`\(NodeKind::CallExpression)`				: CallExpression
 	`\(NodeKind::ConditionalExpression)`		: ConditionalExpression
 	`\(NodeKind::CreateExpression)`				: CreateExpression
 	`\(NodeKind::CurryExpression)`				: CurryExpression
@@ -1484,14 +1499,7 @@ const $expressions = {
 	`\(NodeKind::IfExpression)`					: IfExpression
 	`\(NodeKind::LambdaExpression)`				: LambdaExpression
 	`\(NodeKind::Literal)`						: StringLiteral
-	`\(NodeKind::MemberExpression)`				: func(data, parent, scope) {
-		if callee = $sealed.callee(data, parent) {
-			return new MemberSealedExpression(data, parent, scope, callee)
-		}
-		else {
-			return new MemberExpression(data, parent, scope)
-		}
-	}
+	`\(NodeKind::MemberExpression)`				: MemberExpression
 	`\(NodeKind::NumericExpression)`			: NumberLiteral
 	`\(NodeKind::ObjectBinding)`				: ObjectBinding
 	`\(NodeKind::ObjectExpression)`				: ObjectExpression
@@ -1700,12 +1708,12 @@ export class Compiler {
 		//console.timeEnd('parse')
 		
 		//console.time('compile')
-		@module.analyse()
-		
-		@module.fuse()
-		
-		@fragments = @module.toFragments()
+		@module.compile()
 		//console.timeEnd('compile')
+		
+		//console.time('toFragments')
+		@fragments = @module.toFragments()
+		//console.timeEnd('toFragments')
 		
 		return this
 	} // }}}

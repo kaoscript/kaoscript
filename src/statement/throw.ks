@@ -4,13 +4,17 @@ class ThrowStatement extends Statement {
 	}
 	analyse() { // {{{
 		@value = $compile.expression(@data.value, this)
+		@value.analyse()
 		
 		if (variable ?= $variable.fromAST(@data.value, this)) && variable.type && (variable ?= $variable.fromType(variable.type, this)) {
 			Exception.validateReportedError(variable, this)
 		}
 	} // }}}
-	fuse() { // {{{
-		@value.fuse()
+	prepare() { // {{{
+		@value.prepare()
+	} // }}}
+	translate() { // {{{
+		@value.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments

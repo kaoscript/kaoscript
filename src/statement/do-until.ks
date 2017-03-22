@@ -4,22 +4,29 @@ class DoUntilStatement extends Statement {
 		_condition
 	}
 	analyse() { // {{{
-		this._condition = $compile.expression(this._data.condition, this)
-		this._body = $compile.expression(this._data.body, this)
+		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
+		
+		@body = $compile.expression(@data.body, this)
+		@body.analyse()
 	} // }}}
-	fuse() { // {{{
-		this._condition.fuse()
-		this._body.fuse()
+	prepare() { // {{{
+		@condition.prepare()
+		@body.prepare()
+	} // }}}
+	translate() { // {{{
+		@condition.translate()
+		@body.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
 			.code('do')
 			.step()
-			.compile(this._body)
+			.compile(@body)
 			.step()
 			.code('while(!(')
-			.compileBoolean(this._condition)
+			.compileBoolean(@condition)
 			.code('))')
 			.done()
 	} // }}}

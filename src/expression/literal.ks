@@ -19,18 +19,17 @@ class Literal extends Expression {
 	constructor(data, parent, scope, @value) { // {{{
 		super(data, parent, scope)
 	} // }}}
-	analyse() { // {{{
-	} // }}}
-	fuse() { // {{{
-	} // }}}
+	analyse()
+	prepare()
+	translate()
 	isComposite() => false
 	isEntangled() => false
 	toFragments(fragments, mode) { // {{{
-		if this._data {
-			fragments.code(this._value, this._data)
+		if @data {
+			fragments.code(@value, @data)
 		}
 		else {
-			fragments.code(this._value)
+			fragments.code(@value)
 		}
 	} // }}}
 }
@@ -45,27 +44,27 @@ class IdentifierLiteral extends Literal {
 		if variable && !($predefined[data.name] == true || $runtime.isDefined(data.name, parent)) {
 			if parent is MemberExpression {
 				if parent._data.object == data {
-					this._isVariable = true
+					@isVariable = true
 				}
 				else if parent._data.computed && parent._data.property == data {
-					this._isVariable = true
+					@isVariable = true
 				}
 			}
 			else {
-				this._isVariable = true
+				@isVariable = true
 			}
 		}
 		
-		if this._isVariable && !this._scope.hasVariable(data.name) {
+		if @isVariable && !@scope.hasVariable(data.name) {
 			ReferenceException.throwNotDefined(data.name, this)
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this._isVariable {
-			fragments.code(this._scope.getRenamedVariable(this._value), this._data)
+		if @isVariable {
+			fragments.code(@scope.getRenamedVariable(@value), @data)
 		}
 		else {
-			fragments.code(this._value, this._data)
+			fragments.code(@value, @data)
 		}
 	} // }}}
 }

@@ -3,23 +3,26 @@ class BlockExpression extends Expression {
 		_body = []
 	}
 	analyse() { // {{{
-		if this._data.statements {
-			for statement in this._data.statements {
-				if statement ?= $compile.statement(statement, this) {
-					this._body.push(statement)
-					
-					statement.analyse()
-				}
+		if @data.statements {
+			for statement in @data.statements {
+				@body.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		for statement in this._body {
-			statement.fuse()
+	prepare() { // {{{
+		for statement in @body {
+			statement.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for statement in @body {
+			statement.translate()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		for statement in this._body {
+		for statement in @body {
 			statement.toFragments(fragments, mode)
 		}
 	} // }}}

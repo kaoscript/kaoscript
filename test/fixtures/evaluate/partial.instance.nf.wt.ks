@@ -5,7 +5,7 @@ class Shape {
 		_shape: string = ''
 	}
 	
-	constructor(@shape: string)
+	constructor(@shape)
 	
 	shape() => this._shape
 }
@@ -15,7 +15,7 @@ class Action {
 		_color: string = ''
 	}
 	
-	constructor(@color: string)
+	constructor(@color)
 }
 
 impl Action {

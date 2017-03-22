@@ -4,32 +4,41 @@ class ObjectExpression extends Expression {
 		_templates = []
 	}
 	analyse() { // {{{
-		for property in this._data.properties {
+		for property in @data.properties {
 			if property.name.kind == NodeKind::Identifier || property.name.kind == NodeKind::Literal {
-				this._properties.push(property = new ObjectMember(property, this))
+				@properties.push(property = new ObjectMember(property, this))
 			}
 			else {
-				this._templates.push(property = new ObjectTemplateMember(property, this))
+				@templates.push(property = new ObjectTemplateMember(property, this))
 			}
 			
 			property.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
-		for property in this._properties {
-			property.fuse()
+	prepare() { // {{{
+		for property in @properties {
+			property.prepare()
 		}
 		
-		for property in this._templates {
-			property.fuse()
+		for property in @templates {
+			property.prepare()
 		}
 	} // }}}
-	reference() => this._parent.reference()
+	translate() { // {{{
+		for property in @properties {
+			property.translate()
+		}
+		
+		for property in @templates {
+			property.translate()
+		}
+	} // }}}
+	reference() => @parent.reference()
 	toFragments(fragments, mode) { // {{{
-		if this._properties.length {
+		if @properties.length {
 			let object = fragments.newObject()
 			
-			for property in this._properties {
+			for property in @properties {
 				object.newLine().compile(property)
 			}
 			
@@ -47,32 +56,36 @@ class ObjectMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		if this._data.name.kind == NodeKind::Identifier	{
-			this._name = new IdentifierLiteral(this._data.name, this, this.scope(), false)
+		if @data.name.kind == NodeKind::Identifier	{
+			@name = new IdentifierLiteral(@data.name, this, this.scope(), false)
 			
-			this.reference('.' + this._data.name.name)
+			this.reference('.' + @data.name.name)
 		}
 		else {
-			this._name = new StringLiteral(this._data.name, this)
+			@name = new StringLiteral(@data.name, this)
 			
-			this.reference('[' + $quote(this._data.name.value) + ']')
+			this.reference('[' + $quote(@data.name.value) + ']')
 		}
 		
-		this._name.analyse()
+		@name.analyse()
 		
-		this._value = $compile.expression(this._data.value, this)
+		@value = $compile.expression(@data.value, this)
+		@value.analyse()
 	} // }}}
-	fuse() { // {{{
-		this._value.fuse()
+	prepare() { // {{{
+		@value.prepare()
+	} // }}}
+	translate() { // {{{
+		@value.translate()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._name)
+		fragments.compile(@name)
 		
-		if this._data.value.kind != NodeKind::FunctionExpression {
+		if @data.value.kind != NodeKind::FunctionExpression {
 			fragments.code(': ')
 		}
 		
-		fragments.compile(this._value)
+		fragments.compile(@value)
 	} // }}}
 }
 
@@ -82,24 +95,27 @@ class ObjectTemplateMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		this._name = new TemplateExpression(this._data.name, this)
+		@name = new TemplateExpression(@data.name, this)
+		@name.analyse()
 		
-		this._name.analyse()
-		
-		this._value = $compile.expression(this._data.value, this)
+		@value = $compile.expression(@data.value, this)
+		@value.analyse()
 		
 		this.statement().afterward(this)
 	} // }}}
-	fuse() { // {{{
-		this._value.fuse()
+	prepare() { // {{{
+		@value.prepare()
+	} // }}}
+	translate() { // {{{
+		@value.translate()
 	} // }}}
 	toAfterwardFragments(fragments) { // {{{
 		fragments
 			.newLine()
 			.code(this.parent().reference(), '[')
-			.compile(this._name)
+			.compile(@name)
 			.code('] = ')
-			.compile(this._value)
+			.compile(@value)
 			.done()
 	} // }}}
 }

@@ -142,6 +142,8 @@ class Scope extends AbstractScope {
 		}
 	} // }}}
 	acquireTempName(statement: Statement = null) { // {{{
+		this.updateTempNames()
+		
 		if name ?= this._scopeParent?.acquireTempNameFromKid() {
 			this._tempParentNames[name] = true
 			
@@ -230,8 +232,12 @@ class Scope extends AbstractScope {
 		}
 	} // }}}
 	updateTempNames() { // {{{
-		if this._parent && this._parent._tempNextIndex > this._tempNextIndex {
-			this._tempNextIndex = this._parent._tempNextIndex
+		if @parent {
+			@parent.updateTempNames()
+			
+			if @parent._tempNextIndex > @tempNextIndex {
+				@tempNextIndex = @parent._tempNextIndex
+			}
 		}
 	} // }}}
 }

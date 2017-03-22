@@ -36,14 +36,18 @@ describe('compile', function() {
 			}
 			
 			if(error) {
+				var data;
+				
 				try {
-					compiler.compile().toSource();
+					data = compiler.compile().toSource();
 				}
 				catch(ex) {
 					ex.fileName = path.relative(__dirname, ex.fileName);
 					
 					expect(ex.toString()).to.equal(error);
 				}
+				
+				expect(data).to.not.exist;
 			}
 			else {
 				var data = compiler.compile().toSource();

@@ -20,9 +20,14 @@ class VariableDeclaration extends Statement {
 			@declarators.push(declarator)
 		}
 	} // }}}
-	fuse() { // {{{
+	prepare() { // {{{
 		for declarator in @declarators {
-			declarator.fuse()
+			declarator.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for declarator in @declarators {
+			declarator.translate()
 		}
 	} // }}}
 	isAwait() => @await
@@ -72,11 +77,11 @@ class AwaitDeclarator extends AbstractNode {
 		super(data, parent, new Scope(parent._scope))
 	} // }}}
 	analyse() { // {{{
-		let data = @data
+		@operation = $compile.expression(@data.operation, this)
 		
-		@operation = $compile.expression(data.operation, this)
+		@operation.analyse()
 		
-		for variable in data.variables {
+		for variable in @data.variables {
 			if variable.kind == NodeKind::VariableDeclarator {
 				$variable.define(this, @scope._parent, variable.name, $variable.kind(variable.type), variable.type)
 				
@@ -89,11 +94,18 @@ class AwaitDeclarator extends AbstractNode {
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		@operation.fuse()
+	prepare() { // {{{
+		@operation.prepare()
 		
 		for variable in @variables {
-			variable.fuse()
+			variable.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		@operation.translate()
+		
+		for variable in @variables {
+			variable.translate()
 		}
 	} // }}}
 	statement() => @parent.statement()
@@ -167,17 +179,29 @@ class VariableDeclarator extends AbstractNode {
 		
 		@name = $compile.expression(@data.name, this)
 		
+		@name.analyse()
+		
 		if @data.init? {
 			if @data.name.kind == NodeKind::Identifier {
 				this.reference(@data.name.name)
 			}
 			
 			@init = $compile.expression(@data.init, this)
+			
+			@init.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
+	prepare() { // {{{
 		if @init != null {
-			@init.fuse()
+			@init.prepare()
+			
+			@init.acquireReusable(false)
+			@init.releaseReusable()
+		}
+	} // }}}
+	translate() { // {{{
+		if @init != null {
+			@init.translate()
 		}
 	} // }}}
 	statement() => @parent.statement()

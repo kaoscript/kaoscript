@@ -24,22 +24,6 @@ const $class = {
 		
 		reflect.abstractMethods[name].push(signature)
 	} // }}}
-	areAbstractMethodsImplemented(variable, parent, scope) { // {{{
-		for name, methods of parent.abstractMethods {
-			return false unless ?variable.instanceMethods[name]
-			
-			for method in methods {
-				return false unless $signature.match(method, variable.instanceMethods[name])
-			}
-		}
-		
-		if parent.extends? {
-			return $class.areAbstractMethodsImplemented(variable, scope.getVariable(parent.extends), scope)
-		}
-		else {
-			return true
-		}
-	} // }}}
 	continuous(node, fragments) { // {{{
 		let reflect = {
 			abstract: node._abstract
@@ -340,6 +324,54 @@ const $class = {
 		reflect.instanceMethods[name].push(signature)
 		
 		statement.toFragments(fragments, Mode::None)
+	} // }}}
+	listMissingAbstractMethods(variable, scope) { // {{{
+		const abstractMethods = {}
+		
+		if variable.extends? {
+			$class.listParentAbstractMethods(scope.getVariable(variable.extends), abstractMethods, scope)
+		}
+		
+		let method, index
+		for name, methods of abstractMethods when variable.instanceMethods[name]? {
+			for method, index in methods desc {
+				if $signature.match(method, variable.instanceMethods[name]) {
+					methods.splice(index, 1)
+				}
+			}
+			
+			if methods.length == 0 {
+				delete abstractMethods[name]
+			}
+		}
+		
+		return Object.keys(abstractMethods)
+	} // }}}
+	listParentAbstractMethods(variable, abstractMethods, scope) { // {{{
+		if variable.extends? {
+			$class.listParentAbstractMethods(scope.getVariable(variable.extends), abstractMethods, scope)
+		}
+		
+		if variable.abstract {
+			for name, methods of variable.abstractMethods {
+				abstractMethods[name] ??= []
+				
+				abstractMethods[name]:Array.append(methods)
+			}
+		}
+		
+		let method, index
+		for name, methods of abstractMethods when variable.instanceMethods[name]? {
+			for method, index in methods desc {
+				if $signature.match(method, variable.instanceMethods[name]) {
+					methods.splice(index, 1)
+				}
+			}
+			
+			if methods.length == 0 {
+				delete abstractMethods[name]
+			}
+		}
 	} // }}}
 	methodCall(node, fnName, argName, retCode, fragments, method, index) { // {{{
 		if method.max == 0 {
@@ -1332,56 +1364,11 @@ class ClassDeclaration extends Statement {
 		this._instanceVariableScope = new Scope(parent.scope())
 		this._es5 = this._options.format.classes == 'es5'
 	} // }}}
-	addReference(type?, node) { // {{{
-		if type? {
-			if type is Array {
-				for item in type {
-					this.addReference(item, node)
-				}
-			}
-			else if type.typeName? {
-				let signature = $signature.type(type, @scope)
-				
-				if !?@references[signature] {
-					if signature == 'Any' || type.typeName.name == '...' || $typeofs[signature] == true {
-						@references[signature] = {
-							status: TypeStatus::Native
-							type: type
-						}
-					}
-					else if variable ?= @scope.getVariable(type.typeName.name) {
-						@references[signature] = {
-							status: TypeStatus::Referenced
-							type: type
-							variable: variable
-						}
-					}
-					else {
-						@references[signature] = {
-							status: TypeStatus::Unreferenced
-							type: type
-						}
-					}
-				}
-			}
-			else if type.types {
-				for item in type.types {
-					this.addReference(item, node)
-				}
-			}
-			else {
-				throw new NotImplementedException(node)
-			}
-		}
-	} // }}}
 	analyse() { // {{{
-		let data = @data
-		let scope = @scope
+		@name = @data.name.name
+		@variable = $variable.define(this, @scope, @data.name, VariableKind::Class, @data.type)
 		
-		@name = data.name.name
-		@variable = $variable.define(this, scope, data.name, VariableKind::Class, data.type)
-		
-		let classname = data.name
+		let classname = @data.name
 		
 		let thisVariable = $variable.define(this, @constructorScope, {
 			kind: NodeKind::Identifier
@@ -1439,19 +1426,19 @@ class ClassDeclaration extends Statement {
 			name: 'this'
 		}, VariableKind::Variable, $type.reference(classname.name))
 		
-		if data.extends? {
+		if @data.extends? {
 			@extends = true
 			
-			if @extendsVariable !?= @scope.getVariable(data.extends.name) {
-				ReferenceException.throwNotDefined(data.extends.name, this)
+			if @extendsVariable !?= @scope.getVariable(@data.extends.name) {
+				ReferenceException.throwNotDefined(@data.extends.name, this)
 			}
 			else if @extendsVariable.kind != VariableKind::Class {
-				TypeException.throwNotClass(data.extends.name, this)
+				TypeException.throwNotClass(@data.extends.name, this)
 			}
 			
-			@variable.extends = @extendsName = data.extends.name
+			@variable.extends = @extendsName = @data.extends.name
 			
-			let extname = data.extends
+			let extname = @data.extends
 			
 			let superVariable = $variable.define(this, @constructorScope, {
 				kind: NodeKind::Identifier
@@ -1510,7 +1497,7 @@ class ClassDeclaration extends Statement {
 			}, VariableKind::Variable)
 		}
 		
-		for modifier in data.modifiers {
+		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
 				@variable.abstract = @abstract = true
 				
@@ -1521,35 +1508,35 @@ class ClassDeclaration extends Statement {
 			}
 		}
 		
-		let signature, method
-		for member in data.members {
-			switch member.kind {
+		let declaration
+		for data in @data.members {
+			switch data.kind {
 				NodeKind::CommentBlock => {
 				}
 				NodeKind::CommentLine => {
 				}
 				NodeKind::FieldDeclaration => {
-					new ClassVariableDeclaration(member, this)
+					declaration = new ClassVariableDeclaration(data, this)
+					
+					declaration.analyse()
 				}
 				NodeKind::MethodDeclaration => {
-					if $method.isConstructor(member.name.name, @variable) {
-						new ClassConstructorDeclaration(member, this)
+					if $method.isConstructor(data.name.name, @variable) {
+						declaration = new ClassConstructorDeclaration(data, this)
 					}
-					else if $method.isDestructor(member.name.name, @variable) {
-						new ClassDestructorDeclaration(member, this)
+					else if $method.isDestructor(data.name.name, @variable) {
+						declaration = new ClassDestructorDeclaration(data, this)
 					}
 					else {
-						new ClassMethodDeclaration(member, this)
+						declaration = new ClassMethodDeclaration(data, this)
 					}
+					
+					declaration.analyse()
 				}
 				=> {
-					throw new NotSupportedException(`Unknow kind \(member.kind)`, this)
+					throw new NotSupportedException(`Unknow kind \(data.kind)`, this)
 				}
 			}
-		}
-		
-		if @extends && !@abstract && !$class.areAbstractMethodsImplemented(@variable, @extendsVariable, @scope) {
-			SyntaxException.throwMissingAbstractMethods(@name, this)
 		}
 		
 		if @sealed {
@@ -1561,80 +1548,127 @@ class ClassDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		for :variable of this._classVariables {
-			variable.analyse()
-		}
-		
-		for :variable of this._instanceVariables {
-			variable.analyse()
-		}
-		
-		for method in this._constructors {
-			method.analyse()
-		}
-		
-		this._destructor.analyse() if this._destructor?
-		
-		for :methods of this._instanceMethods {
-			for method in methods {
-				method.analyse()
-			}
-		}
-		
-		for :methods of this._abstractMethods {
-			for method in methods {
-				method.analyse()
-			}
-		}
-		
-		for :methods of this._classMethods {
-			for method in methods {
-				method.analyse()
-			}
-		}
-		
-		for name, variable of this._classVariables {
-			variable.fuse()
+	prepare() { // {{{
+		for name, variable of @classVariables {
+			variable.prepare()
 			
 			@variable.classVariables[name] = variable.signature()
 		}
 		
-		for name, variable of this._instanceVariables {
-			variable.fuse()
+		for name, variable of @instanceVariables {
+			variable.prepare()
 			
 			@variable.instanceVariables[name] = variable.signature()
 		}
 		
-		for method in this._constructors {
-			method.fuse()
+		for method in @constructors {
+			method.prepare()
 			
 			@variable.constructors.push(method.signature())
 		}
 		
-		this._destructor.fuse() if this._destructor?
+		@destructor.prepare() if @destructor?
 		
-		for name, methods of this._instanceMethods {
+		for name, methods of @instanceMethods {
 			for method in methods {
-				method.fuse()
+				method.prepare()
 				
 				@variable.instanceMethods[name].push(method.signature())
 			}
 		}
 		
-		for name, methods of this._abstractMethods {
+		for name, methods of @abstractMethods {
 			for method in methods {
-				method.fuse()
+				method.prepare()
 				
 				@variable.abstractMethods[name].push(method.signature())
 			}
 		}
 		
-		for name, methods of this._classMethods {
+		for name, methods of @classMethods {
 			for method in methods {
-				method.fuse()
+				method.prepare()
 				
 				@variable.classMethods[name].push(method.signature())
+			}
+		}
+		
+		if @extends && !@abstract && (notImplemented = $class.listMissingAbstractMethods(@variable, @scope)).length != 0 {
+			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
+		}
+	} // }}}
+	translate() { // {{{
+		for :variable of this._classVariables {
+			variable.translate()
+		}
+		
+		for :variable of this._instanceVariables {
+			variable.translate()
+		}
+		
+		for method in this._constructors {
+			method.translate()
+		}
+		
+		this._destructor.translate() if this._destructor?
+		
+		for :methods of this._instanceMethods {
+			for method in methods {
+				method.translate()
+			}
+		}
+		
+		for :methods of this._abstractMethods {
+			for method in methods {
+				method.translate()
+			}
+		}
+		
+		for :methods of this._classMethods {
+			for method in methods {
+				method.translate()
+			}
+		}
+	} // }}}
+	addReference(type?, node) { // {{{
+		if type? {
+			if type is Array {
+				for item in type {
+					this.addReference(item, node)
+				}
+			}
+			else if type.typeName? {
+				let signature = $signature.type(type, @scope)
+				
+				if !?@references[signature] {
+					if signature == 'Any' || type.typeName.name == '...' || $typeofs[signature] == true {
+						@references[signature] = {
+							status: TypeStatus::Native
+							type: type
+						}
+					}
+					else if variable ?= @scope.getVariable(type.typeName.name) {
+						@references[signature] = {
+							status: TypeStatus::Referenced
+							type: type
+							variable: variable
+						}
+					}
+					else {
+						@references[signature] = {
+							status: TypeStatus::Unreferenced
+							type: type
+						}
+					}
+				}
+			}
+			else if type.types {
+				for item in type.types {
+					this.addReference(item, node)
+				}
+			}
+			else {
+				throw new NotImplementedException(node)
 			}
 		}
 	} // }}}
@@ -1909,6 +1943,7 @@ class ClassDeclaration extends Statement {
 class ClassMethodDeclaration extends Statement {
 	private {
 		_abstract: Boolean		= false
+		_analysed: Boolean		= false
 		_instance: Boolean		= true
 		_internalName: String
 		_name: String
@@ -1984,19 +2019,43 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
-		
-		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
+			parameter.analyse()
+		}
 	} // }}}
-	fuse() { // {{{
-		this.fuseSignature() if !?@signature
-		
-		this.compile(@statements)
+	prepare() { // {{{
+		if !@analysed {
+			for parameter in @parameters {
+				parameter.prepare()
+			}
+			
+			@signature = Signature.fromNode(this)
+			
+			@analysed = true
+		}
 	} // }}}
-	fuseSignature() { // {{{
-		this.compile(@parameters)
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
 		
-		return @signature = Signature.fromNode(this)
+		@statements = []
+		for statement in $body(@data.body) {
+			@statements.push(statement = $compile.statement(statement, this))
+			
+			statement.analyse()
+		}
+		
+		for statement in @statements {
+			statement.prepare()
+		}
+		
+		for statement in @statements {
+			statement.translate()
+		}
 	} // }}}
 	getAliasType(name, node) => @parent.getAliasType(name, node)
 	isAbstract() => @abstract
@@ -2015,7 +2074,16 @@ class ClassMethodDeclaration extends Statement {
 	isMethod() => true
 	length() => @parameters.length
 	name() => @name
-	signature() => @signature ?? this.fuseSignature()
+	signature() {
+		if @analysed {
+			return @signature
+		}
+		else {
+			this.prepare()
+			
+			return @signature
+		}
+	}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
@@ -2087,7 +2155,49 @@ class ClassConstructorDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
+			parameter.analyse()
+		}
+	} // }}}
+	prepare() { // {{{
+		for parameter in @parameters {
+			parameter.prepare()
+		}
+		
+		@signature = Signature.fromNode(this)
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+		
+		let body = $body(@data.body)
+		if @parent._extends && (!?@parent._extendsVariable.sealed || !@parent._extendsVariable.sealed.extern) {
+			if body.length == 0 {
+				this.callParentConstructor(body)
+			}
+			else if !this.isCallingParentConstructor(body) {
+				SyntaxException.throwNoSuperCall(this)
+			}
+		}
+		
+		@statements = []
+		for statement in body {
+			@statements.push(statement = $compile.statement(statement, this))
+			
+			statement.analyse()
+		}
+		
+		for statement in @statements {
+			statement.prepare()
+		}
+		
+		for statement in @statements {
+			statement.translate()
+		}
 	} // }}}
 	private callParentConstructor(body) { // {{{
 		// list maybe parent's variables
@@ -2119,25 +2229,6 @@ class ClassConstructorDeclaration extends Statement {
 			// add call to parent's constructor
 			SyntaxException.throwNoSuperCall(this)
 		}
-	} // }}}
-	fuse() { // {{{
-		this.compile(@parameters)
-		
-		let body = $body(@data.body)
-		if @parent._extends && (!?@parent._extendsVariable.sealed || !@parent._extendsVariable.sealed.extern) {
-			if body.length == 0 {
-				this.callParentConstructor(body)
-			}
-			else if !this.isCallingParentConstructor(body) {
-				SyntaxException.throwNoSuperCall(this)
-			}
-		}
-		
-		@statements = [$compile.statement(statement, this) for statement in body]
-		
-		this.compile(@statements)
-		
-		@signature = Signature.fromNode(this)
 	} // }}}
 	getAliasType(name, node) => @parent.getAliasType(name, node)
 	isAbstract() { // {{{
@@ -2234,20 +2325,38 @@ class ClassDestructorDeclaration extends Statement {
 		parent._variable.destructors++
 	} // }}}
 	analyse() { // {{{
-		@parameters = [new Parameter({
+		const parameter = new Parameter({
 			kind: NodeKind::Parameter
 			modifiers: []
 			name: $identifier('that')
-		}, this)]
+		}, this)
 		
-		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
+		parameter.analyse()
+		
+		@parameters = [parameter]
 	} // }}}
-	fuse() { // {{{
-		this.compile(@parameters)
-		
-		this.compile(@statements)
+	prepare() { // {{{
+		for parameter in @parameters {
+			parameter.prepare()
+		}
 		
 		@signature = Signature.fromNode(this)
+	} // }}}
+	translate() { // {{{
+		@statements = []
+		for statement in $body(@data.body) {
+			@statements.push(statement = $compile.statement(statement, this))
+			
+			statement.analyse()
+		}
+		
+		for statement in @statements {
+			statement.prepare()
+		}
+		
+		for statement in @statements {
+			statement.translate()
+		}
 	} // }}}
 	getAliasType(name, node) => @parent.getAliasType(name, node)
 	isAbstract() { // {{{
@@ -2318,8 +2427,6 @@ class ClassVariableDeclaration extends AbstractNode {
 		@parent.addReference($type.type(@data.type, @scope, this), this)
 	} // }}}
 	analyse() { // {{{
-		@signature = $field.signature(@data, @parent)
-		
 		if @data.defaultValue? {
 			@hasDefaultValue = true
 			
@@ -2329,16 +2436,23 @@ class ClassVariableDeclaration extends AbstractNode {
 				@scope = @parent._instanceVariableScope
 				
 				@defaultValue = $compile.expression(@data.defaultValue, this)
+				@defaultValue.analyse()
 				
 				@scope = scope
 			}
 			else {
 				@defaultValue = $compile.expression(@data.defaultValue, this)
+				@defaultValue.analyse()
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		@defaultValue.fuse() if @defaultValue?
+	prepare() { // {{{
+		@signature = $field.signature(@data, @parent)
+		
+		@defaultValue.prepare() if @defaultValue?
+	} // }}}
+	translate() { // {{{
+		@defaultValue.translate() if @defaultValue?
 	} // }}}
 	hasDefaultValue() => @hasDefaultValue
 	isInstance() => @instance

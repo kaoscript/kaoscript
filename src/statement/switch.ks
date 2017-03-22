@@ -27,18 +27,18 @@ class SwitchStatement extends Statement {
 		_value
 	}
 	analyse() { // {{{
-		let scope = this._scope
+		let scope = @scope
 		
-		if this._data.expression.kind == NodeKind::Identifier {
-			this._name = this._data.expression.name
+		if @data.expression.kind == NodeKind::Identifier {
+			@name = @data.expression.name
 		}
 		else {
-			this._name = this._scope.acquireTempName()
-			this._value = $compile.expression(this._data.expression, this)
+			@value = $compile.expression(@data.expression, this)
+			@value.analyse()
 		}
 		
 		let clause, condition, name, exp, value
-		for data in this._data.clauses {
+		for data in @data.clauses {
 			clause = {
 				hasTest: false
 				bindings: []
@@ -46,7 +46,7 @@ class SwitchStatement extends Statement {
 				scope: this.newScope()
 			}
 			
-			this._scope = clause.scope
+			@scope = clause.scope
 			
 			for condition, conditionIdx in data.conditions {
 				if condition.kind == NodeKind::SwitchConditionArray {
@@ -102,34 +102,69 @@ class SwitchStatement extends Statement {
 			clause.hasTest = true if data.filter?
 			
 			clause.body = $compile.expression($block(data.body), this)
+			clause.body.analyse()
 			
-			this._clauses.push(clause)
+			@clauses.push(clause)
 			
-			this._scope = scope
+			@scope = scope
 		}
 	} // }}}
-	fuse() { // {{{
-		for clause in this._clauses {
+	prepare() { // {{{
+		if @data.expression.kind == NodeKind::Identifier {
+			@name = @data.expression.name
+		}
+		else {
+			@name = @scope.acquireTempName()
+		}
+		
+		@value.prepare() if @value?
+		
+		for clause in @clauses {
 			for condition in clause.conditions {
-				condition.fuse()
+				condition.prepare()
 			}
 			
-			clause.filter.fuse()
+			for binding in clause.bindings {
+				binding.prepare()
+			}
 			
-			clause.body.fuse()
+			clause.filter.prepare()
+			
+			clause.body.prepare()
+		}
+		
+		if @data.expression.kind != NodeKind::Identifier {
+			@scope.releaseTempName(@name)
+		}
+	} // }}}
+	translate() { // {{{
+		@value.translate() if @value?
+		
+		for clause in @clauses {
+			for condition in clause.conditions {
+				condition.translate()
+			}
+			
+			for binding in clause.bindings {
+				binding.translate()
+			}
+			
+			clause.filter.translate()
+			
+			clause.body.translate()
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if this._value? {
+		if @value? {
 			fragments
 				.newLine()
-				.code($variable.scope(this), this._name, ' = ')
-				.compile(this._value)
+				.code($variable.scope(this), @name, ' = ')
+				.compile(@value)
 				.done()
 		}
 		
 		let condition
-		for clause in this._clauses {
+		for clause in @clauses {
 			for condition in clause.conditions {
 				condition.toStatementFragments(fragments)
 			}
@@ -141,7 +176,7 @@ class SwitchStatement extends Statement {
 		let we = false
 		
 		let i, binding
-		for clause, clauseIdx in this._clauses {
+		for clause, clauseIdx in @clauses {
 			if clause.conditions.length {
 				if we {
 					SyntaxException.throwAfterDefaultClause(this)
@@ -157,7 +192,7 @@ class SwitchStatement extends Statement {
 				for condition, i in clause.conditions {
 					ctrl.code(' || ') if i
 					
-					condition.toBooleanFragments(ctrl, this._name)
+					condition.toBooleanFragments(ctrl, @name)
 				}
 				
 				clause.filter.toBooleanFragments(ctrl, true)
@@ -210,7 +245,7 @@ class SwitchStatement extends Statement {
 		
 		ctrl.done()
 		
-		this._scope.releaseTempName(this._name) if this._value?
+		@scope.releaseTempName(@name) if @value?
 	} // }}}
 }
 
@@ -219,15 +254,19 @@ class SwitchBindingArray extends AbstractNode {
 		_array
 	}
 	analyse() { // {{{
-		this._array = $compile.expression(this._data, this)
+		@array = $compile.expression(@data, this)
+		@array.analyse()
 	} // }}}
-	fuse() { // {{{
-		this._array.fuse()
+	prepare() { // {{{
+		@array.prepare()
+	} // }}}
+	translate() { // {{{
+		@array.translate()
 	} // }}}
 	toFragments(fragments) { // {{{
 		let line = fragments.newLine()
 		
-		this._array.toAssignmentFragments(line, this._parent._name)
+		@array.toAssignmentFragments(line, @parent._name)
 		
 		line.done()
 	} // }}}
@@ -235,23 +274,23 @@ class SwitchBindingArray extends AbstractNode {
 
 class SwitchBindingType extends AbstractNode {
 	analyse() { // {{{
-		$variable.define(this, this._scope, this._data.name, VariableKind::Variable)
+		$variable.define(this, @scope, @data.name, VariableKind::Variable)
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toFragments(fragments) { // {{{
-		fragments.line($variable.scope(this), this._data.name.name, ' = ', this._parent._name)
+		fragments.line($variable.scope(this), @data.name.name, ' = ', @parent._name)
 	} // }}}
 }
 
 class SwitchBindingValue extends AbstractNode {
 	analyse() { // {{{
-		$variable.define(this, this._scope, this._data, VariableKind::Variable)
+		$variable.define(this, @scope, @data, VariableKind::Variable)
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toFragments(fragments) { // {{{
-		fragments.line($variable.scope(this), this._data.name, ' = ', this._parent._name)
+		fragments.line($variable.scope(this), @data.name, ' = ', @parent._name)
 	} // }}}
 }
 
@@ -262,16 +301,16 @@ class SwitchConditionArray extends AbstractNode {
 	}
 	analyse() { // {{{
 		let nv = true
-		for i from 0 til this._data.values.length while nv {
-			if this._data.values[i].kind != NodeKind::OmittedExpression {
+		for i from 0 til @data.values.length while nv {
+			if @data.values[i].kind != NodeKind::OmittedExpression {
 				nv = false
 			}
 		}
 		
 		if !nv {
-			this._name = this._scope.parent().acquireTempName()
+			@name = @scope.parent().acquireTempName()
 			
-			for value in this._data.values {
+			for value in @data.values {
 				if value.kind != NodeKind::OmittedExpression {
 					if value.kind == NodeKind::SwitchConditionRange {
 						value = new SwitchConditionRange(value, this)
@@ -282,14 +321,19 @@ class SwitchConditionArray extends AbstractNode {
 					
 					value.analyse()
 					
-					this._values.push(value)
+					@values.push(value)
 				}
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		for value in this._values {
-			value.fuse()
+	prepare() { // {{{
+		for value in @values {
+			value.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for value in @values {
+			value.translate()
 		}
 	} // }}}
 	toBooleanFragments(fragments, name) { // {{{
@@ -297,7 +341,7 @@ class SwitchConditionArray extends AbstractNode {
 		
 		fragments.code('(', $runtime.typeof('Array', this), '(', name, ')')
 		
-		let mm = $switch.length(this._data.values)
+		let mm = $switch.length(@data.values)
 		if mm.min == mm.max {
 			if mm.min != Infinity {
 				fragments.code(' && ', name, '.length === ', mm.min)
@@ -311,21 +355,21 @@ class SwitchConditionArray extends AbstractNode {
 			}
 		}
 		
-		if this._name? {
-			fragments.code(' && ', this._name, '(', name, ')')
+		if @name? {
+			fragments.code(' && ', @name, '(', name, ')')
 		}
 		
 		fragments.code(')')
 		
-		this._scope.parent().releaseTempName(this._name) if this._name?
+		@scope.parent().releaseTempName(@name) if @name?
 	} // }}}
 	toStatementFragments(fragments) { // {{{
-		if this._values.length > 0 {
+		if @values.length > 0 {
 			let line = fragments.newLine()
 			
-			line.code($variable.scope(this), this._name, ' = ([')
+			line.code($variable.scope(this), @name, ' = ([')
 			
-			for value, i in this._data.values {
+			for value, i in @data.values {
 				line.code(', ') if i
 				
 				if value.kind == NodeKind::OmittedExpression {
@@ -341,11 +385,11 @@ class SwitchConditionArray extends AbstractNode {
 			line.code(']) => ')
 			
 			let index = 0
-			for value, i in this._data.values {
+			for value, i in @data.values {
 				if value.kind != NodeKind::OmittedExpression {
 					line.code(' && ') if index
 					
-					this._values[index].toBooleanFragments(line, '__ks_' + i)
+					@values[index].toBooleanFragments(line, '__ks_' + i)
 					
 					index++
 				}
@@ -364,45 +408,51 @@ class SwitchConditionRange extends AbstractNode {
 		_to		= true
 	}
 	analyse() { // {{{
-		if this._data.from? {
-			this._left = $compile.expression(this._data.from, this)
+		if @data.from? {
+			@left = $compile.expression(@data.from, this)
 		}
 		else {
-			this._left = $compile.expression(this._data.then, this)
-			this._from = false
+			@left = $compile.expression(@data.then, this)
+			@from = false
 		}
 		
-		if this._data.to? {
-			this._right = $compile.expression(this._data.to, this)
+		if @data.to? {
+			@right = $compile.expression(@data.to, this)
 		}
 		else {
-			this._right = $compile.expression(this._data.til, this)
-			this._to = false
+			@right = $compile.expression(@data.til, this)
+			@to = false
 		}
+		
+		@left.analyse()
+		@right.analyse()
 	} // }}}
-	fuse() { // {{{
-		this._left.fuse()
-		this._right.fuse()
+	prepare() { // {{{
+		@left.prepare()
+		@right.prepare()
+	} // }}}
+	translate() { // {{{
+		@left.translate()
+		@right.translate()
 	} // }}}
 	toBooleanFragments(fragments, name) { // {{{
 		fragments
-			.code(name, this._from ? ' >= ' : '>')
-			.compile(this._left)
+			.code(name, @from ? ' >= ' : '>')
+			.compile(@left)
 			.code(' && ')
-			.code(name, this._to ? ' <= ' : '<')
-			.compile(this._right)
+			.code(name, @to ? ' <= ' : '<')
+			.compile(@right)
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 	} // }}}
 }
 
 class SwitchConditionType extends AbstractNode {
-	analyse() { // {{{
-	} // }}}
-	fuse() { // {{{
-	} // }}}
+	analyse()
+	prepare()
+	translate()
 	toBooleanFragments(fragments, name) { // {{{
-		$type.check(this, fragments, name, this._data.type)
+		$type.check(this, fragments, name, @data.type)
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 	} // }}}
@@ -413,15 +463,19 @@ class SwitchConditionValue extends AbstractNode {
 		_value
 	}
 	analyse() { // {{{
-		this._value = $compile.expression(this._data, this)
+		@value = $compile.expression(@data, this)
+		@value.analyse()
 	} // }}}
-	fuse() { // {{{
-		this._value.fuse()
+	prepare() { // {{{
+		@value.prepare()
+	} // }}}
+	translate() { // {{{
+		@value.translate()
 	} // }}}
 	toBooleanFragments(fragments, name) { // {{{
 		fragments
 			.code(name, ' === ')
-			.compile(this._value)
+			.compile(@value)
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 	} // }}}
@@ -434,24 +488,42 @@ class SwitchFilter extends AbstractNode {
 		_name
 	}
 	analyse() { // {{{
-		if this._data.filter? {
-			if this._data.bindings.length > 0 {
-				this._name = this._scope.parent().acquireTempName()
+		if @data.filter? {
+			if @data.bindings.length > 0 {
+				@name = @scope.parent().acquireTempName()
 				
-				for binding in this._data.bindings {
-					this._bindings.push($compile.expression(binding, this))
+				for binding in @data.bindings {
+					@bindings.push(binding = $compile.expression(binding, this))
+					
+					binding.analyse()
 				}
 			}
 			
-			this._filter = $compile.expression(this._data.filter, this)
+			@filter = $compile.expression(@data.filter, this)
+			@filter.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
-		this._filter.fuse() if this._filter?
+	prepare() { // {{{
+		if @filter? {
+			for binding in @bindings {
+				binding.prepare()
+			}
+			
+			@filter.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		if @filter? {
+			for binding in @bindings {
+				binding.translate()
+			}
+			
+			@filter.translate()
+		}
 	} // }}}
 	toBooleanFragments(fragments, nf) { // {{{
 		let mm
-		for binding in this._data.bindings {
+		for binding in @data.bindings {
 			if binding.kind == NodeKind::ArrayBinding {
 				this.module().flag('Type')
 				
@@ -462,50 +534,50 @@ class SwitchFilter extends AbstractNode {
 					nf = true
 				}
 				
-				fragments.code($runtime.typeof('Array', this), '(', this._parent._name, ')')
+				fragments.code($runtime.typeof('Array', this), '(', @parent._name, ')')
 				
 				mm = $switch.length(binding.elements)
 				if mm.min == mm.max {
 					if mm.min != Infinity {
-						fragments.code(' && ', this._parent._name, '.length === ', mm.min)
+						fragments.code(' && ', @parent._name, '.length === ', mm.min)
 					}
 				}
 				else {
-					fragments.code(' && ', this._parent._name, '.length >= ', mm.min)
+					fragments.code(' && ', @parent._name, '.length >= ', mm.min)
 					
 					if mm.max != Infinity {
-						fragments.code(' && ', this._parent._name, '.length <= ', mm.max)
+						fragments.code(' && ', @parent._name, '.length <= ', mm.max)
 					}
 				}
 			}
 		}
 		
-		if this._name? {
+		if @name? {
 			fragments.code(' && ') if nf
 			
-			fragments.code(this._name, '(', this._parent._name, ')')
+			fragments.code(@name, '(', @parent._name, ')')
 			
-			this._scope.parent().releaseTempName(this._name)
+			@scope.parent().releaseTempName(@name)
 		}
-		else if this._filter? {
+		else if @filter? {
 			fragments.code(' && ') if nf
 			
-			fragments.compile(this._filter)
+			fragments.compile(@filter)
 		}
 	} // }}}
 	toStatementFragments(fragments) { // {{{
-		if this._name? {
+		if @name? {
 			let line = fragments.newLine()
 			
-			line.code($variable.scope(this), this._name, ' = (')
+			line.code($variable.scope(this), @name, ' = (')
 		
-			for binding, i in this._bindings {
+			for binding, i in @bindings {
 				line.code(', ') if i
 				
 				line.compile(binding)
 			}
 			
-			line.code(') => ').compile(this._filter)
+			line.code(') => ').compile(@filter)
 			
 			line.done()
 		}

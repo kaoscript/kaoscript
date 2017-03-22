@@ -4,27 +4,32 @@ class DestroyStatement extends Statement {
 		_variable
 	}
 	analyse() { // {{{
-		this._expression = $compile.expression(this._data.variable, this)
+		@expression = $compile.expression(@data.variable, this)
 		
-		if this._data.variable.kind == NodeKind::Identifier {
-			this._variable = this._scope.getVariable(this._data.variable.name)
+		@expression.analyse()
+		
+		if @data.variable.kind == NodeKind::Identifier {
+			@variable = @scope.getVariable(@data.variable.name)
 			
-			this._scope.removeVariable(this._data.variable.name)
+			@scope.removeVariable(@data.variable.name)
 		}
 	} // }}}
-	fuse() { // {{{
-		this._expression.fuse()
+	prepare() { // {{{
+		@expression.prepare()
+	} // }}}
+	translate() { // {{{
+		@expression.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if this._variable?.type? && (type ?= $variable.fromType(this._variable.type, this)) && type.destructors > 0 {
-			fragments.newLine().code(type.name.name, '.__ks_destroy(').compile(this._expression).code(')').done()
+		if @variable?.type? && (type ?= $variable.fromType(@variable.type, this)) && type.destructors > 0 {
+			fragments.newLine().code(type.name.name, '.__ks_destroy(').compile(@expression).code(')').done()
 		}
 		
-		if this._expression is IdentifierLiteral {
-			fragments.newLine().compile(this._expression).code(' = undefined').done()
+		if @expression is IdentifierLiteral {
+			fragments.newLine().compile(@expression).code(' = undefined').done()
 		}
 		else {
-			fragments.newLine().code('delete ').compile(this._expression).done()
+			fragments.newLine().code('delete ').compile(@expression).done()
 		}
 	} // }}}
 }

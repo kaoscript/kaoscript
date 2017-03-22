@@ -5,9 +5,13 @@ class UnaryOperatorExpression extends Expression {
 	}
 	analyse() { // {{{
 		@argument = $compile.expression(@data.argument, this)
+		@argument.analyse()
 	} // }}}
-	fuse() { // {{{
-		@argument.fuse()
+	prepare() { // {{{
+		@argument.prepare()
+	} // }}}
+	translate() { // {{{
+		@argument.translate()
 	} // }}}
 }
 

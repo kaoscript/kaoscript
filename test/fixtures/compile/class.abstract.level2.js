@@ -1,0 +1,92 @@
+module.exports = function() {
+	class Foo {
+		constructor() {
+			this.__ks_init();
+			this.__ks_cons(arguments);
+		}
+		__ks_init() {
+		}
+		__ks_cons(args) {
+			if(args.length !== 0) {
+				throw new SyntaxError("wrong number of arguments");
+			}
+		}
+	}
+	Foo.__ks_reflect = {
+		abstract: true,
+		inits: 0,
+		constructors: [],
+		destructors: 0,
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
+	};
+	class Bar extends Foo {
+		__ks_init() {
+			Foo.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			Foo.prototype.__ks_cons.call(this, args);
+		}
+		__ks_func_greet_0(name) {
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
+			}
+			return "Hello " + name + "!";
+		}
+		greet() {
+			if(arguments.length === 1) {
+				return Bar.prototype.__ks_func_greet_0.apply(this, arguments);
+			}
+			else if(Foo.prototype.greet) {
+				return Foo.prototype.greet.apply(this, arguments);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
+	}
+	Bar.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		destructors: 0,
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {
+			greet: [
+				{
+					access: 3,
+					min: 1,
+					max: 1,
+					parameters: [
+						{
+							type: "Any",
+							min: 1,
+							max: 1
+						}
+					]
+				}
+			]
+		},
+		classMethods: {}
+	};
+	class Qux extends Bar {
+		__ks_init() {
+			Bar.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			Bar.prototype.__ks_cons.call(this, args);
+		}
+	}
+	Qux.__ks_reflect = {
+		inits: 0,
+		constructors: [],
+		destructors: 0,
+		instanceVariables: {},
+		classVariables: {},
+		instanceMethods: {},
+		classMethods: {}
+	};
+}

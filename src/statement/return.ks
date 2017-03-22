@@ -3,22 +3,29 @@ class ReturnStatement extends Statement {
 		_value = null
 	}
 	analyse() { // {{{
-		if this._data.value? {
-			this._value = $compile.expression(this._data.value, this)
+		if @data.value? {
+			@value = $compile.expression(@data.value, this)
+			
+			@value.analyse()
 		}
 	} // }}}
-	fuse() { // {{{
-		if this._value != null && this._value.fuse? {
-			this._value.fuse()
+	prepare() { // {{{
+		if @value != null {
+			@value.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		if @value != null {
+			@value.translate()
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if mode == Mode::Async {
-			if this._value != null {
+			if @value != null {
 				fragments
 					.newLine()
 					.code('return __ks_cb(null, ')
-					.compile(this._value)
+					.compile(@value)
 					.code(')')
 					.done()
 			}
@@ -27,15 +34,15 @@ class ReturnStatement extends Statement {
 			}
 		}
 		else {
-			if this._value != null {
+			if @value != null {
 				fragments
 					.newLine()
 					.code('return ')
-					.compile(this._value)
+					.compile(@value)
 					.done()
 			}
 			else {
-				fragments.line('return', this._data)
+				fragments.line('return', @data)
 			}
 		}
 	} // }}}

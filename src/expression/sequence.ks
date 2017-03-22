@@ -3,11 +3,21 @@ class SequenceExpression extends Expression {
 		_expressions
 	}
 	analyse() { // {{{
-		@expressions = [$compile.expression(expression, this) for expression in @data.expressions]
+		@expressions = []
+		for expression in @data.expressions {
+			@expressions.push(expression = $compile.expression(expression, this))
+			
+			expression.analyse()
+		}
 	} // }}}
-	fuse() { // {{{
+	prepare() { // {{{
 		for expression in @expressions {
-			expression.fuse()
+			expression.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for expression in @expressions {
+			expression.translate()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{

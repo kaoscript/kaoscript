@@ -4,27 +4,34 @@ class BinaryOperatorExpression extends Expression {
 		_right
 		_tested = false
 	}
-	isComputed() => true
-	isNullable() => this._left.isNullable() || this._right.isNullable()
-	isNullableComputed() => (this._left.isNullable() && this._right.isNullable()) || this._left.isNullableComputed() || this._right.isNullableComputed()
 	analyse() { // {{{
-		this._left = $compile.expression(this._data.left, this, false)
-		this._right = $compile.expression(this._data.right, this, false)
+		@left = $compile.expression(@data.left, this)
+		@left.analyse()
+		
+		@right = $compile.expression(@data.right, this)
+		@right.analyse()
 	} // }}}
+	prepare() { // {{{
+		@left.prepare()
+		@right.prepare()
+	} // }}}
+	translate() { // {{{
+		@left.translate()
+		@right.translate()
+	} // }}}
+	isComputed() => true
+	isNullable() => @left.isNullable() || @right.isNullable()
+	isNullableComputed() => (@left.isNullable() && @right.isNullable()) || @left.isNullableComputed() || @right.isNullableComputed()
 	acquireReusable(acquire) { // {{{
-		this._left.acquireReusable(false)
-		this._right.acquireReusable(false)
+		@left.acquireReusable(false)
+		@right.acquireReusable(false)
 	} // }}}
 	releaseReusable() { // {{{
-		this._left.releaseReusable()
-		this._right.releaseReusable()
-	} // }}}
-	fuse() { // {{{
-		this._left.fuse()
-		this._right.fuse()
+		@left.releaseReusable()
+		@right.releaseReusable()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this.isNullable() && !this._tested {
+		if this.isNullable() && !@tested {
 			fragments
 				.wrapNullable(this)
 				.code(' ? ')
@@ -38,19 +45,19 @@ class BinaryOperatorExpression extends Expression {
 		}
 	} // }}}
 	toNullableFragments(fragments) { // {{{
-		if !this._tested {
-			if this._left.isNullable() {
-				fragments.compileNullable(this._left)
+		if !@tested {
+			if @left.isNullable() {
+				fragments.compileNullable(@left)
 				
-				if this._right.isNullable() {
-					fragments.code(' && ').compileNullable(this._right)
+				if @right.isNullable() {
+					fragments.code(' && ').compileNullable(@right)
 				}
 			}
 			else {
-				fragments.compileNullable(this._right)
+				fragments.compileNullable(@right)
 			}
 			
-			this._tested = true
+			@tested = true
 		}
 	} // }}}
 }
@@ -58,232 +65,235 @@ class BinaryOperatorExpression extends Expression {
 class BinaryOperatorAddition extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('+', this._data.operator)
+			.code('+', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.wrapBoolean(this._left)
+			.wrapBoolean(@left)
 			.code($space)
-			.code('&&', this._data.operator)
+			.code('&&', @data.operator)
 			.code($space)
-			.wrapBoolean(this._right)
+			.wrapBoolean(@right)
 	} // }}}
 }
 
 class BinaryOperatorBitwiseAnd extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('&', this._data.operator)
+			.code('&', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorBitwiseLeftShift extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('<<', this._data.operator)
+			.code('<<', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorBitwiseOr extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('|', this._data.operator)
+			.code('|', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorBitwiseRightShift extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('>>', this._data.operator)
+			.code('>>', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorBitwiseXor extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('^', this._data.operator)
+			.code('^', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorDivision extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('/', this._data.operator)
+			.code('/', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorEquality extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('===', this._data.operator)
+			.code('===', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorGreaterThan extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('>', this._data.operator)
+			.code('>', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorGreaterThanOrEqual extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('>=', this._data.operator)
+			.code('>=', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorInequality extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('!==', this._data.operator)
+			.code('!==', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorLessThan extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('<', this._data.operator)
+			.code('<', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorLessThanOrEqual extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('<=', this._data.operator)
+			.code('<=', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorModulo extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('%', this._data.operator)
+			.code('%', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorMultiplication extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
+			.wrap(@left)
 			.code($space)
-			.code('*', this._data.operator)
+			.code('*', @data.operator)
 			.code($space)
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}
 }
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
-	analyse() { // {{{
-		super.analyse()
+	prepare() { // {{{
+		super.prepare()
+		
+		@left.acquireReusable(true)
+		@left.releaseReusable()
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		this._left.acquireReusable(true)
+		@left.acquireReusable(true)
 	} // }}}
 	releaseReusable() { // {{{
-		this._left.releaseReusable()
+		@left.releaseReusable()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this._left.isNullable() {
+		if @left.isNullable() {
 			fragments.code('(')
 			
-			this._left.toNullableFragments(fragments)
+			@left.toNullableFragments(fragments)
 			
 			fragments
 				.code(' && ' + $runtime.type(this) + '.isValue(')
-				.compileReusable(this._left)
+				.compileReusable(@left)
 				.code('))')
 		}
 		else {
 			fragments
 				.code($runtime.type(this) + '.isValue(')
-				.compileReusable(this._left)
+				.compileReusable(@left)
 				.code(')')
 		}
 		
 		fragments
 			.code(' ? ')
-			.compile(this._left)
+			.compile(@left)
 			.code(' : ')
-			.wrap(this._right)
+			.wrap(@right)
 	} // }}}}
 }
 
 class BinaryOperatorOr extends BinaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
-			.wrapBoolean(this._left)
+			.wrapBoolean(@left)
 			.code($space)
-			.code('||', this._data.operator)
+			.code('||', @data.operator)
 			.code($space)
-			.wrapBoolean(this._right)
+			.wrapBoolean(@right)
 	} // }}}
 }
 
 class BinaryOperatorSubtraction extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
-			.wrap(this._left)
-			.code($space, '-', this._data.operator, $space)
-			.wrap(this._right)
+			.wrap(@left)
+			.code($space, '-', @data.operator, $space)
+			.wrap(@right)
 	} // }}}
 }
 
@@ -291,52 +301,70 @@ class BinaryOperatorTypeCasting extends Expression {
 	private {
 		_left
 	}
-	isComputed() => false
-	isNullable() => this._left.isNullable()
 	analyse() { // {{{
-		this._left = $compile.expression(this._data.left, this)
+		@left = $compile.expression(@data.left, this)
+		@left.analyse()
 	} // }}}
-	fuse() { // {{{
-		this._left.fuse()
+	prepare() { // {{{
+		@left.prepare()
 	} // }}}
+	translate() { // {{{
+		@left.translate()
+	} // }}}
+	isComputed() => false
+	isNullable() => @left.isNullable()
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._left)
+		fragments.compile(@left)
 	} // }}}
 }
 
 class BinaryOperatorTypeEquality extends Expression {
+	private {
+		_left
+	}
+	analyse() { // {{{
+		@left = $compile.expression(@data.left, this)
+		@left.analyse()
+	} // }}}
+	prepare() { // {{{
+		@left.prepare()
+	} // }}}
+	translate() { // {{{
+		@left.translate()
+	} // }}}
 	isComputed() => false
 	isNullable() => false
-	analyse() { // {{{
-		this._left = $compile.expression(this._data.left, this)
-	} // }}}
-	fuse() { // {{{
-		this._left.fuse()
-	} // }}}
 	toFragments(fragments, mode) { // {{{
-		$type.check(this, fragments, this._left, this._data.right)
+		$type.check(this, fragments, @left, @data.right)
 	} // }}}
 }
 
 class BinaryOperatorTypeInequality extends Expression {
+	private {
+		_left
+	}
+	analyse() { // {{{
+		@left = $compile.expression(@data.left, this)
+		@left.analyse()
+	} // }}}
+	prepare() { // {{{
+		@left.prepare()
+	} // }}}
+	translate() { // {{{
+		@left.translate()
+	} // }}}
 	isComputed() => false
 	isNullable() => false
-	analyse() { // {{{
-		this._left = $compile.expression(this._data.left, this)
-	} // }}}
-	fuse() { // {{{
-		this._left.fuse()
-	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this._data.right.kind == NodeKind::TypeReference {
+		if @data.right.kind == NodeKind::TypeReference {
 			fragments.code('!')
 			
-			$type.check(this, fragments, this._left, this._data.right)
+			$type.check(this, fragments, @left, @data.right)
 		}
-		else if this._data.right.types? {
+		else if @data.right.types? {
 			fragments.code('!(')
 			
-			$type.check(this, fragments, this._left, this._data.right)
+			$type.check(this, fragments, @left, @data.right)
 			
 			fragments.code(')')
 		}

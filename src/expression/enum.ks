@@ -3,11 +3,12 @@ class EnumExpression extends Expression {
 		_enum
 	}
 	analyse() { // {{{
-		this._enum = $compile.expression(this._data.enum, this)
+		@enum = $compile.expression(@data.enum, this)
+		@enum.analyse()
 	} // }}}
-	fuse() { // {{{
-	} // }}}
+	prepare()
+	translate()
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(this._enum).code('.', this._data.member.name)
+		fragments.compile(@enum).code('.', @data.member.name)
 	} // }}}
 }

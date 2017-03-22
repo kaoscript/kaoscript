@@ -3,14 +3,13 @@ class ExportDeclaration extends Statement {
 		_declarations	= []
 	}
 	analyse() { // {{{
-		let data = this._data
 		let module = this.module()
 		
 		let statement
-		for declaration in data.declarations {
+		for declaration in @data.declarations {
 			switch declaration.kind {
 				NodeKind::ClassDeclaration => {
-					this._declarations.push(statement = $compile.statement(declaration, this))
+					@declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
@@ -20,14 +19,14 @@ class ExportDeclaration extends Statement {
 					module.export(declaration.name, declaration.alias)
 				}
 				NodeKind::EnumDeclaration => {
-					this._declarations.push(statement = $compile.statement(declaration, this))
+					@declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
 					module.export(declaration.name)
 				}
 				NodeKind::FunctionDeclaration => {
-					this._declarations.push(statement = $compile.statement(declaration, this))
+					@declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
@@ -37,12 +36,12 @@ class ExportDeclaration extends Statement {
 					module.export(declaration)
 				}
 				NodeKind::TypeAliasDeclaration => {
-					$variable.define(this, this._scope, declaration.name, VariableKind::TypeAlias, declaration.type)
+					$variable.define(this, @scope, declaration.name, VariableKind::TypeAlias, declaration.type)
 					
 					module.export(declaration.name)
 				}
 				NodeKind::VariableDeclaration => {
-					this._declarations.push(statement = $compile.statement(declaration, this))
+					@declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
@@ -56,13 +55,18 @@ class ExportDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	fuse() { // {{{
-		for declaration in this._declarations {
-			declaration.fuse()
+	prepare() { // {{{
+		for declaration in @declarations {
+			declaration.prepare()
+		}
+	} // }}}
+	translate() { // {{{
+		for declaration in @declarations {
+			declaration.translate()
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		for declaration in this._declarations {
+		for declaration in @declarations {
 			declaration.toFragments(fragments, Mode::None)
 		}
 	} // }}}

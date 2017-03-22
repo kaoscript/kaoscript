@@ -4,70 +4,78 @@ class ExpressionStatement extends Statement {
 		_variable			= ''
 	}
 	analyse() { // {{{
-		this._expression = $compile.expression(this._data, this)
+		@expression = $compile.expression(@data, this)
+		
+		@expression.analyse()
+	} // }}}
+	prepare()
+	translate() { // {{{
+		@expression.prepare()
+		
+		@expression.acquireReusable(false)
+		@expression.releaseReusable()
+		
+		@expression.translate()
 	} // }}}
 	assignment(data, expression) { // {{{
-		if data.left.kind == NodeKind::Identifier && !this._scope.hasVariable(data.left.name) {
-			if !expression.isAssignable() || this._variable.length {
-				this._variables.push(data.left.name)
+		if data.left.kind == NodeKind::Identifier && !@scope.hasVariable(data.left.name) {
+			if !expression.isAssignable() || @variable.length {
+				@variables.push(data.left.name)
 			}
 			else {
-				this._variable = data.left.name
+				@variable = data.left.name
 			}
 			
-			$variable.define(this, this._scope, data.left, $variable.kind(data.right.type), data.right.type)
+			$variable.define(this, @scope, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
-	fuse() { // {{{
-		this._expression.fuse()
-	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this._expression.isAssignable() {
-			if this._variables.length {
-				fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
+		if @expression.isAssignable() {
+			if @variables.length {
+				fragments.newLine().code($variable.scope(this) + @variables.join(', ')).done()
 			}
 			
 			let line = fragments.newLine()
 			
-			if this._variable.length {
+			if @variable.length {
 				line.code($variable.scope(this))
 			}
 			
-			if this._expression.toAssignmentFragments? {
-				this._expression.toAssignmentFragments(line)
+			if @expression.toAssignmentFragments? {
+				@expression.toAssignmentFragments(line)
 			}
 			else {
-				this._expression.toFragments(line, Mode::None)
+				@expression.toFragments(line, Mode::None)
 			}
 			
 			line.done()
 		}
-		else if this._expression.toStatementFragments? {
-			if this._variable.length {
-				this._variables.unshift(this._variable)
+		else if @expression.toStatementFragments? {
+			if @variable.length {
+				@variables.unshift(@variable)
 			}
 			
-			if this._variables.length {
-				fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
+			if @variables.length {
+				fragments.newLine().code($variable.scope(this) + @variables.join(', ')).done()
 			}
 			
-			this._expression.toStatementFragments(fragments, Mode::None)
+			@expression.toStatementFragments(fragments, Mode::None)
 		}
 		else {
-			if this._variables.length {
-				fragments.newLine().code($variable.scope(this) + this._variables.join(', ')).done()
+			if @variables.length {
+				fragments.newLine().code($variable.scope(this) + @variables.join(', ')).done()
 			}
 			
 			let line = fragments.newLine()
 			
-			if this._variable.length {
+			if @variable.length {
 				line.code($variable.scope(this))
 			}
 			
-			line.compile(this._expression, Mode::None).done()
+			line.compile(@expression, Mode::None).done()
 		}
 		
-		for afterward in this._afterwards {
+		for afterward in @afterwards {
 			afterward.toAfterwardFragments(fragments)
 		}
 	} // }}}

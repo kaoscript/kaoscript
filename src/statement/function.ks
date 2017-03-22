@@ -632,15 +632,23 @@ class FunctionDeclaration extends Statement {
 		
 		@variable = $variable.define(this, this.greatScope(), @data.name, VariableKind::Function, @data.type)
 		
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
+			parameter.analyse()
+		}
+	} // }}}
+	prepare() { // {{{
+		for parameter in @parameters {
+			parameter.prepare()
+		}
+		
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Async {
 				@variable.async = true
 			}
 		}
-		
-		@parameters = [new Parameter(parameter, this) for parameter in @data.parameters]
-		
-		@statements = [$compile.statement(statement, this) for statement in $body(@data.body)]
 		
 		let variable
 		for error in @data.throws {
@@ -653,17 +661,32 @@ class FunctionDeclaration extends Statement {
 			
 			@variable.throws.push(error.name)
 		}
-	} // }}}
-	fuse() { // {{{
-		this.compile(@parameters)
 		
-		this.compile(@statements)
+		@statements = []
+		for statement in $body(@data.body) {
+			@statements.push(statement = $compile.statement(statement, this))
+			
+			statement.analyse()
+			
+			if statement.isAwait() {
+				@await = true
+			}
+		}
 		
-		for statement in @statements while !@await {
-			@await = statement.isAwait()
+		for statement in @statements {
+			statement.prepare()
 		}
 		
 		@signature = Signature.fromNode(this)
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+		
+		for statement in @statements {
+			statement.translate()
+		}
 	} // }}}
 	isConsumedError(name, variable): Boolean { // {{{
 		if @variable.throws.length > 0 {
@@ -747,15 +770,51 @@ class Parameter extends AbstractNode {
 	analyse() { // {{{
 		@anonymous = !?@data.name
 		
+		if @data.defaultValue? {
+			@defaultValue = $compile.expression(@data.defaultValue, @parent)
+			@hasDefaultValue = true
+			
+			@defaultValue.analyse()
+		}
+		
+		for modifier in @data.modifiers while !@rest {
+			if modifier.kind == ModifierKind::Rest {
+				@rest = true
+			}
+		}
+		
+		if @anonymous {
+			let name = {
+				kind: NodeKind::Identifier
+				name: @scope.acquireTempName()
+			}
+			
+			$variable.define(this, @scope, name, VariableKind::Variable)
+			
+			@variable = $compile.expression(name, @parent)
+		}
+		else {
+			if @rest {
+				$variable.define(this, @scope, @data.name, VariableKind::Variable, {
+					kind: NodeKind::TypeReference
+					typeName: {
+						kind: NodeKind::Identifier
+						name: 'Array'
+					}
+				})
+			}
+			else {
+				$variable.define(this, @scope, @data.name, VariableKind::Variable)
+			}
+			
+			@variable = $compile.expression(@data.name, @parent)
+		}
+		
+		@name = @variable._value
+	} // }}}
+	prepare() { // {{{
 		if @parent.isMethod() {
 			if !@anonymous {
-				/* let name = @data.name.name
-				
-				for modifier in @data.modifiers while @type == null {
-					if modifier.kind == ModifierKind::ThisAlias {
-						@type = @parent.getAliasType(name, this)
-					}
-				} */
 				for modifier in @data.modifiers {
 					if modifier.kind == ModifierKind::SetterAlias {
 						@setterAlias = true
@@ -784,15 +843,14 @@ class Parameter extends AbstractNode {
 		
 		@nullable = !!@type?.nullable
 		
-		if @data.defaultValue? {
-			@defaultValue = $compile.expression(@data.defaultValue, @parent)
-			@hasDefaultValue = true
-			
+		if @hasDefaultValue {
 			if !@nullable && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
 				@nullable = true
 			}
 			
 			@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && @nullable
+			
+			@defaultValue.prepare()
 		}
 		
 		@signature = {
@@ -819,34 +877,14 @@ class Parameter extends AbstractNode {
 			}
 		}
 		
-		if @anonymous {
-			let name = {
-				kind: NodeKind::Identifier
-				name: @scope.acquireTempName()
-			}
-			
-			$variable.define(this, @scope, name, VariableKind::Variable)
-			
-			@variable = $compile.expression(name, @parent)
+		if !@anonymous && !@rest {
+			$variable.retype(this, @scope, @data.name, $variable.kind(@type), @type)
 		}
-		else {
-			if @rest {
-				$variable.define(this, @scope, @data.name, VariableKind::Variable, {
-					kind: NodeKind::TypeReference
-					typeName: {
-						kind: NodeKind::Identifier
-						name: 'Array'
-					}
-				})
-			}
-			else {
-				$variable.define(this, @scope, @data.name, $variable.kind(@type), @type)
-			}
-			
-			@variable = $compile.expression(@data.name, @parent)
+	} // }}}
+	translate() { // {{{
+		if @hasDefaultValue {
+			@defaultValue.translate()
 		}
-		
-		@name = @variable._value
 	} // }}}
 	arity() { // {{{
 		if @rest {
@@ -858,11 +896,6 @@ class Parameter extends AbstractNode {
 		}
 		
 		return null
-	} // }}}
-	fuse() {// {{{
-		if @defaultValue != null {
-			@defaultValue.fuse()
-		}
 	} // }}}
 	isAnonymous() => @anonymous
 	isSetterAlias() => @setterAlias

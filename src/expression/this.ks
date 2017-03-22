@@ -9,7 +9,7 @@ class ThisExpression extends Expression {
 		
 		do {
 			if parent is ClassDeclaration {
-				@class = this._scope.getVariable(parent._name)
+				@class = scope.getVariable(parent._name)
 				break
 			}
 			else if parent is ImplementClassMethodDeclaration {
@@ -23,10 +23,9 @@ class ThisExpression extends Expression {
 			SyntaxException.throwOutOfClassAlias(data.name.name, this)
 		}
 	} // }}}
-	analyse() { // {{{
-	} // }}}
-	fuse() { // {{{
-	} // }}}
+	analyse()
+	prepare()
+	translate()
 	isInstanceMethod(name, variable) { // {{{
 		return true if variable.instanceMethods[name]?
 		

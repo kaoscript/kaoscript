@@ -5,11 +5,18 @@ class UnlessExpression extends Expression {
 	}
 	analyse() { // {{{
 		@condition = $compile.expression(@data.condition, this)
+		@condition.analyse()
+		
 		@whenFalse = $compile.expression(@data.whenFalse, this)
+		@whenFalse.analyse()
 	} // }}}
-	fuse() { // {{{
-		@condition.fuse()
-		@whenFalse.fuse()
+	prepare() { // {{{
+		@condition.prepare()
+		@whenFalse.prepare()
+	} // }}}
+	translate() { // {{{
+		@condition.translate()
+		@whenFalse.translate()
 	} // }}}
 	isComputed() => true
 	toFragments(fragments, mode) { // {{{
