@@ -1,0 +1,1 @@
+func camelize(value: String): String => value.charAt(0).toLowerCase() + value.substring(1).replace(/[-_\s]+(.)/g, (m, l) => l.toUpperCase())

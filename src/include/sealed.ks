@@ -100,6 +100,9 @@ const $sealed = {
 			return variables[0]	if variables.length == 1
 			return variables	if variables.length > 0
 		}
+		else if type.parameters? {
+			return $sealed.filter($variable.fromType({typeName: $identifier(type.name)}, node), name, data, node, true)
+		}
 		else {
 			throw new NotImplementedException(node)
 		}

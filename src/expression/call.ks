@@ -70,6 +70,11 @@ const $call = {
 				return variables[0]	if variables.length == 1
 				return variables	if variables.length > 0
 			}
+			else if variable.type.parameters? {
+				if variable ?= $variable.fromType({typeName: $identifier(variable.type.name)}, node) {
+					return $call.filterMember(variable, name, data, node)
+				}
+			}
 			else {
 				throw new NotImplementedException(node)
 			}

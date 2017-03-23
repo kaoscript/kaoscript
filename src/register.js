@@ -15,48 +15,38 @@ var Compiler = _.Compiler;
 var target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5';
 
 var loadFile = function(module, filename) { // {{{
-	try {
-		var source = fs.readFile(filename);
-		
-		if(fs.isFile(_.getBinaryPath(filename, target)) && fs.isFile(_.getHashPath(filename, target)) && _.isUpToDate(filename, target, source)) {
-			var data = fs.readFile(_.getBinaryPath(filename, target));
-		}
-		else {
-			var options = {
-				register: false,
-				target: target
-			};
-			
-			var root = path.join(__dirname, '..')
-			if(!(filename.length > root.length && filename.substr(0, root.length) === root) && fs.exists(path.join(root, 'node_modules', '@kaoscript', 'runtime'))) {
-				options.config = {
-					runtime: {
-						helper: {
-							package: 'kaoscript/node_modules/@kaoscript/runtime'
-						},
-						type: {
-							package: 'kaoscript/node_modules/@kaoscript/runtime'
-						}
-					}
-				};
-			}
-			
-			var compiler = new Compiler(filename, options);
-			
-			compiler.compile(source);
-			
-			compiler.writeFiles();
-			
-			var data = compiler.toSource();
-		}
+	var source = fs.readFile(filename);
+	
+	if(fs.isFile(_.getBinaryPath(filename, target)) && fs.isFile(_.getHashPath(filename, target)) && _.isUpToDate(filename, target, source)) {
+		var data = fs.readFile(_.getBinaryPath(filename, target));
 	}
-	catch(error) {
-		console.log(error)
-		if(!error.message.startsWith('/')) {
-			error.message = (error.filename || filename) + ': '+ error.message;
+	else {
+		var options = {
+			register: false,
+			target: target
+		};
+		
+		var root = path.join(__dirname, '..')
+		if(!(filename.length > root.length && filename.substr(0, root.length) === root) && fs.exists(path.join(root, 'node_modules', '@kaoscript', 'runtime'))) {
+			options.config = {
+				runtime: {
+					helper: {
+						package: 'kaoscript/node_modules/@kaoscript/runtime'
+					},
+					type: {
+						package: 'kaoscript/node_modules/@kaoscript/runtime'
+					}
+				}
+			};
 		}
 		
-		throw error;
+		var compiler = new Compiler(filename, options);
+		
+		compiler.compile(source);
+		
+		compiler.writeFiles();
+		
+		var data = compiler.toSource();
 	}
 	
 	return module._compile(data, filename);

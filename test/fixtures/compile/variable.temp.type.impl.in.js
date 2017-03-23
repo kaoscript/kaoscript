@@ -20,7 +20,7 @@ module.exports = function() {
 		name: "capitalizeWords",
 		sealed: __ks_String,
 		function: function() {
-			return Helper.mapArray(this.split(" "), (item) => {
+			return Helper.mapArray(this.split(" "), function(item) {
 				return __ks_String._im_capitalize(item);
 			}).join(" ");
 		},

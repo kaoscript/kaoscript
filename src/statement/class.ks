@@ -2096,7 +2096,7 @@ class ClassMethodDeclaration extends Statement {
 			ctrl.code(@internalName + '(')
 		}
 		
-		$function.parameters(this, ctrl, func(node) {
+		$function.parameters(this, ctrl, false, func(node) {
 			return node.code(')').step()
 		})
 		
@@ -2269,7 +2269,7 @@ class ClassConstructorDeclaration extends Statement {
 			ctrl.code(@internalName + '(')
 		}
 		
-		$function.parameters(this, ctrl, func(node) {
+		$function.parameters(this, ctrl, false, func(node) {
 			return node.code(')').step()
 		})
 		
@@ -2383,7 +2383,7 @@ class ClassDestructorDeclaration extends Statement {
 			ctrl.code(`static \(@internalName)(`)
 		}
 		
-		$function.parameters(this, ctrl, func(node) {
+		$function.parameters(this, ctrl, false, func(node) {
 			return node.code(')').step()
 		})
 		

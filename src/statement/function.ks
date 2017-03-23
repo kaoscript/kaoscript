@@ -8,7 +8,7 @@ const $function = {
 		
 		return null
 	} // }}}
-	isArgumentsRequired(node) { // {{{
+	/* isArgumentsRequired(node) { // {{{
 		if node._data.kind == NodeKind::ArrayComprehension {
 			return false
 		}
@@ -26,8 +26,8 @@ const $function = {
 		}
 		
 		return false
-	} // }}}
-	parameters(node, fragments, fn) { // {{{
+	} // }}} */
+	parameters(node, fragments, arrow, fn) { // {{{
 		if node._options.parse.parameters == 'es5' {
 			return $function.parametersES5(node, fragments, fn)
 		}
@@ -35,7 +35,7 @@ const $function = {
 			return $function.parametersES6(node, fragments, fn)
 		}
 		else {
-			return $function.parametersKS(node, fragments, fn)
+			return $function.parametersKS(node, fragments, arrow, fn)
 		}
 	} // }}}
 	parametersES5(node, fragments, fn) { // {{{
@@ -93,10 +93,11 @@ const $function = {
 		
 		return fn(fragments)
 	} // }}}
-	parametersKS(node, fragments, fn) { // {{{
-		let data = node._data
-		let parameters = node._parameters
-		let signature = node._signature
+	parametersKS(node, fragments, arrow, fn) { // {{{
+		const data = node._data
+		const parameters = node._parameters
+		const signature = node._signature
+		const name = arrow ? '__ks_arguments' : 'arguments'
 		
 		let parameter, ctrl
 		let maxb = 0
@@ -154,7 +155,20 @@ const $function = {
 		let l = rest != -1 ? rest : parameters.length
 		let context
 		
-		if (rest != -1 && !fr && (db == 0 || db + 1 == rest)) || (rest == -1 && ((!signature.async && signature.max == l && (db == 0 || db == l)) || (signature.async && signature.max == l + 1 && (db == 0 || db == l + 1)))) { // {{{
+		/* if	!arrow &&
+			(
+				(rest != -1 && !fr && (db == 0 || db + 1 == rest)) ||
+				(
+					rest == -1 &&
+					(
+						(!signature.async && signature.max == l && (db == 0 || db == l)) ||
+						(signature.async && signature.max == l + 1 && (db == 0 || db == l + 1))
+					)
+				)
+			)
+		{ // {{{ */
+		if !arrow && ((rest != -1 && !fr && (db == 0 || db + 1 == rest)) || (rest == -1 && ((!signature.async && signature.max == l && (db == 0 || db == l)) || (signature.async && signature.max == l + 1 && (db == 0 || db == l + 1)))))
+		{ // {{{
 			for parameter, i in parameters while i < l {
 				fragments.code($comma) if i > 0
 				
@@ -322,20 +336,25 @@ const $function = {
 			}
 		} // }}}
 		else { // {{{
+			if arrow {
+				fragments.code('...__ks_arguments')
+			}
+			
 			fragments = fn(fragments)
 			
 			if rb + ra > 0 {
 				fragments
 					.newControl()
-					.code(`if(arguments.length < \(signature.min))`)
+					.code(`if(\(name).length < \(signature.min))`)
 					.step()
-					.line(`throw new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min))")`)
+					.line(`throw new SyntaxError("wrong number of arguments (" + \(name).length + " for \(signature.min))")`)
 					.done()
 			}
 				
 			fragments.line($variable.scope(node), '__ks_i = -1')
 			
 			context = {
+				name: name
 				required: rb
 				optional: signature.min
 				temp: false
@@ -354,9 +373,9 @@ const $function = {
 						if l + 1 < data.parameters.length {
 							fragments
 								.newControl()
-								.code(`if(arguments.length > __ks_i + \(ra + 1))`)
+								.code(`if(\(name).length > __ks_i + \(ra + 1))`)
 								.step()
-								.line(`__ks_i = arguments.length - \(ra + 1)`)
+								.line(`__ks_i = \(name).length - \(ra + 1)`)
 								.done()
 						}
 					}
@@ -365,7 +384,7 @@ const $function = {
 							.newLine()
 							.code($variable.scope(node))
 							.compile(parameter)
-							.code(` = arguments.length > __ks_i + \(ra + 1) ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - \(ra)) : []`)
+							.code(` = \(name).length > __ks_i + \(ra + 1) ? Array.prototype.slice.call(\(name), __ks_i + 1, \(name).length - \(ra)) : []`)
 							.done()
 						
 						if l + 1 < data.parameters.length {
@@ -384,7 +403,7 @@ const $function = {
 							.newLine()
 							.code($variable.scope(node))
 							.compile(parameter)
-							.code(' = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : []')
+							.code(` = \(name).length > ++__ks_i ? Array.prototype.slice.call(\(name), __ks_i, __ks_i = \(name).length) : []`)
 							.done()
 						
 						if parameter._signature.type != 'Any' && l + 1 < data.parameters.length {
@@ -413,6 +432,7 @@ const $function = {
 			}
 			
 			context = {
+				name: name
 				any: parameter._signature.type == 'Any'
 				increment: false
 				temp: context? ? context.temp : false
@@ -505,7 +525,7 @@ const $function = {
 			parent = parent.parent()
 		}
 		
-		if parent?._instance {
+		/* if parent?._instance {
 			if node._options.format.functions == 'es5' || $function.isArgumentsRequired(node) {
 				if $function.useThisVariable(node._data.body, node) {
 					return {
@@ -532,6 +552,42 @@ const $function = {
 		}
 		else {
 			return {
+				beforeParameters: 'function('
+				afterParameters: ')'
+				footer: ''
+			}
+		} */
+		if parent?._instance {
+			if $function.useThisVariable(node._data.body, node) {
+				if node._options.format.functions == 'es5' {
+					return {
+						arrow: false
+						beforeParameters: 'Helper.vcurry(function('
+						afterParameters: ')'
+						footer: ', this)'
+					}
+				}
+				else {
+					return {
+						arrow: true
+						beforeParameters: '('
+						afterParameters: ') =>'
+						footer: ''
+					}
+				}
+			}
+			else {
+				return {
+					arrow: false
+					beforeParameters: 'function('
+					afterParameters: ')'
+					footer: ''
+				}
+			}
+		}
+		else {
+			return {
+				arrow: false
 				beforeParameters: 'function('
 				afterParameters: ')'
 				footer: ''
@@ -703,7 +759,7 @@ class FunctionDeclaration extends Statement {
 		
 		ctrl.code('function ' + this._data.name.name + '(')
 		
-		$function.parameters(this, ctrl, func(node) {
+		$function.parameters(this, ctrl, false, func(node) {
 			return node.code(')').step()
 		})
 		
@@ -1020,7 +1076,7 @@ class Parameter extends AbstractNode {
 						.newLine()
 						.code($variable.scope(this))
 						.compile(@variable)
-						.code(` = Array.prototype.slice.call(arguments, __ks_i + 1, __ks_i + \(arity.min + 1))`)
+						.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, __ks_i + \(arity.min + 1))`)
 						.done()
 					
 					if index + 1 < context.length {
@@ -1061,7 +1117,7 @@ class Parameter extends AbstractNode {
 						.newLine()
 						.code($variable.scope(this))
 						.compile(@variable)
-						.code(` = arguments.length > __ks_m && (__ks__ = arguments[\(context.increment ? '++' : '')__ks_i]) !== void 0`)
+						.code(` = \(context.name).length > __ks_m && (__ks__ = \(context.name)[\(context.increment ? '++' : '')__ks_i]) !== void 0`)
 					
 					if !@nullable {
 						line.code(' && __ks__ !== null')
@@ -1083,7 +1139,7 @@ class Parameter extends AbstractNode {
 						.newLine()
 						.code($variable.scope(this))
 						.compile(@variable)
-						.code(` = arguments.length > __ks_m && (__ks__ = arguments[__ks_i\(context.increment ? ' + 1' : '')]) !== void 0 && `)
+						.code(` = \(context.name).length > __ks_m && (__ks__ = \(context.name)[__ks_i\(context.increment ? ' + 1' : '')]) !== void 0 && `)
 					
 					if @nullable {
 						line.code('(__ks__ === null || ')
@@ -1114,7 +1170,7 @@ class Parameter extends AbstractNode {
 					.newLine()
 					.code($variable.scope(this))
 					.compile(@variable)
-					.code(' = arguments[', context.increment ? '++' : '', '__ks_i]')
+					.code(` = \(context.name)[`, context.increment ? '++' : '', '__ks_i]')
 					.done()
 				
 				this.toValidationFragments(fragments)
@@ -1137,7 +1193,7 @@ class Parameter extends AbstractNode {
 							.newLine()
 							.code($variable.scope(this))
 							.compile(@variable)
-							.code(` = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length - \(context.required), __ks_i + \(arity.max + 1)))`)
+							.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, Math.min(\(context.name).length - \(context.required), __ks_i + \(arity.max + 1)))`)
 							.done()
 					}
 					else {
@@ -1145,7 +1201,7 @@ class Parameter extends AbstractNode {
 							.newLine()
 							.code($variable.scope(this))
 							.compile(@variable)
-							.code(` = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + \(arity.max + 1)))`)
+							.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, Math.min(\(context.name).length, __ks_i + \(arity.max + 1)))`)
 							.done()
 					}
 					
@@ -1178,7 +1234,7 @@ class Parameter extends AbstractNode {
 						.newLine()
 						.code($variable.scope(this))
 						.compile(@variable)
-						.code(` = arguments.length > \(context.optional) && (__ks__ = arguments[++__ks_i]) !== void 0`)
+						.code(` = \(context.name).length > \(context.optional) && (__ks__ = \(context.name)[++__ks_i]) !== void 0`)
 					
 					if !@nullable {
 						line.code(' && __ks__ !== null')
@@ -1198,9 +1254,9 @@ class Parameter extends AbstractNode {
 					
 					let ctrl = fragments
 						.newControl()
-						.code(`if(arguments.length > \(context.optional) && (`)
+						.code(`if(\(context.name).length > \(context.optional) && (`)
 						.compile(@variable)
-						.code(' = arguments[++__ks_i]) !== void 0')
+						.code(` = \(context.name)[++__ks_i]) !== void 0`)
 					
 					if !@nullable {
 						ctrl.code(' && ').compile(@variable).code(' !== null')
@@ -1261,7 +1317,7 @@ class Parameter extends AbstractNode {
 							.newLine()
 							.code($variable.scope(this))
 							.compile(@variable)
-							.code(' = arguments[++__ks_i]')
+							.code(` = \(context.name)[++__ks_i]`)
 							.done()
 						
 						this.toValidationFragments(fragments)
@@ -1272,7 +1328,7 @@ class Parameter extends AbstractNode {
 						.newLine()
 						.code($variable.scope(this))
 						.compile(@variable)
-						.code(' = arguments[++__ks_i]')
+						.code(` = \(context.name)[++__ks_i]`)
 						.done()
 					
 					this.toValidationFragments(fragments)

@@ -162,6 +162,9 @@ class ImplementClassFieldDeclaration extends Statement {
 				}
 			}
 		}
+		else if type.name? {
+			this.toTypeString(type.name, path)
+		}
 		else {
 			throw new NotImplementedException(this)
 		}
@@ -375,7 +378,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			
 			let ctrl = object.newControl().code('function: function(')
 			
-			$function.parameters(this, ctrl, func(fragments) {
+			$function.parameters(this, ctrl, false, func(fragments) {
 				return fragments.code(')').step()
 			})
 			
@@ -420,6 +423,9 @@ class ImplementClassMethodDeclaration extends Statement {
 					TypeException.throwInvalid(type, this)
 				}
 			}
+		}
+		else if type.name? {
+			this.toTypeString(type.name, path)
 		}
 		else {
 			throw new NotImplementedException(this)
@@ -592,6 +598,9 @@ class ImplementClassMethodAliasDeclaration extends Statement {
 				}
 			}
 		}
+		else if type.name? {
+			this.toTypeString(type.name, path)
+		}
 		else {
 			throw new NotImplementedException(this)
 		}
@@ -762,6 +771,9 @@ class ImplementClassMethodLinkDeclaration extends Statement {
 				}
 			}
 		}
+		else if type.name? {
+			this.toTypeString(type.name, path)
+		}
 		else {
 			throw new NotImplementedException(this)
 		}
@@ -868,7 +880,7 @@ class ImplementVariableMethodDeclaration extends Statement {
 	toFragments(fragments, mode) { // {{{
 		let line = fragments.newLine().code(@variable.sealed.name, '.', @data.name.name, ' = function(')
 		
-		let block = $function.parameters(this, line, func(fragments) {
+		let block = $function.parameters(this, line, false, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 		

@@ -85,7 +85,7 @@ class FunctionExpression extends Expression {
 		
 		fragments.code(surround.beforeParameters)
 		
-		let block = $function.parameters(this, fragments, func(fragments) {
+		let block = $function.parameters(this, fragments, false, func(fragments) {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 		
@@ -178,7 +178,7 @@ class LambdaExpression extends Expression {
 		
 		fragments.code(surround.beforeParameters)
 		
-		let block = $function.parameters(this, fragments, func(fragments) {
+		let block = $function.parameters(this, fragments, surround.arrow, func(fragments) {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 		

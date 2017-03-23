@@ -40,10 +40,12 @@ module.exports = function() {
 			}
 		}
 		__ks_func_build_01_0() {
-			return this._messages.map((message) => {
-				if(arguments.length < 1) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			return this._messages.map((...__ks_arguments) => {
+				if(__ks_arguments.length < 1) {
+					throw new SyntaxError("wrong number of arguments (" + __ks_arguments.length + " for 1)");
 				}
+				let __ks_i = -1;
+				let message = __ks_arguments[++__ks_i];
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
 				}
@@ -57,23 +59,23 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_build_02_0() {
-			return this._messages.map(Helper.vcurry(function() {
-				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			return this._messages.map((...__ks_arguments) => {
+				if(__ks_arguments.length < 2) {
+					throw new SyntaxError("wrong number of arguments (" + __ks_arguments.length + " for 2)");
 				}
 				let __ks_i = -1;
-				let message = arguments[++__ks_i];
+				let message = __ks_arguments[++__ks_i];
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
 				}
 				let __ks__;
-				let foo = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 42;
-				let bar = arguments[++__ks_i];
+				let foo = __ks_arguments.length > 2 && (__ks__ = __ks_arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 42;
+				let bar = __ks_arguments[++__ks_i];
 				if(bar === void 0 || bar === null) {
 					throw new TypeError("'bar' is not nullable");
 				}
 				return this.format(message);
-			}, this));
+			});
 		}
 		build_02() {
 			if(arguments.length === 0) {
@@ -82,23 +84,23 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_build_03_0() {
-			return this._messages.map(Helper.vcurry(function() {
-				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			return this._messages.map((...__ks_arguments) => {
+				if(__ks_arguments.length < 2) {
+					throw new SyntaxError("wrong number of arguments (" + __ks_arguments.length + " for 2)");
 				}
 				let __ks_i = -1;
-				let message = arguments[++__ks_i];
+				let message = __ks_arguments[++__ks_i];
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
 				}
 				let __ks__;
-				let foo = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-				let bar = arguments[++__ks_i];
+				let foo = __ks_arguments.length > 2 && (__ks__ = __ks_arguments[++__ks_i]) !== void 0 ? __ks__ : null;
+				let bar = __ks_arguments[++__ks_i];
 				if(bar === void 0 || bar === null) {
 					throw new TypeError("'bar' is not nullable");
 				}
 				return this.format(message);
-			}, this));
+			});
 		}
 		build_03() {
 			if(arguments.length === 0) {
@@ -107,21 +109,23 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 		__ks_func_build_04_0() {
-			return this._messages.map(Helper.vcurry(function(message) {
-				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			return this._messages.map((...__ks_arguments) => {
+				if(__ks_arguments.length < 2) {
+					throw new SyntaxError("wrong number of arguments (" + __ks_arguments.length + " for 2)");
 				}
+				let __ks_i = -1;
+				let message = __ks_arguments[++__ks_i];
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
 				}
-				let __ks_i;
-				let foo = arguments.length > 2 ? Array.prototype.slice.call(arguments, 1, __ks_i = arguments.length - 1) : (__ks_i = 1, []);
-				let bar = arguments[__ks_i];
+				let foo = __ks_arguments.length > __ks_i + 2 ? Array.prototype.slice.call(__ks_arguments, __ks_i + 1, __ks_arguments.length - 1) : [];
+				__ks_i += foo.length;
+				let bar = __ks_arguments[__ks_i];
 				if(bar === void 0 || bar === null) {
 					throw new TypeError("'bar' is not nullable");
 				}
 				return this.format(message);
-			}, this));
+			});
 		}
 		build_04() {
 			if(arguments.length === 0) {

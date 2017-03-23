@@ -254,7 +254,10 @@ const $signature = {
 	} // }}}
 	type(type = null, scope) { // {{{
 		if type? {
-			if type.typeName? {
+			if type is String {
+				return type
+			}
+			else if type.typeName? {
 				if type.typeParameters? {
 					let signature = {
 						parameters: [$signature.type(item, scope) for item in type.typeParameters]
@@ -869,6 +872,11 @@ const $variable = {
 				
 				return variables[0]	if variables.length == 1
 				return variables	if variables.length > 0
+			}
+			else if variable.type.parameters? {
+				if variable ?= $variable.fromType({typeName: $identifier(variable.type.name)}, node) {
+					return $variable.filterMember(variable, name, node)
+				}
 			}
 			else {
 				throw new NotImplementedException(node)

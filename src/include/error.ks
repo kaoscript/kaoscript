@@ -10,7 +10,7 @@ Error.prepareStackTrace = func(error: Error, stack: Array) { // {{{
 	return message
 } // }}}
 
-class Exception extends Error {
+export class Exception extends Error {
 	public {
 		fileName: String
 		lineNumber: Number
@@ -88,7 +88,7 @@ class Exception extends Error {
 	} // }}}
 }
 
-class IOException extends Exception {
+export class IOException extends Exception {
 	static {
 		throwNotFoundFile(path, node) ~ IOException { // {{{
 			throw new IOException(`The file "\(path)" can't be found`, node)
@@ -105,7 +105,7 @@ class IOException extends Exception {
 	}
 }
 
-class NotImplementedException extends Exception {
+export class NotImplementedException extends Exception {
 	constructor(message = 'Not Implemented', node: AbstractNode) { // {{{
 		super(message, node)
 	} // }}}
@@ -117,13 +117,13 @@ class NotImplementedException extends Exception {
 	} // }}}
 }
 
-class NotSupportedException extends Exception {
+export class NotSupportedException extends Exception {
 	constructor(message = 'Not Supported', node: AbstractNode) { // {{{
 		super(message, node)
 	} // }}}
 }
 
-class ReferenceException extends Exception {
+export class ReferenceException extends Exception {
 	static {
 		throwNotDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
@@ -143,7 +143,7 @@ class ReferenceException extends Exception {
 	}
 }
 
-class SyntaxException extends Exception {
+export class SyntaxException extends Exception {
 	static {
 		throwAfterDefaultClause(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Clause is must be before the default clause`, node)
@@ -208,7 +208,7 @@ class SyntaxException extends Exception {
 	}
 }
 
-class TypeException extends Exception {
+export class TypeException extends Exception {
 	static {
 		throwCannotBeInstantiated(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Class "\(name)" is abstract so it can't be instantiated`, node)
