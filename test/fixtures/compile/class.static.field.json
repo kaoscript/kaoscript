@@ -4,7 +4,6 @@
     "Foo": {
       "name": "Foo",
       "kind": 1,
-      "new": "true",
       "constructors": [
         {
           "access": 3,

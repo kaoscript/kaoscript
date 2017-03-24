@@ -6,7 +6,7 @@ module.exports = function() {
 		duncan: "murbella"
 	};
 	function spicyHeroes() {
-		return spicyHeroes = Helper.mapObject(likes, function(hero, like) {
+		return Helper.mapObject(likes, function(hero, like) {
 			return hero;
 		}, function(hero, like) {
 			return like === "spice";

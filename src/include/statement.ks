@@ -11,11 +11,19 @@ abstract class Statement extends AbstractNode {
 	afterward(node) { // {{{
 		@afterwards.push(node)
 	} // }}}
-	assignment(data, allowAssignement = false) { // {{{
-		if data.left.kind == NodeKind::Identifier && !@scope.hasVariable(data.left.name) {
-			@variables.push(data.left.name)
+	assignment(data, expression) { // {{{
+		if data.left.kind == NodeKind::Identifier {
+			let variable
+			if variable ?= @scope.getVariable(data.left.name) {
+				if variable.immutable {
+					SyntaxException.throwImmutable(data.left.name, this)
+				}
+			}
+			else {
+				@variables.push(data.left.name)
 			
-			$variable.define(this, @scope, data.left, $variable.kind(data.right.type), data.right.type)
+				$variable.define(this, @scope, data.left, false, $variable.kind(data.right.type), data.right.type)
+			}
 		}
 	} // }}}
 	isAwait() => false

@@ -1,0 +1,5 @@
+class name {
+}
+
+class name {
+}

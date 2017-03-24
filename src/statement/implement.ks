@@ -223,7 +223,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		$variable.define(this, @scope, {
 			kind: NodeKind::Identifier
 			name: 'this'
-		}, VariableKind::Variable, $type.reference(@variable.name))
+		}, true, VariableKind::Variable, $type.reference(@variable.name))
 		
 		@parameters = []
 		for parameter in @data.parameters {

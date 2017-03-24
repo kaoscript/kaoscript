@@ -4,7 +4,6 @@
     "foo": {
       "name": "foo",
       "kind": 3,
-      "new": "true",
       "throws": []
     }
   }

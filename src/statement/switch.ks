@@ -274,7 +274,7 @@ class SwitchBindingArray extends AbstractNode {
 
 class SwitchBindingType extends AbstractNode {
 	analyse() { // {{{
-		$variable.define(this, @scope, @data.name, VariableKind::Variable)
+		$variable.define(this, @scope, @data.name, false, VariableKind::Variable)
 	} // }}}
 	prepare()
 	translate()
@@ -285,7 +285,7 @@ class SwitchBindingType extends AbstractNode {
 
 class SwitchBindingValue extends AbstractNode {
 	analyse() { // {{{
-		$variable.define(this, @scope, @data, VariableKind::Variable)
+		$variable.define(this, @scope, @data, false, VariableKind::Variable)
 	} // }}}
 	prepare()
 	translate()

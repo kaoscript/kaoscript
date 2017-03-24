@@ -9,7 +9,6 @@
     "Color": {
       "name": "Color",
       "kind": 1,
-      "new": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {
@@ -52,7 +51,6 @@
     "Space": {
       "name": "Space",
       "kind": 2,
-      "new": "true",
       "type": "Number",
       "counter": -1,
       "requirement": "Space"

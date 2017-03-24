@@ -59,6 +59,7 @@ class IdentifierLiteral extends Literal {
 			ReferenceException.throwNotDefined(data.name, this)
 		}
 	} // }}}
+	name() => @value
 	toFragments(fragments, mode) { // {{{
 		if @isVariable {
 			fragments.code(@scope.getRenamedVariable(@value), @data)

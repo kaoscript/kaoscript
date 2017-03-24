@@ -21,7 +21,7 @@ class ForOfStatement extends Statement {
 		
 		if @data.key? {
 			if @data.declaration || !@scope.hasVariable(@data.key.name) {
-				$variable.define(this, @scope, @data.key.name, $variable.kind(@data.key.type), @data.key.type)
+				$variable.define(this, @scope, @data.key.name, false, $variable.kind(@data.key.type), @data.key.type)
 				
 				@defineKey = true
 			}
@@ -32,7 +32,7 @@ class ForOfStatement extends Statement {
 		
 		if @data.value? {
 			if @data.declaration || !@scope.hasVariable(@data.value.name) {
-				$variable.define(this, @scope, @data.value.name, $variable.kind(@data.value.type), @data.value.type)
+				$variable.define(this, @scope, @data.value.name, false, $variable.kind(@data.value.type), @data.value.type)
 				
 				@defineValue = true
 			}
@@ -111,7 +111,7 @@ class ForOfStatement extends Statement {
 			if !this.greatScope().hasVariable(@expressionName) {
 				line.code($variable.scope(this))
 				
-				$variable.define(this, this.greatScope(), @expressionName, VariableKind::Variable)
+				$variable.define(this, this.greatScope(), @expressionName, false, VariableKind::Variable)
 			}
 			
 			line.code(@expressionName, $equals).compile(@expression).done()

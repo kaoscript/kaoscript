@@ -2,9 +2,8 @@
   "requirements": {},
   "exports": {
     "Colour": {
-      "name": "Color",
+      "name": "Colour",
       "kind": 2,
-      "new": "false",
       "type": "Number",
       "counter": 5
     }

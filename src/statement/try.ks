@@ -19,7 +19,7 @@ class TryStatement extends Statement {
 				}
 				
 				if clause.binding? {
-					$variable.define(this, @scope = new Scope(scope), clause.binding, VariableKind::Variable)
+					$variable.define(this, @scope = new Scope(scope), clause.binding, false, VariableKind::Variable)
 				}
 				
 				body = $compile.expression(clause.body, this)
@@ -37,7 +37,7 @@ class TryStatement extends Statement {
 		
 		if @data.catchClause? {
 			if @data.catchClause.binding? {
-				$variable.define(this, @scope = new Scope(scope), @data.catchClause.binding, VariableKind::Variable)
+				$variable.define(this, @scope = new Scope(scope), @data.catchClause.binding, false, VariableKind::Variable)
 			}
 			
 			@catchClause = $compile.expression(@data.catchClause.body, this)

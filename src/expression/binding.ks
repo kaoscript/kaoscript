@@ -140,10 +140,14 @@ class BindingElement extends Expression {
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this.statement(), this.statement().scope(), @data.name, VariableKind::Variable)
+		const scope = this.statement().scope()
+		
+		if @data.name.kind == NodeKind::Identifier && !scope.hasVariable(@data.name.name) {
+			$variable.define(this.statement(), scope, @data.name, false, VariableKind::Variable)
+		}
 		
 		if @data.alias? {
-			$variable.define(this, @scope, @data.alias, VariableKind::Variable)
+			$variable.define(this, @scope, @data.alias, false, VariableKind::Variable)
 			
 			@alias = $compile.expression(@data.alias, this)
 			@alias.analyse()

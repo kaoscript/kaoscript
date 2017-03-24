@@ -65,57 +65,68 @@ class AbstractScope {
 		_prepared			= false
 		_renamedIndexes 	= {}
 		_renamedVariables	= {}
+		_scopeParent		= null
 		_variables			= {}
 	}
-	constructor(@parent = null)
+	constructor(@parent = null) { // {{{
+		if parent? {
+			while parent? && !(parent is Scope) {
+				parent = parent._parent
+			}
+			
+			if parent? {
+				@scopeParent = parent
+			}
+		}
+	} // }}}
 	addVariable(name, definition) { // {{{
 		if $keywords[name] == true {
-			let index = this._renamedIndexes[name] ? this._renamedIndexes[name] : 0
+			let index = @renamedIndexes[name] ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
 			
-			while this._variables[newName] {
+			while @variables[newName] {
 				newName = '__ks_' + name + '_' + (++index)
 			}
 			
-			this._renamedIndexes[name] = index
-			this._renamedVariables[name] = newName
+			@renamedIndexes[name] = index
+			@renamedVariables[name] = newName
 		}
 		
-		this._variables[name] = definition
+		@variables[name] = definition
 		
 		return this
 	} // }}}
 	getVariable(name) { // {{{
-		if this._variables[name] is Object {
-			return this._variables[name]
+		if @variables[name] is Object {
+			return @variables[name]
 		}
-		else if this._parent? {
-			return this._parent.getVariable(name)
+		else if @parent? {
+			return @parent.getVariable(name)
 		}
 		else {
 			return null
 		}
 	} // }}}
 	hasVariable(name, lookAtParent = true) { // {{{
-		return this._variables[name] is Object || (lookAtParent && this._parent?.hasVariable(name))
+		return @variables[name] is Object || (lookAtParent && @parent?.hasVariable(name))
 	} // }}}
 	isDeclaredVariable(name, lookAtParent = true) { // {{{
-		return this._variables[name]? || (lookAtParent && this._parent?.isDeclaredVariable(name))
+		return @variables[name]? || (lookAtParent && @parent?.isDeclaredVariable(name))
 	} // }}}
-	parent() => this._parent
+	parent() => @parent
 	removeVariable(name) { // {{{
-		if this._variables[name] is Object {
-			this._variables[name] = false
+		if @variables[name] is Object {
+			@variables[name] = false
 		}
 		else {
-			this._parent?.removeVariable(name)
+			@parent?.removeVariable(name)
 		}
 		
 		return this
 	} // }}}
 	rename(name, newName = this.newRenamedVariable(name)) { // {{{
 		if newName != name {
-			this._renamedVariables[name] = newName
+			@renamedVariables[name] = newName
 		}
 	
 		return this
@@ -124,55 +135,42 @@ class AbstractScope {
 
 class Scope extends AbstractScope {
 	private {
-		_scopeParent
 		_tempNextIndex 		= 0
 		_tempNames			= {}
 		_tempParentNames	= {}
 	}
-	constructor(parent) { // {{{
-		super(parent)
-		
-		while parent? && !(parent is Scope) {
-			parent = parent._parent
-		}
-		
-		if parent? {
-			this._scopeParent = parent
-			this._tempNextIndex = parent._tempNextIndex
-		}
-	} // }}}
 	acquireTempName(statement: Statement = null) { // {{{
 		this.updateTempNames()
 		
-		if name ?= this._scopeParent?.acquireTempNameFromKid() {
-			this._tempParentNames[name] = true
+		if name ?= @scopeParent?.acquireTempNameFromKid() {
+			@tempParentNames[name] = true
 			
 			return name
 		}
 		
-		for name of this._tempNames when this._tempNames[name] {
-			this._tempNames[name] = false
+		for name of @tempNames when @tempNames[name] {
+			@tempNames[name] = false
 			
 			return name
 		}
 		
-		while this._tempParentNames[name = '__ks_' + this._tempNextIndex] {
-			++this._tempNextIndex
+		while @tempParentNames[name = '__ks_' + @tempNextIndex] {
+			++@tempNextIndex
 		}
 		
-		++this._tempNextIndex
+		++@tempNextIndex
 		
 		statement._variables.pushUniq(name) if statement?
 		
 		return name
 	} // }}}
 	private acquireTempNameFromKid() { // {{{
-		if name ?= this._parent?.acquireTempNameFromKid() {
+		if name ?= @parent?.acquireTempNameFromKid() {
 			return name
 		}
 		
-		for name of this._tempNames when this._tempNames[name] {
-			this._tempNames[name] = false
+		for name of @tempNames when @tempNames[name] {
+			@tempNames[name] = false
 			
 			return name
 		}
@@ -180,26 +178,26 @@ class Scope extends AbstractScope {
 		return null
 	} // }}}
 	getRenamedVariable(name) { // {{{
-		if this._renamedVariables[name] is String {
-			return this._renamedVariables[name]
+		if @renamedVariables[name] is String {
+			return @renamedVariables[name]
 		}
-		else if this._scopeParent? {
-			return this._scopeParent.getRenamedVariable(name)
+		else if @scopeParent? {
+			return @scopeParent.getRenamedVariable(name)
 		}
 		else {
 			return name
 		}
 	} // }}}
-	newRenamedVariable(name) { // {{{
-		if this._variables[name] {
-			let index = this._renamedIndexes[name] ? this._renamedIndexes[name] : 0
+	newRenamedVariable(name, variables = @variables) { // {{{
+		if variables[name]? {
+			let index = @renamedIndexes[name] ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
 			
-			while this._variables[newName] {
+			while variables[newName] {
 				newName = '__ks_' + name + '_' + (++index)
 			}
 			
-			this._renamedIndexes[name] = index
+			@renamedIndexes[name] = index
 			
 			return newName
 		}
@@ -209,30 +207,30 @@ class Scope extends AbstractScope {
 	} // }}}
 	releaseTempName(name) { // {{{
 		if name.length > 5 && name.substr(0, 5) == '__ks_' {
-			if this._scopeParent && this._tempParentNames[name] {
-				this._scopeParent.releaseTempNameFromKid(name)
+			if @scopeParent && @tempParentNames[name] {
+				@scopeParent.releaseTempNameFromKid(name)
 				
-				this._tempParentNames[name] = false
+				@tempParentNames[name] = false
 			}
 			else {
-				this._tempNames[name] = true
+				@tempNames[name] = true
 			}
 		}
 		
 		return this
 	} // }}}
 	private releaseTempNameFromKid(name) { // {{{
-		if this._parent && this._tempParentNames[name] {
-			this._parent.releaseTempNameFromKid(name)
+		if @parent && @tempParentNames[name] {
+			@parent.releaseTempNameFromKid(name)
 			
-			this._tempParentNames[name] = false
+			@tempParentNames[name] = false
 		}
 		else {
-			this._tempNames[name] = true
+			@tempNames[name] = true
 		}
 	} // }}}
 	updateTempNames() { // {{{
-		if @parent {
+		if @parent? {
 			@parent.updateTempNames()
 			
 			if @parent._tempNextIndex > @tempNextIndex {
@@ -244,38 +242,29 @@ class Scope extends AbstractScope {
 
 class XScope extends AbstractScope {
 	acquireTempName(statement: Statement = null) { // {{{
-		return this._parent.acquireTempName(statement)
+		return @parent.acquireTempName(statement)
 	} // }}}
 	getRenamedVariable(name) { // {{{
-		if this._renamedVariables[name] {
-			return this._renamedVariables[name]
+		if @renamedVariables[name] is String {
+			return @renamedVariables[name]
 		}
-		else if this._variables[name] {
+		else if @variables[name]? {
 			return name
 		}
 		else {
-			return this._parent.getRenamedVariable(name)
+			return @parent.getRenamedVariable(name)
 		}
 	} // }}}
-	newRenamedVariable(name) { // {{{
-		if this._variables[name] {
-			let index = this._renamedIndexes[name] ? this._renamedIndexes[name] : 0
-			let newName = '__ks_' + name + '_' + (++index)
-			
-			while this._variables[newName] {
-				newName = '__ks_' + name + '_' + (++index)
-			}
-			
-			this._renamedIndexes[name] = index
-			
-			return newName
+	newRenamedVariable(name, variables = @variables) { // {{{
+		if variables[name]? {
+			return @scopeParent.newRenamedVariable(name, variables)
 		}
 		else {
-			return this._parent.newRenamedVariable(name)
+			return @parent.newRenamedVariable(name)
 		}
 	} // }}}
 	releaseTempName(name) { // {{{
-		this._parent.releaseTempName(name)
+		@parent.releaseTempName(name)
 		
 		return this
 	} // }}}

@@ -157,6 +157,9 @@ export class SyntaxException extends Exception {
 		throwExclusiveWildcardImport(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Wilcard import is only supported for kaoscript file`, node)
 		} // }}}
+		throwImmutable(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
+		} // }}}
 		throwMissingAbstractMethods(name, methods, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Class "\(name)" doesn't implement the following abstract methods: "\(methods.join('", "'))"`, node)
 		} // }}}

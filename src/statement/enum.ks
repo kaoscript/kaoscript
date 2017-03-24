@@ -14,7 +14,7 @@ class EnumDeclaration extends Statement {
 		_variable
 	}
 	analyse() { // {{{
-		@variable = $variable.define(this, @scope, @data.name, VariableKind::Enum, @data.type)
+		@variable = $variable.define(this, @scope, @data.name, true, VariableKind::Enum, @data.type)
 		
 		@new = @variable.new
 		

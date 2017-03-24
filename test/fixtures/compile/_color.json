@@ -3,13 +3,11 @@
   "exports": {
     "Color": {
       "name": "Color",
-      "kind": 5,
-      "new": "true"
+      "kind": 5
     },
     "Space": {
       "name": "Space",
-      "kind": 5,
-      "new": "true"
+      "kind": 5
     }
   }
 }

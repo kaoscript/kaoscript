@@ -5,7 +5,7 @@ class IfStatement extends Statement {
 		_whenTrue
 	}
 	analyse() { // {{{
-		let scope = @scope
+		const scope = @scope
 		
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
@@ -47,7 +47,7 @@ class IfStatement extends Statement {
 		@whenFalse.translate() if @whenFalse?
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		let ctrl = fragments.newControl()
+		const ctrl = fragments.newControl()
 		
 		@toIfFragments(ctrl, mode)
 		

@@ -51,12 +51,14 @@ const $import = {
 			}
 		}
 		
+		variable.immutable = true
+		
 		node.scope().addVariable(name, variable)
 		
 		module.import(name, file)
 	} // }}}
 	define(module, file = null, node, name, kind, type = null) { // {{{
-		$variable.define(node, node.scope(), name, kind, type)
+		$variable.define(node, node.scope(), name, true, kind, type)
 		
 		module.import(name.name || name, file)
 	} // }}}
@@ -76,6 +78,7 @@ const $import = {
 			}
 			
 			if pkg? {
+				let metadata
 				if pkg.kaoscript && (metadata ?= $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node)) {
 					return metadata
 				}
@@ -228,7 +231,7 @@ const $import = {
 			variable = $variable.define(node, node.scope(), {
 				kind: NodeKind::Identifier
 				name: importAlias
-			}, VariableKind::Variable, type)
+			}, true, VariableKind::Variable, type)
 			
 			module.import(importAlias, moduleName)
 		}
@@ -286,7 +289,7 @@ const $import = {
 	loadNodeModule(x, start, module, data, node) { // {{{
 		let dirs = $import.nodeModulesPaths(start)
 		
-		let file
+		let file, metadata
 		for dir in dirs {
 			file = path.join(dir, x)
 			
@@ -338,6 +341,7 @@ const $import = {
 	resolve(data, y, module, node) { // {{{
 		let x = data.module
 		
+		let metadata
 		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
 			x = fs.resolve(y, x)
 			

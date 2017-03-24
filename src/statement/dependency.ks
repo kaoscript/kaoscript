@@ -58,7 +58,7 @@ const $dependency = {
 		
 		switch declaration.kind {
 			NodeKind::ClassDeclaration => {
-				variable = $variable.define(node, node.greatScope(), declaration.name, VariableKind::Class, declaration)
+				variable = $variable.define(node, node.greatScope(), declaration.name, true, VariableKind::Class, declaration)
 				
 				if declaration.extends? {
 					if superVar !?= node.scope().getVariable(declaration.extends.name) {
@@ -94,7 +94,7 @@ const $dependency = {
 				}
 			}
 			NodeKind::VariableDeclarator => {
-				variable = $variable.define(node, node.greatScope(), declaration.name, $variable.kind(declaration.type), declaration.type)
+				variable = $variable.define(node, node.greatScope(), declaration.name, true, $variable.kind(declaration.type), declaration.type)
 				
 				unless kind == DependencyKind::Extern {
 					variable.requirement = declaration.name.name

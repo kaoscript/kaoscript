@@ -23,18 +23,18 @@ class ForInStatement extends Statement {
 		if @data.value? {
 			if !@scope.hasVariable(@data.value.name) {
 				if @data.value.type? {
-					$variable.define(this, @scope, @data.value.name, $variable.kind(@data.value.type), @data.value.type)
+					$variable.define(this, @scope, @data.value.name, false, $variable.kind(@data.value.type), @data.value.type)
 				}
 				else if (variable ?= $variable.fromAST(@data.expression, this)) && variable.type?.typeName?.name == 'Array' && variable.type.typeParameters? {
 					if variable.type.typeParameters.length == 1 {
-						$variable.define(this, @scope, @data.value.name, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
+						$variable.define(this, @scope, @data.value.name, false, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
 					}
 					else {
-						$variable.define(this, @scope, @data.value.name, VariableKind::Variable, variable.type.typeParameters)
+						$variable.define(this, @scope, @data.value.name, false, VariableKind::Variable, variable.type.typeParameters)
 					}
 				}
 				else {
-					$variable.define(this, @scope, @data.value.name, VariableKind::Variable)
+					$variable.define(this, @scope, @data.value.name, false, VariableKind::Variable)
 				}
 				
 				@defineValue = true
@@ -46,7 +46,7 @@ class ForInStatement extends Statement {
 		
 		if @data.index? {
 			if @data.declaration || !@scope.hasVariable(@data.index.name) {
-				$variable.define(this, @scope, @data.index.name, $variable.kind(@data.index.type), @data.index.type)
+				$variable.define(this, @scope, @data.index.name, false, $variable.kind(@data.index.type), @data.index.type)
 				
 				@defineIndex = true
 			}
@@ -134,7 +134,7 @@ class ForInStatement extends Statement {
 			if !this.greatScope().hasVariable(@expressionName) {
 				line.code($variable.scope(this))
 				
-				$variable.define(this, this.greatScope(), @expressionName, VariableKind::Variable)
+				$variable.define(this, this.greatScope(), @expressionName, false, VariableKind::Variable)
 			}
 			
 			line.code(@expressionName, $equals).compile(@expression).done()

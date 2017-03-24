@@ -1,0 +1,4 @@
+class name {
+}
+
+name = 'foobar'

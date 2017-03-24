@@ -1366,14 +1366,14 @@ class ClassDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
-		@variable = $variable.define(this, @scope, @data.name, VariableKind::Class, @data.type)
+		@variable = $variable.define(this, @scope, @data.name, true, VariableKind::Class, @data.type)
 		
 		let classname = @data.name
 		
 		let thisVariable = $variable.define(this, @constructorScope, {
 			kind: NodeKind::Identifier
 			name: 'this'
-		}, VariableKind::Variable, $type.reference(classname.name))
+		}, true, VariableKind::Variable, $type.reference(classname.name))
 		
 		thisVariable.callable = func(data) {
 			data.arguments = [{
@@ -1417,14 +1417,14 @@ class ClassDeclaration extends Statement {
 		thisVariable = $variable.define(this, @destructorScope, {
 			kind: NodeKind::Identifier
 			name: 'this'
-		}, VariableKind::Variable, $type.reference(classname.name))
+		}, true, VariableKind::Variable, $type.reference(classname.name))
 		
 		@destructorScope.rename('this', 'that')
 		
 		$variable.define(this, @instanceVariableScope, {
 			kind: NodeKind::Identifier
 			name: 'this'
-		}, VariableKind::Variable, $type.reference(classname.name))
+		}, true, VariableKind::Variable, $type.reference(classname.name))
 		
 		if @data.extends? {
 			@extends = true
@@ -1443,7 +1443,7 @@ class ClassDeclaration extends Statement {
 			let superVariable = $variable.define(this, @constructorScope, {
 				kind: NodeKind::Identifier
 				name: 'super'
-			}, VariableKind::Variable)
+			}, true, VariableKind::Variable)
 			
 			if @extendsVariable.sealed?.extern {
 				superVariable.callable = (data) => {
@@ -1494,7 +1494,7 @@ class ClassDeclaration extends Statement {
 			$variable.define(this, @instanceVariableScope, {
 				kind: NodeKind::Identifier
 				name: 'super'
-			}, VariableKind::Variable)
+			}, true, VariableKind::Variable)
 		}
 		
 		for modifier in @data.modifiers {
@@ -1752,13 +1752,13 @@ class ClassDeclaration extends Statement {
 		$variable.define(this, scope, {
 			kind: NodeKind::Identifier
 			name: 'this'
-		}, VariableKind::Variable, $type.reference(@data.name.name))
+		}, true, VariableKind::Variable, $type.reference(@data.name.name))
 		
 		if this._extends {
 			let variable = $variable.define(this, scope, {
 				kind: NodeKind::Identifier
 				name: 'super'
-			}, VariableKind::Variable)
+			}, true, VariableKind::Variable)
 			
 			if this._es5 {
 				let extname = @data.extends

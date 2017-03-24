@@ -7,7 +7,6 @@
     "Function": {
       "name": "Function",
       "kind": 1,
-      "new": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},

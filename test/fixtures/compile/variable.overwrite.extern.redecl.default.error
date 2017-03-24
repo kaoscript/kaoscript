@@ -1,0 +1,1 @@
+SyntaxException: Identifier "name" has already been declared (line 3, file "fixtures/compile/variable.overwrite.extern.redecl.default.ks")

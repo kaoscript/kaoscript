@@ -1,0 +1,5 @@
+func name() {
+}
+
+func name() {
+}

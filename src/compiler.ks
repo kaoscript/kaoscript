@@ -725,16 +725,26 @@ const $type = {
 }
 
 const $variable = {
-	define(node, scope, name, kind, type = null) { // {{{
-		let variable = scope.getVariable(name.name || name)
-		if variable && variable.kind == kind {
-			variable.new = false
+	define(node, scope, name, immutable, kind, type = null) { // {{{
+		let variable
+		
+		if kind == VariableKind::Enum && (variable ?= scope.getVariable(name.name || name)) {
+			if variable.kind == VariableKind::Enum {
+				variable.new = false
+			}
+			else {
+				SyntaxException.throwAlreadyDeclared(name.name || name, node)
+			}
+		}
+		else if scope.hasVariable(name.name || name, false) {
+			SyntaxException.throwAlreadyDeclared(name.name || name, node)
 		}
 		else {
 			scope.addVariable(name.name || name, variable = {
 				name: name,
 				kind: kind,
 				new: true
+				immutable: immutable
 			})
 			
 			if kind == VariableKind::Class {
@@ -1169,9 +1179,6 @@ const $variable = {
 					}
 				}
 			}
-			/* NodeKind::ThisExpression => {
-				 node.scope().getVariable('this')
-			} */
 			NodeKind::TypeReference => {
 				if data.typeName {
 					return node.scope().getVariable($types[data.typeName.name] || data.typeName.name)

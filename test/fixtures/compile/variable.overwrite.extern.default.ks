@@ -1,0 +1,3 @@
+extern name
+
+name = 'foobar'

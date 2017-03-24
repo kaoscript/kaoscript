@@ -1,8 +1,8 @@
 module.exports = function(Color, Space) {
-	Color += "+cie";
-	Space += "+cie";
+	let ColorCIE = Color + "+cie";
+	let SpaceCIE = Space + "+cie";
 	return {
-		Color: Color,
-		Space: Space
+		Color: ColorCIE,
+		Space: SpaceCIE
 	};
 }

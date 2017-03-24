@@ -4,13 +4,11 @@
     "Space": {
       "name": "Space",
       "kind": 2,
-      "new": "true",
       "type": "String"
     },
     "Color": {
       "name": "Color",
       "kind": 1,
-      "new": "true",
       "constructors": [
         {
           "access": 3,

@@ -13,7 +13,7 @@ class FunctionExpression extends Expression {
 		$variable.define(this, @scope, {
 			kind: NodeKind::Identifier,
 			name: 'this'
-		}, VariableKind::Variable)
+		}, true, VariableKind::Variable)
 		
 		@parameters = []
 		for parameter in @data.parameters {

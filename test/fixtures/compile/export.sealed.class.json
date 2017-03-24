@@ -4,7 +4,6 @@
     "console": {
       "name": "console",
       "kind": 5,
-      "new": "true",
       "type": {
         "typeName": {
           "kind": 41,
@@ -33,7 +32,6 @@
     "Shape": {
       "name": "Shape",
       "kind": 1,
-      "new": "true",
       "constructors": [
         {
           "access": 3,

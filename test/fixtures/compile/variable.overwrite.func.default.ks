@@ -1,0 +1,4 @@
+func name() {
+}
+
+name = 'foobar'

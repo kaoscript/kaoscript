@@ -18,7 +18,7 @@ class ForFromStatement extends Statement {
 	} // }}}
 	analyse() { // {{{
 		if !@scope.hasVariable(@data.variable.name) {
-			$variable.define(this, @scope, @data.variable.name, $variable.kind(@data.variable.type), @data.variable.type)
+			$variable.define(this, @scope, @data.variable.name, false, $variable.kind(@data.variable.type), @data.variable.type)
 			
 			@defineVariable = true
 		}

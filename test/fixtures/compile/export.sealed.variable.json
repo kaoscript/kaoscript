@@ -4,7 +4,6 @@
     "Math": {
       "name": "Math",
       "kind": 5,
-      "new": "true",
       "type": {
         "typeName": {
           "kind": 41,

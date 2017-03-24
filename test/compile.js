@@ -42,6 +42,8 @@ describe('compile', function() {
 					data = compiler.compile().toSource();
 				}
 				catch(ex) {
+					expect(ex.fileName).to.exist;
+					
 					ex.fileName = path.relative(__dirname, ex.fileName);
 					
 					expect(ex.toString()).to.equal(error);

@@ -36,7 +36,7 @@ class ExportDeclaration extends Statement {
 					module.export(declaration)
 				}
 				NodeKind::TypeAliasDeclaration => {
-					$variable.define(this, @scope, declaration.name, VariableKind::TypeAlias, declaration.type)
+					$variable.define(this, @scope, declaration.name, true, VariableKind::TypeAlias, declaration.type)
 					
 					module.export(declaration.name)
 				}

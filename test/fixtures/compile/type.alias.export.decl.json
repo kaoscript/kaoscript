@@ -4,7 +4,6 @@
     "T": {
       "name": "T",
       "kind": 4,
-      "new": "true",
       "type": {
         "types": [
           {

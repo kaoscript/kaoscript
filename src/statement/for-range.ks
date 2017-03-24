@@ -15,7 +15,7 @@ class ForRangeStatement extends Statement {
 	}
 	analyse() { // {{{
 		if !@scope.hasVariable(@data.value.name) {
-			$variable.define(this, @scope, @data.value.name, $variable.kind(@data.value.type), @data.value.type)
+			$variable.define(this, @scope, @data.value.name, false, $variable.kind(@data.value.type), @data.value.type)
 			
 			@defineValue = true
 		}

@@ -99,7 +99,7 @@ export class Module {
 			SyntaxException.throwNotBinary('export', this)
 		}
 		
-		let variable = @body.scope().getVariable(name.name)
+		const variable = @body.scope().getVariable(name.name)
 		
 		ReferenceException.throwNotDefined(name.name, this) unless variable
 		
@@ -122,7 +122,11 @@ export class Module {
 		}
 		
 		if alias {
-			@exportMeta[alias.name] = variable
+			const export = Object.clone(variable)
+			
+			export.name = alias
+			
+			@exportMeta[alias.name] = export
 		}
 		else {
 			@exportMeta[name.name] = variable
@@ -624,7 +628,7 @@ export class Module {
 				if n == 'name' {
 					d[n] = variable[n].name || variable[n]
 				}
-				else if !(n == 'accessPath') {
+				else if !(n == 'accessPath' || n == 'immutable' || n == 'new') {
 					d[n] = variable[n]
 				}
 			}

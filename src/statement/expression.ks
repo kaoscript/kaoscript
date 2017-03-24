@@ -18,15 +18,23 @@ class ExpressionStatement extends Statement {
 		@expression.translate()
 	} // }}}
 	assignment(data, expression) { // {{{
-		if data.left.kind == NodeKind::Identifier && !@scope.hasVariable(data.left.name) {
-			if !expression.isAssignable() || @variable.length {
-				@variables.push(data.left.name)
+		if data.left.kind == NodeKind::Identifier {
+			let variable
+			if variable ?= @scope.getVariable(data.left.name) {
+				if variable.immutable {
+					SyntaxException.throwImmutable(data.left.name, this)
+				}
 			}
 			else {
-				@variable = data.left.name
+				if !expression.isAssignable() || @variable.length {
+					@variables.push(data.left.name)
+				}
+				else {
+					@variable = data.left.name
+				}
+				
+				$variable.define(this, @scope, data.left, false, $variable.kind(data.right.type), data.right.type)
 			}
-			
-			$variable.define(this, @scope, data.left, $variable.kind(data.right.type), data.right.type)
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{

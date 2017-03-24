@@ -1,6 +1,6 @@
 require Color, Space
 
-Color += '+cie'
-Space += '+cie'
+let ColorCIE = Color + '+cie'
+let SpaceCIE = Space + '+cie'
 
-export Color, Space
+export ColorCIE as Color, SpaceCIE as Space

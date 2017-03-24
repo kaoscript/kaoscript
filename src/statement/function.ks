@@ -8,25 +8,6 @@ const $function = {
 		
 		return null
 	} // }}}
-	/* isArgumentsRequired(node) { // {{{
-		if node._data.kind == NodeKind::ArrayComprehension {
-			return false
-		}
-		
-		let optional = false
-		for parameter, i in node._parameters {
-			if optional {
-				if parameter._signature.min > 0 {
-					return true
-				}
-			}
-			else if parameter._signature.max == Infinity || parameter._signature.min == 0 {
-				optional = true
-			}
-		}
-		
-		return false
-	} // }}} */
 	parameters(node, fragments, arrow, fn) { // {{{
 		if node._options.parse.parameters == 'es5' {
 			return $function.parametersES5(node, fragments, fn)
@@ -155,7 +136,7 @@ const $function = {
 		let l = rest != -1 ? rest : parameters.length
 		let context
 		
-		/* if	!arrow &&
+		if	!arrow &&
 			(
 				(rest != -1 && !fr && (db == 0 || db + 1 == rest)) ||
 				(
@@ -166,8 +147,6 @@ const $function = {
 					)
 				)
 			)
-		{ // {{{ */
-		if !arrow && ((rest != -1 && !fr && (db == 0 || db + 1 == rest)) || (rest == -1 && ((!signature.async && signature.max == l && (db == 0 || db == l)) || (signature.async && signature.max == l + 1 && (db == 0 || db == l + 1)))))
 		{ // {{{
 			for parameter, i in parameters while i < l {
 				fragments.code($comma) if i > 0
@@ -525,38 +504,6 @@ const $function = {
 			parent = parent.parent()
 		}
 		
-		/* if parent?._instance {
-			if node._options.format.functions == 'es5' || $function.isArgumentsRequired(node) {
-				if $function.useThisVariable(node._data.body, node) {
-					return {
-						beforeParameters: 'Helper.vcurry(function('
-						afterParameters: ')'
-						footer: ', this)'
-					}
-				}
-				else {
-					return {
-						beforeParameters: 'function('
-						afterParameters: ')'
-						footer: ''
-					}
-				}
-			}
-			else {
-				return {
-					beforeParameters: '('
-					afterParameters: ') =>'
-					footer: ''
-				}
-			}
-		}
-		else {
-			return {
-				beforeParameters: 'function('
-				afterParameters: ')'
-				footer: ''
-			}
-		} */
 		if parent?._instance {
 			if $function.useThisVariable(node._data.body, node) {
 				if node._options.format.functions == 'es5' {
@@ -684,9 +631,9 @@ class FunctionDeclaration extends Statement {
 		$variable.define(this, @scope, {
 			kind: NodeKind::Identifier,
 			name: 'this'
-		}, VariableKind::Variable)
+		}, true, VariableKind::Variable)
 		
-		@variable = $variable.define(this, this.greatScope(), @data.name, VariableKind::Function, @data.type)
+		@variable = $variable.define(this, this.greatScope(), @data.name, true, VariableKind::Function, @data.type)
 		
 		@parameters = []
 		for parameter in @data.parameters {
@@ -845,13 +792,13 @@ class Parameter extends AbstractNode {
 				name: @scope.acquireTempName()
 			}
 			
-			$variable.define(this, @scope, name, VariableKind::Variable)
+			$variable.define(this, @scope, name, false, VariableKind::Variable)
 			
 			@variable = $compile.expression(name, @parent)
 		}
 		else {
 			if @rest {
-				$variable.define(this, @scope, @data.name, VariableKind::Variable, {
+				$variable.define(this, @scope, @data.name, false, VariableKind::Variable, {
 					kind: NodeKind::TypeReference
 					typeName: {
 						kind: NodeKind::Identifier
@@ -860,7 +807,7 @@ class Parameter extends AbstractNode {
 				})
 			}
 			else {
-				$variable.define(this, @scope, @data.name, VariableKind::Variable)
+				$variable.define(this, @scope, @data.name, false, VariableKind::Variable)
 			}
 			
 			@variable = $compile.expression(@data.name, @parent)

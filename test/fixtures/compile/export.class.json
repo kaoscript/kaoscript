@@ -4,7 +4,6 @@
     "Shape": {
       "name": "Shape",
       "kind": 1,
-      "new": "true",
       "constructors": [
         {
           "access": 3,

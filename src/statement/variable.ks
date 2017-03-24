@@ -30,8 +30,8 @@ class VariableDeclaration extends Statement {
 			declarator.translate()
 		}
 	} // }}}
+	isImmutable() => !@data.rebindable
 	isAwait() => @await
-	isRooted() => !@data.rebindable
 	modifier(data) { // {{{
 		if data.name.kind == NodeKind::ArrayBinding || data.name.kind == NodeKind::ObjectBinding || @options.format.variables == 'es5' {
 			return $code('var')
@@ -81,14 +81,16 @@ class AwaitDeclarator extends AbstractNode {
 		
 		@operation.analyse()
 		
+		const immutable = @parent.isImmutable()
+		
 		for variable in @data.variables {
 			if variable.kind == NodeKind::VariableDeclarator {
-				$variable.define(this, @scope._parent, variable.name, $variable.kind(variable.type), variable.type)
+				$variable.define(this, @scope._parent, variable.name, immutable, $variable.kind(variable.type), variable.type)
 				
 				@variables.push($compile.expression(variable.name, this))
 			}
 			else {
-				$variable.define(this, @scope._parent, variable, VariableKind::Variable)
+				$variable.define(this, @scope._parent, variable, immutable, VariableKind::Variable)
 				
 				@variables.push($compile.expression(variable, this))
 			}
@@ -151,12 +153,12 @@ class VariableDeclarator extends AbstractNode {
 	}
 	analyse() { // {{{
 		if @data.name.kind == NodeKind::Identifier {
-			if @options.format.variables == 'es5' {
-				@scope.rename(@data.name.name)
-			}
-			
 			if @scope.hasVariable(@data.name.name, false) {
 				SyntaxException.throwAlreadyDeclared(@data.name.name, this)
+			}
+			
+			if @options.format.variables == 'es5' {
+				@scope.rename(@data.name.name)
 			}
 			
 			if @scope.isDeclaredVariable(@data.name.name, false) {
@@ -164,17 +166,19 @@ class VariableDeclarator extends AbstractNode {
 			}
 		}
 		
-		if @data.autotype || @parent.isRooted() {
+		const immutable = @parent.isImmutable()
+		
+		if @data.autotype || immutable {
 			let type = @data.type
 			
 			if !type && @data.init {
 				type = @data.init
 			}
 			
-			$variable.define(this, @scope, @data.name, $variable.kind(@data.type), type)
+			variable = $variable.define(this, @scope, @data.name, immutable, $variable.kind(@data.type), type)
 		}
 		else {
-			$variable.define(this, @scope, @data.name, $variable.kind(@data.type), @data.type)
+			variable = $variable.define(this, @scope, @data.name, immutable, $variable.kind(@data.type), @data.type)
 		}
 		
 		@name = $compile.expression(@data.name, this)
