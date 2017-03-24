@@ -606,6 +606,7 @@ const $function = {
 				}
 			}
 			NodeKind::ReturnStatement => return $function.useThisVariable(data.value, node)
+			NodeKind::ThisExpression => return true
 			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument, node)
 			=> {
 				throw new NotSupportedException(`Unknow kind \(data.kind)`, node)

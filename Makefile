@@ -17,7 +17,7 @@ endif
 
 testks:
 ifeq ($(g),)
-	node_modules/.bin/mocha --colors --check-leaks --reporter spec --compilers ks:./register.js -g ""
+	node_modules/.bin/mocha --colors --check-leaks --reporter spec --compilers ks:./register.js
 else
 	node_modules/.bin/mocha --colors --check-leaks --reporter spec --compilers ks:./register.js -g "$(g)"
 endif
@@ -25,4 +25,10 @@ endif
 clean:
 	find . -type f \( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksm" \) -delete
 
-.PHONY: test build bin
+ok:
+	make comp
+	make comp
+	make comp
+	make clean testks
+
+.PHONY: test build bin comp

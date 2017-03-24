@@ -116,14 +116,14 @@ class MemberExpression extends Expression {
 			else {
 				if @data.computed {
 					fragments
-						.compile(@object)
+						.wrap(@object)
 						.code('[')
 						.compile(@property)
 						.code(']')
 				}
 				else {
 					fragments
-						.compile(@object)
+						.wrap(@object)
 						.code($dot)
 						.compile(@property)
 				}
@@ -195,14 +195,14 @@ class MemberExpression extends Expression {
 			}
 			else if @data.computed {
 				fragments
-					.compile(@object)
+					.wrap(@object)
 					.code('[')
 					.compileReusable(@property)
 					.code(']')
 			}
 			else {
 				fragments
-					.compile(@object)
+					.wrap(@object)
 					.code($dot)
 					.compile(@property)
 			}
