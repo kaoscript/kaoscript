@@ -97,9 +97,10 @@ There are three basics ways to add external dependencies:
 - `import`: from other dependencies (`import readFile from fs`)
 - `require`: from the module parameters (`require foo` -> `module.exports = function(foo)`)
 
-Two combined ways:
+Three combined ways:
 - `extern|require`: first look into the global scope, and if not found, look into the module parameters
 - `require|extern`: first look into the module parameters, and if not found, look into the global scope
+- `require|import`: first look into the module parameters, and if not found, import it
 
 Array
 -----
@@ -557,6 +558,16 @@ Syntax Highlighting
 - [Rainbow](https://github.com/kaoscript/highlight-rainbow)
 - [TextMate](https://github.com/kaoscript/highlight-textmate)
 - [VS Code](https://github.com/kaoscript/highlight-vscode)
+
+Coverage
+--------
+
+kaoscript provides code coverage via the [Istanbul](https://github.com/gotwarlost/istanbul) instrumentation: [@kaoscript/coverage-istanbul](https://github.com/kaoscript/coverage-istanbul).
+
+Register the compiler into Istanbul with the option `--compilers ks:@kaoscript/coverage-istanbul/register`.
+
+You can look at `istanbul.json` in the project [@zokugun/lang](https://github.com/ZokugunKS/lang) to discover an easy integration between mocha, Istanbul and kaoscript.
+It generates a report on the command line and as html pages (with minimap of warnings and errors).
 
 Future
 ------
