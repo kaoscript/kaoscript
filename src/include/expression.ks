@@ -24,6 +24,7 @@ abstract class Expression extends AbstractNode {
 	toBooleanFragments(fragments, mode = Mode::None) => this.toFragments(fragments, mode)
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
 	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
+	abstract type()
 }
 
 include {

@@ -24,19 +24,19 @@ class TemplateExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		for element, index in @elements {
 			if index == 0 {
-				/* const type = $type.type(@data.elements[index], @scope, this)
-				
-				if type?.typeName?.kind == NodeKind::Identifier && (type.typeName.name == 'String' || type.typeName.name == 'string') {
+				/* console.log(element)
+				console.log(element.type()) */
+				if element.type().isString() {
 					fragments.wrap(element)
 				}
 				else {
 					fragments.code('"" + ').wrap(element)
-				} */
-				fragments.wrap(element)
+				}
 			}
 			else {
 				fragments.code(' + ').wrap(element)
 			}
 		}
 	} // }}}
+	type() => Type.String
 }

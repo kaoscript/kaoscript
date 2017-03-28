@@ -1,15 +1,16 @@
 class ThisExpression extends Expression {
 	private {
 		_class
+		_fragment
 		_method		= false
-		_variable
+		_type
 	}
-	constructor(data, parent, scope) { // {{{
-		super(data, parent, scope)
+	analyse() {
+		let parent = @parent
 		
 		do {
 			if parent is ClassDeclaration {
-				@class = scope.getVariable(parent._name)
+				@class = @scope.getVariable(parent._name)
 				break
 			}
 			else if parent is ImplementClassMethodDeclaration {
@@ -20,32 +21,66 @@ class ThisExpression extends Expression {
 		while parent ?= parent.parent()
 		
 		if !?parent {
-			SyntaxException.throwOutOfClassAlias(data.name.name, this)
+			SyntaxException.throwOutOfClassAlias(@data.name.name, this)
 		}
-	} // }}}
-	analyse()
-	prepare()
+	}
+	prepare() {
+		let name = @data.name.name
+		let variable
+		
+		if @method {
+			if variable ?= @getInstanceMethod(name) {
+				@fragment = `this.\(name)`
+			}
+			else {
+				ReferenceException.throwNotDefinedMethod(name, this)
+			}
+		}
+		else {
+			if variable ?= @getInstanceVariable(name) {
+				@fragment = `this.\(name)`
+			}
+			else if variable ?= @getInstanceVariable('_' + name) {
+				@fragment = `this._\(name)`
+			}
+			else {
+				let parent = @parent
+				while parent? && parent is not ClassMethodDeclaration {
+					parent = parent.parent()
+				}
+				
+				if (!?parent || parent.name() != name || parent.length() != 0) && (variable ?= @getInstanceMethod(name)) {
+					@fragment = `this.\(name)()`
+				}
+				else {
+					ReferenceException.throwNotDefinedField(name, this)
+				}
+			}
+		}
+		
+		@type = variable.type
+	}
 	translate()
-	isInstanceMethod(name, variable) { // {{{
-		return true if variable.instanceMethods[name]?
+	getInstanceMethod(name, variable = @class) { // {{{
+		return variable.instanceMethods[name] if variable.instanceMethods[name]?
 		
 		if variable.extends? {
-			return @isInstanceMethod(name, @scope.getVariable(variable.extends))
+			return @getInstanceMethod(name, @scope.getVariable(variable.extends))
 		}
 		
-		return false
+		return null
 	} // }}}
-	isInstanceVariable(name, variable) { // {{{
-		return true if variable.instanceVariables[name]?
+	getInstanceVariable(name, variable = @class) { // {{{
+		return variable.instanceVariables[name] if variable.instanceVariables[name]?
 		
 		if variable.extends? {
-			return @isInstanceVariable(name, @scope.getVariable(variable.extends))
+			return @getInstanceVariable(name, @scope.getVariable(variable.extends))
 		}
 		
-		return false
+		return null
 	} // }}}
 	isMethod(@method) => this
-	toFragments(fragments, mode) { // {{{
+	/* toFragments(fragments, mode) { // {{{
 		let name = @data.name.name
 		
 		if @method {
@@ -77,5 +112,9 @@ class ThisExpression extends Expression {
 				}
 			}
 		}
+	} // }}} */
+	toFragments(fragments, mode) { // {{{
+		fragments.code(@fragment)
 	} // }}}
+	type() => @type
 }

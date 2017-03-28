@@ -31,6 +31,7 @@ class ArrayExpression extends Expression {
 		
 		fragments.code(']')
 	} // }}}
+	type() => Type.Array
 }
 
 class ArrayRange extends Expression {
@@ -38,6 +39,7 @@ class ArrayRange extends Expression {
 		_by = null
 		_from
 		_to
+		_type
 	}
 	analyse() { // {{{
 		@from = $compile.expression(@data.from ?? @data.then, this)
@@ -55,6 +57,8 @@ class ArrayRange extends Expression {
 		@from.prepare()
 		@to.prepare()
 		@by.prepare() if @by?
+		
+		@type = Type.array(this, Type.Number)
 	} // }}}
 	translate() { // {{{
 		@from.translate()
@@ -79,4 +83,5 @@ class ArrayRange extends Expression {
 		
 		fragments.code($comma, @data.from?, $comma, @data.to?, ')')
 	} // }}}
+	type() => @type
 }

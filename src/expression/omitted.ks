@@ -7,4 +7,5 @@ class OmittedExpression extends Expression {
 			fragments.code('...')
 		}
 	} // }}}
+	type() => Type.Any
 }

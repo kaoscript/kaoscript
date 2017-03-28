@@ -8,7 +8,7 @@ class ImplementDeclaration extends Statement {
 			ReferenceException.throwNotDefined(@data.variable.name, this)
 		}
 		
-		if @variable.kind == VariableKind::Class {
+		if @variable.kind() == VariableKind::Class {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
@@ -33,7 +33,7 @@ class ImplementDeclaration extends Statement {
 				@properties.push(property)
 			}
 		}
-		else if @variable.kind == VariableKind::Variable {
+		else if @variable.kind() == VariableKind::Variable {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
@@ -188,7 +188,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	analyse() { // {{{
 		let name = @data.name.name
 		
-		if @isContructor = @data.name.kind == NodeKind::Identifier && $method.isConstructor(name, @variable) {
+		/* if @isContructor = @data.name.kind == NodeKind::Identifier && $method.isConstructor(name, @variable) {
 			throw new NotImplementedException(this)
 		}
 		else if @isDestructor = @data.name.kind == NodeKind::Identifier && $method.isDestructor(name, @variable) {
@@ -230,6 +230,33 @@ class ImplementClassMethodDeclaration extends Statement {
 			@parameters.push(parameter = new Parameter(parameter, this))
 			
 			parameter.analyse()
+		} */
+		if @isContructor = (@data.name.kind == NodeKind::Identifier && @variable.isConstructor(name)) {
+			throw new NotImplementedException(this)
+		}
+		else if @isDestructor = (@data.name.kind == NodeKind::Identifier && @variable.isDestructor(name)) {
+			throw new NotImplementedException(this)
+		}
+		else {
+			for i from 0 til @data.modifiers.length while @instance {
+				if @data.modifiers[i].kind == ModifierKind::Static {
+					@instance = false
+				}
+			}
+			
+			if @data.name.kind == NodeKind::TemplateExpression {
+				@name = $compile.expression(@data.name, this)
+				@name.analyse()
+			}
+		}
+		
+		@scope.define('this', true, VariableKind::Variable, @variable.type())
+		
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
+			parameter.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
@@ -237,7 +264,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			parameter.prepare()
 		}
 		
-		@signature = Signature.fromNode(this)
+		/* @signature = Signature.fromNode(this)
 		
 		if @data.name.kind == NodeKind::Identifier {
 			let name = @data.name.name
@@ -258,6 +285,9 @@ class ImplementClassMethodDeclaration extends Statement {
 					@variable.classMethods[name] = [@signature]
 				}
 			}
+		} */
+		if @data.name.kind == NodeKind::Identifier {
+			@variable.addMethod(@data.name.name, Type.fromNode(this), @instance)
 		}
 		
 		@name.prepare() if @name?
@@ -344,9 +374,6 @@ class ImplementClassMethodDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 		
-		let data = @data
-		let variable = @variable
-		
 		if @isContructor {
 			throw new NotImplementedException(this)
 		}
@@ -360,20 +387,20 @@ class ImplementClassMethodDeclaration extends Statement {
 			
 			let object = line.newObject()
 			
-			object.newLine().code('class: ', variable.name is String ? variable.name : variable.name.name)
+			object.newLine().code(`class: \(@variable.name())`)
 			
-			if data.name.kind == NodeKind::Identifier {
-				object.newLine().code('name: ' + $quote(data.name.name))
+			if @data.name.kind == NodeKind::Identifier {
+				object.newLine().code('name: ' + $quote(@data.name.name))
 			}
-			else if data.name.kind == NodeKind::TemplateExpression {
+			else if @data.name.kind == NodeKind::TemplateExpression {
 				object.newLine().code('name: ').compile(@name)
 			}
 			else {
 				throw new NotImplementedException(this)
 			}
 			
-			if variable.sealed {
-				object.newLine().code('sealed: ' + variable.sealed.name)
+			if @variable.isSealed() {
+				object.newLine().code('sealed: ' + @variable.sealName())
 			}
 			
 			let ctrl = object.newControl().code('function: function(')
@@ -392,7 +419,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			line.code(')').done()
 		}
 	} // }}}
-	toTypeString(type, path) { // {{{
+	/* toTypeString(type, path) { // {{{
 		if type is Array {
 			let src = ''
 			
@@ -430,7 +457,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		else {
 			throw new NotImplementedException(this)
 		}
-	} // }}}
+	} // }}} */
 }
 
 class ImplementClassMethodAliasDeclaration extends Statement {

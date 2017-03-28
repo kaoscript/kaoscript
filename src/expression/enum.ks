@@ -11,4 +11,5 @@ class EnumExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@enum).code('.', @data.member.name)
 	} // }}}
+	type() => Type.Any
 }

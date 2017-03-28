@@ -147,9 +147,11 @@ class AwaitDeclarator extends AbstractNode {
 
 class VariableDeclarator extends AbstractNode {
 	private {
-		_declare	= true
-		_init		= null
+		_autotype: Boolean
+		_declare: Boolean	= true
+		_init				= null
 		_name
+		_variable
 	}
 	analyse() { // {{{
 		if @data.name.kind == NodeKind::Identifier {
@@ -168,6 +170,9 @@ class VariableDeclarator extends AbstractNode {
 		
 		const immutable = @parent.isImmutable()
 		
+		@autotype = @data.autotype || immutable
+		/* const immutable = @parent.isImmutable()
+		
 		if @data.autotype || immutable {
 			let type = @data.type
 			
@@ -179,7 +184,9 @@ class VariableDeclarator extends AbstractNode {
 		}
 		else {
 			variable = $variable.define(this, @scope, @data.name, immutable, $variable.kind(@data.type), @data.type)
-		}
+		} */
+		/* $variable.define(this, @scope, @data.name, immutable, VariableKind::Variable) */
+		@variable = @scope.define(@data.name.name, immutable, this)
 		
 		@name = $compile.expression(@data.name, this)
 		
@@ -201,6 +208,14 @@ class VariableDeclarator extends AbstractNode {
 			
 			@init.acquireReusable(false)
 			@init.releaseReusable()
+			
+			if @autotype {
+				/* const type = @init.type()
+				
+				$variable.retype(this, @scope, @data.name, $variable.kind(type), type) */
+				/* Variable.castTo(@variable, @init.type(), this) */
+				@variable.castTo(@init.type(), this)
+			}
 		}
 	} // }}}
 	translate() { // {{{

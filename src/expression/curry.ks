@@ -222,4 +222,5 @@ class CurryExpression extends Expression {
 			}
 		}
 	} // }}}
+	type() => Type.Function
 }

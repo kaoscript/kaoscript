@@ -26,4 +26,5 @@ class BlockExpression extends Expression {
 			statement.toFragments(fragments, mode)
 		}
 	} // }}}
+	type() => Type.Any
 }

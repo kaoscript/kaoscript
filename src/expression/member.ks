@@ -208,4 +208,5 @@ class MemberExpression extends Expression {
 			}
 		}
 	} // }}}
+	type() => Type.Any
 }

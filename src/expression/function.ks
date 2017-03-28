@@ -121,6 +121,7 @@ class FunctionExpression extends Expression {
 			fragments.code(surround.footer)
 		}
 	} // }}}
+	type() => Type.Any
 }
 
 class LambdaExpression extends Expression {
@@ -214,4 +215,5 @@ class LambdaExpression extends Expression {
 			fragments.code(surround.footer)
 		}
 	} // }}}
+	type() => Type.Any
 }

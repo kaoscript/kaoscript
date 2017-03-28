@@ -97,9 +97,10 @@ There are three basics ways to add external dependencies:
 - `import`: from other dependencies (`import readFile from fs`)
 - `require`: from the module parameters (`require foo` -> `module.exports = function(foo)`)
 
-Two combined ways:
+Three combined ways:
 - `extern|require`: first look into the global scope, and if not found, look into the module parameters
 - `require|extern`: first look into the module parameters, and if not found, look into the global scope
+- `require|import`: first look into the module parameters, and if not found, import it
 
 Array
 -----

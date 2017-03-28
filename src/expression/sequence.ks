@@ -31,4 +31,5 @@ class SequenceExpression extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => @expressions[@expressions.length - 1].type()
 }

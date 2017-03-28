@@ -1,9 +1,3 @@
-enum MemberAccess { // {{{
-	Private		= 1
-	Protected
-	Public
-} // }}}
-
 enum HelperTypeKind { // {{{
 	Native
 	Referenced
@@ -601,16 +595,16 @@ const $class = {
 const $field = {
 	signature(data, node) { // {{{
 		let signature = {
-			access: MemberAccess::Public
+			access: Accessibility::Public
 		}
 		
 		if data.modifiers {
 			for modifier in data.modifiers {
 				if modifier.kind == ModifierKind::Private {
-					signature.access = MemberAccess::Private
+					signature.access = Accessibility::Private
 				}
 				else if modifier.kind == ModifierKind::Protected {
-					signature.access = MemberAccess::Protected
+					signature.access = Accessibility::Protected
 				}
 			}
 		}
@@ -1274,8 +1268,8 @@ const $helper = {
 }
 
 const $method = {
-	isConstructor(name, variable) => name == 'constructor'
-	isDestructor(name, variable) => name == 'destructor'
+	/* isConstructor(name, variable) => name == 'constructor'
+	isDestructor(name, variable) => name == 'destructor' */
 	isUsingProperty(data, name) { // {{{
 		if data is Array {
 			for d in data {

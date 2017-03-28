@@ -26,5 +26,5 @@ module.exports = function() {
 	});
 	let d = 4;
 	let u = 2;
-	console.log(__ks_String._im_toInt(d + u));
+	console.log(__ks_String._im_toInt("" + d + u));
 }

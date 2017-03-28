@@ -13,6 +13,7 @@ class UnaryOperatorExpression extends Expression {
 	translate() { // {{{
 		@argument.translate()
 	} // }}}
+	type() => Type.Any
 }
 
 class UnaryOperatorBitwiseNot extends UnaryOperatorExpression {

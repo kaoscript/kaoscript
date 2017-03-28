@@ -34,6 +34,7 @@ class AssignmentOperatorExpression extends Expression {
 	toNullableFragments(fragments) { // {{{
 		fragments.compileNullable(@right)
 	} // }}}
+	type() => @left.type()
 }
 
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {

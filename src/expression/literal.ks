@@ -12,7 +12,7 @@ const $predefined = { // {{{
 	String: true
 } // }}}
 
-class Literal extends Expression {
+abstract class Literal extends Expression {
 	private {
 		_value
 	}
@@ -37,6 +37,7 @@ class Literal extends Expression {
 class IdentifierLiteral extends Literal {
 	private {
 		_isVariable = false
+		_variable
 	}
 	constructor(data, parent, scope = parent.scope(), variable = true) { // {{{
 		super(data, parent, scope, data.name)
@@ -55,7 +56,7 @@ class IdentifierLiteral extends Literal {
 			}
 		}
 		
-		if @isVariable && !@scope.hasVariable(data.name) {
+		if @isVariable && (@variable !?= @scope.getVariable(data.name)) {
 			ReferenceException.throwNotDefined(data.name, this)
 		}
 	} // }}}
@@ -68,16 +69,19 @@ class IdentifierLiteral extends Literal {
 			fragments.code(@value, @data)
 		}
 	} // }}}
+	type() => @variable.type()
 }
 
 class NumberLiteral extends Literal { // {{{
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.value)
 	} // }}}
+	type() => Type.Number
 } // }}}
 
 class StringLiteral extends Literal { // {{{
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, $quote(data.value))
 	} // }}}
+	type() => Type.String
 } // }}}

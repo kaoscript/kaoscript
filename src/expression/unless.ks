@@ -35,4 +35,5 @@ class UnlessExpression extends Expression {
 			.line(@whenFalse)
 			.done()
 	} // }}}
+	type() => Type.Any
 }

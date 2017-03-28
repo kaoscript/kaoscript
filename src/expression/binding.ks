@@ -126,6 +126,7 @@ class ArrayBinding extends Expression {
 			}
 		}
 	} // }}}
+	type() => Type.Any
 }
 
 class BindingElement extends Expression {
@@ -260,6 +261,7 @@ class BindingElement extends Expression {
 				.code(`[\(@index)]`)
 		}
 	} // }}}
+	type() => Type.Any
 }
 
 class FlatBindingElement extends Expression {
@@ -280,6 +282,7 @@ class FlatBindingElement extends Expression {
 			.code('.')
 			.compile(@property)
 	} // }}}
+	type() => Type.Any
 }
 
 class ObjectBinding extends Expression {
@@ -404,6 +407,7 @@ class ObjectBinding extends Expression {
 			}
 		}
 	} // }}}
+	type() => Type.Any
 }
 
 class TempBinding extends Expression {
@@ -424,4 +428,5 @@ class TempBinding extends Expression {
 			.code($equals)
 			.compile(@value)
 	} // }}}
+	type() => Type.Any
 }

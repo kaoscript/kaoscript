@@ -103,6 +103,7 @@ class ArrayComprehensionForFrom extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => Type.Array
 }
 
 class ArrayComprehensionForIn extends Expression {
@@ -223,6 +224,7 @@ class ArrayComprehensionForIn extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => Type.Array
 }
 
 class ArrayComprehensionForOf extends Expression {
@@ -325,6 +327,7 @@ class ArrayComprehensionForOf extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => Type.Array
 }
 
 class ArrayComprehensionForRange extends Expression {
@@ -424,4 +427,5 @@ class ArrayComprehensionForRange extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => Type.Array
 }

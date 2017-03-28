@@ -48,6 +48,7 @@ class ObjectExpression extends Expression {
 			fragments.code('{}')
 		}
 	} // }}}
+	type() => Type.Any
 }
 
 class ObjectMember extends Expression {
@@ -87,6 +88,7 @@ class ObjectMember extends Expression {
 		
 		fragments.compile(@value)
 	} // }}}
+	type() => Type.Any
 }
 
 class ObjectTemplateMember extends Expression {
@@ -118,4 +120,5 @@ class ObjectTemplateMember extends Expression {
 			.compile(@value)
 			.done()
 	} // }}}
+	type() => Type.Any
 }

@@ -17,7 +17,7 @@ const $dependency = {
 			}
 			NodeKind::MethodDeclaration => {
 				if $method.isConstructor(data.name.name, variable) {
-					variable.constructors.push(Signature.fromAST(data, node))
+					variable.addConstructor(Type.fromAST(data, node))
 				}
 				else if $method.isDestructor(data.name.name, variable) {
 					throw new NotImplementedException(node)
@@ -28,24 +28,7 @@ const $dependency = {
 						instance = false if data.modifiers[i].kind == ModifierKind::Static
 					}
 					
-					let signature = Signature.fromAST(data, node)
-					
-					if instance {
-						if variable.instanceMethods[data.name.name] is Array {
-							variable.instanceMethods[data.name.name].push(signature)
-						}
-						else {
-							variable.instanceMethods[data.name.name] = [signature]
-						}
-					}
-					else {
-						if variable.classMethods[data.name.name] is Array {
-							variable.classMethods[data.name.name].push(signature)
-						}
-						else {
-							variable.classMethods[data.name.name] = [signature]
-						}
-					}
+					variable.addMethod(data.name.name, Type.fromAST(data, node), instance)
 				}
 			}
 			=> {
@@ -54,11 +37,9 @@ const $dependency = {
 		}
 	} // }}}
 	define(declaration, node, kind) { // {{{
-		let variable
-		
 		switch declaration.kind {
 			NodeKind::ClassDeclaration => {
-				variable = $variable.define(node, node.greatScope(), declaration.name, true, VariableKind::Class, declaration)
+				/* variable = $variable.define(node, node.greatScope(), declaration.name, true, VariableKind::Class, declaration)
 				
 				if declaration.extends? {
 					if superVar !?= node.scope().getVariable(declaration.extends.name) {
@@ -91,10 +72,41 @@ const $dependency = {
 				
 				for i from 0 til declaration.members.length {
 					$dependency.classMember(declaration.members[i], variable, node)
+				} */
+				const variable = node.greatScope().define(declaration.name.name, true, VariableKind::Class, node)
+				
+				if declaration.extends? {
+					if superVar !?= node.scope().getVariable(declaration.extends.name) {
+						ReferenceException.throwNotDefined(declaration.extends.name, node)
+					}
+					else if variable.kind() != VariableKind::Class {
+						TypeException.throwNotClass(declaration.extends.name, node)
+					}
+					
+					variable.extends(superVar)
 				}
+				
+				if kind != DependencyKind::Extern {
+					variable.require()
+				}
+				
+				for modifier in declaration.modifiers {
+					if modifier.kind == ModifierKind::Abstract {
+						variable.abstract()
+					}
+					else if modifier.kind == ModifierKind::Sealed {
+						variable.seal()
+					}
+				}
+				
+				for i from 0 til declaration.members.length {
+					$dependency.classMember(declaration.members[i], variable, node)
+				}
+				
+				return variable
 			}
 			NodeKind::VariableDeclarator => {
-				variable = $variable.define(node, node.greatScope(), declaration.name, true, $variable.kind(declaration.type), declaration.type)
+				/* variable = $variable.define(node, node.greatScope(), declaration.name, true, $variable.kind(declaration.type), declaration.type)
 				
 				unless kind == DependencyKind::Extern {
 					variable.requirement = declaration.name.name
@@ -105,14 +117,13 @@ const $dependency = {
 						name: '__ks_' + variable.name.name
 						properties: {}
 					}
-				}
+				} */
+				throw new NotImplementedException(node)
 			}
 			=> {
 				throw new NotSupportedException(`Unexpected kind \(declaration.kind)`, node)
 			}
 		}
-		
-		return variable
 	} // }}}
 }
 
@@ -194,7 +205,7 @@ class RequireOrImportDeclaration extends Statement {
 		_declarators = []
 	}
 	analyse() { // {{{
-		const directory = this.directory()
+		/* const directory = this.directory()
 		const module = this.module()
 		
 		let metadata, variable
@@ -229,7 +240,8 @@ class RequireOrImportDeclaration extends Statement {
 			if metadata.importAlias.length {
 				throw new NotImplementedException(this)
 			}
-		}
+		} */
+		throw new NotImplementedException(this)
 	} // }}}
 	prepare()
 	translate()

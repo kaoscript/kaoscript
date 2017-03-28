@@ -60,6 +60,7 @@ class BinaryOperatorExpression extends Expression {
 			@tested = true
 		}
 	} // }}}
+	type() => Type.Any
 }
 
 class BinaryOperatorAddition extends BinaryOperatorExpression {
@@ -316,6 +317,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@left)
 	} // }}}
+	type() => Type.Any
 }
 
 class BinaryOperatorTypeEquality extends Expression {
@@ -337,6 +339,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	toFragments(fragments, mode) { // {{{
 		$type.check(this, fragments, @left, @data.right)
 	} // }}}
+	type() => Type.Boolean
 }
 
 class BinaryOperatorTypeInequality extends Expression {
@@ -372,4 +375,5 @@ class BinaryOperatorTypeInequality extends Expression {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
+	type() => Type.Boolean
 }

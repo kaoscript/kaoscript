@@ -27,19 +27,19 @@ enum Mode {
 	Async
 }
 
-enum CalleeKind {
-	ClassMethod
-	InstanceMethod
-	VariableProperty
-}
-
-enum VariableKind { // {{{
+enum VariableKind {
 	Class = 1
 	Enum
 	Function
 	TypeAlias
 	Variable
-} // }}}
+}
+
+enum CalleeKind {
+	ClassMethod
+	InstanceMethod
+	VariableProperty
+}
 
 const $defaultTypes = { // {{{
 	Array: 'Array'
@@ -625,7 +625,7 @@ const $type = {
 					}
 				}
 			}
-			NodeKind::Template => {
+			NodeKind::TemplateExpression => {
 				return {
 					typeName: {
 						kind: NodeKind::Identifier
@@ -725,7 +725,7 @@ const $type = {
 }
 
 const $variable = {
-	define(node, scope, name, immutable, kind, type = null) { // {{{
+	/* define(node, scope, name, immutable, kind, type = null) { // {{{
 		let variable
 		
 		if kind == VariableKind::Enum && (variable ?= scope.getVariable(name.name || name)) {
@@ -748,6 +748,7 @@ const $variable = {
 			})
 			
 			if kind == VariableKind::Class {
+				variable.type = name.name || name
 				variable.constructors = []
 				variable.destructors = 0
 				variable.instanceVariables = {}
@@ -756,32 +757,33 @@ const $variable = {
 				variable.classMethods = {}
 			}
 			else if kind == VariableKind::Enum {
-				if type {
-					if type.typeName.name == 'string' || type.typeName.name == 'String' {
-						variable.type = 'String'
-					}
+				if type? && (type.typeName.name == 'string' || type.typeName.name == 'String') {
+					variable.type = Type.String
 				}
 				
-				if !variable.type {
-					variable.type = 'Number'
+				if !?variable.type {
+					variable.type = Type.Number
 					variable.counter = -1
 				}
 			}
 			else if kind == VariableKind::TypeAlias {
-				variable.type = $type.type(type, scope, node)
+				/* variable.type = $type.type(type, scope, node) */
+				variable.type = Type.fromAST(type, scope, node)
 			}
 			else if kind == VariableKind::Function {
-				variable.type ?= $type.type(type, scope, node) if type?
+				/* variable.type = type? && (type ?= $type.type(type, scope, node)) ? type : Type.Any */
+				variable.type = Type.fromAST(type, scope, node)
 				
 				variable.throws = []
 			}
 			else if kind == VariableKind::Variable && type? {
-				variable.type ?= $type.type(type, scope, node)
+				/* variable.type = type? && (type ?= $type.type(type, scope, node)) ? type : Type.Any */
+				variable.type = Type.fromAST(type, scope, node)
 			}
 		}
 		
 		return variable
-	} // }}}
+	} // }}} */
 	filterMember(variable, name, node) { // {{{
 		//console.log('variable.filterMember.var', variable)
 		//console.log('variable.filterMember.name', name)
@@ -1283,19 +1285,22 @@ const $variable = {
 		
 		variables.push(variable) if nf
 	} // }}}
-	retype(node, scope, name, kind, type = null) { // {{{
+	retype(node, scope, name, kind, type = 'Any') { // {{{
 		const variable = scope.getVariable(name.name || name)
 		
 		if kind == VariableKind::Variable {
-			variable.type ?= $type.type(type, scope, node) if type?
+			/* variable.type ?= $type.type(type, scope, node) if type? */
+			variable.type = type
 		}
 		else if kind == VariableKind::Function {
 			variable.kind = kind
-			variable.type ?= $type.type(type, scope, node) if type?
+			/* variable.type ?= $type.type(type, scope, node) if type? */
+			variable.type = type
 			
 			variable.throws = []
 		}
 		else if kind == VariableKind::Class {
+			variable.type = name.name || name
 			variable.kind = kind
 			variable.constructors = []
 			variable.destructors = 0
@@ -1304,7 +1309,7 @@ const $variable = {
 			variable.instanceMethods = {}
 			variable.classMethods = {}
 			
-			delete variable.type
+			/* delete variable.type */
 		}
 		else {
 			throw new NotImplementedException(node)
@@ -1371,9 +1376,12 @@ include {
 	./include/util
 	./include/attribute
 	./include/fragment
+	/* ./include/type */
+	./include/variable
 	./include/scope
 	./include/module
 	./include/sealed
+	./include/signature
 	./include/statement
 	./include/expression
 	./operator/assignment

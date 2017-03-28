@@ -9,6 +9,6 @@ module.exports = function() {
 		if(value === "chani") {
 			break;
 		}
-		console.log(key + " likes " + value);
+		console.log("" + key + " likes " + value);
 	}
 }

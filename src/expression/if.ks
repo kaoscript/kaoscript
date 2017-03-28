@@ -58,4 +58,16 @@ class IfExpression extends Expression {
 		
 		ctrl.code(')').step().line(@whenTrue).done()
 	} // }}}
+	type() { // {{{
+		const t = @whenTrue.type()
+		
+		if @whenFalse? {
+			const f = @whenFalse.type()
+			
+			return Type.equals(t, f) ? t : Type.union(this, t, f)
+		}
+		else {
+			return t
+		}
+	} // }}}
 }

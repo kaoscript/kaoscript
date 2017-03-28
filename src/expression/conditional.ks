@@ -33,4 +33,10 @@ class ConditionalExpression extends Expression {
 			.code(' : ')
 			.compile(@whenFalse)
 	} // }}}
+	type() { // {{{
+		const t = @whenTrue.type()
+		const f = @whenFalse.type()
+		
+		return Type.equals(t, f) ? t : Type.union(this, t, f)
+	} // }}}
 }

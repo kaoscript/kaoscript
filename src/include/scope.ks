@@ -96,6 +96,28 @@ class AbstractScope {
 		
 		return this
 	} // }}}
+	define(name, immutable, node) {
+		if @variables[name] is Object {
+			SyntaxException.throwAlreadyDeclared(name, node)
+		}
+		
+		const variable = new Variable(name, immutable)
+		
+		this.addVariable(name, variable)
+		
+		return variable
+	}
+	define(name, immutable, kind, type = null, node) {
+		if @variables[name] is Object {
+			SyntaxException.throwAlreadyDeclared(name, node)
+		}
+		
+		const variable = new Variable(name, immutable, kind, type)
+		
+		this.addVariable(name, variable)
+		
+		return variable
+	}
 	getVariable(name) { // {{{
 		if @variables[name] is Object {
 			return @variables[name]

@@ -55,4 +55,5 @@ class CreateExpression extends Expression {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
+	type() => Type.Any
 }

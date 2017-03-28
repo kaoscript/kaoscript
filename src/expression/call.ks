@@ -138,7 +138,6 @@ class CallExpression extends Expression {
 		_reuseName		= null
 		_sealed			= false
 		_tested			= false
-		_type
 	}
 	analyse() { // {{{
 		for argument in @data.arguments {
@@ -151,6 +150,23 @@ class CallExpression extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
+		for argument in @data.arguments {
+			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
+				@arguments.push(argument = $compile.expression(argument.argument, this))
+				
+				@list = false
+			}
+			else {
+				@arguments.push(argument = $compile.expression(argument, this))
+			}
+			
+			argument.analyse()
+		}
+		
+		for argument in @arguments {
+			argument.prepare()
+		}
+		
 		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.computed && (@callee = $sealed.callee(@data.callee, @parent)) != false {
 			@sealed = true
 			
@@ -195,6 +211,7 @@ class CallExpression extends Expression {
 			
 			@callee.prepare()
 			
+			let variable
 			if (variable ?= $call.variable(@data, this)) && variable.throws?.length > 0 {
 				for name in variable.throws {
 					if error ?= @scope.getVariable(name) {
@@ -202,23 +219,6 @@ class CallExpression extends Expression {
 					}
 				}
 			}
-		}
-		
-		for argument in @data.arguments {
-			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
-				@arguments.push(argument = $compile.expression(argument.argument, this))
-				
-				@list = false
-			}
-			else {
-				@arguments.push(argument = $compile.expression(argument, this))
-			}
-			
-			argument.analyse()
-		}
-		
-		for argument in @arguments {
-			argument.prepare()
 		}
 	} // }}}
 	translate() { // {{{
@@ -270,7 +270,7 @@ class CallExpression extends Expression {
 	isCallable() => !@reusable
 	isComputed() => @sealed ? @callee is Array : (@data.nullable || @callee.isNullable()) && !@tested
 	isNullable() => @data.nullable || (@sealed ? @object.isNullable() : @callee.isNullable())
-	isNullableComputed() => @sealed ? @callee is Array : this._data.nullable && this._callee.isNullable()
+	isNullableComputed() => @sealed ? @callee is Array : @data.nullable && @callee.isNullable()
 	releaseReusable() { // {{{
 		if !@sealed {
 			this.statement().scope().releaseTempName(@reuseName) if @reuseName?
@@ -597,4 +597,5 @@ class CallExpression extends Expression {
 			@reusable = true
 		}
 	} // }}}
+	type() => Type.Any
 }

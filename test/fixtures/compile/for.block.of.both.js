@@ -6,6 +6,6 @@ module.exports = function() {
 	};
 	for(let key in likes) {
 		let value = likes[key];
-		console.log(key + " likes " + value);
+		console.log("" + key + " likes " + value);
 	}
 }

@@ -70,6 +70,7 @@ class PolyadicOperatorExpression extends Expression {
 			@tested = true
 		}
 	} // }}}
+	type() => Type.Any
 }
 
 class PolyadicOperatorAddition extends PolyadicOperatorExpression {
