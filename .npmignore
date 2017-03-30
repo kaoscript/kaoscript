@@ -1,0 +1,5 @@
+*.ksb
+*.ksh
+*.ksm
+*.marks
+lib/compiler2.js

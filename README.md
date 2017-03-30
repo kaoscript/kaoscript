@@ -2,10 +2,12 @@
 ===================================================
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-![Dependencies](https://img.shields.io/david/kaoscript/kaoscript.svg)
+[![npm version](https://img.shields.io/npm/v/kaoscript.svg)](https://www.npmjs.com/package/kaoscript)
+[![Dependency Status](https://img.shields.io/gemnasium/kaoscript/kaoscript.svg)](https://gemnasium.com/github.com/kaoscript/kaoscript)
 [![Build Status](https://travis-ci.org/kaoscript/kaoscript.svg?branch=master)](https://travis-ci.org/kaoscript/kaoscript)
 [![CircleCI](https://circleci.com/gh/kaoscript/kaoscript/tree/master.svg?style=shield)](https://circleci.com/gh/kaoscript/kaoscript/tree/master)
 [![Waffle.io](https://img.shields.io/badge/kanban-waffle.io-blue.svg)](https://waffle.io/kaoscript/kaoscript)
+[![Gitter](https://img.shields.io/gitter/room/kaoscript/kaoscript.svg)](https://gitter.im/kaoscript/kaoscript)
 
 [![NPM](https://nodei.co/npm/kaoscript.png?downloads=true&stars=true)](https://www.npmjs.com/package/kaoscript)
 
