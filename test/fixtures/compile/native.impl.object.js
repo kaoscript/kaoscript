@@ -1,40 +1,30 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	var __ks_Object = {};
-	Helper.newInstanceMethod({
-		class: Object,
-		name: "map",
-		sealed: __ks_Object,
-		function: function(iterator) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(iterator === void 0 || iterator === null) {
-				throw new TypeError("'iterator' is not nullable");
-			}
-			else if(!Type.isFunction(iterator)) {
-				throw new TypeError("'iterator' is not of type 'Function'");
-			}
-			let results = [];
-			for(let item in this) {
-				let index = this[item];
-				results.push(iterator(item, index));
-			}
-			return results;
-		},
-		signature: {
-			access: 3,
-			min: 1,
-			max: 1,
-			parameters: [
-				{
-					type: "Function",
-					min: 1,
-					max: 1
-				}
-			]
+	__ks_Object.__ks_func_map_0 = function(iterator) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
-	});
+		if(iterator === void 0 || iterator === null) {
+			throw new TypeError("'iterator' is not nullable");
+		}
+		else if(!Type.isFunction(iterator)) {
+			throw new TypeError("'iterator' is not of type 'Function'");
+		}
+		let results = [];
+		for(let item in this) {
+			let index = this[item];
+			results.push(iterator(item, index));
+		}
+		return results;
+	};
+	__ks_Object._im_map = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 1) {
+			return __ks_Object.__ks_func_map_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
 	console.log(__ks_Object._im_map({
 		leto: "spice",
 		paul: "chani",

@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Shape {
 		constructor() {
@@ -31,57 +31,48 @@ module.exports = function() {
 				throw new SyntaxError("wrong number of arguments");
 			}
 		}
-	}
-	Shape.__ks_reflect = {
-		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_color: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
-	Helper.newInstanceMethod({
-		class: Shape,
-		name: "draw",
-		function: function(canvas) {
+		__ks_func_color_0() {
+			return this._color;
+		}
+		__ks_func_color_1(color) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 			}
-			if(canvas === void 0 || canvas === null) {
-				throw new TypeError("'canvas' is not nullable");
+			if(color === void 0 || color === null) {
+				throw new TypeError("'color' is not nullable");
 			}
-			return "I'm drawing a " + this._color + " rectangle.";
-		},
-		signature: {
-			access: 3,
-			min: 1,
-			max: 1,
-			parameters: [
-				{
-					type: "Any",
-					min: 1,
-					max: 1
-				}
-			]
+			else if(!Type.isString(color)) {
+				throw new TypeError("'color' is not of type 'String'");
+			}
+			this._color = color;
+			return this;
 		}
-	});
+		color() {
+			if(arguments.length === 0) {
+				return Shape.prototype.__ks_func_color_0.apply(this);
+			}
+			else if(arguments.length === 1) {
+				return Shape.prototype.__ks_func_color_1.apply(this, arguments);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
+	}
+	Shape.prototype.__ks_func_draw_0 = function(canvas) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(canvas === void 0 || canvas === null) {
+			throw new TypeError("'canvas' is not nullable");
+		}
+		return "I'm drawing a " + this._color + " rectangle.";
+	};
+	Shape.prototype.draw = function() {
+		if(arguments.length === 1) {
+			return Shape.prototype.__ks_func_draw_0.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	return {
+		Shape: Shape
+	};
 }

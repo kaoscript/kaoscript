@@ -620,20 +620,8 @@ export class Module {
 			}
 		}
 		
-		let d
 		for name, variable of @exportMeta {
-			d = {}
-			
-			for n of variable {
-				if n == 'name' {
-					d[n] = variable[n].name || variable[n]
-				}
-				else if !(n == 'accessPath' || n == 'immutable' || n == 'new') {
-					d[n] = variable[n]
-				}
-			}
-			
-			data.exports[name] = d
+			data.exports[name] = $variable.export(variable)
 		}
 		
 		return data

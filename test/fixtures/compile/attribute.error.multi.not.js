@@ -12,15 +12,6 @@ module.exports = function() {
 			Error.prototype.constructor.call(this, args);
 		}
 	}
-	NotImplementedError.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	class NotSupportedError extends Error {
 		constructor() {
 			super();
@@ -33,14 +24,5 @@ module.exports = function() {
 			Error.prototype.constructor.call(this, args);
 		}
 	}
-	NotSupportedError.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	throw new NotImplementedError();
 }

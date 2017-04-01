@@ -1,7 +1,7 @@
 extern parseFloat, parseInt
 
 extern sealed class String {
-	toLowerCase(): string
+	toLowerCase(): String
 }
 
 impl String {
@@ -16,7 +16,7 @@ impl String {
 			return this.match(/[^\r\n]+/g) || []
 		}
 	} // }}}
-	lower() as toLowerCase
+	lower(): String => this.toLowerCase()
 	toFloat(): Number => parseFloat(this)
 	toInt(base = 10): Number => parseInt(this, base)
 }

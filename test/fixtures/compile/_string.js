@@ -1,86 +1,59 @@
-var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	var __ks_String = {};
-	Helper.newInstanceMethod({
-		class: String,
-		name: "lines",
-		sealed: __ks_String,
-		function: function(emptyLines) {
-			if(emptyLines === void 0 || emptyLines === null) {
-				emptyLines = false;
-			}
-			if(this.length === 0) {
-				return [];
-			}
-			else if(emptyLines) {
-				return this.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
-			}
-			else {
-				return this.match(/[^\r\n]+/g) || [];
-			}
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: 1,
-			parameters: [
-				{
-					type: "Any",
-					min: 0,
-					max: 1
-				}
-			]
+	__ks_String.__ks_func_lines_0 = function(emptyLines) {
+		if(emptyLines === void 0 || emptyLines === null) {
+			emptyLines = false;
 		}
-	});
-	Helper.newInstanceMethod({
-		class: String,
-		name: "lower",
-		sealed: __ks_String,
-		method: "toLowerCase",
-		signature: {
-			access: 3,
-			min: 0,
-			max: 0,
-			parameters: []
+		if(this.length === 0) {
+			return [];
 		}
-	});
-	Helper.newInstanceMethod({
-		class: String,
-		name: "toFloat",
-		sealed: __ks_String,
-		function: function() {
-			return parseFloat(this);
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: 0,
-			parameters: []
+		else if(emptyLines) {
+			return this.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
 		}
-	});
-	Helper.newInstanceMethod({
-		class: String,
-		name: "toInt",
-		sealed: __ks_String,
-		function: function(base) {
-			if(base === void 0 || base === null) {
-				base = 10;
-			}
-			return parseInt(this, base);
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: 1,
-			parameters: [
-				{
-					type: "Any",
-					min: 0,
-					max: 1
-				}
-			]
+		else {
+			return this.match(/[^\r\n]+/g) || [];
 		}
-	});
+	};
+	__ks_String._im_lines = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length >= 0 && args.length <= 1) {
+			return __ks_String.__ks_func_lines_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_String.__ks_func_lower_0 = function() {
+		return this.toLowerCase();
+	};
+	__ks_String._im_lower = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 0) {
+			return __ks_String.__ks_func_lower_0.apply(that);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_String.__ks_func_toFloat_0 = function() {
+		return parseFloat(this);
+	};
+	__ks_String._im_toFloat = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 0) {
+			return __ks_String.__ks_func_toFloat_0.apply(that);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_String.__ks_func_toInt_0 = function(base) {
+		if(base === void 0 || base === null) {
+			base = 10;
+		}
+		return parseInt(this, base);
+	};
+	__ks_String._im_toInt = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length >= 0 && args.length <= 1) {
+			return __ks_String.__ks_func_toInt_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
 	return {
 		String: String,
 		__ks_String: __ks_String

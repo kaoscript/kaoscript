@@ -17,25 +17,4 @@ module.exports = function() {
 			}
 		}
 	}
-	Foo.__ks_reflect = {
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 0,
-				max: 0,
-				parameters: []
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_bar: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 }

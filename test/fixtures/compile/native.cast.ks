@@ -7,7 +7,7 @@ extern sealed class String {
 }
 
 impl String {
-	lower() as toLowerCase
+	lower() => this.toLowerCase()
 }
 
 let foo = 'HELLO!'

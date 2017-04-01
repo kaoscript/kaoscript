@@ -33,37 +33,4 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Foobar.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {
-			_name: {
-				access: 1,
-				type: "Any"
-			},
-			_items: {
-				access: 1,
-				type: "Array"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			list: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Function",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 }

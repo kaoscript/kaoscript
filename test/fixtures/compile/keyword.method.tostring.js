@@ -21,22 +21,4 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Foo.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {
-			toString: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				}
-			]
-		},
-		classMethods: {}
-	};
 }

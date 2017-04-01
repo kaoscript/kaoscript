@@ -23,15 +23,6 @@ module.exports = function() {
 			Foo.__ks_destroy_0(that);
 		}
 	}
-	Foo.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 1,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	let foo = new Foo();
 	Foo.__ks_destroy(foo);
 	foo = undefined;

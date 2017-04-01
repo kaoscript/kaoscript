@@ -27,6 +27,7 @@
                 "max": 2
               }
             ],
+            "sealed": "true",
             "throws": []
           }
         ],
@@ -44,6 +45,7 @@
                 "rest": "true"
               }
             ],
+            "sealed": "true",
             "throws": []
           }
         ]

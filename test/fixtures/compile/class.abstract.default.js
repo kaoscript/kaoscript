@@ -38,40 +38,6 @@ module.exports = function() {
 			}
 		}
 	}
-	AbstractGreetings.__ks_reflect = {
-		abstract: true,
-		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 0,
-				max: 0,
-				parameters: []
-			},
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_message: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	class Greetings extends AbstractGreetings {
 		__ks_init() {
 			AbstractGreetings.prototype.__ks_init.call(this);
@@ -98,30 +64,6 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Greetings.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {
-			greet: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	let hello = new Greetings("Hello world!");
 	console.log(hello.greet("miss White"));
 }

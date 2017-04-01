@@ -44,43 +44,6 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Exception.__ks_reflect = {
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "Any",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {
-			throw: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		}
-	};
 	try {
 		Exception.throw("foobar");
 	}

@@ -75,66 +75,6 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Shape.__ks_reflect = {
-		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_color: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			color: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				},
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "String",
-							min: 1,
-							max: 1
-						}
-					]
-				},
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: Shape,
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	let s = new Shape("#777");
 	console.log(s.color());
 }

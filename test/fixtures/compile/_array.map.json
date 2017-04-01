@@ -32,6 +32,7 @@
                 "max": 1
               }
             ],
+            "sealed": "true",
             "throws": []
           },
           {
@@ -51,6 +52,7 @@
                 "max": 2
               }
             ],
+            "sealed": "true",
             "throws": []
           }
         ]

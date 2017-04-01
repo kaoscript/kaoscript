@@ -1,95 +1,58 @@
-var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	var __ks_Array = {};
-	Helper.newInstanceMethod({
-		class: Array,
-		name: "appendUniq",
-		sealed: __ks_Array,
-		function: function(...args) {
-			if(args.length === 1) {
-				__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[0]));
-			}
-			else {
-				for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
-					__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[i]));
-				}
-			}
-			return this;
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: Infinity,
-			parameters: [
-				{
-					type: "Any",
-					min: 0,
-					max: Infinity
-				}
-			]
+	__ks_Array.__ks_func_appendUniq_0 = function(...args) {
+		if(args.length === 1) {
+			__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[0]));
 		}
-	});
-	Helper.newInstanceMethod({
-		class: Array,
-		name: "contains",
-		sealed: __ks_Array,
-		function: function() {
-			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		else {
+			for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+				__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[i]));
 			}
-			let __ks_i = -1;
-			let item = arguments[++__ks_i];
-			if(item === void 0 || item === null) {
-				throw new TypeError("'item' is not nullable");
-			}
-			let __ks__;
-			let from = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
-			return this.indexOf(item, from) !== -1;
-		},
-		signature: {
-			access: 3,
-			min: 1,
-			max: 2,
-			parameters: [
-				{
-					type: "Any",
-					min: 1,
-					max: 2
-				}
-			]
 		}
-	});
-	Helper.newInstanceMethod({
-		class: Array,
-		name: "pushUniq",
-		sealed: __ks_Array,
-		function: function(...args) {
-			if(args.length === 1) {
-				if(!__ks_Array._im_contains(this, args[0])) {
-					this.push(args[0]);
-				}
-			}
-			else {
-				for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
-					item = args[__ks_0];
-					if(!__ks_Array._im_contains(this, item)) {
-						this.push(item);
-					}
-				}
-			}
-			return this;
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: Infinity,
-			parameters: [
-				{
-					type: "Any",
-					min: 0,
-					max: Infinity
-				}
-			]
+		return this;
+	};
+	__ks_Array._im_appendUniq = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		return __ks_Array.__ks_func_appendUniq_0.apply(that, args);
+	};
+	__ks_Array.__ks_func_contains_0 = function() {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
-	});
+		let __ks_i = -1;
+		let item = arguments[++__ks_i];
+		if(item === void 0 || item === null) {
+			throw new TypeError("'item' is not nullable");
+		}
+		let __ks__;
+		let from = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
+		return this.indexOf(item, from) !== -1;
+	};
+	__ks_Array._im_contains = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length >= 1 && args.length <= 2) {
+			return __ks_Array.__ks_func_contains_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_Array.__ks_func_pushUniq_0 = function(...args) {
+		if(args.length === 1) {
+			if(!__ks_Array._im_contains(this, args[0])) {
+				this.push(args[0]);
+			}
+		}
+		else {
+			for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
+				item = args[__ks_0];
+				if(!__ks_Array._im_contains(this, item)) {
+					this.push(item);
+				}
+			}
+		}
+		return this;
+	};
+	__ks_Array._im_pushUniq = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		return __ks_Array.__ks_func_pushUniq_0.apply(that, args);
+	};
 }

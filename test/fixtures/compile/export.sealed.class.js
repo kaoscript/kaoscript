@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Shape {
 		constructor() {
@@ -26,61 +26,23 @@ module.exports = function() {
 			}
 		}
 	}
-	Shape.__ks_reflect = {
-		sealed: true,
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_color: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	var __ks_Shape = {};
-	Helper.newInstanceMethod({
-		class: Shape,
-		name: "draw",
-		sealed: __ks_Shape,
-		function: function(shape) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(shape === void 0 || shape === null) {
-				throw new TypeError("'shape' is not nullable");
-			}
-			return "I'm drawing a " + this._color + " " + shape + ".";
-		},
-		signature: {
-			access: 3,
-			min: 1,
-			max: 1,
-			parameters: [
-				{
-					type: "Any",
-					min: 1,
-					max: 1
-				}
-			]
+	__ks_Shape.__ks_func_draw_0 = function(shape) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
-	});
+		if(shape === void 0 || shape === null) {
+			throw new TypeError("'shape' is not nullable");
+		}
+		return "I'm drawing a " + this._color + " " + shape + ".";
+	};
+	__ks_Shape._im_draw = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 1) {
+			return __ks_Shape.__ks_func_draw_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
 	return {
 		console: console,
 		Shape: Shape,

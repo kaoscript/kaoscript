@@ -44,53 +44,6 @@ module.exports = function() {
 		}
 	}
 	Foo.bar = "Hello world!";
-	Foo.__ks_reflect = {
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			name: {
-				access: 3,
-				type: "String"
-			}
-		},
-		classVariables: {
-			bar: {
-				access: 3,
-				type: "String"
-			}
-		},
-		instanceMethods: {
-			qux: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	console.log(Foo.bar);
 	let foo = new Foo("xyz");
 	console.log(foo.name);

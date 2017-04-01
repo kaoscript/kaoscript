@@ -1,20 +1,15 @@
-var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	var __ks_Number = {};
-	Helper.newInstanceMethod({
-		class: Number,
-		name: "zeroPad",
-		sealed: __ks_Number,
-		function: function() {
-			return "00" + this.toString();
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: 0,
-			parameters: []
+	__ks_Number.__ks_func_zeroPad_0 = function() {
+		return "00" + this.toString();
+	};
+	__ks_Number._im_zeroPad = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 0) {
+			return __ks_Number.__ks_func_zeroPad_0.apply(that);
 		}
-	});
+		throw new SyntaxError("wrong number of arguments");
+	};
 	var __ks_Math = {};
 	__ks_Number._im_zeroPad(Math.pow(3, 2));
 	__ks_Number._im_zeroPad(Math.PI);

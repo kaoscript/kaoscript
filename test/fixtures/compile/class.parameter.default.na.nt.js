@@ -51,49 +51,4 @@ module.exports = function() {
 			}
 		}
 	}
-	Greetings.__ks_reflect = {
-		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 0,
-				max: 0,
-				parameters: []
-			},
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "Any",
-						min: 1,
-						max: 1
-					}
-				]
-			},
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "Number",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_message: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 }

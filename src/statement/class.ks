@@ -17,26 +17,7 @@ enum TypeStatus { // {{{
 } // }}}
 
 const $class = {
-	abstractMethod(node, fragments, statement, signature, reflect, name) { // {{{
-		if !(reflect.abstractMethods[name] is Array) {
-			reflect.abstractMethods[name] = []
-		}
-		
-		reflect.abstractMethods[name].push(signature)
-	} // }}}
 	continuous(node, fragments) { // {{{
-		let reflect = {
-			abstract: node._abstract
-			inits: 0
-			constructors: []
-			destructors: 0
-			instanceVariables: {}
-			classVariables: {}
-			instanceMethods: {}
-			classMethods: {}
-			abstractMethods: {}
-		}
-		
 		let noinit = Object.isEmpty(node._instanceVariables)
 		
 		if !noinit {
@@ -47,14 +28,6 @@ const $class = {
 					noinit = false
 				}
 			}
-		}
-		
-		for name, variable of node._instanceVariables {
-			reflect.instanceVariables[name] = variable.signature()
-		}
-		
-		for name, variable of node._classVariables {
-			reflect.classVariables[name] = variable.signature()
 		}
 		
 		if node._es5 {
@@ -73,22 +46,28 @@ const $class = {
 				clazz.line('$extends: ', node._extendsName)
 			}
 			
+			const mets = []
+			
 			let ctrl
 			if node._destructor? || !Object.isEmpty(node._classMethods) {
 				ctrl = clazz.newLine().code('$static: ').newObject()
 				
 				if node._destructor? {
-					$class.destructor(node, ctrl, node._destructor, reflect)
+					$class.destructor(node, ctrl, node._destructor)
 					
-					$helper.destructor(node, ctrl, reflect)
+					$helper.destructor(node, ctrl, node._variable)
 				}
 				
 				for name, methods of node._classMethods {
+					mets.clear()
+					
 					for method in methods {
-						$class.classMethod(node, ctrl, method, method.signature(), reflect, name)
+						$class.classMethod(node, ctrl, method, method.signature(), name)
+						
+						mets.push(method.signature())
 					}
 					
-					$helper.classMethod(node, ctrl, reflect, name)
+					$helper.classMethod(node, ctrl.newControl(), node._variable, mets, name, $class.classMethodHeaderES5^^(name), $class.methodFooterES5)
 				}
 				
 				ctrl.done()
@@ -124,8 +103,6 @@ const $class = {
 				}
 			}
 			else {
-				++reflect.inits
-				
 				ctrl = clazz
 					.newControl()
 					.code($class.methodHeader('__ks_init_1', node), '()')
@@ -144,24 +121,26 @@ const $class = {
 				ctrl.line(node._name + '.prototype.__ks_init_1.call(this)')
 			}
 			
+			mets.clear()
+			
 			for method in node._constructors {
-				$class.constructor(node, clazz, method, method.signature(), reflect)
+				$class.constructor(node, clazz, method, method.signature())
+				
+				mets.push(method.signature())
 			}
 			
-			$helper.constructor(node, clazz, reflect)
+			$helper.constructor(node, clazz.newControl(), node._variable, mets, $class.constructorHeaderES5, $class.methodFooterES5)
 			
 			for name, methods of node._instanceMethods {
+				mets.clear()
+				
 				for method in methods {
-					$class.instanceMethod(node, clazz, method, method.signature(), reflect, name)
+					$class.instanceMethod(node, clazz, method, method.signature(), name)
+					
+					mets.push(method.signature())
 				}
 				
-				$helper.instanceMethod(node, clazz, reflect, name)
-			}
-			
-			for name, methods of node._abstractMethods {
-				for method in methods {
-					$class.abstractMethod(node, clazz, method, method.signature(), reflect, name)
-				}
+				$helper.instanceMethod(node, clazz.newControl(), node._variable, mets, name, $class.instanceMethodHeaderES5^^(name), $class.methodFooterES5)
 			}
 			
 			clazz.done()
@@ -222,8 +201,6 @@ const $class = {
 				}
 			}
 			else {
-				++reflect.inits
-				
 				ctrl = clazz
 					.newControl()
 					.code('__ks_init_1()')
@@ -246,65 +223,69 @@ const $class = {
 				ctrl.done()
 			}
 			
+			const mets = []
+			
 			for method in node._constructors {
-				$class.constructor(node, clazz, method, method.signature(), reflect)
+				$class.constructor(node, clazz, method, method.signature())
+				
+				mets.push(method.signature())
 			}
 			
-			$helper.constructor(node, clazz, reflect)
+			$helper.constructor(node, clazz.newControl(), node._variable, mets, $class.constructorHeaderES6, $class.methodFooterES6)
 			
 			if node._destructor? {
-				$class.destructor(node, clazz, node._destructor, reflect)
+				$class.destructor(node, clazz, node._destructor)
 				
-				$helper.destructor(node, clazz, reflect)
+				$helper.destructor(node, clazz, node._variable)
 			}
 			
 			for name, methods of node._instanceMethods {
+				mets.clear()
+				
 				for method in methods {
-					$class.instanceMethod(node, clazz, method, method.signature(), reflect, name)
+					$class.instanceMethod(node, clazz, method, method.signature(), name)
+					
+					mets.push(method.signature())
 				}
 				
-				$helper.instanceMethod(node, clazz, reflect, name)
-			}
-			
-			for name, methods of node._abstractMethods {
-				for method in methods {
-					$class.abstractMethod(node, clazz, method, method.signature(), reflect, name)
-				}
+				$helper.instanceMethod(node, clazz.newControl(), node._variable, mets, name, $class.instanceMethodHeaderES6^^(name), $class.methodFooterES6)
 			}
 			
 			for name, methods of node._classMethods {
+				mets.clear()
+				
 				for method in methods {
-					$class.classMethod(node, clazz, method, method.signature(), reflect, name)
+					$class.classMethod(node, clazz, method, method.signature(), name)
+					
+					mets.push(method.signature())
 				}
 				
-				$helper.classMethod(node, clazz, reflect, name)
+				$helper.classMethod(node, clazz.newControl(), node._variable, mets, name, $class.classMethodHeaderES6^^(name), $class.methodFooterES6)
 			}
 			
 			clazz.done()
 		}
-		
-		return reflect
 	} // }}}
-	classMethod(node, fragments, statement, signature, reflect, name) { // {{{
-		if reflect.classMethods[name] is not Array {
-			reflect.classMethods[name] = []
-		}
-		
-		reflect.classMethods[name].push(signature)
-		
+	classMethod(node, fragments, statement, signature, name) { // {{{
 		statement.toFragments(fragments, Mode::None)
 	} // }}}
-	constructor(node, fragments, statement, signature, reflect) { // {{{
-		let index = reflect.constructors.length
-		
-		reflect.constructors.push(signature)
-	
+	classMethodHeaderES5(name, node, fragments) { // {{{
+		return fragments.code($class.methodHeader(name, node) + '()').step()
+	} // }}}
+	classMethodHeaderES6(name, node, fragments) { // {{{
+		return fragments.code('static ' + name + '()').step()
+	} // }}}
+	constructor(node, fragments, statement, signature) { // {{{
 		statement.toFragments(fragments, Mode::None)
 	} // }}}
-	destructor(node, fragments, statement, reflect) { // {{{
+	constructorHeaderES5(node, fragments) { // {{{
+		return fragments.code($class.methodHeader('__ks_cons', node) + '(args)').step()
+	} // }}}
+	constructorHeaderES6(node, fragments) { // {{{
+		return fragments.code($class.methodHeader('__ks_cons', node) + '(args)').step()
+	} // }}}
+	destructor(node, fragments, statement) { // {{{
 		statement.toFragments(fragments, Mode::None)
-		
-		reflect.destructors++
 	} // }}}
 	hierarchy(variable, node, hierarchy = []) { // {{{
 		hierarchy.push(variable.name.name)
@@ -316,14 +297,14 @@ const $class = {
 			return hierarchy
 		}
 	} // }}}
-	instanceMethod(node, fragments, statement, signature, reflect, name) { // {{{
-		if reflect.instanceMethods[name] is not Array {
-			reflect.instanceMethods[name] = []
-		}
-		
-		reflect.instanceMethods[name].push(signature)
-		
+	instanceMethod(node, fragments, statement, signature, name) { // {{{
 		statement.toFragments(fragments, Mode::None)
+	} // }}}
+	instanceMethodHeaderES5(name, node, fragments) { // {{{
+		return fragments.code($class.methodHeader(name, node) + '()').step()
+	} // }}}
+	instanceMethodHeaderES6(name, node, fragments) { // {{{
+		return fragments.code($class.methodHeader(name, node) + '()').step()
 	} // }}}
 	listMissingAbstractMethods(variable, scope) { // {{{
 		const abstractMethods = {}
@@ -373,13 +354,18 @@ const $class = {
 			}
 		}
 	} // }}}
-	methodCall(node, fnName, argName, retCode, fragments, method, index) { // {{{
+	methodCall(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
 		if method.max == 0 {
-			fragments.line(retCode, node._data.name.name, '.', fnName, index, '.apply(this)')
+			fragments.line(retCode, variable.name.name || variable.name, '.', fnName, index, '.apply(this)')
 		}
 		else {
-			fragments.line(retCode, node._data.name.name, '.', fnName, index, '.apply(this, ', argName, ')')
+			fragments.line(retCode, variable.name.name || variable.name, '.', fnName, index, '.apply(this, ', argName, ')')
 		}
+	} // }}}
+	methodFooterES5(fragments) { // {{{
+	} // }}}
+	methodFooterES6(fragments) { // {{{
+		fragments.done()
 	} // }}}
 	methodHeader(name, node) { // {{{
 		if node._es5 {
@@ -390,19 +376,6 @@ const $class = {
 		}
 	} // }}}
 	sealed(node, fragments) { // {{{
-		let reflect = {
-			abstract: node._abstract
-			sealed: true
-			inits: 0
-			constructors: []
-			destructors: 0
-			instanceVariables: {}
-			classVariables: {}
-			instanceMethods: {}
-			classMethods: {}
-			abstractMethods: {}
-		}
-		
 		let noinit = Object.isEmpty(node._instanceVariables)
 		
 		if !noinit {
@@ -413,14 +386,6 @@ const $class = {
 					noinit = false
 				}
 			}
-		}
-		
-		for name, variable of node._instanceVariables {
-			reflect.instanceVariables[name] = variable.signature()
-		}
-		
-		for name, variable of node._classVariables {
-			reflect.classVariables[name] = variable.signature()
 		}
 		
 		if node._es5 {
@@ -439,22 +404,28 @@ const $class = {
 				clazz.line('$extends: ', node._extendsName)
 			}
 			
+			const mets = []
+			
 			let ctrl
 			if node._destructor? || !Object.isEmpty(node._classMethods) {
 				ctrl = clazz.newLine().code('$static: ').newObject()
 				
 				if node._destructor? {
-					$class.destructor(node, ctrl, node._destructor, reflect)
+					$class.destructor(node, ctrl, node._destructor)
 					
-					$helper.destructor(node, ctrl, reflect)
+					$helper.destructor(node, ctrl, node._variable)
 				}
 				
 				for name, methods of node._classMethods {
+					mets.clear()
+					
 					for method in methods {
-						$class.classMethod(node, ctrl, method, method.signature(), reflect, name)
+						$class.classMethod(node, ctrl, method, method.signature(), name)
+						
+						mets.push(method.signature())
 					}
 					
-					$helper.classMethod(node, ctrl, reflect, name)
+					$helper.classMethod(node, ctrl.newControl(), node._variable, mets, name, $class.classMethodHeaderES5^^(name), $class.methodFooterES5)
 				}
 				
 				ctrl.done()
@@ -489,24 +460,26 @@ const $class = {
 				ctrl.line('this.__ks_cons(arguments)')
 			}
 			
+			mets.clear()
+			
 			for method in node._constructors {
-				$class.constructor(node, clazz, method, method.signature(), reflect)
+				$class.constructor(node, clazz, method, method.signature())
+				
+				mets.push(method.signature())
 			}
 			
-			$helper.constructor(node, clazz, reflect)
+			$helper.constructor(node, clazz.newControl(), node._variable, mets, $class.constructorHeaderES5, $class.methodFooterES5)
 			
 			for name, methods of node._instanceMethods {
+				mets.clear()
+				
 				for method in methods {
-					$class.instanceMethod(node, clazz, method, method.signature(), reflect, name)
+					$class.instanceMethod(node, clazz, method, method.signature(), name)
+					
+					mets.push(method.signature())
 				}
 				
-				$helper.instanceMethod(node, clazz, reflect, name)
-			}
-			
-			for name, methods of node._abstractMethods {
-				for method in methods {
-					$class.abstractMethod(node, clazz, method, method.signature(), reflect, name)
-				}
+				$helper.instanceMethod(node, clazz.newControl(), node._variable, mets, name, $class.instanceMethodHeaderES5^^(name), $class.methodFooterES5)
 			}
 			
 			clazz.done()
@@ -557,44 +530,48 @@ const $class = {
 				ctrl.done()
 			}
 			
+			const mets = []
+			
 			for method in node._constructors {
-				$class.constructor(node, clazz, method, method.signature(), reflect)
+				$class.constructor(node, clazz, method, method.signature())
+				
+				mets.push(method.signature())
 			}
 			
-			$helper.constructor(node, clazz, reflect)
+			$helper.constructor(node, clazz.newControl(), node._variable, mets, $class.constructorHeaderES6, $class.methodFooterES6)
 			
 			if node._destructor? {
-				$class.destructor(node, clazz, node._destructor, reflect)
+				$class.destructor(node, clazz, node._destructor)
 				
-				$helper.destructor(node, clazz, reflect)
+				$helper.destructor(node, clazz, node._variable)
 			}
 			
 			for name, methods of node._instanceMethods {
+				mets.clear()
+				
 				for method in methods {
-					$class.instanceMethod(node, clazz, method, method.signature(), reflect, name)
+					$class.instanceMethod(node, clazz, method, method.signature(), name)
+					
+					mets.push(method.signature())
 				}
 				
-				$helper.instanceMethod(node, clazz, reflect, name)
-			}
-			
-			for name, methods of node._abstractMethods {
-				for method in methods {
-					$class.abstractMethod(node, clazz, method, method.signature(), reflect, name)
-				}
+				$helper.instanceMethod(node, clazz.newControl(), node._variable, mets, name, $class.instanceMethodHeaderES6^^(name), $class.methodFooterES6)
 			}
 			
 			for name, methods of node._classMethods {
+				mets.clear()
+				
 				for method in methods {
-					$class.classMethod(node, clazz, method, method.signature(), reflect, name)
+					$class.classMethod(node, clazz, method, method.signature(), name)
+					
+					mets.push(method.signature())
 				}
 				
-				$helper.classMethod(node, clazz, reflect, name)
+				$helper.classMethod(node, clazz.newControl(), node._variable, mets, name, $class.classMethodHeaderES6^^(name), $class.methodFooterES6)
 			}
 			
 			clazz.done()
 		}
-		
-		return reflect
 	} // }}}
 }
 
@@ -631,21 +608,21 @@ const $field = {
 }
 
 const $helper = {
-	classMethod(node, fragments, reflect, name) { // {{{
+	classMethod(node, fragments, variable, methods, name, header, footer) { // {{{
 		let extend = false
-		if node._extends {
-			extend = func(node, fragments, ctrl) {
-				if node._extendsVariable.classMethods[name] {
+		if variable.extends? {
+			extend = func(node, fragments, ctrl?, variable) {
+				if node.scope().getVariable(variable.extends).classMethods[name] {
 					ctrl.done()
 					
-					fragments.line('return ' + node._extendsName + '.' + name + '.apply(null, arguments)')
+					fragments.line(`return \(variable.extends).\(name).apply(null, arguments)`)
 				}
 				else {
 					ctrl
 						.step()
-						.code('else if(' + node._extendsName + '.' + name + ')')
+						.code(`else if(\(variable.extends).\(name))`)
 						.step()
-						.line('return ' + node._extendsName + '.' + name + '.apply(null, arguments)')
+						.line(`return \(variable.extends).\(name).apply(null, arguments)`)
 						.done()
 					
 					fragments.line('throw new SyntaxError("wrong number of arguments")')
@@ -653,41 +630,32 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), node._es5 ? $class.methodHeader(name, node) + '()' : 'static ' + name + '()', reflect.classMethods[name], $class.methodCall^^(node, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', 'classMethods.' + name, true)
+		return $helper.methods(node, fragments, variable, methods, extend, header, footer, $class.methodCall^^(node, variable, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', true)
 	} // }}}
-	constructor(node, fragments, reflect) { // {{{
-		let extend = false
-		if node._extends {
-			extend = func(node, fragments, ctrl = null) {
-				let constructorName = node._extendsVariable.sealed?.extern ? 'constructor' : '__ks_cons'
+	constructor(node, fragments, variable, methods, header, footer) { // {{{
+		let extend = null
+		if variable.extends? {
+			extend = func(node, fragments, ctrl?, variable) {
+				const extends = node.scope().getVariable(variable.extends)
+				const constructorName = extends.sealed?.extern ? 'constructor' : '__ks_cons'
 				
 				if ctrl? {
 					ctrl
 						.step()
 						.code('else')
 						.step()
-						.line(`\(node._extendsName).prototype.\(constructorName).call(this, args)`)
+						.line(`\(variable.extends).prototype.\(constructorName).call(this, args)`)
 						.done()
 				}
 				else {
-					fragments.line(`\(node._extendsName).prototype.\(constructorName).call(this, args)`)
+					fragments.line(`\(variable.extends).prototype.\(constructorName).call(this, args)`)
 				}
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), $class.methodHeader('__ks_cons', node) + '(args)', reflect.constructors, $class.methodCall^^(node, 'prototype.__ks_cons_', 'args', ''), 'args', 'constructors', false)
+		return $helper.methods(node, fragments, variable, methods, extend, header, footer, $class.methodCall^^(node, variable, 'prototype.__ks_cons_', 'args', ''), 'args', false)
 	} // }}}
-	decide(node, fragments, type, index, path, argName) { // {{{
-		node.module().flag('Type')
-		
-		if tof = $runtime.typeof(type, node) {
-			fragments.code(tof + '(' + argName + '[' + index + '])')
-		}
-		else {
-			fragments.code($runtime.type(node), '.is(' + argName + '[' + index + '], ' + path + ')')
-		}
-	} // }}}
-	destructor(node, fragments, reflect) { // {{{
+	destructor(node, fragments, variable) { // {{{
 		let ctrl = fragments.newControl()
 		
 		if node._es5 {
@@ -703,27 +671,27 @@ const $helper = {
 			ctrl.line(`\(node._extendsName).__ks_destroy(that)`)
 		}
 		
-		for i from 0 til reflect.destructors {
+		for i from 0 til variable.destructors {
 			ctrl.line(`\(node._name).__ks_destroy_\(i)(that)`)
 		}
 		
 		ctrl.done() unless node._es5
 	} // }}}
-	instanceMethod(node, fragments, reflect, name) { // {{{
-		let extend = false
-		if node._extends {
-			extend = func(node, fragments, ctrl) {
-				if node._extendsVariable.instanceMethods[name] {
+	instanceMethod(node, fragments, variable, methods, name, header, footer) { // {{{
+		let extend = null
+		if variable.extends? {
+			extend = func(node, fragments, ctrl?, variable) {
+				if node.scope().getVariable(variable.extends).instanceMethods[name] {
 					ctrl.done()
 					
-					fragments.line('return ' + node._extendsName + '.prototype.' + name + '.apply(this, arguments)')
+					fragments.line(`return \(variable.extends).prototype.\(name).apply(this, arguments)`)
 				}
 				else {
 					ctrl
 						.step()
-						.code('else if(' + node._extendsName + '.prototype.' + name + ')')
+						.code(`else if(\(variable.extends).prototype.\(name))`)
 						.step()
-						.line('return ' + node._extendsName + '.prototype.' + name + '.apply(this, arguments)')
+						.line(`return \(variable.extends).prototype.\(name).apply(this, arguments)`)
 						.done()
 					
 					fragments.line('throw new SyntaxError("wrong number of arguments")')
@@ -731,18 +699,18 @@ const $helper = {
 			}
 		}
 		
-		$helper.methods(extend, node, fragments.newControl(), $class.methodHeader(name, node) + '()', reflect.instanceMethods[name], $class.methodCall^^(node, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', 'instanceMethods.' + name, true)
+		return $helper.methods(node, fragments, variable, methods, extend, header, footer, $class.methodCall^^(node, variable, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', true)
 	} // }}}
-	methods(extend, node, fragments, header, methods, call, argName, refName, returns) { // {{{
-		fragments.code(header).step()
+	methods(node, fragments, variable, methods, extend?, header, footer, call, argName, returns) { // {{{
+		let block = header(node, fragments)
 		
 		let method
 		if methods.length == 0 {
-			if extend {
-				extend(node, fragments)
+			if extend? {
+				extend(node, block, null, variable)
 			}
 			else {
-				fragments
+				block
 					.newControl()
 					.code('if(' + argName + '.length !== 0)')
 					.step()
@@ -754,10 +722,10 @@ const $helper = {
 			method = methods[0]
 			
 			if method.min == 0 && method.max >= Infinity {
-				call(fragments, method, 0)
+				call(block, method, 0)
 			}
 			else if method.min == method.max {
-				let ctrl = fragments.newControl()
+				let ctrl = block.newControl()
 				
 				ctrl.code('if(' + argName + '.length === ' + method.min + ')').step()
 				
@@ -765,17 +733,17 @@ const $helper = {
 				
 				if returns {
 					if extend {
-						extend(node, fragments, ctrl)
+						extend(node, block, ctrl, variable)
 					}
 					else {
 						ctrl.done()
 						
-						fragments.line('throw new SyntaxError("wrong number of arguments")')
+						block.line('throw new SyntaxError("wrong number of arguments")')
 					}
 				}
 				else {
 					if extend {
-						extend(node, fragments, ctrl)
+						extend(node, block, ctrl, variable)
 					}
 					else {
 						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
@@ -783,7 +751,7 @@ const $helper = {
 				}
 			}
 			else if method.max < Infinity {
-				let ctrl = fragments.newControl()
+				let ctrl = block.newControl()
 				
 				ctrl.code('if(' + argName + '.length >= ' + method.min + ' && ' + argName + '.length <= ' + method.max + ')').step()
 				
@@ -792,14 +760,14 @@ const $helper = {
 				if returns {
 					ctrl.done()
 					
-					fragments.line('throw new SyntaxError("wrong number of arguments")')
+					block.line('throw new SyntaxError("wrong number of arguments")')
 				}
 				else {
 					ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
 				}
 			}
 			else {
-				call(fragments, method, 0)
+				call(block, method, 0)
 			}
 		}
 		else {
@@ -860,7 +828,7 @@ const $helper = {
 					}
 				}
 				
-				let ctrl = fragments.newControl()
+				let ctrl = block.newControl()
 				
 				for k, group of groups {
 					ctrl.step().code('else ') unless ctrl.isFirstStep()
@@ -903,7 +871,7 @@ const $helper = {
 							}
 						}
 						
-						if $helper.methodCheckTree(methods, types, 0, node, ctrl, call, argName, refName, returns) {
+						if $helper.methodCheckTree(methods, types, 0, node, ctrl, call, argName, returns) {
 							if returns {
 								fragments.line('throw new Error("Wrong type of arguments")')
 							}
@@ -918,7 +886,7 @@ const $helper = {
 					if returns {
 						ctrl.done()
 						
-						fragments.line('throw new SyntaxError("wrong number of arguments")')
+						block.line('throw new SyntaxError("wrong number of arguments")')
 					}
 					else {
 						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
@@ -937,9 +905,11 @@ const $helper = {
 			}
 		}
 		
-		fragments.done() unless node._es5
+		footer(block)
+		
+		return fragments
 	} // }}}
-	methodCheckTree(methods, types, index, node, fragments, call, argName, refName, returns) { // {{{
+	methodCheckTree(methods, types, index, node, fragments, call, argName, returns) { // {{{
 		if !?types[index + 1] {
 			SyntaxException.throwNotDifferentiableMethods(node)
 		}
@@ -951,7 +921,6 @@ const $helper = {
 		for name, type of types[index + 1].types {
 			tree.push(item = {
 				type: [name]
-				path: [`this.constructor.__ks_reflect.\(refName)\(type.path)`]
 				methods: [methods[i] for i in type.methods]
 				usage: type.methods.length
 			})
@@ -994,7 +963,7 @@ const $helper = {
 				return false
 			}
 			else {
-				return $helper.methodCheckTree(methods, types, index + 1, node, fragments, call, argName, refName, returns)
+				return $helper.methodCheckTree(methods, types, index + 1, node, fragments, call, argName, returns)
 			}
 		}
 		else {
@@ -1016,7 +985,6 @@ const $helper = {
 					
 					for type in usage.types {
 						item.type.push(...type.type)
-						item.path.push(...type.path)
 						item.usage += type.usage
 						item.weight += type.weight
 						
@@ -1063,7 +1031,7 @@ const $helper = {
 					
 					ctrl.code('if(')
 					
-					$helper.decide(node, ctrl, item.type[0], index, item.path[0], argName)
+					$type.check(node, ctrl, `\(argName)[\(index)]`, item.type[0])
 					
 					ctrl.code(')')
 				}
@@ -1074,7 +1042,7 @@ const $helper = {
 					call(ctrl, item.methods[0], item.methods[0].index)
 				}
 				else {
-					$helper.methodCheckTree(methods, types, index + 1, node, ctrl, call, argName, refName, returns)
+					$helper.methodCheckTree(methods, types, index + 1, node, ctrl, call, argName, returns)
 				}
 			}
 			
@@ -1164,112 +1132,6 @@ const $helper = {
 				++count
 			}
 		}
-	} // }}}
-	reflect(node, fragments, reflect) { // {{{
-		let classname = node._name
-		
-		let line = fragments.newLine()
-		
-		line.code(classname + '.__ks_reflect = ')
-		
-		let object = line.newObject()
-		
-		if reflect.sealed {
-			object.line('sealed: true')
-		}
-		
-		if reflect.abstract {
-			object.line('abstract: true')
-		}
-		
-		object.newLine().code('inits: ' + reflect.inits)
-		
-		a = object.newLine().code('constructors: ').newArray()
-		for i from 0 til reflect.constructors.length {
-			$helper.reflectMethod(node, a.newLine(), reflect.constructors[i], classname + '.__ks_reflect.constructors[' + i + ']')
-		}
-		a.done()
-		
-		object.line('destructors: ', reflect.destructors)
-		
-		o = object.newLine().code('instanceVariables: ').newObject()
-		for name, variable of reflect.instanceVariables {
-			$helper.reflectVariable(node, o.newLine(), name, variable, classname + '.__ks_reflect.instanceVariables.' + name)
-		}
-		o.done()
-		
-		o = object.newLine().code('classVariables: ').newObject()
-		for name, variable of reflect.classVariables {
-			$helper.reflectVariable(node, o.newLine(), name, variable, classname + '.__ks_reflect.classVariables.' + name)
-		}
-		o.done()
-		
-		o = object.newLine().code('instanceMethods: ').newObject()
-		for name, methods of reflect.instanceMethods {
-			a = o.newLine().code(name + ': ').newArray()
-			
-			for i from 0 til methods.length {
-				$helper.reflectMethod(node, a.newLine(), methods[i], classname + '.__ks_reflect.instanceMethods.' + name + '[' + i + ']')
-			}
-			
-			a.done()
-		}
-		o.done()
-		
-		o = object.newLine().code('classMethods: ').newObject()
-		for name, methods of reflect.classMethods {
-			a = o.newLine().code(name + ': ').newArray()
-			
-			for i from 0 til methods.length {
-				$helper.reflectMethod(node, a.newLine(), methods[i], classname + '.__ks_reflect.classMethods.' + name + '[' + i + ']')
-			}
-			
-			a.done()
-		}
-		o.done()
-		
-		object.done()
-		
-		line.done()
-	} // }}}
-	reflectMethod(node, fragments, signature, path = null) { // {{{
-		let object = fragments.newObject()
-		
-		object.newLine().code('access: ' + signature.access)
-		object.newLine().code('min: ' + signature.min)
-		object.newLine().code('max: ' + (signature.max == Infinity ? 'Infinity' : signature.max))
-		
-		let array = object.newLine().code('parameters: ').newArray()
-		
-		for i from 0 til signature.parameters.length {
-			$helper.reflectParameter(node, array.newLine(), signature.parameters[i], path + '.parameters[' + i + ']')
-		}
-		
-		array.done()
-		
-		object.done()
-	} // }}}
-	reflectParameter(node, fragments, signature, path = null) { // {{{
-		let object = fragments.newObject()
-		
-		object.newLine().code('type: ' + node.toTypeString(signature.type, path))
-		object.newLine().code('min: ' + signature.min)
-		object.newLine().code('max: ' + signature.max)
-		
-		object.done()
-	} // }}}
-	reflectVariable(node, fragments, name, signature, path = null) { // {{{
-		let object = fragments.code(name, ': ').newObject()
-		
-		object.line('access: ' + signature.access)
-		
-		object.line('type: ' + node.toTypeString(signature.type, path))
-		
-		if signature.nullable {
-			object.line('nullable: true')
-		}
-		
-		object.done()
 	} // }}}
 }
 
@@ -1851,7 +1713,12 @@ class ClassDeclaration extends Statement {
 		return scope
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		let reflect = @sealed ? $class.sealed(this, fragments) : $class.continuous(this, fragments)
+		if @sealed {
+			$class.sealed(this, fragments)
+		}
+		else {
+			$class.continuous(this, fragments)
+		}
 		
 		for :variable of @classVariables {
 			variable.toFragments(fragments)
@@ -1868,8 +1735,6 @@ class ClassDeclaration extends Statement {
 			
 			line.code(')').done()
 		}
-		
-		$helper.reflect(this, fragments, reflect)
 		
 		if references ?= this.module().listReferences(@name) {
 			for ref in references {
@@ -2074,7 +1939,7 @@ class ClassMethodDeclaration extends Statement {
 	isMethod() => true
 	length() => @parameters.length
 	name() => @name
-	signature() {
+	signature() { // {{{
 		if @analysed {
 			return @signature
 		}
@@ -2083,7 +1948,7 @@ class ClassMethodDeclaration extends Statement {
 			
 			return @signature
 		}
-	}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
@@ -2397,9 +2262,9 @@ class ClassDestructorDeclaration extends Statement {
 
 class ClassVariableDeclaration extends AbstractNode {
 	private {
-		_defaultValue			= null
-		_hasDefaultValue		= false
-		_instance: Boolean		= true
+		_defaultValue				= null
+		_hasDefaultValue: Boolean	= false
+		_instance: Boolean			= true
 		_name
 		_signature
 	}

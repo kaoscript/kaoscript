@@ -12,15 +12,6 @@ module.exports = function() {
 			}
 		}
 	}
-	Attribute.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	class ErrorAttribute extends Attribute {
 		__ks_init() {
 			Attribute.prototype.__ks_init.call(this);
@@ -43,31 +34,4 @@ module.exports = function() {
 			}
 		}
 	}
-	ErrorAttribute.__ks_reflect = {
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "Any",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_data: {
-				access: 1,
-				type: "Any"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 }

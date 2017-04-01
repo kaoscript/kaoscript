@@ -53,42 +53,6 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Shape.__ks_reflect = {
-		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 1,
-		instanceVariables: {
-			_color: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			draw: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				}
-			]
-		},
-		classMethods: {}
-	};
 	class Rectangle extends Shape {
 		__ks_init_1() {
 			this._foo = "bar";
@@ -137,40 +101,4 @@ module.exports = function() {
 			return Shape.prototype.draw.apply(this, arguments);
 		}
 	}
-	Rectangle.__ks_reflect = {
-		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "Any",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 1,
-		instanceVariables: {
-			_foo: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			draw: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				}
-			]
-		},
-		classMethods: {}
-	};
 }

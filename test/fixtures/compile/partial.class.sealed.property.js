@@ -1,26 +1,12 @@
-var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	var __ks_Array = {};
-	Helper.newInstanceMethod({
-		class: Array,
-		name: "pushUniq",
-		sealed: __ks_Array,
-		function: function(...args) {
-			return this;
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: Infinity,
-			parameters: [
-				{
-					type: "Any",
-					min: 0,
-					max: Infinity
-				}
-			]
-		}
-	});
+	__ks_Array.__ks_func_pushUniq_0 = function(...args) {
+		return this;
+	};
+	__ks_Array._im_pushUniq = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		return __ks_Array.__ks_func_pushUniq_0.apply(that, args);
+	};
 	class Foobar {
 		constructor() {
 			this.__ks_init();
@@ -38,20 +24,6 @@ module.exports = function() {
 			}
 		}
 	}
-	Foobar.__ks_reflect = {
-		inits: 1,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {
-			values: {
-				access: 3,
-				type: "Array"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	const foobar = new Foobar();
 	__ks_Array._im_pushUniq(foobar.values, 42);
 }

@@ -7,12 +7,7 @@ module.exports = function() {
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
-			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
-			}
-		}
-		__ks_func_Rectangle_0(color) {
+		__ks_cons_0(color) {
 			if(color === void 0 || color === null) {
 				color = "black";
 			}
@@ -21,11 +16,13 @@ module.exports = function() {
 			}
 			this._color = color;
 		}
-		Rectangle() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
-				return Rectangle.prototype.__ks_func_Rectangle_0.apply(this, arguments);
+		__ks_cons(args) {
+			if(args.length >= 0 && args.length <= 1) {
+				Rectangle.prototype.__ks_cons_0.apply(this, args);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			else {
+				throw new SyntaxError("wrong number of arguments");
+			}
 		}
 		__ks_func_draw_0(canvas) {
 			if(arguments.length < 1) {
@@ -46,49 +43,6 @@ module.exports = function() {
 	Object.defineProperty(Rectangle, 'version', {
 		value: [1, 0, 0]
 	});
-	Rectangle.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {
-			_color: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			Rectangle: [
-				{
-					access: 3,
-					min: 0,
-					max: 1,
-					parameters: [
-						{
-							type: "String",
-							min: 0,
-							max: 1
-						}
-					]
-				}
-			],
-			draw: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	console.log(Rectangle.name);
 	console.log(Rectangle.version);
 }

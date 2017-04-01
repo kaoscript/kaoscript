@@ -43,46 +43,4 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Person.__ks_reflect = {
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 0,
-				max: 0,
-				parameters: []
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_height: {
-				access: 1,
-				type: "Number"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			height: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				},
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Number",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 }

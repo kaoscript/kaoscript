@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Shape {
 		constructor() {
@@ -44,67 +44,17 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Shape.__ks_reflect = {
-		sealed: true,
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_color: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			draw: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				}
-			]
-		},
-		classMethods: {
-			makeBlue: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				}
-			]
-		}
-	};
 	var __ks_Shape = {};
-	Helper.newClassMethod({
-		class: Shape,
-		name: "makeRed",
-		sealed: __ks_Shape,
-		function: function() {
-			return new Shape("red");
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: 0,
-			parameters: []
+	__ks_Shape.__ks_sttc_makeRed_0 = function() {
+		return new Shape("red");
+	};
+	__ks_Shape._cm_makeRed = function() {
+		var args = Array.prototype.slice.call(arguments);
+		if(args.length === 0) {
+			return __ks_Shape.__ks_sttc_makeRed_0();
 		}
-	});
+		throw new SyntaxError("wrong number of arguments");
+	};
 	let shape = Shape.makeBlue();
 	console.log(shape.draw());
 	shape = __ks_Shape._cm_makeRed();

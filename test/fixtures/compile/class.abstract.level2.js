@@ -12,16 +12,6 @@ module.exports = function() {
 			}
 		}
 	}
-	Foo.__ks_reflect = {
-		abstract: true,
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	class Bar extends Foo {
 		__ks_init() {
 			Foo.prototype.__ks_init.call(this);
@@ -48,30 +38,6 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Bar.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {
-			greet: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	class Qux extends Bar {
 		__ks_init() {
 			Bar.prototype.__ks_init.call(this);
@@ -80,13 +46,4 @@ module.exports = function() {
 			Bar.prototype.__ks_cons.call(this, args);
 		}
 	}
-	Qux.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 }

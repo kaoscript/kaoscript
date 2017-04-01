@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.8.0
+ * Version 0.9.0
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -323,7 +323,27 @@ func $toInt(data, defaultValue) { // {{{
 
 const $type = {
 	check(node, fragments, name, type) { // {{{
-		if type.kind == NodeKind::TypeReference {
+		if type is String {
+			let tof = $runtime.typeof(type, node)
+			
+			if !tof && $types[type]? {
+				tof = $runtime.typeof($types[type], node)
+			}
+			
+			if tof {
+				fragments
+					.code(tof + '(')
+					.compile(name)
+					.code(')')
+			}
+			else {
+				fragments
+					.code($runtime.type(node), '.is(')
+					.compile(name)
+					.code(', ', type, ')')
+			}
+		}
+		else if type.kind == NodeKind::TypeReference {
 			type = $type.unalias(type, node.scope())
 			
 			if type.typeParameters {
@@ -368,28 +388,7 @@ const $type = {
 				}
 			}
 			else {
-				let tof = $runtime.typeof(type.typeName.name, node)
-				
-				if !tof && $types[type.typeName.name]? {
-					tof = $runtime.typeof($types[type.typeName.name], node)
-				}
-				
-				if tof {
-					fragments
-						.code(tof + '(')
-						.compile(name)
-						.code(')')
-				}
-				else {
-					fragments
-						.code($runtime.type(node), '.is(')
-						.compile(name)
-						.code(', ')
-					
-					$type.compile(type, fragments)
-					
-					fragments.code(')')
-				}
+				$type.check(node, fragments, name, type.typeName.name)
 			}
 		}
 		else if type.types? {
@@ -714,7 +713,7 @@ const $type = {
 		}
 	} // }}}
 	unalias(type, scope) { // {{{
-		let variable = scope.getVariable(type.typeName.name)
+		let variable = scope.getVariable(type is String ? type : type.typeName.name)
 		
 		if variable && variable.kind == VariableKind::TypeAlias {
 			return $type.unalias(variable.type, scope)
@@ -781,6 +780,43 @@ const $variable = {
 		}
 		
 		return variable
+	} // }}}
+	export(variable) { // {{{
+		let export = {}
+		
+		for name of variable {
+			if name == 'name' {
+				export[name] = variable[name].name || variable[name]
+			}
+			else if name == 'classMethods' || name == 'instanceMethods' {
+				export[name] = $variable.exportMethods(variable[name])
+			}
+			else if !(name == 'accessPath' || name == 'immutable' || name == 'new') {
+				export[name] = variable[name]
+			}
+		}
+		
+		return export
+	} // }}}
+	exportMethod(method) { // {{{
+		let export = {}
+		
+		for name of method {
+			if !(name == 'index') {
+				export[name] = method[name]
+			}
+		}
+		
+		return export
+	} // }}}
+	exportMethods(methods) { // {{{
+		let export = {}
+		
+		for name of methods {
+			export[name] = [$variable.exportMethod(method) for method in methods[name]]
+		}
+		
+		return export
 	} // }}}
 	filterMember(variable, name, node) { // {{{
 		//console.log('variable.filterMember.var', variable)

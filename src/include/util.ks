@@ -82,6 +82,11 @@ impl Array {
 		}
 		return this
 	} // }}}
+	clear() { // {{{
+		this.length = 0
+		
+		return this
+	} // }}}
 	clone() { // {{{
 		let i = this.length
 		let clone = new Array(i)

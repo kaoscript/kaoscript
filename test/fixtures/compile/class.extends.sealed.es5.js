@@ -25,26 +25,4 @@ module.exports = function() {
 			}
 		}
 	});
-	NotImplementedError.__ks_reflect = {
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 0,
-				max: 1,
-				parameters: [
-					{
-						type: "Any",
-						min: 0,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 }

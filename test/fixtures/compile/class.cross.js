@@ -38,41 +38,6 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Foo.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {
-			_bar: {
-				access: 1,
-				type: "#Bar"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			bar: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				},
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "#Bar",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	class Bar {
 		constructor() {
 			this.__ks_init();
@@ -111,41 +76,4 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Bar.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {
-			_foo: {
-				access: 1,
-				type: Foo
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			foo: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				},
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: Foo,
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
-	Foo.__ks_reflect.instanceVariables._bar.type = Bar;
-	Foo.__ks_reflect.instanceMethods.bar[1].parameters[0].type = Bar;
 }

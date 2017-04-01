@@ -23,28 +23,6 @@ module.exports = function() {
 			}
 		}
 	}
-	Foo.__ks_reflect = {
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "Any",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	class Bar {
 		constructor() {
 			this.__ks_init();
@@ -62,18 +40,4 @@ module.exports = function() {
 			}
 		}
 	}
-	Bar.__ks_reflect = {
-		inits: 1,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {
-			_foo: {
-				access: 1,
-				type: Foo
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 }

@@ -1,34 +1,6 @@
 {
   "requirements": {},
   "exports": {
-    "console": {
-      "name": "console",
-      "kind": 5,
-      "type": {
-        "typeName": {
-          "kind": 41,
-          "name": "Object"
-        },
-        "properties": {
-          "log": {
-            "kind": 3,
-            "name": "log",
-            "signature": {
-              "min": 0,
-              "max": "Infinity",
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 0,
-                  "max": "Infinity",
-                  "rest": "true"
-                }
-              ]
-            }
-          }
-        }
-      }
-    },
     "Shape": {
       "name": "Shape",
       "kind": 1,
@@ -57,6 +29,30 @@
       },
       "classVariables": {},
       "instanceMethods": {
+        "color": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "String",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "throws": []
+          }
+        ],
         "draw": [
           {
             "access": 3,
@@ -70,21 +66,12 @@
                 "max": 1
               }
             ],
-            "sealed": "true",
             "throws": [],
             "type": "String"
           }
         ]
       },
-      "classMethods": {},
-      "sealed": {
-        "name": "__ks_Shape",
-        "constructors": "false",
-        "instanceMethods": {
-          "draw": "true"
-        },
-        "classMethods": {}
-      }
+      "classMethods": {}
     }
   }
 }

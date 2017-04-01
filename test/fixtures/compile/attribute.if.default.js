@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Shape {
 		constructor() {
@@ -32,56 +32,19 @@ module.exports = function() {
 			}
 		}
 	}
-	Shape.__ks_reflect = {
-		inits: 1,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_color: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
-	Helper.newInstanceMethod({
-		class: Shape,
-		name: "draw_es6",
-		function: function(canvas) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(canvas === void 0 || canvas === null) {
-				throw new TypeError("'canvas' is not nullable");
-			}
-			return "I'm drawing a " + this._color + " rectangle.";
-		},
-		signature: {
-			access: 3,
-			min: 1,
-			max: 1,
-			parameters: [
-				{
-					type: "Any",
-					min: 1,
-					max: 1
-				}
-			]
+	Shape.prototype.__ks_func_draw_es6_0 = function(canvas) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
-	});
+		if(canvas === void 0 || canvas === null) {
+			throw new TypeError("'canvas' is not nullable");
+		}
+		return "I'm drawing a " + this._color + " rectangle.";
+	};
+	Shape.prototype.draw_es6 = function() {
+		if(arguments.length === 1) {
+			return Shape.prototype.__ks_func_draw_es6_0.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
 }

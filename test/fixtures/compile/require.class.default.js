@@ -1,47 +1,39 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function(Color, __ks_Color, Space) {
-	Helper.newField("_luma", "Number");
-	Helper.newInstanceMethod({
-		class: Color,
-		name: "luma",
-		function: function() {
-			return this._luma;
-		},
-		signature: {
-			access: 3,
-			min: 0,
-			max: 0,
-			parameters: []
+	Color.prototype.__ks_func_luma_0 = function() {
+		return this._luma;
+	};
+	Color.prototype.luma = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_luma_0.apply(this);
 		}
-	});
-	Helper.newInstanceMethod({
-		class: Color,
-		name: "luma",
-		function: function(luma) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(luma === void 0 || luma === null) {
-				throw new TypeError("'luma' is not nullable");
-			}
-			else if(!Type.isNumber(luma)) {
-				throw new TypeError("'luma' is not of type 'Number'");
-			}
-			return this;
-		},
-		signature: {
-			access: 3,
-			min: 1,
-			max: 1,
-			parameters: [
-				{
-					type: "Number",
-					min: 1,
-					max: 1
-				}
-			]
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_luma_1.apply(this, arguments);
 		}
-	});
+		throw new SyntaxError("wrong number of arguments");
+	};
+	Color.prototype.__ks_func_luma_1 = function(luma) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(luma === void 0 || luma === null) {
+			throw new TypeError("'luma' is not nullable");
+		}
+		else if(!Type.isNumber(luma)) {
+			throw new TypeError("'luma' is not of type 'Number'");
+		}
+		this._luma = luma;
+		return this;
+	};
+	Color.prototype.luma = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_luma_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_luma_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
 	return {
 		Color: Color,
 		Space: Space

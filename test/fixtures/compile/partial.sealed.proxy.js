@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Shape {
 		constructor() {
@@ -47,85 +47,32 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Shape.__ks_reflect = {
-		sealed: true,
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "String",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_color: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			draw: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				},
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	var __ks_Shape = {};
-	Helper.newInstanceMethod({
-		class: Shape,
-		name: "draw",
-		sealed: __ks_Shape,
-		function: function(color, shape) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			if(shape === void 0 || shape === null) {
-				throw new TypeError("'shape' is not nullable");
-			}
-			return "I'm drawing a " + color + " " + shape + ".";
-		},
-		signature: {
-			access: 3,
-			min: 2,
-			max: 2,
-			parameters: [
-				{
-					type: "Any",
-					min: 2,
-					max: 2
-				}
-			]
+	__ks_Shape.__ks_func_draw_2 = function(color, shape) {
+		if(arguments.length < 2) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
 		}
-	});
+		if(color === void 0 || color === null) {
+			throw new TypeError("'color' is not nullable");
+		}
+		if(shape === void 0 || shape === null) {
+			throw new TypeError("'shape' is not nullable");
+		}
+		return "I'm drawing a " + color + " " + shape + ".";
+	};
+	__ks_Shape._im_draw = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 0) {
+			return Shape.prototype.__ks_func_draw_0.apply(that);
+		}
+		else if(args.length === 1) {
+			return Shape.prototype.__ks_func_draw_1.apply(that, args);
+		}
+		else if(args.length === 2) {
+			return __ks_Shape.__ks_func_draw_2.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
 	class Proxy {
 		constructor() {
 			this.__ks_init();
@@ -187,66 +134,6 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	Proxy.__ks_reflect = {
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "Any",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_shape: {
-				access: 1,
-				type: Shape
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			draw: [
-				{
-					access: 3,
-					min: 0,
-					max: 0,
-					parameters: []
-				},
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				},
-				{
-					access: 3,
-					min: 2,
-					max: 2,
-					parameters: [
-						{
-							type: "Any",
-							min: 2,
-							max: 2
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	let shape = new Proxy("yellow");
 	console.log(shape.draw("rectangle"));
 	console.log(shape.draw("red", "rectangle"));

@@ -45,55 +45,6 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	});
-	Greetings.__ks_reflect = {
-		sealed: true,
-		inits: 0,
-		constructors: [
-			{
-				access: 3,
-				min: 0,
-				max: 0,
-				parameters: []
-			},
-			{
-				access: 3,
-				min: 1,
-				max: 1,
-				parameters: [
-					{
-						type: "Any",
-						min: 1,
-						max: 1
-					}
-				]
-			}
-		],
-		destructors: 0,
-		instanceVariables: {
-			_message: {
-				access: 1,
-				type: "String"
-			}
-		},
-		classVariables: {},
-		instanceMethods: {
-			greet: [
-				{
-					access: 3,
-					min: 1,
-					max: 1,
-					parameters: [
-						{
-							type: "Any",
-							min: 1,
-							max: 1
-						}
-					]
-				}
-			]
-		},
-		classMethods: {}
-	};
 	var __ks_Greetings = {};
 	let hello = new Greetings("Hello world!");
 	console.log(hello.greet("miss White"));

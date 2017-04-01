@@ -19,7 +19,7 @@ sealed class Shape {
 let form = 'rectangle'
 
 impl Shape {
-	drawing() as draw with form
+	drawing() => this.draw(form)
 }
 
 let shape: Shape = new Shape('yellow')

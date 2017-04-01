@@ -26,6 +26,7 @@
                 "max": 1
               }
             ],
+            "sealed": "true",
             "throws": []
           }
         ]

@@ -605,9 +605,30 @@ const $function = {
 					}
 				}
 			}
+			NodeKind::PolyadicExpression => {
+				for operand in data.operands {
+					if $function.useThisVariable(operand, node) {
+						return true
+					}
+				}
+			}
 			NodeKind::ReturnStatement => return $function.useThisVariable(data.value, node)
+			NodeKind::TemplateExpression => {
+				for element in data.elements {
+					if $function.useThisVariable(element, node) {
+						return true
+					}
+				}
+			}
 			NodeKind::ThisExpression => return true
 			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument, node)
+			NodeKind::VariableDeclaration => {
+				for declaration in data.declarations {
+					if declaration.init? && $function.useThisVariable(declaration.init, node) {
+						return true
+					}
+				}
+			}
 			=> {
 				throw new NotSupportedException(`Unknow kind \(data.kind)`, node)
 			}

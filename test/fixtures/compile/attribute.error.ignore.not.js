@@ -12,14 +12,5 @@ module.exports = function() {
 			Error.prototype.constructor.call(this, args);
 		}
 	}
-	Exception.__ks_reflect = {
-		inits: 0,
-		constructors: [],
-		destructors: 0,
-		instanceVariables: {},
-		classVariables: {},
-		instanceMethods: {},
-		classMethods: {}
-	};
 	throw new Error();
 }
