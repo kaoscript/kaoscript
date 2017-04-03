@@ -2,10 +2,13 @@
   "requirements": {},
   "exports": {
     "Color": {
-      "name": "Color",
-      "kind": 2,
-      "type": "Number",
-      "counter": 2
+      "elements": [
+        "Red",
+        "Green",
+        "Blue"
+      ],
+      "index": 2,
+      "kind": 1
     }
   }
 }

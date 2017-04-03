@@ -4,13 +4,7 @@
     "Space": {}
   },
   "exports": {
-    "Color": {
-      "name": "Color",
-      "kind": 5
-    },
-    "Space": {
-      "name": "Space",
-      "kind": 5
-    }
+    "Color": "Any",
+    "Space": "Any"
   }
 }

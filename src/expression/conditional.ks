@@ -3,6 +3,7 @@ class ConditionalExpression extends Expression {
 		_condition
 		_whenFalse
 		_whenTrue
+		_type: Type
 	}
 	analyse() { // {{{
 		@condition = $compile.expression(@data.condition, this)
@@ -18,6 +19,11 @@ class ConditionalExpression extends Expression {
 		@condition.prepare()
 		@whenTrue.prepare()
 		@whenFalse.prepare()
+		
+		const t = @whenTrue.type()
+		const f = @whenFalse.type()
+		
+		@type = t.equals(f) ? t : new UnionType([t, f])
 	} // }}}
 	translate() { // {{{
 		@condition.translate()
@@ -33,4 +39,5 @@ class ConditionalExpression extends Expression {
 			.code(' : ')
 			.compile(@whenFalse)
 	} // }}}
+	type() => @type
 }

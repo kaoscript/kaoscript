@@ -1,19 +1,16 @@
 class FunctionExpression extends Expression {
 	private {
-		_await: Boolean		= false
-		_isObjectMember		= false
-		_parameters
-		_signature
-		_statements
+		_awaiting: Boolean					= false
+		_isObjectMember: Boolean		= false
+		_parameters: Array<Parameter>
+		_statements						= []
+		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this, @scope, {
-			kind: NodeKind::Identifier,
-			name: 'this'
-		}, true, VariableKind::Variable)
+		@scope.define('this', true, this)
 		
 		@parameters = []
 		for parameter in @data.parameters {
@@ -29,14 +26,21 @@ class FunctionExpression extends Expression {
 			parameter.prepare()
 		}
 		
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+		
 		@statements = []
-		for statement in $body(@data.body) {
+		for statement in $ast.body(@data.body) {
 			@statements.push(statement = $compile.statement(statement, this))
 			
 			statement.analyse()
 			
 			if statement.isAwait() {
-				@await = true
+				@awaiting = true
 			}
 		}
 		
@@ -44,18 +48,12 @@ class FunctionExpression extends Expression {
 			statement.prepare()
 		}
 		
-		@signature = Signature.fromNode(this)
-	} // }}}
-	translate() { // {{{
-		for parameter in @parameters {
-			parameter.translate()
-		}
-		
 		for statement in @statements {
 			statement.translate()
 		}
 	} // }}}
 	isMethod() => false
+	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		let surround
 		
@@ -85,11 +83,11 @@ class FunctionExpression extends Expression {
 		
 		fragments.code(surround.beforeParameters)
 		
-		let block = $function.parameters(this, fragments, false, func(fragments) {
+		const block = Parameter.toFragments(this, fragments, false, func(fragments) {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 		
-		if @await {
+		if @awaiting {
 			let stack = []
 			
 			let f = block
@@ -121,14 +119,15 @@ class FunctionExpression extends Expression {
 			fragments.code(surround.footer)
 		}
 	} // }}}
+	type() => @type
 }
 
 class LambdaExpression extends Expression {
 	private {
-		_await: Boolean		= false
+		_awaiting: Boolean		= false
 		_parameters
-		_signature
-		_statements
+		_statements			= []
+		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
@@ -146,14 +145,21 @@ class LambdaExpression extends Expression {
 			parameter.prepare()
 		}
 		
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+		
 		@statements = []
-		for statement in $body(@data.body) {
+		for statement in $ast.body(@data.body) {
 			@statements.push(statement = $compile.statement(statement, this))
 			
 			statement.analyse()
 			
 			if statement.isAwait() {
-				@await = true
+				@awaiting = true
 			}
 		}
 		
@@ -161,28 +167,22 @@ class LambdaExpression extends Expression {
 			statement.prepare()
 		}
 		
-		@signature = Signature.fromNode(this)
-	} // }}}
-	translate() { // {{{
-		for parameter in @parameters {
-			parameter.translate()
-		}
-		
 		for statement in @statements {
 			statement.translate()
 		}
 	} // }}}
 	isMethod() => false
+	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		let surround = $function.surround(this)
 		
 		fragments.code(surround.beforeParameters)
 		
-		let block = $function.parameters(this, fragments, surround.arrow, func(fragments) {
+		let block = Parameter.toFragments(this, fragments, surround.arrow, func(fragments) {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 		
-		if @await {
+		if @awaiting {
 			let stack = []
 			
 			let f = block
@@ -214,4 +214,5 @@ class LambdaExpression extends Expression {
 			fragments.code(surround.footer)
 		}
 	} // }}}
+	type() => @type
 }

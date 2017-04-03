@@ -1,70 +1,82 @@
-enum EnumKind {
-	Flags
-	Number
-	String
-}
-
 class EnumDeclaration extends Statement {
 	private {
-		_dependentValues	= []
-		_kind				= EnumKind::Number
-		_name
-		_new
-		_values				= []
-		_variable
+		_composites: Array				= []
+		_name: String
+		_new: Boolean					= true
+		_values: Array				= []
+		_type: EnumType
 	}
 	analyse() { // {{{
-		@variable = $variable.define(this, @scope, @data.name, true, VariableKind::Enum, @data.type)
+		@name = @data.name.name
 		
-		@new = @variable.new
-		
-		if @variable.type == 'String' {
-			@kind = EnumKind::String
+		if variable ?= @scope.getVariable(@name) {
+			@type = variable.type()
+			@new = false
 		}
-		else if @data.attributes? {
-			let nf = true
-			for attr in @data.attributes while nf {
-				if attr.kind == NodeKind::AttributeDeclaration && attr.declaration.kind == NodeKind::Identifier && attr.declaration.name == 'flags' {
-					nf = false
-					
-					@kind = EnumKind::Flags
-					
-					if @new {
-						@variable.counter = -2
+		else {
+			const domain = new ScopeDomain(@scope)
+			const type = Type.fromAST(@data.type, this)
+			
+			if type.isString() {
+				@type = new EnumType(@name, EnumKind::String, domain)
+			}
+			else if @data.attributes? {
+				let nf = true
+				for attr in @data.attributes while nf {
+					if attr.kind == NodeKind::AttributeDeclaration && attr.declaration.kind == NodeKind::Identifier && attr.declaration.name == 'flags' {
+						nf = false
+						
+						@type = new EnumType(@name, EnumKind::Flags, domain)
 					}
 				}
+				
+				if nf {
+					@type = new EnumType(@name, domain)
+				}
 			}
+			else {
+				@type = new EnumType(@name, domain)
+			}
+			
+			@scope.define(@name, true, @type, this)
 		}
-		
-		@name = $compile.expression(@data.name, this)
-		@name.analyse()
-		
-		switch @kind {
+	} // }}}
+	prepare() { // {{{
+		switch @type.kind() {
 			EnumKind::Flags => {
 				for data in @data.members {
 					if data.value? {
 						if data.value.kind == NodeKind::PolyadicExpression && data.value.operator.kind == BinaryOperatorKind::BitwiseOr {
-							@dependentValues.push({
+							@composites.push({
 								name: data.name.name
-								operands: data.value.operands
+								components: data.value.operands
 							})
+							
+							@type.addElement(data.name.name)
 						}
 						else {
-							@variable.counter = $toInt(data.value, @variable.counter + 1)
+							if data.value.kind == NodeKind::NumericExpression {
+								@type.index(data.value.value)
+							}
+							else {
+								throw new NotSupportedException(this)
+							}
 							
 							@values.push({
 								name: data.name.name
-								value: @variable.counter < 0 ? 0 : 1 << @variable.counter
+								value: @type.index() <= 0 ? 0 : 1 << (@type.index() - 1)
 							})
+							
+							@type.addElement(data.name.name)
 						}
 					}
 					else {
-						++@variable.counter
-						
 						@values.push({
 							name: data.name.name
-							value: @variable.counter < 0 ? 0 : 1 << @variable.counter
+							value: @type.step().index() <= 0 ? 0 : 1 << (@type.index() - 1)
 						})
+						
+						@type.addElement(data.name.name)
 					}
 				}
 			}
@@ -74,32 +86,40 @@ class EnumDeclaration extends Statement {
 						name: data.name.name
 						value: $quote(data.name.name.toLowerCase())
 					})
+					
+					@type.addElement(data.name.name)
 				}
 			}
 			EnumKind::Number => {
 				let value
 				for data in @data.members {
 					if data.value? {
-						@variable.counter = $toInt(data.value, @variable.counter + 1)
+						if data.value.kind == NodeKind::NumericExpression {
+							@type.index(data.value.value)
+						}
+						else {
+							throw new NotSupportedException(this)
+						}
 					}
 					else {
-						++@variable.counter
+						@type.step()
 					}
 					
 					@values.push({
 						name: data.name.name
-						value: @variable.counter
+						value: @type.index()
 					})
+					
+					@type.addElement(data.name.name)
 				}
 			}
 		}
 	} // }}}
-	prepare()
 	translate()
 	toStatementFragments(fragments, mode) { // {{{
 		if @new {
-			let line = fragments.newLine().code($variable.scope(this), @variable.name.name, $equals)
-			let object = line.newObject()
+			const line = fragments.newLine().code($runtime.scope(this), @name, $equals)
+			const object = line.newObject()
 			
 			for member in @values {
 				object.line(member.name, ': ', member.value)
@@ -110,27 +130,22 @@ class EnumDeclaration extends Statement {
 		}
 		else {
 			for member in @values {
-				fragments
-					.newLine()
-					.compile(@name)
-					.code('.', member.name, ' = ', member.value)
-					.done()
+				fragments.line(@name, '.', member.name, ' = ', member.value)
 			}
 		}
 		
-		if @dependentValues.length > 0 {
+		if @composites.length > 0 {
 			let line
 			
-			for member in @dependentValues {
+			for member in @composites {
 				line = fragments
 					.newLine()
-					.compile(@name)
-					.code('.', member.name, ' = ')
+					.code(@name, '.', member.name, ' = ')
 				
-				for value, i in member.operands {
+				for value, i in member.components {
 					line.code(' | ') if i > 0
 					
-					line.compile(@name).code('.', value.name)
+					line.code(@name, '.', value.name)
 				}
 				
 				line.done()

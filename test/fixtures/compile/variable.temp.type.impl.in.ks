@@ -1,5 +1,5 @@
 extern sealed class String {
-	split(): Array<String>
+	split(...): Array<String>
 }
 
 impl String {

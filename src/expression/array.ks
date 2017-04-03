@@ -24,20 +24,24 @@ class ArrayExpression extends Expression {
 		fragments.code('[')
 		
 		for value, index in @values {
-			fragments.code($comma) if index
+			if index != 0 {
+				fragments.code($comma)
+			}
 			
 			fragments.compile(value)
 		}
 		
 		fragments.code(']')
 	} // }}}
+	type() => @scope.reference('Array')
 }
 
 class ArrayRange extends Expression {
 	private {
-		_by = null
+		_by				= null
 		_from
 		_to
+		_type: Type
 	}
 	analyse() { // {{{
 		@from = $compile.expression(@data.from ?? @data.then, this)
@@ -50,8 +54,11 @@ class ArrayRange extends Expression {
 			@by = $compile.expression(@data.by, this)
 			@by.analyse()
 		}
+		
 	} // }}}
 	prepare() { // {{{
+		@type = Type.arrayOf(@scope.reference('Number'), @scope)
+		
 		@from.prepare()
 		@to.prepare()
 		@by.prepare() if @by?
@@ -59,7 +66,10 @@ class ArrayRange extends Expression {
 	translate() { // {{{
 		@from.translate()
 		@to.translate()
-		@by.translate() if @by?
+		
+		if @by != null {
+			@by.translate()
+		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
@@ -79,4 +89,5 @@ class ArrayRange extends Expression {
 		
 		fragments.code($comma, @data.from?, $comma, @data.to?, ')')
 	} // }}}
+	type() => @type
 }

@@ -1,4 +1,5 @@
 abstract class Expression extends AbstractNode {
+	/* abstract type() */
 	acquireReusable(acquire) { // {{{
 	} // }}}
 	releaseReusable() { // {{{

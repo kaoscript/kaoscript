@@ -1,7 +1,8 @@
 class ObjectExpression extends Expression {
 	private {
-		_properties = []
-		_templates = []
+		_properties		= []
+		_templates		= []
+		_type: Type
 	}
 	analyse() { // {{{
 		for property in @data.properties {
@@ -23,6 +24,9 @@ class ObjectExpression extends Expression {
 		for property in @templates {
 			property.prepare()
 		}
+		
+		@type = new ObjectType(@properties, new ScopeDomain(@scope))
+		/* @type = @scope.reference('Object') */
 	} // }}}
 	translate() { // {{{
 		for property in @properties {
@@ -48,6 +52,7 @@ class ObjectExpression extends Expression {
 			fragments.code('{}')
 		}
 	} // }}}
+	type() => @type
 }
 
 class ObjectMember extends Expression {
@@ -57,7 +62,7 @@ class ObjectMember extends Expression {
 	}
 	analyse() { // {{{
 		if @data.name.kind == NodeKind::Identifier	{
-			@name = new IdentifierLiteral(@data.name, this, this.scope(), false)
+			@name = new Literal(@data.name, this, @scope, @data.name.name)
 			
 			this.reference('.' + @data.name.name)
 		}
@@ -66,8 +71,6 @@ class ObjectMember extends Expression {
 			
 			this.reference('[' + $quote(@data.name.value) + ']')
 		}
-		
-		@name.analyse()
 		
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
@@ -78,6 +81,8 @@ class ObjectMember extends Expression {
 	translate() { // {{{
 		@value.translate()
 	} // }}}
+	name() => @name.value()
+	value() => @value
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@name)
 		
@@ -96,6 +101,7 @@ class ObjectTemplateMember extends Expression {
 	}
 	analyse() { // {{{
 		@name = new TemplateExpression(@data.name, this)
+		@name.computing(true)
 		@name.analyse()
 		
 		@value = $compile.expression(@data.value, this)

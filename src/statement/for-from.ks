@@ -1,15 +1,16 @@
 class ForFromStatement extends Statement {
 	private {
 		_body
-		_boundName
+		_boundName: String
 		_by
-		_byName
-		_defineVariable	= false
+		_byName: String
+		_defineVariable: Boolean		= false
 		_from
 		_til
 		_to
 		_until
 		_variable
+		_variableVariable: Variable
 		_when
 		_while
 	}
@@ -17,8 +18,8 @@ class ForFromStatement extends Statement {
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
-		if !@scope.hasVariable(@data.variable.name) {
-			$variable.define(this, @scope, @data.variable.name, false, $variable.kind(@data.variable.type), @data.variable.type)
+		if @data.declaration || !@scope.hasVariable(@data.variable.name) {
+			@variableVariable = @scope.define(@data.variable.name, false, @scope.reference('Number'), this)
 			
 			@defineVariable = true
 		}
@@ -57,10 +58,12 @@ class ForFromStatement extends Statement {
 			@when.analyse()
 		}
 		
-		@body = $compile.expression($block(@data.body), this)
+		@body = $compile.expression($ast.block(@data.body), this)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
+		@variable.prepare()
+		
 		@from.prepare()
 		
 		let context = @defineVariable ? null : this
@@ -97,6 +100,7 @@ class ForFromStatement extends Statement {
 		@scope.releaseTempName(@byName) if ?@byName
 	} // }}}
 	translate() { // {{{
+		@variable.translate()
 		@from.translate()
 		
 		if @til? {
@@ -120,13 +124,12 @@ class ForFromStatement extends Statement {
 		@body.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		let data = @data
-		
 		let ctrl = fragments.newControl().code('for(')
 		
-		if data.declaration || @defineVariable {
-			ctrl.code($variable.scope(this))
+		if @defineVariable {
+			ctrl.code($runtime.scope(this))
 		}
+		
 		ctrl.compile(@variable).code($equals).compile(@from)
 		
 		if @boundName? {
@@ -139,18 +142,18 @@ class ForFromStatement extends Statement {
 		
 		ctrl.code('; ')
 		
-		if data.until {
+		if @data.until {
 			ctrl.code('!(').compileBoolean(@until).code(') && ')
 		}
-		else if data.while {
+		else if @data.while {
 			ctrl.compileBoolean(@while).code(' && ')
 		}
 		
 		ctrl.compile(@variable)
 		
-		let desc = (data.by && data.by.kind == NodeKind::NumericExpression && data.by.value < 0) || (data.from.kind == NodeKind::NumericExpression && ((data.to && data.to.kind == NodeKind::NumericExpression && data.from.value > data.to.value) || (data.til && data.til.kind == NodeKind::NumericExpression && data.from.value > data.til.value)))
+		let desc = (@data.by && @data.by.kind == NodeKind::NumericExpression && @data.by.value < 0) || (@data.from.kind == NodeKind::NumericExpression && ((@data.to && @data.to.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value) || (@data.til && @data.til.kind == NodeKind::NumericExpression && @data.from.value > @data.til.value)))
 		
-		if data.til {
+		if @data.til {
 			if desc {
 				ctrl.code(' > ')
 			}
@@ -173,19 +176,19 @@ class ForFromStatement extends Statement {
 		
 		ctrl.code('; ')
 		
-		if data.by {
-			if data.by.kind == NodeKind::NumericExpression {
-				if data.by.value == 1 {
+		if @data.by {
+			if @data.by.kind == NodeKind::NumericExpression {
+				if @data.by.value == 1 {
 					ctrl.code('++').compile(@variable)
 				}
-				else if data.by.value == -1 {
+				else if @data.by.value == -1 {
 					ctrl.code('--').compile(@variable)
 				}
-				else if data.by.value >= 0 {
+				else if @data.by.value >= 0 {
 					ctrl.compile(@variable).code(' += ').compile(@by)
 				}
 				else {
-					ctrl.compile(@variable).code(' -= ', -data.by.value)
+					ctrl.compile(@variable).code(' -= ', -@data.by.value)
 				}
 			}
 			else {
@@ -201,7 +204,7 @@ class ForFromStatement extends Statement {
 		
 		ctrl.code(')').step()
 		
-		if data.when {
+		if @data.when {
 			ctrl
 				.newControl()
 				.code('if(')

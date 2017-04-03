@@ -10,19 +10,19 @@ module.exports = function() {
 			throw new TypeError("'x' is not nullable");
 		}
 		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'Number'");
+			throw new TypeError("'x' is not of type 'float'");
 		}
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
 		else if(!Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'Number'");
+			throw new TypeError("'y' is not of type 'float'");
 		}
 		if(percentage === void 0 || percentage === null) {
 			throw new TypeError("'percentage' is not nullable");
 		}
 		else if(!Type.isNumber(percentage)) {
-			throw new TypeError("'percentage' is not of type 'Number'");
+			throw new TypeError("'percentage' is not of type 'float'");
 		}
 		return ((1 - percentage) * x) + (percentage * y);
 	}

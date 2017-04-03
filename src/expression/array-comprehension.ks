@@ -18,7 +18,7 @@ class ArrayComprehensionForFrom extends Expression {
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this, @scope, @data.loop.variable.name, false, VariableKind::Variable)
+		@scope.define(@data.loop.variable.name, false, @scope.reference('Number'), this)
 		
 		@variable = $compile.expression(@data.loop.variable, this)
 		@variable.analyse()
@@ -103,6 +103,7 @@ class ArrayComprehensionForFrom extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => @scope.reference('Array')
 }
 
 class ArrayComprehensionForIn extends Expression {
@@ -110,8 +111,11 @@ class ArrayComprehensionForIn extends Expression {
 		_body
 		_expression
 		_index
+		_indexVariable: Variable
+		_type: Type
 		_value
-		_valueName
+		_valueName: String
+		_valueVariable: Variable
 		_when
 	}
 	constructor(data, parent, scope) { // {{{
@@ -122,25 +126,7 @@ class ArrayComprehensionForIn extends Expression {
 		@expression.analyse()
 		
 		if @data.loop.value? {
-			if (variable ?= $variable.fromAST(@data.loop.expression, this)) && variable.type? {
-				if variable.type.typeName? {
-					if variable.type.typeName.name == 'Array' && variable.type.typeParameters?.length == 1 {
-						$variable.define(this, @scope, @data.loop.value.name, false, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
-					}
-					else {
-						$variable.define(this, @scope, @data.loop.value.name, false, VariableKind::Variable)
-					}
-				}
-				else if variable.type.name == 'Array' && variable.type.parameters?.length == 1 {
-					$variable.define(this, @scope, @data.loop.value.name, false, $variable.kind(variable.type.parameters[0]), variable.type.parameters[0])
-				}
-				else {
-					$variable.define(this, @scope, @data.loop.value.name, false, VariableKind::Variable)
-				}
-			}
-			else {
-				$variable.define(this, @scope, @data.loop.value.name, false, VariableKind::Variable)
-			}
+			@valueVariable = @scope.define(@data.loop.value.name, false, this)
 			
 			@value = $compile.expression(@data.loop.value, this)
 			@value.analyse()
@@ -150,7 +136,7 @@ class ArrayComprehensionForIn extends Expression {
 		}
 		
 		if @data.loop.index? {
-			$variable.define(this, @scope, @data.loop.index.name, false, VariableKind::Variable)
+			@indexVariable = @scope.define(@data.loop.index.name, false, @scope.reference('Number'), this)
 			
 			@index = $compile.expression(@data.loop.index, this)
 			@index.analyse()
@@ -168,10 +154,24 @@ class ArrayComprehensionForIn extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@expression.prepare()
-		@value.prepare() if @value?
-		@index.prepare() if @index?
+		
+		if @value? {
+			@valueVariable.type(@expression.type().parameter())
+			
+			@value.prepare()
+		}
+		
+		if @index? {
+			@index.prepare()
+		}
+		
 		@body.prepare()
-		@when.prepare() if @when?
+		
+		@type = Type.arrayOf(@body.type(), @scope)
+		
+		if @when? {
+			@when.prepare()
+		}
 	} // }}}
 	translate() { // {{{
 		@expression.translate()
@@ -223,6 +223,7 @@ class ArrayComprehensionForIn extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => @type
 }
 
 class ArrayComprehensionForOf extends Expression {
@@ -242,7 +243,7 @@ class ArrayComprehensionForOf extends Expression {
 		@expression.analyse()
 		
 		if @data.loop.key? {
-			$variable.define(this, @scope, @data.loop.key.name, false, VariableKind::Variable)
+			@scope.define(@data.loop.key.name, false, @scope.reference('String'), this)
 			
 			@key = $compile.expression(@data.loop.key, this)
 			@key.analyse()
@@ -252,7 +253,7 @@ class ArrayComprehensionForOf extends Expression {
 		}
 		
 		if @data.loop.value? {
-			$variable.define(this, @scope, @data.loop.value.name, false, VariableKind::Variable)
+			@scope.define(@data.loop.value.name, false, this)
 			
 			@value = $compile.expression(@data.loop.value, this)
 			@value.analyse()
@@ -325,6 +326,7 @@ class ArrayComprehensionForOf extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => @scope.reference('Array')
 }
 
 class ArrayComprehensionForRange extends Expression {
@@ -340,7 +342,7 @@ class ArrayComprehensionForRange extends Expression {
 		super(data, parent, parent.newScope(scope))
 	} // }}}
 	analyse() { // {{{
-		$variable.define(this, @scope, @data.loop.value.name, false, VariableKind::Variable)
+		@scope.define(@data.loop.value.name, false, @scope.reference('Number'), this)
 		
 		@value = $compile.expression(@data.loop.value, this)
 		@value.analyse()
@@ -424,4 +426,5 @@ class ArrayComprehensionForRange extends Expression {
 		
 		fragments.code(')')
 	} // }}}
+	type() => @scope.reference('Array')
 }

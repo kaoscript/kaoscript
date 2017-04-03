@@ -1,0 +1,1 @@
+import PI from @kaoscript/test-import/src/index

@@ -21,6 +21,8 @@ module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
 	__ks_Math.foo = function() {
 		return Math.PI;
 	};
-	__ks_Math.pi;
-	__ks_Math.foo();
+	console.log("" + Math.pi);
+	console.log("" + __ks_Math.foo());
+	console.log(Math.pi.toString());
+	console.log(__ks_Math.foo().toString());
 }

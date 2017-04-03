@@ -89,6 +89,14 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type(): Type { // {{{
+		if @operands[0].type().isNumber() || @operands[0].type().isString() {
+			return @operands[0].type()
+		}
+		else {
+			return new UnionType([@scope.reference('Number'), @scope.reference('String')])
+		}
+	} // }}}
 }
 
 class PolyadicOperatorAnd extends PolyadicOperatorExpression {
@@ -108,6 +116,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			fragments.wrapBoolean(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorBitwiseAnd extends PolyadicOperatorExpression {
@@ -127,6 +136,7 @@ class PolyadicOperatorBitwiseAnd extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class PolyadicOperatorBitwiseLeftShift extends PolyadicOperatorExpression {
@@ -146,6 +156,7 @@ class PolyadicOperatorBitwiseLeftShift extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class PolyadicOperatorBitwiseOr extends PolyadicOperatorExpression {
@@ -165,6 +176,7 @@ class PolyadicOperatorBitwiseOr extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class PolyadicOperatorBitwiseRightShift extends PolyadicOperatorExpression {
@@ -184,6 +196,7 @@ class PolyadicOperatorBitwiseRightShift extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class PolyadicOperatorBitwiseXor extends PolyadicOperatorExpression {
@@ -203,6 +216,7 @@ class PolyadicOperatorBitwiseXor extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class PolyadicOperatorDivision extends PolyadicOperatorExpression {
@@ -222,6 +236,7 @@ class PolyadicOperatorDivision extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class PolyadicOperatorEquality extends PolyadicOperatorExpression {
@@ -237,6 +252,7 @@ class PolyadicOperatorEquality extends PolyadicOperatorExpression {
 				.compile(@operands[i + 1])
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorGreaterThan extends PolyadicOperatorExpression {
@@ -252,6 +268,7 @@ class PolyadicOperatorGreaterThan extends PolyadicOperatorExpression {
 				.wrap(@operands[i + 1])
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorGreaterThanOrEqual extends PolyadicOperatorExpression {
@@ -267,6 +284,7 @@ class PolyadicOperatorGreaterThanOrEqual extends PolyadicOperatorExpression {
 				.wrap(@operands[i + 1])
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorLessThan extends PolyadicOperatorExpression {
@@ -282,6 +300,7 @@ class PolyadicOperatorLessThan extends PolyadicOperatorExpression {
 				.wrap(@operands[i + 1])
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
@@ -297,6 +316,7 @@ class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
 				.wrap(@operands[i + 1])
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
@@ -316,7 +336,9 @@ class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }
+
 class PolyadicOperatorModulo extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
@@ -334,9 +356,13 @@ class PolyadicOperatorModulo extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
+	private {
+		_type: Type
+	}
 	constructor(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
@@ -349,11 +375,34 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		}
 	} // }}}
 	prepare() { // {{{
+		const types = []
+		
+		let operandType, type, ne
 		for operand in @operands {
 			operand.prepare()
 			
 			operand.acquireReusable(true)
 			operand.releaseReusable()
+			
+			operandType = operand.type()
+			ne = true
+			
+			for type in types while ne {
+				if type.equals(operandType) {
+					ne = false
+				}
+			}
+			
+			if ne {
+				types.push(operandType)
+			}
+		}
+		
+		if types.length == 1 {
+			@type = types[0]
+		}
+		else {
+			@type = new UnionType(types)
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
@@ -398,6 +447,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		
 		fragments.compile(@operands[l])
 	} // }}}
+	type() => @type
 }
 
 class PolyadicOperatorOr extends PolyadicOperatorExpression {
@@ -417,6 +467,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			fragments.wrapBoolean(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
@@ -436,4 +487,5 @@ class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
 			fragments.wrap(operand)
 		}
 	} // }}}
+	type() => @scope.reference('Number')
 }

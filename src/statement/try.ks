@@ -11,15 +11,17 @@ class TryStatement extends Statement {
 		if @data.catchClauses? {
 			let variable, body, type
 			for clause in @data.catchClauses {
-				if variable !?= $variable.fromAST(clause.type, this) {
+				if variable !?= scope.getVariable(clause.type.name) {
 					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
-				else if variable.kind != VariableKind::Class {
+				else if variable.type() is not ClassType {
 					TypeException.throwNotClass(clause.type.name, this)
 				}
 				
 				if clause.binding? {
-					$variable.define(this, @scope = new Scope(scope), clause.binding, false, VariableKind::Variable)
+					@scope = new Scope(scope)
+					
+					@scope.define(clause.binding.name, false, this)
 				}
 				
 				body = $compile.expression(clause.body, this)
@@ -37,7 +39,8 @@ class TryStatement extends Statement {
 		
 		if @data.catchClause? {
 			if @data.catchClause.binding? {
-				$variable.define(this, @scope = new Scope(scope), @data.catchClause.binding, false, VariableKind::Variable)
+				@scope = new Scope(scope)
+				@scope.define(@data.catchClause.binding.name, false, this)
 			}
 			
 			@catchClause = $compile.expression(@data.catchClause.body, this)
@@ -59,6 +62,7 @@ class TryStatement extends Statement {
 		
 		for clause in @catchClauses {
 			clause.body.prepare()
+			clause.type.prepare()
 		}
 		
 		@catchClause.prepare() if @catchClause?
@@ -69,21 +73,25 @@ class TryStatement extends Statement {
 		
 		for clause in @catchClauses {
 			clause.body.translate()
+			clause.type.translate()
 		}
 		
 		@catchClause.translate() if @catchClause?
 		@finalizer.translate() if @finalizer?
 	} // }}}
-	isConsumedError(name, variable): Boolean { // {{{
-		if @data.catchClauses.length > 0 {
-			for clause in @data.catchClauses {
-				return true if $error.isConsumed(clause.type.name, name, variable, @scope)
+	isConsumedError(error): Boolean { // {{{
+		if @catchClauses.length > 0 {
+			for clause in @catchClauses {
+				if clause.type.type().match(error) {
+					return true
+				}
 			}
 			
 			return false
 		}
-		
-		return true
+		else {
+			return true
+		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let finalizer = null
@@ -93,7 +101,7 @@ class TryStatement extends Statement {
 			
 			let line = fragments
 				.newLine()
-				.code($variable.scope(this), finalizer, ' = () =>')
+				.code($runtime.scope(this), finalizer, ' = () =>')
 			
 			line
 				.newBlock()
@@ -138,7 +146,7 @@ class TryStatement extends Statement {
 					.step()
 					
 				if clause.binding? {
-					ifs.line($variable.scope(this), clause.binding.name, ' = ', error)
+					ifs.line($runtime.scope(this), clause.binding.name, ' = ', error)
 				}
 				
 				ifs.compile(@catchClauses[i].body)
@@ -148,7 +156,7 @@ class TryStatement extends Statement {
 				ifs.step().code('else').step()
 				
 				if @data.catchClause.binding? {
-					ifs.line($variable.scope(this), @data.catchClause.binding.name, ' = ', error)
+					ifs.line($runtime.scope(this), @data.catchClause.binding.name, ' = ', error)
 				}
 				
 				ifs.compile(@catchClause)

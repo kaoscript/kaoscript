@@ -12,7 +12,7 @@ class IfStatement extends Statement {
 		
 		@scope = this.newScope(scope)
 		
-		@whenTrue = $compile.expression($block(@data.whenTrue), this)
+		@whenTrue = $compile.expression($ast.block(@data.whenTrue), this)
 		@whenTrue.analyse()
 		
 		if @data.whenFalse? {
@@ -25,7 +25,7 @@ class IfStatement extends Statement {
 			else {
 				@scope = this.newScope(scope)
 				
-				@whenFalse = $compile.expression($block(@data.whenFalse), this)
+				@whenFalse = $compile.expression($ast.block(@data.whenFalse), this)
 				@whenFalse.analyse()
 			}
 		}

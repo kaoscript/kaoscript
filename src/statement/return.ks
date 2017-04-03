@@ -46,4 +46,5 @@ class ReturnStatement extends Statement {
 			}
 		}
 	} // }}}
+	type() => @value.type()
 }

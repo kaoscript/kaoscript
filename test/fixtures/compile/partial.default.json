@@ -2,12 +2,12 @@
   "requirements": {},
   "exports": {
     "Shape": {
-      "name": "Shape",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "false",
+      "sealed": "false",
       "constructors": [
         {
           "access": 3,
-          "async": "false",
           "min": 1,
           "max": 1,
           "parameters": [
@@ -24,7 +24,8 @@
       "instanceVariables": {
         "_color": {
           "access": 1,
-          "type": "String"
+          "name": "String",
+          "nullable": "false"
         }
       },
       "classVariables": {},
@@ -36,6 +37,8 @@
             "min": 0,
             "max": 0,
             "parameters": [],
+            "returns": "Any",
+            "sealed": "false",
             "throws": []
           },
           {
@@ -50,6 +53,8 @@
                 "max": 1
               }
             ],
+            "returns": "Any",
+            "sealed": "false",
             "throws": []
           }
         ],
@@ -66,8 +71,9 @@
                 "max": 1
               }
             ],
-            "throws": [],
-            "type": "String"
+            "returns": "String",
+            "sealed": "false",
+            "throws": []
           }
         ]
       },

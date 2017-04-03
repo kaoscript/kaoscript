@@ -2,10 +2,16 @@
   "requirements": {},
   "exports": {
     "Colour": {
-      "name": "Colour",
-      "kind": 2,
-      "type": "Number",
-      "counter": 5
+      "elements": [
+        "Red",
+        "Green",
+        "Blue",
+        "DarkRed",
+        "DarkGreen",
+        "DarkBlue"
+      ],
+      "index": 5,
+      "kind": 1
     }
   }
 }

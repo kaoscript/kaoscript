@@ -7,14 +7,16 @@
   },
   "exports": {
     "Color": {
-      "name": "Color",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "false",
+      "sealed": "false",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {
         "_luma": {
           "access": 1,
-          "type": "Number"
+          "name": "Number",
+          "nullable": "false"
         }
       },
       "classVariables": {},
@@ -26,8 +28,9 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": [],
-            "type": "Number"
+            "returns": "Number",
+            "sealed": "false",
+            "throws": []
           },
           {
             "access": 3,
@@ -41,19 +44,14 @@
                 "max": 1
               }
             ],
+            "returns": "Any",
+            "sealed": "false",
             "throws": []
           }
         ]
       },
-      "classMethods": {},
-      "requirement": "Color"
+      "classMethods": {}
     },
-    "Space": {
-      "name": "Space",
-      "kind": 2,
-      "type": "Number",
-      "counter": -1,
-      "requirement": "Space"
-    }
+    "Space": "Enum"
   }
 }

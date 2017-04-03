@@ -7,7 +7,7 @@ class UnlessStatement extends Statement {
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
 		
-		@whenFalse = $compile.expression($block(@data.whenFalse), this)
+		@whenFalse = $compile.expression($ast.block(@data.whenFalse), this)
 		@whenFalse.analyse()
 	} // }}}
 	prepare() { // {{{

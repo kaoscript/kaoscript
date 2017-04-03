@@ -28,7 +28,7 @@ module.exports = function() {
 				throw new TypeError("'height' is not nullable");
 			}
 			else if(!Type.isNumber(height)) {
-				throw new TypeError("'height' is not of type 'Number'");
+				throw new TypeError("'height' is not of type 'float'");
 			}
 			this._height = height;
 			return this;

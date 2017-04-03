@@ -1,15 +1,17 @@
 class ForInStatement extends Statement {
 	private {
 		_body
-		_boundName
-		_defineIndex	= false
-		_defineValue	= false
+		_boundName: String
+		_defineIndex: Boolean	= false
+		_defineValue: Boolean	= false
 		_expression
-		_expressionName
+		_expressionName: String
 		_index
-		_indexName
+		_indexName: String
+		_indexVariable: Variable
 		_until
 		_value
+		_valueVariable: Variable
 		_when
 		_while
 	}
@@ -21,21 +23,8 @@ class ForInStatement extends Statement {
 		@expression.analyse()
 		
 		if @data.value? {
-			if !@scope.hasVariable(@data.value.name) {
-				if @data.value.type? {
-					$variable.define(this, @scope, @data.value.name, false, $variable.kind(@data.value.type), @data.value.type)
-				}
-				else if (variable ?= $variable.fromAST(@data.expression, this)) && variable.type?.typeName?.name == 'Array' && variable.type.typeParameters? {
-					if variable.type.typeParameters.length == 1 {
-						$variable.define(this, @scope, @data.value.name, false, $variable.kind(variable.type.typeParameters[0]), variable.type.typeParameters[0])
-					}
-					else {
-						$variable.define(this, @scope, @data.value.name, false, VariableKind::Variable, variable.type.typeParameters)
-					}
-				}
-				else {
-					$variable.define(this, @scope, @data.value.name, false, VariableKind::Variable)
-				}
+			if @data.declaration || !@scope.hasVariable(@data.value.name) {
+				@valueVariable = @scope.define(@data.value.name, false, this)
 				
 				@defineValue = true
 			}
@@ -46,7 +35,7 @@ class ForInStatement extends Statement {
 		
 		if @data.index? {
 			if @data.declaration || !@scope.hasVariable(@data.index.name) {
-				$variable.define(this, @scope, @data.index.name, false, $variable.kind(@data.index.type), @data.index.type)
+				@indexVariable = @scope.define(@data.index.name, false, @scope.reference('Number'), this)
 				
 				@defineIndex = true
 			}
@@ -69,7 +58,7 @@ class ForInStatement extends Statement {
 			@when.analyse()
 		}
 		
-		@body = $compile.expression($block(@data.body), this)
+		@body = $compile.expression($ast.block(@data.body), this)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -81,7 +70,9 @@ class ForInStatement extends Statement {
 			@scope.updateTempNames()
 		}
 		
-		@value.prepare() if @value?
+		if @defineValue {
+			@valueVariable.type(@expression.type().parameter())
+		}
 		
 		if !?@index && !(@data.index? && !@data.declaration && this.greatScope().hasVariable(@data.index.name)) {
 			@indexName = @scope.acquireTempName()
@@ -132,9 +123,9 @@ class ForInStatement extends Statement {
 			let line = fragments.newLine()
 			
 			if !this.greatScope().hasVariable(@expressionName) {
-				line.code($variable.scope(this))
+				line.code($runtime.scope(this))
 				
-				$variable.define(this, this.greatScope(), @expressionName, false, VariableKind::Variable)
+				this.greatScope().define(@expressionName, false, this)
 			}
 			
 			line.code(@expressionName, $equals).compile(@expression).done()
@@ -159,7 +150,7 @@ class ForInStatement extends Statement {
 			else {
 				ctrl = fragments
 					.newControl()
-					.code('for(', $variable.scope(this))
+					.code('for(', $runtime.scope(this))
 					.compile(@indexName ?? @index)
 					.code($equals)
 					.compile(@expressionName ?? @expression)
@@ -176,12 +167,12 @@ class ForInStatement extends Statement {
 				
 				ctrl = fragments
 					.newControl()
-					.code('for(', $variable.scope(this))
+					.code('for(', $runtime.scope(this))
 			}
 			else {
 				ctrl = fragments
 					.newControl()
-					.code('for(', $variable.scope(this))
+					.code('for(', $runtime.scope(this))
 					.compile(@indexName ?? @index)
 					.code(' = 0, ')
 			}

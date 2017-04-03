@@ -1,9 +1,3 @@
-enum MemberAccess { // {{{
-	Private		= 1
-	Protected
-	Public
-} // }}}
-
 enum HelperTypeKind { // {{{
 	Native
 	Referenced
@@ -16,901 +10,38 @@ enum TypeStatus { // {{{
 	Unreferenced
 } // }}}
 
-const $class = {
-	continuous(node, fragments) { // {{{
-		let noinit = Object.isEmpty(node._instanceVariables)
-		
-		if !noinit {
-			noinit = true
-			
-			for name, field of node._instanceVariables while noinit {
-				if field.hasDefaultValue() {
-					noinit = false
-				}
-			}
-		}
-		
-		if node._es5 {
-			node.module().flag('Helper')
-			
-			let line = fragments.newLine().code($variable.scope(node), node._name, ' = ', $runtime.helper(node), '.class(')
-			let clazz = line.newObject()
-			
-			clazz.line('$name: ' + $quote(node._name))
-			
-			if node._data.version? {
-				clazz.line(`$version: [\(node._data.version.major), \(node._data.version.minor), \(node._data.version.patch)]`)
-			}
-			
-			if node._extends {
-				clazz.line('$extends: ', node._extendsName)
-			}
-			
-			const mets = []
-			
-			let ctrl
-			if node._destructor? || !Object.isEmpty(node._classMethods) {
-				ctrl = clazz.newLine().code('$static: ').newObject()
-				
-				if node._destructor? {
-					$class.destructor(node, ctrl, node._destructor)
-					
-					$helper.destructor(node, ctrl, node._variable)
-				}
-				
-				for name, methods of node._classMethods {
-					mets.clear()
-					
-					for method in methods {
-						$class.classMethod(node, ctrl, method, method.signature(), name)
-						
-						mets.push(method.signature())
-					}
-					
-					$helper.classMethod(node, ctrl.newControl(), node._variable, mets, name, $class.classMethodHeaderES5^^(name), $class.methodFooterES5)
-				}
-				
-				ctrl.done()
-			}
-			
-			if !node._extends || node._extendsVariable.sealed?.extern {
-				clazz
-					.newControl()
-					.code($class.methodHeader('$create', node), '()')
-					.step()
-					.line('this.__ks_init()')
-					.line('this.__ks_cons(arguments)')
-			}
-			
-			if noinit {
-				if node._extends {
-					if node._extendsVariable.sealed?.extern {
-						clazz
-							.newControl()
-							.code($class.methodHeader('__ks_init', node), '()')
-							.step()
-					}
-					else {
-						clazz
-							.newControl()
-							.code($class.methodHeader('__ks_init', node), '()')
-							.step()
-							.line(node._extendsName + '.prototype.__ks_init.call(this)')
-					}
-				}
-				else {
-					clazz.newControl().code($class.methodHeader('__ks_init', node), '()').step()
-				}
-			}
-			else {
-				ctrl = clazz
-					.newControl()
-					.code($class.methodHeader('__ks_init_1', node), '()')
-					.step()
-				
-				for :field of node._instanceVariables {
-					field.toFragments(ctrl)
-				}
-				
-				ctrl = clazz.newControl().code($class.methodHeader('__ks_init', node), '()').step()
-				
-				if node._extends {
-					ctrl.line(node._extendsName + '.prototype.__ks_init.call(this)')
-				}
-				
-				ctrl.line(node._name + '.prototype.__ks_init_1.call(this)')
-			}
-			
-			mets.clear()
-			
-			for method in node._constructors {
-				$class.constructor(node, clazz, method, method.signature())
-				
-				mets.push(method.signature())
-			}
-			
-			$helper.constructor(node, clazz.newControl(), node._variable, mets, $class.constructorHeaderES5, $class.methodFooterES5)
-			
-			for name, methods of node._instanceMethods {
-				mets.clear()
-				
-				for method in methods {
-					$class.instanceMethod(node, clazz, method, method.signature(), name)
-					
-					mets.push(method.signature())
-				}
-				
-				$helper.instanceMethod(node, clazz.newControl(), node._variable, mets, name, $class.instanceMethodHeaderES5^^(name), $class.methodFooterES5)
-			}
-			
-			clazz.done()
-			line.code(')').done()
+class ClassDeclaration extends Statement {
+	private {
+		_abstract: Boolean 		= false
+		_abstractMethods		= {}
+		_classMethods			= {}
+		_classVariables			= {}
+		_constructors			= []
+		_constructorScope
+		_destructor				= null
+		_destructorScope
+		_es5: Boolean			= false
+		_extends: Boolean		= false
+		_extendsName: String
+		_extendsType: ClassType
+		_instanceMethods		= {}
+		_instanceVariables		= {}
+		_instanceVariableScope
+		_name
+		_references				= {}
+		_sealed: Boolean 		= false
+		_type: ClassType
+	}
+	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
+		if method.max() == 0 {
+			fragments.line(retCode, variable.name(), '.', fnName, index, '.apply(this)')
 		}
 		else {
-			let clazz = fragments
-				.newControl()
-				.code('class ', node._name)
-			
-			if node._extends {
-				clazz.code(' extends ', node._extendsName)
-			}
-			
-			clazz.step()
-			
-			let ctrl
-			if !node._extends {
-				clazz
-					.newControl()
-					.code('constructor()')
-					.step()
-					.line('this.__ks_init()')
-					.line('this.__ks_cons(arguments)')
-					.done()
-			}
-			else if node._extendsVariable.sealed?.extern {
-				clazz
-					.newControl()
-					.code('constructor()')
-					.step()
-					.line('super()')
-					.line('this.__ks_init()')
-					.line('this.__ks_cons(arguments)')
-					.done()
-			}
-			
-			if noinit {
-				if node._extends {
-					if node._extendsVariable.sealed?.extern {
-						clazz
-							.newControl()
-							.code('__ks_init()')
-							.step()
-							.done()
-					}
-					else {
-						clazz
-							.newControl()
-							.code('__ks_init()')
-							.step()
-							.line(node._extendsName + '.prototype.__ks_init.call(this)')
-							.done()
-					}
-				}
-				else {
-					clazz.newControl().code('__ks_init()').step().done()
-				}
-			}
-			else {
-				ctrl = clazz
-					.newControl()
-					.code('__ks_init_1()')
-					.step()
-				
-				for :field of node._instanceVariables {
-					field.toFragments(ctrl)
-				}
-				
-				ctrl.done()
-				
-				ctrl = clazz.newControl().code('__ks_init()').step()
-				
-				if node._extends {
-					ctrl.line(node._extendsName + '.prototype.__ks_init.call(this)')
-				}
-				
-				ctrl.line(node._name + '.prototype.__ks_init_1.call(this)')
-				
-				ctrl.done()
-			}
-			
-			const mets = []
-			
-			for method in node._constructors {
-				$class.constructor(node, clazz, method, method.signature())
-				
-				mets.push(method.signature())
-			}
-			
-			$helper.constructor(node, clazz.newControl(), node._variable, mets, $class.constructorHeaderES6, $class.methodFooterES6)
-			
-			if node._destructor? {
-				$class.destructor(node, clazz, node._destructor)
-				
-				$helper.destructor(node, clazz, node._variable)
-			}
-			
-			for name, methods of node._instanceMethods {
-				mets.clear()
-				
-				for method in methods {
-					$class.instanceMethod(node, clazz, method, method.signature(), name)
-					
-					mets.push(method.signature())
-				}
-				
-				$helper.instanceMethod(node, clazz.newControl(), node._variable, mets, name, $class.instanceMethodHeaderES6^^(name), $class.methodFooterES6)
-			}
-			
-			for name, methods of node._classMethods {
-				mets.clear()
-				
-				for method in methods {
-					$class.classMethod(node, clazz, method, method.signature(), name)
-					
-					mets.push(method.signature())
-				}
-				
-				$helper.classMethod(node, clazz.newControl(), node._variable, mets, name, $class.classMethodHeaderES6^^(name), $class.methodFooterES6)
-			}
-			
-			clazz.done()
+			fragments.line(retCode, variable.name(), '.', fnName, index, '.apply(this, ', argName, ')')
 		}
 	} // }}}
-	classMethod(node, fragments, statement, signature, name) { // {{{
-		statement.toFragments(fragments, Mode::None)
-	} // }}}
-	classMethodHeaderES5(name, node, fragments) { // {{{
-		return fragments.code($class.methodHeader(name, node) + '()').step()
-	} // }}}
-	classMethodHeaderES6(name, node, fragments) { // {{{
-		return fragments.code('static ' + name + '()').step()
-	} // }}}
-	constructor(node, fragments, statement, signature) { // {{{
-		statement.toFragments(fragments, Mode::None)
-	} // }}}
-	constructorHeaderES5(node, fragments) { // {{{
-		return fragments.code($class.methodHeader('__ks_cons', node) + '(args)').step()
-	} // }}}
-	constructorHeaderES6(node, fragments) { // {{{
-		return fragments.code($class.methodHeader('__ks_cons', node) + '(args)').step()
-	} // }}}
-	destructor(node, fragments, statement) { // {{{
-		statement.toFragments(fragments, Mode::None)
-	} // }}}
-	hierarchy(variable, node, hierarchy = []) { // {{{
-		hierarchy.push(variable.name.name)
-		
-		if variable.extends? && (variable ?= node.scope().getVariable(variable.extends)) {
-			return $class.hierarchy(variable, node, hierarchy)
-		}
-		else {
-			return hierarchy
-		}
-	} // }}}
-	instanceMethod(node, fragments, statement, signature, name) { // {{{
-		statement.toFragments(fragments, Mode::None)
-	} // }}}
-	instanceMethodHeaderES5(name, node, fragments) { // {{{
-		return fragments.code($class.methodHeader(name, node) + '()').step()
-	} // }}}
-	instanceMethodHeaderES6(name, node, fragments) { // {{{
-		return fragments.code($class.methodHeader(name, node) + '()').step()
-	} // }}}
-	listMissingAbstractMethods(variable, scope) { // {{{
-		const abstractMethods = {}
-		
-		if variable.extends? {
-			$class.listParentAbstractMethods(scope.getVariable(variable.extends), abstractMethods, scope)
-		}
-		
-		let method, index
-		for name, methods of abstractMethods when variable.instanceMethods[name]? {
-			for method, index in methods desc {
-				if $signature.match(method, variable.instanceMethods[name]) {
-					methods.splice(index, 1)
-				}
-			}
-			
-			if methods.length == 0 {
-				delete abstractMethods[name]
-			}
-		}
-		
-		return Object.keys(abstractMethods)
-	} // }}}
-	listParentAbstractMethods(variable, abstractMethods, scope) { // {{{
-		if variable.extends? {
-			$class.listParentAbstractMethods(scope.getVariable(variable.extends), abstractMethods, scope)
-		}
-		
-		if variable.abstract {
-			for name, methods of variable.abstractMethods {
-				abstractMethods[name] ??= []
-				
-				abstractMethods[name]:Array.append(methods)
-			}
-		}
-		
-		let method, index
-		for name, methods of abstractMethods when variable.instanceMethods[name]? {
-			for method, index in methods desc {
-				if $signature.match(method, variable.instanceMethods[name]) {
-					methods.splice(index, 1)
-				}
-			}
-			
-			if methods.length == 0 {
-				delete abstractMethods[name]
-			}
-		}
-	} // }}}
-	methodCall(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
-		if method.max == 0 {
-			fragments.line(retCode, variable.name.name || variable.name, '.', fnName, index, '.apply(this)')
-		}
-		else {
-			fragments.line(retCode, variable.name.name || variable.name, '.', fnName, index, '.apply(this, ', argName, ')')
-		}
-	} // }}}
-	methodFooterES5(fragments) { // {{{
-	} // }}}
-	methodFooterES6(fragments) { // {{{
-		fragments.done()
-	} // }}}
-	methodHeader(name, node) { // {{{
-		if node._es5 {
-			return name + ': function'
-		}
-		else {
-			return name
-		}
-	} // }}}
-	sealed(node, fragments) { // {{{
-		let noinit = Object.isEmpty(node._instanceVariables)
-		
-		if !noinit {
-			noinit = true
-			
-			for name, field of node._instanceVariables while noinit {
-				if field.hasDefaultValue {
-					noinit = false
-				}
-			}
-		}
-		
-		if node._es5 {
-			node.module().flag('Helper')
-			
-			let line = fragments.newLine().code($variable.scope(node), node._name, ' = ', $runtime.helper(node), '.class(')
-			let clazz = line.newObject()
-			
-			clazz.line('$name: ' + $quote(node._name))
-			
-			if node._data.version? {
-				clazz.line(`$version: [\(node._data.version.major), \(node._data.version.minor), \(node._data.version.patch)]`)
-			}
-			
-			if node._extends {
-				clazz.line('$extends: ', node._extendsName)
-			}
-			
-			const mets = []
-			
-			let ctrl
-			if node._destructor? || !Object.isEmpty(node._classMethods) {
-				ctrl = clazz.newLine().code('$static: ').newObject()
-				
-				if node._destructor? {
-					$class.destructor(node, ctrl, node._destructor)
-					
-					$helper.destructor(node, ctrl, node._variable)
-				}
-				
-				for name, methods of node._classMethods {
-					mets.clear()
-					
-					for method in methods {
-						$class.classMethod(node, ctrl, method, method.signature(), name)
-						
-						mets.push(method.signature())
-					}
-					
-					$helper.classMethod(node, ctrl.newControl(), node._variable, mets, name, $class.classMethodHeaderES5^^(name), $class.methodFooterES5)
-				}
-				
-				ctrl.done()
-			}
-			
-			if node._extends {
-				ctrl = clazz
-					.newControl()
-					.code($class.methodHeader('__ks_init', node), '()')
-					.step()
-					
-				ctrl.line(node._extendsName, '.prototype.__ks_init.call(this)')
-				
-				if !noinit {
-					for :field of node._instanceVariables {
-						field.toFragments(ctrl)
-					}
-				}
-			}
-			else {
-				ctrl = clazz
-					.newControl()
-					.code($class.methodHeader('$create', node), '()')
-					.step()
-			
-				if !noinit {
-					for :field of node._instanceVariables {
-						field.toFragments(ctrl)
-					}
-				}
-				
-				ctrl.line('this.__ks_cons(arguments)')
-			}
-			
-			mets.clear()
-			
-			for method in node._constructors {
-				$class.constructor(node, clazz, method, method.signature())
-				
-				mets.push(method.signature())
-			}
-			
-			$helper.constructor(node, clazz.newControl(), node._variable, mets, $class.constructorHeaderES5, $class.methodFooterES5)
-			
-			for name, methods of node._instanceMethods {
-				mets.clear()
-				
-				for method in methods {
-					$class.instanceMethod(node, clazz, method, method.signature(), name)
-					
-					mets.push(method.signature())
-				}
-				
-				$helper.instanceMethod(node, clazz.newControl(), node._variable, mets, name, $class.instanceMethodHeaderES5^^(name), $class.methodFooterES5)
-			}
-			
-			clazz.done()
-			line.code(')').done()
-		}
-		else {
-			let clazz = fragments
-				.newControl()
-				.code('class ', node._name)
-			
-			if node._extends {
-				clazz.code(' extends ', node._extendsName)
-			}
-			
-			clazz.step()
-			
-			let ctrl
-			if node._extends {
-				ctrl = clazz
-					.newControl()
-					.code('__ks_init()')
-					.step()
-					
-				ctrl.line(node._extendsName, '.prototype.__ks_init.call(this)')
-				
-				if !noinit {
-					for :field of node._instanceVariables {
-						field.toFragments(ctrl)
-					}
-				}
-				
-				ctrl.done()
-			}
-			else {
-				ctrl = clazz
-					.newControl()
-					.code('constructor()')
-					.step()
-			
-				if !noinit {
-					for :field of node._instanceVariables {
-						field.toFragments(ctrl)
-					}
-				}
-				
-				ctrl.line('this.__ks_cons(arguments)')
-				
-				ctrl.done()
-			}
-			
-			const mets = []
-			
-			for method in node._constructors {
-				$class.constructor(node, clazz, method, method.signature())
-				
-				mets.push(method.signature())
-			}
-			
-			$helper.constructor(node, clazz.newControl(), node._variable, mets, $class.constructorHeaderES6, $class.methodFooterES6)
-			
-			if node._destructor? {
-				$class.destructor(node, clazz, node._destructor)
-				
-				$helper.destructor(node, clazz, node._variable)
-			}
-			
-			for name, methods of node._instanceMethods {
-				mets.clear()
-				
-				for method in methods {
-					$class.instanceMethod(node, clazz, method, method.signature(), name)
-					
-					mets.push(method.signature())
-				}
-				
-				$helper.instanceMethod(node, clazz.newControl(), node._variable, mets, name, $class.instanceMethodHeaderES6^^(name), $class.methodFooterES6)
-			}
-			
-			for name, methods of node._classMethods {
-				mets.clear()
-				
-				for method in methods {
-					$class.classMethod(node, clazz, method, method.signature(), name)
-					
-					mets.push(method.signature())
-				}
-				
-				$helper.classMethod(node, clazz.newControl(), node._variable, mets, name, $class.classMethodHeaderES6^^(name), $class.methodFooterES6)
-			}
-			
-			clazz.done()
-		}
-	} // }}}
-}
-
-const $field = {
-	signature(data, node) { // {{{
-		let signature = {
-			access: MemberAccess::Public
-		}
-		
-		if data.modifiers {
-			for modifier in data.modifiers {
-				if modifier.kind == ModifierKind::Private {
-					signature.access = MemberAccess::Private
-				}
-				else if modifier.kind == ModifierKind::Protected {
-					signature.access = MemberAccess::Protected
-				}
-			}
-		}
-		
-		if data.type {
-			signature.type = $signature.type(data.type, node.scope())
-			
-			if data.type.nullable {
-				signature.nullable = true
-			}
-		}
-		else {
-			signature.type = 'Any'
-		}
-		
-		return signature
-	} // }}}
-}
-
-const $helper = {
-	classMethod(node, fragments, variable, methods, name, header, footer) { // {{{
-		let extend = false
-		if variable.extends? {
-			extend = func(node, fragments, ctrl?, variable) {
-				if node.scope().getVariable(variable.extends).classMethods[name] {
-					ctrl.done()
-					
-					fragments.line(`return \(variable.extends).\(name).apply(null, arguments)`)
-				}
-				else {
-					ctrl
-						.step()
-						.code(`else if(\(variable.extends).\(name))`)
-						.step()
-						.line(`return \(variable.extends).\(name).apply(null, arguments)`)
-						.done()
-					
-					fragments.line('throw new SyntaxError("wrong number of arguments")')
-				}
-			}
-		}
-		
-		return $helper.methods(node, fragments, variable, methods, extend, header, footer, $class.methodCall^^(node, variable, '__ks_sttc_' + name + '_', 'arguments', 'return '), 'arguments', true)
-	} // }}}
-	constructor(node, fragments, variable, methods, header, footer) { // {{{
-		let extend = null
-		if variable.extends? {
-			extend = func(node, fragments, ctrl?, variable) {
-				const extends = node.scope().getVariable(variable.extends)
-				const constructorName = extends.sealed?.extern ? 'constructor' : '__ks_cons'
-				
-				if ctrl? {
-					ctrl
-						.step()
-						.code('else')
-						.step()
-						.line(`\(variable.extends).prototype.\(constructorName).call(this, args)`)
-						.done()
-				}
-				else {
-					fragments.line(`\(variable.extends).prototype.\(constructorName).call(this, args)`)
-				}
-			}
-		}
-		
-		return $helper.methods(node, fragments, variable, methods, extend, header, footer, $class.methodCall^^(node, variable, 'prototype.__ks_cons_', 'args', ''), 'args', false)
-	} // }}}
-	destructor(node, fragments, variable) { // {{{
-		let ctrl = fragments.newControl()
-		
-		if node._es5 {
-			ctrl.code($class.methodHeader('__ks_destroy', node) + '(that)')
-		}
-		else {
-			ctrl.code('static __ks_destroy(that)')
-		}
-		
-		ctrl.step()
-		
-		if node._extends {
-			ctrl.line(`\(node._extendsName).__ks_destroy(that)`)
-		}
-		
-		for i from 0 til variable.destructors {
-			ctrl.line(`\(node._name).__ks_destroy_\(i)(that)`)
-		}
-		
-		ctrl.done() unless node._es5
-	} // }}}
-	instanceMethod(node, fragments, variable, methods, name, header, footer) { // {{{
-		let extend = null
-		if variable.extends? {
-			extend = func(node, fragments, ctrl?, variable) {
-				if node.scope().getVariable(variable.extends).instanceMethods[name] {
-					ctrl.done()
-					
-					fragments.line(`return \(variable.extends).prototype.\(name).apply(this, arguments)`)
-				}
-				else {
-					ctrl
-						.step()
-						.code(`else if(\(variable.extends).prototype.\(name))`)
-						.step()
-						.line(`return \(variable.extends).prototype.\(name).apply(this, arguments)`)
-						.done()
-					
-					fragments.line('throw new SyntaxError("wrong number of arguments")')
-				}
-			}
-		}
-		
-		return $helper.methods(node, fragments, variable, methods, extend, header, footer, $class.methodCall^^(node, variable, 'prototype.__ks_func_' + name + '_', 'arguments', 'return '), 'arguments', true)
-	} // }}}
-	methods(node, fragments, variable, methods, extend?, header, footer, call, argName, returns) { // {{{
-		let block = header(node, fragments)
-		
-		let method
-		if methods.length == 0 {
-			if extend? {
-				extend(node, block, null, variable)
-			}
-			else {
-				block
-					.newControl()
-					.code('if(' + argName + '.length !== 0)')
-					.step()
-					.line('throw new SyntaxError("wrong number of arguments")')
-					.done()
-			}
-		}
-		else if methods.length == 1 {
-			method = methods[0]
-			
-			if method.min == 0 && method.max >= Infinity {
-				call(block, method, 0)
-			}
-			else if method.min == method.max {
-				let ctrl = block.newControl()
-				
-				ctrl.code('if(' + argName + '.length === ' + method.min + ')').step()
-				
-				call(ctrl, method, 0)
-				
-				if returns {
-					if extend {
-						extend(node, block, ctrl, variable)
-					}
-					else {
-						ctrl.done()
-						
-						block.line('throw new SyntaxError("wrong number of arguments")')
-					}
-				}
-				else {
-					if extend {
-						extend(node, block, ctrl, variable)
-					}
-					else {
-						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
-					}
-				}
-			}
-			else if method.max < Infinity {
-				let ctrl = block.newControl()
-				
-				ctrl.code('if(' + argName + '.length >= ' + method.min + ' && ' + argName + '.length <= ' + method.max + ')').step()
-				
-				call(ctrl, method, 0)
-				
-				if returns {
-					ctrl.done()
-					
-					block.line('throw new SyntaxError("wrong number of arguments")')
-				}
-				else {
-					ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
-				}
-			}
-			else {
-				call(block, method, 0)
-			}
-		}
-		else {
-			let groups = {}
-			let infinities = []
-			let min = Infinity
-			let max = 0
-			
-			for index from 0 til methods.length {
-				method = methods[index]
-				method.index = index
-				
-				if method.max == Infinity {
-					infinities.push(method)
-				}
-				else {
-					for n from method.min to method.max {
-						if groups[n]? {
-							groups[n].methods.push(method)
-						}
-						else {
-							groups[n] = {
-								n: n
-								methods: [method]
-							}
-						}
-					}
-					
-					min = Math.min(min, method.min)
-					max = Math.max(max, method.max)
-				}
-			}
-			
-			if infinities.length {
-				for method in infinities {
-					for group of groups when method.min >= group.n {
-						group.methods.push(method)
-					}
-				}
-			}
-			
-			if min == Infinity {
-				throw new NotImplementedException(node)
-			}
-			else {
-				for i from min to max {
-					if group ?= groups[i] {
-						for j from i + 1 to max while (gg ?= groups[j]) && Array.same(gg.methods, group.methods) {
-							if group.n is Array {
-								group.n.push(j)
-							}
-							else {
-								group.n = [i, j]
-							}
-							
-							delete groups[j]
-						}
-					}
-				}
-				
-				let ctrl = block.newControl()
-				
-				for k, group of groups {
-					ctrl.step().code('else ') unless ctrl.isFirstStep()
-					
-					if group.n is Array {
-						if group.n.length == 2 {
-							ctrl.code(`if(\(argName).length === \(group.n[0]) || \(argName).length === \(group.n[1]))`).step()
-						}
-						else {
-							ctrl.code(`if(\(argName).length >= \(group.n[0]) && \(argName).length <= \(group.n[group.n.length - 1]))`).step()
-						}
-					}
-					else {
-						ctrl.code(`if(\(argName).length === \(group.n))`).step()
-					}
-					
-					if group.methods.length == 1 {
-						call(ctrl, group.methods[0], group.methods[0].index)
-					}
-					else {
-						let types = {}
-						for method in group.methods {
-							$helper.methodTypes(node, method, group.n, types)
-						}
-						
-						let indexes = []
-						for p, parameter of types {
-							for t, type of parameter.types {
-								type.methods:Array.remove(...indexes)
-								
-								if type.methods.length == 0 {
-									delete parameter.types[t]
-								}
-							}
-							
-							for t, type of parameter.types {
-								if type.methods.length == 1 {
-									indexes:Array.pushUniq(type.methods[0])
-								}
-							}
-						}
-						
-						if $helper.methodCheckTree(methods, types, 0, node, ctrl, call, argName, returns) {
-							if returns {
-								fragments.line('throw new Error("Wrong type of arguments")')
-							}
-							else {
-								fragments.step().code('else').step().code('throw new Error("Wrong type of arguments")')
-							}
-						}
-					}
-				}
-				
-				if infinities.length == 0 {
-					if returns {
-						ctrl.done()
-						
-						block.line('throw new SyntaxError("wrong number of arguments")')
-					}
-					else {
-						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
-					}
-				}
-				else if infinities.length == 1 {
-					ctrl.step().code('else').step()
-					
-					call(ctrl, infinities[0], infinities[0].index)
-					
-					ctrl.done()
-				}
-				else {
-					throw new NotImplementedException(node)
-				}
-			}
-		}
-		
-		footer(block)
-		
-		return fragments
-	} // }}}
-	methodCheckTree(methods, types, index, node, fragments, call, argName, returns) { // {{{
-		if !?types[index + 1] {
+	static checkMethods(methods, parameters, index, node, fragments, call, argName, returns) { // {{{
+		if !?parameters[index + 1] {
 			SyntaxException.throwNotDifferentiableMethods(node)
 		}
 		
@@ -918,14 +49,14 @@ const $helper = {
 		const usages = []
 		
 		let type, nf, item, usage
-		for name, type of types[index + 1].types {
+		for :type of parameters[index + 1].types {
 			tree.push(item = {
-				type: [name]
+				type: type.type
 				methods: [methods[i] for i in type.methods]
 				usage: type.methods.length
 			})
 			
-			if name == 'Any' {
+			if type.type.isAny() {
 				item.weight = 0
 			}
 			else {
@@ -958,12 +89,12 @@ const $helper = {
 			item = tree[0]
 			
 			if item.methods.length == 1 {
-				call(fragments, item.methods[0], item.methods[0].index)
+				call(fragments, item.methods[0], item.methods[0].index())
 				
 				return false
 			}
 			else {
-				return $helper.methodCheckTree(methods, types, index + 1, node, fragments, call, argName, returns)
+				return ClassDeclaration.checkMethods(methods, parameters, index + 1, node, fragments, call, argName, returns)
 			}
 		}
 		else {
@@ -1031,7 +162,7 @@ const $helper = {
 					
 					ctrl.code('if(')
 					
-					$type.check(node, ctrl, `\(argName)[\(index)]`, item.type[0])
+					item.type[0].toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(index)]`))
 					
 					ctrl.code(')')
 				}
@@ -1039,10 +170,10 @@ const $helper = {
 				ctrl.step()
 				
 				if item.methods.length == 1 {
-					call(ctrl, item.methods[0], item.methods[0].index)
+					call(ctrl, item.methods[0], item.methods[0].index())
 				}
 				else {
-					$helper.methodCheckTree(methods, types, index + 1, node, ctrl, call, argName, returns)
+					ClassDeclaration.checkMethods(methods, parameters, index + 1, node, ctrl, call, argName, returns)
 				}
 			}
 			
@@ -1051,97 +182,10 @@ const $helper = {
 			return ne
 		}
 	} // }}}
-	methodTypes(node, method, target, types) { // {{{
-		let index = 1
-		let count = method.min
-		for parameter, p in method.parameters {
-			for i from 1 to parameter.min {
-				if type !?= types[index] {
-					type = types[index] = {
-						index: index
-						types: {}
-					}
-				}
-				
-				if parameter.type is Array {
-					for j from 0 til parameter.type.length {
-						if type.types[parameter.type[j]] {
-							type.types[parameter.type[j]].methods.push(method.index)
-						}
-						else {
-							type.types[parameter.type[j]] = {
-								name: parameter.type[j]
-								path: `[\(method.index)].parameters[\(p)].type`
-								methods: [method.index]
-							}
-						}
-					}
-				}
-				else {
-					if type.types[parameter.type] {
-						type.types[parameter.type].methods.push(method.index)
-					}
-					else {
-						type.types[parameter.type] = {
-							name: parameter.type
-							path: `[\(method.index)].parameters[\(p)].type`
-							methods: [method.index]
-						}
-					}
-				}
-				
-				++index
-			}
-			
-			for i from parameter.min + 1 to parameter.max while count < target {
-				if type !?= types[index] {
-					type = types[index] = {
-						index: index
-						types: {}
-					}
-				}
-				
-				if parameter.type is Array {
-					for j from 0 til parameter.type.length {
-						if type.types[parameter.type[j]] {
-							type.types[parameter.type[j]].methods.push(method.index)
-						}
-						else {
-							type.types[parameter.type[j]] = {
-								name: parameter.type[j]
-								path: `[\(method.index)].parameters[\(p)].type`
-								methods: [method.index]
-							}
-						}
-					}
-				}
-				else {
-					if type.types[parameter.type] {
-						type.types[parameter.type].methods.push(method.index)
-					}
-					else {
-						type.types[parameter.type] = {
-							name: parameter.type
-							path: `[\(method.index)].parameters[\(p)].type`
-							methods: [method.index]
-						}
-					}
-				}
-				
-				++index
-				++count
-			}
-		}
-	} // }}}
-}
-
-const $method = {
-	isConstructor(name, variable) => name == 'constructor'
-	isDestructor(name, variable) => name == 'destructor'
-	isUsingProperty(data, name) { // {{{
+	static isAssigningAlias(data, name, constructor, extending) { // {{{
 		if data is Array {
 			for d in data {
-				if $method.isUsingProperty(d, name) {
+				if ClassDeclaration.isAssigningAlias(d, name, constructor, extending) {
 					return true
 				}
 			}
@@ -1159,214 +203,344 @@ const $method = {
 					}
 				}
 				NodeKind::CallExpression => {
-					if data.arguments.length == 2 && data.arguments[0].kind == NodeKind::Identifier && data.arguments[0].name == 'this' && data.arguments[1].kind == NodeKind::ArrayExpression && data.callee.kind == NodeKind::MemberExpression && data.callee.property.kind == NodeKind::Identifier && data.callee.property.name == 'call' && data.callee.object.kind == NodeKind::MemberExpression && data.callee.object.property.kind == NodeKind::Identifier && data.callee.object.property.name == '__ks_cons' {
-						for arg in data.arguments[1].values {
-							if arg.kind == NodeKind::Identifier && arg.name == name {
-								return true
+					if constructor && data.callee.kind == NodeKind::Identifier {
+						if data.callee.name == 'this' || (extending && data.callee.name == 'super') {
+							for arg in data.arguments {
+								if arg.kind == NodeKind::Identifier && arg.name == name {
+									return true
+								}
 							}
 						}
 					}
 				}
 				NodeKind::ReturnStatement => {
-					return $method.isUsingProperty(data.value, name)
+					return ClassDeclaration.isAssigningAlias(data.value, name, constructor, extending)
 				}
 			}
 		}
 		
 		return false
 	} // }}}
-	sameType(s1, s2) { // {{{
-		if s1 is Array {
-			if s2 is Array && s1.length == s2.length {
-				for i from 0 til s1.length {
-					if !$method.sameType(s1[i], s2[i]) {
-						return false
+	static mapMethod(method, target, map) { // {{{
+		let index = 1
+		let count = method.min()
+		let item
+		
+		for parameter, p in method.parameters() {
+			for i from 1 to parameter.min() {
+				if item !?= map[index] {
+					item = map[index] = {
+						index: index
+						types: {}
 					}
 				}
 				
-				return true
+				ClassDeclaration.mapParameter(parameter.type(), method.index(), item)
+				
+				++index
 			}
-			else {
-				return false
+			
+			for i from parameter.min() + 1 to parameter.max() while count < target {
+				if item !?= map[index] {
+					item = map[index] = {
+						index: index
+						types: {}
+					}
+				}
+				
+				ClassDeclaration.mapParameter(parameter.type(), method.index(), item)
+				
+				++index
+				++count
+			}
+		}
+	} // }}}
+	static mapParameter(type, index, map) { // {{{
+		if type is UnionType {
+			for value in type.types() {
+				ClassDeclaration.mapParameter(value, index, map)
 			}
 		}
 		else {
-			return s1 == s2
+			if map.types[type.hashCode()] is Object {
+				map.types[type.hashCode()].methods.push(index)
+			}
+			else {
+				map.types[type.hashCode()] = {
+					type: type
+					methods: [index]
+				}
+			}
 		}
 	} // }}}
-}
-
-class ClassDeclaration extends Statement {
-	private {
-		_abstract 			= false
-		_abstractMethods	= {}
-		_classMethods		= {}
-		_classVariables		= {}
-		_constructors		= []
-		_constructorScope
-		_destructor			= null
-		_destructorScope
-		_es5				= false
-		_extends			= false
-		_extendsName
-		_extendsVariable
-		_instanceMethods	= {}
-		_instanceVariables	= {}
-		_instanceVariableScope
-		_name
-		_references			= {}
-		_sealed 			= false
-		_variable
-	}
-	constructor(data, parent) { // {{{
-		super(data, parent)
+	static toSwitchFragments(node, fragments, variable, methods, extend?, header, footer, call, argName, returns) { // {{{
+		let block = header(node, fragments)
 		
-		this._constructorScope = new Scope(parent.scope())
-		this._destructorScope = new Scope(parent.scope())
-		this._instanceVariableScope = new Scope(parent.scope())
-		this._es5 = this._options.format.classes == 'es5'
-	} // }}}
-	analyse() { // {{{
-		@name = @data.name.name
-		@variable = $variable.define(this, @scope, @data.name, true, VariableKind::Class, @data.type)
-		
-		let classname = @data.name
-		
-		let thisVariable = $variable.define(this, @constructorScope, {
-			kind: NodeKind::Identifier
-			name: 'this'
-		}, true, VariableKind::Variable, $type.reference(classname.name))
-		
-		thisVariable.callable = func(data) {
-			data.arguments = [{
-				kind: NodeKind::Identifier
-				name: 'this'
-			}, {
-				kind: NodeKind::ArrayExpression
-				values: data.arguments
-			}]
-			
-			data.callee = {
-				kind: NodeKind::MemberExpression
-				object: {
-					kind: NodeKind::MemberExpression
-					object: {
-						kind: NodeKind::MemberExpression
-						object: classname
-						property: {
-							kind: NodeKind::Identifier
-							name: 'prototype'
-						}
-						computed: false
-						nullable: false
-					}
-					property: {
-						kind: NodeKind::Identifier
-						name: '__ks_cons'
-					}
-					computed: false
-					nullable: false
-				}
-				property: {
-					kind: NodeKind::Identifier
-					name: 'call'
-				}
-				computed: false
-				nullable: false
+		let method
+		if methods.length == 0 {
+			if extend? {
+				extend(node, block, null, variable)
+			}
+			else {
+				block
+					.newControl()
+					.code(`if(\(argName).length !== 0)`)
+					.step()
+					.line('throw new SyntaxError("wrong number of arguments")')
+					.done()
 			}
 		}
-		
-		thisVariable = $variable.define(this, @destructorScope, {
-			kind: NodeKind::Identifier
-			name: 'this'
-		}, true, VariableKind::Variable, $type.reference(classname.name))
-		
-		@destructorScope.rename('this', 'that')
-		
-		$variable.define(this, @instanceVariableScope, {
-			kind: NodeKind::Identifier
-			name: 'this'
-		}, true, VariableKind::Variable, $type.reference(classname.name))
-		
-		if @data.extends? {
-			@extends = true
+		else if methods.length == 1 {
+			method = methods[0]
 			
-			if @extendsVariable !?= @scope.getVariable(@data.extends.name) {
-				ReferenceException.throwNotDefined(@data.extends.name, this)
+			if method.min() == 0 && method.max() >= Infinity {
+				call(block, method, 0)
 			}
-			else if @extendsVariable.kind != VariableKind::Class {
-				TypeException.throwNotClass(@data.extends.name, this)
+			else if method.min() == method.max() {
+				const ctrl = block.newControl()
+				
+				ctrl.code(`if(\(argName).length === \(method.min()))`).step()
+				
+				call(ctrl, method, 0)
+				
+				if returns {
+					if extend {
+						extend(node, block, ctrl, variable)
+					}
+					else {
+						ctrl.done()
+						
+						block.line('throw new SyntaxError("wrong number of arguments")')
+					}
+				}
+				else {
+					if extend {
+						extend(node, block, ctrl, variable)
+					}
+					else {
+						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
+					}
+				}
 			}
-			
-			@variable.extends = @extendsName = @data.extends.name
-			
-			let extname = @data.extends
-			
-			let superVariable = $variable.define(this, @constructorScope, {
-				kind: NodeKind::Identifier
-				name: 'super'
-			}, true, VariableKind::Variable)
-			
-			if @extendsVariable.sealed?.extern {
-				superVariable.callable = (data) => {
-					SyntaxException.throwNotCompatibleConstructor(classname, this)
+			else if method.max() < Infinity {
+				let ctrl = block.newControl()
+				
+				ctrl.code(`if(\(argName).length >= \(method.min()) && \(argName).length <= \(method.max()))`).step()
+				
+				call(ctrl, method, 0)
+				
+				if returns {
+					ctrl.done()
+					
+					block.line('throw new SyntaxError("wrong number of arguments")')
+				}
+				else {
+					ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
 				}
 			}
 			else {
-				superVariable.callable = func(data) {
-					data.arguments = [{
-						kind: NodeKind::Identifier
-						name: 'this'
-					}, {
-						kind: NodeKind::ArrayExpression
-						values: data.arguments
-					}]
+				call(block, method, 0)
+			}
+		}
+		else {
+			let groups = {}
+			let infinities = []
+			let min = Infinity
+			let max = 0
+			
+			for index from 0 til methods.length {
+				method = methods[index]
+				method.index(index)
+				
+				if method.max() == Infinity {
+					infinities.push(method)
+				}
+				else {
+					for n from method.min() to method.max() {
+						if groups[n]? {
+							groups[n].methods.push(method)
+						}
+						else {
+							groups[n] = {
+								n: n
+								methods: [method]
+							}
+						}
+					}
 					
-					data.callee = {
-						kind: NodeKind::MemberExpression
-						object: {
-							kind: NodeKind::MemberExpression
-							object: {
-								kind: NodeKind::MemberExpression
-								object: extname
-								property: {
-									kind: NodeKind::Identifier
-									name: 'prototype'
-								}
-								computed: false
-								nullable: false
-							}
-							property: {
-								kind: NodeKind::Identifier
-								name: '__ks_cons'
-							}
-							computed: false
-							nullable: false
-						}
-						property: {
-							kind: NodeKind::Identifier
-							name: 'call'
-						}
-						computed: false
-						nullable: false
+					min = Math.min(min, method.min())
+					max = Math.max(max, method.max())
+				}
+			}
+			
+			if infinities.length {
+				for method in infinities {
+					for group of groups when method.min() >= group.n {
+						group.methods.push(method)
 					}
 				}
 			}
 			
-			$variable.define(this, @instanceVariableScope, {
-				kind: NodeKind::Identifier
-				name: 'super'
-			}, true, VariableKind::Variable)
+			if min == Infinity {
+				throw new NotImplementedException(node)
+			}
+			else {
+				for i from min to max {
+					if group ?= groups[i] {
+						for j from i + 1 to max while (gg ?= groups[j]) && Array.same(gg.methods, group.methods) {
+							if group.n is Array {
+								group.n.push(j)
+							}
+							else {
+								group.n = [i, j]
+							}
+							
+							delete groups[j]
+						}
+					}
+				}
+				
+				let ctrl = block.newControl()
+				
+				for k, group of groups {
+					ctrl.step().code('else ') unless ctrl.isFirstStep()
+					
+					if group.n is Array {
+						if group.n.length == 2 {
+							ctrl.code(`if(\(argName).length === \(group.n[0]) || \(argName).length === \(group.n[1]))`).step()
+						}
+						else {
+							ctrl.code(`if(\(argName).length >= \(group.n[0]) && \(argName).length <= \(group.n[group.n.length - 1]))`).step()
+						}
+					}
+					else {
+						ctrl.code(`if(\(argName).length === \(group.n))`).step()
+					}
+					
+					if group.methods.length == 1 {
+						call(ctrl, group.methods[0], group.methods[0].index())
+					}
+					else {
+						const parameters = {}
+						for method in group.methods {
+							ClassDeclaration.mapMethod(method, group.n, parameters)
+						}
+						
+						let indexes = []
+						for :parameter of parameters {
+							for hash, type of parameter.types {
+								type.methods:Array.remove(...indexes)
+								
+								if type.methods.length == 0 {
+									delete parameter.types[hash]
+								}
+							}
+							
+							for :type of parameter.types {
+								if type.methods.length == 1 {
+									indexes:Array.pushUniq(type.methods[0])
+								}
+							}
+						}
+						
+						if ClassDeclaration.checkMethods(methods, parameters, 0, node, ctrl, call, argName, returns) {
+							if returns {
+								fragments.line('throw new Error("Wrong type of arguments")')
+							}
+							else {
+								fragments.step().code('else').step().code('throw new Error("Wrong type of arguments")')
+							}
+						}
+					}
+				}
+				
+				if infinities.length == 0 {
+					if returns {
+						ctrl.done()
+						
+						block.line('throw new SyntaxError("wrong number of arguments")')
+					}
+					else {
+						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
+					}
+				}
+				else if infinities.length == 1 {
+					ctrl.step().code('else').step()
+					
+					call(ctrl, infinities[0], infinities[0].index())
+					
+					ctrl.done()
+				}
+				else {
+					throw new NotImplementedException(node)
+				}
+			}
+		}
+		
+		footer(block)
+		
+		return fragments
+	} // }}}
+	constructor(data, parent) { // {{{
+		super(data, parent)
+		
+		@constructorScope = new Scope(parent.scope())
+		@destructorScope = new Scope(parent.scope())
+		@instanceVariableScope = new Scope(parent.scope())
+		@es5 = @options.format.classes == 'es5'
+	} // }}}
+	analyse() { // {{{
+		@name = @data.name.name
+		@type = new ClassType(@name, @scope)
+		
+		@scope.define(@name, true, @type, this)
+		
+		let variable = @constructorScope.define('this', true, @type.reference(), this)
+		
+		variable.replaceCall = (data, arguments) => new CallThisConstructorSubstitude(data, arguments, @type)
+		
+		@destructorScope.define('this', true, @type.reference(), this)
+		@destructorScope.rename('this', 'that')
+		
+		@instanceVariableScope.define('this', true, @type.reference(), this)
+		
+		if @data.extends? {
+			@extends = true
+			@extendsName = @data.extends.name
+			
+			if variable !?= @scope.getVariable(@extendsName) {
+				ReferenceException.throwNotDefined(@extendsName, this)
+			}
+			else if (@extendsType = variable.type()) is not ClassType {
+				TypeException.throwNotClass(@extendsName, this)
+			}
+			
+			@type.extends(@extendsType)
+			
+			const superVariable = @constructorScope.define('super', true, @extendsType.reference(), this)
+			
+			if @extendsType.isSealedAlien() {
+				superVariable.replaceCall = (data, arguments) => {
+					SyntaxException.throwNotCompatibleConstructor(@name, this)
+				}
+			}
+			else {
+				superVariable.replaceCall = (data, arguments) => new CallSuperConstructorSubstitude(data, arguments, @type)
+			}
+			
+			@instanceVariableScope.define('super', true, @extendsType.reference(), this)
 		}
 		
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
-				@variable.abstract = @abstract = true
+				@abstract = true
 				
-				@variable.abstractMethods = {}
+				@type.abstract()
 			}
 			else if modifier.kind == ModifierKind::Sealed {
 				@sealed = true
+				
+				@type.seal()
 			}
 		}
 		
@@ -1383,10 +557,10 @@ class ClassDeclaration extends Statement {
 					declaration.analyse()
 				}
 				NodeKind::MethodDeclaration => {
-					if $method.isConstructor(data.name.name, @variable) {
+					if @type.isConstructor(data.name.name) {
 						declaration = new ClassConstructorDeclaration(data, this)
 					}
-					else if $method.isDestructor(data.name.name, @variable) {
+					else if @type.isDestructor(data.name.name) {
 						declaration = new ClassDestructorDeclaration(data, this)
 					}
 					else {
@@ -1400,42 +574,33 @@ class ClassDeclaration extends Statement {
 				}
 			}
 		}
-		
-		if @sealed {
-			@variable.sealed = {
-				name: '__ks_' + @variable.name.name
-				constructors: false
-				instanceMethods: {}
-				classMethods: {}
-			}
-		}
 	} // }}}
 	prepare() { // {{{
 		for name, variable of @classVariables {
 			variable.prepare()
 			
-			@variable.classVariables[name] = variable.signature()
+			@type.addClassVariable(name, variable.type())
+		}
+		
+		for name, methods of @classMethods {
+			for method in methods {
+				method.prepare()
+				
+				@type.addClassMethod(name, method.type())
+			}
 		}
 		
 		for name, variable of @instanceVariables {
 			variable.prepare()
 			
-			@variable.instanceVariables[name] = variable.signature()
+			@type.addInstanceVariable(name, variable.type())
 		}
-		
-		for method in @constructors {
-			method.prepare()
-			
-			@variable.constructors.push(method.signature())
-		}
-		
-		@destructor.prepare() if @destructor?
 		
 		for name, methods of @instanceMethods {
 			for method in methods {
 				method.prepare()
 				
-				@variable.instanceMethods[name].push(method.signature())
+				@type.addInstanceMethod(name, method.type())
 			}
 		}
 		
@@ -1443,281 +608,575 @@ class ClassDeclaration extends Statement {
 			for method in methods {
 				method.prepare()
 				
-				@variable.abstractMethods[name].push(method.signature())
+				@type.addAbstractMethod(name, method.type())
 			}
 		}
 		
-		for name, methods of @classMethods {
-			for method in methods {
-				method.prepare()
-				
-				@variable.classMethods[name].push(method.signature())
-			}
+		for method in @constructors {
+			method.prepare()
+			
+			@type.addConstructor(method.type())
 		}
 		
-		if @extends && !@abstract && (notImplemented = $class.listMissingAbstractMethods(@variable, @scope)).length != 0 {
+		if @destructor? {
+			@destructor.prepare()
+			
+			@type.addDestructor()
+		}
+		
+		if @extends && !@abstract && (notImplemented = @type.getMissingAbstractMethods()).length != 0 {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 	} // }}}
 	translate() { // {{{
-		for :variable of this._classVariables {
+		for :variable of @classVariables {
 			variable.translate()
 		}
 		
-		for :variable of this._instanceVariables {
+		for :variable of @instanceVariables {
 			variable.translate()
 		}
 		
-		for method in this._constructors {
+		for method in @constructors {
 			method.translate()
 		}
 		
-		this._destructor.translate() if this._destructor?
+		@destructor.translate() if @destructor?
 		
-		for :methods of this._instanceMethods {
+		for :methods of @instanceMethods {
 			for method in methods {
 				method.translate()
 			}
 		}
 		
-		for :methods of this._abstractMethods {
+		for :methods of @abstractMethods {
 			for method in methods {
 				method.translate()
 			}
 		}
 		
-		for :methods of this._classMethods {
+		for :methods of @classMethods {
 			for method in methods {
 				method.translate()
 			}
 		}
 	} // }}}
-	addReference(type?, node) { // {{{
-		if type? {
-			if type is Array {
-				for item in type {
-					this.addReference(item, node)
-				}
-			}
-			else if type.typeName? {
-				let signature = $signature.type(type, @scope)
+	addReference(type, node) { // {{{
+		if !type.isAny() {
+			if type is ReferenceType {
+				const name = type.name()
 				
-				if !?@references[signature] {
-					if signature == 'Any' || type.typeName.name == '...' || $typeofs[signature] == true {
-						@references[signature] = {
+				if !?@references[name] {
+					if $typeofs[name] == true {
+						@references[name] = {
 							status: TypeStatus::Native
 							type: type
 						}
 					}
-					else if variable ?= @scope.getVariable(type.typeName.name) {
-						@references[signature] = {
+					else if variable ?= @scope.getVariable(name) {
+						@references[name] = {
 							status: TypeStatus::Referenced
 							type: type
 							variable: variable
 						}
 					}
 					else {
-						@references[signature] = {
+						@references[name] = {
 							status: TypeStatus::Unreferenced
 							type: type
 						}
 					}
 				}
 			}
-			else if type.types {
-				for item in type.types {
-					this.addReference(item, node)
+			else if type is UnionType {
+				for let type in type.types() {
+					this.addReference(type, node)
 				}
 			}
 			else {
-				throw new NotImplementedException(node)
+				throw new NotImplementedException(this)
 			}
 		}
 	} // }}}
-	getAliasType(name, parameter) { // {{{
-		let variable
-		
-		if parameter._setterAlias {
-			variable = this.getInstanceMethod(name)
-		}
-		else {
-			variable = this.getInstanceVariable(name) ?? this.getInstanceVariable('_' + name)
-		}
-		
-		if variable? {
-			let type = $type.reference(variable.type ?? 'Any')
-			
-			if variable.nullable {
-				type.nullable = true
+	extends() => @extendsType
+	hasInits() { // {{{
+		for :field of @instanceVariables {
+			if field.hasDefaultValue() {
+				return true
 			}
-			
-			return type
-		}
-		
-		ReferenceException.throwNotDefinedMember(name, parameter)
-	} // }}}
-	getInstanceMethod(name, variable = null) { // {{{
-		if variable == null {
-			for method in @instanceMethods[name] {
-				signature = method.signature()
-				
-				if signature.min == 1 && signature.max == 1 {
-					return signature.parameters[0]
-				}
-			}
-		}
-		else {
-			if variable.instanceMethods[name]? {
-				throw new NotImplementedException()
-			}
-			else if variable.extends? {
-				return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
-			}
-		}
-		
-		return null
-	} // }}}
-	getInstanceVariable(name, variable = @variable) { // {{{
-		if variable.instanceVariables[name]? {
-			return variable.instanceVariables[name]
-		}
-		else if variable.extends? {
-			return this.getInstanceVariable(name, @scope.getVariable(variable.extends))
-		}
-		
-		return null
-	} // }}}
-	isInstanceMethod(name, variable = @variable) { // {{{
-		if variable.instanceMethods[name]?['1']? {
-			return true
-		}
-		else if variable.extends? {
-			return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
 		}
 		
 		return false
 	} // }}}
-	isInstanceVariable(name, variable = @variable) { // {{{
-		if variable.instanceVariables[name]? {
-			return true
-		}
-		else if variable.extends? {
-			return this.isInstanceVariable(name, @scope.getVariable(variable.extends))
-		}
-		
-		return false
-	} // }}}
+	isExtending() => @extends
 	name() => @name
-	newInstanceMethodScope(method) { // {{{
-		let scope = new Scope(this._scope)
+	newInstanceMethodScope(method: ClassMethodDeclaration) { // {{{
+		let scope = new Scope(@scope)
 		
-		$variable.define(this, scope, {
-			kind: NodeKind::Identifier
-			name: 'this'
-		}, true, VariableKind::Variable, $type.reference(@data.name.name))
+		scope.define('this', true, @type.reference(), this)
 		
-		if this._extends {
-			let variable = $variable.define(this, scope, {
-				kind: NodeKind::Identifier
-				name: 'super'
-			}, true, VariableKind::Variable)
+		if @extends {
+			const variable = scope.define('super', true, @extendsType.reference(), this)
 			
-			if this._es5 {
-				let extname = @data.extends
+			if @es5 {
+				variable.replaceCall = (data, arguments) => new CallSuperMethodES5Substitude(data, arguments, method, @type)
 				
-				variable.callable = func(data) {
-					data.arguments = [{
-						kind: NodeKind::Identifier
-						name: 'this'
-					}, {
-						kind: NodeKind::ArrayExpression
-						values: data.arguments
-					}]
-					
-					data.callee = {
-						kind: NodeKind::MemberExpression
-						object: {
-							kind: NodeKind::MemberExpression
-							object: {
-								kind: NodeKind::MemberExpression
-								object: extname
-								property: {
-									kind: NodeKind::Identifier
-									name: 'prototype'
-								}
-								computed: false
-								nullable: false
-							}
-							property: method.name
-							computed: false
-							nullable: false
-						}
-						property: {
-							kind: NodeKind::Identifier
-							name: 'call'
-						}
-						computed: false
-						nullable: false
-					}
-				}
-				
-				variable.reduce = func(data) {
-					data.arguments = [{
-						kind: NodeKind::Identifier
-						name: 'this'
-					}, {
-						kind: NodeKind::ArrayExpression
-						values: data.arguments
-					}]
-					
-					data.callee = {
-						kind: NodeKind::MemberExpression
-						object: {
-							kind: NodeKind::MemberExpression
-							object: {
-								kind: NodeKind::MemberExpression
-								object: extname
-								property: {
-									kind: NodeKind::Identifier
-									name: 'prototype'
-								}
-								computed: false
-								nullable: false
-							}
-							property: data.callee.property
-							computed: false
-							nullable: false
-						}
-						property: {
-							kind: NodeKind::Identifier
-							name: 'apply'
-						}
-						computed: false
-						nullable: false
-					}
-				}
+				variable.replaceMemberCall= (property, arguments) => new MemberSuperMethodES5Substitude(property, arguments, @type)
 			}
 			else {
-				variable.callable = func(data) {
-					data.callee = {
-						kind: NodeKind::MemberExpression
-						object: data.callee
-						property: method.name
-						computed: false
-						nullable: false
-					}
-				}
+				variable.replaceCall = (data, arguments) => new CallSuperMethodES6Substitude(data, arguments, method, @type)
 			}
 		}
 		
 		return scope
 	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
-		if @sealed {
-			$class.sealed(this, fragments)
+	toContinousES5Fragments(fragments) { // {{{
+		this.module().flag('Helper')
+		
+		let line = fragments.newLine().code($runtime.scope(this), @name, ' = ', $runtime.helper(this), '.class(')
+		let clazz = line.newObject()
+		
+		clazz.line('$name: ' + $quote(@name))
+		
+		if @data.version? {
+			clazz.line(`$version: [\(@data.version.major), \(@data.version.minor), \(@data.version.patch)]`)
+		}
+		
+		if @extends {
+			clazz.line('$extends: ', @extendsName)
+		}
+		
+		const m = []
+		
+		let ctrl
+		if @destructor? || !Object.isEmpty(@classMethods) {
+			ctrl = clazz.newLine().code('$static: ').newObject()
+			
+			if @destructor? {
+				@destructor.toFragments(ctrl, Mode::None)
+				
+				ClassDestructorDeclaration.toSwitchFragments(this, ctrl, @type)
+			}
+			
+			for name, methods of @classMethods {
+				m.clear()
+				
+				for method in methods {
+					method.toFragments(ctrl, Mode::None)
+					
+					m.push(method.type())
+				}
+				
+				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+			}
+			
+			ctrl.done()
+		}
+		
+		if !@extends || @extendsType.isSealedAlien() {
+			clazz
+				.newControl()
+				.code('$create: function()')
+				.step()
+				.line('this.__ks_init()')
+				.line('this.__ks_cons(arguments)')
+		}
+		
+		if this.hasInits() {
+			ctrl = clazz
+				.newControl()
+				.code('__ks_init_1: function()')
+				.step()
+			
+			for :field of @instanceVariables {
+				field.toFragments(ctrl)
+			}
+			
+			ctrl = clazz.newControl().code('__ks_init: function()').step()
+			
+			if @extends && !@extendsType.isSealedAlien() {
+				ctrl.line(@extendsName + '.prototype.__ks_init.call(this)')
+			}
+			
+			ctrl.line(@name + '.prototype.__ks_init_1.call(this)')
 		}
 		else {
-			$class.continuous(this, fragments)
+			if @extends {
+				if @extendsType.isSealedAlien() {
+					clazz
+						.newControl()
+						.code('__ks_init: function()')
+						.step()
+				}
+				else {
+					clazz
+						.newControl()
+						.code('__ks_init: function()')
+						.step()
+						.line(@extendsName + '.prototype.__ks_init.call(this)')
+				}
+			}
+			else {
+				clazz.newControl().code('__ks_init: function()').step()
+			}
+		}
+		
+		m.clear()
+		
+		for method in @constructors {
+			method.toFragments(clazz, Mode::None)
+			
+			m.push(method.type())
+		}
+		
+		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
+		
+		for name, methods of @instanceMethods {
+			m.clear()
+			
+			for method in methods {
+				method.toFragments(clazz, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+		}
+		
+		clazz.done()
+		line.code(')').done()
+	} // }}}
+	toContinousES6Fragments(fragments) { // {{{
+		let clazz = fragments
+			.newControl()
+			.code('class ', @name)
+		
+		if @extends {
+			clazz.code(' extends ', @extendsName)
+		}
+		
+		clazz.step()
+		
+		let ctrl
+		if !@extends {
+			clazz
+				.newControl()
+				.code('constructor()')
+				.step()
+				.line('this.__ks_init()')
+				.line('this.__ks_cons(arguments)')
+				.done()
+		}
+		else if @extendsType.isSealedAlien() {
+			clazz
+				.newControl()
+				.code('constructor()')
+				.step()
+				.line('super()')
+				.line('this.__ks_init()')
+				.line('this.__ks_cons(arguments)')
+				.done()
+		}
+		
+		if this.hasInits() {
+			ctrl = clazz
+				.newControl()
+				.code('__ks_init_1()')
+				.step()
+			
+			for :field of @instanceVariables {
+				field.toFragments(ctrl)
+			}
+			
+			ctrl.done()
+			
+			ctrl = clazz.newControl().code('__ks_init()').step()
+			
+			if @extends && !@extendsType.isSealedAlien() {
+				ctrl.line(@extendsName + '.prototype.__ks_init.call(this)')
+			}
+			
+			ctrl.line(@name + '.prototype.__ks_init_1.call(this)')
+			
+			ctrl.done()
+		}
+		else {
+			if @extends {
+				if @extendsType.isSealedAlien() {
+					clazz
+						.newControl()
+						.code('__ks_init()')
+						.step()
+						.done()
+				}
+				else {
+					clazz
+						.newControl()
+						.code('__ks_init()')
+						.step()
+						.line(@extendsName + '.prototype.__ks_init.call(this)')
+						.done()
+				}
+			}
+			else {
+				clazz.newControl().code('__ks_init()').step().done()
+			}
+		}
+		
+		const m = []
+		
+		for method in @constructors {
+			method.toFragments(clazz, Mode::None)
+			
+			m.push(method.type())
+		}
+		
+		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons(args)').step(), func(fragments) {
+			fragments.done()
+		})
+		
+		if @destructor? {
+			@destructor.toFragments(clazz, Mode::None)
+			
+			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
+		}
+		
+		for name, methods of @instanceMethods {
+			m.clear()
+			
+			for method in methods {
+				method.toFragments(clazz, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+				fragments.done()
+			})
+		}
+		
+		for name, methods of @classMethods {
+			m.clear()
+			
+			for method in methods {
+				method.toFragments(clazz, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+				fragments.done()
+			})
+		}
+		
+		clazz.done()
+	} // }}}
+	toSealedES5Fragments(fragments) { // {{{
+		@module().flag('Helper')
+		
+		const line = fragments.newLine().code($runtime.scope(this), @name, ' = ', $runtime.helper(this), '.class(')
+		const clazz = line.newObject()
+		
+		clazz.line('$name: ' + $quote(@name))
+		
+		if @data.version? {
+			clazz.line(`$version: [\(@data.version.major), \(@data.version.minor), \(@data.version.patch)]`)
+		}
+		
+		if @extends {
+			clazz.line('$extends: ', @extendsName)
+		}
+		
+		const m = []
+		
+		let ctrl
+		/* if node._destructor? || !Object.isEmpty(node._classMethods) {
+			ctrl = clazz.newLine().code('$static: ').newObject()
+			
+			if node._destructor? {
+				$class.destructor(node, ctrl, node._destructor)
+				
+				$helper.destructor(node, ctrl, node._variable)
+			}
+			
+			for name, methods of node._classMethods {
+				mets.clear()
+				
+				for method in methods {
+					$class.classMethod(node, ctrl, method, method.signature(), name)
+					
+					mets.push(method.signature())
+				}
+				
+				$helper.classMethod(node, ctrl.newControl(), node._variable, mets, name, $class.classMethodHeaderES5^^(name), $class.methodFooterES5)
+			}
+			
+			ctrl.done()
+		} */
+		
+		if @extends && !@extendsType.isSealedAlien() {
+			ctrl = clazz
+				.newControl()
+				.code('__ks_init: function()')
+				.step()
+				
+			ctrl.line(@extendsName, '.prototype.__ks_init.call(this)')
+			
+			if this.hasInits() {
+				for :field of @instanceVariables {
+					field.toFragments(ctrl)
+				}
+			}
+		}
+		else {
+			ctrl = clazz
+				.newControl()
+				.code('$create: function()')
+				.step()
+		
+			if this.hasInits() {
+				for :field of @instanceVariables {
+					field.toFragments(ctrl)
+				}
+			}
+			
+			ctrl.line('this.__ks_cons(arguments)')
+		}
+		
+		m.clear()
+		
+		for method in @constructors {
+			method.toFragments(clazz, Mode::None)
+			
+			m.push(method.type())
+		}
+		
+		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
+		
+		for name, methods of @instanceMethods {
+			m.clear()
+			
+			for method in methods {
+				method.toFragments(clazz, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+		}
+		
+		clazz.done()
+		line.code(')').done()
+	} // }}}
+	toSealedES6Fragments(fragments) { // {{{
+		const clazz = fragments
+			.newControl()
+			.code('class ', @name)
+		
+		if @extends {
+			clazz.code(' extends ', @extendsName)
+		}
+		
+		clazz.step()
+		
+		let ctrl
+		if @extends && !@extendsType.isSealedAlien() {
+			ctrl = clazz
+				.newControl()
+				.code('__ks_init()')
+				.step()
+				
+			ctrl.line(@extendsName, '.prototype.__ks_init.call(this)')
+			
+			if this.hasInits() {
+				for :field of @instanceVariables {
+					field.toFragments(ctrl)
+				}
+			}
+			
+			ctrl.done()
+		}
+		else {
+			ctrl = clazz
+				.newControl()
+				.code('constructor()')
+				.step()
+		
+			if this.hasInits() {
+				for :field of @instanceVariables {
+					field.toFragments(ctrl)
+				}
+			}
+			
+			ctrl.line('this.__ks_cons(arguments)')
+			
+			ctrl.done()
+		}
+		
+		const m = []
+		
+		for method in @constructors {
+			method.toFragments(clazz, Mode::None)
+			
+			m.push(method.type())
+		}
+		
+		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons(args)').step(), func(fragments) {
+			fragments.done()
+		})
+		
+		/* if node._destructor? {
+			$class.destructor(node, clazz, node._destructor)
+			
+			$helper.destructor(node, clazz, node._variable)
+		} */
+		
+		for name, methods of @instanceMethods {
+			m.clear()
+			
+			for method in methods {
+				method.toFragments(clazz, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+				fragments.done()
+			})
+		}
+		
+		for name, methods of @classMethods {
+			m.clear()
+			
+			for method in methods {
+				method.toFragments(clazz, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+				fragments.done()
+			})
+		}
+		
+		clazz.done()
+	} // }}}
+	toStatementFragments(fragments, mode) { // {{{
+		if @sealed {
+			if @es5 {
+				this.toSealedES5Fragments(fragments)
+			}
+			else {
+				this.toSealedES6Fragments(fragments)
+			}
+		}
+		else {
+			if @es5 {
+				this.toContinousES5Fragments(fragments)
+			}
+			else {
+				this.toContinousES6Fragments(fragments)
+			}
 		}
 		
 		for :variable of @classVariables {
@@ -1743,81 +1202,196 @@ class ClassDeclaration extends Statement {
 		}
 		
 		if @sealed {
-			fragments.line('var ' + @variable.sealed.name + ' = {}')
+			fragments.line(`var \(@type.sealName()) = {}`)
 		}
 	} // }}}
-	toTypeString(type, path) { // {{{
-		if type is Array {
-			let src = ''
-			
-			for i from 0 til type.length {
-				if i {
-					src += ','
-				}
-				
-				src += this.toTypeString(type[i], path)
+	type() => @type
+}
+
+class CallThisConstructorSubstitude {
+	private {
+		_arguments
+		_class: Type
+		_data
+	}
+	constructor(@data, @arguments, @class)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`\(@class.name()).prototype.__ks_cons.call(this, [`)
+		
+		for argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
 			}
 			
-			return '[' + src + ']'
+			fragments.compile(argument)
 		}
-		else if type is String {
-			if reference ?= @references[type] {
-				if reference.status == HelperTypeKind::Native {
-					return $quote(type)
-				}
-				else if reference.status == HelperTypeKind::Referenced {
-					return type
-				}
-				else if reference.status == HelperTypeKind::Unreferenced {
-					if path? {
-						this.module().addReference(type, path + '.type = ' + type)
-						
-						return $quote('#' + type)
-					}
-					else {
-						TypeException.throwInvalid(type, this)
-					}
-				}
+		
+		fragments.code(']')
+	} // }}}
+	type() => Type.Void
+}
+
+class CallSuperConstructorSubstitude {
+	private {
+		_arguments
+		_class: Type
+		_data
+	}
+	constructor(@data, @arguments, @class)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`\(@class.extends().name()).prototype.__ks_cons.call(this, [`)
+		
+		for argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
 			}
-			else if type == 'Any' || $typeofs[type] == true {
-				return $quote(type)
-			}
-			else if @scope.hasVariable(type) {
-				return type
-			}
-			else {
-				if path? {
-					this.module().addReference(type, path + '.type = ' + type)
-					
-					return $quote('#' + type)
-				}
-				else {
-					TypeException.throwInvalid(type, this)
-				}
-			}
+			
+			fragments.compile(argument)
 		}
-		else if type.name? {
-			return this.toTypeString(type.name, path)
+		
+		fragments.code(']')
+	} // }}}
+	type() => Type.Void
+}
+
+class CallSuperMethodES5Substitude {
+	private {
+		_arguments
+		_class: Type
+		_data
+		_method: ClassMethodDeclaration
+	}
+	constructor(@data, @arguments, @method, @class)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`\(@class.extends().name()).prototype.\(@method.name()).call(this, [`)
+		
+		for argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
+			}
+			
+			fragments.compile(argument)
 		}
-		else {
-			throw new NotImplementedException(this)
+		
+		fragments.code(']')
+	} // }}}
+	type() => @method.type().returnType()
+}
+
+class CallSuperMethodES6Substitude {
+	private {
+		_arguments
+		_class: Type
+		_data
+		_method: ClassMethodDeclaration
+	}
+	constructor(@data, @arguments, @method, @class)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`super.\(@method.name())(`)
+		
+		for argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
+			}
+			
+			fragments.compile(argument)
 		}
+	} // }}}
+	type() => @method.type().returnType()
+}
+
+class MemberSuperMethodES5Substitude {
+	private {
+		_arguments
+		_class: Type
+		_property: String
+	}
+	constructor(@property, @arguments, @class)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`\(@class.extends().name()).prototype.\(@property).apply(this, [`)
+		
+		for argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
+			}
+			
+			fragments.compile(argument)
+		}
+		
+		fragments.code(']')
 	} // }}}
 }
 
 class ClassMethodDeclaration extends Statement {
 	private {
 		_abstract: Boolean		= false
+		_aliases: Array			= []
 		_analysed: Boolean		= false
+		_body: Array
 		_instance: Boolean		= true
 		_internalName: String
 		_name: String
-		_parameters
-		_signature
-		_statements
+		_parameters: Array
+		_statements: Array
+		_type: Type
 	}
+	static toClassSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
+		let extend = null
+		if variable.isExtending() {
+			extend = func(node, fragments, ctrl?, variable) {
+				const extends = variable.extends().name()
+				if node.scope().getVariable(extends).type().hasClassMethod(name) {
+					ctrl.done()
+					
+					fragments.line(`return \(extends).\(name).apply(null, arguments)`)
+				}
+				else {
+					ctrl
+						.step()
+						.code(`else if(\(extends).\(name))`)
+						.step()
+						.line(`return \(extends).\(name).apply(null, arguments)`)
+						.done()
+					
+					fragments.line('throw new SyntaxError("wrong number of arguments")')
+				}
+			}
+		}
+		
+		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, `__ks_sttc_\(name)_`, 'arguments', 'return '), 'arguments', true)
+	} // }}}
+	static toInstanceSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
+		let extend = null
+		if variable.isExtending() {
+			extend = func(node, fragments, ctrl?, variable) {
+				const extends = variable.extends().name()
+				if node.scope().getVariable(extends).type().hasInstanceMethod(name) {
+					ctrl.done()
+					
+					fragments.line(`return \(extends).prototype.\(name).apply(this, arguments)`)
+				}
+				else {
+					ctrl
+						.step()
+						.code(`else if(\(extends).prototype.\(name))`)
+						.step()
+						.line(`return \(extends).prototype.\(name).apply(this, arguments)`)
+						.done()
+					
+					fragments.line('throw new SyntaxError("wrong number of arguments")')
+				}
+			}
+		}
+		
+		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, `prototype.__ks_func_\(name)_`, 'arguments', 'return '), 'arguments', true)
+	} // }}}
 	constructor(data, parent) { // {{{
-		super(data, parent, parent.newInstanceMethodScope(data))
+		super(data, parent, parent.newInstanceMethodScope(this))
 		
 		@name = data.name.name
 		
@@ -1838,8 +1412,6 @@ class ClassMethodDeclaration extends Statement {
 					}
 					else {
 						parent._abstractMethods[@name] = [this]
-					
-						parent._variable.abstractMethods[@name] = []
 					}
 				}
 				else {
@@ -1856,8 +1428,6 @@ class ClassMethodDeclaration extends Statement {
 					@internalName = `__ks_func_\(@name)_0`
 					
 					parent._instanceMethods[@name] = [this]
-					
-					parent._variable.instanceMethods[@name] = []
 				}
 			}
 		}
@@ -1874,16 +1444,16 @@ class ClassMethodDeclaration extends Statement {
 				@internalName = `__ks_sttc_\(@name)_0`
 				
 				parent._classMethods[@name] = [this]
-				
-				parent._variable.classMethods[@name] = []
 			}
 		}
 		
 		for parameter in @data.parameters {
-			@parent.addReference($type.type(parameter.type, @scope, this), this)
+			@parent.addReference(Type.fromAST(parameter.type, this), this)
 		}
 	} // }}}
 	analyse() { // {{{
+		@body = $ast.body(@data.body)
+		
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
@@ -1897,7 +1467,21 @@ class ClassMethodDeclaration extends Statement {
 				parameter.prepare()
 			}
 			
-			@signature = Signature.fromNode(this)
+			const arguments = [parameter.type() for parameter in @parameters]
+			@type = new ClassMethodType(arguments, @data, this)
+			
+			if @parent._extends {
+				if method ?= @parent._extendsType.getInstanceMethod(@name, arguments) {
+					if @data.type? {
+						if !@type.returnType().isInstanceOf(method.returnType()) {
+							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
+						}
+					}
+					else {
+						@type.returnType(method.returnType())
+					}
+				}
+			}
 			
 			@analysed = true
 		}
@@ -1908,7 +1492,14 @@ class ClassMethodDeclaration extends Statement {
 		}
 		
 		@statements = []
-		for statement in $body(@data.body) {
+		
+		for statement in @aliases {
+			@statements.push(statement)
+			
+			statement.analyse()
+		}
+		
+		for statement in @body {
 			@statements.push(statement = $compile.statement(statement, this))
 			
 			statement.analyse()
@@ -1922,75 +1513,33 @@ class ClassMethodDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
-	getAliasType(name, node) => @parent.getAliasType(name, node)
-	isAbstract() => @abstract
-	isConsumedError(name, variable): Boolean { // {{{
-		if @data.throws.length > 0 {
-			for x in @data.throws {
-				return true if $error.isConsumed(x.name, name, variable, @scope)
-			}
+	addAliasStatement(statement: AliasStatement) { // {{{
+		if !ClassDeclaration.isAssigningAlias(@body, statement.name(), false, false) {
+			@aliases.push(statement)
 		}
-		
-		return false
 	} // }}}
+	isAbstract() => @abstract
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
-	isInstanceMethod(name) => @parent.isInstanceMethod(name)
-	isInstanceVariable(name) => @parent.isInstanceVariable(name)
 	isMethod() => true
 	length() => @parameters.length
 	name() => @name
-	signature() { // {{{
-		if @analysed {
-			return @signature
-		}
-		else {
-			this.prepare()
-			
-			return @signature
-		}
-	} // }}}
+	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		if @parent._es5 {
-			ctrl.code($class.methodHeader(@internalName, @parent) + '(')
+			ctrl.code(`\(@internalName): function(`)
 		}
 		else {
 			ctrl.code('static ') if !@instance
 			
-			ctrl.code(@internalName + '(')
+			ctrl.code(`\(@internalName)(`)
 		}
 		
-		$function.parameters(this, ctrl, false, func(node) {
+		Parameter.toFragments(this, ctrl, false, func(node) {
 			return node.code(')').step()
 		})
-		
-		for parameter in @parameters {
-			if parameter._thisAlias && !$method.isUsingProperty($body(@data.body), parameter._name) {
-				if parameter._setterAlias {
-					if (@name != parameter._name || @signature.min != 1 || @signature.max != 1) && this.isInstanceMethod(parameter._name) {
-						ctrl.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
-					}
-					else {
-						ReferenceException.throwNotDefinedMember(parameter._name, this)
-					}
-				}
-				else {
-					if this.isInstanceVariable(parameter._name) {
-						ctrl.newLine().code('this.' + parameter._name + ' = ').compile(parameter).done()
-					}
-					else if this.isInstanceVariable('_' + parameter._name) {
-						ctrl.newLine().code('this._' + parameter._name + ' = ').compile(parameter).done()
-					}
-					else if (@name != parameter._name || @signature.min != 1 || @signature.max != 1) && this.isInstanceMethod(parameter._name) {
-						ctrl.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
-					}
-					else {
-						ReferenceException.throwNotDefinedMember(parameter._name, this)
-					}
-				}
-			}
-		}
 		
 		for statement in @statements {
 			ctrl.compile(statement)
@@ -1998,15 +1547,51 @@ class ClassMethodDeclaration extends Statement {
 		
 		ctrl.done() unless @parent._es5
 	} // }}}
+	type() { // {{{
+		if @analysed {
+			return @type
+		}
+		else {
+			this.prepare()
+			
+			return @type
+		}
+	} // }}}
 }
 
 class ClassConstructorDeclaration extends Statement {
 	private {
-		_internalName
+		_aliases: Array			= []
+		_body: Array
+		_internalName: String
 		_parameters
-		_signature
 		_statements
+		_type: Type
 	}
+	static toSwitchFragments(node, fragments, variable, methods, header, footer) { // {{{
+		let extend = null
+		if node.isExtending() {
+			extend = func(node, fragments, ctrl?, variable) {
+				const name = variable.extends().name()
+				const extends = node.scope().getVariable(name).type()
+				const constructorName = extends.isSealedAlien() ? 'constructor' : '__ks_cons'
+				
+				if ctrl? {
+					ctrl
+						.step()
+						.code('else')
+						.step()
+						.line(`\(name).prototype.\(constructorName).call(this, args)`)
+						.done()
+				}
+				else {
+					fragments.line(`\(name).prototype.\(constructorName).call(this, args)`)
+				}
+			}
+		}
+		
+		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, 'prototype.__ks_cons_', 'args', ''), 'args', false)
+	} // }}}
 	constructor(data, parent) { // {{{
 		super(data, parent, new Scope(parent._constructorScope))
 		
@@ -2015,11 +1600,12 @@ class ClassConstructorDeclaration extends Statement {
 		parent._constructors.push(this)
 		
 		for parameter in @data.parameters {
-			//console.log(Parameter.type(parameter, this))
-			@parent.addReference($type.type(parameter.type, @scope, this), this)
+			@parent.addReference(Type.fromAST(parameter.type, this), this)
 		}
 	} // }}}
 	analyse() { // {{{
+		@body = $ast.body(@data.body)
+		
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
@@ -2032,28 +1618,54 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.prepare()
 		}
 		
-		@signature = Signature.fromNode(this)
+		@type = new ClassConstructorType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
 		
-		let body = $body(@data.body)
-		if @parent._extends && (!?@parent._extendsVariable.sealed || !@parent._extendsVariable.sealed.extern) {
-			if body.length == 0 {
-				this.callParentConstructor(body)
+		let index = -1
+		if @body.length == 0 {
+			if @parent._extends {
+				this.callParentConstructor(@body)
+				
+				index = 0
 			}
-			else if !this.isCallingParentConstructor(body) {
-				SyntaxException.throwNoSuperCall(this)
-			}
+		}
+		else if (index = this.getConstructorIndex(@body)) == -1 && @parent._extends && (!@parent._extendsType.isSealed() || !@parent._extendsType.isSealedAlien()) {
+			SyntaxException.throwNoSuperCall(this)
 		}
 		
 		@statements = []
-		for statement in body {
-			@statements.push(statement = $compile.statement(statement, this))
+		
+		if @aliases.length == 0 {
+			for statement in @body {
+				@statements.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
+			}
+		}
+		else {
+			/* for statement in @body from 0 to index { */
+			for statement, i in @body while i <= index {
+				@statements.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
+			}
 			
-			statement.analyse()
+			for statement in @aliases {
+				@statements.push(statement)
+				
+				statement.analyse()
+			}
+			
+			/* for statement in @body from index + 1 { */
+			for statement, i in @body when i > index {
+				@statements.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
+			}
 		}
 		
 		for statement in @statements {
@@ -2064,23 +1676,24 @@ class ClassConstructorDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
+	addAliasStatement(statement: AliasStatement) { // {{{
+		if !ClassDeclaration.isAssigningAlias(@body, statement.name(), true, @parent._extends) {
+			@aliases.push(statement)
+		}
+	} // }}}
 	private callParentConstructor(body) { // {{{
 		// list maybe parent's variables
-		const instanceVariables = @parent._variable.instanceVariables
+		const type = @parent.type()
 		
 		let parameters = [
 			parameter
 			for parameter in @parameters
 			when	!parameter.isAnonymous() &&
-					!parameter.isSetterAlias() &&
-					!?instanceVariables[parameter.name()] &&
-					!?instanceVariables[`_\(parameter.name())`]
+					!parameter.isThisAlias()
 		]
 		
 		if parameters.length == 0 {
-			const constructors = @parent._extendsVariable.constructors
-			
-			if constructors.length != 0 {
+			if @parent._extendsType.hasConstructors() {
 				SyntaxException.throwNoSuperCall(this)
 			}
 		}
@@ -2095,7 +1708,22 @@ class ClassConstructorDeclaration extends Statement {
 			SyntaxException.throwNoSuperCall(this)
 		}
 	} // }}}
-	getAliasType(name, node) => @parent.getAliasType(name, node)
+	private getConstructorIndex(body: Array) { // {{{
+		for statement, index in body {
+			if statement.kind == NodeKind::CallExpression {
+				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super') {
+					return index
+				}
+			}
+			else if statement.kind == NodeKind::IfStatement {
+				if statement.whenFalse? && this.getConstructorIndex(statement.whenTrue.statements) != -1 && this.getConstructorIndex(statement.whenFalse.statements) != -1 {
+					return index
+				}
+			}
+		}
+		
+		return -1
+	} // }}}
 	isAbstract() { // {{{
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
@@ -2105,65 +1733,22 @@ class ClassConstructorDeclaration extends Statement {
 		
 		return false
 	} // }}}
-	private isCallingParentConstructor(body) { // {{{
-		// walk body to find super call
-		for statement in body {
-			if statement.kind == NodeKind::CallExpression {
-				if statement.callee.kind == NodeKind::Identifier && statement.callee.name == 'super' {
-					return true
-				}
-			}
-			else if statement.kind == NodeKind::IfStatement {
-				throw new NotImplementedException(this)
-			}
-		}
-		
-		return false
-	} // }}}
-	isInstanceMethod(name) => @parent.isInstanceMethod(name)
-	isInstanceVariable(name) => @parent.isInstanceVariable(name)
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isMethod() => true
-	signature() => @signature
+	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		if @parent._es5 {
-			ctrl.code($class.methodHeader(@internalName, @parent) + '(')
+			ctrl.code(`\(@internalName): function(`)
 		}
 		else {
-			ctrl.code(@internalName + '(')
+			ctrl.code(`\(@internalName)(`)
 		}
 		
-		$function.parameters(this, ctrl, false, func(node) {
+		Parameter.toFragments(this, ctrl, false, func(node) {
 			return node.code(')').step()
 		})
-		
-		for parameter in @parameters {
-			if parameter._thisAlias && !$method.isUsingProperty($body(@data.body), parameter._name) {
-				if parameter._setterAlias {
-					if this.isInstanceMethod(parameter._name) {
-						ctrl.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
-					}
-					else {
-						ReferenceException.throwNotDefinedMember(parameter._name, this)
-					}
-				}
-				else {
-					if this.isInstanceVariable(parameter._name) {
-						ctrl.newLine().code('this.' + parameter._name + ' = ').compile(parameter).done()
-					}
-					else if this.isInstanceVariable('_' + parameter._name) {
-						ctrl.newLine().code('this._' + parameter._name + ' = ').compile(parameter).done()
-					}
-					else if this.isInstanceMethod(parameter._name) {
-						ctrl.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
-					}
-					else {
-						ReferenceException.throwNotDefinedMember(parameter._name, this)
-					}
-				}
-			}
-		}
 		
 		for statement in @statements {
 			ctrl.compile(statement)
@@ -2171,29 +1756,50 @@ class ClassConstructorDeclaration extends Statement {
 		
 		ctrl.done() unless @parent._es5
 	} // }}}
+	type() => @type
 }
 
 class ClassDestructorDeclaration extends Statement {
 	private {
-		_internalName
-		_parameters		= []
-		_signature
+		_internalName: String
+		_parameters: Array
 		_statements
+		_type: Type
 	}
+	static toSwitchFragments(node, fragments, variable) { // {{{
+		let ctrl = fragments.newControl()
+		
+		if node._es5 {
+			ctrl.code('__ks_destroy: function(that)')
+		}
+		else {
+			ctrl.code('static __ks_destroy(that)')
+		}
+		
+		ctrl.step()
+		
+		if node._extends {
+			ctrl.line(`\(node._extendsName).__ks_destroy(that)`)
+		}
+		
+		for i from 0 til variable.destructors() {
+			ctrl.line(`\(node._name).__ks_destroy_\(i)(that)`)
+		}
+		
+		ctrl.done() unless node._es5
+	} // }}}
 	constructor(data, parent) { // {{{
 		super(data, parent, new Scope(parent._destructorScope))
 		
 		@internalName = `__ks_destroy_0`
 		
 		parent._destructor = this
-		
-		parent._variable.destructors++
 	} // }}}
 	analyse() { // {{{
 		const parameter = new Parameter({
 			kind: NodeKind::Parameter
 			modifiers: []
-			name: $identifier('that')
+			name: $ast.identifier('that')
 		}, this)
 		
 		parameter.analyse()
@@ -2201,15 +1807,13 @@ class ClassDestructorDeclaration extends Statement {
 		@parameters = [parameter]
 	} // }}}
 	prepare() { // {{{
-		for parameter in @parameters {
-			parameter.prepare()
-		}
+		@parameters[0].prepare()
 		
-		@signature = Signature.fromNode(this)
+		@type = new ClassDestructorType(@data, this)
 	} // }}}
 	translate() { // {{{
 		@statements = []
-		for statement in $body(@data.body) {
+		for statement in $ast.body(@data.body) {
 			@statements.push(statement = $compile.statement(statement, this))
 			
 			statement.analyse()
@@ -2223,7 +1827,6 @@ class ClassDestructorDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
-	getAliasType(name, node) => @parent.getAliasType(name, node)
 	isAbstract() { // {{{
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
@@ -2234,21 +1837,19 @@ class ClassDestructorDeclaration extends Statement {
 		return false
 	} // }}}
 	isInstance() => false
-	isInstanceMethod(name) => @parent.isInstanceMethod(name)
-	isInstanceVariable(name) => @parent.isInstanceVariable(name)
 	isMethod() => true
-	signature() => @signature
+	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
 		
 		if @parent._es5 {
-			ctrl.code($class.methodHeader(@internalName, @parent) + '(')
+			ctrl.code(`\(@internalName): function(`)
 		}
 		else {
 			ctrl.code(`static \(@internalName)(`)
 		}
 		
-		$function.parameters(this, ctrl, false, func(node) {
+		Parameter.toFragments(this, ctrl, false, func(node) {
 			return node.code(')').step()
 		})
 		
@@ -2258,6 +1859,7 @@ class ClassDestructorDeclaration extends Statement {
 		
 		ctrl.done() unless @parent._es5
 	} // }}}
+	type() => @type
 }
 
 class ClassVariableDeclaration extends AbstractNode {
@@ -2265,8 +1867,8 @@ class ClassVariableDeclaration extends AbstractNode {
 		_defaultValue				= null
 		_hasDefaultValue: Boolean	= false
 		_instance: Boolean			= true
-		_name
-		_signature
+		_name: String
+		_type: ClassVariableType
 	}
 	constructor(data, parent) { // {{{
 		super(data, parent)
@@ -2289,7 +1891,7 @@ class ClassVariableDeclaration extends AbstractNode {
 			parent._classVariables[@name] = this
 		}
 		
-		@parent.addReference($type.type(@data.type, @scope, this), this)
+		@parent.addReference(@type = Type.fromAST(@data, this), this)
 	} // }}}
 	analyse() { // {{{
 		if @data.defaultValue? {
@@ -2312,17 +1914,18 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		@signature = $field.signature(@data, @parent)
-		
-		@defaultValue.prepare() if @defaultValue?
+		if @hasDefaultValue {
+			@defaultValue.prepare()
+		}
 	} // }}}
 	translate() { // {{{
-		@defaultValue.translate() if @defaultValue?
+		if @hasDefaultValue {
+			@defaultValue.translate()
+		}
 	} // }}}
 	hasDefaultValue() => @hasDefaultValue
 	isInstance() => @instance
 	name() => @name
-	signature() => @signature
 	toFragments(fragments) { // {{{
 		if @hasDefaultValue {
 			if @instance {
@@ -2341,4 +1944,5 @@ class ClassVariableDeclaration extends AbstractNode {
 			}
 		}
 	} // }}}
+	type() => @type
 }

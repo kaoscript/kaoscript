@@ -1,14 +1,16 @@
 class ForOfStatement extends Statement {
 	private {
 		_body
-		_defineKey		= false
-		_defineValue	= false
+		_defineKey: Boolean		= false
+		_defineValue: Boolean	= false
 		_expression
-		_expressionName
+		_expressionName: String
 		_key
-		_keyName
+		_keyName: String
+		_keyVariable: Variable
 		_until
 		_value
+		_valueVariable: Variable
 		_when
 		_while
 	}
@@ -21,7 +23,7 @@ class ForOfStatement extends Statement {
 		
 		if @data.key? {
 			if @data.declaration || !@scope.hasVariable(@data.key.name) {
-				$variable.define(this, @scope, @data.key.name, false, $variable.kind(@data.key.type), @data.key.type)
+				@keyVariable = @scope.define(@data.key.name, false, @scope.reference('String'), this)
 				
 				@defineKey = true
 			}
@@ -32,7 +34,7 @@ class ForOfStatement extends Statement {
 		
 		if @data.value? {
 			if @data.declaration || !@scope.hasVariable(@data.value.name) {
-				$variable.define(this, @scope, @data.value.name, false, $variable.kind(@data.value.type), @data.value.type)
+				@valueVariable = @scope.define(@data.value.name, false, this)
 				
 				@defineValue = true
 			}
@@ -55,7 +57,7 @@ class ForOfStatement extends Statement {
 			@when.analyse()
 		}
 		
-		@body = $compile.expression($block(@data.body), this)
+		@body = $compile.expression($ast.block(@data.body), this)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -65,6 +67,10 @@ class ForOfStatement extends Statement {
 			@expressionName = this.greatScope().acquireTempName()
 			
 			@scope.updateTempNames()
+		}
+		
+		if @defineValue {
+			@valueVariable.type(@expression.type().parameter())
 		}
 		
 		if @key? {
@@ -109,9 +115,9 @@ class ForOfStatement extends Statement {
 			let line = fragments.newLine()
 			
 			if !this.greatScope().hasVariable(@expressionName) {
-				line.code($variable.scope(this))
+				line.code($runtime.scope(this))
 				
-				$variable.define(this, this.greatScope(), @expressionName, false, VariableKind::Variable)
+				this.greatScope().define(@expressionName, false, this)
 			}
 			
 			line.code(@expressionName, $equals).compile(@expression).done()
@@ -121,13 +127,13 @@ class ForOfStatement extends Statement {
 		
 		if @key? {
 			if @data.declaration || @defineKey {
-				ctrl.code($variable.scope(this))
+				ctrl.code($runtime.scope(this))
 			}
 			
 			ctrl.compile(@key)
 		}
 		else {
-			ctrl.code($variable.scope(this), @keyName)
+			ctrl.code($runtime.scope(this), @keyName)
 		}
 		
 		ctrl.code(' in ').compile(@expressionName ?? @expression).code(')').step()
@@ -136,7 +142,7 @@ class ForOfStatement extends Statement {
 			let line = ctrl.newLine()
 			
 			if @data.declaration || @defineValue {
-				line.code($variable.scope(this))
+				line.code($runtime.scope(this))
 			}
 			
 			line.compile(@value).code($equals).compile(@expressionName ?? @expression).code('[').compile(@key ?? @keyName).code(']').done()

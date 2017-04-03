@@ -71,6 +71,14 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type(): Type { // {{{
+		if @left.type().isNumber() || @left.type().isString() {
+			return @left.type()
+		}
+		else {
+			return new UnionType([@scope.reference('Number'), @scope.reference('String')])
+		}
+	} // }}}
 }
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
@@ -82,6 +90,7 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 			.code($space)
 			.wrapBoolean(@right)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorBitwiseAnd extends BinaryOperatorExpression {
@@ -93,6 +102,7 @@ class BinaryOperatorBitwiseAnd extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorBitwiseLeftShift extends BinaryOperatorExpression {
@@ -104,6 +114,7 @@ class BinaryOperatorBitwiseLeftShift extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorBitwiseOr extends BinaryOperatorExpression {
@@ -115,6 +126,7 @@ class BinaryOperatorBitwiseOr extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorBitwiseRightShift extends BinaryOperatorExpression {
@@ -126,6 +138,7 @@ class BinaryOperatorBitwiseRightShift extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorBitwiseXor extends BinaryOperatorExpression {
@@ -137,6 +150,7 @@ class BinaryOperatorBitwiseXor extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorDivision extends BinaryOperatorExpression {
@@ -148,6 +162,7 @@ class BinaryOperatorDivision extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorEquality extends BinaryOperatorExpression {
@@ -159,6 +174,7 @@ class BinaryOperatorEquality extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorGreaterThan extends BinaryOperatorExpression {
@@ -170,6 +186,7 @@ class BinaryOperatorGreaterThan extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorGreaterThanOrEqual extends BinaryOperatorExpression {
@@ -181,6 +198,7 @@ class BinaryOperatorGreaterThanOrEqual extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorInequality extends BinaryOperatorExpression {
@@ -192,6 +210,7 @@ class BinaryOperatorInequality extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorLessThan extends BinaryOperatorExpression {
@@ -203,6 +222,7 @@ class BinaryOperatorLessThan extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorLessThanOrEqual extends BinaryOperatorExpression {
@@ -214,6 +234,7 @@ class BinaryOperatorLessThanOrEqual extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorModulo extends BinaryOperatorExpression {
@@ -225,6 +246,7 @@ class BinaryOperatorModulo extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorMultiplication extends BinaryOperatorExpression {
@@ -236,14 +258,25 @@ class BinaryOperatorMultiplication extends BinaryOperatorExpression {
 			.code($space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
+	private {
+		_type: Type
+	}
 	prepare() { // {{{
 		super.prepare()
 		
 		@left.acquireReusable(true)
 		@left.releaseReusable()
+		
+		if @left.type().equals(@right.type()) {
+			@type = @left.type()
+		}
+		else {
+			@type = new UnionType([@left.type(), @right.type()])
+		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
 		@left.acquireReusable(true)
@@ -275,6 +308,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			.code(' : ')
 			.wrap(@right)
 	} // }}}}
+	type() => @type
 }
 
 class BinaryOperatorOr extends BinaryOperatorExpression {
@@ -286,6 +320,7 @@ class BinaryOperatorOr extends BinaryOperatorExpression {
 			.code($space)
 			.wrapBoolean(@right)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorSubtraction extends BinaryOperatorExpression {
@@ -295,15 +330,19 @@ class BinaryOperatorSubtraction extends BinaryOperatorExpression {
 			.code($space, '-', @data.operator, $space)
 			.wrap(@right)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorTypeCasting extends Expression {
 	private {
 		_left
+		_type: Type
 	}
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
+		
+		@type = Type.fromAST(@data.right, this)
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -316,15 +355,19 @@ class BinaryOperatorTypeCasting extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@left)
 	} // }}}
+	type() => @type
 }
 
 class BinaryOperatorTypeEquality extends Expression {
 	private {
 		_left
+		_type: Type
 	}
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
+		
+		@type = Type.fromAST(@data.right, this)
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -335,17 +378,21 @@ class BinaryOperatorTypeEquality extends Expression {
 	isComputed() => false
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
-		$type.check(this, fragments, @left, @data.right)
+		@type.toTestFragments(fragments, @left)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorTypeInequality extends Expression {
 	private {
 		_left
+		_type: Type
 	}
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
+		
+		@type = Type.fromAST(@data.right, this)
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -359,12 +406,12 @@ class BinaryOperatorTypeInequality extends Expression {
 		if @data.right.kind == NodeKind::TypeReference {
 			fragments.code('!')
 			
-			$type.check(this, fragments, @left, @data.right)
+			@type.toTestFragments(fragments, @left)
 		}
 		else if @data.right.types? {
 			fragments.code('!(')
 			
-			$type.check(this, fragments, @left, @data.right)
+			@type.toTestFragments(fragments, @left)
 			
 			fragments.code(')')
 		}
@@ -372,4 +419,5 @@ class BinaryOperatorTypeInequality extends Expression {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }

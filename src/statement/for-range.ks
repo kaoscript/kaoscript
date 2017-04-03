@@ -4,18 +4,19 @@ class ForRangeStatement extends Statement {
 		_boundName
 		_by
 		_byName
-		_defineValue	= false
+		_defineValue: Boolean		= false
 		_from
 		_til
 		_to
 		_until
 		_value
+		_valueVariable: Variable
 		_when
 		_while
 	}
 	analyse() { // {{{
 		if !@scope.hasVariable(@data.value.name) {
-			$variable.define(this, @scope, @data.value.name, false, $variable.kind(@data.value.type), @data.value.type)
+			@valueVariable = @scope.define(@data.value.name, false, @scope.reference('Number'), this)
 			
 			@defineValue = true
 		}
@@ -48,7 +49,7 @@ class ForRangeStatement extends Statement {
 			@when.analyse()
 		}
 		
-		@body = $compile.expression($block(@data.body), this)
+		@body = $compile.expression($ast.block(@data.body), this)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -99,7 +100,7 @@ class ForRangeStatement extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl().code('for(')
 		if @data.declaration || @defineValue {
-			ctrl.code($variable.scope(this))
+			ctrl.code($runtime.scope(this))
 		}
 		ctrl.compile(@value).code($equals).compile(@from)
 		

@@ -5,8 +5,9 @@
   },
   "exports": {
     "Function": {
-      "name": "Function",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "true",
+      "sealed": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -31,19 +32,11 @@
                 "max": "Infinity"
               }
             ],
+            "returns": "Any",
             "sealed": "true",
             "throws": []
           }
         ]
-      },
-      "sealed": {
-        "name": "__ks_Function",
-        "constructors": "false",
-        "instanceMethods": {},
-        "classMethods": {
-          "vcurry": "true"
-        },
-        "extern": "true"
       }
     }
   }

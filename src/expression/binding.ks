@@ -103,18 +103,6 @@ class ArrayBinding extends Expression {
 				@elements[0].toFlatFragments(fragments, value)
 			}
 			else {
-				/* let variable = new IdentifierLiteral({
-					kind: NodeKind::Identifier
-					name: @name
-				}, this, @scope, false)
-				
-				@elements[0].toFlatFragments(fragments, new TempBinding(variable, value, this))
-				
-				for i from 1 til @elements.length {
-					fragments.code(', ')
-					
-					@elements[i].toFlatFragments(fragments, variable)
-				} */
 				throw new NotImplementedException(this)
 			}
 		}
@@ -143,11 +131,11 @@ class BindingElement extends Expression {
 		const scope = this.statement().scope()
 		
 		if @data.name.kind == NodeKind::Identifier && !scope.hasVariable(@data.name.name) {
-			$variable.define(this.statement(), scope, @data.name, false, VariableKind::Variable)
+			scope.define(@data.name.name, false, this.statement())
 		}
 		
 		if @data.alias? {
-			$variable.define(this, @scope, @data.alias, false, VariableKind::Variable)
+			@scope.define(@data.alias.name, false, this)
 			
 			@alias = $compile.expression(@data.alias, this)
 			@alias.analyse()
@@ -228,10 +216,7 @@ class BindingElement extends Expression {
 			@name.toFlatFragments(fragments, new FlatBindingElement(value, @alias ?? @name, this))
 		}
 		else if @defaultValue? {
-			let variable = new IdentifierLiteral({
-				kind: NodeKind::Identifier
-				name: @variable
-			}, this, @scope, false)
+			const variable = new Literal(false, this, @scope, @variable)
 			
 			fragments
 				.compile(@name)
@@ -382,10 +367,7 @@ class ObjectBinding extends Expression {
 				@elements[0].toFlatFragments(fragments, value)
 			}
 			else {
-				let variable = new IdentifierLiteral({
-					kind: NodeKind::Identifier
-					name: @name
-				}, this, @scope, false)
+				const variable = new Literal(false, this, @scope, @name)
 				
 				@elements[0].toFlatFragments(fragments, new TempBinding(variable, value, this))
 				

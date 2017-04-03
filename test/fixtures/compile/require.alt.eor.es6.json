@@ -7,8 +7,9 @@
   },
   "exports": {
     "Array": {
-      "name": "Array",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "true",
+      "sealed": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -27,6 +28,7 @@
                 "max": 2
               }
             ],
+            "returns": "Any",
             "sealed": "true",
             "throws": []
           }
@@ -41,26 +43,16 @@
               {
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity",
-                "rest": "true"
+                "max": "Infinity"
               }
             ],
+            "returns": "Any",
             "sealed": "true",
             "throws": []
           }
         ]
       },
-      "classMethods": {},
-      "requirement": "Array",
-      "sealed": {
-        "name": "__ks_Array",
-        "constructors": "false",
-        "instanceMethods": {
-          "contains": "true",
-          "pushUniq": "true"
-        },
-        "classMethods": {}
-      }
+      "classMethods": {}
     }
   }
 }

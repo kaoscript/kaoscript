@@ -85,12 +85,12 @@ class AwaitDeclarator extends AbstractNode {
 		
 		for variable in @data.variables {
 			if variable.kind == NodeKind::VariableDeclarator {
-				$variable.define(this, @scope._parent, variable.name, immutable, $variable.kind(variable.type), variable.type)
+				@scope._parent.define(variable.name.name, immutable, Type.fromAST(variable.type, this), this)
 				
 				@variables.push($compile.expression(variable.name, this))
 			}
 			else {
-				$variable.define(this, @scope._parent, variable, immutable, VariableKind::Variable)
+				@scope._parent.define(variable.name, immutable, this)
 				
 				@variables.push($compile.expression(variable, this))
 			}
@@ -147,13 +147,16 @@ class AwaitDeclarator extends AbstractNode {
 
 class VariableDeclarator extends AbstractNode {
 	private {
-		_declare	= true
-		_init		= null
+		_autotype: Boolean
+		_declare: Boolean		= true
+		_hasVariable: Boolean	= false
+		_init					= null
 		_name
+		_variable: Variable
 	}
 	analyse() { // {{{
 		if @data.name.kind == NodeKind::Identifier {
-			if @scope.hasVariable(@data.name.name, false) {
+			if @scope.hasLocalVariable(@data.name.name) {
 				SyntaxException.throwAlreadyDeclared(@data.name.name, this)
 			}
 			
@@ -161,32 +164,25 @@ class VariableDeclarator extends AbstractNode {
 				@scope.rename(@data.name.name)
 			}
 			
-			if @scope.isDeclaredVariable(@data.name.name, false) {
+			if @scope.hasDeclaredLocalVariable(@data.name.name) {
 				@declare = false
 			}
 		}
 		
 		const immutable = @parent.isImmutable()
 		
-		if @data.autotype || immutable {
-			let type = @data.type
-			
-			if !type && @data.init {
-				type = @data.init
-			}
-			
-			variable = $variable.define(this, @scope, @data.name, immutable, $variable.kind(@data.type), type)
-		}
-		else {
-			variable = $variable.define(this, @scope, @data.name, immutable, $variable.kind(@data.type), @data.type)
+		if @data.name.kind == NodeKind::Identifier {
+			@variable = @scope.define(@data.name.name, immutable, Type.fromAST(@data.type, this), this)
+			@hasVariable = true
 		}
 		
 		@name = $compile.expression(@data.name, this)
-		
 		@name.analyse()
 		
+		@autotype = @hasVariable && (@data.autotype || immutable)
+		
 		if @data.init? {
-			if @data.name.kind == NodeKind::Identifier {
+			if @hasVariable {
 				this.reference(@data.name.name)
 			}
 			
@@ -201,6 +197,10 @@ class VariableDeclarator extends AbstractNode {
 			
 			@init.acquireReusable(false)
 			@init.releaseReusable()
+			
+			if @autotype {
+				@variable.type(@init.type())
+			}
 		}
 	} // }}}
 	translate() { // {{{

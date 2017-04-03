@@ -2,10 +2,12 @@
   "requirements": {},
   "exports": {
     "disks": {
-      "name": "disks",
-      "kind": 3,
-      "throws": [],
-      "async": "true"
+      "async": "true",
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
+      "throws": []
     }
   }
 }

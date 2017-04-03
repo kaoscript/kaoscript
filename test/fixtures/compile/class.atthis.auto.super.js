@@ -53,8 +53,8 @@ module.exports = function() {
 			if(backgroundColor === void 0 || backgroundColor === null) {
 				throw new TypeError("'backgroundColor' is not nullable");
 			}
-			this._backgroundColor = backgroundColor;
 			Shape.prototype.__ks_cons.call(this, [color]);
+			this._backgroundColor = backgroundColor;
 		}
 		__ks_cons(args) {
 			if(args.length === 2) {

@@ -2,7 +2,7 @@ var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function foo(bar, qux, __ks_cb) {
 		if(arguments.length < 3) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2 + 1)");
 		}
 		if(bar === void 0 || bar === null) {
 			throw new TypeError("'bar' is not nullable");

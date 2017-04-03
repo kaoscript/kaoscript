@@ -39,28 +39,22 @@ const $nodeModules = { // {{{
 } // }}}
 
 const $import = {
-	addVariable(module, file = null, node, name, variable, data) { // {{{
-		if variable.requirement? && data.references? {
-			let nf = true
-			for reference in data.references while nf {
-				if (reference.foreign? && reference.foreign.name == variable.requirement) || reference.alias.name == variable.requirement {
-					nf = false
-					
-					variable = $variable.merge(node.scope().getVariable(reference.alias.name), variable)
-				}
-			}
+	addVariable(name: String, type: Type, node: AbstractNode, module, file: String = null) {
+		if variable ?= node.scope().getLocalVariable(name) {
+			console.log(variable.type())
+			console.log(type)
+			variable.type().merge(type, node)
+		}
+		else {
+			node.scope().define(name, true, type, node)
 		}
 		
-		variable.immutable = true
-		
-		node.scope().addVariable(name, variable)
+		module.import(name, file)
+	}
+	define(name: String, type: Type?, node: AbstractNode, module, file: String = null) { // {{{
+		node.scope().define(name, true, type, node)
 		
 		module.import(name, file)
-	} // }}}
-	define(module, file = null, node, name, kind, type = null) { // {{{
-		$variable.define(node, node.scope(), name, true, kind, type)
-		
-		module.import(name.name || name, file)
 	} // }}}
 	loadCoreModule(x, module, data, node) { // {{{
 		if $nodeModules[x] {
@@ -159,7 +153,7 @@ const $import = {
 			}
 		}
 		
-		if importVarCount || importAll || importAlias.length {
+		if importVarCount != 0 || importAll || importAlias.length != 0 {
 			let nf
 			for name, requirement of requirements {
 				SyntaxException.throwMissingRequirement(name, node) if !requirement.nullable && (!?data.references || data.references.length == 0)
@@ -192,49 +186,34 @@ const $import = {
 			}
 		}
 		
-		if importVarCount == 1 {
-			for name, alias of importVariables {
+		const domain = new ImportDomain(exports, node)
+		
+		for name, alias of importVariables {
+			if !domain.hasTemporary(name) {
+				ReferenceException.throwNotDefinedInModule(name, data.module, node)
 			}
 			
-			ReferenceException.throwNotDefinedInModule(name, data.module, node) unless variable ?= exports[name]
-			
-			$import.addVariable(module, moduleName, node, alias, variable, data)
-		}
-		else if importVarCount {
-			nf = false
-			for name, alias of importVariables {
-				ReferenceException.throwNotDefinedInModule(name, data.module, node) unless variable ?= exports[name]
-				
-				$import.addVariable(module, moduleName, node, alias, variable, data)
-			}
+			$import.addVariable(alias, domain.commit(name, alias), node, module, moduleName)
 		}
 		
 		if importAll {
-			for name, variable of exports {
-				$import.addVariable(module, moduleName, node, name, variable, data)
+			for name of exports {
+				$import.addVariable(name, domain.commit(name), node, module, moduleName)
 			}
 		}
 		
-		if importAlias.length {
-			type = {
-				typeName: {
-					kind: NodeKind::Identifier
-					name: 'Object'
-				}
-				properties: {}
+		if importAlias.length != 0 {
+			const type = new ObjectType(importAlias, domain)
+			const ref = type.reference()
+			
+			for name of exports {
+				type.addProperty(name, domain.commit(name).container(ref))
 			}
 			
-			for name, variable of exports {
-				type.properties[name] = variable
-			}
-			
-			variable = $variable.define(node, node.scope(), {
-				kind: NodeKind::Identifier
-				name: importAlias
-			}, true, VariableKind::Variable, type)
-			
-			module.import(importAlias, moduleName)
+			$import.define(importAlias, type, node, module, moduleName)
 		}
+		
+		domain.commit()
 		
 		return {
 			kind: ImportKind::KSFile
@@ -266,7 +245,7 @@ const $import = {
 				if specifier.local {
 					metadata.wilcard = specifier.local.name
 					
-					$import.define(module, file, node, specifier.local, VariableKind::Variable)
+					$import.define(specifier.local.name, null, node, module, file)
 				}
 				else {
 					SyntaxException.throwExclusiveWildcardImport(node)
@@ -281,7 +260,7 @@ const $import = {
 		metadata.count = count
 		
 		for alias of variables {
-			$import.define(module, file, node, variables[alias], VariableKind::Variable)
+			$import.define(variables[alias], null, node, module, file)
 		}
 		
 		return metadata
@@ -373,7 +352,7 @@ const $import = {
 		let name, alias, variable, importCode
 		let importCodeVariable = false
 		
-		if (importVarCount && importAll) || (importVarCount && importAlias.length) || (importAll && importAlias.length) {
+		if (importVarCount != 0 && importAll) || (importVarCount != 0 && importAlias.length != 0) || (importAll && importAlias.length != 0) {
 			importCode = node._scope.acquireTempName()
 			importCodeVariable = true
 			
@@ -408,7 +387,7 @@ const $import = {
 								line.code(reference.alias.name)
 								
 								if requirement.class {
-									line.code(', __ks_' + reference.alias.name)
+									line.code(`, __ks_\(reference.alias.name)`)
 								}
 								
 								nf = false
@@ -434,7 +413,7 @@ const $import = {
 								line.code(reference.alias.name)
 								
 								if requirement.class {
-									line.code(', __ks_' + reference.alias.name)
+									line.code(`, __ks_\(reference.alias.name)`)
 								}
 								
 								nf = false
@@ -456,7 +435,7 @@ const $import = {
 			
 			line.code(')').done()
 		}
-		else if importVarCount || importAll || importAlias.length {
+		else if importVarCount != 0 || importAll || importAlias.length != 0 {
 			importCode = 'require(' + $quote(moduleName) + ')('
 			
 			let nf
@@ -488,7 +467,7 @@ const $import = {
 								importCode += reference.alias.name
 								
 								if requirement.class {
-									importCode += ', __ks_' + reference.alias.name
+									importCode += `, __ks_\(reference.alias.name)`
 								}
 								
 								nf = false
@@ -514,7 +493,7 @@ const $import = {
 								importCode += reference.alias.name
 								
 								if requirement.class {
-									importCode += ', __ks_' + reference.alias.name
+									importCode += `, __ks_\(reference.alias.name)`
 								}
 								
 								nf = false
@@ -543,11 +522,9 @@ const $import = {
 			
 			variable = exports[name]
 			
-			if variable.kind != VariableKind::TypeAlias {
+			if node.scope().getVariable(alias).type() is not AliasType {
 				if variable.sealed {
-					variable.sealed.name = '__ks_' + alias
-					
-					fragments.newLine().code(`var {\(alias), \(variable.sealed.name)} = \(importCode)`).done()
+					fragments.newLine().code(`var {\(alias), __ks_\(alias)} = \(importCode)`).done()
 				}
 				else {
 					fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
@@ -563,7 +540,7 @@ const $import = {
 					for name, alias of importVariables {
 						variable = exports[alias]
 						
-						if variable.kind != VariableKind::TypeAlias {
+						if node.scope().getVariable(alias).type() is not AliasType {
 							if nf {
 								line.code(', ')
 							}
@@ -586,7 +563,7 @@ const $import = {
 					for name, alias of importVariables {
 						variable = exports[alias]
 						
-						if variable.kind != VariableKind::TypeAlias {
+						if node.scope().getVariable(alias).type() is not AliasType {
 							if nf {
 								line.code(', ')
 							}
@@ -608,7 +585,7 @@ const $import = {
 				for name, alias of importVariables {
 					variable = exports[name]
 					
-					if variable.kind != VariableKind::TypeAlias {
+					if node.scope().getVariable(alias).type() is not AliasType {
 						if nf {
 							line.code(', ')
 						}
@@ -620,16 +597,14 @@ const $import = {
 							line.code(name)
 							
 							if variable.sealed {
-								line.code(', ', variable.sealed.name)
+								line.code(`, __ks_\(name)`)
 							}
 						}
 						else {
 							line.code(name, ': ', alias)
 							
 							if variable.sealed {
-								variable.sealed.name = '__ks_' + alias
-								
-								line.code(', ', variable.sealed.name)
+								line.code(`, __ks_\(alias)`)
 							}
 						}
 					}
@@ -643,13 +618,11 @@ const $import = {
 			let variables = []
 			
 			for name, variable of exports {
-				if variable.kind != VariableKind::TypeAlias {
+				if node.scope().getVariable(name).type() is not AliasType {
 					variables.push(name)
 					
 					if variable.sealed {
-						variable.sealed.name = '__ks_' + name
-						
-						variables.push(variable.sealed.name)
+						variables.push(`__ks_\(name)`)
 					}
 				}
 			}

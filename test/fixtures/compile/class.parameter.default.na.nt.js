@@ -32,7 +32,7 @@ module.exports = function() {
 			else if(!Type.isNumber(number)) {
 				throw new TypeError("'number' is not of type 'Number'");
 			}
-			Greetings.prototype.__ks_cons.call(this, [number]);
+			Greetings.prototype.__ks_cons.call(this, ["" + number]);
 		}
 		__ks_cons(args) {
 			if(args.length === 0) {

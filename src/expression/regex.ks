@@ -5,4 +5,5 @@ class RegularExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@data.value)
 	} // }}}
+	type() => @scope.reference('RegExp')
 }

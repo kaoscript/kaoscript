@@ -84,7 +84,7 @@ module.exports = function() {
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
-			return this.message() + "\nIt's nice to meet you, " + name + ".";
+			return "" + this.message() + "\nIt's nice to meet you, " + name + ".";
 		}
 		greet_02() {
 			if(arguments.length === 1) {
@@ -99,7 +99,7 @@ module.exports = function() {
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
-			return this._message.toUpperCase() + "\nIt's nice to meet you, " + name + ".";
+			return "" + this._message.toUpperCase() + "\nIt's nice to meet you, " + name + ".";
 		}
 		greet_03() {
 			if(arguments.length === 1) {

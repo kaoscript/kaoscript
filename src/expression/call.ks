@@ -1,209 +1,21 @@
-const $call = {
-	caller(data, node) { // {{{
-		if data is IdentifierLiteral {
-			return data
-		}
-		else if data is MemberExpression {
-			return data._object
-		}
-		else {
-			throw new NotImplementedException(node)
-		}
-	} // }}}
-	filterMember(variable, name, data, node) { // {{{
-		if variable.kind == VariableKind::Class {
-			if variable.instanceMethods[name] is Array {
-				let variables: Array = []
-				
-				for method in variable.instanceMethods[name] {
-					if $signature.matchArguments(method, data.arguments) {
-						variables.push(method)
-					}
-				}
-				
-				return variables[0]	if variables.length == 1
-				return variables	if variables.length > 0
-			}
-			else if variable.instanceVariables[name] is Object {
-				throw new NotImplementedException(node)
-			}
-		}
-		else if variable.kind == VariableKind::Enum {
-			throw new NotImplementedException(node)
-		}
-		else if variable.kind == VariableKind::TypeAlias {
-			throw new NotImplementedException(node)
-		}
-		else if variable.kind == VariableKind::Variable {
-			throw new NotImplementedException(node)
-		}
-		else {
-			throw new NotImplementedException(node)
-		}
-		
-		return null
-	} // }}}
-	filterType(variable, name, data, node) { // {{{
-		if variable.type? {
-			if variable.type is String {
-				if variable ?= $variable.fromType({typeName: $identifier(variable.type)}, node) {
-					return $call.filterMember(variable, name, data, node)
-				}
-			}
-			else if variable.type.properties? {
-				return variable.type.properties[name] if variable.type.properties[name] is Object
-			}
-			else if variable.type.typeName? {
-				if variable ?= $variable.fromType(variable.type, node) {
-					return $call.filterMember(variable, name, data, node)
-				}
-			}
-			else if variable.type.types? {
-				let variables: Array = []
-				
-				for type in variable.type.types {
-					return null unless (v ?= $variable.fromType(type, node)) && (v ?= $call.filterMember(v, name, data, node))
-					
-					$variable.push(variables, v)
-				}
-				
-				return variables[0]	if variables.length == 1
-				return variables	if variables.length > 0
-			}
-			else if variable.type.parameters? {
-				if variable ?= $variable.fromType({typeName: $identifier(variable.type.name)}, node) {
-					return $call.filterMember(variable, name, data, node)
-				}
-			}
-			else {
-				throw new NotImplementedException(node)
-			}
-		}
-		
-		return null
-	} // }}}
-	variable(data, node) { // {{{
-		if data.callee.kind == NodeKind::MemberExpression {
-			if !data.callee.computed && (variable ?= $variable.fromAST(data.callee.object, node)) {
-				if variable.kind == VariableKind::TypeAlias {
-					variable = $variable.fromType($type.unalias(variable.type, node.scope()), node)
-				}
-				
-				let name = data.callee.property.name
-				
-				if variable.kind == VariableKind::Class {
-					if data.callee.object.kind == NodeKind::Identifier {
-						if variable.classMethods[name]? {
-							let variables: Array = []
-							
-							for method in variable.classMethods[name] {
-								if $signature.matchArguments(method, data.arguments) {
-									variables.push(method)
-								}
-							}
-							
-							return variables[0]	if variables.length == 1
-							return variables	if variables.length > 0
-						}
-						else if variable.classVariables[name]? {
-							throw new NotImplementedException(node)
-						}
-					}
-					else {
-						throw new NotImplementedException(node)
-					}
-				}
-				else {
-					return $call.filterType(variable, name, data, node)
-				}
-			}
-			
-			return null
-		}
-		else {
-			return $variable.fromAST(data.callee, node)
-		}
-	} // }}}
-}
-
 class CallExpression extends Expression {
 	private {
-		_arguments		= []
-		_callee
-		_caller
+		_arguments: Array				= []
+		_callees: Array					= []
 		_callScope
-		_list			= true
+		_defaultCallee: DefaultCallee
+		_hasDefaultCallee: Boolean		= false
+		_list: Boolean					= true
+		_nullable: Boolean				= false
+		_nullableComputed: Boolean		= false
 		_object
-		_reusable		= false
-		_reuseName		= null
-		_sealed			= false
-		_tested			= false
-		_type
+		_property: String
+		_reusable: Boolean				= false
+		_reuseName: String				= null
+		_tested: Boolean				= false
+		_type: Type
 	}
 	analyse() { // {{{
-		for argument in @data.arguments {
-			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
-				$compile.expression(argument.argument, this).analyse()
-			}
-			else {
-				$compile.expression(argument, this).analyse()
-			}
-		}
-	} // }}}
-	prepare() { // {{{
-		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.computed && (@callee = $sealed.callee(@data.callee, @parent)) != false {
-			@sealed = true
-			
-			@object = $compile.expression(@data.callee.object, this)
-		
-			@object.analyse()
-			
-			@object.prepare()
-		}
-		else {
-			let callee = $variable.fromAST(@data.callee, this)
-			if callee?.kind == VariableKind::Class {
-				TypeException.throwConstructorWithoutNew(callee.name.name, this)
-			}
-			
-			if @data.callee.kind == NodeKind::Identifier {
-				if callee? {
-					callee.callable(@data) if callee.callable?
-				}
-				else {
-					ReferenceException.throwNotDefined(@data.callee.name, this)
-				}
-			}
-			else if @data.callee.kind == NodeKind::MemberExpression {
-				if (variable ?= $variable.fromAST(@data.callee.object, this)) && variable.reduce? {
-					variable.reduce(@data)
-				}
-			}
-			
-			if @data.callee.kind == NodeKind::MemberExpression {
-				@callee = new MemberExpression(@data.callee, this, this.scope())
-			}
-			else if @data.callee.kind == NodeKind::ThisExpression {
-				@callee = new ThisExpression(@data.callee, this, this.scope())
-				@callee.isMethod(true)
-			}
-			else {
-				@callee = $compile.expression(@data.callee, this)
-			}
-			
-			@callee.analyse()
-			
-			@callee.prepare()
-			
-			if (variable ?= $call.variable(@data, this)) && variable.throws?.length > 0 {
-				for name in variable.throws {
-					if error ?= @scope.getVariable(name) {
-						Exception.validateReportedError(error, this)
-					}
-				}
-			}
-		}
-		
 		for argument in @data.arguments {
 			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
 				@arguments.push(argument = $compile.expression(argument.argument, this))
@@ -216,336 +28,772 @@ class CallExpression extends Expression {
 			
 			argument.analyse()
 		}
-		
+	} // }}}
+	prepare() { // {{{
 		for argument in @arguments {
 			argument.prepare()
 		}
+		
+		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.computed {
+			@object = $compile.expression(@data.callee.object, this)
+			@object.analyse()
+			@object.prepare()
+			
+			@property = @data.callee.property.name
+			
+			this.makeCallee(@object.type())
+		}
+		else {
+			if 	@data.callee.kind == NodeKind::Identifier &&
+				(variable ?= @scope.getVariable(@data.callee.name)) &&
+				(substitute ?= variable.replaceCall?(@data, @arguments))
+			{
+				this.addCallee(new SubstituteCallee(@data, substitute, this))
+			}
+			else {
+				this.addCallee(new DefaultCallee(@data, this))
+			}
+		}
+		
+		if @hasDefaultCallee {
+			@callees.push(@defaultCallee)
+		}
+		
+		if @callees.length == 1 {
+			@nullable = @callees[0].isNullable()
+			@nullableComputed = @callees[0].isNullableComputed()
+			
+			@type = @callees[0].type()
+		}
+		else {
+			@nullable = @callees[0].isNullable()
+			@nullableComputed = @callees[0].isNullableComputed()
+			
+			const types = [@callees[0].type()]
+			
+			let type
+			for i from 1 til @callees.length {
+				type = @callees[i].type()
+				
+				if !types.any(item => type.equals(item)) {
+					types.push(type)
+				}
+				
+				if @callees[i].isNullable() {
+					@nullable = true
+				}
+				if @callees[i].isNullableComputed() {
+					@nullableComputed = true
+				}
+			}
+			
+			if types.length == 1 {
+				@type = types[0]
+			}
+			else {
+				@type = new UnionType(types)
+			}
+		}
+		/* console.log('-- callees --')
+		console.log(@callees)
+		console.log(@property)
+		console.log(@type) */
 	} // }}}
 	translate() { // {{{
 		for argument in @arguments {
 			argument.translate()
 		}
 		
-		if @sealed {
-			@object.translate()
+		for callee in @callees {
+			callee.translate()
 		}
-		else {
-			@callee.translate()
-			
-			if @data.scope.kind == ScopeKind::Argument {
-				@callScope = $compile.expression(@data.scope.value, this)
-				
-				@callScope.analyse()
-				
-				@callScope.prepare()
-				
-				@callScope.translate()
-			}
-			
-			if !@list {
-				@caller = $call.caller(@callee, this)
-				
-				@caller.analyse()
-				
-				@caller.prepare()
-				
-				@caller.translate()
-			}
+		
+		if @data.scope.kind == ScopeKind::Argument {
+			@callScope = $compile.expression(@data.scope.value, this)
+			@callScope.analyse()
+			@callScope.prepare()
+			@callScope.translate()
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		if @sealed {
-			if acquire {
-				throw new NotImplementedException(this)
+		if acquire {
+			@reuseName = this.statement().scope().acquireTempName(this.statement())
+		}
+		
+		if @callees.length == 1 {
+			@callees[0].acquireReusable(acquire)
+		}
+		else {
+			throw new NotImplementedException(this)
+		}
+	} // }}}
+	addCallee(callee: Callee) { // {{{
+		if callee is DefaultCallee {
+			if @hasDefaultCallee {
+				const t1 = @defaultCallee.type()
+				if !t1.isAny() {
+					const t2 = callee.type()
+					
+					if t2.isAny() {
+						@defaultCallee = t2
+					}
+					else if t1 is UnionType {
+						t1.addType(t2)
+					}
+					else if t2 is UnionType {
+						t2.addType(t1)
+						
+						@defaultCallee = t2
+					}
+					else if t1.isInstanceOf(t2, this) {
+						@defaultCallee = t2
+					}
+					else if !t2.isInstanceOf(t1, this) {
+						@defaultCallee.type(new UnionType([t1, t2]))
+					}
+				}
+			}
+			else {
+				@defaultCallee = callee
+				@hasDefaultCallee = true
 			}
 		}
 		else {
-			if acquire {
-				@reuseName = this.statement().scope().acquireTempName(this.statement())
-			}
-			
-			@callee.acquireReusable(@data.nullable || (!@list && @data.scope.kind == ScopeKind::This))
+			@callees.push(callee)
 		}
 	} // }}}
+	arguments() => @arguments
 	isCallable() => !@reusable
-	isComputed() => @sealed ? @callee is Array : (@data.nullable || @callee.isNullable()) && !@tested
-	isNullable() => @data.nullable || (@sealed ? @object.isNullable() : @callee.isNullable())
-	isNullableComputed() => @sealed ? @callee is Array : this._data.nullable && this._callee.isNullable()
+	isComputed() => @nullable && !@tested
+	isNullable() => @nullable
+	isNullableComputed() => @nullableComputed
+	makeCallee(type) { // {{{
+		//console.log('-- call.makeCallee --')
+		//console.log(type)
+		//console.log(@property)
+		
+		switch type {
+			is AliasType => {
+				throw new NotImplementedException(this)
+			}
+			is ClassType => {
+				const class = type
+				
+				if methods ?= class.getClassMethods(@property) {
+					let sealed = false
+					const types = []
+					const m = []
+					
+					let type
+					for method in methods {
+						if method.isSealed() {
+							sealed = true
+						}
+						
+						if method.matchArguments([argument.type() for argument in @arguments]) {
+							m.push(method)
+							
+							type = method.returnType()
+							
+							if !type.isContainedIn(types) {
+								types.push(type)
+							}
+						}
+					}
+					
+					if types.length == 0 {
+						if sealed {
+							this.addCallee(new SealedMethodCallee(@data, class, false, this))
+						}
+						else {
+							this.addCallee(new DefaultCallee(@data, @object, this))
+						}
+					}
+					else if types.length == 1 {
+						if sealed {
+							this.addCallee(new SealedMethodCallee(@data, class, false, m, types[0], this))
+						}
+						else {
+							this.addCallee(new DefaultCallee(@data, @object, m, types[0], this))
+						}
+					}
+					else {
+						throw new NotImplementedException(this)
+					}
+				}
+				else {
+					this.addCallee(new DefaultCallee(@data, @object, this))
+				}
+			}
+			is FunctionType => {
+				this.makeCalleeFromReference(@scope.reference('Function'))
+			}
+			is ObjectType => {
+				if (fn ?= type.getProperty(@property)) && fn is FunctionType {
+					if type.isSealedProperty(@property) {
+						this.addCallee(new SealedFunctionCallee(@data, type, fn, fn.returnType(), this))
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, @object, fn, fn.returnType(), this))
+					}
+				}
+				else {
+					this.makeCalleeFromReference(@scope.reference('Object'))
+				}
+			}
+			is ParameterType => {
+				this.makeCallee(type.type())
+			}
+			is ReferenceType => {
+				this.makeCalleeFromReference(type)
+			}
+			is UnionType => {
+				for let type in type.types() {
+					this.makeCallee(type)
+				}
+			}
+			=> {
+				this.addCallee(new DefaultCallee(@data, @object, this))
+			}
+		}
+	} // }}}
+	makeCalleeFromReference(type) { // {{{
+		//console.log('-- call.filterReference --')
+		//console.log(type)
+		
+		const value = type.unalias()
+		//console.log(value)
+		//console.log(@property)
+		
+		switch value {
+			is ClassType => {
+				if methods ?= value.getInstanceMethods(@property) {
+					let sealed = false
+					const types = []
+					const m = []
+					
+					let type
+					for method in methods {
+						if method.isSealed() {
+							sealed = true
+						}
+						
+						if method.matchArguments([argument.type() for argument in @arguments]) {
+							m.push(method)
+							
+							type = method.returnType()
+							
+							if !type.isContainedIn(types) {
+								types.push(type)
+							}
+						}
+					}
+					
+					if types.length == 0 {
+						if sealed {
+							this.addCallee(new SealedMethodCallee(@data, value, true, this))
+						}
+						else {
+							this.addCallee(new DefaultCallee(@data, @object, this))
+						}
+					}
+					else if types.length == 1 {
+						if sealed {
+							this.addCallee(new SealedMethodCallee(@data, value, true, m, types[0], this))
+						}
+						else if	@data.callee.object.kind == NodeKind::Identifier &&
+								(variable ?= @scope.getVariable(@data.callee.object.name)) &&
+								(substitute ?= variable.replaceMemberCall?(@property, @arguments))
+						{
+							this.addCallee(new SubstituteCallee(@data, substitute, types[0], this))
+						}
+						else {
+							this.addCallee(new DefaultCallee(@data, @object, m, types[0], this))
+						}
+					}
+					else {
+						throw new NotImplementedException(this)
+					}
+				}
+				else {
+					this.addCallee(new DefaultCallee(@data, @object, this))
+				}
+			}
+			is FunctionType => {
+				throw new NotImplementedException(this)
+			}
+			is ParameterType => {
+				throw new NotImplementedException(this)
+			}
+			is UnionType => {
+				for let type in value.types() {
+					this.makeCallee(type)
+				}
+			}
+			=> {
+				this.addCallee(new DefaultCallee(@data, @object, this))
+			}
+		}
+	} // }}}
 	releaseReusable() { // {{{
-		if !@sealed {
-			this.statement().scope().releaseTempName(@reuseName) if @reuseName?
-			
-			@callee.releaseReusable()
+		this.statement().scope().releaseTempName(@reuseName) if @reuseName?
+		
+		if @callees.length == 1 {
+			@callees[0].releaseReusable()
+		}
+		else {
+			throw new NotImplementedException(this)
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @sealed {
-			if @callee is Array {
-				if @callee.length == 2 {
-					this.module().flag('Type')
-					
-					let name = null
-					if @data.callee.object.kind == NodeKind::Identifier {
-						if tof = $runtime.typeof(@callee[0].variable.name, this) {
-							fragments.code(tof, '(').compile(@object).code(')')
-						}
-						else {
-							fragments.code($runtime.type(this), '.is(').compile(@object).code(', ', @callee[0].variable.name, ')')
-						}
-					}
-					else {
-						name = @scope.acquireTempName()
-						
-						if tof = $runtime.typeof(@callee[0].variable.name, this) {
-							fragments.code(tof, '(', name, ' = ').compile(@object).code(')')
-						}
-						else {
-							fragments.code($runtime.type(this), '.is(', name, ' = ').compile(@object).code(', ', @callee[0].variable.name, ')')
-						}
-					}
-					
-					fragments.code(' ? ')
-					
-					fragments.code((@callee[0].variable.accessPath || ''), @callee[0].variable.sealed.name + '._im_' + @data.callee.property.name + '(')
-					
-					if name? {
-						fragments.code(name)
-					}
-					else {
-						fragments.compile(@object)
-					}
-					
-					for argument in @arguments {
-						fragments.code(', ').compile(argument)
-					}
-					
-					fragments.code(') : ')
-					
-					fragments.code((@callee[1].variable.accessPath || ''), @callee[1].variable.sealed.name + '._im_' + @data.callee.property.name + '(')
-					
-					if name? {
-						fragments.code(name)
-					}
-					else {
-						fragments.compile(@object)
-					}
-					
-					for argument in @arguments {
-						fragments.code(', ').compile(argument)
-					}
-					
-					fragments.code(')')
-					
-					@scope.releaseTempName(name) if name?
-				}
-				else {
-					throw new NotImplementedException(this)
-				}
-			}
-			else {
-				let path = @callee.variable.accessPath? ? @callee.variable.accessPath + @callee.variable.sealed.name : @callee.variable.sealed.name
-				
-				if @callee.kind == CalleeKind::InstanceMethod {
-					if @list {
-						fragments
-							.code(`\(path)._im_\(this._data.callee.property.name)(`)
-							.compile(@object)
-						
-						for i from 0 til @arguments.length {
-							fragments.code($comma).compile(@arguments[i])
-						}
-						
-						fragments.code(')')
-					}
-					else {
-						fragments
-							.code(`\(path)._im_\(this._data.callee.property.name).apply(\(path), [`)
-							.compile(@object)
-							.code(`].concat(`)
-							
-						
-						for i from 0 til @arguments.length {
-							fragments.code($comma) if i != 0
-							
-							fragments.compile(@arguments[i])
-						}
-						
-						fragments.code('))')
-					}
-				}
-				else if @callee.kind == CalleeKind::ClassMethod {
-					if @list {
-						fragments.code(`\(path)._cm_\(this._data.callee.property.name)(`)
-						
-						for i from 0 til @arguments.length {
-							fragments.code($comma) if i != 0
-							
-							fragments.compile(@arguments[i])
-						}
-						
-						fragments.code(')')
-					}
-					else if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
-						fragments.code(`\(path)._cm_\(this._data.callee.property.name).apply(\(path), `).compile(@arguments[0]).code(')')
-					}
-					else {
-						fragments.code(`\(path)._cm_\(this._data.callee.property.name).apply(\(path), [].concat(`)
-						
-						for i from 0 til @arguments.length {
-							fragments.code($comma) if i != 0
-							
-							fragments.compile(@arguments[i])
-						}
-						
-						fragments.code('))')
-					}
-				}
-				else {
-					if @list {
-						fragments.code(`\(path).\(this._data.callee.property.name)(`)
-						
-						for i from 0 til @arguments.length {
-							fragments.code($comma) if i != 0
-							
-							fragments.compile(@arguments[i])
-						}
-						
-						fragments.code(')')
-					}
-					else if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
-						fragments.code(`\(path).\(this._data.callee.property.name).apply(\(path), `).compile(@arguments[0]).code(')')
-					}
-					else {
-						fragments.code(`\(path).\(this._data.callee.property.name).apply(\(path), [].concat(`)
-						
-						for i from 0 til @arguments.length {
-							fragments.code($comma) if i != 0
-							
-							fragments.compile(@arguments[i])
-						}
-						
-						fragments.code('))')
-					}
-				}
-			}
+		if mode == Mode::Async {
+			this.toCallFragments(fragments, mode)
+			
+			fragments.code(', ') if @arguments.length
 		}
 		else {
-			if mode == Mode::Async {
-				this.toCallFragments(fragments, mode)
+			if @reusable {
+				fragments.code(this._reuseName)
+			}
+			else if this.isNullable() && !@tested {
+				fragments.wrapNullable(this).code(' ? ')
 				
-				fragments.code(', ') if @arguments.length
+				@tested = true
+				
+				this.toFragments(fragments, mode)
+				
+				fragments.code(' : undefined')
 			}
 			else {
-				if @reusable {
-					fragments.code(this._reuseName)
-				}
-				else if this.isNullable() && !@tested {
-					fragments.wrapNullable(this).code(' ? ')
-					
-					@tested = true
-					
-					this.toFragments(fragments, mode)
-					
-					fragments.code(' : undefined')
-				}
-				else {
-					this.toCallFragments(fragments, mode)
-					
-					fragments.code(')')
-				}
+				this.toCallFragments(fragments, mode)
+				
+				fragments.code(')')
 			}
 		}
 	} // }}}
 	toBooleanFragments(fragments, mode) { // {{{
-		if @sealed {
-			this.toFragments(fragments, mode)
+		if mode == Mode::Async {
+			this.toCallFragments(fragments, mode)
+			
+			fragments.code(', ') if @arguments.length
 		}
 		else {
-			if mode == Mode::Async {
-				this.toCallFragments(fragments, mode)
+			if @reusable {
+				fragments.code(@reuseName)
+			}
+			else if this.isNullable() && !@tested {
+				fragments.wrapNullable(this).code(' ? ')
 				
-				fragments.code(', ') if @arguments.length
+				@tested = true
+				
+				this.toFragments(fragments, mode)
+				
+				fragments.code(' : false')
 			}
 			else {
-				if @reusable {
-					fragments.code(@reuseName)
-				}
-				else if this.isNullable() && !@tested {
-					fragments.wrapNullable(this).code(' ? ')
-					
-					@tested = true
-					
-					this.toFragments(fragments, mode)
-					
-					fragments.code(' : false')
-				}
-				else {
-					this.toCallFragments(fragments, mode)
-					
-					fragments.code(')')
-				}
+				this.toCallFragments(fragments, mode)
+				
+				fragments.code(')')
 			}
 		}
 	} // }}}
 	toCallFragments(fragments, mode) { // {{{
-		if @sealed {
-			throw new NotImplementedException(this)
+		if @callees.length == 1 {
+			@callees[0].toFragments(fragments, mode, this)
+		}
+		else if @callees.length == 2 {
+			this.module().flag('Type')
+			
+			@callees[0].toTestFragments(fragments, this)
+			
+			fragments.code(' ? ')
+			
+			@callees[0].toFragments(fragments, mode, this)
+			
+			fragments.code(') : ')
+			
+			@callees[1].toFragments(fragments, mode, this)
 		}
 		else {
-			if @list {
-				if @data.scope.kind == ScopeKind::This {
-					fragments.wrap(@callee, mode).code('(')
+			throw new NotImplementedException(this)
+		}
+	} // }}}
+	toNullableFragments(fragments) { // {{{
+		if !@tested {
+			@tested = true
+			
+			if @callees.length == 1 {
+				@callees[0].toNullableFragments(fragments, this)
+			}
+			else {
+				throw new NotImplementedException(this)
+			}
+		}
+	} // }}}
+	toReusableFragments(fragments) { // {{{
+		fragments
+			.code(@reuseName, $equals)
+			.compile(this)
+		
+		@reusable = true
+	} // }}}
+	type() => @type
+}
+
+abstract class Callee {
+	abstract isNullable(): Boolean
+	abstract isNullableComputed(): Boolean
+	abstract toFragments(fragments, mode, node)
+	abstract translate()
+	abstract type(): Type
+	acquireReusable(acquire)
+	releaseReusable()
+	validate(type: FunctionType, node) { // {{{
+		for throw in type.throws() {
+			Exception.validateReportedError(throw, node)
+		}
+	} // }}}
+}
+
+class DefaultCallee extends Callee {
+	private {
+		_data
+		_expression
+		_list: Boolean
+		_nullable: Boolean
+		_nullableComputed: Boolean
+		_scope: ScopeKind
+		_type: Type
+	}
+	constructor(@data, node) { // {{{
+		super()
+		
+		@expression = $compile.expression(data.callee, node)
+		@expression.analyse()
+		@expression.prepare()
+		
+		@list = node._list
+		@nullable = data.nullable || @expression.isNullable()
+		@nullableComputed = data.nullable && @expression.isNullable()
+		@scope = data.scope.kind
+		
+		const type = @expression.type()
+		
+		if type is ClassType {
+			TypeException.throwConstructorWithoutNew(type.name(), node)
+		}
+		else if type is FunctionType {
+			this.validate(type, node)
+			
+			@type = type.returnType()
+		}
+		else {
+			@type = Type.Any
+		}
+	} // }}}
+	constructor(@data, object, node) { // {{{
+		super()
+		
+		@expression = new MemberExpression(data.callee, node, node.scope(), object)
+		@expression.analyse()
+		@expression.prepare()
+		
+		@list = node._list
+		@nullable = data.nullable || @expression.isNullable()
+		@nullableComputed = data.nullable && @expression.isNullable()
+		@scope = data.scope.kind
+		
+		/* const type = @expression.type()
+		
+		if type is ClassType {
+			TypeException.throwConstructorWithoutNew(type.name(), node)
+		}
+		else if type is FunctionType {
+			this.validate(type, node)
+			
+			@type = type.returnType()
+		}
+		else {
+			@type = Type.Any
+		} */
+		@type = Type.Any
+	} // }}}
+	constructor(@data, object, methods, @type, node) { // {{{
+		super()
+		
+		@expression = new MemberExpression(data.callee, node, node.scope(), object)
+		@expression.analyse()
+		@expression.prepare()
+		
+		@list = node._list
+		@nullable = data.nullable || @expression.isNullable()
+		@nullableComputed = data.nullable && @expression.isNullable()
+		@scope = data.scope.kind
+		
+		for method in methods {
+			this.validate(method, node)
+		}
+	} // }}}
+	acquireReusable(acquire) { // {{{
+		@expression.acquireReusable(@data.nullable || (!@list && @scope == ScopeKind::This))
+	} // }}}
+	isNullable() => @nullable
+	isNullableComputed() => @nullableComputed
+	releaseReusable() { // {{{
+		@expression.releaseReusable()
+	} // }}}
+	toFragments(fragments, mode, node) { // {{{
+		if @list {
+			switch @scope {
+				ScopeKind::Argument => {
+					fragments.wrap(@expression, mode).code('.call(').compile(node._callScope, mode)
 					
-					for argument, index in @arguments {
+					for argument in node._arguments {
+						fragments.code($comma).compile(argument, mode)
+					}
+				}
+				ScopeKind::Null => {
+					fragments.wrap(@expression, mode).code('.call(null')
+					
+					for argument in node._arguments {
+						fragments.code($comma).compile(argument, mode)
+					}
+				}
+				ScopeKind::This => {
+					fragments.wrap(@expression, mode).code('(')
+					
+					for argument, index in node._arguments {
 						fragments.code($comma) if index
 						
 						fragments.compile(argument, mode)
 					}
 				}
-				else if @data.scope.kind == ScopeKind::Null {
-					fragments.wrap(@callee, mode).code('.call(null')
+			}
+		}
+		else {
+			if @scope == ScopeKind::Argument {
+				fragments
+					.compileReusable(@expression)
+					.code('.apply(')
+					.compile(node._callScope, mode)
+			}
+			else if @scope == ScopeKind::Null || @expression is not MemberExpression {
+				fragments
+					.compileReusable(@expression)
+					.code('.apply(null')
+			}
+			else {
+				fragments
+					.compileReusable(@expression)
+					.code('.apply(')
+					.compile(@expression.caller(), mode)
+			}
+			
+			if node._arguments.length == 1 && node._arguments[0].type().isArray() {
+				fragments.code($comma).compile(node._arguments[0])
+			}
+			else {
+				fragments.code(', [].concat(')
+				
+				for i from 0 til node._arguments.length {
+					fragments.code($comma) if i != 0
 					
-					for argument in @arguments {
-						fragments.code($comma).compile(argument, mode)
-					}
+					fragments.compile(node._arguments[i])
 				}
-				else {
-					fragments.wrap(@callee, mode).code('.call(').compile(@callScope, mode)
+				
+				fragments.code(')')
+			}
+		}
+	} // }}}
+	toNullableFragments(fragments, node) { // {{{
+		if @data.nullable {
+			if @expression.isNullable() {
+				fragments
+					.compileNullable(@expression)
+					.code(' && ')
+			}
+			
+			fragments
+				.code($runtime.type(node) + '.isFunction(')
+				.compileReusable(@expression)
+				.code(')')
+		}
+		else if @expression.isNullable() {
+			fragments.compileNullable(@expression)
+		}
+		else {
+			fragments
+				.code($runtime.type(node) + '.isValue(')
+				.compileReusable(node)
+				.code(')')
+		}
+	} // }}}
+	translate() { // {{{
+		@expression.translate()
+	} // }}}
+	type() => @type
+	type(@type) => this
+}
+
+class SealedFunctionCallee extends Callee {
+	private {
+		_nullable: Boolean
+		_nullableComputed: Boolean
+		_object
+		_property: String
+		_recipient: ObjectType
+		_type: Type
+	}
+	constructor(data, @recipient, function, @type, node) { // {{{
+		super()
+		
+		@object = node._object
+		@property = node._property
+		
+		nullable = data.nullable || node._object.isNullable()
+		nullableComputed = data.nullable && node._object.isNullable()
+		
+		this.validate(function, node)
+	} // }}}
+	translate() { // {{{
+		@object.translate()
+	} // }}}
+	isNullable() => @nullable
+	isNullableComputed() => @nullableComputed
+	toFragments(fragments, mode, node) { // {{{
+		if node._list {
+			switch node._data.scope.kind {
+				ScopeKind::Argument => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::Null => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::This => {
+					fragments.code(`\(@recipient.sealName()).\(@property)(`)
 					
-					for argument in @arguments {
-						fragments.code($comma).compile(argument, mode)
+					for i from 0 til node._arguments.length {
+						fragments.code($comma).compile(node._arguments[i])
 					}
 				}
 			}
-			else {
-				if @data.scope.kind == ScopeKind::Null {
-					fragments
-						.wrap(@callee, mode)
-						.code('.apply(null')
+		}
+		else {
+			switch node._data.scope.kind {
+				ScopeKind::Argument => {
+					throw new NotImplementedException(node)
 				}
-				else if @data.scope.kind == ScopeKind::This {
-					fragments
-						.compileReusable(@callee)
-						.code('.apply(')
-						.compile(@caller, mode)
+				ScopeKind::Null => {
+					throw new NotImplementedException(node)
 				}
-				else {
-					fragments
-						.wrap(@callee, mode)
-						.code('.apply(')
-						.compile(@callScope, mode)
+				ScopeKind::This => {
+					throw new NotImplementedException(node)
 				}
-				
-				if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
-					fragments.code($comma).compile(@arguments[0])
+			}
+		}
+	} // }}}
+	toTestFragments(fragments, node) { // {{{
+		@type.toTestFragments(fragments, @object)
+	} // }}}
+	type() => @type
+}
+
+class SealedMethodCallee extends Callee {
+	private {
+		_class: ClassType
+		_instance: Boolean
+		_nullable: Boolean
+		_nullableComputed: Boolean
+		_object
+		_property: String
+		_type: Type
+	}
+	constructor(data, @class, @instance, methods = [], @type = Type.Any, node) { // {{{
+		super()
+		
+		@object = node._object
+		@property = node._property
+		
+		nullable = data.nullable || node._object.isNullable()
+		nullableComputed = data.nullable && node._object.isNullable()
+		
+		for method in methods {
+			this.validate(method, node)
+		}
+	} // }}}
+	translate() { // {{{
+		@object.translate()
+	} // }}}
+	isNullable() => @nullable
+	isNullableComputed() => @nullableComputed
+	toFragments(fragments, mode, node) { // {{{
+		if node._list {
+			switch node._data.scope.kind {
+				ScopeKind::Argument => {
+					throw new NotImplementedException(node)
 				}
-				else {
-					fragments.code(', [].concat(')
+				ScopeKind::Null => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::This => {
+					if @instance {
+						fragments
+							.code(`\(@class.getSealedPath())._im_\(@property)(`)
+							.compile(@object)
+						
+						for i from 0 til node._arguments.length {
+							fragments.code($comma).compile(node._arguments[i])
+						}
+					}
+					else {
+						fragments.code(`\(@class.getSealedPath())._cm_\(@property)(`)
+						
+						for i from 0 til node._arguments.length {
+							fragments.code($comma) if i != 0
+							
+							fragments.compile(node._arguments[i])
+						}
+					}
+				}
+			}
+		}
+		else if node._arguments.length == 1 && node._arguments[0].type().isArray() {
+			switch node._data.scope.kind {
+				ScopeKind::Argument => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::Null => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::This => {
+					throw new NotImplementedException(node)
+				}
+			}
+		}
+		else {
+			switch node._data.scope.kind {
+				ScopeKind::Argument => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::Null => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::This => {
+					if @instance {
+						fragments
+							.code(`\(@class.getSealedPath())._im_\(@property).apply(\(@class.getSealedPath()), [`)
+							.compile(@object)
+							.code(`].concat(`)
+					}
+					else {
+						fragments
+							.code(`\(@class.getSealedPath())._cm_\(@property).apply(\(@class.getSealedPath()), [].concat(`)
+					}
 					
-					for i from 0 til @arguments.length {
+					for i from 0 til node._arguments.length {
 						fragments.code($comma) if i != 0
 						
-						fragments.compile(@arguments[i])
+						fragments.compile(node._arguments[i])
 					}
 					
 					fragments.code(')')
@@ -553,48 +801,38 @@ class CallExpression extends Expression {
 			}
 		}
 	} // }}}
-	toNullableFragments(fragments) { // {{{
-		if @sealed {
-			throw new NotImplementedException(this)
-		}
-		else {
-			if !@tested {
-				@tested = true
-				
-				if @data.nullable {
-					if @callee.isNullable() {
-						fragments
-							.compileNullable(@callee)
-							.code(' && ')
-					}
-					
-					fragments
-						.code($runtime.type(this) + '.isFunction(')
-						.compileReusable(@callee)
-						.code(')')
-				}
-				else if @callee.isNullable() {
-					fragments.compileNullable(@callee)
-				}
-				else {
-					fragments
-						.code($runtime.type(this) + '.isValue(')
-						.compileReusable(this)
-						.code(')')
-				}
-			}
-		}
+	toTestFragments(fragments, node) { // {{{
+		@type.toTestFragments(fragments, @object)
 	} // }}}
-	toReusableFragments(fragments) { // {{{
-		if @sealed {
-			throw new NotImplementedException(this)
-		}
-		else {
-			fragments
-				.code(@reuseName, $equals)
-				.compile(this)
-			
-			@reusable = true
-		}
+	type() => @type
+}
+
+class SubstituteCallee extends Callee {
+	private {
+		_substitute
+		_nullable: Boolean
+		_nullableComputed: Boolean
+		_type: Type
+	}
+	constructor(data, @substitute, node) { // {{{
+		super()
+		
+		@nullable = data.nullable || substitute.isNullable()
+		@nullableComputed = data.nullable && substitute.isNullable()
+		
+		@type = @substitute.type()
 	} // }}}
+	constructor(data, @substitute, @type, node) { // {{{
+		super()
+		
+		@nullable = data.nullable || substitute.isNullable()
+		@nullableComputed = data.nullable && substitute.isNullable()
+	} // }}}
+	isNullable() => @nullable
+	isNullableComputed() => @nullableComputed
+	toFragments(fragments, mode, node) { // {{{
+		@substitute.toFragments(fragments, mode)
+	} // }}}
+	translate()
+	type() => @type
 }

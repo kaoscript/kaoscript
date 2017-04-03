@@ -3,12 +3,9 @@ class CreateExpression extends Expression {
 		_arguments	= []
 		_class
 		_list		= true
+		_type		= Type.Any
 	}
 	analyse() { // {{{
-		if (variable ?= $variable.fromAST(@data.class, this)) && variable.abstract {
-			TypeException.throwCannotBeInstantiated(variable.name.name, this)
-		}
-		
 		@class = $compile.expression(@data.class, this)
 		@class.analyse()
 		
@@ -28,6 +25,15 @@ class CreateExpression extends Expression {
 	prepare() { // {{{
 		@class.prepare()
 		
+		const type = @class.type()
+		if type is ClassType {
+			if type.isAbstract() {
+				TypeException.throwCannotBeInstantiated(type.name(), this)
+			}
+			
+			@type = type.reference()
+		}
+		
 		for argument in @arguments {
 			argument.prepare()
 		}
@@ -39,6 +45,7 @@ class CreateExpression extends Expression {
 			argument.translate()
 		}
 	} // }}}
+	isComputed() => true
 	toFragments(fragments, mode) { // {{{
 		if @list {
 			fragments.code('new ').compile(@class).code('(')
@@ -55,4 +62,5 @@ class CreateExpression extends Expression {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
+	type() => @type
 }

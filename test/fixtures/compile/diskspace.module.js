@@ -6,7 +6,7 @@ module.exports = function() {
 	const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i;
 	function disks(__ks_cb) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 0 + 1)");
 		}
 		if(!Type.isFunction(__ks_cb)) {
 			throw new TypeError("'callback' must be a function");

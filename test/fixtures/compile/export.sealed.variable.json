@@ -2,53 +2,26 @@
   "requirements": {},
   "exports": {
     "Math": {
-      "name": "Math",
-      "kind": 5,
-      "type": {
-        "typeName": {
-          "kind": 41,
-          "name": "Object"
-        },
-        "properties": {
-          "PI": {
-            "kind": 5,
-            "name": "PI",
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
-              }
-            }
-          },
-          "pow": {
-            "kind": 3,
-            "name": "pow",
-            "signature": {
+      "alien": "true",
+      "sealed": "true",
+      "properties": {
+        "PI": "Number",
+        "pow": {
+          "async": "false",
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
               "min": 0,
-              "max": "Infinity",
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 0,
-                  "max": "Infinity",
-                  "rest": "true"
-                }
-              ]
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
-              }
+              "max": "Infinity"
             }
-          }
+          ],
+          "returns": "Number",
+          "throws": []
         }
       },
-      "sealed": {
-        "name": "__ks_Math",
-        "properties": {},
-        "extern": "true"
-      }
+      "sealedProperties": []
     }
   }
 }

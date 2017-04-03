@@ -6,8 +6,9 @@
   },
   "exports": {
     "Array": {
-      "name": "Array",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "false",
+      "sealed": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -26,21 +27,13 @@
                 "max": 1
               }
             ],
+            "returns": "Any",
             "sealed": "true",
             "throws": []
           }
         ]
       },
-      "classMethods": {},
-      "requirement": "Array",
-      "sealed": {
-        "name": "__ks_Array",
-        "constructors": "false",
-        "instanceMethods": {
-          "last": "true"
-        },
-        "classMethods": {}
-      }
+      "classMethods": {}
     }
   }
 }

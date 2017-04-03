@@ -1,3 +1,5 @@
+extern console
+
 extern sealed class Number {
 	toString(): String
 }
@@ -12,5 +14,8 @@ impl Math {
 	foo(): Number => Math.PI
 }
 
-Math.pi
-Math.foo()
+console.log(`\(Math.pi)`)
+console.log(`\(Math.foo())`)
+
+console.log(`\(Math.pi.toString())`)
+console.log(`\(Math.foo().toString())`)

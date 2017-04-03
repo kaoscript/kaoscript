@@ -2,8 +2,11 @@
   "requirements": {},
   "exports": {
     "foo": {
-      "name": "foo",
-      "kind": 3,
+      "async": "false",
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
       "throws": []
     }
   }

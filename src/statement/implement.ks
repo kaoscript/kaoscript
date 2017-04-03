@@ -1,6 +1,7 @@
 class ImplementDeclaration extends Statement {
 	private {
 		_properties = []
+		_type: Type
 		_variable
 	}
 	analyse() { // {{{
@@ -8,14 +9,16 @@ class ImplementDeclaration extends Statement {
 			ReferenceException.throwNotDefined(@data.variable.name, this)
 		}
 		
-		if @variable.kind == VariableKind::Class {
+		@type = @variable.type().unalias()
+		
+		if @type is ClassType {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
-						property = new ImplementClassFieldDeclaration(property, this, @variable)
+						property = new ImplementClassFieldDeclaration(property, this, @type)
 					}
 					NodeKind::MethodDeclaration => {
-						property = new ImplementClassMethodDeclaration(property, this, @variable)
+						property = new ImplementClassMethodDeclaration(property, this, @type)
 					}
 					=> {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
@@ -27,14 +30,14 @@ class ImplementDeclaration extends Statement {
 				@properties.push(property)
 			}
 		}
-		else if @variable.kind == VariableKind::Variable {
+		else if @type is ObjectType {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
-						property = new ImplementVariableFieldDeclaration(property, this, @variable)
+						property = new ImplementObjectVariableDeclaration(property, this, @type)
 					}
 					NodeKind::MethodDeclaration => {
-						property = new ImplementVariableMethodDeclaration(property, this, @variable)
+						property = new ImplementObjectFunctionDeclaration(property, this, @type)
 					}
 					=> {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
@@ -65,21 +68,22 @@ class ImplementDeclaration extends Statement {
 			property.toFragments(fragments, Mode::None)
 		}
 	} // }}}
+	type() => @type
 }
 
 class ImplementClassFieldDeclaration extends Statement {
 	private {
+		_class: ClassType
 		_defaultValue				= null
 		_hasDefaultValue: Boolean	= false
 		_instance: Boolean			= true
-		_name
-		_signature
-		_variable
+		_name: String
+		_type: ClassVariableType
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @class) { // {{{
 		super(data, parent)
 		
-		if variable.sealed {
+		if class.isSealed() {
 			TypeException.throwImplFieldToSealedType(this)
 		}
 	} // }}}
@@ -112,32 +116,23 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		@signature = $field.signature(@data, this)
+		@type = Type.fromAST(@data, this)
 		
 		if @instance {
-			@variable.instanceVariables[@name] = @signature
+			@class.addInstanceVariable(@name, @type)
 		}
 		else {
-			@variable.classVariables[@name] = @signature
+			@class.addClassVariable(@name, @type)
 		}
 		
-		if @variable.sealed? {
-			if @instance {
-				if @variable.sealed.instanceVariables[@name] != true {
-					@variable.sealed.instanceVariables[@name] = true
-				}
-			}
-			else {
-				if @variable.sealed.classVariables[@name] != true {
-					@variable.sealed.classVariables[@name] = true
-				}
-			}
+		if @hasDefaultValue {
+			@defaultValue.prepare()
 		}
-		
-		@defaultValue.prepare() if @defaultValue?
 	} // }}}
 	translate() { // {{{
-		@defaultValue.translate() if @defaultValue?
+		if @hasDefaultValue {
+			@defaultValue.translate()
+		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @hasDefaultValue {
@@ -149,72 +144,35 @@ class ImplementClassFieldDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	toTypeString(type, path) { // {{{
-		if type is Array {
-			let src = ''
-			
-			for i from 0 til type.length {
-				if i {
-					src += ','
-				}
-				
-				src += this.toTypeString(type[i], path)
-			}
-			
-			return '[' + src + ']'
-		}
-		else if type is String {
-			if type == 'Any' || $typeofs[type] == true {
-				return $quote(type)
-			}
-			else if @scope.hasVariable(type) {
-				return type
-			}
-			else {
-				if path? {
-					this.module().addReference(type, path + '.type = ' + type)
-					
-					return $quote('#' + type)
-				}
-				else {
-					TypeException.throwInvalid(type, this)
-				}
-			}
-		}
-		else if type.name? {
-			this.toTypeString(type.name, path)
-		}
-		else {
-			throw new NotImplementedException(this)
-		}
-	} // }}}
+	type() => @type
 }
 
 class ImplementClassMethodDeclaration extends Statement {
 	private {
+		_aliases: Array			= []
+		_body: Array
+		_class: ClassType
 		_isContructor: Boolean	= false
 		_isDestructor: Boolean	= false
 		_instance: Boolean		= true
 		_internalName: String
 		_name: String
-		_parameters
-		_sealed: Boolean		= false
-		_signature
+		_parameters: Array<Parameter>
 		_statements
-		_variable
+		_this: Variable
+		_type: Type
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @class) { // {{{
 		super(data, parent, new Scope(parent.scope()))
-		
-		@sealed = @variable.sealed?
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
+		@body = $ast.body(@data.body)
 		
-		if @isContructor = @data.name.kind == NodeKind::Identifier && $method.isConstructor(@name, @variable) {
+		if @isContructor = (@data.name.kind == NodeKind::Identifier && @class.isConstructor(@name)) {
 			throw new NotImplementedException(this)
 		}
-		else if @isDestructor = @data.name.kind == NodeKind::Identifier && $method.isDestructor(@name, @variable) {
+		else if @isDestructor = (@data.name.kind == NodeKind::Identifier && @class.isDestructor(@name)) {
 			throw new NotImplementedException(this)
 		}
 		else {
@@ -223,29 +181,9 @@ class ImplementClassMethodDeclaration extends Statement {
 					@instance = false
 				}
 			}
-			
-			if !@instance && (@name == 'name' || @name == 'version') {
-				SyntaxException.throwReservedClassMethod(@name, @parent)
-			}
-			
-			if @sealed {
-				if @instance {
-					if @variable.sealed.instanceMethods[@name] != true {
-						@variable.sealed.instanceMethods[@name] = true
-					}
-				}
-				else {
-					if @variable.sealed.classMethods[@name] != true {
-						@variable.sealed.classMethods[@name] = true
-					}
-				}
-			}
 		}
 		
-		$variable.define(this, @scope, {
-			kind: NodeKind::Identifier
-			name: 'this'
-		}, true, VariableKind::Variable, $type.reference(@variable.name))
+		@this = @scope.define('this', true, @class.reference(), this)
 		
 		@parameters = []
 		for parameter in @data.parameters {
@@ -259,35 +197,17 @@ class ImplementClassMethodDeclaration extends Statement {
 			parameter.prepare()
 		}
 		
-		@signature = Signature.fromNode(this)
+		@type = new ClassMethodType([parameter.type() for parameter in @parameters], @data, this)
 		
-		if @sealed {
-			@signature.sealed = true
+		if @class.isSealed() {
+			@type.seal()
 		}
 		
 		if @instance {
-			if @variable.instanceMethods[@name] is Array {
-				@internalName = `__ks_func_\(@name)_\(@variable.instanceMethods[@name].length)`
-				
-				@variable.instanceMethods[@name].push(@signature)
-			}
-			else {
-				@internalName = `__ks_func_\(@name)_0`
-				
-				@variable.instanceMethods[@name] = [@signature]
-			}
+			@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
 		}
 		else {
-			if @variable.classMethods[@name] is Array {
-				@internalName = `__ks_sttc_\(@name)_\(@variable.classMethods[@name].length)`
-				
-				@variable.classMethods[@name].push(@signature)
-			}
-			else {
-				@internalName = `__ks_sttc_\(@name)_0`
-				
-				@variable.classMethods[@name] = [@signature]
-			}
+			@internalName = `__ks_sttc_\(@name)_\(@class.addClassMethod(@name, @type))`
 		}
 	} // }}}
 	translate() { // {{{
@@ -296,7 +216,14 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 		
 		@statements = []
-		for statement in $body(@data.body) {
+		
+		for statement in @aliases {
+			@statements.push(statement)
+			
+			statement.analyse()
+		}
+		
+		for statement in @body {
 			@statements.push(statement = $compile.statement(statement, this))
 			
 			statement.analyse()
@@ -310,64 +237,14 @@ class ImplementClassMethodDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
-	getAliasType(name, node) { // {{{
-		if	(variable ?= this.getInstanceVariable(name)) ||
-			(variable ?= this.getInstanceMethod(name)) ||
-			(variable ?= this.getInstanceVariable('_' + name)) {
-			
-			let type = $type.reference(variable.type ?? 'Any')
-			
-			if variable.nullable {
-				type.nullable = true
-			}
-			
-			return type
-		}
-		else {
-			ReferenceException.throwNotDefinedMember(name, node)
+	addAliasStatement(statement: AliasStatement) { // {{{
+		if !ClassDeclaration.isAssigningAlias(@body, statement.name(), false, false) {
+			@aliases.push(statement)
 		}
 	} // }}}
-	getInstanceMethod(name, variable = @variable) { // {{{
-		if variable.instanceMethods[name]?['1']? {
-			throw new NotImplementedException()
-		}
-		else if variable.extends? {
-			return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
-		}
-		
-		return null
-	} // }}}
-	getInstanceVariable(name, variable = @variable) { // {{{
-		if variable.instanceVariables[name]? {
-			return variable.instanceVariables[name]
-		}
-		else if variable.extends? {
-			return this.getInstanceVariable(name, @scope.getVariable(variable.extends))
-		}
-		
-		return null
-	} // }}}
-	isInstanceMethod(name, variable = @variable) { // {{{
-		if variable.instanceMethods[name]?['1']? {
-			return true
-		}
-		else if variable.extends? {
-			return this.getInstanceMethod(name, @scope.getVariable(variable.extends))
-		}
-		
-		return false
-	} // }}}
-	isInstanceVariable(name, variable = @variable) { // {{{
-		if variable.instanceVariables[name]? {
-			return true
-		}
-		else if variable.extends? {
-			return this.isInstanceVariable(name, @scope.getVariable(variable.extends))
-		}
-		
-		return false
-	} // }}}
+	class() => @class
 	isMethod() => true
+	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		if @isContructor {
 			throw new NotImplementedException(this)
@@ -378,52 +255,23 @@ class ImplementClassMethodDeclaration extends Statement {
 		else {
 			const line = fragments.newLine()
 			
-			if @sealed {
-				line.code(`\(@variable.sealed.name).\(@internalName) = function(`)
+			if @class.isSealed() {
+				line.code(`\(@class.sealName()).\(@internalName) = function(`)
 			}
 			else {
 				if @instance {
-					line.code(`\(@variable.name.name || @variable.name).prototype.\(@internalName) = function(`)
+					line.code(`\(@class.name()).prototype.\(@internalName) = function(`)
 				}
 				else {
-					line.code(`\(@variable.name.name || @variable.name).\(@internalName) = function(`)
+					line.code(`\(@class.name()).\(@internalName) = function(`)
 				}
 			}
 			
-			const block = $function.parameters(this, line, false, func(node) {
+			const block = Parameter.toFragments(this, line, false, func(node) {
 				line.code(')')
 				
 				return line.newBlock()
 			})
-			
-			if @instance {
-				for parameter in @parameters {
-					if parameter._thisAlias && !$method.isUsingProperty($body(@data.body), parameter._name) {
-						if parameter._setterAlias {
-							if (@name != parameter._name || @signature.min != 1 || @signature.max != 1) && this.isInstanceMethod(parameter._name) {
-								block.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
-							}
-							else {
-								ReferenceException.throwNotDefinedMember(parameter._name, this)
-							}
-						}
-						else {
-							if this.isInstanceVariable(parameter._name) {
-								block.newLine().code('this.' + parameter._name + ' = ').compile(parameter).done()
-							}
-							else if this.isInstanceVariable('_' + parameter._name) {
-								block.newLine().code('this._' + parameter._name + ' = ').compile(parameter).done()
-							}
-							else if (@name != parameter._name || @signature.min != 1 || @signature.max != 1) && this.isInstanceMethod(parameter._name) {
-								block.newLine().code('this.' + parameter._name + '(').compile(parameter).code(')').done()
-							}
-							else {
-								ReferenceException.throwNotDefinedMember(parameter._name, this)
-							}
-						}
-					}
-				}
-			}
 			
 			for statement in @statements {
 				block.compile(statement)
@@ -433,136 +281,85 @@ class ImplementClassMethodDeclaration extends Statement {
 			line.done()
 			
 			if @instance {
-				if @sealed {
-					$helper.methods(this, fragments.newLine(), @variable, @variable.instanceMethods[@name], null, (node, fragments) => {
-						const block = fragments.code(`\(@variable.sealed.name)._im_\(@name) = function(that)`).newBlock()
+				if @class.isSealed() {
+					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), null, (node, fragments) => {
+						const block = fragments.code(`\(@class.sealName())._im_\(@name) = function(that)`).newBlock()
 						
 						block.line('var args = Array.prototype.slice.call(arguments, 1, arguments.length)')
 						
 						return block
 					}, (fragments) => fragments.done(), (fragments, method, index) => {
-						if method.max == 0 {
-							if method.sealed {
-								fragments.line(`return \(@variable.sealed.name).__ks_func_\(@name)_\(index).apply(that)`)
+						if method.max() == 0 {
+							if method.isSealed() {
+								fragments.line(`return \(@class.sealName()).__ks_func_\(@name)_\(index).apply(that)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name.name || @variable.name).prototype.__ks_func_\(@name)_\(index).apply(that)`)
+								fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that)`)
 							}
 						}
 						else {
-							if method.sealed {
-								fragments.line(`return \(@variable.sealed.name).__ks_func_\(@name)_\(index).apply(that, args)`)
+							if method.isSealed() {
+								fragments.line(`return \(@class.sealName()).__ks_func_\(@name)_\(index).apply(that, args)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name.name || @variable.name).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
+								fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
 							}
 						}
 					}, 'args', true).done()
 				}
 				else {
-					$helper.instanceMethod(this, fragments.newLine(), @variable, @variable.instanceMethods[@name], @name, (node, fragments) => {
-						return fragments.code(`\(@variable.name.name || @variable.name).prototype.\(@name) = function()`).newBlock()
-					}, (fragments) => fragments.done()).done()
+					ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 				}
 			}
 			else {
-				if @sealed {
-					$helper.methods(this, fragments.newLine(), @variable, @variable.classMethods[@name], null, (node, fragments) => {
-						const block = fragments.code(`\(@variable.sealed.name)._cm_\(@name) = function()`).newBlock()
+				if @class.isSealed() {
+					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), null, (node, fragments) => {
+						const block = fragments.code(`\(@class.sealName())._cm_\(@name) = function()`).newBlock()
 						
 						block.line('var args = Array.prototype.slice.call(arguments)')
 						
 						return block
 					}, (fragments) => fragments.done(), (fragments, method, index) => {
-						if method.max == 0 {
-							if method.sealed {
-								fragments.line(`return \(@variable.sealed.name).__ks_sttc_\(@name)_\(index)()`)
+						if method.max() == 0 {
+							if method.isSealed() {
+								fragments.line(`return \(@class.sealName()).__ks_sttc_\(@name)_\(index)()`)
 							}
 							else {
-								fragments.line(`return \(@variable.name.name || @variable.name).__ks_sttc_\(@name)_\(index)()`)
+								fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index)()`)
 							}
 						}
 						else {
-							if method.sealed {
-								fragments.line(`return \(@variable.sealed.name).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+							if method.isSealed() {
+								fragments.line(`return \(@class.sealName()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name.name || @variable.name).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+								fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
 							}
 						}
 					}, 'args', true).done()
 				}
 				else {
-					$helper.classMethod(this, fragments.newLine(), @variable, @variable.classMethods[@name], @name, (node, fragments) => {
-						return fragments.code(`\(@variable.name.name || @variable.name).\(@name) = function()`).newBlock()
-					}, (fragments) => fragments.done()).done()
+					ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 				}
 			}
 		}
 	} // }}}
-	toTypeString(type, path) { // {{{
-		if type is Array {
-			let src = ''
-			
-			for i from 0 til type.length {
-				if i {
-					src += ','
-				}
-				
-				src += this.toTypeString(type[i], path)
-			}
-			
-			return '[' + src + ']'
-		}
-		else if type is String {
-			if type == 'Any' || $typeofs[type] == true {
-				return $quote(type)
-			}
-			else if @scope.hasVariable(type) {
-				return type
-			}
-			else {
-				if path? {
-					this.module().addReference(type, path + '.type = ' + type)
-					
-					return $quote('#' + type)
-				}
-				else {
-					TypeException.throwInvalid(type, this)
-				}
-			}
-		}
-		else if type.name? {
-			this.toTypeString(type.name, path)
-		}
-		else {
-			throw new NotImplementedException(this)
-		}
-	} // }}}
+	type() => @type
 }
 
-class ImplementVariableFieldDeclaration extends Statement {
+class ImplementObjectVariableDeclaration extends Statement {
 	private {
+		_object: ObjectType
 		_value
-		_variable
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @object) { // {{{
 		super(data, parent)
 	} // }}}
 	analyse() { // {{{
 		@value = $compile.expression(@data.defaultValue, this)
 		@value.analyse()
 		
-		let property = {
-			kind: VariableKind::Variable
-			name: @data.name.name
-		}
-		
-		if @data.type? {
-			property.type = $type.type(@data.type, @scope, this)
-		}
-		
-		@variable.sealed.properties[property.name] = property
+		@object.addSealedProperty(@data.name.name, Type.fromAST(@data.type, this))
 	} // }}}
 	prepare() { // {{{
 		@value.prepare()
@@ -573,20 +370,20 @@ class ImplementVariableFieldDeclaration extends Statement {
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.newLine()
-			.code(@variable.sealed.name, '.', @data.name.name, ' = ')
+			.code(@object.sealName(), '.', @data.name.name, ' = ')
 			.compile(@value)
 			.done()
 	} // }}}
 }
 
-class ImplementVariableMethodDeclaration extends Statement {
+class ImplementObjectFunctionDeclaration extends Statement {
 	private {
-		_parameters
-		_signature
-		_statements
-		_variable
+		_object: ObjectType
+		_parameters: Array
+		_statements: Array
+		_type: FunctionType
 	}
-	constructor(data, parent, @variable) { // {{{
+	constructor(data, parent, @object) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -602,24 +399,14 @@ class ImplementVariableMethodDeclaration extends Statement {
 			parameter.prepare()
 		}
 		
-		let property = {
-			kind: VariableKind::Function
-			name: @data.name.name
-			signature: $function.signature(@data, this)
-		}
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
 		
-		if @data.type? {
-			property.type = $type.type(@data.type, @scope, this)
-		}
-		
-		@variable.sealed.properties[property.name] = property
-		
-		@signature = Signature.fromNode(this)
+		@object.addSealedProperty(@data.name.name, @type)
 	} // }}}
 	translate() { // {{{
 		if @data.body? {
 			@statements = []
-			for statement in $body(@data.body) {
+			for statement in $ast.body(@data.body) {
 				@statements.push(statement = $compile.statement(statement, this))
 				
 				statement.analyse()
@@ -638,10 +425,11 @@ class ImplementVariableMethodDeclaration extends Statement {
 		}
 	} // }}}
 	isMethod() => false
+	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
-		let line = fragments.newLine().code(@variable.sealed.name, '.', @data.name.name, ' = function(')
+		const line = fragments.newLine().code(@object.sealName(), '.', @data.name.name, ' = function(')
 		
-		let block = $function.parameters(this, line, false, func(fragments) {
+		const block = Parameter.toFragments(this, line, false, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 		
@@ -653,4 +441,5 @@ class ImplementVariableMethodDeclaration extends Statement {
 		
 		line.done()
 	} // }}}
+	type() => @type
 }

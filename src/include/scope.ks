@@ -79,7 +79,11 @@ class AbstractScope {
 			}
 		}
 	} // }}}
-	addVariable(name, definition) { // {{{
+	addVariable(name: String, variable: Variable, node) { // {{{
+		if @variables[name] is Variable {
+			SyntaxException.throwAlreadyDeclared(name, node)
+		}
+		
 		if $keywords[name] == true {
 			let index = @renamedIndexes[name] ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
@@ -92,11 +96,30 @@ class AbstractScope {
 			@renamedVariables[name] = newName
 		}
 		
-		@variables[name] = definition
+		@variables[name] = variable
 		
 		return this
 	} // }}}
-	getVariable(name) { // {{{
+	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode) { // {{{
+		if @variables[name] is Variable {
+			SyntaxException.throwAlreadyDeclared(name, node)
+		}
+		
+		const variable = new Variable(name, immutable, type)
+		
+		this.addVariable(name, variable, node)
+		
+		return variable
+	} // }}}
+	getLocalVariable(name): Variable { // {{{
+		if @variables[name] is Object {
+			return @variables[name]
+		}
+		else {
+			return null
+		}
+	} // }}}
+	getVariable(name): Variable { // {{{
 		if @variables[name] is Object {
 			return @variables[name]
 		}
@@ -107,15 +130,13 @@ class AbstractScope {
 			return null
 		}
 	} // }}}
-	hasVariable(name, lookAtParent = true) { // {{{
-		return @variables[name] is Object || (lookAtParent && @parent?.hasVariable(name))
-	} // }}}
-	isDeclaredVariable(name, lookAtParent = true) { // {{{
-		return @variables[name]? || (lookAtParent && @parent?.isDeclaredVariable(name))
-	} // }}}
+	hasDeclaredLocalVariable(name) => @variables[name]?
+	hasLocalVariable(name) => @variables[name] is Variable
+	hasVariable(name) => @variables[name] is Variable || @parent?.hasVariable(name)
 	parent() => @parent
+	reference(name: String) => (new ScopeDomain(this)).reference(name)
 	removeVariable(name) { // {{{
-		if @variables[name] is Object {
+		if @variables[name] is Variable {
 			@variables[name] = false
 		}
 		else {

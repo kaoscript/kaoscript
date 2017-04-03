@@ -5,8 +5,9 @@
   },
   "exports": {
     "Object": {
-      "name": "Object",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "true",
+      "sealed": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -31,6 +32,7 @@
                 "max": 1
               }
             ],
+            "returns": "Any",
             "sealed": "true",
             "throws": []
           },
@@ -51,19 +53,11 @@
                 "max": 2
               }
             ],
+            "returns": "Any",
             "sealed": "true",
             "throws": []
           }
         ]
-      },
-      "sealed": {
-        "name": "__ks_Object",
-        "constructors": "false",
-        "instanceMethods": {},
-        "classMethods": {
-          "map": "true"
-        },
-        "extern": "true"
       }
     }
   }

@@ -1,0 +1,1 @@
+import * as rt from @kaoscript/runtime/src/runtime.js

@@ -13,40 +13,42 @@ class ExportDeclaration extends Statement {
 					
 					statement.analyse()
 					
-					module.export(declaration.name)
+					module.export(declaration.name.name, null, this)
 				}
 				NodeKind::ExportAlias => {
-					module.export(declaration.name, declaration.alias)
+					module.export(declaration.name.name, declaration.alias.name, this)
 				}
 				NodeKind::EnumDeclaration => {
 					@declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
-					module.export(declaration.name)
+					module.export(declaration.name.name, null, this)
 				}
 				NodeKind::FunctionDeclaration => {
 					@declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
-					module.export(declaration.name)
+					module.export(declaration.name.name, null, this)
 				}
 				NodeKind::Identifier => {
-					module.export(declaration)
+					module.export(declaration.name, null, this)
 				}
 				NodeKind::TypeAliasDeclaration => {
-					$variable.define(this, @scope, declaration.name, true, VariableKind::TypeAlias, declaration.type)
+					statement = $compile.statement(declaration, this)
 					
-					module.export(declaration.name)
+					statement.analyse()
+					
+					module.export(statement.name(), null, this)
 				}
 				NodeKind::VariableDeclaration => {
 					@declarations.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
-					for j from 0 til declaration.declarations.length {
-						module.export(declaration.declarations[j].name)
+					for i from 0 til declaration.declarations.length {
+						module.export(declaration.declarations[i].name.name, null, this)
 					}
 				}
 				=> {

@@ -1,0 +1,1 @@
+SyntaxException: Call "super()" is missing (line 15, file "fixtures/compile/class.constructor.search.if.missing.ks")

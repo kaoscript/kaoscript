@@ -1,15 +1,16 @@
 const $predefined = { // {{{
-	false: true
-	null: true
-	string: true
-	true: true
-	Error: true
-	Function: true
-	Infinity: true
-	Math: true
-	NaN: true
-	Object: true
-	String: true
+	__false(scope) => scope.reference('Boolean')
+	__null(scope) => Type.Any
+	__true(scope) => scope.reference('Boolean')
+	__Error(scope) => scope.reference('Error')
+	__Function(scope) => scope.reference('Function')
+	__Infinity(scope) => scope.reference('Number')
+	__Math(scope) => scope.reference('Object')
+	__Number(scope) => scope.reference('Number')
+	__NaN(scope) => scope.reference('Number')
+	__Object(scope) => scope.reference('Object')
+	__String(scope) => scope.reference('String')
+	__RegExp(scope) => scope.reference('RegExp')
 } // }}}
 
 class Literal extends Expression {
@@ -32,52 +33,54 @@ class Literal extends Expression {
 			fragments.code(@value)
 		}
 	} // }}}
+	value() => @value
 }
 
 class IdentifierLiteral extends Literal {
 	private {
-		_isVariable = false
+		_isVariable: Boolean	= false
+		_variable: Variable
+		_type: Type
 	}
-	constructor(data, parent, scope = parent.scope(), variable = true) { // {{{
+	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.name)
-		
-		if variable && !($predefined[data.name] == true || $runtime.isDefined(data.name, parent)) {
-			if parent is MemberExpression {
-				if parent._data.object == data {
-					@isVariable = true
-				}
-				else if parent._data.computed && parent._data.property == data {
-					@isVariable = true
-				}
-			}
-			else {
-				@isVariable = true
-			}
+	} // }}}
+	analyse() { // {{{
+		if @variable ?= @scope.getVariable(@value) {
+			@isVariable = true
 		}
-		
-		if @isVariable && !@scope.hasVariable(data.name) {
-			ReferenceException.throwNotDefined(data.name, this)
+		else if $predefined[`__\(@value)`] is Function {
+			@type = $predefined[`__\(@value)`](@scope)
+		}
+		else if $runtime.isDefined(@value, @parent) {
+			@type = Type.Any
+		}
+		else {
+			ReferenceException.throwNotDefined(@value, this)
+		}
+	} // }}}
+	prepare() { // {{{
+		if @isVariable {
+			@type = @variable.type()
 		}
 	} // }}}
 	name() => @value
 	toFragments(fragments, mode) { // {{{
-		if @isVariable {
-			fragments.code(@scope.getRenamedVariable(@value), @data)
-		}
-		else {
-			fragments.code(@value, @data)
-		}
+		fragments.code(@scope.getRenamedVariable(@value), @data)
 	} // }}}
+	type() => @type
 }
 
 class NumberLiteral extends Literal { // {{{
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.value)
 	} // }}}
+	type() => @scope.reference('Number')
 } // }}}
 
 class StringLiteral extends Literal { // {{{
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, $quote(data.value))
 	} // }}}
+	type() => @scope.reference('String')
 } // }}}

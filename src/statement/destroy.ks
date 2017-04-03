@@ -1,7 +1,8 @@
 class DestroyStatement extends Statement {
 	private {
 		_expression
-		_variable
+		_hasVariable: Boolean	= false
+		_variable: Variable
 	}
 	analyse() { // {{{
 		@expression = $compile.expression(@data.variable, this)
@@ -10,6 +11,7 @@ class DestroyStatement extends Statement {
 		
 		if @data.variable.kind == NodeKind::Identifier {
 			@variable = @scope.getVariable(@data.variable.name)
+			@hasVariable = true
 			
 			@scope.removeVariable(@data.variable.name)
 		}
@@ -21,8 +23,8 @@ class DestroyStatement extends Statement {
 		@expression.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if @variable?.type? && (type ?= $variable.fromType(@variable.type, this)) && type.destructors > 0 {
-			fragments.newLine().code(type.name.name, '.__ks_destroy(').compile(@expression).code(')').done()
+		if @hasVariable && (type = @variable.type().unalias()) is ClassType && type.hasDestructors() {
+			fragments.newLine().code(type.name(), '.__ks_destroy(').compile(@expression).code(')').done()
 		}
 		
 		if @expression is IdentifierLiteral {

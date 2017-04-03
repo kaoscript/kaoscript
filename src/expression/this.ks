@@ -1,81 +1,72 @@
 class ThisExpression extends Expression {
 	private {
-		_class
-		_method		= false
-		_variable
+		_calling: Boolean			= false
+		_class: ClassType
+		_entangled: Boolean			= false
+		_fragment
+		_method: ClassMethodType
+		_name: String
+		_type
 	}
-	constructor(data, parent, scope) { // {{{
-		super(data, parent, scope)
+	analyse() { // {{{
+		@name = @data.name.name
+		
+		let parent = @parent
 		
 		do {
-			if parent is ClassDeclaration {
-				@class = scope.getVariable(parent._name)
+			if parent is CallExpression && parent.data().callee == @data {
+				@calling = true
+			}
+			else if parent is ClassDeclaration {
+				@class = parent.type()
 				break
 			}
 			else if parent is ImplementClassMethodDeclaration {
-				@class = parent._variable
+				@class = parent.class()
 				break
 			}
 		}
 		while parent ?= parent.parent()
 		
 		if !?parent {
-			SyntaxException.throwOutOfClassAlias(data.name.name, this)
+			SyntaxException.throwOutOfClassAlias(@name, this)
 		}
 	} // }}}
-	analyse()
-	prepare()
-	translate()
-	isInstanceMethod(name, variable) { // {{{
-		return true if variable.instanceMethods[name]?
-		
-		if variable.extends? {
-			return @isInstanceMethod(name, @scope.getVariable(variable.extends))
-		}
-		
-		return false
-	} // }}}
-	isInstanceVariable(name, variable) { // {{{
-		return true if variable.instanceVariables[name]?
-		
-		if variable.extends? {
-			return @isInstanceVariable(name, @scope.getVariable(variable.extends))
-		}
-		
-		return false
-	} // }}}
-	isMethod(@method) => this
-	toFragments(fragments, mode) { // {{{
-		let name = @data.name.name
-		
-		if @method {
-			if @isInstanceMethod(name, @class) {
-				fragments.code('this.', name)
+	prepare() { // {{{
+		if @calling {
+			if type ?= @class.getInstanceMethod(@name, [argument.type() for argument in @parent.arguments()]) {
+				@fragment = `this.\(@name)`
+			}
+			else if @type ?= @class.getInstanceVariable(@name) {
+				@fragment = `this.\(@name)`
+			}
+			else if @type ?= @class.getInstanceVariable(`_\(@name)`) {
+				@fragment = `this._\(@name)`
 			}
 			else {
-				ReferenceException.throwNotDefinedMethod(name, this)
+				ReferenceException.throwNotDefinedField(@name, this)
 			}
 		}
 		else {
-			if @isInstanceVariable(name, @class) {
-				fragments.code('this.', name)
+			if @type ?= @class.getInstanceVariable(@name) {
+				@fragment = `this.\(@name)`
 			}
-			else if @isInstanceVariable('_' + name, @class) {
-				fragments.code('this._', name)
+			else if @type ?= @class.getInstanceVariable(`_\(@name)`) {
+				@fragment = `this._\(@name)`
+			}
+			else if @type ?= @class.getPropertyGetter(@name) {
+				@fragment = `this.\(@name)()`
+				@entangled = true
 			}
 			else {
-				let parent = @parent
-				while parent? && parent is not ClassMethodDeclaration {
-					parent = parent.parent()
-				}
-				
-				if (!?parent || parent.name() != name || parent.length() != 0) && @isInstanceMethod(name, @class) {
-					fragments.code('this.', name, '()')
-				}
-				else {
-					ReferenceException.throwNotDefinedField(name, this)
-				}
+				ReferenceException.throwNotDefinedField(@name, this)
 			}
 		}
 	} // }}}
+	translate()
+	isEntangled() => @entangled
+	toFragments(fragments, mode) { // {{{
+		fragments.code(@fragment)
+	} // }}}
+	type() => @type
 }

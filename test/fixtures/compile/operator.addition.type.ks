@@ -1,0 +1,1 @@
+func surround(value, separator = '') => (separator + value + separator).toString()

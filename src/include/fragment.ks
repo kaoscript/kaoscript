@@ -1,3 +1,8 @@
+enum Mode {
+	None
+	Async
+}
+
 const $indentations = []
 
 export class CodeFragment {

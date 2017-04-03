@@ -1,5 +1,5 @@
 module.exports = function() {
-	let Integer = {
+	const Integer = {
 		parse(value = null, radix = null) {
 			return parseInt(value, radix);
 		}

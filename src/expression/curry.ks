@@ -1,11 +1,10 @@
 class CurryExpression extends Expression {
 	private {
-		_arguments	= []
+		_arguments: Array	= []
 		_callee
-		_caller
 		_callScope
-		_list		= true
-		_tested		= false
+		_list: Boolean		= true
+		_tested: Boolean		= false
 	}
 	analyse() { // {{{
 		@callee = $compile.expression(@data.callee, this)
@@ -34,12 +33,8 @@ class CurryExpression extends Expression {
 	translate() { // {{{
 		@callee.translate()
 		
-		if @data.scope.kind == ScopeKind::This {
-			@caller = $call.caller(@callee, this)
-		}
-		else if @data.scope.kind == ScopeKind::Argument {
+		if @data.scope.kind == ScopeKind::Argument {
 			@callScope = $compile.expression(@data.scope.value, this)
-			
 			@callScope.analyse()
 			@callScope.prepare()
 			@callScope.translate()
@@ -72,13 +67,7 @@ class CurryExpression extends Expression {
 					.code($runtime.helper(this), '.vcurry(')
 					.compile(@callee)
 					.code(', ')
-				
-				if @caller? {
-					fragments.compile(@caller)
-				}
-				else {
-					fragments.code('null')
-				}
+					.compile(@callee.caller())
 				
 				for argument in @arguments {
 					fragments.code($comma).compile(argument)
@@ -122,17 +111,10 @@ class CurryExpression extends Expression {
 					.code($runtime.helper(this), '.curry(')
 					.compile(@callee)
 					.code($comma)
+					.compile(@callee.caller())
+					.code($comma)
 				
-				if @caller? {
-					fragments.compile(@caller)
-				}
-				else {
-					fragments.code('null')
-				}
-				
-				fragments.code($comma)
-				
-				if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
+				if @arguments.length == 1 && @arguments[0].type().isArray() {
 					fragments.compile(@arguments[0])
 				}
 				else {
@@ -155,7 +137,7 @@ class CurryExpression extends Expression {
 					.compile(@callee)
 					.code(', null, ')
 				
-				if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
+				if @arguments.length == 1 && @arguments[0].type().isArray() {
 					fragments.compile(@arguments[0])
 				}
 				else {
@@ -180,7 +162,7 @@ class CurryExpression extends Expression {
 					.compile(@callScope)
 					.code($comma)
 				
-				if @arguments.length == 1 && $signature.type($type.type(@data.arguments[0].argument, @scope, this), @scope) == 'Array' {
+				if @arguments.length == 1 && @arguments[0].type().isArray() {
 					fragments.compile(@arguments[0])
 				}
 				else {
@@ -222,4 +204,5 @@ class CurryExpression extends Expression {
 			}
 		}
 	} // }}}
+	type() => @scope.reference('Function')
 }

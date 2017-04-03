@@ -5,13 +5,13 @@ class ThrowStatement extends Statement {
 	analyse() { // {{{
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
-		
-		if (variable ?= $variable.fromAST(@data.value, this)) && variable.type && (variable ?= $variable.fromType(variable.type, this)) {
-			Exception.validateReportedError(variable, this)
-		}
 	} // }}}
 	prepare() { // {{{
 		@value.prepare()
+		
+		if (type ?= @value.type().unalias()) && type is ClassType {
+			Exception.validateReportedError(type, this)
+		}
 	} // }}}
 	translate() { // {{{
 		@value.translate()

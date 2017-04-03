@@ -1,0 +1,7 @@
+{
+  "requirements": {},
+  "exports": {
+    "Color": "Any",
+    "Space": "Any"
+  }
+}

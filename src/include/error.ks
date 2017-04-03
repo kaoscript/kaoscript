@@ -12,20 +12,24 @@ Error.prepareStackTrace = func(error: Error, stack: Array) { // {{{
 
 export class Exception extends Error {
 	public {
-		fileName: String
-		lineNumber: Number
+		fileName: String		= null
+		lineNumber: Number		= 0
 		message: String
 		name: String
 	}
 	
 	static {
-		validateReportedError(variable, node) { // {{{
+		validateReportedError(error: ClassType, node) { // {{{
 			let options = node._options.error
 			
 			if options.level == 'fatal' {
-				if !node.parent().isConsumedError(variable.name.name, variable) {
-					if options.ignore.length != 0 {
-						let hierarchy = $class.hierarchy(variable, node)
+				if !node.parent().isConsumedError(error) {
+					if options.ignore.length == 0 {
+						SyntaxException.throwUnreportedError(error.name(), node)
+					}
+					else {
+						const hierarchy = error.getHierarchy()
+						
 						let nf = true
 						
 						for name in hierarchy while nf {
@@ -35,25 +39,22 @@ export class Exception extends Error {
 						}
 						
 						if nf {
-							SyntaxException.throwUnreportedError(variable.name.name, node)
+							SyntaxException.throwUnreportedError(error.name(), node)
 						}
 						else if options.raise.length != 0 {
 							for name in hierarchy {
 								if options.raise:Array.contains(name) {
-									SyntaxException.throwUnreportedError(variable.name.name, node)
+									SyntaxException.throwUnreportedError(error.name(), node)
 								}
 							}
 						}
-					}
-					else {
-						SyntaxException.throwUnreportedError(variable.name.name, node)
 					}
 				}
 			}
 		} // }}}
 	}
 	
-	constructor(@message, @fileName, @lineNumber) { // {{{
+	constructor(@message) { // {{{
 		@name = this.constructor.name
 		
 		if !?this.stack {
@@ -61,11 +62,15 @@ export class Exception extends Error {
 		}
 	} // }}}
 	
-	constructor(message, node: AbstractNode) { // {{{
+	constructor(@message, @fileName, @lineNumber) { // {{{
+		this(message)
+	} // }}}
+	
+	constructor(@message, node: AbstractNode) { // {{{
 		this(message, node.file(), node._data.start.line)
 	} // }}}
 	
-	constructor(message, node: AbstractNode, data) { // {{{
+	constructor(@message, node: AbstractNode, data) { // {{{
 		this(message, node.file(), data.start.line)
 	} // }}}
 	
@@ -79,11 +84,21 @@ export class Exception extends Error {
 	} // }}}
 	
 	toString() { // {{{
-		if @message.length {
-			return `\(this.name): \(@message) (line \(@lineNumber), file "\(@fileName)")`
+		if @lineNumber == 0 {
+			if @message.length == 0{
+				return `\(this.name): Unexpected error`
+			}
+			else {
+				return `\(this.name): \(@message)`
+			}
 		}
 		else {
-			return `\(this.name): line \(@lineNumber), file "\(@fileName)"`
+			if @message.length == 0 {
+				return `\(this.name): line \(@lineNumber), file "\(@fileName)"`
+			}
+			else {
+				return `\(this.name): \(@message) (line \(@lineNumber), file "\(@fileName)")`
+			}
 		}
 	} // }}}
 }
@@ -106,6 +121,9 @@ export class IOException extends Exception {
 }
 
 export class NotImplementedException extends Exception {
+	constructor(message = 'Not Implemented') { // {{{
+		super(message)
+	} // }}}
 	constructor(message = 'Not Implemented', node: AbstractNode) { // {{{
 		super(message, node)
 	} // }}}
@@ -118,6 +136,9 @@ export class NotImplementedException extends Exception {
 }
 
 export class NotSupportedException extends Exception {
+	constructor(message = 'Not Supported') { // {{{
+		super(message)
+	} // }}}
 	constructor(message = 'Not Supported', node: AbstractNode) { // {{{
 		super(message, node)
 	} // }}}
@@ -160,6 +181,9 @@ export class SyntaxException extends Exception {
 		throwImmutable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
 		} // }}}
+		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
+		} // }}}
 		throwMissingAbstractMethods(name, methods, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Class "\(name)" doesn't implement the following abstract methods: "\(methods.join('", "'))"`, node)
 		} // }}}
@@ -201,6 +225,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwReservedClassVariable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Class variable "\(name)" is reserved`, node)
+		} // }}}
+		throwTooMuchAttributesForIfAttribute() ~ SyntaxException { // {{{
+			throw new SyntaxException(`Expected 1 argument for 'if' attribute`)
 		} // }}}
 		throwTooMuchRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Rest parameter has already been declared`, node)

@@ -1,9 +1,6 @@
 {
   "requirements": {},
   "exports": {
-    "name": {
-      "name": "name",
-      "kind": 5
-    }
+    "name": "Any"
   }
 }

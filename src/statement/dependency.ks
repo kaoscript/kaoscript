@@ -7,7 +7,7 @@ enum DependencyKind {
 }
 
 const $dependency = {
-	classMember(data, variable, node) { // {{{
+	classMember(data, type: ClassType, node) { // {{{
 		switch(data.kind) {
 			NodeKind::FieldDeclaration => {
 				throw new NotImplementedException(node)
@@ -16,10 +16,10 @@ const $dependency = {
 				throw new NotImplementedException(node)
 			}
 			NodeKind::MethodDeclaration => {
-				if $method.isConstructor(data.name.name, variable) {
-					variable.constructors.push(Signature.fromAST(data, node))
+				if type.isConstructor(data.name.name) {
+					throw new NotImplementedException(node)
 				}
-				else if $method.isDestructor(data.name.name, variable) {
+				else if type.isDestructor(data.name.name) {
 					throw new NotImplementedException(node)
 				}
 				else {
@@ -28,23 +28,11 @@ const $dependency = {
 						instance = false if data.modifiers[i].kind == ModifierKind::Static
 					}
 					
-					let signature = Signature.fromAST(data, node)
-					
 					if instance {
-						if variable.instanceMethods[data.name.name] is Array {
-							variable.instanceMethods[data.name.name].push(signature)
-						}
-						else {
-							variable.instanceMethods[data.name.name] = [signature]
-						}
+						type.addInstanceMethod(data.name.name, Type.fromAST(data, node))
 					}
 					else {
-						if variable.classMethods[data.name.name] is Array {
-							variable.classMethods[data.name.name].push(signature)
-						}
-						else {
-							variable.classMethods[data.name.name] = [signature]
-						}
+						type.addClassMethod(data.name.name, Type.fromAST(data, node))
 					}
 				}
 			}
@@ -54,65 +42,77 @@ const $dependency = {
 		}
 	} // }}}
 	define(declaration, node, kind) { // {{{
-		let variable
+		const scope = node.greatScope()
 		
 		switch declaration.kind {
 			NodeKind::ClassDeclaration => {
-				variable = $variable.define(node, node.greatScope(), declaration.name, true, VariableKind::Class, declaration)
+				const type = new ClassType(declaration.name.name, scope)
+				const variable = scope.define(declaration.name.name, true, type, node)
 				
 				if declaration.extends? {
 					if superVar !?= node.scope().getVariable(declaration.extends.name) {
 						ReferenceException.throwNotDefined(declaration.extends.name, node)
 					}
-					else if variable.kind != VariableKind::Class {
+					else if superVar.type() is not ClassType {
 						TypeException.throwNotClass(declaration.extends.name, node)
 					}
 					
-					variable.extends = declaration.extends.name
+					type.extends(superVar.type())
 				}
 				
-				unless kind == DependencyKind::Extern {
-					variable.requirement = declaration.name.name
+				if kind != DependencyKind::Extern {
+					variable.require()
+				}
+				
+				if	kind == DependencyKind::Extern ||
+					kind == DependencyKind::ExternOrRequire ||
+					kind == DependencyKind::RequireOrExtern
+				{
+					type.alienize()
 				}
 				
 				for modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind::Abstract {
-						variable.abstract = true
+						type.abstract()
 					}
 					else if modifier.kind == ModifierKind::Sealed {
-						variable.sealed = {
-							name: '__ks_' + variable.name.name
-							constructors: false
-							instanceMethods: {}
-							classMethods: {}
-						}
+						type.seal()
 					}
 				}
 				
 				for i from 0 til declaration.members.length {
-					$dependency.classMember(declaration.members[i], variable, node)
+					$dependency.classMember(declaration.members[i], type, node)
 				}
+				
+				return variable
 			}
 			NodeKind::VariableDeclarator => {
-				variable = $variable.define(node, node.greatScope(), declaration.name, true, $variable.kind(declaration.type), declaration.type)
+				let type = Type.fromAST(declaration.type, node)
 				
-				unless kind == DependencyKind::Extern {
-					variable.requirement = declaration.name.name
+				if type is ReferenceType && type.name() == 'Class' {
+					type = new ClassType(declaration.name.name, scope)
 				}
-				
-				if declaration.sealed {
-					variable.sealed = {
-						name: '__ks_' + variable.name.name
-						properties: {}
+				else if type is ObjectType {
+					if declaration.sealed {
+						type.seal(declaration.name.name)
+					}
+					
+					if	kind == DependencyKind::Extern ||
+						kind == DependencyKind::ExternOrRequire ||
+						kind == DependencyKind::RequireOrExtern
+					{
+						type.alienize()
 					}
 				}
+				
+				const variable = scope.define(declaration.name.name, true, type, node)
+				
+				return variable
 			}
 			=> {
 				throw new NotSupportedException(`Unexpected kind \(declaration.kind)`, node)
 			}
 		}
-		
-		return variable
 	} // }}}
 }
 
@@ -127,10 +127,8 @@ class ExternDeclaration extends Statement {
 		for declaration in @data.declarations {
 			variable = $dependency.define(declaration, this, DependencyKind::Extern)
 			
-			if variable.sealed? {
-				variable.sealed.extern = true
-				
-				@lines.push(`var \(variable.sealed.name) = {}`)
+			if variable.type().isSealed() {
+				@lines.push(`var \(variable.type().sealName()) = {}`)
 			}
 		}
 	} // }}}
@@ -197,36 +195,30 @@ class RequireOrImportDeclaration extends Statement {
 		const directory = this.directory()
 		const module = this.module()
 		
-		let metadata, variable
+		let metadata, requirement
 		for declarator in @data.declarations {
 			metadata = $import.resolve(declarator, directory, module, this)
 			
 			if metadata.importVarCount > 0 {
 				for name, alias of metadata.importVariables {
-					variable = metadata.exports[name]
+					requirement = module.require(Variable.import(alias, metadata.exports[name], this), DependencyKind::RequireOrImport)
 					
-					variable.requirement = alias
-					
-					module.require(variable, DependencyKind::RequireOrImport, {
-						data: @data
-						metadata: metadata
-						node: this
-					})
+					requirement.data = @data
+					requirement.metadata = metadata
+					requirement.node = this
 				}
 			}
 			else if metadata.importAll {
-				for name, variable of metadata.exports {
-					variable.requirement = name
+				for name, data of metadata.exports {
+					requirement = module.require(Variable.import(name, data, this), DependencyKind::RequireOrImport)
 					
-					module.require(variable, DependencyKind::RequireOrImport, {
-						data: @data
-						metadata: metadata
-						node: this
-					})
+					requirement.data = @data
+					requirement.metadata = metadata
+					requirement.node = this
 				}
 			}
 			
-			if metadata.importAlias.length {
+			if metadata.importAlias.length != 0 {
 				throw new NotImplementedException(this)
 			}
 		}

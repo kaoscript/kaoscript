@@ -1,6 +1,7 @@
 class TemplateExpression extends Expression {
 	private {
-		_elements
+		_computing: Boolean		= false
+		_elements: Array
 	}
 	analyse() { // {{{
 		@elements = []
@@ -20,23 +21,34 @@ class TemplateExpression extends Expression {
 			element.translate()
 		}
 	} // }}}
+	computing(@computing)
 	isComputed() => @elements.length > 1
 	toFragments(fragments, mode) { // {{{
-		for element, index in @elements {
-			if index == 0 {
-				/* const type = $type.type(@data.elements[index], @scope, this)
-				
-				if type?.typeName?.kind == NodeKind::Identifier && (type.typeName.name == 'String' || type.typeName.name == 'string') {
+		if @computing {
+			for element, index in @elements {
+				if index == 0 {
 					fragments.wrap(element)
 				}
 				else {
-					fragments.code('"" + ').wrap(element)
-				} */
-				fragments.wrap(element)
+					fragments.code(' + ').wrap(element)
+				}
 			}
-			else {
-				fragments.code(' + ').wrap(element)
+		}
+		else {
+			for element, index in @elements {
+				if index == 0 {
+					if element.type().isString() {
+						fragments.wrap(element)
+					}
+					else {
+						fragments.code('"" + ').wrap(element)
+					}
+				}
+				else {
+					fragments.code(' + ').wrap(element)
+				}
 			}
 		}
 	} // }}}
+	type() => @scope.reference('String')
 }

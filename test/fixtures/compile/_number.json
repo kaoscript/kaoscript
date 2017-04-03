@@ -2,8 +2,9 @@
   "requirements": {},
   "exports": {
     "Number": {
-      "name": "Number",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "true",
+      "sealed": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -22,9 +23,9 @@
                 "max": 2
               }
             ],
+            "returns": "Number",
             "sealed": "true",
-            "throws": [],
-            "type": "Number"
+            "throws": []
           }
         ],
         "mod": [
@@ -40,9 +41,9 @@
                 "max": 1
               }
             ],
+            "returns": "Number",
             "sealed": "true",
-            "throws": [],
-            "type": "Number"
+            "throws": []
           }
         ],
         "round": [
@@ -58,9 +59,9 @@
                 "max": 1
               }
             ],
+            "returns": "Number",
             "sealed": "true",
-            "throws": [],
-            "type": "Number"
+            "throws": []
           }
         ],
         "toFloat": [
@@ -70,9 +71,9 @@
             "min": 0,
             "max": 0,
             "parameters": [],
+            "returns": "Number",
             "sealed": "true",
-            "throws": [],
-            "type": "Number"
+            "throws": []
           }
         ],
         "toInt": [
@@ -88,26 +89,13 @@
                 "max": 1
               }
             ],
+            "returns": "Number",
             "sealed": "true",
-            "throws": [],
-            "type": "Number"
+            "throws": []
           }
         ]
       },
-      "classMethods": {},
-      "sealed": {
-        "name": "__ks_Number",
-        "constructors": "false",
-        "instanceMethods": {
-          "limit": "true",
-          "mod": "true",
-          "round": "true",
-          "toFloat": "true",
-          "toInt": "true"
-        },
-        "classMethods": {},
-        "extern": "true"
-      }
+      "classMethods": {}
     }
   }
 }

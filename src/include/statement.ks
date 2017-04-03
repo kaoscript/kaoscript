@@ -15,14 +15,14 @@ abstract class Statement extends AbstractNode {
 		if data.left.kind == NodeKind::Identifier {
 			let variable
 			if variable ?= @scope.getVariable(data.left.name) {
-				if variable.immutable {
+				if variable.isImmutable() {
 					SyntaxException.throwImmutable(data.left.name, this)
 				}
 			}
 			else {
 				@variables.push(data.left.name)
 			
-				$variable.define(this, @scope, data.left, false, $variable.kind(data.right.type), data.right.type)
+				@scope.define(data.left.name, false, this)
 			}
 		}
 	} // }}}
@@ -31,7 +31,7 @@ abstract class Statement extends AbstractNode {
 	toFragments(fragments, mode) { // {{{
 		let variables = @variables()
 		if variables.length {
-			fragments.newLine().code($variable.scope(this) + variables.join(', ')).done()
+			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
 		
 		if r ?= this.toStatementFragments(fragments, mode) {

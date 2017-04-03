@@ -6,15 +6,15 @@
   },
   "exports": {
     "Color": {
-      "name": "Color",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "false",
+      "sealed": "false",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {},
-      "requirement": "Color"
+      "classMethods": {}
     }
   }
 }

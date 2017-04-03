@@ -2,24 +2,10 @@
   "requirements": {},
   "exports": {
     "T": {
-      "name": "T",
-      "kind": 4,
-      "type": {
-        "types": [
-          {
-            "typeName": {
-              "kind": 41,
-              "name": "number"
-            }
-          },
-          {
-            "typeName": {
-              "kind": 41,
-              "name": "string"
-            }
-          }
-        ]
-      }
+      "type": [
+        "Number",
+        "String"
+      ]
     }
   }
 }

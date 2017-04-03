@@ -2,8 +2,9 @@
   "requirements": {},
   "exports": {
     "String": {
-      "name": "String",
-      "kind": 1,
+      "abstract": "false",
+      "alien": "true",
+      "sealed": "true",
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -16,8 +17,9 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": [],
-            "type": "String"
+            "returns": "String",
+            "sealed": "false",
+            "throws": []
           }
         ],
         "lower": [
@@ -27,9 +29,9 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": [],
+            "returns": "String",
             "sealed": "true",
-            "type": "String"
+            "throws": []
           }
         ],
         "lines": [
@@ -45,9 +47,9 @@
                 "max": 1
               }
             ],
+            "returns": "Array",
             "sealed": "true",
-            "throws": [],
-            "type": "Array"
+            "throws": []
           }
         ],
         "toFloat": [
@@ -57,9 +59,9 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "throws": [],
+            "returns": "Number",
             "sealed": "true",
-            "type": "Number"
+            "throws": []
           }
         ],
         "toInt": [
@@ -75,25 +77,13 @@
                 "max": 1
               }
             ],
-            "throws": [],
+            "returns": "Number",
             "sealed": "true",
-            "type": "Number"
+            "throws": []
           }
         ]
       },
-      "classMethods": {},
-      "sealed": {
-        "name": "__ks_String",
-        "constructors": "false",
-        "instanceMethods": {
-          "lines": "true",
-          "lower": "true",
-          "toFloat": "true",
-          "toInt": "true"
-        },
-        "classMethods": {},
-        "extern": "true"
-      }
+      "classMethods": {}
     }
   }
 }

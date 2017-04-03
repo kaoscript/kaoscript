@@ -101,7 +101,7 @@ class SwitchStatement extends Statement {
 			
 			clause.hasTest = true if data.filter?
 			
-			clause.body = $compile.expression($block(data.body), this)
+			clause.body = $compile.expression($ast.block(data.body), this)
 			clause.body.analyse()
 			
 			@clauses.push(clause)
@@ -158,7 +158,7 @@ class SwitchStatement extends Statement {
 		if @value? {
 			fragments
 				.newLine()
-				.code($variable.scope(this), @name, ' = ')
+				.code($runtime.scope(this), @name, ' = ')
 				.compile(@value)
 				.done()
 		}
@@ -274,23 +274,23 @@ class SwitchBindingArray extends AbstractNode {
 
 class SwitchBindingType extends AbstractNode {
 	analyse() { // {{{
-		$variable.define(this, @scope, @data.name, false, VariableKind::Variable)
+		@scope.define(@data.name.name, false, this)
 	} // }}}
 	prepare()
 	translate()
 	toFragments(fragments) { // {{{
-		fragments.line($variable.scope(this), @data.name.name, ' = ', @parent._name)
+		fragments.line($runtime.scope(this), @data.name.name, ' = ', @parent._name)
 	} // }}}
 }
 
 class SwitchBindingValue extends AbstractNode {
 	analyse() { // {{{
-		$variable.define(this, @scope, @data, false, VariableKind::Variable)
+		@scope.define(@data.name, false, this)
 	} // }}}
 	prepare()
 	translate()
 	toFragments(fragments) { // {{{
-		fragments.line($variable.scope(this), @data.name, ' = ', @parent._name)
+		fragments.line($runtime.scope(this), @data.name, ' = ', @parent._name)
 	} // }}}
 }
 
@@ -367,7 +367,7 @@ class SwitchConditionArray extends AbstractNode {
 		if @values.length > 0 {
 			let line = fragments.newLine()
 			
-			line.code($variable.scope(this), @name, ' = ([')
+			line.code($runtime.scope(this), @name, ' = ([')
 			
 			for value, i in @data.values {
 				line.code(', ') if i
@@ -448,14 +448,18 @@ class SwitchConditionRange extends AbstractNode {
 }
 
 class SwitchConditionType extends AbstractNode {
+	private {
+		_type: Type
+	}
 	analyse()
-	prepare()
+	prepare() { // {{{
+		@type = Type.fromAST(@data.type, this)
+	} // }}}
 	translate()
 	toBooleanFragments(fragments, name) { // {{{
-		$type.check(this, fragments, name, @data.type)
+		@type.toTestFragments(fragments, new Literal(false, this, @scope, name))
 	} // }}}
-	toStatementFragments(fragments) { // {{{
-	} // }}}
+	toStatementFragments(fragments)
 }
 
 class SwitchConditionValue extends AbstractNode {
@@ -569,7 +573,7 @@ class SwitchFilter extends AbstractNode {
 		if @name? {
 			let line = fragments.newLine()
 			
-			line.code($variable.scope(this), @name, ' = (')
+			line.code($runtime.scope(this), @name, ' = (')
 		
 			for binding, i in @bindings {
 				line.code(', ') if i

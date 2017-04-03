@@ -94,43 +94,27 @@ export class Module {
 	} // }}}
 	compiler() => @compiler
 	directory() => @directory
-	export(name, alias = false) { // {{{
+	export(name: String, alias: String?, node) { // {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
 		
-		const variable = @body.scope().getVariable(name.name)
+		let variable: Variable
 		
-		ReferenceException.throwNotDefined(name.name, this) unless variable
+		if variable !?= @body.scope().getVariable(name) {
+			ReferenceException.throwNotDefined(name, node)
+		}
 		
-		if variable.kind != VariableKind::TypeAlias {
-			if alias {
-				@exportSource.push(`\(alias.name): \(name.name)`)
-			}
-			else {
-				@exportSource.push(`\(name.name): \(name.name)`)
-			}
+		if variable.type() is not AliasType {
+			@exportSource.push(`\(alias ?? name): \(name)`)
 			
-			if variable.sealed {
-				if alias {
-					@exportSource.push(`__ks_\(alias.name): \(variable.sealed.name)`)
-				}
-				else {
-					@exportSource.push(`__ks_\(name.name): \(variable.sealed.name)`)
-				}
+			const type = variable.type().unalias()
+			if type.isSealed() {
+				@exportSource.push(`__ks_\(alias ?? name): \(type.sealName())`)
 			}
 		}
 		
-		if alias {
-			const export = Object.clone(variable)
-			
-			export.name = alias
-			
-			@exportMeta[alias.name] = export
-		}
-		else {
-			@exportMeta[name.name] = variable
-		}
+		@exportMeta[alias ?? name] = variable
 	} // }}}
 	file() => @file
 	flag(name) { // {{{
@@ -139,10 +123,10 @@ export class Module {
 	hasInclude(path) { // {{{
 		return @includes?[path]
 	} // }}}
-	import(name, file = null) { // {{{
+	import(name: String, file = null) { // {{{
 		@imports[name] = true
 		
-		if file && file.slice(-$extensions.source.length).toLowerCase() == $extensions.source {
+		if file? && file.slice(-$extensions.source.length).toLowerCase() == $extensions.source {
 			@register = true
 		}
 	} // }}}
@@ -204,35 +188,31 @@ export class Module {
 		
 		return output
 	} // }}}
-	require(variable, kind, data = null) { // {{{
+	require(variable: Variable, kind: DependencyKind) { // {{{
 		if @binary {
 			SyntaxException.throwNotBinary('require', this)
 		}
 		
 		if kind == DependencyKind::Require {
-			@requirements[variable.requirement] = {
+			@requirements[variable.name()] = {
 				kind: kind
-				name: variable.requirement
-				extendable: variable.kind == VariableKind::Class || variable.sealed
+				name: variable.name()
+				flexible: variable.type().isFlexible()
 			}
 		}
 		else {
 			let requirement = {
 				kind: kind
-				name: variable.requirement
-				extendable: variable.kind == VariableKind::Class || variable.sealed
+				name: variable.name()
+				flexible: variable.type().isFlexible()
 				parameter: @body.scope().acquireTempName()
-			}
-			
-			if data? {
-				for name of data {
-					requirement[name] = data[name]
-				}
 			}
 			
 			@requirements[requirement.parameter] = requirement
 			
 			@dynamicRequirements.push(requirement)
+			
+			return requirement
 		}
 	} // }}}
 	toHashes() => @hashes
@@ -296,7 +276,7 @@ export class Module {
 					
 					fragments.push($code(requirement.parameter))
 					
-					if requirement.extendable {
+					if requirement.flexible {
 						fragments.push($code(', __ks_' + requirement.parameter))
 					}
 				}
@@ -310,7 +290,7 @@ export class Module {
 						DependencyKind::ExternOrRequire => {
 							fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
 							
-							if requirement.extendable {
+							if requirement.flexible {
 								fragments.push($code('\t\treturn [' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + '];\n'))
 								fragments.push($code('\t}\n'))
 								fragments.push($code('\telse {\n'))
@@ -328,7 +308,7 @@ export class Module {
 						DependencyKind::RequireOrExtern => {
 							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 							
-							if requirement.extendable {
+							if requirement.flexible {
 								fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
 								fragments.push($code('\t}\n'))
 								fragments.push($code('\telse {\n'))
@@ -346,7 +326,7 @@ export class Module {
 						DependencyKind::RequireOrImport => {
 							fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 							
-							if requirement.extendable {
+							if requirement.flexible {
 								fragments.push($code('\t\treturn [' + requirement.parameter + ', __ks_' + requirement.parameter + '];\n'))
 								fragments.push($code('\t}\n'))
 								fragments.push($code('\telse {\n'))
@@ -395,7 +375,7 @@ export class Module {
 							DependencyKind::ExternOrRequire => {
 								fragments.push($code('\tif(Type.isValue(' + requirement.name + ')) {\n'))
 								
-								if requirement.extendable {
+								if requirement.flexible {
 									fragments.push($code('\t\treq.push(' + requirement.name + ', typeof __ks_' + requirement.name + ' === "undefined" ? {} : __ks_' + requirement.name + ');\n'))
 									fragments.push($code('\t}\n'))
 									fragments.push($code('\telse {\n'))
@@ -413,7 +393,7 @@ export class Module {
 							DependencyKind::RequireOrExtern => {
 								fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 								
-								if requirement.extendable {
+								if requirement.flexible {
 									fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
 									fragments.push($code('\t}\n'))
 									fragments.push($code('\telse {\n'))
@@ -431,7 +411,7 @@ export class Module {
 							DependencyKind::RequireOrImport => {
 								fragments.push($code('\tif(Type.isValue(' + requirement.parameter + ')) {\n'))
 								
-								if requirement.extendable {
+								if requirement.flexible {
 									fragments.push($code('\t\treq.push(' + requirement.parameter + ', __ks_' + requirement.parameter + ');\n'))
 									fragments.push($code('\t}\n'))
 									fragments.push($code('\telse {\n'))
@@ -492,7 +472,7 @@ export class Module {
 				
 				fragments.push($code(name))
 				
-				if @requirements[name].extendable {
+				if @requirements[name].flexible {
 					fragments.push($code(', __ks_' + name))
 				}
 			}
@@ -510,7 +490,7 @@ export class Module {
 						
 						fragments.push($code(requirement.parameter))
 						
-						if requirement.extendable {
+						if requirement.flexible {
 							fragments.push($code(', __ks_' + requirement.parameter))
 						}
 					}
@@ -525,7 +505,7 @@ export class Module {
 						
 						fragments.push($code(`\(requirement.name) = __ks__[\(++i)]`))
 						
-						if requirement.extendable {
+						if requirement.flexible {
 							fragments.push($code(`, __ks_\(requirement.name) = __ks__[\(++i)]`))
 						}
 					}
@@ -540,7 +520,7 @@ export class Module {
 						
 						fragments.push($code(requirement.name))
 						
-						if requirement.extendable {
+						if requirement.flexible {
 							fragments.push($code(', __ks_' + requirement.name))
 						}
 					}
@@ -554,7 +534,7 @@ export class Module {
 						
 						fragments.push($code(requirement.parameter))
 						
-						if requirement.extendable {
+						if requirement.flexible {
 							fragments.push($code(', __ks_' + requirement.parameter))
 						}
 					}
@@ -596,7 +576,7 @@ export class Module {
 		
 		for name, variable of @requirements {
 			if variable.parameter {
-				if variable.extendable {
+				if variable.flexible {
 					data.requirements[variable.name] = {
 						class: true
 						nullable: true
@@ -609,7 +589,7 @@ export class Module {
 				}
 			}
 			else {
-				if variable.extendable {
+				if variable.flexible {
 					data.requirements[name] = {
 						class: true
 					}
@@ -621,7 +601,7 @@ export class Module {
 		}
 		
 		for name, variable of @exportMeta {
-			data.exports[name] = $variable.export(variable)
+			data.exports[name] = variable.export()
 		}
 		
 		return data
@@ -660,7 +640,7 @@ class ModuleBlock extends AbstractNode {
 	} // }}}
 	directory() => @module.directory()
 	file() => @module.file()
-	isConsumedError(name, variable): Boolean => false
+	isConsumedError(error): Boolean => false
 	module() => @module
 	toFragments(fragments) { // {{{
 		for statement in @body {

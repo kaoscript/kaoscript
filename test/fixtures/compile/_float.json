@@ -2,35 +2,22 @@
   "requirements": {},
   "exports": {
     "Float": {
-      "name": "Float",
-      "kind": 5,
-      "type": {
-        "typeName": {
-          "kind": 41,
-          "name": "Object"
-        },
-        "properties": {
-          "parse": {
-            "kind": 3,
-            "name": "parse",
-            "signature": {
+      "alien": "false",
+      "sealed": "false",
+      "properties": {
+        "parse": {
+          "async": "false",
+          "min": 0,
+          "max": 1,
+          "parameters": [
+            {
+              "type": "Any",
               "min": 0,
-              "max": 1,
-              "parameters": [
-                {
-                  "type": "Any",
-                  "min": 0,
-                  "max": 1
-                }
-              ]
-            },
-            "type": {
-              "typeName": {
-                "kind": 41,
-                "name": "Number"
-              }
+              "max": 1
             }
-          }
+          ],
+          "returns": "Number",
+          "throws": []
         }
       }
     }

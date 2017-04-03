@@ -21,7 +21,7 @@ class ExpressionStatement extends Statement {
 		if data.left.kind == NodeKind::Identifier {
 			let variable
 			if variable ?= @scope.getVariable(data.left.name) {
-				if variable.immutable {
+				if variable.isImmutable() {
 					SyntaxException.throwImmutable(data.left.name, this)
 				}
 			}
@@ -33,20 +33,20 @@ class ExpressionStatement extends Statement {
 					@variable = data.left.name
 				}
 				
-				$variable.define(this, @scope, data.left, false, $variable.kind(data.right.type), data.right.type)
+				@scope.define(data.left.name, false, this)
 			}
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @expression.isAssignable() {
 			if @variables.length {
-				fragments.newLine().code($variable.scope(this) + @variables.join(', ')).done()
+				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
 			}
 			
 			let line = fragments.newLine()
 			
 			if @variable.length {
-				line.code($variable.scope(this))
+				line.code($runtime.scope(this))
 			}
 			
 			if @expression.toAssignmentFragments? {
@@ -64,20 +64,20 @@ class ExpressionStatement extends Statement {
 			}
 			
 			if @variables.length {
-				fragments.newLine().code($variable.scope(this) + @variables.join(', ')).done()
+				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
 			}
 			
 			@expression.toStatementFragments(fragments, Mode::None)
 		}
 		else {
 			if @variables.length {
-				fragments.newLine().code($variable.scope(this) + @variables.join(', ')).done()
+				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
 			}
 			
 			let line = fragments.newLine()
 			
 			if @variable.length {
-				line.code($variable.scope(this))
+				line.code($runtime.scope(this))
 			}
 			
 			line.compile(@expression, Mode::None).done()

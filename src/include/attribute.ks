@@ -128,8 +128,9 @@ class IfAttribute extends Attribute {
 	constructor(@data)
 	evaluate(target) { // {{{
 		if @data.arguments.length != 1 {
-			$throw(`Expected 1 argument for if() at line \(@data.start.line)`)
+			SyntaxException.throwTooMuchAttributesForIfAttribute()
 		}
+		
 		return this.evaluate(@data.arguments[0], target)
 	} // }}}
 	evaluate(data, target) { // {{{

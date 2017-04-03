@@ -21,6 +21,7 @@ class UnaryOperatorBitwiseNot extends UnaryOperatorExpression {
 			.code('~', @data.operator)
 			.wrap(@argument)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class UnaryOperatorDecrementPostfix extends UnaryOperatorExpression {
@@ -29,6 +30,7 @@ class UnaryOperatorDecrementPostfix extends UnaryOperatorExpression {
 			.wrap(@argument)
 			.code('--', @data.operator)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class UnaryOperatorDecrementPrefix extends UnaryOperatorExpression {
@@ -37,6 +39,7 @@ class UnaryOperatorDecrementPrefix extends UnaryOperatorExpression {
 			.code('--', @data.operator)
 			.wrap(@argument)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
@@ -57,6 +60,7 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 				.code(')',  @data.operator)
 		}
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class UnaryOperatorIncrementPostfix extends UnaryOperatorExpression {
@@ -65,6 +69,7 @@ class UnaryOperatorIncrementPostfix extends UnaryOperatorExpression {
 			.wrap(@argument)
 			.code('++', @data.operator)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
@@ -73,6 +78,7 @@ class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
 			.code('++', @data.operator)
 			.wrap(@argument)
 	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
@@ -81,6 +87,7 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 			.code('!', @data.operator)
 			.wrapBoolean(@argument)
 	} // }}}
+	type() => @scope.reference('Boolean')
 }
 
 class UnaryOperatorNegative extends UnaryOperatorExpression {
@@ -89,4 +96,5 @@ class UnaryOperatorNegative extends UnaryOperatorExpression {
 			.code('-', @data.operator)
 			.wrap(@argument)
 	} // }}}
+	type() => @scope.reference('Number')
 }
