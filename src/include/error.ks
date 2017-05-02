@@ -161,6 +161,9 @@ export class ReferenceException extends Exception {
 		throwNotDefinedMethod(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Method "\(name)" is not defined`, node)
 		} // }}}
+		throwNotDefinedProperty(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`Property "\(name)" is not defined`, node)
+		} // }}}
 	}
 }
 
@@ -193,8 +196,8 @@ export class SyntaxException extends Exception {
 		throwNoDefaultParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't have a default value`, node)
 		} // }}}
-		throwNotDifferentiableMethods(node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Can't differentiate methods`, node)
+		throwNoExport(module, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`No export can be found in module "\(module)"`, node)
 		} // }}}
 		throwNoNullParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't be nullable`, node)
@@ -213,6 +216,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwNotCompatibleConstructor(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parent's constructor of class "\(name)" can't be called`, node)
+		} // }}}
+		throwNotDifferentiableMethods(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Can't differentiate methods`, node)
 		} // }}}
 		throwNotNamedParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter must be named`, node)

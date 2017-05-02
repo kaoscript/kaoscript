@@ -109,7 +109,7 @@ export class Module {
 			@exportSource.push(`\(alias ?? name): \(name)`)
 			
 			const type = variable.type().unalias()
-			if type.isSealed() {
+			if type.isSealed() && !type.isAnonymous() {
 				@exportSource.push(`__ks_\(alias ?? name): \(type.sealName())`)
 			}
 		}
@@ -642,6 +642,7 @@ class ModuleBlock extends AbstractNode {
 	file() => @module.file()
 	isConsumedError(error): Boolean => false
 	module() => @module
+	recipient() => @module
 	toFragments(fragments) { // {{{
 		for statement in @body {
 			statement.toFragments(fragments, Mode::None)

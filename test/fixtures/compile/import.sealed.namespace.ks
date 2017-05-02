@@ -1,4 +1,4 @@
-import * from ./export.sealed.variable.ks
+import * from ./export.sealed.namespace.ks
 
 extern console
 

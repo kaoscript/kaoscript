@@ -1,7 +1,7 @@
 abstract class Statement extends AbstractNode {
 	private {
-		_afterwards	: Array	= []
-		_variables	: Array	= []
+		_afterwards: Array	= []
+		_variables: Array	= []
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
@@ -68,6 +68,7 @@ include {
 	../statement/implement
 	../statement/import
 	../statement/include
+	../statement/namespace
 	../statement/return
 	../statement/switch
 	../statement/throw

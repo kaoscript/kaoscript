@@ -145,6 +145,9 @@ abstract class Type {
 					
 					return type
 				}
+				NodeKind::FunctionDeclaration => {
+					return new FunctionType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
+				}
 				NodeKind::FunctionExpression => {
 					return new FunctionType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
 				}
@@ -184,7 +187,7 @@ abstract class Type {
 				}
 				NodeKind::TypeReference => {
 					if data.properties? {
-						const names = []
+						/* const names = []
 						const types = []
 						
 						for property in data.properties {
@@ -192,7 +195,35 @@ abstract class Type {
 							types.push(Type.fromAST(property.type, domain, node))
 						}
 						
-						return new ObjectType(names, types, domain)
+						return new ObjectType(names, types, domain) */
+						const scope = node.scope()
+						const name = scope.getAnomynousClassName()
+						
+						const type = new ClassType(name, domain)
+						const variable = scope.define(name, true, type, node)
+						
+						type.anonymize()
+						
+						let ref
+						for property in data.properties {
+							if property.type.kind == NodeKind::FunctionExpression {
+								type.addInstanceMethod(property.name.name, new ClassMethodType([Type.fromAST(parameter, domain, node) for parameter in property.type.parameters], property.type, node))
+							}
+							else if property.type.kind == NodeKind::TypeReference {
+								ref = Type.fromAST(property.type, domain, node)
+								if ref.isAnonymous() {
+									ref = ref.reference()
+								}
+								
+								type.addInstanceVariable(property.name.name, new ClassVariableType(ref))
+							}
+							else {
+								console.log(property)
+								throw new NotImplementedException(node)
+							}
+						}
+						
+						return type
 					}
 					else if data.typeName? {
 						if data.typeName.kind == NodeKind::Identifier {
@@ -209,7 +240,7 @@ abstract class Type {
 						else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
 							const type = new ReferenceType(data.typeName.property.name, data.nullable, domain)
 							
-							type.container(Type.fromAST(data.typeName.object, domain, node).reference())
+							type.namespace(Type.fromAST(data.typeName.object, domain, node).reference())
 							
 							if data.typeParameters? {
 								for parameter in data.typeParameters {
@@ -223,6 +254,9 @@ abstract class Type {
 				}
 				NodeKind::UnionType => {
 					return new UnionType([Type.fromAST(type, domain, node) for type in data.types])
+				}
+				NodeKind::VariableDeclarator => {
+					return Type.fromAST(data.type, domain, node)
 				}
 			}
 			
@@ -299,7 +333,7 @@ abstract class Type {
 				return type
 			}
 			else if data.properties? {
-				const type = new ObjectType(domain)
+				/* const type = new ObjectType(domain)
 				
 				type._alien = data.alien
 				
@@ -313,6 +347,23 @@ abstract class Type {
 				
 				for name, property of data.properties {
 					type.addProperty(name, Type.import(name, property, domain, node))
+				}
+				
+				return type */
+				const type = new NamespaceType(name, domain)
+				
+				type._alien = data.alien
+				
+				if data.sealed {
+					type.seal()
+					
+					for let name in data.sealedProperties {
+						type._seal.properties[name] = true
+					}
+				}
+				
+				for name, property of data.properties {
+					type.addProperty(name, Type.import(name, property, domain, node), property.sealed == true)
 				}
 				
 				return type
@@ -331,6 +382,28 @@ abstract class Type {
 			else if data.type? {
 				return new AliasType(Type.import(null, data.type, domain, node))
 			}
+			else if data.methods? {
+				const scope = node.scope()
+				const name = scope.getAnomynousClassName()
+				
+				const type = new ClassType(name, domain)
+				
+				scope.define(name, true, type, node)
+				
+				type.anonymize()
+				
+				for name, variable of data.variables {
+					type.addInstanceVariable(name, ClassVariableType.import(variable, domain, node))
+				}
+				
+				for name, methods of data.methods {
+					for method in methods {
+						type.addInstanceMethod(name, ClassMethodType.import(method, domain, node))
+					}
+				}
+				
+				return type
+			}
 			else {
 				console.log(data)
 				throw new NotImplementedException(node)
@@ -344,6 +417,7 @@ abstract class Type {
 	abstract toTestFragments(fragments, node)
 	dereference(): Type? => this
 	isAny() => false
+	isAnonymous() => false
 	isArray() => false
 	isContainedIn(types) { // {{{
 		for type in types {
@@ -416,10 +490,10 @@ class ClassType extends Type {
 		_abstract: Boolean			= false
 		_abstractMethods: Object	= {}
 		_alien: Boolean				= false
+		_anonymous: Boolean			= false
 		_classMethods: Object		= {}
 		_classVariables: Object		= {}
 		_constructors: Array		= []
-		_container: ReferenceType
 		_destructors: Number		= 0
 		_domain: Domain
 		_extending: Boolean			= false
@@ -427,6 +501,7 @@ class ClassType extends Type {
 		_instanceMethods: Object	= {}
 		_instanceVariables: Object	= {}
 		_name: String
+		_namespace: ReferenceType
 		_seal
 		_sealed: Boolean			= false
 	}
@@ -505,8 +580,9 @@ class ClassType extends Type {
 	alienize() { // {{{
 		@alien = true
 	} // }}}
-	container() => @container
-	container(@container) => this
+	anonymize() { // {{{
+		@anonymous = true
+	} // }}}
 	destructors() => @destructors
 	equals(b?): Boolean { // {{{
 		if b is ReferenceType || b is ClassType {
@@ -517,39 +593,59 @@ class ClassType extends Type {
 		}
 	} // }}}
 	export() { // {{{
-		const export = {
-			abstract: @abstract
-			alien: @alien
-			sealed: @sealed
-			constructors: [constructor.export() for constructor in @constructors]
-			destructors: @destructors
-			instanceVariables: {}
-			classVariables: {}
-			instanceMethods: {}
-			classMethods: {}
+		if @anonymous {
+			const export = {
+				alien: @alien
+				sealed: @sealed
+				variables: {}
+				methods: {}
+			}
+			
+			for name, variable of @instanceVariables {
+				export.variables[name] = variable.export()
+			}
+			
+			for name, methods of @instanceMethods {
+				export.methods[name] = [method.export() for method in methods]
+			}
+			
+			return export
 		}
-		
-		for name, variable of @instanceVariables {
-			export.instanceVariables[name] = variable.export()
+		else {
+			const export = {
+				abstract: @abstract
+				alien: @alien
+				sealed: @sealed
+				constructors: [constructor.export() for constructor in @constructors]
+				destructors: @destructors
+				instanceVariables: {}
+				classVariables: {}
+				instanceMethods: {}
+				classMethods: {}
+			}
+			
+			for name, variable of @instanceVariables {
+				export.instanceVariables[name] = variable.export()
+			}
+			
+			for name, variable of @classVariables {
+				export.classVariables[name] = variable.export()
+			}
+			
+			for name, methods of @instanceMethods {
+				export.instanceMethods[name] = [method.export() for method in methods]
+			}
+			
+			for name, methods of @classMethods {
+				export.classMethods[name] = [method.export() for method in methods]
+			}
+			
+			if @extending {
+				export.extends = @extends.reference().export()
+			}
+			
+			return export
 		}
-		
-		for name, variable of @classVariables {
-			export.classVariables[name] = variable.export()
-		}
-		
-		for name, methods of @instanceMethods {
-			export.instanceMethods[name] = [method.export() for method in methods]
-		}
-		
-		for name, methods of @classMethods {
-			export.classMethods[name] = [method.export() for method in methods]
-		}
-		
-		if @extending {
-			export.extends = @extends.reference().export()
-		}
-		
-		return export
 	} // }}}
 	extends() => @extends
 	extends(@extends) { // {{{
@@ -702,8 +798,8 @@ class ClassType extends Type {
 		return null
 	} // }}}
 	getSealedPath(): String { // {{{
-		if @container? {
-			return `\(@container.path()).\(@seal.name)`
+		if @namespace? {
+			return `\(@namespace.path()).\(@seal.name)`
 		}
 		else {
 			return @seal.name
@@ -749,6 +845,7 @@ class ClassType extends Type {
 	} // }}}
 	isAbstract() => @abstract
 	isAlien() => @alien
+	isAnonymous() => @anonymous
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
 	isExtending() => @extending
@@ -788,8 +885,10 @@ class ClassType extends Type {
 		}
 	} // }}}
 	name() => @name
+	namespace() => @namespace
+	namespace(@namespace) => this
 	reference() => new ReferenceType(this, @domain)
-	seal() { // {{{
+	seal(...) { // {{{
 		@sealed = true
 		
 		@seal = {
@@ -1050,7 +1149,82 @@ class FunctionType extends Type {
 	} // }}}
 }
 
-class ObjectType extends Type {
+class NamespaceType extends Type {
+	private {
+		_alien: Boolean				= false
+		_domain: Domain
+		_name: String
+		_namespace: ReferenceType
+		_properties: Object			= {}
+		_seal
+		_sealed: Boolean			= false
+	}
+	constructor(@name, @domain)
+	constructor(@name, scope: AbstractScope) { // {{{
+		/* this(name, new ScopeDomain(scope)) */
+		super()
+		
+		@domain = new ScopeDomain(scope)
+	} // }}}
+	addProperty(name: String, type: Type, sealed = @sealed) { // {{{
+		@properties[name] = type
+		
+		if sealed {
+			@seal.properties[name] = true
+		}
+	} // }}}
+	alienize() { // {{{
+		@alien = true
+	} // }}}
+	equals(b?) { // {{{
+		throw new NotImplementedException()
+	} // }}}
+	export() { // {{{
+		const export = {
+			alien: @alien
+			sealed: @sealed
+			properties: {}
+		}
+		
+		if @sealed {
+			export.sealedProperties = [name for name in @seal.properties]
+		}
+		
+		for name, value of @properties {
+			export.properties[name] = value.export()
+		}
+		
+		return export
+	} // }}}
+	getProperty(name: String): Type => @properties[name] ?? null
+	isFlexible() => @sealed
+	isSealed() => @sealed
+	isSealedProperty(name: String) => @sealed && @seal.properties[name] == true
+	name() => @name
+	namespace() => @namespace
+	namespace(@namespace) => this
+	reference() => new ReferenceType(this, @domain)
+	seal(...) { // {{{
+		@sealed = true
+		
+		@seal = {
+			name: `__ks_\(@name)`
+			properties: {}
+		}
+	} // }}}
+	sealName() => @seal.name
+	toQuote() { // {{{
+		throw new NotImplementedException()
+	} // }}}
+	toFragments(fragments, node) { // {{{
+		throw new NotImplementedException()
+	} // }}}
+	toTestFragments(fragments, node) { // {{{
+		throw new NotImplementedException()
+	} // }}}
+}
+
+/* class ObjectType extends Type {
 	private {
 		_alien: Boolean				= false
 		_container: ReferenceType
@@ -1138,7 +1312,7 @@ class ObjectType extends Type {
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-}
+} */
 
 class ParameterType extends Type {
 	private {
@@ -1185,18 +1359,28 @@ class ParameterType extends Type {
 
 class ReferenceType extends Type {
 	private {
-		_container: ReferenceType
+		_alien: Boolean				= false
 		_domain: Domain
-		_hasContainer: Boolean		= false
+		/* _hasNamespace: Boolean		= false */
 		_name: String
+		_namespace: ReferenceType
 		_nullable: Boolean			= false
 		_parameters: Array<Type>
+		_sealed: Boolean			= false
+		_sealName: String
 	}
+	constructor() { // {{{
+		super()
+		
+		@name = 'Any'
+		@parameters = []
+	} // }}}
 	constructor(type: Type, @domain) { // {{{
 		super()
 		
-		@container = type.container()
-		@hasContainer = @container?
+		@namespace = type.namespace()
+		/* @hasNamespace = @namespace? */
+		
 		@name = type.name()
 		@parameters = []
 	} // }}}
@@ -1205,11 +1389,28 @@ class ReferenceType extends Type {
 		
 		@name = $types[name] ?? name
 	} // }}}
-	container() => @container
-	container(@container) => this
+	/* container() => @container
+	container(@container) => this */
+	alienize() { // {{{
+		@alien = true
+	} // }}}
 	dereference(): Type? { // {{{
-		if @hasContainer {
-			return @container.getProperty(@name)
+		/* if @hasNamespace {
+			return @namespace.getProperty(@name)
+		}
+		else if variable ?= @domain.getVariable(@name) {
+			return variable.dereference()
+		}
+		
+		return null */
+		/* console.log('-- dereference', this)
+		console.log('namespace', @namespace?.getProperty(@name))
+		console.log('domain', @domain.getVariable(@name)) */
+		if @name == 'Any' {
+			return null
+		}
+		else if @namespace? {
+			return @namespace.getProperty(@name)
 		}
 		else if variable ?= @domain.getVariable(@name) {
 			return variable.dereference()
@@ -1230,8 +1431,23 @@ class ReferenceType extends Type {
 		
 		return true
 	} // }}}
-	export() => @name
+	export() { // {{{
+		if (type ?= this.dereference()) && type is ClassType && type.isAnonymous() {
+			return type.export()
+		}
+		else if @sealed {
+			return {
+				alien: @alien
+				sealed: true
+				type: @name
+			}
+		}
+		else {
+			return @name
+		}
+	} // }}}
 	getProperty(name: String): Type { // {{{
+		/* console.log('-- getProperty', name) */
 		if type ?= this.dereference() {
 			if type is ClassType {
 				return type.getInstanceProperty(name)
@@ -1284,16 +1500,35 @@ class ReferenceType extends Type {
 	} // }}}
 	isNullable() => @nullable
 	isNumber() => @name == 'Number'
+	isSealed() => @sealed
 	isString() => @name == 'String'
 	match(b: Type): Boolean { // {{{
 		if b.isAny() {
 			return this.isAny()
 		}
+		else if @nullable == b._nullable {
+			a = this.unalias()
+			b = b.unalias()
+			
+			if a is ReferenceType {
+				if b is ReferenceType {
+					return a._name == b._name
+				}
+				else {
+					return false
+				}
+			}
+			else {
+				return a == b
+			}
+		}
 		else {
-			throw new NotImplementedException()
+			return false
 		}
 	} // }}}
 	name() => @name
+	namespace() => @namespace
+	namespace(@namespace) => this
 	parameter(index: Number = 0) { // {{{
 		if index >= @parameters.length {
 			return Type.Any
@@ -1304,14 +1539,19 @@ class ReferenceType extends Type {
 	} // }}}
 	parameters() => @parameters
 	path(): String { // {{{
-		if @container? {
-			return `\(@container.path()).\(@name)`
+		if @namespace? {
+			return `\(@namespace.path()).\(@name)`
 		}
 		else {
 			return @name
 		}
 	} // }}}
 	reference() => this
+	seal(name: String) { // {{{
+		@sealed = true
+		@sealName = `__ks_\(name)`
+	} // }}}
+	sealName() => @sealName
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}
@@ -1419,11 +1659,22 @@ class ClassVariableType extends ReferenceType {
 	private {
 		_access: Accessibility	= Accessibility::Public
 	}
+	static import(data, domain: Domain, node: AbstractNode): ClassVariableType { // {{{
+		const type = new ClassVariableType(Type.import(data.type, domain, node))
+		
+		type._access = data.access
+		type._nullable = data.nullable
+		
+		return type
+	} // }}}
+	constructor(ref: ReferenceType) {
+		super(ref._name, ref._nullable, ref._parameters, ref._domain)
+	}
 	access(@access) => this
 	export() => { // {{{
 		access: @access
-		name: @name
 		nullable: @nullable
+		type: super.export()
 	} // }}}
 	reference() => new ReferenceType(@name, @nullable, @parameters, @domain)
 }

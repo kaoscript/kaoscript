@@ -114,6 +114,11 @@ class ArrayBinding extends Expression {
 			}
 		}
 	} // }}}
+	walk(fn) { // {{{
+		for element in @elements {
+			element.walk(fn)
+		}
+	} // }}}
 }
 
 class BindingElement extends Expression {
@@ -244,6 +249,9 @@ class BindingElement extends Expression {
 				.wrap(value)
 				.code(`[\(@index)]`)
 		}
+	} // }}}
+	walk(fn) { // {{{
+		@name.walk(fn)
 	} // }}}
 }
 
@@ -384,6 +392,11 @@ class ObjectBinding extends Expression {
 				
 				@elements[i].toFlatFragments(fragments, value)
 			}
+		}
+	} // }}}
+	walk(fn) { // {{{
+		for element in @elements {
+			element.walk(fn)
 		}
 	} // }}}
 }

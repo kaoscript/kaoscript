@@ -69,7 +69,7 @@ describe('compile', function() {
 				}
 				
 				if(metadata) {
-					var data = JSON.stringify(compiler.toMetadata(), function(key, value){return value == Infinity ? 'Infinity' : value === true ? 'true' : value === false ? 'false' : value;}, 2);
+					var data = JSON.stringify(compiler.toMetadata(), function(key, value){return value === Infinity ? 'Infinity' : value === true ? 'true' : value === false ? 'false' : value;}, 2);
 					//console.log(data);
 					
 					expect(JSON.parse(data)).to.eql(JSON.parse(metadata));

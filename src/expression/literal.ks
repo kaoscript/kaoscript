@@ -69,6 +69,14 @@ class IdentifierLiteral extends Literal {
 		fragments.code(@scope.getRenamedVariable(@value), @data)
 	} // }}}
 	type() => @type
+	walk(fn) { // {{{
+		if @isVariable {
+			fn(@value, @type)
+		}
+		else {
+			throw new NotSupportedException()
+		}
+	} // }}}
 }
 
 class NumberLiteral extends Literal { // {{{

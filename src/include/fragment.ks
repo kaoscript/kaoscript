@@ -96,7 +96,7 @@ export class ControlBuilder {
 	private {
 		_addLastNewLine
 		_builder
-		_firstStep = true
+		_firstStep		= true
 		_indent
 		_step
 	}
@@ -124,10 +124,8 @@ export class ControlBuilder {
 		return this
 	} // }}}
 	done() { // {{{
-		this._step.done()
-		
-		if this._addLastNewLine {
-			this._builder._fragments.push(new CodeFragment('\n'))
+		if @step.done() && @addLastNewLine {
+			@builder._fragments.push(new CodeFragment('\n'))
 		}
 	} // }}}
 	isFirstStep() { // {{{
@@ -180,15 +178,16 @@ export class ControlBuilder {
 }
 
 export class BlockBuilder {
+	private {
+		_builder
+		_indent
+		_undone			= true
+	}
 	static create(builder, indent) { // {{{
 		builder._blocks[indent] ??= new BlockBuilder(builder, indent)
 	
 		return builder._blocks[indent].init()
 	} // }}}
-	private {
-		_builder
-		_indent
-	}
 	constructor(@builder, @indent)
 	compile(node, mode = Mode::None) { // {{{
 		if node is Object {
@@ -201,10 +200,20 @@ export class BlockBuilder {
 		return this
 	} // }}}
 	done() { // {{{
-		this._builder._fragments.push($indent(this._indent), new CodeFragment('}'))
+		if @undone {
+			@builder._fragments.push($indent(@indent), new CodeFragment('}'))
+			
+			@undone = false
+			
+			return true
+		}
+		else {
+			return false
+		}
 	} // }}}
 	private init() { // {{{
-		this._builder._fragments.push(new CodeFragment(' {\n'))
+		@builder._fragments.push(new CodeFragment(' {\n'))
+		@undone = true
 		
 		return this
 	} // }}}
@@ -231,15 +240,16 @@ export class BlockBuilder {
 }
 
 export class ExpressionBuilder {
+	private {
+		_builder
+		_indent
+		_undone			= true
+	}
 	static create(builder, indent) { // {{{
 		builder._expressions[indent] ??= new ExpressionBuilder(builder, indent)
 	
 		return builder._expressions[indent].init()
 	} // }}}
-	private {
-		_builder
-		_indent
-	}
 	constructor(@builder, @indent)
 	code(...args) { // {{{
 		let arg, data
@@ -312,9 +322,18 @@ export class ExpressionBuilder {
 		return this
 	} // }}}
 	done(skipLastNewLine = false) { // {{{
+		if @undone {
+			@undone = false
+			
+			return true
+		}
+		else {
+			return false
+		}
 	} // }}}
 	private init() { // {{{
-		this._builder._fragments.push($indent(this._indent))
+		@builder._fragments.push($indent(@indent))
+		@undone = true
 		
 		return this
 	} // }}}
@@ -384,7 +403,11 @@ export class LineBuilder extends ExpressionBuilder {
 		return builder._lines[indent].init()
 	} // }}}
 	done() { // {{{
-		this._builder._fragments.push($terminator)
+		if @undone {
+			@builder._fragments.push($terminator)
+			
+			@undone = false
+		}
 	} // }}}
 }
 

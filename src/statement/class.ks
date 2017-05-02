@@ -733,8 +733,8 @@ class ClassDeclaration extends Statement {
 	toContinousES5Fragments(fragments) { // {{{
 		this.module().flag('Helper')
 		
-		let line = fragments.newLine().code($runtime.scope(this), @name, ' = ', $runtime.helper(this), '.class(')
-		let clazz = line.newObject()
+		const line = fragments.newLine().code($runtime.scope(this), @name, ' = ', $runtime.helper(this), '.class(')
+		const clazz = line.newObject()
 		
 		clazz.line('$name: ' + $quote(@name))
 		
@@ -847,7 +847,7 @@ class ClassDeclaration extends Statement {
 		line.code(')').done()
 	} // }}}
 	toContinousES6Fragments(fragments) { // {{{
-		let clazz = fragments
+		const clazz = fragments
 			.newControl()
 			.code('class ', @name)
 		
@@ -1206,6 +1206,9 @@ class ClassDeclaration extends Statement {
 		}
 	} // }}}
 	type() => @type
+	walk(fn) { // {{{
+		fn(@name, @type)
+	} // }}}
 }
 
 class CallThisConstructorSubstitude {

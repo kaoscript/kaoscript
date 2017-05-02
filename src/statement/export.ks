@@ -1,60 +1,76 @@
 class ExportDeclaration extends Statement {
 	private {
 		_declarations	= []
+		_statements		= []
 	}
 	analyse() { // {{{
-		let module = this.module()
+		const recipient = @parent.recipient()
 		
 		let statement
 		for declaration in @data.declarations {
 			switch declaration.kind {
 				NodeKind::ClassDeclaration => {
-					@declarations.push(statement = $compile.statement(declaration, this))
+					@statements.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
-					module.export(declaration.name.name, null, this)
+					recipient.export(statement.name(), null, this)
 				}
 				NodeKind::ExportAlias => {
-					module.export(declaration.name.name, declaration.alias.name, this)
+					statement = new AliasDeclarator(declaration, this)
+					
+					statement.analyse()
+					
+					recipient.export(declaration.name.name, declaration.alias.name, this)
 				}
 				NodeKind::EnumDeclaration => {
-					@declarations.push(statement = $compile.statement(declaration, this))
+					@statements.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
-					module.export(declaration.name.name, null, this)
+					recipient.export(statement.name(), null, this)
 				}
 				NodeKind::FunctionDeclaration => {
-					@declarations.push(statement = $compile.statement(declaration, this))
+					@statements.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
-					module.export(declaration.name.name, null, this)
+					recipient.export(statement.name(), null, this)
 				}
 				NodeKind::Identifier => {
-					module.export(declaration.name, null, this)
+					statement = new IdentifierLiteral(declaration, this)
+					
+					statement.analyse()
+					
+					recipient.export(statement.name(), null, this)
+				}
+				NodeKind::NamespaceDeclaration => {
+					@statements.push(statement = $compile.statement(declaration, this))
+					
+					statement.analyse()
+					
+					recipient.export(statement.name(), null, this)
 				}
 				NodeKind::TypeAliasDeclaration => {
-					statement = $compile.statement(declaration, this)
+					@statements.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
-					module.export(statement.name(), null, this)
+					recipient.export(statement.name(), null, this)
 				}
 				NodeKind::VariableDeclaration => {
-					@declarations.push(statement = $compile.statement(declaration, this))
+					@statements.push(statement = $compile.statement(declaration, this))
 					
 					statement.analyse()
 					
-					for i from 0 til declaration.declarations.length {
-						module.export(declaration.declarations[i].name.name, null, this)
-					}
+					statement.walk((name,) => recipient.export(name, null, this))
 				}
 				=> {
 					throw new NotImplementedException(this)
 				}
 			}
+			
+			@declarations.push(statement)
 		}
 	} // }}}
 	prepare() { // {{{
@@ -68,8 +84,37 @@ class ExportDeclaration extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		for declaration in @declarations {
+		for declaration in @statements {
 			declaration.toFragments(fragments, Mode::None)
 		}
 	} // }}}
+	walk(fn) { // {{{
+		for declaration in @declarations {
+			declaration.walk(fn)
+		}
+	} // }}}
+}
+
+class AliasDeclarator extends AbstractNode {
+	private {
+		_name: String
+		_variable: Variable
+		_type: Type
+	}
+	analyse() { // {{{
+		@name = @data.alias.name
+		
+		if @variable !?= @scope.getVariable(@data.name.name) {
+			ReferenceException.throwNotDefined(@data.name.name, this)
+		}
+	} // }}}
+	prepare() { // {{{
+		@type = @variable.type()
+	} // }}}
+	translate()
+	name() => @name
+	walk(fn) { // {{{
+		fn(@name, @type)
+	} // }}}
+	type() => @type
 }

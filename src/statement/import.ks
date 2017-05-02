@@ -41,8 +41,6 @@ const $nodeModules = { // {{{
 const $import = {
 	addVariable(name: String, type: Type, node: AbstractNode, module, file: String = null) {
 		if variable ?= node.scope().getLocalVariable(name) {
-			console.log(variable.type())
-			console.log(type)
 			variable.type().merge(type, node)
 		}
 		else {
@@ -203,11 +201,12 @@ const $import = {
 		}
 		
 		if importAlias.length != 0 {
-			const type = new ObjectType(importAlias, domain)
+			/* const type = new NamespaceType(importAlias, domain) */
+			const type = new NamespaceType(importAlias, node.scope())
 			const ref = type.reference()
 			
 			for name of exports {
-				type.addProperty(name, domain.commit(name).container(ref))
+				type.addProperty(name, domain.commit(name).namespace(ref))
 			}
 			
 			$import.define(importAlias, type, node, module, moduleName)

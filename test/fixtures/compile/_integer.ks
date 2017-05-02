@@ -1,12 +1,5 @@
 extern parseInt
 
-export const Integer = {
-	parse(value = null, radix = null) {
-		return parseInt(value, radix)
-	}
+export namespace Integer {
+	export func parse(value = null, radix = null): Number => parseInt(value, radix)
 }
-/* export namespace Float {
-	parse(value = null, radix = null) {
-		return parseInt(value, radix)
-	}
-} */

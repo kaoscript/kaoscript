@@ -1,0 +1,1 @@
+extern sealed namespace Math

@@ -23,12 +23,13 @@ else
 endif
 
 clean:
-	find . -type f \( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksm" \) -delete
+	find -L . -type f \( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksm" \) -exec rm {} \;
 
 ok:
+	make clean
 	make comp
 	make comp
 	make comp
-	make clean testks
+	make testks
 
 .PHONY: test build bin comp

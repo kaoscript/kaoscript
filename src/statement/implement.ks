@@ -30,7 +30,7 @@ class ImplementDeclaration extends Statement {
 				@properties.push(property)
 			}
 		}
-		else if @type is ObjectType {
+		/* else if @type is ObjectType {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
@@ -38,6 +38,25 @@ class ImplementDeclaration extends Statement {
 					}
 					NodeKind::MethodDeclaration => {
 						property = new ImplementObjectFunctionDeclaration(property, this, @type)
+					}
+					=> {
+						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
+					}
+				}
+				
+				property.analyse()
+				
+				@properties.push(property)
+			}
+		} */
+		else if @type is NamespaceType {
+			for property in @data.properties {
+				switch property.kind {
+					NodeKind::FieldDeclaration => {
+						property = new ImplementNamespaceVariableDeclaration(property, this, @type)
+					}
+					NodeKind::MethodDeclaration => {
+						property = new ImplementNamespaceFunctionDeclaration(property, this, @type)
 					}
 					=> {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
@@ -347,7 +366,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	type() => @type
 }
 
-class ImplementObjectVariableDeclaration extends Statement {
+/* class ImplementObjectVariableDeclaration extends Statement {
 	private {
 		_object: ObjectType
 		_value
@@ -428,6 +447,137 @@ class ImplementObjectFunctionDeclaration extends Statement {
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		const line = fragments.newLine().code(@object.sealName(), '.', @data.name.name, ' = function(')
+		
+		const block = Parameter.toFragments(this, line, false, func(fragments) {
+			return fragments.code(')').newBlock()
+		})
+		
+		for statement in @statements {
+			block.compile(statement)
+		}
+		
+		block.done()
+		
+		line.done()
+	} // }}}
+	type() => @type
+} */
+class ImplementNamespaceVariableDeclaration extends Statement {
+	private {
+		_namespace: NamespaceType
+		_value
+	}
+	constructor(data, parent, @namespace) { // {{{
+		super(data, parent)
+	} // }}}
+	analyse() { // {{{
+		@value = $compile.expression(@data.defaultValue, this)
+		@value.analyse()
+		
+		@namespace.addProperty(@data.name.name, Type.fromAST(@data.type, this))
+	} // }}}
+	prepare() { // {{{
+		@value.prepare()
+	} // }}}
+	translate() { // {{{
+		@value.translate()
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		/* fragments
+			.newLine()
+			.code(@object.sealName(), '.', @data.name.name, ' = ')
+			.compile(@value)
+			.done() */
+		if @namespace.isSealed() {
+			fragments
+				.newLine()
+				.code(@namespace.sealName(), '.', @data.name.name, ' = ')
+				.compile(@value)
+				.done()
+		}
+		else {
+			fragments
+				.newLine()
+				.code(@namespace.name(), '.', @data.name.name, ' = ')
+				.compile(@value)
+				.done()
+		}
+	} // }}}
+}
+
+class ImplementNamespaceFunctionDeclaration extends Statement {
+	private {
+		_namespace: NamespaceType
+		_parameters: Array
+		_statements: Array
+		_type: FunctionType
+	}
+	constructor(data, parent, @namespace) { // {{{
+		super(data, parent, new Scope(parent.scope()))
+	} // }}}
+	analyse() { // {{{
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+			
+			parameter.analyse()
+		}
+	} // }}}
+	prepare() { // {{{
+		for parameter in @parameters {
+			parameter.prepare()
+		}
+		
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+		
+		@namespace.addProperty(@data.name.name, @type)
+	} // }}}
+	translate() { // {{{
+		if @data.body? {
+			@statements = []
+			for statement in $ast.body(@data.body) {
+				@statements.push(statement = $compile.statement(statement, this))
+				
+				statement.analyse()
+			}
+			
+			for statement in @statements {
+				statement.prepare()
+			}
+			
+			for statement in @statements {
+				statement.translate()
+			}
+		}
+		else {
+			@statements = []
+		}
+	} // }}}
+	parameters() => @parameters
+	toFragments(fragments, mode) { // {{{
+		/* const line = fragments.newLine().code(@object.sealName(), '.', @data.name.name, ' = function(')
+		
+		const block = Parameter.toFragments(this, line, false, func(fragments) {
+			return fragments.code(')').newBlock()
+		})
+		
+		for statement in @statements {
+			block.compile(statement)
+		}
+		
+		block.done()
+		
+		line.done() */
+		const line = fragments.newLine()
+		
+		if @namespace.isSealed() {
+			line.code(@namespace.sealName())
+		}
+		else {
+			line.code(@namespace.name())
+		}
+		
+		line.code('.', @data.name.name, ' = function(')
 		
 		const block = Parameter.toFragments(this, line, false, func(fragments) {
 			return fragments.code(')').newBlock()

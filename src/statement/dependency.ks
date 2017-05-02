@@ -86,15 +86,38 @@ const $dependency = {
 				
 				return variable
 			}
+			NodeKind::NamespaceDeclaration => {
+				const type = new NamespaceType(declaration.name.name, scope)
+				const variable = scope.define(declaration.name.name, true, type, node)
+				
+				if	kind == DependencyKind::Extern ||
+					kind == DependencyKind::ExternOrRequire ||
+					kind == DependencyKind::RequireOrExtern
+				{
+					type.alienize()
+				}
+				
+				for modifier in declaration.modifiers {
+					if modifier.kind == ModifierKind::Sealed {
+						type.seal()
+					}
+				}
+				
+				for statement in declaration.statements {
+					type.addProperty(statement.name.name, Type.fromAST(statement, node), false)
+				}
+				
+				return variable
+			}
 			NodeKind::VariableDeclarator => {
 				let type = Type.fromAST(declaration.type, node)
 				
-				if type is ReferenceType && type.name() == 'Class' {
+				/* if type is ReferenceType && type.name() == 'Class' {
 					type = new ClassType(declaration.name.name, scope)
 				}
-				else if type is ObjectType {
+				else if type is NamespaceType  || type is ClassType {
 					if declaration.sealed {
-						type.seal(declaration.name.name)
+						type.seal()
 					}
 					
 					if	kind == DependencyKind::Extern ||
@@ -103,6 +126,38 @@ const $dependency = {
 					{
 						type.alienize()
 					}
+					
+					if type is ClassType {
+						type = type.reference()
+					}
+				} */
+				let referenced = false
+				
+				if type is ReferenceType {
+					if type.name() == 'Class' {
+						type = new ClassType(declaration.name.name, scope)
+					}
+				}
+				else if type is ClassType {
+					referenced = true
+				}
+				else if type == Type.Any {
+					type = new ReferenceType()
+				}
+				
+				if declaration.sealed {
+					type.seal(declaration.name.name)
+				}
+				
+				if	kind == DependencyKind::Extern ||
+					kind == DependencyKind::ExternOrRequire ||
+					kind == DependencyKind::RequireOrExtern
+				{
+					type.alienize()
+				}
+				
+				if referenced {
+					type = type.reference()
 				}
 				
 				const variable = scope.define(declaration.name.name, true, type, node)

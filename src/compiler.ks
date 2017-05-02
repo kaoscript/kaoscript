@@ -237,11 +237,11 @@ const $compile = {
 				expression = new clazz(data, parent, scope)
 			}
 			else {
-				throw new NotSupportedException(`Unexpected assignment operator \(data.operator.kind)`, parent)
+				throw new NotSupportedException(`Unexpected unary operator \(data.operator.kind)`, parent)
 			}
 		}
 		else {
-			throw new NotSupportedException(`Unexpected assignment operator \(data.kind)`, parent)
+			throw new NotSupportedException(`Unexpected expression/statement \(data.kind)`, parent)
 		}
 		
 		return expression
@@ -366,6 +366,7 @@ const $statements = {
 	`\(NodeKind::ImportDeclaration)`			: ImportDeclaration
 	`\(NodeKind::IncludeDeclaration)`			: IncludeDeclaration
 	`\(NodeKind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration
+	`\(NodeKind::NamespaceDeclaration)`			: NamespaceDeclaration
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(NodeKind::RequireOrImportDeclaration)`	: RequireOrImportDeclaration

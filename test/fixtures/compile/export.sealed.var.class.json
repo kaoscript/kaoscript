@@ -1,0 +1,16 @@
+{
+  "requirements": {},
+  "exports": {
+    "Window": {
+      "abstract": "false",
+      "alien": "true",
+      "sealed": "true",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  }
+}

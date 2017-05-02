@@ -25,8 +25,8 @@ class ObjectExpression extends Expression {
 			property.prepare()
 		}
 		
-		@type = new ObjectType(@properties, new ScopeDomain(@scope))
-		/* @type = @scope.reference('Object') */
+		/* @type = new ObjectType(@properties, new ScopeDomain(@scope)) */
+		@type = @scope.reference('Object')
 	} // }}}
 	translate() { // {{{
 		for property in @properties {
@@ -118,7 +118,7 @@ class ObjectTemplateMember extends Expression {
 	toAfterwardFragments(fragments) { // {{{
 		fragments
 			.newLine()
-			.code(this.parent().reference(), '[')
+			.code(@parent.reference(), '[')
 			.compile(@name)
 			.code('] = ')
 			.compile(@value)

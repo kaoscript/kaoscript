@@ -125,11 +125,7 @@ const $function = {
 			NodeKind::ThrowStatement => return $function.useThisVariable(data.value, node)
 			NodeKind::UnaryExpression => return $function.useThisVariable(data.argument, node)
 			NodeKind::VariableDeclaration => {
-				for declaration in data.declarations {
-					if declaration.init? && $function.useThisVariable(declaration.init, node) {
-						return true
-					}
-				}
+				return data.init? && $function.useThisVariable(data.init, node)
 			}
 			=> {
 				throw new NotImplementedException(`Unknow kind \(data.kind)`, node)
@@ -143,6 +139,7 @@ const $function = {
 class FunctionDeclaration extends Statement {
 	private {
 		_awaiting: Boolean		= false
+		_name: String
 		_parameters
 		_signature
 		_statements
@@ -155,6 +152,7 @@ class FunctionDeclaration extends Statement {
 	analyse() { // {{{
 		@scope.define('this', true, this)
 		
+		@name = @data.name.name
 		@variable = this.greatScope().define(@data.name.name, true, this)
 		
 		@parameters = []
@@ -199,11 +197,10 @@ class FunctionDeclaration extends Statement {
 	} // }}}
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isMethod() => false
+	name() => @name
 	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
-		let ctrl = fragments.newControl()
-		
-		ctrl.code('function ' + @data.name.name + '(')
+		const ctrl = fragments.newControl().code(`function \(@name)(`)
 		
 		Parameter.toFragments(this, ctrl, false, func(node) {
 			return node.code(')').step()
@@ -238,4 +235,7 @@ class FunctionDeclaration extends Statement {
 		ctrl.done()
 	} // }}}
 	type() => @type
+	walk(fn) { // {{{
+		fn(@name, @type)
+	} // }}}
 }

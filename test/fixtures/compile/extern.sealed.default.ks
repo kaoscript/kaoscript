@@ -6,9 +6,9 @@ impl Number {
 	zeroPad(): String => '00' + this.toString()
 }
 
-extern sealed Math: {
+extern sealed namespace Math {
 	PI: Number
-	pow(...args): Number
+	pow(...): Number
 }
 
 Math.pow(3, 2).zeroPad()

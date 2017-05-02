@@ -4,21 +4,26 @@
     "console": {
       "alien": "true",
       "sealed": "false",
-      "properties": {
-        "log": {
-          "async": "false",
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "type": "Any",
-              "min": 0,
-              "max": "Infinity"
-            }
-          ],
-          "returns": "Any",
-          "throws": []
-        }
+      "variables": {},
+      "methods": {
+        "log": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          }
+        ]
       }
     },
     "Shape": {
@@ -44,8 +49,8 @@
       "instanceVariables": {
         "_color": {
           "access": 1,
-          "name": "String",
-          "nullable": "false"
+          "nullable": "false",
+          "type": "String"
         }
       },
       "classVariables": {},

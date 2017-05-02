@@ -1,8 +1,8 @@
 class EnumDeclaration extends Statement {
 	private {
-		_composites: Array				= []
+		_composites: Array			= []
 		_name: String
-		_new: Boolean					= true
+		_new: Boolean				= true
 		_values: Array				= []
 		_type: EnumType
 	}
@@ -116,6 +116,7 @@ class EnumDeclaration extends Statement {
 		}
 	} // }}}
 	translate()
+	name() => @name
 	toStatementFragments(fragments, mode) { // {{{
 		if @new {
 			const line = fragments.newLine().code($runtime.scope(this), @name, $equals)
@@ -152,4 +153,5 @@ class EnumDeclaration extends Statement {
 			}
 		}
 	} // }}}
+	type() => @type
 }

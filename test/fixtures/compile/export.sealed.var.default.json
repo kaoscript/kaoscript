@@ -1,0 +1,10 @@
+{
+  "requirements": {},
+  "exports": {
+    "window": {
+      "alien": "true",
+      "sealed": "true",
+      "type": "Any"
+    }
+  }
+}

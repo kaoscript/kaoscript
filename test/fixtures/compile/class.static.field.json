@@ -24,15 +24,15 @@
       "instanceVariables": {
         "name": {
           "access": 3,
-          "name": "String",
-          "nullable": "false"
+          "nullable": "false",
+          "type": "String"
         }
       },
       "classVariables": {
         "bar": {
           "access": 3,
-          "name": "String",
-          "nullable": "false"
+          "nullable": "false",
+          "type": "String"
         }
       },
       "instanceMethods": {

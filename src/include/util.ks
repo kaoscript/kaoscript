@@ -82,13 +82,13 @@ impl Array {
 		}
 		return this
 	} // }}}
-	any(fn): Boolean {
+	any(fn): Boolean { // {{{
 		for item, index in this {
 			return true if fn(item, index, this)
 		}
 		
 		return false
-	}
+	} // }}}
 	clear() { // {{{
 		this.length = 0
 		

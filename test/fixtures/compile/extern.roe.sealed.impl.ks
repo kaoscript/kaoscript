@@ -4,7 +4,7 @@ require|extern sealed class Number {
 	toString(): String
 }
 
-require|extern sealed Math: {
+require|extern sealed namespace Math {
 	PI: Number
 	pow(): Number
 }

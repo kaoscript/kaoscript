@@ -209,4 +209,5 @@ class IncludeDeclarator extends Statement {
 	translate()
 	directory() => @directory
 	file() => @file
+	recipient() => this.module()
 }

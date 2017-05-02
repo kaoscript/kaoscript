@@ -1,9 +1,12 @@
 module.exports = function() {
-	const Integer = {
-		parse(value = null, radix = null) {
+	let Integer = (function() {
+		function parse(value = null, radix = null) {
 			return parseInt(value, radix);
 		}
-	};
+		return {
+			parse: parse
+		};
+	})();
 	return {
 		Integer: Integer
 	};

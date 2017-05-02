@@ -228,7 +228,20 @@ class CallExpression extends Expression {
 			is FunctionType => {
 				this.makeCalleeFromReference(@scope.reference('Function'))
 			}
-			is ObjectType => {
+			is NamespaceType => {
+				if property ?= type.getProperty(@property) {
+					if property is FunctionType && type.isSealedProperty(@property) {
+						this.addCallee(new SealedFunctionCallee(@data, type, property, property.returnType(), this))
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, @object, property, this))
+					}
+				}
+				else {
+					this.addCallee(new DefaultCallee(@data, @object, this))
+				}
+			}
+			/* is ObjectType => {
 				if (fn ?= type.getProperty(@property)) && fn is FunctionType {
 					if type.isSealedProperty(@property) {
 						this.addCallee(new SealedFunctionCallee(@data, type, fn, fn.returnType(), this))
@@ -240,7 +253,7 @@ class CallExpression extends Expression {
 				else {
 					this.makeCalleeFromReference(@scope.reference('Object'))
 				}
-			}
+			} */
 			is ParameterType => {
 				this.makeCallee(type.type())
 			}
@@ -503,7 +516,7 @@ class DefaultCallee extends Callee {
 		@nullableComputed = data.nullable && @expression.isNullable()
 		@scope = data.scope.kind
 		
-		/* const type = @expression.type()
+		const type = @expression.type()
 		
 		if type is ClassType {
 			TypeException.throwConstructorWithoutNew(type.name(), node)
@@ -515,8 +528,31 @@ class DefaultCallee extends Callee {
 		}
 		else {
 			@type = Type.Any
-		} */
-		@type = Type.Any
+		}
+	} // }}}
+	constructor(@data, object, type: Type, node) { // {{{
+		super()
+		
+		@expression = new MemberExpression(data.callee, node, node.scope(), object)
+		@expression.analyse()
+		@expression.prepare()
+		
+		@list = node._list
+		@nullable = data.nullable || @expression.isNullable()
+		@nullableComputed = data.nullable && @expression.isNullable()
+		@scope = data.scope.kind
+		
+		if type is ClassType {
+			TypeException.throwConstructorWithoutNew(type.name(), node)
+		}
+		else if type is FunctionType {
+			this.validate(type, node)
+			
+			@type = type.returnType()
+		}
+		else {
+			@type = Type.Any
+		}
 	} // }}}
 	constructor(@data, object, methods, @type, node) { // {{{
 		super()
@@ -532,6 +568,10 @@ class DefaultCallee extends Callee {
 		
 		for method in methods {
 			this.validate(method, node)
+		}
+		
+		if @type is ClassType {
+			TypeException.throwConstructorWithoutNew(@type.name(), node)
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
@@ -605,6 +645,119 @@ class DefaultCallee extends Callee {
 			}
 		}
 	} // }}}
+	toCurryFragments(fragments, mode, node) { // {{{
+		node.module().flag('Helper')
+		
+		const arguments = node._arguments
+		
+		if @list {
+			switch @scope {
+				ScopeKind::Argument => {
+					fragments
+						.code($runtime.helper(node), '.vcurry(')
+						.compile(@expression)
+						.code($comma)
+						.compile(node._callScope)
+					
+					for argument in arguments {
+						fragments.code($comma).compile(argument)
+					}
+				}
+				ScopeKind::Null => {
+					fragments
+						.code($runtime.helper(node), '.vcurry(')
+						.compile(@expression)
+						.code(', null')
+					
+					for argument in arguments {
+						fragments.code($comma).compile(argument)
+					}
+				}
+				ScopeKind::This => {
+					fragments
+						.code($runtime.helper(node), '.vcurry(')
+						.compile(@expression)
+						.code(', ')
+						.compile(@expression.caller())
+					
+					for argument in arguments {
+						fragments.code($comma).compile(argument, mode)
+					}
+				}
+			}
+		}
+		else {
+			switch @scope {
+				ScopeKind::Argument => {
+					fragments
+						.code($runtime.helper(node), '.curry(')
+						.compile(@expression)
+						.code($comma)
+						.compile(node._callScope)
+						.code($comma)
+					
+					if arguments.length == 1 && arguments[0].type().isArray() {
+						fragments.compile(arguments[0])
+					}
+					else {
+						fragments.code('[].concat(')
+						
+						for i from 0 til arguments.length {
+							fragments.code($comma) if i != 0
+							
+							fragments.compile(arguments[i])
+						}
+						
+						fragments.code(')')
+					}
+				}
+				ScopeKind::Null => {
+					fragments
+						.code($runtime.helper(node), '.curry(')
+						.compile(@expression)
+						.code(', null, ')
+					
+					if arguments.length == 1 && arguments[0].type().isArray() {
+						fragments.compile(arguments[0])
+					}
+					else {
+						fragments.code('[].concat(')
+						
+						for i from 0 til arguments.length {
+							fragments.code($comma) if i != 0
+							
+							fragments.compile(arguments[i])
+						}
+						
+						fragments.code(')')
+					}
+				}
+				ScopeKind::This => {
+					fragments
+						.code($runtime.helper(node), '.curry(')
+						.compile(@expression)
+						.code($comma)
+						.compile(@expression.caller())
+						.code($comma)
+					
+					if arguments.length == 1 && arguments[0].type().isArray() {
+						fragments.compile(arguments[0])
+					}
+					else {
+						fragments.code('[].concat(')
+						
+						for i from 0 til arguments.length {
+							fragments.code($comma) if i != 0
+							
+							fragments.compile(arguments[i])
+						}
+						
+						fragments.code(')')
+					}
+				}
+			}
+		}
+	} // }}}
 	toNullableFragments(fragments, node) { // {{{
 		if @data.nullable {
 			if @expression.isNullable() {
@@ -637,14 +790,14 @@ class DefaultCallee extends Callee {
 
 class SealedFunctionCallee extends Callee {
 	private {
+		_namespace: NamespaceType
 		_nullable: Boolean
 		_nullableComputed: Boolean
 		_object
 		_property: String
-		_recipient: ObjectType
 		_type: Type
 	}
-	constructor(data, @recipient, function, @type, node) { // {{{
+	constructor(data, @namespace, function, @type, node) { // {{{
 		super()
 		
 		@object = node._object
@@ -670,7 +823,7 @@ class SealedFunctionCallee extends Callee {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind::This => {
-					fragments.code(`\(@recipient.sealName()).\(@property)(`)
+					fragments.code(`\(@namespace.sealName()).\(@property)(`)
 					
 					for i from 0 til node._arguments.length {
 						fragments.code($comma).compile(node._arguments[i])

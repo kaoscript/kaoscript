@@ -156,9 +156,10 @@ class AbstractScope {
 
 class Scope extends AbstractScope {
 	private {
-		_tempNextIndex 		= 0
-		_tempNames			= {}
-		_tempParentNames	= {}
+		_anonymousClassIndex	= 0
+		_tempNextIndex 			= 0
+		_tempNames				= {}
+		_tempParentNames		= {}
 	}
 	acquireTempName(statement: Statement = null) { // {{{
 		this.updateTempNames()
@@ -198,6 +199,7 @@ class Scope extends AbstractScope {
 		
 		return null
 	} // }}}
+	getAnomynousClassName() => `__ks_cls_\(@anonymousClassIndex++)`
 	getRenamedVariable(name) { // {{{
 		if @renamedVariables[name] is String {
 			return @renamedVariables[name]
