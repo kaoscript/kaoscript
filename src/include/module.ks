@@ -109,7 +109,7 @@ export class Module {
 			@exportSource.push(`\(alias ?? name): \(name)`)
 			
 			const type = variable.type().unalias()
-			if type.isSealed() && !type.isAnonymous() {
+			if type.isSealed() && type.isExtendable() {
 				@exportSource.push(`__ks_\(alias ?? name): \(type.sealName())`)
 			}
 		}

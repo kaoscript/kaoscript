@@ -2,10 +2,12 @@
   "requirements": {},
   "exports": {
     "Math": {
-      "alien": "true",
       "sealed": "true",
       "properties": {
-        "PI": "Number",
+        "PI": {
+          "sealed": "false",
+          "type": "Number"
+        },
         "pow": {
           "async": "false",
           "min": 0,
@@ -18,10 +20,10 @@
             }
           ],
           "returns": "Number",
+          "sealed": "false",
           "throws": []
         }
-      },
-      "sealedProperties": []
+      }
     }
   }
 }

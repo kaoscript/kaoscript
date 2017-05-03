@@ -7,40 +7,6 @@ enum DependencyKind {
 }
 
 const $dependency = {
-	classMember(data, type: ClassType, node) { // {{{
-		switch(data.kind) {
-			NodeKind::FieldDeclaration => {
-				throw new NotImplementedException(node)
-			}
-			NodeKind::MethodAliasDeclaration => {
-				throw new NotImplementedException(node)
-			}
-			NodeKind::MethodDeclaration => {
-				if type.isConstructor(data.name.name) {
-					throw new NotImplementedException(node)
-				}
-				else if type.isDestructor(data.name.name) {
-					throw new NotImplementedException(node)
-				}
-				else {
-					let instance = true
-					for i from 0 til data.modifiers.length while instance {
-						instance = false if data.modifiers[i].kind == ModifierKind::Static
-					}
-					
-					if instance {
-						type.addInstanceMethod(data.name.name, Type.fromAST(data, node))
-					}
-					else {
-						type.addClassMethod(data.name.name, Type.fromAST(data, node))
-					}
-				}
-			}
-			=> {
-				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
-			}
-		}
-	} // }}}
 	define(declaration, node, kind) { // {{{
 		const scope = node.greatScope()
 		
@@ -80,8 +46,8 @@ const $dependency = {
 					}
 				}
 				
-				for i from 0 til declaration.members.length {
-					$dependency.classMember(declaration.members[i], type, node)
+				for member in declaration.members {
+					type.addPropertyFromAST(member, node)
 				}
 				
 				return variable
@@ -90,13 +56,6 @@ const $dependency = {
 				const type = new NamespaceType(declaration.name.name, scope)
 				const variable = scope.define(declaration.name.name, true, type, node)
 				
-				if	kind == DependencyKind::Extern ||
-					kind == DependencyKind::ExternOrRequire ||
-					kind == DependencyKind::RequireOrExtern
-				{
-					type.alienize()
-				}
-				
 				for modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind::Sealed {
 						type.seal()
@@ -104,7 +63,7 @@ const $dependency = {
 				}
 				
 				for statement in declaration.statements {
-					type.addProperty(statement.name.name, Type.fromAST(statement, node), false)
+					type.addPropertyFromAST(statement, node)
 				}
 				
 				return variable
@@ -112,25 +71,6 @@ const $dependency = {
 			NodeKind::VariableDeclarator => {
 				let type = Type.fromAST(declaration.type, node)
 				
-				/* if type is ReferenceType && type.name() == 'Class' {
-					type = new ClassType(declaration.name.name, scope)
-				}
-				else if type is NamespaceType  || type is ClassType {
-					if declaration.sealed {
-						type.seal()
-					}
-					
-					if	kind == DependencyKind::Extern ||
-						kind == DependencyKind::ExternOrRequire ||
-						kind == DependencyKind::RequireOrExtern
-					{
-						type.alienize()
-					}
-					
-					if type is ClassType {
-						type = type.reference()
-					}
-				} */
 				let referenced = false
 				
 				if type is ReferenceType {
@@ -141,17 +81,25 @@ const $dependency = {
 				else if type is ClassType {
 					referenced = true
 				}
-				else if type == Type.Any {
-					type = new ReferenceType()
-				}
 				
 				if declaration.sealed {
-					type.seal(declaration.name.name)
+					if type == Type.Any {
+						type = new SealedReferenceType(node)
+					}
+					else if type is ReferenceType {
+						type = new SealedReferenceType(type)
+					}
+					else {
+						type.seal()
+					}
 				}
 				
-				if	kind == DependencyKind::Extern ||
-					kind == DependencyKind::ExternOrRequire ||
-					kind == DependencyKind::RequireOrExtern
+				if	type is ClassType &&
+					(
+						kind == DependencyKind::Extern ||
+						kind == DependencyKind::ExternOrRequire ||
+						kind == DependencyKind::RequireOrExtern
+					)
 				{
 					type.alienize()
 				}
@@ -182,7 +130,7 @@ class ExternDeclaration extends Statement {
 		for declaration in @data.declarations {
 			variable = $dependency.define(declaration, this, DependencyKind::Extern)
 			
-			if variable.type().isSealed() {
+			if variable.type().isSealed() && variable.type().isExtendable() {
 				@lines.push(`var \(variable.type().sealName()) = {}`)
 			}
 		}

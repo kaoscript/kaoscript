@@ -1,10 +1,35 @@
 {
   "requirements": {},
   "exports": {
+    "console": {
+      "alien": "true",
+      "sealed": "false",
+      "variables": {},
+      "methods": {
+        "log": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          }
+        ]
+      }
+    },
     "Shape": {
       "abstract": "false",
       "alien": "false",
-      "sealed": "false",
+      "sealed": "true",
       "constructors": [
         {
           "access": 3,
@@ -22,41 +47,13 @@
       ],
       "destructors": 0,
       "instanceVariables": {
-        "_color": {
+        "_shape": {
           "access": 1,
           "type": "String"
         }
       },
       "classVariables": {},
       "instanceMethods": {
-        "color": [
-          {
-            "access": 3,
-            "async": "false",
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any",
-            "sealed": "false",
-            "throws": []
-          },
-          {
-            "access": 3,
-            "async": "false",
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "type": "String",
-                "min": 1,
-                "max": 1
-              }
-            ],
-            "returns": "Any",
-            "sealed": "false",
-            "throws": []
-          }
-        ],
         "draw": [
           {
             "access": 3,
@@ -65,13 +62,16 @@
             "max": 1,
             "parameters": [
               {
-                "type": "Any",
+                "type": {
+                  "nullable": "true",
+                  "name": "Any"
+                },
                 "min": 1,
                 "max": 1
               }
             ],
             "returns": "String",
-            "sealed": "false",
+            "sealed": "true",
             "throws": []
           }
         ]

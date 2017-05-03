@@ -2,7 +2,6 @@
   "requirements": {},
   "exports": {
     "Float": {
-      "alien": "false",
       "sealed": "false",
       "properties": {
         "parse": {

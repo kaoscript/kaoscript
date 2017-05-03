@@ -1894,7 +1894,7 @@ class ClassVariableDeclaration extends AbstractNode {
 			parent._classVariables[@name] = this
 		}
 		
-		@parent.addReference(@type = Type.fromAST(@data, this), this)
+		@parent.addReference(@type = ClassVariableType.fromAST(@data, this), this)
 	} // }}}
 	analyse() { // {{{
 		if @data.defaultValue? {

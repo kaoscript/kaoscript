@@ -94,10 +94,10 @@ class CallExpression extends Expression {
 				@type = new UnionType(types)
 			}
 		}
-		/* console.log('-- callees --')
-		console.log(@callees)
-		console.log(@property)
-		console.log(@type) */
+		//console.log('-- callees --')
+		//console.log(@callees)
+		//console.log(@property)
+		//console.log(@type)
 	} // }}}
 	translate() { // {{{
 		for argument in @arguments {
@@ -241,19 +241,6 @@ class CallExpression extends Expression {
 					this.addCallee(new DefaultCallee(@data, @object, this))
 				}
 			}
-			/* is ObjectType => {
-				if (fn ?= type.getProperty(@property)) && fn is FunctionType {
-					if type.isSealedProperty(@property) {
-						this.addCallee(new SealedFunctionCallee(@data, type, fn, fn.returnType(), this))
-					}
-					else {
-						this.addCallee(new DefaultCallee(@data, @object, fn, fn.returnType(), this))
-					}
-				}
-				else {
-					this.makeCalleeFromReference(@scope.reference('Object'))
-				}
-			} */
 			is ParameterType => {
 				this.makeCallee(type.type())
 			}
@@ -826,7 +813,11 @@ class SealedFunctionCallee extends Callee {
 					fragments.code(`\(@namespace.sealName()).\(@property)(`)
 					
 					for i from 0 til node._arguments.length {
-						fragments.code($comma).compile(node._arguments[i])
+						if i != 0 {
+							fragments.code($comma)
+						}
+						
+						fragments.compile(node._arguments[i])
 					}
 				}
 			}

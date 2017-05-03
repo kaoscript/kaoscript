@@ -7,17 +7,14 @@
       "variables": {
         "innerHeight": {
           "access": 3,
-          "nullable": "false",
           "type": "Number"
         },
         "innerWidth": {
           "access": 3,
-          "nullable": "false",
           "type": "Number"
         },
         "console": {
           "access": 3,
-          "nullable": "false",
           "type": {
             "alien": "false",
             "sealed": "false",

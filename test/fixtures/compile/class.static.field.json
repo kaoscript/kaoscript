@@ -24,14 +24,12 @@
       "instanceVariables": {
         "name": {
           "access": 3,
-          "nullable": "false",
           "type": "String"
         }
       },
       "classVariables": {
         "bar": {
           "access": 3,
-          "nullable": "false",
           "type": "String"
         }
       },

@@ -201,7 +201,6 @@ const $import = {
 		}
 		
 		if importAlias.length != 0 {
-			/* const type = new NamespaceType(importAlias, domain) */
 			const type = new NamespaceType(importAlias, node.scope())
 			const ref = type.reference()
 			

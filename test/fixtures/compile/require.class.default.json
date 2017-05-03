@@ -15,7 +15,6 @@
       "instanceVariables": {
         "_luma": {
           "access": 1,
-          "nullable": "false",
           "type": "Number"
         }
       },

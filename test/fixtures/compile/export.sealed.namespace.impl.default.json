@@ -1,0 +1,61 @@
+{
+  "requirements": {},
+  "exports": {
+    "console": "Any",
+    "Number": {
+      "abstract": "false",
+      "alien": "true",
+      "sealed": "true",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "toString": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": "false",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    "Math": {
+      "sealed": "true",
+      "properties": {
+        "PI": {
+          "sealed": "false",
+          "type": "Number"
+        },
+        "pow": {
+          "async": "false",
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Number",
+          "sealed": "false",
+          "throws": []
+        },
+        "pi": {
+          "sealed": "true",
+          "type": "Number"
+        },
+        "foo": {
+          "async": "false",
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Number",
+          "sealed": "true",
+          "throws": []
+        }
+      }
+    }
+  }
+}

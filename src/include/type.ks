@@ -112,39 +112,6 @@ abstract class Type {
 			}
 			
 			switch data.kind {
-				NodeKind::FieldDeclaration => {
-					let type: ClassVariableType
-					
-					if data.type? {
-						if data.type.typeName? {
-							if data.type.properties? {
-								throw new NotImplementedException(node)
-							}
-							else {
-								type = new ClassVariableType(data.type.typeName.name, data.type.nullable, domain)
-							}
-						}
-						else {
-							throw new NotImplementedException(node)
-						}
-					}
-					else {
-						type = new ClassVariableType('Any', domain)
-					}
-					
-					if data.modifiers? {
-						for modifier in data.modifiers {
-							if modifier.kind == ModifierKind::Private {
-								type.access(Accessibility::Private)
-							}
-							else if modifier.kind == ModifierKind::Protected {
-								type.access(Accessibility::Protected)
-							}
-						}
-					}
-					
-					return type
-				}
 				NodeKind::FunctionDeclaration => {
 					return new FunctionType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
 				}
@@ -157,9 +124,6 @@ abstract class Type {
 					}
 					
 					return type
-				}
-				NodeKind::MethodDeclaration => {
-					return new ClassMethodType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
 				}
 				NodeKind::Parameter => {
 					const type = Type.fromAST(data.type, domain, node)
@@ -187,15 +151,6 @@ abstract class Type {
 				}
 				NodeKind::TypeReference => {
 					if data.properties? {
-						/* const names = []
-						const types = []
-						
-						for property in data.properties {
-							names.push(property.name.name)
-							types.push(Type.fromAST(property.type, domain, node))
-						}
-						
-						return new ObjectType(names, types, domain) */
 						const scope = node.scope()
 						const name = scope.getAnomynousClassName()
 						
@@ -333,37 +288,14 @@ abstract class Type {
 				return type
 			}
 			else if data.properties? {
-				/* const type = new ObjectType(domain)
-				
-				type._alien = data.alien
-				
-				if data.sealed {
-					type.seal(name)
-					
-					for let name in data.sealedProperties {
-						type._seal.properties[name] = true
-					}
-				}
-				
-				for name, property of data.properties {
-					type.addProperty(name, Type.import(name, property, domain, node))
-				}
-				
-				return type */
 				const type = new NamespaceType(name, domain)
-				
-				type._alien = data.alien
 				
 				if data.sealed {
 					type.seal()
-					
-					for let name in data.sealedProperties {
-						type._seal.properties[name] = true
-					}
 				}
 				
 				for name, property of data.properties {
-					type.addProperty(name, Type.import(name, property, domain, node), property.sealed == true)
+					type.addPropertyFromMetadata(name, property, domain, node)
 				}
 				
 				return type
@@ -378,9 +310,6 @@ abstract class Type {
 				type._index = data.index
 				
 				return type
-			}
-			else if data.type? {
-				return new AliasType(Type.import(null, data.type, domain, node))
 			}
 			else if data.methods? {
 				const scope = node.scope()
@@ -401,6 +330,14 @@ abstract class Type {
 						type.addInstanceMethod(name, ClassMethodType.import(method, domain, node))
 					}
 				}
+				
+				return type
+			}
+			else if data.type? {
+				return new AliasType(Type.import(null, data.type, domain, node))
+			}
+			else if data.name? {
+				const type = new ReferenceType(data.name, data.nullable, domain)
 				
 				return type
 			}
@@ -428,6 +365,7 @@ abstract class Type {
 		
 		return false
 	} // }}}
+	isExtendable() => false
 	isFlexible() => false
 	isNumber() => false
 	isSealed() => false
@@ -576,6 +514,42 @@ class ClassType extends Type {
 	} // }}}
 	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
 		@instanceVariables[name] = type
+	} // }}}
+	addPropertyFromAST(data, node) { // {{{
+		switch(data.kind) {
+			NodeKind::FieldDeclaration => {
+				throw new NotImplementedException(node)
+			}
+			NodeKind::MethodAliasDeclaration => {
+				throw new NotImplementedException(node)
+			}
+			NodeKind::MethodDeclaration => {
+				if this.isConstructor(data.name.name) {
+					throw new NotImplementedException(node)
+				}
+				else if this.isDestructor(data.name.name) {
+					throw new NotImplementedException(node)
+				}
+				else {
+					let instance = true
+					for i from 0 til data.modifiers.length while instance {
+						instance = false if data.modifiers[i].kind == ModifierKind::Static
+					}
+					
+					const type = ClassMethodType.fromAST(data, node)
+					
+					if instance {
+						this.addInstanceMethod(data.name.name, type)
+					}
+					else {
+						this.addClassMethod(data.name.name, type)
+					}
+				}
+			}
+			=> {
+				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
+			}
+		}
 	} // }}}
 	alienize() { // {{{
 		@alien = true
@@ -848,6 +822,7 @@ class ClassType extends Type {
 	isAnonymous() => @anonymous
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
+	isExtendable() => !@anonymous
 	isExtending() => @extending
 	isFlexible() => true
 	isSealed() => @sealed
@@ -888,7 +863,7 @@ class ClassType extends Type {
 	namespace() => @namespace
 	namespace(@namespace) => this
 	reference() => new ReferenceType(this, @domain)
-	seal(...) { // {{{
+	seal() { // {{{
 		@sealed = true
 		
 		@seal = {
@@ -1151,13 +1126,13 @@ class FunctionType extends Type {
 
 class NamespaceType extends Type {
 	private {
-		_alien: Boolean				= false
 		_domain: Domain
 		_name: String
 		_namespace: ReferenceType
 		_properties: Object			= {}
-		_seal
 		_sealed: Boolean			= false
+		_sealName: String
+		_sealProperties: Object		= {}
 	}
 	constructor(@name, @domain)
 	constructor(@name, scope: AbstractScope) { // {{{
@@ -1166,28 +1141,58 @@ class NamespaceType extends Type {
 		
 		@domain = new ScopeDomain(scope)
 	} // }}}
-	addProperty(name: String, type: Type, sealed = @sealed) { // {{{
+	addProperty(name: String, type: Type) { // {{{
 		@properties[name] = type
 		
-		if sealed {
-			@seal.properties[name] = true
+		if @sealed {
+			@sealProperties[name] = true
+			
+			type.seal()
 		}
 	} // }}}
-	alienize() { // {{{
-		@alien = true
+	addPropertyFromAST(data, node) { // {{{
+		let type
+		if data.kind == NodeKind::VariableDeclarator {
+			type = NamespaceVariableType.fromAST(data, node)
+		}
+		else if data.kind == NodeKind::FunctionDeclaration {
+			type = NamespaceFunctionType.fromAST(data, node)
+		}
+		else {
+			throw new NotSupportedException(node)
+		}
+		
+		@properties[data.name.name] = type
+		
+		if type.isSealed() {
+			@sealProperties[data.name.name] = true
+		}
+	} // }}}
+	addPropertyFromMetadata(name, data, domain, node) { // {{{
+		let type
+		if data is String {
+			type = NamespaceVariableType.import(data, domain, node)
+		}
+		else if data.parameters? {
+			type = NamespaceFunctionType.import(data, domain, node)
+		}
+		else {
+			type = NamespaceVariableType.import(data, domain, node)
+		}
+		
+		@properties[name] = type
+		
+		if type.isSealed() {
+			@sealProperties[name] = true
+		}
 	} // }}}
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	export() { // {{{
 		const export = {
-			alien: @alien
 			sealed: @sealed
 			properties: {}
-		}
-		
-		if @sealed {
-			export.sealedProperties = [name for name in @seal.properties]
 		}
 		
 		for name, value of @properties {
@@ -1197,22 +1202,20 @@ class NamespaceType extends Type {
 		return export
 	} // }}}
 	getProperty(name: String): Type => @properties[name] ?? null
+	isExtendable() => true
 	isFlexible() => @sealed
 	isSealed() => @sealed
-	isSealedProperty(name: String) => @sealed && @seal.properties[name] == true
+	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
 	name() => @name
 	namespace() => @namespace
 	namespace(@namespace) => this
 	reference() => new ReferenceType(this, @domain)
-	seal(...) { // {{{
+	seal() { // {{{
 		@sealed = true
 		
-		@seal = {
-			name: `__ks_\(@name)`
-			properties: {}
-		}
+		@sealName = `__ks_\(@name)`
 	} // }}}
-	sealName() => @seal.name
+	sealName() => @sealName
 	toQuote() { // {{{
 		throw new NotImplementedException()
 	} // }}}
@@ -1223,96 +1226,6 @@ class NamespaceType extends Type {
 		throw new NotImplementedException()
 	} // }}}
 }
-
-/* class ObjectType extends Type {
-	private {
-		_alien: Boolean				= false
-		_container: ReferenceType
-		_domain: Domain
-		_name: String
-		_properties: Object			= {}
-		_seal
-		_sealed: Boolean			= false
-	}
-	constructor(@domain)
-	constructor(name: String, @domain) { // {{{
-		super()
-		
-		this.seal(name)
-	} // }}}
-	constructor(properties: Array<ObjectMember>, @domain) { // {{{
-		super()
-		
-		for property in properties {
-			@properties[property.name()] = property.value().type()
-		}
-	} // }}}
-	constructor(names: Array, types: Array, @domain) { // {{{
-		super()
-		
-		for i from 0 til names.length {
-			@properties[names[i]] = types[i]
-		}
-	} // }}}
-	addProperty(name: String, type: Type) { // {{{
-		@properties[name] = type
-	} // }}}
-	addSealedProperty(name: String, type: Type) { // {{{
-		@properties[name] = type
-		
-		@seal.properties[name] = true
-	} // }}}
-	alienize() { // {{{
-		@alien = true
-	} // }}}
-	container() => @container
-	container(@container) => this
-	equals(b?): Boolean { // {{{
-		throw new NotImplementedException()
-	} // }}}
-	export() { // {{{
-		const export = {
-			alien: @alien
-			sealed: @sealed
-			properties: {}
-		}
-		
-		if @sealed {
-			export.sealedProperties = [name for name in @seal.properties]
-		}
-		
-		for name, value of @properties {
-			export.properties[name] = value.export()
-		}
-		
-		return export
-	} // }}}
-	getProperty(name: String): Type => @properties[name] ?? Type.Any
-	isFlexible() => @sealed
-	isSealed() => @sealed
-	isSealedProperty(name: String) => @sealed && @seal.properties[name] == true
-	name() => @name
-	parameter(index: Number = 0) => Type.Any
-	reference() => new ReferenceType(this, @domain)
-	seal(@name) { // {{{
-		@sealed = true
-		
-		@seal = {
-			name: `__ks_\(@name)`
-			properties: {}
-		}
-	} // }}}
-	sealName() => @seal.name
-	toFragments(fragments, node) { // {{{
-		throw new NotImplementedException(node)
-	} // }}}
-	toQuote(): String { // {{{
-		throw new NotImplementedException()
-	} // }}}
-	toTestFragments(fragments, node) { // {{{
-		throw new NotImplementedException(node)
-	} // }}}
-} */
 
 class ParameterType extends Type {
 	private {
@@ -1359,15 +1272,11 @@ class ParameterType extends Type {
 
 class ReferenceType extends Type {
 	private {
-		_alien: Boolean				= false
 		_domain: Domain
-		/* _hasNamespace: Boolean		= false */
 		_name: String
 		_namespace: ReferenceType
 		_nullable: Boolean			= false
 		_parameters: Array<Type>
-		_sealed: Boolean			= false
-		_sealName: String
 	}
 	constructor() { // {{{
 		super()
@@ -1379,7 +1288,6 @@ class ReferenceType extends Type {
 		super()
 		
 		@namespace = type.namespace()
-		/* @hasNamespace = @namespace? */
 		
 		@name = type.name()
 		@parameters = []
@@ -1389,23 +1297,7 @@ class ReferenceType extends Type {
 		
 		@name = $types[name] ?? name
 	} // }}}
-	/* container() => @container
-	container(@container) => this */
-	alienize() { // {{{
-		@alien = true
-	} // }}}
 	dereference(): Type? { // {{{
-		/* if @hasNamespace {
-			return @namespace.getProperty(@name)
-		}
-		else if variable ?= @domain.getVariable(@name) {
-			return variable.dereference()
-		}
-		
-		return null */
-		/* console.log('-- dereference', this)
-		console.log('namespace', @namespace?.getProperty(@name))
-		console.log('domain', @domain.getVariable(@name)) */
 		if @name == 'Any' {
 			return null
 		}
@@ -1435,11 +1327,10 @@ class ReferenceType extends Type {
 		if (type ?= this.dereference()) && type is ClassType && type.isAnonymous() {
 			return type.export()
 		}
-		else if @sealed {
+		else if @nullable {
 			return {
-				alien: @alien
-				sealed: true
-				type: @name
+				nullable: @nullable
+				name: @name
 			}
 		}
 		else {
@@ -1447,7 +1338,6 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	getProperty(name: String): Type { // {{{
-		/* console.log('-- getProperty', name) */
 		if type ?= this.dereference() {
 			if type is ClassType {
 				return type.getInstanceProperty(name)
@@ -1500,7 +1390,6 @@ class ReferenceType extends Type {
 	} // }}}
 	isNullable() => @nullable
 	isNumber() => @name == 'Number'
-	isSealed() => @sealed
 	isString() => @name == 'String'
 	match(b: Type): Boolean { // {{{
 		if b.isAny() {
@@ -1547,11 +1436,6 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	reference() => this
-	seal(name: String) { // {{{
-		@sealed = true
-		@sealName = `__ks_\(name)`
-	} // }}}
-	sealName() => @sealName
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}
@@ -1659,21 +1543,54 @@ class ClassVariableType extends ReferenceType {
 	private {
 		_access: Accessibility	= Accessibility::Public
 	}
+	static fromAST(data, node: AbstractNode) { // {{{
+		const domain = new ScopeDomain(node.scope())
+		
+		let type: ClassVariableType
+		
+		if data.type? {
+			if data.type.typeName? {
+				if data.type.properties? {
+					throw new NotImplementedException(node)
+				}
+				else {
+					type = new ClassVariableType(data.type.typeName.name, data.type.nullable, domain)
+				}
+			}
+			else {
+				throw new NotImplementedException(node)
+			}
+		}
+		else {
+			type = new ClassVariableType('Any', domain)
+		}
+		
+		if data.modifiers? {
+			for modifier in data.modifiers {
+				if modifier.kind == ModifierKind::Private {
+					type.access(Accessibility::Private)
+				}
+				else if modifier.kind == ModifierKind::Protected {
+					type.access(Accessibility::Protected)
+				}
+			}
+		}
+		
+		return type
+	} // }}}
 	static import(data, domain: Domain, node: AbstractNode): ClassVariableType { // {{{
 		const type = new ClassVariableType(Type.import(data.type, domain, node))
 		
 		type._access = data.access
-		type._nullable = data.nullable
 		
 		return type
 	} // }}}
-	constructor(ref: ReferenceType) {
+	constructor(ref: ReferenceType) { // {{{
 		super(ref._name, ref._nullable, ref._parameters, ref._domain)
-	}
+	} // }}}
 	access(@access) => this
 	export() => { // {{{
 		access: @access
-		nullable: @nullable
 		type: super.export()
 	} // }}}
 	reference() => new ReferenceType(@name, @nullable, @parameters, @domain)
@@ -1684,6 +1601,11 @@ class ClassMethodType extends FunctionType {
 		_access: Accessibility	= Accessibility::Public
 		_sealed: Boolean		= false
 	}
+	static fromAST(data, node: AbstractNode) { // {{{
+		const domain = new ScopeDomain(node.scope())
+		
+		return new ClassMethodType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
+	} // }}}
 	static import(data, domain: Domain, node: AbstractNode): ClassMethodType { // {{{
 		const type = new ClassMethodType()
 		
@@ -1744,6 +1666,9 @@ class ClassMethodType extends FunctionType {
 			}
 			else if modifier.kind == ModifierKind::Protected {
 				@access = Accessibility::Protected
+			}
+			else if modifier.kind == ModifierKind::Sealed {
+				@sealed = true
 			}
 		}
 	} // }}}
@@ -1820,6 +1745,109 @@ class ClassDestructorType extends FunctionType {
 			}
 		}
 	} // }}}
+}
+
+class NamespaceVariableType extends ReferenceType {
+	private {
+		_sealed: Bololean	= false
+	}
+	static fromAST(data, node: AbstractNode) { // {{{
+		const type = new NamespaceVariableType(Type.fromAST(data.type, node))
+		
+		if data.modifiers? {
+			for modifier in data.modifiers {
+				if modifier.kind == ModifierKind::Sealed {
+					type._sealed = true
+				}
+			}
+		}
+		
+		return type
+	} // }}}
+	static import(data, domain: Domain, node: AbstractNode): ClassVariableType { // {{{
+		const type = new NamespaceVariableType(Type.import(data.type, domain, node))
+		
+		if data.sealed == true {
+			type._sealed = true
+		}
+		
+		return type
+	} // }}}
+	constructor(ref: ReferenceType) { // {{{
+		super(ref._name, ref._nullable, ref._parameters, ref._domain)
+	} // }}}
+	export() => { // {{{
+		sealed: @sealed
+		type: super.export()
+	} // }}}
+	isSealed() => @sealed
+	reference() => new ReferenceType(@name, @nullable, @parameters, @domain)
+	seal() { // {{{
+		@sealed = true
+	} // }}}
+}
+
+class NamespaceFunctionType extends FunctionType {
+	private {
+		_sealed: Boolean		= false
+	}
+	static fromAST(data, node: AbstractNode) { // {{{
+		const domain = new ScopeDomain(node.scope())
+		
+		return type = new NamespaceFunctionType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
+	} // }}}
+	static import(data, domain: Domain, node: AbstractNode): ClassMethodType { // {{{
+		const type = new NamespaceFunctionType()
+		
+		type._async = data.async
+		type._min = data.min
+		type._max = data.max
+		type._sealed = data.sealed
+		type._throws = [Type.import(throw, domain, node) for throw in data.throws]
+		
+		type._returnType = Type.import(data.returns, domain, node)
+		
+		type._parameters = [Type.import(parameter, domain, node) for parameter in data.parameters]
+		
+		return type
+	} // }}}
+	export() => { // {{{
+		async: @async
+		min: @min
+		max: @max
+		parameters: [parameter.export() for parameter in @parameters]
+		returns: @returnType.export()
+		sealed: @sealed
+		throws: [throw.export() for throw in @throws]
+	} // }}}
+	isSealed() => @sealed
+	private processModifiers(modifiers) { // {{{
+		for modifier in modifiers {
+			if modifier.kind == ModifierKind::Async {
+				this.async()
+			}
+			else if modifier.kind == ModifierKind::Sealed {
+				@sealed = true
+			}
+		}
+	} // }}}
+	seal() { // {{{
+		@sealed = true
+	} // }}}
+}
+
+class SealedReferenceType extends ReferenceType {
+	constructor(ref: ReferenceType) { // {{{
+		super(ref._name, ref._nullable, ref._parameters, ref._domain)
+	} // }}}
+	constructor(node: AbstractNode) { // {{{
+		super('Any', new ScopeDomain(node.scope()))
+	} // }}}
+	export() => { // {{{
+		sealed: true
+		type: super.export()
+	} // }}}
+	isSealed() => true
 }
 
 Type.Any = new AnyType()

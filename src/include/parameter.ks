@@ -143,9 +143,9 @@ class Parameter extends AbstractNode {
 		let l = rest != -1 ? rest : parameters.length
 		let context
 		
-		/* console.log(signature)
-		console.log(rb, ra)
-		console.log(maxb, maxa) */
+		//console.log(signature)
+		//console.log(rb, ra)
+		//console.log(maxb, maxa)
 		
 		if	!arrow &&
 			(

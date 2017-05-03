@@ -25,7 +25,6 @@ class ObjectExpression extends Expression {
 			property.prepare()
 		}
 		
-		/* @type = new ObjectType(@properties, new ScopeDomain(@scope)) */
 		@type = @scope.reference('Object')
 	} // }}}
 	translate() { // {{{

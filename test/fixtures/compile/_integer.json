@@ -2,7 +2,6 @@
   "requirements": {},
   "exports": {
     "Integer": {
-      "alien": "false",
       "sealed": "false",
       "properties": {
         "parse": {

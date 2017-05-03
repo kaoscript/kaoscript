@@ -47,20 +47,9 @@ class MemberExpression extends Expression {
 			@property = $compile.expression(@data.property, this)
 			@property.analyse()
 			@property.prepare()
-			
-			/* if @object.type().isArray() {
-				@type = @object.type().parameter()
-			}
-			else {
-				@type = Type.Any
-			} */
 		}
 		else {
 			@property = @data.property.name
-			
-			/* if @type !?= @object.type().getProperty(@property) {
-				ReferenceException.throwNotDefinedProperty(@property, this)
-			} */
 		}
 	} // }}}
 	translate() { // {{{

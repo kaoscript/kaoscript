@@ -49,7 +49,6 @@
       "instanceVariables": {
         "_color": {
           "access": 1,
-          "nullable": "false",
           "type": "String"
         }
       },
