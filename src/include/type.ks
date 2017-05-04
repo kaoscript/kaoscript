@@ -285,6 +285,8 @@ abstract class Type {
 				
 				type._parameters = [Type.import(null, parameter, domain, node) for parameter in data.parameters]
 				
+				type.updateArguments()
+				
 				return type
 			}
 			else if data.properties? {
@@ -937,10 +939,16 @@ class EnumType extends Type {
 class FunctionType extends Type {
 	private {
 		_async: Boolean						= false
+		_hasRest: Boolean					= false
 		_index: Number
-		_min: Number						= 0
 		_max: Number						= 0
+		_maxBefore: Number					= 0
+		_maxAfter: Number					= 0
+		_min: Number						= 0
+		_minBefore: Number					= 0
+		_minAfter: Number					= 0
 		_parameters: Array<ParameterType>	= []
+		_restIndex: Number					= -1
 		_returnType: Type
 		_throws: Array<Type>				= []
 	}
@@ -1014,6 +1022,8 @@ class FunctionType extends Type {
 				}
 			}
 		}
+		
+		this.updateArguments()
 	} // }}}
 	async() { // {{{
 		@async = true
@@ -1055,22 +1065,62 @@ class FunctionType extends Type {
 		if arguments.length == 0 {
 			return true
 		}
-		else if @max == Infinity {
-			if arguments.length == 1 {
-				const parameter = @parameters[0]
+		else if @parameters.length == 1 {
+			const parameter = @parameters[0]
+			
+			for argument in arguments {
+				if !parameter.matchArgument(argument) {
+					return false
+				}
+			}
+			
+			return true
+		}
+		else if @hasRest {
+			let a = 0
+			let b = arguments.length - 1
+			
+			for i from @parameters.length - 1 til @restIndex by -1 {
+				parameter = @parameters[i]
 				
-				for argument in arguments {
-					if !parameter.matchArgument(argument) {
+				for j from 0 til parameter.min() {
+					if !parameter.matchArgument(arguments[b]) {
 						return false
 					}
+					
+					--b
+				}
+			}
+			
+			let optional = @maxBefore - @minBefore
+			
+			for i from 0 til @restIndex {
+				parameter = @parameters[i]
+				
+				for j from 0 til parameter.min() {
+					if !parameter.matchArgument(arguments[a]) {
+						return false
+					}
+					
+					++a
 				}
 				
-				return true
+				for j from parameter.min() til parameter.max() while optional != 0 when parameter.matchArgument(arguments[a]) {
+					++a
+					--optional
+				}
 			}
-			else {
-				// TODO
-				return false
+			
+			parameter = @parameters[@restIndex]
+			for j from 0 til parameter.min() {
+				if !parameter.matchArgument(arguments[a]) {
+					return false
+				}
+				
+				++a
 			}
+			
+			return true
 		}
 		else if arguments.length == @parameters.length {
 			for parameter, i in @parameters {
@@ -1096,8 +1146,25 @@ class FunctionType extends Type {
 			return true
 		}
 		else {
-			// TODO
-			return false
+			let a = 0
+			let optional = arguments.length - @min
+			
+			for parameter in @parameters {
+				for i from 0 til parameter.min() {
+					if !parameter.matchArgument(arguments[a]) {
+						return false
+					}
+					
+					++a
+				}
+				
+				for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
+					++a
+					--optional
+				}
+			}
+			
+			return optional == 0
 		}
 	} // }}}
 	max() => @max
@@ -1121,6 +1188,22 @@ class FunctionType extends Type {
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
+	} // }}}
+	updateArguments() { // {{{
+		for parameter, i in @parameters {
+			if @hasRest {
+				@minAfter += parameter.min()
+				@maxAfter += parameter.max()
+			}
+			else if parameter.max() == Infinity {
+				@restIndex = i
+				@hasRest = true
+			}
+			else {
+				@minBefore += parameter.min()
+				@maxBefore += parameter.max()
+			}
+		}
 	} // }}}
 }
 
@@ -1620,6 +1703,8 @@ class ClassMethodType extends FunctionType {
 		
 		type._parameters = [Type.import(parameter, domain, node) for parameter in data.parameters]
 		
+		type.updateArguments()
+		
 		return type
 	} // }}}
 	access(@access) => this
@@ -1691,6 +1776,8 @@ class ClassConstructorType extends FunctionType {
 		
 		type._throws = [Type.import(throw, domain, node) for throw in data.throws]
 		type._parameters = [Type.import(parameter, domain, node) for parameter in data.parameters]
+		
+		type.updateArguments()
 		
 		return type
 	} // }}}
@@ -1808,6 +1895,8 @@ class NamespaceFunctionType extends FunctionType {
 		type._returnType = Type.import(data.returns, domain, node)
 		
 		type._parameters = [Type.import(parameter, domain, node) for parameter in data.parameters]
+		
+		type.updateArguments()
 		
 		return type
 	} // }}}
