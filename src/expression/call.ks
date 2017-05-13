@@ -1,6 +1,7 @@
 class CallExpression extends Expression {
 	private {
 		_arguments: Array				= []
+		_await: Boolean					= false
 		_callees: Array					= []
 		_callScope
 		_defaultCallee: DefaultCallee
@@ -27,6 +28,10 @@ class CallExpression extends Expression {
 			}
 			
 			argument.analyse()
+			
+			if argument.isAwait() {
+				@await = true
+			}
 		}
 	} // }}}
 	prepare() { // {{{
@@ -44,11 +49,38 @@ class CallExpression extends Expression {
 			this.makeCallee(@object.type())
 		}
 		else {
-			if 	@data.callee.kind == NodeKind::Identifier &&
-				(variable ?= @scope.getVariable(@data.callee.name)) &&
-				(substitute ?= variable.replaceCall?(@data, @arguments))
-			{
-				this.addCallee(new SubstituteCallee(@data, substitute, this))
+			if @data.callee.kind == NodeKind::Identifier && (variable ?= @scope.getVariable(@data.callee.name)) {
+				const type = variable.type()
+				
+				if type is FunctionType {
+					if type.isAsync() {
+						if @parent is VariableDeclaration {
+							if !@parent.isAwait() {
+								TypeException.throwNotSyncFunction(@data.callee.name, this)
+							}
+						}
+						else if @parent is not AwaitExpression {
+							TypeException.throwNotSyncFunction(@data.callee.name, this)
+						}
+					}
+					else {
+						if @parent is VariableDeclaration {
+							if @parent.isAwait() {
+								TypeException.throwNotAsyncFunction(@data.callee.name, this)
+							}
+						}
+						else if @parent is AwaitExpression {
+							TypeException.throwNotAsyncFunction(@data.callee.name, this)
+						}
+					}
+				}
+				
+				if substitute ?= variable.replaceCall?(@data, @arguments) {
+					this.addCallee(new SubstituteCallee(@data, substitute, this))
+				}
+				else {
+					this.addCallee(new DefaultCallee(@data, this))
+				}
 			}
 			else {
 				this.addCallee(new DefaultCallee(@data, this))
@@ -163,6 +195,16 @@ class CallExpression extends Expression {
 		}
 	} // }}}
 	arguments() => @arguments
+	isAwait() => @await
+	isAwaiting() { // {{{
+		for argument in @arguments {
+			if argument.isAwaiting() {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
 	isCallable() => !@reusable
 	isComputed() => @nullable && !@tested
 	isNullable() => @nullable
@@ -347,6 +389,12 @@ class CallExpression extends Expression {
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if mode == Mode::Async {
+			for argument in @arguments {
+				if argument.isAwaiting() {
+					return argument.toFragments(fragments, mode)
+				}
+			}
+			
 			this.toCallFragments(fragments, mode)
 			
 			fragments.code(', ') if @arguments.length
@@ -365,6 +413,12 @@ class CallExpression extends Expression {
 				fragments.code(' : undefined')
 			}
 			else {
+				for argument in @arguments {
+					if argument.isAwaiting() {
+						return argument.toFragments(fragments, mode)
+					}
+				}
+				
 				this.toCallFragments(fragments, mode)
 				
 				fragments.code(')')

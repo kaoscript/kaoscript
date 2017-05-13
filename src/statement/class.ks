@@ -33,7 +33,7 @@ class ClassDeclaration extends Statement {
 		_type: ClassType
 	}
 	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
-		if method.max() == 0 {
+		if method.max() == 0 && !method.isAsync() {
 			fragments.line(retCode, variable.name(), '.', fnName, index, '.apply(this)')
 		}
 		else {
@@ -273,7 +273,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	static toSwitchFragments(node, fragments, variable, methods, extend?, header, footer, call, argName, returns) { // {{{
+	static toSwitchFragments(node, fragments, variable, methods, name: String, extend?, header, footer, call, argName, returns) { // {{{
 		let block = header(node, fragments)
 		
 		let method
@@ -293,43 +293,76 @@ class ClassDeclaration extends Statement {
 		else if methods.length == 1 {
 			method = methods[0]
 			
-			if method.min() == 0 && method.max() >= Infinity {
+			const async = method.isAsync()
+			const min = method.absoluteMin()
+			const max = method.absoluteMax()
+			
+			if min == 0 && max >= Infinity {
 				call(block, method, 0)
 			}
-			else if method.min() == method.max() {
+			else if min == max {
 				const ctrl = block.newControl()
 				
-				ctrl.code(`if(\(argName).length === \(method.min()))`).step()
+				ctrl.code(`if(\(argName).length === \(min))`).step()
 				
 				call(ctrl, method, 0)
 				
-				if returns {
-					if extend {
-						extend(node, block, ctrl, variable)
-					}
-					else {
-						ctrl.done()
-						
-						block.line('throw new SyntaxError("wrong number of arguments")')
-					}
+				if extend {
+					extend(node, block, ctrl, variable)
+				}
+				else if async {
+					ctrl.step().code('else').step()
+					
+					ctrl.line(`let __ks_cb, __ks_error = new SyntaxError("wrong number of arguments")`)
+					
+					ctrl
+						.newControl()
+						.code(`if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+						.step()
+						.line(`return __ks_cb(__ks_error)`)
+						.step()
+						.code(`else`)
+						.step()
+						.line(`throw __ks_error`)
+						.done()
+					
+					ctrl.done()
+				}
+				else if returns {
+					ctrl.done()
+					
+					block.line('throw new SyntaxError("wrong number of arguments")')
 				}
 				else {
-					if extend {
-						extend(node, block, ctrl, variable)
-					}
-					else {
-						ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
-					}
+					ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
 				}
 			}
-			else if method.max() < Infinity {
+			else if max < Infinity {
 				let ctrl = block.newControl()
 				
-				ctrl.code(`if(\(argName).length >= \(method.min()) && \(argName).length <= \(method.max()))`).step()
+				ctrl.code(`if(\(argName).length >= \(min) && \(argName).length <= \(max))`).step()
 				
 				call(ctrl, method, 0)
 				
-				if returns {
+				if async {
+					ctrl.step().code('else').step()
+					
+					ctrl.line(`let __ks_cb, __ks_error = new SyntaxError("wrong number of arguments")`)
+					
+					ctrl
+						.newControl()
+						.code(`if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+						.step()
+						.line(`return __ks_cb(__ks_error)`)
+						.step()
+						.code(`else`)
+						.step()
+						.line(`throw __ks_error`)
+						.done()
+					
+					ctrl.done()
+				}
+				else if returns {
 					ctrl.done()
 					
 					block.line('throw new SyntaxError("wrong number of arguments")')
@@ -343,20 +376,31 @@ class ClassDeclaration extends Statement {
 			}
 		}
 		else {
+			const async = methods[0].isAsync()
+			
 			let groups = {}
 			let infinities = []
 			let min = Infinity
 			let max = 0
+			let asyncCount = 0
+			let syncCount = 0
 			
 			for index from 0 til methods.length {
 				method = methods[index]
 				method.index(index)
 				
-				if method.max() == Infinity {
+				if method.isAsync() {
+					++asyncCount
+				}
+				else {
+					++syncCount
+				}
+				
+				if method.absoluteMax() == Infinity {
 					infinities.push(method)
 				}
 				else {
-					for n from method.min() to method.max() {
+					for n from method.absoluteMin() to method.absoluteMax() {
 						if groups[n]? {
 							groups[n].methods.push(method)
 						}
@@ -368,14 +412,18 @@ class ClassDeclaration extends Statement {
 						}
 					}
 					
-					min = Math.min(min, method.min())
-					max = Math.max(max, method.max())
+					min = Math.min(min, method.absoluteMin())
+					max = Math.max(max, method.absoluteMax())
 				}
+			}
+			
+			if asyncCount != 0 && syncCount != 0 {
+				SyntaxException.throwInvalidSyncMethods(node.name(), name, node)
 			}
 			
 			if infinities.length {
 				for method in infinities {
-					for group of groups when method.min() >= group.n {
+					for group of groups when method.absoluteMin() >= group.n {
 						group.methods.push(method)
 					}
 				}
@@ -455,7 +503,25 @@ class ClassDeclaration extends Statement {
 				}
 				
 				if infinities.length == 0 {
-					if returns {
+					if async {
+						ctrl.step().code('else').step()
+						
+						ctrl.line(`let __ks_cb, __ks_error = new SyntaxError("wrong number of arguments")`)
+						
+						ctrl
+							.newControl()
+							.code(`if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+							.step()
+							.line(`return __ks_cb(__ks_error)`)
+							.step()
+							.code(`else`)
+							.step()
+							.line(`throw __ks_error`)
+							.done()
+						
+						ctrl.done()
+					}
+					else if returns {
 						ctrl.done()
 						
 						block.line('throw new SyntaxError("wrong number of arguments")')
@@ -1335,7 +1401,9 @@ class ClassMethodDeclaration extends Statement {
 		_abstract: Boolean		= false
 		_aliases: Array			= []
 		_analysed: Boolean		= false
+		_awaiting: Boolean		= false
 		_body: Array
+		_exit: Boolean			= false
 		_instance: Boolean		= true
 		_internalName: String
 		_name: String
@@ -1366,7 +1434,7 @@ class ClassMethodDeclaration extends Statement {
 			}
 		}
 		
-		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, `__ks_sttc_\(name)_`, 'arguments', 'return '), 'arguments', true)
+		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, name, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, `__ks_sttc_\(name)_`, 'arguments', 'return '), 'arguments', true)
 	} // }}}
 	static toInstanceSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
 		let extend = null
@@ -1391,7 +1459,7 @@ class ClassMethodDeclaration extends Statement {
 			}
 		}
 		
-		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, `prototype.__ks_func_\(name)_`, 'arguments', 'return '), 'arguments', true)
+		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, name, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, `prototype.__ks_func_\(name)_`, 'arguments', 'return '), 'arguments', true)
 	} // }}}
 	constructor(data, parent) { // {{{
 		super(data, parent, parent.newInstanceMethodScope(this))
@@ -1500,6 +1568,10 @@ class ClassMethodDeclaration extends Statement {
 			@statements.push(statement)
 			
 			statement.analyse()
+			
+			if statement.isAwait() {
+				@awaiting = true
+			}
 		}
 		
 		for statement in @body {
@@ -1510,6 +1582,13 @@ class ClassMethodDeclaration extends Statement {
 		
 		for statement in @statements {
 			statement.prepare()
+			
+			if @exit {
+				SyntaxException.throwDeadCode(statement)
+			}
+			else {
+				@exit = statement.isExit()
+			}
 		}
 		
 		for statement in @statements {
@@ -1544,8 +1623,17 @@ class ClassMethodDeclaration extends Statement {
 			return node.code(')').step()
 		})
 		
-		for statement in @statements {
-			ctrl.compile(statement)
+		if @awaiting {
+			throw new NotImplementedException(this)
+		}
+		else {
+			for statement in @statements {
+				ctrl.compile(statement)
+			}
+			
+			if !@exit && @type.isAsync() {
+				ctrl.line('__ks_cb()')
+			}
 		}
 		
 		ctrl.done() unless @parent._es5
@@ -1593,7 +1681,7 @@ class ClassConstructorDeclaration extends Statement {
 			}
 		}
 		
-		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, 'prototype.__ks_cons_', 'args', ''), 'args', false)
+		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, 'constructor', extend, header, footer, ClassDeclaration.callMethod^^(node, variable, 'prototype.__ks_cons_', 'args', ''), 'args', false)
 	} // }}}
 	constructor(data, parent) { // {{{
 		super(data, parent, new Scope(parent._constructorScope))

@@ -1,12 +1,29 @@
 class ReturnStatement extends Statement {
 	private {
-		_value = null
+		_await: Boolean			= false
+		_function				= null
+		_exceptions: Boolean	= false
+		_value					= null
 	}
+	constructor(@data, @parent) { // {{{
+		super(data, parent)
+		
+		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclaration || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
+			parent = parent.parent()
+		}
+		
+		if parent? {
+			@function = parent
+		}
+	} // }}}
 	analyse() { // {{{
 		if @data.value? {
 			@value = $compile.expression(@data.value, this)
 			
 			@value.analyse()
+			
+			@await = @value.isAwait()
+			@exceptions = @value.hasExceptions()
 		}
 	} // }}}
 	prepare() { // {{{
@@ -19,8 +36,23 @@ class ReturnStatement extends Statement {
 			@value.translate()
 		}
 	} // }}}
+	hasExceptions() => @exceptions
+	isAwait() => @await
+	isExit() => true
+	toAwaitStatementFragments(fragments, statements) { // {{{
+		const line = fragments.newLine()
+		
+		const item = @value.toFragments(line, Mode::None)
+		
+		item([this])
+		
+		line.done()
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if mode == Mode::Async {
+		if @value.isAwaiting() {
+			return this.toAwaitStatementFragments^@(fragments)
+		}
+		else if @function?.type().isAsync() {
 			if @value != null {
 				fragments
 					.newLine()

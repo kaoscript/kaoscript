@@ -1,9 +1,21 @@
+enum TryState {
+	Body
+	Catch
+	Finally
+}
+
 class TryStatement extends Statement {
 	private {
-		_body
+		_await: Boolean				= false
+		_catchVarname: String
 		_catchClause
-		_catchClauses = []
+		_catchClauses: Array		= []
+		_continueVarname: String
+		_exit: Boolean				= false
 		_finalizer
+		_finallyVarname: String
+		_state: TryState
+		_statements: Array			= []
 	}
 	analyse() { // {{{
 		let scope = @scope
@@ -49,8 +61,15 @@ class TryStatement extends Statement {
 		
 		@scope = scope
 		
-		@body = $compile.expression(@data.body, this)
-		@body.analyse()
+		for statement in $ast.body(@data.body) {
+			@statements.push(statement = $compile.statement(statement, this))
+			
+			statement.analyse()
+			
+			if statement.isAwait() {
+				@await = true
+			}
+		}
 		
 		if @data.finalizer? {
 			@finalizer = $compile.expression(@data.finalizer, this)
@@ -58,18 +77,44 @@ class TryStatement extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		@body.prepare()
+		let exit = false
+		for statement in @statements {
+			statement.prepare()
+			
+			if exit {
+				SyntaxException.throwDeadCode(statement)
+			}
+			else {
+				exit = statement.isExit()
+			}
+		}
 		
 		for clause in @catchClauses {
 			clause.body.prepare()
 			clause.type.prepare()
 		}
 		
-		@catchClause.prepare() if @catchClause?
-		@finalizer.prepare() if @finalizer?
+		if @catchClause? {
+			@catchClause.prepare()
+			
+			@exit = exit && @catchClause.isExit()
+		}
+		
+		if @finalizer? {
+			@finalizer.prepare()
+			
+			if exit || @exit {
+				SyntaxException.throwDeadCode(@finalizer)
+			}
+			else {
+				@exit = @finalizer.isExit()
+			}
+		}
 	} // }}}
 	translate() { // {{{
-		@body.translate()
+		for statement in @statements {
+			statement.translate()
+		}
 		
 		for clause in @catchClauses {
 			clause.body.translate()
@@ -79,6 +124,15 @@ class TryStatement extends Statement {
 		@catchClause.translate() if @catchClause?
 		@finalizer.translate() if @finalizer?
 	} // }}}
+	getErrorVarname() { // {{{
+		if @catchClauses.length == 0 && @data.catchClause?.binding? {
+			return @data.catchClause.binding.name
+		}
+		else {
+			return @scope.acquireTempName()
+		}
+	} // }}}
+	isAwait() => @await
 	isConsumedError(error): Boolean { // {{{
 		if @catchClauses.length > 0 {
 			for clause in @catchClauses {
@@ -93,15 +147,42 @@ class TryStatement extends Statement {
 			return true
 		}
 	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
-		let finalizer = null
+	isExit() => @exit
+	toAwaitStatementFragments(fragments, statements) { // {{{
+		if statements.length != 0 {
+			@continueVarname = @scope.acquireTempName()
+			
+			const line = fragments
+				.newLine()
+				.code($runtime.scope(this), @continueVarname, ` = () =>`)
+			
+			const block = line.newBlock()
+			
+			let index = -1
+			let item
+			
+			for statement, i in statements while index == -1 {
+				if item ?= statement.toFragments(block, Mode::None) {
+					index = i
+				}
+			}
+			
+			if index != -1 {
+				item(statements.slice(index + 1))
+			}
+			
+			block.done()
+			line.done()
+		}
 		
 		if @finalizer? {
-			finalizer = @scope.acquireTempName()
+			@state = TryState::Finally
 			
-			let line = fragments
+			@finallyVarname = @scope.acquireTempName()
+			
+			const line = fragments
 				.newLine()
-				.code($runtime.scope(this), finalizer, ' = () =>')
+				.code($runtime.scope(this), @finallyVarname, ' = () =>')
 			
 			line
 				.newBlock()
@@ -111,30 +192,228 @@ class TryStatement extends Statement {
 			line.done()
 		}
 		
-		let ctrl = fragments
+		if @catchClauses.length != 0 || @catchClause? {
+			@state = TryState::Catch
+			
+			@catchVarname = @scope.acquireTempName()
+			
+			const error = this.getErrorVarname()
+			
+			const line = fragments
+				.newLine()
+				.code($runtime.scope(this), @catchVarname, ` = (\(error)) =>`)
+			
+			const block = line.newBlock()
+			
+			this.toCatchFragments(block, error)
+			
+			@scope.releaseTempName(error)
+			
+			block.done()
+			line.done()
+		}
+		
+		@state = TryState::Body
+		
+		const ctrl = fragments
 			.newControl()
 			.code('try')
 			.step()
-			.compile(@body)
+			
+		let index = -1
+		let item
 		
-		if finalizer? {
-			ctrl.line(finalizer, '()')
+		for statement, i in @statements while index == -1 {
+			if item ?= statement.toFragments(ctrl, Mode::None) {
+				index = i
+			}
 		}
 		
-		ctrl.step()
+		if index != -1 {
+			item(@statements.slice(index + 1))
+		}
 		
-		if @catchClauses.length {
-			this.module().flag('Type')
+		ctrl
+			.step()
+			.code(`catch(__ks_e)`)
+			.step()
+		
+		if @catchVarname? {
+			ctrl.line(`\(@catchVarname)(__ks_e)`)
+		}
+		else if @finallyVarname? {
+			ctrl.line(`\(@finallyVarname)()`)
+		}
+		else if @continueVarname? {
+			ctrl.line(`\(@continueVarname)()`)
+		}
+		
+		ctrl.done()
+	} // }}}
+	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
+		fragments.code('(__ks_e')
+		
+		for parameter in parameters {
+			fragments.code($comma).compile(parameter)
+		}
+		
+		fragments.code(') =>')
+		
+		const block = fragments.newBlock()
+		
+		const ctrl = block
+			.newControl()
+			.code('if(__ks_e)')
+			.step()
+		
+		if @state == TryState::Body {
+			if @catchVarname? {
+				ctrl.line(`\(@catchVarname)(__ks_e)`)
+			}
+			else if @finallyVarname? {
+				ctrl.line(`\(@finallyVarname)()`)
+			}
+			else if @continueVarname? {
+				ctrl.line(`\(@continueVarname)()`)
+			}
+		}
+		else if @state == TryState::Catch {
+			if @finallyVarname? {
+				ctrl.line(`\(@finallyVarname)()`)
+			}
+			else if @continueVarname? {
+				ctrl.line(`\(@continueVarname)()`)
+			}
+		}
+		else if @state == TryState::Finally {
+			if @continueVarname? {
+				ctrl.line(`\(@continueVarname)()`)
+			}
+		}
+		
+		ctrl
+			.step()
+			.code('else')
+			.step()
+		
+		const statement = statements[statements.length - 1]
+		
+		if @state == TryState::Body {
+			if statements.length == 1 && !statement.hasExceptions() {
+				ctrl.compile(statement)
+				
+				if statement is not ReturnStatement {
+					if @finallyVarname? {
+						ctrl.line(`\(@finallyVarname)()`)
+					}
+					else if @continueVarname? {
+						ctrl.line(`\(@continueVarname)()`)
+					}
+				}
+			}
+			else {
+				const returnOutside = statement is ReturnStatement && statement.hasExceptions()
+				
+				if returnOutside {
+					statement.toDeclareReusableFragments(ctrl)
+				}
+				
+				const ctrl2 = ctrl
+					.newControl()
+					.code('try')
+					.step()
+				
+				let index = -1
+				let item
+				
+				for i from 0 til statements.length - 1 while index == -1 {
+					if item ?= statements[i].toFragments(ctrl2, Mode::None) {
+						index = i
+					}
+				}
+				
+				if index != -1 {
+					item(statements.slice(index + 1))
+				}
+				else {
+					if returnOutside {
+						statement.toReusableFragments(ctrl2)
+					}
+					else {
+						if item ?= statement.toFragments(ctrl2, Mode::None) {
+							item([])
+						}
+					}
+				}
+				
+				ctrl2
+					.step()
+					.code(`catch(__ks_e)`)
+					.step()
+				
+				if @catchVarname? {
+					ctrl2.line(`return \(@catchVarname)(__ks_e)`)
+				}
+				
+				ctrl2.done()
+				
+				if !?item {
+					if returnOutside {
+						ctrl.compile(statement)
+					}
+					else if statement is not ReturnStatement {
+						if @finallyVarname? {
+							ctrl.line(`\(@finallyVarname)()`)
+						}
+						else if @continueVarname? {
+							ctrl.line(`\(@continueVarname)()`)
+						}
+					}
+				}
+			}
+		}
+		else {
+			let index = -1
+			let item
 			
-			let error = @scope.acquireTempName()
-			
-			ctrl.code('catch(', error, ')').step()
-			
-			if finalizer? {
-				ctrl.line(finalizer, '()')
+			for i from 0 til statements.length while index == -1 {
+				if item ?= statements[i].toFragments(ctrl, Mode::None) {
+					index = i
+				}
 			}
 			
-			let ifs = ctrl.newControl()
+			if index != -1 {
+				item(statements.slice(index + 1))
+			}
+			
+			if @state == TryState::Catch {
+				if @finallyVarname? {
+					ctrl.line(`\(@finallyVarname)()`)
+				}
+				else if @continueVarname? {
+					ctrl.line(`\(@continueVarname)()`)
+				}
+			}
+			else if @state == TryState::Finally {
+				if @continueVarname? {
+					ctrl.line(`\(@continueVarname)()`)
+				}
+			}
+		}
+		
+		ctrl.done()
+		
+		block.done()
+		
+		fragments.code(')').done()
+	} // }}}
+	toCatchFragments(fragments, error) { // {{{
+		let async = false
+		
+		if @catchClauses.length != 0 {
+			this.module().flag('Type')
+			
+			let ifs = fragments.newControl()
 			
 			for clause, i in @data.catchClauses {
 				ifs.step().code('else ') if i
@@ -150,6 +429,10 @@ class TryStatement extends Statement {
 				}
 				
 				ifs.compile(@catchClauses[i].body)
+				
+				if !@catchClauses[i].body.isAwait() && @continueVarname? {
+					ifs.line(`\(@continueVarname)()`)
+				}
 			}
 			
 			if @catchClause? {
@@ -160,42 +443,84 @@ class TryStatement extends Statement {
 				}
 				
 				ifs.compile(@catchClause)
+				
+				if !@catchClause.isAwait() && @continueVarname? {
+					ifs.line(`\(@continueVarname)()`)
+				}
+			}
+			else if @continueVarname? {
+				ifs.step().code('else').step()
+				
+				ifs.line(`\(@continueVarname)()`)
 			}
 			
 			ifs.done()
-			
-			@scope.releaseTempName(error)
 		}
 		else if @catchClause? {
-			let error = @scope.acquireTempName()
+			fragments.compile(@catchClause)
 			
-			if @data.catchClause.binding? {
-				ctrl.code('catch(', @data.catchClause.binding.name, ')').step()
+			if !@catchClause.isAwait() {
+				if @finallyVarname? {
+					fragments.line(`\(@finallyVarname)()`)
+				}
+				else if @continueVarname? {
+					fragments.line(`\(@continueVarname)()`)
+				}
 			}
-			else {
-				ctrl.code('catch(', error, ')').step()
-			}
-			
-			if finalizer? {
-				ctrl.line(finalizer, '()')
-			}
-			
-			ctrl.compile(@catchClause)
-			
-			@scope.releaseTempName(error)
+		}
+		else if @finallyVarname? {
+			fragments.line(`\(@finallyVarname)()`)
+		}
+		else if @continueVarname? {
+			fragments.line(`\(@continueVarname)()`)
+		}
+	} // }}}
+	toStatementFragments(fragments, mode) { // {{{
+		if @await {
+			return this.toAwaitStatementFragments^@(fragments)
 		}
 		else {
-			let error = @scope.acquireTempName()
-			
-			ctrl.code('catch(', error, ')').step()
-			
-			if finalizer? {
-				ctrl.line(finalizer, '()')
+			let finalizer = null
+		
+			if @finalizer? {
+				@finallyVarname = @scope.acquireTempName()
+				
+				const line = fragments
+					.newLine()
+					.code($runtime.scope(this), @finallyVarname, ' = () =>')
+				
+				line
+					.newBlock()
+					.compile(@finalizer)
+					.done()
+				
+				line.done()
 			}
 			
+			const ctrl = fragments
+				.newControl()
+				.code('try')
+				.step()
+			
+			for statement in @statements {
+				ctrl.compile(statement, Mode::None)
+			}
+			
+			if @finallyVarname? {
+				ctrl.line(`\(@finallyVarname)()`)
+			}
+			
+			ctrl.step()
+			
+			const error = this.getErrorVarname()
+			
+			ctrl.code(`catch(\(error))`).step()
+			
+			this.toCatchFragments(ctrl, error)
+			
 			@scope.releaseTempName(error)
+			
+			ctrl.done()
 		}
-		
-		ctrl.done()
 	} // }}}
 }

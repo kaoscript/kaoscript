@@ -81,8 +81,6 @@ class SwitchStatement extends Statement {
 				}
 				else if binding.kind == NodeKind::ObjectBinding {
 					throw new NotImplementedException(this)
-					
-					clause.hasTest = true
 				}
 				else if binding.kind == NodeKind::SwitchTypeCasting {
 					binding = new SwitchBindingType(binding, this)

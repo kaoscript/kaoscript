@@ -37,8 +37,24 @@ class ExpressionStatement extends Statement {
 			}
 		}
 	} // }}}
+	hasExceptions() => @expression.hasExceptions()
+	isAwait() => @expression.isAwait()
+	toAwaitStatementFragments(fragments, statements) {
+		const line = fragments.newLine()
+		
+		const item = @expression.toFragments(line, Mode::None)
+		
+		statements.unshift(this)
+		
+		item(statements)
+		
+		line.done()
+	}
 	toFragments(fragments, mode) { // {{{
-		if @expression.isAssignable() {
+		if @expression.isAwaiting() {
+			return this.toAwaitStatementFragments^@(fragments)
+		}
+		else if @expression.isAssignable() {
 			if @variables.length {
 				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
 			}

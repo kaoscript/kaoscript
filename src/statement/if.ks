@@ -46,6 +46,7 @@ class IfStatement extends Statement {
 		@whenTrue.translate()
 		@whenFalse.translate() if @whenFalse?
 	} // }}}
+	isExit() => @whenFalse? && @whenTrue.isExit() && @whenFalse.isExit()
 	toStatementFragments(fragments, mode) { // {{{
 		const ctrl = fragments.newControl()
 		

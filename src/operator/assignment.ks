@@ -1,5 +1,6 @@
 class AssignmentOperatorExpression extends Expression {
 	private {
+		_await: Boolean		= false
 		_left
 		_right
 	}
@@ -11,6 +12,8 @@ class AssignmentOperatorExpression extends Expression {
 		
 		@right = $compile.expression(@data.right, this)
 		@right.analyse()
+		
+		@await = @right.isAwait()
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -21,6 +24,8 @@ class AssignmentOperatorExpression extends Expression {
 		@right.translate()
 	} // }}}
 	isAssignable() => true
+	isAwait() => @await
+	isAwaiting() => @right.isAwaiting()
 	isComputed() => true
 	isNullable() => @right.isNullable()
 	assignment(data) { // {{{
@@ -75,8 +80,14 @@ class AssignmentOperatorBitwiseXor extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
+	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(@left).code($equals).compile(@right)
+		if @right.isAwaiting() {
+			return @right.toFragments(fragments, mode)
+		}
+		else {
+			fragments.compile(@left).code($equals).compile(@right)
+		}
 	} // }}}
 	toAssignmentFragments(fragments) { // {{{
 		if @left.toAssignmentFragments? {

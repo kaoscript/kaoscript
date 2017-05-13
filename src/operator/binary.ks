@@ -1,8 +1,9 @@
 class BinaryOperatorExpression extends Expression {
 	private {
+		_await: Boolean		= false
 		_left
 		_right
-		_tested = false
+		_tested: Boolean	= false
 	}
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
@@ -10,6 +11,8 @@ class BinaryOperatorExpression extends Expression {
 		
 		@right = $compile.expression(@data.right, this)
 		@right.analyse()
+		
+		@await = @left.isAwait() || @right.isAwait()
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -19,6 +22,9 @@ class BinaryOperatorExpression extends Expression {
 		@left.translate()
 		@right.translate()
 	} // }}}
+	hasExceptions() => false
+	isAwait() => @await
+	isAwaiting() => @left.isAwaiting() || @right.isAwaiting()
 	isComputed() => true
 	isNullable() => @left.isNullable() || @right.isNullable()
 	isNullableComputed() => (@left.isNullable() && @right.isNullable()) || @left.isNullableComputed() || @right.isNullableComputed()
@@ -31,7 +37,18 @@ class BinaryOperatorExpression extends Expression {
 		@right.releaseReusable()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if this.isNullable() && !@tested {
+		if @await {
+			if @left.isAwaiting() {
+				return @left.toFragments(fragments, mode)
+			}
+			else if @right.isAwaiting() {
+				return @right.toFragments(fragments, mode)
+			}
+			else {
+				this.toOperatorFragments(fragments)
+			}
+		}
+		else if this.isNullable() && !@tested {
 			fragments
 				.wrapNullable(this)
 				.code(' ? ')
@@ -350,6 +367,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	translate() { // {{{
 		@left.translate()
 	} // }}}
+	hasExceptions() => false
 	isComputed() => false
 	isNullable() => @left.isNullable()
 	toFragments(fragments, mode) { // {{{
@@ -375,6 +393,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	translate() { // {{{
 		@left.translate()
 	} // }}}
+	hasExceptions() => false
 	isComputed() => false
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
@@ -400,6 +419,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	translate() { // {{{
 		@left.translate()
 	} // }}}
+	hasExceptions() => false
 	isComputed() => false
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{

@@ -1,0 +1,19 @@
+{
+  "requirements": {},
+  "exports": {
+    "foo": {
+      "async": "true",
+      "min": 1,
+      "max": 1,
+      "parameters": [
+        {
+          "type": "Number",
+          "min": 1,
+          "max": 1
+        }
+      ],
+      "returns": "String",
+      "throws": []
+    }
+  }
+}

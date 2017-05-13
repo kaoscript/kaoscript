@@ -178,6 +178,9 @@ export class SyntaxException extends Exception {
 		throwAlreadyDeclared(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Identifier "\(name)" has already been declared`, node)
 		} // }}}
+		throwDeadCode(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Dead code`, node)
+		} // }}}
 		throwExclusiveWildcardImport(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Wilcard import is only supported for kaoscript file`, node)
 		} // }}}
@@ -186,6 +189,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
+		} // }}}
+		throwInvalidSyncMethods(className, methodName, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
 		} // }}}
 		throwMissingAbstractMethods(name, methods, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Class "\(name)" doesn't implement the following abstract methods: "\(methods.join('", "'))"`, node)
@@ -261,8 +267,14 @@ export class TypeException extends Exception {
 		throwInvalid(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Invalid type "\(name)"`, node)
 		} // }}}
+		throwNotAsyncFunction(name, node) ~ TypeException { // {{{
+			throw new TypeException(`The function "\(name)" is not asynchronous`, node)
+		} // }}}
 		throwNotClass(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a class`, node)
+		} // }}}
+		throwNotSyncFunction(name, node) ~ TypeException { // {{{
+			throw new TypeException(`The function "\(name)" is not synchronous`, node)
 		} // }}}
 	}
 }

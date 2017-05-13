@@ -3,11 +3,28 @@ class VariableDeclaration extends Statement {
 		_autotype: Boolean
 		_await: Boolean
 		_declarators: Array		= []
+		_function				= null
 		_hasInit: Boolean		= false
 		_immutable: Boolean
 		_init
 		_toDeclareAll: Boolean	= true
+		_try
 	}
+	constructor(@data, @parent) { // {{{
+		super(data, parent)
+		
+		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclaration || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
+			if parent is TryStatement {
+				@try = parent
+			}
+			
+			parent = parent.parent()
+		}
+		
+		if parent? {
+			@function = parent
+		}
+	} // }}}
 	analyse() { // {{{
 		@immutable = !@data.rebindable
 		@autotype = @immutable || @data.autotype
@@ -79,9 +96,40 @@ class VariableDeclaration extends Statement {
 	init() => @init
 	isAwait() => @await
 	isImmutable() => @immutable
+	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
+		fragments.code('(__ks_e')
+		
+		for parameter in parameters {
+			fragments.code($comma).compile(parameter)
+		}
+		
+		fragments.code(') =>')
+		
+		const block = fragments.newBlock()
+		
+		for statement in statements {
+			block.compile(statement, Mode::None)
+		}
+		
+		block.done()
+		
+		fragments.code(')').done()
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @await {
-			throw new NotImplementedException()
+			let line = fragments.newLine()
+			
+			@init.toFragments(line, Mode::Async)
+			
+			if @try? {
+				return @try.toAwaitExpressionFragments^@(line, @declarators)
+			}
+			else if @function?.type().isAsync() {
+				return @function.toAwaitExpressionFragments^@(line, @declarators)
+			}
+			else {
+				return this.toAwaitExpressionFragments^@(line, @declarators)
+			}
 		}
 		else {
 			if @hasInit {
@@ -181,9 +229,9 @@ class VariableBindingDeclarator extends AbstractNode {
 		@binding.translate()
 	} // }}}
 	isAlreadyDeclared() => false
-	toFlatFragments(fragments, init) {
+	toFlatFragments(fragments, init) { // {{{
 		@binding.toFlatFragments(fragments, init)
-	}
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@binding)
 	} // }}}

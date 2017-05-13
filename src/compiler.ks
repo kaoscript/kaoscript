@@ -320,6 +320,7 @@ const $expressions = {
 	}
 	`\(NodeKind::ArrayExpression)`				: ArrayExpression
 	`\(NodeKind::ArrayRange)`					: ArrayRange
+	`\(NodeKind::AwaitExpression)`				: AwaitExpression
 	`\(NodeKind::BindingElement)`				: BindingElement
 	`\(NodeKind::Block)`						: BlockExpression
 	`\(NodeKind::CallExpression)`				: CallExpression

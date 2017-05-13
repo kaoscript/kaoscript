@@ -83,6 +83,7 @@ class Parameter extends AbstractNode {
 		const parameters = node.parameters()
 		const signature = node.type()
 		const name = arrow ? '__ks_arguments' : 'arguments'
+		const async = signature.isAsync()
 		
 		let parameter, ctrl
 		let maxb = 0
@@ -129,7 +130,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 		
-		if signature.isAsync() {
+		if async {
 			if rest != -1 {
 				++ra
 				++maxa
@@ -166,7 +167,7 @@ class Parameter extends AbstractNode {
 				
 				parameter.toParameterFragments(fragments)
 			}
-			else if signature.isAsync() && ra == 0 {
+			else if async && ra == 0 {
 				fragments.code($comma) if l > 0
 				
 				fragments.code('__ks_cb')
@@ -175,13 +176,51 @@ class Parameter extends AbstractNode {
 			fragments = fn(fragments)
 			
 			if rb + ra > 0 {
-				if signature.isAsync() {
-					fragments
+				if async {
+					node.module().flag('Type')
+					
+					if rest != -1 {
+						fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
+					}
+					
+					let ctrl = fragments
 						.newControl()
 						.code(`if(arguments.length < \(signature.min() + 1))`)
 						.step()
-						.line(`throw new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
-						.done()
+						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
+					
+					if rest == -1 {
+						ctrl
+							.newControl()
+							.code(`if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+							.step()
+							.line(`return __ks_cb(__ks_error)`)
+							.step()
+							.code(`else`)
+							.step()
+							.line(`throw __ks_error`)
+							.done()
+					}
+					else {
+						ctrl
+							.newControl()
+							.code(`if(Type.isFunction(__ks_cb))`)
+							.step()
+							.line(`return __ks_cb(__ks_error)`)
+							.step()
+							.code(`else`)
+							.step()
+							.line(`throw __ks_error`)
+							.done()
+					}
+					
+					ctrl
+						.step()
+						.code(`else if(!Type.isFunction(__ks_cb))`)
+						.step()
+						.line(`throw new TypeError("'callback' must be a function")`)
+					
+					ctrl.done()
 				}
 				else {
 					fragments
@@ -307,26 +346,25 @@ class Parameter extends AbstractNode {
 						.code(`.length < \(arity.min))`)
 						.step()
 					
-					ctrl
-						.newLine()
-						.code(`throw new SyntaxError("wrong number of rest values (" + `)
-						.compile(parameter)
-						.code(`.length + " for at least \(arity.min))")`)
-						.done()
+					if async {
+						ctrl
+							.newLine()
+							.code(`return __ks_cb(new SyntaxError("wrong number of rest values (" + `)
+							.compile(parameter)
+							.code(`.length + " for at least \(arity.min))"))`)
+							.done()
+					}
+					else {
+						ctrl
+							.newLine()
+							.code(`throw new SyntaxError("wrong number of rest values (" + `)
+							.compile(parameter)
+							.code(`.length + " for at least \(arity.min))")`)
+							.done()
+					}
 					
 					ctrl.done()
 				}
-			}
-			
-			if signature.isAsync() && ra == 0 {
-				node.module().flag('Type')
-				
-				fragments
-					.newControl()
-					.code('if(!', $runtime.type(node), '.isFunction(__ks_cb))')
-					.step()
-					.line(`throw new TypeError("'callback' must be a function")`)
-					.done()
 			}
 		} // }}}
 		else { // {{{
@@ -337,12 +375,44 @@ class Parameter extends AbstractNode {
 			fragments = fn(fragments)
 			
 			if rb + ra > 0 {
-				fragments
-					.newControl()
-					.code(`if(\(name).length < \(signature.min()))`)
-					.step()
-					.line(`throw new SyntaxError("wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
-					.done()
+				if async {
+					node.module().flag('Type')
+					
+					fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
+					
+					let ctrl = fragments
+						.newControl()
+						.code(`if(arguments.length < \(signature.min() + 1))`)
+						.step()
+						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
+					
+					ctrl
+						.newControl()
+						.code(`if(Type.isFunction(__ks_cb))`)
+						.step()
+						.line(`return __ks_cb(__ks_error)`)
+						.step()
+						.code(`else`)
+						.step()
+						.line(`throw __ks_error`)
+						.done()
+					
+					ctrl
+						.step()
+						.code(`else if(!Type.isFunction(__ks_cb))`)
+						.step()
+						.line(`throw new TypeError("'callback' must be a function")`)
+					
+					ctrl.done()
+				}
+				else {
+					fragments
+						.newControl()
+						.code(`if(\(name).length < \(signature.min()))`)
+						.step()
+						.line(`throw new SyntaxError("wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
+						.done()
+				}
 			}
 			
 			fragments.line($runtime.scope(node), '__ks_i = -1')
@@ -353,6 +423,7 @@ class Parameter extends AbstractNode {
 				optional: signature.min()
 				temp: false
 				length: data.parameters.length
+				async: async
 			}
 			
 			for i from 0 til l {
@@ -578,6 +649,8 @@ class Parameter extends AbstractNode {
 		@header = true
 	} // }}}
 	toValidationFragments(fragments) { // {{{
+		const async = @parent.type().isAsync()
+		
 		if @anonymous {
 			if !@type.type().isAny() && !@hasDefaultValue {
 				let ctrl = fragments
@@ -595,8 +668,15 @@ class Parameter extends AbstractNode {
 				ctrl
 					.code(')')
 					.step()
-					.line(`throw new TypeError("anonymous argument is not of type \(@type().toQuote())")`)
-					.done()
+				
+				if async {
+					ctrl.line(`return __ks_cb(new TypeError("anonymous argument is not of type \(@type().toQuote())"))`)
+				}
+				else {
+					ctrl.line(`throw new TypeError("anonymous argument is not of type \(@type().toQuote())")`)
+				}
+				
+				ctrl.done()
 			}
 		}
 		else {
@@ -636,7 +716,13 @@ class Parameter extends AbstractNode {
 					ctrl
 						.code('if(').compile(@name).code(' === void 0').code(' || ').compile(@name).code(' === null').code(')')
 						.step()
-						.line(`throw new TypeError("'\(@variable.name())' is not nullable")`)
+					
+					if async {
+						ctrl.line(`return __ks_cb(new TypeError("'\(@variable.name())' is not nullable"))`)
+					}
+					else {
+						ctrl.line(`throw new TypeError("'\(@variable.name())' is not nullable")`)
+					}
 				}
 			}
 			
@@ -666,7 +752,13 @@ class Parameter extends AbstractNode {
 				ctrl
 					.code(')')
 					.step()
-					.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
+				
+				if async {
+					ctrl.line(`return __ks_cb(new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())"))`)
+				}
+				else {
+					ctrl.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
+				}
 			}
 			
 			if ctrl != null {
@@ -885,8 +977,15 @@ class Parameter extends AbstractNode {
 						ctrl2
 							.code(')')
 							.step()
-							.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
-							.done()
+						
+						if context.async {
+							ctrl2.line(`return __ks_cb(new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())"))`)
+						}
+						else {
+							ctrl2.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
+						}
+						
+						ctrl2.done()
 					}
 					else {
 						let ctrl2 =	ctrl
@@ -898,8 +997,15 @@ class Parameter extends AbstractNode {
 						ctrl2
 							.code(')')
 							.step()
-							.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
-							.done()
+						
+						if context.async {
+							ctrl2.line(`return __ks_cb(new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())"))`)
+						}
+						else {
+							ctrl2.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
+						}
+						
+						ctrl2.done()
 					}
 					
 					ctrl.step().code('else').step()

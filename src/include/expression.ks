@@ -4,7 +4,10 @@ abstract class Expression extends AbstractNode {
 	} // }}}
 	releaseReusable() { // {{{
 	} // }}}
+	hasExceptions() => true
 	isAssignable() => false
+	isAwait() => false
+	isAwaiting() => false
 	isBooleanComputed() => this.isComputed()
 	isCallable() => false
 	isComposite() => true
@@ -31,6 +34,7 @@ include {
 	../expression/literal
 	../expression/array
 	../expression/array-comprehension
+	../expression/await
 	../expression/binding
 	../expression/block
 	../expression/call

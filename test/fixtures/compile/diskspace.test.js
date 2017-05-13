@@ -10,9 +10,6 @@ describe("diskspace", function() {
 			throw new TypeError("'done' is not nullable");
 		}
 		disks((__ks_e, d) => {
-			if(__ks_e) {
-				return __ks_cb(__ks_e);
-			}
 			expect(d).to.have.length.above(0);
 			console.log(d);
 			done();

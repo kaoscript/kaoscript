@@ -138,11 +138,12 @@ const $function = {
 
 class FunctionDeclaration extends Statement {
 	private {
-		_awaiting: Boolean		= false
+		_await: Boolean			= false
+		_exit: Boolean			= false
 		_name: String
 		_parameters
 		_signature
-		_statements
+		_statements: Array		= []
 		_variable: Variable
 		_type: Type
 	}
@@ -176,29 +177,75 @@ class FunctionDeclaration extends Statement {
 			parameter.translate()
 		}
 		
-		@statements = []
 		for statement in $ast.body(@data.body) {
 			@statements.push(statement = $compile.statement(statement, this))
 			
 			statement.analyse()
 			
 			if statement.isAwait() {
-				@awaiting = true
+				@await = true
 			}
 		}
 		
 		for statement in @statements {
 			statement.prepare()
+			
+			if @exit {
+				SyntaxException.throwDeadCode(statement)
+			}
+			else {
+				@exit = statement.isExit()
+			}
 		}
 		
 		for statement in @statements {
 			statement.translate()
 		}
 	} // }}}
+	isAwait() => @await
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isMethod() => false
 	name() => @name
 	parameters() => @parameters
+	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
+		fragments.code('(__ks_e')
+		
+		for parameter in parameters {
+			fragments.code($comma).compile(parameter)
+		}
+		
+		fragments.code(') =>')
+		
+		const block = fragments.newBlock()
+		
+		const ctrl = block
+			.newControl()
+			.code('if(__ks_e)')
+			.step()
+			.line('__ks_cb(__ks_e)')
+			.step()
+			.code('else')
+			.step()
+		
+		let index = -1
+		let item
+		
+		for statement, i in statements while index == -1 {
+			if item ?= statement.toFragments(ctrl, Mode::None) {
+				index = i
+			}
+		}
+		
+		if index != -1 {
+			item(statements.slice(index + 1))
+		}
+		
+		ctrl.done()
+		
+		block.done()
+		
+		fragments.code(')').done()
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const ctrl = fragments.newControl().code(`function \(@name)(`)
 		
@@ -206,29 +253,27 @@ class FunctionDeclaration extends Statement {
 			return node.code(')').step()
 		})
 		
-		if @awaiting {
-			let stack = []
-			
-			let f = ctrl
-			let m = Mode::None
-			
+		if @await {
+			let index = -1
 			let item
-			for statement in @statements {
-				if item ?= statement.toFragments(f, m) {
-					f = item.fragments
-					m = item.mode
-					
-					stack.push(item)
+			
+			for statement, i in @statements while index == -1 {
+				if item ?= statement.toFragments(ctrl, Mode::None) {
+					index = i
 				}
 			}
 			
-			for item in stack {
-				item.done(item.fragments)
+			if index != -1 {
+				item(@statements.slice(index + 1))
 			}
 		}
 		else {
 			for statement in @statements {
 				ctrl.compile(statement, Mode::None)
+			}
+			
+			if !@exit && @type.isAsync() {
+				ctrl.line('__ks_cb()')
 			}
 		}
 		

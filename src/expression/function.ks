@@ -1,6 +1,7 @@
 class FunctionExpression extends Expression {
 	private {
-		_awaiting: Boolean					= false
+		_awaiting: Boolean				= false
+		_exit: Boolean					= false
 		_isObjectMember: Boolean		= false
 		_parameters: Array<Parameter>
 		_statements						= []
@@ -46,6 +47,13 @@ class FunctionExpression extends Expression {
 		
 		for statement in @statements {
 			statement.prepare()
+			
+			if @exit {
+				SyntaxException.throwDeadCode(statement)
+			}
+			else {
+				@exit = statement.isExit()
+			}
 		}
 		
 		for statement in @statements {
@@ -88,28 +96,26 @@ class FunctionExpression extends Expression {
 		})
 		
 		if @awaiting {
-			let stack = []
-			
-			let f = block
-			let m = Mode::None
-			
+			let index = -1
 			let item
-			for statement in @statements {
-				if item ?= statement.toFragments(f, m) {
-					f = item.fragments
-					m = item.mode
-					
-					stack.push(item)
+			
+			for statement, i in @statements while index == -1 {
+				if item ?= statement.toFragments(block, Mode::None) {
+					index = i
 				}
 			}
 			
-			for item in stack {
-				item.done(item.fragments)
+			if index != -1 {
+				item(@statements.slice(index + 1))
 			}
 		}
 		else {
 			for statement in @statements {
 				block.compile(statement)
+			}
+			
+			if !@exit && @type.isAsync() {
+				block.line('__ks_cb()')
 			}
 		}
 		
@@ -125,8 +131,9 @@ class FunctionExpression extends Expression {
 class LambdaExpression extends Expression {
 	private {
 		_awaiting: Boolean		= false
+		_exit: Boolean			= false
 		_parameters
-		_statements			= []
+		_statements				= []
 		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
@@ -165,6 +172,13 @@ class LambdaExpression extends Expression {
 		
 		for statement in @statements {
 			statement.prepare()
+			
+			if @exit {
+				SyntaxException.throwDeadCode(statement)
+			}
+			else {
+				@exit = statement.isExit()
+			}
 		}
 		
 		for statement in @statements {
@@ -183,28 +197,26 @@ class LambdaExpression extends Expression {
 		})
 		
 		if @awaiting {
-			let stack = []
-			
-			let f = block
-			let m = Mode::None
-			
+			let index = -1
 			let item
-			for statement in @statements {
-				if item ?= statement.toFragments(f, m) {
-					f = item.fragments
-					m = item.mode
-					
-					stack.push(item)
+			
+			for statement, i in @statements while index == -1 {
+				if item ?= statement.toFragments(block, Mode::None) {
+					index = i
 				}
 			}
 			
-			for item in stack {
-				item.done(item.fragments)
+			if index != -1 {
+				item(@statements.slice(index + 1))
 			}
 		}
 		else {
 			for statement in @statements {
 				block.compile(statement)
+			}
+			
+			if !@exit && @type.isAsync() {
+				block.line('__ks_cb()')
 			}
 		}
 		

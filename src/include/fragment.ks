@@ -160,8 +160,8 @@ export class ControlBuilder {
 		
 		return this
 	} // }}}
-	wrap(node) { // {{{
-		this._step.wrap(node)
+	wrap(node, mode = null) { // {{{
+		this._step.wrap(node, mode)
 		
 		return this
 	} // }}}

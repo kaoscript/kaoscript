@@ -282,7 +282,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			
 			if @instance {
 				if @class.isSealed() {
-					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), null, (node, fragments) => {
+					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, null, (node, fragments) => {
 						const block = fragments.code(`\(@class.sealName())._im_\(@name) = function(that)`).newBlock()
 						
 						block.line('var args = Array.prototype.slice.call(arguments, 1, arguments.length)')
@@ -313,7 +313,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 			else {
 				if @class.isSealed() {
-					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), null, (node, fragments) => {
+					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, null, (node, fragments) => {
 						const block = fragments.code(`\(@class.sealName())._cm_\(@name) = function()`).newBlock()
 						
 						block.line('var args = Array.prototype.slice.call(arguments)')

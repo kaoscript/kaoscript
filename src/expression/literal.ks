@@ -17,12 +17,16 @@ class Literal extends Expression {
 	private {
 		_value
 	}
+	constructor(@value, @parent) { // {{{
+		super(false, parent)
+	} // }}}
 	constructor(data, parent, scope, @value) { // {{{
 		super(data, parent, scope)
 	} // }}}
 	analyse()
 	prepare()
 	translate()
+	hasExceptions() => false
 	isComposite() => false
 	isEntangled() => false
 	toFragments(fragments, mode) { // {{{

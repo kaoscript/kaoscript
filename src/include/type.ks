@@ -217,8 +217,6 @@ abstract class Type {
 			
 			console.log(data)
 			throw new NotImplementedException(node)
-			
-			return Type.Any
 		} // }}}
 		import(...{3,3}args) { // {{{
 			if args[1] is Domain {
@@ -1025,6 +1023,8 @@ class FunctionType extends Type {
 		
 		this.updateArguments()
 	} // }}}
+	absoluteMax() => @async ? @max + 1 : @max
+	absoluteMin() => @async ? @min + 1 : @min
 	async() { // {{{
 		@async = true
 	} // }}}

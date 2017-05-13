@@ -1,6 +1,18 @@
 class ThrowStatement extends Statement {
 	private {
-		_value = null
+		_function	= null
+		_value		= null
+	}
+	constructor(@data, @parent) {
+		super(data, parent)
+		
+		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclaration || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
+			parent = parent.parent()
+		}
+		
+		if parent? {
+			@function = parent
+		}
 	}
 	analyse() { // {{{
 		@value = $compile.expression(@data.value, this)
@@ -13,14 +25,25 @@ class ThrowStatement extends Statement {
 			Exception.validateReportedError(type, this)
 		}
 	} // }}}
+	isExit() => true
 	translate() { // {{{
 		@value.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		fragments
-			.newLine()
-			.code('throw ')
-			.compile(@value)
-			.done()
+		if @function?.type().isAsync() {
+			fragments
+				.newLine()
+				.code('return __ks_cb(')
+				.compile(@value)
+				.code(')')
+				.done()
+		}
+		else {
+			fragments
+				.newLine()
+				.code('throw ')
+				.compile(@value)
+				.done()
+		}
 	} // }}}
 }

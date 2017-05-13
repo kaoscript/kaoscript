@@ -27,6 +27,7 @@ abstract class Statement extends AbstractNode {
 		}
 	} // }}}
 	isAwait() => false
+	isExit() => false
 	statement() => this
 	toFragments(fragments, mode) { // {{{
 		let variables = @variables()

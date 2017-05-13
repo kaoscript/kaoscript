@@ -29,6 +29,7 @@ class PolyadicOperatorExpression extends Expression {
 	} // }}}
 	releaseReusable() { // {{{
 	} // }}}
+	hasExceptions() => false
 	isComputed() => true
 	isNullable() { // {{{
 		for operand in @operands {
