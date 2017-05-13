@@ -187,6 +187,9 @@ export class SyntaxException extends Exception {
 		throwImmutable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
 		} // }}}
+		throwInvalidAwait(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
+		} // }}}
 		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
 		} // }}}

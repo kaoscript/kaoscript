@@ -1,0 +1,1 @@
+TypeException: The function "foo" is not synchronous (line 4, file "fixtures/compile/await.error.if.ks")

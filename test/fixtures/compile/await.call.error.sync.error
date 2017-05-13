@@ -1,1 +1,0 @@
-TypeException: The function "foo" is not asynchronous (line 4, file "fixtures/compile/await.call.error.sync.ks")

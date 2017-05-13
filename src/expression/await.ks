@@ -20,6 +20,9 @@ class AwaitExpression extends Expression {
 		if parent? {
 			@function = parent
 		}
+		else if !this.module().isBinary() {
+			SyntaxException.throwInvalidAwait(this)
+		}
 	} // }}}
 	analyse() { // {{{
 		@operation = $compile.expression(@data.operation, this)

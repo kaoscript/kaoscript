@@ -130,6 +130,7 @@ export class Module {
 			@register = true
 		}
 	} // }}}
+	isBinary() => @binary
 	isUpToDate(file, target, data) { // {{{
 		let hashes
 		try {
@@ -610,8 +611,8 @@ export class Module {
 
 class ModuleBlock extends AbstractNode {
 	private {
-		_body: Array		= []
 		_module
+		_statements: Array		= []
 	}
 	constructor(@data, @module) { // {{{
 		super()
@@ -622,19 +623,19 @@ class ModuleBlock extends AbstractNode {
 	analyse() { // {{{
 		for statement in @data.body {
 			if statement ?= $compile.statement(statement, this) {
-				@body.push(statement)
+				@statements.push(statement)
 				
 				statement.analyse()
 			}
 		}
 	} // }}}
 	prepare() { // {{{
-		for statement in @body {
+		for statement in @statements {
 			statement.prepare()
 		}
 	} // }}}
 	translate() { // {{{
-		for statement in @body {
+		for statement in @statements {
 			statement.translate()
 		}
 	} // }}}
@@ -644,8 +645,17 @@ class ModuleBlock extends AbstractNode {
 	module() => @module
 	recipient() => @module
 	toFragments(fragments) { // {{{
-		for statement in @body {
-			statement.toFragments(fragments, Mode::None)
+		let index = -1
+		let item
+		
+		for statement, i in @statements while index == -1 {
+			if item ?= statement.toFragments(fragments, Mode::None) {
+				index = i
+			}
+		}
+		
+		if index != -1 {
+			item(@statements.slice(index + 1))
 		}
 	} // }}}
 }

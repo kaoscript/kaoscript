@@ -30,6 +30,10 @@ class VariableDeclaration extends Statement {
 		@autotype = @immutable || @data.autotype
 		@await = @data.await
 		
+		if @await && !?@function && !this.module().isBinary() {
+			SyntaxException.throwInvalidAwait(this)
+		}
+		
 		let declarator
 		for data in @data.variables {
 			switch data.name.kind {

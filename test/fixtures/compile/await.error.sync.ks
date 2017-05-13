@@ -1,3 +1,5 @@
+#![bin]
+
 func foo(bar, qux) {
 }
 
