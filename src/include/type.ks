@@ -472,10 +472,7 @@ class ClassType extends Type {
 	}
 	constructor(@name, @domain)
 	constructor(@name, scope: AbstractScope) { // {{{
-		/* this(name, new ScopeDomain(scope)) */
-		super()
-		
-		@domain = scope.domain()
+		this(name, scope.domain())
 	} // }}}
 	abstract() { // {{{
 		@abstract = true
@@ -1319,10 +1316,7 @@ class NamespaceType extends Type {
 	}
 	constructor(@name, @domain)
 	constructor(@name, scope: AbstractScope) { // {{{
-		/* this(name, new ScopeDomain(scope)) */
-		super()
-		
-		@domain = scope.domain()
+		this(name, scope.domain())
 	} // }}}
 	addProperty(name: String, type: Type) { // {{{
 		@properties[name] = type

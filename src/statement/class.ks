@@ -1744,8 +1744,7 @@ class ClassConstructorDeclaration extends Statement {
 			}
 		}
 		else {
-			/* for statement in @body from 0 to index { */
-			for statement, i in @body while i <= index {
+			for statement in @body to index {
 				@statements.push(statement = $compile.statement(statement, this))
 				
 				statement.analyse()
@@ -1757,8 +1756,7 @@ class ClassConstructorDeclaration extends Statement {
 				statement.analyse()
 			}
 			
-			/* for statement in @body from index + 1 { */
-			for statement, i in @body when i > index {
+			for statement in @body from index + 1 {
 				@statements.push(statement = $compile.statement(statement, this))
 				
 				statement.analyse()
