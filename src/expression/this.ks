@@ -17,19 +17,31 @@ class ThisExpression extends Expression {
 			if parent is CallExpression && parent.data().callee == @data {
 				@calling = true
 			}
-			else if parent is ClassDeclaration {
-				@class = parent.type()
+			else if parent is ClassMethodDeclaration ||	parent is ClassVariableDeclaration {
+				if !parent.isInstance() {
+					SyntaxException.throwUnexpectedAlias(@name, this)
+				}
+				
+				@class = parent.parent().type()
+				break
+			}
+			else if parent is ClassConstructorDeclaration || parent is ClassDestructorDeclaration {
+				@class = parent.parent().type()
 				break
 			}
 			else if parent is ImplementClassMethodDeclaration {
+				if !parent.isInstance() {
+					SyntaxException.throwUnexpectedAlias(@name, this)
+				}
+				
 				@class = parent.class()
 				break
 			}
 		}
 		while parent ?= parent.parent()
 		
-		if !?parent {
-			SyntaxException.throwOutOfClassAlias(@name, this)
+		if !?@class {
+			SyntaxException.throwUnexpectedAlias(@name, this)
 		}
 	} // }}}
 	prepare() { // {{{

@@ -537,7 +537,7 @@ class Parameter extends AbstractNode {
 	prepare() { // {{{
 		let type: Type = null
 		
-		if @parent.isMethod() {
+		if @parent.isInstanceMethod() {
 			if !@anonymous {
 				for modifier in @data.modifiers {
 					if modifier.kind == ModifierKind::SetterAlias {
@@ -560,7 +560,7 @@ class Parameter extends AbstractNode {
 		else {
 			for modifier in @data.modifiers {
 				if modifier.kind == ModifierKind::ThisAlias {
-					SyntaxException.throwOutOfClassAlias(this)
+					SyntaxException.throwUnexpectedAlias(@data.name.name, this)
 				}
 			}
 			

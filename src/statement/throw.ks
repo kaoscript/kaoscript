@@ -21,8 +21,17 @@ class ThrowStatement extends Statement {
 	prepare() { // {{{
 		@value.prepare()
 		
-		if (type ?= @value.type().unalias()) && type is ClassType {
+		if type !?= @value.type().dereference() {
+			TypeException.throwRequireClass(this)
+		}
+		else if type is ClassType {
 			Exception.validateReportedError(type, this)
+		}
+		else if !type.isAny() {
+			TypeException.throwRequireClass(this)
+		}
+		else if @parent is ModuleBlock {
+			SyntaxException.throwUnreportedError(type.name(), this)
 		}
 	} // }}}
 	isExit() => true

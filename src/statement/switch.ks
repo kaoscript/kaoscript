@@ -153,6 +153,10 @@ class SwitchStatement extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
+		if @clauses.length == 0 {
+			return
+		}
+		
 		if @value? {
 			fragments
 				.newLine()

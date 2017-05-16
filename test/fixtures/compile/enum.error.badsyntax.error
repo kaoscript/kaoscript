@@ -1,0 +1,1 @@
+ReferenceException: "A" is not defined (line 7, file "fixtures/compile/enum.error.badsyntax.ks")

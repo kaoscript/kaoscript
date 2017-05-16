@@ -1,0 +1,1 @@
+ReferenceException: "ClassB" is not defined (line 3, file "fixtures/compile/class.static.field.after.ks")

@@ -1,3 +1,3 @@
-const foo = func(a:Number, b:Number): int {
+const foo = func(a:Number, b:Number): Number {
 	return a - b
 }

@@ -187,11 +187,17 @@ class FunctionDeclaration extends Statement {
 			}
 		}
 		
+		const rtype = @type.returnType()
+		const na = !rtype.isAny()
+		
 		for statement in @statements {
 			statement.prepare()
 			
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
+			}
+			else if na && !statement.isReturning(rtype) {
+				TypeException.throwUnexpectedReturnedType(rtype, statement)
 			}
 			else {
 				@exit = statement.isExit()
@@ -204,7 +210,7 @@ class FunctionDeclaration extends Statement {
 	} // }}}
 	isAwait() => @await
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
-	isMethod() => false
+	isInstanceMethod() => false
 	name() => @name
 	parameters() => @parameters
 	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{

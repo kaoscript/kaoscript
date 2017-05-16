@@ -36,6 +36,15 @@ class BlockExpression extends Expression {
 	} // }}}
 	isAwait() => @await
 	isExit() => @exit
+	isReturning(type: Type) { // {{{
+		for statement in @statements {
+			if !statement.isReturning(type) {
+				return false
+			}
+		}
+		
+		return true
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @await {
 			let index = -1

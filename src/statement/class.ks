@@ -1056,29 +1056,29 @@ class ClassDeclaration extends Statement {
 		const m = []
 		
 		let ctrl
-		/* if node._destructor? || !Object.isEmpty(node._classMethods) {
+		if @destructor? || !Object.isEmpty(@classMethods) {
 			ctrl = clazz.newLine().code('$static: ').newObject()
 			
-			if node._destructor? {
-				$class.destructor(node, ctrl, node._destructor)
+			if @destructor? {
+				@destructor.toFragments(ctrl, Mode::None)
 				
-				$helper.destructor(node, ctrl, node._variable)
+				ClassDestructorDeclaration.toSwitchFragments(this, ctrl, @type)
 			}
 			
-			for name, methods of node._classMethods {
-				mets.clear()
+			for name, methods of @classMethods {
+				m.clear()
 				
 				for method in methods {
-					$class.classMethod(node, ctrl, method, method.signature(), name)
+					method.toFragments(ctrl, Mode::None)
 					
-					mets.push(method.signature())
+					m.push(method.type())
 				}
 				
-				$helper.classMethod(node, ctrl.newControl(), node._variable, mets, name, $class.classMethodHeaderES5^^(name), $class.methodFooterES5)
+				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 			}
 			
 			ctrl.done()
-		} */
+		}
 		
 		if @extends && !@extendsType.isSealedAlien() {
 			ctrl = clazz
@@ -1191,11 +1191,11 @@ class ClassDeclaration extends Statement {
 			fragments.done()
 		})
 		
-		/* if node._destructor? {
-			$class.destructor(node, clazz, node._destructor)
+		if @destructor? {
+			@destructor.toFragments(clazz, Mode::None)
 			
-			$helper.destructor(node, clazz, node._variable)
-		} */
+			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
+		}
 		
 		for name, methods of @instanceMethods {
 			m.clear()
@@ -1519,7 +1519,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 		
 		for parameter in @data.parameters {
-			@parent.addReference(Type.fromAST(parameter.type, this), this)
+			@parent.addReference(Type.fromAST(parameter.type, @scope.domain(), false, this), this)
 		}
 	} // }}}
 	analyse() { // {{{
@@ -1541,8 +1541,8 @@ class ClassMethodDeclaration extends Statement {
 			const arguments = [parameter.type() for parameter in @parameters]
 			@type = new ClassMethodType(arguments, @data, this)
 			
-			if @parent._extends {
-				if method ?= @parent._extendsType.getInstanceMethod(@name, arguments) {
+			if @parent.isExtending() {
+				if method ?= @parent._extendsType.getInstanceMethod(@name, arguments) ?? @parent._extendsType.getAsbtractMethod(@name, arguments) {
 					if @data.type? {
 						if !@type.returnType().isInstanceOf(method.returnType()) {
 							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
@@ -1580,11 +1580,17 @@ class ClassMethodDeclaration extends Statement {
 			statement.analyse()
 		}
 		
+		const rtype = @type.returnType()
+		const na = !rtype.isAny()
+		
 		for statement in @statements {
 			statement.prepare()
 			
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
+			}
+			else if na && !statement.isReturning(rtype) {
+				TypeException.throwUnexpectedReturnedType(rtype, statement)
 			}
 			else {
 				@exit = statement.isExit()
@@ -1603,7 +1609,7 @@ class ClassMethodDeclaration extends Statement {
 	isAbstract() => @abstract
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
-	isMethod() => true
+	isInstanceMethod() => @instance
 	length() => @parameters.length
 	name() => @name
 	parameters() => @parameters
@@ -1691,7 +1697,7 @@ class ClassConstructorDeclaration extends Statement {
 		parent._constructors.push(this)
 		
 		for parameter in @data.parameters {
-			@parent.addReference(Type.fromAST(parameter.type, this), this)
+			@parent.addReference(Type.fromAST(parameter.type, @scope.domain(), false, this), this)
 		}
 	} // }}}
 	analyse() { // {{{
@@ -1825,7 +1831,7 @@ class ClassConstructorDeclaration extends Statement {
 		return false
 	} // }}}
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
-	isMethod() => true
+	isInstanceMethod() => true
 	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
@@ -1928,7 +1934,7 @@ class ClassDestructorDeclaration extends Statement {
 		return false
 	} // }}}
 	isInstance() => false
-	isMethod() => true
+	isInstanceMethod() => true
 	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
@@ -1988,6 +1994,29 @@ class ClassVariableDeclaration extends AbstractNode {
 		if @data.defaultValue? {
 			@hasDefaultValue = true
 			
+			if !@instance {
+				@defaultValue = $compile.expression(@data.defaultValue, this)
+				@defaultValue.analyse()
+			}
+		}
+	} // }}}
+	prepare() { // {{{
+		if @parent.isExtending() {
+			const type = @parent._extendsType
+			
+			if @instance {
+				if type.hasInstanceVariable(@name) {
+					ReferenceException.throwAlreadyDefinedField(@name, this)
+				}
+			}
+			else {
+				if type.hasClassVariable(@name) {
+					ReferenceException.throwAlreadyDefinedField(@name, this)
+				}
+			}
+		}
+		
+		if @hasDefaultValue {
 			if @instance {
 				let scope = @scope
 				
@@ -1998,14 +2027,7 @@ class ClassVariableDeclaration extends AbstractNode {
 				
 				@scope = scope
 			}
-			else {
-				@defaultValue = $compile.expression(@data.defaultValue, this)
-				@defaultValue.analyse()
-			}
-		}
-	} // }}}
-	prepare() { // {{{
-		if @hasDefaultValue {
+			
 			@defaultValue.prepare()
 		}
 	} // }}}

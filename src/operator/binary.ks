@@ -363,6 +363,11 @@ class BinaryOperatorTypeCasting extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
+		
+		const type = @left.type()
+		if !(type is ReferenceType || type.isAny()) {
+			TypeException.throwInvalidCasting(this)
+		}
 	} // }}}
 	translate() { // {{{
 		@left.translate()
@@ -385,7 +390,12 @@ class BinaryOperatorTypeEquality extends Expression {
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
 		
-		@type = Type.fromAST(@data.right, this)
+		if @data.right.typeName.kind == NodeKind::Identifier && @data.right.typeName.name == 'NaN' {
+			@type = @scope.reference('NaN')
+		}
+		else {
+			@type = Type.fromAST(@data.right, this)
+		}
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -411,7 +421,12 @@ class BinaryOperatorTypeInequality extends Expression {
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
 		
-		@type = Type.fromAST(@data.right, this)
+		if @data.right.typeName.kind == NodeKind::Identifier && @data.right.typeName.name == 'NaN' {
+			@type = @scope.reference('NaN')
+		}
+		else {
+			@type = Type.fromAST(@data.right, this)
+		}
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()

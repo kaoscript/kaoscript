@@ -6,6 +6,7 @@ class ForInStatement extends Statement {
 		_defineValue: Boolean	= false
 		_expression
 		_expressionName: String
+		_from
 		_index
 		_indexName: String
 		_indexVariable: Variable
@@ -14,6 +15,8 @@ class ForInStatement extends Statement {
 		_valueVariable: Variable
 		_when
 		_while
+		_til
+		_to
 	}
 	constructor(data, parent) { // {{{
 		super(data, parent, parent.newScope())
@@ -44,16 +47,30 @@ class ForInStatement extends Statement {
 			@index.analyse()
 		}
 		
-		if @data.until {
+		if @data.from? {
+			@from = $compile.expression(@data.from, this)
+			@from.analyse()
+		}
+		
+		if @data.til? {
+			@til = $compile.expression(@data.til, this)
+			@til.analyse()
+		}
+		else if @data.to? {
+			@to = $compile.expression(@data.to, this)
+			@to.analyse()
+		}
+		
+		if @data.until? {
 			@until = $compile.expression(@data.until, this)
 			@until.analyse()
 		}
-		else if @data.while {
+		else if @data.while? {
 			@while = $compile.expression(@data.while, this)
 			@while.analyse()
 		}
 		
-		if @data.when {
+		if @data.when? {
 			@when = $compile.expression(@data.when, this)
 			@when.analyse()
 		}
@@ -78,8 +95,17 @@ class ForInStatement extends Statement {
 			@indexName = @scope.acquireTempName()
 		}
 		
-		if !@data.desc {
-			@boundName = @scope.acquireTempName()
+		@boundName = @scope.acquireTempName()
+		
+		if @from? {
+			@from.prepare()
+		}
+		
+		if @til? {
+			@til.prepare()
+		}
+		else if @to? {
+			@to.prepare()
 		}
 		
 		if @until? {
@@ -100,12 +126,25 @@ class ForInStatement extends Statement {
 		
 		this.greatScope().releaseTempName(@expressionName) if @expressionName?
 		@scope.releaseTempName(@indexName) if @indexName?
-		@scope.releaseTempName(@boundName) if @boundName?
+		@scope.releaseTempName(@boundName)
 	} // }}}
 	translate() { // {{{
 		@expression.translate()
 		
-		@value.translate() if @value?
+		if @value? {
+			@value.translate()
+		}
+		
+		if @from? {
+			@from.translate()
+		}
+		
+		if @til? {
+			@til.translate()
+		}
+		else if @to? {
+			@to.translate()
+		}
 		
 		if @until? {
 			@until.translate()
@@ -114,9 +153,137 @@ class ForInStatement extends Statement {
 			@while.translate()
 		}
 		
-		@when.translate() if @when?
+		if @when? {
+			@when.translate()
+		}
 		
 		@body.translate()
+	} // }}}
+	toBoundFragments(fragments) { // {{{
+		if @data.desc {
+			if @from? {
+				if @from is NumberLiteral && @from.value() < 0 {
+					fragments
+						.code('Math.max(0, ')
+						.compile(@expressionName ?? @expression)
+						.code(`.length - \(-@from.value()))`)
+				}
+				else {
+					fragments.compile(@from)
+				}
+			}
+			else {
+				fragments.code('0')
+			}
+		}
+		else {
+			if @til? {
+				if @til is NumberLiteral && @til.value() < 0 {
+					fragments
+						.compile(@expressionName ?? @expression)
+						.code(`.length - \(-@til.value())`)
+				}
+				else {
+					fragments
+						.code('Math.min(')
+						.compile(@expressionName ?? @expression)
+						.code('.length, ')
+						.compile(@til)
+						.code(')')
+				}
+			}
+			else if @to? {
+				if @to is NumberLiteral {
+					if @to.value() < 0 {
+						fragments
+							.compile(@expressionName ?? @expression)
+							.code(`.length - \(-@to.value() - 1)`)
+					}
+					else {
+						fragments
+							.code('Math.min(')
+							.compile(@expressionName ?? @expression)
+							.code(`.length, \(@to.value() + 1))`)
+					}
+				}
+				else {
+					fragments
+						.code('Math.min(')
+						.compile(@expressionName ?? @expression)
+						.code('.length, ')
+						.compile(@to)
+						.code(' + 1)')
+				}
+			}
+			else {
+				fragments
+					.compile(@expressionName ?? @expression)
+					.code('.length')
+			}
+		}
+	} // }}}
+	toFromFragments(fragments) { // {{{
+		if @data.desc {
+			if @til? {
+				if @til is NumberLiteral && @til.value() < 0 {
+					fragments
+						.compile(@expressionName ?? @expression)
+						.code(`.length - \(-@til.value() + 1)`)
+				}
+				else {
+					fragments
+						.code('Math.min(')
+						.compile(@expressionName ?? @expression)
+						.code('.length, ')
+						.compile(@til)
+						.code(') - 1')
+				}
+			}
+			else if @to? {
+				if @to is NumberLiteral {
+					if @to.value() < 0 {
+						fragments
+							.compile(@expressionName ?? @expression)
+							.code(`.length - \(-@to.value())`)
+					}
+					else {
+						fragments
+							.code('Math.min(')
+							.compile(@expressionName ?? @expression)
+							.code(`.length, \(@to.value()))`)
+					}
+				}
+				else {
+					fragments
+						.code('Math.min(')
+						.compile(@expressionName ?? @expression)
+						.code('.length, ')
+						.compile(@to)
+						.code(')')
+				}
+			}
+			else {
+				fragments
+					.compile(@expressionName ?? @expression)
+					.code('.length - 1')
+			}
+		}
+		else {
+			if @from? {
+				if @from is NumberLiteral && @from.value() < 0 {
+					fragments
+						.code('Math.max(0, ')
+						.compile(@expressionName ?? @expression)
+						.code(`.length - \(-@from.value()))`)
+				}
+				else {
+					fragments.compile(@from)
+				}
+			}
+			else {
+				fragments.code('0')
+			}
+		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {
@@ -133,55 +300,35 @@ class ForInStatement extends Statement {
 		
 		let ctrl
 		
-		if @data.desc {
-			if @index? && !@data.declaration && !@defineIndex {
-				fragments
-					.newLine()
-					.compile(@index)
-					.code($equals)
-					.compile(@expressionName ?? @expression)
-					.code('.length - 1')
-					.done()
-				
-				ctrl = fragments
-					.newControl()
-					.code('for(')
-			}
-			else {
-				ctrl = fragments
-					.newControl()
-					.code('for(', $runtime.scope(this))
-					.compile(@indexName ?? @index)
-					.code($equals)
-					.compile(@expressionName ?? @expression)
-					.code('.length - 1')
-			}
+		if @index && !@data.declaration && !@defineIndex {
+			const line = fragments
+				.newLine()
+				.compile(@index)
+				.code($equals)
+			
+			this.toFromFragments(line)
+			
+			line.done()
+			
+			ctrl = fragments
+				.newControl()
+				.code('for(', $runtime.scope(this))
 		}
 		else {
-			if @index && !@data.declaration && !@defineIndex {
-				fragments
-					.newLine()
-					.compile(@index)
-					.code(' = 0')
-					.done()
-				
-				ctrl = fragments
-					.newControl()
-					.code('for(', $runtime.scope(this))
-			}
-			else {
-				ctrl = fragments
-					.newControl()
-					.code('for(', $runtime.scope(this))
-					.compile(@indexName ?? @index)
-					.code(' = 0, ')
-			}
+			ctrl = fragments
+				.newControl()
+				.code('for(', $runtime.scope(this))
+				.compile(@indexName ?? @index)
+				.code($equals)
 			
-			ctrl
-				.code(@boundName, $equals)
-				.compile(@expressionName ?? @expression)
-				.code('.length')
+			this.toFromFragments(ctrl)
+			
+			ctrl.code($comma)
 		}
+		
+		ctrl.code(@boundName, $equals)
+		
+		this.toBoundFragments(ctrl)
 		
 		if @data.declaration || @defineValue {
 			ctrl.code($comma).compile(@value)
@@ -199,7 +346,7 @@ class ForInStatement extends Statement {
 		if @data.desc {
 			ctrl
 				.compile(@indexName ?? @index)
-				.code(' >= 0; --')
+				.code(' >= ' + @boundName + '; --')
 				.compile(@indexName ?? @index)
 		}
 		else {

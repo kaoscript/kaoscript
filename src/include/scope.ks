@@ -61,6 +61,7 @@ let $keywords = { // {{{
 class AbstractScope {
 	private {
 		_body: Array		= []
+		_domain				= null
 		_parent
 		_prepared			= false
 		_renamedIndexes 	= {}
@@ -111,6 +112,13 @@ class AbstractScope {
 		
 		return variable
 	} // }}}
+	domain() { // {{{
+		if @domain == null {
+			@domain = new ScopeDomain(this)
+		}
+		
+		return @domain
+	} // }}}
 	getLocalVariable(name): Variable { // {{{
 		if @variables[name] is Object {
 			return @variables[name]
@@ -134,7 +142,7 @@ class AbstractScope {
 	hasLocalVariable(name) => @variables[name] is Variable
 	hasVariable(name) => @variables[name] is Variable || @parent?.hasVariable(name)
 	parent() => @parent
-	reference(name: String) => (new ScopeDomain(this)).reference(name)
+	reference(name: String) => this.domain().reference(name)
 	removeVariable(name) { // {{{
 		if @variables[name] is Variable {
 			@variables[name] = false

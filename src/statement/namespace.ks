@@ -5,11 +5,14 @@ class NamespaceDeclaration extends Statement {
 		_statements: Array
 		_type: NamespaceType
 	}
+	constructor(data, parent) { // {{{
+		super(data, parent, new Scope(parent.scope()))
+	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
 		@type = new NamespaceType(@name, @scope)
 		
-		@scope.define(@name, true, @type, this)
+		@scope.parent().define(@name, true, @type, this)
 		
 		@statements = []
 		for statement in @data.statements {

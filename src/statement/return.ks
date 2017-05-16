@@ -39,6 +39,7 @@ class ReturnStatement extends Statement {
 	hasExceptions() => @exceptions
 	isAwait() => @await
 	isExit() => true
+	isReturning(type: Type) => @value.type().isInstanceOf(type)
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 		
@@ -49,11 +50,19 @@ class ReturnStatement extends Statement {
 		line.done()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if @value.isAwaiting() {
-			return this.toAwaitStatementFragments^@(fragments)
+		if @value == null {
+			if @function?.type().isAsync() {
+				fragments.line('return __ks_cb()')
+			}
+			else {
+				fragments.line('return', @data)
+			}
 		}
-		else if @function?.type().isAsync() {
-			if @value != null {
+		else {
+			if @value.isAwaiting() {
+				return this.toAwaitStatementFragments^@(fragments)
+			}
+			else if @function?.type().isAsync() {
 				fragments
 					.newLine()
 					.code('return __ks_cb(null, ')
@@ -62,19 +71,11 @@ class ReturnStatement extends Statement {
 					.done()
 			}
 			else {
-				fragments.line('return __ks_cb()')
-			}
-		}
-		else {
-			if @value != null {
 				fragments
 					.newLine()
 					.code('return ')
 					.compile(@value)
 					.done()
-			}
-			else {
-				fragments.line('return', @data)
 			}
 		}
 	} // }}}

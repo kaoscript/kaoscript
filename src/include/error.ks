@@ -146,11 +146,17 @@ export class NotSupportedException extends Exception {
 
 export class ReferenceException extends Exception {
 	static {
+		throwAlreadyDefinedField(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`Field "\(name)" is already defined by its parent class`, node)
+		} // }}}
 		throwNotDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
 		} // }}}
 		throwNotDefinedField(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Field "\(name)" is not defined`, node)
+		} // }}}
+		throwNotDefinedEnumElement(element, enum, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`Element "\(element)" is not defined in enum "\(enum)"`, node)
 		} // }}}
 		throwNotDefinedInModule(name, module, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined in the module "\(module)"`, node)
@@ -232,9 +238,6 @@ export class SyntaxException extends Exception {
 		throwNotNamedParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter must be named`, node)
 		} // }}}
-		throwOutOfClassAlias(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Alias "@\(name)" must be inside a class`, node)
-		} // }}}
 		throwReservedClassMethod(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Class method "\(name)" is reserved`, node)
 		} // }}}
@@ -246,6 +249,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwTooMuchRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Rest parameter has already been declared`, node)
+		} // }}}
+		throwUnexpectedAlias(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Alias "@\(name)" is expected in an instance method/variable`, node)
 		} // }}}
 		throwUnreportedError(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Error "\(name)" is unreported, it must be caught or declared to be thrown`, node)
@@ -270,6 +276,9 @@ export class TypeException extends Exception {
 		throwInvalid(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Invalid type "\(name)"`, node)
 		} // }}}
+		throwInvalidCasting(node) ~ TypeException { // {{{
+			throw new TypeException(`Only variables can be casted`, node)
+		} // }}}
 		throwNotAsyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not asynchronous`, node)
 		} // }}}
@@ -278,6 +287,12 @@ export class TypeException extends Exception {
 		} // }}}
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)
+		} // }}}
+		throwRequireClass(node) ~ TypeException { // {{{
+			throw new TypeException(`An instance is required`, node)
+		} // }}}
+		throwUnexpectedReturnedType(type, node) ~ TypeException { // {{{
+			throw new TypeException(`Expected returned type \(type.toQuote())`, node)
 		} // }}}
 	}
 }

@@ -1,0 +1,3 @@
+#![bin]
+
+throw new Error()

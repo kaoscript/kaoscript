@@ -20,6 +20,8 @@ class Greetings extends AbstractGreetings {
 	greet(name) => `\(@message)\nIt's nice to meet you, \(name).`
 }
 
-let hello = new Greetings('Hello world!')
+const hello = new Greetings('Hello world!')
 
-console.log(hello.greet('miss White'))
+console.log(`\(hello.greet('miss White'))`)
+
+export AbstractGreetings, Greetings

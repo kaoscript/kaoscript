@@ -1,12 +1,26 @@
 const $natives = { // {{{
+	Any: true
+	any: true
 	Array: true
+	array: true
 	Boolean: true
+	bool: true
 	Class: true
+	class: true
+	Enum: true
+	enum: true
 	Function: true
+	func: true
 	Number: true
+	number: true
 	Object: true
+	object: true
 	RegExp: true
+	regex: true
 	String: true
+	string: true
+	Void: true
+	void: true
 } // }}}
 
 const $types = { // {{{
@@ -34,6 +48,7 @@ enum EnumKind {
 }
 
 abstract class Domain {
+	abstract hasVariable(name: String): Boolean
 	abstract getVariable(name: String): Type
 	reference(name: String) => new ReferenceType(name, this)
 }
@@ -43,9 +58,13 @@ class ScopeDomain extends Domain {
 		_scope: AbstractScope
 	}
 	constructor(@scope)
+	hasVariable(name: String) => @scope.hasVariable(name) || $natives[name] == true
 	getVariable(name: String) { // {{{
 		if variable ?= @scope.getVariable(name) {
 			return variable.type()
+		}
+		else if $natives[name] == true {
+			return @scope.reference(name)
 		}
 		else {
 			return null
@@ -86,6 +105,7 @@ class ImportDomain extends Domain {
 		return @types[name]
 	} // }}}
 	hasTemporary(name: String) => @temporaries[name] is Type
+	hasVariable(name: String) => @temporaries[name] is Type || $natives[name] == true
 	getVariable(name: String) { // {{{
 		if @types[name] is Type {
 			return @types[name]
@@ -101,32 +121,33 @@ class ImportDomain extends Domain {
 
 abstract class Type {
 	static {
-		arrayOf(parameter: Type, scope: AbstractScope) => new ReferenceType('Array', false, [parameter], new ScopeDomain(scope))
-		fromAST(data?, node: AbstractNode): Type => Type.fromAST(data, new ScopeDomain(node.scope()), node)
-		fromAST(data?, domain: Domain, node: AbstractNode): Type { // {{{
+		arrayOf(parameter: Type, scope: AbstractScope) => new ReferenceType('Array', false, [parameter], scope.domain())
+		fromAST(data?, node: AbstractNode): Type => Type.fromAST(data, node.scope().domain(), true, node)
+		fromAST(data?, domain: Domain, defined: Boolean, node: AbstractNode): Type { // {{{
 			if !?data {
 				return Type.Any
 			}
 			else if data is Type {
-				return data
+				return data:Type
 			}
 			
 			switch data.kind {
 				NodeKind::FunctionDeclaration => {
-					return new FunctionType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
+					return new FunctionType([Type.fromAST(parameter, domain, defined, node) for parameter in data.parameters], data, node)
 				}
 				NodeKind::FunctionExpression => {
-					return new FunctionType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
+					return new FunctionType([Type.fromAST(parameter, domain, defined, node) for parameter in data.parameters], data, node)
 				}
 				NodeKind::Identifier => {
-					if type !?= domain.getVariable(data.name) {
+					if type ?= domain.getVariable(data.name) {
+						return type
+					}
+					else {
 						ReferenceException.throwNotDefined(data.name, node)
 					}
-					
-					return type
 				}
 				NodeKind::Parameter => {
-					const type = Type.fromAST(data.type, domain, node)
+					const type = Type.fromAST(data.type, domain, defined, node)
 					
 					let min: Number = data.defaultValue? ? 0 : 1
 					let max: Number = 1
@@ -162,10 +183,10 @@ abstract class Type {
 						let ref
 						for property in data.properties {
 							if property.type.kind == NodeKind::FunctionExpression {
-								type.addInstanceMethod(property.name.name, new ClassMethodType([Type.fromAST(parameter, domain, node) for parameter in property.type.parameters], property.type, node))
+								type.addInstanceMethod(property.name.name, new ClassMethodType([Type.fromAST(parameter, domain, defined, node) for parameter in property.type.parameters], property.type, node))
 							}
 							else if property.type.kind == NodeKind::TypeReference {
-								ref = Type.fromAST(property.type, domain, node)
+								ref = Type.fromAST(property.type, domain, defined, node)
 								if ref.isAnonymous() {
 									ref = ref.reference()
 								}
@@ -182,24 +203,29 @@ abstract class Type {
 					}
 					else if data.typeName? {
 						if data.typeName.kind == NodeKind::Identifier {
-							const type = new ReferenceType(data.typeName.name, data.nullable, domain)
-							
-							if data.typeParameters? {
-								for parameter in data.typeParameters {
-									type._parameters.push(Type.fromAST(parameter, domain, node))
+							if !defined || domain.hasVariable(data.typeName.name) {
+								const type = new ReferenceType(data.typeName.name, data.nullable, domain)
+								
+								if data.typeParameters? {
+									for parameter in data.typeParameters {
+										type._parameters.push(Type.fromAST(parameter, domain, defined, node))
+									}
 								}
+								
+								return type
 							}
-							
-							return type
+							else {
+								ReferenceException.throwNotDefined(data.typeName.name, node)
+							}
 						}
 						else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
 							const type = new ReferenceType(data.typeName.property.name, data.nullable, domain)
 							
-							type.namespace(Type.fromAST(data.typeName.object, domain, node).reference())
+							type.namespace(Type.fromAST(data.typeName.object, domain, defined, node).reference())
 							
 							if data.typeParameters? {
 								for parameter in data.typeParameters {
-									type._parameters.push(Type.fromAST(parameter, domain, node))
+									type._parameters.push(Type.fromAST(parameter, domain, defined, node))
 								}
 							}
 							
@@ -208,10 +234,10 @@ abstract class Type {
 					}
 				}
 				NodeKind::UnionType => {
-					return new UnionType([Type.fromAST(type, domain, node) for type in data.types])
+					return new UnionType([Type.fromAST(type, domain, defined, node) for type in data.types])
 				}
 				NodeKind::VariableDeclarator => {
-					return Type.fromAST(data.type, domain, node)
+					return Type.fromAST(data.type, domain, defined, node)
 				}
 			}
 			
@@ -223,7 +249,7 @@ abstract class Type {
 				return Type.import(null, args[0], args[1], args[2])
 			}
 			else {
-				return Type.import(args[0], args[1], new ScopeDomain(args[2].scope()), args[2])
+				return Type.import(args[0], args[1], args[2].scope().domain(), args[2])
 			}
 		} // }}}
 		import(name: String?, data, domain: Domain, node: AbstractNode): Type { // {{{
@@ -406,6 +432,7 @@ class AnyType extends Type {
 	getProperty(name) => Type.Any
 	hashCode() => 'Any'
 	isAny() => true
+	isInstanceOf(target: Type) => true
 	isNullable() => false
 	match(b: Type) => true
 	merge(type: Type, node) { // {{{
@@ -448,7 +475,7 @@ class ClassType extends Type {
 		/* this(name, new ScopeDomain(scope)) */
 		super()
 		
-		@domain = new ScopeDomain(scope)
+		@domain = scope.domain()
 	} // }}}
 	abstract() { // {{{
 		@abstract = true
@@ -518,9 +545,6 @@ class ClassType extends Type {
 	addPropertyFromAST(data, node) { // {{{
 		switch(data.kind) {
 			NodeKind::FieldDeclaration => {
-				throw new NotImplementedException(node)
-			}
-			NodeKind::MethodAliasDeclaration => {
 				throw new NotImplementedException(node)
 			}
 			NodeKind::MethodDeclaration => {
@@ -614,6 +638,14 @@ class ClassType extends Type {
 				export.classMethods[name] = [method.export() for method in methods]
 			}
 			
+			if @abstract {
+				export.abstractMethods = {}
+				
+				for name, methods of @abstractMethods {
+					export.abstractMethods[name] = [method.export() for method in methods]
+				}
+			}
+			
 			if @extending {
 				export.extends = @extends.reference().export()
 			}
@@ -632,7 +664,9 @@ class ClassType extends Type {
 		
 		if @abstract {
 			for name, methods of @abstractMethods {
-				abstractMethods[name] ??= []
+				if abstractMethods[name] is not Array {
+					abstractMethods[name] = []
+				}
 				
 				abstractMethods[name]:Array.append(methods)
 			}
@@ -649,6 +683,22 @@ class ClassType extends Type {
 			if methods.length == 0 {
 				delete abstractMethods[name]
 			}
+		}
+	} // }}}
+	getAsbtractMethod(name: String, arguments: Array) { // {{{
+		if @abstractMethods[name] is Array {
+			for method in @abstractMethods[name] {
+				if method.matchArguments(arguments) {
+					return method
+				}
+			}
+		}
+		
+		if @extending {
+			return @extends.getAsbtractMethod(name, arguments)
+		}
+		else {
+			return null
 		}
 	} // }}}
 	getClassMethods(name: String) { // {{{
@@ -791,6 +841,18 @@ class ClassType extends Type {
 			return false
 		}
 	} // }}}
+	hasClassVariable(name) { // {{{
+		if @classVariables[name] is ClassVariableType {
+			return true
+		}
+		
+		if @extending {
+			return @extends.hasClassVariable(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
 	hasConstructors() => @constructors.length != 0
 	hasDestructors() => @destructors != 0
 	hasInstanceMethod(name) { // {{{
@@ -825,6 +887,17 @@ class ClassType extends Type {
 	isExtendable() => !@anonymous
 	isExtending() => @extending
 	isFlexible() => true
+	isInstanceOf(target: ClassType) { // {{{
+		if this.equals(target) {
+			return true
+		}
+		else if @extending {
+			return @extends.isInstanceOf(target)
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
 	match(b): Boolean { // {{{
@@ -914,9 +987,19 @@ class EnumType extends Type {
 		index: @index
 		kind: @kind
 	} // }}}
+	hasElement(name: String) { // {{{
+		for element in @elements {
+			if element == name {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
 	index() => @index
 	index(@index)
 	kind() => @kind
+	name() => @name
 	step(): EnumType { // {{{
 		@index++
 		
@@ -1057,100 +1140,78 @@ class FunctionType extends Type {
 		return false
 	} // }}}
 	matchArguments(arguments: Array<Type>) { // {{{
-		/* if @min > arguments.length > @max { */
-		if @min > arguments.length || arguments.length > @max {
-			return false
-		}
-		
 		if arguments.length == 0 {
-			return true
+			return @min == 0
 		}
-		else if @parameters.length == 1 {
-			const parameter = @parameters[0]
-			
-			for argument in arguments {
-				if !parameter.matchArgument(argument) {
-					return false
-				}
+		else if arguments[0] is ParameterType {
+			if @parameters.length != arguments.length {
+				return false
 			}
 			
-			return true
-		}
-		else if @hasRest {
-			let a = 0
-			let b = arguments.length - 1
-			
-			for i from @parameters.length - 1 til @restIndex by -1 {
-				parameter = @parameters[i]
-				
-				for j from 0 til parameter.min() {
-					if !parameter.matchArgument(arguments[b]) {
-						return false
-					}
-					
-					--b
-				}
-			}
-			
-			let optional = @maxBefore - @minBefore
-			
-			for i from 0 til @restIndex {
-				parameter = @parameters[i]
-				
-				for j from 0 til parameter.min() {
-					if !parameter.matchArgument(arguments[a]) {
-						return false
-					}
-					
-					++a
-				}
-				
-				for j from parameter.min() til parameter.max() while optional != 0 when parameter.matchArgument(arguments[a]) {
-					++a
-					--optional
-				}
-			}
-			
-			parameter = @parameters[@restIndex]
-			for j from 0 til parameter.min() {
-				if !parameter.matchArgument(arguments[a]) {
-					return false
-				}
-				
-				++a
-			}
-			
-			return true
-		}
-		else if arguments.length == @parameters.length {
 			for parameter, i in @parameters {
-				if !parameter.matchArgument(arguments[i]) {
+				if !parameter.equals(arguments[i]) {
 					return false
-				}
-			}
-			
-			return true
-		}
-		else if arguments.length == @max {
-			let a = -1
-			
-			let p
-			for parameter in @parameters {
-				for p from 0 til parameter.max() {
-					if !parameter.matchArgument(arguments[++a]) {
-						return false
-					}
 				}
 			}
 			
 			return true
 		}
 		else {
-			let a = 0
-			let optional = arguments.length - @min
+			if !(@min <= arguments.length <= @max) {
+				return false
+			}
 			
-			for parameter in @parameters {
-				for i from 0 til parameter.min() {
+			if arguments.length == 0 {
+				return true
+			}
+			else if @parameters.length == 1 {
+				const parameter = @parameters[0]
+				
+				for argument in arguments {
+					if !parameter.matchArgument(argument) {
+						return false
+					}
+				}
+				
+				return true
+			}
+			else if @hasRest {
+				let a = 0
+				let b = arguments.length - 1
+				
+				for i from @parameters.length - 1 til @restIndex by -1 {
+					parameter = @parameters[i]
+					
+					for j from 0 til parameter.min() {
+						if !parameter.matchArgument(arguments[b]) {
+							return false
+						}
+						
+						--b
+					}
+				}
+				
+				let optional = @maxBefore - @minBefore
+				
+				for i from 0 til @restIndex {
+					parameter = @parameters[i]
+					
+					for j from 0 til parameter.min() {
+						if !parameter.matchArgument(arguments[a]) {
+							return false
+						}
+						
+						++a
+					}
+					
+					for j from parameter.min() til parameter.max() while optional != 0 when parameter.matchArgument(arguments[a]) {
+						++a
+						--optional
+					}
+				}
+				
+				parameter = @parameters[@restIndex]
+				for j from 0 til parameter.min() {
 					if !parameter.matchArgument(arguments[a]) {
 						return false
 					}
@@ -1158,13 +1219,52 @@ class FunctionType extends Type {
 					++a
 				}
 				
-				for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
-					++a
-					--optional
-				}
+				return true
 			}
-			
-			return optional == 0
+			else if arguments.length == @parameters.length {
+				for parameter, i in @parameters {
+					if !parameter.matchArgument(arguments[i]) {
+						return false
+					}
+				}
+				
+				return true
+			}
+			else if arguments.length == @max {
+				let a = -1
+				
+				let p
+				for parameter in @parameters {
+					for p from 0 til parameter.max() {
+						if !parameter.matchArgument(arguments[++a]) {
+							return false
+						}
+					}
+				}
+				
+				return true
+			}
+			else {
+				let a = 0
+				let optional = arguments.length - @min
+				
+				for parameter in @parameters {
+					for i from 0 til parameter.min() {
+						if !parameter.matchArgument(arguments[a]) {
+							return false
+						}
+						
+						++a
+					}
+					
+					for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
+						++a
+						--optional
+					}
+				}
+				
+				return optional == 0
+			}
 		}
 	} // }}}
 	max() => @max
@@ -1222,7 +1322,7 @@ class NamespaceType extends Type {
 		/* this(name, new ScopeDomain(scope)) */
 		super()
 		
-		@domain = new ScopeDomain(scope)
+		@domain = scope.domain()
 	} // }}}
 	addProperty(name: String, type: Type) { // {{{
 		@properties[name] = type
@@ -1319,7 +1419,11 @@ class ParameterType extends Type {
 	constructor(@type, @min = 1, @max = 1)
 	clone() => new ParameterType(@type, @min, @max)
 	equals(b?): Boolean { // {{{
-		throw new NotImplementedException()
+		if b is not ParameterType {
+			return false
+		}
+		
+		return @min == b.min() && @max == b.max() && @type.equals(b.type())
 	} // }}}
 	export() => { // {{{
 		type: @type.export()
@@ -1387,12 +1491,14 @@ class ReferenceType extends Type {
 		else if @namespace? {
 			return @namespace.getProperty(@name)
 		}
-		else if variable ?= @domain.getVariable(@name) {
+		else if (variable ?= @domain.getVariable(@name)) && (variable is not ReferenceType || variable.name() != @name || variable.domain() != @domain) {
 			return variable.dereference()
 		}
-		
-		return null
+		else {
+			return null
+		}
 	} // }}}
+	domain() => @domain
 	equals(b?): Boolean { // {{{
 		if b is not ReferenceType {
 			return b.equals(this)
@@ -1464,9 +1570,8 @@ class ReferenceType extends Type {
 			return true
 		}
 		
-		const class = this.unalias()
-		if class is ClassType {
-			return class.isInstanceOf(target)
+		if (thisClass ?= this.dereference()) && thisClass is ClassType && (targetClass ?= target.dereference()) && targetClass is ClassType {
+			return thisClass.isInstanceOf(targetClass)
 		}
 		
 		return false
@@ -1576,6 +1681,15 @@ class UnionType extends Type {
 		return match == @types.length
 	} // }}}
 	export() => [type.export() for type in @types]
+	isInstanceOf(target) { // {{{
+		for type in @types {
+			if type.isInstanceOf(target) {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
 	isNullable() { // {{{
 		for type in @types {
 			if type.isNullable() {
@@ -1627,7 +1741,7 @@ class ClassVariableType extends ReferenceType {
 		_access: Accessibility	= Accessibility::Public
 	}
 	static fromAST(data, node: AbstractNode) { // {{{
-		const domain = new ScopeDomain(node.scope())
+		const domain = node.scope().domain()
 		
 		let type: ClassVariableType
 		
@@ -1685,9 +1799,9 @@ class ClassMethodType extends FunctionType {
 		_sealed: Boolean		= false
 	}
 	static fromAST(data, node: AbstractNode) { // {{{
-		const domain = new ScopeDomain(node.scope())
+		const domain = node.scope().domain()
 		
-		return new ClassMethodType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
+		return new ClassMethodType([Type.fromAST(parameter, domain, false, node) for parameter in data.parameters], data, node)
 	} // }}}
 	static import(data, domain: Domain, node: AbstractNode): ClassMethodType { // {{{
 		const type = new ClassMethodType()
@@ -1851,7 +1965,7 @@ class NamespaceVariableType extends ReferenceType {
 		
 		return type
 	} // }}}
-	static import(data, domain: Domain, node: AbstractNode): ClassVariableType { // {{{
+	static import(data, domain: Domain, node: AbstractNode): NamespaceVariableType { // {{{
 		const type = new NamespaceVariableType(Type.import(data.type, domain, node))
 		
 		if data.sealed == true {
@@ -1879,11 +1993,11 @@ class NamespaceFunctionType extends FunctionType {
 		_sealed: Boolean		= false
 	}
 	static fromAST(data, node: AbstractNode) { // {{{
-		const domain = new ScopeDomain(node.scope())
+		const domain = node.scope().domain()
 		
-		return type = new NamespaceFunctionType([Type.fromAST(parameter, domain, node) for parameter in data.parameters], data, node)
+		return type = new NamespaceFunctionType([Type.fromAST(parameter, domain, false, node) for parameter in data.parameters], data, node)
 	} // }}}
-	static import(data, domain: Domain, node: AbstractNode): ClassMethodType { // {{{
+	static import(data, domain: Domain, node: AbstractNode): NamespaceFunctionType { // {{{
 		const type = new NamespaceFunctionType()
 		
 		type._async = data.async
@@ -1930,7 +2044,7 @@ class SealedReferenceType extends ReferenceType {
 		super(ref._name, ref._nullable, ref._parameters, ref._domain)
 	} // }}}
 	constructor(node: AbstractNode) { // {{{
-		super('Any', new ScopeDomain(node.scope()))
+		super('Any', node.scope().domain())
 	} // }}}
 	export() => { // {{{
 		sealed: true

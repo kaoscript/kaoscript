@@ -67,6 +67,8 @@ const $ast = {
 				{
 					kind: NodeKind::ReturnStatement
 					value: data
+					start: data.start
+					end: data.end
 				}
 			]
 		}

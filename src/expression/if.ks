@@ -1,6 +1,7 @@
 class IfExpression extends Expression {
 	private {
 		_condition
+		_type
 		_whenFalse
 		_whenTrue
 	}
@@ -18,8 +19,25 @@ class IfExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@condition.prepare()
+		
 		@whenTrue.prepare()
-		@whenFalse.prepare() if @whenFalse?
+		
+		if @whenFalse? {
+			@whenFalse.prepare()
+			
+			const t = @whenTrue.type()
+			const f = @whenFalse.type()
+			
+			if t.equals(f) {
+				@type = t
+			}
+			else {
+				@type = Type.union(t, f)
+			}
+		}
+		else {
+			@type = @whenTrue.type()
+		}
 	} // }}}
 	translate() { // {{{
 		@condition.translate()
@@ -58,16 +76,5 @@ class IfExpression extends Expression {
 		
 		ctrl.code(')').step().line(@whenTrue).done()
 	} // }}}
-	type() { // {{{
-		const t = @whenTrue.type()
-		
-		if @whenFalse? {
-			const f = @whenFalse.type()
-			
-			return Type.equals(t, f) ? t : Type.union(this, t, f)
-		}
-		else {
-			return t
-		}
-	} // }}}
+	type() => @type
 }

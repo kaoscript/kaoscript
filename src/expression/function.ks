@@ -45,11 +45,17 @@ class FunctionExpression extends Expression {
 			}
 		}
 		
+		const rtype = @type.returnType()
+		const na = !rtype.isAny()
+		
 		for statement in @statements {
 			statement.prepare()
 			
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
+			}
+			else if na && !statement.isReturning(rtype) {
+				TypeException.throwUnexpectedReturnedType(rtype, statement)
 			}
 			else {
 				@exit = statement.isExit()
@@ -60,7 +66,7 @@ class FunctionExpression extends Expression {
 			statement.translate()
 		}
 	} // }}}
-	isMethod() => false
+	isInstanceMethod() => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		let surround
@@ -170,11 +176,17 @@ class LambdaExpression extends Expression {
 			}
 		}
 		
+		const rtype = @type.returnType()
+		const na = !rtype.isAny()
+		
 		for statement in @statements {
 			statement.prepare()
 			
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
+			}
+			else if na && !statement.isReturning(rtype) {
+				TypeException.throwUnexpectedReturnedType(rtype, statement)
 			}
 			else {
 				@exit = statement.isExit()
@@ -185,7 +197,7 @@ class LambdaExpression extends Expression {
 			statement.translate()
 		}
 	} // }}}
-	isMethod() => false
+	isInstanceMethod() => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		let surround = $function.surround(this)

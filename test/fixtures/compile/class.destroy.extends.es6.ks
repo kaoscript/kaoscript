@@ -1,3 +1,5 @@
+extern class Error
+
 class Shape {
 	private {
 		_color: string = 'black'
@@ -9,7 +11,7 @@ class Shape {
 		this._color = null
 	}
 	
-	draw(): string {
+	draw(): string ~ Error {
 		throw new Error('Not Implemented')
 	}
 }

@@ -10,7 +10,7 @@ extern {
 }
 
 let $caster = {
-	hex(n: string | number): int { // {{{
+	hex(n: string | number): Number { // {{{
 		return Float.parse(n).limit(0, 255).round()
 	} // }}}
 }

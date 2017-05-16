@@ -2,6 +2,13 @@ extern console: {
 	log(...args)
 }
 
+extern {
+	class UIImageView
+	class UILabel
+	class UITableView
+	class UIView
+}
+
 let view: UIView
 
 switch view {

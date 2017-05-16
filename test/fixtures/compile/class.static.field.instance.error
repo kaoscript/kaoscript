@@ -1,0 +1,1 @@
+SyntaxException: Alias "@x" is expected in an instance method/variable (line 7, file "fixtures/compile/class.static.field.instance.ks")

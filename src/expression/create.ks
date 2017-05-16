@@ -25,13 +25,18 @@ class CreateExpression extends Expression {
 	prepare() { // {{{
 		@class.prepare()
 		
-		const type = @class.type()
-		if type is ClassType {
+		if type !?= @class.type().dereference() {
+			ReferenceException.throwNotDefined(@class.type().name(), this)
+		}
+		else if type is ClassType {
 			if type.isAbstract() {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
 			
 			@type = type.reference()
+		}
+		else if !type.isAny() {
+			TypeException.throwNotClass(type.name(), this)
 		}
 		
 		for argument in @arguments {

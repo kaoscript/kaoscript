@@ -10,7 +10,12 @@ class EnumExpression extends Expression {
 	prepare() { // {{{
 		@enum.prepare()
 		
-		@type = @enum.type().type()
+		const enum = @enum.type()
+		if !enum.hasElement(@data.member.name) {
+			ReferenceException.throwNotDefinedEnumElement(@data.member.name, enum.name(), this)
+		}
+		
+		@type = enum.type()
 	} // }}}
 	translate() { // {{{
 		@enum.translate()

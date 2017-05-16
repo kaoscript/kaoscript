@@ -7,7 +7,7 @@ extern {
 	}
 }
 
-func hex(n: string | number): int { // {{{
+func hex(n: string | number): Number { // {{{
 	return Float.parse(n).limit(0, 255).round()
 } // }}}
 

@@ -148,6 +148,15 @@ class TryStatement extends Statement {
 		}
 	} // }}}
 	isExit() => @exit
+	isReturning(type: Type) { // {{{
+		for statement in @statements {
+			if !statement.isReturning(type) {
+				return false
+			}
+		}
+		
+		return true
+	} // }}}
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		if statements.length != 0 {
 			@continueVarname = @scope.acquireTempName()

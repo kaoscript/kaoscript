@@ -2,10 +2,14 @@ extern console: {
 	log(...args)
 }
 
-let foo = () => 'otto'
+extern class Error
 
-if bar !?= foo() {
-	throw new Error()
+func qux() ~ Error {
+	let foo = () => 'otto'
+	
+	if bar !?= foo() {
+		throw new Error()
+	}
+	
+	console.log(foo, bar)
 }
-
-console.log(foo, bar)

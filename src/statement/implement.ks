@@ -243,7 +243,8 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	class() => @class
-	isMethod() => true
+	isInstance() => @instance
+	isInstanceMethod() => @instance
 	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		if @isContructor {
@@ -439,7 +440,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			@statements = []
 		}
 	} // }}}
-	isMethod() => false
+	isInstanceMethod() => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		const line = fragments.newLine()

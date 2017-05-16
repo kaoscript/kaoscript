@@ -47,6 +47,14 @@ class IfStatement extends Statement {
 		@whenFalse.translate() if @whenFalse?
 	} // }}}
 	isExit() => @whenFalse? && @whenTrue.isExit() && @whenFalse.isExit()
+	isReturning(type: Type) { // {{{
+		if @whenFalse {
+			return @whenTrue.isReturning(type) && @whenFalse.isReturning(type)
+		}
+		else {
+			return @whenTrue.isReturning(type)
+		}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const ctrl = fragments.newControl()
 		

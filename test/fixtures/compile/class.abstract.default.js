@@ -64,6 +64,10 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-	let hello = new Greetings("Hello world!");
+	const hello = new Greetings("Hello world!");
 	console.log(hello.greet("miss White"));
+	return {
+		AbstractGreetings: AbstractGreetings,
+		Greetings: Greetings
+	};
 }
