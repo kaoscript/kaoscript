@@ -14,6 +14,8 @@ class TryStatement extends Statement {
 		_exit: Boolean				= false
 		_finalizer
 		_finallyVarname: String
+		_hasCatch: Boolean			= false
+		_hasFinally: Boolean		= false
 		_state: TryState
 		_statements: Array			= []
 	}
@@ -89,6 +91,8 @@ class TryStatement extends Statement {
 			}
 		}
 		
+		@hasCatch = @catchClauses.length != 0
+		
 		for clause in @catchClauses {
 			clause.body.prepare()
 			clause.type.prepare()
@@ -97,17 +101,17 @@ class TryStatement extends Statement {
 		if @catchClause? {
 			@catchClause.prepare()
 			
+			@hasCatch = true
 			@exit = exit && @catchClause.isExit()
 		}
 		
 		if @finalizer? {
 			@finalizer.prepare()
 			
-			if exit || @exit {
-				SyntaxException.throwDeadCode(@finalizer)
-			}
-			else {
-				@exit = @finalizer.isExit()
+			@hasFinally = true
+			
+			if @finalizer.isExit() {
+				@exit = true
 			}
 		}
 	} // }}}
@@ -484,28 +488,14 @@ class TryStatement extends Statement {
 			fragments.line(`\(@continueVarname)()`)
 		}
 	} // }}}
+	toFinallyFragments(fragments) { // {{{
+		fragments.code('finally').step().compile(@finalizer)
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @await {
 			return this.toAwaitStatementFragments^@(fragments)
 		}
 		else {
-			let finalizer = null
-		
-			if @finalizer? {
-				@finallyVarname = @scope.acquireTempName()
-				
-				const line = fragments
-					.newLine()
-					.code($runtime.scope(this), @finallyVarname, ' = () =>')
-				
-				line
-					.newBlock()
-					.compile(@finalizer)
-					.done()
-				
-				line.done()
-			}
-			
 			const ctrl = fragments
 				.newControl()
 				.code('try')
@@ -523,9 +513,23 @@ class TryStatement extends Statement {
 			
 			const error = this.getErrorVarname()
 			
-			ctrl.code(`catch(\(error))`).step()
-			
-			this.toCatchFragments(ctrl, error)
+			if @hasCatch {
+				ctrl.code(`catch(\(error))`).step()
+				
+				this.toCatchFragments(ctrl, error)
+				
+				if @hasFinally {
+					ctrl.step()
+					
+					this.toFinallyFragments(ctrl)
+				}
+			}
+			else if @hasFinally {
+				this.toFinallyFragments(ctrl)
+			}
+			else {
+				ctrl.code(`catch(\(error))`).step()
+			}
 			
 			@scope.releaseTempName(error)
 			

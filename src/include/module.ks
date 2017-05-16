@@ -641,7 +641,7 @@ class ModuleBlock extends AbstractNode {
 	} // }}}
 	directory() => @module.directory()
 	file() => @module.file()
-	isConsumedError(error): Boolean => false
+	isConsumedError(error): Boolean => @module.isBinary()
 	module() => @module
 	recipient() => @module
 	toFragments(fragments) { // {{{

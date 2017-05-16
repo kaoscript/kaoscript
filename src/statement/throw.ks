@@ -1,19 +1,33 @@
 class ThrowStatement extends Statement {
 	private {
 		_function	= null
+		_inSource: Boolean	= true
 		_value		= null
 	}
-	constructor(@data, @parent) {
+	constructor(@data, @parent) { // {{{
 		super(data, parent)
 		
-		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclaration || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
-			parent = parent.parent()
+		do {
+			if	parent is FunctionExpression ||
+				parent is LambdaExpression ||
+				parent is FunctionDeclaration ||
+				parent is ClassMethodDeclaration ||
+				parent is ImplementClassMethodDeclaration ||
+				parent is ImplementNamespaceFunctionDeclaration
+			{
+				@function = parent
+				@inSource = false
+				break
+			}
+			else if	parent is ClassConstructorDeclaration ||
+					parent is ClassDestructorDeclaration
+			{
+				@inSource = false
+				break
+			}
 		}
-		
-		if parent? {
-			@function = parent
-		}
-	}
+		while parent ?= parent.parent()
+	} // }}}
 	analyse() { // {{{
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
@@ -30,8 +44,8 @@ class ThrowStatement extends Statement {
 		else if !type.isAny() {
 			TypeException.throwRequireClass(this)
 		}
-		else if @parent is ModuleBlock {
-			SyntaxException.throwUnreportedError(type.name(), this)
+		else if @inSource && !this.module().isBinary() {
+			SyntaxException.throwUnreportedError(this)
 		}
 	} // }}}
 	isExit() => true

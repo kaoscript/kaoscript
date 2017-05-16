@@ -253,6 +253,9 @@ export class SyntaxException extends Exception {
 		throwUnexpectedAlias(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Alias "@\(name)" is expected in an instance method/variable`, node)
 		} // }}}
+		throwUnreportedError(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`An error is unreported, it must be caught or declared to be thrown`, node)
+		} // }}}
 		throwUnreportedError(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Error "\(name)" is unreported, it must be caught or declared to be thrown`, node)
 		} // }}}
