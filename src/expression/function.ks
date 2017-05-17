@@ -97,7 +97,7 @@ class FunctionExpression extends Expression {
 		
 		fragments.code(surround.beforeParameters)
 		
-		const block = Parameter.toFragments(this, fragments, false, func(fragments) {
+		const block = Parameter.toFragments(this, fragments, ParameterMode::Default, func(fragments) {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 		
@@ -204,7 +204,7 @@ class LambdaExpression extends Expression {
 		
 		fragments.code(surround.beforeParameters)
 		
-		let block = Parameter.toFragments(this, fragments, surround.arrow, func(fragments) {
+		let block = Parameter.toFragments(this, fragments, surround.arrow ? ParameterMode::ArrowFunction : ParameterMode::Default, func(fragments) {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 		

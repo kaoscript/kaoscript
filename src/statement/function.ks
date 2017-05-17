@@ -255,7 +255,7 @@ class FunctionDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		const ctrl = fragments.newControl().code(`function \(@name)(`)
 		
-		Parameter.toFragments(this, ctrl, false, func(node) {
+		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
 			return node.code(')').step()
 		})
 		

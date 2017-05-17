@@ -8,6 +8,7 @@
     "Array": {
       "abstract": "false",
       "alien": "false",
+      "hybrid": "false",
       "sealed": "true",
       "constructors": [],
       "destructors": 0,

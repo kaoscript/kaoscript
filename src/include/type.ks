@@ -272,6 +272,7 @@ abstract class Type {
 					
 					type._abstract = data.abstract
 					type._alien = data.alien
+					type._hybrid = data.hybrid
 					
 					if data.sealed {
 						type.seal()
@@ -279,6 +280,10 @@ abstract class Type {
 					
 					for method in data.constructors {
 						type.addConstructor(ClassConstructorType.import(method, domain, node))
+					}
+					
+					for name, vtype of data.instanceVariables {
+						type.addInstanceVariable(name, ClassVariableType.import(vtype, domain, node))
 					}
 					
 					for name, methods of data.instanceMethods {
@@ -463,6 +468,7 @@ class ClassType extends Type {
 		_domain: Domain
 		_extending: Boolean			= false
 		_extends: ClassType
+		_hybrid: Boolean			= false
 		_instanceMethods: Object	= {}
 		_instanceVariables: Object	= {}
 		_name: String
@@ -610,6 +616,7 @@ class ClassType extends Type {
 			const export = {
 				abstract: @abstract
 				alien: @alien
+				hybrid: @hybrid
 				sealed: @sealed
 				constructors: [constructor.export() for constructor in @constructors]
 				destructors: @destructors
@@ -653,6 +660,10 @@ class ClassType extends Type {
 	extends() => @extends
 	extends(@extends) { // {{{
 		@extending = true
+		
+		if @extends.isAlien() || @extends.isHybrid() {
+			@hybrid = true
+		}
 	} // }}}
 	filterAbstractMethods(abstractMethods) { // {{{
 		if @extending {
@@ -884,6 +895,7 @@ class ClassType extends Type {
 	isExtendable() => !@anonymous
 	isExtending() => @extending
 	isFlexible() => true
+	isHybrid() => @hybrid
 	isInstanceOf(target: ClassType) { // {{{
 		if this.equals(target) {
 			return true

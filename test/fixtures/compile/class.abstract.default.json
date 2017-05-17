@@ -4,6 +4,7 @@
     "AbstractGreetings": {
       "abstract": "true",
       "alien": "false",
+      "hybrid": "false",
       "sealed": "false",
       "constructors": [
         {
@@ -38,7 +39,7 @@
       "instanceMethods": {},
       "classMethods": {},
       "abstractMethods": {
-      	"greet": [
+        "greet": [
           {
             "access": 3,
             "async": "false",
@@ -61,6 +62,7 @@
     "Greetings": {
       "abstract": "false",
       "alien": "false",
+      "hybrid": "false",
       "sealed": "false",
       "constructors": [],
       "destructors": 0,

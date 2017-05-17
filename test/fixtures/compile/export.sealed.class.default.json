@@ -29,6 +29,7 @@
     "Shape": {
       "abstract": "false",
       "alien": "false",
+      "hybrid": "false",
       "sealed": "true",
       "constructors": [
         {

@@ -12,24 +12,26 @@ enum TypeStatus { // {{{
 
 class ClassDeclaration extends Statement {
 	private {
-		_abstract: Boolean 		= false
-		_abstractMethods		= {}
-		_classMethods			= {}
-		_classVariables			= {}
-		_constructors			= []
+		_abstract: Boolean 			= false
+		_abstractMethods			= {}
+		_classMethods				= {}
+		_classVariables				= {}
+		_constructors				= []
 		_constructorScope
-		_destructor				= null
+		_destructor					= null
 		_destructorScope
-		_es5: Boolean			= false
-		_extends: Boolean		= false
+		_es5: Boolean				= false
+		_extending: Boolean			= false
+		_extendingAlien: Boolean	= false
 		_extendsName: String
 		_extendsType: ClassType
-		_instanceMethods		= {}
-		_instanceVariables		= {}
+		_hybrid: Boolean			= false
+		_instanceMethods			= {}
+		_instanceVariables			= {}
 		_instanceVariableScope
 		_name
-		_references				= {}
-		_sealed: Boolean 		= false
+		_references					= {}
+		_sealed: Boolean 			= false
 		_type: ClassType
 	}
 	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
@@ -561,9 +563,9 @@ class ClassDeclaration extends Statement {
 		
 		@scope.define(@name, true, @type, this)
 		
-		let variable = @constructorScope.define('this', true, @type.reference(), this)
+		let thisVariable = @constructorScope.define('this', true, @type.reference(), this)
 		
-		variable.replaceCall = (data, arguments) => new CallThisConstructorSubstitude(data, arguments, @type)
+		thisVariable.replaceCall = (data, arguments) => new CallThisConstructorSubstitude(data, arguments, @type)
 		
 		@destructorScope.define('this', true, @type.reference(), this)
 		@destructorScope.rename('this', 'that')
@@ -571,9 +573,10 @@ class ClassDeclaration extends Statement {
 		@instanceVariableScope.define('this', true, @type.reference(), this)
 		
 		if @data.extends? {
-			@extends = true
+			@extending = true
 			@extendsName = @data.extends.name
 			
+			let variable
 			if variable !?= @scope.getVariable(@extendsName) {
 				ReferenceException.throwNotDefined(@extendsName, this)
 			}
@@ -583,15 +586,22 @@ class ClassDeclaration extends Statement {
 			
 			@type.extends(@extendsType)
 			
+			@hybrid = @type.isHybrid()
+			
 			const superVariable = @constructorScope.define('super', true, @extendsType.reference(), this)
 			
-			if @extendsType.isSealedAlien() {
-				superVariable.replaceCall = (data, arguments) => {
-					SyntaxException.throwNotCompatibleConstructor(@name, this)
-				}
+			if @hybrid && !@es5 {
+				thisVariable.replaceCall = (data, arguments) => new CallHybridThisConstructorES6Substitude(data, arguments, @type)
+				
+				superVariable.replaceCall = (data, arguments) => new CallHybridSuperConstructorES6Substitude(data, arguments, @type)
 			}
 			else {
-				superVariable.replaceCall = (data, arguments) => new CallSuperConstructorSubstitude(data, arguments, @type)
+				if @es5 {
+					superVariable.replaceCall = (data, arguments) => new CallSuperConstructorES5Substitude(data, arguments, @type)
+				}
+				else {
+					superVariable.replaceCall = (data, arguments) => new CallSuperConstructorSubstitude(data, arguments, @type)
+				}
 			}
 			
 			@instanceVariableScope.define('super', true, @extendsType.reference(), this)
@@ -624,7 +634,12 @@ class ClassDeclaration extends Statement {
 				}
 				NodeKind::MethodDeclaration => {
 					if @type.isConstructor(data.name.name) {
-						declaration = new ClassConstructorDeclaration(data, this)
+						if @hybrid && !@es5 {
+							declaration = new ClassHybridConstructorES6Declaration(data, this)
+						}
+						else {
+							declaration = new ClassConstructorDeclaration(data, this)
+						}
 					}
 					else if @type.isDestructor(data.name.name) {
 						declaration = new ClassDestructorDeclaration(data, this)
@@ -690,7 +705,7 @@ class ClassDeclaration extends Statement {
 			@type.addDestructor()
 		}
 		
-		if @extends && !@abstract && (notImplemented = @type.getMissingAbstractMethods()).length != 0 {
+		if @extending && !@abstract && (notImplemented = @type.getMissingAbstractMethods()).length != 0 {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 	} // }}}
@@ -774,14 +789,14 @@ class ClassDeclaration extends Statement {
 		
 		return false
 	} // }}}
-	isExtending() => @extends
+	isExtending() => @extending
 	name() => @name
 	newInstanceMethodScope(method: ClassMethodDeclaration) { // {{{
 		let scope = new Scope(@scope)
 		
 		scope.define('this', true, @type.reference(), this)
 		
-		if @extends {
+		if @extending {
 			const variable = scope.define('super', true, @extendsType.reference(), this)
 			
 			if @es5 {
@@ -808,7 +823,7 @@ class ClassDeclaration extends Statement {
 			clazz.line(`$version: [\(@data.version.major), \(@data.version.minor), \(@data.version.patch)]`)
 		}
 		
-		if @extends {
+		if @extending {
 			clazz.line('$extends: ', @extendsName)
 		}
 		
@@ -839,7 +854,7 @@ class ClassDeclaration extends Statement {
 			ctrl.done()
 		}
 		
-		if !@extends || @extendsType.isSealedAlien() {
+		if !@extending || @extendsType.isSealedAlien() {
 			clazz
 				.newControl()
 				.code('$create: function()')
@@ -860,14 +875,14 @@ class ClassDeclaration extends Statement {
 			
 			ctrl = clazz.newControl().code('__ks_init: function()').step()
 			
-			if @extends && !@extendsType.isSealedAlien() {
+			if @extending && !@extendsType.isSealedAlien() {
 				ctrl.line(@extendsName + '.prototype.__ks_init.call(this)')
 			}
 			
 			ctrl.line(@name + '.prototype.__ks_init_1.call(this)')
 		}
 		else {
-			if @extends {
+			if @extending {
 				if @extendsType.isSealedAlien() {
 					clazz
 						.newControl()
@@ -917,28 +932,18 @@ class ClassDeclaration extends Statement {
 			.newControl()
 			.code('class ', @name)
 		
-		if @extends {
+		if @extending {
 			clazz.code(' extends ', @extendsName)
 		}
 		
 		clazz.step()
 		
 		let ctrl
-		if !@extends {
+		if !@extending {
 			clazz
 				.newControl()
 				.code('constructor()')
 				.step()
-				.line('this.__ks_init()')
-				.line('this.__ks_cons(arguments)')
-				.done()
-		}
-		else if @extendsType.isSealedAlien() {
-			clazz
-				.newControl()
-				.code('constructor()')
-				.step()
-				.line('super()')
 				.line('this.__ks_init()')
 				.line('this.__ks_cons(arguments)')
 				.done()
@@ -958,7 +963,7 @@ class ClassDeclaration extends Statement {
 			
 			ctrl = clazz.newControl().code('__ks_init()').step()
 			
-			if @extends && !@extendsType.isSealedAlien() {
+			if @extending && !@extendsType.isSealedAlien() {
 				ctrl.line(@extendsName + '.prototype.__ks_init.call(this)')
 			}
 			
@@ -967,22 +972,13 @@ class ClassDeclaration extends Statement {
 			ctrl.done()
 		}
 		else {
-			if @extends {
-				if @extendsType.isSealedAlien() {
-					clazz
-						.newControl()
-						.code('__ks_init()')
-						.step()
-						.done()
-				}
-				else {
-					clazz
-						.newControl()
-						.code('__ks_init()')
-						.step()
-						.line(@extendsName + '.prototype.__ks_init.call(this)')
-						.done()
-				}
+			if @extending {
+				clazz
+					.newControl()
+					.code('__ks_init()')
+					.step()
+					.line(@extendsName + '.prototype.__ks_init.call(this)')
+					.done()
 			}
 			else {
 				clazz.newControl().code('__ks_init()').step().done()
@@ -1037,6 +1033,147 @@ class ClassDeclaration extends Statement {
 		
 		clazz.done()
 	} // }}}
+	toHybridES6Fragments(fragments) { // {{{
+		const clazz = fragments
+			.newControl()
+			.code('class ', @name, ' extends ', @extendsName)
+			.step()
+		
+		const m = []
+		
+		let ctrl
+		if @constructors.length == 0 {
+			clazz
+				.newControl()
+				.code('constructor()')
+				.step()
+				.line('super(...arguments)')
+				.line('this.__ks_init()')
+				.done()
+		}
+		else if @constructors.length == 1 {
+			@constructors[0].toConstructorFragments(clazz)
+		}
+		else {
+			ctrl = clazz
+				.newControl()
+				.code('constructor()')
+				.step()
+				
+			for method in @constructors {
+				method.toFragments(ctrl, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			const line = ctrl
+				.newLine()
+				.code('const __ks_cons = (__ks_arguments) =>')
+			
+			ClassDeclaration.toSwitchFragments(
+				this
+				line.newBlock()
+				@type
+				m
+				'constructor'
+				func(node, fragments, ctrl, variable) {
+				}
+				func(node, fragments) => fragments
+				func(fragments) {
+					fragments.done()
+				}
+				(fragments, method, index) => {
+					fragments.line(`__ks_cons_\(index)(__ks_arguments)`)
+				}
+				'__ks_arguments'
+				false
+			)
+			
+			line.done()
+			
+			ctrl
+				.line('__ks_cons(arguments)')
+				.done()
+		}
+		
+		if this.hasInits() {
+			ctrl = clazz
+				.newControl()
+				.code('__ks_init_1()')
+				.step()
+			
+			for :field of @instanceVariables {
+				field.toFragments(ctrl)
+			}
+			
+			ctrl.done()
+			
+			if @extendsType.isSealedAlien() {
+				clazz
+					.newControl()
+					.code('__ks_init()')
+					.step()
+					.line(`\(@name).prototype.__ks_init_1.call(this)`)
+					.done()
+			}
+			else {
+				clazz
+					.newControl()
+					.code('__ks_init()')
+					.step()
+					.line(`\(@extendsName).prototype.__ks_init.call(this)`)
+					.line(`\(@name).prototype.__ks_init_1.call(this)`)
+					.done()
+			}
+		}
+		else if @extendsType.isSealedAlien() {
+			clazz.newControl().code('__ks_init()').step().done()
+		}
+		else {
+			clazz
+				.newControl()
+				.code('__ks_init()')
+				.step()
+				.line(`\(@extendsName).prototype.__ks_init.call(this)`)
+				.done()
+		}
+		
+		if @destructor? {
+			@destructor.toFragments(clazz, Mode::None)
+			
+			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
+		}
+		
+		for name, methods of @instanceMethods {
+			m.clear()
+			
+			for method in methods {
+				method.toFragments(clazz, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+				fragments.done()
+			})
+		}
+		
+		for name, methods of @classMethods {
+			m.clear()
+			
+			for method in methods {
+				method.toFragments(clazz, Mode::None)
+				
+				m.push(method.type())
+			}
+			
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+				fragments.done()
+			})
+		}
+		
+		clazz.done()
+	} // }}}
 	toSealedES5Fragments(fragments) { // {{{
 		@module().flag('Helper')
 		
@@ -1049,7 +1186,7 @@ class ClassDeclaration extends Statement {
 			clazz.line(`$version: [\(@data.version.major), \(@data.version.minor), \(@data.version.patch)]`)
 		}
 		
-		if @extends {
+		if @extending {
 			clazz.line('$extends: ', @extendsName)
 		}
 		
@@ -1080,7 +1217,7 @@ class ClassDeclaration extends Statement {
 			ctrl.done()
 		}
 		
-		if @extends && !@extendsType.isSealedAlien() {
+		if @extending && !@extendsType.isSealedAlien() {
 			ctrl = clazz
 				.newControl()
 				.code('__ks_init: function()')
@@ -1139,14 +1276,14 @@ class ClassDeclaration extends Statement {
 			.newControl()
 			.code('class ', @name)
 		
-		if @extends {
+		if @extending {
 			clazz.code(' extends ', @extendsName)
 		}
 		
 		clazz.step()
 		
 		let ctrl
-		if @extends && !@extendsType.isSealedAlien() {
+		if @extending && !@extendsType.isSealedAlien() {
 			ctrl = clazz
 				.newControl()
 				.code('__ks_init()')
@@ -1240,6 +1377,9 @@ class ClassDeclaration extends Statement {
 			if @es5 {
 				this.toContinousES5Fragments(fragments)
 			}
+			else if @hybrid {
+				this.toHybridES6Fragments(fragments)
+			}
 			else {
 				this.toContinousES6Fragments(fragments)
 			}
@@ -1301,6 +1441,22 @@ class CallThisConstructorSubstitude {
 	type() => Type.Void
 }
 
+class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitude {
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`__ks_cons([`)
+		
+		for argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
+			}
+			
+			fragments.compile(argument)
+		}
+		
+		fragments.code(']')
+	} // }}}
+}
+
 class CallSuperConstructorSubstitude {
 	private {
 		_arguments
@@ -1323,6 +1479,46 @@ class CallSuperConstructorSubstitude {
 		fragments.code(']')
 	} // }}}
 	type() => Type.Void
+}
+
+class CallSuperConstructorES5Substitude extends CallSuperConstructorSubstitude {
+	toFragments(fragments, mode) { // {{{
+		if @class.extends().isAlien() {
+			if @arguments.length == 0 {
+				fragments.code('(1')
+			}
+			else {
+				throw new NotSupportedException()
+			}
+		}
+		else {
+			fragments.code(`\(@class.extends().name()).prototype.__ks_cons.call(this, [`)
+			
+			for argument, index in @arguments {
+				if index != 0 {
+					fragments.code($comma)
+				}
+				
+				fragments.compile(argument)
+			}
+			
+			fragments.code(']')
+		}
+	} // }}}
+}
+
+class CallHybridSuperConstructorES6Substitude extends CallSuperConstructorSubstitude {
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`super(`)
+		
+		for argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
+			}
+			
+			fragments.compile(argument)
+		}
+	} // }}}
 }
 
 class CallSuperMethodES5Substitude {
@@ -1625,7 +1821,7 @@ class ClassMethodDeclaration extends Statement {
 			ctrl.code(`\(@internalName)(`)
 		}
 		
-		Parameter.toFragments(this, ctrl, false, func(node) {
+		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
 			return node.code(')').step()
 		})
 		
@@ -1658,7 +1854,7 @@ class ClassMethodDeclaration extends Statement {
 
 class ClassConstructorDeclaration extends Statement {
 	private {
-		_aliases: Array			= []
+		_aliases: Array				= []
 		_body: Array
 		_internalName: String
 		_parameters
@@ -1722,15 +1918,15 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.translate()
 		}
 		
-		let index = -1
+		let index = 1
 		if @body.length == 0 {
-			if @parent._extends {
+			if @parent._extending {
 				this.callParentConstructor(@body)
 				
 				index = 0
 			}
 		}
-		else if (index = this.getConstructorIndex(@body)) == -1 && @parent._extends && (!@parent._extendsType.isSealed() || !@parent._extendsType.isSealedAlien()) {
+		else if (index = this.getConstructorIndex(@body)) == -1 && @parent._extending {
 			SyntaxException.throwNoSuperCall(this)
 		}
 		
@@ -1772,7 +1968,7 @@ class ClassConstructorDeclaration extends Statement {
 		}
 	} // }}}
 	addAliasStatement(statement: AliasStatement) { // {{{
-		if !ClassDeclaration.isAssigningAlias(@body, statement.name(), true, @parent._extends) {
+		if !ClassDeclaration.isAssigningAlias(@body, statement.name(), true, @parent._extending) {
 			@aliases.push(statement)
 		}
 	} // }}}
@@ -1819,6 +2015,22 @@ class ClassConstructorDeclaration extends Statement {
 		
 		return -1
 	} // }}}
+	private getSuperIndex(body: Array) { // {{{
+		for statement, index in body {
+			if statement.kind == NodeKind::CallExpression {
+				if statement.callee.kind == NodeKind::Identifier && statement.callee.name == 'super' {
+					return index
+				}
+			}
+			else if statement.kind == NodeKind::IfStatement {
+				if statement.whenFalse? && this.getSuperIndex(statement.whenTrue.statements) != -1 && this.getSuperIndex(statement.whenFalse.statements) != -1 {
+					return index
+				}
+			}
+		}
+		
+		return -1
+	} // }}}
 	isAbstract() { // {{{
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
@@ -1841,7 +2053,7 @@ class ClassConstructorDeclaration extends Statement {
 			ctrl.code(`\(@internalName)(`)
 		}
 		
-		Parameter.toFragments(this, ctrl, false, func(node) {
+		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
 			return node.code(')').step()
 		})
 		
@@ -1852,6 +2064,77 @@ class ClassConstructorDeclaration extends Statement {
 		ctrl.done() unless @parent._es5
 	} // }}}
 	type() => @type
+}
+
+class ClassHybridConstructorES6Declaration extends ClassConstructorDeclaration {
+	toConstructorFragments(fragments) { // {{{
+		let ctrl = fragments
+			.newControl()
+			.code('constructor(')
+		
+		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
+			return node.code(')').step()
+		})
+		
+		if @parent._extendsType.isSealedAlien() {
+			const index = this.getSuperIndex(@body)
+			
+			if index == -1 {
+				for statement in @statements {
+					ctrl.compile(statement)
+				}
+			}
+			else {
+				for statement in @statements to index {
+					ctrl.compile(statement)
+				}
+				
+				ctrl.line('this.__ks_init()')
+				
+				for statement in @statements from index + 1 {
+					ctrl.compile(statement)
+				}
+			}
+		}
+		else {
+			for statement in @statements {
+					ctrl.compile(statement)
+				}
+		}
+		
+		ctrl.done()
+	} // }}}
+	toStatementFragments(fragments, mode) { // {{{
+		const ctrl = fragments
+			.newLine()
+			.code(`const \(@internalName) = (`)
+		
+		const block = Parameter.toFragments(this, ctrl, ParameterMode::HybridConstructor, func(node) {
+			return node.code(') =>').newBlock()
+		})
+		
+		const index = this.getSuperIndex(@body)
+		
+		if index == -1 {
+			for statement in @statements {
+				block.compile(statement)
+			}
+		}
+		else {
+			for statement in @statements to index {
+				block.compile(statement)
+			}
+			
+			block.line('this.__ks_init()')
+			
+			for statement in @statements from index + 1 {
+				block.compile(statement)
+			}
+		}
+		
+		block.done()
+		ctrl.done()
+	} // }}}
 }
 
 class ClassDestructorDeclaration extends Statement {
@@ -1873,7 +2156,7 @@ class ClassDestructorDeclaration extends Statement {
 		
 		ctrl.step()
 		
-		if node._extends {
+		if node._extending {
 			ctrl.line(`\(node._extendsName).__ks_destroy(that)`)
 		}
 		
@@ -1944,7 +2227,7 @@ class ClassDestructorDeclaration extends Statement {
 			ctrl.code(`static \(@internalName)(`)
 		}
 		
-		Parameter.toFragments(this, ctrl, false, func(node) {
+		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
 			return node.code(')').step()
 		})
 		

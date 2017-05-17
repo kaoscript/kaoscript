@@ -55,6 +55,8 @@ export class Exception extends Error {
 	}
 	
 	constructor(@message) { // {{{
+		super()
+		
 		@name = this.constructor.name
 		
 		if !?this.stack {

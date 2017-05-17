@@ -33,12 +33,7 @@ function prepare(file) {
 		
 		fs.writeFileSync(
 			path.join(__dirname, 'test', 'fixtures', 'compile', name + '.json'),
-			JSON.stringify(data, function(key, value) {
-				if(value == Infinity) {
-					return 'Infinity';
-				}
-				return value;
-			}, 2),
+			JSON.stringify(data, function(key, value){return value === Infinity ? 'Infinity' : value === true ? 'true' : value === false ? 'false' : value;}, 2),
 			{
 				encoding: 'utf8'
 			}

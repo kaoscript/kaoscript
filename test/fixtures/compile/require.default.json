@@ -8,6 +8,7 @@
     "Color": {
       "abstract": "false",
       "alien": "false",
+      "hybrid": "false",
       "sealed": "false",
       "constructors": [],
       "destructors": 0,

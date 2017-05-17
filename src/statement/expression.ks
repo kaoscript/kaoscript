@@ -39,7 +39,7 @@ class ExpressionStatement extends Statement {
 	} // }}}
 	hasExceptions() => @expression.hasExceptions()
 	isAwait() => @expression.isAwait()
-	toAwaitStatementFragments(fragments, statements) {
+	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 		
 		const item = @expression.toFragments(line, Mode::None)
@@ -49,7 +49,7 @@ class ExpressionStatement extends Statement {
 		item(statements)
 		
 		line.done()
-	}
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @expression.isAwaiting() {
 			return this.toAwaitStatementFragments^@(fragments)

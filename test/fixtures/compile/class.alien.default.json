@@ -1,0 +1,81 @@
+{
+  "requirements": {},
+  "exports": {
+    "ClassA": {
+      "abstract": "false",
+      "alien": "true",
+      "hybrid": "false",
+      "sealed": "true",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    "ClassB": {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "true",
+      "sealed": "false",
+      "constructors": [
+        {
+          "access": 3,
+          "min": 2,
+          "max": 2,
+          "parameters": [
+            {
+              "type": "Number",
+              "min": 2,
+              "max": 2
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "destructors": 0,
+      "instanceVariables": {
+        "_z": {
+          "access": 1,
+          "type": "Number"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "extends": "ClassA"
+    },
+    "ClassC": {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "true",
+      "sealed": "false",
+      "constructors": [
+        {
+          "access": 3,
+          "min": 2,
+          "max": 2,
+          "parameters": [
+            {
+              "type": "Number",
+              "min": 2,
+              "max": 2
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "destructors": 0,
+      "instanceVariables": {
+        "_w": {
+          "access": 1,
+          "type": "Number"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "extends": "ClassB"
+    }
+  }
+}

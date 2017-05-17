@@ -1,3 +1,9 @@
+enum ParameterMode {
+	ArrowFunction
+	Default
+	HybridConstructor
+}
+
 class Parameter extends AbstractNode {
 	private {
 		_anonymous: Boolean
@@ -13,7 +19,7 @@ class Parameter extends AbstractNode {
 		_type: Type
 		_variable: Variable					= null
 	}
-	static toFragments(node, fragments, arrow, fn) { // {{{
+	static toFragments(node, fragments, mode, fn) { // {{{
 		if node._options.parse.parameters == 'es5' {
 			return Parameter.toES5Fragments(node, fragments, fn)
 		}
@@ -21,7 +27,7 @@ class Parameter extends AbstractNode {
 			return Parameter.toES6Fragments(node, fragments, fn)
 		}
 		else {
-			return Parameter.toKSFragments(node, fragments, arrow, fn)
+			return Parameter.toKSFragments(node, fragments, mode, fn)
 		}
 	} // }}}
 	static toES5Fragments(node, fragments, fn) { // {{{
@@ -78,12 +84,13 @@ class Parameter extends AbstractNode {
 		
 		return fn(fragments)
 	} // }}}
-	static toKSFragments(node, fragments, arrow, fn) { // {{{
+	static toKSFragments(node, fragments, mode: ParameterMode, fn) { // {{{
 		const data = node.data()
 		const parameters = node.parameters()
 		const signature = node.type()
-		const name = arrow ? '__ks_arguments' : 'arguments'
 		const async = signature.isAsync()
+		
+		const name = mode == ParameterMode::Default ? 'arguments' : '__ks_arguments'
 		
 		let parameter, ctrl
 		let maxb = 0
@@ -148,7 +155,7 @@ class Parameter extends AbstractNode {
 		//console.log(rb, ra)
 		//console.log(maxb, maxa)
 		
-		if	!arrow &&
+		if	mode == ParameterMode::Default &&
 			(
 				(rest != -1 && !fr && (db == 0 || db + 1 == rest)) ||
 				(rest == -1 && signature.max() == l && (db == 0 || db == l))
@@ -368,8 +375,11 @@ class Parameter extends AbstractNode {
 			}
 		} // }}}
 		else { // {{{
-			if arrow {
-				fragments.code('...__ks_arguments')
+			if mode == ParameterMode::ArrowFunction {
+				fragments.code(`...\(name)`)
+			}
+			if mode == ParameterMode::HybridConstructor {
+				fragments.code(name)
 			}
 			
 			fragments = fn(fragments)
@@ -405,7 +415,7 @@ class Parameter extends AbstractNode {
 					
 					ctrl.done()
 				}
-				else {
+				else if mode != ParameterMode::HybridConstructor {
 					fragments
 						.newControl()
 						.code(`if(\(name).length < \(signature.min()))`)

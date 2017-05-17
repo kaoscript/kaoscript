@@ -4,6 +4,7 @@
     "Foo": {
       "abstract": "false",
       "alien": "false",
+      "hybrid": "false",
       "sealed": "false",
       "constructors": [
         {

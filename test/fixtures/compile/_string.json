@@ -4,6 +4,7 @@
     "String": {
       "abstract": "false",
       "alien": "true",
+      "hybrid": "false",
       "sealed": "true",
       "constructors": [],
       "destructors": 0,
@@ -22,18 +23,6 @@
             "throws": []
           }
         ],
-        "lower": [
-          {
-            "access": 3,
-            "async": "false",
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "String",
-            "sealed": "true",
-            "throws": []
-          }
-        ],
         "lines": [
           {
             "access": 3,
@@ -48,6 +37,18 @@
               }
             ],
             "returns": "Array",
+            "sealed": "true",
+            "throws": []
+          }
+        ],
+        "lower": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
             "sealed": "true",
             "throws": []
           }

@@ -14,6 +14,7 @@ module.exports = function() {
 			if(message === void 0 || message === null) {
 				message = "Not Implemented";
 			}
+			(1);
 			this.message = message;
 		},
 		__ks_cons: function(args) {

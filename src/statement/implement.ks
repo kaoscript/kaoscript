@@ -268,7 +268,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 			}
 			
-			const block = Parameter.toFragments(this, line, false, func(node) {
+			const block = Parameter.toFragments(this, line, ParameterMode::Default, func(node) {
 				line.code(')')
 				
 				return line.newBlock()
@@ -454,7 +454,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		
 		line.code('.', @data.name.name, ' = function(')
 		
-		const block = Parameter.toFragments(this, line, false, func(fragments) {
+		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 		
