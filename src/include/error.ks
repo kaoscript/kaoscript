@@ -58,10 +58,6 @@ export class Exception extends Error {
 		super()
 		
 		@name = this.constructor.name
-		
-		if !?this.stack {
-			@captureStackTrace()
-		}
 	} // }}}
 	
 	constructor(@message, @fileName, @lineNumber) { // {{{
@@ -74,15 +70,6 @@ export class Exception extends Error {
 	
 	constructor(@message, node: AbstractNode, data) { // {{{
 		this(message, node.file(), data.start.line)
-	} // }}}
-	
-	private captureStackTrace() { // {{{
-		if Error.captureStackTrace? {
-			Error.captureStackTrace(this)
-		}
-		else {
-			this.stack = (new Error()).stack
-		}
 	} // }}}
 	
 	toString() { // {{{
@@ -189,6 +176,9 @@ export class SyntaxException extends Exception {
 		throwDeadCode(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Dead code`, node)
 		} // }}}
+		throwDuplicateKey(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Duplicate key has been found in object`, node)
+		} // }}}
 		throwExclusiveWildcardImport(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Wilcard import is only supported for kaoscript file`, node)
 		} // }}}
@@ -197,6 +187,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwInvalidAwait(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
+		} // }}}
+		throwInvalidEnumAccess(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Accessing an enum can only be done with "::"`, node)
 		} // }}}
 		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)

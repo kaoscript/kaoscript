@@ -21,7 +21,9 @@ class IncludeDeclaration extends Statement {
 					module.addInclude(path)
 					
 					try {
+						//console.time('parse')
 						data = module.parse(data, path)
+						//console.timeEnd('parse')
 					}
 					catch error {
 						error.filename = path
@@ -61,7 +63,9 @@ class IncludeDeclaration extends Statement {
 				module.addInclude(path)
 				
 				try {
+					//console.time('parse')
 					data = module.parse(data, path)
+					//console.timeEnd('parse')
 				}
 				catch error {
 					error.filename = path

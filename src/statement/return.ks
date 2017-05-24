@@ -4,6 +4,7 @@ class ReturnStatement extends Statement {
 		_function				= null
 		_exceptions: Boolean	= false
 		_value					= null
+		_temp: String			= null
 	}
 	constructor(@data, @parent) { // {{{
 		super(data, parent)
@@ -29,6 +30,10 @@ class ReturnStatement extends Statement {
 	prepare() { // {{{
 		if @value != null {
 			@value.prepare()
+			
+			if @afterwards.length != 0 {
+				@temp = @scope.acquireTempName(this)
+			}
 		}
 	} // }}}
 	translate() { // {{{
@@ -40,6 +45,7 @@ class ReturnStatement extends Statement {
 	isAwait() => @await
 	isExit() => true
 	isReturning(type: Type) => @value.type().isInstanceOf(type)
+	reference() => @temp
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 		
@@ -49,7 +55,7 @@ class ReturnStatement extends Statement {
 		
 		line.done()
 	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { // {{{
 		if @value == null {
 			if @function?.type().isAsync() {
 				fragments.line('return __ks_cb()')
@@ -58,24 +64,59 @@ class ReturnStatement extends Statement {
 				fragments.line('return', @data)
 			}
 		}
-		else {
+		else if @temp == null {
+			if @variables.length != 0 {
+				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
+			}
+			
 			if @value.isAwaiting() {
 				return this.toAwaitStatementFragments^@(fragments)
 			}
-			else if @function?.type().isAsync() {
-				fragments
-					.newLine()
-					.code('return __ks_cb(null, ')
-					.compile(@value)
-					.code(')')
-					.done()
+			else {
+				if @function?.type().isAsync() {
+					fragments
+						.newLine()
+						.code('return __ks_cb(null, ')
+						.compile(@value)
+						.code(')')
+						.done()
+				}
+				else {
+					fragments
+						.newLine()
+						.code('return ')
+						.compile(@value)
+						.done()
+				}
+			}
+		}
+		else {
+			if @value.isAwaiting() {
+				throw new NotImplementedException(this)
 			}
 			else {
+				@variables.remove(@temp)
+				
+				if @variables.length != 0 {
+					fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
+				}
+				
 				fragments
 					.newLine()
-					.code('return ')
+					.code(`\($runtime.scope(this))\(@temp) = `)
 					.compile(@value)
 					.done()
+				
+				for afterward in @afterwards {
+					afterward.toAfterwardFragments(fragments)
+				}
+				
+				if @function?.type().isAsync() {
+					fragments.line(`return __ks_cb(null, \(@temp))`)
+				}
+				else {
+					fragments.line(`return \(@temp)`)
+				}
 			}
 		}
 	} // }}}

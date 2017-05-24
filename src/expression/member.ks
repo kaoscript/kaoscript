@@ -38,8 +38,15 @@ class MemberExpression extends Expression {
 			else {
 				@property = @data.property.name
 				
-				if @type !?= @object.type().getProperty(@property) {
-					ReferenceException.throwNotDefinedProperty(@property, this)
+				const type = @object.type()
+				
+				if @type !?= type.getProperty(@property) {
+					if type is EnumType {
+						SyntaxException.throwInvalidEnumAccess(this)
+					}
+					else {
+						ReferenceException.throwNotDefinedProperty(@property, this)
+					}
 				}
 			}
 		}

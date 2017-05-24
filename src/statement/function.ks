@@ -154,7 +154,8 @@ class FunctionDeclaration extends Statement {
 		@scope.define('this', true, this)
 		
 		@name = @data.name.name
-		@variable = this.greatScope().define(@data.name.name, true, this)
+		
+		@variable = this.greatScope().define(@name, true, this)
 		
 		@parameters = []
 		for parameter in @data.parameters {

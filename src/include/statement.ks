@@ -31,8 +31,8 @@ abstract class Statement extends AbstractNode {
 	isReturning(type: Type) => true
 	statement() => this
 	toFragments(fragments, mode) { // {{{
-		let variables = @variables()
-		if variables.length {
+		const variables = this.variables()
+		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
 		

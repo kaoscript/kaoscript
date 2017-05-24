@@ -1,23 +1,36 @@
 class ObjectExpression extends Expression {
 	private {
-		_properties		= []
-		_templates		= []
+		_properties				= {}
+		_propertyCount			= 0
+		_templates				= []
 		_type: Type
 	}
 	analyse() { // {{{
+		let ref
 		for property in @data.properties {
 			if property.name.kind == NodeKind::Identifier || property.name.kind == NodeKind::Literal {
-				@properties.push(property = new ObjectMember(property, this))
+				property = new ObjectMember(property, this)
+				property.analyse()
+				
+				ref = property.reference()
+				if @properties[ref]? {
+					SyntaxException.throwDuplicateKey(property)
+				}
+				else {
+					@properties[ref] = property
+				}
+				
+				@propertyCount++
 			}
 			else {
 				@templates.push(property = new ObjectTemplateMember(property, this))
+				
+				property.analyse()
 			}
-			
-			property.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
-		for property in @properties {
+		for :property of @properties {
 			property.prepare()
 		}
 		
@@ -28,7 +41,7 @@ class ObjectExpression extends Expression {
 		@type = @scope.reference('Object')
 	} // }}}
 	translate() { // {{{
-		for property in @properties {
+		for :property of @properties {
 			property.translate()
 		}
 		
@@ -38,17 +51,17 @@ class ObjectExpression extends Expression {
 	} // }}}
 	reference() => @parent.reference()
 	toFragments(fragments, mode) { // {{{
-		if @properties.length {
+		if @propertyCount == 0 {
+			fragments.code('{}')
+		}
+		else {
 			let object = fragments.newObject()
 			
-			for property in @properties {
+			for :property of @properties {
 				object.newLine().compile(property)
 			}
 			
 			object.done()
-		}
-		else {
-			fragments.code('{}')
 		}
 	} // }}}
 	type() => @type
@@ -109,9 +122,11 @@ class ObjectTemplateMember extends Expression {
 		this.statement().afterward(this)
 	} // }}}
 	prepare() { // {{{
+		@name.prepare()
 		@value.prepare()
 	} // }}}
 	translate() { // {{{
+		@name.translate()
 		@value.translate()
 	} // }}}
 	toAfterwardFragments(fragments) { // {{{

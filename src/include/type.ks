@@ -996,6 +996,7 @@ class EnumType extends Type {
 		index: @index
 		kind: @kind
 	} // }}}
+	getProperty(name: String) => null
 	hasElement(name: String) { // {{{
 		for element in @elements {
 			if element == name {
