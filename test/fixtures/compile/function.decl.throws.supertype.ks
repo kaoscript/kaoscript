@@ -6,7 +6,7 @@ func foo(bar) ~ SyntaxError, RangeError {
 }
 
 try {
-	foo()
+	foo(42)
 }
 on Error {
 }

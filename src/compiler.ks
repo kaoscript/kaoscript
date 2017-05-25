@@ -317,7 +317,7 @@ const $expressions = {
 			return new ArrayComprehensionForRange(data, parent, scope)
 		}
 		else {
-			throw new NotSupportedException(parent, `Unexpected kind \(data.loop.kind)`)
+			throw new NotSupportedException(`Unexpected kind \(data.loop.kind)`, parent)
 		}
 	}
 	`\(NodeKind::ArrayExpression)`				: ArrayExpression

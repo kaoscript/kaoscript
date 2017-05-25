@@ -1,0 +1,1 @@
+TypeException: Constructor of class "Point3D" can't be matched to given arguments (line 18, file "fixtures/compile/class.constructor.limit.ks")

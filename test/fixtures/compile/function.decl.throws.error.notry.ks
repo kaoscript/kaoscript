@@ -3,4 +3,4 @@ extern class Error
 func foo(bar) ~ Error {
 }
 
-foo()
+foo(42)

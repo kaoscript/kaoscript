@@ -1,10 +1,10 @@
 module.exports = function(expect) {
-	function foo(...items) {
+	let foo = function(...items) {
 		if(items.length < 1) {
 			throw new SyntaxError("wrong number of rest values (" + items.length + " for at least 1)");
 		}
 		return [items];
-	}
+	};
 	expect(function() {
 		return foo();
 	}).to.throw();

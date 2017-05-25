@@ -25,6 +25,10 @@ class CreateExpression extends Expression {
 	prepare() { // {{{
 		@class.prepare()
 		
+		for argument in @arguments {
+			argument.prepare()
+		}
+		
 		if type !?= @class.type().dereference() {
 			ReferenceException.throwNotDefined(@class.type().name(), this)
 		}
@@ -32,15 +36,14 @@ class CreateExpression extends Expression {
 			if type.isAbstract() {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
+			else if !type.matchArguments([argument.type() for argument in @arguments]) {
+				TypeException.throwNoMatchingConstructor(type.name(), this)
+			}
 			
 			@type = type.reference()
 		}
 		else if !type.isAny() {
 			TypeException.throwNotClass(type.name(), this)
-		}
-		
-		for argument in @arguments {
-			argument.prepare()
 		}
 	} // }}}
 	translate() { // {{{

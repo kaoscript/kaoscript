@@ -75,7 +75,10 @@ class CallExpression extends Expression {
 					}
 				}
 				
-				if type is OverloadedFunctionType {
+				if type is FunctionType {
+					this.makeCallee(type)
+				}
+				else if type is OverloadedFunctionType {
 					this.makeCallee(type)
 				}
 				else {
@@ -216,6 +219,14 @@ class CallExpression extends Expression {
 	isNullableComputed() => @nullableComputed
 	makeCallee(type) { // {{{
 		switch type {
+			is FunctionType => {
+				if !type.matchArguments([argument.type() for argument in @arguments]) {
+					TypeException.throwNoMatchingFunction(this)
+				}
+				else {
+					this.addCallee(new DefaultCallee(@data, @object, this))
+				}
+			}
 			is OverloadedFunctionType => {
 				const args = [argument.type() for argument in @arguments]
 				const matches = []

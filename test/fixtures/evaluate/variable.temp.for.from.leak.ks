@@ -1,6 +1,6 @@
 require expect: func
 
-func foo(...args) {
+let foo = func(...args) {
 	let i = 42
 	
 	for i from 0 til args.length {

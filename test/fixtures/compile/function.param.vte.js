@@ -1,6 +1,6 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function(expect) {
-	function foo(x) {
+	let foo = function(x) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
@@ -11,7 +11,7 @@ module.exports = function(expect) {
 			throw new TypeError("'x' is not of type 'Number'");
 		}
 		return [x];
-	}
+	};
 	expect(function() {
 		return foo();
 	}).to.throw();

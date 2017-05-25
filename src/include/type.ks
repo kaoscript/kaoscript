@@ -409,8 +409,10 @@ abstract class Type {
 	isFlexible() => false
 	isFunction() => false
 	isNumber() => false
+	isObject() => false
 	isSealed() => false
 	isString() => false
+	matchArgument(argument: Type) => this.equals(argument)
 	unalias(): Type => this
 }
 
@@ -769,7 +771,7 @@ class ClassType extends Type {
 	} // }}}
 	getInstanceProperty(name: String): Type { // {{{
 		if @instanceMethods[name] is Array {
-			throw new NotImplementedException()
+			return new ClassMethodSetType(@instanceMethods[name])
 		}
 		else if @instanceVariables[name] is ClassVariableType {
 			return @instanceVariables[name]
@@ -927,6 +929,25 @@ class ClassType extends Type {
 			return this.match(b.extends())
 		}
 		else {
+			return false
+		}
+	} // }}}
+	matchArguments(arguments: Array<Type>) { // {{{
+		if @constructors.length == 0 {
+			if @extending {
+				return @extends.matchArguments(arguments)
+			}
+			else {
+				return @alien || arguments.length == 0
+			}
+		}
+		else {
+			for constructor in @constructors {
+				if constructor.matchArguments(arguments) {
+					return true
+				}
+			}
+			
 			return false
 		}
 	} // }}}
@@ -1511,11 +1532,14 @@ class ParameterType extends Type {
 		return @type.match(b._type)
 	} // }}}
 	matchArgument(argument: Type) { // {{{
-		if @type.isAny() || @type.equals(argument) {
+		if @type.isAny() || argument.isAny() {
 			return true
 		}
 		
-		return false
+		//console.log(@type)
+		//console.log(argument)
+		
+		return @type.matchArgument(argument)
 	} // }}}
 	max() => @max
 	min() => @min
@@ -1650,6 +1674,7 @@ class ReferenceType extends Type {
 	} // }}}
 	isNullable() => @nullable
 	isNumber() => @name == 'Number'
+	isObject() => @name == 'Object'
 	isString() => @name == 'String'
 	match(b: Type): Boolean { // {{{
 		if b.isAny() {
@@ -1667,12 +1692,37 @@ class ReferenceType extends Type {
 					return false
 				}
 			}
+			else if a is ClassType && b is ClassType {
+				return a.match(b)
+			}
 			else {
 				return a == b
 			}
 		}
 		else {
 			return false
+		}
+	} // }}}
+	matchArgument(argument: Type) { // {{{
+		const a = this.unalias()
+		const b = argument.unalias()
+		
+		if a is ReferenceType {
+			if b is ReferenceType {
+				return a._name == b._name
+			}
+			else {
+				return false
+			}
+		}
+		else if a is ClassType && b is ClassType {
+			return a.match(b)
+		}
+		else if a is EnumType {
+			return a.type().matchArgument(argument)
+		}
+		else {
+			return a == b
 		}
 	} // }}}
 	name() => @name
@@ -1731,6 +1781,11 @@ class UnionType extends Type {
 	private {
 		_types: Array<Type>
 	}
+	constructor() { // {{{
+		super()
+		
+		@types = []
+	} // }}}
 	constructor(@types)
 	addType(type: Type) { // {{{
 		throw new NotImplementedException()
@@ -1765,6 +1820,15 @@ class UnionType extends Type {
 	isNullable() { // {{{
 		for type in @types {
 			if type.isNullable() {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
+	matchArgument(argument: Type) { // {{{
+		for type in @types {
+			if type.matchArgument(argument) {
 				return true
 			}
 		}
@@ -1856,6 +1920,9 @@ class ClassVariableType extends ReferenceType {
 	} // }}}
 	constructor(ref: ReferenceType) { // {{{
 		super(ref._name, ref._nullable, ref._parameters, ref._domain)
+	} // }}}
+	constructor(@name, @nullable = null, @domain) { // {{{
+		super(name, nullable, domain)
 	} // }}}
 	access(@access) => this
 	export() => { // {{{
@@ -1949,6 +2016,19 @@ class ClassMethodType extends FunctionType {
 	} // }}}
 }
 
+class ClassMethodSetType extends OverloadedFunctionType {
+	constructor(@functions) { // {{{
+		super()
+		
+		for function in functions {
+			if function.isAsync() {
+				@async = true
+				break
+			}
+		}
+	} // }}}
+}
+
 class ClassConstructorType extends FunctionType {
 	private {
 		_access: Accessibility	= Accessibility::Public
@@ -2025,7 +2105,7 @@ class NamespaceVariableType extends ReferenceType {
 		_sealed: Bololean	= false
 	}
 	static fromAST(data, node: AbstractNode) { // {{{
-		const type = new NamespaceVariableType(Type.fromAST(data.type, node))
+		const type = new NamespaceVariableType(Type.fromAST(data.type, node):ReferenceType)
 		
 		if data.modifiers? {
 			for modifier in data.modifiers {

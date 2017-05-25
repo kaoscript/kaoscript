@@ -15,10 +15,10 @@ class ImplementDeclaration extends Statement {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
-						property = new ImplementClassFieldDeclaration(property, this, @type)
+						property = new ImplementClassFieldDeclaration(property, this, @type:ClassType)
 					}
 					NodeKind::MethodDeclaration => {
-						property = new ImplementClassMethodDeclaration(property, this, @type)
+						property = new ImplementClassMethodDeclaration(property, this, @type:ClassType)
 					}
 					=> {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
@@ -34,10 +34,10 @@ class ImplementDeclaration extends Statement {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
-						property = new ImplementNamespaceVariableDeclaration(property, this, @type)
+						property = new ImplementNamespaceVariableDeclaration(property, this, @type:NamespaceType)
 					}
 					NodeKind::MethodDeclaration => {
-						property = new ImplementNamespaceFunctionDeclaration(property, this, @type)
+						property = new ImplementNamespaceFunctionDeclaration(property, this, @type:NamespaceType)
 					}
 					=> {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)

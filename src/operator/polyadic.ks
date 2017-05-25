@@ -364,8 +364,8 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	private {
 		_type: Type
 	}
-	constructor(data, parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+	constructor(@data, @parent, @scope = new Scope(parent.scope())) { // {{{
+		super(data, parent, scope)
 	} // }}}
 	analyse() { // {{{
 		@operands = []

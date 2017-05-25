@@ -1,6 +1,6 @@
 require expect: func
 
-func foo(x = null, y = null, z) {
+let foo = func(x = null, y = null, z) {
 	return [x, y, z]
 }
 

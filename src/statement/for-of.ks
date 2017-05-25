@@ -63,6 +63,11 @@ class ForOfStatement extends Statement {
 	prepare() { // {{{
 		@expression.prepare()
 		
+		const type = @expression.type()
+		if !(type.isAny() || type.isObject()) {
+			TypeException.throwInvalidForOfExpression(this)
+		}
+		
 		if @expression.isEntangled() {
 			@expressionName = this.greatScope().acquireTempName()
 			
@@ -70,7 +75,7 @@ class ForOfStatement extends Statement {
 		}
 		
 		if @defineValue {
-			@valueVariable.type(@expression.type().parameter())
+			@valueVariable.type(type.parameter())
 		}
 		
 		if @key? {

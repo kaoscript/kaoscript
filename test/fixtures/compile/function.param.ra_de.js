@@ -1,5 +1,5 @@
 module.exports = function(expect) {
-	function foo() {
+	let foo = function() {
 		if(arguments.length < 1) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
@@ -9,7 +9,7 @@ module.exports = function(expect) {
 		let __ks__;
 		let x = arguments.length > 3 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 42;
 		return [items, x];
-	}
+	};
 	expect(function() {
 		return foo();
 	}).to.throw();

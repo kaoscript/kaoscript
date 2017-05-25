@@ -23,6 +23,6 @@ class Rectangle extends Shape {
 	}
 }
 
-let r = new Rectangle('black')
+let r = new Rectangle('black', 'white')
 
 console.log(r.draw())

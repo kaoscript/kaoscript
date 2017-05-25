@@ -1,5 +1,5 @@
 module.exports = function(expect) {
-	function foo(x, y, z) {
+	let foo = function(x, y, z) {
 		if(arguments.length < 3) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
 		}
@@ -13,7 +13,7 @@ module.exports = function(expect) {
 			throw new TypeError("'z' is not nullable");
 		}
 		return [x, y, z];
-	}
+	};
 	expect(function() {
 		return foo();
 	}).to.throw();

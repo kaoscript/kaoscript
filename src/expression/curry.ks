@@ -20,4 +20,5 @@ class CurryExpression extends CallExpression {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
+	type() => @scope.reference('Function')
 }

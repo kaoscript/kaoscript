@@ -1,6 +1,6 @@
 require expect: func
 
-func foo(...{1,3}items, ...{1,3}values) {
+let foo = func(...{1,3}items, ...{1,3}values) {
 	return [items, values]
 }
 

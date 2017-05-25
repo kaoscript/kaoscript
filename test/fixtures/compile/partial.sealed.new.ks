@@ -30,6 +30,6 @@ impl Shape {
 	}
 }
 
-console.log(new Shape().draw())
+console.log(new Shape('blue').draw())
 
-console.log(new Shape().makeRed().draw())
+console.log(new Shape('blue').makeRed().draw())

@@ -66,6 +66,6 @@ module.exports = function() {
 		}
 		throw new SyntaxError("wrong number of arguments");
 	};
-	console.log((new Shape()).draw());
-	console.log(__ks_Shape._im_makeRed(new Shape()).draw());
+	console.log((new Shape("blue")).draw());
+	console.log(__ks_Shape._im_makeRed(new Shape("blue")).draw());
 }

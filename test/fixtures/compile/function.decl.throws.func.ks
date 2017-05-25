@@ -4,5 +4,5 @@ func foo(bar) ~ Error {
 }
 
 func bar() ~ Error {
-	foo()
+	foo(42)
 }

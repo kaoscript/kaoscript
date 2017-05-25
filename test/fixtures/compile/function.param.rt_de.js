@@ -1,6 +1,6 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function(expect) {
-	function foo() {
+	let foo = function() {
 		let __ks_i = -1;
 		let items = [];
 		while(Type.isString(arguments[++__ks_i])) {
@@ -10,7 +10,7 @@ module.exports = function(expect) {
 		let __ks__;
 		let x = arguments.length > __ks_m && (__ks__ = arguments[__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 42;
 		return [items, x];
-	}
+	};
 	expect(foo()).to.eql([[], 42]);
 	expect(foo(1)).to.eql([[], 1]);
 	expect(foo("foo")).to.eql([["foo"], 42]);

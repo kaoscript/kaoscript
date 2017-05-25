@@ -30,7 +30,7 @@ module.exports = function() {
 				ErrorAttribute.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				Attribute.prototype.__ks_cons.call(this, args);
+				throw new SyntaxError("wrong number of arguments");
 			}
 		}
 	}

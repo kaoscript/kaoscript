@@ -1,1 +1,1 @@
-TypeException: Arguments don't match the function (line 4, file "fixtures/compile/function.overloading.call.number.ks")
+TypeException: Function can't be matched to given arguments (line 4, file "fixtures/compile/function.overloading.call.number.ks")

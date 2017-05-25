@@ -7,11 +7,14 @@ class MemberExpression extends Expression {
 		_tested: Boolean		= false
 		_type: Type
 	}
-	constructor(@data, @parent, @scope, @object) {
+	constructor(@data, @parent, @scope) { // {{{
+		super(data, parent, scope)
+	} // }}}
+	constructor(@data, @parent, @scope, @object) { // {{{
 		super(data, parent, scope)
 		
 		@prepareObject = false
-	}
+	} // }}}
 	analyse() { // {{{
 		if @prepareObject {
 			@object = $compile.expression(@data.object, this)
@@ -102,6 +105,12 @@ class MemberExpression extends Expression {
 			}
 			else {
 				fragments.code($dot).compile(@property)
+			}
+			
+			if @type is ClassMethodSetType {
+				if @parent is not UnaryOperatorExpression {
+					fragments.code('.bind(').compile(@object).code(')')
+				}
 			}
 		}
 	} // }}}

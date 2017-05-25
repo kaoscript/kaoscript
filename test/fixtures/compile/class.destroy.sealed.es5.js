@@ -90,7 +90,7 @@ module.exports = function() {
 				Rectangle.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				Shape.prototype.__ks_cons.call(this, args);
+				throw new SyntaxError("wrong number of arguments");
 			}
 		},
 		__ks_func_draw_0: function() {

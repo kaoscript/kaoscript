@@ -780,6 +780,7 @@ class ClassDeclaration extends Statement {
 		}
 	} // }}}
 	extends() => @extendsType
+	hasConstructors() => @constructors.length != 0
 	hasInits() { // {{{
 		for :field of @instanceVariables {
 			if field.hasDefaultValue() {
@@ -1865,19 +1866,19 @@ class ClassConstructorDeclaration extends Statement {
 		let extend = null
 		if node.isExtending() {
 			extend = func(node, fragments, ctrl?, variable) {
-				const name = variable.extends().name()
-				const extends = node.scope().getVariable(name).type()
-				const constructorName = extends.isSealedAlien() ? 'constructor' : '__ks_cons'
-				
-				if ctrl? {
+				if variable.hasConstructors() {
 					ctrl
 						.step()
 						.code('else')
 						.step()
-						.line(`\(name).prototype.\(constructorName).call(this, args)`)
+						.line(`throw new SyntaxError("wrong number of arguments")`)
 						.done()
 				}
 				else {
+					const name = variable.extends().name()
+					const extends = node.scope().getVariable(name).type()
+					const constructorName = extends.isSealedAlien() ? 'constructor' : '__ks_cons'
+					
 					fragments.line(`\(name).prototype.\(constructorName).call(this, args)`)
 				}
 			}

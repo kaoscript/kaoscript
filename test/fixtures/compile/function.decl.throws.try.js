@@ -8,7 +8,7 @@ module.exports = function() {
 		}
 	}
 	try {
-		foo();
+		foo(42);
 	}
 	catch(__ks_0) {
 	}

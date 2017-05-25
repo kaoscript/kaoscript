@@ -81,6 +81,11 @@ class ForInStatement extends Statement {
 	prepare() { // {{{
 		@expression.prepare()
 		
+		const type = @expression.type()
+		if !(type.isAny() || type.isArray()) {
+			TypeException.throwInvalidForInExpression(this)
+		}
+		
 		if @expression.isEntangled() {
 			@expressionName = this.greatScope().acquireTempName()
 			
@@ -88,7 +93,7 @@ class ForInStatement extends Statement {
 		}
 		
 		if @defineValue {
-			@valueVariable.type(@expression.type().parameter())
+			@valueVariable.type(type.parameter())
 		}
 		
 		if !?@index && !(@data.index? && !@data.declaration && this.greatScope().hasVariable(@data.index.name)) {

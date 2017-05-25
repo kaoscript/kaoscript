@@ -286,8 +286,17 @@ export class TypeException extends Exception {
 		throwInvalidCasting(node) ~ TypeException { // {{{
 			throw new TypeException(`Only variables can be casted`, node)
 		} // }}}
+		throwInvalidForInExpression(node) ~ TypeException { // {{{
+			throw new TypeException(`"for..in" must be used with an array`, node)
+		} // }}}
+		throwInvalidForOfExpression(node) ~ TypeException { // {{{
+			throw new TypeException(`"for..of" must be used with an object`, node)
+		} // }}}
+		throwNoMatchingConstructor(name, node) ~ TypeException { // {{{
+			throw new TypeException(`Constructor of class "\(name)" can't be matched to given arguments`, node)
+		} // }}}
 		throwNoMatchingFunction(node) ~ TypeException { // {{{
-			throw new TypeException(`Arguments don't match the function`, node)
+			throw new TypeException(`Function can't be matched to given arguments`, node)
 		} // }}}
 		throwNotAsyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not asynchronous`, node)
