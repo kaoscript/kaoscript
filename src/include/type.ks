@@ -372,6 +372,15 @@ abstract class Type {
 				
 				return type
 			}
+			else if data.functions? {
+				const type = new OverloadedFunctionType()
+				
+				for function in data.functions {
+					type.addFunction(Type.import(null, function, domain, node))
+				}
+				
+				return type
+			}
 			else {
 				console.log(data)
 				throw new NotImplementedException(node)
@@ -398,6 +407,7 @@ abstract class Type {
 	} // }}}
 	isExtendable() => false
 	isFlexible() => false
+	isFunction() => false
 	isNumber() => false
 	isSealed() => false
 	isString() => false
@@ -1125,8 +1135,21 @@ class FunctionType extends Type {
 		if b is ReferenceType {
 			return b.name() == 'Function'
 		}
+		else if b is not FunctionType {
+			return false
+		}
 		
-		throw new NotImplementedException()
+		if @async != b._async || @hasRest != b._hasRest || @max != b._max || @min != b._min || @restIndex != b._restIndex || @parameters.length != b._parameters.length {
+			return false
+		}
+		
+		for parameter, index in @parameters {
+			if !parameter.equals(b._parameters[index]) {
+				return false
+			}
+		}
+		
+		return true
 	} // }}}
 	export() => { // {{{
 		async: @async
@@ -1149,6 +1172,7 @@ class FunctionType extends Type {
 		
 		return false
 	} // }}}
+	isFunction() => true
 	matchArguments(arguments: Array<Type>) { // {{{
 		if arguments.length == 0 {
 			return @min == 0
@@ -1406,6 +1430,47 @@ class NamespaceType extends Type {
 		@sealName = `__ks_\(@name)`
 	} // }}}
 	sealName() => @sealName
+	toQuote() { // {{{
+		throw new NotImplementedException()
+	} // }}}
+	toFragments(fragments, node) { // {{{
+		throw new NotImplementedException()
+	} // }}}
+	toTestFragments(fragments, node) { // {{{
+		throw new NotImplementedException()
+	} // }}}
+}
+
+class OverloadedFunctionType extends Type {
+	private {
+		_async: Boolean						= false
+		_functions: Array<FunctionType>		= []
+	}
+	addFunction(type: FunctionType) { // {{{
+		@functions.push(type)
+		
+		if @functions.length == 1 {
+			@async = type.isAsync()
+		}
+	} // }}}
+	equals(b?) { // {{{
+		throw new NotImplementedException()
+	} // }}}
+	export() => ({ // {{{
+		functions: [function.export() for function in @functions]
+	}) // }}}
+	functions() => @functions
+	hasFunction(type: FunctionType) { // {{{
+		for function in @functions {
+			if function.equals(type) {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
+	isAsync() => @async
+	isFunction() => true
 	toQuote() { // {{{
 		throw new NotImplementedException()
 	} // }}}

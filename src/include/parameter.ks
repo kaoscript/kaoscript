@@ -2,6 +2,7 @@ enum ParameterMode {
 	ArrowFunction
 	Default
 	HybridConstructor
+	OverloadedFunction
 }
 
 class Parameter extends AbstractNode {
@@ -90,7 +91,7 @@ class Parameter extends AbstractNode {
 		const signature = node.type()
 		const async = signature.isAsync()
 		
-		const name = mode == ParameterMode::Default ? 'arguments' : '__ks_arguments'
+		const name = (mode == ParameterMode::Default || mode == ParameterMode::OverloadedFunction) ? 'arguments' : '__ks_arguments'
 		
 		let parameter, ctrl
 		let maxb = 0
@@ -378,7 +379,7 @@ class Parameter extends AbstractNode {
 			if mode == ParameterMode::ArrowFunction {
 				fragments.code(`...\(name)`)
 			}
-			if mode == ParameterMode::HybridConstructor {
+			else if mode == ParameterMode::HybridConstructor {
 				fragments.code(name)
 			}
 			
@@ -415,7 +416,7 @@ class Parameter extends AbstractNode {
 					
 					ctrl.done()
 				}
-				else if mode != ParameterMode::HybridConstructor {
+				else if mode == ParameterMode::Default || mode == ParameterMode::ArrowFunction {
 					fragments
 						.newControl()
 						.code(`if(\(name).length < \(signature.min()))`)

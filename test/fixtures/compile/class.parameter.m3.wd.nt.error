@@ -1,1 +1,1 @@
-SyntaxException: Can't differentiate methods (line 1, file "fixtures/compile/class.parameter.m3.wd.nt.ks")
+SyntaxException: Methods can't be differentiated (line 1, file "fixtures/compile/class.parameter.m3.wd.nt.ks")

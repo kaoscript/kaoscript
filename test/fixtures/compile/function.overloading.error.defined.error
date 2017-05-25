@@ -1,0 +1,1 @@
+SyntaxException: Variable "reverse" is not an overloadable function (line 3, file "fixtures/compile/function.overloading.error.defined.ks")

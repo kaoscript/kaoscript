@@ -9,7 +9,7 @@ class AwaitExpression extends Expression {
 	constructor(@data, @parent, @scope = null) { // {{{
 		super(data, parent, scope)
 		
-		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclaration || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
+		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
 			if parent is TryStatement {
 				@try = parent
 			}

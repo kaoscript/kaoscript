@@ -46,13 +46,13 @@ class CallExpression extends Expression {
 			
 			@property = @data.callee.property.name
 			
-			this.makeCallee(@object.type())
+			this.makeMemberCallee(@object.type())
 		}
 		else {
 			if @data.callee.kind == NodeKind::Identifier && (variable ?= @scope.getVariable(@data.callee.name)) {
 				const type = variable.type()
 				
-				if type is FunctionType {
+				if type.isFunction() {
 					if type.isAsync() {
 						if @parent is VariableDeclaration {
 							if !@parent.isAwait() {
@@ -75,11 +75,16 @@ class CallExpression extends Expression {
 					}
 				}
 				
-				if substitute ?= variable.replaceCall?(@data, @arguments) {
-					this.addCallee(new SubstituteCallee(@data, substitute, this))
+				if type is OverloadedFunctionType {
+					this.makeCallee(type)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, this))
+					if substitute ?= variable.replaceCall?(@data, @arguments) {
+						this.addCallee(new SubstituteCallee(@data, substitute, this))
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, this))
+					}
 				}
 			}
 			else {
@@ -210,7 +215,40 @@ class CallExpression extends Expression {
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	makeCallee(type) { // {{{
-		//console.log('-- call.makeCallee --')
+		switch type {
+			is OverloadedFunctionType => {
+				const args = [argument.type() for argument in @arguments]
+				const matches = []
+				
+				for function in type.functions() {
+					if function.matchArguments(args) {
+						matches.push(function)
+					}
+				}
+				
+				if matches.length == 0 {
+					TypeException.throwNoMatchingFunction(this)
+				}
+				else if matches.length == 1 {
+					this.addCallee(new DefaultCallee(@data, matches[0], this))
+				}
+				else {
+					const type = new UnionType()
+					
+					for function in matches {
+						type.addType(function.returnType())
+					}
+					
+					this.addCallee(new DefaultCallee(@data, @object, type.refine(), this))
+				}
+			}
+			=> {
+				this.addCallee(new DefaultCallee(@data, @object, this))
+			}
+		}
+	} // }}}
+	makeMemberCallee(type) { // {{{
+		//console.log('-- call.makeMemberCallee --')
 		//console.log(type)
 		//console.log(@property)
 		
@@ -225,6 +263,7 @@ class CallExpression extends Expression {
 					let sealed = false
 					const types = []
 					const m = []
+					const args = [argument.type() for argument in @arguments]
 					
 					let type
 					for method in methods {
@@ -232,7 +271,7 @@ class CallExpression extends Expression {
 							sealed = true
 						}
 						
-						if method.matchArguments([argument.type() for argument in @arguments]) {
+						if method.matchArguments(args) {
 							m.push(method)
 							
 							type = method.returnType()
@@ -268,12 +307,20 @@ class CallExpression extends Expression {
 				}
 			}
 			is FunctionType => {
-				this.makeCalleeFromReference(@scope.reference('Function'))
+				this.makeMemberCalleeFromReference(@scope.reference('Function'))
 			}
 			is NamespaceType => {
 				if property ?= type.getProperty(@property) {
-					if property is FunctionType && type.isSealedProperty(@property) {
-						this.addCallee(new SealedFunctionCallee(@data, type, property, property.returnType(), this))
+					if property is FunctionType {
+						if type.isSealedProperty(@property) {
+							this.addCallee(new SealedFunctionCallee(@data, type, property, property.returnType(), this))
+						}
+						else {
+							this.addCallee(new DefaultCallee(@data, @object, property, this))
+						}
+					}
+					else if property is OverloadedFunctionType {
+						this.makeCallee(property)
 					}
 					else {
 						this.addCallee(new DefaultCallee(@data, @object, property, this))
@@ -284,14 +331,14 @@ class CallExpression extends Expression {
 				}
 			}
 			is ParameterType => {
-				this.makeCallee(type.type())
+				this.makeMemberCallee(type.type())
 			}
 			is ReferenceType => {
-				this.makeCalleeFromReference(type)
+				this.makeMemberCalleeFromReference(type)
 			}
 			is UnionType => {
 				for let type in type.types() {
-					this.makeCallee(type)
+					this.makeMemberCallee(type)
 				}
 			}
 			=> {
@@ -299,7 +346,7 @@ class CallExpression extends Expression {
 			}
 		}
 	} // }}}
-	makeCalleeFromReference(type) { // {{{
+	makeMemberCalleeFromReference(type) { // {{{
 		//console.log('-- call.filterReference --')
 		//console.log(type)
 		
@@ -369,7 +416,7 @@ class CallExpression extends Expression {
 			}
 			is UnionType => {
 				for let type in value.types() {
-					this.makeCallee(type)
+					this.makeMemberCallee(type)
 				}
 			}
 			=> {
@@ -519,10 +566,16 @@ class DefaultCallee extends Callee {
 		_scope: ScopeKind
 		_type: Type
 	}
-	constructor(@data, node) { // {{{
+	constructor(@data, object = null, node) { // {{{
 		super()
 		
-		@expression = $compile.expression(data.callee, node)
+		if object == null {
+			@expression = $compile.expression(data.callee, node)
+		}
+		else {
+			@expression = new MemberExpression(data.callee, node, node.scope(), object)
+		}
+		
 		@expression.analyse()
 		@expression.prepare()
 		
@@ -545,36 +598,16 @@ class DefaultCallee extends Callee {
 			@type = Type.Any
 		}
 	} // }}}
-	constructor(@data, object, node) { // {{{
+	constructor(@data, object = null, type: Type, node) { // {{{
 		super()
 		
-		@expression = new MemberExpression(data.callee, node, node.scope(), object)
-		@expression.analyse()
-		@expression.prepare()
-		
-		@list = node._list
-		@nullable = data.nullable || @expression.isNullable()
-		@nullableComputed = data.nullable && @expression.isNullable()
-		@scope = data.scope.kind
-		
-		const type = @expression.type()
-		
-		if type is ClassType {
-			TypeException.throwConstructorWithoutNew(type.name(), node)
-		}
-		else if type is FunctionType {
-			this.validate(type, node)
-			
-			@type = type.returnType()
+		if object == null {
+			@expression = $compile.expression(data.callee, node)
 		}
 		else {
-			@type = Type.Any
+			@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		}
-	} // }}}
-	constructor(@data, object, type: Type, node) { // {{{
-		super()
 		
-		@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		@expression.analyse()
 		@expression.prepare()
 		

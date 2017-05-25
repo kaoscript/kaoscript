@@ -10,7 +10,7 @@ class ThrowStatement extends Statement {
 		do {
 			if	parent is FunctionExpression ||
 				parent is LambdaExpression ||
-				parent is FunctionDeclaration ||
+				parent is FunctionDeclarator ||
 				parent is ClassMethodDeclaration ||
 				parent is ImplementClassMethodDeclaration ||
 				parent is ImplementNamespaceFunctionDeclaration

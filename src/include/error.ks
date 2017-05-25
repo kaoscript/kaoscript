@@ -203,6 +203,9 @@ export class SyntaxException extends Exception {
 		throwMissingRequirement(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`import is missing the argument "\(name)"`, node)
 		} // }}}
+		throwMixedOverloadedFunction(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Overloaded functions can't mix sync/async`, node)
+		} // }}}
 		throwNoDefaultParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't have a default value`, node)
 		} // }}}
@@ -227,11 +230,17 @@ export class SyntaxException extends Exception {
 		throwNotCompatibleConstructor(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parent's constructor of class "\(name)" can't be called`, node)
 		} // }}}
+		throwNotDifferentiableFunction(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Overloaded functions can't be differentiated`, node)
+		} // }}}
 		throwNotDifferentiableMethods(node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Can't differentiate methods`, node)
+			throw new SyntaxException(`Methods can't be differentiated`, node)
 		} // }}}
 		throwNotNamedParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter must be named`, node)
+		} // }}}
+		throwNotOverloadableFunction(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Variable "\(name)" is not an overloadable function`, node)
 		} // }}}
 		throwReservedClassMethod(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Class method "\(name)" is reserved`, node)
@@ -276,6 +285,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwInvalidCasting(node) ~ TypeException { // {{{
 			throw new TypeException(`Only variables can be casted`, node)
+		} // }}}
+		throwNoMatchingFunction(node) ~ TypeException { // {{{
+			throw new TypeException(`Arguments don't match the function`, node)
 		} // }}}
 		throwNotAsyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not asynchronous`, node)

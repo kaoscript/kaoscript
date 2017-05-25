@@ -138,16 +138,11 @@ const $function = {
 
 class FunctionDeclaration extends Statement {
 	private {
-		_await: Boolean			= false
-		_exit: Boolean			= false
+		_main: Boolean				= false
 		_name: String
-		_parameters
-		_signature
-		_statements: Array		= []
-		_variable: Variable
-		_type: Type
+		_variable: FunctionVariable
 	}
-	constructor(data, parent) { // {{{
+	constructor(@data, @parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
 	} // }}}
 	analyse() { // {{{
@@ -155,8 +150,88 @@ class FunctionDeclaration extends Statement {
 		
 		@name = @data.name.name
 		
-		@variable = this.greatScope().define(@name, true, this)
+		if @variable ?= this.greatScope().getLocalVariable(@name) {
+			if @variable is not FunctionVariable {
+				SyntaxException.throwNotOverloadableFunction(@name, this)
+			}
+		}
+		else {
+			@main = true
+			@variable = new FunctionVariable(@name)
+			
+			this.greatScope().addVariable(@name, @variable, this)
+		}
 		
+		const declarator = new FunctionDeclarator(@variable, @data, this)
+		
+		declarator.analyse()
+	} // }}}
+	prepare() { // {{{
+		return unless @main
+		
+		@variable.prepare()
+	} // }}}
+	translate() { // {{{
+		return unless @main
+		
+		@variable.translate()
+	} // }}}
+	name() => @name
+	toStatementFragments(fragments, mode) { // {{{
+		return unless @main
+		
+		if @variable.length() == 1 {
+			@variable.getDeclarator(0).toStatementFragments(fragments, mode)
+		}
+		else {
+			ClassDeclaration.toSwitchFragments(
+				this
+				fragments.newLine()
+				@variable.type()
+				[declarator.type() for declarator in @variable._declarators]
+				@name
+				null
+				(node, fragments) => {
+					const block = fragments.code(`function \(@name)()`).newBlock()
+					
+					return block
+				}
+				(fragments) => {
+					fragments.done()
+				}
+				(fragments, method, index) => {
+					const declarator = @variable.getDeclarator(index)
+					
+					declarator.toSwitchFragments(fragments)
+				}
+				'arguments'
+				false
+			).done()
+		}
+	} // }}}
+	type() => @variable.type()
+	walk(fn) { // {{{
+		if @main {
+			fn(@name, @variable.type())
+		}
+	} // }}}
+}
+
+class FunctionDeclarator extends AbstractNode {
+	private {
+		_await: Boolean				= false
+		_exit: Boolean				= false
+		_parameters
+		_statements: Array			= []
+		_variable: FunctionVariable
+		_type: FunctionType
+	}
+	constructor(@variable, @data, @parent) { // {{{
+		super(data, parent)
+		
+		variable.addDeclarator(this)
+	} // }}}
+	analyse() { // {{{
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
@@ -170,8 +245,6 @@ class FunctionDeclaration extends Statement {
 		}
 		
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
-		
-		@variable.type(@type)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
@@ -212,7 +285,6 @@ class FunctionDeclaration extends Statement {
 	isAwait() => @await
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
-	name() => @name
 	parameters() => @parameters
 	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
 		fragments.code('(__ks_e')
@@ -254,10 +326,10 @@ class FunctionDeclaration extends Statement {
 		fragments.code(')').done()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		const ctrl = fragments.newControl().code(`function \(@name)(`)
+		const ctrl = fragments.newControl().code(`function \(@parent.name())(`)
 		
-		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
-			return node.code(')').step()
+		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(fragments) {
+			return fragments.code(')').step()
 		})
 		
 		if @await {
@@ -286,8 +358,84 @@ class FunctionDeclaration extends Statement {
 		
 		ctrl.done()
 	} // }}}
+	toSwitchFragments(fragments) { // {{{
+		Parameter.toFragments(this, fragments, ParameterMode::OverloadedFunction, (fragments) => fragments)
+		
+		if @await {
+			let index = -1
+			let item
+			
+			for statement, i in @statements while index == -1 {
+				if item ?= statement.toFragments(fragments, Mode::None) {
+					index = i
+				}
+			}
+			
+			if index != -1 {
+				item(@statements.slice(index + 1))
+			}
+		}
+		else {
+			for statement in @statements {
+				fragments.compile(statement, Mode::None)
+			}
+			
+			if !@exit && @type.isAsync() {
+				fragments.line('__ks_cb()')
+			}
+		}
+	} // }}}
 	type() => @type
-	walk(fn) { // {{{
-		fn(@name, @type)
+}
+
+class FunctionVariable extends Variable {
+	private {
+		_declarators: Array<FunctionDeclarator>		= []
+	}
+	constructor(@name) { // {{{
+		super(name, true)
+	} // }}}
+	addDeclarator(declarator: FunctionDeclarator) { // {{{
+		@declarators.push(declarator)
+	} // }}}
+	getDeclarator(index: Number) => @declarators[index]
+	length() => @declarators.length
+	prepare() { // {{{
+		if @declarators.length == 1 {
+			@declarators[0].prepare()
+			
+			@type = @declarators[0].type()
+		}
+		else {
+			@type = new OverloadedFunctionType()
+			
+			let declarator = @declarators[0]
+			declarator.prepare()
+			
+			let type = declarator.type()
+			@type.addFunction(type)
+			
+			const async = type.isAsync()
+			
+			for declarator in @declarators from 1 {
+				declarator.prepare()
+				
+				type = declarator.type()
+				
+				if type.isAsync() != async {
+					SyntaxException.throwMixedOverloadedFunction(declarator)
+				}
+				else if @type.hasFunction(type) {
+					SyntaxException.throwNotDifferentiableFunction(declarator)
+				}
+				
+				@type.addFunction(type)
+			}
+		}
+	} // }}}
+	translate() { // {{{
+		for declarator in @declarators {
+			declarator.translate()
+		}
 	} // }}}
 }

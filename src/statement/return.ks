@@ -9,7 +9,7 @@ class ReturnStatement extends Statement {
 	constructor(@data, @parent) { // {{{
 		super(data, parent)
 		
-		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclaration || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
+		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
 			parent = parent.parent()
 		}
 		

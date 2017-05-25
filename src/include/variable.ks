@@ -1,6 +1,3 @@
-enum VariableKind {
-}
-
 class Variable {
 	private {
 		_immutable: Boolean		= true
