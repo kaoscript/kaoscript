@@ -34,6 +34,13 @@ class VariableDeclaration extends Statement {
 			SyntaxException.throwInvalidAwait(this)
 		}
 		
+		if @data.init? {
+			@hasInit = true
+			
+			@init = $compile.expression(@data.init, this)
+			@init.analyse()
+		}
+		
 		let declarator
 		for data in @data.variables {
 			switch data.name.kind {
@@ -60,15 +67,10 @@ class VariableDeclaration extends Statement {
 			@declarators.push(declarator)
 		}
 		
-		if @data.init? {
-			@hasInit = true
-			
+		if @hasInit {
 			if @declarators.length == 1 && @declarators[0] is VariableIdentifierDeclarator {
 				this.reference(@declarators[0].name())
 			}
-			
-			@init = $compile.expression(@data.init, this)
-			@init.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
@@ -99,6 +101,15 @@ class VariableDeclaration extends Statement {
 	hasInit() => @hasInit
 	init() => @init
 	isAwait() => @await
+	isDeclararingVariable(name: String) { // {{{
+		for declarator in @declarators {
+			if declarator.isDeclararingVariable(name) {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
 	isImmutable() => @immutable
 	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
 		fragments.code('(__ks_e')
@@ -233,6 +244,7 @@ class VariableBindingDeclarator extends AbstractNode {
 		@binding.translate()
 	} // }}}
 	isAlreadyDeclared() => false
+	isDeclararingVariable(name: String) => @binding.isDeclararingVariable(name)
 	toFlatFragments(fragments, init) { // {{{
 		@binding.toFlatFragments(fragments, init)
 	} // }}}
@@ -252,44 +264,46 @@ class VariableBindingDeclarator extends AbstractNode {
 class VariableIdentifierDeclarator extends AbstractNode {
 	private {
 		_alreadyDeclared: Boolean		= false
-		_name
+		_identifier: IdentifierLiteral
+		_name: String
 		_variable: Variable
 	}
 	analyse() { // {{{
-		const name = @data.name.name
+		@name = @data.name.name
 		
-		if @scope.hasLocalVariable(name) {
-			SyntaxException.throwAlreadyDeclared(name, this)
+		if @scope.hasLocalVariable(@name) {
+			SyntaxException.throwAlreadyDeclared(@name, this)
 		}
 		
 		if @options.format.variables == 'es5' {
-			@scope.rename(name)
+			@scope.rename(@name)
 		}
 		
-		if @scope.hasDeclaredLocalVariable(name) {
+		if @scope.hasDeclaredLocalVariable(@name) {
 			@alreadyDeclared = true
 		}
 		
-		@variable = @scope.define(name, @parent.isImmutable(), Type.fromAST(@data.type, this), this)
+		@variable = @scope.define(@name, @parent.isImmutable(), Type.fromAST(@data.type, this), this)
 		
-		@name = new IdentifierLiteral(@data.name, this)
-		@name.analyse()
+		@identifier = new IdentifierLiteral(@data.name, this)
+		@identifier.analyse()
 	} // }}}
 	prepare() { // {{{
-		@name.prepare()
+		@identifier.prepare()
 	} // }}}
 	translate() { // {{{
-		@name.translate()
+		@identifier.translate()
 	} // }}}
 	isAlreadyDeclared() => @alreadyDeclared
+	isDeclararingVariable(name: String) => @name == name
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(@name)
+		fragments.compile(@identifier)
 	} // }}}
-	name() => @variable.name()
+	name() => @name
 	type(type: Type) { // {{{
 		@variable.type(type)
 	} // }}}
 	walk(fn) { // {{{
-		fn(@variable.name(), @variable.type())
+		fn(@name, @variable.type())
 	} // }}}
 }

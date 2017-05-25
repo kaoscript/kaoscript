@@ -34,6 +34,8 @@ class ExpressionStatement extends Statement {
 				}
 				
 				@scope.define(data.left.name, false, this)
+				
+				return [data.left.name]
 			}
 		}
 	} // }}}

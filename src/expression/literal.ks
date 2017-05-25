@@ -42,15 +42,33 @@ class Literal extends Expression {
 
 class IdentifierLiteral extends Literal {
 	private {
+		_assignenement			= null
 		_isVariable: Boolean	= false
 		_variable: Variable
 		_type: Type
 	}
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.name)
+		
+		const statement = parent.statement()
+		while parent != statement {
+			if parent is AssignmentOperatorExpression {
+				@assignenement = parent
+				break
+			}
+			
+			parent = parent.parent()
+		}
+		
+		if @assignenement == null && statement is VariableDeclaration {
+			@assignenement = statement
+		}
 	} // }}}
 	analyse() { // {{{
-		if @variable ?= @scope.getVariable(@value) {
+		if @assignenement != null && @assignenement.isDeclararingVariable(@name) {
+			ReferenceException.throwSelfDefinedVariable(@value, this)
+		}
+		else if @variable ?= @scope.getVariable(@value) {
 			@isVariable = true
 		}
 		else if $predefined[`__\(@value)`] is Function {

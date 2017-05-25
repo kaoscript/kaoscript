@@ -1,14 +1,19 @@
 class AssignmentOperatorExpression extends Expression {
 	private {
-		_await: Boolean		= false
+		_await: Boolean				= false
 		_left
 		_right
+		_variables: Array<String>	= []
 	}
 	analyse() { // {{{
-		this.assignment(@data)
+		let variables = this.assignment(@data)
 		
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
+		
+		if variables? {
+			@variables = variables
+		}
 		
 		@right = $compile.expression(@data.right, this)
 		@right.analyse()
@@ -23,19 +28,20 @@ class AssignmentOperatorExpression extends Expression {
 		@left.translate()
 		@right.translate()
 	} // }}}
+	assignment(data) { // {{{
+		let expression = this
+		while expression._parent is not Statement {
+			expression = expression._parent
+		}
+		
+		return expression._parent.assignment(data, expression)
+	} // }}}
 	isAssignable() => true
 	isAwait() => @await
 	isAwaiting() => @right.isAwaiting()
 	isComputed() => true
+	isDeclararingVariable(name: String) => @variables.contains(name)
 	isNullable() => @right.isNullable()
-	assignment(data) { // {{{
-		let expression = this
-		while !(expression._parent is Statement) {
-			expression = expression._parent
-		}
-		
-		expression._parent.assignment(data, expression)
-	} // }}}
 	toNullableFragments(fragments) { // {{{
 		fragments.compileNullable(@right)
 	} // }}}

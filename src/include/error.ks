@@ -159,6 +159,9 @@ export class ReferenceException extends Exception {
 		throwNotDefinedProperty(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Property "\(name)" is not defined`, node)
 		} // }}}
+		throwSelfDefinedVariable(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`Variable "\(name)" is being self-defined`, node)
+		} // }}}
 	}
 }
 

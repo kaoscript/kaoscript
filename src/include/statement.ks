@@ -23,6 +23,8 @@ abstract class Statement extends AbstractNode {
 				@variables.push(data.left.name)
 			
 				@scope.define(data.left.name, false, this)
+				
+				return [data.left.name]
 			}
 		}
 	} // }}}

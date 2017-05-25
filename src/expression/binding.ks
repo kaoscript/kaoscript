@@ -39,6 +39,15 @@ class ArrayBinding extends Expression {
 			element.translate()
 		}
 	} // }}}
+	isDeclararingVariable(name: String) { // {{{
+		for element in @elements {
+			if element.isDeclararingVariable(name) {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @existingCount && @nonexistingCount {
 			fragments.code('[')
@@ -124,10 +133,11 @@ class ArrayBinding extends Expression {
 class BindingElement extends Expression {
 	private {
 		_alias
-		_defaultValue	 = null
-		_index			= -1
+		_defaultValue				= null
+		_index						= -1
 		_name
 		_variable
+		_variables: Array<String>	= []
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, new Scope(scope))
@@ -137,6 +147,8 @@ class BindingElement extends Expression {
 		
 		if @data.name.kind == NodeKind::Identifier && !scope.hasVariable(@data.name.name) {
 			scope.define(@data.name.name, false, this.statement())
+			
+			@variables.push(@data.name.name)
 		}
 		
 		if @data.alias? {
@@ -144,6 +156,8 @@ class BindingElement extends Expression {
 			
 			@alias = $compile.expression(@data.alias, this)
 			@alias.analyse()
+			
+			@variables.push(@data.alias.name)
 		}
 		
 		@name = $compile.expression(@data.name, this)
@@ -171,6 +185,7 @@ class BindingElement extends Expression {
 		@defaultValue.translate() if @defaultValue?
 	} // }}}
 	index(@index) => this
+	isDeclararingVariable(name: String) => @variables.contains(name)
 	toFragments(fragments) { // {{{
 		if @data.spread {
 			fragments.code('...')
@@ -312,6 +327,15 @@ class ObjectBinding extends Expression {
 		for element in @elements {
 			element.translate()
 		}
+	} // }}}
+	isDeclararingVariable(name: String) { // {{{
+		for element in @elements {
+			if element.isDeclararingVariable(name) {
+				return true
+			}
+		}
+		
+		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @exists {
