@@ -224,7 +224,7 @@ class CallExpression extends Expression {
 					TypeException.throwNoMatchingFunction(this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, this))
+					this.addCallee(new DefaultCallee(@data, @object, type, this))
 				}
 			}
 			is OverloadedFunctionType => {
@@ -327,7 +327,7 @@ class CallExpression extends Expression {
 							this.addCallee(new SealedFunctionCallee(@data, type, property, property.returnType(), this))
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, property, this))
+							this.makeCallee(property)
 						}
 					}
 					else if property is OverloadedFunctionType {
