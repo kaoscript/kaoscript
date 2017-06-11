@@ -7,8 +7,8 @@ extern {
 }
 
 import {
-	expect 		from chai
-	*			from ./fixtures/compile/diskspace.module.ks
+	expect 		from 'chai'
+	*			from './fixtures/compile/diskspace.module.ks'
 }
 
 describe('diskspace', func() {

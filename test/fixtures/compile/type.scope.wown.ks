@@ -1,6 +1,6 @@
 extern console
 
-import CarFactory, Car as OldCar from ./type.scope.source.ks
+import CarFactory, Car as OldCar from './type.scope.source.ks'
 
 class Car {
 	getType() {

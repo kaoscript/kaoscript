@@ -1,4 +1,4 @@
-import * from ./class.alien.default.ks
+import * from './class.alien.default.ks'
 
 class ClassD extends ClassB {
 	private {

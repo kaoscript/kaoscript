@@ -1,3 +1,3 @@
-import * from ./export.default.ks
+import * from './export.default.ks'
 
 name = 'foobar'

@@ -1,4 +1,4 @@
 include {
-	./_array.ks
-	./_string.ks
+	'./_array.ks'
+	'./_string.ks'
 }

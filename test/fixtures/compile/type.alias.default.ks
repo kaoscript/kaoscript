@@ -1,5 +1,5 @@
-import * from ./_number.ks
-import * from ./_string.ks
+import * from './_number.ks'
+import * from './_string.ks'
 
 extern console: {
 	log(...args)

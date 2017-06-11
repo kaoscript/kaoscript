@@ -4,7 +4,7 @@ extern console: {
 
 extern Class
 
-import * from ./_string.ks with Class
+import * from './_string.ks' with Class
 
 let foo = 'HELLO!'
 

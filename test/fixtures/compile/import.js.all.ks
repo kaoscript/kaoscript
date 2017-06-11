@@ -1,1 +1,1 @@
-import * as rt from @kaoscript/runtime/src/runtime.js
+import * as rt from '@kaoscript/runtime/src/runtime.js'

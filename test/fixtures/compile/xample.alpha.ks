@@ -1,5 +1,5 @@
-import * from ./_float.ks
-import * from ./_number.ks
+import * from './_float.ks'
+import * from './_number.ks'
 
 extern {
 	console: {

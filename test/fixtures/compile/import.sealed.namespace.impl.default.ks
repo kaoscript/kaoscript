@@ -1,4 +1,4 @@
-import * from ./export.sealed.namespace.impl.default.ks
+import * from './export.sealed.namespace.impl.default.ks'
 
 console.log(`\(Math.pi)`)
 console.log(`\(Math.foo())`)

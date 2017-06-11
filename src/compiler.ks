@@ -11,16 +11,18 @@
 #![runtime(type(alias='KSType'))]
 
 import {
-	*				from @kaoscript/ast
-	* as fs			from ./fs.js
-	* as metadata	from ../package.json
-	parse			from @kaoscript/parser
-	* as path		from path
+	*				from '@kaoscript/ast'
+	* as fs			from './fs.js'
+	* as metadata	from '../package.json'
+	* as parser		from '@kaoscript/parser'
+	* as path		from 'path'
 }
+
+const parse = parser().parse
 
 extern console, JSON
 
-include ./include/error
+include './include/error'
 
 const $extensions = { // {{{
 	binary: '.ksb',
@@ -186,20 +188,20 @@ abstract class AbstractNode {
 }
 
 include {
-	./include/util
-	./include/attribute
-	./include/fragment
-	./include/type
-	./include/variable
-	./include/scope
-	./include/module
-	./include/statement
-	./include/expression
-	./include/parameter
-	./operator/assignment
-	./operator/binary
-	./operator/polyadic
-	./operator/unary
+	'./include/util'
+	'./include/attribute'
+	'./include/fragment'
+	'./include/type'
+	'./include/variable'
+	'./include/scope'
+	'./include/module'
+	'./include/statement'
+	'./include/expression'
+	'./include/parameter'
+	'./operator/assignment'
+	'./operator/binary'
+	'./operator/polyadic'
+	'./operator/unary'
 }
 
 const $compile = {

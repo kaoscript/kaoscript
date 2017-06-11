@@ -7,8 +7,8 @@ extern {
 }
 
 import {
-	expect 		from chai
-	*			from ./diskspace.module.ks
+	expect 		from 'chai'
+	*			from './diskspace.module.ks'
 }
 
 describe('diskspace', func() {

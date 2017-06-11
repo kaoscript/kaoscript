@@ -1,4 +1,4 @@
-import * from ./export.sealed.namespace.default.ks
+import * from './export.sealed.namespace.default.ks'
 
 extern console
 

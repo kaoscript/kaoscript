@@ -31,25 +31,25 @@ abstract class Expression extends AbstractNode {
 }
 
 include {
-	../expression/literal
-	../expression/array
-	../expression/array-comprehension
-	../expression/await
-	../expression/binding
-	../expression/block
-	../expression/call
-	../expression/conditional
-	../expression/create
-	../expression/curry
-	../expression/enum
-	../expression/function
-	../expression/if
-	../expression/member
-	../expression/object
-	../expression/omitted
-	../expression/regex
-	../expression/sequence
-	../expression/this
-	../expression/template
-	../expression/unless
+	'../expression/literal'
+	'../expression/array'
+	'../expression/array-comprehension'
+	'../expression/await'
+	'../expression/binding'
+	'../expression/block'
+	'../expression/call'
+	'../expression/conditional'
+	'../expression/create'
+	'../expression/curry'
+	'../expression/enum'
+	'../expression/function'
+	'../expression/if'
+	'../expression/member'
+	'../expression/object'
+	'../expression/omitted'
+	'../expression/regex'
+	'../expression/sequence'
+	'../expression/this'
+	'../expression/template'
+	'../expression/unless'
 }

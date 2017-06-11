@@ -21,14 +21,7 @@ export class Module {
 		_rewire
 	}
 	constructor(data, @compiler, @file) { // {{{
-		try {
-			@data = @parse(data, file)
-		}
-		catch error {
-			error.filename = file
-			
-			throw error
-		}
+		@data = this.parse(data, file)
 		
 		@directory = path.dirname(file)
 		@options = Attribute.configure(@data, @compiler._options.config, AttributeTarget::Global)
@@ -165,7 +158,17 @@ export class Module {
 			return null
 		}
 	} // }}}
-	parse(data, file) => parse(data)
+	parse(data, file) { // {{{
+		try {
+			return parse(data)
+		}
+		catch error {
+			error.message += ` (file "\(file)")`
+			error.fileName = file
+			
+			throw error
+		}
+	} // }}}
 	path(x = null, name) { // {{{
 		if !?x || !?@output {
 			return name

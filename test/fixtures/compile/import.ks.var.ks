@@ -1,1 +1,1 @@
-import PI from @kaoscript/test-import/src/index
+import PI from '@kaoscript/test-import/src/index'
