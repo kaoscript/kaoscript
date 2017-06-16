@@ -105,7 +105,7 @@ class ImportDomain extends Domain {
 		return @types[name]
 	} // }}}
 	hasTemporary(name: String) => @temporaries[name] is Type
-	hasVariable(name: String) => @temporaries[name] is Type || $natives[name] == true
+	hasVariable(name: String) => @types[name] is Type || $natives[name] == true
 	getVariable(name: String) { // {{{
 		if @types[name] is Type {
 			return @types[name]
@@ -132,6 +132,20 @@ abstract class Type {
 			}
 			
 			switch data.kind {
+				NodeKind::ClassDeclaration => {
+					const type = new ClassType(data.name.name, domain)
+					
+					for modifier in data.modifiers {
+						if modifier.kind == ModifierKind::Abstract {
+							type._abstract = data.abstract
+						}
+						else if modifier.kind == ModifierKind::Sealed {
+							type.seal()
+						}
+					}
+					
+					return type
+				}
 				NodeKind::FunctionDeclaration => {
 					return new FunctionType([Type.fromAST(parameter, domain, defined, node) for parameter in data.parameters], data, node)
 				}
@@ -144,6 +158,16 @@ abstract class Type {
 					}
 					else {
 						ReferenceException.throwNotDefined(data.name, node)
+					}
+				}
+				NodeKind::MemberExpression => {
+					const object = Type.fromAST(data.object, domain, defined, node)
+					
+					if object.isAny() {
+						return Type.Any
+					}
+					else {
+						return object.getProperty(data.property.name)
 					}
 				}
 				NodeKind::Parameter => {
@@ -392,6 +416,7 @@ abstract class Type {
 	abstract toQuote(): String
 	abstract toFragments(fragments, node)
 	abstract toTestFragments(fragments, node)
+	alienize() => this
 	dereference(): Type? => this
 	isAny() => false
 	isAnonymous() => false
@@ -485,6 +510,7 @@ class ClassType extends Type {
 		_instanceVariables: Object	= {}
 		_name: String
 		_namespace: ReferenceType
+		_parentName: String
 		_seal
 		_sealed: Boolean			= false
 	}
@@ -592,6 +618,8 @@ class ClassType extends Type {
 	} // }}}
 	alienize() { // {{{
 		@alien = true
+		
+		return this
 	} // }}}
 	anonymize() { // {{{
 		@anonymous = true
@@ -670,7 +698,7 @@ class ClassType extends Type {
 		}
 	} // }}}
 	extends() => @extends
-	extends(@extends) { // {{{
+	extends(@extends, @parentName = extends.name()) { // {{{
 		@extending = true
 		
 		if @extends.isAlien() || @extends.isHybrid() {
@@ -975,6 +1003,7 @@ class ClassType extends Type {
 	name() => @name
 	namespace() => @namespace
 	namespace(@namespace) => this
+	parentName() => @parentName
 	reference() => new ReferenceType(this, @domain)
 	seal() { // {{{
 		@sealed = true

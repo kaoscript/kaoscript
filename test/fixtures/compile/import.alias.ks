@@ -2,6 +2,6 @@ extern console: {
 	log(...args)
 }
 
-import name as foo from './export.default.ks'
+import './export.default.ks' for name => foo
 
 console.log(foo)

@@ -11,14 +11,12 @@
 #![runtime(type(alias='KSType'))]
 
 import {
-	*				from '@kaoscript/ast'
-	* as fs			from './fs.js'
-	* as metadata	from '../package.json'
-	* as parser		from '@kaoscript/parser'
-	* as path		from 'path'
+	'../package.json'		as metadata
+	'./fs.js'
+	'@kaoscript/ast'
+	'@kaoscript/parser'()	for parse
+	'path'
 }
-
-const parse = parser().parse
 
 extern console, JSON
 

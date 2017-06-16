@@ -182,9 +182,6 @@ export class SyntaxException extends Exception {
 		throwDuplicateKey(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Duplicate key has been found in object`, node)
 		} // }}}
-		throwExclusiveWildcardImport(node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Wilcard import is only supported for kaoscript file`, node)
-		} // }}}
 		throwImmutable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
 		} // }}}
@@ -196,6 +193,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
+		} // }}}
+		throwInvalidNamedArgument(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Argument "\(name)" can't be a named argument`, node)
 		} // }}}
 		throwInvalidSyncMethods(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
@@ -259,6 +259,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwUnexpectedAlias(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Alias "@\(name)" is expected in an instance method/variable`, node)
+		} // }}}
+		throwUnnamedWildcardImport(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Wilcard import can't be named`, node)
 		} // }}}
 		throwUnreportedError(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`An error is unreported, it must be caught or declared to be thrown`, node)

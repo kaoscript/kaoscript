@@ -1,4 +1,4 @@
-import * from './_array'
+import './_array'
 
 extern sealed class Object {
 	static keys(...): Array<String>

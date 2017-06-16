@@ -9,6 +9,7 @@ enum AnimalFlags {
 	Endangered
 	
 	EndangeredFlyingClawedFishEating = HasClaws | CanFly | EatsFish | Endangered
+	Predator = CanFly | HasClaws
 }
 
 func printAnimalAbilities(animal) {

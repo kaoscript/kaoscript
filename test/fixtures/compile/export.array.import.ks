@@ -1,6 +1,6 @@
 extern sealed class Array
 
-import Array from './_array.map.ks' with Array
-import Array from './_array.last.ks' with Array
+import './_array.map.ks'(Array) for Array
+import './_array.last.ks'(Array) for Array
 
 export Array

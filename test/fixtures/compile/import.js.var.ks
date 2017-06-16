@@ -1,1 +1,1 @@
-import Helper, Type from '@kaoscript/runtime/src/runtime.js'
+import '@kaoscript/runtime/src/runtime.js' for Helper, Type

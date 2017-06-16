@@ -1,4 +1,4 @@
-import * from './export.default.ks'
+import './export.default.ks'
 
 func foo() {
 	name = 'foobar'

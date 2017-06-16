@@ -7,6 +7,7 @@ module.exports = function() {
 		Endangered: 8
 	};
 	AnimalFlags.EndangeredFlyingClawedFishEating = AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.EatsFish | AnimalFlags.Endangered;
+	AnimalFlags.Predator = AnimalFlags.CanFly | AnimalFlags.HasClaws;
 	function printAnimalAbilities(animal) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");

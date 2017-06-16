@@ -1,4 +1,4 @@
-import * from './_array.ks'
+import './_array.ks'
 
 extern console: {
 	log(...args)

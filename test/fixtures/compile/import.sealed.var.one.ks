@@ -1,4 +1,4 @@
-import Shape from './export.sealed.class.default.ks'
+import './export.sealed.class.default.ks' for Shape
 
 extern console: {
 	log(...args)

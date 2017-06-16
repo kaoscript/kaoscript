@@ -1,5 +1,5 @@
-import * from './_string.ks'
-import exec from 'child_process'
+import './_string.ks'
+import 'child_process' for exec
 
 const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i
 

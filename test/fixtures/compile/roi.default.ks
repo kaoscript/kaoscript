@@ -1,4 +1,4 @@
-require|import Array from './_array'
+require|import './_array' for Array
 
 impl Array {
 	contains(item, from = 0) { // {{{

@@ -1,4 +1,4 @@
-import * from './_string'
+import './_string'
 
 func lines(value) {
 	return value:String.lines()

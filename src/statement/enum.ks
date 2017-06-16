@@ -46,7 +46,15 @@ class EnumDeclaration extends Statement {
 			EnumKind::Flags => {
 				for data in @data.members {
 					if data.value? {
-						if data.value.kind == NodeKind::PolyadicExpression && data.value.operator.kind == BinaryOperatorKind::BitwiseOr {
+						if data.value.kind == NodeKind::BinaryExpression && data.value.operator.kind == BinaryOperatorKind::BitwiseOr {
+							@composites.push({
+								name: data.name.name
+								components: [data.value.left, data.value.right]
+							})
+							
+							@type.addElement(data.name.name)
+						}
+						else if data.value.kind == NodeKind::PolyadicExpression && data.value.operator.kind == BinaryOperatorKind::BitwiseOr {
 							@composites.push({
 								name: data.name.name
 								components: data.value.operands

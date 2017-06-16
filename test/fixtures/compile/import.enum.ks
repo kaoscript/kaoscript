@@ -2,7 +2,7 @@ extern console: {
 	log(...args)
 }
 
-import * from './export.enum.ks'
+import './export.enum.ks'
 
 let color = Color::Red
 

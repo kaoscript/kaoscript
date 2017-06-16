@@ -1,6 +1,6 @@
 extern console
 
-import * from './function.overloading.export.ks'
+import './function.overloading.export.ks'
 
 const foo = reverse('hello')
 

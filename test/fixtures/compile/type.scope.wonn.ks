@@ -1,6 +1,6 @@
 extern console
 
-import CarFactory, Car as OldCar from './type.scope.source.ks'
+import './type.scope.source.ks' for CarFactory, Car => OldCar
 
 const factory = new CarFactory()
 

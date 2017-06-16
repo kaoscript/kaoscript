@@ -1,3 +1,3 @@
-import * as T from './export.sealed.class.default.ks'
+import './export.sealed.class.default.ks' as T
 
 let shape = T.Shape()

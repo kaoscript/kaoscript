@@ -1,4 +1,4 @@
-import * from './_number.ks'
+import './_number.ks'
 
 extern {
 	console: {
