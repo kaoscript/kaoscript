@@ -1207,7 +1207,7 @@ class FunctionType extends Type {
 		max: @max
 		parameters: [parameter.export() for parameter in @parameters]
 		returns: @returnType.export()
-		throws: [throw.export() for throw in @throws]
+		throws: [throw.reference().export() for throw in @throws]
 	} // }}}
 	getProperty(name: String) => Type.Any
 	index() => @index
@@ -1941,7 +1941,13 @@ class ClassVariableType extends ReferenceType {
 		return type
 	} // }}}
 	static import(data, domain: Domain, node: AbstractNode): ClassVariableType { // {{{
-		const type = new ClassVariableType(Type.import(data.type, domain, node))
+		let type
+		if data.type == 'Any' {
+			type = new ClassVariableType('Any', null, domain)
+		}
+		else {
+			type = new ClassVariableType(Type.import(data.type, domain, node))
+		}
 		
 		type._access = data.access
 		
@@ -1998,7 +2004,7 @@ class ClassMethodType extends FunctionType {
 		parameters: [parameter.export() for parameter in @parameters]
 		returns: @returnType.export()
 		sealed: @sealed
-		throws: [throw.export() for throw in @throws]
+		throws: [throw.reference().export() for throw in @throws]
 	} // }}}
 	isMatched(methods: Array<ClassMethodType>): Boolean { // {{{
 		for method in methods {
@@ -2082,7 +2088,7 @@ class ClassConstructorType extends FunctionType {
 		min: @min
 		max: @max
 		parameters: [parameter.export() for parameter in @parameters]
-		throws: [throw.export() for throw in @throws]
+		throws: [throw.reference().export() for throw in @throws]
 	} // }}}
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
@@ -2112,7 +2118,7 @@ class ClassDestructorType extends FunctionType {
 	access(@access) => this
 	export() => { // {{{
 		access: @access
-		throws: [throw.export() for throw in @throws]
+		throws: [throw.reference().export() for throw in @throws]
 	} // }}}
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
@@ -2202,7 +2208,7 @@ class NamespaceFunctionType extends FunctionType {
 		parameters: [parameter.export() for parameter in @parameters]
 		returns: @returnType.export()
 		sealed: @sealed
-		throws: [throw.export() for throw in @throws]
+		throws: [throw.reference().export() for throw in @throws]
 	} // }}}
 	isSealed() => @sealed
 	private processModifiers(modifiers) { // {{{

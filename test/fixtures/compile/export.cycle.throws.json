@@ -1,0 +1,32 @@
+{
+  "requirements": {},
+  "exports": {
+    "Foo": {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "false",
+      "sealed": "false",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "test": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": [
+              "Foo"
+            ]
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  }
+}

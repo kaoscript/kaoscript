@@ -26,6 +26,10 @@
         "_color": {
           "access": 1,
           "type": "String"
+        },
+        "_side": {
+          "access": 1,
+          "type": "Any"
         }
       },
       "classVariables": {},
