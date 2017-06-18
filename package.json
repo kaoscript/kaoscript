@@ -34,14 +34,20 @@
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
-		"@kaoscript/ast": "^0.6.0",
-		"@kaoscript/parser": "^0.7.0",
-		"@kaoscript/runtime": "^0.6.0",
+		"@kaoscript/ast": "kaoscript/ast#v0.7.0",
+		"@kaoscript/parser": "kaoscript/parser#v0.8.0",
+		"@kaoscript/runtime": "kaoscript/runtime#v0.6.0",
 		"commander": "2.9.x"
 	},
 	"devDependencies": {
-		"@kaoscript/test-import": "",
+		"@kaoscript/coverage-istanbul": "kaoscript/coverage-istanbul#v0.2.0",
+		"@kaoscript/test-import": "kaoscript/test-import#v0.2.0",
+		"@zokugun/istanbul.cover": "0.5.x",
+		"@zokugun/istanbul.cover.cmd.mocha": "0.4.x",
+		"@zokugun/istanbul.reporter.minimap": "0.5.x",
 		"chai": "2.x",
+		"coveralls": "2.x",
+		"istanbul": "^0.4",
 		"mocha": "2.x",
 		"rimraf": "2.5.x"
 	},
