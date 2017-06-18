@@ -4,8 +4,12 @@
       "class": "true"
     }
   },
-  "exports": {
-    "Array": {
+  "exports": [
+    0,
+    "Array"
+  ],
+  "references": [
+    {
       "abstract": "false",
       "alien": "false",
       "hybrid": "false",
@@ -62,5 +66,5 @@
         ]
       }
     }
-  }
+  ]
 }

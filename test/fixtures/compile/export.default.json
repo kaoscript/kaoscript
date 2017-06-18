@@ -1,6 +1,8 @@
 {
   "requirements": {},
-  "exports": {
-    "name": "Any"
-  }
+  "exports": [
+    -1,
+    "name"
+  ],
+  "references": []
 }

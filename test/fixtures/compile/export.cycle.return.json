@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "Foo": {
+  "exports": [
+    0,
+    "Foo"
+  ],
+  "references": [
+    {
       "abstract": "false",
       "alien": "false",
       "hybrid": "false",
@@ -26,5 +30,5 @@
       },
       "classMethods": {}
     }
-  }
+  ]
 }

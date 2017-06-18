@@ -1,9 +1,13 @@
 {
   "requirements": {},
-  "exports": {
-    "window": {
+  "exports": [
+    0,
+    "window"
+  ],
+  "references": [
+    {
       "sealed": "true",
       "type": "Any"
     }
-  }
+  ]
 }

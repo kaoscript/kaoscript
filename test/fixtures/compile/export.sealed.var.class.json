@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "Window": {
+  "exports": [
+    0,
+    "Window"
+  ],
+  "references": [
+    {
       "abstract": "false",
       "alien": "true",
       "hybrid": "false",
@@ -13,5 +17,5 @@
       "instanceMethods": {},
       "classMethods": {}
     }
-  }
+  ]
 }

@@ -78,13 +78,18 @@ class ImportDomain extends Domain {
 		_temporaries	= {}
 		_types			= {}
 	}
-	constructor(variables, node) { // {{{
+	constructor(metadata, node) { // {{{
 		super()
 		
 		@scope = node.scope()
 		
-		for name, data of variables {
-			@temporaries[name] = Type.import(name, data, this, node)
+		for i from 0 til metadata.exports.length by 2 {
+			if metadata.exports[i] == -1 {
+				@temporaries[metadata.exports[i + 1]] = Type.Any
+			}
+			else {
+				@temporaries[metadata.exports[i + 1]] = Type.import(metadata.exports[i + 1], metadata.references[metadata.exports[i]], metadata.references, this, node)
+			}
 		}
 	} // }}}
 	commit() { // {{{
@@ -120,6 +125,9 @@ class ImportDomain extends Domain {
 }
 
 abstract class Type {
+	private {
+		_referenceIndex: Number	= -1
+	}
 	static {
 		arrayOf(parameter: Type, scope: AbstractScope) => new ReferenceType('Array', false, [parameter], scope.domain())
 		fromAST(data?, node: AbstractNode): Type => Type.fromAST(data, node.scope().domain(), true, node)
@@ -268,15 +276,15 @@ abstract class Type {
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
-		import(...{3,3}args) { // {{{
-			if args[1] is Domain {
-				return Type.import(null, args[0], args[1], args[2])
+		import(...{4,4}args) { // {{{
+			if args[2] is Domain {
+				return Type.import(null, args[0], args[1], args[2], args[3])
 			}
 			else {
-				return Type.import(args[0], args[1], args[2].scope().domain(), args[2])
+				return Type.import(args[0], args[1], args[2], args[3].scope().domain(), args[3])
 			}
 		} // }}}
-		import(name: String?, data, domain: Domain, node: AbstractNode): Type { // {{{
+		import(name: String?, data, references, domain: Domain, node: AbstractNode): Type { // {{{
 			//console.log('-- import --')
 			//console.log(name)
 			//console.log(JSON.stringify(data, null, 2))
@@ -285,7 +293,12 @@ abstract class Type {
 				return data == 'Any' ? Type.Any : new ReferenceType(data, domain)
 			}
 			else if data is Array {
-				return new UnionType([Type.import(null, type, domain, node) for type in data])
+				if data[0] is Number {
+					return Type.import(data[1], references[data[0]], references, domain, node)
+				}
+				else {
+					return new UnionType([Type.import(null, type, references, domain, node) for type in data])
+				}
 			}
 			else if data.constructors? {
 				if name == null {
@@ -293,6 +306,10 @@ abstract class Type {
 				}
 				else {
 					const type = new ClassType(name, domain)
+					
+					if data.extends? {
+						type.extends(Type.import(null, data.extends, references, domain, node), data.extends[1])
+					}
 					
 					type._abstract = data.abstract
 					type._alien = data.alien
@@ -303,22 +320,22 @@ abstract class Type {
 					}
 					
 					for method in data.constructors {
-						type.addConstructor(ClassConstructorType.import(method, domain, node))
+						type.addConstructor(ClassConstructorType.import(method, references, domain, node))
 					}
 					
 					for name, vtype of data.instanceVariables {
-						type.addInstanceVariable(name, ClassVariableType.import(vtype, domain, node))
+						type.addInstanceVariable(name, ClassVariableType.import(vtype, references, domain, node))
 					}
 					
 					for name, methods of data.instanceMethods {
 						for method in methods {
-							type.addInstanceMethod(name, ClassMethodType.import(method, domain, node))
+							type.addInstanceMethod(name, ClassMethodType.import(method, references, domain, node))
 						}
 					}
 					
 					for name, methods of data.classMethods {
 						for method in methods {
-							type.addClassMethod(name, ClassMethodType.import(method, domain, node))
+							type.addClassMethod(name, ClassMethodType.import(method, references, domain, node))
 						}
 					}
 					
@@ -331,12 +348,11 @@ abstract class Type {
 				type._async = data.async
 				type._min = data.min
 				type._max = data.max
-				type._sealed = data.sealed
-				type._throws = [Type.import(null, throw, domain, node) for throw in data.throws]
+				type._throws = [Type.import(null, throw, references, domain, node) for throw in data.throws]
 				
-				type._returnType = Type.import(null, data.returns, domain, node)
+				type._returnType = Type.import(null, data.returns, references, domain, node)
 				
-				type._parameters = [Type.import(null, parameter, domain, node) for parameter in data.parameters]
+				type._parameters = [Type.import(null, parameter, references, domain, node) for parameter in data.parameters]
 				
 				type.updateArguments()
 				
@@ -350,13 +366,13 @@ abstract class Type {
 				}
 				
 				for name, property of data.properties {
-					type.addPropertyFromMetadata(name, property, domain, node)
+					type.addPropertyFromMetadata(name, property, references, domain, node)
 				}
 				
 				return type
 			}
 			else if data.min? {
-				return new ParameterType(Type.import(null, data.type, domain, node), data.min, data.max)
+				return new ParameterType(Type.import(null, data.type, references, domain, node), data.min, data.max)
 			}
 			else if data.elements? {
 				const type = new EnumType(name, data.kind, domain)
@@ -377,19 +393,19 @@ abstract class Type {
 				type.anonymize()
 				
 				for name, variable of data.variables {
-					type.addInstanceVariable(name, ClassVariableType.import(variable, domain, node))
+					type.addInstanceVariable(name, ClassVariableType.import(variable, references, domain, node))
 				}
 				
 				for name, methods of data.methods {
 					for method in methods {
-						type.addInstanceMethod(name, ClassMethodType.import(method, domain, node))
+						type.addInstanceMethod(name, ClassMethodType.import(method, references, domain, node))
 					}
 				}
 				
 				return type
 			}
 			else if data.type? {
-				return new AliasType(Type.import(null, data.type, domain, node))
+				return new AliasType(Type.import(null, data.type, references, domain, node))
 			}
 			else if data.name? {
 				const type = new ReferenceType(data.name, data.nullable, domain)
@@ -400,7 +416,7 @@ abstract class Type {
 				const type = new OverloadedFunctionType()
 				
 				for function in data.functions {
-					type.addFunction(Type.import(null, function, domain, node))
+					type.addFunction(Type.import(null, function, references, domain, node))
 				}
 				
 				return type
@@ -438,6 +454,19 @@ abstract class Type {
 	isSealed() => false
 	isString() => false
 	matchArgument(argument: Type) => this.equals(argument)
+	metaReference(name) => [@referenceIndex, name]
+	toMetadata(references) { // {{{
+		if @referenceIndex == -1 {
+			this.toReference(references)
+			
+			@referenceIndex = references.length - 1
+		}
+		
+		return @referenceIndex
+	} // }}}
+	toReference(references) { // {{{
+		references.push(this.export())
+	} // }}}
 	unalias(): Type => this
 }
 
@@ -486,6 +515,7 @@ class AnyType extends Type {
 	toFragments(fragments, node) { // {{{
 		fragments.code('Any')
 	} // }}}
+	toMetadata(references) => -1
 	toQuote(): String => `'Any'`
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
@@ -691,7 +721,7 @@ class ClassType extends Type {
 			}
 			
 			if @extending {
-				export.extends = @extends.reference().export()
+				export.extends = @extends.metaReference(@parentName)
 			}
 			
 			return export
@@ -1004,6 +1034,13 @@ class ClassType extends Type {
 	namespace() => @namespace
 	namespace(@namespace) => this
 	parentName() => @parentName
+	toReference(references) { // {{{
+		if @extending {
+			@extends.toMetadata(references)
+		}
+		
+		references.push(this.export())
+	} // }}}
 	reference() => new ReferenceType(this, @domain)
 	seal() { // {{{
 		@sealed = true
@@ -1432,16 +1469,16 @@ class NamespaceType extends Type {
 			@sealProperties[data.name.name] = true
 		}
 	} // }}}
-	addPropertyFromMetadata(name, data, domain, node) { // {{{
+	addPropertyFromMetadata(name, data, references, domain, node) { // {{{
 		let type
 		if data is String {
-			type = NamespaceVariableType.import(data, domain, node)
+			type = NamespaceVariableType.import(data, references, domain, node)
 		}
 		else if data.parameters? {
-			type = NamespaceFunctionType.import(data, domain, node)
+			type = NamespaceFunctionType.import(data, references, domain, node)
 		}
 		else {
-			type = NamespaceVariableType.import(data, domain, node)
+			type = NamespaceVariableType.import(data, references, domain, node)
 		}
 		
 		@properties[name] = type
@@ -1940,13 +1977,13 @@ class ClassVariableType extends ReferenceType {
 		
 		return type
 	} // }}}
-	static import(data, domain: Domain, node: AbstractNode): ClassVariableType { // {{{
+	static import(data, references, domain: Domain, node: AbstractNode): ClassVariableType { // {{{
 		let type
 		if data.type == 'Any' {
 			type = new ClassVariableType('Any', null, domain)
 		}
 		else {
-			type = new ClassVariableType(Type.import(data.type, domain, node))
+			type = new ClassVariableType(Type.import(data.type, references, domain, node))
 		}
 		
 		type._access = data.access
@@ -1977,7 +2014,7 @@ class ClassMethodType extends FunctionType {
 		
 		return new ClassMethodType([Type.fromAST(parameter, domain, false, node) for parameter in data.parameters], data, node)
 	} // }}}
-	static import(data, domain: Domain, node: AbstractNode): ClassMethodType { // {{{
+	static import(data, references, domain: Domain, node: AbstractNode): ClassMethodType { // {{{
 		const type = new ClassMethodType()
 		
 		type._access = data.access
@@ -1985,11 +2022,11 @@ class ClassMethodType extends FunctionType {
 		type._min = data.min
 		type._max = data.max
 		type._sealed = data.sealed
-		type._throws = [Type.import(throw, domain, node) for throw in data.throws]
+		type._throws = [Type.import(throw, references, domain, node) for throw in data.throws]
 		
-		type._returnType = Type.import(data.returns, domain, node)
+		type._returnType = Type.import(data.returns, references, domain, node)
 		
-		type._parameters = [Type.import(parameter, domain, node) for parameter in data.parameters]
+		type._parameters = [Type.import(parameter, references, domain, node) for parameter in data.parameters]
 		
 		type.updateArguments()
 		
@@ -2068,15 +2105,15 @@ class ClassConstructorType extends FunctionType {
 	private {
 		_access: Accessibility	= Accessibility::Public
 	}
-	static import(data, domain: Domain, node: AbstractNode): ClassConstructorType { // {{{
+	static import(data, references, domain: Domain, node: AbstractNode): ClassConstructorType { // {{{
 		const type = new ClassConstructorType()
 		
 		type._access = data.access
 		type._min = data.min
 		type._max = data.max
 		
-		type._throws = [Type.import(throw, domain, node) for throw in data.throws]
-		type._parameters = [Type.import(parameter, domain, node) for parameter in data.parameters]
+		type._throws = [Type.import(throw, references, domain, node) for throw in data.throws]
+		type._parameters = [Type.import(parameter, references, domain, node) for parameter in data.parameters]
 		
 		type.updateArguments()
 		
@@ -2152,8 +2189,8 @@ class NamespaceVariableType extends ReferenceType {
 		
 		return type
 	} // }}}
-	static import(data, domain: Domain, node: AbstractNode): NamespaceVariableType { // {{{
-		const type = new NamespaceVariableType(Type.import(data.type, domain, node))
+	static import(data, references, domain: Domain, node: AbstractNode): NamespaceVariableType { // {{{
+		const type = new NamespaceVariableType(Type.import(data.type, references, domain, node))
 		
 		if data.sealed == true {
 			type._sealed = true
@@ -2184,18 +2221,18 @@ class NamespaceFunctionType extends FunctionType {
 		
 		return type = new NamespaceFunctionType([Type.fromAST(parameter, domain, false, node) for parameter in data.parameters], data, node)
 	} // }}}
-	static import(data, domain: Domain, node: AbstractNode): NamespaceFunctionType { // {{{
+	static import(data, references, domain: Domain, node: AbstractNode): NamespaceFunctionType { // {{{
 		const type = new NamespaceFunctionType()
 		
 		type._async = data.async
 		type._min = data.min
 		type._max = data.max
 		type._sealed = data.sealed
-		type._throws = [Type.import(throw, domain, node) for throw in data.throws]
+		type._throws = [Type.import(throw, references, domain, node) for throw in data.throws]
 		
-		type._returnType = Type.import(data.returns, domain, node)
+		type._returnType = Type.import(data.returns, references, domain, node)
 		
-		type._parameters = [Type.import(parameter, domain, node) for parameter in data.parameters]
+		type._parameters = [Type.import(parameter, references, domain, node) for parameter in data.parameters]
 		
 		type.updateArguments()
 		

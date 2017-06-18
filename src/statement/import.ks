@@ -129,8 +129,6 @@ const $import = {
 		
 		module.addHashes(x, hashes)
 		
-		let {exports, requirements} = metadata
-		
 		let importVariables = {}
 		let importVarCount = 0
 		let importAll = false
@@ -168,7 +166,7 @@ const $import = {
 			}
 			
 			let nf
-			for name, requirement of requirements {
+			for name, requirement of metadata.requirements {
 				nf = true
 				
 				for argument in data.arguments while nf {
@@ -190,14 +188,25 @@ const $import = {
 			}
 		}
 		else {
-			for name, requirement of requirements {
+			for name, requirement of metadata.requirements {
 				unless requirement.nullable {
 					SyntaxException.throwMissingRequirement(name, node)
 				}
 			}
 		}
 		
-		const domain = new ImportDomain(exports, node)
+		const domain = new ImportDomain(metadata, node)
+		const variables = []
+		
+		if importAll {
+			for i from 1 til metadata.exports.length by 2 {
+				name = metadata.exports[i]
+				
+				$import.addVariable(name, domain.commit(name), node, module, moduleName)
+				
+				variables.push(name)
+			}
+		}
 		
 		for name, alias of importVariables {
 			if !domain.hasTemporary(name) {
@@ -207,17 +216,13 @@ const $import = {
 			$import.addVariable(alias, domain.commit(name, alias), node, module, moduleName)
 		}
 		
-		if importAll {
-			for name of exports {
-				$import.addVariable(name, domain.commit(name), node, module, moduleName)
-			}
-		}
-		
 		if importAlias.length != 0 {
 			const type = new NamespaceType(importAlias, node.scope())
 			const ref = type.reference()
 			
-			for name of exports {
+			for i from 1 til metadata.exports.length by 2 {
+				name = metadata.exports[i]
+				
 				if domain.hasVariable(name) {
 					type.addProperty(name, domain.getVariable(name))
 				}
@@ -234,8 +239,8 @@ const $import = {
 		return {
 			kind: ImportKind::KSFile
 			moduleName: moduleName
-			exports: exports
-			requirements: requirements
+			exports: variables
+			requirements: metadata.requirements
 			importVariables: importVariables
 			importVarCount: importVarCount
 			importAll: importAll
@@ -421,7 +426,7 @@ const $import = {
 		}
 	} // }}}
 	toKSFileFragments(fragments, metadata, data, node) { // {{{
-		let {moduleName, exports, requirements, importVariables, importVarCount, importAll, importAlias} = metadata
+		const {moduleName, exports, requirements, importVariables, importVarCount, importAll, importAlias} = metadata
 		
 		let importCode = 'require(' + $quote(moduleName) + ')('
 		let importCodeVariable = false
@@ -492,10 +497,8 @@ const $import = {
 			for name, alias of importVariables {
 			}
 			
-			variable = exports[name]
-			
-			if node.scope().getVariable(alias).type() is not AliasType {
-				if variable.sealed {
+			if (variable = node.scope().getVariable(alias).type()) is not AliasType {
+				if variable.isSealed() {
 					fragments.newLine().code(`var {\(alias), __ks_\(alias)} = \(importCode)`).done()
 				}
 				else {
@@ -510,8 +513,6 @@ const $import = {
 					
 					let nf = false
 					for name, alias of importVariables {
-						variable = exports[alias]
-						
 						if node.scope().getVariable(alias).type() is not AliasType {
 							if nf {
 								line.code(', ')
@@ -533,8 +534,6 @@ const $import = {
 					
 					let nf = false
 					for name, alias of importVariables {
-						variable = exports[alias]
-						
 						if node.scope().getVariable(alias).type() is not AliasType {
 							if nf {
 								line.code(', ')
@@ -555,9 +554,7 @@ const $import = {
 				
 				let nf = false
 				for name, alias of importVariables {
-					variable = exports[name]
-					
-					if node.scope().getVariable(alias).type() is not AliasType {
+					if (variable = node.scope().getVariable(alias).type()) is not AliasType {
 						if nf {
 							line.code(', ')
 						}
@@ -568,14 +565,14 @@ const $import = {
 						if alias == name {
 							line.code(name)
 							
-							if variable.sealed {
+							if variable.isSealed() {
 								line.code(`, __ks_\(name)`)
 							}
 						}
 						else {
 							line.code(name, ': ', alias)
 							
-							if variable.sealed {
+							if variable.isSealed() {
 								line.code(`, __ks_\(alias)`)
 							}
 						}
@@ -589,11 +586,11 @@ const $import = {
 		if importAll {
 			let variables = []
 			
-			for name, variable of exports {
-				if node.scope().getVariable(name).type() is not AliasType {
+			for name in exports {
+				if (variable = node.scope().getVariable(name).type()) is not AliasType {
 					variables.push(name)
 					
-					if variable.sealed {
+					if variable.isSealed() {
 						variables.push(`__ks_\(name)`)
 					}
 				}

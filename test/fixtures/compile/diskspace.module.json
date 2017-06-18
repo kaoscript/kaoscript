@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "disks": {
+  "exports": [
+    0,
+    "disks"
+  ],
+  "references": [
+    {
       "async": "true",
       "min": 0,
       "max": 0,
@@ -9,5 +13,5 @@
       "returns": "Any",
       "throws": []
     }
-  }
+  ]
 }

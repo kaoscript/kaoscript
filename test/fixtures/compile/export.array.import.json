@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "Array": {
+  "exports": [
+    0,
+    "Array"
+  ],
+  "references": [
+    {
       "abstract": "false",
       "alien": "true",
       "hybrid": "false",
@@ -77,5 +81,5 @@
         ]
       }
     }
-  }
+  ]
 }

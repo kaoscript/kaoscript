@@ -1,8 +1,8 @@
 {
   "requirements": {},
   "exports": [
-    0,
-    "Foo"
+    1,
+    "ReShape"
   ],
   "references": [
     {
@@ -27,38 +27,39 @@
       ],
       "destructors": 0,
       "instanceVariables": {
-        "name": {
-          "access": 3,
+        "_color": {
+          "access": 1,
           "type": "String"
+        },
+        "_side": {
+          "access": 1,
+          "type": "Any"
         }
       },
-      "classVariables": {
-        "bar": {
-          "access": 3,
-          "type": "String"
-        }
-      },
-      "instanceMethods": {
-        "qux": [
-          {
-            "access": 3,
-            "async": "false",
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "type": "Any",
-                "min": 1,
-                "max": 1
-              }
-            ],
-            "returns": "Any",
-            "sealed": "false",
-            "throws": []
-          }
-        ]
-      },
+      "classVariables": {},
+      "instanceMethods": {},
       "classMethods": {}
+    },
+    {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "false",
+      "sealed": "false",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "_name": {
+          "access": 1,
+          "type": "String"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "extends": [
+        0,
+        "Shape"
+      ]
     }
   ]
 }

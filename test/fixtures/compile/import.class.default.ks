@@ -1,6 +1,6 @@
 extern console
 
-import './export.class.ks'
+import './export.class.default.ks'
 
 let shape = new Shape('red')
 

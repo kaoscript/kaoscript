@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "Float": {
+  "exports": [
+    0,
+    "Float"
+  ],
+  "references": [
+    {
       "sealed": "false",
       "properties": {
         "toFloat": {
@@ -34,5 +38,5 @@
         }
       }
     }
-  }
+  ]
 }

@@ -1,4 +1,4 @@
-import './export.class.ks'
+import './export.class.default.ks'
 
 impl Shape {
 	draw(canvas): string {

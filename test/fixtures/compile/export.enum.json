@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "Color": {
+  "exports": [
+    0,
+    "Color"
+  ],
+  "references": [
+    {
       "elements": [
         "Red",
         "Green",
@@ -10,5 +14,5 @@
       "index": 2,
       "kind": 1
     }
-  }
+  ]
 }

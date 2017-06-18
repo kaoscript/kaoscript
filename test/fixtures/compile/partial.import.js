@@ -1,6 +1,6 @@
 require("kaoscript/register");
 module.exports = function() {
-	var Shape = require("./export.class.ks")().Shape;
+	var Shape = require("./export.class.default.ks")().Shape;
 	Shape.prototype.__ks_func_draw_0 = function(canvas) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");

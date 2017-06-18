@@ -1,7 +1,10 @@
 {
   "requirements": {},
-  "exports": {
-    "Color": "Any",
-    "Space": "Any"
-  }
+  "exports": [
+    -1,
+    "Color",
+    -1,
+    "Space"
+  ],
+  "references": []
 }

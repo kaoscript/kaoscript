@@ -5,8 +5,14 @@
     },
     "Space": {}
   },
-  "exports": {
-    "Color": {
+  "exports": [
+    0,
+    "Color",
+    1,
+    "Space"
+  ],
+  "references": [
+    {
       "abstract": "false",
       "alien": "false",
       "hybrid": "false",
@@ -52,6 +58,6 @@
       },
       "classMethods": {}
     },
-    "Space": "Enum"
-  }
+    "Enum"
+  ]
 }

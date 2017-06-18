@@ -3,8 +3,12 @@
     "Helper": {},
     "Type": {}
   },
-  "exports": {
-    "Function": {
+  "exports": [
+    0,
+    "Function"
+  ],
+  "references": [
+    {
       "abstract": "false",
       "alien": "true",
       "hybrid": "false",
@@ -40,5 +44,5 @@
         ]
       }
     }
-  }
+  ]
 }

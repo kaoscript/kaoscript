@@ -1,11 +1,15 @@
 {
   "requirements": {},
-  "exports": {
-    "T": {
+  "exports": [
+    0,
+    "T"
+  ],
+  "references": [
+    {
       "type": [
         "Number",
         "String"
       ]
     }
-  }
+  ]
 }

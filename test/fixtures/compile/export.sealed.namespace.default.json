@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "Math": {
+  "exports": [
+    0,
+    "Math"
+  ],
+  "references": [
+    {
       "sealed": "true",
       "properties": {
         "PI": {
@@ -25,5 +29,5 @@
         }
       }
     }
-  }
+  ]
 }

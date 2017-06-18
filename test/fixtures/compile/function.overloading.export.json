@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "reverse": {
+  "exports": [
+    0,
+    "reverse"
+  ],
+  "references": [
+    {
       "functions": [
         {
           "async": "false",
@@ -33,5 +37,5 @@
         }
       ]
     }
-  }
+  ]
 }

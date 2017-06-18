@@ -1,7 +1,13 @@
 {
   "requirements": {},
-  "exports": {
-    "AbstractGreetings": {
+  "exports": [
+    0,
+    "AbstractGreetings",
+    1,
+    "Greetings"
+  ],
+  "references": [
+    {
       "abstract": "true",
       "alien": "false",
       "hybrid": "false",
@@ -59,7 +65,7 @@
         ]
       }
     },
-    "Greetings": {
+    {
       "abstract": "false",
       "alien": "false",
       "hybrid": "false",
@@ -89,7 +95,10 @@
         ]
       },
       "classMethods": {},
-      "extends": "AbstractGreetings"
+      "extends": [
+        0,
+        "AbstractGreetings"
+      ]
     }
-  }
+  ]
 }

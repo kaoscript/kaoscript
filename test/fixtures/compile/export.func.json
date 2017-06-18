@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "foo": {
+  "exports": [
+    0,
+    "foo"
+  ],
+  "references": [
+    {
       "async": "false",
       "min": 0,
       "max": 0,
@@ -9,5 +13,5 @@
       "returns": "Any",
       "throws": []
     }
-  }
+  ]
 }

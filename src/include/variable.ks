@@ -6,12 +6,8 @@ class Variable {
 		_required: Boolean		= false
 		_type: Type				= Type.Any
 	}
-	static {
-		import(name: String, data, node) => new Variable(name, true, Type.import(name, data, node))
-	}
 	constructor()
 	constructor(@name, @immutable, @type = Type.Any)
-	export() => @type.export()
 	isImmutable() => @immutable
 	name() => @name
 	require() { // {{{

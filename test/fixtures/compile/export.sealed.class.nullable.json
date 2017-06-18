@@ -1,7 +1,13 @@
 {
   "requirements": {},
-  "exports": {
-    "console": {
+  "exports": [
+    0,
+    "console",
+    1,
+    "Shape"
+  ],
+  "references": [
+    {
       "alien": "true",
       "sealed": "false",
       "variables": {},
@@ -26,7 +32,7 @@
         ]
       }
     },
-    "Shape": {
+    {
       "abstract": "false",
       "alien": "false",
       "hybrid": "false",
@@ -79,5 +85,5 @@
       },
       "classMethods": {}
     }
-  }
+  ]
 }

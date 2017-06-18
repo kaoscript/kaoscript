@@ -1,7 +1,15 @@
 {
   "requirements": {},
-  "exports": {
-    "ClassA": {
+  "exports": [
+    0,
+    "ClassA",
+    1,
+    "ClassB",
+    2,
+    "ClassC"
+  ],
+  "references": [
+    {
       "abstract": "false",
       "alien": "true",
       "hybrid": "false",
@@ -13,7 +21,7 @@
       "instanceMethods": {},
       "classMethods": {}
     },
-    "ClassB": {
+    {
       "abstract": "false",
       "alien": "false",
       "hybrid": "true",
@@ -43,9 +51,12 @@
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
-      "extends": "ClassA"
+      "extends": [
+        0,
+        "ClassA"
+      ]
     },
-    "ClassC": {
+    {
       "abstract": "false",
       "alien": "false",
       "hybrid": "true",
@@ -75,7 +86,10 @@
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
-      "extends": "ClassB"
+      "extends": [
+        1,
+        "ClassB"
+      ]
     }
-  }
+  ]
 }

@@ -13,6 +13,7 @@ export class Module {
 		_hashes					= {}
 		_imports				= {}
 		_includes				= {}
+		_metadata				= null
 		_options
 		_output
 		_references				= {}
@@ -573,42 +574,45 @@ export class Module {
 		return fragments
 	} // }}}
 	toMetadata() { // {{{
-		let data = {
-			requirements: {},
-			exports: {}
-		}
-		
-		for name, variable of @requirements {
-			if variable.parameter {
-				if variable.flexible {
-					data.requirements[variable.name] = {
-						class: true
-						nullable: true
+		if @metadata == null {
+			@metadata = {
+				requirements: {},
+				exports: []
+				references: []
+			}
+			
+			for name, variable of @requirements {
+				if variable.parameter {
+					if variable.flexible {
+						@metadata.requirements[variable.name] = {
+							class: true
+							nullable: true
+						}
+					}
+					else {
+						@metadata.requirements[variable.name] = {
+							nullable: true
+						}
 					}
 				}
 				else {
-					data.requirements[variable.name] = {
-						nullable: true
+					if variable.flexible {
+						@metadata.requirements[name] = {
+							class: true
+						}
+					}
+					else {
+						@metadata.requirements[name] = {}
 					}
 				}
 			}
-			else {
-				if variable.flexible {
-					data.requirements[name] = {
-						class: true
-					}
-				}
-				else {
-					data.requirements[name] = {}
-				}
+			
+			for name, variable of @exportMeta {
+				@metadata.exports.push(variable.type().toMetadata(@metadata.references), name)
 			}
 		}
 		
-		for name, variable of @exportMeta {
-			data.exports[name] = variable.export()
-		}
-		
-		return data
+		return @metadata
 	} // }}}
 }
 

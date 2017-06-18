@@ -203,8 +203,8 @@ class RequireOrImportDeclaration extends Statement {
 			metadata = $import.resolve(declarator, directory, module, this)
 			
 			if metadata.importVarCount > 0 {
-				for name, alias of metadata.importVariables {
-					requirement = module.require(Variable.import(alias, metadata.exports[name], this), DependencyKind::RequireOrImport)
+				for :alias of metadata.importVariables {
+					requirement = module.require(@scope.getVariable(alias), DependencyKind::RequireOrImport)
 					
 					requirement.data = @data
 					requirement.metadata = metadata
@@ -212,8 +212,8 @@ class RequireOrImportDeclaration extends Statement {
 				}
 			}
 			else if metadata.importAll {
-				for name, data of metadata.exports {
-					requirement = module.require(Variable.import(name, data, this), DependencyKind::RequireOrImport)
+				for name in metadata.exports {
+					requirement = module.require(@scope.getVariable(name), DependencyKind::RequireOrImport)
 					
 					requirement.data = @data
 					requirement.metadata = metadata

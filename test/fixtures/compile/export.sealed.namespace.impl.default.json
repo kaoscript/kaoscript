@@ -1,8 +1,15 @@
 {
   "requirements": {},
-  "exports": {
-    "console": "Any",
-    "Number": {
+  "exports": [
+    -1,
+    "console",
+    0,
+    "Number",
+    1,
+    "Math"
+  ],
+  "references": [
+    {
       "abstract": "false",
       "alien": "true",
       "hybrid": "false",
@@ -27,7 +34,7 @@
       },
       "classMethods": {}
     },
-    "Math": {
+    {
       "sealed": "true",
       "properties": {
         "PI": {
@@ -58,5 +65,5 @@
         }
       }
     }
-  }
+  ]
 }

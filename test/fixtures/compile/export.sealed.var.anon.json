@@ -1,7 +1,11 @@
 {
   "requirements": {},
-  "exports": {
-    "window": {
+  "exports": [
+    0,
+    "window"
+  ],
+  "references": [
+    {
       "alien": "true",
       "sealed": "true",
       "variables": {
@@ -63,5 +67,5 @@
         ]
       }
     }
-  }
+  ]
 }
