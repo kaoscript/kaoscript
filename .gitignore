@@ -4,3 +4,4 @@ node_modules
 *.ksm
 *.marks
 lib/compiler2.js
+coverage

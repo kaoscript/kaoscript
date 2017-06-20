@@ -3,7 +3,7 @@ module.exports = function() {
 	class WHITESPACE extends ChevrotainToken {
 		constructor() {
 			super(...arguments);
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 		}
 		__ks_init() {
 		}
@@ -14,7 +14,7 @@ module.exports = function() {
 	class MyParser extends ChevrotainParser {
 		constructor() {
 			super([], tokens);
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 		}
 		__ks_init() {
 		}

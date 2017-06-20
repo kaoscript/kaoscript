@@ -14,11 +14,18 @@ class ForRangeStatement extends Statement {
 		_when
 		_while
 	}
+	constructor(data, parent) { // {{{
+		super(data, parent, parent.newScope())
+	} // }}}
 	analyse() { // {{{
-		if !@scope.hasVariable(@data.value.name) {
+		const variable = @scope.getVariable(@data.value.name)
+		if @data.declaration || variable == null {
 			@valueVariable = @scope.define(@data.value.name, false, @scope.reference('Number'), this)
 			
 			@defineValue = true
+		}
+		else if variable.isImmutable() {
+			ReferenceException.throwImmutable(@data.value.name, this)
 		}
 		
 		@value = $compile.expression(@data.value, this)

@@ -217,6 +217,24 @@ class CallExpression extends Expression {
 	isComputed() => @nullable && !@tested
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
+	isUsingVariable(name) { // {{{
+		if @object? {
+			if @object.isUsingVariable(name) {
+				return true
+			}
+		}
+		else if @data.callee.kind == NodeKind::Identifier && @data.callee.name == name {
+			return true
+		}
+		
+		for argument in @arguments {
+			if argument.isUsingVariable(name) {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
 	makeCallee(type) { // {{{
 		switch type {
 			is FunctionType => {

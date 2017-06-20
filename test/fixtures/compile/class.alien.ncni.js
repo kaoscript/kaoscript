@@ -4,7 +4,7 @@ module.exports = function() {
 	class ClassB extends ClassA {
 		constructor() {
 			super(...arguments);
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 		}
 		__ks_init() {
 		}

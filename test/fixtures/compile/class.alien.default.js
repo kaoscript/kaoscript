@@ -19,7 +19,7 @@ module.exports = function() {
 				throw new TypeError("'y' is not of type 'Number'");
 			}
 			super(x, y);
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 			this._z = x * y;
 		}
 		__ks_init_1() {

@@ -42,6 +42,7 @@ class AssignmentOperatorExpression extends Expression {
 	isComputed() => true
 	isDeclararingVariable(name: String) => @variables.contains(name)
 	isNullable() => @right.isNullable()
+	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	toNullableFragments(fragments) { // {{{
 		fragments.compileNullable(@right)
 	} // }}}

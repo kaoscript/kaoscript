@@ -3,7 +3,7 @@ module.exports = function() {
 	class NotImplementedError extends Error {
 		constructor() {
 			super(...arguments);
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 		}
 		__ks_init() {
 		}
@@ -11,7 +11,7 @@ module.exports = function() {
 	class NotSupportedError extends Error {
 		constructor() {
 			super(...arguments);
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 		}
 		__ks_init() {
 		}

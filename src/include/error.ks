@@ -138,6 +138,9 @@ export class ReferenceException extends Exception {
 		throwAlreadyDefinedField(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Field "\(name)" is already defined by its parent class`, node)
 		} // }}}
+		throwImmutable(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
+		} // }}}
 		throwNotDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
 		} // }}}
@@ -181,9 +184,6 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwDuplicateKey(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Duplicate key has been found in object`, node)
-		} // }}}
-		throwImmutable(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
 		} // }}}
 		throwInvalidAwait(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)

@@ -33,7 +33,18 @@ class PolyadicOperatorExpression extends Expression {
 	isComputed() => true
 	isNullable() { // {{{
 		for operand in @operands {
-			return true if operand.isNullable()
+			if operand.isNullable() {
+				return true
+			}
+		}
+		
+		return false
+	} // }}}
+	isUsingVariable(name) { // {{{
+		for operand in @operands {
+			if operand.isUsingVariable(name) {
+				return true
+			}
 		}
 		
 		return false

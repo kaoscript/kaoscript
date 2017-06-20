@@ -18,31 +18,77 @@ class ForFromStatement extends Statement {
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
-		if @data.declaration || !@scope.hasVariable(@data.variable.name) {
+		let rename = false
+		const variable = @scope.getVariable(@data.variable.name)
+		
+		@defineVariable = @data.declaration || variable == null
+		
+		@from = $compile.expression(@data.from, this, @parent.scope())
+		@from.analyse()
+		
+		if @from.isUsingVariable(@data.variable.name) {
+			if @defineVariable {
+				rename = true
+			}
+			else {
+				SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
+			}
+		}
+		
+		if @data.til {
+			@til = $compile.expression(@data.til, this, @parent.scope())
+			@til.analyse()
+			
+			if @til.isUsingVariable(@data.variable.name) {
+				if @defineVariable {
+					rename = true
+				}
+				else {
+					SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
+				}
+			}
+		}
+		else {
+			@to = $compile.expression(@data.to, this, @parent.scope())
+			@to.analyse()
+			
+			if @to.isUsingVariable(@data.variable.name) {
+				if @defineVariable {
+					rename = true
+				}
+				else {
+					SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
+				}
+			}
+		}
+		
+		if @data.by {
+			@by = $compile.expression(@data.by, this, @parent.scope())
+			@by.analyse()
+			
+			if @by.isUsingVariable(@data.variable.name) {
+				if @defineVariable {
+					rename = true
+				}
+				else {
+					SyntaxException.throwAlreadyDeclared(@data.variable.name, this)
+				}
+			}
+		}
+		
+		if @defineVariable {
 			@variableVariable = @scope.define(@data.variable.name, false, @scope.reference('Number'), this)
 			
-			@defineVariable = true
+			if rename {
+				@scope.rename(@data.variable.name)
+			}
+		}
+		else if variable.isImmutable() {
+			ReferenceException.throwImmutable(@data.variable.name, this)
 		}
 		
 		@variable = $compile.expression(@data.variable, this)
 		@variable.analyse()
-		
-		@from = $compile.expression(@data.from, this)
-		@from.analyse()
-		
-		if @data.til {
-			@til = $compile.expression(@data.til, this)
-			@til.analyse()
-		}
-		else {
-			@to = $compile.expression(@data.to, this)
-			@to.analyse()
-		}
-		
-		if @data.by {
-			@by = $compile.expression(@data.by, this)
-			@by.analyse()
-		}
 		
 		if @data.until {
 			@until = $compile.expression(@data.until, this)

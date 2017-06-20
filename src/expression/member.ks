@@ -78,6 +78,7 @@ class MemberExpression extends Expression {
 	isEntangled() =>this.isCallable() || this.isNullable()
 	isNullable() => @data.nullable || @object.isNullable() || (@data.computed && @property.isNullable())
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@data.nullable ? 1 : 0) + (@data.computed && @property.isNullable() ? 1 : 0) > 1
+	isUsingVariable(name) => @object.isUsingVariable(name)
 	releaseReusable() { // {{{
 		@object.releaseReusable()
 	} // }}}

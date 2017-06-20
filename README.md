@@ -60,6 +60,7 @@ Features
 - **advanced parameters**
 - **error handling**: by default, it's à la Java but it's configurable
 - **conditional compilation**
+- **typed import**: import non-kaoscript objects and indicate their types
 
 Getting Started
 ---------------
@@ -575,11 +576,9 @@ Future
 ------
 
 - add JSX-like support
-- compile to another language (Rust or Go)
+- compile to another language (Rust, Go or Haxe)
 
 License
 -------
 
-Copyright &copy; 2016 Baptiste Augrain
-
-Licensed under the [MIT license](http://www.opensource.org/licenses/mit-license.php).
+[MIT](http://www.opensource.org/licenses/mit-license.php) &copy; Baptiste Augrain

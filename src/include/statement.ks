@@ -16,7 +16,7 @@ abstract class Statement extends AbstractNode {
 			let variable
 			if variable ?= @scope.getVariable(data.left.name) {
 				if variable.isImmutable() {
-					SyntaxException.throwImmutable(data.left.name, this)
+					ReferenceException.throwImmutable(data.left.name, this)
 				}
 			}
 			else {

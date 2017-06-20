@@ -1,5 +1,5 @@
 var chai = require('chai');
-var Compiler = require('..')().Compiler;
+var Compiler = require(process.env.running_under_istanbul ? '../src/compiler.ks' : '..')().Compiler;
 var expect = require('chai').expect;
 var fs = require('fs');
 var path = require('path');

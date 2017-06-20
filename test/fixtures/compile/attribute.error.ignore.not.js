@@ -3,7 +3,7 @@ module.exports = function() {
 	class Exception extends Error {
 		constructor() {
 			super(...arguments);
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 		}
 		__ks_init() {
 		}

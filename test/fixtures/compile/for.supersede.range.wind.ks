@@ -1,8 +1,6 @@
-extern console: {
-	log(...args)
-}
+extern console
 
-let x = 3.14
+const x = 3.14
 
 for x in 0..10 {
 	console.log(x)

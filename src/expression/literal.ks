@@ -86,6 +86,7 @@ class IdentifierLiteral extends Literal {
 			@type = @variable.type()
 		}
 	} // }}}
+	isUsingVariable(name) => @value == name
 	name() => @value
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@scope.getRenamedVariable(@value), @data)
@@ -105,6 +106,7 @@ class NumberLiteral extends Literal { // {{{
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.value)
 	} // }}}
+	isUsingVariable(name) => false
 	type() => @scope.reference('Number')
 } // }}}
 

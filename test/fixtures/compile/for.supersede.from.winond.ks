@@ -1,8 +1,6 @@
-extern console: {
-	log(...args)
-}
+extern console
 
-let x = 42
+const x = 42
 
 for x from 10 to 0 {
 	console.log(x)

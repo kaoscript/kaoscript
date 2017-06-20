@@ -392,11 +392,11 @@ abstract class Type {
 				
 				type.anonymize()
 				
-				for name, variable of data.variables {
+				for let name, variable of data.variables {
 					type.addInstanceVariable(name, ClassVariableType.import(variable, references, domain, node))
 				}
 				
-				for name, methods of data.methods {
+				for let name, methods of data.methods {
 					for method in methods {
 						type.addInstanceMethod(name, ClassMethodType.import(method, references, domain, node))
 					}

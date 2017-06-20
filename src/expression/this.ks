@@ -77,6 +77,7 @@ class ThisExpression extends Expression {
 	} // }}}
 	translate()
 	isEntangled() => @entangled
+	isUsingVariable(name) => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@fragment)
 	} // }}}

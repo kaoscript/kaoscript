@@ -6,7 +6,7 @@ module.exports = function() {
 				message = "Not Implemented";
 			}
 			super();
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 			this.message = message;
 		}
 		__ks_init() {

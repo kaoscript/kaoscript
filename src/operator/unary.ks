@@ -1,7 +1,6 @@
 class UnaryOperatorExpression extends Expression {
 	private {
 		_argument
-		_right
 	}
 	analyse() { // {{{
 		@argument = $compile.expression(@data.argument, this)
@@ -14,6 +13,7 @@ class UnaryOperatorExpression extends Expression {
 		@argument.translate()
 	} // }}}
 	hasExceptions() => false
+	isUsingVariable(name) => @argument.isUsingVariable(name)
 }
 
 class UnaryOperatorBitwiseNot extends UnaryOperatorExpression {

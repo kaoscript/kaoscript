@@ -1,15 +1,15 @@
 class ForOfStatement extends Statement {
 	private {
 		_body
-		_defineKey: Boolean		= false
-		_defineValue: Boolean	= false
+		_defineKey: Boolean			= false
+		_defineValue: Boolean		= false
 		_expression
 		_expressionName: String
-		_key
+		_key						= null
 		_keyName: String
 		_keyVariable: Variable
 		_until
-		_value
+		_value						= null
 		_valueVariable: Variable
 		_when
 		_while
@@ -18,14 +18,19 @@ class ForOfStatement extends Statement {
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
-		@expression = $compile.expression(@data.expression, this)
-		@expression.analyse()
+		let keyVariable = null
+		let valueVariable = null
 		
 		if @data.key? {
-			if @data.declaration || !@scope.hasVariable(@data.key.name) {
+			keyVariable = @scope.getVariable(@data.key.name)
+			
+			if @data.declaration || keyVariable == null {
 				@keyVariable = @scope.define(@data.key.name, false, @scope.reference('String'), this)
 				
 				@defineKey = true
+			}
+			else if keyVariable.isImmutable() {
+				ReferenceException.throwImmutable(@data.key.name, this)
 			}
 			
 			@key = $compile.expression(@data.key, this)
@@ -33,14 +38,39 @@ class ForOfStatement extends Statement {
 		}
 		
 		if @data.value? {
-			if @data.declaration || !@scope.hasVariable(@data.value.name) {
+			valueVariable = @scope.getVariable(@data.value.name)
+			
+			if @data.declaration || valueVariable == null {
 				@valueVariable = @scope.define(@data.value.name, false, this)
 				
 				@defineValue = true
 			}
+			else if valueVariable.isImmutable() {
+				ReferenceException.throwImmutable(@data.value.name, this)
+			}
 		
 			@value = $compile.expression(@data.value, this)
 			@value.analyse()
+		}
+		
+		@expression = $compile.expression(@data.expression, this, @parent.scope())
+		@expression.analyse()
+		
+		if @key != null && @expression.isUsingVariable(@data.key.name) {
+			if @defineKey {
+				@scope.rename(@data.key.name)
+			}
+			else {
+				SyntaxException.throwAlreadyDeclared(@data.key.name, this)
+			}
+		}
+		if @value != null && @expression.isUsingVariable(@data.value.name) {
+			if @defineValue {
+				@scope.rename(@data.value.name)
+			}
+			else {
+				SyntaxException.throwAlreadyDeclared(@data.value.name, this)
+			}
 		}
 		
 		if @data.until {
@@ -130,7 +160,7 @@ class ForOfStatement extends Statement {
 		
 		let ctrl = fragments.newControl().code('for(')
 		
-		if @key? {
+		if @key != null {
 			if @data.declaration || @defineKey {
 				ctrl.code($runtime.scope(this))
 			}
@@ -143,7 +173,7 @@ class ForOfStatement extends Statement {
 		
 		ctrl.code(' in ').compile(@expressionName ?? @expression).code(')').step()
 		
-		if @value? {
+		if @value != null {
 			let line = ctrl.newLine()
 			
 			if @data.declaration || @defineValue {

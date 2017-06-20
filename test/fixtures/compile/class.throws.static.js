@@ -9,7 +9,7 @@ module.exports = function() {
 				throw new TypeError("'message' is not nullable");
 			}
 			super();
-			this.__ks_init();
+			this.constructor.prototype.__ks_init();
 			this.message = message;
 		}
 		__ks_init() {

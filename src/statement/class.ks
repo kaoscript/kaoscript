@@ -1043,13 +1043,17 @@ class ClassDeclaration extends Statement {
 		
 		let ctrl
 		if @constructors.length == 0 {
-			clazz
+			ctrl = clazz
 				.newControl()
 				.code('constructor()')
 				.step()
 				.line('super(...arguments)')
-				.line('this.__ks_init()')
-				.done()
+			
+			if @extendsType.isSealedAlien() {
+				ctrl.line('this.constructor.prototype.__ks_init()')
+			}
+			
+			ctrl.done()
 		}
 		else if @constructors.length == 1 {
 			@constructors[0].toHybridConstructorFragments(clazz)
@@ -2072,6 +2076,9 @@ class ClassConstructorDeclaration extends Statement {
 			const index = this.getSuperIndex(@body)
 			
 			if index == -1 {
+				ctrl.line('super()')
+				ctrl.line('this.constructor.prototype.__ks_init()')
+				
 				for statement in @statements {
 					ctrl.compile(statement)
 				}
@@ -2081,7 +2088,7 @@ class ClassConstructorDeclaration extends Statement {
 					ctrl.compile(statement)
 				}
 				
-				ctrl.line('this.__ks_init()')
+				ctrl.line('this.constructor.prototype.__ks_init()')
 				
 				for statement in @statements from index + 1 {
 					ctrl.compile(statement)
@@ -2090,8 +2097,8 @@ class ClassConstructorDeclaration extends Statement {
 		}
 		else {
 			for statement in @statements {
-					ctrl.compile(statement)
-				}
+				ctrl.compile(statement)
+			}
 		}
 		
 		ctrl.done()
