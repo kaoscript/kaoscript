@@ -260,6 +260,9 @@ export class SyntaxException extends Exception {
 		throwUnexpectedAlias(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Alias "@\(name)" is expected in an instance method/variable`, node)
 		} // }}}
+		throwUnmatchedMacro(name, node, data) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Macro "\(name)" can't be matched`, node, data)
+		} // }}}
 		throwUnnamedWildcardImport(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Wilcard import can't be named`, node)
 		} // }}}

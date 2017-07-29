@@ -1,1 +1,1 @@
-ReferenceException: "Error" is not defined (line 1, file "fixtures/compile/throw.default.ne.ks")
+SyntaxException: An error is unreported, it must be caught or declared to be thrown (line 1, file "fixtures/compile/throw.default.ne.ks")

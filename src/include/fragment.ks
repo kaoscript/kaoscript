@@ -3,6 +3,11 @@ enum Mode {
 	Async
 }
 
+enum FragmentTarget {
+	Javascript
+	Kaoscript
+}
+
 const $indentations = []
 
 export class CodeFragment {
@@ -49,14 +54,17 @@ func $locationDataToString(location = null) { // {{{
 } // }}}
 
 func $quote(value) { // {{{
-	return '"' + value.replace(/"/g, '\\"') + '"'
+	return '"' + value.replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"'
 } // }}}
 
 const $comma = $code(', ')
 const $dot = $code('.')
 const $equals = $code(' = ')
 const $space = $code(' ')
-const $terminator = $code(';\n')
+const $terminators = {
+	`\(FragmentTarget::Javascript)`: $code(';\n')
+	`\(FragmentTarget::Kaoscript)`: $code('\n')
+}
 
 export class FragmentBuilder {
 	private {
@@ -67,10 +75,12 @@ export class FragmentBuilder {
 		_indent
 		_lines			= {}
 		_objects		= {}
+		_target			= FragmentTarget::Javascript
 	}
 	constructor(@indent)
+	constructor(@indent, @target)
 	line(...args) { // {{{
-		let line = LineBuilder.create(this, this._indent)
+		let line = LineBuilder.create(this, @indent)
 		
 		if args.length == 1 && args[0] is Object {
 			line.compile(args[0])
@@ -84,12 +94,12 @@ export class FragmentBuilder {
 		return this
 	} // }}}
 	newControl() { // {{{
-		return new ControlBuilder(this, this._indent)
+		return new ControlBuilder(this, @indent)
 	} // }}}
 	newLine() { // {{{
-		return LineBuilder.create(this, this._indent)
+		return LineBuilder.create(this, @indent)
 	} // }}}
-	toArray() => this._fragments
+	toArray() => @fragments
 }
 
 export class ControlBuilder {
@@ -404,7 +414,7 @@ export class LineBuilder extends ExpressionBuilder {
 	} // }}}
 	done() { // {{{
 		if @undone {
-			@builder._fragments.push($terminator)
+			@builder._fragments.push($terminators[@builder._target])
 			
 			@undone = false
 		}

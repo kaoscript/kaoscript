@@ -62,6 +62,8 @@ class AbstractScope {
 	private {
 		_body: Array		= []
 		_domain				= null
+		_macros				= {}
+		_natives			= {}
 		_parent
 		_prepared			= false
 		_renamedIndexes 	= {}
@@ -79,6 +81,32 @@ class AbstractScope {
 				@scopeParent = parent
 			}
 		}
+	} // }}}
+	addMacro(name: String, macro: Macro) { // {{{
+		if @macros[name] is Array {
+			let na = true
+			
+			for m, index in @macros[name] while na {
+				if m.type().match(macro.type()) {
+					@macros[name].splice(index, 0, macro)
+					
+					na = false
+				}
+			}
+			
+			if na {
+				@macros[name].push(macro)
+			}
+		}
+		else {
+			@macros[name] = [macro]
+		}
+	} // }}}
+	addNative(name: String) { // {{{
+		@natives[name] = new Variable(name, true, Type.Any)
+	} // }}}
+	addNative(name: String, type: String) { // {{{
+		@natives[name] = new Variable(name, true, this.reference(type))
 	} // }}}
 	addVariable(name: String, variable: Variable, node) { // {{{
 		if @variables[name] is Variable {
@@ -120,16 +148,48 @@ class AbstractScope {
 		return @domain
 	} // }}}
 	getLocalVariable(name): Variable { // {{{
-		if @variables[name] is Object {
+		if @variables[name] is Variable {
 			return @variables[name]
+		}
+		else if @natives[name] is Variable {
+			return @natives[name]
 		}
 		else {
 			return null
 		}
 	} // }}}
+	getMacro(data, parent) { // {{{
+		if data.callee.kind == NodeKind::Identifier {
+			if @macros[data.callee.name]? {
+				for macro in @macros[data.callee.name] {
+					if macro.matchArguments(data.arguments) {
+						return macro
+					}
+				}
+			}
+			
+			SyntaxException.throwUnmatchedMacro(data.callee.name, parent, data)
+		}
+		else {
+			if	(variable ?= Variable.fromAST(data.callee.object, this)) &&
+				(macros ?= variable.type().listMacros(data.callee.property.name))
+			{
+				for macro in macros {
+					if macro.matchArguments(data.arguments) {
+						return macro
+					}
+				}
+			}
+			
+			SyntaxException.throwUnmatchedMacro($ast.toSource(data.callee, $nil), parent, data)
+		}
+	} // }}}
 	getVariable(name): Variable { // {{{
-		if @variables[name] is Object {
+		if @variables[name] is Variable {
 			return @variables[name]
+		}
+		else if @natives[name] is Variable {
+			return @natives[name]
 		}
 		else if @parent? {
 			return @parent.getVariable(name)
@@ -139,8 +199,8 @@ class AbstractScope {
 		}
 	} // }}}
 	hasDeclaredLocalVariable(name) => @variables[name]?
-	hasLocalVariable(name) => @variables[name] is Variable
-	hasVariable(name) => @variables[name] is Variable || @parent?.hasVariable(name)
+	hasLocalVariable(name) => @variables[name] is Variable || @natives[name] is Variable
+	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || @parent?.hasVariable(name)
 	parent() => @parent
 	reference(name: String) => this.domain().reference(name)
 	removeVariable(name) { // {{{

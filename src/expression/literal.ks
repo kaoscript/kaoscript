@@ -2,6 +2,7 @@ const $predefined = { // {{{
 	__false(scope) => scope.reference('Boolean')
 	__null(scope) => Type.Any
 	__true(scope) => scope.reference('Boolean')
+	__Date(scope) => scope.reference('Date')
 	__Error(scope) => scope.reference('Error')
 	__Function(scope) => scope.reference('Function')
 	__Infinity(scope) => scope.reference('Number')

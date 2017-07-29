@@ -30,7 +30,9 @@ class CreateExpression extends Expression {
 		}
 		
 		if type !?= @class.type().dereference() {
-			ReferenceException.throwNotDefined(@class.type().name(), this)
+			if !@class.type().isPredefined() {
+				ReferenceException.throwNotDefined(@class.type().name(), this)
+			}
 		}
 		else if type is ClassType {
 			if type.isAbstract() {

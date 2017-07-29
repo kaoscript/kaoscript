@@ -7,6 +7,8 @@ const $natives = { // {{{
 	bool: true
 	Class: true
 	class: true
+	Date: true
+	date: true
 	Enum: true
 	enum: true
 	Function: true
@@ -28,6 +30,7 @@ const $types = { // {{{
 	array: 'Array'
 	bool: 'Boolean'
 	class: 'Class'
+	date: 'Date'
 	enum: 'Enum'
 	func: 'Function'
 	number: 'Number'
@@ -177,6 +180,9 @@ abstract class Type {
 					else {
 						return object.getProperty(data.property.name)
 					}
+				}
+				NodeKind::NumericExpression => {
+					return domain.reference('Number')
 				}
 				NodeKind::Parameter => {
 					const type = Type.fromAST(data.type, domain, defined, node)
@@ -538,6 +544,7 @@ class ClassType extends Type {
 		_hybrid: Boolean			= false
 		_instanceMethods: Object	= {}
 		_instanceVariables: Object	= {}
+		_macros: Object				= {}
 		_name: String
 		_namespace: ReferenceType
 		_parentName: String
@@ -613,6 +620,14 @@ class ClassType extends Type {
 	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
 		@instanceVariables[name] = type
 	} // }}}
+	addMacro(name, macro) {
+		if @macros[name] is Array {
+			@macros[name].push(macro)
+		}
+		else {
+			@macros[name] = [macro]
+		}
+	}
 	addPropertyFromAST(data, node) { // {{{
 		switch(data.kind) {
 			NodeKind::FieldDeclaration => {
@@ -979,6 +994,7 @@ class ClassType extends Type {
 	} // }}}
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
+	listMacros(name) => @macros[name]
 	match(b): Boolean { // {{{
 		if @name == b.name() {
 			return true
@@ -1196,7 +1212,9 @@ class FunctionType extends Type {
 			@min += last._min
 		}
 		
-		this.processModifiers(data.modifiers)
+		if data.modifiers? {
+			this.processModifiers(data.modifiers)
+		}
 		
 		if data.throws? {
 			let type
@@ -1270,7 +1288,7 @@ class FunctionType extends Type {
 			}
 			
 			for parameter, i in @parameters {
-				if !parameter.equals(arguments[i]) {
+				if !parameter.matchArgument(arguments[i]) {
 					return false
 				}
 			}
@@ -1741,6 +1759,7 @@ class ReferenceType extends Type {
 	isNullable() => @nullable
 	isNumber() => @name == 'Number'
 	isObject() => @name == 'Object'
+	isPredefined() => $predefined[`__\(@name)`] is Function
 	isString() => @name == 'String'
 	match(b: Type): Boolean { // {{{
 		if b.isAny() {

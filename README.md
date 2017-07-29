@@ -97,7 +97,7 @@ Alien Dependencies
 
 There are three basics ways to add external dependencies:
 - `extern`: from the global scope (`extern console`)
-- `import`: from other dependencies (`import readFile from fs`)
+- `import`: from other dependencies (`import 'fs' for readFile`)
 - `require`: from the module parameters (`require foo` -> `module.exports = function(foo)`)
 
 Three combined ways:
@@ -153,7 +153,7 @@ Function
 --------
 
 ```kaoscript
-import * from ./_number.ks
+import './_number.ks'
 
 extern console, parseFoat
 
@@ -168,8 +168,8 @@ Async/Await
 -----------
 
 ```kaoscript
-import * from ./_string.ks
-import exec from child_process
+import './_string.ks'
+import 'child_process' for exec
 
 const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i
 

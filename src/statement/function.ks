@@ -221,7 +221,7 @@ class FunctionDeclarator extends AbstractNode {
 	private {
 		_await: Boolean				= false
 		_exit: Boolean				= false
-		_parameters
+		_parameters: Array			= []
 		_statements: Array			= []
 		_variable: FunctionVariable
 		_type: FunctionType
@@ -232,7 +232,6 @@ class FunctionDeclarator extends AbstractNode {
 		variable.addDeclarator(this)
 	} // }}}
 	analyse() { // {{{
-		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
 			

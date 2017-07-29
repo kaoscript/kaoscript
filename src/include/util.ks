@@ -109,7 +109,7 @@ impl Array {
 	} // }}}
 	static from(item) { // {{{
 		if KSType.isEnumerable(item) && !KSType.isString(item) {
-			return (item is array) ? item : Array.prototype.slice.call(item)
+			return (item is Array) ? item : Array.prototype.slice.call(item)
 		}
 		else {
 			return [item]

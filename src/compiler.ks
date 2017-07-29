@@ -84,6 +84,135 @@ const $ast = {
 			return name
 		}
 	} // }}}
+	toSource(data, validate) { // {{{
+		switch data.kind {
+			NodeKind::BinaryExpression => {
+				return $ast.toSource(data.left, validate) + $ast.toBinarySource(data.operator) + $ast.toSource(data.right, validate)
+			}
+			NodeKind::CallExpression => {
+				let source = $ast.toSource(data.callee, validate)
+				
+				source += '('
+				
+				for argument, index in data.arguments {
+					if index != 0 {
+						source += ', '
+					}
+					
+					source += $ast.toSource(argument, validate)
+				}
+				
+				source += ')'
+				
+				return source
+			}
+			NodeKind::CreateExpression => {
+				let source = 'new ' + $ast.toSource(data.class, validate)
+				
+				source += '('
+				
+				for argument, index in data.arguments {
+					if index != 0 {
+						source += ', '
+					}
+					
+					source += $ast.toSource(argument, validate)
+				}
+				
+				source += ')'
+				
+				return source
+			}
+			NodeKind::Identifier => {
+				validate(data.name)
+				
+				return data.name
+			}
+			NodeKind::ImportDeclaration => {
+				if data.declarations.length == 1 {
+					return 'import ' + $ast.toSource(data.declarations[0], validate)
+				}
+				else {
+					throw new NotImplementedException()
+				}
+			}
+			NodeKind::ImportDeclarator => {
+				return $quote(data.source.value)
+			}
+			NodeKind::Literal => {
+				return $quote(data.value)
+			}
+			NodeKind::MemberExpression => {
+				let source = $ast.toSource(data.object, validate)
+				
+				if data.computed {
+					source += '[' + $ast.toSource(data.property, validate) + ']'
+				}
+				else {
+					source += '.' + $ast.toSource(data.property, validate)
+				}
+				
+				return source
+			}
+			NodeKind::NumericExpression => {
+				return data.value
+			}
+			NodeKind::TemplateExpression => {
+				let source = '`'
+				
+				for element in data.elements {
+					if element.kind == NodeKind::Literal {
+						source += element.value
+					}
+					else {
+						source += '\\(' + $ast.toSource(element, validate) + ')'
+					}
+				}
+				
+				return source + '`'
+			}
+			NodeKind::VariableDeclaration => {
+				let source = data.rebindable ? 'let ' : 'const '
+				
+				for variable, index in data.variables {
+					if index != 0 {
+						source += ', '
+					}
+					
+					source += $ast.toSource(variable, validate)
+				}
+				
+				if data.init? {
+					source += (data.autotype ? ' := ' : ' = ')
+					
+					source += $ast.toSource(data.init, validate)
+				}
+				
+				return source
+			}
+			NodeKind::VariableDeclarator => {
+				return $ast.toSource(data.name, validate)
+			}
+			=> {
+				console.error(data)
+				throw new NotImplementedException()
+			}
+		}
+	} // }}}
+	toBinarySource(data) { // {{{
+		switch data.kind {
+			BinaryOperatorKind::Division => {
+				return '/'
+			}
+			BinaryOperatorKind::Multiplication => {
+				return '*'
+			}
+			=> {
+				console.error(data)
+				throw new NotImplementedException()
+			}
+		}
+	} // }}}
 }
 
 const $runtime = {
@@ -200,6 +329,7 @@ include {
 	'./operator/binary'
 	'./operator/polyadic'
 	'./operator/unary'
+	'./include/macro'
 }
 
 const $compile = {
@@ -250,9 +380,16 @@ const $compile = {
 	} // }}}
 	statement(data, parent) { // {{{
 		if Attribute.conditional(data, parent.module()._compiler._target) {
-			let clazz = $statements[data.kind] ?? $statements.default
-			
-			return new clazz(data, parent)
+			if data.kind == NodeKind::MacroDeclaration {
+				parent.scope().addMacro(data.name.name, new Macro(data, parent))
+				
+				return null
+			}
+			else {
+				let clazz = $statements[data.kind] ?? $statements.default
+				
+				return new clazz(data, parent)
+			}
 		}
 		else {
 			return null
@@ -326,6 +463,18 @@ const $expressions = {
 	`\(NodeKind::BindingElement)`				: BindingElement
 	`\(NodeKind::Block)`						: BlockExpression
 	`\(NodeKind::CallExpression)`				: CallExpression
+	`\(NodeKind::CallMacroExpression)`	 		: func(data, parent, scope) {
+		const macro = scope.getMacro(data, parent)
+		
+		const statements = macro.execute(data.arguments, parent)
+		
+		if statements.length == 1 && statements[0] is ExpressionStatement {
+			return $compile.expression(statements[0].data(), parent)
+		}
+		else {
+			throw new NotImplementedException(parent)
+		}
+	}
 	`\(NodeKind::ConditionalExpression)`		: ConditionalExpression
 	`\(NodeKind::CreateExpression)`				: CreateExpression
 	`\(NodeKind::CurryExpression)`				: CurryExpression
@@ -350,6 +499,7 @@ const $expressions = {
 
 const $statements = {
 	`\(NodeKind::BreakStatement)`				: BreakStatement
+	`\(NodeKind::CallMacroExpression)`	 		: CallMacroStatement
 	`\(NodeKind::ClassDeclaration)`				: ClassDeclaration
 	`\(NodeKind::ContinueStatement)`			: ContinueStatement
 	`\(NodeKind::DestroyStatement)`				: DestroyStatement
@@ -574,7 +724,7 @@ export class Compiler {
 	toSource() { // {{{
 		let source = ''
 		
-		for fragment in this._fragments {
+		for fragment in @fragments {
 			source += fragment.code
 		}
 		

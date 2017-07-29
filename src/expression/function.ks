@@ -66,6 +66,7 @@ class FunctionExpression extends Expression {
 			statement.translate()
 		}
 	} // }}}
+	isComputed() => true
 	isInstanceMethod() => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
@@ -197,6 +198,7 @@ class LambdaExpression extends Expression {
 			statement.translate()
 		}
 	} // }}}
+	isComputed() => true
 	isInstanceMethod() => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{

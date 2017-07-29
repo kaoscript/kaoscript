@@ -6,6 +6,19 @@ class Variable {
 		_required: Boolean		= false
 		_type: Type				= Type.Any
 	}
+	static {
+		fromAST(data, scope) { // {{{
+			switch data.kind {
+				NodeKind::Identifier => {
+					return scope.getVariable(data.name)
+				}
+				=> {
+					console.error(data)
+					throw new NotImplementedException()
+				}
+			}
+		} // }}}
+	}
 	constructor()
 	constructor(@name, @immutable, @type = Type.Any)
 	isImmutable() => @immutable

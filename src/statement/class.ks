@@ -29,6 +29,7 @@ class ClassDeclaration extends Statement {
 		_instanceMethods			= {}
 		_instanceVariables			= {}
 		_instanceVariableScope
+		_macros						= {}
 		_name
 		_references					= {}
 		_sealed: Boolean 			= false
@@ -610,6 +611,22 @@ class ClassDeclaration extends Statement {
 					declaration = new ClassVariableDeclaration(data, this)
 					
 					declaration.analyse()
+				}
+				NodeKind::MacroDeclaration => {
+					declaration = new Macro(data, this)
+					
+					declaration.analyse()
+					
+					const name = declaration.name()
+					
+					if @macros[name] is Array {
+						@macros[name].push(declaration)
+					}
+					else {
+						@macros[name] = [declaration]
+					}
+					
+					@type.addMacro(name, declaration)
 				}
 				NodeKind::MethodDeclaration => {
 					if @type.isConstructor(data.name.name) {
