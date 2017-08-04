@@ -73,10 +73,23 @@ class IncludeDeclaration extends Statement {
 					throw error
 				}
 				
-				for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-					@statements.push(statement)
-					
-					statement.analyse()
+				for statement in data.body {
+					if statement.kind == NodeKind::ExportDeclaration {
+						for declaration in statement.declarations
+						when	declaration.kind != NodeKind::ExportAlias &&
+								declaration.kind != NodeKind::Identifier &&
+								(declaration ?= $compile.statement(declaration, declarator))
+						{
+							@statements.push(declaration)
+							
+							declaration.analyse()
+						}
+					}
+					else if statement ?= $compile.statement(statement, declarator) {
+						@statements.push(statement)
+						
+						statement.analyse()
+					}
 				}
 			}
 		}
@@ -172,10 +185,23 @@ class IncludeOnceDeclaration extends Statement {
 						throw error
 					}
 					
-					for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-						@statements.push(statement)
-						
-						statement.analyse()
+					for statement in data.body {
+						if statement.kind == NodeKind::ExportDeclaration {
+							for declaration in statement.declarations
+							when	declaration.kind != NodeKind::ExportAlias &&
+									declaration.kind != NodeKind::Identifier &&
+									(declaration ?= $compile.statement(declaration, declarator))
+							{
+								@statements.push(declaration)
+								
+								declaration.analyse()
+							}
+						}
+						else if statement ?= $compile.statement(statement, declarator) {
+							@statements.push(statement)
+							
+							statement.analyse()
+						}
 					}
 				}
 			}
