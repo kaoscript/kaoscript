@@ -4,37 +4,15 @@ class IncludeDeclaration extends Statement {
 	}
 	analyse() { // {{{
 		let directory = this.directory()
-		let module = this.module()
-		let compiler = module.compiler()
 		
-		let path, data, declarator
+		let x
 		for file in @data.files {
 			if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(file) {
-				path = fs.resolve(directory, file)
+				x = fs.resolve(directory, file)
 				
-				if fs.isFile(path) || fs.isFile(path += $extensions.source) {
-					declarator = new IncludeDeclarator(path, this)
-					
-					data = fs.readFile(path)
-					
-					module.addHash(path, compiler.sha256(path, data))
-					module.addInclude(path)
-					
-					try {
-						//console.time('parse')
-						data = module.parse(data, path)
-						//console.timeEnd('parse')
-					}
-					catch error {
-						error.filename = path
-						
-						throw error
-					}
-					
-					for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-						@statements.push(statement)
-						
-						statement.analyse()
+				if fs.isFile(x) || fs.isFile(x += $extensions.source) {
+					if this.canLoadFile(x) {
+						this.loadLocalFile(x)
 					}
 				}
 				else {
@@ -44,10 +22,56 @@ class IncludeDeclaration extends Statement {
 			else {
 				let nf = true
 				for dir in $import.nodeModulesPaths(directory) while nf {
-					path = fs.resolve(dir, file)
+					x = fs.resolve(dir, file)
 				
-					if fs.isFile(path) || fs.isFile(path += $extensions.source) {
+					if fs.isFile(x) {
 						nf = false
+					}
+					else if fs.isFile(x + $extensions.source) {
+						x += $extensions.source
+						
+						nf = false
+					}
+					else {
+						let pkgfile = path.join(x, 'package.json')
+						
+						if fs.isFile(pkgfile) {
+							let pkg
+							try {
+								pkg = JSON.parse(fs.readFile(pkgfile))
+							}
+							
+							if pkg? {
+								if pkg.kaoscript? && fs.isFile(path.join(x, pkg.kaoscript.main)) {
+									x = path.join(x, pkg.kaoscript.main)
+									
+									nf = false
+								}
+								else if pkg.main? {
+									if fs.isFile(path.join(x, pkg.main)) {
+										x = path.join(x, pkg.main)
+										
+										nf = false
+									}
+									else if fs.isFile(path.join(x, pkg.main + $extensions.source)) {
+										x = path.join(x, pkg.main + $extensions.source)
+										
+										nf = false
+									}
+									else if fs.isFile(path.join(x, pkg.main, 'index' + $extensions.source)) {
+										x = path.join(x, pkg.main, 'index' + $extensions.source)
+										
+										nf = false
+									}
+								}
+							}
+						}
+						
+						if nf && fs.isFile(path.join(x, 'index' + $extensions.source)) {
+							x = path.join(x, 'index' + $extensions.source)
+							
+							nf = false
+						}
 					}
 				}
 				
@@ -55,41 +79,8 @@ class IncludeDeclaration extends Statement {
 					IOException.throwNotFoundModule(file, directory, this)
 				}
 				
-				declarator = new IncludeDeclarator(path, this)
-				
-				data = fs.readFile(path)
-				
-				module.addHash(path, compiler.sha256(path, data))
-				module.addInclude(path)
-				
-				try {
-					//console.time('parse')
-					data = module.parse(data, path)
-					//console.timeEnd('parse')
-				}
-				catch error {
-					error.filename = path
-					
-					throw error
-				}
-				
-				for statement in data.body {
-					if statement.kind == NodeKind::ExportDeclaration {
-						for declaration in statement.declarations
-						when	declaration.kind != NodeKind::ExportAlias &&
-								declaration.kind != NodeKind::Identifier &&
-								(declaration ?= $compile.statement(declaration, declarator))
-						{
-							@statements.push(declaration)
-							
-							declaration.analyse()
-						}
-					}
-					else if statement ?= $compile.statement(statement, declarator) {
-						@statements.push(statement)
-						
-						statement.analyse()
-					}
+				if this.canLoadFile(x) {
+					this.loadModuleFile(x)
 				}
 			}
 		}
@@ -102,6 +93,72 @@ class IncludeDeclaration extends Statement {
 	translate() { // {{{
 		for statement in @statements {
 			statement.translate()
+		}
+	} // }}}
+	canLoadFile(path) => true
+	loadLocalFile(path) { // {{{
+		const module = this.module()
+		const declarator = new IncludeDeclarator(path, this)
+		
+		let data = fs.readFile(path)
+		
+		module.addHash(path, module.compiler().sha256(path, data))
+		module.addInclude(path)
+		
+		try {
+			//console.time('parse')
+			data = module.parse(data, path)
+			//console.timeEnd('parse')
+		}
+		catch error {
+			error.filename = path
+			
+			throw error
+		}
+		
+		for statement in data.body when statement ?= $compile.statement(statement, declarator) {
+			@statements.push(statement)
+			
+			statement.analyse()
+		}
+	} // }}}
+	loadModuleFile(path) { // {{{
+		const module = this.module()
+		const declarator = new IncludeDeclarator(path, this)
+		
+		let data = fs.readFile(path)
+		
+		module.addHash(path, module.compiler().sha256(path, data))
+		module.addInclude(path)
+		
+		try {
+			//console.time('parse')
+			data = module.parse(data, path)
+			//console.timeEnd('parse')
+		}
+		catch error {
+			error.filename = path
+			
+			throw error
+		}
+		
+		for statement in data.body {
+			if statement.kind == NodeKind::ExportDeclaration {
+				for declaration in statement.declarations
+				when	declaration.kind != NodeKind::ExportAlias &&
+						declaration.kind != NodeKind::Identifier &&
+						(declaration ?= $compile.statement(declaration, declarator))
+				{
+					@statements.push(declaration)
+					
+					declaration.analyse()
+				}
+			}
+			else if statement ?= $compile.statement(statement, declarator) {
+				@statements.push(statement)
+				
+				statement.analyse()
+			}
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
@@ -111,117 +168,8 @@ class IncludeDeclaration extends Statement {
 	} // }}}
 }
 
-class IncludeOnceDeclaration extends Statement {
-	private {
-		_statements = []
-	}
-	analyse() { // {{{
-		let directory = this.directory()
-		let module = this.module()
-		let compiler = module.compiler()
-		
-		let path, data, declarator
-		for file in @data.files {
-			if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(file) {
-				path = fs.resolve(directory, file)
-				
-				if fs.isFile(path) || fs.isFile(path += $extensions.source) {
-					if !module.hasInclude(path) {
-						declarator = new IncludeDeclarator(path, this)
-						
-						data = fs.readFile(path)
-						
-						module.addHash(path, compiler.sha256(path, data))
-						module.addInclude(path)
-						
-						try {
-							data = module.parse(data, path)
-						}
-						catch error {
-							error.filename = path
-							
-							throw error
-						}
-						
-						for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-							@statements.push(statement)
-							
-							statement.analyse()
-						}
-					}
-				}
-				else {
-					IOException.throwNotFoundFile(file, directory, this)
-				}
-			}
-			else {
-				let nf = true
-				for dir in $import.nodeModulesPaths(directory) while nf {
-					path = fs.resolve(dir, file)
-				
-					if fs.isFile(path) || fs.isFile(path += $extensions.source) {
-						nf = false
-					}
-				}
-				
-				if nf {
-					IOException.throwNotFoundModule(file, directory, this)
-				}
-				
-				if !module.hasInclude(path) {
-					declarator = new IncludeDeclarator(path, this)
-					
-					data = fs.readFile(path)
-					
-					module.addHash(path, compiler.sha256(path, data))
-					module.addInclude(path)
-					
-					try {
-						data = module.parse(data, path)
-					}
-					catch error {
-						error.filename = path
-						
-						throw error
-					}
-					
-					for statement in data.body {
-						if statement.kind == NodeKind::ExportDeclaration {
-							for declaration in statement.declarations
-							when	declaration.kind != NodeKind::ExportAlias &&
-									declaration.kind != NodeKind::Identifier &&
-									(declaration ?= $compile.statement(declaration, declarator))
-							{
-								@statements.push(declaration)
-								
-								declaration.analyse()
-							}
-						}
-						else if statement ?= $compile.statement(statement, declarator) {
-							@statements.push(statement)
-							
-							statement.analyse()
-						}
-					}
-				}
-			}
-		}
-	} // }}}
-	prepare() { // {{{
-		for statement in @statements {
-			statement.prepare()
-		}
-	} // }}}
-	translate() { // {{{
-		for statement in @statements {
-			statement.translate()
-		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
-		for statement in @statements {
-			statement.toFragments(fragments, mode)
-		}
-	} // }}}
+class IncludeOnceDeclaration extends IncludeDeclaration {
+	canLoadFile(path) => !this.module().hasInclude(path)
 }
 
 class IncludeDeclarator extends Statement {

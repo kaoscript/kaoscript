@@ -4,6 +4,7 @@ macro trace_build_age_with_reification() {
 	let d = new Date(2013, 2, 15)
 	
 	d.setUTCDate(1)
+	d.setUTCHours(0, 0, 0)
 	
 	const buildTime = Math.floor(d.getTime() / 1000)
 	
