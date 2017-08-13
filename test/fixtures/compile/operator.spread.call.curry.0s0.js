@@ -2,7 +2,7 @@ var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	let foo = [1, 2];
 	let bar = [];
-	bar.push.apply(bar, [].concat(0, foo));
+	bar.push(0, ...foo);
 	function log(...args) {
 		console.log.apply(console, args);
 	}

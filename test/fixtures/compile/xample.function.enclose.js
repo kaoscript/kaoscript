@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		let f = this;
 		return function(...args) {
-			return enclosure.apply(null, [].concat(f, args));
+			return enclosure(f, ...args);
 		};
 	};
 	__ks_Function._im_enclose = function(that) {

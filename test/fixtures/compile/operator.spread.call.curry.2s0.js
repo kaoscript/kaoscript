@@ -2,7 +2,7 @@ var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	let foo = [1, 2];
 	let bar = [];
-	bar.push.apply(bar, [].concat(0, foo));
+	bar.push(0, ...foo);
 	function log(...args) {
 		console.log.apply(console, args);
 	}
@@ -10,6 +10,6 @@ module.exports = function() {
 	let directory = "xfer";
 	let user = "john";
 	let info = [directory, " ", user, ": "];
-	let logHello = Helper.curry(log, null, [].concat(machine, ":", info));
+	let logHello = Helper.vcurry(log, null, machine, ":", ...info);
 	logHello("foo");
 }

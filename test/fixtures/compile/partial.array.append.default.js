@@ -42,11 +42,11 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_appendUniq_0 = function(...args) {
 		if(args.length === 1) {
-			__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[0]));
+			__ks_Array._im_pushUniq(this, ...args[0]);
 		}
 		else {
 			for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
-				__ks_Array._im_pushUniq.apply(__ks_Array, [this].concat(args[i]));
+				__ks_Array._im_pushUniq(this, ...args[i]);
 			}
 		}
 		return this;

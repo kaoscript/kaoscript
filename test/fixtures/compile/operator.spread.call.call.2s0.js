@@ -1,5 +1,5 @@
 module.exports = function() {
 	let foo = [1, 2];
 	let bar = [];
-	bar.push.apply(bar, [].concat(0, 4, foo));
+	bar.push(0, 4, ...foo);
 }

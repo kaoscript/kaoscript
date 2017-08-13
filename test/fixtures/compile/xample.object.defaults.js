@@ -1,7 +1,7 @@
 module.exports = function() {
 	var __ks_Object = {};
 	__ks_Object.__ks_sttc_defaults_0 = function(...args) {
-		return __ks_Object._cm_merge.apply(__ks_Object, [].concat({}, args));
+		return __ks_Object._cm_merge({}, ...args);
 	};
 	__ks_Object._cm_defaults = function() {
 		var args = Array.prototype.slice.call(arguments);

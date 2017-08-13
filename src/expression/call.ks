@@ -5,8 +5,8 @@ class CallExpression extends Expression {
 		_callees: Array					= []
 		_callScope
 		_defaultCallee: DefaultCallee
+		_flatten: Boolean				= false
 		_hasDefaultCallee: Boolean		= false
-		_list: Boolean					= true
 		_nullable: Boolean				= false
 		_nullableComputed: Boolean		= false
 		_object
@@ -16,16 +16,60 @@ class CallExpression extends Expression {
 		_tested: Boolean				= false
 		_type: Type
 	}
-	analyse() { // {{{
-		for argument in @data.arguments {
-			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
-				@arguments.push(argument = $compile.expression(argument.argument, this))
-				
-				@list = false
+	static {
+		toFlattenArgumentsFragments(fragments, arguments, prefill = null) { // {{{
+			if arguments.length == 1 && prefill == null && arguments[0].argument().type().isArray() {
+				fragments.compile(arguments[0].argument())
 			}
 			else {
-				@arguments.push(argument = $compile.expression(argument, this))
+				if prefill == null {
+					fragments.code('[].concat(')
+				}
+				else {
+					fragments.code('[').compile(prefill).code('].concat(')
+				}
+				
+				let opened = false
+				
+				for argument, index in arguments {
+					if argument is UnaryOperatorSpread {
+						if opened {
+							fragments.code('], ')
+							
+							opened = false
+						}
+						else if index != 0 {
+							fragments.code($comma)
+						}
+						
+						fragments.compile(argument.argument())
+					}
+					else {
+						if index != 0 {
+							fragments.code($comma)
+						}
+						
+						if !opened {
+							fragments.code('[')
+							
+							opened = true
+						}
+						
+						fragments.compile(argument)
+					}
+				}
+				
+				if opened {
+					fragments.code(']')
+				}
+				
+				fragments.code(')')
 			}
+		} // }}}
+	}
+	analyse() { // {{{
+		if @data.arguments.length == 1 {
+			@arguments.push(argument = $compile.expression(@data.arguments[0], this))
 			
 			argument.analyse()
 			
@@ -33,10 +77,32 @@ class CallExpression extends Expression {
 				@await = true
 			}
 		}
+		else {
+			const es5 = @options.format.spreads == 'es5'
+			
+			for argument in @data.arguments {
+				@arguments.push(argument = $compile.expression(argument, this))
+				
+				argument.analyse()
+				
+				if es5 && argument is UnaryOperatorSpread {
+					@flatten = true
+				}
+				else if argument.isAwait() {
+					@await = true
+				}
+			}
+		}
 	} // }}}
 	prepare() { // {{{
 		for argument in @arguments {
 			argument.prepare()
+		}
+		
+		if @arguments.length == 1 {
+			if @arguments[0] is UnaryOperatorSpread && (@options.format.spreads == 'es5' || @arguments[0].argument().type().isArray()) {
+				@flatten = true
+			}
 		}
 		
 		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.computed {
@@ -589,7 +655,7 @@ class DefaultCallee extends Callee {
 	private {
 		_data
 		_expression
-		_list: Boolean
+		_flatten: Boolean
 		_nullable: Boolean
 		_nullableComputed: Boolean
 		_scope: ScopeKind
@@ -608,7 +674,7 @@ class DefaultCallee extends Callee {
 		@expression.analyse()
 		@expression.prepare()
 		
-		@list = node._list
+		@flatten = node._flatten
 		@nullable = data.nullable || @expression.isNullable()
 		@nullableComputed = data.nullable && @expression.isNullable()
 		@scope = data.scope.kind
@@ -640,7 +706,7 @@ class DefaultCallee extends Callee {
 		@expression.analyse()
 		@expression.prepare()
 		
-		@list = node._list
+		@flatten = node._flatten
 		@nullable = data.nullable || @expression.isNullable()
 		@nullableComputed = data.nullable && @expression.isNullable()
 		@scope = data.scope.kind
@@ -664,7 +730,7 @@ class DefaultCallee extends Callee {
 		@expression.analyse()
 		@expression.prepare()
 		
-		@list = node._list
+		@flatten = node._flatten
 		@nullable = data.nullable || @expression.isNullable()
 		@nullableComputed = data.nullable && @expression.isNullable()
 		@scope = data.scope.kind
@@ -678,7 +744,7 @@ class DefaultCallee extends Callee {
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		@expression.acquireReusable(@data.nullable || (!@list && @scope == ScopeKind::This))
+		@expression.acquireReusable(@data.nullable || (@flatten && @scope == ScopeKind::This))
 	} // }}}
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
@@ -686,7 +752,28 @@ class DefaultCallee extends Callee {
 		@expression.releaseReusable()
 	} // }}}
 	toFragments(fragments, mode, node) { // {{{
-		if @list {
+		if @flatten {
+			if @scope == ScopeKind::Argument {
+				fragments
+					.compileReusable(@expression)
+					.code('.apply(')
+					.compile(node._callScope, mode)
+			}
+			else if @scope == ScopeKind::Null || @expression is not MemberExpression {
+				fragments
+					.compileReusable(@expression)
+					.code('.apply(null')
+			}
+			else {
+				fragments
+					.compileReusable(@expression)
+					.code('.apply(')
+					.compile(@expression.caller(), mode)
+			}
+			
+			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node._arguments)
+		}
+		else {
 			switch @scope {
 				ScopeKind::Argument => {
 					fragments.wrap(@expression, mode).code('.call(').compile(node._callScope, mode)
@@ -713,47 +800,41 @@ class DefaultCallee extends Callee {
 				}
 			}
 		}
-		else {
-			if @scope == ScopeKind::Argument {
-				fragments
-					.compileReusable(@expression)
-					.code('.apply(')
-					.compile(node._callScope, mode)
-			}
-			else if @scope == ScopeKind::Null || @expression is not MemberExpression {
-				fragments
-					.compileReusable(@expression)
-					.code('.apply(null')
-			}
-			else {
-				fragments
-					.compileReusable(@expression)
-					.code('.apply(')
-					.compile(@expression.caller(), mode)
-			}
-			
-			if node._arguments.length == 1 && node._arguments[0].type().isArray() {
-				fragments.code($comma).compile(node._arguments[0])
-			}
-			else {
-				fragments.code(', [].concat(')
-				
-				for i from 0 til node._arguments.length {
-					fragments.code($comma) if i != 0
-					
-					fragments.compile(node._arguments[i])
-				}
-				
-				fragments.code(')')
-			}
-		}
 	} // }}}
 	toCurryFragments(fragments, mode, node) { // {{{
 		node.module().flag('Helper')
 		
 		const arguments = node._arguments
 		
-		if @list {
+		if @flatten {
+			switch @scope {
+				ScopeKind::Argument => {
+					fragments
+						.code($runtime.helper(node), '.curry(')
+						.compile(@expression)
+						.code($comma)
+						.compile(node._callScope)
+						.code($comma)
+				}
+				ScopeKind::Null => {
+					fragments
+						.code($runtime.helper(node), '.curry(')
+						.compile(@expression)
+						.code(', null, ')
+				}
+				ScopeKind::This => {
+					fragments
+						.code($runtime.helper(node), '.curry(')
+						.compile(@expression)
+						.code($comma)
+						.compile(@expression.caller())
+						.code($comma)
+				}
+			}
+			
+			CallExpression.toFlattenArgumentsFragments(fragments, arguments)
+		}
+		else {
 			switch @scope {
 				ScopeKind::Argument => {
 					fragments
@@ -761,20 +842,12 @@ class DefaultCallee extends Callee {
 						.compile(@expression)
 						.code($comma)
 						.compile(node._callScope)
-					
-					for argument in arguments {
-						fragments.code($comma).compile(argument)
-					}
 				}
 				ScopeKind::Null => {
 					fragments
 						.code($runtime.helper(node), '.vcurry(')
 						.compile(@expression)
 						.code(', null')
-					
-					for argument in arguments {
-						fragments.code($comma).compile(argument)
-					}
 				}
 				ScopeKind::This => {
 					fragments
@@ -782,82 +855,11 @@ class DefaultCallee extends Callee {
 						.compile(@expression)
 						.code(', ')
 						.compile(@expression.caller())
-					
-					for argument in arguments {
-						fragments.code($comma).compile(argument, mode)
-					}
 				}
 			}
-		}
-		else {
-			switch @scope {
-				ScopeKind::Argument => {
-					fragments
-						.code($runtime.helper(node), '.curry(')
-						.compile(@expression)
-						.code($comma)
-						.compile(node._callScope)
-						.code($comma)
-					
-					if arguments.length == 1 && arguments[0].type().isArray() {
-						fragments.compile(arguments[0])
-					}
-					else {
-						fragments.code('[].concat(')
-						
-						for i from 0 til arguments.length {
-							fragments.code($comma) if i != 0
-							
-							fragments.compile(arguments[i])
-						}
-						
-						fragments.code(')')
-					}
-				}
-				ScopeKind::Null => {
-					fragments
-						.code($runtime.helper(node), '.curry(')
-						.compile(@expression)
-						.code(', null, ')
-					
-					if arguments.length == 1 && arguments[0].type().isArray() {
-						fragments.compile(arguments[0])
-					}
-					else {
-						fragments.code('[].concat(')
-						
-						for i from 0 til arguments.length {
-							fragments.code($comma) if i != 0
-							
-							fragments.compile(arguments[i])
-						}
-						
-						fragments.code(')')
-					}
-				}
-				ScopeKind::This => {
-					fragments
-						.code($runtime.helper(node), '.curry(')
-						.compile(@expression)
-						.code($comma)
-						.compile(@expression.caller())
-						.code($comma)
-					
-					if arguments.length == 1 && arguments[0].type().isArray() {
-						fragments.compile(arguments[0])
-					}
-					else {
-						fragments.code('[].concat(')
-						
-						for i from 0 til arguments.length {
-							fragments.code($comma) if i != 0
-							
-							fragments.compile(arguments[i])
-						}
-						
-						fragments.code(')')
-					}
-				}
+			
+			for argument in arguments {
+				fragments.code($comma).compile(argument)
 			}
 		}
 	} // }}}
@@ -917,7 +919,20 @@ class SealedFunctionCallee extends Callee {
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	toFragments(fragments, mode, node) { // {{{
-		if node._list {
+		if node._flatten {
+			switch node._data.scope.kind {
+				ScopeKind::Argument => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::Null => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::This => {
+					throw new NotImplementedException(node)
+				}
+			}
+		}
+		else {
 			switch node._data.scope.kind {
 				ScopeKind::Argument => {
 					throw new NotImplementedException(node)
@@ -935,19 +950,6 @@ class SealedFunctionCallee extends Callee {
 						
 						fragments.compile(node._arguments[i])
 					}
-				}
-			}
-		}
-		else {
-			switch node._data.scope.kind {
-				ScopeKind::Argument => {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind::Null => {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind::This => {
-					throw new NotImplementedException(node)
 				}
 			}
 		}
@@ -987,7 +989,29 @@ class SealedMethodCallee extends Callee {
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	toFragments(fragments, mode, node) { // {{{
-		if node._list {
+		if node._flatten {
+			switch node._data.scope.kind {
+				ScopeKind::Argument => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::Null => {
+					throw new NotImplementedException(node)
+				}
+				ScopeKind::This => {
+					if @instance {
+						fragments.code(`\(@class.getSealedPath())._im_\(@property).apply(null, `)
+						
+						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments, @object)
+					}
+					else {
+						fragments.code(`\(@class.getSealedPath())._cm_\(@property).apply(null, `)
+						
+						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments)
+					}
+				}
+			}
+		}
+		else {
 			switch node._data.scope.kind {
 				ScopeKind::Argument => {
 					throw new NotImplementedException(node)
@@ -1014,49 +1038,6 @@ class SealedMethodCallee extends Callee {
 							fragments.compile(node._arguments[i])
 						}
 					}
-				}
-			}
-		}
-		else if node._arguments.length == 1 && node._arguments[0].type().isArray() {
-			switch node._data.scope.kind {
-				ScopeKind::Argument => {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind::Null => {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind::This => {
-					throw new NotImplementedException(node)
-				}
-			}
-		}
-		else {
-			switch node._data.scope.kind {
-				ScopeKind::Argument => {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind::Null => {
-					throw new NotImplementedException(node)
-				}
-				ScopeKind::This => {
-					if @instance {
-						fragments
-							.code(`\(@class.getSealedPath())._im_\(@property).apply(\(@class.getSealedPath()), [`)
-							.compile(@object)
-							.code(`].concat(`)
-					}
-					else {
-						fragments
-							.code(`\(@class.getSealedPath())._cm_\(@property).apply(\(@class.getSealedPath()), [].concat(`)
-					}
-					
-					for i from 0 til node._arguments.length {
-						fragments.code($comma) if i != 0
-						
-						fragments.compile(node._arguments[i])
-					}
-					
-					fragments.code(')')
 				}
 			}
 		}

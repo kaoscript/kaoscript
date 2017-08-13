@@ -565,6 +565,7 @@ const $unaryOperators = {
 	`\(UnaryOperatorKind::IncrementPrefix)`		: UnaryOperatorIncrementPrefix
 	`\(UnaryOperatorKind::Negation)`			: UnaryOperatorNegation
 	`\(UnaryOperatorKind::Negative)`			: UnaryOperatorNegative
+	`\(UnaryOperatorKind::Spread)`				: UnaryOperatorSpread
 }
 
 const $targets = {

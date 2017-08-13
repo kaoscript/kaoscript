@@ -1,25 +1,24 @@
 class CreateExpression extends Expression {
 	private {
-		_arguments	= []
-		_class
-		_list		= true
-		_type		= Type.Any
+		_arguments: Array		= []
+		_class: Expression
+		_flatten: Boolean		= false
+		_type: Type				= Type.Any
 	}
 	analyse() { // {{{
 		@class = $compile.expression(@data.class, this)
 		@class.analyse()
 		
+		const es5 = @options.format.spreads == 'es5'
+		
 		for argument in @data.arguments {
-			if argument.kind == NodeKind::UnaryExpression && argument.operator.kind == UnaryOperatorKind::Spread {
-				@arguments.push(argument = $compile.expression(argument.argument, this))
-				
-				@list = false
-			}
-			else {
-				@arguments.push(argument = $compile.expression(argument, this))
-			}
+			@arguments.push(argument = $compile.expression(argument, this))
 			
 			argument.analyse()
+			
+			if es5 && argument is UnaryOperatorSpread {
+				@flatten = true
+			}
 		}
 	} // }}}
 	prepare() { // {{{
@@ -57,7 +56,16 @@ class CreateExpression extends Expression {
 	} // }}}
 	isComputed() => true
 	toFragments(fragments, mode) { // {{{
-		if @list {
+		if @flatten {
+			this.module().flag('Helper')
+			
+			fragments.code('Helper.create(').compile(@class)
+			
+			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
+			
+			fragments.code(')')
+		}
+		else {
 			fragments.code('new ').compile(@class).code('(')
 			
 			for i from 0 til @arguments.length {
@@ -67,9 +75,6 @@ class CreateExpression extends Expression {
 			}
 			
 			fragments.code(')')
-		}
-		else {
-			throw new NotImplementedException(this)
 		}
 	} // }}}
 	type() => @type

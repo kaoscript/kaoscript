@@ -12,6 +12,7 @@ class UnaryOperatorExpression extends Expression {
 	translate() { // {{{
 		@argument.translate()
 	} // }}}
+	argument() => @argument
 	hasExceptions() => false
 	isUsingVariable(name) => @argument.isUsingVariable(name)
 }
@@ -98,4 +99,13 @@ class UnaryOperatorNegative extends UnaryOperatorExpression {
 			.wrap(@argument)
 	} // }}}
 	type() => @scope.reference('Number')
+}
+
+class UnaryOperatorSpread extends UnaryOperatorExpression {
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.code('...', @data.operator)
+			.wrap(@argument)
+	} // }}}
+	type() => @scope.reference('Array')
 }
