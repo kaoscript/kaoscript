@@ -301,6 +301,9 @@ export class TypeException extends Exception {
 		throwInvalidForOfExpression(node) ~ TypeException { // {{{
 			throw new TypeException(`"for..of" must be used with an object`, node)
 		} // }}}
+		throwInvalidSpread(node) ~ TypeException { // {{{
+			throw new TypeException(`Spread operator require an array`, node)
+		} // }}}
 		throwNoMatchingConstructor(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Constructor of class "\(name)" can't be matched to given arguments`, node)
 		} // }}}

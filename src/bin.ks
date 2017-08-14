@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.5.0
+ * Version 0.9.0
  * September 15th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
@@ -10,12 +10,12 @@
 extern console, global, Object, process, require
 
 import {
-	Compiler		from ./compiler.ks
-	* as metadata	from ../package.json
-	* as Module		from module
-	* as path		from path
-	* as program	from commander
-	* as vm			from vm
+	'../package.json'	as metadata
+	'./compiler.ks'		for Compiler
+	'commander'			as program
+	'module'			as Module
+	'path'
+	'vm'
 }
 
 func rewire(option) {

@@ -118,7 +118,7 @@ class ClassDeclaration extends Statement {
 					}
 					
 					for type in usage.types {
-						item.type.push(...type.type)
+						item.type.push(type.type)
 						item.usage += type.usage
 						item.weight += type.weight
 						
