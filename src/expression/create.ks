@@ -59,7 +59,7 @@ class CreateExpression extends Expression {
 		if @flatten {
 			this.module().flag('Helper')
 			
-			fragments.code('Helper.create(').compile(@class)
+			fragments.code(`\($runtime.helper(this)).create(`).compile(@class)
 			
 			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
 			

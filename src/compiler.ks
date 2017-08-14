@@ -315,7 +315,7 @@ abstract class AbstractNode {
 }
 
 include {
-	'./include/util'
+	'@kaoscript/util'
 	'./include/attribute'
 	'./include/fragment'
 	'./include/type'

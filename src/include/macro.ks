@@ -38,7 +38,9 @@ class Macro extends AbstractNode {
 		@name = data.name.name
 		@type = MacroType.fromAST(data, this)
 		
-		const builder = new FragmentBuilder(0, FragmentTarget::Kaoscript)
+		const builder = new Writer({
+			terminator: '\n'
+		})
 		
 		const line = builder.newLine().code('func(__ks_evaluate, __ks_reificate')
 		

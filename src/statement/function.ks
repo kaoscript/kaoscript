@@ -10,7 +10,7 @@ const $function = {
 				if node._options.format.functions == 'es5' {
 					return {
 						arrow: false
-						beforeParameters: 'Helper.vcurry(function('
+						beforeParameters: `\($runtime.helper(node)).vcurry(function(`
 						afterParameters: ')'
 						footer: ', this)'
 					}
