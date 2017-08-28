@@ -181,7 +181,7 @@ class AbstractScope {
 				}
 			}
 			
-			SyntaxException.throwUnmatchedMacro($ast.toSource(data.callee, $nil), parent, data)
+			SyntaxException.throwUnmatchedMacro(Generator.generate(data.callee), parent, data)
 		}
 	} // }}}
 	getVariable(name): Variable { // {{{

@@ -1,4 +1,4 @@
-include '@kaoscript/source-writer'
+include once '@kaoscript/source-generator'
 
 enum Mode {
 	None
@@ -241,7 +241,7 @@ class ExpressionBuilder extends ExpressionWriter {
 class LineBuilder extends ExpressionBuilder {
 	done() { // {{{
 		if @undone {
-			@writer.push(@writer._terminator)
+			@writer.push(@writer.lineTerminator)
 			
 			@undone = false
 		}

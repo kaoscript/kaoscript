@@ -1,0 +1,119 @@
+{
+  "requirements": {},
+  "exports": [
+    0,
+    "Color"
+  ],
+  "references": [
+    {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "false",
+      "sealed": "false",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "_red": {
+          "access": 1,
+          "type": "Number"
+        },
+        "_green": {
+          "access": 1,
+          "type": "Number"
+        },
+        "_blue": {
+          "access": 1,
+          "type": "Number"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "red": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          }
+        ],
+        "green": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          }
+        ],
+        "blue": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ]
+}

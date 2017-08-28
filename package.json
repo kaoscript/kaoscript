@@ -41,7 +41,7 @@
 	},
 	"devDependencies": {
 		"@kaoscript/coverage-istanbul": "kaoscript/coverage-istanbul#v0.2.0",
-		"@kaoscript/source-writer": "kaoscript/source-writer#v0.1.0",
+		"@kaoscript/source-generator": "kaoscript/source-generator#v0.1.0",
 		"@kaoscript/test-import": "kaoscript/test-import#v0.2.0",
 		"@kaoscript/util": "kaoscript/util#v0.1.0",
 		"@zokugun/istanbul.cover": "0.5.x",

@@ -1,11 +1,11 @@
-class Color {
+export class Color {
 	macro registerSpace(@expression: Object) {
 		if expression.components? {
-			const fields: Array<Expr> = []
-			const methods: Array<Expr> = []
+			const fields: Array = []
+			const methods: Array = []
 			
 			let field
-			for name, component in expression.components {
+			for name, component of expression.components {
 				field = `_\(name)`
 				
 				fields.push(macro private #i(field): Number)
@@ -34,8 +34,8 @@ class Color {
 }
 
 Color.registerSpace!({
-	name: Space::SRGB
-	alias: [Space::RGB]
+	name: 'srgb'
+	alias: ['rgb']
 	components: {
 		red: {
 			max: 255

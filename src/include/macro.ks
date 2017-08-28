@@ -8,18 +8,37 @@ enum MacroVariableKind {
 func $evaluate(source) { // {{{
 	const compiler = new Compiler('__ks__')
 	
-	compiler.compile('#![bin]\nreturn ' + source)
+	compiler.compile('#![bin]\nextern console, JSON\nreturn ' + source)
 	
 	//console.log(compiler.toSource())
 	
 	return eval(`(function() {\(compiler.toSource())})()`)
 } // }}}
 
-func $nil() { // {{{
-} // }}}
-
-func $reificate(data, kind) { // {{{
-	return $ast.toSource(data, $nil)
+func $reificate(data, ast, reification) { // {{{
+	//console.log(data, ast, reification)
+	if ast {
+		return Generator.generate(data)
+	}
+	else {
+		switch reification {
+			ReificationKind::Block => {
+				let src = ''
+				
+				for element in data {
+					src += element + '\n'
+				}
+				
+				return src
+			}
+			ReificationKind::Expression => {
+				return JSON.stringify(data)
+			}
+			ReificationKind::Identifier => {
+				return data
+			}
+		}
+	}
 } // }}}
 
 class Macro extends AbstractNode {
@@ -38,8 +57,11 @@ class Macro extends AbstractNode {
 		@name = data.name.name
 		@type = MacroType.fromAST(data, this)
 		
-		const builder = new Writer({
-			terminator: '\n'
+		const builder = new Generator.KSWriter({
+			filters: {
+				expression: this.filter^@(false)
+				statement: this.filter^@(true)
+			}
 		})
 		
 		const line = builder.newLine().code('func(__ks_evaluate, __ks_reificate')
@@ -49,7 +71,7 @@ class Macro extends AbstractNode {
 			line.code(', ', data.name.name)
 			
 			if data.defaultValue? {
-				line.code(' = ', $ast.toSource(data.defaultValue, $nil))
+				line.code(' = ').expression(data.defaultValue)
 			}
 			
 			auto = false
@@ -67,19 +89,14 @@ class Macro extends AbstractNode {
 		
 		for name, kind of @parameters {
 			if kind == MacroVariableKind::AutoEvaluated {
-				block.line(`\(name) = __ks_evaluate(__ks_reificate(\(name), 3))`)
+				block.line(`\(name) = __ks_evaluate(__ks_reificate(\(name), true, 3))`)
 			}
 		}
 		
 		block.line('let __ks_src = ""')
 		
 		for statement in $ast.block(@data.body).statements {
-			if statement.kind == NodeKind::MacroExpression {
-				this.toStatementFragments(statement, block)
-			}
-			else {
-				block.line($ast.toSource(statement, $nil))
-			}
+			block.statement(statement)
 		}
 		
 		block.line('return __ks_src').done()
@@ -100,17 +117,13 @@ class Macro extends AbstractNode {
 	prepare()
 	translate()
 	execute(arguments: Array, parent) { // {{{
+		//console.log(@fn.toString())
 		const module = this.module()
 		
 		const args = [$evaluate, $reificate].concat(arguments)
 		
-		/* for argument in arguments {
-			/* args.push($ast.toValue(argument, this)) */
-			args.push(argument)
-		} */
-		
 		let data = @fn(...args)
-		//console.log(data)
+		//console.log('execute =>', data)
 		
 		try {
 			data = module.parse(data, path)
@@ -129,41 +142,48 @@ class Macro extends AbstractNode {
 		
 		return statements
 	} // }}}
+	private filter(statement, data, fragments) { // {{{
+		if data.kind == NodeKind::MacroExpression {
+			if statement {
+				fragments = fragments.newLine().code('__ks_src += ')
+			}
+			
+			for element, index in data.elements {
+				if index != 0 {
+					fragments.code(' + ')
+				}
+				
+				switch element.kind {
+					MacroElementKind::Expression => {
+						fragments
+							.code('__ks_reificate(')
+							.expression(element.expression)
+							.code(`, \(element.expression.kind == NodeKind::Identifier && @parameters[element.expression.name] == MacroVariableKind::AST), \(element.reification.kind))`)
+					}
+					MacroElementKind::Literal => {
+						fragments.code($quote(element.value.replace(/\\/g, '\\\\')))
+					}
+					MacroElementKind::NewLine => {
+						fragments.code('"\\n"')
+					}
+				}
+			}
+			
+			if statement {
+				fragments.done()
+			}
+			
+			return true
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isInstanceMethod() => false
 	matchArguments(arguments: Array) => @type.matchArguments(arguments)
 	name() => @name
 	statement() => this
 	type() => @type
-	private toStatementFragments(data, fragments) { // {{{
-		const line = fragments.newLine().code('__ks_src += ')
-		
-		for element, index in data.elements {
-			if index != 0 {
-				line.code(' + ')
-			}
-			
-			switch element.kind {
-				NodeKind::Literal => {
-					line.code($quote(element.value.replace(/\\/g, '\\\\')))
-				}
-				NodeKind::MacroVariable => {
-					if element.expression.kind == NodeKind::Identifier {
-						if @parameters[element.expression.name] == MacroVariableKind::AST {
-							line.code(`__ks_reificate(\(element.expression.name), \(element.reification.kind))`)
-						}
-						else {
-							line.code(element.expression.name)
-						}
-					}
-					else {
-						line.code(`__ks_reificate(\($ast.toSource(element.expression, $nil)), \(element.reification.kind))`)
-					}
-				}
-			}
-		}
-		
-		line.done()
-	} // }}}
 }
 
 class MacroType extends FunctionType {
@@ -262,6 +282,9 @@ class MacroParameterType extends ParameterType {
 			}
 			'Number' => {
 				return argument.kind == NodeKind::NumericExpression
+			}
+			'Object' => {
+				return argument.kind == NodeKind::ObjectExpression
 			}
 			'String' => {
 				return argument.kind == NodeKind::Literal
