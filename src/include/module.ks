@@ -25,7 +25,7 @@ export class Module {
 		@data = this.parse(data, file)
 		
 		@directory = path.dirname(file)
-		@options = Attribute.configure(@data, @compiler._options.config, AttributeTarget::Global)
+		@options = Attribute.configure(@data, @compiler._options.config, true, AttributeTarget::Global)
 		
 		for attr in @data.attributes {
 			if attr.declaration.kind == NodeKind::Identifier &&	attr.declaration.name == 'bin' {

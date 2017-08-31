@@ -116,6 +116,8 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 		
+		Attribute.configure(data, this.module()._options, false, AttributeTarget::Global)
+		
 		for statement in data.body when statement ?= $compile.statement(statement, declarator) {
 			@statements.push(statement)
 			
@@ -141,6 +143,8 @@ class IncludeDeclaration extends Statement {
 			
 			throw error
 		}
+		
+		Attribute.configure(data, this.module()._options, false, AttributeTarget::Global)
 		
 		for statement in data.body {
 			if statement.kind == NodeKind::ExportDeclaration {

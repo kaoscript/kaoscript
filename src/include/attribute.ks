@@ -28,17 +28,15 @@ class Attribute {
 			
 			return true
 		} // }}}
-		configure(data, options, targets) { // {{{
-			let nc = true
-			
+		configure(data, options, clone, targets) { // {{{
 			if data.attributes?.length > 0 {
 				let attribute
 				for attr in data.attributes {
 					if attr.declaration.kind == NodeKind::AttributeExpression && (attribute ?= Attribute.get(attr.declaration, targets)) {
-						if nc {
+						if clone {
 							options = Object.clone(options)
 							
-							nc = false
+							clone = false
 						}
 						
 						attribute.configure(options)

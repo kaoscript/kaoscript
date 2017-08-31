@@ -6,7 +6,7 @@ abstract class Statement extends AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
 		
-		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
+		@options = Attribute.configure(data, parent._options, true, AttributeTarget::Statement)
 	} // }}}
 	afterward(node) { // {{{
 		@afterwards.push(node)
