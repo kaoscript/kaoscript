@@ -34,6 +34,7 @@ class ClassDeclaration extends Statement {
 		_references					= {}
 		_sealed: Boolean 			= false
 		_type: ClassType
+		_variable: Variable
 	}
 	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
 		if method.max() == 0 && !method.isAsync() {
@@ -562,7 +563,7 @@ class ClassDeclaration extends Statement {
 		@name = @data.name.name
 		@type = new ClassType(@name, @scope)
 		
-		@scope.define(@name, true, @type, this)
+		@variable = @scope.define(@name, true, @type, this)
 		
 		let thisVariable = @constructorScope.define('this', true, @type.reference(), this)
 		
@@ -802,6 +803,9 @@ class ClassDeclaration extends Statement {
 				throw new NotImplementedException(this)
 			}
 		}
+	} // }}}
+	export(recipient) { // {{{
+		recipient.export(@name, @variable)
 	} // }}}
 	extends() => @extendsType
 	hasConstructors() => @constructors.length != 0

@@ -509,6 +509,7 @@ class AnyType extends Type {
 	getProperty(name) => Type.Any
 	hashCode() => 'Any'
 	isAny() => true
+	isCompatible(type) => false
 	isInstanceOf(target: Type) => true
 	isNullable() => false
 	match(b: Type) => true
@@ -620,14 +621,14 @@ class ClassType extends Type {
 	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
 		@instanceVariables[name] = type
 	} // }}}
-	addMacro(name, macro) {
+	addMacro(name, macro) { // {{{
 		if @macros[name] is Array {
 			@macros[name].push(macro)
 		}
 		else {
 			@macros[name] = [macro]
 		}
-	}
+	} // }}}
 	addPropertyFromAST(data, node) { // {{{
 		switch(data.kind) {
 			NodeKind::FieldDeclaration => {
@@ -975,6 +976,13 @@ class ClassType extends Type {
 	isAbstract() => @abstract
 	isAlien() => @alien
 	isAnonymous() => @anonymous
+	isCompatible(type) {
+		if type is not ClassType {
+			return false
+		}
+		
+		return true
+	}
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
 	isExtendable() => !@anonymous
@@ -1026,10 +1034,6 @@ class ClassType extends Type {
 		}
 	} // }}}
 	merge(type: Type, node) { // {{{
-		if type is not ClassType {
-			throw new NotSupportedException(node)
-		}
-		
 		for constructor in type._constructors {
 			this.addConstructor(constructor)
 		}
@@ -1543,6 +1547,11 @@ class NamespaceType extends Type {
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
+	} // }}}
+	walk(fn) { // {{{
+		for name, type of @properties {
+			fn(name, type)
+		}
 	} // }}}
 }
 

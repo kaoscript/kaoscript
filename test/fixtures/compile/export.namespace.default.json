@@ -1,0 +1,38 @@
+{
+  "requirements": {},
+  "exports": [
+    0,
+    "NS"
+  ],
+  "references": [
+    {
+      "sealed": "false",
+      "properties": {
+        "foo": {
+          "async": "false",
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": []
+        },
+        "bar": {
+          "async": "false",
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": []
+        },
+        "qux": {
+          "async": "false",
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": []
+        }
+      }
+    }
+  ]
+}

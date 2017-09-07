@@ -149,8 +149,7 @@ class IncludeDeclaration extends Statement {
 		for statement in data.body {
 			if statement.kind == NodeKind::ExportDeclaration {
 				for declaration in statement.declarations
-				when	declaration.kind != NodeKind::ExportAlias &&
-						declaration.kind != NodeKind::Identifier &&
+				when	declaration.kind == NodeKind::ExportDeclarationSpecifier &&
 						(declaration ?= $compile.statement(declaration, declarator))
 				{
 					@statements.push(declaration)

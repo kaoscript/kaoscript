@@ -129,7 +129,7 @@ class AbstractScope {
 		
 		return this
 	} // }}}
-	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode) { // {{{
+	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable { // {{{
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}

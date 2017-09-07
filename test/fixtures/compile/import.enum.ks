@@ -18,4 +18,4 @@ color = Color::DarkGreen
 
 console.log(color)
 
-export Color as Colour
+export Color => Colour

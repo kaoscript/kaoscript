@@ -1,1 +1,1 @@
-import '@kaoscript/runtime/src/runtime.js' as rt
+import '@kaoscript/runtime/src/runtime.js' => rt

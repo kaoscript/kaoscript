@@ -1,0 +1,37 @@
+{
+  "requirements": {},
+  "exports": [
+    0,
+    "foo",
+    1,
+    "bar",
+    2,
+    "qux"
+  ],
+  "references": [
+    {
+      "async": "false",
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
+      "throws": []
+    },
+    {
+      "async": "false",
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
+      "throws": []
+    },
+    {
+      "async": "false",
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
+      "throws": []
+    }
+  ]
+}

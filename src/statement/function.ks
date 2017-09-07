@@ -176,6 +176,9 @@ class FunctionDeclaration extends Statement {
 		
 		@variable.translate()
 	} // }}}
+	export(recipient) { // {{{
+		recipient.export(@name, @variable)
+	} // }}}
 	name() => @name
 	toStatementFragments(fragments, mode) { // {{{
 		return unless @main

@@ -1,0 +1,22 @@
+{
+  "requirements": {},
+  "exports": [
+    0,
+    "ns"
+  ],
+  "references": [
+    {
+      "sealed": "false",
+      "properties": {
+        "foo": {
+          "async": "false",
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": []
+        }
+      }
+    }
+  ]
+}

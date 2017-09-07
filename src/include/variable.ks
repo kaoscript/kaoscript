@@ -26,6 +26,9 @@ class Variable {
 	require() { // {{{
 		@required = true
 	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments.code(@name)
+	} // }}}
 	type() => @type
 	type(@type) => this
 }

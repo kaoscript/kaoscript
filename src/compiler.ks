@@ -389,7 +389,7 @@ const $statements = {
 	`\(NodeKind::ImplementDeclaration)`			: ImplementDeclaration
 	`\(NodeKind::ImportDeclaration)`			: ImportDeclaration
 	`\(NodeKind::IncludeDeclaration)`			: IncludeDeclaration
-	`\(NodeKind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration
+	/* `\(NodeKind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration */
 	`\(NodeKind::NamespaceDeclaration)`			: NamespaceDeclaration
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration

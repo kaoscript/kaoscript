@@ -1,14 +1,18 @@
 class TypeAliasDeclaration extends Statement {
 	private {
 		_name: String
+		_variable: Variable
 	}
 	analyse() { // {{{
 		@name = @data.name.name
 		
-		@scope.define(@name, true, new AliasType(Type.fromAST(@data.type, this)), this)
+		@variable = @scope.define(@name, true, new AliasType(Type.fromAST(@data.type, this)), this)
 	} // }}}
 	prepare()
 	translate()
+	export(recipient) { // {{{
+		recipient.export(@name, @variable)
+	} // }}}
 	name() => @name
 	toStatementFragments(fragments, mode)
 }

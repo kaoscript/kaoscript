@@ -98,6 +98,11 @@ class VariableDeclaration extends Statement {
 			declarator.translate()
 		}
 	} // }}}
+	export(recipient) { // {{{
+		for declarator in @declarators {
+			declarator.export(recipient)
+		}
+	} // }}}
 	hasInit() => @hasInit
 	init() => @init
 	isAwait() => @await
@@ -243,6 +248,9 @@ class VariableBindingDeclarator extends AbstractNode {
 	translate() { // {{{
 		@binding.translate()
 	} // }}}
+	export(recipient) { // {{{
+		@binding.export(recipient)
+	} // }}}
 	isAlreadyDeclared() => false
 	isDeclararingVariable(name: String) => @binding.isDeclararingVariable(name)
 	toFlatFragments(fragments, init) { // {{{
@@ -293,6 +301,9 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	translate() { // {{{
 		@identifier.translate()
+	} // }}}
+	export(recipient) { // {{{
+		recipient.export(@name, @variable)
 	} // }}}
 	isAlreadyDeclared() => @alreadyDeclared
 	isDeclararingVariable(name: String) => @name == name

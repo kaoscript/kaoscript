@@ -1,9 +1,10 @@
 class NamespaceDeclaration extends Statement {
 	private {
-		_exports: Array			= []
+		_exports				= {}
 		_name: String
 		_statements: Array
 		_type: NamespaceType
+		_variable: Variable
 	}
 	constructor(data, parent) { // {{{
 		super(data, parent, new Scope(parent.scope()))
@@ -12,7 +13,7 @@ class NamespaceDeclaration extends Statement {
 		@name = @data.name.name
 		@type = new NamespaceType(@name, @scope)
 		
-		@scope.parent().define(@name, true, @type, this)
+		@variable = @scope.parent().define(@name, true, @type, this)
 		
 		@statements = []
 		for statement in @data.statements {
@@ -35,21 +36,11 @@ class NamespaceDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
-	export(name: String, alias: String?, node) { // {{{
-		let variable: Variable
-		
-		if variable !?= @scope.getVariable(name) {
-			ReferenceException.throwNotDefined(name, node)
-		}
-		
-		if variable.type() is not AliasType {
-			@exports.push(`\(alias ?? name): \(name)`)
-			
-			const type = variable.type().unalias()
-			if type.isSealed() {
-				@exports.push(`__ks_\(alias ?? name): \(type.sealName())`)
-			}
-		}
+	export(recipient) { // {{{
+		recipient.export(@name, @variable)
+	} // }}}
+	export(name: String, variable) { // {{{
+		@exports[name] = variable
 	} // }}}
 	name() => @name
 	recipient() => this
@@ -57,8 +48,15 @@ class NamespaceDeclaration extends Statement {
 		const line = fragments.newLine().code('return ')
 		const object = line.newObject()
 		
-		for export in @exports {
-			object.line(export)
+		for name, variable of @exports {
+			if variable.type() is not AliasType {
+				object.newLine().code(`\(name): `).compile(variable).done()
+				
+				const type = variable.type().unalias()
+				if type.isSealed() {
+					object.line(`__ks_\(name): \(type.sealName())`)
+				}
+			}
 		}
 		
 		object.done()

@@ -1,0 +1,1 @@
+SyntaxException: Identifier "name" has already been declared (line 2, file "fixtures/compile/import.dual.ks")

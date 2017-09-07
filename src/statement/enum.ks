@@ -5,12 +5,13 @@ class EnumDeclaration extends Statement {
 		_new: Boolean				= true
 		_values: Array				= []
 		_type: EnumType
+		_variable: Variable
 	}
 	analyse() { // {{{
 		@name = @data.name.name
 		
-		if variable ?= @scope.getVariable(@name) {
-			@type = variable.type()
+		if @variable ?= @scope.getVariable(@name) {
+			@type = @variable.type()
 			@new = false
 		}
 		else {
@@ -38,7 +39,7 @@ class EnumDeclaration extends Statement {
 				@type = new EnumType(@name, domain)
 			}
 			
-			@scope.define(@name, true, @type, this)
+			@variable = @scope.define(@name, true, @type, this)
 		}
 	} // }}}
 	prepare() { // {{{
@@ -124,6 +125,9 @@ class EnumDeclaration extends Statement {
 		}
 	} // }}}
 	translate()
+	export(recipient) { // {{{
+		recipient.export(@name, @variable)
+	} // }}}
 	name() => @name
 	toStatementFragments(fragments, mode) { // {{{
 		if @new {

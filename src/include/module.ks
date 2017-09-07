@@ -1,13 +1,12 @@
 export class Module {
 	private {
-		_binary		: Boolean	= false
+		_binary: Boolean		= false
 		_body
-		_compiler	: Compiler
+		_compiler: Compiler
 		_data
 		_directory
 		_dynamicRequirements	= []
-		_exportSource			= []
-		_exportMeta				= {}
+		_exports				= {}
 		_file
 		_flags					= {}
 		_hashes					= {}
@@ -88,27 +87,12 @@ export class Module {
 	} // }}}
 	compiler() => @compiler
 	directory() => @directory
-	export(name: String, alias: String?, node) { // {{{
+	export(name: String, variable) { // {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
 		
-		let variable: Variable
-		
-		if variable !?= @body.scope().getVariable(name) {
-			ReferenceException.throwNotDefined(name, node)
-		}
-		
-		if variable.type() is not AliasType {
-			@exportSource.push(`\(alias ?? name): \(name)`)
-			
-			const type = variable.type().unalias()
-			if type.isSealed() && type.isExtendable() {
-				@exportSource.push(`__ks_\(alias ?? name): \(type.sealName())`)
-			}
-		}
-		
-		@exportMeta[alias ?? name] = variable
+		@exports[name] = variable
 	} // }}}
 	file() => @file
 	flag(name) { // {{{
@@ -548,25 +532,33 @@ export class Module {
 				}
 			}
 			
-			fragments.append(builder.toArray())
+			let export = 0
+			for :variable of @exports {
+				if variable.type() is not AliasType {
+					++export
+				}
+			}
 			
-			if @exportSource.length {
-				fragments.push($code('\treturn {'))
+			if export != 0 {
+				const line = builder.newLine().code('return ')
+				const object = line.newObject()
 				
-				nf = false
-				for src in @exportSource {
-					if nf {
-						fragments.push($code(','))
+				for name, variable of @exports {
+					if variable.type() is not AliasType {
+						object.newLine().code(`\(name): `).compile(variable).done()
+						
+						const type = variable.type().unalias()
+						if type.isSealed() && type.isExtendable() {
+							object.line(`__ks_\(name): \(type.sealName())`)
+						}
 					}
-					else {
-						nf = true
-					}
-					
-					fragments.push($code('\n\t\t' + src))
 				}
 				
-				fragments.push($code('\n\t};\n'))
+				object.done()
+				line.done()
 			}
+			
+			fragments.append(builder.toArray())
 			
 			fragments.push($code('}\n'))
 		}
@@ -607,7 +599,7 @@ export class Module {
 				}
 			}
 			
-			for name, variable of @exportMeta {
+			for name, variable of @exports {
 				@metadata.exports.push(variable.type().toMetadata(@metadata.references), name)
 			}
 		}

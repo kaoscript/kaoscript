@@ -1,0 +1,37 @@
+{
+  "requirements": {},
+  "exports": [
+    0,
+    "nsFoo",
+    1,
+    "nsBar",
+    2,
+    "nsQux"
+  ],
+  "references": [
+    {
+      "async": "false",
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
+      "throws": []
+    },
+    {
+      "async": "false",
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
+      "throws": []
+    },
+    {
+      "async": "false",
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
+      "throws": []
+    }
+  ]
+}

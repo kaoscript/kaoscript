@@ -40,8 +40,14 @@ const $nodeModules = { // {{{
 
 const $import = {
 	addVariable(name: String, type: Type, node: AbstractNode, module, file: String = null) { // {{{
-		if variable ?= node.scope().getLocalVariable(name) {
-			variable.type().merge(type, node)
+		if variable ?= node.scope().getVariable(name) {
+			if variable.type().isCompatible(type) {
+				/* variable.type().merge(type) */
+				throw new NotImplementedException(node)
+			}
+			else {
+				SyntaxException.throwAlreadyDeclared(name, node)
+			}
 		}
 		else {
 			node.scope().define(name, true, type, node)

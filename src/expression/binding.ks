@@ -39,6 +39,11 @@ class ArrayBinding extends Expression {
 			element.translate()
 		}
 	} // }}}
+	export(recipient) { // {{{
+		for element in @elements {
+			element.export(recipient)
+		}
+	} // }}}
 	isDeclararingVariable(name: String) { // {{{
 		for element in @elements {
 			if element.isDeclararingVariable(name) {
@@ -136,7 +141,8 @@ class BindingElement extends Expression {
 		_defaultValue				= null
 		_index						= -1
 		_name
-		_variable
+		_tempName: String
+		_variable: Variable			= null
 		_variables: Array<String>	= []
 	}
 	constructor(data, parent, scope) { // {{{
@@ -146,13 +152,13 @@ class BindingElement extends Expression {
 		const scope = this.statement().scope()
 		
 		if @data.name.kind == NodeKind::Identifier && !scope.hasVariable(@data.name.name) {
-			scope.define(@data.name.name, false, this.statement())
+			@variable = scope.define(@data.name.name, false, this.statement())
 			
 			@variables.push(@data.name.name)
 		}
 		
 		if @data.alias? {
-			@scope.define(@data.alias.name, false, this)
+			@variable = @scope.define(@data.alias.name, false, this)
 			
 			@alias = $compile.expression(@data.alias, this)
 			@alias.analyse()
@@ -168,9 +174,9 @@ class BindingElement extends Expression {
 			@defaultValue.analyse()
 			
 			if @options.format.destructuring == 'es5' {
-				@variable = @scope.acquireTempName(this.statement())
+				@tempName = @scope.acquireTempName(this.statement())
 				
-				@scope.releaseTempName(@variable)
+				@scope.releaseTempName(@tempName)
 			}
 		}
 	} // }}}
@@ -183,6 +189,11 @@ class BindingElement extends Expression {
 		@alias.translate() if @alias?
 		@name.translate()
 		@defaultValue.translate() if @defaultValue?
+	} // }}}
+	export(recipient) { // {{{
+		if @variable != null {
+			recipient.export(@variable.name(), @variable)
+		}
 	} // }}}
 	index(@index) => this
 	isDeclararingVariable(name: String) => @variables.contains(name)
@@ -236,7 +247,7 @@ class BindingElement extends Expression {
 			@name.toFlatFragments(fragments, new FlatBindingElement(value, @alias ?? @name, this))
 		}
 		else if @defaultValue? {
-			const variable = new Literal(false, this, @scope, @variable)
+			const variable = new Literal(false, this, @scope, @tempName)
 			
 			fragments
 				.compile(@name)
@@ -326,6 +337,11 @@ class ObjectBinding extends Expression {
 	translate() { // {{{
 		for element in @elements {
 			element.translate()
+		}
+	} // }}}
+	export(recipient) { // {{{
+		for element in @elements {
+			element.export(recipient)
 		}
 	} // }}}
 	isDeclararingVariable(name: String) { // {{{

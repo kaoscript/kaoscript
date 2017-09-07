@@ -1,4 +1,4 @@
-import './export.sealed.class.default.ks' as T
+import './export.sealed.class.default.ks' => T
 
 let shape := new T.Shape('yellow')
 
