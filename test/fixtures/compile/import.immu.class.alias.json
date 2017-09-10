@@ -1,0 +1,108 @@
+{
+  "requirements": {},
+  "exports": [
+    0,
+    "Color",
+    1,
+    "Space"
+  ],
+  "references": [
+    {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "false",
+      "sealed": "false",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "_blue": {
+          "access": 1,
+          "type": "Number"
+        },
+        "_green": {
+          "access": 1,
+          "type": "Number"
+        },
+        "_red": {
+          "access": 1,
+          "type": "Number"
+        },
+        "_space": {
+          "access": 1,
+          "type": "Space"
+        },
+        "_luma": {
+          "access": 1,
+          "type": "Number"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "space": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Space",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          }
+        ],
+        "luma": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Number",
+            "sealed": "false",
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Number",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "elements": [
+        "RGB"
+      ],
+      "index": -1,
+      "kind": 2
+    }
+  ]
+}

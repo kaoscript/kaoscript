@@ -443,6 +443,7 @@ abstract class Type {
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
+	isClass() => false
 	isContainedIn(types) { // {{{
 		for type in types {
 			if this.equals(type) {
@@ -452,6 +453,7 @@ abstract class Type {
 		
 		return false
 	} // }}}
+	isEnum() => false
 	isExtendable() => false
 	isFlexible() => false
 	isFunction() => false
@@ -976,13 +978,8 @@ class ClassType extends Type {
 	isAbstract() => @abstract
 	isAlien() => @alien
 	isAnonymous() => @anonymous
-	isCompatible(type) {
-		if type is not ClassType {
-			return false
-		}
-		
-		return true
-	}
+	isClass() => true
+	isCompatible(type) => type.isClass()
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
 	isExtendable() => !@anonymous
@@ -1036,6 +1033,10 @@ class ClassType extends Type {
 	merge(type: Type, node) { // {{{
 		for constructor in type._constructors {
 			this.addConstructor(constructor)
+		}
+		
+		for name, variable of type._instanceVariables {
+			this.addInstanceVariable(name, variable)
 		}
 		
 		for name, methods of type._instanceMethods {
@@ -1125,7 +1126,11 @@ class EnumType extends Type {
 	} // }}}
 	index() => @index
 	index(@index)
+	isCompatible(type) => type.isEnum()
+	isEnum() => true
 	kind() => @kind
+	merge(type: Type, node) { // {{{
+	} // }}}
 	name() => @name
 	step(): EnumType { // {{{
 		@index++
@@ -1753,6 +1758,8 @@ class ReferenceType extends Type {
 	} // }}}
 	isAny() => @name == 'Any'
 	isArray() => @name == 'Array'
+	isClass() => @name == 'Class'
+	isEnum() => @name == 'Enum'
 	isInstanceOf(target: AnyType) => true
 	isInstanceOf(target: ReferenceType) { // {{{
 		if @name == target._name || target.isAny() {

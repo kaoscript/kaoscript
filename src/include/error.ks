@@ -162,6 +162,12 @@ export class ReferenceException extends Exception {
 		throwNotDefinedProperty(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Property "\(name)" is not defined`, node)
 		} // }}}
+		throwNotMergeable(name, module, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`Local's "\(name)" and module's "\(name)" (from "\(module)") can't be merged`, node)
+		} // }}}
+		throwNotPassed(name, module, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
+		} // }}}
 		throwSelfDefinedVariable(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Variable "\(name)" is being self-defined`, node)
 		} // }}}
