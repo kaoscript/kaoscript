@@ -4,4 +4,4 @@ module.exports = function() {
 	let bar;
 	Type.isValue(foo) ? bar = foo : undefined;
 	console.log(foo, bar);
-}
+};

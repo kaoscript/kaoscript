@@ -63,4 +63,4 @@ module.exports = function() {
 		ClassB: ClassB,
 		ClassC: ClassC
 	};
-}
+};

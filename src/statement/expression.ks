@@ -27,7 +27,7 @@ class ExpressionStatement extends Statement {
 			}
 			else {
 				if !expression.isAssignable() || @variable.length {
-					@variables.push(data.left.name)
+					@assignments.push(data.left.name)
 				}
 				else {
 					@variable = data.left.name
@@ -57,13 +57,13 @@ class ExpressionStatement extends Statement {
 			return this.toAwaitStatementFragments^@(fragments)
 		}
 		else if @expression.isAssignable() {
-			if @variables.length {
-				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
+			if @assignments.length != 0 {
+				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 			
 			let line = fragments.newLine()
 			
-			if @variable.length {
+			if @variable.length != 0 {
 				line.code($runtime.scope(this))
 			}
 			
@@ -77,19 +77,19 @@ class ExpressionStatement extends Statement {
 			line.done()
 		}
 		else if @expression.toStatementFragments? {
-			if @variable.length {
-				@variables.unshift(@variable)
+			if @variable.length != 0 {
+				@assignments.unshift(@variable)
 			}
 			
-			if @variables.length {
-				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
+			if @assignments.length != 0 {
+				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 			
 			@expression.toStatementFragments(fragments, Mode::None)
 		}
 		else {
-			if @variables.length {
-				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
+			if @assignments.length != 0 {
+				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 			
 			let line = fragments.newLine()

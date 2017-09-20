@@ -1,8 +1,12 @@
 {
-  "requirements": {
-    "Helper": {},
-    "Type": {}
-  },
+  "requirements": [
+    -1,
+    "Helper",
+    "true",
+    -1,
+    "Type",
+    "true"
+  ],
   "exports": [
     0,
     "Function"

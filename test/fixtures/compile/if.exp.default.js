@@ -4,4 +4,4 @@ module.exports = function() {
 	if(debug) {
 		console.log(name);
 	}
-}
+};

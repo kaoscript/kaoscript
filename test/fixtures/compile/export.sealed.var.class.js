@@ -4,4 +4,4 @@ module.exports = function() {
 		Window: Window,
 		__ks_Window: __ks_Window
 	};
-}
+};

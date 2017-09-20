@@ -46,4 +46,4 @@ module.exports = function() {
 			Bar.prototype.__ks_cons.call(this, args);
 		}
 	}
-}
+};

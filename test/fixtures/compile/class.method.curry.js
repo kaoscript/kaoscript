@@ -39,4 +39,4 @@ module.exports = function() {
 		return printer("It's nice to meet you, ", name, ".");
 	}
 	print("miss White", hello);
-}
+};

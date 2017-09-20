@@ -17,4 +17,4 @@ module.exports = function() {
 		}
 	};
 	console.log($caster.hex(128));
-}
+};

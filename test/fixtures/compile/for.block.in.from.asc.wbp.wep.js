@@ -4,4 +4,4 @@ module.exports = function() {
 		hero = heroes[index];
 		console.log("The hero at index %d is %s", index, hero);
 	}
-}
+};

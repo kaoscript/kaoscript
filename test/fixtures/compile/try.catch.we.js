@@ -5,4 +5,4 @@ module.exports = function() {
 	catch(error) {
 		console.log(error);
 	}
-}
+};

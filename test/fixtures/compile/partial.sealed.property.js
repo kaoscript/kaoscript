@@ -26,4 +26,4 @@ module.exports = function() {
 	}
 	const foobar = new Foobar();
 	__ks_Array._im_pushUniq(foobar.values, 42);
-}
+};

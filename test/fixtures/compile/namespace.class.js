@@ -31,4 +31,4 @@ module.exports = function() {
 		};
 	})();
 	const x = new qux.Foobar();
-}
+};

@@ -11,4 +11,4 @@ module.exports = function() {
 			throw new TypeError("'bar' is not of type 'Array'");
 		}
 	}
-}
+};

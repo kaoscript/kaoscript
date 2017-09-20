@@ -3,4 +3,4 @@ module.exports = function() {
 		this.log.apply(this, args);
 	}
 	log.call(console, "hello");
-}
+};

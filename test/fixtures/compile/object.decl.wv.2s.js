@@ -3,4 +3,4 @@ module.exports = function() {
 		bar: "hello",
 		"qux": "world"
 	};
-}
+};

@@ -10,4 +10,4 @@ module.exports = function() {
 	var bar = (__ks_0 = foo()).bar, baz = __ks_0.baz;
 	console.log(bar);
 	console.log(baz);
-}
+};

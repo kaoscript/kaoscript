@@ -70,4 +70,4 @@ module.exports = function() {
 		AbstractGreetings: AbstractGreetings,
 		Greetings: Greetings
 	};
-}
+};

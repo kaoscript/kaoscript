@@ -77,4 +77,4 @@ module.exports = function() {
 		}
 	}
 	let r = Shape.makeRectangle("black");
-}
+};

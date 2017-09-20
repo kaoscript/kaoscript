@@ -26,4 +26,4 @@ module.exports = function(expect) {
 	expect(foo(1, 2, 3)).to.eql([[1], 2, 42, 3]);
 	expect(foo(1, 2, 3, 4)).to.eql([[1, 2], 3, 42, 4]);
 	expect(foo(1, 2, 3, 4, 5, 6)).to.eql([[1, 2, 3, 4], 5, 42, 6]);
-}
+};

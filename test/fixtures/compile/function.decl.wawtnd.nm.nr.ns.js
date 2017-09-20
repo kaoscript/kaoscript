@@ -17,4 +17,4 @@ module.exports = function() {
 			throw new TypeError("'qux' is not of type 'Number'");
 		}
 	}
-}
+};

@@ -77,4 +77,4 @@ module.exports = function() {
 	}
 	let s = new Shape("#777");
 	console.log(s.color());
-}
+};

@@ -28,4 +28,4 @@ module.exports = function() {
 	else {
 		console.log("Not a point");
 	}
-}
+};

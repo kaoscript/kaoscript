@@ -27,4 +27,4 @@ module.exports = function() {
 		let items = arguments.length > __ks_i + 2 ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - 1) : [];
 		__ks_cb();
 	}
-}
+};

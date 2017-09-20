@@ -8,4 +8,4 @@ module.exports = function() {
 			let n = 0;
 		}
 	};
-}
+};

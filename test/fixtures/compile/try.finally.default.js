@@ -5,4 +5,4 @@ module.exports = function() {
 	finally {
 		console.log("finally");
 	}
-}
+};

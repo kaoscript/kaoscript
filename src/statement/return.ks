@@ -65,8 +65,8 @@ class ReturnStatement extends Statement {
 			}
 		}
 		else if @temp == null {
-			if @variables.length != 0 {
-				fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
+			if @assignments.length != 0 {
+				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 			
 			if @value.isAwaiting() {
@@ -95,10 +95,10 @@ class ReturnStatement extends Statement {
 				throw new NotImplementedException(this)
 			}
 			else {
-				@variables.remove(@temp)
+				@assignments.remove(@temp)
 				
-				if @variables.length != 0 {
-					fragments.newLine().code($runtime.scope(this) + @variables.join(', ')).done()
+				if @assignments.length != 0 {
+					fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 				}
 				
 				fragments

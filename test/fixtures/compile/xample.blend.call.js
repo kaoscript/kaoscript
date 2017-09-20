@@ -27,4 +27,4 @@ module.exports = function() {
 		return ((1 - percentage) * x) + (percentage * y);
 	}
 	console.log(__ks_Number._im_round(blend(0.8, 0.5, 0.3), 2));
-}
+};

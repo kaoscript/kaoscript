@@ -16,4 +16,4 @@ module.exports = function(expect) {
 		return foo(null);
 	}).to.throw();
 	expect(foo(1, 2)).to.eql([1]);
-}
+};

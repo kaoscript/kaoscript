@@ -1,5 +1,6 @@
 class Variable {
 	private {
+		_altereable: Boolean	= false
 		_immutable: Boolean		= true
 		_name: String
 		_new: Boolean			= true
@@ -23,6 +24,12 @@ class Variable {
 	constructor(@name, @immutable, @type = Type.Any)
 	isImmutable() => @immutable
 	name() => @name
+	prepareAlteration() { // {{{
+		if @required && !@altereable {
+			@type = @type.replicate()
+			@altereable = true
+		}
+	} // }}}
 	require() { // {{{
 		@required = true
 	} // }}}

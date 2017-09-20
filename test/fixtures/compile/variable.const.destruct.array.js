@@ -4,4 +4,4 @@ module.exports = function() {
 	}
 	var [x, y] = foo();
 	console.log(x, y);
-}
+};

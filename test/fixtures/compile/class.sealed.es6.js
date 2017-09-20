@@ -46,4 +46,4 @@ module.exports = function() {
 	var __ks_Greetings = {};
 	let hello = new Greetings("Hello world!");
 	console.log(hello.greet("miss White"));
-}
+};

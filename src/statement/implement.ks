@@ -9,6 +9,8 @@ class ImplementDeclaration extends Statement {
 			ReferenceException.throwNotDefined(@data.variable.name, this)
 		}
 		
+		@variable.prepareAlteration()
+		
 		@type = @variable.type().unalias()
 		
 		if @type is ClassType {

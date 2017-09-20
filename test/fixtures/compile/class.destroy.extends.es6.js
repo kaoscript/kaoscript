@@ -101,4 +101,4 @@ module.exports = function() {
 			return Shape.prototype.draw.apply(this, arguments);
 		}
 	}
-}
+};

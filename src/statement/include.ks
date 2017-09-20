@@ -1,3 +1,5 @@
+const $localFileRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/
+
 class IncludeDeclaration extends Statement {
 	private {
 		_statements = []
@@ -7,7 +9,7 @@ class IncludeDeclaration extends Statement {
 		
 		let x
 		for file in @data.files {
-			if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(file) {
+			if $localFileRegex.test(file) {
 				x = fs.resolve(directory, file)
 				
 				if fs.isFile(x) || fs.isFile(x += $extensions.source) {
@@ -21,7 +23,7 @@ class IncludeDeclaration extends Statement {
 			}
 			else {
 				let nf = true
-				for dir in $import.nodeModulesPaths(directory) while nf {
+				for dir in $nodeModulesPaths(directory) while nf {
 					x = fs.resolve(dir, file)
 				
 					if fs.isFile(x) {
@@ -80,7 +82,7 @@ class IncludeDeclaration extends Statement {
 				}
 				
 				if this.canLoadFile(x) {
-					this.loadModuleFile(x)
+					this.loadModuleFile(x, file)
 				}
 			}
 		}
@@ -95,7 +97,7 @@ class IncludeDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
-	canLoadFile(path) => true
+	canLoadFile(path) => !this.module().hasInclude(path)
 	loadLocalFile(path) { // {{{
 		const module = this.module()
 		const declarator = new IncludeDeclarator(path, this)
@@ -124,9 +126,9 @@ class IncludeDeclaration extends Statement {
 			statement.analyse()
 		}
 	} // }}}
-	loadModuleFile(path) { // {{{
+	loadModuleFile(path, file) { // {{{
 		const module = this.module()
-		const declarator = new IncludeDeclarator(path, this)
+		const declarator = new IncludeDeclarator(path, file, this)
 		
 		let data = fs.readFile(path)
 		
@@ -146,22 +148,10 @@ class IncludeDeclaration extends Statement {
 		
 		Attribute.configure(data, this.module()._options, false, AttributeTarget::Global)
 		
-		for statement in data.body {
-			if statement.kind == NodeKind::ExportDeclaration {
-				for declaration in statement.declarations
-				when	declaration.kind == NodeKind::ExportDeclarationSpecifier &&
-						(declaration ?= $compile.statement(declaration, declarator))
-				{
-					@statements.push(declaration)
-					
-					declaration.analyse()
-				}
-			}
-			else if statement ?= $compile.statement(statement, declarator) {
-				@statements.push(statement)
-				
-				statement.analyse()
-			}
+		for statement in data.body when statement ?= $compile.statement(statement, declarator) {
+			@statements.push(statement)
+			
+			statement.analyse()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
@@ -171,24 +161,36 @@ class IncludeDeclaration extends Statement {
 	} // }}}
 }
 
-class IncludeOnceDeclaration extends IncludeDeclaration {
-	canLoadFile(path) => !this.module().hasInclude(path)
+class IncludeAgainDeclaration extends IncludeDeclaration {
+	canLoadFile(path) => true
 }
 
 class IncludeDeclarator extends Statement {
 	private {
-		_directory
-		_file
+		_directory: String
+		_file: String
+		_includePath: String
 	}
-	constructor(@file, parent) { // {{{
+	constructor(@file, includePath: String = null, @parent) { // {{{
 		super({}, parent)
 		
 		@directory = path.dirname(file)
+		
+		if includePath == null {
+			@includePath = parent.includePath()
+		}
+		else if parent.includePath() == null || !$localFileRegex.test(includePath) {
+			@includePath = includePath
+		}
+		else {
+			@includePath = path.join(parent.includePath(), includePath)
+		}
 	} // }}}
 	analyse()
 	prepare()
 	translate()
 	directory() => @directory
 	file() => @file
+	includePath() => @includePath
 	recipient() => this.module()
 }

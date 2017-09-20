@@ -14,4 +14,4 @@ module.exports = function() {
 	function bar() {
 		throw new Error();
 	}
-}
+};

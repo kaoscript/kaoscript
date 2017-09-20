@@ -13,4 +13,4 @@ module.exports = function() {
 	};
 	foo = __ks_0;
 	console.log(foo);
-}
+};

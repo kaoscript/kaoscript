@@ -76,4 +76,4 @@ module.exports = function() {
 	let shape = new Shape("yellow");
 	console.log(__ks_Shape._im_draw(shape, "rectangle"));
 	console.log(__ks_Shape._im_draw(shape, "red", "rectangle"));
-}
+};

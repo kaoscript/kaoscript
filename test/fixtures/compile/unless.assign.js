@@ -4,4 +4,4 @@ module.exports = function() {
 	if(!(y === 0)) {
 		x = 1;
 	}
-}
+};

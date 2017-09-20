@@ -12,4 +12,4 @@ module.exports = function() {
 	}
 	let x;
 	foo(x = bar());
-}
+};

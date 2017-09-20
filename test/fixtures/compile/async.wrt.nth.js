@@ -21,4 +21,4 @@ module.exports = function() {
 		}
 		return __ks_cb(null, "" + qux + "-" + bar);
 	}
-}
+};

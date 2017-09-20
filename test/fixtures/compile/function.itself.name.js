@@ -3,4 +3,4 @@ module.exports = function() {
 		const cache = foo.cache;
 	}
 	foo.cache = {};
-}
+};

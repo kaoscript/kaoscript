@@ -3,4 +3,4 @@ module.exports = function() {
 	for(let index = 0, __ks_0 = heroes.length; index < __ks_0; ++index) {
 		console.log(index);
 	}
-}
+};

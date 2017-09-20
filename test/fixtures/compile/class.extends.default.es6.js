@@ -69,4 +69,4 @@ module.exports = function() {
 	}
 	let r = new Rectangle("black");
 	console.log(r.draw());
-}
+};

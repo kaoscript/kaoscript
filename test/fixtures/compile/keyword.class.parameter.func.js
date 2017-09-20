@@ -8,4 +8,4 @@ module.exports = function() {
 		}
 		console.log(__ks_class_1);
 	}
-}
+};

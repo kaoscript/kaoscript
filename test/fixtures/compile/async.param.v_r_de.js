@@ -22,4 +22,4 @@ module.exports = function() {
 		let y = 42;
 		__ks_cb();
 	}
-}
+};

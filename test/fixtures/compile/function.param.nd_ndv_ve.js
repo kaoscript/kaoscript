@@ -19,4 +19,4 @@ module.exports = function(expect) {
 	expect(foo(1)).to.eql([null, 42, 1]);
 	expect(foo(1, 2)).to.eql([1, 42, 2]);
 	expect(foo(1, 2, 3)).to.eql([1, 2, 3]);
-}
+};

@@ -38,4 +38,4 @@ module.exports = function() {
 	}
 	catch(__ks_0) {
 	}
-}
+};

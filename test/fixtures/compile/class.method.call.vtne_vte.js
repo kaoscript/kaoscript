@@ -48,4 +48,4 @@ module.exports = function() {
 	console.log(x.foo("foo"));
 	console.log(x.foo(1, "foo"));
 	console.log("" + x.foo("foo", "bar"));
-}
+};

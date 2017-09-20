@@ -20,4 +20,4 @@ module.exports = function() {
 			console.log("I'm an old person of age " + n);
 		}
 	}
-}
+};

@@ -48,4 +48,4 @@ module.exports = function() {
 		Shape: Shape,
 		__ks_Shape: __ks_Shape
 	};
-}
+};

@@ -14,4 +14,4 @@ module.exports = function() {
 		return "bar";
 	}
 	console.log(__ks_Function._im_foo(bar));
-}
+};

@@ -17,4 +17,4 @@ module.exports = function() {
 		nsBar: NS.bar,
 		nsQux: NS.qux
 	};
-}
+};

@@ -50,4 +50,4 @@ module.exports = function() {
 			__ks_0(__ks_e);
 		}
 	}
-}
+};

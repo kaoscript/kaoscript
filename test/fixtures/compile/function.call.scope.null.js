@@ -3,4 +3,4 @@ module.exports = function() {
 		console.log.apply(console, args);
 	}
 	log.call(null, "hello");
-}
+};

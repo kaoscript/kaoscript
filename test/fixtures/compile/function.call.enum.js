@@ -18,4 +18,4 @@ module.exports = function() {
 		return "xyz";
 	}
 	console.log(toString(Foobar.X));
-}
+};

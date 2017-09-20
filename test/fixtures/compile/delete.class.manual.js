@@ -26,4 +26,4 @@ module.exports = function() {
 	let foo = new Foo();
 	Foo.__ks_destroy(foo);
 	foo = undefined;
-}
+};

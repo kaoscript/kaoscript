@@ -9,4 +9,4 @@ module.exports = function() {
 	})();
 	console.log(Float.PI);
 	console.log(Float.name);
-}
+};

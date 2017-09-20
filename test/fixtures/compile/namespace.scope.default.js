@@ -35,4 +35,4 @@ module.exports = function() {
 	console.log(Float.PI);
 	console.log(Float.toFloat("3.14"));
 	console.log(Float.toString(3.14));
-}
+};

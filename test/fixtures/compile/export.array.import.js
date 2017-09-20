@@ -7,4 +7,4 @@ module.exports = function() {
 		Array: Array,
 		__ks_Array: __ks_Array
 	};
-}
+};

@@ -68,4 +68,4 @@ module.exports = function() {
 	}
 	const formatter = new Formatter();
 	console.log(formatter.camelize("john doe"));
-}
+};

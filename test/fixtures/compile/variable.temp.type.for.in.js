@@ -1,5 +1,6 @@
+require("kaoscript/register");
 module.exports = function() {
-	var {String, __ks_String} = require("./_string")();
+	var {String, __ks_String} = require("./_string.ks")();
 	function foo() {
 		return ["1", "8", "F"];
 	}
@@ -8,4 +9,4 @@ module.exports = function() {
 		item = __ks_0[__ks_1];
 		console.log(__ks_String._im_toInt(item, 16));
 	}
-}
+};

@@ -4,4 +4,4 @@ module.exports = function() {
 	let bar;
 	if(true && (Type.isValue(foo) ? (bar = foo, true) : false)) {
 	}
-}
+};

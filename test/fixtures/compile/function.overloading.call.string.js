@@ -31,4 +31,4 @@ module.exports = function() {
 	};
 	const foo = reverse("hello");
 	console.log(foo);
-}
+};

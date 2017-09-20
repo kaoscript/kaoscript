@@ -10,4 +10,4 @@ module.exports = function() {
 	function bar() {
 		foo(42);
 	}
-}
+};

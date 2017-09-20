@@ -25,4 +25,4 @@ module.exports = function() {
 			T.FooX.prototype.__ks_cons.call(this, args);
 		}
 	}
-}
+};

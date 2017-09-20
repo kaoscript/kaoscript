@@ -1,14 +1,26 @@
 {
-  "requirements": {
-    "Array": {
-      "class": "true"
-    }
-  },
-  "exports": [
+  "requirements": [
     0,
+    "Array",
+    "true"
+  ],
+  "exports": [
+    1,
     "Array"
   ],
   "references": [
+    {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "false",
+      "sealed": "true",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
     {
       "abstract": "false",
       "alien": "false",

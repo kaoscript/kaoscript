@@ -6,4 +6,4 @@ module.exports = function() {
 		Green: 1,
 		Blue: 2
 	};
-}
+};

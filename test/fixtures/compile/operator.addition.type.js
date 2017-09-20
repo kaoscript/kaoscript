@@ -12,4 +12,4 @@ module.exports = function() {
 		let separator = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "";
 		return (separator + value + separator).toString();
 	}
-}
+};

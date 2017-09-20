@@ -14,4 +14,4 @@ module.exports = function() {
 		PI: 3.14
 	};
 	__ks_Number._im_zeroPad(Math.PI);
-}
+};

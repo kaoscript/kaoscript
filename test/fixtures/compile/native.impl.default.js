@@ -13,4 +13,4 @@ module.exports = function() {
 	let foo = "HELLO!";
 	console.log(foo);
 	console.log(__ks_String._im_lowerFirst(foo));
-}
+};

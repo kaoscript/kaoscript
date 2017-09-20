@@ -1,0 +1,29 @@
+extern console
+
+import './function.overloading.export.ks'
+
+func reverse(value: Number): Number => -value
+
+const foo = reverse('hello')
+
+console.log(`\(foo)`)
+
+export reverse
+
+
+
+
+import './function.overloading.export.ks' for reverse => oldReverse
+
+func reverse(value: Number): Number => -value
+func reverse(...args) => oldReverse(...args)
+
+
+import './function.overloading.export.ks' for reverse => oldReverse
+
+func reverse(...args) {
+	if args.length == 1 && args[0] is Number {
+	}
+	else {
+	}
+}

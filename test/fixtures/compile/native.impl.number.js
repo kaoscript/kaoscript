@@ -28,4 +28,4 @@ module.exports = function() {
 		throw new SyntaxError("wrong number of arguments");
 	};
 	console.log(__ks_Number._im_mod(42, 3));
-}
+};

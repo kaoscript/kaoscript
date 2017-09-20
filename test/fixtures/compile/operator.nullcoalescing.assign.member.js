@@ -4,4 +4,4 @@ module.exports = function() {
 	if(!Type.isValue(tt.uu)) {
 		tt.uu = bar;
 	}
-}
+};

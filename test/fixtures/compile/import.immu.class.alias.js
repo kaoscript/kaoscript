@@ -6,4 +6,4 @@ module.exports = function() {
 		Color: C,
 		Space: S
 	};
-}
+};

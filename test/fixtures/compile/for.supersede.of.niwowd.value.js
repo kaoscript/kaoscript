@@ -8,4 +8,4 @@ module.exports = function() {
 		let __ks_value_1 = value[__ks_0];
 		console.log(__ks_value_1);
 	}
-}
+};

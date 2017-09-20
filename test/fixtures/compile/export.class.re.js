@@ -13,4 +13,4 @@ module.exports = function() {
 	return {
 		ReShape: ReShape
 	};
-}
+};

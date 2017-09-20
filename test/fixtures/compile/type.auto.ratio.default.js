@@ -8,4 +8,4 @@ module.exports = function() {
 	let l2 = foo() + 0.05;
 	let ratio = l1 / l2;
 	console.log(__ks_Number._im_round(ratio, 2));
-}
+};

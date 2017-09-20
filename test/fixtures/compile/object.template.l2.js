@@ -4,4 +4,4 @@ module.exports = function() {
 		bar: {}
 	};
 	foo.bar[x] = 42;
-}
+};

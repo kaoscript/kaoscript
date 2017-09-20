@@ -36,4 +36,4 @@ module.exports = function() {
 	printAnimalAbilities(animal);
 	animal.flags |= AnimalFlags.HasClaws | AnimalFlags.CanFly;
 	printAnimalAbilities(animal);
-}
+};

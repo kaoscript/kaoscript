@@ -137,4 +137,4 @@ module.exports = function() {
 	let shape = new Proxy("yellow");
 	console.log(shape.draw("rectangle"));
 	console.log(shape.draw("red", "rectangle"));
-}
+};

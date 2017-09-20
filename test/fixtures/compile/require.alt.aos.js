@@ -31,4 +31,4 @@ module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1, __ks_2, __ks
 		String: String,
 		__ks_String: __ks_String
 	};
-}
+};

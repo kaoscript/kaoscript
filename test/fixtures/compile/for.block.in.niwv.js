@@ -4,4 +4,4 @@ module.exports = function() {
 		hero = heroes[__ks_0];
 		console.log(hero);
 	}
-}
+};

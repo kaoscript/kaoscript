@@ -4,4 +4,4 @@ module.exports = function(expect) {
 	};
 	expect(foo()).to.eql([null]);
 	expect(foo(1)).to.eql([1]);
-}
+};

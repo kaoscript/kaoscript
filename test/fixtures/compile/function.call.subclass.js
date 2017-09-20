@@ -87,4 +87,4 @@ module.exports = function() {
 	}
 	const p = new Point3D(1, 2, 3);
 	console.log(x(p));
-}
+};

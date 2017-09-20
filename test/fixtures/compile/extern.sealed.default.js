@@ -13,4 +13,4 @@ module.exports = function() {
 	var __ks_Math = {};
 	__ks_Number._im_zeroPad(Math.pow(3, 2));
 	__ks_Number._im_zeroPad(Math.PI);
-}
+};

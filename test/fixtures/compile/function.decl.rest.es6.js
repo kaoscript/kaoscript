@@ -7,4 +7,4 @@ module.exports = function() {
 			throw new TypeError("'bar' is not nullable");
 		}
 	}
-}
+};

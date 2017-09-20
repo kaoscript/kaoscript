@@ -11,4 +11,4 @@ module.exports = function() {
 		}
 		return ((min + max) / 2).round(2);
 	}
-}
+};

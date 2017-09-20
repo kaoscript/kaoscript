@@ -4,4 +4,4 @@ module.exports = function() {
 	function foo(...items) {
 		console.log(__ks_Array._im_last(items));
 	}
-}
+};

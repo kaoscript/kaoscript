@@ -16,4 +16,4 @@ module.exports = function() {
 	else {
 		console.log("It's some other UIView or subclass");
 	}
-}
+};

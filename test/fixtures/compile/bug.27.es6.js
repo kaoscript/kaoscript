@@ -11,4 +11,4 @@ module.exports = function() {
 		}
 		foo.bar().qux(...args);
 	}
-}
+};

@@ -1772,4 +1772,4 @@ module.exports = function() {
 		Space: Space,
 		Color: Color
 	};
-}
+};

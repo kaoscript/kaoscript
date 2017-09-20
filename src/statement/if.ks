@@ -46,6 +46,14 @@ class IfStatement extends Statement {
 		@whenTrue.translate()
 		@whenFalse.translate() if @whenFalse?
 	} // }}}
+	assignments() { // {{{
+		if @whenFalse is IfStatement {
+			return [].concat(@assignments, @whenFalse.assignments())
+		}
+		else {
+			return @assignments
+		}
+	} // }}}
 	isExit() => @whenFalse? && @whenTrue.isExit() && @whenFalse.isExit()
 	isReturning(type: Type) { // {{{
 		if @whenFalse {
@@ -83,14 +91,6 @@ class IfStatement extends Statement {
 			else {
 				fragments.step().code('else').step().compile(@whenFalse, mode)
 			}
-		}
-	} // }}}
-	variables() { // {{{
-		if @whenFalse is IfStatement {
-			return [].concat(@variables, @whenFalse.variables())
-		}
-		else {
-			return @variables
 		}
 	} // }}}
 }

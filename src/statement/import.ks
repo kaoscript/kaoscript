@@ -1,10 +1,5 @@
 extern process, require
 
-enum ImportKind {
-	KSFile
-	NodeFile
-}
-
 const $nodeModules = { // {{{
 	assert: true
 	buffer: true
@@ -38,766 +33,48 @@ const $nodeModules = { // {{{
 	zlib: true
 } // }}}
 
-const $import = {
-	addVariable(name: String, type: Type, node: AbstractNode, module, file: String = null) { // {{{
-		if variable ?= node.scope().getVariable(name) {
-			if variable.type().isCompatible(type) {
-				/* variable.type().merge(type) */
-				throw new NotImplementedException(node)
-			}
-			else {
-				SyntaxException.throwAlreadyDeclared(name, node)
-			}
-		}
-		else {
-			node.scope().define(name, true, type, node)
-		}
-		
-		module.import(name, file)
-	} // }}}
-	define(name: String, type: Type?, node: AbstractNode, module, file: String = null) { // {{{
-		node.scope().define(name, true, type, node)
-		
-		module.import(name, file)
-	} // }}}
-	loadCoreModule(x, module, data, node) { // {{{
-		if $nodeModules[x] {
-			return $import.loadNodeFile(null, x, module, data, node)
+func $nodeModulesPaths(start) { // {{{
+	start = fs.resolve(start)
+	
+	let prefix = '/'
+	if /^([A-Za-z]:)/.test(start) {
+		prefix = ''
+	}
+	else if /^\\\\/.test(start) {
+		prefix = '\\\\'
+	}
+	
+	let splitRe = process.platform == 'win32' ? /[\/\\]/ : /\/+/
+	
+	let parts = start.split(splitRe)
+	
+	let dirs = []
+	for i from parts.length - 1 to 0 by -1 {
+		if parts[i] == 'node_modules' {
+			continue
 		}
 		
-		return null
-	}, // }}}
-	loadDirectory(x, moduleName = null, module, data, node) { // {{{
-		let pkgfile = path.join(x, 'package.json')
-		if fs.isFile(pkgfile) {
-			let pkg
-			try {
-				pkg = JSON.parse(fs.readFile(pkgfile))
-			}
-			
-			if pkg? {
-				let metadata
-				if pkg.kaoscript && (metadata ?= $import.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, module, data, node)) {
-					return metadata
-				}
-				else if pkg.main && ((metadata ?= $import.loadFile(path.join(x, pkg.main), moduleName, module, data, node)) || (metadata ?= $import.loadDirectory(path.join(x, pkg.main), moduleName, module, data, node))) {
-					return metadata
-				}
-			}
-		}
-		
-		return $import.loadFile(path.join(x, 'index'), moduleName, module, data, node)
-	} // }}}
-	loadFile(x, moduleName = null, module, data, node) { // {{{
-		if fs.isFile(x) {
-			if x.endsWith($extensions.source) {
-				return $import.loadKSFile(x, moduleName, module, data, node)
-			}
-			else {
-				return $import.loadNodeFile(x, moduleName, module, data, node)
-			}
-		}
-		
-		if fs.isFile(x + $extensions.source) {
-			return $import.loadKSFile(x + $extensions.source, moduleName!= null ? moduleName + $extensions.source : moduleName, module, data, node)
-		}
-		else {
-			for ext of require.extensions {
-				if fs.isFile(x + ext) {
-					return $import.loadNodeFile(x, moduleName, module, data, node)
-				}
-			}
-		}
-		
-		return null
-	} // }}}
-	loadKSFile(x, moduleName = null, module, data, node) { // {{{
-		moduleName ??= module.path(x, data.source.value)
-		
-		let metadata, name, alias, variable, hashes
-		
-		let source = fs.readFile(x)
-		let target = module.compiler()._options.target
-		
-		if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (metadata ?= $import.readMetadata(getMetadataPath(x, target))) {
-		}
-		else {
-			let compiler = module.compiler().createServant(x)
-			
-			compiler.compile(source)
-			
-			compiler.writeFiles()
-			
-			metadata = compiler.toMetadata()
-			
-			hashes = compiler.toHashes()
-		}
-		
-		module.addHashes(x, hashes)
-		
-		let importVariables = {}
-		let importVarCount = 0
-		let importAll = false
-		let importAlias = ''
-		
-		if data.specifiers.length == 0 {
-			importAll = true
-		}
-		else {
-			for specifier in data.specifiers {
-				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
-					importAlias = specifier.local.name
-				}
-				else {
-					if specifier.imported.kind == NodeKind::Identifier {
-						importVariables[specifier.imported.name] = specifier.local.name
-					}
-					else {
-						importVariables[specifier.imported.name.name] = specifier.local.name
-					}
-					
-					++importVarCount
-				}
-			}
-		}
-		
-		if data.arguments?.length != 0 {
-			for argument in data.arguments {
-				if argument.kind == NodeKind::NamedArgument {
-					$import.use(argument.value, node)
-				}
-				else {
-					$import.use(argument, node)
-				}
-			}
-			
-			let nf
-			for name, requirement of metadata.requirements {
-				nf = true
-				
-				for argument in data.arguments while nf {
-					if argument.kind == NodeKind::NamedArgument {
-						if argument.name.name == name {
-							nf = false
-						}
-					}
-					else {
-						if argument.name == name {
-							nf = false
-						}
-					}
-				}
-				
-				unless !nf || requirement.nullable {
-					SyntaxException.throwMissingRequirement(name, node)
-				}
-			}
-		}
-		else {
-			for name, requirement of metadata.requirements {
-				unless requirement.nullable {
-					SyntaxException.throwMissingRequirement(name, node)
-				}
-			}
-		}
-		
-		const domain = new ImportDomain(metadata, node)
-		const variables = []
-		
-		if importAll {
-			for i from 1 til metadata.exports.length by 2 {
-				name = metadata.exports[i]
-				
-				$import.addVariable(name, domain.commit(name), node, module, moduleName)
-				
-				variables.push(name)
-			}
-		}
-		
-		for name, alias of importVariables {
-			if !domain.hasTemporary(name) {
-				ReferenceException.throwNotDefinedInModule(name, data.source.value, node)
-			}
-			
-			$import.addVariable(alias, domain.commit(name, alias), node, module, moduleName)
-		}
-		
-		if importAlias.length != 0 {
-			const type = new NamespaceType(importAlias, node.scope())
-			const ref = type.reference()
-			
-			for i from 1 til metadata.exports.length by 2 {
-				name = metadata.exports[i]
-				
-				if domain.hasVariable(name) {
-					type.addProperty(name, domain.getVariable(name))
-				}
-				else {
-					type.addProperty(name, domain.commit(name).namespace(ref))
-				}
-			}
-			
-			$import.define(importAlias, type, node, module, moduleName)
-		}
-		
-		domain.commit()
-		
-		return {
-			kind: ImportKind::KSFile
-			moduleName: moduleName
-			exports: variables
-			requirements: metadata.requirements
-			importVariables: importVariables
-			importVarCount: importVarCount
-			importAll: importAll
-			importAlias: importAlias
-		}
-	} // }}}
-	loadNodeFile(x = null, moduleName = null, module, data, node) { // {{{
-		let file = null
-		if moduleName == null {
-			file = moduleName = module.path(x, data.source.value)
-		}
-		
-		if data.arguments?.length != 0 {
-			for argument in data.arguments {
-				if argument.kind == NodeKind::NamedArgument {
-					SyntaxException.throwInvalidNamedArgument(argument.name.name, node)
-				}
-				else {
-					$import.use(argument, node)
-				}
-			}
-		}
-		
-		let metadata = {
-			kind: ImportKind::NodeFile
-			moduleName: moduleName
-		}
-		
-		if data.specifiers.length == 0 {
-			metadata.variables = {}
-			metadata.count = 0
-			
-			const parts = data.source.value.split('/')
-			for i from 0 til parts.length {
-				if !/(?:^\.+$|^@)/.test(parts[i]) {
-					metadata.wilcard = parts[i].split('.')[0]
-					
-					break
-				}
-			}
-			
-			if metadata.wilcard? {
-				$import.define(metadata.wilcard, null, node, module, file)
-			}
-			else {
-				SyntaxException.throwUnnamedWildcardImport(node)
-			}
-		}
-		else {
-			let variables = {}
-			let count = 0
-			let type
-			
-			for specifier in data.specifiers {
-				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
-					metadata.wilcard = specifier.local.name
-					
-					if specifier.specifiers?.length != 0 {
-						type = new NamespaceType(metadata.wilcard, node.scope().domain())
-						
-						for s in specifier.specifiers {
-							if s.imported.kind == NodeKind::Identifier {
-								type.addProperty(s.local.name, Type.Any)
-							}
-							else {
-								type.addProperty(s.local.name, Type.fromAST(s.imported, node).alienize())
-							}
-						}
-						
-						$import.define(metadata.wilcard, type, node, module, file)
-					}
-					else {
-						$import.define(metadata.wilcard, null, node, module, file)
-					}
-				}
-				else {
-					++count
-					
-					if specifier.imported.kind == NodeKind::Identifier {
-						variables[specifier.imported.name] = specifier.local.name
-						
-						$import.define(variables[specifier.imported.name], null, node, module, file)
-					}
-					else {
-						variables[specifier.imported.name.name] = specifier.local.name
-						
-						type = Type.fromAST(specifier.imported, node).alienize()
-						
-						$import.define(variables[specifier.imported.name.name], type, node, module, file)
-					}
-				}
-			}
-			
-			metadata.variables = variables
-			metadata.count = count
-		}
-		
-		return metadata
-	} // }}}
-	loadNodeModule(x, start, module, data, node) { // {{{
-		let dirs = $import.nodeModulesPaths(start)
-		
-		let file, metadata
-		for dir in dirs {
-			file = path.join(dir, x)
-			
-			if (metadata ?= $import.loadFile(file, x, module, data, node)) || (metadata ?= $import.loadDirectory(file, x, module, data, node)) {
-				return metadata
-			}
-		}
-		
-		return null
-	} // }}}
-	nodeModulesPaths(start) { // {{{
-		start = fs.resolve(start)
-		
-		let prefix = '/'
-		if /^([A-Za-z]:)/.test(start) {
-			prefix = ''
-		}
-		else if /^\\\\/.test(start) {
-			prefix = '\\\\'
-		}
-		
-		let splitRe = process.platform == 'win32' ? /[\/\\]/ : /\/+/
-		
-		let parts = start.split(splitRe)
-		
-		let dirs = []
-		for i from parts.length - 1 to 0 by -1 {
-			if parts[i] == 'node_modules' {
-				continue
-			}
-			
-			dirs.push(prefix + path.join(path.join(...parts.slice(0, i + 1)), 'node_modules'))
-		}
-		
-		if process.platform == 'win32' {
-			dirs[dirs.length - 1] = dirs[dirs.length - 1].replace(':', ':\\')
-		}
-		
-		return dirs
-	} // }}}
-	readMetadata(file) { // {{{
-		try {
-			return JSON.parse(fs.readFile(file))
-		}
-		catch {
-			return null
-		}
-	} // }}}
-	resolve(data, y, module, node) { // {{{
-		let x = data.source.value
-		
-		let metadata
-		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
-			x = fs.resolve(y, x)
-			
-			if (metadata ?= $import.loadFile(x, null, module, data, node)) || (metadata ?= $import.loadDirectory(x, null, module, data, node)) {
-				return metadata
-			}
-		}
-		else {
-			if (metadata ?= $import.loadNodeModule(x, y, module, data, node)) || (metadata ?= $import.loadCoreModule(x, module, data, node)) {
-				return metadata
-			}
-		}
-		
-		IOException.throwNotFoundModule(x, y, node)
-	} // }}}
-	use(data, node) { // {{{
-		if data is Array {
-			for item in data {
-				if item.kind == NodeKind::Identifier && !node.scope().hasVariable(item.name) {
-					ReferenceException.throwNotDefined(item.name, node)
-				}
-			}
-		}
-		else if data.kind == NodeKind::Identifier {
-			unless node.scope().hasVariable(data.name) {
-				ReferenceException.throwNotDefined(data.name, node)
-			}
-		}
-	} // }}}
-	toKSFileFragments(fragments, metadata, data, node) { // {{{
-		const {moduleName, exports, requirements, importVariables, importVarCount, importAll, importAlias} = metadata
-		
-		let importCode = 'require(' + $quote(moduleName) + ')('
-		let importCodeVariable = false
-		
-		if data.arguments?.length != 0 {
-			let first = true
-			let nf
-			
-			for name, requirement of requirements {
-				if first {
-					first = false
-				}
-				else {
-					importCode += ', '
-				}
-				
-				nf = true
-				
-				for argument in data.arguments while nf {
-					if argument.kind == NodeKind::NamedArgument {
-						if argument.name.name == name {
-							importCode += argument.value.name
-							
-							if requirement.class {
-								importCode += `, __ks_\(argument.value.name)`
-							}
-							
-							nf = false
-						}
-					}
-					else {
-						if argument.name == name {
-							importCode += name
-							
-							if requirement.class {
-								importCode += `, __ks_\(name)`
-							}
-							
-							nf = false
-						}
-					}
-				}
-				
-				if nf {
-					if requirement.class {
-						importCode += 'null, null'
-					}
-					else {
-						importCode += 'null'
-					}
-				}
-			}
-		}
-		
-		importCode += ')'
-		
-		if (importVarCount != 0 && importAll) || (importVarCount != 0 && importAlias.length != 0) || (importAll && importAlias.length != 0) {
-			const variable = node._scope.acquireTempName()
-			
-			fragments.line(`var \(variable) = \(importCode)`)
-			
-			importCode = variable
-			importCodeVariable = true
-		}
-		
-		let name, alias, variable
-		if importVarCount == 1 {
-			for name, alias of importVariables {
-			}
-			
-			if (variable = node.scope().getVariable(alias).type()) is not AliasType {
-				if variable.isSealed() {
-					fragments.newLine().code(`var {\(alias), __ks_\(alias)} = \(importCode)`).done()
-				}
-				else {
-					fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
-				}
-			}
-		}
-		else if importVarCount > 0 {
-			if node._options.format.destructuring == 'es5' {
-				if importCodeVariable {
-					let line = fragments.newLine().code('var ')
-					
-					let nf = false
-					for name, alias of importVariables {
-						if node.scope().getVariable(alias).type() is not AliasType {
-							if nf {
-								line.code(', ')
-							}
-							else {
-								nf = true
-							}
-							
-							line.code(`\(alias) = \(importCode).\(name)`)
-						}
-					}
-					
-					line.done()
-				}
-				else {
-					fragments.line(`var __ks__ = \(importCode)`)
-					
-					let line = fragments.newLine().code('var ')
-					
-					let nf = false
-					for name, alias of importVariables {
-						if node.scope().getVariable(alias).type() is not AliasType {
-							if nf {
-								line.code(', ')
-							}
-							else {
-								nf = true
-							}
-							
-							line.code(`\(alias) = __ks__.\(name)`)
-						}
-					}
-					
-					line.done()
-				}
-			}
-			else {
-				let line = fragments.newLine().code('var {')
-				
-				let nf = false
-				for name, alias of importVariables {
-					if (variable = node.scope().getVariable(alias).type()) is not AliasType {
-						if nf {
-							line.code(', ')
-						}
-						else {
-							nf = true
-						}
-						
-						if alias == name {
-							line.code(name)
-							
-							if variable.isSealed() {
-								line.code(`, __ks_\(name)`)
-							}
-						}
-						else {
-							line.code(name, ': ', alias)
-							
-							if variable.isSealed() {
-								line.code(`, __ks_\(alias)`)
-							}
-						}
-					}
-				}
-				
-				line.code('} = ', importCode).done()
-			}
-		}
-		
-		if importAll {
-			let variables = []
-			
-			for name in exports {
-				if (variable = node.scope().getVariable(name).type()) is not AliasType {
-					variables.push(name)
-					
-					if variable.isSealed() {
-						variables.push(`__ks_\(name)`)
-					}
-				}
-			}
-			
-			if variables.length == 1 {
-				fragments
-					.newLine()
-					.code('var ', variables[0], ' = ', importCode, '.' + variables[0])
-					.done()
-			}
-			else if variables.length > 0 {
-				if node._options.format.destructuring == 'es5' {
-					if importCodeVariable {
-						let line = fragments.newLine().code('var ')
-						
-						for name, i in variables {
-							if i > 0 {
-								line.code(', ')
-							}
-							
-							line.code(`\(name) = \(importCode).\(name)`)
-						}
-						
-						line.done()
-					}
-					else {
-						fragments.line(`var __ks__ = \(importCode)`)
-						
-						let line = fragments.newLine().code('var ')
-						
-						for name, i in variables {
-							if i > 0 {
-								line.code(', ')
-							}
-							
-							line.code(`\(name) = __ks__.\(name)`)
-						}
-						
-						line.done()
-					}
-				}
-				else {
-					let line = fragments.newLine().code('var {')
-					
-					for name, i in variables {
-						if i > 0 {
-							line.code(', ')
-						}
-						
-						line.code(name)
-					}
-					
-					line.code('} = ', importCode).done()
-				}
-			}
-		}
-		
-		if importAlias.length {
-			fragments.newLine().code('var ', importAlias, ' = ', importCode).done()
-		}
-		
-		node._scope.releaseTempName(importCode)
-	} // }}}
-	toNodeFileFragments(fragments, metadata, data, node) { // {{{
-		let moduleName = metadata.moduleName
-		
-		if metadata.wilcard? {
-			const line = fragments
-				.newLine()
-				.code(`var \(metadata.wilcard) = require(\($quote(moduleName)))`)
-			
-			if data.arguments? {
-				line.code('(')
-				
-				for argument, index in data.arguments {
-					if index != 0 {
-						line.code(', ')
-					}
-					
-					line.code(argument.name)
-				}
-				
-				line.code(')')
-			}
-			
-			line.done()
-		}
-		
-		let variables = metadata.variables
-		let count = metadata.count
-		
-		if count == 1 {
-			let alias
-			for alias of variables {
-			}
-			
-			const line = fragments
-				.newLine()
-				.code(`var \(variables[alias]) = require(\($quote(moduleName)))`)
-			
-			if data.arguments? {
-				line.code('(')
-				
-				for argument, index in data.arguments {
-					if index != 0 {
-						line.code(', ')
-					}
-					
-					line.code(argument.name)
-				}
-				
-				line.code(')')
-			}
-			
-			line.code(`.\(alias)`).done()
-		}
-		else if count > 0 {
-			if node._options.format.destructuring == 'es5' {
-				let line = fragments
-					.newLine()
-					.code(`var __ks__ = require(\($quote(moduleName)))`)
-				
-				if data.arguments? {
-					line.code('(')
-					
-					for argument, index in data.arguments {
-						if index != 0 {
-							line.code(', ')
-						}
-						
-						line.code(argument.name)
-					}
-					
-					line.code(')')
-				}
-				
-				line.done()
-				
-				line = fragments.newLine().code('var ')
-				
-				let nf = false
-				for name, alias of variables {
-					if nf {
-						line.code(', ')
-					}
-					else {
-						nf = true
-					}
-					
-					line.code(`\(alias) = __ks__.\(name)`)
-				}
-				
-				line.done()
-			}
-			else {
-				let line = fragments.newLine().code('var {')
-				
-				let nf = false
-				for alias of variables {
-					if nf {
-						line.code(', ')
-					}
-					else {
-						nf = true
-					}
-					
-					if variables[alias] == alias {
-						line.code(alias)
-					}
-					else {
-						line.code(alias, ': ', variables[alias])
-					}
-				}
-				
-				line.code('} = require(', $quote(moduleName), ')')
-				
-				if data.arguments? {
-					line.code('(')
-					
-					for argument, index in data.arguments {
-						if index != 0 {
-							line.code(', ')
-						}
-						
-						line.code(argument.name)
-					}
-					
-					line.code(')')
-				}
-				
-				line.done()
-			}
-		}
-	} // }}}
-}
+		dirs.push(prefix + path.join(path.join(...parts.slice(0, i + 1)), 'node_modules'))
+	}
+	
+	if process.platform == 'win32' {
+		dirs[dirs.length - 1] = dirs[dirs.length - 1].replace(':', ':\\')
+	}
+	
+	return dirs
+} // }}}
 
 class Importer extends Statement {
 	private {
+		_alias: String				= null
+		_count: Number				= 0
+		_isKSFile: Boolean
 		_localToModuleArguments		= {}
 		_moduleToLocalArguments		= {}
+		_moduleName: String
+		_requirements				= {}
+		_sealedVariables			= {}
+		_variables					= {}
 	}
 	analyse()
 	prepare()
@@ -823,23 +100,49 @@ class Importer extends Statement {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
-	addVariable(name: String, type: Type, module, file: String = null) { // {{{
-		if variable ?= @scope.getVariable(name) {
-			if @localToModuleArguments[name] is not String {
-				ReferenceException.throwNotPassed(name, @data.source.value, this)
+	addVariable(imported: String, local: String, isVariable: Boolean, type: Type?) { // {{{
+		if variable ?= @scope.getVariable(local) {
+			if @parent.includePath() != null {
+				// TODO: check & merge type
+				return
 			}
-			else if variable.type().isCompatible(type) {
-				variable.type().merge(type, this)
+			else if isVariable {
+				if @localToModuleArguments[local] is not String {
+					ReferenceException.throwNotPassed(local, @data.source.value, this)
+				}
+				else if variable.type().isCompatible(type) {
+					variable.type().merge(type, this)
+				}
+				else {
+					ReferenceException.throwNotMergeable(local, @data.source.value, this)
+				}
 			}
 			else {
-				ReferenceException.throwNotMergeable(name, @data.source.value, this)
+				SyntaxException.throwAlreadyDeclared(local, this)
 			}
 		}
 		else {
-			@scope.define(name, true, type, this)
+			@scope.define(local, true, type, this)
 		}
 		
-		module.import(name, file)
+		this.module().import(local, @moduleName)
+		
+		if isVariable && type is not AliasType {
+			@variables[imported] = local
+			++@count
+			
+			if @isKSFile && type.isSealed() {
+				@sealedVariables[imported] = true
+				++@count
+			}
+		}
+	} // }}}
+	loadCoreModule(x) { // {{{
+		if $nodeModules[x] == true {
+			return this.loadNodeFile(null, x)
+		}
+		
+		return false
 	} // }}}
 	loadDirectory(x, moduleName = null) { // {{{
 		let pkgfile = path.join(x, 'package.json')
@@ -852,18 +155,17 @@ class Importer extends Statement {
 			if pkg? {
 				let metadata
 				
-				if	pkg.kaoscript &&
-					(metadata ?= this.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName))
+				if	pkg.kaoscript && this.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName)
 				{
-					return metadata
+					return true
 				}
 				else if	pkg.main &&
 						(
-							(metadata ?= this.loadFile(path.join(x, pkg.main), moduleName)) ||
-							(metadata ?= this.loadDirectory(path.join(x, pkg.main), moduleName))
+							this.loadFile(path.join(x, pkg.main), moduleName) ||
+							this.loadDirectory(path.join(x, pkg.main), moduleName)
 						)
 				{
-					return metadata
+					return true
 				}
 			}
 		}
@@ -881,7 +183,7 @@ class Importer extends Statement {
 		}
 		
 		if fs.isFile(x + $extensions.source) {
-			return this.loadKSFile(x + $extensions.source, moduleName!= null ? moduleName + $extensions.source : moduleName)
+			return this.loadKSFile(x + $extensions.source, moduleName != null ? moduleName + $extensions.source : moduleName)
 		}
 		else {
 			for ext of require.extensions {
@@ -891,12 +193,18 @@ class Importer extends Statement {
 			}
 		}
 		
-		return null
+		return false
 	} // }}}
-	loadKSFile(x, moduleName = null) { // {{{
+	loadKSFile(x: String, moduleName = null) { // {{{
 		const module = this.module()
 		
-		moduleName ??= module.path(x, @data.source.value)
+		if moduleName == null {
+			moduleName = module.path(x, @data.source.value)
+			
+			if moduleName.slice(-$extensions.source.length).toLowerCase() != $extensions.source {
+				moduleName += $extensions.source
+			}
+		}
 		
 		let metadata, name, alias, variable, hashes
 		
@@ -919,102 +227,179 @@ class Importer extends Statement {
 		
 		module.addHashes(x, hashes)
 		
-		let importVariables = {}
-		let importVarCount = 0
-		let importAll = false
-		let importAlias = ''
+		@isKSFile = true
+		@moduleName = moduleName
 		
-		if @data.specifiers.length == 0 {
-			importAll = true
-		}
-		else {
-			for specifier in @data.specifiers {
-				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
-					importAlias = specifier.local.name
-				}
-				else {
-					if specifier.imported.kind == NodeKind::Identifier {
-						importVariables[specifier.imported.name] = specifier.local.name
-					}
-					else {
-						importVariables[specifier.imported.name.name] = specifier.local.name
-					}
-					
-					++importVarCount
-				}
-			}
-		}
+		const domain = new ImportDomain(metadata, this)
 		
 		if @data.arguments?.length != 0 {
 			for argument in @data.arguments {
 				this.addArgument(argument)
 			}
 			
-			for name, requirement of metadata.requirements {
+			let name, type
+			for i from 0 til metadata.requirements.length by 3 {
+				name = metadata.requirements[i + 1]
+				
 				if @moduleToLocalArguments[name] is not String {
 					SyntaxException.throwMissingRequirement(name, this)
+				}
+				
+				type = Type.import(name, metadata.references[metadata.requirements[i]], metadata.references, domain, this)
+				
+				// TODO: validate type
+				
+				@requirements[name] = {
+					index: Math.floor(i / 3) + 1
+					type: type
 				}
 			}
 		}
 		else {
-			for name, requirement of metadata.requirements {
-				unless requirement.nullable {
-					SyntaxException.throwMissingRequirement(name, this)
+			for i from 1 til metadata.requirements.length by 3 {
+				if metadata.requirements[i + 1] {
+					SyntaxException.throwMissingRequirement(metadata.requirements[i], this)
 				}
 			}
 		}
 		
-		const domain = new ImportDomain(metadata, this)
-		const variables = []
-		
-		if importAll {
+		if @data.specifiers.length == 0 {
 			for i from 1 til metadata.exports.length by 2 {
 				name = metadata.exports[i]
 				
-				this.addVariable(name, domain.commit(name), module, moduleName)
-				
-				variables.push(name)
+				this.addVariable(name, name, true, domain.commit(name))
 			}
 		}
-		
-		for name, alias of importVariables {
-			if !domain.hasTemporary(name) {
-				ReferenceException.throwNotDefinedInModule(name, @data.source.value, this)
-			}
-			
-			this.addVariable(alias, domain.commit(name, alias), module, moduleName)
-		}
-		
-		if importAlias.length != 0 {
-			const type = new NamespaceType(importAlias, @scope)
-			const ref = type.reference()
-			
-			for i from 1 til metadata.exports.length by 2 {
-				name = metadata.exports[i]
-				
-				if domain.hasVariable(name) {
-					type.addProperty(name, domain.getVariable(name))
+		else {
+			let name
+			for specifier in @data.specifiers {
+				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
+					@alias = specifier.local.name
 				}
 				else {
-					type.addProperty(name, domain.commit(name).namespace(ref))
+					name = specifier.imported.kind == NodeKind::Identifier ? specifier.imported.name : specifier.imported.name.name
+					
+					if !domain.hasTemporary(name) {
+						ReferenceException.throwNotDefinedInModule(name, @data.source.value, this)
+					}
+					
+					this.addVariable(name, specifier.local.name, true, domain.commit(name))
 				}
 			}
 			
-			this.define(importAlias, type, module, moduleName)
+			if @alias != null {
+				const type = new NamespaceType(@alias, @scope)
+				const ref = type.reference()
+				
+				for i from 1 til metadata.exports.length by 2 {
+					name = metadata.exports[i]
+					
+					if domain.hasVariable(name) {
+						type.addProperty(name, domain.getVariable(name))
+					}
+					else {
+						type.addProperty(name, domain.commit(name).namespace(ref))
+					}
+				}
+				
+				this.addVariable(@alias, @alias, false, type)
+			}
 		}
 		
 		domain.commit()
 		
-		return {
-			kind: ImportKind::KSFile
-			moduleName: moduleName
-			exports: variables
-			requirements: metadata.requirements
-			importVariables: importVariables
-			importVarCount: importVarCount
-			importAll: importAll
-			importAlias: importAlias
+		return true
+	} // }}}
+	loadNodeFile(x = null, moduleName = null) { // {{{
+		const module = this.module()
+		
+		let file = null
+		if moduleName == null {
+			file = moduleName = module.path(x, @data.source.value)
 		}
+		
+		if @data.arguments?.length != 0 {
+			for argument in @data.arguments {
+				if argument.kind == NodeKind::NamedArgument {
+					SyntaxException.throwInvalidNamedArgument(argument.name.name, this)
+				}
+				else {
+					this.addArgument(argument)
+				}
+			}
+		}
+		
+		@isKSFile = false
+		@moduleName = moduleName
+		
+		if @data.specifiers.length == 0 {
+			const parts = @data.source.value.split('/')
+			for i from 0 til parts.length {
+				if !/(?:^\.+$|^@)/.test(parts[i]) {
+					@alias = parts[i].split('.')[0]
+					
+					break
+				}
+			}
+			
+			if @alias == null {
+				SyntaxException.throwUnnamedWildcardImport(this)
+			}
+			
+			this.addVariable(@alias, @alias, false, null)
+		}
+		else {
+			let type
+			for specifier in @data.specifiers {
+				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
+					@alias = specifier.local.name
+					
+					if specifier.specifiers?.length != 0 {
+						type = new NamespaceType(@alias, @scope)
+						
+						for s in specifier.specifiers {
+							if s.imported.kind == NodeKind::Identifier {
+								type.addProperty(s.local.name, Type.Any)
+							}
+							else {
+								type.addProperty(s.local.name, Type.fromAST(s.imported, this).alienize())
+							}
+						}
+						
+						this.addVariable(@alias, @alias, false, type)
+					}
+					else {
+						this.addVariable(@alias, @alias, false, null)
+					}
+				}
+				else {
+					if specifier.imported.kind == NodeKind::Identifier {
+						this.addVariable(specifier.imported.name, specifier.local.name, true, null)
+					}
+					else {
+						type = Type.fromAST(specifier.imported, this).alienize()
+						
+						this.addVariable(specifier.imported.name.name, specifier.local.name, true, type)
+					}
+				}
+			}
+		}
+		
+		return true
+	} // }}}
+	loadNodeModule(x, start) { // {{{
+		let dirs = $nodeModulesPaths(start)
+		
+		let file, metadata
+		for dir in dirs {
+			file = path.join(dir, x)
+			
+			if this.loadFile(file, x) || this.loadDirectory(file, x) {
+				return true
+			}
+		}
+		
+		return false
 	} // }}}
 	readMetadata(file) { // {{{
 		try {
@@ -1032,37 +417,48 @@ class Importer extends Statement {
 		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
 			x = fs.resolve(y, x)
 			
-			if (metadata ?= this.loadFile(x, null)) || (metadata ?= this.loadDirectory(x, null)) {
-				return metadata
+			if !(this.loadFile(x, null) || this.loadDirectory(x, null)) {
+				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
 		else {
-			if (metadata ?= this.loadNodeModule(x, y)) || (metadata ?= this.loadCoreModule(x)) {
-				return metadata
+			if !(this.loadNodeModule(x, y) || this.loadCoreModule(x)) {
+				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
-		
-		IOException.throwNotFoundModule(x, y, this)
 	} // }}}
-	toKSFileFragments(fragments, metadata) { // {{{
-		const {moduleName, exports, requirements, importVariables, importVarCount, importAll, importAlias} = metadata
+	toImportFragments(fragments) { // {{{
+		if @isKSFile {
+			this.toKSFileFragments(fragments)
+		}
+		else {
+			this.toNodeFileFragments(fragments)
+		}
+	} // }}}
+	toKSFileFragments(fragments) { // {{{
+		const modulePath = $localFileRegex.test(@moduleName) && @parent.includePath() != null ? path.join(path.dirname(@parent.includePath()), @moduleName) : @moduleName
 		
-		let importCode = 'require(' + $quote(moduleName) + ')('
+		let importCode = `require(\($quote(modulePath)))(`
 		let importCodeVariable = false
+		let name, alias, variable
 		
 		if @data.arguments?.length != 0 {
-			let first = true
+			let nf = false
 			
-			for name, requirement of requirements {
-				if first {
-					first = false
+			for name of @requirements {
+				if nf {
+					importCode += ', '
 				}
 				else {
-					importCode += ', '
+					nf = true
 				}
 				
 				if @moduleToLocalArguments[name] is String {
 					importCode += @moduleToLocalArguments[name]
+					
+					if @requirements[name].type.isSealed() {
+						importCode += `, __ks_\(@moduleToLocalArguments[name])`
+					}
 				}
 				else {
 					importCode += 'null'
@@ -1072,7 +468,7 @@ class Importer extends Statement {
 		
 		importCode += ')'
 		
-		if (importVarCount != 0 && importAll) || (importVarCount != 0 && importAlias.length != 0) || (importAll && importAlias.length != 0) {
+		if @count != 0 && @alias != null {
 			const variable = @scope.acquireTempName()
 			
 			fragments.line(`var \(variable) = \(importCode)`)
@@ -1081,89 +477,66 @@ class Importer extends Statement {
 			importCodeVariable = true
 		}
 		
-		let name, alias, variable
-		if importVarCount == 1 {
-			for name, alias of importVariables {
+		if @count == 1 {
+			for name, alias of @variables {
 			}
 			
-			if (variable = @scope.getVariable(alias).type()) is not AliasType {
-				if variable.isSealed() {
-					fragments.newLine().code(`var {\(alias), __ks_\(alias)} = \(importCode)`).done()
-				}
-				else {
-					fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
-				}
-			}
+			fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
 		}
-		else if importVarCount > 0 {
+		else if @count > 0 {
 			if @options.format.destructuring == 'es5' {
-				if importCodeVariable {
-					let line = fragments.newLine().code('var ')
-					
-					let nf = false
-					for name, alias of importVariables {
-						if @scope.getVariable(alias).type() is not AliasType {
-							if nf {
-								line.code(', ')
-							}
-							else {
-								nf = true
-							}
-							
-							line.code(`\(alias) = \(importCode).\(name)`)
-						}
-					}
-					
-					line.done()
-				}
-				else {
+				let variable = importCode
+				
+				if !importCodeVariable {
 					fragments.line(`var __ks__ = \(importCode)`)
 					
-					let line = fragments.newLine().code('var ')
-					
-					let nf = false
-					for name, alias of importVariables {
-						if @scope.getVariable(alias).type() is not AliasType {
-							if nf {
-								line.code(', ')
-							}
-							else {
-								nf = true
-							}
-							
-							line.code(`\(alias) = __ks__.\(name)`)
-						}
+					variable = '__ks__'
+				}
+				
+				let line = fragments.newLine().code('var ')
+				
+				let nf = false
+				for name, alias of @variables {
+					if nf {
+						line.code(', ')
+					}
+					else {
+						nf = true
 					}
 					
-					line.done()
+					line.code(`\(alias) = \(variable).\(name)`)
+					
+					if @sealedVariables[name] == true {
+						line.code(`, __ks_\(alias) = \(variable).__ks_\(name)`)
+					}
 				}
+				
+				line.done()
 			}
 			else {
 				let line = fragments.newLine().code('var {')
 				
 				let nf = false
-				for name, alias of importVariables {
-					if (variable = @scope.getVariable(alias).type()) is not AliasType {
-						if nf {
-							line.code(', ')
-						}
-						else {
-							nf = true
-						}
+				for name, alias of @variables {
+					if nf {
+						line.code(', ')
+					}
+					else {
+						nf = true
+					}
 						
-						if alias == name {
-							line.code(name)
-							
-							if variable.isSealed() {
-								line.code(`, __ks_\(name)`)
-							}
+					if alias == name {
+						line.code(name)
+						
+						if @sealedVariables[name] == true {
+							line.code(`, __ks_\(name)`)
 						}
-						else {
-							line.code(name, ': ', alias)
-							
-							if variable.isSealed() {
-								line.code(`, __ks_\(alias)`)
-							}
+					}
+					else {
+						line.code(`\(name): \(alias)`)
+						
+						if @sealedVariables[name] == true {
+							line.code(`, __ks_\(name): __ks_\(alias)`)
 						}
 					}
 				}
@@ -1172,85 +545,17 @@ class Importer extends Statement {
 			}
 		}
 		
-		if importAll {
-			let variables = []
-			
-			for name in exports {
-				if (variable = @scope.getVariable(name).type()) is not AliasType {
-					variables.push(name)
-					
-					if variable.isSealed() {
-						variables.push(`__ks_\(name)`)
-					}
-				}
-			}
-			
-			if variables.length == 1 {
-				fragments
-					.newLine()
-					.code('var ', variables[0], ' = ', importCode, '.' + variables[0])
-					.done()
-			}
-			else if variables.length > 0 {
-				if @options.format.destructuring == 'es5' {
-					if importCodeVariable {
-						let line = fragments.newLine().code('var ')
-						
-						for name, i in variables {
-							if i > 0 {
-								line.code(', ')
-							}
-							
-							line.code(`\(name) = \(importCode).\(name)`)
-						}
-						
-						line.done()
-					}
-					else {
-						fragments.line(`var __ks__ = \(importCode)`)
-						
-						let line = fragments.newLine().code('var ')
-						
-						for name, i in variables {
-							if i > 0 {
-								line.code(', ')
-							}
-							
-							line.code(`\(name) = __ks__.\(name)`)
-						}
-						
-						line.done()
-					}
-				}
-				else {
-					let line = fragments.newLine().code('var {')
-					
-					for name, i in variables {
-						if i > 0 {
-							line.code(', ')
-						}
-						
-						line.code(name)
-					}
-					
-					line.code('} = ', importCode).done()
-				}
-			}
-		}
-		
-		if importAlias.length {
-			fragments.newLine().code('var ', importAlias, ' = ', importCode).done()
+		if @alias != null {
+			fragments.newLine().code('var ', @alias, ' = ', importCode).done()
 		}
 		
 		@scope.releaseTempName(importCode)
 	} // }}}
-	toNodeFileFragments(fragments, metadata) { // {{{
-		let moduleName = metadata.moduleName
-		
-		if metadata.wilcard? {
+	toNodeFileFragments(fragments) { // {{{
+		if @alias != null {
 			const line = fragments
 				.newLine()
-				.code(`var \(metadata.wilcard) = require(\($quote(moduleName)))`)
+				.code(`var \(@alias) = require(\($quote(@moduleName)))`)
 			
 			if @data.arguments? {
 				line.code('(')
@@ -1269,17 +574,14 @@ class Importer extends Statement {
 			line.done()
 		}
 		
-		let variables = metadata.variables
-		let count = metadata.count
-		
-		if count == 1 {
-			let alias
-			for alias of variables {
+		let name, alias
+		if @count == 1 {
+			for name, alias of @variables {
 			}
 			
 			const line = fragments
 				.newLine()
-				.code(`var \(variables[alias]) = require(\($quote(moduleName)))`)
+				.code(`var \(alias) = require(\($quote(@moduleName)))`)
 			
 			if @data.arguments? {
 				line.code('(')
@@ -1297,11 +599,11 @@ class Importer extends Statement {
 			
 			line.code(`.\(alias)`).done()
 		}
-		else if count > 0 {
+		else if @count > 0 {
 			if @options.format.destructuring == 'es5' {
 				let line = fragments
 					.newLine()
-					.code(`var __ks__ = require(\($quote(moduleName)))`)
+					.code(`var __ks__ = require(\($quote(@moduleName)))`)
 				
 				if @data.arguments? {
 					line.code('(')
@@ -1322,7 +624,7 @@ class Importer extends Statement {
 				line = fragments.newLine().code('var ')
 				
 				let nf = false
-				for name, alias of variables {
+				for name, alias of @variables {
 					if nf {
 						line.code(', ')
 					}
@@ -1339,7 +641,7 @@ class Importer extends Statement {
 				let line = fragments.newLine().code('var {')
 				
 				let nf = false
-				for alias of variables {
+				for name, alias of @variables {
 					if nf {
 						line.code(', ')
 					}
@@ -1347,15 +649,15 @@ class Importer extends Statement {
 						nf = true
 					}
 					
-					if variables[alias] == alias {
-						line.code(alias)
+					if alias == name {
+						line.code(name)
 					}
 					else {
-						line.code(alias, ': ', variables[alias])
+						line.code(name, ': ', alias)
 					}
 				}
 				
-				line.code('} = require(', $quote(moduleName), ')')
+				line.code(`} = require(\($quote(@moduleName)))`)
 				
 				if @data.arguments? {
 					line.code('(')
@@ -1402,16 +704,11 @@ class ImportDeclarator extends Importer {
 		_metadata
 	}
 	analyse() { // {{{
-		@metadata = this.resolve()
+		this.resolve()
 	} // }}}
 	prepare()
 	translate()
 	toStatementFragments(fragments, mode) { // {{{
-		if @metadata.kind == ImportKind::KSFile {
-			this.toKSFileFragments(fragments, @metadata)
-		}
-		else {
-			this.toNodeFileFragments(fragments, @metadata)
-		}
+		this.toImportFragments(fragments)
 	} // }}}
 }

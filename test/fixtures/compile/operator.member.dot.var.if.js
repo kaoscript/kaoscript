@@ -4,4 +4,4 @@ module.exports = function() {
 	if(Type.isValue((b = a.b).c)) {
 		console.log(b);
 	}
-}
+};

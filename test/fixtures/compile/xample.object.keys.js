@@ -15,4 +15,4 @@ module.exports = function() {
 		}
 		return __ks_Array._im_last(Object.keys(x));
 	}
-}
+};

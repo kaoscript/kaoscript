@@ -5,4 +5,4 @@ module.exports = function() {
 		__ks_0[x] = 42;
 		return __ks_0;
 	}
-}
+};

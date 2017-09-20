@@ -12,4 +12,4 @@ module.exports = function() {
 	let info = [directory, " ", user, ": "];
 	let logHello = Helper.vcurry(log, null, machine, ":", ...info);
 	logHello("foo");
-}
+};

@@ -83,4 +83,4 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments");
 		}
 	}
-}
+};

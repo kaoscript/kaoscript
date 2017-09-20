@@ -1,0 +1,59 @@
+{
+  "requirements": [
+    0,
+    "Array",
+    "false",
+    1,
+    "Object",
+    "false",
+    2,
+    "String",
+    "false"
+  ],
+  "exports": [
+    0,
+    "Array",
+    1,
+    "Object",
+    2,
+    "String"
+  ],
+  "references": [
+    {
+      "abstract": "false",
+      "alien": "true",
+      "hybrid": "false",
+      "sealed": "true",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "abstract": "false",
+      "alien": "true",
+      "hybrid": "false",
+      "sealed": "true",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "abstract": "false",
+      "alien": "true",
+      "hybrid": "false",
+      "sealed": "true",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ]
+}

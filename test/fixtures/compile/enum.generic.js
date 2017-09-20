@@ -7,4 +7,4 @@ module.exports = function() {
 	};
 	let card = CardSuit.Clubs;
 	console.log(card);
-}
+};

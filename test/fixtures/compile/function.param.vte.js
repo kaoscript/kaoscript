@@ -23,4 +23,4 @@ module.exports = function(expect) {
 	expect(function() {
 		return foo("foo", 1);
 	}).to.throw();
-}
+};

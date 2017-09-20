@@ -27,4 +27,4 @@ module.exports = function() {
 	console.log(factory.makeCar().getType());
 	console.log("" + (new Car()).getType());
 	console.log((new OldCar()).getType());
-}
+};

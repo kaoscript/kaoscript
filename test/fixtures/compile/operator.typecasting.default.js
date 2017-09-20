@@ -1,5 +1,6 @@
+require("kaoscript/register");
 module.exports = function() {
-	var {String, __ks_String} = require("./_string")();
+	var {String, __ks_String} = require("./_string.ks")();
 	function lines(value) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
@@ -9,4 +10,4 @@ module.exports = function() {
 		}
 		return __ks_String._im_lines(value);
 	}
-}
+};

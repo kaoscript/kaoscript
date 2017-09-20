@@ -76,4 +76,4 @@ module.exports = function() {
 	}
 	let r = new Rectangle("black", "white");
 	console.log(r.draw());
-}
+};

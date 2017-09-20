@@ -14,4 +14,4 @@ module.exports = function() {
 		throw new SyntaxError("wrong number of arguments");
 	};
 	console.log(__ks_String._im_toInt("42"));
-}
+};

@@ -12,4 +12,4 @@ module.exports = function(expect) {
 		return foo();
 	}).to.throw();
 	expect(foo(1)).to.eql([1]);
-}
+};

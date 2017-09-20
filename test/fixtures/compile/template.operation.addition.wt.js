@@ -4,4 +4,4 @@ module.exports = function() {
 	console.log(x + y);
 	console.log("foo" + x + y + "bar");
 	console.log("foo" + (x + y) + "bar");
-}
+};

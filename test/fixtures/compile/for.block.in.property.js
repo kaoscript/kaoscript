@@ -6,4 +6,4 @@ module.exports = function() {
 		hero = characters.heroes[__ks_0];
 		console.log(hero);
 	}
-}
+};

@@ -6,4 +6,4 @@ module.exports = function() {
 			console.log("The hero at index %d is %s", index, hero);
 		}
 	}
-}
+};

@@ -7,4 +7,4 @@ module.exports = function() {
 	for(let key in likes) {
 		console.log(key);
 	}
-}
+};

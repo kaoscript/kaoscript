@@ -44,4 +44,4 @@ module.exports = function() {
 	});
 	console.log(Rectangle.name);
 	console.log(Rectangle.version);
-}
+};

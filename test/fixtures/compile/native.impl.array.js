@@ -14,4 +14,4 @@ module.exports = function() {
 		throw new SyntaxError("wrong number of arguments");
 	};
 	console.log(__ks_Array._im_last([1, 2, 3]));
-}
+};

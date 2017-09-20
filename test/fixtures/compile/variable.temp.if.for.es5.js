@@ -7,4 +7,4 @@ module.exports = function() {
 			console.log(items);
 		}
 	}
-}
+};

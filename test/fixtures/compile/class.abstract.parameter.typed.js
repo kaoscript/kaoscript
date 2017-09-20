@@ -44,4 +44,4 @@ module.exports = function() {
 	}
 	let r = new Rectangle();
 	console.log(r.draw("black"));
-}
+};

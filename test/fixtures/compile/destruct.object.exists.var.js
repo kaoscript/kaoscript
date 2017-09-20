@@ -8,4 +8,4 @@ module.exports = function() {
 	bar = __ks_0;
 	console.log(bar);
 	console.log(baz);
-}
+};

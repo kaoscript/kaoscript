@@ -11,4 +11,4 @@ module.exports = function() {
 		}
 		return [x, y];
 	};
-}
+};

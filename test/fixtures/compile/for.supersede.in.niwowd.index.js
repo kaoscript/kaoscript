@@ -4,4 +4,4 @@ module.exports = function() {
 		console.log(__ks_hero_1);
 	}
 	console.log(hero);
-}
+};

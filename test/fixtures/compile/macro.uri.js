@@ -24,4 +24,4 @@ module.exports = function() {
 			URI.prototype.__ks_cons.call(this, args);
 		}
 	}
-}
+};

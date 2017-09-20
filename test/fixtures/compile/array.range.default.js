@@ -9,4 +9,4 @@ module.exports = function() {
 	let g = Helper.newArrayRange(5, 1, 1, true, true);
 	let h = Helper.newArrayRange(5, 1, 2, true, true);
 	let i = Helper.newArrayRange(1, 2, 0.3, true, true);
-}
+};

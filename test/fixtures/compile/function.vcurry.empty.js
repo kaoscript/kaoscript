@@ -5,4 +5,4 @@ module.exports = function() {
 	}
 	let logHello = Helper.vcurry(log, null);
 	logHello("foo");
-}
+};

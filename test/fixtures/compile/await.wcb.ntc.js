@@ -32,4 +32,4 @@ module.exports = function() {
 			cb(Type.isValue(d) ? d : 0);
 		});
 	}
-}
+};

@@ -5,4 +5,4 @@ module.exports = function() {
 	let binary = 661;
 	let radix = 50998809317;
 	let __ks_float_1 = 123456.789012;
-}
+};

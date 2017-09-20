@@ -1,7 +1,7 @@
 abstract class Statement extends AbstractNode {
 	private {
 		_afterwards: Array	= []
-		_variables: Array	= []
+		_assignments: Array	= []
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
@@ -20,7 +20,7 @@ abstract class Statement extends AbstractNode {
 				}
 			}
 			else {
-				@variables.push(data.left.name)
+				@assignments.push(data.left.name)
 			
 				@scope.define(data.left.name, false, this)
 				
@@ -28,12 +28,14 @@ abstract class Statement extends AbstractNode {
 			}
 		}
 	} // }}}
+	assignments() => @assignments
 	isAwait() => false
 	isExit() => false
+	includePath() => @parent.includePath()
 	isReturning(type: Type) => true
 	statement() => this
 	toFragments(fragments, mode) { // {{{
-		const variables = this.variables()
+		const variables = this.assignments()
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
@@ -49,14 +51,12 @@ abstract class Statement extends AbstractNode {
 			}
 		}
 	} // }}}
-	variables() => @variables
 }
 
 include {
 	'../statement/break'
 	'../statement/class'
 	'../statement/continue'
-	'../statement/dependency'
 	'../statement/destroy'
 	'../statement/do-until'
 	'../statement/do-while'
@@ -71,6 +71,7 @@ include {
 	'../statement/if'
 	'../statement/implement'
 	'../statement/import'
+	'../statement/dependency'
 	'../statement/include'
 	'../statement/namespace'
 	'../statement/return'

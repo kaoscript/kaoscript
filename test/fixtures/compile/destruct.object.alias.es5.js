@@ -7,4 +7,4 @@ module.exports = function() {
 	var a = foo.bar, b = foo.baz;
 	console.log(a);
 	console.log(b);
-}
+};

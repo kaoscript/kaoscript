@@ -9,4 +9,4 @@ module.exports = function() {
 		let end = "";
 		let begin = (lang === "en") ? (end = "goodbye", "hello") : "bonjour";
 	}
-}
+};

@@ -1,9 +1,10 @@
+require("kaoscript/register");
 function __ks_require(__ks_0, __ks___ks_0) {
 	if(Type.isValue(__ks_0)) {
 		return [__ks_0, __ks___ks_0];
 	}
 	else {
-		var {Array, __ks_Array} = require("./_array")();
+		var {Array, __ks_Array} = require("./_array.ks")();
 		return [Array, __ks_Array];
 	}
 }
@@ -53,4 +54,4 @@ module.exports = function(__ks_0, __ks___ks_0) {
 		Array: Array,
 		__ks_Array: __ks_Array
 	};
-}
+};

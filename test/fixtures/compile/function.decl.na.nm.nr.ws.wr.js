@@ -3,4 +3,4 @@ module.exports = function() {
 		let bar = "hello";
 		return bar;
 	}
-}
+};

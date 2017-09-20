@@ -1,17 +1,32 @@
 {
-  "requirements": {
-    "Color": {
-      "class": "true"
-    },
-    "Space": {}
-  },
-  "exports": [
+  "requirements": [
     0,
+    "Color",
+    "true",
+    1,
+    "Space",
+    "true"
+  ],
+  "exports": [
+    2,
     "Color",
     1,
     "Space"
   ],
   "references": [
+    {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "false",
+      "sealed": "false",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    "Enum",
     {
       "abstract": "false",
       "alien": "false",
@@ -57,7 +72,6 @@
         ]
       },
       "classMethods": {}
-    },
-    "Enum"
+    }
   ]
 }

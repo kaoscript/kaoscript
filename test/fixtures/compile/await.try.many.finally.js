@@ -99,4 +99,4 @@ module.exports = function() {
 			__ks_7(__ks_e);
 		}
 	}
-}
+};

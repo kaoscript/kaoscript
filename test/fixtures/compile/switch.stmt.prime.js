@@ -12,4 +12,4 @@ module.exports = function() {
 	else {
 		console.log("Ain't special");
 	}
-}
+};

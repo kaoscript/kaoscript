@@ -5,4 +5,4 @@ module.exports = function() {
 	console.log("" + __ks_Math.foo());
 	console.log(Math.pi.toString());
 	console.log(__ks_Math.foo().toString());
-}
+};

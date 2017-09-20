@@ -6,4 +6,4 @@ module.exports = function() {
 	};
 	let color = Color.Red;
 	console.log(color);
-}
+};

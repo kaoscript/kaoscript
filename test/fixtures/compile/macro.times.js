@@ -4,4 +4,4 @@ module.exports = function() {
 	let i = 42;
 	let t = 2;
 	console.log(5 * i * t);
-}
+};

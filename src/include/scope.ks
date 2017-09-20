@@ -250,7 +250,9 @@ class Scope extends AbstractScope {
 		
 		++@tempNextIndex
 		
-		statement._variables.pushUniq(name) if statement?
+		if statement != null {
+			statement._assignments.pushUniq(name)
+		}
 		
 		return name
 	} // }}}

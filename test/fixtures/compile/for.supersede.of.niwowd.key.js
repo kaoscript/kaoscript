@@ -7,4 +7,4 @@ module.exports = function() {
 	for(let __ks_value_1 in value) {
 		console.log(__ks_value_1);
 	}
-}
+};

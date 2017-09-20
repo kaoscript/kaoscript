@@ -11,16 +11,19 @@
 #![runtime(type(alias='KSType'))]
 
 import {
-	'../package.json'		as metadata
+	'../package.json'		=> metadata
 	'./fs.js'
-	'@kaoscript/ast'
 	'@kaoscript/parser'()	for parse
 	'path'
 }
 
 extern console, JSON
 
-include './include/error'
+include {
+	'@kaoscript/ast'
+	//'@kaoscript/util'
+	'./include/error'
+}
 
 const $extensions = { // {{{
 	binary: '.ksb',
@@ -185,7 +188,6 @@ abstract class AbstractNode {
 	statement() => this._parent?.statement()
 }
 
-/* include once '@kaoscript/util' */
 include {
 	'./include/attribute'
 	'./include/fragment'
@@ -389,7 +391,7 @@ const $statements = {
 	`\(NodeKind::ImplementDeclaration)`			: ImplementDeclaration
 	`\(NodeKind::ImportDeclaration)`			: ImportDeclaration
 	`\(NodeKind::IncludeDeclaration)`			: IncludeDeclaration
-	/* `\(NodeKind::IncludeOnceDeclaration)`		: IncludeOnceDeclaration */
+	`\(NodeKind::IncludeAgainDeclaration)`		: IncludeAgainDeclaration
 	`\(NodeKind::NamespaceDeclaration)`			: NamespaceDeclaration
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
@@ -673,4 +675,4 @@ export func isUpToDate(file, target, source) { // {{{
 	return true
 } // }}}
 
-export $extensions as extensions
+export $extensions => extensions

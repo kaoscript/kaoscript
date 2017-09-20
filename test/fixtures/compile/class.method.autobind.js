@@ -33,4 +33,4 @@ module.exports = function() {
 	let x = f.x.bind(f);
 	console.log(x());
 	console.log(f.x());
-}
+};

@@ -5,4 +5,4 @@ module.exports = function() {
 		console.log(hero);
 	}
 	console.log(hero);
-}
+};

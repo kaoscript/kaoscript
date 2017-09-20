@@ -24,4 +24,4 @@ module.exports = function() {
 		}
 		return ((1 - percentage) * x) + (percentage * y);
 	}
-}
+};

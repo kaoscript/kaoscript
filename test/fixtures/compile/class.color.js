@@ -52,4 +52,4 @@ module.exports = function() {
 		Color: Color,
 		Space: Space
 	};
-}
+};

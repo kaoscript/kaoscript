@@ -22,4 +22,4 @@ module.exports = function(Helper, Type) {
 		Function: Function,
 		__ks_Function: __ks_Function
 	};
-}
+};

@@ -10,4 +10,4 @@ module.exports = function() {
 	}, function(hero, like) {
 		return like === "spice";
 	});
-}
+};

@@ -36,4 +36,4 @@ module.exports = function() {
 	})();
 	const foo = Util.reverse("hello");
 	console.log(foo);
-}
+};

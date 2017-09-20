@@ -11,4 +11,4 @@ module.exports = function() {
 			console.log("Error");
 		}
 	}
-}
+};

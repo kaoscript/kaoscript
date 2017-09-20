@@ -33,4 +33,4 @@ module.exports = function() {
 	return {
 		Float: Float
 	};
-}
+};

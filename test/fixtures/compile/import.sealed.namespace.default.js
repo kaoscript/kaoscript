@@ -5,4 +5,4 @@ module.exports = function() {
 		return 42;
 	};
 	console.log(__ks_Math.pi());
-}
+};

@@ -11,4 +11,4 @@ module.exports = function() {
 		let value = __ks_0[key];
 		console.log(key + " likes " + value);
 	}
-}
+};

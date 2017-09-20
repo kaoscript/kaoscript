@@ -1,3 +1,3 @@
-module.exports = function(Color, __ks_Color) {
+module.exports = function(Color) {
 	console.log(Color);
-}
+};

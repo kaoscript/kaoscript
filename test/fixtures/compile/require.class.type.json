@@ -1,2 +1,140 @@
 {
+  "requirements": [
+    0,
+    "Space",
+    "true",
+    1,
+    "Color",
+    "true"
+  ],
+  "exports": [
+    2,
+    "Color",
+    0,
+    "Space"
+  ],
+  "references": [
+    {
+      "elements": [
+        "RGB"
+      ],
+      "index": -1,
+      "kind": 2
+    },
+    {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "false",
+      "sealed": "false",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "space": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Space",
+            "sealed": "false",
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Space",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Color",
+            "sealed": "false",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "abstract": "false",
+      "alien": "false",
+      "hybrid": "false",
+      "sealed": "false",
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "_luma": {
+          "access": 1,
+          "type": "Number"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "space": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Space",
+            "sealed": "false",
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Space",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Color",
+            "sealed": "false",
+            "throws": []
+          }
+        ],
+        "luma": [
+          {
+            "access": 3,
+            "async": "false",
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Number",
+            "sealed": "false",
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": "false",
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Number",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": "false",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ]
 }

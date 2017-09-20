@@ -8,4 +8,4 @@ module.exports = function() {
 	for(let value in likes) {
 		console.log(value);
 	}
-}
+};

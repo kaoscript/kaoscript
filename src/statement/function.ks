@@ -151,7 +151,6 @@ class FunctionDeclaration extends Statement {
 		@name = @data.name.name
 		
 		if @variable ?= this.greatScope().getLocalVariable(@name) {
-			console.log(@variable)
 			if @variable is not FunctionVariable {
 				SyntaxException.throwNotOverloadableFunction(@name, this)
 			}

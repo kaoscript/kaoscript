@@ -14,4 +14,4 @@ module.exports = function() {
 		bar: 2
 	}.foo) ? __ks_0 : 5;
 	console.log(foo);
-}
+};

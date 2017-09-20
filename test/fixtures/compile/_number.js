@@ -87,4 +87,4 @@ module.exports = function() {
 		Number: Number,
 		__ks_Number: __ks_Number
 	};
-}
+};

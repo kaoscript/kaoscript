@@ -15,4 +15,4 @@ module.exports = function() {
 		return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 255));
 	}
 	console.log(hex(128));
-}
+};

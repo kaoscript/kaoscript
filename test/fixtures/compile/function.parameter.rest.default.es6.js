@@ -104,4 +104,4 @@ module.exports = function() {
 		}
 		console.log(items, x, y, z);
 	}
-}
+};

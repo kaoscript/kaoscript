@@ -54,6 +54,7 @@ abstract class Domain {
 	abstract hasVariable(name: String): Boolean
 	abstract getVariable(name: String): Type
 	reference(name: String) => new ReferenceType(name, this)
+	replicate(name: String, type: Type)
 }
 
 class ScopeDomain extends Domain {
@@ -124,6 +125,9 @@ class ImportDomain extends Domain {
 		else {
 			return null
 		}
+	} // }}}
+	replicate(name: String, type: Type) { // {{{
+		@types[name] = type
 	} // }}}
 }
 
@@ -551,7 +555,7 @@ class ClassType extends Type {
 		_name: String
 		_namespace: ReferenceType
 		_parentName: String
-		_seal
+		_seal: Object
 		_sealed: Boolean			= false
 	}
 	constructor(@name, @domain)
@@ -984,7 +988,7 @@ class ClassType extends Type {
 	isDestructor(name: String) => name == 'destructor'
 	isExtendable() => !@anonymous
 	isExtending() => @extending
-	isFlexible() => true
+	isFlexible() => @sealed
 	isHybrid() => @hybrid
 	isInstanceOf(target: ClassType) { // {{{
 		if this.equals(target) {
@@ -1063,6 +1067,50 @@ class ClassType extends Type {
 		references.push(this.export())
 	} // }}}
 	reference() => new ReferenceType(this, @domain)
+	replicate() { // {{{
+		const that = new ClassType(@name, @domain)
+		
+		that._abstract = this._abstract
+		that._alien = this._alien
+		that._anonymous = this._anonymous
+		that._destructors = this._destructors
+		that._extending = this._extending
+		that._extends = this._extends
+		that._hybrid = this._hybrid
+		that._namespace = this._namespace
+		that._parentName = this._parentName
+		that._sealed = this._sealed
+		
+		for name, methods of this._abstractMethods {
+			that._abstractMethods[name] = [].concat(methods)
+		}
+		for name, methods of this._classMethods {
+			that._classMethods[name] = [].concat(methods)
+		}
+		for name, methods of this._instanceMethods {
+			that._instanceMethods[name] = [].concat(methods)
+		}
+		for name, methods of this._macros {
+			that._macros[name] = [].concat(methods)
+		}
+		
+		for name, variable of this._classVariables {
+			that._classVariables[name] = variable
+		}
+		for name, variable of this._instanceVariables {
+			that._instanceVariables[name] = variable
+		}
+		
+		that._constructors.concat(this._constructors)
+		
+		if this._sealed {
+			that._seal = Object.clone(this._seal)
+		}
+		
+		@domain.replicate(@name, that)
+		
+		return that
+	} // }}}
 	seal() { // {{{
 		@sealed = true
 		
@@ -1102,6 +1150,9 @@ class EnumType extends Type {
 		else {
 			@type = domain.reference('Number')
 		}
+	} // }}}
+	constructor(@name, @kind, scope: AbstractScope) { // {{{
+		this(name, kind, scope.domain())
 	} // }}}
 	addElement(name: String) { // {{{
 		@elements.push(name)
@@ -1538,6 +1589,22 @@ class NamespaceType extends Type {
 	namespace() => @namespace
 	namespace(@namespace) => this
 	reference() => new ReferenceType(this, @domain)
+	replicate() { // {{{
+		const that = new NamespaceType(@name, @domain)
+		
+		that._namespace = this._namespace
+		that._sealed = this._sealed
+		that._sealName = this._sealName
+		
+		for name, property of this._properties {
+			that._properties[name] = property
+		}
+		for name, property of this._sealProperties {
+			that._sealProperties[name] = property
+		}
+		
+		return that
+	} // }}}
 	seal() { // {{{
 		@sealed = true
 		

@@ -3,4 +3,4 @@ module.exports = function() {
 	for(let x = 0; x <= 10; x += y) {
 		console.log(x);
 	}
-}
+};

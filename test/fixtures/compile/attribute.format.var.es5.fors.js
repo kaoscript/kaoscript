@@ -19,4 +19,4 @@ module.exports = function() {
 		var value = likes[key];
 		console.log(key + " likes " + value);
 	}
-}
+};

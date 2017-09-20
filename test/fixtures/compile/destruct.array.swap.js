@@ -5,4 +5,4 @@ module.exports = function() {
 		[left, right] = [right, left];
 	}
 	console.log(left, right);
-}
+};

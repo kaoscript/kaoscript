@@ -71,4 +71,4 @@ module.exports = function() {
 			__ks_3(__ks_e);
 		}
 	}
-}
+};

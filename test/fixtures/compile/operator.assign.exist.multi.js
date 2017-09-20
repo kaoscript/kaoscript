@@ -13,4 +13,4 @@ module.exports = function() {
 	else if(Type.isValue(__ks_0 = qux()) ? (x = __ks_0, true) : false) {
 		console.log(x);
 	}
-}
+};

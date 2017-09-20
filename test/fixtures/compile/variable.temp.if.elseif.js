@@ -7,4 +7,4 @@ module.exports = function() {
 		else if(Type.isValue(__ks_0 = foo.bar()) ? (items = __ks_0, true) : false) {
 		}
 	}
-}
+};

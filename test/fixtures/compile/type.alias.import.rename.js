@@ -5,4 +5,4 @@ module.exports = function() {
 	var {String, __ks_String} = require("./_string.ks")();
 	let x = 0;
 	console.log(Type.isNumber(x) ? __ks_Number._im_toInt(x) : __ks_String._im_toInt(x));
-}
+};

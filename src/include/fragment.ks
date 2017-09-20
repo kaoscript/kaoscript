@@ -1,4 +1,4 @@
-include once '@kaoscript/source-generator'
+include '@kaoscript/source-generator'
 
 enum Mode {
 	None

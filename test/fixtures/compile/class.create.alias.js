@@ -34,4 +34,4 @@ module.exports = function() {
 			return Writer.prototype.__ks_func_newLine_0.apply(this, arguments);
 		}
 	}
-}
+};

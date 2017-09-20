@@ -63,4 +63,4 @@ module.exports = function() {
 			ClassB.prototype.__ks_init.call(this);
 		}
 	}
-}
+};

@@ -30,4 +30,4 @@ module.exports = function() {
 	console.log(x.foo(1));
 	console.log(x.foo(1, 2));
 	console.log(x.foo(1, 2, 3, 4));
-}
+};

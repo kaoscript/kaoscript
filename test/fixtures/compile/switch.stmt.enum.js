@@ -81,4 +81,4 @@ module.exports = function() {
 		}
 		return fg_code + ";" + bg_code + "m";
 	}
-}
+};

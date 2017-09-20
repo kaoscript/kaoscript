@@ -6,4 +6,4 @@ module.exports = function() {
 		hero = heroes[index];
 	}
 	console.log(hero, index);
-}
+};

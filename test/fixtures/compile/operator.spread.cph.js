@@ -4,4 +4,4 @@ module.exports = function() {
 		return i;
 	});
 	console.log.apply(console, args);
-}
+};

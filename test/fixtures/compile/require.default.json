@@ -1,9 +1,9 @@
 {
-  "requirements": {
-    "Color": {
-      "class": "true"
-    }
-  },
+  "requirements": [
+    0,
+    "Color",
+    "true"
+  ],
   "exports": [
     0,
     "Color"

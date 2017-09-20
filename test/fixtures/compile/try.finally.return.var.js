@@ -10,4 +10,4 @@ module.exports = function() {
 			console.log("finally", x);
 		}
 	}
-}
+};

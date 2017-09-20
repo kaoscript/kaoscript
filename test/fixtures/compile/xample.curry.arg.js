@@ -14,4 +14,4 @@ module.exports = function() {
 	}
 	let f = Helper.vcurry(fff, o);
 	let s = f("Hello ");
-}
+};

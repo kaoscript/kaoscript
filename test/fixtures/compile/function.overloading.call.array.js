@@ -32,4 +32,4 @@ module.exports = function() {
 	};
 	const foo = reverse([1, 2, 3]);
 	console.log(foo.toString());
-}
+};

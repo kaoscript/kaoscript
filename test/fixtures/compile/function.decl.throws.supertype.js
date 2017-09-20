@@ -15,4 +15,4 @@ module.exports = function() {
 		if(Type.is(__ks_0, Error) {
 		}
 	}
-}
+};

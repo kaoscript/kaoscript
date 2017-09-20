@@ -149,4 +149,4 @@ module.exports = function() {
 		String: String,
 		__ks_String: __ks_String
 	};
-}
+};

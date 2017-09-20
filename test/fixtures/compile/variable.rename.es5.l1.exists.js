@@ -9,4 +9,4 @@ module.exports = function() {
 			console.log(Type.isValue(__ks_x_1.toUpperCase));
 		}
 	}
-}
+};

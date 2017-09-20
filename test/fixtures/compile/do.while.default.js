@@ -3,4 +3,4 @@ module.exports = function() {
 		buy();
 	}
 	while(supply > demand)
-}
+};

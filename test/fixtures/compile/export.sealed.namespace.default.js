@@ -4,4 +4,4 @@ module.exports = function() {
 		Math: Math,
 		__ks_Math: __ks_Math
 	};
-}
+};

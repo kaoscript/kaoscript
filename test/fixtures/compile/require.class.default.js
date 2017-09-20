@@ -38,4 +38,4 @@ module.exports = function(Color, Space) {
 		Color: Color,
 		Space: Space
 	};
-}
+};

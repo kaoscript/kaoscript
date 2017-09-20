@@ -30,4 +30,4 @@ module.exports = function() {
 			ClassD.prototype.__ks_init_1.call(this);
 		}
 	}
-}
+};

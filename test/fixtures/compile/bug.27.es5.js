@@ -12,4 +12,4 @@ module.exports = function() {
 		let __ks_0;
 		(__ks_0 = foo.bar(), __ks_0.qux).apply(__ks_0, [].concat(args));
 	}
-}
+};

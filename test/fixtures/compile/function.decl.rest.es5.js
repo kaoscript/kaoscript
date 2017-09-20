@@ -8,4 +8,4 @@ module.exports = function() {
 		}
 		let qux = Array.prototype.slice.call(arguments, 1, arguments.length);
 	}
-}
+};

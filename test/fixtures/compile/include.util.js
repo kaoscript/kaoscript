@@ -378,4 +378,4 @@ module.exports = function() {
 		var args = Array.prototype.slice.call(arguments);
 		return __ks_Object.__ks_sttc_merge_0.apply(null, args);
 	};
-}
+};

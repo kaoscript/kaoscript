@@ -6,4 +6,4 @@ module.exports = function() {
 	}, function(hero, index) {
 		return (index % 2) === 0;
 	});
-}
+};

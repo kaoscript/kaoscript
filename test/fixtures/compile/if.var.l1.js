@@ -6,4 +6,4 @@ module.exports = function() {
 	if((message = foo.message).length > 0) {
 		console.log(message);
 	}
-}
+};

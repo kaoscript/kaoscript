@@ -18,4 +18,4 @@ module.exports = function() {
 		};
 	})();
 	console.log(Float.toString(3.14));
-}
+};

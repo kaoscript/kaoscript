@@ -42,6 +42,7 @@ class NamespaceDeclaration extends Statement {
 	export(name: String, variable) { // {{{
 		@exports[name] = variable
 	} // }}}
+	includePath() => null
 	name() => @name
 	recipient() => this
 	toExportFragements(fragments) { // {{{

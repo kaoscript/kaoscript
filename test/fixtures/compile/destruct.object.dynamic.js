@@ -4,4 +4,4 @@ module.exports = function() {
 		qux: "bar"
 	};
 	console.log(foo);
-}
+};

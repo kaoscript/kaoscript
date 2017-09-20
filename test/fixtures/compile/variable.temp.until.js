@@ -6,4 +6,4 @@ module.exports = function() {
 	while(!(x = foo())) {
 		console.log(x);
 	}
-}
+};

@@ -72,4 +72,4 @@ module.exports = function() {
 	console.log(shape.draw());
 	__ks_Shape._im_makeRed(shape);
 	console.log(shape.draw());
-}
+};

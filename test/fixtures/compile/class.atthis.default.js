@@ -55,4 +55,4 @@ module.exports = function() {
 	}
 	let hello = new Greetings("Hello world!");
 	console.log(hello.greet("miss White"));
-}
+};

@@ -3,4 +3,4 @@ module.exports = function() {
 		bar: "qux"
 	};
 	delete foo.bar;
-}
+};

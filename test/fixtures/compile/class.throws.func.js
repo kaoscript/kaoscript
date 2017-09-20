@@ -57,4 +57,4 @@ module.exports = function() {
 		const hello = new Greetings("Hello world!");
 		console.log(hello.greet("miss White"));
 	}
-}
+};

@@ -3,4 +3,4 @@ module.exports = function() {
 	function foo(...args) {
 		bar.push.apply(bar, args);
 	}
-}
+};

@@ -9,4 +9,4 @@ module.exports = function() {
 	Color.DarkGreen = 4;
 	Color.DarkBlue = 5;
 	console.log(Color.DarkGreen);
-}
+};

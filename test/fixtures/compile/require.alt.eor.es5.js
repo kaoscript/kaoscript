@@ -54,4 +54,4 @@ module.exports = function(__ks_0, __ks___ks_0) {
 		Array: Array,
 		__ks_Array: __ks_Array
 	};
-}
+};

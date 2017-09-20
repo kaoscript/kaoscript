@@ -3,4 +3,4 @@ module.exports = function() {
 	console.log("number");
 	console.log("any");
 	console.log("any");
-}
+};

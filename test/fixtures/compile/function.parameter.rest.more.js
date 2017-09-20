@@ -6,4 +6,4 @@ module.exports = function() {
 		let __ks_i = -1;
 		let args = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + 4));
 	}
-}
+};

@@ -5,53 +5,66 @@ class ExportDeclaration extends Statement {
 	}
 	analyse() { // {{{
 		let statement
-		for declaration in @data.declarations {
-			switch declaration.kind {
-				NodeKind::ExportDeclarationSpecifier => {
-					@statements.push(statement = $compile.statement(declaration.declaration, this))
+		
+		if @parent.includePath() == null {
+			for declaration in @data.declarations {
+				switch declaration.kind {
+					NodeKind::ExportDeclarationSpecifier => {
+						statement = $compile.statement(declaration.declaration, this)
+					}
+					NodeKind::ExportNamedSpecifier => {
+						statement = new ExportNamedSpecifier(declaration, this)
+					}
+					NodeKind::ExportPropertiesSpecifier => {
+						statement = new ExportPropertiesSpecifier(declaration, this)
+					}
+					NodeKind::ExportWildcardSpecifier => {
+						statement = new ExportWildcardSpecifier(declaration, this)
+					}
+					=> {
+						console.log(declaration)
+						throw new NotImplementedException(this)
+					}
 				}
-				NodeKind::ExportNamedSpecifier => {
-					statement = new ExportNamedSpecifier(declaration, this)
-				}
-				NodeKind::ExportPropertiesSpecifier => {
-					statement = new ExportPropertiesSpecifier(declaration, this)
-				}
-				NodeKind::ExportWildcardSpecifier => {
-					statement = new ExportWildcardSpecifier(declaration, this)
-				}
-				=> {
-					console.log(declaration)
-					throw new NotImplementedException(this)
-				}
+				
+				statement.analyse()
+				
+				@statements.push(statement)
+				@declarations.push(statement)
 			}
-			
-			statement.analyse()
-			
-			@declarations.push(statement)
+		}
+		else {
+			for declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
+				@statements.push(statement = $compile.statement(declaration.declaration, this))
+				
+				statement.analyse()
+			}
 		}
 	} // }}}
 	prepare() { // {{{
 		const recipient = @parent.recipient()
 		
+		for statement in @statements {
+			statement.prepare()
+		}
+		
 		for declaration in @declarations {
-			declaration.prepare()
-			
 			declaration.export(recipient)
 		}
 	} // }}}
 	translate() { // {{{
-		for declaration in @declarations {
-			declaration.translate()
+		for statement in @statements {
+			statement.translate()
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		for declaration in @statements {
-			declaration.toFragments(fragments, Mode::None)
+		for statement in @statements {
+			statement.toFragments(fragments, Mode::None)
 		}
 	} // }}}
 	walk(fn) { // {{{
-		for declaration in @declarations {
-			declaration.walk(fn)
+		for statement in @statements {
+			statement.walk(fn)
 		}
 	} // }}}
 }
@@ -71,6 +84,7 @@ class ExportNamedSpecifier extends AbstractNode {
 	export(recipient) { // {{{
 		recipient.export(@data.exported.name, @expression)
 	} // }}}
+	toFragments(fragments, mode)
 	walk(fn) { // {{{
 		fn(@data.exported.name, @expression.type())
 	} // }}}
@@ -93,6 +107,7 @@ class ExportPropertiesSpecifier extends AbstractNode {
 			recipient.export(property.exported.name, new ExportProperty(@object, property.local.name))
 		}
 	} // }}}
+	toFragments(fragments, mode)
 }
 
 class ExportWildcardSpecifier extends AbstractNode {
@@ -112,6 +127,7 @@ class ExportWildcardSpecifier extends AbstractNode {
 			recipient.export(name, new ExportProperty(@expression, name))
 		})
 	} // }}}
+	toFragments(fragments, mode)
 }
 
 class ExportProperty {

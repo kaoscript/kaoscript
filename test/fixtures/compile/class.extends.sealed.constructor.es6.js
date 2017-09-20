@@ -65,4 +65,4 @@ module.exports = function() {
 			Exception.prototype.__ks_init_1.call(this);
 		}
 	}
-}
+};

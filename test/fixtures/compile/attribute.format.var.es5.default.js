@@ -16,4 +16,4 @@ module.exports = function() {
 	function foo() {
 		var x = 5;
 	}
-}
+};

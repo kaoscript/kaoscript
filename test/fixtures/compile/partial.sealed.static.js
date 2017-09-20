@@ -59,4 +59,4 @@ module.exports = function() {
 	console.log(shape.draw());
 	shape = __ks_Shape._cm_makeRed();
 	console.log(shape.draw());
-}
+};

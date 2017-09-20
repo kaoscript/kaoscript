@@ -4,4 +4,4 @@ module.exports = function() {
 	}
 	const messages = ["hello", "world"];
 	log.apply(null, messages);
-}
+};

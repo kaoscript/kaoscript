@@ -61,4 +61,4 @@ module.exports = function() {
 	};
 	let shape = Shape.makeRed();
 	console.log(shape.draw());
-}
+};

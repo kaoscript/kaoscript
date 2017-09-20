@@ -16,4 +16,4 @@ module.exports = function(Array, __ks_Array) {
 		Array: Array,
 		__ks_Array: __ks_Array
 	};
-}
+};

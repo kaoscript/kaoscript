@@ -123,4 +123,4 @@ module.exports = function() {
 	return {
 		Color: Color
 	};
-}
+};

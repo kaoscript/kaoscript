@@ -1,0 +1,1 @@
+ReferenceException: To overwrite "name", it needs to be passed to the module "./export.default.ks" (line 5, file "fixtures/compile/import.default.ks")

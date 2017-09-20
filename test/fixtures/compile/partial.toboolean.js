@@ -23,4 +23,4 @@ module.exports = function() {
 	};
 	console.log(__ks_Boolean._im_toBoolean(true));
 	console.log(__ks_String._im_toBoolean("true"));
-}
+};
