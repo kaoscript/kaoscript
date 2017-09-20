@@ -304,7 +304,12 @@ abstract class Type {
 			}
 			else if data is Array {
 				if data[0] is Number {
-					return Type.import(data[1], references[data[0]], references, domain, node)
+					if data[0] == -1 {
+						return new ClassType(data[1], domain)
+					}
+					else {
+						return Type.import(data[1], references[data[0]], references, domain, node)
+					}
 				}
 				else {
 					return new UnionType([Type.import(null, type, references, domain, node) for type in data])
@@ -1549,14 +1554,14 @@ class NamespaceType extends Type {
 	} // }}}
 	addPropertyFromMetadata(name, data, references, domain, node) { // {{{
 		let type
-		if data is String {
-			type = NamespaceVariableType.import(data, references, domain, node)
-		}
-		else if data.parameters? {
+		if data.parameters? {
 			type = NamespaceFunctionType.import(data, references, domain, node)
 		}
-		else {
+		else if data.sealed? && data.type? {
 			type = NamespaceVariableType.import(data, references, domain, node)
+		}
+		else {
+			type = Type.import(name, data, references, domain, node)
 		}
 		
 		@properties[name] = type

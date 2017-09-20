@@ -8,7 +8,6 @@
  * http://www.opensource.org/licenses/mit-license.php
  **/
 #![error(off)]
-#![runtime(type(alias='KSType'))]
 
 import {
 	'../package.json'		=> metadata
