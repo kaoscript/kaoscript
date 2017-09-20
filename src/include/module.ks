@@ -175,7 +175,7 @@ export class Module {
 	} // }}}
 	parse(data, file) { // {{{
 		try {
-			return parse(data)
+			return Parser.parse(data)
 		}
 		catch error {
 			error.message += ` (file "\(file)")`

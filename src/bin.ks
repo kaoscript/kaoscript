@@ -10,10 +10,10 @@
 extern console, global, Object, process, require
 
 import {
-	'../package.json'	as metadata
+	'../package.json'	=> metadata
 	'./compiler.ks'		for Compiler
-	'commander'			as program
-	'module'			as Module
+	'commander'			=> program
+	'module'			=> Module
 	'path'
 	'vm'
 }

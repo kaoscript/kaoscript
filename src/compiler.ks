@@ -10,9 +10,8 @@
 #![error(off)]
 
 import {
-	'../package.json'		=> metadata
+	'../package.json'	=> metadata
 	'./fs.js'
-	'@kaoscript/parser'()	for parse
 	'path'
 }
 
@@ -20,6 +19,7 @@ extern console, JSON
 
 include {
 	'@kaoscript/ast'
+	'@kaoscript/parser'
 	'@kaoscript/util'
 	'./include/error'
 }
