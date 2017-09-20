@@ -201,7 +201,7 @@ class Importer extends Statement {
 		if moduleName == null {
 			moduleName = module.path(x, @data.source.value)
 			
-			if moduleName.slice(-$extensions.source.length).toLowerCase() != $extensions.source {
+			if moduleName.slice(-$extensions.source.length).toLowerCase() != $extensions.source && path.basename(x) == path.basename(moduleName + $extensions.source) {
 				moduleName += $extensions.source
 			}
 		}
