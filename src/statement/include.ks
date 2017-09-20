@@ -13,7 +13,7 @@ class IncludeDeclaration extends Statement {
 				x = fs.resolve(directory, file)
 				
 				if fs.isFile(x) || fs.isFile(x += $extensions.source) {
-					if this.canLoadFile(x) {
+					if this.canLoadLocalFile(x) {
 						this.loadLocalFile(x)
 					}
 				}
@@ -22,6 +22,9 @@ class IncludeDeclaration extends Statement {
 				}
 			}
 			else {
+				let modulePath = file
+				let moduleVersion = ''
+				
 				let nf = true
 				for dir in $nodeModulesPaths(directory) while nf {
 					x = fs.resolve(dir, file)
@@ -31,6 +34,7 @@ class IncludeDeclaration extends Statement {
 					}
 					else if fs.isFile(x + $extensions.source) {
 						x += $extensions.source
+						modulePath += $extensions.source
 						
 						nf = false
 					}
@@ -46,31 +50,40 @@ class IncludeDeclaration extends Statement {
 							if pkg? {
 								if pkg.kaoscript? && fs.isFile(path.join(x, pkg.kaoscript.main)) {
 									x = path.join(x, pkg.kaoscript.main)
+									modulePath = path.join(modulePath, pkg.kaoscript.main)
 									
 									nf = false
 								}
 								else if pkg.main? {
 									if fs.isFile(path.join(x, pkg.main)) {
 										x = path.join(x, pkg.main)
+										modulePath = path.join(modulePath, pkg.main)
 										
 										nf = false
 									}
 									else if fs.isFile(path.join(x, pkg.main + $extensions.source)) {
 										x = path.join(x, pkg.main + $extensions.source)
+										modulePath = path.join(modulePath, pkg.main + $extensions.source)
 										
 										nf = false
 									}
 									else if fs.isFile(path.join(x, pkg.main, 'index' + $extensions.source)) {
 										x = path.join(x, pkg.main, 'index' + $extensions.source)
+										modulePath = path.join(modulePath, pkg.main, 'index' + $extensions.source)
 										
 										nf = false
 									}
+								}
+								
+								if !nf {
+									moduleVersion = pkg.version
 								}
 							}
 						}
 						
 						if nf && fs.isFile(path.join(x, 'index' + $extensions.source)) {
 							x = path.join(x, 'index' + $extensions.source)
+							modulePath = path.join(modulePath, 'index' + $extensions.source)
 							
 							nf = false
 						}
@@ -81,8 +94,8 @@ class IncludeDeclaration extends Statement {
 					IOException.throwNotFoundModule(file, directory, this)
 				}
 				
-				if this.canLoadFile(x) {
-					this.loadModuleFile(x, file)
+				if this.canLoadModuleFile(x, file, modulePath, moduleVersion) {
+					this.loadModuleFile(x, file, modulePath, moduleVersion)
 				}
 			}
 		}
@@ -97,7 +110,20 @@ class IncludeDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
-	canLoadFile(path) => !this.module().hasInclude(path)
+	canLoadLocalFile(file) => !this.module().hasInclude(file)
+	canLoadModuleFile(file, name, path, version) { // {{{
+		if versions ?= this.module().listIncludeVersions(file, path) {
+			if versions.length > 1 || versions[0] == version {
+				return false
+			}
+			else {
+				SyntaxException.throwMismatchedInclude(name, this)
+			}
+		}
+		else {
+			return true
+		}
+	} // }}}
 	loadLocalFile(path) { // {{{
 		const module = this.module()
 		const declarator = new IncludeDeclarator(path, this)
@@ -126,14 +152,14 @@ class IncludeDeclaration extends Statement {
 			statement.analyse()
 		}
 	} // }}}
-	loadModuleFile(path, file) { // {{{
+	loadModuleFile(path, moduleName, modulePath, moduleVersion) { // {{{
 		const module = this.module()
-		const declarator = new IncludeDeclarator(path, file, this)
+		const declarator = new IncludeDeclarator(path, moduleName, this)
 		
 		let data = fs.readFile(path)
 		
 		module.addHash(path, module.compiler().sha256(path, data))
-		module.addInclude(path)
+		module.addInclude(path, modulePath, moduleVersion)
 		
 		try {
 			//console.time('parse')
@@ -162,7 +188,8 @@ class IncludeDeclaration extends Statement {
 }
 
 class IncludeAgainDeclaration extends IncludeDeclaration {
-	canLoadFile(path) => true
+	canLoadLocalFile(...) => true
+	canLoadModuleFile(...) => true
 }
 
 class IncludeDeclarator extends Statement {
@@ -171,19 +198,19 @@ class IncludeDeclarator extends Statement {
 		_file: String
 		_includePath: String
 	}
-	constructor(@file, includePath: String = null, @parent) { // {{{
+	constructor(@file, moduleName: String = null, @parent) { // {{{
 		super({}, parent)
 		
 		@directory = path.dirname(file)
 		
-		if includePath == null {
+		if moduleName == null {
 			@includePath = parent.includePath()
 		}
-		else if parent.includePath() == null || !$localFileRegex.test(includePath) {
-			@includePath = includePath
+		else if parent.includePath() == null || !$localFileRegex.test(moduleName) {
+			@includePath = moduleName
 		}
 		else {
-			@includePath = path.join(parent.includePath(), includePath)
+			@includePath = path.join(parent.includePath(), moduleName)
 		}
 	} // }}}
 	analyse()

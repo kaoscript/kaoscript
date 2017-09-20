@@ -21,7 +21,7 @@ extern console, JSON
 
 include {
 	'@kaoscript/ast'
-	//'@kaoscript/util'
+	'@kaoscript/util'
 	'./include/error'
 }
 

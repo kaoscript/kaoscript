@@ -206,6 +206,9 @@ export class SyntaxException extends Exception {
 		throwInvalidSyncMethods(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
 		} // }}}
+		throwMismatchedInclude(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Inclusions of "\(name)" should have the same version`, node)
+		} // }}}
 		throwMissingAbstractMethods(name, methods, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Class "\(name)" doesn't implement the following abstract methods: "\(methods.join('", "'))"`, node)
 		} // }}}

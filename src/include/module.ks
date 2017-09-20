@@ -11,7 +11,8 @@ export class Module {
 		_flags					= {}
 		_hashes					= {}
 		_imports				= {}
-		_includes				= {}
+		_includeModules			= {}
+		_includePaths			= {}
 		_metadata				= null
 		_options
 		_output
@@ -64,7 +65,25 @@ export class Module {
 		}
 	} // }}}
 	addInclude(path) { // {{{
-		@includes[path] = true
+		if @includePaths[path] is not String {
+			@includePaths[path] = true
+		}
+	} // }}}
+	addInclude(path, modulePath, moduleVersion) { // {{{
+		if @includePaths[path] == true || @includePaths[path] is not String {
+			@includePaths[path] = modulePath
+		}
+		
+		if @includeModules[modulePath] is Object {
+			@includeModules[modulePath].paths:Array.pushUniq(path)
+			@includeModules[modulePath].versions:Array.pushUniq(moduleVersion)
+		}
+		else {
+			@includeModules[modulePath] = {
+				paths: [path]
+				versions: [moduleVersion]
+			}
+		}
 	} // }}}
 	addReference(key, code) { // {{{
 		if @references[key] {
@@ -99,7 +118,7 @@ export class Module {
 		@flags[name] = true
 	} // }}}
 	hasInclude(path) { // {{{
-		return @includes?[path]
+		return @includePaths[path] == true || @includePaths[path] is String
 	} // }}}
 	import(name: String, file = null) { // {{{
 		@imports[name] = true
@@ -130,6 +149,17 @@ export class Module {
 		}
 		
 		return hashes
+	} // }}}
+	listIncludeVersions(path, modulePath) { // {{{
+		if @includeModules[modulePath] is Object {
+			return @includeModules[modulePath].versions
+		}
+		else if @includePaths[path] == true {
+			return ['']
+		}
+		else {
+			return null
+		}
 	} // }}}
 	listReferences(key) { // {{{
 		if @references[key] {

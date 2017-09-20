@@ -34,12 +34,12 @@
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
-		"@kaoscript/ast": "kaoscript/ast#v0.7.0",
 		"@kaoscript/parser": "kaoscript/parser#v0.8.0",
 		"@kaoscript/runtime": "kaoscript/runtime#v0.6.0",
 		"commander": "2.9.x"
 	},
 	"devDependencies": {
+		"@kaoscript/ast": "kaoscript/ast#v0.7.0",
 		"@kaoscript/coverage-istanbul": "kaoscript/coverage-istanbul#v0.2.0",
 		"@kaoscript/source-generator": "kaoscript/source-generator#v0.1.0",
 		"@kaoscript/test-import": "kaoscript/test-import#v0.2.0",

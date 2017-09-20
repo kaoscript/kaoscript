@@ -54,7 +54,7 @@ describe('compile', function() {
 			}
 			else {
 				var data = compiler.compile().toSource();
-				console.log(data);
+				//console.log(data);
 				
 				expect(data).to.equal(fs.readFileSync(path.join(__dirname, 'fixtures', 'compile', name + '.js'), {
 					encoding: 'utf8'
