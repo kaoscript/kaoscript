@@ -6,20 +6,29 @@ enum MacroVariableKind {
 }
 
 func $evaluate(source) { // {{{
+	//console.log(source)
+	
 	const compiler = new Compiler('__ks__')
 	
-	compiler.compile('#![bin]\nextern console, JSON\nreturn ' + source)
+	compiler.compile('#![bin]\nextern console, JSON, __ks_marker\nreturn ' + source)
 	
 	//console.log(compiler.toSource())
 	
-	return eval(`(function() {\(compiler.toSource())})()`)
+	return eval(`(function(__ks_marker) {\(compiler.toSource())})`)(MacroMarker)
 } // }}}
 
-func $reificate(node, data, ast, reification) { // {{{
+class MacroMarker {
+	public {
+		index: Number
+	}
+	constructor(@index)
+}
+
+func $reificate(macro, node, data, ast, reification) { // {{{
 	if ast {
 		return Generator.generate(data, {
 			transformers: {
-				expression: $transformExpression^^(node)
+				expression: $transformExpression^^(macro, node)
 			}
 		})
 	}
@@ -35,7 +44,13 @@ func $reificate(node, data, ast, reification) { // {{{
 				return src
 			}
 			ReificationKind::Expression => {
-				return JSON.stringify(data)
+				const context = {
+					data: ''
+				}
+				
+				$serialize(macro, data, context)
+				
+				return context.data
 			}
 			ReificationKind::Identifier => {
 				return data
@@ -44,7 +59,71 @@ func $reificate(node, data, ast, reification) { // {{{
 	}
 } // }}}
 
-func $transformExpression(node, data, writer) { // {{{
+func $serialize(macro, data, context) { // {{{
+	if data == null || data is Boolean {
+		context.data += JSON.stringify(data)
+	}
+	else if data is Array {
+		if data.length == 0 {
+			context.data += '[]'
+		}
+		else {
+			context.data += '['
+			
+			$serialize(macro, data[0], context)
+			
+			for i from 1 til data.length {
+				context.data += ', '
+				
+				$serialize(macro, data[i], context)
+			}
+			
+			context.data += ']'
+		}
+	}
+	else if data is MacroMarker {
+		context.data += Generator.generate(macro.getMark(data.index))
+	}
+	else if data is Number {
+		context.data += (data is NaN ? 'NaN' : data)
+	}
+	else if data is RegExp {
+		context.data += data
+	}
+	else if data is String {
+		context.data += $quote(data)
+	}
+	else {
+		let empty = true
+		
+		context.data += '{'
+		
+		for key, value of data {
+			if empty {
+				empty = false
+				
+				context.data += '\n'
+			}
+			
+			if value is MacroMarker {
+				context.data += `\(key)\(Generator.generate(macro.getMark(value.index), {
+					mode: Generator.KSWriterMode::Property
+				}))`
+			}
+			else {
+				context.data += `\($quote(key)): `
+				
+				$serialize(macro, value, context)
+			}
+			
+			context.data += '\n'
+		}
+		
+		context.data += '}'
+	}
+} // }}}
+
+func $transformExpression(macro, node, data, writer) { // {{{
 	switch data.kind {
 		NodeKind::EnumExpression => {
 			if variable ?= node.scope().getVariable(data.enum.name) {
@@ -60,13 +139,10 @@ func $transformExpression(node, data, writer) { // {{{
 					}
 				}
 			}
-			/* else {
-				ReferenceException.throwNotDefined(data.enum.name, node)
-			} */
 		}
-		/* NodeKind::Identifier => {
-			throw new NotSupportedException()
-		} */
+		NodeKind::FunctionExpression => {
+			return macro.addMark(data)
+		}
 	}
 	
 	return data
@@ -75,6 +151,7 @@ func $transformExpression(node, data, writer) { // {{{
 class Macro extends AbstractNode {
 	private {
 		_fn: Function
+		_marks:	Array				= []
 		_name: String
 		_parameters: Object			= {}
 		_type: MacroType
@@ -147,11 +224,30 @@ class Macro extends AbstractNode {
 	analyse()
 	prepare()
 	translate()
+	addMark(data) {
+		const index = @marks.length
+		
+		@marks.push(data)
+		
+		return {
+			kind: NodeKind::CreateExpression
+			class: {
+				kind: NodeKind::Identifier
+				name: '__ks_marker'
+			}
+			arguments: [
+				{
+					kind: NodeKind::NumericExpression
+					value: index
+				}
+			]
+		}
+	}
 	execute(arguments: Array, parent) { // {{{
 		//console.log(@fn.toString())
 		const module = this.module()
 		
-		const args = [$evaluate, $reificate^^(parent)].concat(arguments)
+		const args = [$evaluate, $reificate^^(this, parent)].concat(arguments)
 		
 		let data = @fn(...args)
 		//console.log('execute =>', data)
@@ -210,6 +306,7 @@ class Macro extends AbstractNode {
 			return false
 		}
 	} // }}}
+	getMark(index) => @marks[index]
 	isInstanceMethod() => false
 	matchArguments(arguments: Array) => @type.matchArguments(arguments)
 	name() => @name

@@ -1,3 +1,5 @@
+extern $hex
+
 enum Space<String> {
 	RGB
 	SRGB
@@ -42,10 +44,10 @@ Color.registerSpace!({
 	name: Space::SRGB
 	alias: [Space::RGB]
 	formatters: {
-		hex(that: Color): string { // {{{
+		hex(that: Color): String { // {{{
 			return $hex(that)
 		} // }}}
-		srgb(that: Color): string { // {{{
+		srgb(that: Color): String { // {{{
 			if that._alpha == 1 {
 				return 'rgb(' + that._red + ', ' + that._green + ', ' + that._blue + ')'
 			}
