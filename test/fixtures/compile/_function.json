@@ -1,22 +1,15 @@
 {
-  "requirements": [
-    -1,
-    "Helper",
-    "true",
-    -1,
-    "Type",
-    "true"
-  ],
+  "requirements": [],
   "exports": [
     0,
     "Function"
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -26,7 +19,7 @@
         "vcurry": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 1,
             "max": "Infinity",
             "parameters": [
@@ -42,7 +35,7 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]

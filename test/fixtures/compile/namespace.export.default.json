@@ -6,10 +6,10 @@
   ],
   "references": [
     {
-      "sealed": "false",
+      "sealed": false,
       "properties": {
         "toFloat": {
-          "async": "false",
+          "async": false,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -23,7 +23,7 @@
           "throws": []
         },
         "toString": {
-          "async": "false",
+          "async": false,
           "min": 1,
           "max": 1,
           "parameters": [

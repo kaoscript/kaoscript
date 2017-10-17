@@ -8,10 +8,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "false",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {
@@ -37,17 +37,17 @@
         "space": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Any",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           },
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 1,
             "max": 1,
             "parameters": [
@@ -58,7 +58,7 @@
               }
             ],
             "returns": "Any",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           }
         ]

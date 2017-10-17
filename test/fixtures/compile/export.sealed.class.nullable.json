@@ -8,14 +8,14 @@
   ],
   "references": [
     {
-      "alien": "true",
-      "sealed": "false",
+      "alien": true,
+      "sealed": false,
       "variables": {},
       "methods": {
         "log": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": "Infinity",
             "parameters": [
@@ -26,17 +26,17 @@
               }
             ],
             "returns": "Any",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           }
         ]
       }
     },
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [
         {
           "access": 3,
@@ -64,13 +64,13 @@
         "draw": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 1,
             "max": 1,
             "parameters": [
               {
                 "type": {
-                  "nullable": "true",
+                  "nullable": true,
                   "name": "Any"
                 },
                 "min": 1,
@@ -78,7 +78,7 @@
               }
             ],
             "returns": "String",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]

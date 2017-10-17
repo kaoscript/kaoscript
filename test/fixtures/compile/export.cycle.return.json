@@ -6,10 +6,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "false",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -18,12 +18,12 @@
         "clone": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Foo",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           }
         ]

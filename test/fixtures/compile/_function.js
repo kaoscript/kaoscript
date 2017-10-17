@@ -1,4 +1,5 @@
-module.exports = function(Helper, Type) {
+var Type = require("@kaoscript/runtime").Type;
+module.exports = function() {
 	var __ks_Function = {};
 	__ks_Function.__ks_sttc_vcurry_0 = function(self, bind = null, ...args) {
 		if(arguments.length < 1) {

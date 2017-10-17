@@ -6,10 +6,10 @@
   ],
   "references": [
     {
-      "sealed": "false",
+      "sealed": false,
       "properties": {
         "parse": {
-          "async": "false",
+          "async": false,
           "min": 0,
           "max": 2,
           "parameters": [

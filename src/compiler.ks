@@ -619,7 +619,7 @@ export class Compiler {
 		if !this._module._binary {
 			let metadata = this.toMetadata()
 			
-			fs.writeFile(getMetadataPath(this._file, this._options.target), JSON.stringify(metadata))
+			fs.writeFile(getMetadataPath(this._file, this._options.target), JSON.stringify(metadata, func(key, value) => key == 'max' && value == Infinity ? 'Infinity' : value))
 		}
 		
 		fs.writeFile(getHashPath(this._file, this._options.target), JSON.stringify(this._module.toHashes()))

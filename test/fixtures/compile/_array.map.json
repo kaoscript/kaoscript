@@ -2,7 +2,7 @@
   "requirements": [
     0,
     "Array",
-    "true"
+    true
   ],
   "exports": [
     1,
@@ -10,10 +10,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -22,10 +22,10 @@
       "classMethods": {}
     },
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -35,7 +35,7 @@
         "map": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 2,
             "max": 2,
             "parameters": [
@@ -51,12 +51,12 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           },
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 3,
             "max": 3,
             "parameters": [
@@ -72,7 +72,7 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]

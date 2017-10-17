@@ -6,10 +6,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},

@@ -10,10 +10,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -22,12 +22,12 @@
         "toString": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           }
         ]
@@ -35,32 +35,32 @@
       "classMethods": {}
     },
     {
-      "sealed": "true",
+      "sealed": true,
       "properties": {
         "PI": {
-          "sealed": "false",
+          "sealed": false,
           "type": "Number"
         },
         "pow": {
-          "async": "false",
+          "async": false,
           "min": 0,
           "max": 0,
           "parameters": [],
           "returns": "Number",
-          "sealed": "false",
+          "sealed": false,
           "throws": []
         },
         "pi": {
-          "sealed": "true",
+          "sealed": true,
           "type": "Number"
         },
         "foo": {
-          "async": "false",
+          "async": false,
           "min": 0,
           "max": 0,
           "parameters": [],
           "returns": "Number",
-          "sealed": "true",
+          "sealed": true,
           "throws": []
         }
       }

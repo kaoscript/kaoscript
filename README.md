@@ -6,6 +6,7 @@
 [![Dependency Status](https://img.shields.io/gemnasium/kaoscript/kaoscript.svg)](https://gemnasium.com/github.com/kaoscript/kaoscript)
 [![Build Status](https://travis-ci.org/kaoscript/kaoscript.svg?branch=master)](https://travis-ci.org/kaoscript/kaoscript)
 [![CircleCI](https://circleci.com/gh/kaoscript/kaoscript/tree/master.svg?style=shield)](https://circleci.com/gh/kaoscript/kaoscript/tree/master)
+[![Known Vulnerabilities](https://snyk.io/test/github/kaoscript/kaoscript/badge.svg)](https://snyk.io/test/github/kaoscript/kaoscript)
 [![Waffle.io](https://img.shields.io/badge/kanban-waffle.io-blue.svg)](https://waffle.io/kaoscript/kaoscript)
 [![Gitter](https://img.shields.io/gitter/room/kaoscript/kaoscript.svg)](https://gitter.im/kaoscript/kaoscript)
 

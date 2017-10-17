@@ -6,7 +6,7 @@
   ],
   "references": [
     {
-      "sealed": "true",
+      "sealed": true,
       "type": "Any"
     }
   ]

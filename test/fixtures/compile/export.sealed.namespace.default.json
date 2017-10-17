@@ -6,14 +6,14 @@
   ],
   "references": [
     {
-      "sealed": "true",
+      "sealed": true,
       "properties": {
         "PI": {
-          "sealed": "false",
+          "sealed": false,
           "type": "Number"
         },
         "pow": {
-          "async": "false",
+          "async": false,
           "min": 0,
           "max": "Infinity",
           "parameters": [
@@ -24,7 +24,7 @@
             }
           ],
           "returns": "Number",
-          "sealed": "false",
+          "sealed": false,
           "throws": []
         }
       }

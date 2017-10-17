@@ -1,3 +1,5 @@
+extern console
+
 import {
 	'./_array.ks'
 	'./_float.ks'
@@ -198,6 +200,7 @@ func $component(component, name: string, space: string): void { // {{{
 	$spaces[space].components[name] = component
 	
 	$components[name] ??= {
+		field: component.field
 		spaces: {}
 		families: []
 	}
@@ -206,7 +209,8 @@ func $component(component, name: string, space: string): void { // {{{
 	$components[name].spaces[space] = true
 } // }}}
 
-func $convert(that: Color, space: string, result: object = {_alpha: 0}): object ~ Error { // {{{
+/* func $convert(that: Color, space: string, result: object = {_alpha: 0}): object ~ Error { // {{{ */
+func $convert(that: Color, space: string, result = {_alpha: 0}): object ~ Error { // {{{
 	if ?(s = $spaces[that._space]).converters[space] {
 		let args := [that[component.field] for name, component of s.components]
 		
@@ -253,25 +257,7 @@ func $from(that: Color, args: array): Color { // {{{
 	return that
 } // }}}
 
-/* func $getFieldWithCasting(name, component, space) { // {{{
-	if ?$components[name].spaces[this._space] {
-		return this[component.field]
-	}
-	else {
-		return this.like(space)[component.field]
-	}
-} // }}}
-
-func $getFieldWithoutCasting(name, field) ~ Error { // {{{
-	if ?$components[name].spaces[this._space] {
-		return this[field]
-	}
-	else {
-		throw new Error('The component \'' + name + '\' has a conflict between the spaces \'' + $components[name].families.join('\', \'') + '\'')
-	}
-} // }}} */
-
-func $hex(that: Color) { // {{{
+func $hex(that) { // {{{
 	let chars = '0123456789abcdef'
 
 	let r1 = that._red >> 4
@@ -489,56 +475,6 @@ let $parsers = {
 	} // }}}
 }
 
-/* func $setFieldWithCasting(name, component, space, value: number | string): Color { // {{{
-	if ?$components[name].spaces[this._space] {
-		if ?component.parser {
-			this[component.field] = component.parser(value)
-		}
-		else if component.loop {
-			this[component.field] = value.toFloat().mod(component.mod).round(component.round)
-		}
-		else {
-			this[component.field] = value.toFloat().limit(component.min, component.max).round(component.round)
-		}
-	}
-	else {
-		this.space(space)
-		
-		if ?component.parser {
-			this[component.field] = component.parser(value)
-		}
-		else if component.loop {
-			this[component.field] = value.toFloat().mod(component.mod).round(component.round)
-		}
-		else {
-			this[component.field] = value.toFloat().limit(component.min, component.max).round(component.round)
-		}
-	}
-	
-	return this
-} // }}}
-
-func $setFieldWithoutCasting(name, field, value: number | string): Color ~ Error { // {{{
-	if ?$components[name].spaces[this._space] {
-		let component = $spaces[this._space].components[name]
-		
-		if ?component.parser {
-			this[field] = component.parser(value)
-		}
-		else if component.loop {
-			this[field] = value.toFloat().mod(component.mod).round(component.round)
-		}
-		else {
-			this[field] = value.toFloat().limit(component.min, component.max).round(component.round)
-		}
-	}
-	else {
-		throw new Error('The component \'' + name + '\' has a conflict between the spaces \'' + $components[name].families.join('\', \'') + '\'')
-	}
-	
-	return this
-} // }}} */
-
 func $space(name: string): void { // {{{
 	$spaces[name] = $spaces[name] ?? {
 		alias: {}
@@ -604,7 +540,7 @@ export class Color {
 		
 		greyscale(...args): Color | bool { // {{{
 			let model = args.last()
-			if Type.isString(model) && (model == 'BT709' || model == 'average' || model == 'lightness' || model == 'Y' || model == 'RMY') {
+			if model == 'BT709' || model == 'average' || model == 'lightness' || model == 'Y' || model == 'RMY' {
 				args.pop()
 			}
 			else {
@@ -814,7 +750,7 @@ export class Color {
 	} // }}}
 	
 	clearer(value: string | number): Color { // {{{
-		if Type.isString(value) && value.endsWith('%') {
+		if value is String && value.endsWith('%') {
 			return this.alpha(this._alpha * ((100 - value.toFloat()) / 100))
 		}
 		else {
@@ -826,7 +762,8 @@ export class Color {
 		return this.copy(new Color())
 	} // }}}
 	
-	contrast(color: Color): {ratio: float, error: float, min: float, max: float} ~ Error { // {{{
+	/* contrast(color: Color): {ratio: float, error: float, min: float, max: float} ~ Error { // {{{ */
+	contrast(color: Color) ~ Error { // {{{
 		let a = this._alpha
 		
 		if a == 1 {
@@ -906,8 +843,9 @@ export class Color {
 		return this.hex() == color.hex()
 	} // }}}
 	
-	format(format: string = this._space): string ~ Error { // {{{
-		
+	/* format(format: string = this._space): string | bool ~ Error { // {{{ */
+	#[error(off)]
+	format(format: string = this._space) { // {{{
 		if format ?= $formatters[format] {
 			return format.formatter(?format.space ? this.like(format.space) : this)
 		}
@@ -918,6 +856,21 @@ export class Color {
 	
 	from(...args): Color { // {{{
 		return $from(this, args)
+	} // }}}
+	
+	#[error(off)]
+	private getField(name) { // {{{
+		const component = $components[name]
+		
+		if component.spaces[this._space]? {
+			return this[component.field]
+		}
+		else if component.families.length > 1 {
+			throw new Error(`The component '\(name)' has a conflict between the spaces '\(component.families.join('\', \''))'`)
+		}
+		else {
+			return this.like(component.families[0])[component.field]
+		}
 	} // }}}
 	
 	#[error(off)]
@@ -1001,10 +954,16 @@ export class Color {
 		return that._red == 255 && that._green == 255 && that._blue == 255
 	} // }}}
 	
-	like(space: string): object ~ Error { // {{{
+	/* like(space: string): object ~ Error { // {{{ */
+	like(space: string) ~ Error { // {{{
 		space = $aliases[space] ?? space
 		
-		return this if this._space == space || ?$spaces[this._space][space] else $convert(this, space)
+		if this._space == space || $spaces[this._space][space]? {
+			return this
+		}
+		else {
+			return $convert(this, space)
+		}
 	} // }}}
 	
 	#[error(off)]
@@ -1033,7 +992,7 @@ export class Color {
 	} // }}}
 	
 	opaquer(value: string | number): Color { // {{{
-		if Type.isString(value) && value.endsWith('%') {
+		if value is String && value.endsWith('%') {
 			return this.alpha(this._alpha * ((100 + value.toFloat()) / 100))
 		}
 		else {
@@ -1052,6 +1011,35 @@ export class Color {
 	
 	scheme(functions: array<func>): array<Color> { // {{{
 		return [fn(this.clone()) for fn in functions]
+	} // }}}
+	
+	#[error(off)]
+	private setField(name, value: number | string): Color { // {{{
+		let component
+		
+		if $components[name].spaces[this._space]? {
+			component = $spaces[this._space].components[name]
+		}
+		else if component.families.length > 1 {
+			throw new Error(`The component '\(name)' has a conflict between the spaces '\(component.families.join('\', \''))'`)
+		}
+		else {
+			this.space(component.families[0])
+			
+			component = $spaces[component.families[0]].components[name]
+		}
+		
+		if ?component.parser {
+			this[component.field] = component.parser(value)
+		}
+		else if component.loop {
+			this[component.field] = value.toFloat().mod(component.mod).round(component.round)
+		}
+		else {
+			this[component.field] = value.toFloat().limit(component.min, component.max).round(component.round)
+		}
+		
+		return this
 	} // }}}
 	
 	#[error(off)]
@@ -1097,7 +1085,7 @@ export class Color {
 Color.registerSpace!({
 	name: Space::SRGB
 	alias: [Space::RGB]
-	/* formatters: {
+	formatters: {
 		hex(that: Color): string { // {{{
 			return $hex(that)
 		} // }}}
@@ -1109,7 +1097,7 @@ Color.registerSpace!({
 				return 'rgba(' + that._red + ', ' + that._green + ', ' + that._blue + ', ' + that._alpha + ')'
 			}
 		} // }}}
-	} */
+	}
 	components: {
 		red: {
 			max: 255

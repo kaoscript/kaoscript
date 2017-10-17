@@ -1,7 +1,6 @@
 require("kaoscript/register");
 var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Error = {};
 	var {Array, __ks_Array} = require("./_array.ks")();
 	var Float = require("./_float.ks")().Float;
 	var Integer = require("./_integer.ks")().Integer;
@@ -169,19 +168,19 @@ module.exports = function() {
 			throw new TypeError("'x' is not nullable");
 		}
 		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'Number'");
+			throw new TypeError("'x' is not of type 'float'");
 		}
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
 		else if(!Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'Number'");
+			throw new TypeError("'y' is not of type 'float'");
 		}
 		if(percentage === void 0 || percentage === null) {
 			throw new TypeError("'percentage' is not nullable");
 		}
 		else if(!Type.isNumber(percentage)) {
-			throw new TypeError("'percentage' is not of type 'Number'");
+			throw new TypeError("'percentage' is not of type 'float'");
 		}
 		return ((1 - percentage) * x) + (percentage * y);
 	}
@@ -261,6 +260,7 @@ module.exports = function() {
 		$spaces[space].components[name] = component;
 		if(!Type.isValue($components[name])) {
 			$components[name] = {
+				field: component.field,
 				spaces: {},
 				families: []
 			};
@@ -287,17 +287,10 @@ module.exports = function() {
 		else if(!Type.isString(space)) {
 			throw new TypeError("'space' is not of type 'String'");
 		}
-		let result;
-		if(arguments.length > 2 && (result = arguments[++__ks_i]) !== void 0 && result !== null) {
-			if(!Type.isObject(result)) {
-				throw new TypeError("'result' is not of type 'Object'");
-			}
-		}
-		else {
-			result = {
-				_alpha: 0
-			};
-		}
+		let __ks__;
+		let result = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : {
+			_alpha: 0
+		};
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
 			let args = Helper.mapObject(s.components, function(name, component) {
@@ -371,52 +364,12 @@ module.exports = function() {
 		that._dummy = true;
 		return that;
 	}
-	function $getFieldWithCasting(name, component, space) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
-		if(component === void 0 || component === null) {
-			throw new TypeError("'component' is not nullable");
-		}
-		if(space === void 0 || space === null) {
-			throw new TypeError("'space' is not nullable");
-		}
-		if(Type.isValue($components[name].spaces[this._space])) {
-			return this[component.field];
-		}
-		else {
-			return this.like(space)[component.field];
-		}
-	}
-	function $getFieldWithoutCasting(name, field) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
-		if(field === void 0 || field === null) {
-			throw new TypeError("'field' is not nullable");
-		}
-		if(Type.isValue($components[name].spaces[this._space])) {
-			return this[field];
-		}
-		else {
-			throw new Error("The component '" + name + "' has a conflict between the spaces '" + $components[name].families.join("', '") + "'");
-		}
-	}
 	function $hex(that) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(that === void 0 || that === null) {
 			throw new TypeError("'that' is not nullable");
-		}
-		else if(!Type.is(that, Color)) {
-			throw new TypeError("'that' is not of type 'Color'");
 		}
 		let chars = "0123456789abcdef";
 		let r1 = that._red >> 4;
@@ -639,83 +592,6 @@ module.exports = function() {
 			return false;
 		}
 	};
-	function $setFieldWithCasting(name, component, space, value) {
-		if(arguments.length < 4) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 4)");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
-		if(component === void 0 || component === null) {
-			throw new TypeError("'component' is not nullable");
-		}
-		if(space === void 0 || space === null) {
-			throw new TypeError("'space' is not nullable");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!(Type.isNumber(value) || Type.isString(value))) {
-			throw new TypeError("'value' is not of type 'Number' or 'String'");
-		}
-		if(Type.isValue($components[name].spaces[this._space])) {
-			if(Type.isValue(component.parser)) {
-				this[component.field] = component.parser(value);
-			}
-			else if(component.loop) {
-				this[component.field] = __ks_Number._im_round(__ks_Number._im_mod(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.mod), component.round);
-			}
-			else {
-				this[component.field] = __ks_Number._im_round(__ks_Number._im_limit(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.min, component.max), component.round);
-			}
-		}
-		else {
-			this.space(space);
-			if(Type.isValue(component.parser)) {
-				this[component.field] = component.parser(value);
-			}
-			else if(component.loop) {
-				this[component.field] = __ks_Number._im_round(__ks_Number._im_mod(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.mod), component.round);
-			}
-			else {
-				this[component.field] = __ks_Number._im_round(__ks_Number._im_limit(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.min, component.max), component.round);
-			}
-		}
-		return this;
-	}
-	function $setFieldWithoutCasting(name, field, value) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
-		if(field === void 0 || field === null) {
-			throw new TypeError("'field' is not nullable");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!(Type.isNumber(value) || Type.isString(value))) {
-			throw new TypeError("'value' is not of type 'Number' or 'String'");
-		}
-		if(Type.isValue($components[name].spaces[this._space])) {
-			let component = $spaces[this._space].components[name];
-			if(Type.isValue(component.parser)) {
-				this[field] = component.parser(value);
-			}
-			else if(component.loop) {
-				this[field] = __ks_Number._im_round(__ks_Number._im_mod(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.mod), component.round);
-			}
-			else {
-				this[field] = __ks_Number._im_round(__ks_Number._im_limit(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.min, component.max), component.round);
-			}
-		}
-		else {
-			throw new Error("The component '" + name + "' has a conflict between the spaces '" + $components[name].families.join("', '") + "'");
-		}
-		return this;
-	}
 	function $space(name) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
@@ -800,7 +676,7 @@ module.exports = function() {
 				throw new TypeError("'percentage' is not nullable");
 			}
 			else if(!Type.isNumber(percentage)) {
-				throw new TypeError("'percentage' is not of type 'Number'");
+				throw new TypeError("'percentage' is not of type 'float'");
 			}
 			let space;
 			if(arguments.length > 2 && (space = arguments[++__ks_i]) !== void 0 && space !== null) {
@@ -867,10 +743,10 @@ module.exports = function() {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			if(Type.isString(value) && value.endsWith("%")) {
-				return this.alpha(this._alpha * ((100 - (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value))) / 100));
+				return this.alpha(this._alpha * ((100 - Type.isNumber(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value)) / 100));
 			}
 			else {
-				return this.alpha(this._alpha - (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value)));
+				return this.alpha(this._alpha - Type.isNumber(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value));
 			}
 		}
 		clearer() {
@@ -1030,6 +906,30 @@ module.exports = function() {
 		from() {
 			return Color.prototype.__ks_func_from_0.apply(this, arguments);
 		}
+		__ks_func_getField_0(name) {
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
+			}
+			const component = $components[name];
+			if(Type.isValue(component.spaces[this._space])) {
+				return this[component.field];
+			}
+			else if(component.families.length > 1) {
+				throw new Error("The component '" + name + "' has a conflict between the spaces '" + component.families.join("', '") + "'");
+			}
+			else {
+				return this.like(component.families[0])[component.field];
+			}
+		}
+		getField() {
+			if(arguments.length === 1) {
+				return Color.prototype.__ks_func_getField_0.apply(this, arguments);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
 		__ks_func_gradient_0(endColor, length) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
@@ -1044,7 +944,7 @@ module.exports = function() {
 				throw new TypeError("'length' is not nullable");
 			}
 			else if(!Type.isNumber(length)) {
-				throw new TypeError("'length' is not of type 'Number'");
+				throw new TypeError("'length' is not of type 'int'");
 			}
 			let gradient = [this];
 			if(length > 0) {
@@ -1158,7 +1058,12 @@ module.exports = function() {
 				throw new TypeError("'space' is not of type 'String'");
 			}
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
-			return ((this._space === space) || Type.isValue($spaces[this._space][space])) ? this : $convert(this, space);
+			if((this._space === space) || Type.isValue($spaces[this._space][space])) {
+				return this;
+			}
+			else {
+				return $convert(this, space);
+			}
 		}
 		like() {
 			if(arguments.length === 1) {
@@ -1206,10 +1111,10 @@ module.exports = function() {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			if(Type.isString(value) && value.endsWith("%")) {
-				return this.alpha(this._alpha * ((100 + (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value))) / 100));
+				return this.alpha(this._alpha * ((100 + Type.isNumber(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value)) / 100));
 			}
 			else {
-				return this.alpha(this._alpha + (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value)));
+				return this.alpha(this._alpha + Type.isNumber(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value));
 			}
 		}
 		opaquer() {
@@ -1272,6 +1177,47 @@ module.exports = function() {
 			}
 			throw new SyntaxError("wrong number of arguments");
 		}
+		__ks_func_setField_0(name, value) {
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
+			}
+			if(value === void 0 || value === null) {
+				throw new TypeError("'value' is not nullable");
+			}
+			else if(!(Type.isNumber(value) || Type.isString(value))) {
+				throw new TypeError("'value' is not of type 'Number' or 'String'");
+			}
+			let component;
+			if(Type.isValue($components[name].spaces[this._space])) {
+				component = $spaces[this._space].components[name];
+			}
+			else if(component.families.length > 1) {
+				throw new Error("The component '" + name + "' has a conflict between the spaces '" + component.families.join("', '") + "'");
+			}
+			else {
+				this.space(component.families[0]);
+				component = $spaces[component.families[0]].components[name];
+			}
+			if(Type.isValue(component.parser)) {
+				this[component.field] = component.parser(value);
+			}
+			else if(component.loop) {
+				this[component.field] = __ks_Number._im_round(__ks_Number._im_mod(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.mod), component.round);
+			}
+			else {
+				this[component.field] = __ks_Number._im_round(__ks_Number._im_limit(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.min, component.max), component.round);
+			}
+			return this;
+		}
+		setField() {
+			if(arguments.length === 2) {
+				return Color.prototype.__ks_func_setField_0.apply(this, arguments);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
 		__ks_func_shade_0(percentage) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
@@ -1280,7 +1226,7 @@ module.exports = function() {
 				throw new TypeError("'percentage' is not nullable");
 			}
 			else if(!Type.isNumber(percentage)) {
-				throw new TypeError("'percentage' is not of type 'Number'");
+				throw new TypeError("'percentage' is not of type 'float'");
 			}
 			return this.blend($static.black, percentage);
 		}
@@ -1337,7 +1283,7 @@ module.exports = function() {
 				throw new TypeError("'percentage' is not nullable");
 			}
 			else if(!Type.isNumber(percentage)) {
-				throw new TypeError("'percentage' is not of type 'Number'");
+				throw new TypeError("'percentage' is not of type 'float'");
 			}
 			return this.blend($static.white, percentage);
 		}
@@ -1355,7 +1301,7 @@ module.exports = function() {
 				throw new TypeError("'percentage' is not nullable");
 			}
 			else if(!Type.isNumber(percentage)) {
-				throw new TypeError("'percentage' is not of type 'Number'");
+				throw new TypeError("'percentage' is not of type 'float'");
 			}
 			return this.blend($static.gray, percentage);
 		}
@@ -1374,7 +1320,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_greyscale_0(...args) {
 			let model = __ks_Array._im_last(args);
-			if(Type.isString(model) && ((model === "BT709") || (model === "average") || (model === "lightness") || (model === "Y") || (model === "RMY"))) {
+			if((model === "BT709") || (model === "average") || (model === "lightness") || (model === "Y") || (model === "RMY")) {
 				args.pop();
 			}
 			else {
@@ -1534,84 +1480,6 @@ module.exports = function() {
 					}
 					else if(Type.isValue(component.mutator)) {
 						$component(component, name, space.name);
-						if($components[name].families.length > 1) {
-							Helper.newInstanceMethod({
-								class: Color,
-								name: name,
-								function: $getFieldWithoutCasting,
-								arguments: [
-									name,
-									component.field
-								],
-								signature: {
-									access: 3,
-									min: 0,
-									max: 0,
-									parameters: []
-								}
-							});
-							Helper.newInstanceMethod({
-								class: Color,
-								name: name,
-								function: $setFieldWithoutCasting,
-								arguments: [
-									name,
-									component.field
-								],
-								signature: {
-									access: 3,
-									min: 1,
-									max: 1,
-									parameters: [
-										{
-											type: "Any",
-											min: 1,
-											max: 1
-										}
-									]
-								}
-							});
-						}
-						else {
-							Helper.newInstanceMethod({
-								class: Color,
-								name: name,
-								function: $getFieldWithCasting,
-								arguments: [
-									name,
-									component,
-									space.name
-								],
-								signature: {
-									access: 3,
-									min: 0,
-									max: 0,
-									parameters: []
-								}
-							});
-							Helper.newInstanceMethod({
-								class: Color,
-								name: name,
-								function: $setFieldWithCasting,
-								arguments: [
-									name,
-									component,
-									space.name
-								],
-								signature: {
-									access: 3,
-									min: 1,
-									max: 1,
-									parameters: [
-										{
-											type: "Any",
-											min: 1,
-											max: 1
-										}
-									]
-								}
-							});
-						}
 					}
 					else {
 						if(!Type.isValue(component.min)) {
@@ -1628,84 +1496,6 @@ module.exports = function() {
 							component.half = component.mod / 2;
 						}
 						$component(component, name, space.name);
-						if($components[name].families.length > 1) {
-							Helper.newInstanceMethod({
-								class: Color,
-								name: name,
-								function: $getFieldWithoutCasting,
-								arguments: [
-									name,
-									component.field
-								],
-								signature: {
-									access: 3,
-									min: 0,
-									max: 0,
-									parameters: []
-								}
-							});
-							Helper.newInstanceMethod({
-								class: Color,
-								name: name,
-								function: $setFieldWithoutCasting,
-								arguments: [
-									name,
-									component.field
-								],
-								signature: {
-									access: 3,
-									min: 1,
-									max: 1,
-									parameters: [
-										{
-											type: "Any",
-											min: 1,
-											max: 1
-										}
-									]
-								}
-							});
-						}
-						else {
-							Helper.newInstanceMethod({
-								class: Color,
-								name: name,
-								function: $getFieldWithCasting,
-								arguments: [
-									name,
-									component,
-									space.name
-								],
-								signature: {
-									access: 3,
-									min: 0,
-									max: 0,
-									parameters: []
-								}
-							});
-							Helper.newInstanceMethod({
-								class: Color,
-								name: name,
-								function: $setFieldWithCasting,
-								arguments: [
-									name,
-									component,
-									space.name
-								],
-								signature: {
-									access: 3,
-									min: 1,
-									max: 1,
-									parameters: [
-										{
-											type: "Any",
-											min: 1,
-											max: 1
-										}
-									]
-								}
-							});
-						}
 					}
 				}
 			}
@@ -1718,9 +1508,9 @@ module.exports = function() {
 		}
 	}
 	Color.registerSpace({
-		name: Space.SRGB,
-		alias: [Space.RGB],
-		formatters: {
+		"name": "srgb",
+		"alias": ["rgb"],
+		"formatters": {
 			hex(that) {
 				if(arguments.length < 1) {
 					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
@@ -1751,18 +1541,108 @@ module.exports = function() {
 				}
 			}
 		},
-		components: {
-			red: {
-				max: 255
+		"components": {
+			"red": {
+				"max": 255
 			},
-			green: {
-				max: 255
+			"green": {
+				"max": 255
 			},
-			blue: {
-				max: 255
+			"blue": {
+				"max": 255
 			}
 		}
 	});
+	Color.prototype.__ks_func_red_0 = function() {
+		return this.getField("red");
+	};
+	Color.prototype.red = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_red_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_red_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	Color.prototype.__ks_func_red_1 = function(value) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(value === void 0 || value === null) {
+			throw new TypeError("'value' is not nullable");
+		}
+		return this.setField("red", value);
+	};
+	Color.prototype.red = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_red_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_red_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	Color.prototype.__ks_func_green_0 = function() {
+		return this.getField("green");
+	};
+	Color.prototype.green = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_green_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_green_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	Color.prototype.__ks_func_green_1 = function(value) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(value === void 0 || value === null) {
+			throw new TypeError("'value' is not nullable");
+		}
+		return this.setField("green", value);
+	};
+	Color.prototype.green = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_green_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_green_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	Color.prototype.__ks_func_blue_0 = function() {
+		return this.getField("blue");
+	};
+	Color.prototype.blue = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_blue_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_blue_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	Color.prototype.__ks_func_blue_1 = function(value) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(value === void 0 || value === null) {
+			throw new TypeError("'value' is not nullable");
+		}
+		return this.setField("blue", value);
+	};
+	Color.prototype.blue = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_blue_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_blue_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
 	let $static = {
 		black: Color.from("#000"),
 		gray: Color.from("#808080"),

@@ -8,14 +8,14 @@
   ],
   "references": [
     {
-      "sealed": "true",
+      "sealed": true,
       "properties": {
         "PI": {
-          "sealed": "false",
+          "sealed": false,
           "type": "Number"
         },
         "pow": {
-          "async": "false",
+          "async": false,
           "min": 0,
           "max": "Infinity",
           "parameters": [
@@ -26,11 +26,11 @@
             }
           ],
           "returns": "Number",
-          "sealed": "false",
+          "sealed": false,
           "throws": []
         },
         "foo": {
-          "async": "false",
+          "async": false,
           "min": 2,
           "max": 3,
           "parameters": [
@@ -41,7 +41,7 @@
             },
             {
               "type": {
-                "nullable": "true",
+                "nullable": true,
                 "name": "Any"
               },
               "min": 1,
@@ -54,7 +54,7 @@
             }
           ],
           "returns": "String",
-          "sealed": "true",
+          "sealed": true,
           "throws": []
         }
       }

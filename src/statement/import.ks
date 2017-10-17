@@ -403,7 +403,7 @@ class Importer extends Statement {
 	} // }}}
 	readMetadata(file) { // {{{
 		try {
-			return JSON.parse(fs.readFile(file))
+			return JSON.parse(fs.readFile(file), func(key, value) => key == 'max' && value == 'Infinity' ? Infinity : value)
 		}
 		catch {
 			return null

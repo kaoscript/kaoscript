@@ -6,7 +6,7 @@
   ],
   "references": [
     {
-      "async": "false",
+      "async": false,
       "min": 0,
       "max": 0,
       "parameters": [],

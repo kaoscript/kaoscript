@@ -444,6 +444,15 @@ abstract class Type {
 				throw new NotImplementedException(node)
 			}
 		} // }}}
+		union(...types) { // {{{
+			for type in types {
+				if type.isAny() {
+					return Type.Any
+				}
+			}
+			
+			return new UnionType(types)
+		} // }}}
 	}
 	abstract equals(b?): Boolean
 	abstract export()

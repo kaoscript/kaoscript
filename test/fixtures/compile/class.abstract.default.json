@@ -8,10 +8,10 @@
   ],
   "references": [
     {
-      "abstract": "true",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "false",
+      "abstract": true,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
       "constructors": [
         {
           "access": 3,
@@ -48,7 +48,7 @@
         "greet": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 1,
             "max": 1,
             "parameters": [
@@ -59,17 +59,17 @@
               }
             ],
             "returns": "String",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           }
         ]
       }
     },
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "false",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -78,7 +78,7 @@
         "greet": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 1,
             "max": 1,
             "parameters": [
@@ -89,7 +89,7 @@
               }
             ],
             "returns": "String",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           }
         ]

@@ -6,10 +6,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "false",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
       "constructors": [
         {
           "access": 3,
@@ -41,10 +41,10 @@
       "classMethods": {}
     },
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "false",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {

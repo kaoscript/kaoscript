@@ -6,10 +6,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -18,19 +18,19 @@
         "toLowerCase": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           }
         ],
         "lines": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 1,
             "parameters": [
@@ -41,38 +41,38 @@
               }
             ],
             "returns": "Array",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "lower": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "toFloat": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Number",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "toInt": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 1,
             "parameters": [
@@ -83,7 +83,7 @@
               }
             ],
             "returns": "Number",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]

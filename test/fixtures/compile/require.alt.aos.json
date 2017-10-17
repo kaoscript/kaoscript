@@ -2,13 +2,13 @@
   "requirements": [
     0,
     "Array",
-    "false",
+    false,
     1,
     "Object",
-    "false",
+    false,
     2,
     "String",
-    "false"
+    false
   ],
   "exports": [
     0,
@@ -20,10 +20,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -32,10 +32,10 @@
       "classMethods": {}
     },
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -44,10 +44,10 @@
       "classMethods": {}
     },
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},

@@ -2,7 +2,7 @@
   "requirements": [
     0,
     "Array",
-    "false"
+    false
   ],
   "exports": [
     1,
@@ -10,10 +10,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -22,7 +22,7 @@
         "last": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 1,
             "parameters": [
@@ -33,7 +33,7 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]
@@ -42,7 +42,7 @@
         "map": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 2,
             "max": 2,
             "parameters": [
@@ -58,12 +58,12 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           },
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 3,
             "max": 3,
             "parameters": [
@@ -79,17 +79,17 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]
       }
     },
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -98,7 +98,7 @@
         "last": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 1,
             "parameters": [
@@ -109,14 +109,14 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "contains": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 1,
             "max": 2,
             "parameters": [
@@ -127,14 +127,14 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "pushUniq": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": "Infinity",
             "parameters": [
@@ -145,7 +145,7 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]
@@ -154,7 +154,7 @@
         "map": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 2,
             "max": 2,
             "parameters": [
@@ -170,12 +170,12 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           },
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 3,
             "max": 3,
             "parameters": [
@@ -191,7 +191,7 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]

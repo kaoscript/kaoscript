@@ -2,7 +2,7 @@
   "requirements": [
     0,
     "Color",
-    "true"
+    true
   ],
   "exports": [
     0,
@@ -10,10 +10,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "false",
-      "hybrid": "false",
-      "sealed": "false",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},

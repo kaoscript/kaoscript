@@ -6,8 +6,8 @@ extern {
 }
 
 import {
-	expect 		from chai
-	*			from ./fixtures/compile/color.ks
+	'chai' for expect
+	'./fixtures/compile/color.ks'
 }
 
 describe('color.property', func() {

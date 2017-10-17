@@ -2,10 +2,10 @@
   "requirements": [
     -1,
     "Helper",
-    "true",
+    true,
     -1,
     "Type",
-    "true"
+    true
   ],
   "exports": [
     0,
@@ -13,10 +13,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -26,7 +26,7 @@
         "map": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 2,
             "max": 2,
             "parameters": [
@@ -42,12 +42,12 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           },
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 3,
             "max": 3,
             "parameters": [
@@ -63,7 +63,7 @@
               }
             ],
             "returns": "Any",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]

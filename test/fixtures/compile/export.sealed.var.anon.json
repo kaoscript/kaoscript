@@ -6,8 +6,8 @@
   ],
   "references": [
     {
-      "alien": "true",
-      "sealed": "true",
+      "alien": true,
+      "sealed": true,
       "variables": {
         "innerHeight": {
           "access": 3,
@@ -20,14 +20,14 @@
         "console": {
           "access": 3,
           "type": {
-            "alien": "false",
-            "sealed": "false",
+            "alien": false,
+            "sealed": false,
             "variables": {},
             "methods": {
               "log": [
                 {
                   "access": 3,
-                  "async": "false",
+                  "async": false,
                   "min": 0,
                   "max": "Infinity",
                   "parameters": [
@@ -38,7 +38,7 @@
                     }
                   ],
                   "returns": "Any",
-                  "sealed": "false",
+                  "sealed": false,
                   "throws": []
                 }
               ]
@@ -50,7 +50,7 @@
         "moveTo": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 2,
             "max": 2,
             "parameters": [
@@ -61,7 +61,7 @@
               }
             ],
             "returns": "Any",
-            "sealed": "false",
+            "sealed": false,
             "throws": []
           }
         ]

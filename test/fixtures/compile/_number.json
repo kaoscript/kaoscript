@@ -6,10 +6,10 @@
   ],
   "references": [
     {
-      "abstract": "false",
-      "alien": "true",
-      "hybrid": "false",
-      "sealed": "true",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
@@ -18,7 +18,7 @@
         "limit": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 2,
             "max": 2,
             "parameters": [
@@ -29,14 +29,14 @@
               }
             ],
             "returns": "Number",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "mod": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 1,
             "max": 1,
             "parameters": [
@@ -47,14 +47,14 @@
               }
             ],
             "returns": "Number",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "round": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 1,
             "parameters": [
@@ -65,26 +65,26 @@
               }
             ],
             "returns": "Number",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "toFloat": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Number",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ],
         "toInt": [
           {
             "access": 3,
-            "async": "false",
+            "async": false,
             "min": 0,
             "max": 1,
             "parameters": [
@@ -95,7 +95,7 @@
               }
             ],
             "returns": "Number",
-            "sealed": "true",
+            "sealed": true,
             "throws": []
           }
         ]
