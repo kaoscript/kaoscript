@@ -114,10 +114,10 @@ class AbstractScope {
 		}
 		
 		if $keywords[name] == true {
-			let index = @renamedIndexes[name] ? @renamedIndexes[name] : 0
+			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
 			
-			while @variables[newName] {
+			while @variables[newName] is Variable {
 				newName = '__ks_' + name + '_' + (++index)
 			}
 			
@@ -198,7 +198,7 @@ class AbstractScope {
 			return null
 		}
 	} // }}}
-	hasDeclaredLocalVariable(name) => @variables[name]?
+	hasDeclaredLocalVariable(name) => @variables[name] is Variable || @variables[name] == false
 	hasLocalVariable(name) => @variables[name] is Variable || @natives[name] is Variable
 	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || @parent?.hasVariable(name)
 	parent() => @parent
@@ -362,5 +362,46 @@ class XScope extends AbstractScope {
 		return this
 	} // }}}
 	updateTempNames() { // {{{
+	} // }}}
+}
+
+class ModuleScope extends Scope {
+	private {
+		_predefined		= {}
+	}
+	constructor() { // {{{
+		super()
+		
+		@predefined.__Array = Variable.createPredefinedClass('Array', this)
+		@predefined.__Boolean = Variable.createPredefinedClass('Boolean', this)
+		@predefined.__Class = Variable.createPredefinedClass('Class', this)
+		@predefined.__Date = Variable.createPredefinedClass('Date', this)
+		@predefined.__Error = Variable.createPredefinedClass('Error', this)
+		@predefined.__Function = Variable.createPredefinedClass('Function', this)
+		@predefined.__Number = Variable.createPredefinedClass('Number', this)
+		@predefined.__Object = Variable.createPredefinedClass('Object', this)
+		@predefined.__String = Variable.createPredefinedClass('String', this)
+		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
+		
+		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
+		@predefined.__null = new Variable('null', true, true, Type.Any)
+		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
+		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
+		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
+		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
+	} // }}}
+	getVariable(name): Variable { // {{{
+		if @variables[name] is Variable {
+			return @variables[name]
+		}
+		else if @natives[name] is Variable {
+			return @natives[name]
+		}
+		else if @predefined[`__\(name)`] is Variable {
+			return @predefined[`__\(name)`]
+		}
+		else {
+			return null
+		}
 	} // }}}
 }

@@ -51,16 +51,17 @@ enum EnumKind {
 }
 
 abstract class Domain {
+	private {
+		_scope: AbstractScope
+	}
 	abstract hasVariable(name: String): Boolean
 	abstract getVariable(name: String): Type
 	reference(name: String) => new ReferenceType(name, this)
 	replicate(name: String, type: Type)
+	scope() => @scope
 }
 
 class ScopeDomain extends Domain {
-	private {
-		_scope: AbstractScope
-	}
 	constructor(@scope)
 	hasVariable(name: String) => @scope.hasVariable(name) || $natives[name] == true
 	getVariable(name: String) { // {{{
@@ -78,7 +79,6 @@ class ScopeDomain extends Domain {
 
 class ImportDomain extends Domain {
 	private {
-		_scope: AbstractScope
 		_temporaries	= {}
 		_types			= {}
 	}
@@ -170,6 +170,9 @@ abstract class Type {
 				NodeKind::Identifier => {
 					if type ?= domain.getVariable(data.name) {
 						return type
+					}
+					else if $runtime.isDefined(data.name, node) {
+						return Type.Any
 					}
 					else {
 						ReferenceException.throwNotDefined(data.name, node)
@@ -993,6 +996,7 @@ class ClassType extends Type {
 	isDestructor(name: String) => name == 'destructor'
 	isExtendable() => !@anonymous
 	isExtending() => @extending
+	isExtending(name: String) => @name == name || (@extending && (@parentName == name || @extends.isExtending(name)))
 	isFlexible() => @sealed
 	isHybrid() => @hybrid
 	isInstanceOf(target: ClassType) { // {{{
@@ -1285,7 +1289,7 @@ class FunctionType extends Type {
 			let type
 			
 			for throw in data.throws {
-				if (type = Type.fromAST(throw, node)) is ClassType {
+				if (type ?= Type.fromAST(throw, node).dereference()) && type is ClassType {
 					@throws.push(type)
 				}
 				else {
@@ -1298,6 +1302,44 @@ class FunctionType extends Type {
 	} // }}}
 	absoluteMax() => @async ? @max + 1 : @max
 	absoluteMin() => @async ? @min + 1 : @min
+	addParameter(type: Type, min = 1, max = 1) { // {{{
+		let last
+		
+		if @parameters.length == 0 {
+			@parameters.push(new ParameterType(type, min, max))
+		}
+		else if type.equals((last = @parameters[@parameters.length - 1])._type) {
+			if max == Infinity {
+				last._max = Infinity
+			}
+			else {
+				last._max += max
+			}
+			
+			last._min += min
+		}
+		
+		if @hasRest {
+			@max += max
+			
+			@minAfter += min
+			@maxAfter += max
+		}
+		else if max == Infinity {
+			@max = Infinity
+			
+			@restIndex = @parameters.length - 1
+			@hasRest = true
+		}
+		else {
+			@max += max
+			
+			@minBefore += min
+			@maxBefore += max
+		}
+		
+		@min += min
+	} // }}}
 	async() { // {{{
 		@async = true
 	} // }}}
@@ -1847,7 +1889,6 @@ class ReferenceType extends Type {
 	isNullable() => @nullable
 	isNumber() => @name == 'Number'
 	isObject() => @name == 'Object'
-	isPredefined() => $predefined[`__\(@name)`] is Function
 	isString() => @name == 'String'
 	match(b: Type): Boolean { // {{{
 		if b.isAny() {

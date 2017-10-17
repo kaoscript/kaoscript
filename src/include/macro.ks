@@ -15,10 +15,13 @@ func $evaluate(source) { // {{{
 	return eval(`(function() {\(compiler.toSource())})()`)
 } // }}}
 
-func $reificate(data, ast, reification) { // {{{
-	//console.log(data, ast, reification)
+func $reificate(node, data, ast, reification) { // {{{
 	if ast {
-		return Generator.generate(data)
+		return Generator.generate(data, {
+			transformers: {
+				expression: $transformExpression^^(node)
+			}
+		})
 	}
 	else {
 		switch reification {
@@ -39,6 +42,34 @@ func $reificate(data, ast, reification) { // {{{
 			}
 		}
 	}
+} // }}}
+
+func $transformExpression(node, data, writer) { // {{{
+	switch data.kind {
+		NodeKind::EnumExpression => {
+			if variable ?= node.scope().getVariable(data.enum.name) {
+				const type = variable.type()
+				if type.isEnum() {
+					switch type.kind() {
+						EnumKind::String => {
+							return {
+								kind: NodeKind::Literal
+								value: data.member.name.toLowerCase()
+							}
+						}
+					}
+				}
+			}
+			/* else {
+				ReferenceException.throwNotDefined(data.enum.name, node)
+			} */
+		}
+		/* NodeKind::Identifier => {
+			throw new NotSupportedException()
+		} */
+	}
+	
+	return data
 } // }}}
 
 class Macro extends AbstractNode {
@@ -120,7 +151,7 @@ class Macro extends AbstractNode {
 		//console.log(@fn.toString())
 		const module = this.module()
 		
-		const args = [$evaluate, $reificate].concat(arguments)
+		const args = [$evaluate, $reificate^^(parent)].concat(arguments)
 		
 		let data = @fn(...args)
 		//console.log('execute =>', data)

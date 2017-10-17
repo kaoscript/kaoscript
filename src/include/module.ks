@@ -341,13 +341,19 @@ export class Module {
 				const line = block.newLine().code('return ')
 				const object = line.newObject()
 				
+				let type
 				for name, variable of @exports {
-					if variable.type() is not AliasType {
+					type = variable.type()
+					
+					if type is not AliasType {
 						object.newLine().code(`\(name): `).compile(variable).done()
 						
-						const type = variable.type().unalias()
-						if type.isSealed() && type.isExtendable() {
-							object.line(`__ks_\(name): \(type.sealName())`)
+						if type is not ReferenceType {
+							type = type.unalias()
+							
+							if type.isSealed() && type.isExtendable() {
+								object.line(`__ks_\(name): \(type.sealName())`)
+							}
 						}
 					}
 				}
@@ -436,7 +442,7 @@ class ModuleBlock extends AbstractNode {
 		super()
 		
 		@options = module._options
-		@scope = new Scope()
+		@scope = new ModuleScope()
 	} // }}}
 	analyse() { // {{{
 		for statement in @data.body {

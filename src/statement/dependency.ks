@@ -157,7 +157,7 @@ class ExternDeclaration extends DependencyStatement {
 		let variable
 		if @parent.includePath() != null {
 			for declaration in @data.declarations {
-				if variable ?= @scope.getVariable(declaration.name.name) {
+				if (variable ?= @scope.getVariable(declaration.name.name)) && !variable.isPredefined() {
 					// TODO: check & merge type
 				}
 				else {

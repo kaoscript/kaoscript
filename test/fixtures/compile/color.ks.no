@@ -1,10 +1,10 @@
-extern sealed class Error
-
-import * from ./_array.ks
-import * from ./_float.ks
-import * from ./_integer.ks
-import * from ./_number.ks
-import * from ./_string.ks
+import {
+	'./_array.ks'
+	'./_float.ks'
+	'./_integer.ks'
+	'./_number.ks'
+	'./_string.ks'
+}
 
 type float = Number
 type int = Number
@@ -253,7 +253,7 @@ func $from(that: Color, args: array): Color { // {{{
 	return that
 } // }}}
 
-func $getFieldWithCasting(name, component, space) { // {{{
+/* func $getFieldWithCasting(name, component, space) { // {{{
 	if ?$components[name].spaces[this._space] {
 		return this[component.field]
 	}
@@ -269,7 +269,7 @@ func $getFieldWithoutCasting(name, field) ~ Error { // {{{
 	else {
 		throw new Error('The component \'' + name + '\' has a conflict between the spaces \'' + $components[name].families.join('\', \'') + '\'')
 	}
-} // }}}
+} // }}} */
 
 func $hex(that: Color) { // {{{
 	let chars = '0123456789abcdef'
@@ -489,7 +489,7 @@ let $parsers = {
 	} // }}}
 }
 
-func $setFieldWithCasting(name, component, space, value: number | string): Color { // {{{
+/* func $setFieldWithCasting(name, component, space, value: number | string): Color { // {{{
 	if ?$components[name].spaces[this._space] {
 		if ?component.parser {
 			this[component.field] = component.parser(value)
@@ -537,7 +537,7 @@ func $setFieldWithoutCasting(name, field, value: number | string): Color ~ Error
 	}
 	
 	return this
-} // }}}
+} // }}} */
 
 func $space(name: string): void { // {{{
 	$spaces[name] = $spaces[name] ?? {
@@ -560,6 +560,39 @@ export class Color {
 		_red: int = 0
 		_green: int = 0
 		_blue: int = 0
+	}
+	
+	macro {
+		registerSpace(@space: Object) {
+			if space.components? {
+				const fields: Array = []
+				const methods: Array = []
+				
+				let field
+				for name, component of space.components {
+					field = `_\(name)`
+					
+					fields.push(macro private #i(field): Number)
+					
+					methods.push(macro {
+						#i(name)() => this.getField(#(name))
+						#i(name)(value) => this.setField(#(name), value)
+					})
+				}
+				
+				macro {
+					Color.registerSpace(#(space))
+					
+					impl Color {
+						#b(fields)
+						#b(methods)
+					}
+				}
+			}
+			else {
+				macro Color.registerSpace(#(space))
+			}
+		}
 	}
 	
 	static {
@@ -682,7 +715,7 @@ export class Color {
 					}
 					else if ?component.mutator {
 						$component(component, name, space.name)
-						
+						/* 
 						if $components[name].families.length > 1 {
 							impl Color {
 								`\(name)`() for $getFieldWithoutCasting with name, component.field
@@ -694,7 +727,7 @@ export class Color {
 								`\(name)`() for $getFieldWithCasting with name, component, space.name
 								`\(name)`(value) for $setFieldWithCasting with name, component, space.name
 							}
-						}
+						} */
 					}
 					else {
 						component.min ??= 0
@@ -708,7 +741,7 @@ export class Color {
 						}
 						
 						$component(component, name, space.name)
-						
+						/* 
 						if $components[name].families.length > 1 {
 							impl Color {
 								`\(name)`() for $getFieldWithoutCasting with name, component.field
@@ -720,7 +753,7 @@ export class Color {
 								`\(name)`() for $getFieldWithCasting with name, component, space.name
 								`\(name)`(value) for $setFieldWithCasting with name, component, space.name
 							}
-						}
+						} */
 					}
 				}
 			}
@@ -1061,10 +1094,10 @@ export class Color {
 	} // }}}
 }
 
-Color.registerSpace({
+Color.registerSpace!({
 	name: Space::SRGB
 	alias: [Space::RGB]
-	formatters: {
+	/* formatters: {
 		hex(that: Color): string { // {{{
 			return $hex(that)
 		} // }}}
@@ -1076,7 +1109,7 @@ Color.registerSpace({
 				return 'rgba(' + that._red + ', ' + that._green + ', ' + that._blue + ', ' + that._alpha + ')'
 			}
 		} // }}}
-	}
+	} */
 	components: {
 		red: {
 			max: 255

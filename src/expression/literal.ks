@@ -1,20 +1,3 @@
-const $predefined = { // {{{
-	__false(scope) => scope.reference('Boolean')
-	__null(scope) => Type.Any
-	__true(scope) => scope.reference('Boolean')
-	__Class(scope) => scope.reference('Class')
-	__Date(scope) => scope.reference('Date')
-	__Error(scope) => scope.reference('Error')
-	__Function(scope) => scope.reference('Function')
-	__Infinity(scope) => scope.reference('Number')
-	__Math(scope) => scope.reference('Object')
-	__Number(scope) => scope.reference('Number')
-	__NaN(scope) => scope.reference('Number')
-	__Object(scope) => scope.reference('Object')
-	__String(scope) => scope.reference('String')
-	__RegExp(scope) => scope.reference('RegExp')
-} // }}}
-
 class Literal extends Expression {
 	private {
 		_value
@@ -73,9 +56,6 @@ class IdentifierLiteral extends Literal {
 		}
 		else if @variable ?= @scope.getVariable(@value) {
 			@isVariable = true
-		}
-		else if $predefined[`__\(@value)`] is Function {
-			@type = $predefined[`__\(@value)`](@scope)
 		}
 		else if $runtime.isDefined(@value, @parent) {
 			@type = Type.Any

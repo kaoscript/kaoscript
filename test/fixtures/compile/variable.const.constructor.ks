@@ -1,0 +1,1 @@
+const constructor = 42

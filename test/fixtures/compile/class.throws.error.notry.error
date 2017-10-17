@@ -1,1 +1,1 @@
-SyntaxException: Error "SyntaxError" is unreported, it must be caught or declared to be thrown (line 20, file "fixtures/compile/class.throws.error.notry.ks")
+SyntaxException: An error "SyntaxError" is unreported, it must be caught or declared to be thrown (line 20, file "fixtures/compile/class.throws.error.notry.ks")

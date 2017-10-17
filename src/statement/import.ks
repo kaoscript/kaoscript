@@ -101,7 +101,7 @@ class Importer extends Statement {
 		}
 	} // }}}
 	addVariable(imported: String, local: String, isVariable: Boolean, type: Type?) { // {{{
-		if variable ?= @scope.getVariable(local) {
+		if (variable ?= @scope.getVariable(local)) && !variable.isPredefined() {
 			if @parent.includePath() != null {
 				// TODO: check & merge type
 				return

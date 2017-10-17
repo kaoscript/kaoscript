@@ -279,7 +279,7 @@ export class SyntaxException extends Exception {
 			throw new SyntaxException(`An error is unreported, it must be caught or declared to be thrown`, node)
 		} // }}}
 		throwUnreportedError(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Error "\(name)" is unreported, it must be caught or declared to be thrown`, node)
+			throw new SyntaxException(`An error "\(name)" is unreported, it must be caught or declared to be thrown`, node)
 		} // }}}
 	}
 }
