@@ -280,7 +280,7 @@ class CallExpression extends Expression {
 		return false
 	} // }}}
 	isCallable() => !@reusable
-	isComputed() => @nullable && !@tested
+	isComputed() => (@nullable || @callees.length > 1) && !@tested
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	isUsingVariable(name) { // {{{

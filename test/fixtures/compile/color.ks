@@ -651,19 +651,6 @@ export class Color {
 					}
 					else if ?component.mutator {
 						$component(component, name, space.name)
-						/* 
-						if $components[name].families.length > 1 {
-							impl Color {
-								`\(name)`() for $getFieldWithoutCasting with name, component.field
-								`\(name)`(value) for $setFieldWithoutCasting with name, component.field
-							}
-						}
-						else {
-							impl Color {
-								`\(name)`() for $getFieldWithCasting with name, component, space.name
-								`\(name)`(value) for $setFieldWithCasting with name, component, space.name
-							}
-						} */
 					}
 					else {
 						component.min ??= 0
@@ -677,19 +664,6 @@ export class Color {
 						}
 						
 						$component(component, name, space.name)
-						/* 
-						if $components[name].families.length > 1 {
-							impl Color {
-								`\(name)`() for $getFieldWithoutCasting with name, component.field
-								`\(name)`(value) for $setFieldWithoutCasting with name, component.field
-							}
-						}
-						else {
-							impl Color {
-								`\(name)`() for $getFieldWithCasting with name, component, space.name
-								`\(name)`(value) for $setFieldWithCasting with name, component, space.name
-							}
-						} */
 					}
 				}
 			}
