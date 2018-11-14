@@ -49,7 +49,7 @@ const $typeofs = { // {{{
 const $ast = {
 	block(data) { // {{{
 		return data if data.kind == NodeKind::Block
-		
+
 		return {
 			kind: NodeKind::Block
 			statements: [
@@ -91,18 +91,18 @@ const $ast = {
 const $runtime = {
 	helper(node) { // {{{
 		node.module?().flag('Helper')
-		
+
 		return node._options.runtime.helper.alias
 	} // }}}
 	isDefined(name, node) { // {{{
 		if node._options.runtime.helper.alias == name {
 			node.module?().flag('Helper')
-			
+
 			return true
 		}
 		else if node._options.runtime.type.alias == name {
 			node.module?().flag('Type')
-			
+
 			return true
 		}
 		else {
@@ -114,13 +114,13 @@ const $runtime = {
 	} // }}}
 	type(node) { // {{{
 		node.module?().flag('Type')
-		
+
 		return node._options.runtime.type.alias
 	} // }}}
 	typeof(type, node = null) { // {{{
 		if node? {
 			return null unless $typeofs[type]
-			
+
 			if type == 'NaN' {
 				return 'isNaN'
 			}
@@ -207,7 +207,7 @@ include {
 const $compile = {
 	expression(data, parent, scope = parent.scope()) { // {{{
 		let expression
-		
+
 		let clazz = $expressions[data.kind]
 		if clazz? {
 			expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
@@ -247,19 +247,19 @@ const $compile = {
 		else {
 			throw new NotSupportedException(`Unexpected expression/statement \(data.kind)`, parent)
 		}
-		
+
 		return expression
 	} // }}}
 	statement(data, parent) { // {{{
 		if Attribute.conditional(data, parent.module()._compiler._target) {
 			if data.kind == NodeKind::MacroDeclaration {
 				parent.scope().addMacro(data.name.name, new Macro(data, parent))
-				
+
 				return null
 			}
 			else {
 				let clazz = $statements[data.kind] ?? $statements.default
-				
+
 				return new clazz(data, parent)
 			}
 		}
@@ -337,9 +337,9 @@ const $expressions = {
 	`\(NodeKind::CallExpression)`				: CallExpression
 	`\(NodeKind::CallMacroExpression)`	 		: func(data, parent, scope) {
 		const macro = scope.getMacro(data, parent)
-		
+
 		const statements = macro.execute(data.arguments, parent)
-		
+
 		if statements.length == 1 && statements[0] is ExpressionStatement {
 			return $compile.expression(statements[0].data(), parent)
 		}
@@ -479,7 +479,7 @@ export class Compiler {
 			if target !?= $targetRegex.exec(target) {
 				throw new Error(`Invalid target syntax: \(target)`)
 			}
-			
+
 			$targets[target[1]] ??= {}
 			$targets[target[1]][target[2]] = options
 		} // }}}
@@ -500,14 +500,14 @@ export class Compiler {
 			if alias !?= $targetRegex.exec(alias) {
 				throw new Error(`Invalid target syntax: \(alias)`)
 			}
-			
+
 			if !?$targets[alias[1]] {
 				throw new Error(`Undefined target '\(alias[1])'`)
 			}
 			else if !?$targets[alias[1]][alias[2]] {
 				throw new Error(`Undefined target's version '\(alias[2])'`)
 			}
-			
+
 			$targets[target[1]] ??= {}
 			$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]]
 		} // }}}
@@ -541,40 +541,40 @@ export class Compiler {
 				}
 			}
 		}, options)
-		
+
 		if target !?= $targetRegex.exec(@options.target) {
 			throw new Error(`Invalid target syntax: \(@options.target)`)
 		}
-		
+
 		@target = {
 			name: target[1],
 			version: target[2]
 		}
-		
+
 		if !?$targets[@target.name] {
 			throw new Error(`Undefined target '\(@target.name)'`)
 		}
 		else if !?$targets[@target.name][@target.version] {
 			throw new Error(`Undefined target's version '\(@target.version)'`)
 		}
-		
+
 		@options.target = `\(@target.name)-v\(@target.version)`
-		
+
 		@options.config = Object.defaults($targets[@target.name][@target.version], @options.config)
 	} // }}}
 	compile(data = null) { // {{{
 		//console.time('parse')
 		@module = new Module(data ?? fs.readFile(@file), this, @file)
 		//console.timeEnd('parse')
-		
+
 		//console.time('compile')
 		@module.compile()
 		//console.timeEnd('compile')
-		
+
 		//console.time('toFragments')
 		@fragments = @module.toFragments()
 		//console.timeEnd('toFragments')
-		
+
 		return this
 	} // }}}
 	createServant(file) { // {{{
@@ -596,11 +596,11 @@ export class Compiler {
 	} // }}}
 	toSource() { // {{{
 		let source = ''
-		
+
 		for fragment in @fragments {
 			source += fragment.code
 		}
-		
+
 		if source.length {
 			return source.substr(0, source.length - 1)
 		}
@@ -613,35 +613,35 @@ export class Compiler {
 	} // }}}
 	writeFiles() { // {{{
 		fs.mkdir(path.dirname(this._file))
-		
+
 		fs.writeFile(getBinaryPath(this._file, this._options.target), this.toSource())
-		
+
 		if !this._module._binary {
 			let metadata = this.toMetadata()
-			
+
 			fs.writeFile(getMetadataPath(this._file, this._options.target), JSON.stringify(metadata, func(key, value) => key == 'max' && value == Infinity ? 'Infinity' : value))
 		}
-		
+
 		fs.writeFile(getHashPath(this._file, this._options.target), JSON.stringify(this._module.toHashes()))
 	} // }}}
 	writeOutput() { // {{{
 		if !this._options.output {
 			throw new Error('Undefined option: output')
 		}
-		
+
 		fs.mkdir(this._options.output)
-		
+
 		let filename = path.join(this._options.output, path.basename(this._file)).slice(0, -3) + '.js'
-		
+
 		fs.writeFile(filename, this.toSource())
-		
+
 		return this
 	} // }}}
 }
 
 export func compileFile(file, options = null) { // {{{
 	let compiler = new Compiler(file, options)
-	
+
 	return compiler.compile().toSource()
 } // }}}
 
@@ -659,9 +659,9 @@ export func isUpToDate(file, target, source) { // {{{
 	catch {
 		return false
 	}
-	
+
 	let root = path.dirname(file)
-	
+
 	for name, hash of hashes {
 		if name == '.' {
 			return null if fs.sha256(source) != hash
@@ -670,7 +670,7 @@ export func isUpToDate(file, target, source) { // {{{
 			return null if fs.sha256(fs.readFile(path.join(root, name))) != hash
 		}
 	}
-	
+
 	return true
 } // }}}
 

@@ -4,7 +4,7 @@ module.exports = function() {
 	let bar = [];
 	bar.push(0, ...foo);
 	function log(...args) {
-		console.log.apply(console, args);
+		console.log(...args);
 	}
 	let machine = "tesla";
 	let directory = "xfer";

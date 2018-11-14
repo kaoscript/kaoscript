@@ -1,7 +1,7 @@
 module.exports = function() {
 	function log(...args) {
-		console.log.apply(console, args);
+		console.log(...args);
 	}
 	const messages = ["hello", "world"];
-	log.apply(null, messages);
+	log.call(null, ...messages);
 };

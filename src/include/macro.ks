@@ -1,16 +1,18 @@
-extern eval
+extern eval, parseInt
 
 enum MacroVariableKind {
 	AST
 	AutoEvaluated
 }
 
+const $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
+
 func $evaluate(source) { // {{{
 	//console.log(source)
 
 	const compiler = new Compiler('__ks__', {
 		register: false
-		target: 'ecma-v5'
+		target: $target
 	})
 
 	compiler.compile('#![bin]\nextern console, JSON, __ks_marker\nreturn ' + source)

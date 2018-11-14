@@ -1,6 +1,6 @@
 module.exports = function() {
 	function log(...args) {
-		this.log.apply(this, args);
+		this.log(...args);
 	}
 	log.call(console, "hello");
 };

@@ -4,12 +4,12 @@ module.exports = function() {
 	let bar = [];
 	bar.push(0, ...foo);
 	function log(...args) {
-		console.log.apply(console, args);
+		console.log(...args);
 	}
 	let machine = "tesla";
 	let directory = "xfer";
 	let user = "john";
 	let info = [machine, ":", directory, " ", user, ": "];
-	let logHello = Helper.curry(log, null, info);
+	let logHello = Helper.vcurry(log, null, ...info);
 	logHello("foo");
 };

@@ -203,12 +203,12 @@ module.exports = function() {
 		else if(!Type.isFunction(first)) {
 			throw new TypeError("'first' is not of type 'Function'");
 		}
-		let that = first.apply(null, firstArgs);
+		let that = first.call(null, ...firstArgs);
 		let lastArgs = Helper.mapObject(components, function(name, component) {
 			return that[component.field];
 		});
 		lastArgs.push(that);
-		return last.apply(null, lastArgs);
+		return last.call(null, ...lastArgs);
 	}
 	let $caster = {
 		alpha(n = null, percentage) {
@@ -297,7 +297,7 @@ module.exports = function() {
 				return that[component.field];
 			});
 			args.push(result);
-			s.converters[space].apply(s.converters, args);
+			s.converters[space](...args);
 			result._space = space;
 			return result;
 		}

@@ -100,7 +100,7 @@ class CallExpression extends Expression {
 		}
 
 		if @arguments.length == 1 {
-			if @arguments[0] is UnaryOperatorSpread && (@options.format.spreads == 'es5' || @arguments[0].argument().type().isArray()) {
+			if @arguments[0] is UnaryOperatorSpread && (@options.format.spreads == 'es5' || !@arguments[0].argument().type().isArray()) {
 				@flatten = true
 			}
 		}
