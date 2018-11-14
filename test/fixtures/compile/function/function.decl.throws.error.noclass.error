@@ -1,0 +1,1 @@
+TypeException: Identifier "BadError" is not a class (line 3, file "fixtures/compile/function/function.decl.throws.error.noclass.ks")

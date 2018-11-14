@@ -8,11 +8,12 @@ class ImplementDeclaration extends Statement {
 		if @variable !?= @scope.getVariable(@data.variable.name) {
 			ReferenceException.throwNotDefined(@data.variable.name, this)
 		}
-		
+	} // }}}
+	prepare() { // {{{
 		@variable.prepareAlteration()
-		
+
 		@type = @variable.type().unalias()
-		
+
 		if @type is ClassType {
 			for property in @data.properties {
 				switch property.kind {
@@ -26,9 +27,9 @@ class ImplementDeclaration extends Statement {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
 					}
 				}
-				
+
 				property.analyse()
-				
+
 				@properties.push(property)
 			}
 		}
@@ -45,17 +46,16 @@ class ImplementDeclaration extends Statement {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
 					}
 				}
-				
+
 				property.analyse()
-				
+
 				@properties.push(property)
 			}
 		}
 		else {
 			TypeException.throwImplInvalidType(this)
 		}
-	} // }}}
-	prepare() { // {{{
+
 		for property in @properties {
 			property.prepare()
 		}
@@ -84,7 +84,7 @@ class ImplementClassFieldDeclaration extends Statement {
 	}
 	constructor(data, parent, @class) { // {{{
 		super(data, parent)
-		
+
 		if class.isSealed() {
 			TypeException.throwImplFieldToSealedType(this)
 		}
@@ -95,20 +95,20 @@ class ImplementClassFieldDeclaration extends Statement {
 				@instance = false
 			}
 		}
-		
+
 		@name = @data.name.name
-		
+
 		if @data.defaultValue? {
 			@hasDefaultValue = true
-			
+
 			if @instance {
 				let scope = @scope
-				
+
 				@scope = @parent._instanceVariableScope
-				
+
 				@defaultValue = $compile.expression(@data.defaultValue, this)
 				@defaultValue.analyse()
-				
+
 				@scope = scope
 			}
 			else {
@@ -119,14 +119,16 @@ class ImplementClassFieldDeclaration extends Statement {
 	} // }}}
 	prepare() { // {{{
 		@type = ClassVariableType.fromAST(@data, this)
-		
+
+		@type.flagAlteration()
+
 		if @instance {
 			@class.addInstanceVariable(@name, @type)
 		}
 		else {
 			@class.addClassVariable(@name, @type)
 		}
-		
+
 		if @hasDefaultValue {
 			@defaultValue.prepare()
 		}
@@ -170,7 +172,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	analyse() { // {{{
 		@name = @data.name.name
 		@body = $ast.body(@data.body)
-		
+
 		if @isContructor = (@data.name.kind == NodeKind::Identifier && @class.isConstructor(@name)) {
 			throw new NotImplementedException(this)
 		}
@@ -184,13 +186,13 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 			}
 		}
-		
+
 		@this = @scope.define('this', true, @class.reference(), this)
-		
+
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
-			
+
 			parameter.analyse()
 		}
 	} // }}}
@@ -198,13 +200,15 @@ class ImplementClassMethodDeclaration extends Statement {
 		for parameter in @parameters {
 			parameter.prepare()
 		}
-		
+
 		@type = new ClassMethodType([parameter.type() for parameter in @parameters], @data, this)
-		
+
+		@type.flagAlteration()
+
 		if @class.isSealed() {
 			@type.seal()
 		}
-		
+
 		if @instance {
 			@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
 		}
@@ -216,25 +220,25 @@ class ImplementClassMethodDeclaration extends Statement {
 		for parameter in @parameters {
 			parameter.translate()
 		}
-		
+
 		@statements = []
-		
+
 		for statement in @aliases {
 			@statements.push(statement)
-			
+
 			statement.analyse()
 		}
-		
+
 		for statement in @body {
 			@statements.push(statement = $compile.statement(statement, this))
-			
+
 			statement.analyse()
 		}
-		
+
 		for statement in @statements {
 			statement.prepare()
 		}
-		
+
 		for statement in @statements {
 			statement.translate()
 		}
@@ -257,7 +261,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 		else {
 			const line = fragments.newLine()
-			
+
 			if @class.isSealed() {
 				line.code(`\(@class.sealName()).\(@internalName) = function(`)
 			}
@@ -269,27 +273,27 @@ class ImplementClassMethodDeclaration extends Statement {
 					line.code(`\(@class.name()).\(@internalName) = function(`)
 				}
 			}
-			
+
 			const block = Parameter.toFragments(this, line, ParameterMode::Default, func(node) {
 				line.code(')')
-				
+
 				return line.newBlock()
 			})
-			
+
 			for statement in @statements {
 				block.compile(statement)
 			}
-			
+
 			block.done()
 			line.done()
-			
+
 			if @instance {
 				if @class.isSealed() {
 					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, null, (node, fragments) => {
 						const block = fragments.code(`\(@class.sealName())._im_\(@name) = function(that)`).newBlock()
-						
+
 						block.line('var args = Array.prototype.slice.call(arguments, 1, arguments.length)')
-						
+
 						return block
 					}, (fragments) => fragments.done(), (fragments, method, index) => {
 						if method.max() == 0 {
@@ -308,7 +312,7 @@ class ImplementClassMethodDeclaration extends Statement {
 								fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
 							}
 						}
-					}, 'args', true).done()
+					}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
 				}
 				else {
 					ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
@@ -318,9 +322,9 @@ class ImplementClassMethodDeclaration extends Statement {
 				if @class.isSealed() {
 					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, null, (node, fragments) => {
 						const block = fragments.code(`\(@class.sealName())._cm_\(@name) = function()`).newBlock()
-						
+
 						block.line('var args = Array.prototype.slice.call(arguments)')
-						
+
 						return block
 					}, (fragments) => fragments.done(), (fragments, method, index) => {
 						if method.max() == 0 {
@@ -339,7 +343,7 @@ class ImplementClassMethodDeclaration extends Statement {
 								fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
 							}
 						}
-					}, 'args', true).done()
+					}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
 				}
 				else {
 					ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
@@ -362,14 +366,14 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 	analyse() { // {{{
 		@value = $compile.expression(@data.defaultValue, this)
 		@value.analyse()
-		
+
 		//@namespace.addProperty(@data.name.name, Type.fromAST(@data.type, this))
 	} // }}}
 	prepare() { // {{{
 		@value.prepare()
-		
+
 		@type = NamespaceVariableType.fromAST(@data, this)
-		
+
 		@namespace.addProperty(@data.name.name, @type)
 	} // }}}
 	translate() { // {{{
@@ -408,7 +412,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
-			
+
 			parameter.analyse()
 		}
 	} // }}}
@@ -416,9 +420,9 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		for parameter in @parameters {
 			parameter.prepare()
 		}
-		
+
 		@type = NamespaceFunctionType.fromAST(@data, this)
-		
+
 		@namespace.addProperty(@data.name.name, @type)
 	} // }}}
 	translate() { // {{{
@@ -426,14 +430,14 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			@statements = []
 			for statement in $ast.body(@data.body) {
 				@statements.push(statement = $compile.statement(statement, this))
-				
+
 				statement.analyse()
 			}
-			
+
 			for statement in @statements {
 				statement.prepare()
 			}
-			
+
 			for statement in @statements {
 				statement.translate()
 			}
@@ -446,26 +450,26 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		const line = fragments.newLine()
-		
+
 		if @namespace.isSealed() {
 			line.code(@namespace.sealName())
 		}
 		else {
 			line.code(@namespace.name())
 		}
-		
+
 		line.code('.', @data.name.name, ' = function(')
-		
+
 		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
-		
+
 		for statement in @statements {
 			block.compile(statement)
 		}
-		
+
 		block.done()
-		
+
 		line.done()
 	} // }}}
 	type() => @type

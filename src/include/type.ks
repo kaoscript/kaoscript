@@ -79,38 +79,31 @@ class ScopeDomain extends Domain {
 
 class ImportDomain extends Domain {
 	private {
+		_metadata
+		_node
 		_temporaries	= {}
 		_types			= {}
 	}
-	constructor(metadata, node) { // {{{
+	constructor(@metadata, @node) { // {{{
 		super()
-		
+
 		@scope = node.scope()
-		
-		for i from 0 til metadata.exports.length by 2 {
-			if metadata.exports[i] == -1 {
-				@temporaries[metadata.exports[i + 1]] = Type.Any
-			}
-			else {
-				@temporaries[metadata.exports[i + 1]] = Type.import(metadata.exports[i + 1], metadata.references[metadata.exports[i]], metadata.references, this, node)
-			}
-		}
 	} // }}}
 	commit() { // {{{
 		for name, type of @temporaries {
 			@types[name] = @temporaries[name]
 		}
-		
+
 		delete this._temporaries
 	} // }}}
 	commit(name: String) { // {{{
 		@types[name] = @temporaries[name]
-		
+
 		return @types[name]
 	} // }}}
 	commit(tempName: String, name: String) { // {{{
 		@types[name] = @temporaries[tempName]
-		
+
 		return @types[name]
 	} // }}}
 	hasTemporary(name: String) => @temporaries[name] is Type
@@ -126,6 +119,23 @@ class ImportDomain extends Domain {
 			return null
 		}
 	} // }}}
+	prepare(requirements) { // {{{
+		let requirement
+		for i from 0 til @metadata.requirements.length by 3 {
+			if requirement ?= requirements[@metadata.requirements[i + 1]] {
+				@metadata.references[@metadata.requirements[i]] = requirement.type
+			}
+		}
+
+		for i from 0 til @metadata.exports.length by 2 {
+			if @metadata.exports[i] == -1 {
+				@temporaries[@metadata.exports[i + 1]] = Type.Any
+			}
+			else {
+				@temporaries[@metadata.exports[i + 1]] = Type.import(@metadata.exports[i + 1], @metadata.references[@metadata.exports[i]], @metadata.references, this, @node)
+			}
+		}
+	} // }}}
 	replicate(name: String, type: Type) { // {{{
 		@types[name] = type
 	} // }}}
@@ -133,7 +143,10 @@ class ImportDomain extends Domain {
 
 abstract class Type {
 	private {
-		_referenceIndex: Number	= -1
+		_alien: Boolean				= false
+		_referenceIndex: Number		= -1
+		_requirement: Number 		= -1
+		_sealed: Boolean			= false
 	}
 	static {
 		arrayOf(parameter: Type, scope: AbstractScope) => new ReferenceType('Array', false, [parameter], scope.domain())
@@ -145,11 +158,11 @@ abstract class Type {
 			else if data is Type {
 				return data:Type
 			}
-			
+
 			switch data.kind {
 				NodeKind::ClassDeclaration => {
 					const type = new ClassType(data.name.name, domain)
-					
+
 					for modifier in data.modifiers {
 						if modifier.kind == ModifierKind::Abstract {
 							type._abstract = data.abstract
@@ -158,11 +171,16 @@ abstract class Type {
 							type.seal()
 						}
 					}
-					
+
 					return type
 				}
 				NodeKind::FunctionDeclaration => {
-					return new FunctionType([Type.fromAST(parameter, domain, defined, node) for parameter in data.parameters], data, node)
+					if data.parameters? {
+						return new FunctionType([Type.fromAST(parameter, domain, defined, node) for parameter in data.parameters], data, node)
+					}
+					else {
+						return new FunctionType([new ParameterType(Type.Any, 0, Infinity)], data, node)
+					}
 				}
 				NodeKind::FunctionExpression => {
 					return new FunctionType([Type.fromAST(parameter, domain, defined, node) for parameter in data.parameters], data, node)
@@ -180,7 +198,7 @@ abstract class Type {
 				}
 				NodeKind::MemberExpression => {
 					const object = Type.fromAST(data.object, domain, defined, node)
-					
+
 					if object.isAny() {
 						return Type.Any
 					}
@@ -193,10 +211,10 @@ abstract class Type {
 				}
 				NodeKind::Parameter => {
 					const type = Type.fromAST(data.type, domain, defined, node)
-					
+
 					let min: Number = data.defaultValue? ? 0 : 1
 					let max: Number = 1
-					
+
 					let nf = true
 					for modifier in data.modifiers while nf {
 						if modifier.kind == ModifierKind::Rest {
@@ -208,23 +226,23 @@ abstract class Type {
 								min = 0
 								max = Infinity
 							}
-							
+
 							nf = true
 						}
 					}
-					
+
 					return new ParameterType(type, min, max)
 				}
 				NodeKind::TypeReference => {
 					if data.properties? {
 						const scope = node.scope()
 						const name = scope.getAnomynousClassName()
-						
+
 						const type = new ClassType(name, domain)
 						const variable = scope.define(name, true, type, node)
-						
+
 						type.anonymize()
-						
+
 						let ref
 						for property in data.properties {
 							if property.type.kind == NodeKind::FunctionExpression {
@@ -235,7 +253,7 @@ abstract class Type {
 								if ref.isAnonymous() {
 									ref = ref.reference()
 								}
-								
+
 								type.addInstanceVariable(property.name.name, new ClassVariableType(ref))
 							}
 							else {
@@ -243,20 +261,20 @@ abstract class Type {
 								throw new NotImplementedException(node)
 							}
 						}
-						
+
 						return type
 					}
 					else if data.typeName? {
 						if data.typeName.kind == NodeKind::Identifier {
 							if !defined || domain.hasVariable(data.typeName.name) {
 								const type = new ReferenceType(data.typeName.name, data.nullable, domain)
-								
+
 								if data.typeParameters? {
 									for parameter in data.typeParameters {
 										type._parameters.push(Type.fromAST(parameter, domain, defined, node))
 									}
 								}
-								
+
 								return type
 							}
 							else {
@@ -265,15 +283,15 @@ abstract class Type {
 						}
 						else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
 							const type = new ReferenceType(data.typeName.property.name, data.nullable, domain)
-							
+
 							type.namespace(Type.fromAST(data.typeName.object, domain, defined, node).reference())
-							
+
 							if data.typeParameters? {
 								for parameter in data.typeParameters {
 									type._parameters.push(Type.fromAST(parameter, domain, defined, node))
 								}
 							}
-							
+
 							return type
 						}
 					}
@@ -285,7 +303,7 @@ abstract class Type {
 					return Type.fromAST(data.type, domain, defined, node)
 				}
 			}
-			
+
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
@@ -301,7 +319,7 @@ abstract class Type {
 			//console.log('-- import --')
 			//console.log(name)
 			//console.log(JSON.stringify(data, null, 2))
-			
+
 			if data is String {
 				return data == 'Any' ? Type.Any : new ReferenceType(data, domain)
 			}
@@ -318,75 +336,78 @@ abstract class Type {
 					return new UnionType([Type.import(null, type, references, domain, node) for type in data])
 				}
 			}
+			else if data is Type {
+				return data
+			}
 			else if data.constructors? {
 				if name == null {
 					throw new NotImplementedException(node)
 				}
 				else {
 					const type = new ClassType(name, domain)
-					
+
 					if data.extends? {
 						type.extends(Type.import(null, data.extends, references, domain, node), data.extends[1])
 					}
-					
+
 					type._abstract = data.abstract
 					type._alien = data.alien
 					type._hybrid = data.hybrid
-					
+
 					if data.sealed {
 						type.seal()
 					}
-					
+
 					for method in data.constructors {
 						type.addConstructor(ClassConstructorType.import(method, references, domain, node))
 					}
-					
+
 					for name, vtype of data.instanceVariables {
 						type.addInstanceVariable(name, ClassVariableType.import(vtype, references, domain, node))
 					}
-					
+
 					for name, methods of data.instanceMethods {
 						for method in methods {
 							type.addInstanceMethod(name, ClassMethodType.import(method, references, domain, node))
 						}
 					}
-					
+
 					for name, methods of data.classMethods {
 						for method in methods {
 							type.addClassMethod(name, ClassMethodType.import(method, references, domain, node))
 						}
 					}
-					
+
 					return type
 				}
 			}
 			else if data.parameters? {
 				const type = new FunctionType()
-				
+
 				type._async = data.async
 				type._min = data.min
 				type._max = data.max
 				type._throws = [Type.import(null, throw, references, domain, node) for throw in data.throws]
-				
+
 				type._returnType = Type.import(null, data.returns, references, domain, node)
-				
+
 				type._parameters = [Type.import(null, parameter, references, domain, node) for parameter in data.parameters]
-				
+
 				type.updateArguments()
-				
+
 				return type
 			}
 			else if data.properties? {
 				const type = new NamespaceType(name, domain)
-				
+
 				if data.sealed {
 					type.seal()
 				}
-				
+
 				for name, property of data.properties {
 					type.addPropertyFromMetadata(name, property, references, domain, node)
 				}
-				
+
 				return type
 			}
 			else if data.min? {
@@ -394,32 +415,32 @@ abstract class Type {
 			}
 			else if data.elements? {
 				const type = new EnumType(name, data.kind, domain)
-				
+
 				type._elements = data.elements
 				type._index = data.index
-				
+
 				return type
 			}
 			else if data.methods? {
 				const scope = node.scope()
 				const name = scope.getAnomynousClassName()
-				
+
 				const type = new ClassType(name, domain)
-				
+
 				scope.define(name, true, type, node)
-				
+
 				type.anonymize()
-				
+
 				for let name, variable of data.variables {
 					type.addInstanceVariable(name, ClassVariableType.import(variable, references, domain, node))
 				}
-				
+
 				for let name, methods of data.methods {
 					for method in methods {
 						type.addInstanceMethod(name, ClassMethodType.import(method, references, domain, node))
 					}
 				}
-				
+
 				return type
 			}
 			else if data.type? {
@@ -427,16 +448,57 @@ abstract class Type {
 			}
 			else if data.name? {
 				const type = new ReferenceType(data.name, data.nullable, domain)
-				
+
 				return type
 			}
 			else if data.functions? {
 				const type = new OverloadedFunctionType()
-				
+
 				for function in data.functions {
 					type.addFunction(Type.import(null, function, references, domain, node))
 				}
-				
+
+				return type
+			}
+			else if data.reference? {
+				return Type.import(name, references[data.reference], references, domain, node)
+			}
+			else if data.requirement? {
+				const type = references[data.requirement]
+
+				if type is Type {
+					return type
+				}
+				else if type is Object {
+					return Type.import(name, type, references, domain, node)
+				}
+				else {
+					throw new NotImplementedException(node)
+				}
+			}
+			else if data.class? {
+				const type = Type.import(name, data.class, references, domain, node)
+
+				unless type is ClassType {
+					TypeException.throwNotClass(name, node)
+				}
+
+				for name, vtype of data.instanceVariables {
+					type.addInstanceVariable(name, ClassVariableType.import(vtype, references, domain, node))
+				}
+
+				for name, methods of data.instanceMethods {
+					for method in methods {
+						type.addInstanceMethod(name, ClassMethodType.import(method, references, domain, node))
+					}
+				}
+
+				for name, methods of data.classMethods {
+					for method in methods {
+						type.addClassMethod(name, ClassMethodType.import(method, references, domain, node))
+					}
+				}
+
 				return type
 			}
 			else {
@@ -450,17 +512,24 @@ abstract class Type {
 					return Type.Any
 				}
 			}
-			
+
 			return new UnionType(types)
 		} // }}}
 	}
 	abstract equals(b?): Boolean
 	abstract export()
+	//abstract match(b: Type): Boolean
 	abstract toQuote(): String
 	abstract toFragments(fragments, node)
 	abstract toTestFragments(fragments, node)
-	alienize() => this
+	alienize() { // {{{
+		@alien = true
+
+		return this
+	} // }}}
 	dereference(): Type? => this
+	getRequirement() => @requirement
+	isAlien() => @alien
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
@@ -471,26 +540,34 @@ abstract class Type {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	isEnum() => false
 	isExtendable() => false
 	isFlexible() => false
 	isFunction() => false
+	isMergeable(type) => false
 	isNumber() => false
 	isObject() => false
-	isSealed() => false
+	isRequired() => @requirement != -1
+	isSealed() => @sealed
 	isString() => false
 	matchArgument(argument: Type) => this.equals(argument)
 	metaReference(name) => [@referenceIndex, name]
+	seal() { // {{{
+		@sealed = true
+	} // }}}
+	setRequirement(index: Number) { // {{{
+		@requirement = index
+	} // }}}
 	toMetadata(references) { // {{{
 		if @referenceIndex == -1 {
 			this.toReference(references)
-			
+
 			@referenceIndex = references.length - 1
 		}
-		
+
 		return @referenceIndex
 	} // }}}
 	toReference(references) { // {{{
@@ -532,7 +609,6 @@ class AnyType extends Type {
 	getProperty(name) => Type.Any
 	hashCode() => 'Any'
 	isAny() => true
-	isCompatible(type) => false
 	isInstanceOf(target: Type) => true
 	isNullable() => false
 	match(b: Type) => true
@@ -556,7 +632,6 @@ class ClassType extends Type {
 	private {
 		_abstract: Boolean			= false
 		_abstractMethods: Object	= {}
-		_alien: Boolean				= false
 		_anonymous: Boolean			= false
 		_classMethods: Object		= {}
 		_classVariables: Object		= {}
@@ -572,8 +647,8 @@ class ClassType extends Type {
 		_name: String
 		_namespace: ReferenceType
 		_parentName: String
+		_requiredReference: ReferenceType
 		_seal: Object
-		_sealed: Boolean			= false
 	}
 	constructor(@name, @domain)
 	constructor(@name, scope: AbstractScope) { // {{{
@@ -584,34 +659,34 @@ class ClassType extends Type {
 	} // }}}
 	addAbstractMethod(name: String, type: ClassMethodType): Number { // {{{
 		let index: Number = 0
-		
+
 		if @abstractMethods[name] is Array {
 			index = @abstractMethods[name].length
-			
+
 			@abstractMethods[name].push(type)
 		}
 		else {
 			@abstractMethods[name] = [type]
 		}
-		
+
 		return index
 	} // }}}
 	addClassMethod(name: String, type: ClassMethodType): Number { // {{{
 		let index: Number = 0
-		
+
 		if @classMethods[name] is Array {
 			index = @classMethods[name].length
-			
+
 			@classMethods[name].push(type)
 		}
 		else {
 			@classMethods[name] = [type]
 		}
-		
+
 		if type.isSealed() {
 			@seal.classMethods[name] = true
 		}
-		
+
 		return index
 	} // }}}
 	addClassVariable(name: String, type: ClassVariableType) { // {{{
@@ -625,20 +700,20 @@ class ClassType extends Type {
 	} // }}}
 	addInstanceMethod(name: String, type: ClassMethodType): Number { // {{{
 		let index: Number = 0
-		
+
 		if @instanceMethods[name] is Array {
 			index = @instanceMethods[name].length
-			
+
 			@instanceMethods[name].push(type)
 		}
 		else {
 			@instanceMethods[name] = [type]
 		}
-		
+
 		if type.isSealed() {
 			@seal.instanceMethods[name] = true
 		}
-		
+
 		return index
 	} // }}}
 	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
@@ -669,9 +744,9 @@ class ClassType extends Type {
 					for i from 0 til data.modifiers.length while instance {
 						instance = false if data.modifiers[i].kind == ModifierKind::Static
 					}
-					
+
 					const type = ClassMethodType.fromAST(data, node)
-					
+
 					if instance {
 						this.addInstanceMethod(data.name.name, type)
 					}
@@ -684,11 +759,6 @@ class ClassType extends Type {
 				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
 			}
 		}
-	} // }}}
-	alienize() { // {{{
-		@alien = true
-		
-		return this
 	} // }}}
 	anonymize() { // {{{
 		@anonymous = true
@@ -703,22 +773,55 @@ class ClassType extends Type {
 		}
 	} // }}}
 	export() { // {{{
-		if @anonymous {
+		if ?@requiredReference {
+			const export = {
+				class: @requiredReference.export()
+				instanceVariables: {}
+				classVariables: {}
+				instanceMethods: {}
+				classMethods: {}
+			}
+
+			for name, variable of @instanceVariables when variable.isAlteration() {
+				export.instanceVariables[name] = variable.export()
+			}
+
+			for name, variable of @classVariables when variable.isAlteration() {
+				export.classVariables[name] = variable.export()
+			}
+
+			for name, methods of @instanceMethods {
+				const exportedMethods = [method.export() for method in methods when method.isAlteration()]
+				if exportedMethods.length > 0 {
+					export.instanceMethods[name] = exportedMethods
+				}
+			}
+
+			for name, methods of @classMethods {
+				const exportedMethods = [method.export() for method in methods when method.isAlteration()]
+				if exportedMethods.length > 0 {
+					export.classMethods[name] = exportedMethods
+				}
+			}
+
+			return export
+		}
+		else if @anonymous {
 			const export = {
 				alien: @alien
 				sealed: @sealed
 				variables: {}
 				methods: {}
 			}
-			
+
 			for name, variable of @instanceVariables {
 				export.variables[name] = variable.export()
 			}
-			
+
 			for name, methods of @instanceMethods {
 				export.methods[name] = [method.export() for method in methods]
 			}
-			
+
 			return export
 		}
 		else {
@@ -734,42 +837,42 @@ class ClassType extends Type {
 				instanceMethods: {}
 				classMethods: {}
 			}
-			
+
 			for name, variable of @instanceVariables {
 				export.instanceVariables[name] = variable.export()
 			}
-			
+
 			for name, variable of @classVariables {
 				export.classVariables[name] = variable.export()
 			}
-			
+
 			for name, methods of @instanceMethods {
 				export.instanceMethods[name] = [method.export() for method in methods]
 			}
-			
+
 			for name, methods of @classMethods {
 				export.classMethods[name] = [method.export() for method in methods]
 			}
-			
+
 			if @abstract {
 				export.abstractMethods = {}
-				
+
 				for name, methods of @abstractMethods {
 					export.abstractMethods[name] = [method.export() for method in methods]
 				}
 			}
-			
+
 			if @extending {
 				export.extends = @extends.metaReference(@parentName)
 			}
-			
+
 			return export
 		}
 	} // }}}
 	extends() => @extends
 	extends(@extends, @parentName = extends.name()) { // {{{
 		@extending = true
-		
+
 		if @extends.isAlien() || @extends.isHybrid() {
 			@hybrid = true
 		}
@@ -778,17 +881,17 @@ class ClassType extends Type {
 		if @extending {
 			@extends.filterAbstractMethods(abstractMethods)
 		}
-		
+
 		if @abstract {
 			for name, methods of @abstractMethods {
 				if abstractMethods[name] is not Array {
 					abstractMethods[name] = []
 				}
-				
+
 				abstractMethods[name]:Array.append(methods)
 			}
 		}
-		
+
 		let method, index
 		for name, methods of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
@@ -796,7 +899,7 @@ class ClassType extends Type {
 					methods.splice(index, 1)
 				}
 			}
-			
+
 			if methods.length == 0 {
 				delete abstractMethods[name]
 			}
@@ -810,7 +913,7 @@ class ClassType extends Type {
 				}
 			}
 		}
-		
+
 		if @extending {
 			return @extends.getAsbtractMethod(name, arguments)
 		}
@@ -822,7 +925,7 @@ class ClassType extends Type {
 		if @classMethods[name] is Array {
 			return @classMethods[name]
 		}
-		
+
 		return null
 	} // }}}
 	getClassProperty(name: String): Type { // {{{
@@ -835,12 +938,12 @@ class ClassType extends Type {
 	} // }}}
 	getHierarchy() { // {{{
 		const hierarchy = [@name]
-		
+
 		let class = this
 		while(class.isExtending()) {
 			hierarchy.push((class = class.extends()).name())
 		}
-		
+
 		return hierarchy
 	} // }}}
 	getInstanceMethod(name: String, arguments: Array) { // {{{
@@ -851,7 +954,7 @@ class ClassType extends Type {
 				}
 			}
 		}
-		
+
 		if @extending {
 			return @extends.getInstanceMethod(name, arguments)
 		}
@@ -863,7 +966,7 @@ class ClassType extends Type {
 		if @instanceMethods[name] is Array {
 			return @instanceMethods[name]
 		}
-		
+
 		return null
 	} // }}}
 	getInstanceProperty(name: String): Type { // {{{
@@ -884,16 +987,16 @@ class ClassType extends Type {
 		else if @extending {
 			return @extends.getInstanceVariable(name)
 		}
-		
+
 		return null
 	} // }}}
 	getMissingAbstractMethods() { // {{{
 		const abstractMethods = {}
-		
+
 		if @extending {
 			@extends.filterAbstractMethods(abstractMethods)
 		}
-		
+
 		let method, index
 		for name, methods of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
@@ -901,12 +1004,12 @@ class ClassType extends Type {
 					methods.splice(index, 1)
 				}
 			}
-			
+
 			if methods.length == 0 {
 				delete abstractMethods[name]
 			}
 		}
-		
+
 		return Object.keys(abstractMethods)
 	} // }}}
 	getProperty(name: String) => this.getClassProperty(name)
@@ -921,7 +1024,7 @@ class ClassType extends Type {
 		else if @extending {
 			return @extends.getPropertyGetter(name)
 		}
-		
+
 		return null
 	} // }}}
 	getPropertySetter(name: String) { // {{{
@@ -935,7 +1038,7 @@ class ClassType extends Type {
 		else if @extending {
 			return @extends.getPropertySetter(name)
 		}
-		
+
 		return null
 	} // }}}
 	getSealedPath(): String { // {{{
@@ -950,7 +1053,7 @@ class ClassType extends Type {
 		if @classMethods[name] is Array {
 			return true
 		}
-		
+
 		if @extending {
 			return @extends.hasClassMethod(name)
 		}
@@ -962,7 +1065,7 @@ class ClassType extends Type {
 		if @classVariables[name] is ClassVariableType {
 			return true
 		}
-		
+
 		if @extending {
 			return @extends.hasClassVariable(name)
 		}
@@ -976,7 +1079,7 @@ class ClassType extends Type {
 		if @instanceMethods[name] is Array {
 			return true
 		}
-		
+
 		if @extending {
 			return @extends.hasInstanceMethod(name)
 		}
@@ -988,7 +1091,7 @@ class ClassType extends Type {
 		if @instanceVariables[name] is ClassVariableType {
 			return true
 		}
-		
+
 		if @extending {
 			return @extends.hasInstanceVariable(name)
 		}
@@ -997,10 +1100,8 @@ class ClassType extends Type {
 		}
 	} // }}}
 	isAbstract() => @abstract
-	isAlien() => @alien
 	isAnonymous() => @anonymous
 	isClass() => true
-	isCompatible(type) => type.isClass()
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
 	isExtendable() => !@anonymous
@@ -1019,19 +1120,29 @@ class ClassType extends Type {
 			return false
 		}
 	} // }}}
-	isSealed() => @sealed
+	isMergeable(type) => type.isClass()
 	isSealedAlien() => @alien && @sealed
 	listMacros(name) => @macros[name]
-	match(b): Boolean { // {{{
-		if @name == b.name() {
-			return true
+	match(b: Type): Boolean { // {{{
+		if b is ClassType {
+			if @name == b.name() {
+				return true
+			}
+			else if b.isExtending() {
+				return this.match(b.extends())
+			}
+			else if @extending {
+				return @extends.match(b)
+			}
+			else {
+				return false
+			}
 		}
-		else if b.isExtending() {
-			return this.match(b.extends())
+		else if b is ReferenceType {
+			return b.isClass()
 		}
-		else {
-			return false
-		}
+
+		return false
 	} // }}}
 	matchArguments(arguments: Array<Type>) { // {{{
 		if @constructors.length == 0 {
@@ -1048,25 +1159,25 @@ class ClassType extends Type {
 					return true
 				}
 			}
-			
+
 			return false
 		}
 	} // }}}
-	merge(type: Type, node) { // {{{
+	merge(type: ClassType, node) { // {{{
 		for constructor in type._constructors {
 			this.addConstructor(constructor)
 		}
-		
+
 		for name, variable of type._instanceVariables {
 			this.addInstanceVariable(name, variable)
 		}
-		
+
 		for name, methods of type._instanceMethods {
 			for method in methods {
 				this.addInstanceMethod(name, method)
 			}
 		}
-		
+
 		for name, methods of type._classMethods {
 			for method in methods {
 				this.addClassMethod(name, method)
@@ -1081,13 +1192,13 @@ class ClassType extends Type {
 		if @extending {
 			@extends.toMetadata(references)
 		}
-		
+
 		references.push(this.export())
 	} // }}}
 	reference() => new ReferenceType(this, @domain)
-	replicate() { // {{{
+	replicate(:string) { // {{{
 		const that = new ClassType(@name, @domain)
-		
+
 		that._abstract = this._abstract
 		that._alien = this._alien
 		that._anonymous = this._anonymous
@@ -1098,7 +1209,7 @@ class ClassType extends Type {
 		that._namespace = this._namespace
 		that._parentName = this._parentName
 		that._sealed = this._sealed
-		
+
 		for name, methods of this._abstractMethods {
 			that._abstractMethods[name] = [].concat(methods)
 		}
@@ -1111,27 +1222,31 @@ class ClassType extends Type {
 		for name, methods of this._macros {
 			that._macros[name] = [].concat(methods)
 		}
-		
+
 		for name, variable of this._classVariables {
 			that._classVariables[name] = variable
 		}
 		for name, variable of this._instanceVariables {
 			that._instanceVariables[name] = variable
 		}
-		
+
 		that._constructors.concat(this._constructors)
-		
+
 		if this._sealed {
 			that._seal = Object.clone(this._seal)
 		}
-		
+
+		if this.isRequired() {
+			that.setRequiredReference(this.reference())
+		}
+
 		@domain.replicate(@name, that)
-		
+
 		return that
 	} // }}}
 	seal() { // {{{
 		@sealed = true
-		
+
 		@seal = {
 			name: `__ks_\(@name)`
 			constructors: false
@@ -1140,6 +1255,7 @@ class ClassType extends Type {
 		}
 	} // }}}
 	sealName() => @seal.name
+	setRequiredReference(@requiredReference)
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
@@ -1161,7 +1277,7 @@ class EnumType extends Type {
 	}
 	constructor(@name, @kind = EnumKind::Number, domain: Domain) { // {{{
 		super()
-		
+
 		if @kind == EnumKind::String {
 			@type = domain.reference('String')
 		}
@@ -1190,20 +1306,21 @@ class EnumType extends Type {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	index() => @index
 	index(@index)
-	isCompatible(type) => type.isEnum()
 	isEnum() => true
+	isMergeable(type) => type.isEnum()
 	kind() => @kind
+	match(b: Type): Boolean => b.isEnum()
 	merge(type: Type, node) { // {{{
 	} // }}}
 	name() => @name
 	step(): EnumType { // {{{
 		@index++
-		
+
 		return this
 	} // }}}
 	toQuote() { // {{{
@@ -1231,35 +1348,36 @@ class FunctionType extends Type {
 		_minAfter: Number					= 0
 		_parameters: Array<ParameterType>	= []
 		_restIndex: Number					= -1
-		_returnType: Type
+		_returnType: Type					= Type.Any
 		_throws: Array<Type>				= []
 	}
 	constructor()
 	constructor(parameters: Array<ParameterType>, data, node) { // {{{
 		super()
-		
+
 		@returnType = Type.fromAST(data.type, node)
-		
+
 		let last: Type = null
-		
+
 		for parameter in parameters {
-			if last == null || !parameter._type.equals(last._type) {
-				if last != null {
-					if last._max == Infinity {
-						if @max == Infinity {
-							SyntaxException.throwTooMuchRestParameter(node)
-						}
-						else {
-							@max = Infinity
-						}
+			if last == null {
+				@parameters.push(last = parameter.clone())
+			}
+			else if !parameter._type.equals(last._type) {
+				if last._max == Infinity {
+					if @max == Infinity {
+						SyntaxException.throwTooMuchRestParameter(node)
 					}
 					else {
-						@max += last._max
+						@max = Infinity
 					}
-					
-					@min += last._min
 				}
-				
+				else {
+					@max += last._max
+				}
+
+				@min += last._min
+
 				@parameters.push(last = parameter.clone())
 			}
 			else {
@@ -1269,11 +1387,11 @@ class FunctionType extends Type {
 				else {
 					last._max += parameter._max
 				}
-				
+
 				last._min += parameter._min
 			}
 		}
-		
+
 		if last != null {
 			if last._max == Infinity {
 				if @max == Infinity {
@@ -1286,17 +1404,17 @@ class FunctionType extends Type {
 			else {
 				@max += last._max
 			}
-			
+
 			@min += last._min
 		}
-		
+
 		if data.modifiers? {
 			this.processModifiers(data.modifiers)
 		}
-		
+
 		if data.throws? {
 			let type
-			
+
 			for throw in data.throws {
 				if (type ?= Type.fromAST(throw, node).dereference()) && type is ClassType {
 					@throws.push(type)
@@ -1306,14 +1424,14 @@ class FunctionType extends Type {
 				}
 			}
 		}
-		
+
 		this.updateArguments()
 	} // }}}
 	absoluteMax() => @async ? @max + 1 : @max
 	absoluteMin() => @async ? @min + 1 : @min
 	addParameter(type: Type, min = 1, max = 1) { // {{{
 		let last
-		
+
 		if @parameters.length == 0 {
 			@parameters.push(new ParameterType(type, min, max))
 		}
@@ -1324,29 +1442,29 @@ class FunctionType extends Type {
 			else {
 				last._max += max
 			}
-			
+
 			last._min += min
 		}
-		
+
 		if @hasRest {
 			@max += max
-			
+
 			@minAfter += min
 			@maxAfter += max
 		}
 		else if max == Infinity {
 			@max = Infinity
-			
+
 			@restIndex = @parameters.length - 1
 			@hasRest = true
 		}
 		else {
 			@max += max
-			
+
 			@minBefore += min
 			@maxBefore += max
 		}
-		
+
 		@min += min
 	} // }}}
 	async() { // {{{
@@ -1359,26 +1477,35 @@ class FunctionType extends Type {
 		else if b is not FunctionType {
 			return false
 		}
-		
+
 		if @async != b._async || @hasRest != b._hasRest || @max != b._max || @min != b._min || @restIndex != b._restIndex || @parameters.length != b._parameters.length {
 			return false
 		}
-		
+
 		for parameter, index in @parameters {
 			if !parameter.equals(b._parameters[index]) {
 				return false
 			}
 		}
-		
+
 		return true
 	} // }}}
-	export() => { // {{{
-		async: @async
-		min: @min
-		max: @max
-		parameters: [parameter.export() for parameter in @parameters]
-		returns: @returnType.export()
-		throws: [throw.reference().export() for throw in @throws]
+	export() { // {{{
+		if @referenceIndex == -1 {
+			return {
+				async: @async
+				min: @min
+				max: @max
+				parameters: [parameter.export() for parameter in @parameters]
+				returns: @returnType.export()
+				throws: [throw.reference().export() for throw in @throws]
+			}
+		}
+		else {
+			return {
+				reference: @referenceIndex
+			}
+		}
 	} // }}}
 	getProperty(name: String) => Type.Any
 	index() => @index
@@ -1390,10 +1517,23 @@ class FunctionType extends Type {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	isFunction() => true
+	match(b: Type): Boolean { // {{{
+		if b is ReferenceType {
+			return b.isFunction()
+		}
+		else if b is FunctionType {
+			return this.matchArguments(b._parameters) && @returnType.match(b._returnType)
+		}
+		else if b is OverloadedFunctionType {
+			throw new NotImplementedException()
+		}
+
+		return false
+	} // }}}
 	matchArguments(arguments: Array<Type>) { // {{{
 		if arguments.length == 0 {
 			return @min == 0
@@ -1402,78 +1542,78 @@ class FunctionType extends Type {
 			if @parameters.length != arguments.length {
 				return false
 			}
-			
+
 			for parameter, i in @parameters {
-				if !parameter.matchArgument(arguments[i]) {
+				if !parameter.match(arguments[i]) {
 					return false
 				}
 			}
-			
+
 			return true
 		}
 		else {
 			if !(@min <= arguments.length <= @max) {
 				return false
 			}
-			
+
 			if arguments.length == 0 {
 				return true
 			}
 			else if @parameters.length == 1 {
 				const parameter = @parameters[0]
-				
+
 				for argument in arguments {
 					if !parameter.matchArgument(argument) {
 						return false
 					}
 				}
-				
+
 				return true
 			}
 			else if @hasRest {
 				let a = 0
 				let b = arguments.length - 1
-				
+
 				for i from @parameters.length - 1 til @restIndex by -1 {
 					parameter = @parameters[i]
-					
+
 					for j from 0 til parameter.min() {
 						if !parameter.matchArgument(arguments[b]) {
 							return false
 						}
-						
+
 						--b
 					}
 				}
-				
+
 				let optional = @maxBefore - @minBefore
-				
+
 				for i from 0 til @restIndex {
 					parameter = @parameters[i]
-					
+
 					for j from 0 til parameter.min() {
 						if !parameter.matchArgument(arguments[a]) {
 							return false
 						}
-						
+
 						++a
 					}
-					
+
 					for j from parameter.min() til parameter.max() while optional != 0 when parameter.matchArgument(arguments[a]) {
 						++a
 						--optional
 					}
 				}
-				
+
 				parameter = @parameters[@restIndex]
 				for j from 0 til parameter.min() {
 					if !parameter.matchArgument(arguments[a]) {
 						return false
 					}
-					
+
 					++a
 				}
-				
+
 				return true
 			}
 			else if arguments.length == @parameters.length {
@@ -1482,12 +1622,12 @@ class FunctionType extends Type {
 						return false
 					}
 				}
-				
+
 				return true
 			}
 			else if arguments.length == @max {
 				let a = -1
-				
+
 				let p
 				for parameter in @parameters {
 					for p from 0 til parameter.max() {
@@ -1496,28 +1636,28 @@ class FunctionType extends Type {
 						}
 					}
 				}
-				
+
 				return true
 			}
 			else {
 				let a = 0
 				let optional = arguments.length - @min
-				
+
 				for parameter in @parameters {
 					for i from 0 til parameter.min() {
 						if !parameter.matchArgument(arguments[a]) {
 							return false
 						}
-						
+
 						++a
 					}
-					
+
 					for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
 						++a
 						--optional
 					}
 				}
-				
+
 				return optional == 0
 			}
 		}
@@ -1568,7 +1708,6 @@ class NamespaceType extends Type {
 		_name: String
 		_namespace: ReferenceType
 		_properties: Object			= {}
-		_sealed: Boolean			= false
 		_sealName: String
 		_sealProperties: Object		= {}
 	}
@@ -1578,10 +1717,10 @@ class NamespaceType extends Type {
 	} // }}}
 	addProperty(name: String, type: Type) { // {{{
 		@properties[name] = type
-		
+
 		if @sealed {
 			@sealProperties[name] = true
-			
+
 			type.seal()
 		}
 	} // }}}
@@ -1596,9 +1735,9 @@ class NamespaceType extends Type {
 		else {
 			throw new NotSupportedException(node)
 		}
-		
+
 		@properties[data.name.name] = type
-		
+
 		if type.isSealed() {
 			@sealProperties[data.name.name] = true
 		}
@@ -1614,9 +1753,9 @@ class NamespaceType extends Type {
 		else {
 			type = Type.import(name, data, references, domain, node)
 		}
-		
+
 		@properties[name] = type
-		
+
 		if type.isSealed() {
 			@sealProperties[name] = true
 		}
@@ -1629,11 +1768,11 @@ class NamespaceType extends Type {
 			sealed: @sealed
 			properties: {}
 		}
-		
+
 		for name, value of @properties {
 			export.properties[name] = value.export()
 		}
-		
+
 		return export
 	} // }}}
 	getProperty(name: String): Type => @properties[name] ?? null
@@ -1641,29 +1780,30 @@ class NamespaceType extends Type {
 	isFlexible() => @sealed
 	isSealed() => @sealed
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
+	match(b: Type) => false
 	name() => @name
 	namespace() => @namespace
 	namespace(@namespace) => this
 	reference() => new ReferenceType(this, @domain)
-	replicate() { // {{{
+	replicate(:string) { // {{{
 		const that = new NamespaceType(@name, @domain)
-		
+
 		that._namespace = this._namespace
 		that._sealed = this._sealed
 		that._sealName = this._sealName
-		
+
 		for name, property of this._properties {
 			that._properties[name] = property
 		}
 		for name, property of this._sealProperties {
 			that._sealProperties[name] = property
 		}
-		
+
 		return that
 	} // }}}
 	seal() { // {{{
 		@sealed = true
-		
+
 		@sealName = `__ks_\(@name)`
 	} // }}}
 	sealName() => @sealName
@@ -1687,20 +1827,68 @@ class OverloadedFunctionType extends Type {
 	private {
 		_async: Boolean						= false
 		_functions: Array<FunctionType>		= []
+		_references: Array<Type>			= []
 	}
 	addFunction(type: FunctionType) { // {{{
-		@functions.push(type)
-		
-		if @functions.length == 1 {
+		if @functions.length == 0 {
 			@async = type.isAsync()
 		}
+
+		@functions.push(type)
+
+		@references.pushUniq(type)
+	} // }}}
+	addFunction(type: OverloadedFunctionType) { // {{{
+		if @functions.length == 0 {
+			@async = type.isAsync()
+		}
+
+		for fn in type.functions() {
+			@functions.push(fn)
+
+			@references.pushUniq(type)
+		}
+	} // }}}
+	addFunction(type: ReferenceType) { // {{{
+		if @functions.length == 0 {
+			@async = type.isAsync()
+		}
+
+		const fn = new FunctionType()
+		fn.addParameter(Type.Any, 0, Infinity)
+
+		@functions.push(fn)
+
+		@references.pushUniq(type)
 	} // }}}
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export() => ({ // {{{
-		functions: [function.export() for function in @functions]
-	}) // }}}
+	export() { // {{{
+		if @referenceIndex == -1 {
+			const functions = []
+
+			for reference in @references {
+				if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
+					for fn in reference.functions() {
+						functions.push(fn.export())
+					}
+				}
+				else {
+					functions.push(reference.export())
+				}
+			}
+
+			return {
+				functions: functions
+			}
+		}
+		else {
+			return {
+				reference: @referenceIndex
+			}
+		}
+	} // }}}
 	functions() => @functions
 	hasFunction(type: FunctionType) { // {{{
 		for function in @functions {
@@ -1708,11 +1896,49 @@ class OverloadedFunctionType extends Type {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	isAsync() => @async
 	isFunction() => true
+	isMergeable(type) => type is OverloadedFunctionType && @async == type.isAsync()
+	match(b: Type): Boolean { // {{{
+		if b is ReferenceType {
+			return b.isFunction()
+		}
+		else if b is FunctionType {
+			for fn in @functions {
+				if fn.match(b) {
+					return true
+				}
+			}
+		}
+		else if b is OverloadedFunctionType {
+			let nf
+			for fb in b.functions() {
+				nf = true
+
+				for fn in @functions while nf {
+					if fn.match(fb) {
+						nf = false
+					}
+				}
+
+				if nf {
+					return false
+				}
+			}
+
+			return true
+		}
+
+		return false
+	} // }}}
+	merge(type: OverloadedFunctionType, node) { // {{{
+		for fn in type.functions() {
+			this.addFunction(fn)
+		}
+	} // }}}
 	toQuote() { // {{{
 		throw new NotImplementedException()
 	} // }}}
@@ -1736,7 +1962,7 @@ class ParameterType extends Type {
 		if b is not ParameterType {
 			return false
 		}
-		
+
 		return @min == b.min() && @max == b.max() && @type.equals(b.type())
 	} // }}}
 	export() => { // {{{
@@ -1749,17 +1975,14 @@ class ParameterType extends Type {
 		if @min != b._min || @max != b._max {
 			return false
 		}
-		
+
 		return @type.match(b._type)
 	} // }}}
 	matchArgument(argument: Type) { // {{{
 		if @type.isAny() || argument.isAny() {
 			return true
 		}
-		
-		//console.log(@type)
-		//console.log(argument)
-		
+
 		return @type.matchArgument(argument)
 	} // }}}
 	max() => @max
@@ -1784,21 +2007,22 @@ class ReferenceType extends Type {
 	}
 	constructor() { // {{{
 		super()
-		
+
 		@name = 'Any'
 		@parameters = []
 	} // }}}
 	constructor(type: Type, @domain) { // {{{
 		super()
-		
+
 		@namespace = type.namespace()
-		
+
 		@name = type.name()
 		@parameters = []
+		@requirement = type.getRequirement()
 	} // }}}
 	constructor(name: String, @nullable = false, @parameters = [], @domain) { // {{{
 		super()
-		
+
 		@name = $types[name] ?? name
 	} // }}}
 	dereference(): Type? { // {{{
@@ -1820,16 +2044,26 @@ class ReferenceType extends Type {
 		if b is not ReferenceType {
 			return b.equals(this)
 		}
-		
+
 		if @name != b._name || @nullable != b._nullable || @parameters.length != b._parameters.length {
 			return false
 		}
-		
+
 		// TODO: test @parameters
-		
+
 		return true
 	} // }}}
 	export() { // {{{
+		if this.isRequired() {
+			return {
+				requirement: @requirement
+			}
+		}
+		else {
+			return this.exportReference()
+		}
+	} // }}}
+	private exportReference() { // {{{
 		if (type ?= this.dereference()) && type is ClassType && type.isAnonymous() {
 			return type.export()
 		}
@@ -1858,41 +2092,43 @@ class ReferenceType extends Type {
 	} // }}}
 	hashCode(): String { // {{{
 		let hash = @name
-		
+
 		if @parameters.length != 0 {
 			hash += '<'
-			
+
 			for parameter, i in @parameters {
 				if i {
 					hash += ','
 				}
-				
+
 				hash += parameter.hashCode()
 			}
-			
+
 			hash += '>'
 		}
-		
+
 		if @nullable {
 			hash += '?'
 		}
-		
+
 		return hash
 	} // }}}
 	isAny() => @name == 'Any'
 	isArray() => @name == 'Array'
+	isAsync() => false
 	isClass() => @name == 'Class'
 	isEnum() => @name == 'Enum'
+	isFunction() => @name == 'Function'
 	isInstanceOf(target: AnyType) => true
 	isInstanceOf(target: ReferenceType) { // {{{
 		if @name == target._name || target.isAny() {
 			return true
 		}
-		
+
 		if (thisClass ?= this.dereference()) && thisClass is ClassType && (targetClass ?= target.dereference()) && targetClass is ClassType {
 			return thisClass.isInstanceOf(targetClass)
 		}
-		
+
 		return false
 	} // }}}
 	isNullable() => @nullable
@@ -1906,7 +2142,7 @@ class ReferenceType extends Type {
 		else if @nullable == b._nullable {
 			a = this.unalias()
 			b = b.unalias()
-			
+
 			if a is ReferenceType {
 				if b is ReferenceType {
 					return a._name == b._name
@@ -1929,7 +2165,7 @@ class ReferenceType extends Type {
 	matchArgument(argument: Type) { // {{{
 		const a = this.unalias()
 		const b = argument.unalias()
-		
+
 		if a is ReferenceType {
 			if b is ReferenceType {
 				return a._name == b._name
@@ -1969,10 +2205,27 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	reference() => this
+	replicate(name: string) { // {{{
+		if this.isClass() {
+			const class = new ClassType(name, @domain)
+
+			class.setRequiredReference(this)
+
+			@domain.replicate(name, class)
+
+			return class
+		}
+		else {
+			return new ReferenceType(@name, @domain)
+		}
+	} // }}}
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}
 	toQuote() => `'\(@name)'`
+	toReference(references) { // {{{
+		references.push(this.exportReference())
+	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		if (variable ?= node.scope().getVariable(@name)) && variable.type() is AliasType {
 			variable.type().toTestFragments(fragments, node)
@@ -1987,13 +2240,13 @@ class ReferenceType extends Type {
 					.compile(node)
 					.code(`, \(@name)`)
 			}
-			
+
 			for parameter in @parameters {
 				fragments.code($comma)
-				
+
 				parameter.toFragments(fragments, node)
 			}
-			
+
 			fragments.code(')')
 		}
 	} // }}}
@@ -2006,18 +2259,18 @@ class UnionType extends Type {
 	}
 	constructor() { // {{{
 		super()
-		
+
 		@types = []
 	} // }}}
 	constructor(@types)
 	addType(type: Type) { // {{{
-		throw new NotImplementedException()
+		@types.push(type)
 	} // }}}
 	equals(b?): Boolean { // {{{
 		if !?b || b is not UnionType || @types.length != b._types.length {
 			return false
 		}
-		
+
 		let match = 0
 		for aType in @types {
 			for bType in b._types {
@@ -2027,7 +2280,7 @@ class UnionType extends Type {
 				}
 			}
 		}
-		
+
 		return match == @types.length
 	} // }}}
 	export() => [type.export() for type in @types]
@@ -2037,7 +2290,7 @@ class UnionType extends Type {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	isNullable() { // {{{
@@ -2046,7 +2299,7 @@ class UnionType extends Type {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	matchArgument(argument: Type) { // {{{
@@ -2055,7 +2308,7 @@ class UnionType extends Type {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	toFragments(fragments, node) { // {{{
@@ -2064,20 +2317,20 @@ class UnionType extends Type {
 	toQuote(): String { // {{{
 		const elements = [type.toQuote() for type in @types]
 		const last = elements.pop()
-		
+
 		return `\(elements.join(', ')) or \(last)`
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		fragments.code('(')
-		
+
 		for type, i in @types {
 			if i {
 				fragments.code(' || ')
 			}
-			
+
 			type.toTestFragments(fragments, node)
 		}
-		
+
 		fragments.code(')')
 	} // }}}
 	types() => @types
@@ -2098,12 +2351,13 @@ class VoidType extends Type {
 class ClassVariableType extends ReferenceType {
 	private {
 		_access: Accessibility	= Accessibility::Public
+		_alteration: Boolean		= false
 	}
 	static fromAST(data, node: AbstractNode) { // {{{
 		const domain = node.scope().domain()
-		
+
 		let type: ClassVariableType
-		
+
 		if data.type? {
 			if data.type.typeName? {
 				if data.type.properties? {
@@ -2120,7 +2374,7 @@ class ClassVariableType extends ReferenceType {
 		else {
 			type = new ClassVariableType('Any', domain)
 		}
-		
+
 		if data.modifiers? {
 			for modifier in data.modifiers {
 				if modifier.kind == ModifierKind::Private {
@@ -2131,7 +2385,7 @@ class ClassVariableType extends ReferenceType {
 				}
 			}
 		}
-		
+
 		return type
 	} // }}}
 	static import(data, references, domain: Domain, node: AbstractNode): ClassVariableType { // {{{
@@ -2142,9 +2396,9 @@ class ClassVariableType extends ReferenceType {
 		else {
 			type = new ClassVariableType(Type.import(data.type, references, domain, node))
 		}
-		
+
 		type._access = data.access
-		
+
 		return type
 	} // }}}
 	constructor(ref: ReferenceType) { // {{{
@@ -2154,39 +2408,43 @@ class ClassVariableType extends ReferenceType {
 		super(name, nullable, domain)
 	} // }}}
 	access(@access) => this
-	export() => { // {{{
+	exportReference() => { // {{{
 		access: @access
-		type: super.export()
+		type: super.exportReference()
 	} // }}}
+	flagAlteration() { // {{{
+		@alteration = true
+	} // }}}
+	isAlteration() => @alteration
 	reference() => new ReferenceType(@name, @nullable, @parameters, @domain)
 }
 
 class ClassMethodType extends FunctionType {
 	private {
 		_access: Accessibility	= Accessibility::Public
-		_sealed: Boolean		= false
+		_alteration: Boolean		= false
 	}
 	static fromAST(data, node: AbstractNode) { // {{{
 		const domain = node.scope().domain()
-		
+
 		return new ClassMethodType([Type.fromAST(parameter, domain, false, node) for parameter in data.parameters], data, node)
 	} // }}}
 	static import(data, references, domain: Domain, node: AbstractNode): ClassMethodType { // {{{
 		const type = new ClassMethodType()
-		
+
 		type._access = data.access
 		type._async = data.async
 		type._min = data.min
 		type._max = data.max
 		type._sealed = data.sealed
 		type._throws = [Type.import(throw, references, domain, node) for throw in data.throws]
-		
+
 		type._returnType = Type.import(data.returns, references, domain, node)
-		
+
 		type._parameters = [Type.import(parameter, references, domain, node) for parameter in data.parameters]
-		
+
 		type.updateArguments()
-		
+
 		return type
 	} // }}}
 	access(@access) => this
@@ -2200,27 +2458,30 @@ class ClassMethodType extends FunctionType {
 		sealed: @sealed
 		throws: [throw.reference().export() for throw in @throws]
 	} // }}}
+	flagAlteration() { // {{{
+		@alteration = true
+	} // }}}
+	isAlteration() => @alteration
 	isMatched(methods: Array<ClassMethodType>): Boolean { // {{{
 		for method in methods {
 			if method.match(this) {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
-	isSealed() => @sealed
 	match(b: ClassMethodType) { // {{{
 		if @min != b._min || @max != b._max || @async != b._async || @parameters.length != b._parameters.length {
 			return false
 		}
-		
+
 		for parameter, i in @parameters {
 			if !parameter.match(b._parameters[i]) {
 				return false
 			}
 		}
-		
+
 		return true
 	} // }}}
 	private processModifiers(modifiers) { // {{{
@@ -2240,15 +2501,12 @@ class ClassMethodType extends FunctionType {
 		}
 	} // }}}
 	returnType(@returnType)
-	seal() { // {{{
-		@sealed = true
-	} // }}}
 }
 
 class ClassMethodSetType extends OverloadedFunctionType {
 	constructor(@functions) { // {{{
 		super()
-		
+
 		for function in functions {
 			if function.isAsync() {
 				@async = true
@@ -2264,16 +2522,16 @@ class ClassConstructorType extends FunctionType {
 	}
 	static import(data, references, domain: Domain, node: AbstractNode): ClassConstructorType { // {{{
 		const type = new ClassConstructorType()
-		
+
 		type._access = data.access
 		type._min = data.min
 		type._max = data.max
-		
+
 		type._throws = [Type.import(throw, references, domain, node) for throw in data.throws]
 		type._parameters = [Type.import(parameter, references, domain, node) for parameter in data.parameters]
-		
+
 		type.updateArguments()
-		
+
 		return type
 	} // }}}
 	access(@access) => this
@@ -2305,7 +2563,7 @@ class ClassDestructorType extends FunctionType {
 	}
 	constructor(data, node) { // {{{
 		super([], data, node)
-		
+
 		@min = 1
 		@max = 1
 	} // }}}
@@ -2330,12 +2588,9 @@ class ClassDestructorType extends FunctionType {
 }
 
 class NamespaceVariableType extends ReferenceType {
-	private {
-		_sealed: Bololean	= false
-	}
 	static fromAST(data, node: AbstractNode) { // {{{
 		const type = new NamespaceVariableType(Type.fromAST(data.type, node):ReferenceType)
-		
+
 		if data.modifiers? {
 			for modifier in data.modifiers {
 				if modifier.kind == ModifierKind::Sealed {
@@ -2343,56 +2598,49 @@ class NamespaceVariableType extends ReferenceType {
 				}
 			}
 		}
-		
+
 		return type
 	} // }}}
 	static import(data, references, domain: Domain, node: AbstractNode): NamespaceVariableType { // {{{
 		const type = new NamespaceVariableType(Type.import(data.type, references, domain, node))
-		
+
 		if data.sealed == true {
 			type._sealed = true
 		}
-		
+
 		return type
 	} // }}}
 	constructor(ref: ReferenceType) { // {{{
 		super(ref._name, ref._nullable, ref._parameters, ref._domain)
 	} // }}}
-	export() => { // {{{
+	exportReference() => { // {{{
 		sealed: @sealed
-		type: super.export()
+		type: super.exportReference()
 	} // }}}
-	isSealed() => @sealed
 	reference() => new ReferenceType(@name, @nullable, @parameters, @domain)
-	seal() { // {{{
-		@sealed = true
-	} // }}}
 }
 
 class NamespaceFunctionType extends FunctionType {
-	private {
-		_sealed: Boolean		= false
-	}
 	static fromAST(data, node: AbstractNode) { // {{{
 		const domain = node.scope().domain()
-		
+
 		return type = new NamespaceFunctionType([Type.fromAST(parameter, domain, false, node) for parameter in data.parameters], data, node)
 	} // }}}
 	static import(data, references, domain: Domain, node: AbstractNode): NamespaceFunctionType { // {{{
 		const type = new NamespaceFunctionType()
-		
+
 		type._async = data.async
 		type._min = data.min
 		type._max = data.max
 		type._sealed = data.sealed
 		type._throws = [Type.import(throw, references, domain, node) for throw in data.throws]
-		
+
 		type._returnType = Type.import(data.returns, references, domain, node)
-		
+
 		type._parameters = [Type.import(parameter, references, domain, node) for parameter in data.parameters]
-		
+
 		type.updateArguments()
-		
+
 		return type
 	} // }}}
 	export() => { // {{{
@@ -2404,7 +2652,6 @@ class NamespaceFunctionType extends FunctionType {
 		sealed: @sealed
 		throws: [throw.reference().export() for throw in @throws]
 	} // }}}
-	isSealed() => @sealed
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Async {
@@ -2415,9 +2662,6 @@ class NamespaceFunctionType extends FunctionType {
 			}
 		}
 	} // }}}
-	seal() { // {{{
-		@sealed = true
-	} // }}}
 }
 
 class SealedReferenceType extends ReferenceType {
@@ -2427,9 +2671,9 @@ class SealedReferenceType extends ReferenceType {
 	constructor(node: AbstractNode) { // {{{
 		super('Any', node.scope().domain())
 	} // }}}
-	export() => { // {{{
+	exportReference() => { // {{{
 		sealed: true
-		type: super.export()
+		type: super.exportReference()
 	} // }}}
 	isSealed() => true
 }

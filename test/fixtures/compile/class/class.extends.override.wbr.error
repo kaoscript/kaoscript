@@ -1,0 +1,1 @@
+SyntaxException: Method "draw" of the class "Rectangle" has an invalid return type (line 19, file "fixtures/compile/class/class.extends.override.wbr.ks")

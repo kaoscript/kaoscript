@@ -9,12 +9,12 @@ enum DependencyKind {
 abstract class DependencyStatement extends Statement {
 	define(declaration, kind) { // {{{
 		const scope = this.greatScope()
-		
+
 		switch declaration.kind {
 			NodeKind::ClassDeclaration => {
 				const type = new ClassType(declaration.name.name, scope)
 				const variable = scope.define(declaration.name.name, true, type, this)
-				
+
 				if declaration.extends? {
 					if superVar !?= @scope.getVariable(declaration.extends.name) {
 						ReferenceException.throwNotDefined(declaration.extends.name, this)
@@ -22,21 +22,21 @@ abstract class DependencyStatement extends Statement {
 					else if superVar.type() is not ClassType {
 						TypeException.throwNotClass(declaration.extends.name, this)
 					}
-					
+
 					type.extends(superVar.type())
 				}
-				
+
 				if kind != DependencyKind::Extern {
 					variable.require()
 				}
-				
+
 				if	kind == DependencyKind::Extern ||
 					kind == DependencyKind::ExternOrRequire ||
 					kind == DependencyKind::RequireOrExtern
 				{
 					type.alienize()
 				}
-				
+
 				for modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind::Abstract {
 						type.abstract()
@@ -45,101 +45,113 @@ abstract class DependencyStatement extends Statement {
 						type.seal()
 					}
 				}
-				
+
 				for member in declaration.members {
 					type.addPropertyFromAST(member, this)
 				}
-				
+
 				return variable
 			}
 			NodeKind::EnumDeclaration => {
 				let kind = EnumKind::Number
-				
+
 				if declaration.type? {
 					if Type.fromAST(declaration.type, this).isString() {
 						kind = EnumKind::String
 					}
 				}
-				
+
 				const type = new EnumType(declaration.name.name, kind, scope)
 				const variable = scope.define(declaration.name.name, true, type, this)
-				
+
 				if kind != DependencyKind::Extern {
 					variable.require()
 				}
-				
+
 				for member in declaration.members {
 					type.addElement(member.name.name)
 				}
-				
+
+				return variable
+			}
+			NodeKind::FunctionDeclaration => {
+				let type
+				if declaration.parameters? {
+					const parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
+					type = new FunctionType(parameters, declaration, this)
+				}
+				else {
+					type = new ReferenceType('Function', this.scope().domain())
+				}
+
+				const variable = scope.define(declaration.name.name, true, type, this)
+
+				if kind != DependencyKind::Extern {
+					variable.require()
+				}
+
 				return variable
 			}
 			NodeKind::NamespaceDeclaration => {
 				const type = new NamespaceType(declaration.name.name, scope)
 				const variable = scope.define(declaration.name.name, true, type, this)
-				
+
 				if kind != DependencyKind::Extern {
 					variable.require()
 				}
-				
+
 				for modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind::Sealed {
 						type.seal()
 					}
 				}
-				
+
 				for statement in declaration.statements {
 					type.addPropertyFromAST(statement, this)
 				}
-				
+
 				return variable
 			}
 			NodeKind::VariableDeclarator => {
 				let type = Type.fromAST(declaration.type, this)
-				
-				let referenced = false
-				
-				if type is ReferenceType {
-					if type.name() == 'Class' {
+
+				let instance = type is ClassType
+
+				if type is ReferenceType && type.name() == 'Class' {
+					type = new ClassType(declaration.name.name, scope)
+				}
+
+				if declaration.sealed {
+					if type is ReferenceType && type.name() == 'Class' {
 						type = new ClassType(declaration.name.name, scope)
 					}
-				}
-				else if type is ClassType {
-					referenced = true
-				}
-				
-				if declaration.sealed {
-					if type == Type.Any {
+					else if type == Type.Any {
 						type = new SealedReferenceType(this)
 					}
 					else if type is ReferenceType {
 						type = new SealedReferenceType(type)
 					}
-					else {
-						type.seal()
-					}
+
+					type.seal()
 				}
-				
-				if	type is ClassType &&
-					(
-						kind == DependencyKind::Extern ||
-						kind == DependencyKind::ExternOrRequire ||
-						kind == DependencyKind::RequireOrExtern
-					)
+
+				if	kind == DependencyKind::Extern ||
+					kind == DependencyKind::ExternOrRequire ||
+					kind == DependencyKind::RequireOrExtern
 				{
 					type.alienize()
 				}
-				
-				if referenced {
+
+				if instance {
 					type = type.reference()
 				}
-				
+
 				const variable = scope.define(declaration.name.name, true, type, this)
-				
+
 				if kind != DependencyKind::Extern {
 					variable.require()
 				}
-				
+
 				return variable
 			}
 			=> {
@@ -155,24 +167,48 @@ class ExternDeclaration extends DependencyStatement {
 	}
 	analyse() { // {{{
 		let variable
-		if @parent.includePath() != null {
-			for declaration in @data.declarations {
-				if (variable ?= @scope.getVariable(declaration.name.name)) && !variable.isPredefined() {
-					// TODO: check & merge type
+		for declaration in @data.declarations {
+			if (variable ?= @scope.getVariable(declaration.name.name)) && !variable.isPredefined() {
+				if declaration.kind == NodeKind::FunctionDeclaration {
+					let parameters
+					if declaration.parameters?.length != 0 {
+						parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
+					}
+					else {
+						parameters = [new ParameterType(Type.Any, 0, Infinity)]
+					}
+
+					const type = new FunctionType(parameters, declaration, this)
+
+					if variable.type() is FunctionType {
+						const newType = new OverloadedFunctionType()
+
+						newType.addFunction(variable.type())
+						newType.addFunction(type)
+
+						variable.type(newType)
+					}
+					else if variable.type() is OverloadedFunctionType {
+						variable.type().addFunction(type)
+					}
+					else {
+						SyntaxException.throwAlreadyDeclared(declaration.name.name, this)
+					}
 				}
-				else {
+				else if @parent.includePath() == null {
 					variable = this.define(declaration, DependencyKind::Extern)
-					
+
 					if variable.type().isSealed() && variable.type().isExtendable() {
 						@lines.push(`var \(variable.type().sealName()) = {}`)
 					}
 				}
+				else {
+					// TODO: check & merge type
+				}
 			}
-		}
-		else {
-			for declaration in @data.declarations {
+			else {
 				variable = this.define(declaration, DependencyKind::Extern)
-				
+
 				if variable.type().isSealed() && variable.type().isExtendable() {
 					@lines.push(`var \(variable.type().sealName()) = {}`)
 				}
@@ -191,21 +227,48 @@ class ExternDeclaration extends DependencyStatement {
 class RequireDeclaration extends DependencyStatement {
 	analyse() { // {{{
 		const module = this.module()
-		
-		if @parent.includePath() != null {
-			let variable
-			for declaration in @data.declarations {
-				if variable ?= @scope.getVariable(declaration.name.name) {
-					// TODO: check & merge type
+
+		let variable
+		for declaration in @data.declarations {
+			if variable ?= @scope.getVariable(declaration.name.name) {
+				if declaration.kind == NodeKind::FunctionDeclaration {
+					const requirement = module.getRequirement(declaration.name.name)
+
+					let parameters
+					if declaration.parameters?.length != 0 {
+						parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
+					}
+					else {
+						parameters = [new ParameterType(Type.Any, 0, Infinity)]
+					}
+
+					const type = new FunctionType(parameters, declaration, this)
+
+					if variable.type() is FunctionType {
+						const newType = new OverloadedFunctionType()
+
+						newType.addFunction(variable.type())
+						newType.addFunction(type)
+
+						variable.type(newType)
+						requirement.type(newType)
+					}
+					else if variable.type() is OverloadedFunctionType {
+						variable.type().addFunction(type)
+					}
+					else {
+						SyntaxException.throwAlreadyDeclared(declaration.name.name, this)
+					}
+				}
+				else if @parent.includePath() == null {
+					module.addRequirement(new StaticRequirement(declaration, this))
 				}
 				else {
-					module.require(new StaticRequirement(declaration, this))
+					// TODO: check & merge type
 				}
 			}
-		}
-		else {
-			for declaration in @data.declarations {
-				module.require(new StaticRequirement(declaration, this))
+			else {
+				module.addRequirement(new StaticRequirement(declaration, this))
 			}
 		}
 	} // }}}
@@ -218,9 +281,9 @@ class RequireDeclaration extends DependencyStatement {
 class ExternOrRequireDeclaration extends DependencyStatement {
 	analyse() { // {{{
 		const module = this.module()
-		
+
 		module.flag('Type')
-		
+
 		if @parent.includePath() != null {
 			let variable
 			for declaration in @data.declarations {
@@ -228,13 +291,13 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 					// TODO: check & merge type
 				}
 				else {
-					module.require(new EORDynamicRequirement(declaration, this))
+					module.addRequirement(new EORDynamicRequirement(declaration, this))
 				}
 			}
 		}
 		else {
 			for declaration in @data.declarations {
-				module.require(new EORDynamicRequirement(declaration, this))
+				module.addRequirement(new EORDynamicRequirement(declaration, this))
 			}
 		}
 	} // }}}
@@ -247,9 +310,9 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 class RequireOrExternDeclaration extends DependencyStatement {
 	analyse() { // {{{
 		const module = this.module()
-		
+
 		module.flag('Type')
-		
+
 		if @parent.includePath() != null {
 			let variable
 			for declaration in @data.declarations {
@@ -257,13 +320,13 @@ class RequireOrExternDeclaration extends DependencyStatement {
 					// TODO: check & merge type
 				}
 				else {
-					module.require(new ROEDynamicRequirement(declaration, this))
+					module.addRequirement(new ROEDynamicRequirement(declaration, this))
 				}
 			}
 		}
 		else {
 			for declaration in @data.declarations {
-				module.require(new ROEDynamicRequirement(declaration, this))
+				module.addRequirement(new ROEDynamicRequirement(declaration, this))
 			}
 		}
 	} // }}}
@@ -280,22 +343,26 @@ class RequireOrImportDeclaration extends Statement {
 	analyse() { // {{{
 		for declarator in @data.declarations {
 			@declarators.push(declarator = new RequireOrImportDeclarator(declarator, this))
-			
+
 			declarator.analyse()
 		}
 	} // }}}
-	prepare()
+	prepare() { // {{{
+		for declarator in @declarators {
+			declarator.prepare()
+		}
+	} // }}}
 	translate()
 	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
 
 class RequireOrImportDeclarator extends Importer {
-	analyse() { // {{{
+	prepare() { // {{{
+		super.prepare()
+
 		const module = this.module()
-		
-		this.resolve()
-		
+
 		if @count != 0 {
 			if @parent.includePath() != null {
 				let variable
@@ -304,22 +371,21 @@ class RequireOrImportDeclarator extends Importer {
 						// TODO: check & merge type
 					}
 					else {
-						module.require(new ROIDynamicRequirement(variable, this))
+						module.addRequirement(new ROIDynamicRequirement(variable, this))
 					}
 				}
 			}
 			else {
 				for :alias of @variables {
-					module.require(new ROIDynamicRequirement(@scope.getVariable(alias), this))
+					module.addRequirement(new ROIDynamicRequirement(@scope.getVariable(alias), this))
 				}
 			}
 		}
-		
+
 		if @alias != null {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
-	prepare()
 	translate()
 	metadata() => @metadata
 	toStatementFragments(fragments, mode) { // {{{
@@ -345,12 +411,13 @@ abstract class Requirement {
 	} // }}}
 	toNameFragments(fragments) { // {{{
 		fragments.code(@name)
-		
+
 		if @type.isFlexible() {
 			fragments.code(`, __ks_\(@name)`)
 		}
 	} // }}}
 	type() => @type
+	type(@type) => this
 }
 
 class StaticRequirement extends Requirement {
@@ -361,7 +428,7 @@ class StaticRequirement extends Requirement {
 	parameter() => @name
 	toParameterFragments(fragments) { // {{{
 		fragments.code(@name)
-		
+
 		if @type.isFlexible() {
 			fragments.code(`, __ks_\(@name)`)
 		}
@@ -374,28 +441,28 @@ abstract class DynamicRequirement extends Requirement {
 	}
 	constructor(variable: Variable, node) { // {{{
 		super(variable)
-		
+
 		@parameter = node.module().scope().acquireTempName()
 	} // }}}
 	constructor(data, kind, node) { // {{{
 		super(data, kind, node)
-		
+
 		@parameter = node.module().scope().acquireTempName()
 	} // }}}
 	isRequired() => false
-	parameter() => @name
+	parameter() => @parameter
 	toAssignmentFragments(fragments, index) { // {{{
 		fragments.code(`\(@name) = __ks__[\(++index)]`)
-		
+
 		if @type.isFlexible() {
 			fragments.code(`, __ks_\(@name) = __ks__[\(++index)]`)
 		}
-		
+
 		return index
 	} // }}}
 	toParameterFragments(fragments) { // {{{
 		fragments.code(@parameter)
-		
+
 		if @type.isFlexible() {
 			fragments.code(`, __ks_\(@parameter)`)
 		}
@@ -411,7 +478,7 @@ class EORDynamicRequirement extends DynamicRequirement {
 			.newControl()
 			.code(`if(Type.isValue(\(@name)))`)
 			.step()
-		
+
 		if @type.isFlexible() {
 			ctrl
 				.line(`return [\(@name), typeof __ks_\(@name) === "undefined" ? {} : __ks_\(@name)]`)
@@ -428,7 +495,7 @@ class EORDynamicRequirement extends DynamicRequirement {
 				.step()
 				.line(`return [\(@parameter)]`)
 		}
-		
+
 		ctrl.done()
 	} // }}}
 	toManyAltFragments(fragments) { // {{{
@@ -436,7 +503,7 @@ class EORDynamicRequirement extends DynamicRequirement {
 			.newControl()
 			.code(`if(Type.isValue(\(@name)))`)
 			.step()
-		
+
 		if @type.isFlexible() {
 			ctrl
 				.line(`req.push(\(@name), typeof __ks_\(@name) === "undefined" ? {} : __ks_\(@name))`)
@@ -453,7 +520,7 @@ class EORDynamicRequirement extends DynamicRequirement {
 				.step()
 				.line(`req.push(\(@parameter))`)
 		}
-		
+
 		ctrl.done()
 	} // }}}
 }
@@ -467,7 +534,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 			.newControl()
 			.code(`if(Type.isValue(\(@parameter)))`)
 			.step()
-		
+
 		if @type.isFlexible() {
 			ctrl
 				.line(`return [\(@parameter), __ks_\(@parameter)]`)
@@ -484,7 +551,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 				.step()
 				.line(`return [\(@name)]`)
 		}
-		
+
 		ctrl.done()
 	} // }}}
 	toManyAltFragments(fragments) { // {{{
@@ -492,7 +559,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 			.newControl()
 			.code(`if(Type.isValue(\(@parameter)))`)
 			.step()
-		
+
 		if @type.isFlexible() {
 			ctrl
 				.line(`req.push(\(@parameter), __ks_\(@parameter))`)
@@ -509,7 +576,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 				.step()
 				.line(`req.push(\(@name))`)
 		}
-		
+
 		ctrl.done()
 	} // }}}
 }
@@ -520,7 +587,7 @@ class ROIDynamicRequirement extends DynamicRequirement {
 	}
 	constructor(variable: Variable, importer) { // {{{
 		super(variable, @importer = importer)
-		
+
 		variable.require()
 	} // }}}
 	toLoneAltFragments(fragments) { // {{{
@@ -528,16 +595,16 @@ class ROIDynamicRequirement extends DynamicRequirement {
 			.newControl()
 			.code(`if(Type.isValue(\(@parameter)))`)
 			.step()
-		
+
 		if @type.isFlexible() {
 			ctrl
 				.line(`return [\(@parameter), __ks_\(@parameter)]`)
 				.step()
 				.code('else')
 				.step()
-			
+
 			@importer.toImportFragments(ctrl)
-			
+
 			ctrl.line(`return [\(@name), __ks_\(@name)]`).done()
 		}
 		else {
@@ -546,12 +613,12 @@ class ROIDynamicRequirement extends DynamicRequirement {
 				.step()
 				.code('else')
 				.step()
-			
+
 			@importer.toImportFragments(ctrl)
-			
+
 			ctrl.line(`return [\(@name)]`).done()
 		}
-		
+
 		ctrl.done()
 	} // }}}
 	toManyAltFragments(fragments) { // {{{
@@ -559,16 +626,16 @@ class ROIDynamicRequirement extends DynamicRequirement {
 			.newControl()
 			.code(`if(Type.isValue(\(@parameter)))`)
 			.step()
-		
+
 		if @type.isFlexible() {
 			ctrl
 				.line(`req.push(\(@parameter), __ks_\(@parameter))`)
 				.step()
 				.code('else')
 				.step()
-			
+
 			@importer.toImportFragments(ctrl)
-			
+
 			ctrl.line(`req.push(\(@name), __ks_\(@name))`).done()
 		}
 		else {
@@ -577,12 +644,12 @@ class ROIDynamicRequirement extends DynamicRequirement {
 				.step()
 				.code('else')
 				.step()
-			
+
 			@importer.toImportFragments(ctrl)
-			
+
 			ctrl.line(`req.push(\(@name))`).done()
 		}
-		
+
 		ctrl.done()
 	} // }}}
 }

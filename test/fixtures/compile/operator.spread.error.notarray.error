@@ -1,1 +1,0 @@
-TypeException: Spread operator require an array (line 5, file "fixtures/compile/operator.spread.error.notarray.ks")

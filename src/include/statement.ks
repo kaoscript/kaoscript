@@ -5,7 +5,7 @@ abstract class Statement extends AbstractNode {
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
-		
+
 		@options = Attribute.configure(data, parent._options, true, AttributeTarget::Statement)
 	} // }}}
 	afterward(node) { // {{{
@@ -21,9 +21,9 @@ abstract class Statement extends AbstractNode {
 			}
 			else {
 				@assignments.push(data.left.name)
-			
+
 				@scope.define(data.left.name, false, this)
-				
+
 				return [data.left.name]
 			}
 		}
@@ -39,10 +39,10 @@ abstract class Statement extends AbstractNode {
 		if variables.length != 0 {
 			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
 		}
-		
+
 		if r ?= this.toStatementFragments(fragments, mode) {
 			r.afterwards = @afterwards
-			
+
 			return r
 		}
 		else {

@@ -1,0 +1,1 @@
+TypeException: Class constructor "Foo" cannot be invoked without 'new' (line 3, file "fixtures/compile/new/new.extern.no.ks")

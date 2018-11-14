@@ -1,0 +1,1 @@
+SyntaxException: Identifier "hero" is immutable (line 7, file "fixtures/compile/for/for.supersede.in.winond.index.ks")

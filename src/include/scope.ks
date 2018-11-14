@@ -76,7 +76,7 @@ class AbstractScope {
 			while parent? && !(parent is Scope) {
 				parent = parent._parent
 			}
-			
+
 			if parent? {
 				@scopeParent = parent
 			}
@@ -84,16 +84,17 @@ class AbstractScope {
 	} // }}}
 	addMacro(name: String, macro: Macro) { // {{{
 		if @macros[name] is Array {
+			const type = macro.type()
 			let na = true
-			
+
 			for m, index in @macros[name] while na {
-				if m.type().match(macro.type()) {
+				if m.type().match(type) {
 					@macros[name].splice(index, 0, macro)
-					
+
 					na = false
 				}
 			}
-			
+
 			if na {
 				@macros[name].push(macro)
 			}
@@ -112,39 +113,39 @@ class AbstractScope {
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
-		
+
 		if $keywords[name] == true {
 			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
-			
+
 			while @variables[newName] is Variable {
 				newName = '__ks_' + name + '_' + (++index)
 			}
-			
+
 			@renamedIndexes[name] = index
 			@renamedVariables[name] = newName
 		}
-		
+
 		@variables[name] = variable
-		
+
 		return this
 	} // }}}
 	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable { // {{{
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
-		
+
 		const variable = new Variable(name, immutable, type)
-		
+
 		this.addVariable(name, variable, node)
-		
+
 		return variable
 	} // }}}
 	domain() { // {{{
 		if @domain == null {
 			@domain = new ScopeDomain(this)
 		}
-		
+
 		return @domain
 	} // }}}
 	getLocalVariable(name): Variable { // {{{
@@ -167,7 +168,7 @@ class AbstractScope {
 					}
 				}
 			}
-			
+
 			SyntaxException.throwUnmatchedMacro(data.callee.name, parent, data)
 		}
 		else {
@@ -180,7 +181,7 @@ class AbstractScope {
 					}
 				}
 			}
-			
+
 			SyntaxException.throwUnmatchedMacro(Generator.generate(data.callee), parent, data)
 		}
 	} // }}}
@@ -210,14 +211,19 @@ class AbstractScope {
 		else {
 			@parent?.removeVariable(name)
 		}
-		
+
 		return this
 	} // }}}
 	rename(name, newName = this.newRenamedVariable(name)) { // {{{
 		if newName != name {
 			@renamedVariables[name] = newName
 		}
-	
+
+		return this
+	} // }}}
+	replaceVariable(name: String, variable: Variable) { // {{{
+		@variables[name] = variable
+
 		return this
 	} // }}}
 }
@@ -225,49 +231,58 @@ class AbstractScope {
 class Scope extends AbstractScope {
 	private {
 		_anonymousClassIndex	= 0
+		_stashes				= {}
 		_tempNextIndex 			= 0
 		_tempNames				= {}
 		_tempParentNames		= {}
 	}
 	acquireTempName(statement: Statement = null) { // {{{
 		this.updateTempNames()
-		
+
 		if name ?= @scopeParent?.acquireTempNameFromKid() {
 			@tempParentNames[name] = true
-			
+
 			return name
 		}
-		
+
 		for name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
-			
+
 			return name
 		}
-		
+
 		while @tempParentNames[name = '__ks_' + @tempNextIndex] {
 			++@tempNextIndex
 		}
-		
+
 		++@tempNextIndex
-		
+
 		if statement != null {
 			statement._assignments.pushUniq(name)
 		}
-		
+
 		return name
 	} // }}}
 	private acquireTempNameFromKid() { // {{{
 		if name ?= @parent?.acquireTempNameFromKid() {
 			return name
 		}
-		
+
 		for name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
-			
+
 			return name
 		}
-		
+
 		return null
+	} // }}}
+	addStash(name, ...fn) { // {{{
+		if ?@stashes[name] {
+			@stashes[name].push(fn)
+		}
+		else {
+			@stashes[name] = [fn]
+		}
 	} // }}}
 	getAnomynousClassName() => `__ks_cls_\(@anonymousClassIndex++)`
 	getRenamedVariable(name) { // {{{
@@ -285,37 +300,60 @@ class Scope extends AbstractScope {
 		if variables[name]? {
 			let index = @renamedIndexes[name] ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
-			
+
 			while variables[newName] {
 				newName = '__ks_' + name + '_' + (++index)
 			}
-			
+
 			@renamedIndexes[name] = index
-			
+
 			return newName
 		}
 		else {
 			return name
 		}
 	} // }}}
+	processStash(name) { // {{{
+		const stash = @stashes[name]
+		if ?stash {
+			delete @stashes[name]
+
+			let variable = this.getVariable(name)
+			for let fn in stash {
+				if fn[0](variable) {
+					break
+				}
+			}
+
+			variable = this.getVariable(name)
+			for let fn in stash {
+				fn[1](variable)
+			}
+
+			return true
+		}
+		else {
+			return false
+		}
+	} // }}}
 	releaseTempName(name) { // {{{
 		if name.length > 5 && name.substr(0, 5) == '__ks_' {
 			if @scopeParent && @tempParentNames[name] {
 				@scopeParent.releaseTempNameFromKid(name)
-				
+
 				@tempParentNames[name] = false
 			}
 			else {
 				@tempNames[name] = true
 			}
 		}
-		
+
 		return this
 	} // }}}
 	private releaseTempNameFromKid(name) { // {{{
 		if @parent && @tempParentNames[name] {
 			@parent.releaseTempNameFromKid(name)
-			
+
 			@tempParentNames[name] = false
 		}
 		else {
@@ -325,7 +363,7 @@ class Scope extends AbstractScope {
 	updateTempNames() { // {{{
 		if @parent? {
 			@parent.updateTempNames()
-			
+
 			if @parent._tempNextIndex > @tempNextIndex {
 				@tempNextIndex = @parent._tempNextIndex
 			}
@@ -358,7 +396,7 @@ class XScope extends AbstractScope {
 	} // }}}
 	releaseTempName(name) { // {{{
 		@parent.releaseTempName(name)
-		
+
 		return this
 	} // }}}
 	updateTempNames() { // {{{
@@ -371,7 +409,7 @@ class ModuleScope extends Scope {
 	}
 	constructor() { // {{{
 		super()
-		
+
 		@predefined.__Array = Variable.createPredefinedClass('Array', this)
 		@predefined.__Boolean = Variable.createPredefinedClass('Boolean', this)
 		@predefined.__Class = Variable.createPredefinedClass('Class', this)
@@ -382,7 +420,7 @@ class ModuleScope extends Scope {
 		@predefined.__Object = Variable.createPredefinedClass('Object', this)
 		@predefined.__String = Variable.createPredefinedClass('String', this)
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
-		
+
 		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
 		@predefined.__null = new Variable('null', true, true, Type.Any)
 		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))

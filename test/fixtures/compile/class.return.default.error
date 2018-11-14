@@ -1,1 +1,0 @@
-TypeException: Expected returned type 'String' (line 2, file "fixtures/compile/class.return.default.ks")

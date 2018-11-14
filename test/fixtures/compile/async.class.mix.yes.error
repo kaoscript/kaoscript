@@ -1,1 +1,0 @@
-SyntaxException: Method "foo" of the class "Foo" can be neither sync nor async (line 1, file "fixtures/compile/async.class.mix.yes.ks")

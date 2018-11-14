@@ -1,0 +1,1 @@
+SyntaxException: Identifier "name" is immutable (line 3, file "fixtures/compile/variable/variable.overwrite.import.default.ks")

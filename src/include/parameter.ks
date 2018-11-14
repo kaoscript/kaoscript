@@ -5,6 +5,11 @@ enum ParameterMode {
 	OverloadedFunction
 }
 
+enum ParameterWrongDoing {
+	BadType
+	NotNullable
+}
+
 class Parameter extends AbstractNode {
 	private {
 		_anonymous: Boolean
@@ -20,7 +25,7 @@ class Parameter extends AbstractNode {
 		_type: Type
 		_variable: Variable					= null
 	}
-	static toFragments(node, fragments, mode, fn) { // {{{
+	static toFragments(node, fragments, mode, fn, wrongdoer = Parameter.toWrongDoingFragments) { // {{{
 		if node._options.parse.parameters == 'es5' {
 			return Parameter.toES5Fragments(node, fragments, fn)
 		}
@@ -28,12 +33,12 @@ class Parameter extends AbstractNode {
 			return Parameter.toES6Fragments(node, fragments, fn)
 		}
 		else {
-			return Parameter.toKSFragments(node, fragments, mode, fn)
+			return Parameter.toKSFragments(node, fragments, mode, fn, wrongdoer)
 		}
 	} // }}}
 	static toES5Fragments(node, fragments, fn) { // {{{
 		const data = node.data()
-		
+
 		for parameter, i in node.parameters() {
 			if parameter.isRest() {
 				SyntaxException.throwNoRestParameter(node)
@@ -47,28 +52,28 @@ class Parameter extends AbstractNode {
 			else if parameter.isAnonymous() {
 				SyntaxException.throwNotNamedParameter(node)
 			}
-			
+
 			fragments.code($comma) if i
-			
+
 			parameter.toParameterFragments(fragments)
 		}
-		
+
 		return fn(fragments)
 	} // }}}
 	static toES6Fragments(node, fragments, fn) { // {{{
 		const data = node.data()
 		let rest = false
-		
+
 		for parameter, i in node.parameters() {
 			if parameter.isAnonymous() {
 				SyntaxException.throwNotNamedParameter(node)
 			}
-			
+
 			fragments.code($comma) if i
-			
+
 			if parameter.isRest() {
 				parameter.toParameterFragments(fragments)
-				
+
 				rest = true
 			}
 			else if rest {
@@ -77,22 +82,22 @@ class Parameter extends AbstractNode {
 			else {
 				parameter.toParameterFragments(fragments)
 			}
-			
+
 			if parameter.hasDefaultValue() {
 				fragments.code(' = ').compile(parameter._defaultValue)
 			}
 		}
-		
+
 		return fn(fragments)
 	} // }}}
-	static toKSFragments(node, fragments, mode: ParameterMode, fn) { // {{{
+	static toKSFragments(node, fragments, mode: ParameterMode, fn, wrongdoer) { // {{{
 		const data = node.data()
 		const parameters = node.parameters()
 		const signature = node.type()
 		const async = signature.isAsync()
-		
+
 		const name = (mode == ParameterMode::Default || mode == ParameterMode::OverloadedFunction) ? 'arguments' : '__ks_arguments'
-		
+
 		let parameter, ctrl
 		let maxb = 0
 		let rb = 0
@@ -102,18 +107,18 @@ class Parameter extends AbstractNode {
 		let ra = 0
 		let fr = false
 		let rest = -1
-		
+
 		let type
 		for parameter, i in parameters {
 			type = parameter.type()
-			
+
 			if rest != -1 {
 				if type.min() != 0 {
 					ra += type.min()
 				}
-				
+
 				maxa += type.max()
-				
+
 				if parameter.isRest() {
 					fr = true
 				}
@@ -129,15 +134,15 @@ class Parameter extends AbstractNode {
 				else {
 					rb += type.min()
 				}
-				
+
 				maxb += type.max()
-				
+
 				if parameter.isRest() {
 					fr = true
 				}
 			}
 		}
-		
+
 		if async {
 			if rest != -1 {
 				++ra
@@ -148,14 +153,14 @@ class Parameter extends AbstractNode {
 				++maxb
 			}
 		}
-		
+
 		let l = rest != -1 ? rest : parameters.length
 		let context
-		
+
 		//console.log(signature)
 		//console.log(rb, ra)
 		//console.log(maxb, maxa)
-		
+
 		if	mode == ParameterMode::Default &&
 			(
 				(rest != -1 && !fr && (db == 0 || db + 1 == rest)) ||
@@ -164,39 +169,39 @@ class Parameter extends AbstractNode {
 		{ // {{{
 			for parameter, i in parameters while i < l {
 				fragments.code($comma) if i > 0
-				
+
 				parameter.toParameterFragments(fragments)
 			}
-			
+
 			if ra == 0 && rest != -1 && (parameters[rest].type().isAny() || maxa == 0) && node._options.format.parameters == 'es6' {
 				parameter = parameters[rest]
-				
+
 				fragments.code($comma) if rest > 0
-				
+
 				parameter.toParameterFragments(fragments)
 			}
 			else if async && ra == 0 {
 				fragments.code($comma) if l > 0
-				
+
 				fragments.code('__ks_cb')
 			}
-			
+
 			fragments = fn(fragments)
-			
+
 			if rb + ra > 0 {
 				if async {
 					node.module().flag('Type')
-					
+
 					if rest != -1 {
 						fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
 					}
-					
+
 					let ctrl = fragments
 						.newControl()
 						.code(`if(arguments.length < \(signature.min() + 1))`)
 						.step()
 						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
-					
+
 					if rest == -1 {
 						ctrl
 							.newControl()
@@ -221,13 +226,13 @@ class Parameter extends AbstractNode {
 							.line(`throw __ks_error`)
 							.done()
 					}
-					
+
 					ctrl
 						.step()
 						.code(`else if(!Type.isFunction(__ks_cb))`)
 						.step()
 						.line(`throw new TypeError("'callback' must be a function")`)
-					
+
 					ctrl.done()
 				}
 				else {
@@ -239,21 +244,21 @@ class Parameter extends AbstractNode {
 						.done()
 				}
 			}
-			
+
 			for parameter, i in parameters while i < l {
-				parameter.toValidationFragments(fragments)
+				parameter.toValidationFragments(fragments, wrongdoer)
 			}
-			
+
 			if rest != -1 {
 				parameter = parameters[rest]
-				
+
 				if ra > 0 {
 					if parameter._anonymous {
 						fragments.line(`\($runtime.scope(node)) __ks_i = arguments.length > \(maxb + ra) ? arguments.length - \(ra) : \(maxb)`)
 					}
 					else {
 						fragments.line($runtime.scope(node), '__ks_i')
-						
+
 						if parameter.type().isAny() {
 							fragments
 								.newLine()
@@ -279,14 +284,14 @@ class Parameter extends AbstractNode {
 					else {
 						fragments.line($runtime.scope(node), '__ks_i = -1')
 					}
-				
+
 					if parameter._anonymous {
 						ctrl = fragments
 							.newControl()
 							.code('while(')
-						
+
 						parameter.type().toTestFragments(ctrl, new Literal(false, node, node.scope(), 'arguments[++__ks_i]'))
-						
+
 						ctrl
 							.code(')')
 							.step()
@@ -299,23 +304,23 @@ class Parameter extends AbstractNode {
 							.compile(parameter)
 							.code(' = []')
 							.done()
-						
+
 						ctrl = fragments
 							.newControl()
 							.code('while(')
-						
+
 						parameter.type().toTestFragments(ctrl, new Literal(false, node, node.scope(), 'arguments[++__ks_i]'))
-						
+
 						ctrl
 							.code(')')
 							.step()
-						
+
 						ctrl
 							.newLine()
 							.compile(parameter)
 							.code('.push(arguments[__ks_i])')
 							.done()
-						
+
 						ctrl.done()
 					}
 				}
@@ -327,7 +332,7 @@ class Parameter extends AbstractNode {
 						.code($equals, `Array.prototype.slice.call(arguments, \(maxb), arguments.length)`)
 						.done()
 				}
-				
+
 				if parameter.hasDefaultValue() {
 					ctrl = fragments
 						.newControl()
@@ -335,17 +340,17 @@ class Parameter extends AbstractNode {
 						.compile(parameter)
 						.code('.length === 0)')
 						.step()
-					
+
 					ctrl
 						.newLine()
 						.compile(parameter)
 						.code($equals)
 						.compile(parameter._defaultValue)
 						.done()
-					
+
 					ctrl.done()
 				}
-				
+
 				if (arity ?= parameter.arity()) && arity.min > 0 {
 					ctrl = fragments
 						.newControl()
@@ -353,7 +358,7 @@ class Parameter extends AbstractNode {
 						.compile(parameter)
 						.code(`.length < \(arity.min))`)
 						.step()
-					
+
 					if async {
 						ctrl
 							.newLine()
@@ -370,7 +375,7 @@ class Parameter extends AbstractNode {
 							.code(`.length + " for at least \(arity.min))")`)
 							.done()
 					}
-					
+
 					ctrl.done()
 				}
 			}
@@ -382,21 +387,21 @@ class Parameter extends AbstractNode {
 			else if mode == ParameterMode::HybridConstructor {
 				fragments.code(name)
 			}
-			
+
 			fragments = fn(fragments)
-			
+
 			if rb + ra > 0 {
 				if async {
 					node.module().flag('Type')
-					
+
 					fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
-					
+
 					let ctrl = fragments
 						.newControl()
 						.code(`if(arguments.length < \(signature.min() + 1))`)
 						.step()
 						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
-					
+
 					ctrl
 						.newControl()
 						.code(`if(Type.isFunction(__ks_cb))`)
@@ -407,13 +412,13 @@ class Parameter extends AbstractNode {
 						.step()
 						.line(`throw __ks_error`)
 						.done()
-					
+
 					ctrl
 						.step()
 						.code(`else if(!Type.isFunction(__ks_cb))`)
 						.step()
 						.line(`throw new TypeError("'callback' must be a function")`)
-					
+
 					ctrl.done()
 				}
 				else if mode == ParameterMode::Default || mode == ParameterMode::ArrowFunction {
@@ -425,9 +430,9 @@ class Parameter extends AbstractNode {
 						.done()
 				}
 			}
-			
+
 			fragments.line($runtime.scope(node), '__ks_i = -1')
-			
+
 			context = {
 				name: name
 				required: rb
@@ -436,14 +441,14 @@ class Parameter extends AbstractNode {
 				length: data.parameters.length
 				async: async
 			}
-			
+
 			for i from 0 til l {
-				parameters[i].toBeforeRestFragments(fragments, context, i)
+				parameters[i].toBeforeRestFragments(fragments, context, i, wrongdoer)
 			}
-			
+
 			if rest != -1 { // {{{
 				parameter = parameters[rest]
-				
+
 				if ra > 0 {
 					if parameter._anonymous {
 						if l + 1 < data.parameters.length {
@@ -462,7 +467,7 @@ class Parameter extends AbstractNode {
 							.compile(parameter)
 							.code(` = \(name).length > __ks_i + \(ra + 1) ? Array.prototype.slice.call(\(name), __ks_i + 1, \(name).length - \(ra)) : []`)
 							.done()
-						
+
 						if l + 1 < data.parameters.length {
 							fragments
 								.newLine()
@@ -481,7 +486,7 @@ class Parameter extends AbstractNode {
 							.compile(parameter)
 							.code(` = \(name).length > ++__ks_i ? Array.prototype.slice.call(\(name), __ks_i, __ks_i = \(name).length) : []`)
 							.done()
-						
+
 						if !parameter.type().isAny() && l + 1 < data.parameters.length {
 							fragments
 								.newLine()
@@ -494,10 +499,10 @@ class Parameter extends AbstractNode {
 				}
 			} // }}}
 		} // }}}
-		
+
 		if ra != 0 || maxa != 0 { // {{{
 			parameter = parameters[rest]
-			
+
 			if ra != maxa && !parameter.type().isAny() {
 				if ra {
 					fragments.line($runtime.scope(node), '__ks_m = __ks_i + ', ra)
@@ -506,7 +511,7 @@ class Parameter extends AbstractNode {
 					fragments.line($runtime.scope(node), '__ks_m = __ks_i')
 				}
 			}
-			
+
 			context = {
 				name: name
 				any: parameter.type().isAny()
@@ -514,40 +519,70 @@ class Parameter extends AbstractNode {
 				temp: context? ? context.temp : false
 				length: parameters.length
 			}
-			
+
 			for i from rest + 1 til parameters.length {
-				parameters[i].toAfterRestFragments(fragments, context, i)
+				parameters[i].toAfterRestFragments(fragments, context, i, wrongdoer)
 			}
 		} // }}}
-		
+
 		return fragments
+	} // }}}
+	static toWrongDoingFragments(fragments, wrongdoing, data) { // {{{
+		switch wrongdoing {
+			ParameterWrongDoing::BadType => {
+				if data.name? {
+					if data.async {
+						fragments.line(`return __ks_cb(new TypeError("'\(data.name)' is not of type \(data.type.toQuote())"))`)
+					}
+					else {
+						fragments.line(`throw new TypeError("'\(data.name)' is not of type \(data.type.toQuote())")`)
+					}
+				}
+				else {
+					if data.async {
+						fragments.line(`return __ks_cb(new TypeError("anonymous argument is not of type \(data.type.toQuote())"))`)
+					}
+					else {
+						fragments.line(`throw new TypeError("anonymous argument is not of type \(data.type.toQuote())")`)
+					}
+				}
+			}
+			ParameterWrongDoing::NotNullable => {
+				if data.async {
+					fragments.line(`return __ks_cb(new TypeError("'\(data.name)' is not nullable"))`)
+				}
+				else {
+					fragments.line(`throw new TypeError("'\(data.name)' is not nullable")`)
+				}
+			}
+		}
 	} // }}}
 	analyse() { // {{{
 		@anonymous = !?@data.name
-		
+
 		if @data.defaultValue? {
 			@defaultValue = $compile.expression(@data.defaultValue, @parent)
 			@hasDefaultValue = true
-			
+
 			@defaultValue.analyse()
 		}
-		
+
 		if @anonymous {
 			const name = @scope.acquireTempName()
-			
+
 			@variable = @scope.define(name, false, this)
-			
+
 			@name = $compile.expression($ast.identifier(name), @parent)
 		}
 		else {
 			@variable = @scope.define(@data.name.name, false, this)
-			
+
 			@name = $compile.expression(@data.name, @parent)
 		}
 	} // }}}
 	prepare() { // {{{
 		let type: Type = null
-		
+
 		if @parent.isInstanceMethod() {
 			if !@anonymous {
 				for modifier in @data.modifiers {
@@ -558,14 +593,14 @@ class Parameter extends AbstractNode {
 						@thisAlias = true
 					}
 				}
-				
+
 				if @thisAlias {
 					const alias = new AliasStatement(@data.name.name, @setterAlias, this)
-					
+
 					type = alias.type().reference()
 				}
 			}
-			
+
 			type ??= Type.fromAST(@data.type, this)
 		}
 		else {
@@ -574,20 +609,20 @@ class Parameter extends AbstractNode {
 					SyntaxException.throwUnexpectedAlias(@data.name.name, this)
 				}
 			}
-			
+
 			type = Type.fromAST(@data.type, this)
 		}
-		
+
 		@nullable = type.isNullable()
-		
+
 		let min: Number = 1
 		let max: Number = 1
-		
+
 		let nf = true
 		for modifier in @data.modifiers while nf {
 			if modifier.kind == ModifierKind::Rest {
 				@rest = true
-				
+
 				if modifier.arity {
 					min = modifier.arity.min
 					max = modifier.arity.max
@@ -596,25 +631,25 @@ class Parameter extends AbstractNode {
 					min = 0
 					max = Infinity
 				}
-				
+
 				nf = true
 			}
 		}
-		
+
 		if @hasDefaultValue {
 			if !@nullable && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
 				@nullable = true
 			}
-			
+
 			@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && @nullable
-			
+
 			@defaultValue.prepare()
-			
+
 			min = 0
 		}
-		
+
 		@type = new ParameterType(type, min, max)
-		
+
 		@variable.type(@rest ? Type.arrayOf(type, @scope) : type)
 	} // }}}
 	translate() { // {{{
@@ -630,7 +665,7 @@ class Parameter extends AbstractNode {
 				}
 			}
 		}
-		
+
 		return null
 	} // }}}
 	hasDefaultValue() => @hasDefaultValue
@@ -645,9 +680,9 @@ class Parameter extends AbstractNode {
 	} // }}}
 	toParameterFragments(fragments) { // {{{
 		fragments.code('...') if @rest
-		
+
 		fragments.compile(@name)
-		
+
 		if @maybeHeadedDefaultValue {
 			if @hasDefaultValue {
 				fragments.code($equals).compile(@defaultValue)
@@ -656,55 +691,53 @@ class Parameter extends AbstractNode {
 				fragments.code(' = null')
 			}
 		}
-		
+
 		@header = true
 	} // }}}
-	toValidationFragments(fragments) { // {{{
+	toValidationFragments(fragments, wrongdoer) { // {{{
 		const async = @parent.type().isAsync()
-		
+
 		if @anonymous {
 			if !@type.type().isAny() && !@hasDefaultValue {
 				let ctrl = fragments
 					.newControl()
 					.code('if(')
-				
+
 				if @nullable {
 					ctrl.compile(@name).code(' !== null && ')
 				}
-				
+
 				ctrl.code('!')
-				
+
 				@variable.type().toTestFragments(ctrl, this)
-				
+
 				ctrl
 					.code(')')
 					.step()
-				
-				if async {
-					ctrl.line(`return __ks_cb(new TypeError("anonymous argument is not of type \(@type().toQuote())"))`)
-				}
-				else {
-					ctrl.line(`throw new TypeError("anonymous argument is not of type \(@type().toQuote())")`)
-				}
-				
+
+				wrongdoer(ctrl, ParameterWrongDoing::BadType, {
+					async: async
+					type: @type
+				})
+
 				ctrl.done()
 			}
 		}
 		else {
 			let ctrl = null
-			
+
 			if @hasDefaultValue {
 				if !@header || !@maybeHeadedDefaultValue {
 					ctrl = fragments
 						.newControl()
 						.code('if(').compile(@name).code(' === void 0')
-					
+
 					if !@nullable {
 						ctrl.code(' || ').compile(@name).code(' === null')
 					}
-					
+
 					ctrl.code(')').step()
-					
+
 					ctrl
 						.newLine()
 						.compile(@name)
@@ -715,7 +748,7 @@ class Parameter extends AbstractNode {
 			}
 			else {
 				ctrl = fragments.newControl()
-				
+
 				if @nullable {
 					ctrl.code('if(').compile(@name).code(' === void 0').code(')')
 						.step()
@@ -727,16 +760,14 @@ class Parameter extends AbstractNode {
 					ctrl
 						.code('if(').compile(@name).code(' === void 0').code(' || ').compile(@name).code(' === null').code(')')
 						.step()
-					
-					if async {
-						ctrl.line(`return __ks_cb(new TypeError("'\(@variable.name())' is not nullable"))`)
-					}
-					else {
-						ctrl.line(`throw new TypeError("'\(@variable.name())' is not nullable")`)
-					}
+
+					wrongdoer(ctrl, ParameterWrongDoing::NotNullable, {
+						async: async
+						name: @variable.name()
+					})
 				}
 			}
-			
+
 			if @rest {
 				if !@variable.type().parameter().isAny() {
 					throw new NotImplementedException(this)
@@ -749,35 +780,34 @@ class Parameter extends AbstractNode {
 				else {
 					ctrl = fragments.newControl()
 				}
-				
+
 				ctrl.code('if(')
-				
+
 				if @nullable {
 					ctrl.compile(@name).code(' !== null && ')
 				}
-				
+
 				ctrl.code('!')
-				
+
 				@variable.type().toTestFragments(ctrl, this)
-				
+
 				ctrl
 					.code(')')
 					.step()
-				
-				if async {
-					ctrl.line(`return __ks_cb(new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())"))`)
-				}
-				else {
-					ctrl.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
-				}
+
+				wrongdoer(ctrl, ParameterWrongDoing::BadType, {
+					async: async
+					name: @variable.name()
+					type: @type
+				})
 			}
-			
+
 			if ctrl != null {
 				ctrl.done()
 			}
 		}
 	} // }}}
-	toAfterRestFragments(fragments, context, index) { // {{{
+	toAfterRestFragments(fragments, context, index, wrongdoer) { // {{{
 		if arity ?= this.arity() {
 			if @anonymous {
 				throw new NotImplementedException(this)
@@ -790,7 +820,7 @@ class Parameter extends AbstractNode {
 						.compile(@name)
 						.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, __ks_i + \(arity.min + 1))`)
 						.done()
-					
+
 					if index + 1 < context.length {
 						fragments
 							.newLine()
@@ -821,20 +851,20 @@ class Parameter extends AbstractNode {
 				if @type.isAny() {
 					if !context.temp {
 						fragments.line(`\($runtime.scope(this))__ks__`)
-						
+
 						context.temp = true
 					}
-					
+
 					let line = fragments
 						.newLine()
 						.code($runtime.scope(this))
 						.compile(@name)
 						.code(` = \(context.name).length > __ks_m && (__ks__ = \(context.name)[\(context.increment ? '++' : '')__ks_i]) !== void 0`)
-					
+
 					if !@nullable {
 						line.code(' && __ks__ !== null')
 					}
-					
+
 					line
 						.code(' ? __ks__ : ')
 						.compile(@defaultValue)
@@ -843,33 +873,33 @@ class Parameter extends AbstractNode {
 				else {
 					if !context.temp {
 						fragments.line(`\($runtime.scope(this))__ks__`)
-						
+
 						context.temp = true
 					}
-					
+
 					let line = fragments
 						.newLine()
 						.code($runtime.scope(this))
 						.compile(@name)
 						.code(` = \(context.name).length > __ks_m && (__ks__ = \(context.name)[__ks_i\(context.increment ? ' + 1' : '')]) !== void 0 && `)
-					
+
 					if @nullable {
 						line.code('(__ks__ === null || ')
-						
+
 						@type.toTestFragments(line, new Literal(false, this, @scope, '__ks__'))
-						
+
 						line.code(')')
 					}
 					else {
 						@type.toTestFragments(line, new Literal(false, this, @scope, '__ks__'))
 					}
-					
+
 					line
 						.code(context.increment ? ' ? (++__ks_i, __ks__) : ' : ' ? __ks__ : ')
 						.compile(@defaultValue)
 						.done()
 				}
-				
+
 				context.increment = true
 			}
 		}
@@ -884,17 +914,17 @@ class Parameter extends AbstractNode {
 					.compile(@name)
 					.code(` = \(context.name)[`, context.increment ? '++' : '', '__ks_i]')
 					.done()
-				
-				this.toValidationFragments(fragments)
+
+				this.toValidationFragments(fragments, wrongdoer)
 			}
-			
+
 			context.increment = true
 		}
 	} // }}}
-	toBeforeRestFragments(fragments, context, index) { // {{{
+	toBeforeRestFragments(fragments, context, index, wrongdoer) { // {{{
 		if arity ?= this.arity() {
 			context.required -= arity.min
-			
+
 			if @anonymous {
 				throw new NotImplementedException(this)
 			}
@@ -916,7 +946,7 @@ class Parameter extends AbstractNode {
 							.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, Math.min(\(context.name).length, __ks_i + \(arity.max + 1)))`)
 							.done()
 					}
-					
+
 					if index + 1 < context.length {
 						fragments
 							.newLine()
@@ -930,7 +960,7 @@ class Parameter extends AbstractNode {
 					throw new NotImplementedException(this)
 				}
 			}
-			
+
 			context.optional += arity.max - arity.min
 		}
 		else {
@@ -938,20 +968,20 @@ class Parameter extends AbstractNode {
 				if @type.isAny() {
 					if !context.temp {
 						fragments.line(`\($runtime.scope(this))__ks__`)
-						
+
 						context.temp = true
 					}
-					
+
 					let line = fragments
 						.newLine()
 						.code($runtime.scope(this))
 						.compile(@name)
 						.code(` = \(context.name).length > \(context.optional) && (__ks__ = \(context.name)[++__ks_i]) !== void 0`)
-					
+
 					if !@nullable {
 						line.code(' && __ks__ !== null')
 					}
-					
+
 					line
 						.code(' ? __ks__ : ')
 						.compile(@defaultValue)
@@ -963,74 +993,72 @@ class Parameter extends AbstractNode {
 						.code($runtime.scope(this))
 						.compile(@name)
 						.done()
-					
+
 					let ctrl = fragments
 						.newControl()
 						.code(`if(\(context.name).length > \(context.optional) && (`)
 						.compile(@name)
 						.code(` = \(context.name)[++__ks_i]) !== void 0`)
-					
+
 					if !@nullable {
 						ctrl.code(' && ').compile(@name).code(' !== null')
 					}
-					
+
 					ctrl.code(')').step()
-					
+
 					if @nullable {
 						let ctrl2 =	ctrl
 							.newControl()
 							.code('if(')
 							.compile(@name)
 							.code(' !== null && !')
-						
+
 						@type.toTestFragments(ctrl2, this)
-						
+
 						ctrl2
 							.code(')')
 							.step()
-						
-						if context.async {
-							ctrl2.line(`return __ks_cb(new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())"))`)
-						}
-						else {
-							ctrl2.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
-						}
-						
+
+						wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
+							async: context.async
+							name: @variable.name()
+							type: @type
+						})
+
 						ctrl2.done()
 					}
 					else {
 						let ctrl2 =	ctrl
 							.newControl()
 							.code('if(!')
-						
+
 						@type.toTestFragments(ctrl2, this)
-						
+
 						ctrl2
 							.code(')')
 							.step()
-						
-						if context.async {
-							ctrl2.line(`return __ks_cb(new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())"))`)
-						}
-						else {
-							ctrl2.line(`throw new TypeError("'\(@variable.name())' is not of type \(@type.toQuote())")`)
-						}
-						
+
+						wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
+							async: context.async
+							name: @variable.name()
+							type: @type
+						})
+
 						ctrl2.done()
 					}
-					
+
 					ctrl.step().code('else').step()
-					
+
 					ctrl
 						.newLine()
 						.compile(@name)
 						.code($equals)
 						.compile(@defaultValue)
 						.done()
-					
+
 					ctrl.done()
 				}
-				
+
 				++context.optional
 			}
 			else {
@@ -1045,8 +1073,8 @@ class Parameter extends AbstractNode {
 							.compile(@name)
 							.code(` = \(context.name)[++__ks_i]`)
 							.done()
-						
-						this.toValidationFragments(fragments)
+
+						this.toValidationFragments(fragments, wrongdoer)
 					}
 				}
 				else {
@@ -1056,10 +1084,10 @@ class Parameter extends AbstractNode {
 						.compile(@name)
 						.code(` = \(context.name)[++__ks_i]`)
 						.done()
-					
-					this.toValidationFragments(fragments)
+
+					this.toValidationFragments(fragments, wrongdoer)
 				}
-				
+
 				--context.required
 			}
 		}
@@ -1077,11 +1105,11 @@ class AliasStatement extends Statement {
 	}
 	constructor(@name, @setter, @parameter) { // {{{
 		super({}, parameter.parent())
-		
+
 		parameter.parent().addAliasStatement(this)
-		
+
 		const class = parameter.parent().parent().type()
-		
+
 		if setter {
 			if @type !?= class.getPropertySetter(name) {
 				ReferenceException.throwNotDefinedMember(name, @parameter)

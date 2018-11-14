@@ -1,0 +1,1 @@
+ReferenceException: Element "Z" is not defined in enum "Kind" (line 7, file "fixtures/compile/enum/enum.error.notdecl.ks")

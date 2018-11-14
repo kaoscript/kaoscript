@@ -1,1 +1,0 @@
-SyntaxException: An error "Number" is unreported, it must be caught or declared to be thrown (line 1, file "fixtures/compile/throw.default.number.ks")

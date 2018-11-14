@@ -1,1 +1,0 @@
-SyntaxException: Identifier "name" is immutable (line 3, file "fixtures/compile/variable.overwrite.extern.default.ks")

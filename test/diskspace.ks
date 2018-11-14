@@ -8,15 +8,15 @@ extern {
 
 import {
 	'chai' for expect
-	'./fixtures/compile/diskspace.module.ks'
+	'./fixtures/compile/diskspace/diskspace.module.ks'
 }
 
 describe('diskspace', func() {
 	it('print', func(done) { // {{{
 		let d = await disks()
-		
+
 		console.log(d)
-		
+
 		done()
 	}) // }}}
 })

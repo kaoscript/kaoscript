@@ -1,0 +1,79 @@
+{
+  "requirements": [
+    0,
+    "Array",
+    true
+  ],
+  "exports": [
+    1,
+    "Array"
+  ],
+  "references": [
+    {
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": true,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "class": {
+        "requirement": 0
+      },
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {
+        "map": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "Array",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Function",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": true,
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": false,
+            "min": 3,
+            "max": 3,
+            "parameters": [
+              {
+                "type": "Array",
+                "min": 1,
+                "max": 1
+              },
+              {
+                "type": "Function",
+                "min": 2,
+                "max": 2
+              }
+            ],
+            "returns": "Any",
+            "sealed": true,
+            "throws": []
+          }
+        ]
+      }
+    }
+  ]
+}

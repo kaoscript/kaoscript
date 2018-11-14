@@ -1,0 +1,64 @@
+{
+  "requirements": [],
+  "exports": [
+    0,
+    "String"
+  ],
+  "references": [
+    {
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "replace": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "capitalizeWords": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": true,
+            "throws": []
+          }
+        ],
+        "classify": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": true,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ]
+}

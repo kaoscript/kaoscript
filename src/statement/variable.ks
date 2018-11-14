@@ -12,15 +12,15 @@ class VariableDeclaration extends Statement {
 	}
 	constructor(@data, @parent) { // {{{
 		super(data, parent)
-		
+
 		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
 			if parent is TryStatement {
 				@try = parent
 			}
-			
+
 			parent = parent.parent()
 		}
-		
+
 		if parent? {
 			@function = parent
 		}
@@ -29,18 +29,18 @@ class VariableDeclaration extends Statement {
 		@immutable = !@data.rebindable
 		@autotype = @immutable || @data.autotype
 		@await = @data.await
-		
+
 		if @await && !?@function && !this.module().isBinary() {
 			SyntaxException.throwInvalidAwait(this)
 		}
-		
+
 		if @data.init? {
 			@hasInit = true
-			
+
 			@init = $compile.expression(@data.init, this)
 			@init.analyse()
 		}
-		
+
 		let declarator
 		for data in @data.variables {
 			switch data.name.kind {
@@ -57,16 +57,16 @@ class VariableDeclaration extends Statement {
 					throw new NotImplementedException(this)
 				}
 			}
-			
+
 			declarator.analyse()
-			
+
 			if @toDeclareAll && declarator.isAlreadyDeclared() {
 				@toDeclareAll = false
 			}
-			
+
 			@declarators.push(declarator)
 		}
-		
+
 		if @hasInit {
 			if @declarators.length == 1 && @declarators[0] is VariableIdentifierDeclarator {
 				this.reference(@declarators[0].name())
@@ -76,15 +76,15 @@ class VariableDeclaration extends Statement {
 	prepare() { // {{{
 		if @hasInit {
 			@init.prepare()
-			
+
 			@init.acquireReusable(false)
 			@init.releaseReusable()
-			
+
 			if @autotype {
 				@declarators[0].type(@init.type())
 			}
 		}
-		
+
 		for declarator in @declarators {
 			declarator.prepare()
 		}
@@ -93,7 +93,7 @@ class VariableDeclaration extends Statement {
 		if @hasInit {
 			@init.translate()
 		}
-		
+
 		for declarator in @declarators {
 			declarator.translate()
 		}
@@ -112,35 +112,35 @@ class VariableDeclaration extends Statement {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	isImmutable() => @immutable
 	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
 		fragments.code('(__ks_e')
-		
+
 		for parameter in parameters {
 			fragments.code($comma).compile(parameter)
 		}
-		
+
 		fragments.code(') =>')
-		
+
 		const block = fragments.newBlock()
-		
+
 		for statement in statements {
 			block.compile(statement, Mode::None)
 		}
-		
+
 		block.done()
-		
+
 		fragments.code(')').done()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @await {
 			let line = fragments.newLine()
-			
+
 			@init.toFragments(line, Mode::Async)
-			
+
 			if @try? {
 				return @try.toAwaitExpressionFragments^@(line, @declarators)
 			}
@@ -155,9 +155,9 @@ class VariableDeclaration extends Statement {
 			if @hasInit {
 				const declarator = @declarators[0]
 				const binding = declarator is VariableBindingDeclarator
-				
+
 				let line = fragments.newLine()
-				
+
 				if @toDeclareAll {
 					if binding || @options.format.variables == 'es5' {
 						line.code('var ')
@@ -169,7 +169,7 @@ class VariableDeclaration extends Statement {
 						line.code('const ')
 					}
 				}
-				
+
 				if binding && @options.format.destructuring == 'es5' {
 					declarator.toFlatFragments(line, @init)
 				}
@@ -179,12 +179,12 @@ class VariableDeclaration extends Statement {
 						.code($equals)
 						.compile(@init)
 				}
-				
+
 				line.done()
 			}
 			else if @toDeclareAll {
 				let line = fragments.newLine()
-				
+
 				if @options.format.variables == 'es5' {
 					line.code('var ')
 				}
@@ -194,34 +194,34 @@ class VariableDeclaration extends Statement {
 				else {
 					line.code('const ')
 				}
-				
+
 				for declarator, index in @declarators {
 					line.code($comma) if index != 0
-					
+
 					line.compile(declarator)
 				}
-				
+
 				line.done()
 			}
 			else {
 				const toDeclare = [declarator for declarator in @declarators when !declarator.isAlreadyDeclared()]
-				
+
 				if toDeclare.length != 0 {
 					let line = fragments.newLine()
-					
+
 					if @options.format.variables == 'es5' {
 						line.code('var ')
 					}
 					else {
 						line.code('let ')
 					}
-					
+
 					for declarator, index in toDeclare {
 						line.code($comma) if index != 0
-						
+
 						line.compile(declarator)
 					}
-					
+
 					line.done()
 				}
 			}
@@ -278,25 +278,29 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	}
 	analyse() { // {{{
 		@name = @data.name.name
-		
+
 		if @scope.hasLocalVariable(@name) {
 			SyntaxException.throwAlreadyDeclared(@name, this)
 		}
-		
+
 		if @options.format.variables == 'es5' {
 			@scope.rename(@name)
 		}
-		
+
 		if @scope.hasDeclaredLocalVariable(@name) {
 			@alreadyDeclared = true
 		}
-		
-		@variable = @scope.define(@name, @parent.isImmutable(), Type.fromAST(@data.type, this), this)
-		
+
+		@variable = @scope.define(@name, @parent.isImmutable(), null, this)
+
 		@identifier = new IdentifierLiteral(@data.name, this)
 		@identifier.analyse()
 	} // }}}
 	prepare() { // {{{
+		if @data.type? {
+			@variable.type(Type.fromAST(@data.type, this))
+		}
+
 		@identifier.prepare()
 	} // }}}
 	translate() { // {{{

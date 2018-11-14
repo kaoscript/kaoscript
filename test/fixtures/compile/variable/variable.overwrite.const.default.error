@@ -1,0 +1,1 @@
+SyntaxException: Identifier "x" is immutable (line 3, file "fixtures/compile/variable/variable.overwrite.const.default.ks")

@@ -1,0 +1,1 @@
+SyntaxException: Class variable "version" is reserved (line 3, file "fixtures/compile/class/class.static.version.field.ks")

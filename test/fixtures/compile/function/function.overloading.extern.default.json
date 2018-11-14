@@ -1,0 +1,28 @@
+{
+  "requirements": [],
+  "exports": [
+    0,
+    "reverse"
+  ],
+  "references": [
+    {
+      "functions": [
+        "Function",
+        {
+          "async": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "type": "String",
+              "min": 1,
+              "max": 1
+            }
+          ],
+          "returns": "String",
+          "throws": []
+        }
+      ]
+    }
+  ]
+}

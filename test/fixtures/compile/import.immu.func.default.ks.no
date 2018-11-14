@@ -1,5 +1,0 @@
-import './function.overloading.export.ks'
-
-import './require.func.default.ks'(reverse)
-
-export reverse

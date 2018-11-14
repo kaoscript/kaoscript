@@ -1,0 +1,1 @@
+SyntaxException: An error "String" is unreported, it must be caught or declared to be thrown (line 1, file "fixtures/compile/throw/throw.default.string.ks")

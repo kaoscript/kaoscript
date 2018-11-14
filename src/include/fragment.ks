@@ -22,6 +22,10 @@ func $code(code) { // {{{
 	return new CodeFragment(code)
 } // }}}
 
+func $const(node) { // {{{
+	return node._options.format.variables == 'es5' ? 'var ' : 'const '
+} // }}}
+
 func $quote(value) { // {{{
 	return '"' + value.replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"'
 } // }}}

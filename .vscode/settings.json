@@ -1,0 +1,18 @@
+{
+	"search.exclude": {
+		"node_modules": true,
+		"**/*.ksb": true,
+		"**/*.ksh": true,
+		"**/*.ksm": true,
+		"**/*.marks": true,
+		"lib/compiler2.js": true,
+		"coverage": true
+	},
+	"files.exclude": {
+		"**/*.ksb": true,
+		"**/*.ksh": true,
+		"**/*.ksm": true,
+		"**/*.marks": true,
+		"coverage": true
+	}
+}

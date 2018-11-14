@@ -1,1 +1,0 @@
-ReferenceException: "int" is not defined (line 1, file "fixtures/compile/function.error.badtype.ks")

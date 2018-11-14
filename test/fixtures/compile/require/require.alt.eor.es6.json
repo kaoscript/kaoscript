@@ -1,0 +1,71 @@
+{
+  "requirements": [
+    0,
+    "Array",
+    false
+  ],
+  "exports": [
+    1,
+    "Array"
+  ],
+  "references": [
+    {
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "class": {
+        "requirement": 0
+      },
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "contains": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 1,
+            "max": 2,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": 2
+              }
+            ],
+            "returns": "Any",
+            "sealed": true,
+            "throws": []
+          }
+        ],
+        "pushUniq": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": "Any",
+            "sealed": true,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ]
+}

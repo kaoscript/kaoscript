@@ -2,11 +2,11 @@ extern sealed class Error
 
 Error.prepareStackTrace = func(error: Error, stack: Array) { // {{{
 	let message = error.toString()
-	
+
 	for i from 0 til stack.length {
 		message += '\n    ' + stack[i].toString()
 	}
-	
+
 	return message
 } // }}}
 
@@ -17,11 +17,11 @@ export class Exception extends Error {
 		message: String
 		name: String
 	}
-	
+
 	static {
 		validateReportedError(error: ClassType, node) { // {{{
 			let options = node._options.error
-			
+
 			if options.level == 'fatal' {
 				if !node.parent().isConsumedError(error) {
 					if options.ignore.length == 0 {
@@ -29,15 +29,15 @@ export class Exception extends Error {
 					}
 					else {
 						const hierarchy = error.getHierarchy()
-						
+
 						let nf = true
-						
+
 						for name in hierarchy while nf {
 							if options.ignore:Array.contains(name) {
 								nf = false
 							}
 						}
-						
+
 						if nf {
 							SyntaxException.throwUnreportedError(error.name(), node)
 						}
@@ -53,25 +53,25 @@ export class Exception extends Error {
 			}
 		} // }}}
 	}
-	
+
 	constructor(@message) { // {{{
 		super()
-		
+
 		@name = this.constructor.name
 	} // }}}
-	
+
 	constructor(@message, @fileName, @lineNumber) { // {{{
 		this(message)
 	} // }}}
-	
+
 	constructor(@message, node: AbstractNode) { // {{{
 		this(message, node.file(), node._data.start.line)
 	} // }}}
-	
+
 	constructor(@message, node: AbstractNode, data) { // {{{
 		this(message, node.file(), data.start.line)
 	} // }}}
-	
+
 	toString() { // {{{
 		if @lineNumber == 0 {
 			if @message.length == 0{
@@ -161,9 +161,6 @@ export class ReferenceException extends Exception {
 		} // }}}
 		throwNotDefinedProperty(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Property "\(name)" is not defined`, node)
-		} // }}}
-		throwNotMergeable(name, module, node) ~ ReferenceException { // {{{
-			throw new ReferenceException(`Local's "\(name)" and module's "\(name)" (from "\(module)") can't be merged`, node)
 		} // }}}
 		throwNotPassed(name, module, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
@@ -324,6 +321,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwNotClass(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a class`, node)
+		} // }}}
+		throwNotCompatible(varname, argname, modname, node) ~ ReferenceException { // {{{
+			throw new TypeException(`The variable "\(varname)" and the argument "\(argname)" of the module "\(modname)") aren't compatible`, node)
 		} // }}}
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)

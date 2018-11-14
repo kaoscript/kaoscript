@@ -1,6 +1,8 @@
 class Variable {
 	private {
+		// true: can be altered by `impl` declaration
 		_altereable: Boolean	= false
+		// true: the value can be set only once
 		_immutable: Boolean		= true
 		_name: String
 		_new: Boolean			= true
@@ -12,12 +14,12 @@ class Variable {
 		createPredefinedClass(name, scope) { // {{{
 			const fn = new ClassConstructorType()
 			fn.addParameter(Type.Any, 0, Infinity)
-			
+
 			type = new ClassType(name, scope)
 			type.alienize()
 			type.seal()
 			type.addConstructor(fn)
-			
+
 			return new Variable(name, true, true, type)
 		} // }}}
 		fromAST(data, scope) { // {{{
@@ -37,10 +39,11 @@ class Variable {
 	constructor(@name, @immutable, @predefined, @type)
 	isImmutable() => @immutable
 	isPredefined() => @predefined
+	isRequired() => @required
 	name() => @name
 	prepareAlteration() { // {{{
 		if @required && !@altereable {
-			@type = @type.replicate()
+			@type = @type.replicate(@name)
 			@altereable = true
 		}
 	} // }}}

@@ -1,1 +1,0 @@
-SyntaxException: Method "greet" is abstract but the class "Greetings" is not (line 1, file "fixtures/compile/class.abstract.error.noabs.ks")

@@ -5,7 +5,7 @@ class ExportDeclaration extends Statement {
 	}
 	analyse() { // {{{
 		let statement
-		
+
 		if @parent.includePath() == null {
 			for declaration in @data.declarations {
 				switch declaration.kind {
@@ -26,9 +26,9 @@ class ExportDeclaration extends Statement {
 						throw new NotImplementedException(this)
 					}
 				}
-				
+
 				statement.analyse()
-				
+
 				@statements.push(statement)
 				@declarations.push(statement)
 			}
@@ -36,18 +36,18 @@ class ExportDeclaration extends Statement {
 		else {
 			for declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
 				@statements.push(statement = $compile.statement(declaration.declaration, this))
-				
+
 				statement.analyse()
 			}
 		}
 	} // }}}
 	prepare() { // {{{
 		const recipient = @parent.recipient()
-		
+
 		for statement in @statements {
 			statement.prepare()
 		}
-		
+
 		for declaration in @declarations {
 			declaration.export(recipient)
 		}
@@ -74,10 +74,10 @@ class ExportNamedSpecifier extends AbstractNode {
 		_expression
 	}
 	analyse() { // {{{
-		@expression = $compile.expression(@data.local, @parent)
-		@expression.analyse()
 	} // }}}
 	prepare() { // {{{
+		@expression = $compile.expression(@data.local, @parent)
+		@expression.analyse()
 		@expression.prepare()
 	} // }}}
 	translate()
@@ -95,10 +95,10 @@ class ExportPropertiesSpecifier extends AbstractNode {
 		_object
 	}
 	analyse() { // {{{
-		@object = $compile.expression(@data.object, @parent)
-		@object.analyse()
 	} // }}}
 	prepare() { // {{{
+		@object = $compile.expression(@data.object, @parent)
+		@object.analyse()
 		@object.prepare()
 	} // }}}
 	translate()
@@ -115,10 +115,10 @@ class ExportWildcardSpecifier extends AbstractNode {
 		_expression
 	}
 	analyse() { // {{{
-		@expression = $compile.expression(@data.local, @parent)
-		@expression.analyse()
 	} // }}}
 	prepare() { // {{{
+		@expression = $compile.expression(@data.local, @parent)
+		@expression.analyse()
 		@expression.prepare()
 	} // }}}
 	translate()

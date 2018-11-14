@@ -1,1 +1,0 @@
-ReferenceException: Variable "foo" is being self-defined (line 1, file "fixtures/compile/variable.self.auto.ks")

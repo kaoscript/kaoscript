@@ -28,41 +28,41 @@ class CallExpression extends Expression {
 				else {
 					fragments.code('[').compile(prefill).code('].concat(')
 				}
-				
+
 				let opened = false
-				
+
 				for argument, index in arguments {
 					if argument is UnaryOperatorSpread {
 						if opened {
 							fragments.code('], ')
-							
+
 							opened = false
 						}
 						else if index != 0 {
 							fragments.code($comma)
 						}
-						
+
 						fragments.compile(argument.argument())
 					}
 					else {
 						if index != 0 {
 							fragments.code($comma)
 						}
-						
+
 						if !opened {
 							fragments.code('[')
-							
+
 							opened = true
 						}
-						
+
 						fragments.compile(argument)
 					}
 				}
-				
+
 				if opened {
 					fragments.code(']')
 				}
-				
+
 				fragments.code(')')
 			}
 		} // }}}
@@ -70,21 +70,21 @@ class CallExpression extends Expression {
 	analyse() { // {{{
 		if @data.arguments.length == 1 {
 			@arguments.push(argument = $compile.expression(@data.arguments[0], this))
-			
+
 			argument.analyse()
-			
+
 			if argument.isAwait() {
 				@await = true
 			}
 		}
 		else {
 			const es5 = @options.format.spreads == 'es5'
-			
+
 			for argument in @data.arguments {
 				@arguments.push(argument = $compile.expression(argument, this))
-				
+
 				argument.analyse()
-				
+
 				if es5 && argument is UnaryOperatorSpread {
 					@flatten = true
 				}
@@ -98,26 +98,26 @@ class CallExpression extends Expression {
 		for argument in @arguments {
 			argument.prepare()
 		}
-		
+
 		if @arguments.length == 1 {
 			if @arguments[0] is UnaryOperatorSpread && (@options.format.spreads == 'es5' || @arguments[0].argument().type().isArray()) {
 				@flatten = true
 			}
 		}
-		
+
 		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.computed {
 			@object = $compile.expression(@data.callee.object, this)
 			@object.analyse()
 			@object.prepare()
-			
+
 			@property = @data.callee.property.name
-			
+
 			this.makeMemberCallee(@object.type())
 		}
 		else {
 			if @data.callee.kind == NodeKind::Identifier && (variable ?= @scope.getVariable(@data.callee.name)) {
 				const type = variable.type()
-				
+
 				if type.isFunction() {
 					if type.isAsync() {
 						if @parent is VariableDeclaration {
@@ -140,7 +140,7 @@ class CallExpression extends Expression {
 						}
 					}
 				}
-				
+
 				if type is FunctionType {
 					this.makeCallee(type)
 				}
@@ -160,31 +160,31 @@ class CallExpression extends Expression {
 				this.addCallee(new DefaultCallee(@data, this))
 			}
 		}
-		
+
 		if @hasDefaultCallee {
 			@callees.push(@defaultCallee)
 		}
-		
+
 		if @callees.length == 1 {
 			@nullable = @callees[0].isNullable()
 			@nullableComputed = @callees[0].isNullableComputed()
-			
+
 			@type = @callees[0].type()
 		}
 		else {
 			@nullable = @callees[0].isNullable()
 			@nullableComputed = @callees[0].isNullableComputed()
-			
+
 			const types = [@callees[0].type()]
-			
+
 			let type
 			for i from 1 til @callees.length {
 				type = @callees[i].type()
-				
+
 				if !types.any(item => type.equals(item)) {
 					types.push(type)
 				}
-				
+
 				if @callees[i].isNullable() {
 					@nullable = true
 				}
@@ -192,7 +192,7 @@ class CallExpression extends Expression {
 					@nullableComputed = true
 				}
 			}
-			
+
 			if types.length == 1 {
 				@type = types[0]
 			}
@@ -209,11 +209,11 @@ class CallExpression extends Expression {
 		for argument in @arguments {
 			argument.translate()
 		}
-		
+
 		for callee in @callees {
 			callee.translate()
 		}
-		
+
 		if @data.scope.kind == ScopeKind::Argument {
 			@callScope = $compile.expression(@data.scope.value, this)
 			@callScope.analyse()
@@ -225,7 +225,7 @@ class CallExpression extends Expression {
 		if acquire {
 			@reuseName = this.statement().scope().acquireTempName(this.statement())
 		}
-		
+
 		if @callees.length == 1 {
 			@callees[0].acquireReusable(acquire)
 		}
@@ -239,7 +239,7 @@ class CallExpression extends Expression {
 				const t1 = @defaultCallee.type()
 				if !t1.isAny() {
 					const t2 = callee.type()
-					
+
 					if t2.isAny() {
 						@defaultCallee = t2
 					}
@@ -248,7 +248,7 @@ class CallExpression extends Expression {
 					}
 					else if t2 is UnionType {
 						t2.addType(t1)
-						
+
 						@defaultCallee = t2
 					}
 					else if t1.isInstanceOf(t2, this) {
@@ -276,7 +276,7 @@ class CallExpression extends Expression {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	isCallable() => !@reusable
@@ -292,13 +292,13 @@ class CallExpression extends Expression {
 		else if @data.callee.kind == NodeKind::Identifier && @data.callee.name == name {
 			return true
 		}
-		
+
 		for argument in @arguments {
 			if argument.isUsingVariable(name) {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	makeCallee(type) { // {{{
@@ -314,13 +314,13 @@ class CallExpression extends Expression {
 			is OverloadedFunctionType => {
 				const args = [argument.type() for argument in @arguments]
 				const matches = []
-				
+
 				for function in type.functions() {
 					if function.matchArguments(args) {
 						matches.push(function)
 					}
 				}
-				
+
 				if matches.length == 0 {
 					TypeException.throwNoMatchingFunction(this)
 				}
@@ -329,12 +329,12 @@ class CallExpression extends Expression {
 				}
 				else {
 					const type = new UnionType()
-					
+
 					for function in matches {
 						type.addType(function.returnType())
 					}
-					
-					this.addCallee(new DefaultCallee(@data, @object, type.refine(), this))
+
+					this.addCallee(new DefaultCallee(@data, @object, type, this))
 				}
 			}
 			=> {
@@ -346,37 +346,37 @@ class CallExpression extends Expression {
 		//console.log('-- call.makeMemberCallee --')
 		//console.log(type)
 		//console.log(@property)
-		
+
 		switch type {
 			is AliasType => {
 				throw new NotImplementedException(this)
 			}
 			is ClassType => {
 				const class = type
-				
+
 				if methods ?= class.getClassMethods(@property) {
 					let sealed = false
 					const types = []
 					const m = []
 					const args = [argument.type() for argument in @arguments]
-					
+
 					let type
 					for method in methods {
 						if method.isSealed() {
 							sealed = true
 						}
-						
+
 						if method.matchArguments(args) {
 							m.push(method)
-							
+
 							type = method.returnType()
-							
+
 							if !type.isContainedIn(types) {
 								types.push(type)
 							}
 						}
 					}
-					
+
 					if types.length == 0 {
 						if sealed {
 							this.addCallee(new SealedMethodCallee(@data, class, false, this))
@@ -444,35 +444,35 @@ class CallExpression extends Expression {
 	makeMemberCalleeFromReference(type) { // {{{
 		//console.log('-- call.filterReference --')
 		//console.log(type)
-		
+
 		const value = type.unalias()
 		//console.log(value)
 		//console.log(@property)
-		
+
 		switch value {
 			is ClassType => {
 				if methods ?= value.getInstanceMethods(@property) {
 					let sealed = false
 					const types = []
 					const m = []
-					
+
 					let type
 					for method in methods {
 						if method.isSealed() {
 							sealed = true
 						}
-						
+
 						if method.matchArguments([argument.type() for argument in @arguments]) {
 							m.push(method)
-							
+
 							type = method.returnType()
-							
+
 							if !type.isContainedIn(types) {
 								types.push(type)
 							}
 						}
 					}
-					
+
 					if types.length == 0 {
 						if sealed {
 							this.addCallee(new SealedMethodCallee(@data, value, true, this))
@@ -521,7 +521,7 @@ class CallExpression extends Expression {
 	} // }}}
 	releaseReusable() { // {{{
 		this.statement().scope().releaseTempName(@reuseName) if @reuseName?
-		
+
 		if @callees.length == 1 {
 			@callees[0].releaseReusable()
 		}
@@ -536,9 +536,9 @@ class CallExpression extends Expression {
 					return argument.toFragments(fragments, mode)
 				}
 			}
-			
+
 			this.toCallFragments(fragments, mode)
-			
+
 			fragments.code(', ') if @arguments.length
 		}
 		else {
@@ -547,11 +547,11 @@ class CallExpression extends Expression {
 			}
 			else if this.isNullable() && !@tested {
 				fragments.wrapNullable(this).code(' ? ')
-				
+
 				@tested = true
-				
+
 				this.toFragments(fragments, mode)
-				
+
 				fragments.code(' : undefined')
 			}
 			else {
@@ -560,9 +560,9 @@ class CallExpression extends Expression {
 						return argument.toFragments(fragments, mode)
 					}
 				}
-				
+
 				this.toCallFragments(fragments, mode)
-				
+
 				fragments.code(')')
 			}
 		}
@@ -570,7 +570,7 @@ class CallExpression extends Expression {
 	toBooleanFragments(fragments, mode) { // {{{
 		if mode == Mode::Async {
 			this.toCallFragments(fragments, mode)
-			
+
 			fragments.code(', ') if @arguments.length
 		}
 		else {
@@ -579,16 +579,16 @@ class CallExpression extends Expression {
 			}
 			else if this.isNullable() && !@tested {
 				fragments.wrapNullable(this).code(' ? ')
-				
+
 				@tested = true
-				
+
 				this.toFragments(fragments, mode)
-				
+
 				fragments.code(' : false')
 			}
 			else {
 				this.toCallFragments(fragments, mode)
-				
+
 				fragments.code(')')
 			}
 		}
@@ -599,15 +599,15 @@ class CallExpression extends Expression {
 		}
 		else if @callees.length == 2 {
 			this.module().flag('Type')
-			
+
 			@callees[0].toTestFragments(fragments, this)
-			
+
 			fragments.code(' ? ')
-			
+
 			@callees[0].toFragments(fragments, mode, this)
-			
+
 			fragments.code(') : ')
-			
+
 			@callees[1].toFragments(fragments, mode, this)
 		}
 		else {
@@ -617,7 +617,7 @@ class CallExpression extends Expression {
 	toNullableFragments(fragments) { // {{{
 		if !@tested {
 			@tested = true
-			
+
 			if @callees.length == 1 {
 				@callees[0].toNullableFragments(fragments, this)
 			}
@@ -630,7 +630,7 @@ class CallExpression extends Expression {
 		fragments
 			.code(@reuseName, $equals)
 			.compile(this)
-		
+
 		@reusable = true
 	} // }}}
 	type() => @type
@@ -663,30 +663,30 @@ class DefaultCallee extends Callee {
 	}
 	constructor(@data, object = null, node) { // {{{
 		super()
-		
+
 		if object == null {
 			@expression = $compile.expression(data.callee, node)
 		}
 		else {
 			@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		}
-		
+
 		@expression.analyse()
 		@expression.prepare()
-		
+
 		@flatten = node._flatten
 		@nullable = data.nullable || @expression.isNullable()
 		@nullableComputed = data.nullable && @expression.isNullable()
 		@scope = data.scope.kind
-		
+
 		const type = @expression.type()
-		
+
 		if type is ClassType {
 			TypeException.throwConstructorWithoutNew(type.name(), node)
 		}
 		else if type is FunctionType {
 			this.validate(type, node)
-			
+
 			@type = type.returnType()
 		}
 		else {
@@ -695,28 +695,28 @@ class DefaultCallee extends Callee {
 	} // }}}
 	constructor(@data, object = null, type: Type, node) { // {{{
 		super()
-		
+
 		if object == null {
 			@expression = $compile.expression(data.callee, node)
 		}
 		else {
 			@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		}
-		
+
 		@expression.analyse()
 		@expression.prepare()
-		
+
 		@flatten = node._flatten
 		@nullable = data.nullable || @expression.isNullable()
 		@nullableComputed = data.nullable && @expression.isNullable()
 		@scope = data.scope.kind
-		
+
 		if type is ClassType {
 			TypeException.throwConstructorWithoutNew(type.name(), node)
 		}
 		else if type is FunctionType {
 			this.validate(type, node)
-			
+
 			@type = type.returnType()
 		}
 		else {
@@ -725,20 +725,20 @@ class DefaultCallee extends Callee {
 	} // }}}
 	constructor(@data, object, methods, @type, node) { // {{{
 		super()
-		
+
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		@expression.analyse()
 		@expression.prepare()
-		
+
 		@flatten = node._flatten
 		@nullable = data.nullable || @expression.isNullable()
 		@nullableComputed = data.nullable && @expression.isNullable()
 		@scope = data.scope.kind
-		
+
 		for method in methods {
 			this.validate(method, node)
 		}
-		
+
 		if @type is ClassType {
 			TypeException.throwConstructorWithoutNew(@type.name(), node)
 		}
@@ -770,31 +770,31 @@ class DefaultCallee extends Callee {
 					.code('.apply(')
 					.compile(@expression.caller(), mode)
 			}
-			
+
 			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), node._arguments)
 		}
 		else {
 			switch @scope {
 				ScopeKind::Argument => {
 					fragments.wrap(@expression, mode).code('.call(').compile(node._callScope, mode)
-					
+
 					for argument in node._arguments {
 						fragments.code($comma).compile(argument, mode)
 					}
 				}
 				ScopeKind::Null => {
 					fragments.wrap(@expression, mode).code('.call(null')
-					
+
 					for argument in node._arguments {
 						fragments.code($comma).compile(argument, mode)
 					}
 				}
 				ScopeKind::This => {
 					fragments.wrap(@expression, mode).code('(')
-					
+
 					for argument, index in node._arguments {
 						fragments.code($comma) if index
-						
+
 						fragments.compile(argument, mode)
 					}
 				}
@@ -803,9 +803,9 @@ class DefaultCallee extends Callee {
 	} // }}}
 	toCurryFragments(fragments, mode, node) { // {{{
 		node.module().flag('Helper')
-		
+
 		const arguments = node._arguments
-		
+
 		if @flatten {
 			switch @scope {
 				ScopeKind::Argument => {
@@ -831,7 +831,7 @@ class DefaultCallee extends Callee {
 						.code($comma)
 				}
 			}
-			
+
 			CallExpression.toFlattenArgumentsFragments(fragments, arguments)
 		}
 		else {
@@ -857,7 +857,7 @@ class DefaultCallee extends Callee {
 						.compile(@expression.caller())
 				}
 			}
-			
+
 			for argument in arguments {
 				fragments.code($comma).compile(argument)
 			}
@@ -870,7 +870,7 @@ class DefaultCallee extends Callee {
 					.compileNullable(@expression)
 					.code(' && ')
 			}
-			
+
 			fragments
 				.code($runtime.type(node) + '.isFunction(')
 				.compileReusable(@expression)
@@ -904,13 +904,13 @@ class SealedFunctionCallee extends Callee {
 	}
 	constructor(data, @namespace, function, @type, node) { // {{{
 		super()
-		
+
 		@object = node._object
 		@property = node._property
-		
+
 		nullable = data.nullable || node._object.isNullable()
 		nullableComputed = data.nullable && node._object.isNullable()
-		
+
 		this.validate(function, node)
 	} // }}}
 	translate() { // {{{
@@ -942,12 +942,12 @@ class SealedFunctionCallee extends Callee {
 				}
 				ScopeKind::This => {
 					fragments.code(`\(@namespace.sealName()).\(@property)(`)
-					
+
 					for i from 0 til node._arguments.length {
 						if i != 0 {
 							fragments.code($comma)
 						}
-						
+
 						fragments.compile(node._arguments[i])
 					}
 				}
@@ -972,13 +972,13 @@ class SealedMethodCallee extends Callee {
 	}
 	constructor(data, @class, @instance, methods = [], @type = Type.Any, node) { // {{{
 		super()
-		
+
 		@object = node._object
 		@property = node._property
-		
+
 		nullable = data.nullable || node._object.isNullable()
 		nullableComputed = data.nullable && node._object.isNullable()
-		
+
 		for method in methods {
 			this.validate(method, node)
 		}
@@ -1000,12 +1000,12 @@ class SealedMethodCallee extends Callee {
 				ScopeKind::This => {
 					if @instance {
 						fragments.code(`\(@class.getSealedPath())._im_\(@property).apply(null, `)
-						
+
 						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments, @object)
 					}
 					else {
 						fragments.code(`\(@class.getSealedPath())._cm_\(@property).apply(null, `)
-						
+
 						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments)
 					}
 				}
@@ -1024,17 +1024,17 @@ class SealedMethodCallee extends Callee {
 						fragments
 							.code(`\(@class.getSealedPath())._im_\(@property)(`)
 							.compile(@object)
-						
+
 						for i from 0 til node._arguments.length {
 							fragments.code($comma).compile(node._arguments[i])
 						}
 					}
 					else {
 						fragments.code(`\(@class.getSealedPath())._cm_\(@property)(`)
-						
+
 						for i from 0 til node._arguments.length {
 							fragments.code($comma) if i != 0
-							
+
 							fragments.compile(node._arguments[i])
 						}
 					}
@@ -1057,15 +1057,15 @@ class SubstituteCallee extends Callee {
 	}
 	constructor(data, @substitute, node) { // {{{
 		super()
-		
+
 		@nullable = data.nullable || substitute.isNullable()
 		@nullableComputed = data.nullable && substitute.isNullable()
-		
+
 		@type = @substitute.type()
 	} // }}}
 	constructor(data, @substitute, @type, node) { // {{{
 		super()
-		
+
 		@nullable = data.nullable || substitute.isNullable()
 		@nullableComputed = data.nullable && substitute.isNullable()
 	} // }}}

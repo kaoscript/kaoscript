@@ -1,1 +1,0 @@
-SyntaxException: Class variable "name" is reserved (line 3, file "fixtures/compile/class.static.name.field.ks")

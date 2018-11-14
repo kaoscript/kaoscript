@@ -1,0 +1,1 @@
+SyntaxException: An error "Error" is unreported, it must be caught or declared to be thrown (line 8, file "fixtures/compile/attribute/attribute.error.ignore.err.ks")

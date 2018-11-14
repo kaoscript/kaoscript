@@ -1,0 +1,1 @@
+SyntaxException: Overloaded functions can't be differentiated (line 4, file "fixtures/compile/variable/variable.overwrite.func.twice.ks")

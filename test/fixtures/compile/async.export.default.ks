@@ -1,1 +1,0 @@
-export func foo(x: Number) async: String => `\(x * 3)`

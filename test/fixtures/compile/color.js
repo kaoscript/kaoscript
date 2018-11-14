@@ -1,11 +1,11 @@
 require("kaoscript/register");
 var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Array, __ks_Array} = require("./_array.ks")();
-	var Float = require("./_float.ks")().Float;
-	var Integer = require("./_integer.ks")().Integer;
-	var {Number, __ks_Number} = require("./_number.ks")();
-	var {String, __ks_String} = require("./_string.ks")();
+	var {Array, __ks_Array} = require("./_/_array.ks")();
+	var Float = require("./_/_float.ks")().Float;
+	var Integer = require("./_/_integer.ks")().Integer;
+	var {Number, __ks_Number} = require("./_/_number.ks")();
+	var {String, __ks_String} = require("./_/_string.ks")();
 	let $spaces = {};
 	let $aliases = {};
 	let $components = {};

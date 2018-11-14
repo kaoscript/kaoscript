@@ -1,0 +1,1 @@
+ReferenceException: Property "PI" is not defined (line 10, file "fixtures/compile/namescape/namespace.export.not.ks")

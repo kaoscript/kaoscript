@@ -1,0 +1,1 @@
+TypeException: Class constructor "Shape" cannot be invoked without 'new' (line 3, file "fixtures/compile/import/import.sealed.alias.bad.ks")

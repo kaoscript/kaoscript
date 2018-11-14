@@ -1,0 +1,1 @@
+SyntaxException: An error "RangeError" is unreported, it must be caught or declared to be thrown (line 7, file "fixtures/compile/function/function.decl.throws.error.missingtype.ks")

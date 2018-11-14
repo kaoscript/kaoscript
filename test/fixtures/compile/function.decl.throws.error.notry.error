@@ -1,1 +1,0 @@
-SyntaxException: An error "Error" is unreported, it must be caught or declared to be thrown (line 6, file "fixtures/compile/function.decl.throws.error.notry.ks")

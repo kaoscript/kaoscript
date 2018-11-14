@@ -6,12 +6,12 @@ class IncludeDeclaration extends Statement {
 	}
 	analyse() { // {{{
 		let directory = this.directory()
-		
+
 		let x
 		for file in @data.files {
 			if $localFileRegex.test(file) {
 				x = fs.resolve(directory, file)
-				
+
 				if fs.isFile(x) || fs.isFile(x += $extensions.source) {
 					if this.canLoadLocalFile(x) {
 						this.loadLocalFile(x)
@@ -24,76 +24,76 @@ class IncludeDeclaration extends Statement {
 			else {
 				let modulePath = file
 				let moduleVersion = ''
-				
+
 				let nf = true
 				for dir in $nodeModulesPaths(directory) while nf {
 					x = fs.resolve(dir, file)
-				
+
 					if fs.isFile(x) {
 						nf = false
 					}
 					else if fs.isFile(x + $extensions.source) {
 						x += $extensions.source
 						modulePath += $extensions.source
-						
+
 						nf = false
 					}
 					else {
 						let pkgfile = path.join(x, 'package.json')
-						
+
 						if fs.isFile(pkgfile) {
 							let pkg
 							try {
 								pkg = JSON.parse(fs.readFile(pkgfile))
 							}
-							
+
 							if pkg? {
 								if pkg.kaoscript? && fs.isFile(path.join(x, pkg.kaoscript.main)) {
 									x = path.join(x, pkg.kaoscript.main)
 									modulePath = path.join(modulePath, pkg.kaoscript.main)
-									
+
 									nf = false
 								}
 								else if pkg.main? {
 									if fs.isFile(path.join(x, pkg.main)) {
 										x = path.join(x, pkg.main)
 										modulePath = path.join(modulePath, pkg.main)
-										
+
 										nf = false
 									}
 									else if fs.isFile(path.join(x, pkg.main + $extensions.source)) {
 										x = path.join(x, pkg.main + $extensions.source)
 										modulePath = path.join(modulePath, pkg.main + $extensions.source)
-										
+
 										nf = false
 									}
 									else if fs.isFile(path.join(x, pkg.main, 'index' + $extensions.source)) {
 										x = path.join(x, pkg.main, 'index' + $extensions.source)
 										modulePath = path.join(modulePath, pkg.main, 'index' + $extensions.source)
-										
+
 										nf = false
 									}
 								}
-								
+
 								if !nf {
 									moduleVersion = pkg.version
 								}
 							}
 						}
-						
+
 						if nf && fs.isFile(path.join(x, 'index' + $extensions.source)) {
 							x = path.join(x, 'index' + $extensions.source)
 							modulePath = path.join(modulePath, 'index' + $extensions.source)
-							
+
 							nf = false
 						}
 					}
 				}
-				
+
 				if nf {
 					IOException.throwNotFoundModule(file, directory, this)
 				}
-				
+
 				if this.canLoadModuleFile(x, file, modulePath, moduleVersion) {
 					this.loadModuleFile(x, file, modulePath, moduleVersion)
 				}
@@ -127,12 +127,12 @@ class IncludeDeclaration extends Statement {
 	loadLocalFile(path) { // {{{
 		const module = this.module()
 		const declarator = new IncludeDeclarator(path, this)
-		
+
 		let data = fs.readFile(path)
-		
+
 		module.addHash(path, module.compiler().sha256(path, data))
 		module.addInclude(path)
-		
+
 		try {
 			//console.time('parse')
 			data = module.parse(data, path)
@@ -140,27 +140,27 @@ class IncludeDeclaration extends Statement {
 		}
 		catch error {
 			error.filename = path
-			
+
 			throw error
 		}
-		
+
 		Attribute.configure(data, this.module()._options, false, AttributeTarget::Global)
-		
+
 		for statement in data.body when statement ?= $compile.statement(statement, declarator) {
 			@statements.push(statement)
-			
+
 			statement.analyse()
 		}
 	} // }}}
 	loadModuleFile(path, moduleName, modulePath, moduleVersion) { // {{{
 		const module = this.module()
 		const declarator = new IncludeDeclarator(path, moduleName, this)
-		
+
 		let data = fs.readFile(path)
-		
+
 		module.addHash(path, module.compiler().sha256(path, data))
 		module.addInclude(path, modulePath, moduleVersion)
-		
+
 		try {
 			//console.time('parse')
 			data = module.parse(data, path)
@@ -168,15 +168,15 @@ class IncludeDeclaration extends Statement {
 		}
 		catch error {
 			error.filename = path
-			
+
 			throw error
 		}
-		
+
 		Attribute.configure(data, this.module()._options, false, AttributeTarget::Global)
-		
+
 		for statement in data.body when statement ?= $compile.statement(statement, declarator) {
 			@statements.push(statement)
-			
+
 			statement.analyse()
 		}
 	} // }}}
@@ -200,9 +200,9 @@ class IncludeDeclarator extends Statement {
 	}
 	constructor(@file, moduleName: String = null, @parent) { // {{{
 		super({}, parent)
-		
+
 		@directory = path.dirname(file)
-		
+
 		if moduleName == null {
 			@includePath = parent.includePath()
 		}

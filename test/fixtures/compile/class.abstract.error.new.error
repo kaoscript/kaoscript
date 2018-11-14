@@ -1,1 +1,0 @@
-TypeException: Class "AbstractGreetings" is abstract so it can't be instantiated (line 15, file "fixtures/compile/class.abstract.error.new.ks")

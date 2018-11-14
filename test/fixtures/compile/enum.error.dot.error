@@ -1,1 +1,0 @@
-SyntaxException: Accessing an enum can only be done with "::" (line 7, file "fixtures/compile/enum.error.dot.ks")

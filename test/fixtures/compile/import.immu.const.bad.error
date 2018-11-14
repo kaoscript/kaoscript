@@ -1,1 +1,0 @@
-ReferenceException: Local's "Color" and module's "Color" (from "./require.class.default.ks") can't be merged (line 4, file "fixtures/compile/import.immu.const.bad.ks")

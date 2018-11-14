@@ -4,7 +4,7 @@ const $function = {
 		while parent? && !(parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration) {
 			parent = parent.parent()
 		}
-		
+
 		if parent?._instance {
 			if $function.useThisVariable(node._data.body, node) {
 				if node._options.format.functions == 'es5' {
@@ -67,7 +67,7 @@ const $function = {
 				if $function.useThisVariable(data.callee, node) {
 					return true
 				}
-				
+
 				for arg in data.arguments {
 					if $function.useThisVariable(arg, node) {
 						return true
@@ -78,7 +78,7 @@ const $function = {
 				if $function.useThisVariable(data.class, node) {
 					return true
 				}
-				
+
 				for arg in data.arguments {
 					if $function.useThisVariable(arg, node) {
 						return true
@@ -91,7 +91,7 @@ const $function = {
 				if $function.useThisVariable(data.condition, node) || $function.useThisVariable(data.whenTrue, node) {
 					return true
 				}
-				
+
 				if data.whenFalse? && data.$function.useThisVariable(data.whenFalse, node) {
 					return true
 				}
@@ -131,15 +131,17 @@ const $function = {
 				throw new NotImplementedException(`Unknow kind \(data.kind)`, node)
 			}
 		}
-		
+
 		return false
 	} // }}}
 }
 
 class FunctionDeclaration extends Statement {
 	private {
+		_extended: Boolean			= false
 		_main: Boolean				= false
 		_name: String
+		_oldVariableName: String
 		_variable: FunctionVariable
 	}
 	constructor(@data, @parent) { // {{{
@@ -147,34 +149,67 @@ class FunctionDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@scope.define('this', true, this)
-		
+
 		@name = @data.name.name
-		
-		if @variable ?= this.greatScope().getLocalVariable(@name) {
-			if @variable is not FunctionVariable {
-				SyntaxException.throwNotOverloadableFunction(@name, this)
+
+		const scope = this.greatScope()
+
+		if @variable ?= scope.getLocalVariable(@name) {
+			if @variable is FunctionVariable {
+				const declarator = new FunctionDeclarator(@variable, @data, this)
+
+				declarator.analyse()
+			}
+			else {
+				scope.addStash(@name, variable => {
+					const type = variable.type()
+
+					if type.isFunction() {
+						@main = true
+						@extended = true
+
+						@variable = new FunctionVariable(@name, true)
+
+						@variable.type().addFunction(type)
+
+						scope.replaceVariable(@name, @variable)
+
+						@oldVariableName = scope.newRenamedVariable(@name)
+					}
+					else {
+						SyntaxException.throwNotOverloadableFunction(@name, this)
+					}
+
+					return true
+				}, variable => {
+					@variable = variable
+
+					const declarator = new FunctionDeclarator(@variable, @data, this)
+
+					declarator.analyse()
+				})
 			}
 		}
 		else {
 			@main = true
-			@variable = new FunctionVariable(@name)
-			
-			this.greatScope().addVariable(@name, @variable, this)
+			@variable = new FunctionVariable(@name, false)
+
+			scope.addVariable(@name, @variable, this)
+
+			const declarator = new FunctionDeclarator(@variable, @data, this)
+
+			declarator.analyse()
 		}
-		
-		const declarator = new FunctionDeclarator(@variable, @data, this)
-		
-		declarator.analyse()
 	} // }}}
 	prepare() { // {{{
-		return unless @main
-		
-		@variable.prepare()
+		if @main || this.greatScope().processStash(@name) {
+			@variable.prepare()
+		}
 	} // }}}
 	translate() { // {{{
-		return unless @main
-		
-		@variable.translate()
+		if @main {
+			@variable.translate()
+		}
 	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
@@ -182,8 +217,50 @@ class FunctionDeclaration extends Statement {
 	name() => @name
 	toStatementFragments(fragments, mode) { // {{{
 		return unless @main
-		
-		if @variable.length() == 1 {
+
+		if @extended {
+			fragments.line($const(this), @oldVariableName, $equals, @name)
+
+			ClassDeclaration.toSwitchFragments(
+				this
+				fragments.newLine()
+				@variable.type()
+				[declarator.type() for declarator in @variable._declarators]
+				@name
+				null
+				(node, fragments) => {
+					const block = fragments.code(`function \(@name)()`).newBlock()
+
+					return block
+				}
+				(fragments) => {
+					fragments.done()
+				}
+				(fragments, method, index) => {
+					const declarator = @variable.getDeclarator(index)
+
+					declarator.toSwitchFragments(fragments, (fragments, wrongdoing, data) => {
+						if this._options.format.spreads == 'es5' {
+							fragments.line(`return \(@oldVariableName).apply(null, arguments)`)
+						}
+						else {
+							fragments.line(`return \(@oldVariableName)(...arguments)`)
+						}
+					})
+				}
+				(block, ctrl, async, returns) => {
+					if this._options.format.spreads == 'es5' {
+						ctrl.step().code('else').step().line(`return \(@oldVariableName).apply(null, arguments)`).done()
+					}
+					else {
+						ctrl.step().code('else').step().line(`return \(@oldVariableName)(...arguments)`).done()
+					}
+				}
+				'arguments'
+				false
+			).done()
+		}
+		else if @variable.length() == 1 {
 			@variable.getDeclarator(0).toStatementFragments(fragments, mode)
 		}
 		else {
@@ -196,7 +273,7 @@ class FunctionDeclaration extends Statement {
 				null
 				(node, fragments) => {
 					const block = fragments.code(`function \(@name)()`).newBlock()
-					
+
 					return block
 				}
 				(fragments) => {
@@ -204,9 +281,10 @@ class FunctionDeclaration extends Statement {
 				}
 				(fragments, method, index) => {
 					const declarator = @variable.getDeclarator(index)
-					
-					declarator.toSwitchFragments(fragments)
+
+					declarator.toSwitchFragments(fragments, Parameter.toWrongDoingFragments)
 				}
+				ClassDeclaration.toWrongDoingFragments
 				'arguments'
 				false
 			).done()
@@ -231,13 +309,13 @@ class FunctionDeclarator extends AbstractNode {
 	}
 	constructor(@variable, @data, @parent) { // {{{
 		super(data, parent)
-		
+
 		variable.addDeclarator(this)
 	} // }}}
 	analyse() { // {{{
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
-			
+
 			parameter.analyse()
 		}
 	} // }}}
@@ -245,30 +323,30 @@ class FunctionDeclarator extends AbstractNode {
 		for parameter in @parameters {
 			parameter.prepare()
 		}
-		
+
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
-		
+
 		for statement in $ast.body(@data.body) {
 			@statements.push(statement = $compile.statement(statement, this))
-			
+
 			statement.analyse()
-			
+
 			if statement.isAwait() {
 				@await = true
 			}
 		}
-		
+
 		const rtype = @type.returnType()
 		const na = !rtype.isAny()
-		
+
 		for statement in @statements {
 			statement.prepare()
-			
+
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
 			}
@@ -279,7 +357,7 @@ class FunctionDeclarator extends AbstractNode {
 				@exit = statement.isExit()
 			}
 		}
-		
+
 		for statement in @statements {
 			statement.translate()
 		}
@@ -290,15 +368,15 @@ class FunctionDeclarator extends AbstractNode {
 	parameters() => @parameters
 	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
 		fragments.code('(__ks_e')
-		
+
 		for parameter in parameters {
 			fragments.code($comma).compile(parameter)
 		}
-		
+
 		fragments.code(') =>')
-		
+
 		const block = fragments.newBlock()
-		
+
 		const ctrl = block
 			.newControl()
 			.code('if(__ks_e)')
@@ -307,43 +385,43 @@ class FunctionDeclarator extends AbstractNode {
 			.step()
 			.code('else')
 			.step()
-		
+
 		let index = -1
 		let item
-		
+
 		for statement, i in statements while index == -1 {
 			if item ?= statement.toFragments(ctrl, Mode::None) {
 				index = i
 			}
 		}
-		
+
 		if index != -1 {
 			item(statements.slice(index + 1))
 		}
-		
+
 		ctrl.done()
-		
+
 		block.done()
-		
+
 		fragments.code(')').done()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const ctrl = fragments.newControl().code(`function \(@parent.name())(`)
-		
+
 		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').step()
 		})
-		
+
 		if @await {
 			let index = -1
 			let item
-			
+
 			for statement, i in @statements while index == -1 {
 				if item ?= statement.toFragments(ctrl, Mode::None) {
 					index = i
 				}
 			}
-			
+
 			if index != -1 {
 				item(@statements.slice(index + 1))
 			}
@@ -352,27 +430,27 @@ class FunctionDeclarator extends AbstractNode {
 			for statement in @statements {
 				ctrl.compile(statement, Mode::None)
 			}
-			
+
 			if !@exit && @type.isAsync() {
 				ctrl.line('__ks_cb()')
 			}
 		}
-		
+
 		ctrl.done()
 	} // }}}
-	toSwitchFragments(fragments) { // {{{
-		Parameter.toFragments(this, fragments, ParameterMode::OverloadedFunction, (fragments) => fragments)
-		
+	toSwitchFragments(fragments, wrongdoer) { // {{{
+		Parameter.toFragments(this, fragments, ParameterMode::OverloadedFunction, (fragments) => fragments, wrongdoer)
+
 		if @await {
 			let index = -1
 			let item
-			
+
 			for statement, i in @statements while index == -1 {
 				if item ?= statement.toFragments(fragments, Mode::None) {
 					index = i
 				}
 			}
-			
+
 			if index != -1 {
 				item(@statements.slice(index + 1))
 			}
@@ -381,7 +459,7 @@ class FunctionDeclarator extends AbstractNode {
 			for statement in @statements {
 				fragments.compile(statement, Mode::None)
 			}
-			
+
 			if !@exit && @type.isAsync() {
 				fragments.line('__ks_cb()')
 			}
@@ -392,10 +470,12 @@ class FunctionDeclarator extends AbstractNode {
 
 class FunctionVariable extends Variable {
 	private {
+		_async: Boolean								= false
+		_extended: Boolean							= false
 		_declarators: Array<FunctionDeclarator>		= []
 	}
-	constructor(@name) { // {{{
-		super(name, true)
+	constructor(@name, @extended) { // {{{
+		super(name, true, new OverloadedFunctionType())
 	} // }}}
 	addDeclarator(declarator: FunctionDeclarator) { // {{{
 		@declarators.push(declarator)
@@ -403,34 +483,50 @@ class FunctionVariable extends Variable {
 	getDeclarator(index: Number) => @declarators[index]
 	length() => @declarators.length
 	prepare() { // {{{
-		if @declarators.length == 1 {
+		if @extended {
+			let type
+
+			for declarator in @declarators {
+				declarator.prepare()
+
+				type = declarator.type()
+
+				if type.isAsync() != @async {
+					SyntaxException.throwMixedOverloadedFunction(declarator)
+				}
+				else if @type.hasFunction(type) {
+					SyntaxException.throwNotDifferentiableFunction(declarator)
+				}
+
+				@type.addFunction(type)
+			}
+		}
+		else if @declarators.length == 1 {
 			@declarators[0].prepare()
-			
+
 			@type = @declarators[0].type()
 		}
 		else {
-			@type = new OverloadedFunctionType()
-			
 			let declarator = @declarators[0]
 			declarator.prepare()
-			
+
 			let type = declarator.type()
 			@type.addFunction(type)
-			
+
 			const async = type.isAsync()
-			
+
 			for declarator in @declarators from 1 {
 				declarator.prepare()
-				
+
 				type = declarator.type()
-				
+
 				if type.isAsync() != async {
 					SyntaxException.throwMixedOverloadedFunction(declarator)
 				}
 				else if @type.hasFunction(type) {
 					SyntaxException.throwNotDifferentiableFunction(declarator)
 				}
-				
+
 				@type.addFunction(type)
 			}
 		}
