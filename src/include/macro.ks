@@ -10,6 +10,7 @@ func $evaluate(source) { // {{{
 
 	const compiler = new Compiler('__ks__', {
 		register: false
+		target: 'ecma-v5'
 	})
 
 	compiler.compile('#![bin]\nextern console, JSON, __ks_marker\nreturn ' + source)
