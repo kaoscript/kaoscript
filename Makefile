@@ -2,7 +2,7 @@ bin:
 	./bin/kaoscript -c -t ecma-v5 -o lib -r src/compiler.ks=lib/compiler.js src/bin.ks
 
 comp:
-	time ./bin/kaoscript -c -t ecma-v5 -o lib src/compiler.ks
+	time ./bin/kaoscript -c -t ecma-v5 -o lib -m src/compiler.ks
 
 build:
 	./bin/kaoscript -c -t ecma-v5 -o lib src/compiler.ks

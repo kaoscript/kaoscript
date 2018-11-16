@@ -266,7 +266,7 @@ class Importer extends Statement {
 			if pkg? {
 				let metadata
 
-				if	pkg.kaoscript && this.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName)
+				if	pkg.kaoscript && this.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, pkg.kaoscript.metadata ? path.join(x, pkg.kaoscript.metadata) : null)
 				{
 					return true
 				}
@@ -306,7 +306,7 @@ class Importer extends Statement {
 
 		return false
 	} // }}}
-	loadKSFile(x: String, moduleName = null) { // {{{
+	loadKSFile(x: String, moduleName = null, metadataPath = null) { // {{{
 		const module = this.module()
 
 		if moduleName == null {
@@ -322,7 +322,9 @@ class Importer extends Statement {
 		let source = fs.readFile(x)
 		let target = module.compiler()._options.target
 
-		if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (@metadata ?= this.readMetadata(getMetadataPath(x, target))) {
+		if ?metadataPath && fs.isFile(metadataPath) && (@metadata ?= this.readMetadata(metadataPath)) {
+		}
+		else if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (@metadata ?= this.readMetadata(getMetadataPath(x, target))) {
 		}
 		else {
 			let compiler = module.compiler().createServant(x)

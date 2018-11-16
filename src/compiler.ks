@@ -617,21 +617,34 @@ export class Compiler {
 		fs.writeFile(getBinaryPath(this._file, this._options.target), this.toSource())
 
 		if !this._module._binary {
-			let metadata = this.toMetadata()
+			const metadata = this.toMetadata()
 
 			fs.writeFile(getMetadataPath(this._file, this._options.target), JSON.stringify(metadata, func(key, value) => key == 'max' && value == Infinity ? 'Infinity' : value))
 		}
 
 		fs.writeFile(getHashPath(this._file, this._options.target), JSON.stringify(this._module.toHashes()))
 	} // }}}
-	writeOutput() { // {{{
-		if !this._options.output {
+	writeMetadata() { // {{{
+		if !@options.output {
 			throw new Error('Undefined option: output')
 		}
 
-		fs.mkdir(this._options.output)
+		const metadata = this.toMetadata()
 
-		let filename = path.join(this._options.output, path.basename(this._file)).slice(0, -3) + '.js'
+		const filename = path.join(@options.output, path.basename(@file)).slice(0, -3) + '.json'
+
+		fs.writeFile(filename, JSON.stringify(metadata, func(key, value) => key == 'max' && value == Infinity ? 'Infinity' : value))
+
+		return this
+	} // }}}
+	writeOutput() { // {{{
+		if !@options.output {
+			throw new Error('Undefined option: output')
+		}
+
+		fs.mkdir(@options.output)
+
+		const filename = path.join(@options.output, path.basename(@file)).slice(0, -3) + '.js'
 
 		fs.writeFile(filename, this.toSource())
 
@@ -675,3 +688,5 @@ export func isUpToDate(file, target, source) { // {{{
 } // }}}
 
 export $extensions => extensions
+
+export AssignmentOperatorKind, BinaryOperatorKind, MacroElementKind, ModifierKind, NodeKind, ReificationKind, ScopeKind, UnaryOperatorKind
