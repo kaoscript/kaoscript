@@ -27,7 +27,8 @@
 		"register.js",
 		"bin",
 		"lib",
-		"src"
+		"src/fs.js",
+		"src/register.js"
 	],
 	"main": "lib/compiler.js",
 	"bin": {
