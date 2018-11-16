@@ -462,6 +462,11 @@ class ModuleBlock extends AbstractNode {
 		for statement in @statements {
 			statement.prepare()
 		}
+		
+		const recipient = this.recipient()
+		for statement in @statements when statement.isExportable() {
+			statement.export(recipient)
+		}
 	} // }}}
 	translate() { // {{{
 		for statement in @statements {

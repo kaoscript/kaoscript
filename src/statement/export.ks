@@ -42,14 +42,8 @@ class ExportDeclaration extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		const recipient = @parent.recipient()
-
 		for statement in @statements {
 			statement.prepare()
-		}
-
-		for declaration in @declarations {
-			declaration.export(recipient)
 		}
 	} // }}}
 	translate() { // {{{
@@ -57,6 +51,12 @@ class ExportDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
+	export(recipient) { // {{{
+		for declaration in @declarations {
+			declaration.export(recipient)
+		}
+	} // }}}
+	isExportable() => true
 	toStatementFragments(fragments, mode) { // {{{
 		for statement in @statements {
 			statement.toFragments(fragments, Mode::None)
@@ -73,15 +73,15 @@ class ExportNamedSpecifier extends AbstractNode {
 	private {
 		_expression
 	}
-	analyse() { // {{{
-	} // }}}
+	analyse()
 	prepare() { // {{{
 		@expression = $compile.expression(@data.local, @parent)
 		@expression.analyse()
-		@expression.prepare()
 	} // }}}
 	translate()
 	export(recipient) { // {{{
+		@expression.prepare()
+		
 		recipient.export(@data.exported.name, @expression)
 	} // }}}
 	toFragments(fragments, mode)
@@ -94,15 +94,15 @@ class ExportPropertiesSpecifier extends AbstractNode {
 	private {
 		_object
 	}
-	analyse() { // {{{
-	} // }}}
+	analyse()
 	prepare() { // {{{
 		@object = $compile.expression(@data.object, @parent)
 		@object.analyse()
-		@object.prepare()
 	} // }}}
 	translate()
 	export(recipient) { // {{{
+		@object.prepare()
+		
 		for property in @data.properties {
 			recipient.export(property.exported.name, new ExportProperty(@object, property.local.name))
 		}
@@ -114,15 +114,15 @@ class ExportWildcardSpecifier extends AbstractNode {
 	private {
 		_expression
 	}
-	analyse() { // {{{
-	} // }}}
+	analyse()
 	prepare() { // {{{
 		@expression = $compile.expression(@data.local, @parent)
 		@expression.analyse()
-		@expression.prepare()
 	} // }}}
 	translate()
 	export(recipient) { // {{{
+		@expression.prepare()
+		
 		@expression.type().walk((name,) => {
 			recipient.export(name, new ExportProperty(@expression, name))
 		})

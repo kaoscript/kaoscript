@@ -25,10 +25,10 @@ class NamespaceDeclaration extends Statement {
 	prepare() { // {{{
 		for statement in @statements {
 			statement.prepare()
-			
-			if statement is ExportDeclaration {
-				statement.walk((name, type) => @type.addProperty(name, type))
-			}
+		}
+		
+		for statement in @statements when statement.isExportable() {
+			statement.export(this)
 		}
 	} // }}}
 	translate() { // {{{
@@ -40,6 +40,8 @@ class NamespaceDeclaration extends Statement {
 		recipient.export(@name, @variable)
 	} // }}}
 	export(name: String, variable) { // {{{
+		@type.addProperty(name, variable.type())
+		
 		@exports[name] = variable
 	} // }}}
 	includePath() => null

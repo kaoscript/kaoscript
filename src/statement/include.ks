@@ -124,6 +124,12 @@ class IncludeDeclaration extends Statement {
 			return true
 		}
 	} // }}}
+	export(recipient) { // {{{
+		for statement in @statements when statement.isExportable() {
+			statement.export(recipient)
+		}
+	} // }}}
+	isExportable() => true
 	loadLocalFile(path) { // {{{
 		const module = this.module()
 		const declarator = new IncludeDeclarator(path, this)

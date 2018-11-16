@@ -16,8 +16,8 @@ let machine = 'tesla'
 let directory = 'xfer'
 let user = 'john'
 
-let info := [machine, ':', directory, ' ', user, ': ']
+const info = [directory, ' ', user, ': ']
 
-let logHello = log^^(...info)
+const logHello = log^^(machine, ':', ...info)
 
 logHello('foo')

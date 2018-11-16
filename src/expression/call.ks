@@ -99,9 +99,18 @@ class CallExpression extends Expression {
 			argument.prepare()
 		}
 
-		if @arguments.length == 1 {
-			if @arguments[0] is UnaryOperatorSpread && (@options.format.spreads == 'es5' || !@arguments[0].argument().type().isArray()) {
-				@flatten = true
+		if @options.format.spreads == 'es5' {
+			for argument in @arguments until @flatten {
+				if argument is UnaryOperatorSpread {
+					@flatten = true
+				}
+			}
+		}
+		else {
+			for argument in @arguments until @flatten {
+				if argument is UnaryOperatorSpread && !argument.argument().type().isArray() {
+					@flatten = true
+				}
 			}
 		}
 

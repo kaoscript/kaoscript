@@ -29,8 +29,10 @@ abstract class Statement extends AbstractNode {
 		}
 	} // }}}
 	assignments() => @assignments
+	export(recipient)
 	isAwait() => false
 	isExit() => false
+	isExportable() => false
 	includePath() => @parent.includePath()
 	isReturning(type: Type) => true
 	statement() => this

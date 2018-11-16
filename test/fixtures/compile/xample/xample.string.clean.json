@@ -1,0 +1,96 @@
+{
+  "requirements": [
+    0,
+    "String",
+    false
+  ],
+  "exports": [
+    1,
+    "String"
+  ],
+  "references": [
+    {
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "split": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": "Array",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "replace": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "trim": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "class": {
+        "requirement": 0
+      },
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "clean": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": true,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ]
+}

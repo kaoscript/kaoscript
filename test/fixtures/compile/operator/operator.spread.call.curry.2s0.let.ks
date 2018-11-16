@@ -1,5 +1,5 @@
-let foo = [1, 2]
-let bar = []
+const foo = [1, 2]
+const bar = []
 
 bar.push(0, ...foo)
 

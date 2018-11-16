@@ -9,7 +9,7 @@ module.exports = function() {
 	let machine = "tesla";
 	let directory = "xfer";
 	let user = "john";
-	let info = [machine, ":", directory, " ", user, ": "];
-	let logHello = Helper.vcurry(log, null, ...info);
+	const info = [directory, " ", user, ": "];
+	const logHello = Helper.vcurry(log, null, machine, ":", ...info);
 	logHello("foo");
 };
