@@ -325,6 +325,7 @@ class Importer extends Statement {
 		if ?metadataPath && fs.isFile(metadataPath) && (@metadata ?= this.readMetadata(metadataPath)) {
 		}
 		else if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (@metadata ?= this.readMetadata(getMetadataPath(x, target))) {
+			module.addHashes(x, hashes)
 		}
 		else {
 			let compiler = module.compiler().createServant(x)
@@ -336,9 +337,9 @@ class Importer extends Statement {
 			@metadata = compiler.toMetadata()
 
 			hashes = compiler.toHashes()
+			
+			module.addHashes(x, hashes)
 		}
-
-		module.addHashes(x, hashes)
 
 		@isKSFile = true
 		@moduleName = moduleName
