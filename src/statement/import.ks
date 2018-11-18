@@ -372,12 +372,23 @@ class Importer extends Statement {
 				}
 			}
 		}
-
+		
+		const macros = {}
+		for i from 0 til @metadata.macros.length by 2 {
+			macros[@metadata.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for data in @metadata.macros[i + 1]]
+		}
+		
 		if @data.specifiers.length == 0 {
 			for i from 1 til @metadata.exports.length by 2 {
 				name = @metadata.exports[i]
 
 				this.addImport(name, name, false)
+			}
+			
+			for name, datas of macros {
+				for data in datas {
+					new MacroDeclaration(data, this, name)
+				}
 			}
 		}
 		else {
@@ -389,7 +400,14 @@ class Importer extends Statement {
 				else {
 					name = specifier.imported.kind == NodeKind::Identifier ? specifier.imported.name : specifier.imported.name.name
 
-					this.addImport(name, specifier.local.name, false)
+					if macros[name]? {
+						for data in macros[name] {
+							new MacroDeclaration(data, this, specifier.local.name)
+						}
+					}
+					else {
+						this.addImport(name, specifier.local.name, false)
+					}
 				}
 			}
 
@@ -397,7 +415,7 @@ class Importer extends Statement {
 				this.addImport(@alias, @alias, true)
 			}
 		}
-
+		
 		return true
 	} // }}}
 	loadNodeFile(x = null, moduleName = null) { // {{{

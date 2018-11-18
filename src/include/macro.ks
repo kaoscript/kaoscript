@@ -1,4 +1,4 @@
-extern eval, parseInt
+extern Buffer, eval, parseInt
 
 enum MacroVariableKind {
 	AST
@@ -153,21 +153,21 @@ func $transformExpression(macro, node, data, writer) { // {{{
 	return data
 } // }}}
 
-class Macro extends AbstractNode {
+class MacroDeclaration extends AbstractNode {
 	private {
 		_fn: Function
 		_marks:	Array				= []
 		_name: String
 		_parameters: Object			= {}
+		_referenceIndex: Number		= -1
 		_type: MacroType
 	}
-	constructor(@data, @parent) { // {{{
+	constructor(@data, @parent, @name = data.name.name) { // {{{
 		super(data, parent, new Scope())
 
 		@scope.addNative('Identifier')
 		@scope.addNative('Expression')
 
-		@name = data.name.name
 		@type = MacroType.fromAST(data, this)
 
 		const builder = new Generator.KSWriter({
@@ -225,6 +225,8 @@ class Macro extends AbstractNode {
 		//console.log(source)
 
 		@fn = $evaluate(source)
+		
+		@parent.scope().addMacro(@name, this)
 	} // }}}
 	analyse()
 	prepare()
@@ -274,6 +276,14 @@ class Macro extends AbstractNode {
 
 		return statements
 	} // }}}
+	export(recipient, name = @name) { // {{{
+		const data = {
+			parameters: @data.parameters
+			body: @data.body
+		}
+		
+		recipient.exportMacro(name, Buffer.from(JSON.stringify(data)).toString('base64'))
+	} // }}}
 	private filter(statement, data, fragments) { // {{{
 		if data.kind == NodeKind::MacroExpression {
 			if statement {
@@ -312,10 +322,12 @@ class Macro extends AbstractNode {
 		}
 	} // }}}
 	getMark(index) => @marks[index]
+	isExportable() => false
 	isInstanceMethod() => false
 	matchArguments(arguments: Array) => @type.matchArguments(arguments)
 	name() => @name
 	statement() => this
+	toFragments(fragments, mode)
 	type() => @type
 }
 

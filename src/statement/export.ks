@@ -82,11 +82,20 @@ class ExportNamedSpecifier extends AbstractNode {
 	export(recipient) { // {{{
 		@expression.prepare()
 		
-		recipient.export(@data.exported.name, @expression)
+		if @expression.isMacro() {
+			for macro in @parent.scope().listMacros(@expression.name()) {
+				macro.export(recipient, @data.exported.name)
+			}
+		}
+		else {
+			recipient.export(@data.exported.name, @expression)
+		}
 	} // }}}
 	toFragments(fragments, mode)
 	walk(fn) { // {{{
-		fn(@data.exported.name, @expression.type())
+		if !@expression.isMacro() {
+			fn(@data.exported.name, @expression.type())
+		}
 	} // }}}
 }
 

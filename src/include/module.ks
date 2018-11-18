@@ -7,6 +7,7 @@ export class Module {
 		_directory
 		_dynamicRequirements	= []
 		_exports				= {}
+		_exportedMacros			= {}
 		_file
 		_flags					= {}
 		_hashes					= {}
@@ -123,6 +124,18 @@ export class Module {
 		}
 
 		@exports[name] = variable
+	} // }}}
+	exportMacro(name: String, data: String) { // {{{
+		if @binary {
+			SyntaxException.throwNotBinary('export', this)
+		}
+
+		if @exportedMacros[name]? {
+			@exportedMacros[name].push(data)
+		}
+		else {
+			@exportedMacros[name] = [data]
+		}
 	} // }}}
 	file() => @file
 	flag(name) { // {{{
@@ -423,6 +436,7 @@ export class Module {
 				requirements: []
 				exports: []
 				references: []
+				macros: []
 			}
 
 			for requirement in @requirements {
@@ -431,6 +445,10 @@ export class Module {
 
 			for name, variable of @exports {
 				@metadata.exports.push(variable.type().toMetadata(@metadata.references), name)
+			}
+			
+			for name, datas of @exportedMacros {
+				@metadata.macros.push(name, datas)
 			}
 		}
 

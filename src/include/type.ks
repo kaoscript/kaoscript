@@ -643,7 +643,6 @@ class ClassType extends Type {
 		_hybrid: Boolean			= false
 		_instanceMethods: Object	= {}
 		_instanceVariables: Object	= {}
-		_macros: Object				= {}
 		_name: String
 		_namespace: ReferenceType
 		_parentName: String
@@ -718,14 +717,6 @@ class ClassType extends Type {
 	} // }}}
 	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
 		@instanceVariables[name] = type
-	} // }}}
-	addMacro(name, macro) { // {{{
-		if @macros[name] is Array {
-			@macros[name].push(macro)
-		}
-		else {
-			@macros[name] = [macro]
-		}
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
 		switch(data.kind) {
@@ -1122,7 +1113,6 @@ class ClassType extends Type {
 	} // }}}
 	isMergeable(type) => type.isClass()
 	isSealedAlien() => @alien && @sealed
-	listMacros(name) => @macros[name]
 	match(b: Type): Boolean { // {{{
 		if b is ClassType {
 			if @name == b.name() {
@@ -1218,9 +1208,6 @@ class ClassType extends Type {
 		}
 		for name, methods of this._instanceMethods {
 			that._instanceMethods[name] = [].concat(methods)
-		}
-		for name, methods of this._macros {
-			that._macros[name] = [].concat(methods)
 		}
 
 		for name, variable of this._classVariables {

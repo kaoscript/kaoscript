@@ -1,27 +1,30 @@
 var Compiler = require('./lib/compiler.js')().Compiler;
 var fs = require('fs');
+var klaw = require('klaw-sync');
 var path = require('path');
 
-var files = fs.readdirSync(path.join(__dirname, 'test', 'fixtures', 'compile'));
-
-var file;
-for(var i = 0; i < files.length; i++) {
-	file = files[i];
-	
-	if(file.slice(-3) === '.ks') {
-		prepare(file);
+var files = klaw(path.join(__dirname, 'test', 'fixtures', 'compile'), {
+	nodir: true,
+	traverseAll: true,
+	filter: function(item) {
+		return item.path.slice(-3) === '.ks'
 	}
+});
+
+for(var i = 0; i < files.length; i++) {
+	patch(files[i].path)
 }
-	
-function prepare(file) {
-	var name = file.slice(0, -3);
+
+function patch(file) {
+	var root = path.dirname(file)
+	var name = path.basename(file).slice(0, -3);
 	
 	try {
-		fs.readFileSync(path.join(__dirname, 'test', 'fixtures', 'compile', name + '.json'), {
+		fs.readFileSync(path.join(root, name + '.json'), {
 			encoding: 'utf8'
 		});
 		
-		var compiler = new Compiler(path.join(__dirname, 'test', 'fixtures', 'compile', file), {
+		var compiler = new Compiler(path.join(root, name + '.ks'), {
 			config: {
 				header: false
 			}
@@ -32,8 +35,8 @@ function prepare(file) {
 		var data = compiler.toMetadata();
 		
 		fs.writeFileSync(
-			path.join(__dirname, 'test', 'fixtures', 'compile', name + '.json'),
-			JSON.stringify(data, function(key, value){return value === Infinity ? 'Infinity' : value === true ? 'true' : value === false ? 'false' : value;}, 2),
+			path.join(root, name + '.json'),
+			JSON.stringify(data, function(key, value){return value === Infinity ? 'Infinity' : value;}, 2),
 			{
 				encoding: 'utf8'
 			}

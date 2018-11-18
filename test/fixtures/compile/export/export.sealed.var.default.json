@@ -9,5 +9,6 @@
       "sealed": true,
       "type": "Any"
     }
-  ]
+  ],
+  "macros": []
 }

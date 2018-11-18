@@ -33,5 +33,6 @@
       "returns": "Any",
       "throws": []
     }
-  ]
+  ],
+  "macros": []
 }

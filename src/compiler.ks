@@ -252,16 +252,9 @@ const $compile = {
 	} // }}}
 	statement(data, parent) { // {{{
 		if Attribute.conditional(data, parent.module()._compiler._target) {
-			if data.kind == NodeKind::MacroDeclaration {
-				parent.scope().addMacro(data.name.name, new Macro(data, parent))
+			let clazz = $statements[data.kind] ?? $statements.default
 
-				return null
-			}
-			else {
-				let clazz = $statements[data.kind] ?? $statements.default
-
-				return new clazz(data, parent)
-			}
+			return new clazz(data, parent)
 		}
 		else {
 			return null
@@ -391,6 +384,7 @@ const $statements = {
 	`\(NodeKind::ImportDeclaration)`			: ImportDeclaration
 	`\(NodeKind::IncludeDeclaration)`			: IncludeDeclaration
 	`\(NodeKind::IncludeAgainDeclaration)`		: IncludeAgainDeclaration
+	`\(NodeKind::MacroDeclaration)`				: MacroDeclaration
 	`\(NodeKind::NamespaceDeclaration)`			: NamespaceDeclaration
 	`\(NodeKind::RequireDeclaration)`			: RequireDeclaration
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration

@@ -29,6 +29,7 @@ class Literal extends Expression {
 class IdentifierLiteral extends Literal {
 	private {
 		_assignenement			= null
+		_isMacro: Boolean		= false
 		_isVariable: Boolean	= false
 		_variable: Variable
 		_type: Type
@@ -60,6 +61,9 @@ class IdentifierLiteral extends Literal {
 		else if $runtime.isDefined(@value, @parent) {
 			@type = Type.Any
 		}
+		else if @scope.hasMacro(@value) {
+			@isMacro = true
+		}
 		else {
 			ReferenceException.throwNotDefined(@value, this)
 		}
@@ -69,6 +73,7 @@ class IdentifierLiteral extends Literal {
 			@type = @variable.type()
 		}
 	} // }}}
+	isMacro() => @isMacro
 	isUsingVariable(name) => @value == name
 	name() => @value
 	toFragments(fragments, mode) { // {{{

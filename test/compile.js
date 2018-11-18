@@ -12,7 +12,7 @@ describe('compile', function() {
 		filter: function(item) {
 			return item.path.slice(-3) === '.ks'
 		}
-	})
+	});
 
 	for(var i = 0; i < files.length; i++) {
 		prepare(files[i].path)

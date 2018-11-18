@@ -82,7 +82,7 @@ class AbstractScope {
 			}
 		}
 	} // }}}
-	addMacro(name: String, macro: Macro) { // {{{
+	addMacro(name: String, macro: MacroDeclaration) { // {{{
 		if @macros[name] is Array {
 			const type = macro.type()
 			let na = true
@@ -172,17 +172,17 @@ class AbstractScope {
 			SyntaxException.throwUnmatchedMacro(data.callee.name, parent, data)
 		}
 		else {
-			if	(variable ?= Variable.fromAST(data.callee.object, this)) &&
-				(macros ?= variable.type().listMacros(data.callee.property.name))
-			{
-				for macro in macros {
+			const path = Generator.generate(data.callee)
+			
+			if @macros[path]? {
+				for macro in @macros[path] {
 					if macro.matchArguments(data.arguments) {
 						return macro
 					}
 				}
 			}
 
-			SyntaxException.throwUnmatchedMacro(Generator.generate(data.callee), parent, data)
+			SyntaxException.throwUnmatchedMacro(path, parent, data)
 		}
 	} // }}}
 	getVariable(name): Variable { // {{{
@@ -201,7 +201,9 @@ class AbstractScope {
 	} // }}}
 	hasDeclaredLocalVariable(name) => @variables[name] is Variable || @variables[name] == false
 	hasLocalVariable(name) => @variables[name] is Variable || @natives[name] is Variable
+	hasMacro(name) => @macros[name] is Array
 	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || @parent?.hasVariable(name)
+	listMacros(name) => @macros[name]
 	parent() => @parent
 	reference(name: String) => this.domain().reference(name)
 	removeVariable(name) { // {{{

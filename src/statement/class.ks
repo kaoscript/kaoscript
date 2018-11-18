@@ -569,20 +569,16 @@ class ClassDeclaration extends Statement {
 					declaration.analyse()
 				}
 				NodeKind::MacroDeclaration => {
-					declaration = new Macro(data, this)
-
-					declaration.analyse()
-
-					const name = declaration.name()
-
+					const name = data.name.name
+					
+					declaration = new MacroDeclaration(data, this, `\(@name).\(name)`)
+					
 					if @macros[name] is Array {
 						@macros[name].push(declaration)
 					}
 					else {
 						@macros[name] = [declaration]
 					}
-
-					@type.addMacro(name, declaration)
 				}
 				NodeKind::MethodDeclaration => {
 					if @type.isConstructor(data.name.name) {
@@ -761,6 +757,14 @@ class ClassDeclaration extends Statement {
 	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
+		
+		for name, macros of @macros {
+			const path = `\(@name).\(name)`
+			
+			for macro in macros {
+				macro.export(recipient, path)
+			}
+		}
 	} // }}}
 	extends() => @extendsType
 	hasConstructors() => @constructors.length != 0
