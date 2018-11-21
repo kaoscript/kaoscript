@@ -21,7 +21,7 @@
 		}
 	],
 	"engines": {
-		"node": ">= 4.0.0"
+		"node": ">= 4.5.0"
 	},
 	"files": [
 		"register.js",
@@ -61,7 +61,6 @@
 		"test-coverage": "node node_modules/@zokugun/istanbul.cover/src/cli.js"
 	},
 	"kaoscript": {
-		"main": "src/compiler.ks",
 		"metadata": "lib/compiler.json"
 	},
 	"keywords": [

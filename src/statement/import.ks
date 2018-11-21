@@ -270,11 +270,22 @@ class Importer extends Statement {
 			if pkg? {
 				let metadata
 
-				if	pkg.kaoscript && this.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, pkg.kaoscript.metadata ? path.join(x, pkg.kaoscript.metadata) : null)
-				{
-					return true
+				if pkg.kaoscript? {
+					const metadata = pkg.kaoscript.metadata? ? path.join(x, pkg.kaoscript.metadata) : null
+
+					if pkg.kaoscript.main? {
+						if this.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, metadata) {
+							return true
+						}
+					}
+					else if metadata? {
+						if this.loadKSFile(null, moduleName ?? x, metadata) {
+							return true
+						}
+					}
 				}
-				else if	pkg.main &&
+
+				if	pkg.main &&
 						(
 							this.loadFile(path.join(x, pkg.main), moduleName) ||
 							this.loadDirectory(path.join(x, pkg.main), moduleName)
@@ -310,7 +321,7 @@ class Importer extends Statement {
 
 		return false
 	} // }}}
-	loadKSFile(x: String, moduleName = null, metadataPath = null) { // {{{
+	loadKSFile(x: String?, moduleName = null, metadataPath = null) { // {{{
 		const module = this.module()
 
 		if moduleName == null {
@@ -323,26 +334,28 @@ class Importer extends Statement {
 
 		let name, alias, variable, hashes
 
-		let source = fs.readFile(x)
-		let target = module.compiler()._options.target
-
 		if ?metadataPath && fs.isFile(metadataPath) && (@metadata ?= this.readMetadata(metadataPath)) {
 		}
-		else if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (@metadata ?= this.readMetadata(getMetadataPath(x, target))) {
-			module.addHashes(x, hashes)
-		}
 		else {
-			let compiler = module.compiler().createServant(x)
+			let source = fs.readFile(x)
+			let target = module.compiler()._options.target
 
-			compiler.compile(source)
+			if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (@metadata ?= this.readMetadata(getMetadataPath(x, target))) {
+				module.addHashes(x, hashes)
+			}
+			else {
+				let compiler = module.compiler().createServant(x)
 
-			compiler.writeFiles()
+				compiler.compile(source)
 
-			@metadata = compiler.toMetadata()
+				compiler.writeFiles()
 
-			hashes = compiler.toHashes()
+				@metadata = compiler.toMetadata()
 
-			module.addHashes(x, hashes)
+				hashes = compiler.toHashes()
+
+				module.addHashes(x, hashes)
+			}
 		}
 
 		@isKSFile = true
