@@ -10,6 +10,7 @@
     {
       "alien": true,
       "sealed": false,
+      "init": 0,
       "variables": {},
       "methods": {
         "log": [
@@ -37,6 +38,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": true,
+      "init": 0,
       "constructors": [
         {
           "access": 3,

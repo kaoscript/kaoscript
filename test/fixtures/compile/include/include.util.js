@@ -85,10 +85,6 @@ module.exports = function() {
 		}
 		return this;
 	};
-	__ks_Array._im_append = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		return __ks_Array.__ks_func_append_0.apply(that, args);
-	};
 	__ks_Array.__ks_func_appendUniq_0 = function(...args) {
 		if(args.length === 1) {
 			__ks_Array._im_pushUniq.apply(null, [this].concat(args[0]));
@@ -99,10 +95,6 @@ module.exports = function() {
 			}
 		}
 		return this;
-	};
-	__ks_Array._im_appendUniq = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		return __ks_Array.__ks_func_appendUniq_0.apply(that, args);
 	};
 	__ks_Array.__ks_func_any_0 = function(fn) {
 		if(arguments.length < 1) {
@@ -119,23 +111,9 @@ module.exports = function() {
 		}
 		return false;
 	};
-	__ks_Array._im_any = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length === 1) {
-			return __ks_Array.__ks_func_any_0.apply(that, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	__ks_Array.__ks_func_clear_0 = function() {
 		this.length = 0;
 		return this;
-	};
-	__ks_Array._im_clear = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length === 0) {
-			return __ks_Array.__ks_func_clear_0.apply(that);
-		}
-		throw new SyntaxError("wrong number of arguments");
 	};
 	__ks_Array.__ks_func_clone_0 = function() {
 		let i = this.length;
@@ -144,13 +122,6 @@ module.exports = function() {
 			clone[--i] = $clone(this[i]);
 		}
 		return clone;
-	};
-	__ks_Array._im_clone = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length === 0) {
-			return __ks_Array.__ks_func_clone_0.apply(that);
-		}
-		throw new SyntaxError("wrong number of arguments");
 	};
 	__ks_Array.__ks_func_contains_0 = function() {
 		if(arguments.length < 1) {
@@ -164,13 +135,6 @@ module.exports = function() {
 		let __ks__;
 		let from = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
 		return this.indexOf(item, from) !== -1;
-	};
-	__ks_Array._im_contains = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 1 && args.length <= 2) {
-			return __ks_Array.__ks_func_contains_0.apply(that, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
 	};
 	__ks_Array.__ks_sttc_from_0 = function(item) {
 		if(arguments.length < 1) {
@@ -186,25 +150,11 @@ module.exports = function() {
 			return [item];
 		}
 	};
-	__ks_Array._cm_from = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 1) {
-			return __ks_Array.__ks_sttc_from_0.apply(null, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	__ks_Array.__ks_func_last_0 = function(index) {
 		if(index === void 0 || index === null) {
 			index = 1;
 		}
 		return this.length ? this[this.length - index] : null;
-	};
-	__ks_Array._im_last = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 0 && args.length <= 1) {
-			return __ks_Array.__ks_func_last_0.apply(that, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
 	};
 	__ks_Array.__ks_func_remove_0 = function(...items) {
 		if(items.length === 1) {
@@ -227,10 +177,6 @@ module.exports = function() {
 		}
 		return this;
 	};
-	__ks_Array._im_remove = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		return __ks_Array.__ks_func_remove_0.apply(that, args);
-	};
 	__ks_Array.__ks_sttc_merge_0 = function(...args) {
 		let source;
 		let i = 0;
@@ -249,10 +195,6 @@ module.exports = function() {
 		}
 		return source;
 	};
-	__ks_Array._cm_merge = function() {
-		var args = Array.prototype.slice.call(arguments);
-		return __ks_Array.__ks_sttc_merge_0.apply(null, args);
-	};
 	__ks_Array.__ks_func_pushUniq_0 = function(...args) {
 		if(args.length === 1) {
 			if(!__ks_Array._im_contains(this, args[0])) {
@@ -268,10 +210,6 @@ module.exports = function() {
 			}
 		}
 		return this;
-	};
-	__ks_Array._im_pushUniq = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		return __ks_Array.__ks_func_pushUniq_0.apply(that, args);
 	};
 	__ks_Array.__ks_sttc_same_0 = function(a, b) {
 		if(arguments.length < 2) {
@@ -292,6 +230,68 @@ module.exports = function() {
 			}
 		}
 		return true;
+	};
+	__ks_Array._im_append = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		return __ks_Array.__ks_func_append_0.apply(that, args);
+	};
+	__ks_Array._im_appendUniq = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		return __ks_Array.__ks_func_appendUniq_0.apply(that, args);
+	};
+	__ks_Array._im_any = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 1) {
+			return __ks_Array.__ks_func_any_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_Array._im_clear = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 0) {
+			return __ks_Array.__ks_func_clear_0.apply(that);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_Array._im_clone = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 0) {
+			return __ks_Array.__ks_func_clone_0.apply(that);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_Array._im_contains = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length >= 1 && args.length <= 2) {
+			return __ks_Array.__ks_func_contains_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_Array._cm_from = function() {
+		var args = Array.prototype.slice.call(arguments);
+		if(args.length === 1) {
+			return __ks_Array.__ks_sttc_from_0.apply(null, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_Array._im_last = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length >= 0 && args.length <= 1) {
+			return __ks_Array.__ks_func_last_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_Array._im_remove = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		return __ks_Array.__ks_func_remove_0.apply(that, args);
+	};
+	__ks_Array._cm_merge = function() {
+		var args = Array.prototype.slice.call(arguments);
+		return __ks_Array.__ks_sttc_merge_0.apply(null, args);
+	};
+	__ks_Array._im_pushUniq = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		return __ks_Array.__ks_func_pushUniq_0.apply(that, args);
 	};
 	__ks_Array._cm_same = function() {
 		var args = Array.prototype.slice.call(arguments);
@@ -320,19 +320,8 @@ module.exports = function() {
 		}
 		return clone;
 	};
-	__ks_Object._cm_clone = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 1) {
-			return __ks_Object.__ks_sttc_clone_0.apply(null, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	__ks_Object.__ks_sttc_defaults_0 = function(...args) {
 		return __ks_Object._cm_merge({}, ...args);
-	};
-	__ks_Object._cm_defaults = function() {
-		var args = Array.prototype.slice.call(arguments);
-		return __ks_Object.__ks_sttc_defaults_0.apply(null, args);
 	};
 	__ks_Object.__ks_sttc_isEmpty_0 = function(item) {
 		if(arguments.length < 1) {
@@ -347,13 +336,6 @@ module.exports = function() {
 			}
 		}
 		return true;
-	};
-	__ks_Object._cm_isEmpty = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 1) {
-			return __ks_Object.__ks_sttc_isEmpty_0.apply(null, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
 	};
 	__ks_Object.__ks_sttc_merge_0 = function(...args) {
 		let source;
@@ -373,6 +355,24 @@ module.exports = function() {
 			++i;
 		}
 		return source;
+	};
+	__ks_Object._cm_clone = function() {
+		var args = Array.prototype.slice.call(arguments);
+		if(args.length === 1) {
+			return __ks_Object.__ks_sttc_clone_0.apply(null, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	__ks_Object._cm_defaults = function() {
+		var args = Array.prototype.slice.call(arguments);
+		return __ks_Object.__ks_sttc_defaults_0.apply(null, args);
+	};
+	__ks_Object._cm_isEmpty = function() {
+		var args = Array.prototype.slice.call(arguments);
+		if(args.length === 1) {
+			return __ks_Object.__ks_sttc_isEmpty_0.apply(null, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
 	};
 	__ks_Object._cm_merge = function() {
 		var args = Array.prototype.slice.call(arguments);

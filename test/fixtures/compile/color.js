@@ -1556,15 +1556,6 @@ module.exports = function() {
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.getField("red");
 	};
-	Color.prototype.red = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_red_0.apply(this);
-		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_red_1.apply(this, arguments);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	Color.prototype.__ks_func_red_1 = function(value) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
@@ -1574,26 +1565,8 @@ module.exports = function() {
 		}
 		return this.setField("red", value);
 	};
-	Color.prototype.red = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_red_0.apply(this);
-		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_red_1.apply(this, arguments);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	Color.prototype.__ks_func_green_0 = function() {
 		return this.getField("green");
-	};
-	Color.prototype.green = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_green_0.apply(this);
-		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_green_1.apply(this, arguments);
-		}
-		throw new SyntaxError("wrong number of arguments");
 	};
 	Color.prototype.__ks_func_green_1 = function(value) {
 		if(arguments.length < 1) {
@@ -1604,26 +1577,8 @@ module.exports = function() {
 		}
 		return this.setField("green", value);
 	};
-	Color.prototype.green = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_green_0.apply(this);
-		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_green_1.apply(this, arguments);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	Color.prototype.__ks_func_blue_0 = function() {
 		return this.getField("blue");
-	};
-	Color.prototype.blue = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_blue_0.apply(this);
-		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_blue_1.apply(this, arguments);
-		}
-		throw new SyntaxError("wrong number of arguments");
 	};
 	Color.prototype.__ks_func_blue_1 = function(value) {
 		if(arguments.length < 1) {
@@ -1633,6 +1588,24 @@ module.exports = function() {
 			throw new TypeError("'value' is not nullable");
 		}
 		return this.setField("blue", value);
+	};
+	Color.prototype.red = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_red_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_red_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
+	};
+	Color.prototype.green = function() {
+		if(arguments.length === 0) {
+			return Color.prototype.__ks_func_green_0.apply(this);
+		}
+		else if(arguments.length === 1) {
+			return Color.prototype.__ks_func_green_1.apply(this, arguments);
+		}
+		throw new SyntaxError("wrong number of arguments");
 	};
 	Color.prototype.blue = function() {
 		if(arguments.length === 0) {

@@ -10,6 +10,68 @@ import {
 	'./fixtures/compile/color.ks'
 }
 
+Color.registerSpace!({ // {{{ rvb
+	name: 'rvb',
+	converters: {
+		from: {
+			srgb(red, green, blue, that) { // {{{
+				that._rouge = red
+				that._vert = green
+				that._blue = blue
+			} // }}}
+		},
+		to: {
+			srgb(rouge, vert, blue, that) { // {{{
+				that._red = rouge
+				that._green = vert
+				that._blue = blue
+			} // }}}
+		}
+	},
+	components: {
+		rouge: {
+			max: 255
+		},
+		vert: {
+			max: 255
+		},
+		blue: {
+			max: 255
+		}
+	}
+}) // }}}
+
+Color.registerSpace!({ // {{{ cmy
+	name: 'cmy',
+	converters: {
+		from: {
+			srgb: func(red, green, blue, that) { // {{{
+				that._cyan = blue
+				that._magenta = red
+				that._yellow = green
+			} // }}}
+		},
+		to: {
+			srgb: func(cyan, magenta, yellow, that) { // {{{
+				that._red = magenta
+				that._green = yellow
+				that._blue = cyan
+			} // }}}
+		}
+	},
+	components: {
+		magenta: {
+			max: 255
+		},
+		green: {
+			max: 255
+		},
+		yellow: {
+			max: 255
+		}
+	}
+}) // }}}
+
 describe('color.space', func() {
 	describe('space', func() {
 		it('get', func() { // {{{
@@ -67,38 +129,7 @@ describe('color.space', func() {
 	})
 	
 	describe('rvb', func() {
-		it('register', func() { // {{{
-			Color.registerSpace!({
-				name: 'rvb',
-				converters: {
-					from: {
-						srgb: func(red, green, blue, that) { // {{{
-							that._rouge = red
-							that._vert = green
-							that._blue = blue
-						} // }}}
-					},
-					to: {
-						srgb: func(rouge, vert, blue, that) { // {{{
-							that._red = rouge
-							that._green = vert
-							that._blue = blue
-						} // }}}
-					}
-				},
-				components: {
-					rouge: {
-						max: 255
-					},
-					vert: {
-						max: 255
-					},
-					blue: {
-						max: 255
-					}
-				}
-			})
-			
+		it('set :rvb', func() { // {{{
 			let c = new Color('#ff0')
 			
 			expect(c.space()).to.equal('srgb')
@@ -140,39 +171,6 @@ describe('color.space', func() {
 	})
 	
 	describe('cmy', func() {
-		it('register', func() { // {{{
-			Color.registerSpace!({
-				name: 'cmy',
-				converters: {
-					from: {
-						srgb: func(red, green, blue, that) { // {{{
-							that._cyan = blue
-							that._magenta = red
-							that._yellow = green
-						} // }}}
-					},
-					to: {
-						srgb: func(cyan, magenta, yellow, that) { // {{{
-							that._red = magenta
-							that._green = yellow
-							that._blue = cyan
-						} // }}}
-					}
-				},
-				components: {
-					magenta: {
-						max: 255
-					},
-					green: {
-						max: 255
-					},
-					yellow: {
-						max: 255
-					}
-				}
-			})
-		}) // }}}
-		
 		it('set :blue', func() { // {{{
 			let c = new Color('#ff0')
 			

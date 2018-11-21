@@ -8,6 +8,7 @@
     {
       "alien": true,
       "sealed": true,
+      "init": 0,
       "variables": {
         "innerHeight": {
           "access": 3,
@@ -22,6 +23,7 @@
           "type": {
             "alien": false,
             "sealed": false,
+            "init": 0,
             "variables": {},
             "methods": {
               "log": [

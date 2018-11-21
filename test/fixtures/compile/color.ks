@@ -511,8 +511,8 @@ export class Color {
 					fields.push(macro private #i(field): Number)
 
 					methods.push(macro {
-						#i(name)() => this.getField(#(name))
-						#i(name)(value) => this.setField(#(name), value)
+						override #i(name)() => this.getField(#(name))
+						override #i(name)(value) => this.setField(#(name), value)
 					})
 				}
 

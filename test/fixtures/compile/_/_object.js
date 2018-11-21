@@ -23,16 +23,6 @@ module.exports = function(Helper, Type) {
 		}
 		return results;
 	};
-	__ks_Object._cm_map = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 2) {
-			return __ks_Object.__ks_sttc_map_0.apply(null, args);
-		}
-		else if(args.length === 3) {
-			return __ks_Object.__ks_sttc_map_1.apply(null, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	__ks_Object.__ks_sttc_map_1 = function(object, iterator, condition) {
 		if(arguments.length < 3) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");

@@ -3,12 +3,12 @@ module.exports = function() {
 	__ks_Object.__ks_sttc_defaults_0 = function(...args) {
 		return __ks_Object._cm_merge({}, ...args);
 	};
+	__ks_Object.__ks_sttc_merge_0 = function(...args) {
+		return {};
+	};
 	__ks_Object._cm_defaults = function() {
 		var args = Array.prototype.slice.call(arguments);
 		return __ks_Object.__ks_sttc_defaults_0.apply(null, args);
-	};
-	__ks_Object.__ks_sttc_merge_0 = function(...args) {
-		return {};
 	};
 	__ks_Object._cm_merge = function() {
 		var args = Array.prototype.slice.call(arguments);

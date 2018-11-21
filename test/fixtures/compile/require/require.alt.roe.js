@@ -22,13 +22,6 @@ module.exports = function(__ks_0, __ks___ks_0) {
 		let from = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
 		return this.indexOf(item, from) !== -1;
 	};
-	__ks_Array._im_contains = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 1 && args.length <= 2) {
-			return __ks_Array.__ks_func_contains_0.apply(that, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	__ks_Array.__ks_func_pushUniq_0 = function(...args) {
 		if(args.length === 1) {
 			if(!__ks_Array._im_contains(this, args[0])) {
@@ -44,6 +37,13 @@ module.exports = function(__ks_0, __ks___ks_0) {
 			}
 		}
 		return this;
+	};
+	__ks_Array._im_contains = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length >= 1 && args.length <= 2) {
+			return __ks_Array.__ks_func_contains_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
 	};
 	__ks_Array._im_pushUniq = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

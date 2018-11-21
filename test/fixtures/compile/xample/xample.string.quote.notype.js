@@ -14,13 +14,6 @@ module.exports = function() {
 		}
 		return quote + __ks_String._im_replaceAll(this, escape, escape + escape).replaceAll(quote, escape + quote) + quote;
 	};
-	__ks_String._im_quote = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 1 && args.length <= 2) {
-			return __ks_String.__ks_func_quote_0.apply(that, args);
-		}
-		throw new SyntaxError("wrong number of arguments");
-	};
 	__ks_String.__ks_func_replaceAll_0 = function(find, replacement) {
 		if(arguments.length < 2) {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
@@ -38,6 +31,13 @@ module.exports = function() {
 			throw new TypeError("'replacement' is not of type 'String'");
 		}
 		return this;
+	};
+	__ks_String._im_quote = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length >= 1 && args.length <= 2) {
+			return __ks_String.__ks_func_quote_0.apply(that, args);
+		}
+		throw new SyntaxError("wrong number of arguments");
 	};
 	__ks_String._im_replaceAll = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

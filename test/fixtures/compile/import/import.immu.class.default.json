@@ -12,6 +12,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
+      "init": 1,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {

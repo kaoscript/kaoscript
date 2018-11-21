@@ -19,6 +19,8 @@ function patch(file) {
 	var root = path.dirname(file)
 	var name = path.basename(file).slice(0, -3);
 	
+	console.log('patching ' + name + '.ks')
+	
 	try {
 		fs.readFileSync(path.join(root, name + '.json'), {
 			encoding: 'utf8'

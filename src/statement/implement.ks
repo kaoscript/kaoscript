@@ -1,6 +1,7 @@
 class ImplementDeclaration extends Statement {
 	private {
-		_properties = []
+		_properties			= []
+		_sharingProperties	= {}
 		_type: Type
 		_variable
 	}
@@ -56,8 +57,13 @@ class ImplementDeclaration extends Statement {
 			TypeException.throwImplInvalidType(this)
 		}
 
+		let name
 		for property in @properties {
 			property.prepare()
+			
+			if name ?= property.getSharedName() {
+				@sharingProperties[name] = property
+			}
 		}
 	} // }}}
 	translate() { // {{{
@@ -69,6 +75,10 @@ class ImplementDeclaration extends Statement {
 		for property in @properties {
 			property.toFragments(fragments, Mode::None)
 		}
+		
+		for :property of @sharingProperties {
+			property.toSharedFragments(fragments)
+		}
 	} // }}}
 	type() => @type
 }
@@ -78,6 +88,7 @@ class ImplementClassFieldDeclaration extends Statement {
 		_class: ClassType
 		_defaultValue				= null
 		_hasDefaultValue: Boolean	= false
+		_init: Number				= 0
 		_instance: Boolean			= true
 		_name: String
 		_type: ClassVariableType
@@ -101,20 +112,8 @@ class ImplementClassFieldDeclaration extends Statement {
 		if @data.defaultValue? {
 			@hasDefaultValue = true
 
-			if @instance {
-				let scope = @scope
-
-				@scope = @parent._instanceVariableScope
-
-				@defaultValue = $compile.expression(@data.defaultValue, this)
-				@defaultValue.analyse()
-
-				@scope = scope
-			}
-			else {
-				@defaultValue = $compile.expression(@data.defaultValue, this)
-				@defaultValue.analyse()
-			}
+			@defaultValue = $compile.expression(@data.defaultValue, this)
+			@defaultValue.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
@@ -130,6 +129,12 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 
 		if @hasDefaultValue {
+			if @instance {
+				@init = @class.init() + 1
+				
+				@class.init(@init)
+			}
+			
 			@defaultValue.prepare()
 		}
 	} // }}}
@@ -138,15 +143,39 @@ class ImplementClassFieldDeclaration extends Statement {
 			@defaultValue.translate()
 		}
 	} // }}}
+	getSharedName() => @hasDefaultValue && @instance ? '__ks_init' : null
 	toFragments(fragments, mode) { // {{{
 		if @hasDefaultValue {
 			if @instance {
-				throw new NotImplementedException(this)
+				const line = fragments.newLine()
+				
+				line.code(`\(@class.name()).prototype.__ks_init_\(@init) = function()`)
+
+				const block = line.newBlock()
+
+				block.newLine().code(`this.\(@name) = `).compile(@defaultValue).done()
+
+				block.done()
+				line.done()
 			}
 			else {
-				throw new NotImplementedException(this)
+				fragments.newLine().code(`\(@class.name()).\(@name) = `).compile(@defaultValue).done()
 			}
 		}
+	} // }}}
+	toSharedFragments(fragments) { // {{{
+		const line = fragments.newLine()
+
+		line.code(`\(@class.name()).prototype.__ks_init = function()`)
+
+		const block = line.newBlock()
+
+		for let i from 1 to @init {
+			block.line(`\(@class.name()).prototype.__ks_init_\(i).call(this)`)
+		}
+
+		block.done()
+		line.done()
 	} // }}}
 	type() => @type
 }
@@ -161,6 +190,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_instance: Boolean		= true
 		_internalName: String
 		_name: String
+		_override: Boolean		= false
 		_parameters: Array<Parameter>
 		_statements
 		_this: Variable
@@ -180,9 +210,12 @@ class ImplementClassMethodDeclaration extends Statement {
 			throw new NotImplementedException(this)
 		}
 		else {
-			for i from 0 til @data.modifiers.length while @instance {
+			for i from 0 til @data.modifiers.length {
 				if @data.modifiers[i].kind == ModifierKind::Static {
 					@instance = false
+				}
+				else if @data.modifiers[i].kind == ModifierKind::Override {
+					@override = true
 				}
 			}
 		}
@@ -210,10 +243,22 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		if @instance {
-			@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
+			if @override && (index ?= @class.matchInstanceMethod(@name, @type)) {
+				@internalName = `__ks_func_\(@name)_\(index)`
+			}
+			else {
+				@override = false
+				@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
+			}
 		}
 		else {
-			@internalName = `__ks_sttc_\(@name)_\(@class.addClassMethod(@name, @type))`
+			if @override && (index ?= @class.matchClassMethod(@name, @type)) {
+				@internalName = `__ks_sttc_\(@name)_\(index)`
+			}
+			else {
+				@override = false
+				@internalName = `__ks_sttc_\(@name)_\(@class.addClassMethod(@name, @type))`
+			}
 		}
 	} // }}}
 	translate() { // {{{
@@ -249,6 +294,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	class() => @class
+	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_cm_\(@name)`
 	isInstance() => @instance
 	isInstanceMethod() => @instance
 	parameters() => @parameters
@@ -286,68 +332,71 @@ class ImplementClassMethodDeclaration extends Statement {
 
 			block.done()
 			line.done()
+		}
+	} // }}}
+	toSharedFragments(fragments) { // {{{
+		return if @override
+		
+		if @instance {
+			if @class.isSealed() {
+				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, null, (node, fragments) => {
+					const block = fragments.code(`\(@class.sealName())._im_\(@name) = function(that)`).newBlock()
 
-			if @instance {
-				if @class.isSealed() {
-					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, null, (node, fragments) => {
-						const block = fragments.code(`\(@class.sealName())._im_\(@name) = function(that)`).newBlock()
+					block.line('var args = Array.prototype.slice.call(arguments, 1, arguments.length)')
 
-						block.line('var args = Array.prototype.slice.call(arguments, 1, arguments.length)')
-
-						return block
-					}, (fragments) => fragments.done(), (fragments, method, index) => {
-						if method.max() == 0 {
-							if method.isSealed() {
-								fragments.line(`return \(@class.sealName()).__ks_func_\(@name)_\(index).apply(that)`)
-							}
-							else {
-								fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that)`)
-							}
+					return block
+				}, (fragments) => fragments.done(), (fragments, method, index) => {
+					if method.max() == 0 {
+						if method.isSealed() {
+							fragments.line(`return \(@class.sealName()).__ks_func_\(@name)_\(index).apply(that)`)
 						}
 						else {
-							if method.isSealed() {
-								fragments.line(`return \(@class.sealName()).__ks_func_\(@name)_\(index).apply(that, args)`)
-							}
-							else {
-								fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
-							}
+							fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that)`)
 						}
-					}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
-				}
-				else {
-					ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
-				}
+					}
+					else {
+						if method.isSealed() {
+							fragments.line(`return \(@class.sealName()).__ks_func_\(@name)_\(index).apply(that, args)`)
+						}
+						else {
+							fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
+						}
+					}
+				}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
 			}
 			else {
-				if @class.isSealed() {
-					ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, null, (node, fragments) => {
-						const block = fragments.code(`\(@class.sealName())._cm_\(@name) = function()`).newBlock()
+				ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
+			}
+		}
+		else {
+			if @class.isSealed() {
+				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, null, (node, fragments) => {
+					const block = fragments.code(`\(@class.sealName())._cm_\(@name) = function()`).newBlock()
 
-						block.line('var args = Array.prototype.slice.call(arguments)')
+					block.line('var args = Array.prototype.slice.call(arguments)')
 
-						return block
-					}, (fragments) => fragments.done(), (fragments, method, index) => {
-						if method.max() == 0 {
-							if method.isSealed() {
-								fragments.line(`return \(@class.sealName()).__ks_sttc_\(@name)_\(index)()`)
-							}
-							else {
-								fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index)()`)
-							}
+					return block
+				}, (fragments) => fragments.done(), (fragments, method, index) => {
+					if method.max() == 0 {
+						if method.isSealed() {
+							fragments.line(`return \(@class.sealName()).__ks_sttc_\(@name)_\(index)()`)
 						}
 						else {
-							if method.isSealed() {
-								fragments.line(`return \(@class.sealName()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
-							}
-							else {
-								fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
-							}
+							fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index)()`)
 						}
-					}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
-				}
-				else {
-					ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
-				}
+					}
+					else {
+						if method.isSealed() {
+							fragments.line(`return \(@class.sealName()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+						}
+						else {
+							fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+						}
+					}
+				}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
+			}
+			else {
+				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 			}
 		}
 	} // }}}
@@ -379,6 +428,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 	translate() { // {{{
 		@value.translate()
 	} // }}}
+	getSharedName() => null
 	toFragments(fragments, mode) { // {{{
 		if @namespace.isSealed() {
 			fragments
@@ -446,6 +496,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			@statements = []
 		}
 	} // }}}
+	getSharedName() => null
 	isInstanceMethod() => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{

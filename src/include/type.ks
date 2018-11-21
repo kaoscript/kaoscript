@@ -353,6 +353,7 @@ abstract class Type {
 					type._abstract = data.abstract
 					type._alien = data.alien
 					type._hybrid = data.hybrid
+					type._init = data.init
 
 					if data.sealed {
 						type.seal()
@@ -426,6 +427,8 @@ abstract class Type {
 				const name = scope.getAnomynousClassName()
 
 				const type = new ClassType(name, domain)
+				
+				type._init = data.init
 
 				scope.define(name, true, type, node)
 
@@ -641,6 +644,7 @@ class ClassType extends Type {
 		_extending: Boolean			= false
 		_extends: ClassType
 		_hybrid: Boolean			= false
+		_init: Number				= 0
 		_instanceMethods: Object	= {}
 		_instanceVariables: Object	= {}
 		_name: String
@@ -767,6 +771,7 @@ class ClassType extends Type {
 		if ?@requiredReference {
 			const export = {
 				class: @requiredReference.export()
+				init: @init
 				instanceVariables: {}
 				classVariables: {}
 				instanceMethods: {}
@@ -801,6 +806,7 @@ class ClassType extends Type {
 			const export = {
 				alien: @alien
 				sealed: @sealed
+				init: @init
 				variables: {}
 				methods: {}
 			}
@@ -821,6 +827,7 @@ class ClassType extends Type {
 				alien: @alien
 				hybrid: @hybrid
 				sealed: @sealed
+				init: @init
 				constructors: [constructor.export() for constructor in @constructors]
 				destructors: @destructors
 				instanceVariables: {}
@@ -1090,6 +1097,8 @@ class ClassType extends Type {
 			return false
 		}
 	} // }}}
+	init() => @init
+	init(@init) => this
 	isAbstract() => @abstract
 	isAnonymous() => @anonymous
 	isClass() => true
@@ -1153,7 +1162,41 @@ class ClassType extends Type {
 			return false
 		}
 	} // }}}
+	matchClassMethod(name: String, type: ClassMethodType) { // {{{
+		if @classMethods[name] is Array {
+			for method, index in @classMethods[name] {
+				if method.match(type) {
+					return index
+				}
+			}
+		}
+
+		if @extending {
+			return @extends.matchClassMethod(name, type)
+		}
+		else {
+			return null
+		}
+	} // }}}
+	matchInstanceMethod(name: String, type: ClassMethodType) { // {{{
+		if @instanceMethods[name] is Array {
+			for method, index in @instanceMethods[name] {
+				if method.match(type) {
+					return index
+				}
+			}
+		}
+
+		if @extending {
+			return @extends.matchInstanceMethod(name, type)
+		}
+		else {
+			return null
+		}
+	} // }}}
 	merge(type: ClassType, node) { // {{{
+		this.init(type.init())
+		
 		for constructor in type._constructors {
 			this.addConstructor(constructor)
 		}
@@ -1196,6 +1239,7 @@ class ClassType extends Type {
 		that._extending = this._extending
 		that._extends = this._extends
 		that._hybrid = this._hybrid
+		that._init = this._init
 		that._namespace = this._namespace
 		that._parentName = this._parentName
 		that._sealed = this._sealed

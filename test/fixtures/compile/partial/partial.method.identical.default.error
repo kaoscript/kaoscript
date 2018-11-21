@@ -1,0 +1,1 @@
+SyntaxException: Methods can't be differentiated (line 27, file "fixtures/compile/partial/partial.method.identical.default.ks")

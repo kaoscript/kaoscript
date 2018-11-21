@@ -598,6 +598,10 @@ class ClassDeclaration extends Statement {
 				}
 			}
 		}
+		
+		if this.hasInits() {
+			@type.init(1)
+		}
 	} // }}}
 	prepare() { // {{{
 		if @extending {

@@ -49,15 +49,15 @@ module.exports = function() {
 		this._color = "red";
 		return this;
 	};
+	__ks_Shape.__ks_sttc_makeRed_0 = function() {
+		return new Shape("red");
+	};
 	__ks_Shape._im_makeRed = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length === 0) {
 			return __ks_Shape.__ks_func_makeRed_0.apply(that);
 		}
 		throw new SyntaxError("wrong number of arguments");
-	};
-	__ks_Shape.__ks_sttc_makeRed_0 = function() {
-		return new Shape("red");
 	};
 	__ks_Shape._cm_makeRed = function() {
 		var args = Array.prototype.slice.call(arguments);
