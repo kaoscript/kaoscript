@@ -13,7 +13,7 @@ module.exports = function() {
 		else if(!(Type.isString(x) || Type.isNumber(x))) {
 			throw new TypeError("'x' is not of type 'String' or 'Number'");
 		}
-		return 42 - (Type.isNumber(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x));
+		return 42 - (Type.isString(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x));
 	}
 	function bar(x, y) {
 		if(arguments.length < 2) {
@@ -31,6 +31,6 @@ module.exports = function() {
 		else if(!(Type.isString(y) || Type.isNumber(y))) {
 			throw new TypeError("'y' is not of type 'String' or 'Number'");
 		}
-		return (Type.isNumber(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x)) - (Type.isNumber(y) ? __ks_String._im_toFloat(y) : __ks_Number._im_toFloat(y));
+		return (Type.isString(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x)) - (Type.isString(y) ? __ks_String._im_toFloat(y) : __ks_Number._im_toFloat(y));
 	}
 };

@@ -8,10 +8,10 @@ class BinaryOperatorExpression extends Expression {
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
-		
+
 		@right = $compile.expression(@data.right, this)
 		@right.analyse()
-		
+
 		@await = @left.isAwait() || @right.isAwait()
 	} // }}}
 	prepare() { // {{{
@@ -53,9 +53,9 @@ class BinaryOperatorExpression extends Expression {
 			fragments
 				.wrapNullable(this)
 				.code(' ? ')
-			
+
 			this.toOperatorFragments(fragments)
-			
+
 			fragments.code(' : false')
 		}
 		else {
@@ -66,7 +66,7 @@ class BinaryOperatorExpression extends Expression {
 		if !@tested {
 			if @left.isNullable() {
 				fragments.compileNullable(@left)
-				
+
 				if @right.isNullable() {
 					fragments.code(' && ').compileNullable(@right)
 				}
@@ -74,7 +74,7 @@ class BinaryOperatorExpression extends Expression {
 			else {
 				fragments.compileNullable(@right)
 			}
-			
+
 			@tested = true
 		}
 	} // }}}
@@ -285,10 +285,10 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	}
 	prepare() { // {{{
 		super.prepare()
-		
+
 		@left.acquireReusable(true)
 		@left.releaseReusable()
-		
+
 		if @left.type().equals(@right.type()) {
 			@type = @left.type()
 		}
@@ -305,9 +305,9 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		if @left.isNullable() {
 			fragments.code('(')
-			
+
 			@left.toNullableFragments(fragments)
-			
+
 			fragments
 				.code(' && ' + $runtime.type(this) + '.isValue(')
 				.compileReusable(@left)
@@ -319,7 +319,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 				.compileReusable(@left)
 				.code(')')
 		}
-		
+
 		fragments
 			.code(' ? ')
 			.compile(@left)
@@ -359,14 +359,15 @@ class BinaryOperatorTypeCasting extends Expression {
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
-		
+
 		@type = Type.fromAST(@data.right, this)
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
-		
+
 		const type = @left.type()
-		if !(type is ReferenceType || type.isAny()) {
+
+		if !(type is ReferenceType || type is UnionType || type.isAny()) {
 			TypeException.throwInvalidCasting(this)
 		}
 	} // }}}
@@ -390,7 +391,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
-		
+
 		if @data.right.typeName.kind == NodeKind::Identifier && @data.right.typeName.name == 'NaN' {
 			@type = @scope.reference('NaN')
 		}
@@ -421,7 +422,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
-		
+
 		if @data.right.typeName.kind == NodeKind::Identifier && @data.right.typeName.name == 'NaN' {
 			@type = @scope.reference('NaN')
 		}
@@ -441,14 +442,14 @@ class BinaryOperatorTypeInequality extends Expression {
 	toFragments(fragments, mode) { // {{{
 		if @data.right.kind == NodeKind::TypeReference {
 			fragments.code('!')
-			
+
 			@type.toTestFragments(fragments, @left)
 		}
 		else if @data.right.types? {
 			fragments.code('!(')
-			
+
 			@type.toTestFragments(fragments, @left)
-			
+
 			fragments.code(')')
 		}
 		else {

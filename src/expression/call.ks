@@ -1052,7 +1052,7 @@ class SealedMethodCallee extends Callee {
 		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
-		@type.toTestFragments(fragments, @object)
+		@class.reference().toTestFragments(fragments, @object)
 	} // }}}
 	type() => @type
 }
