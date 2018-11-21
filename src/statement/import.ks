@@ -171,6 +171,10 @@ class Importer extends Statement {
 			}
 
 			@domain.commit()
+
+			if @data.arguments?.length != 0 || @count != 0 || @alias? {
+				this.module().flagRegister()
+			}
 		}
 	} // }}}
 	translate()
@@ -208,7 +212,7 @@ class Importer extends Statement {
 			SyntaxException.throwAlreadyDeclared(local, this)
 		}
 
-		this.module().import(local, @moduleName)
+		this.module().import(local)
 
 		@imports[imported] = {
 			local: local
@@ -241,7 +245,7 @@ class Importer extends Statement {
 			@scope.define(local, true, type, this)
 		}
 
-		this.module().import(local, @moduleName)
+		this.module().import(local)
 
 		if isVariable && type is not AliasType {
 			@variables[imported] = local
@@ -294,7 +298,7 @@ class Importer extends Statement {
 		}
 
 		if fs.isFile(x + $extensions.source) {
-			return this.loadKSFile(x + $extensions.source, moduleName != null ? moduleName + $extensions.source : moduleName)
+			return this.loadKSFile(x + $extensions.source, moduleName)
 		}
 		else {
 			for ext of require.extensions {
@@ -337,7 +341,7 @@ class Importer extends Statement {
 			@metadata = compiler.toMetadata()
 
 			hashes = compiler.toHashes()
-			
+
 			module.addHashes(x, hashes)
 		}
 
@@ -372,19 +376,19 @@ class Importer extends Statement {
 				}
 			}
 		}
-		
+
 		const macros = {}
 		for i from 0 til @metadata.macros.length by 2 {
 			macros[@metadata.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for data in @metadata.macros[i + 1]]
 		}
-		
+
 		if @data.specifiers.length == 0 {
 			for i from 1 til @metadata.exports.length by 2 {
 				name = @metadata.exports[i]
 
 				this.addImport(name, name, false)
 			}
-			
+
 			for name, datas of macros {
 				for data in datas {
 					new MacroDeclaration(data, this, name)
@@ -415,7 +419,7 @@ class Importer extends Statement {
 				this.addImport(@alias, @alias, true)
 			}
 		}
-		
+
 		return true
 	} // }}}
 	loadNodeFile(x = null, moduleName = null) { // {{{

@@ -141,16 +141,15 @@ export class Module {
 	flag(name) { // {{{
 		@flags[name] = true
 	} // }}}
+	flagRegister() { // {{{
+		@register = true
+	} // }}}
 	getRequirement(name: String) => @requirementByNames[name]
 	hasInclude(path) { // {{{
 		return @includePaths[path] == true || @includePaths[path] is String
 	} // }}}
-	import(name: String, file = null) { // {{{
+	import(name: String) { // {{{
 		@imports[name] = true
-
-		if file? && file.slice(-$extensions.source.length).toLowerCase() == $extensions.source {
-			@register = true
-		}
 	} // }}}
 	isBinary() => @binary
 	isUpToDate(file, target, data) { // {{{
@@ -446,7 +445,7 @@ export class Module {
 			for name, variable of @exports {
 				@metadata.exports.push(variable.type().toMetadata(@metadata.references), name)
 			}
-			
+
 			for name, datas of @exportedMacros {
 				@metadata.macros.push(name, datas)
 			}
@@ -480,7 +479,7 @@ class ModuleBlock extends AbstractNode {
 		for statement in @statements {
 			statement.prepare()
 		}
-		
+
 		const recipient = this.recipient()
 		for statement in @statements when statement.isExportable() {
 			statement.export(recipient)
