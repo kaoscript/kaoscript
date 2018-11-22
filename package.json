@@ -35,24 +35,24 @@
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
-		"@kaoscript/runtime": "github:kaoscript/runtime#v0.6.0",
+		"@kaoscript/runtime": "^0.6.0",
 		"commander": "^2.19.0"
 	},
 	"devDependencies": {
-		"@kaoscript/ast": "github:kaoscript/ast#v0.7.0",
+		"@kaoscript/ast": "^0.7.1",
 		"@kaoscript/coverage-istanbul": "github:kaoscript/coverage-istanbul#v0.2.0",
 		"@kaoscript/parser": "github:kaoscript/parser#v0.8.0",
 		"@kaoscript/source-generator": "github:kaoscript/source-generator#v0.1.0",
-		"@kaoscript/test-import": "github:kaoscript/test-import#v0.2.0",
-		"@kaoscript/util": "github:kaoscript/util#v0.1.0",
-		"@zokugun/istanbul.cover": "0.5.x",
-		"@zokugun/istanbul.cover.cmd.mocha": "0.4.x",
-		"@zokugun/istanbul.reporter.minimap": "0.5.x",
+		"@kaoscript/test-import": "^0.2.0",
+		"@kaoscript/util": "^0.1.0",
+		"@zokugun/istanbul.cover": "^0.5.0",
+		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",
+		"@zokugun/istanbul.reporter.minimap": "^0.5.0",
 		"chai": "^4.2.0",
-		"coveralls": "^2.13.3",
+		"coveralls": "^3.0.2",
 		"istanbul": "^0.4.5",
 		"klaw-sync": "^6.0.0",
-		"mocha": "^4.1.0",
+		"mocha": "^5.2.0",
 		"rimraf": "^2.5.4"
 	},
 	"scripts": {
