@@ -6,7 +6,7 @@ class SequenceExpression extends Expression {
 		@expressions = []
 		for expression in @data.expressions {
 			@expressions.push(expression = $compile.expression(expression, this))
-			
+
 			expression.analyse()
 		}
 	} // }}}
@@ -22,13 +22,24 @@ class SequenceExpression extends Expression {
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.code('(')
-		
+
 		for i from 0 til @expressions.length {
 			fragments.code($comma) if i != 0
-			
+
 			fragments.compile(@expressions[i])
 		}
-		
+
+		fragments.code(')')
+	} // }}}
+	toBooleanFragments(fragments, mode) { // {{{
+		fragments.code('(')
+
+		for i from 0 til @expressions.length {
+			fragments.code($comma) if i != 0
+
+			fragments.compileBoolean(@expressions[i])
+		}
+
 		fragments.code(')')
 	} // }}}
 	type() => @expressions[@expressions.length - 1].type()

@@ -60,7 +60,7 @@ class ImplementDeclaration extends Statement {
 		let name
 		for property in @properties {
 			property.prepare()
-			
+
 			if name ?= property.getSharedName() {
 				@sharingProperties[name] = property
 			}
@@ -75,7 +75,7 @@ class ImplementDeclaration extends Statement {
 		for property in @properties {
 			property.toFragments(fragments, Mode::None)
 		}
-		
+
 		for :property of @sharingProperties {
 			property.toSharedFragments(fragments)
 		}
@@ -131,10 +131,10 @@ class ImplementClassFieldDeclaration extends Statement {
 		if @hasDefaultValue {
 			if @instance {
 				@init = @class.init() + 1
-				
+
 				@class.init(@init)
 			}
-			
+
 			@defaultValue.prepare()
 		}
 	} // }}}
@@ -148,7 +148,7 @@ class ImplementClassFieldDeclaration extends Statement {
 		if @hasDefaultValue {
 			if @instance {
 				const line = fragments.newLine()
-				
+
 				line.code(`\(@class.name()).prototype.__ks_init_\(@init) = function()`)
 
 				const block = line.newBlock()
@@ -336,7 +336,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	} // }}}
 	toSharedFragments(fragments) { // {{{
 		return if @override
-		
+
 		if @instance {
 			if @class.isSealed() {
 				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, null, (node, fragments) => {
