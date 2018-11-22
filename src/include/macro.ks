@@ -155,6 +155,7 @@ func $transformExpression(macro, node, data, writer) { // {{{
 
 class MacroDeclaration extends AbstractNode {
 	private {
+		_executeCount				= 0
 		_fn: Function
 		_marks:	Array				= []
 		_name: String
@@ -225,7 +226,7 @@ class MacroDeclaration extends AbstractNode {
 		//console.log(source)
 
 		@fn = $evaluate(source)
-		
+
 		@parent.scope().addMacro(@name, this)
 	} // }}}
 	analyse()
@@ -253,6 +254,7 @@ class MacroDeclaration extends AbstractNode {
 	execute(arguments: Array, parent) { // {{{
 		//console.log(@fn.toString())
 		const module = this.module()
+		++@executeCount
 
 		const args = [$evaluate, $reificate^^(this, parent)].concat(arguments)
 
@@ -260,10 +262,11 @@ class MacroDeclaration extends AbstractNode {
 		//console.log('execute =>', data)
 
 		try {
-			data = module.parse(data, path)
+			data = Parser.parse(data)
 		}
 		catch error {
-			error.filename = path
+			error.filename = `\(@parent.file())$\(@name)$\(@executeCount)`
+			error.message += ` (file "\(error.filename)")`
 
 			throw error
 		}
@@ -281,7 +284,7 @@ class MacroDeclaration extends AbstractNode {
 			parameters: @data.parameters
 			body: @data.body
 		}
-		
+
 		recipient.exportMacro(name, Buffer.from(JSON.stringify(data)).toString('base64'))
 	} // }}}
 	private filter(statement, data, fragments) { // {{{
