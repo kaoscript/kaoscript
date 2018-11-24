@@ -674,6 +674,7 @@ class Parameter extends AbstractNode {
 	isRest() => @rest
 	isSetterAlias() => @setterAlias
 	isThisAlias() => @thisAlias
+	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
 	returnType() => @type.returnType()
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@name)

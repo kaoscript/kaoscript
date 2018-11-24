@@ -12,45 +12,45 @@ class FunctionExpression extends Expression {
 	} // }}}
 	analyse() { // {{{
 		@scope.define('this', true, this)
-		
+
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
-			
+
 			parameter.analyse()
 		}
-		
+
 		@isObjectMember = @parent is ObjectMember
 	} // }}}
 	prepare() { // {{{
 		for parameter in @parameters {
 			parameter.prepare()
 		}
-		
+
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
-		
+
 		@statements = []
 		for statement in $ast.body(@data.body) {
 			@statements.push(statement = $compile.statement(statement, this))
-			
+
 			statement.analyse()
-			
+
 			if statement.isAwait() {
 				@awaiting = true
 			}
 		}
-		
+
 		const rtype = @type.returnType()
 		const na = !rtype.isAny()
-		
+
 		for statement in @statements {
 			statement.prepare()
-			
+
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
 			}
@@ -61,17 +61,18 @@ class FunctionExpression extends Expression {
 				@exit = statement.isExit()
 			}
 		}
-		
+
 		for statement in @statements {
 			statement.translate()
 		}
 	} // }}}
 	isComputed() => true
 	isInstanceMethod() => false
+	isUsingVariable(name) => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		let surround
-		
+
 		if @isObjectMember {
 			if @options.format.functions == 'es5' {
 				surround = {
@@ -95,23 +96,23 @@ class FunctionExpression extends Expression {
 				footer: ''
 			}
 		}
-		
+
 		fragments.code(surround.beforeParameters)
-		
+
 		const block = Parameter.toFragments(this, fragments, ParameterMode::Default, func(fragments) {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
-		
+
 		if @awaiting {
 			let index = -1
 			let item
-			
+
 			for statement, i in @statements while index == -1 {
 				if item ?= statement.toFragments(block, Mode::None) {
 					index = i
 				}
 			}
-			
+
 			if index != -1 {
 				item(@statements.slice(index + 1))
 			}
@@ -120,14 +121,14 @@ class FunctionExpression extends Expression {
 			for statement in @statements {
 				block.compile(statement)
 			}
-			
+
 			if !@exit && @type.isAsync() {
 				block.line('__ks_cb()')
 			}
 		}
-		
+
 		block.done()
-		
+
 		if surround.footer.length > 0 {
 			fragments.code(surround.footer)
 		}
@@ -150,7 +151,7 @@ class LambdaExpression extends Expression {
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
-			
+
 			parameter.analyse()
 		}
 	} // }}}
@@ -158,31 +159,31 @@ class LambdaExpression extends Expression {
 		for parameter in @parameters {
 			parameter.prepare()
 		}
-		
+
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
-		
+
 		@statements = []
 		for statement in $ast.body(@data.body) {
 			@statements.push(statement = $compile.statement(statement, this))
-			
+
 			statement.analyse()
-			
+
 			if statement.isAwait() {
 				@awaiting = true
 			}
 		}
-		
+
 		const rtype = @type.returnType()
 		const na = !rtype.isAny()
-		
+
 		for statement in @statements {
 			statement.prepare()
-			
+
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
 			}
@@ -193,33 +194,48 @@ class LambdaExpression extends Expression {
 				@exit = statement.isExit()
 			}
 		}
-		
+
 		for statement in @statements {
 			statement.translate()
 		}
 	} // }}}
 	isComputed() => true
 	isInstanceMethod() => false
+	isUsingVariable(name) { // {{{
+		for parameter in @parameters {
+			if parameter.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		for statement in @statements {
+			if statement.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		let surround = $function.surround(this)
-		
+
 		fragments.code(surround.beforeParameters)
-		
+
 		let block = Parameter.toFragments(this, fragments, surround.arrow ? ParameterMode::ArrowFunction : ParameterMode::Default, func(fragments) {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
-		
+
 		if @awaiting {
 			let index = -1
 			let item
-			
+
 			for statement, i in @statements while index == -1 {
 				if item ?= statement.toFragments(block, Mode::None) {
 					index = i
 				}
 			}
-			
+
 			if index != -1 {
 				item(@statements.slice(index + 1))
 			}
@@ -228,14 +244,14 @@ class LambdaExpression extends Expression {
 			for statement in @statements {
 				block.compile(statement)
 			}
-			
+
 			if !@exit && @type.isAsync() {
 				block.line('__ks_cb()')
 			}
 		}
-		
+
 		block.done()
-		
+
 		if surround.footer.length > 0 {
 			fragments.code(surround.footer)
 		}

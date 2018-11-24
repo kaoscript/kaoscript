@@ -1,5 +1,5 @@
 bin:
-	./bin/kaoscript -c -t ecma-v5 -o lib -r src/compiler.ks=lib/compiler.js src/bin.ks
+	./bin/kaoscript -c --no-register -t ecma-v5 -o lib -r src/compiler.ks=lib/compiler.js src/bin.ks
 
 comp:
 	time ./bin/kaoscript -c -t ecma-v5 -o lib -m src/compiler.ks

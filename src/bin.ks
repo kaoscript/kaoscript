@@ -20,16 +20,16 @@ import {
 
 func rewire(option) {
 	let files = []
-	
+
 	for item in option.split(',') {
 		item = item.split('=')
-		
+
 		files.push({
 			input: item[0]
 			output: item[1]
 		})
 	}
-	
+
 	return files
 }
 
@@ -62,7 +62,7 @@ const options = {
 
 if program.rewire? {
 	options.rewire = []
-	
+
 	for item in program.rewire {
 		options.rewire.push({
 			input: path.join(process.cwd(), item.input)
@@ -77,51 +77,55 @@ if program.target? {
 
 if program.compile {
 	options.output = path.join(process.cwd(), program.output ?? '')
-	
+
 	const compiler = new Compiler(file, options)
-	
+
 	compiler.compile()
-	
+
 	if program.print {
 		console.log(compiler.toSource())
 	}
-	
+
 	compiler.writeOutput()
-	
+
 	if program.metadata {
 		compiler.writeMetadata()
 	}
 }
 else if program.print {
 	const compiler = new Compiler(file, options)
-	
+
 	compiler.compile()
-	
+
 	console.log(compiler.toSource())
 }
 else {
 	const compiler = new Compiler(file, options)
-	
+
 	compiler.compile()
-	
+
 	const sandbox = {}
 	for key of global {
 		sandbox[key] = global[key]
 	}
-	
-	_module = sandbox.module = new Module('eval')
-	_require = sandbox.require = (path) => Module._load(path, _module, true)
-	
-	_module.filename = sandbox.__filename
-	
+
+	sandbox.console = console
+	sandbox.__dirname = path.dirname(file)
+	sandbox.__filename = file
+
+	const _module = sandbox.module = new Module('eval')
+	const _require = sandbox.require = (path) => Module._load(path, _module, true)
+
+	_module.filename = file
+
 	for r in Object.getOwnPropertyNames(require) {
 		if r != 'paths' && r != 'arguments' && r != 'caller' {
 			_require[r] = require[r]
 		}
 	}
-	
+
 	_require.paths = _module.paths = Module._nodeModulePaths(process.cwd()).concat(process.cwd())
 	_require.resolve = (request) => Module._resolveFilename(request, _module)
-	
+
 	vm.runInNewContext(compiler.toSource(), sandbox, file)
 }
