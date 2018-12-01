@@ -206,13 +206,13 @@ class CallExpression extends Expression {
 				@type = types[0]
 			}
 			else {
-				@type = new UnionType(types)
+				@type = new UnionType(this.scope(), types)
 			}
 		}
-		//console.log('-- callees --')
-		//console.log(@callees)
-		//console.log(@property)
-		//console.log(@type)
+		// console.log('-- callees --')
+		// console.log(@callees)
+		// console.log(@property)
+		// console.log(@type)
 	} // }}}
 	translate() { // {{{
 		for argument in @arguments {
@@ -264,7 +264,7 @@ class CallExpression extends Expression {
 						@defaultCallee = t2
 					}
 					else if !t2.isInstanceOf(t1, this) {
-						@defaultCallee.type(new UnionType([t1, t2]))
+						@defaultCallee.type(new UnionType(this.scope(), [t1, t2]))
 					}
 				}
 			}
@@ -337,7 +337,7 @@ class CallExpression extends Expression {
 					this.addCallee(new DefaultCallee(@data, matches[0], this))
 				}
 				else {
-					const type = new UnionType()
+					const type = new UnionType(this.scope())
 
 					for function in matches {
 						type.addType(function.returnType())
@@ -351,19 +351,20 @@ class CallExpression extends Expression {
 			}
 		}
 	} // }}}
-	makeMemberCallee(type) { // {{{
-		//console.log('-- call.makeMemberCallee --')
-		//console.log(type)
-		//console.log(@property)
+	makeMemberCallee(value, name: NamedType = null) { // {{{
+		// console.log('-- call.makeMemberCallee --')
+		// console.log(value)
+		// console.log(@property)
 
-		switch type {
+		switch value {
 			is AliasType => {
 				throw new NotImplementedException(this)
 			}
+			is ClassVariableType => {
+				this.makeMemberCalleeFromReference(value.type())
+			}
 			is ClassType => {
-				const class = type
-
-				if methods ?= class.getClassMethods(@property) {
+				if methods ?= value.getClassMethods(@property) {
 					let sealed = false
 					const types = []
 					const m = []
@@ -388,7 +389,7 @@ class CallExpression extends Expression {
 
 					if types.length == 0 {
 						if sealed {
-							this.addCallee(new SealedMethodCallee(@data, class, false, this))
+							this.addCallee(new SealedMethodCallee(@data, name, false, this))
 						}
 						else {
 							this.addCallee(new DefaultCallee(@data, @object, this))
@@ -396,7 +397,7 @@ class CallExpression extends Expression {
 					}
 					else if types.length == 1 {
 						if sealed {
-							this.addCallee(new SealedMethodCallee(@data, class, false, m, types[0], this))
+							this.addCallee(new SealedMethodCallee(@data, name, false, m, types[0], this))
 						}
 						else {
 							this.addCallee(new DefaultCallee(@data, @object, m, types[0], this))
@@ -413,11 +414,17 @@ class CallExpression extends Expression {
 			is FunctionType => {
 				this.makeMemberCalleeFromReference(@scope.reference('Function'))
 			}
+			is NamedType => {
+				this.makeMemberCallee(value.type(), value)
+			}
+			is NamespaceVariableType => {
+				this.makeMemberCalleeFromReference(value.type())
+			}
 			is NamespaceType => {
-				if property ?= type.getProperty(@property) {
+				if property ?= value.getProperty(@property) {
 					if property is FunctionType {
-						if type.isSealedProperty(@property) {
-							this.addCallee(new SealedFunctionCallee(@data, type, property, property.returnType(), this))
+						if value.isSealedProperty(@property) {
+							this.addCallee(new SealedFunctionCallee(@data, name, property, property.returnType(), this))
 						}
 						else {
 							this.makeCallee(property)
@@ -434,14 +441,30 @@ class CallExpression extends Expression {
 					this.addCallee(new DefaultCallee(@data, @object, this))
 				}
 			}
+			is ObjectType => {
+				if property ?= value.getProperty(@property) {
+					if property is FunctionType {
+						this.makeCallee(property)
+					}
+					else if property is OverloadedFunctionType {
+						this.makeCallee(property)
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, @object, property, this))
+					}
+				}
+				else {
+					this.addCallee(new DefaultCallee(@data, @object, this))
+				}
+			}
 			is ParameterType => {
-				this.makeMemberCallee(type.type())
+				this.makeMemberCallee(value.type())
 			}
 			is ReferenceType => {
-				this.makeMemberCalleeFromReference(type)
+				this.makeMemberCalleeFromReference(value)
 			}
 			is UnionType => {
-				for let type in type.types() {
+				for let type in value.types() {
 					this.makeMemberCallee(type)
 				}
 			}
@@ -450,15 +473,15 @@ class CallExpression extends Expression {
 			}
 		}
 	} // }}}
-	makeMemberCalleeFromReference(type) { // {{{
-		//console.log('-- call.filterReference --')
-		//console.log(type)
-
-		const value = type.unalias()
-		//console.log(value)
-		//console.log(@property)
+	makeMemberCalleeFromReference(value, reference: ReferenceType = value) { // {{{
+		// console.log('-- call.makeMemberCalleeFromReference --')
+		// console.log(value)
+		// console.log(@property)
 
 		switch value {
+			is AliasType => {
+				this.makeMemberCalleeFromReference(value.type())
+			}
 			is ClassType => {
 				if methods ?= value.getInstanceMethods(@property) {
 					let sealed = false
@@ -484,7 +507,7 @@ class CallExpression extends Expression {
 
 					if types.length == 0 {
 						if sealed {
-							this.addCallee(new SealedMethodCallee(@data, value, true, this))
+							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, this))
 						}
 						else {
 							this.addCallee(new DefaultCallee(@data, @object, this))
@@ -492,11 +515,11 @@ class CallExpression extends Expression {
 					}
 					else if types.length == 1 {
 						if sealed {
-							this.addCallee(new SealedMethodCallee(@data, value, true, m, types[0], this))
+							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, m, types[0], this))
 						}
 						else if	@data.callee.object.kind == NodeKind::Identifier &&
-								(variable ?= @scope.getVariable(@data.callee.object.name)) &&
-								(substitute ?= variable.replaceMemberCall?(@property, @arguments))
+								(callee ?= @scope.getVariable(@data.callee.object.name)) &&
+								(substitute ?= callee.replaceMemberCall?(@property, @arguments))
 						{
 							this.addCallee(new SubstituteCallee(@data, substitute, types[0], this))
 						}
@@ -515,8 +538,14 @@ class CallExpression extends Expression {
 			is FunctionType => {
 				throw new NotImplementedException(this)
 			}
+			is NamedType => {
+				this.makeMemberCalleeFromReference(value.type(), reference)
+			}
 			is ParameterType => {
 				throw new NotImplementedException(this)
+			}
+			is ReferenceType => {
+				this.makeMemberCalleeFromReference(value.type(), value)
 			}
 			is UnionType => {
 				for let type in value.types() {
@@ -655,7 +684,7 @@ abstract class Callee {
 	releaseReusable()
 	validate(type: FunctionType, node) { // {{{
 		for throw in type.throws() {
-			Exception.validateReportedError(throw, node)
+			Exception.validateReportedError(throw.discardReference(), node)
 		}
 	} // }}}
 }
@@ -690,7 +719,7 @@ class DefaultCallee extends Callee {
 
 		const type = @expression.type()
 
-		if type is ClassType {
+		if type.isClass() {
 			TypeException.throwConstructorWithoutNew(type.name(), node)
 		}
 		else if type is FunctionType {
@@ -720,7 +749,7 @@ class DefaultCallee extends Callee {
 		@nullableComputed = data.nullable && @expression.isNullable()
 		@scope = data.scope.kind
 
-		if type is ClassType {
+		if type.isClass() {
 			TypeException.throwConstructorWithoutNew(type.name(), node)
 		}
 		else if type is FunctionType {
@@ -748,7 +777,7 @@ class DefaultCallee extends Callee {
 			this.validate(method, node)
 		}
 
-		if @type is ClassType {
+		if @type.isClass() {
 			TypeException.throwConstructorWithoutNew(@type.name(), node)
 		}
 	} // }}}
@@ -904,14 +933,14 @@ class DefaultCallee extends Callee {
 
 class SealedFunctionCallee extends Callee {
 	private {
-		_namespace: NamespaceType
 		_nullable: Boolean
 		_nullableComputed: Boolean
 		_object
 		_property: String
 		_type: Type
+		_variable: NamedType<NamespaceType>
 	}
-	constructor(data, @namespace, function, @type, node) { // {{{
+	constructor(data, @variable, function, @type, node) { // {{{
 		super()
 
 		@object = node._object
@@ -950,7 +979,7 @@ class SealedFunctionCallee extends Callee {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind::This => {
-					fragments.code(`\(@namespace.sealName()).\(@property)(`)
+					fragments.code(`\(@variable.getSealedName()).\(@property)(`)
 
 					for i from 0 til node._arguments.length {
 						if i != 0 {
@@ -971,15 +1000,16 @@ class SealedFunctionCallee extends Callee {
 
 class SealedMethodCallee extends Callee {
 	private {
-		_class: ClassType
 		_instance: Boolean
+		_node
 		_nullable: Boolean
 		_nullableComputed: Boolean
 		_object
 		_property: String
 		_type: Type
+		_variable: NamedType<ClassType>
 	}
-	constructor(data, @class, @instance, methods = [], @type = Type.Any, node) { // {{{
+	constructor(data, @variable, @instance, methods = [], @type = Type.Any, @node) { // {{{
 		super()
 
 		@object = node._object
@@ -1008,12 +1038,12 @@ class SealedMethodCallee extends Callee {
 				}
 				ScopeKind::This => {
 					if @instance {
-						fragments.code(`\(@class.getSealedPath())._im_\(@property).apply(null, `)
+						fragments.code(`\(@variable.getSealedPath())._im_\(@property).apply(null, `)
 
 						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments, @object)
 					}
 					else {
-						fragments.code(`\(@class.getSealedPath())._cm_\(@property).apply(null, `)
+						fragments.code(`\(@variable.getSealedPath())._cm_\(@property).apply(null, `)
 
 						CallExpression.toFlattenArgumentsFragments(fragments, node._arguments)
 					}
@@ -1031,7 +1061,7 @@ class SealedMethodCallee extends Callee {
 				ScopeKind::This => {
 					if @instance {
 						fragments
-							.code(`\(@class.getSealedPath())._im_\(@property)(`)
+							.code(`\(@variable.getSealedPath())._im_\(@property)(`)
 							.compile(@object)
 
 						for i from 0 til node._arguments.length {
@@ -1039,7 +1069,7 @@ class SealedMethodCallee extends Callee {
 						}
 					}
 					else {
-						fragments.code(`\(@class.getSealedPath())._cm_\(@property)(`)
+						fragments.code(`\(@variable.getSealedPath())._cm_\(@property)(`)
 
 						for i from 0 til node._arguments.length {
 							fragments.code($comma) if i != 0
@@ -1052,7 +1082,7 @@ class SealedMethodCallee extends Callee {
 		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
-		@class.reference().toTestFragments(fragments, @object)
+		@node.scope().reference(@variable).toTestFragments(fragments, @object)
 	} // }}}
 	type() => @type
 }

@@ -1,5 +1,7 @@
 extern console
 
+const PI = 3.14
+
 import './type.scope.source.ks' for CarFactory, Car => OldCar
 
 class Car {

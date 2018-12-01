@@ -1,5 +1,6 @@
 require("kaoscript/register");
 module.exports = function() {
+	const PI = 3.14;
 	var {CarFactory, Car: OldCar} = require("./type.scope.source.ks")();
 	class Car {
 		constructor() {

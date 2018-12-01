@@ -1,11 +1,37 @@
 {
+  "aliens": [
+    0,
+    "console"
+  ],
   "requirements": [],
   "exports": [
-    0,
+    1,
     "Colour"
   ],
   "references": [
     {
+      "type": "object",
+      "sealed": false,
+      "properties": {
+        "log": {
+          "type": "function",
+          "async": false,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity"
+            }
+          ],
+          "returns": "Any",
+          "throws": []
+        }
+      }
+    },
+    {
+      "type": "enum",
       "elements": [
         "Red",
         "Green",

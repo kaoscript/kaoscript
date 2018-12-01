@@ -1,10 +1,11 @@
 class EnumDeclaration extends Statement {
 	private {
 		_composites: Array			= []
+		_enum: EnumType
 		_name: String
 		_new: Boolean				= true
 		_values: Array				= []
-		_type: EnumType
+		_type: NamedType<EnumType>
 		_variable: Variable
 	}
 	analyse() { // {{{
@@ -14,11 +15,10 @@ class EnumDeclaration extends Statement {
 			@new = false
 		}
 		else {
-			const domain = new ScopeDomain(@scope)
 			const type = Type.fromAST(@data.type, this)
 
 			if type.isString() {
-				@type = new EnumType(@name, EnumKind::String, domain)
+				@enum = new EnumType(@scope, EnumKind::String)
 			}
 			else if @data.attributes? {
 				let nf = true
@@ -26,17 +26,19 @@ class EnumDeclaration extends Statement {
 					if attr.kind == NodeKind::AttributeDeclaration && attr.declaration.kind == NodeKind::Identifier && attr.declaration.name == 'flags' {
 						nf = false
 
-						@type = new EnumType(@name, EnumKind::Flags, domain)
+						@enum = new EnumType(@scope, EnumKind::Flags)
 					}
 				}
 
 				if nf {
-					@type = new EnumType(@name, domain)
+					@enum = new EnumType(@scope)
 				}
 			}
 			else {
-				@type = new EnumType(@name, domain)
+				@enum = new EnumType(@scope)
 			}
+
+			@type = new NamedType(@name, @enum)
 
 			@variable = @scope.define(@name, true, @type, this)
 		}
@@ -44,9 +46,10 @@ class EnumDeclaration extends Statement {
 	prepare() { // {{{
 		if !@new {
 			@type = @variable.type()
+			@enum = @type.type()
 		}
 
-		switch @type.kind() {
+		switch @enum.kind() {
 			EnumKind::Flags => {
 				for data in @data.members {
 					if data.value? {
@@ -56,7 +59,7 @@ class EnumDeclaration extends Statement {
 								components: [data.value.left, data.value.right]
 							})
 
-							@type.addElement(data.name.name)
+							@enum.addElement(data.name.name)
 						}
 						else if data.value.kind == NodeKind::PolyadicExpression && data.value.operator.kind == BinaryOperatorKind::BitwiseOr {
 							@composites.push({
@@ -64,11 +67,11 @@ class EnumDeclaration extends Statement {
 								components: data.value.operands
 							})
 
-							@type.addElement(data.name.name)
+							@enum.addElement(data.name.name)
 						}
 						else {
 							if data.value.kind == NodeKind::NumericExpression {
-								@type.index(data.value.value)
+								@enum.index(data.value.value)
 							}
 							else {
 								throw new NotSupportedException(this)
@@ -76,19 +79,19 @@ class EnumDeclaration extends Statement {
 
 							@values.push({
 								name: data.name.name
-								value: @type.index() <= 0 ? 0 : 1 << (@type.index() - 1)
+								value: @enum.index() <= 0 ? 0 : 1 << (@enum.index() - 1)
 							})
 
-							@type.addElement(data.name.name)
+							@enum.addElement(data.name.name)
 						}
 					}
 					else {
 						@values.push({
 							name: data.name.name
-							value: @type.step().index() <= 0 ? 0 : 1 << (@type.index() - 1)
+							value: @enum.step().index() <= 0 ? 0 : 1 << (@enum.index() - 1)
 						})
 
-						@type.addElement(data.name.name)
+						@enum.addElement(data.name.name)
 					}
 				}
 			}
@@ -99,7 +102,7 @@ class EnumDeclaration extends Statement {
 						value: $quote(data.name.name.toLowerCase())
 					})
 
-					@type.addElement(data.name.name)
+					@enum.addElement(data.name.name)
 				}
 			}
 			EnumKind::Number => {
@@ -107,22 +110,22 @@ class EnumDeclaration extends Statement {
 				for data in @data.members {
 					if data.value? {
 						if data.value.kind == NodeKind::NumericExpression {
-							@type.index(data.value.value)
+							@enum.index(data.value.value)
 						}
 						else {
 							throw new NotSupportedException(this)
 						}
 					}
 					else {
-						@type.step()
+						@enum.step()
 					}
 
 					@values.push({
 						name: data.name.name
-						value: @type.index()
+						value: @enum.index()
 					})
 
-					@type.addElement(data.name.name)
+					@enum.addElement(data.name.name)
 				}
 			}
 		}

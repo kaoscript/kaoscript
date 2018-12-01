@@ -1,0 +1,10 @@
+extern console
+
+import '@kaoscript/parser' for parse
+
+try {
+	const ast = parse('const foo = 42')
+}
+on SyntaxError catch error {
+	console.error(error)
+}

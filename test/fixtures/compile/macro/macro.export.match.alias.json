@@ -1,4 +1,8 @@
 {
+  "aliens": [
+    -1,
+    "console"
+  ],
   "requirements": [],
   "exports": [],
   "references": [],

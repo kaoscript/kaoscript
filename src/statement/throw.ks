@@ -6,7 +6,7 @@ class ThrowStatement extends Statement {
 	}
 	constructor(@data, @parent) { // {{{
 		super(data, parent)
-		
+
 		do {
 			if	parent is FunctionExpression ||
 				parent is LambdaExpression ||
@@ -34,11 +34,11 @@ class ThrowStatement extends Statement {
 	} // }}}
 	prepare() { // {{{
 		@value.prepare()
-		
-		if type !?= @value.type().dereference() {
+
+		if type !?= @value.type().discardReference() {
 			TypeException.throwRequireClass(this)
 		}
-		else if type is ClassType {
+		else if type.isNamed() && type.type() is ClassType {
 			Exception.validateReportedError(type, this)
 		}
 		else if !type.isAny() {

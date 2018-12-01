@@ -134,7 +134,7 @@ func $transformExpression(macro, node, data, writer) { // {{{
 			if variable ?= node.scope().getVariable(data.enum.name) {
 				const type = variable.type()
 				if type.isEnum() {
-					switch type.kind() {
+					switch type.type().kind() {
 						EnumKind::String => {
 							return {
 								kind: NodeKind::Literal
@@ -336,17 +336,17 @@ class MacroDeclaration extends AbstractNode {
 
 class MacroType extends FunctionType {
 	static fromAST(data, node: AbstractNode) { // {{{
-		const domain = node.scope().domain()
+		const scope = node.scope()
 
-		return new MacroType([MacroParameterType.fromAST(parameter, domain, false, node) for parameter in data.parameters], data, node)
+		return new MacroType([MacroParameterType.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
 	} // }}}
-	static import(data, references, domain: Domain, node: AbstractNode): MacroType { // {{{
-		const type = new MacroType()
+	static import(data, references, scope: AbstractScope, node: AbstractNode): MacroType { // {{{
+		const type = new MacroType(scope)
 
 		type._min = data.min
 		type._max = data.max
 
-		type._parameters = [MacroParameterType.import(parameter, references, domain, node) for parameter in data.parameters]
+		type._parameters = [MacroParameterType.import(parameter, references, scope, node) for parameter in data.parameters]
 
 		type.updateArguments()
 
@@ -357,7 +357,7 @@ class MacroType extends FunctionType {
 		max: @max
 		parameters: [parameter.export() for parameter in @parameters]
 	} // }}}
-	match(that: MacroType): Boolean { // {{{
+	matchContentTo(that: MacroType): Boolean { // {{{
 		if that.min() < @min || that.max() > @max {
 			return false
 		}
@@ -366,7 +366,7 @@ class MacroType extends FunctionType {
 
 		if @parameters.length == params.length {
 			for parameter, i in @parameters {
-				if !parameter.match(params[i]) {
+				if !parameter.matchContentTo(params[i]) {
 					return false
 				}
 			}
@@ -384,8 +384,8 @@ class MacroType extends FunctionType {
 
 class MacroParameterType extends ParameterType {
 	static {
-		fromAST(data, domain: Domain, defined: Boolean, node: AbstractNode) { // {{{
-			const type = Type.fromAST(data.type, domain, false, node)
+		fromAST(data, scope: AbstractScope, defined: Boolean, node: AbstractNode) { // {{{
+			const type = Type.fromAST(data.type, scope, false, node)
 
 			let min: Number = data.defaultValue? ? 0 : 1
 			let max: Number = 1
@@ -406,13 +406,13 @@ class MacroParameterType extends ParameterType {
 				}
 			}
 
-			return new MacroParameterType(type, min, max)
+			return new MacroParameterType(scope, type, min, max)
 		} // }}}
 	}
-	clone() => new MacroParameterType(@type, @min, @max)
-	matchArgument(argument) { // {{{
+	clone() => new MacroParameterType(@scope, @type, @min, @max)
+	matchContentTo(value) { // {{{
 		//console.log(@type)
-		//console.log(argument)
+		//console.log(value)
 
 		if @type.isAny() {
 			return true
@@ -420,22 +420,22 @@ class MacroParameterType extends ParameterType {
 
 		switch @type.name() {
 			'Expression' => {
-				return	argument.kind == NodeKind::UnaryExpression ||
-						argument.kind == NodeKind::BinaryExpression ||
-						argument.kind == NodeKind::PolyadicExpression ||
-						$expressions[argument.kind]?
+				return	value.kind == NodeKind::UnaryExpression ||
+						value.kind == NodeKind::BinaryExpression ||
+						value.kind == NodeKind::PolyadicExpression ||
+						$expressions[value.kind]?
 			}
 			'Identifier' => {
-				return argument.kind == NodeKind::Identifier
+				return value.kind == NodeKind::Identifier
 			}
 			'Number' => {
-				return argument.kind == NodeKind::NumericExpression
+				return value.kind == NodeKind::NumericExpression
 			}
 			'Object' => {
-				return argument.kind == NodeKind::ObjectExpression
+				return value.kind == NodeKind::ObjectExpression
 			}
 			'String' => {
-				return argument.kind == NodeKind::Literal
+				return value.kind == NodeKind::Literal
 			}
 		}
 

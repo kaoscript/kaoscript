@@ -5,14 +5,14 @@ class MemberExpression extends Expression {
 		_prepareObject: Boolean	= true
 		_property
 		_tested: Boolean		= false
-		_type: Type
+		_type: Type				= Type.Any
 	}
 	constructor(@data, @parent, @scope) { // {{{
 		super(data, parent, scope)
 	} // }}}
 	constructor(@data, @parent, @scope, @object) { // {{{
 		super(data, parent, scope)
-		
+
 		@prepareObject = false
 	} // }}}
 	analyse() { // {{{
@@ -24,33 +24,32 @@ class MemberExpression extends Expression {
 	prepare() { // {{{
 		if @prepareObject {
 			@object.prepare()
-			
+
 			if @data.computed {
 				@property = $compile.expression(@data.property, this)
-				
+
 				@property.analyse()
 				@property.prepare()
-				
+
 				if @object.type().isArray() {
 					@type = @object.type().parameter()
-				}
-				else {
-					@type = Type.Any
 				}
 			}
 			else {
 				@property = @data.property.name
-				
+
 				const type = @object.type()
-				
-				if @type !?= type.getProperty(@property) {
-					if type is EnumType {
+
+				if property !?= type.getProperty(@property) {
+					if type.isEnum() {
 						SyntaxException.throwInvalidEnumAccess(this)
 					}
 					else {
 						ReferenceException.throwNotDefinedProperty(@property, this)
 					}
 				}
+
+				@type = property.discardVariable()
 			}
 		}
 		else if @data.computed {
@@ -64,7 +63,7 @@ class MemberExpression extends Expression {
 	} // }}}
 	translate() { // {{{
 		@object.translate()
-		
+
 		if @data.computed {
 			@property.translate()
 		}
@@ -86,7 +85,7 @@ class MemberExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		if this.isNullable() && !@tested {
 			fragments.wrapNullable(this).code(' ? ').compile(@object)
-			
+
 			if @data.computed {
 				fragments.code('[').compile(@property).code('] : undefined')
 			}
@@ -95,20 +94,25 @@ class MemberExpression extends Expression {
 			}
 		}
 		else {
+			const type = @object.type()
+
 			if @object.isComputed() || @object._data.kind == NodeKind::NumericExpression {
 				fragments.code('(').compile(@object).code(')')
+			}
+			else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(@property) {
+				fragments.code(type.getSealedName())
 			}
 			else {
 				fragments.compile(@object)
 			}
-			
+
 			if @data.computed {
 				fragments.code('[').compile(@property).code(']')
 			}
 			else {
 				fragments.code($dot).compile(@property)
 			}
-			
+
 			if @type is ClassMethodSetType {
 				if @parent is not UnaryOperatorExpression {
 					fragments.code('.bind(').compile(@object).code(')')
@@ -157,29 +161,29 @@ class MemberExpression extends Expression {
 	toNullableFragments(fragments) { // {{{
 		if !@tested {
 			@tested = true
-			
+
 			let conditional = false
-			
+
 			if @object.isNullable() {
 				fragments.compileNullable(@object)
-				
+
 				conditional = true
 			}
-			
+
 			if @data.nullable {
 				fragments.code(' && ') if conditional
-				
+
 				fragments
 					.code($runtime.type(this) + '.isValue(')
 					.compileReusable(@object)
 					.code(')')
-				
+
 				conditional = true
 			}
-			
+
 			if @data.computed && @property.isNullable() {
 				fragments.code(' && ') if conditional
-				
+
 				fragments.compileNullable(@property)
 			}
 		}

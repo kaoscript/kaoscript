@@ -12,7 +12,7 @@ module.exports = function() {
 		foo(42);
 	}
 	catch(__ks_0) {
-		if(Type.is(__ks_0, Error) {
+		if(Type.is(__ks_0, Error)) {
 		}
 	}
 };

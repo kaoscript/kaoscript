@@ -1,6 +1,5 @@
 {
-  "requirements": [],
-  "exports": [
+  "aliens": [
     -1,
     "console",
     0,
@@ -8,8 +7,18 @@
     1,
     "Math"
   ],
+  "requirements": [],
+  "exports": [
+    -1,
+    "console",
+    0,
+    "Number",
+    2,
+    "Math"
+  ],
   "references": [
     {
+      "type": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,
@@ -36,31 +45,48 @@
       "classMethods": {}
     },
     {
+      "type": "namespace",
       "sealed": true,
       "properties": {
         "PI": {
           "sealed": false,
-          "type": "Number"
+          "type": {
+            "reference": 0
+          }
         },
         "pow": {
           "async": false,
           "min": 0,
           "max": 0,
           "parameters": [],
-          "returns": "Number",
+          "returns": {
+            "reference": 0
+          },
           "sealed": false,
           "throws": []
-        },
+        }
+      }
+    },
+    {
+      "type": "namespace",
+      "namespace": {
+        "reference": 1
+      },
+      "properties": {
         "pi": {
           "sealed": true,
-          "type": "Number"
+          "type": {
+            "reference": 0
+          }
         },
         "foo": {
           "async": false,
           "min": 0,
           "max": 0,
           "parameters": [],
-          "returns": "Number",
+          "returns": {
+            "reference": 0
+          },
           "sealed": true,
           "throws": []
         }

@@ -12,14 +12,14 @@ abstract class DependencyStatement extends Statement {
 
 		switch declaration.kind {
 			NodeKind::ClassDeclaration => {
-				const type = new ClassType(declaration.name.name, scope)
+				let type = new ClassType(scope)
 				const variable = scope.define(declaration.name.name, true, type, this)
 
 				if declaration.extends? {
 					if superVar !?= @scope.getVariable(declaration.extends.name) {
 						ReferenceException.throwNotDefined(declaration.extends.name, this)
 					}
-					else if superVar.type() is not ClassType {
+					else if !superVar.type().isClass() {
 						TypeException.throwNotClass(declaration.extends.name, this)
 					}
 
@@ -27,22 +27,22 @@ abstract class DependencyStatement extends Statement {
 				}
 
 				if kind != DependencyKind::Extern {
-					variable.require()
+					type.flagRequired()
 				}
 
 				if	kind == DependencyKind::Extern ||
 					kind == DependencyKind::ExternOrRequire ||
 					kind == DependencyKind::RequireOrExtern
 				{
-					type.alienize()
+					type = type.flagAlien()
 				}
 
 				for modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind::Abstract {
-						type.abstract()
+						type.flagAbstract()
 					}
 					else if modifier.kind == ModifierKind::Sealed {
-						type.seal()
+						type.flagSealed()
 					}
 				}
 
@@ -61,11 +61,18 @@ abstract class DependencyStatement extends Statement {
 					}
 				}
 
-				const type = new EnumType(declaration.name.name, kind, scope)
+				let type = new EnumType(scope, kind)
 				const variable = scope.define(declaration.name.name, true, type, this)
 
 				if kind != DependencyKind::Extern {
-					variable.require()
+					type.flagRequired()
+				}
+
+				if	kind == DependencyKind::Extern ||
+					kind == DependencyKind::ExternOrRequire ||
+					kind == DependencyKind::RequireOrExtern
+				{
+					type = type.flagAlien()
 				}
 
 				for member in declaration.members {
@@ -81,28 +88,35 @@ abstract class DependencyStatement extends Statement {
 					type = new FunctionType(parameters, declaration, this)
 				}
 				else {
-					type = new ReferenceType('Function', this.scope().domain())
+					type = this.scope().reference('Function')
 				}
 
 				const variable = scope.define(declaration.name.name, true, type, this)
 
 				if kind != DependencyKind::Extern {
-					variable.require()
+					type.flagRequired()
 				}
 
 				return variable
 			}
 			NodeKind::NamespaceDeclaration => {
-				const type = new NamespaceType(declaration.name.name, scope)
+				let type = new NamespaceType(scope)
 				const variable = scope.define(declaration.name.name, true, type, this)
 
 				if kind != DependencyKind::Extern {
-					variable.require()
+					type.flagRequired()
+				}
+
+				if	kind == DependencyKind::Extern ||
+					kind == DependencyKind::ExternOrRequire ||
+					kind == DependencyKind::RequireOrExtern
+				{
+					type = type.flagAlien()
 				}
 
 				for modifier in declaration.modifiers {
 					if modifier.kind == ModifierKind::Sealed {
-						type.seal()
+						type.flagSealed()
 					}
 				}
 
@@ -117,39 +131,39 @@ abstract class DependencyStatement extends Statement {
 
 				let instance = type is ClassType
 
-				if type is ReferenceType && type.name() == 'Class' {
-					type = new ClassType(declaration.name.name, scope)
+				if type is ReferenceType && type.isClass() {
+					type = new ClassType(scope)
 				}
 
 				if declaration.sealed {
-					if type is ReferenceType && type.name() == 'Class' {
-						type = new ClassType(declaration.name.name, scope)
+					if type is ReferenceType && type.isClass() {
+						type = new ClassType(scope)
 					}
 					else if type == Type.Any {
-						type = new SealedReferenceType(this)
+						type = new SealedType(scope, @scope.reference('Any'))
 					}
 					else if type is ReferenceType {
-						type = new SealedReferenceType(type)
+						type = new SealedType(scope, type)
 					}
 
-					type.seal()
+					type.flagSealed()
 				}
 
 				if	kind == DependencyKind::Extern ||
 					kind == DependencyKind::ExternOrRequire ||
 					kind == DependencyKind::RequireOrExtern
 				{
-					type.alienize()
+					type = type.flagAlien()
 				}
 
 				if instance {
-					type = type.reference()
+					type = @scope.reference(type)
 				}
 
 				const variable = scope.define(declaration.name.name, true, type, this)
 
 				if kind != DependencyKind::Extern {
-					variable.require()
+					type.flagRequired()
 				}
 
 				return variable
@@ -166,6 +180,8 @@ class ExternDeclaration extends DependencyStatement {
 		_lines = []
 	}
 	analyse() { // {{{
+		const module = this.module()
+
 		let variable
 		for declaration in @data.declarations {
 			if (variable ?= @scope.getVariable(declaration.name.name)) && !variable.isPredefined() {
@@ -175,13 +191,13 @@ class ExternDeclaration extends DependencyStatement {
 						parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
 					}
 					else {
-						parameters = [new ParameterType(Type.Any, 0, Infinity)]
+						parameters = [new ParameterType(@scope, Type.Any, 0, Infinity)]
 					}
 
 					const type = new FunctionType(parameters, declaration, this)
 
 					if variable.type() is FunctionType {
-						const newType = new OverloadedFunctionType()
+						const newType = new OverloadedFunctionType(@scope)
 
 						newType.addFunction(variable.type())
 						newType.addFunction(type)
@@ -199,7 +215,7 @@ class ExternDeclaration extends DependencyStatement {
 					variable = this.define(declaration, DependencyKind::Extern)
 
 					if variable.type().isSealed() && variable.type().isExtendable() {
-						@lines.push(`var \(variable.type().sealName()) = {}`)
+						@lines.push(`var \(variable.type().getSealedName()) = {}`)
 					}
 				}
 				else {
@@ -210,9 +226,11 @@ class ExternDeclaration extends DependencyStatement {
 				variable = this.define(declaration, DependencyKind::Extern)
 
 				if variable.type().isSealed() && variable.type().isExtendable() {
-					@lines.push(`var \(variable.type().sealName()) = {}`)
+					@lines.push(`var \(variable.type().getSealedName()) = {}`)
 				}
 			}
+
+			module.addAlien(variable.name(), variable.type())
 		}
 	} // }}}
 	prepare()
@@ -239,13 +257,13 @@ class RequireDeclaration extends DependencyStatement {
 						parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
 					}
 					else {
-						parameters = [new ParameterType(Type.Any, 0, Infinity)]
+						parameters = [new ParameterType(@scope, Type.Any, 0, Infinity)]
 					}
 
 					const type = new FunctionType(parameters, declaration, this)
 
 					if variable.type() is FunctionType {
-						const newType = new OverloadedFunctionType()
+						const newType = new OverloadedFunctionType(@scope)
 
 						newType.addFunction(variable.type())
 						newType.addFunction(type)
@@ -404,6 +422,7 @@ abstract class Requirement {
 	constructor(data, kind: DependencyKind, node) { // {{{
 		this(node.define(data, kind))
 	} // }}}
+	isAlien() => false
 	abstract isRequired(): Boolean
 	name() => @name
 	toMetadata(metadata) { // {{{
@@ -473,6 +492,7 @@ class EORDynamicRequirement extends DynamicRequirement {
 	constructor(data, node) { // {{{
 		super(data, DependencyKind::ExternOrRequire, node)
 	} // }}}
+	isAlien() => true
 	toLoneAltFragments(fragments) { // {{{
 		const ctrl = fragments
 			.newControl()
@@ -529,6 +549,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 	constructor(data, node) { // {{{
 		super(data, DependencyKind::RequireOrExtern, node)
 	} // }}}
+	isAlien() => true
 	toLoneAltFragments(fragments) { // {{{
 		const ctrl = fragments
 			.newControl()
@@ -588,7 +609,7 @@ class ROIDynamicRequirement extends DynamicRequirement {
 	constructor(variable: Variable, importer) { // {{{
 		super(variable, @importer = importer)
 
-		variable.require()
+		variable.type().condense()
 	} // }}}
 	toLoneAltFragments(fragments) { // {{{
 		const ctrl = fragments

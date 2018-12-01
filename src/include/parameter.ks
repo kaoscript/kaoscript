@@ -597,7 +597,7 @@ class Parameter extends AbstractNode {
 				if @thisAlias {
 					const alias = new AliasStatement(@data.name.name, @setterAlias, this)
 
-					type = alias.type().reference()
+					type = @scope.reference(alias.type())
 				}
 			}
 
@@ -648,7 +648,7 @@ class Parameter extends AbstractNode {
 			min = 0
 		}
 
-		@type = new ParameterType(type, min, max)
+		@type = new ParameterType(@scope, type, min, max)
 
 		@variable.type(@rest ? Type.arrayOf(type, @scope) : type)
 	} // }}}
@@ -1109,7 +1109,7 @@ class AliasStatement extends Statement {
 
 		parameter.parent().addAliasStatement(this)
 
-		const class = parameter.parent().parent().type()
+		const class = parameter.parent().parent().type().discardAlias()
 
 		if setter {
 			if @type !?= class.getPropertySetter(name) {

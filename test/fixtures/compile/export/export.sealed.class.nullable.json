@@ -1,4 +1,8 @@
 {
+  "aliens": [
+    0,
+    "console"
+  ],
   "requirements": [],
   "exports": [
     0,
@@ -8,32 +12,28 @@
   ],
   "references": [
     {
-      "alien": true,
+      "type": "object",
       "sealed": false,
-      "init": 0,
-      "variables": {},
-      "methods": {
-        "log": [
-          {
-            "access": 3,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity"
-              }
-            ],
-            "returns": "Any",
-            "sealed": false,
-            "throws": []
-          }
-        ]
+      "properties": {
+        "log": {
+          "type": "function",
+          "async": false,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity"
+            }
+          ],
+          "returns": "Any",
+          "throws": []
+        }
       }
     },
     {
+      "type": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,

@@ -1,14 +1,23 @@
 {
-  "requirements": [],
-  "exports": [
+  "aliens": [
     0,
     "reverse"
   ],
+  "requirements": [],
+  "exports": [
+    1,
+    "reverse"
+  ],
   "references": [
+    "Function",
     {
+      "type": "overloadedfunction",
       "functions": [
-        "Function",
         {
+          "reference": 0
+        },
+        {
+          "type": "function",
           "async": false,
           "min": 1,
           "max": 1,

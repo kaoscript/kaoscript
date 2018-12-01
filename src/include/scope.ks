@@ -61,11 +61,11 @@ let $keywords = { // {{{
 class AbstractScope {
 	private {
 		_body: Array		= []
-		_domain				= null
 		_macros				= {}
 		_natives			= {}
 		_parent
 		_prepared			= false
+		_references			= {}
 		_renamedIndexes 	= {}
 		_renamedVariables	= {}
 		_scopeParent		= null
@@ -88,7 +88,7 @@ class AbstractScope {
 			let na = true
 
 			for m, index in @macros[name] while na {
-				if m.type().match(type) {
+				if m.type().matchContentTo(type) {
 					@macros[name].splice(index, 0, macro)
 
 					na = false
@@ -104,12 +104,13 @@ class AbstractScope {
 		}
 	} // }}}
 	addNative(name: String) { // {{{
-		@natives[name] = new Variable(name, true, Type.Any)
+		@natives[name] = new Variable(name, true, false, Type.Any)
 	} // }}}
 	addNative(name: String, type: String) { // {{{
-		@natives[name] = new Variable(name, true, this.reference(type))
+		@natives[name] = new Variable(name, true, false, this.reference(type))
 	} // }}}
 	addVariable(name: String, variable: Variable, node) { // {{{
+		// console.log('addVariable', name, @id)
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -135,18 +136,11 @@ class AbstractScope {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		const variable = new Variable(name, immutable, type)
+		const variable = new Variable(name, immutable, false, type)
 
 		this.addVariable(name, variable, node)
 
 		return variable
-	} // }}}
-	domain() { // {{{
-		if @domain == null {
-			@domain = new ScopeDomain(this)
-		}
-
-		return @domain
 	} // }}}
 	getLocalVariable(name): Variable { // {{{
 		if @variables[name] is Variable {
@@ -173,7 +167,7 @@ class AbstractScope {
 		}
 		else {
 			const path = Generator.generate(data.callee)
-			
+
 			if @macros[path]? {
 				for macro in @macros[path] {
 					if macro.matchArguments(data.arguments) {
@@ -205,7 +199,42 @@ class AbstractScope {
 	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || @parent?.hasVariable(name)
 	listMacros(name) => @macros[name]
 	parent() => @parent
-	reference(name: String) => this.domain().reference(name)
+	reference(name) { // {{{
+		switch name {
+			is AnyType => return this.resolveReference('Any')
+			is ClassVariableType => return this.reference(name.type())
+			is NamedType => {
+				// console.log('reference', name.name(), @id)
+				return name.reference(this)
+			}
+			is ReferenceType => return this.resolveReference(name.name(), name.isNullable())
+			is String => return this.resolveReference(name)
+			is Variable => return this.resolveReference(name.name())
+			=> {
+				console.log(name)
+				throw new NotImplementedException()
+			}
+		}
+	} // }}}
+	private resolveReference(name: String, nullable = false) { // {{{
+		if @variables[name] is Variable || @natives[name] is Variable || !?@parent {
+			const hash = `\(name)\(nullable ? '?' : '')`
+
+			if !?@references[hash] {
+				@references[hash] = new ReferenceType(this, name, nullable)
+			}
+
+			return @references[hash]
+		}
+		else {
+			return @parent.resolveReference(name, nullable)
+		}
+	} // }}}
+	reassignReference(oldName, newName, newScope) { // {{{
+		if @references[oldName]? {
+			@references[oldName].reassign(newName, newScope)
+		}
+	} // }}}
 	removeVariable(name) { // {{{
 		if @variables[name] is Variable {
 			@variables[name] = false
@@ -232,7 +261,6 @@ class AbstractScope {
 
 class Scope extends AbstractScope {
 	private {
-		_anonymousClassIndex	= 0
 		_stashes				= {}
 		_tempNextIndex 			= 0
 		_tempNames				= {}
@@ -286,7 +314,6 @@ class Scope extends AbstractScope {
 			@stashes[name] = [fn]
 		}
 	} // }}}
-	getAnomynousClassName() => `__ks_cls_\(@anonymousClassIndex++)`
 	getRenamedVariable(name) { // {{{
 		if @renamedVariables[name] is String {
 			return @renamedVariables[name]
@@ -431,6 +458,10 @@ class ModuleScope extends Scope {
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
 	} // }}}
 	getVariable(name): Variable { // {{{
+		if $types[name] is String {
+			name = $types[name]
+		}
+
 		if @variables[name] is Variable {
 			return @variables[name]
 		}
@@ -443,5 +474,35 @@ class ModuleScope extends Scope {
 		else {
 			return null
 		}
+	} // }}}
+	hasVariable(name) { // {{{
+		if $types[name] is String {
+			name = $types[name]
+		}
+
+		return @variables[name] is Variable || $natives[name] == true
+	} // }}}
+}
+
+class ImportScope extends Scope {
+}
+
+class NamespaceScope extends Scope {
+	addVariable(name: String, variable: Variable) { // {{{
+		if $keywords[name] == true {
+			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
+			let newName = '__ks_' + name + '_' + (++index)
+
+			while @variables[newName] is Variable {
+				newName = '__ks_' + name + '_' + (++index)
+			}
+
+			@renamedIndexes[name] = index
+			@renamedVariables[name] = newName
+		}
+
+		@variables[name] = variable
+
+		return this
 	} // }}}
 }

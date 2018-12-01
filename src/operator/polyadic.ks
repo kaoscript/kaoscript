@@ -7,7 +7,7 @@ class PolyadicOperatorExpression extends Expression {
 		@operands = []
 		for operand in @data.operands {
 			@operands.push(operand = $compile.expression(operand, this))
-			
+
 			operand.analyse()
 		}
 	} // }}}
@@ -37,7 +37,7 @@ class PolyadicOperatorExpression extends Expression {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	isUsingVariable(name) { // {{{
@@ -46,7 +46,7 @@ class PolyadicOperatorExpression extends Expression {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
@@ -56,9 +56,9 @@ class PolyadicOperatorExpression extends Expression {
 				.compileNullable(this)
 				.code(' ? ')
 		}
-		
+
 		this.toOperatorFragments(fragments)
-		
+
 		if test {
 			fragments.code(' : false')
 		}
@@ -74,11 +74,11 @@ class PolyadicOperatorExpression extends Expression {
 					else {
 						nf = true
 					}
-					
+
 					fragments.compileNullable(operand)
 				}
 			}
-			
+
 			@tested = true
 		}
 	} // }}}
@@ -97,7 +97,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -106,7 +106,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			return @operands[0].type()
 		}
 		else {
-			return new UnionType([@scope.reference('Number'), @scope.reference('String')])
+			return new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')])
 		}
 	} // }}}
 }
@@ -124,7 +124,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrapBoolean(operand)
 		}
 	} // }}}
@@ -144,7 +144,7 @@ class PolyadicOperatorBitwiseAnd extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -164,7 +164,7 @@ class PolyadicOperatorBitwiseLeftShift extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -184,7 +184,7 @@ class PolyadicOperatorBitwiseOr extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -204,7 +204,7 @@ class PolyadicOperatorBitwiseRightShift extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -224,7 +224,7 @@ class PolyadicOperatorBitwiseXor extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -244,7 +244,7 @@ class PolyadicOperatorDivision extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -254,10 +254,10 @@ class PolyadicOperatorDivision extends PolyadicOperatorExpression {
 class PolyadicOperatorEquality extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let l = @operands.length - 1
-		
+
 		for i from 0 til l {
 			fragments.code(' && ') if i
-			
+
 			fragments
 				.compile(@operands[i])
 				.code(' === ')
@@ -271,7 +271,7 @@ class PolyadicOperatorGreaterThan extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		for i from 0 til @operands.length - 1 {
 			fragments.code(' && ') if i
-			
+
 			fragments
 				.wrap(@operands[i])
 				.code($space)
@@ -287,7 +287,7 @@ class PolyadicOperatorGreaterThanOrEqual extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		for i from 0 til @operands.length - 1 {
 			fragments.code(' && ') if i
-			
+
 			fragments
 				.wrap(@operands[i])
 				.code($space)
@@ -303,7 +303,7 @@ class PolyadicOperatorLessThan extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		for i from 0 til @operands.length - 1 {
 			fragments.code(' && ') if i
-			
+
 			fragments
 				.wrap(@operands[i])
 				.code($space)
@@ -319,7 +319,7 @@ class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		for i from 0 til @operands.length - 1 {
 			fragments.code(' && ') if i
-			
+
 			fragments
 				.wrap(@operands[i])
 				.code($space)
@@ -344,7 +344,7 @@ class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -364,7 +364,7 @@ class PolyadicOperatorModulo extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}
@@ -382,39 +382,39 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		@operands = []
 		for operand in @data.operands {
 			@operands.push(operand = $compile.expression(operand, this, this.newScope()))
-			
+
 			operand.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
 		const types = []
-		
+
 		let operandType, type, ne
 		for operand in @operands {
 			operand.prepare()
-			
+
 			operand.acquireReusable(true)
 			operand.releaseReusable()
-			
+
 			operandType = operand.type()
 			ne = true
-			
+
 			for type in types while ne {
 				if type.equals(operandType) {
 					ne = false
 				}
 			}
-			
+
 			if ne {
 				types.push(operandType)
 			}
 		}
-		
+
 		if types.length == 1 {
 			@type = types[0]
 		}
 		else {
-			@type = new UnionType(types)
+			@type = new UnionType(@scope, types)
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
@@ -427,18 +427,18 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Type')
-		
+
 		let l = @operands.length - 1
-		
+
 		let operand
 		for i from 0 til l {
 			operand = @operands[i]
-			
+
 			if operand.isNullable() {
 				fragments.code('(')
-				
+
 				operand.toNullableFragments(fragments)
-				
+
 				fragments
 					.code(' && ' + $runtime.type(this) + '.isValue(')
 					.compileReusable(operand)
@@ -450,13 +450,13 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 					.compileReusable(operand)
 					.code(')')
 			}
-			
+
 			fragments
 				.code(' ? ')
 				.compile(operand)
 				.code(' : ')
 		}
-		
+
 		fragments.compile(@operands[l])
 	} // }}}
 	type() => @type
@@ -475,7 +475,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrapBoolean(operand)
 		}
 	} // }}}
@@ -495,7 +495,7 @@ class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
 			else {
 				nf = true
 			}
-			
+
 			fragments.wrap(operand)
 		}
 	} // }}}

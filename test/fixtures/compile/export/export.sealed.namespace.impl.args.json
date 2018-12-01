@@ -1,13 +1,20 @@
 {
-  "requirements": [],
-  "exports": [
+  "aliens": [
     -1,
     "console",
     0,
     "Math"
   ],
+  "requirements": [],
+  "exports": [
+    -1,
+    "console",
+    1,
+    "Math"
+  ],
   "references": [
     {
+      "type": "namespace",
       "sealed": true,
       "properties": {
         "PI": {
@@ -28,7 +35,15 @@
           "returns": "Number",
           "sealed": false,
           "throws": []
-        },
+        }
+      }
+    },
+    {
+      "type": "namespace",
+      "namespace": {
+        "reference": 0
+      },
+      "properties": {
         "foo": {
           "async": false,
           "min": 2,

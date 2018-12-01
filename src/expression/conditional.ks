@@ -8,10 +8,10 @@ class ConditionalExpression extends Expression {
 	analyse() { // {{{
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
-		
+
 		@whenTrue = $compile.expression(@data.whenTrue, this)
 		@whenTrue.analyse()
-		
+
 		@whenFalse = $compile.expression(@data.whenFalse, this)
 		@whenFalse.analyse()
 	} // }}}
@@ -19,11 +19,11 @@ class ConditionalExpression extends Expression {
 		@condition.prepare()
 		@whenTrue.prepare()
 		@whenFalse.prepare()
-		
+
 		const t = @whenTrue.type()
 		const f = @whenFalse.type()
-		
-		@type = t.equals(f) ? t : new UnionType([t, f])
+
+		@type = t.equals(f) ? t : new UnionType(this.scope(), [t, f])
 	} // }}}
 	translate() { // {{{
 		@condition.translate()

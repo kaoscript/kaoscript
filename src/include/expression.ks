@@ -18,11 +18,11 @@ abstract class Expression extends AbstractNode {
 	isNullableComputed() => this.isComputed()
 	statement(data) { // {{{
 		let expression = this
-		
+
 		while expression._parent is not Statement {
 			expression = expression._parent
 		}
-		
+
 		return expression._parent
 	} // }}}
 	toBooleanFragments(fragments, mode = Mode::None) => this.toFragments(fragments, mode)

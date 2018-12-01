@@ -81,7 +81,7 @@ class ExportNamedSpecifier extends AbstractNode {
 	translate()
 	export(recipient) { // {{{
 		@expression.prepare()
-		
+
 		if @expression.isMacro() {
 			for macro in @parent.scope().listMacros(@expression.name()) {
 				macro.export(recipient, @data.exported.name)
@@ -111,7 +111,7 @@ class ExportPropertiesSpecifier extends AbstractNode {
 	translate()
 	export(recipient) { // {{{
 		@object.prepare()
-		
+
 		for property in @data.properties {
 			recipient.export(property.exported.name, new ExportProperty(@object, property.local.name))
 		}
@@ -131,7 +131,7 @@ class ExportWildcardSpecifier extends AbstractNode {
 	translate()
 	export(recipient) { // {{{
 		@expression.prepare()
-		
+
 		@expression.type().walk((name,) => {
 			recipient.export(name, new ExportProperty(@expression, name))
 		})

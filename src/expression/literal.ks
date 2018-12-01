@@ -36,17 +36,17 @@ class IdentifierLiteral extends Literal {
 	}
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.name)
-		
+
 		const statement = parent.statement()
 		while parent != statement {
 			if parent is AssignmentOperatorExpression {
 				@assignenement = parent
 				break
 			}
-			
+
 			parent = parent.parent()
 		}
-		
+
 		if @assignenement == null && statement is VariableDeclaration {
 			@assignenement = statement
 		}

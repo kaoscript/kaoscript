@@ -94,7 +94,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 			return @left.type()
 		}
 		else {
-			return new UnionType([@scope.reference('Number'), @scope.reference('String')])
+			return new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')])
 		}
 	} // }}}
 }
@@ -293,7 +293,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			@type = @left.type()
 		}
 		else {
-			@type = new UnionType([@left.type(), @right.type()])
+			@type = new UnionType(@scope, [@left.type(), @right.type()])
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{

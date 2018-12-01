@@ -1,4 +1,8 @@
 {
+  "aliens": [
+    0,
+    "window"
+  ],
   "requirements": [],
   "exports": [
     0,
@@ -6,67 +10,47 @@
   ],
   "references": [
     {
-      "alien": true,
+      "type": "object",
       "sealed": true,
-      "init": 0,
-      "variables": {
-        "innerHeight": {
-          "access": 3,
-          "type": "Number"
-        },
-        "innerWidth": {
-          "access": 3,
-          "type": "Number"
-        },
+      "properties": {
+        "innerHeight": "Number",
+        "innerWidth": "Number",
         "console": {
-          "access": 3,
-          "type": {
-            "alien": false,
-            "sealed": false,
-            "init": 0,
-            "variables": {},
-            "methods": {
-              "log": [
+          "type": "object",
+          "sealed": false,
+          "properties": {
+            "log": {
+              "type": "function",
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
                 {
-                  "access": 3,
-                  "async": false,
+                  "type": "Any",
                   "min": 0,
-                  "max": "Infinity",
-                  "parameters": [
-                    {
-                      "type": "Any",
-                      "min": 0,
-                      "max": "Infinity"
-                    }
-                  ],
-                  "returns": "Any",
-                  "sealed": false,
-                  "throws": []
+                  "max": "Infinity"
                 }
-              ]
+              ],
+              "returns": "Any",
+              "throws": []
             }
           }
+        },
+        "moveTo": {
+          "type": "function",
+          "async": false,
+          "min": 2,
+          "max": 2,
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 2,
+              "max": 2
+            }
+          ],
+          "returns": "Any",
+          "throws": []
         }
-      },
-      "methods": {
-        "moveTo": [
-          {
-            "access": 3,
-            "async": false,
-            "min": 2,
-            "max": 2,
-            "parameters": [
-              {
-                "type": "Any",
-                "min": 2,
-                "max": 2
-              }
-            ],
-            "returns": "Any",
-            "sealed": false,
-            "throws": []
-          }
-        ]
       }
     }
   ],

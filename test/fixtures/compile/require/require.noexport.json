@@ -1,12 +1,38 @@
 {
-  "requirements": [
+  "aliens": [
     0,
+    "console"
+  ],
+  "requirements": [
+    1,
     "Color",
     true
   ],
   "exports": [],
   "references": [
     {
+      "type": "object",
+      "sealed": false,
+      "properties": {
+        "log": {
+          "type": "function",
+          "async": false,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity"
+            }
+          ],
+          "returns": "Any",
+          "throws": []
+        }
+      }
+    },
+    {
+      "type": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,

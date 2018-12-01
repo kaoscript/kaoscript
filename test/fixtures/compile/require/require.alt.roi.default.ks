@@ -1,3 +1,5 @@
+const PI = 3.14
+
 require|import '../_/_array' for Array
 
 impl Array {

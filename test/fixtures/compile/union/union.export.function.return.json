@@ -1,0 +1,23 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "foo"
+  ],
+  "references": [
+    {
+      "type": "function",
+      "async": false,
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": [
+        "String",
+        "Number"
+      ],
+      "throws": []
+    }
+  ],
+  "macros": []
+}

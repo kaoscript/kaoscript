@@ -14,6 +14,7 @@ class ClassDeclaration extends Statement {
 	private {
 		_abstract: Boolean 			= false
 		_abstractMethods			= {}
+		_class: ClassType
 		_classMethods				= {}
 		_classVariables				= {}
 		_constructors				= []
@@ -24,7 +25,7 @@ class ClassDeclaration extends Statement {
 		_extending: Boolean			= false
 		_extendingAlien: Boolean	= false
 		_extendsName: String
-		_extendsType: ClassType
+		_extendsType: NamedType<ClassType>
 		_hybrid: Boolean			= false
 		_instanceMethods			= {}
 		_instanceVariables			= {}
@@ -33,7 +34,7 @@ class ClassDeclaration extends Statement {
 		_name
 		_references					= {}
 		_sealed: Boolean 			= false
-		_type: ClassType
+		_type: NamedType<ClassType>
 		_variable: Variable
 	}
 	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
@@ -89,7 +90,10 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		if tree.length == 1 {
+		if tree.length == 0 {
+			return ClassDeclaration.checkMethods(methods, parameters, index + 1, node, fragments, call, argName, returns)
+		}
+		else if tree.length == 1 {
 			item = tree[0]
 
 			if item.methods.length == 1 {
@@ -236,6 +240,7 @@ class ClassDeclaration extends Statement {
 					item = map[index] = {
 						index: index
 						types: {}
+						weight: 0
 					}
 				}
 
@@ -249,6 +254,7 @@ class ClassDeclaration extends Statement {
 					item = map[index] = {
 						index: index
 						types: {}
+						weight: 0
 					}
 				}
 
@@ -273,6 +279,13 @@ class ClassDeclaration extends Statement {
 				map.types[type.hashCode()] = {
 					type: type
 					methods: [index]
+				}
+
+				if type.isAny() {
+					map.weight += 1
+				}
+				else {
+					map.weight += 1_000
 				}
 			}
 		}
@@ -431,7 +444,7 @@ class ClassDeclaration extends Statement {
 						}
 
 						let indexes = []
-						for :parameter of parameters {
+						for :parameter of Object.values(parameters).sort((a, b) => a.weight < b.weight) {
 							for hash, type of parameter.types {
 								type.methods:Array.remove(...indexes)
 
@@ -516,18 +529,19 @@ class ClassDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
-		@type = new ClassType(@name, @scope)
+		@class = new ClassType(@scope)
+		@type = new NamedType(@name, @class)
 
 		@variable = @scope.define(@name, true, @type, this)
 
-		let thisVariable = @constructorScope.define('this', true, @type.reference(), this)
+		let thisVariable = @constructorScope.define('this', true, @scope.reference(@name), this)
 
 		thisVariable.replaceCall = (data, arguments) => new CallThisConstructorSubstitude(data, arguments, @type)
 
-		@destructorScope.define('this', true, @type.reference(), this)
+		@destructorScope.define('this', true, @scope.reference(@name), this)
 		@destructorScope.rename('this', 'that')
 
-		@instanceVariableScope.define('this', true, @type.reference(), this)
+		@instanceVariableScope.define('this', true, @scope.reference(@name), this)
 
 		if @data.extends? {
 			@extending = true
@@ -547,12 +561,12 @@ class ClassDeclaration extends Statement {
 			if modifier.kind == ModifierKind::Abstract {
 				@abstract = true
 
-				@type.abstract()
+				@class.flagAbstract()
 			}
 			else if modifier.kind == ModifierKind::Sealed {
 				@sealed = true
 
-				@type.seal()
+				@class.flagSealed()
 			}
 		}
 
@@ -570,9 +584,9 @@ class ClassDeclaration extends Statement {
 				}
 				NodeKind::MacroDeclaration => {
 					const name = data.name.name
-					
+
 					declaration = new MacroDeclaration(data, this, `\(@name).\(name)`)
-					
+
 					if @macros[name] is Array {
 						@macros[name].push(declaration)
 					}
@@ -581,10 +595,10 @@ class ClassDeclaration extends Statement {
 					}
 				}
 				NodeKind::MethodDeclaration => {
-					if @type.isConstructor(data.name.name) {
+					if @class.isConstructor(data.name.name) {
 						declaration = new ClassConstructorDeclaration(data, this)
 					}
-					else if @type.isDestructor(data.name.name) {
+					else if @class.isDestructor(data.name.name) {
 						declaration = new ClassDestructorDeclaration(data, this)
 					}
 					else {
@@ -598,9 +612,9 @@ class ClassDeclaration extends Statement {
 				}
 			}
 		}
-		
+
 		if this.hasInits() {
-			@type.init(1)
+			@class.init(1)
 		}
 	} // }}}
 	prepare() { // {{{
@@ -608,15 +622,15 @@ class ClassDeclaration extends Statement {
 			if @extendsType !?= Type.fromAST(@data.extends, this) {
 				ReferenceException.throwNotDefined(@extendsName, this)
 			}
-			else if @extendsType is not ClassType {
+			else if @extendsType.discardName() is not ClassType {
 				TypeException.throwNotClass(@extendsName, this)
 			}
 
-			@type.extends(@extendsType, @extendsName)
+			@class.extends(@extendsType)
 
-			@hybrid = @type.isHybrid()
+			@hybrid = @class.isHybrid()
 
-			const superVariable = @constructorScope.define('super', true, @extendsType.reference(), this)
+			const superVariable = @constructorScope.define('super', true, @scope.reference(@extendsName), this)
 
 			if @hybrid && !@es5 {
 				const thisVariable = @constructorScope.getVariable('this')
@@ -634,34 +648,34 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			@instanceVariableScope.define('super', true, @extendsType.reference(), this)
+			@instanceVariableScope.define('super', true, @scope.reference(@extendsName), this)
 		}
 
 		for name, variable of @classVariables {
 			variable.prepare()
 
-			@type.addClassVariable(name, variable.type())
+			@class.addClassVariable(name, variable.type())
 		}
 
 		for name, methods of @classMethods {
 			for method in methods {
 				method.prepare()
 
-				@type.addClassMethod(name, method.type())
+				@class.addClassMethod(name, method.type())
 			}
 		}
 
 		for name, variable of @instanceVariables {
 			variable.prepare()
 
-			@type.addInstanceVariable(name, variable.type())
+			@class.addInstanceVariable(name, variable.type())
 		}
 
 		for name, methods of @instanceMethods {
 			for method in methods {
 				method.prepare()
 
-				@type.addInstanceMethod(name, method.type())
+				@class.addInstanceMethod(name, method.type())
 			}
 		}
 
@@ -669,23 +683,23 @@ class ClassDeclaration extends Statement {
 			for method in methods {
 				method.prepare()
 
-				@type.addAbstractMethod(name, method.type())
+				@class.addAbstractMethod(name, method.type())
 			}
 		}
 
 		for method in @constructors {
 			method.prepare()
 
-			@type.addConstructor(method.type())
+			@class.addConstructor(method.type())
 		}
 
 		if @destructor? {
 			@destructor.prepare()
 
-			@type.addDestructor()
+			@class.addDestructor()
 		}
 
-		if @extending && !@abstract && (notImplemented = @type.getMissingAbstractMethods()).length != 0 {
+		if @extending && !@abstract && (notImplemented = @class.getMissingAbstractMethods()).length != 0 {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 	} // }}}
@@ -754,6 +768,9 @@ class ClassDeclaration extends Statement {
 					this.addReference(type, node)
 				}
 			}
+			else if type is ClassVariableType {
+				this.addReference(type.type(), node)
+			}
 			else {
 				throw new NotImplementedException(this)
 			}
@@ -761,10 +778,10 @@ class ClassDeclaration extends Statement {
 	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
-		
+
 		for name, macros of @macros {
 			const path = `\(@name).\(name)`
-			
+
 			for macro in macros {
 				macro.export(recipient, path)
 			}
@@ -787,7 +804,7 @@ class ClassDeclaration extends Statement {
 	newInstanceMethodScope(method: ClassMethodDeclaration) { // {{{
 		let scope = new Scope(@scope)
 
-		scope.define('this', true, @type.reference(), this)
+		scope.define('this', true, @scope.reference(@name), this)
 
 		if @extending {
 			scope.define('super', true, null, this)
@@ -1397,13 +1414,13 @@ class ClassDeclaration extends Statement {
 		}
 
 		if @sealed {
-			fragments.line(`var \(@type.sealName()) = {}`)
+			fragments.line(`var \(@type.getSealedName()) = {}`)
 		}
 	} // }}}
 	type() => @type
 	updateMethodScope(method) { // {{{
 		if @extending {
-			const variable = method.scope().getVariable('super').type(@extendsType.reference())
+			const variable = method.scope().getVariable('super').type(@scope.reference(@extendsName))
 
 			if @es5 {
 				variable.replaceCall = (data, arguments) => new CallSuperMethodES5Substitude(data, arguments, method, @type)
@@ -1423,13 +1440,13 @@ class ClassDeclaration extends Statement {
 class CallThisConstructorSubstitude {
 	private {
 		_arguments
-		_class: Type
+		_class: NamedType<ClassType>
 		_data
 	}
 	constructor(@data, @arguments, @class)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
-		fragments.code(`\(@class.name()).prototype.__ks_cons.call(this, [`)
+		fragments.code(`\(@class.path()).prototype.__ks_cons.call(this, [`)
 
 		for argument, index in @arguments {
 			if index != 0 {
@@ -1463,13 +1480,13 @@ class CallHybridThisConstructorES6Substitude extends CallThisConstructorSubstitu
 class CallSuperConstructorSubstitude {
 	private {
 		_arguments
-		_class: Type
+		_class: NamedType<ClassType>
 		_data
 	}
 	constructor(@data, @arguments, @class)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
-		fragments.code(`\(@class.parentName()).prototype.__ks_cons.call(this, [`)
+		fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons.call(this, [`)
 
 		for argument, index in @arguments {
 			if index != 0 {
@@ -1486,7 +1503,7 @@ class CallSuperConstructorSubstitude {
 
 class CallSuperConstructorES5Substitude extends CallSuperConstructorSubstitude {
 	toFragments(fragments, mode) { // {{{
-		if @class.extends().isAlien() {
+		if @class.type().extends().isAlien() {
 			if @arguments.length == 0 {
 				fragments.code('(1')
 			}
@@ -1495,7 +1512,7 @@ class CallSuperConstructorES5Substitude extends CallSuperConstructorSubstitude {
 			}
 		}
 		else {
-			fragments.code(`\(@class.parentName()).prototype.__ks_cons.call(this, [`)
+			fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons.call(this, [`)
 
 			for argument, index in @arguments {
 				if index != 0 {
@@ -1527,14 +1544,14 @@ class CallHybridSuperConstructorES6Substitude extends CallSuperConstructorSubsti
 class CallSuperMethodES5Substitude {
 	private {
 		_arguments
-		_class: Type
+		_class: NamedType<ClassType>
 		_data
 		_method: ClassMethodDeclaration
 	}
 	constructor(@data, @arguments, @method, @class)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
-		fragments.code(`\(@class.parentName()).prototype.\(@method.name()).call(this, [`)
+		fragments.code(`\(@class.type().extends().path()).prototype.\(@method.name()).call(this, [`)
 
 		for argument, index in @arguments {
 			if index != 0 {
@@ -1552,7 +1569,7 @@ class CallSuperMethodES5Substitude {
 class CallSuperMethodES6Substitude {
 	private {
 		_arguments
-		_class: Type
+		_class: NamedType<ClassType>
 		_data
 		_method: ClassMethodDeclaration
 	}
@@ -1575,13 +1592,13 @@ class CallSuperMethodES6Substitude {
 class MemberSuperMethodES5Substitude {
 	private {
 		_arguments
-		_class: Type
+		_class: NamedType<ClassType>
 		_property: String
 	}
 	constructor(@property, @arguments, @class)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
-		fragments.code(`\(@class.parentName()).prototype.\(@property).apply(this, [`)
+		fragments.code(`\(@class.discardName().extends().name()).prototype.\(@property).apply(this, [`)
 
 		for argument, index in @arguments {
 			if index != 0 {
@@ -1612,11 +1629,12 @@ class ClassMethodDeclaration extends Statement {
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
 		let extend = null
-		if variable.isExtending() {
+		if variable.type().isExtending() {
 			extend = func(node, fragments, ctrl?, variable) {
-				const parent = variable.parentName()
+				const extends = variable.type().extends()
+				const parent = extends.name()
 
-				if variable.extends().hasClassMethod(name) {
+				if extends.type().hasClassMethod(name) {
 					ctrl.done()
 
 					fragments.line(`return \(parent).\(name).apply(null, arguments)`)
@@ -1638,11 +1656,12 @@ class ClassMethodDeclaration extends Statement {
 	} // }}}
 	static toInstanceSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
 		let extend = null
-		if variable.isExtending() {
+		if variable.type().isExtending() {
 			extend = func(node, fragments, ctrl?, variable) {
-				const parent = variable.parentName()
+				const extends = variable.type().extends()
+				const parent = extends.name()
 
-				if variable.extends().hasInstanceMethod(name) {
+				if extends.type().hasInstanceMethod(name) {
 					ctrl.done()
 
 					fragments.line(`return \(parent).prototype.\(name).apply(this, arguments)`)
@@ -1720,7 +1739,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		for parameter in @data.parameters {
-			@parent.addReference(Type.fromAST(parameter.type, @scope.domain(), false, this), this)
+			@parent.addReference(Type.fromAST(parameter.type, @scope, false, this), this)
 		}
 	} // }}}
 	analyse() { // {{{
@@ -1745,7 +1764,8 @@ class ClassMethodDeclaration extends Statement {
 			@type = new ClassMethodType(arguments, @data, this)
 
 			if @parent.isExtending() {
-				if method ?= @parent._extendsType.getInstanceMethod(@name, arguments) ?? @parent._extendsType.getAsbtractMethod(@name, arguments) {
+				const extends = @parent.extends().type()
+				if method ?= extends.getInstanceMethod(@name, arguments) ?? extends.getAsbtractMethod(@name, arguments) {
 					if @data.type? {
 						if !@type.returnType().isInstanceOf(method.returnType()) {
 							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
@@ -1872,7 +1892,7 @@ class ClassConstructorDeclaration extends Statement {
 		let extend = null
 		if node.isExtending() {
 			extend = func(node, fragments, ctrl?, variable) {
-				if variable.hasConstructors() {
+				if variable.type().hasConstructors() {
 					ctrl
 						.step()
 						.code('else')
@@ -1881,9 +1901,9 @@ class ClassConstructorDeclaration extends Statement {
 						.done()
 				}
 				else {
-					const constructorName = variable.extends().isSealedAlien() ? 'constructor' : '__ks_cons'
+					const constructorName = variable.type().extends().isSealedAlien() ? 'constructor' : '__ks_cons'
 
-					fragments.line(`\(variable.parentName()).prototype.\(constructorName).call(this, args)`)
+					fragments.line(`\(variable.type().extends().path()).prototype.\(constructorName).call(this, args)`)
 				}
 			}
 		}
@@ -1898,7 +1918,7 @@ class ClassConstructorDeclaration extends Statement {
 		parent._constructors.push(this)
 
 		for parameter in @data.parameters {
-			@parent.addReference(Type.fromAST(parameter.type, @scope.domain(), false, this), this)
+			@parent.addReference(Type.fromAST(parameter.type, @scope, false, this), this)
 		}
 	} // }}}
 	analyse() { // {{{
@@ -1989,7 +2009,7 @@ class ClassConstructorDeclaration extends Statement {
 		]
 
 		if parameters.length == 0 {
-			if @parent._extendsType.hasConstructors() {
+			if @parent.extends().type().hasConstructors() {
 				SyntaxException.throwNoSuperCall(this)
 			}
 		}
@@ -2167,7 +2187,7 @@ class ClassDestructorDeclaration extends Statement {
 			ctrl.line(`\(node._extendsName).__ks_destroy(that)`)
 		}
 
-		for i from 0 til variable.destructors() {
+		for i from 0 til variable.type().destructors() {
 			ctrl.line(`\(node._name).__ks_destroy_\(i)(that)`)
 		}
 
@@ -2290,7 +2310,7 @@ class ClassVariableDeclaration extends AbstractNode {
 	} // }}}
 	prepare() { // {{{
 		if @parent.isExtending() {
-			const type = @parent._extendsType
+			const type = @parent._extendsType.type()
 
 			if @instance {
 				if type.hasInstanceVariable(@name) {

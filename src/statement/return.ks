@@ -8,11 +8,11 @@ class ReturnStatement extends Statement {
 	}
 	constructor(@data, @parent) { // {{{
 		super(data, parent)
-		
+
 		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
 			parent = parent.parent()
 		}
-		
+
 		if parent? {
 			@function = parent
 		}
@@ -20,9 +20,9 @@ class ReturnStatement extends Statement {
 	analyse() { // {{{
 		if @data.value? {
 			@value = $compile.expression(@data.value, this)
-			
+
 			@value.analyse()
-			
+
 			@await = @value.isAwait()
 			@exceptions = @value.hasExceptions()
 		}
@@ -30,7 +30,7 @@ class ReturnStatement extends Statement {
 	prepare() { // {{{
 		if @value != null {
 			@value.prepare()
-			
+
 			if @afterwards.length != 0 {
 				@temp = @scope.acquireTempName(this)
 			}
@@ -48,11 +48,11 @@ class ReturnStatement extends Statement {
 	reference() => @temp
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
-		
+
 		const item = @value.toFragments(line, Mode::None)
-		
+
 		item([this])
-		
+
 		line.done()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
@@ -68,7 +68,7 @@ class ReturnStatement extends Statement {
 			if @assignments.length != 0 {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
-			
+
 			if @value.isAwaiting() {
 				return this.toAwaitStatementFragments^@(fragments)
 			}
@@ -96,21 +96,21 @@ class ReturnStatement extends Statement {
 			}
 			else {
 				@assignments.remove(@temp)
-				
+
 				if @assignments.length != 0 {
 					fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 				}
-				
+
 				fragments
 					.newLine()
 					.code(`\($runtime.scope(this))\(@temp) = `)
 					.compile(@value)
 					.done()
-				
+
 				for afterward in @afterwards {
 					afterward.toAfterwardFragments(fragments)
 				}
-				
+
 				if @function?.type().isAsync() {
 					fragments.line(`return __ks_cb(null, \(@temp))`)
 				}

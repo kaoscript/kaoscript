@@ -1,0 +1,102 @@
+{
+  "aliens": [
+    0,
+    "Error"
+  ],
+  "requirements": [],
+  "exports": [
+    1,
+    "Foobar",
+    2,
+    "Exception"
+  ],
+  "references": [
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "foo": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": false,
+            "throws": [
+              {
+                "reference": 2
+              }
+            ]
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": true,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {
+        "throwFoobar": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": false,
+            "throws": [
+              {
+                "reference": 2
+              }
+            ]
+          }
+        ]
+      },
+      "extends": [
+        0,
+        "Error"
+      ]
+    }
+  ],
+  "macros": []
+}

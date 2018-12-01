@@ -1,0 +1,130 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Shape"
+  ],
+  "references": [
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [
+        {
+          "access": 3,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "throws": []
+        },
+        {
+          "access": 3,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "type": "String",
+              "min": 1,
+              "max": 1
+            }
+          ],
+          "throws": []
+        },
+        {
+          "access": 3,
+          "min": 2,
+          "max": 2,
+          "parameters": [
+            {
+              "type": "String",
+              "min": 1,
+              "max": 1
+            },
+            {
+              "type": "Color",
+              "min": 1,
+              "max": 1
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "destructors": 0,
+      "instanceVariables": {
+        "_color": {
+          "access": 1,
+          "type": "Color"
+        },
+        "_name": {
+          "access": 1,
+          "type": "String"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "color": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Color",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "name": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          },
+          {
+            "access": 3,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "String",
+                "min": 1,
+                "max": 1
+              }
+            ],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

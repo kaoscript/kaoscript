@@ -1,4 +1,5 @@
 {
+  "aliens": [],
   "requirements": [
     0,
     "Color",
@@ -15,6 +16,7 @@
   ],
   "references": [
     {
+      "type": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,
@@ -29,8 +31,9 @@
     },
     "Enum",
     {
+      "type": "class",
       "class": {
-        "requirement": 0
+        "reference": 0
       },
       "init": 0,
       "instanceVariables": {

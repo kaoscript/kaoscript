@@ -45,7 +45,7 @@ describe('compile', function() {
 					data = compiler.compile().toSource();
 				}
 				catch(ex) {
-					//console.log(ex)
+					// console.log(ex)
 					expect(ex.fileName).to.exist;
 
 					ex.fileName = path.relative(__dirname, ex.fileName);
@@ -57,7 +57,7 @@ describe('compile', function() {
 			}
 			else {
 				var data = compiler.compile().toSource();
-				//console.log(data);
+				// console.log(data);
 
 				expect(data).to.equal(fs.readFileSync(path.join(root, name + '.js'), {
 					encoding: 'utf8'
@@ -73,7 +73,7 @@ describe('compile', function() {
 
 				if(metadata) {
 					var data = JSON.stringify(compiler.toMetadata(), function(key, value){return value === Infinity ? 'Infinity' : value;}, 2);
-					//console.log(data);
+					// console.log(data);
 
 					expect(JSON.parse(data)).to.eql(JSON.parse(metadata));
 				}

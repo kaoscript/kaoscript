@@ -1,4 +1,10 @@
 {
+  "aliens": [
+    -1,
+    "console",
+    0,
+    "Math"
+  ],
   "requirements": [],
   "exports": [
     0,
@@ -6,6 +12,7 @@
   ],
   "references": [
     {
+      "type": "namespace",
       "sealed": true,
       "properties": {
         "PI": {

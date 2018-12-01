@@ -6,13 +6,13 @@ class Foo {
 	static {
 		bar: string = 'Hello world!'
 	}
-	
+
 	public {
 		name: string
 	}
-	
+
 	constructor(@name)
-	
+
 	qux(name) {
 		this.bar = 'Hello ' + name
 	}

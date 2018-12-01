@@ -9,13 +9,13 @@ class EnumExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@enum.prepare()
-		
-		const enum = @enum.type()
-		if !enum.hasElement(@data.member.name) {
-			ReferenceException.throwNotDefinedEnumElement(@data.member.name, enum.name(), this)
+
+		const named = @enum.type()
+		if !named.type().hasElement(@data.member.name) {
+			ReferenceException.throwNotDefinedEnumElement(@data.member.name, named.name(), this)
 		}
-		
-		@type = enum.type()
+
+		@type = named.type().type()
 	} // }}}
 	translate() { // {{{
 		@enum.translate()

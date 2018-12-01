@@ -181,8 +181,7 @@ abstract class AbstractNode {
 			return this._reference
 		}
 	} // }}}
-	reference(@reference) { // {{{
-	} // }}}
+	reference(@reference)
 	scope() => this._scope
 	statement() => this._parent?.statement()
 }

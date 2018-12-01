@@ -19,7 +19,16 @@ export class Exception extends Error {
 	}
 
 	static {
-		validateReportedError(error: ClassType, node) { // {{{
+		validateReportedError(error: Type, node) { // {{{
+			until error is NamedType {
+				if error.isExtending() {
+					error = error.extends()
+				}
+				else {
+					error = node.scope().getVariable('Error').type()
+				}
+			}
+
 			let options = node._options.error
 
 			if options.level == 'fatal' {
@@ -323,7 +332,10 @@ export class TypeException extends Exception {
 			throw new TypeException(`Identifier "\(name)" is not a class`, node)
 		} // }}}
 		throwNotCompatible(varname, argname, modname, node) ~ ReferenceException { // {{{
-			throw new TypeException(`The variable "\(varname)" and the argument "\(argname)" of the module "\(modname)") aren't compatible`, node)
+			throw new TypeException(`The variable "\(varname)" and the argument "\(argname)" of the module "\(modname)" aren't compatible`, node)
+		} // }}}
+		throwNotNamespace(name, node) ~ TypeException { // {{{
+			throw new TypeException(`Identifier "\(name)" is not a namespace`, node)
 		} // }}}
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)

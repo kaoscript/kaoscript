@@ -1,4 +1,8 @@
 {
+  "aliens": [
+    0,
+    "Window"
+  ],
   "requirements": [],
   "exports": [
     0,
@@ -6,6 +10,7 @@
   ],
   "references": [
     {
+      "type": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,

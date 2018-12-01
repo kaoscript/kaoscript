@@ -1,11 +1,36 @@
 {
+  "aliens": [],
   "requirements": [],
   "exports": [
-    1,
+    0,
     "ReShape"
   ],
   "references": [
     {
+      "type": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "_name": {
+          "access": 1,
+          "type": "String"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "extends": [
+        1,
+        "Shape"
+      ]
+    },
+    {
+      "type": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,
@@ -40,28 +65,6 @@
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {}
-    },
-    {
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "init": 0,
-      "constructors": [],
-      "destructors": 0,
-      "instanceVariables": {
-        "_name": {
-          "access": 1,
-          "type": "String"
-        }
-      },
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "extends": [
-        0,
-        "Shape"
-      ]
     }
   ],
   "macros": []

@@ -1,11 +1,16 @@
 {
+  "aliens": [
+    0,
+    "Function"
+  ],
   "requirements": [],
   "exports": [
-    0,
+    1,
     "Function"
   ],
   "references": [
     {
+      "type": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,
@@ -13,6 +18,17 @@
       "init": 0,
       "constructors": [],
       "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "type": "class",
+      "class": {
+        "reference": 0
+      },
+      "init": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
@@ -25,7 +41,9 @@
             "max": "Infinity",
             "parameters": [
               {
-                "type": "Function",
+                "type": {
+                  "reference": 1
+                },
                 "min": 1,
                 "max": 1
               },

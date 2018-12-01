@@ -6,9 +6,9 @@ class Greetings {
 	private {
 		_message: String?
 	}
-	
+
 	constructor(@message = 'Hello!')
-	
+
 	greet(name) {
 		return @message + '\nIt\'s nice to meet you, ' + name + '.'
 	}

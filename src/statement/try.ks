@@ -28,9 +28,6 @@ class TryStatement extends Statement {
 				if variable !?= scope.getVariable(clause.type.name) {
 					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
-				else if variable.type() is not ClassType {
-					TypeException.throwNotClass(clause.type.name, this)
-				}
 
 				if clause.binding? {
 					@scope = new Scope(scope)
@@ -96,6 +93,8 @@ class TryStatement extends Statement {
 		for clause in @catchClauses {
 			clause.body.prepare()
 			clause.type.prepare()
+
+			exit = exit && clause.body.isExit()
 		}
 
 		if @catchClause? {
@@ -140,7 +139,7 @@ class TryStatement extends Statement {
 	isConsumedError(error): Boolean { // {{{
 		if @catchClauses.length > 0 {
 			for clause in @catchClauses {
-				if clause.type.type().match(error) {
+				if error.matchInheritanceOf(clause.type.type()) {
 					return true
 				}
 			}
@@ -434,7 +433,7 @@ class TryStatement extends Statement {
 				ifs
 					.code('if(', $runtime.type(this), '.is(', error, ', ')
 					.compile(@catchClauses[i].type)
-					.code(')')
+					.code('))')
 					.step()
 
 				if clause.binding? {

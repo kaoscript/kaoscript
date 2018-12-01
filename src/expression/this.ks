@@ -10,9 +10,9 @@ class ThisExpression extends Expression {
 	}
 	analyse() { // {{{
 		@name = @data.name.name
-		
+
 		let parent = @parent
-		
+
 		do {
 			if parent is CallExpression && parent.data().callee == @data {
 				@calling = true
@@ -21,7 +21,7 @@ class ThisExpression extends Expression {
 				if !parent.isInstance() {
 					SyntaxException.throwUnexpectedAlias(@name, this)
 				}
-				
+
 				@class = parent.parent().type()
 				break
 			}
@@ -33,26 +33,26 @@ class ThisExpression extends Expression {
 				if !parent.isInstance() {
 					SyntaxException.throwUnexpectedAlias(@name, this)
 				}
-				
+
 				@class = parent.class()
 				break
 			}
 		}
 		while parent ?= parent.parent()
-		
+
 		if !?@class {
 			SyntaxException.throwUnexpectedAlias(@name, this)
 		}
 	} // }}}
 	prepare() { // {{{
 		if @calling {
-			if type ?= @class.getInstanceMethod(@name, [argument.type() for argument in @parent.arguments()]) {
+			if @type ?= @class.type().getInstanceMethod(@name, [argument.type() for argument in @parent.arguments()]) {
 				@fragment = `this.\(@name)`
 			}
-			else if @type ?= @class.getInstanceVariable(@name) {
+			else if @type ?= @class.type().getInstanceVariable(@name) {
 				@fragment = `this.\(@name)`
 			}
-			else if @type ?= @class.getInstanceVariable(`_\(@name)`) {
+			else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
 				@fragment = `this._\(@name)`
 			}
 			else {
@@ -60,13 +60,15 @@ class ThisExpression extends Expression {
 			}
 		}
 		else {
-			if @type ?= @class.getInstanceVariable(@name) {
+			if variable ?= @class.type().getInstanceVariable(@name) {
 				@fragment = `this.\(@name)`
+				@type = variable.type()
 			}
-			else if @type ?= @class.getInstanceVariable(`_\(@name)`) {
+			else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
 				@fragment = `this._\(@name)`
+				@type = variable.type()
 			}
-			else if @type ?= @class.getPropertyGetter(@name) {
+			else if @type ?= @class.type().getPropertyGetter(@name) {
 				@fragment = `this.\(@name)()`
 				@entangled = true
 			}

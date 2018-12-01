@@ -68,7 +68,6 @@ class Importer extends Statement {
 	private {
 		_alias: String				= null
 		_count: Number				= 0
-		_domain: ImportDomain
 		_imports					= {}
 		_isKSFile: Boolean
 		_localToModuleArguments		= {}
@@ -78,6 +77,7 @@ class Importer extends Statement {
 		_requirements				= {}
 		_sealedVariables			= {}
 		_variables					= {}
+		_worker: ImportWorker
 	}
 	analyse() { // {{{
 		let x = @data.source.value
@@ -99,57 +99,48 @@ class Importer extends Statement {
 	} // }}}
 	prepare() { // {{{
 		if @isKSFile {
-			let moduleType, type
 			for name, requirement of @requirements {
-				type = @scope.getVariable(@moduleToLocalArguments[name]).type()
-				moduleType = Type.import(name, requirement.data, @metadata.references, @domain, this)
-
-				if !type.match(moduleType) {
-					TypeException.throwNotCompatible(@moduleToLocalArguments[name], name, @data.source.value, this)
-				}
-
-				requirement.type = type
+				requirement.name = @moduleToLocalArguments[name]
+				requirement.type = @scope.getVariable(@moduleToLocalArguments[name]).type()
 			}
 
-			@domain.prepare(@requirements)
+			@worker.prepare(@requirements)
 
-			let variable
 			for name, def of @imports {
-				variable = @scope.getVariable(def.local)
+				const variable = @scope.getVariable(def.local)
 
 				if def.isAlias {
-					type = new NamespaceType(@alias, @scope)
-					const ref = type.reference()
+					const type = new NamedContainerType(def.local, new NamespaceType(@scope))
 
 					for i from 1 til @metadata.exports.length by 2 {
 						const name = @metadata.exports[i]
 
-						if @domain.hasVariable(name) {
-							type.addProperty(name, @domain.getVariable(name))
+						if @worker.hasImportedVariable(name) {
+							type.addProperty(name, @worker.getVariable(name))
 						}
 						else {
-							type.addProperty(name, @domain.commit(name).namespace(ref))
+							type.addProperty(name, @worker.commit(name))
 						}
 					}
 
 					variable.type(type)
 				}
 				else {
-					if !@domain.hasTemporary(name) {
+					if !@worker.hasInternalVariable(name) {
 						ReferenceException.throwNotDefinedInModule(name, @data.source.value, this)
 					}
 
-					type = @domain.commit(name)
+					const type = @worker.commit(name)
 
 					if def.newVariable {
 						variable.type(type)
 					}
-					else if @localToModuleArguments[def.local] is not String {
+					else if !variable.isPredefined() && @localToModuleArguments[def.local] is not String {
 						ReferenceException.throwNotPassed(def.local, @data.source.value, this)
 					}
-					else if type.match(variable.type()) {
+					else if type.matchSignatureOf(variable.type()) {
 						if variable.type().isAlien() {
-							type.alienize()
+							type.flagAlien()
 						}
 
 						variable.type(type)
@@ -158,7 +149,13 @@ class Importer extends Statement {
 						TypeException.throwNotCompatible(def.local, name, @data.source.value, this)
 					}
 
-					if type is not AliasType {
+					if type.isNamed() {
+						type.name(def.local)
+
+						type.scope().reassignReference(name, def.local, @scope)
+					}
+
+					if !type.isAlias() {
 						@variables[name] = def.local
 						++@count
 
@@ -169,8 +166,6 @@ class Importer extends Statement {
 					}
 				}
 			}
-
-			@domain.commit()
 
 			if @data.arguments?.length != 0 || @count != 0 || @alias? {
 				this.module().flagRegister()
@@ -201,7 +196,8 @@ class Importer extends Statement {
 		}
 	} // }}}
 	addImport(imported: String, local: String, isAlias: Boolean) { // {{{
-		const newVariable = !@scope.hasVariable(local)
+		const newVariable = (variable !?= @scope.getVariable(local)) || variable.isPredefined()
+
 		if newVariable {
 			@scope.define(local, true, null, this)
 		}
@@ -361,7 +357,7 @@ class Importer extends Statement {
 		@isKSFile = true
 		@moduleName = moduleName
 
-		@domain = new ImportDomain(@metadata, this)
+		@worker = new ImportWorker(@metadata, this)
 
 		if @data.arguments?.length != 0 {
 			for argument in @data.arguments {
@@ -480,14 +476,14 @@ class Importer extends Statement {
 					@alias = specifier.local.name
 
 					if specifier.specifiers?.length != 0 {
-						type = new NamespaceType(@alias, @scope)
+						type = new NamespaceType(@scope)
 
 						for s in specifier.specifiers {
 							if s.imported.kind == NodeKind::Identifier {
 								type.addProperty(s.local.name, Type.Any)
 							}
 							else {
-								type.addProperty(s.local.name, Type.fromAST(s.imported, this).alienize())
+								type.addProperty(s.local.name, Type.fromAST(s.imported, this).flagAlien())
 							}
 						}
 
@@ -502,7 +498,7 @@ class Importer extends Statement {
 						this.addVariable(specifier.imported.name, specifier.local.name, true, null)
 					}
 					else {
-						type = Type.fromAST(specifier.imported, this).alienize()
+						type = Type.fromAST(specifier.imported, this).flagAlien()
 
 						this.addVariable(specifier.imported.name.name, specifier.local.name, true, type)
 					}
@@ -814,4 +810,130 @@ class ImportDeclarator extends Importer {
 	toStatementFragments(fragments, mode) { // {{{
 		this.toImportFragments(fragments)
 	} // }}}
+}
+
+class ImportWorker {
+	private {
+		_imports			= {}
+		_internals			= {}
+		_metadata
+		_node
+		_scope: AbstractScope
+	}
+	constructor(@metadata, @node) { // {{{
+		@scope = new ImportScope(node.scope())
+	} // }}}
+	commit(name: String) { // {{{
+		@imports[name] = true
+
+		return @internals[name]
+	} // }}}
+	hasImportedVariable(name: String) => @imports[name] == true
+	hasInternalVariable(name: String) => @internals[name] is Type
+	hasVariable(name: String) => @internals[name] is Type || $natives[name] == true
+	getVariable(name: String) { // {{{
+		if @internals[name] is Type {
+			return @internals[name]
+		}
+		else if $natives[name] == true {
+			return @scope.reference(name)
+		}
+		else {
+			return null
+		}
+	} // }}}
+	prepare(requirements) { // {{{
+		const references = []
+		const queue = []
+
+		let index, name, type, requirement
+
+		if @metadata.requirements.length > 0 {
+			for i from 0 til @metadata.requirements.length by 3 {
+				type = Type.import(@metadata.references[@metadata.requirements[i]], references, queue, @scope, @node)
+
+				if type is ClassType || type is EnumType || type is NamespaceType {
+					references[@metadata.requirements[i]] = new NamedType(@metadata.requirements[i + 1], type)
+				}
+				else {
+					references[@metadata.requirements[i]] = type
+				}
+			}
+
+			while queue.length > 0 {
+				queue.shift()()
+			}
+
+			for i from 0 til @metadata.requirements.length by 3 {
+				name = @metadata.requirements[i + 1]
+
+				if (requirement ?= requirements[name]) && !requirement.type.matchSignatureOf(references[@metadata.requirements[i]]) {
+					TypeException.throwNotCompatible(requirement.name, name, @node.data().source.value, @node)
+				}
+			}
+
+			references.clear()
+
+			for i from 0 til @metadata.requirements.length by 3 {
+				if requirement ?= requirements[@metadata.requirements[i + 1]] {
+					references[@metadata.requirements[i]] = requirement.type
+				}
+			}
+		}
+
+		for data, index in @metadata.references {
+			if !?references[index] {
+				references[index] = Type.import(data, references, queue, @scope, @node)
+			}
+		}
+
+		for i from 0 til @metadata.aliens.length by 2 {
+			index = @metadata.aliens[i]
+
+			if index != -1 {
+				type = references[index]
+
+				if type is ClassType || type is EnumType || type is NamespaceType {
+					references[index] = new NamedType(@metadata.aliens[i + 1], type)
+				}
+			}
+		}
+
+		for i from 0 til @metadata.exports.length by 2 {
+			if @metadata.exports[i] == -1 {
+				@internals[@metadata.exports[i + 1]] = Type.Any
+			}
+			else {
+				if references[@metadata.exports[i]] is ClassType || references[@metadata.exports[i]] is EnumType || references[@metadata.exports[i]] is NamespaceType {
+					references[@metadata.exports[i]] = new NamedType(@metadata.exports[i + 1], references[@metadata.exports[i]])
+				}
+
+				@internals[@metadata.exports[i + 1]] = references[@metadata.exports[i]]
+
+				@scope.addVariable(@metadata.exports[i + 1], new Variable(@metadata.exports[i + 1], false, false, references[@metadata.exports[i]]), @node)
+			}
+		}
+
+		while queue.length > 0 {
+			queue.shift()()
+		}
+
+		for i from 0 til @metadata.aliens.length by 2 {
+			if @metadata.aliens[i] != -1 {
+				name = @metadata.aliens[i + 1]
+
+				if !?@internals[name] {
+					requirement = @node.scope().getVariable(name)
+
+					if !?requirement {
+						ReferenceException.throwNotDefined(name, @node)
+					}
+					else if !requirement.type().matchSignatureOf(references[@metadata.aliens[i]]) {
+						TypeException.throwNotCompatible(name, name, @node.data().source.value, @node)
+					}
+				}
+			}
+		}
+	} // }}}
+	scope() => @scope
 }

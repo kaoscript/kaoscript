@@ -1,11 +1,20 @@
 {
+  "aliens": [
+    -1,
+    "parseFloat",
+    -1,
+    "parseInt",
+    0,
+    "String"
+  ],
   "requirements": [],
   "exports": [
-    0,
+    1,
     "String"
   ],
   "references": [
     {
+      "type": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,
@@ -23,11 +32,25 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "String",
+            "returns": {
+              "reference": 1
+            },
             "sealed": false,
             "throws": []
           }
-        ],
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "type": "class",
+      "class": {
+        "reference": 0
+      },
+      "init": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
         "lines": [
           {
             "access": 3,
@@ -53,7 +76,9 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "String",
+            "returns": {
+              "reference": 1
+            },
             "sealed": true,
             "throws": []
           }

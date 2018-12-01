@@ -5,8 +5,8 @@ class TypeAliasDeclaration extends Statement {
 	}
 	analyse() { // {{{
 		@name = @data.name.name
-		
-		@variable = @scope.define(@name, true, new AliasType(Type.fromAST(@data.type, this)), this)
+
+		@variable = @scope.define(@name, true, new AliasType(@scope, Type.fromAST(@data.type, this)), this)
 	} // }}}
 	prepare()
 	translate()

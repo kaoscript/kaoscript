@@ -1,0 +1,39 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "foo"
+  ],
+  "references": [
+    {
+      "type": "function",
+      "async": false,
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Any",
+      "throws": [
+        {
+          "reference": 1
+        }
+      ]
+    },
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": true,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "extends": "Error"
+    }
+  ],
+  "macros": []
+}

@@ -1,11 +1,24 @@
 {
+  "aliens": [
+    -1,
+    "isNaN",
+    -1,
+    "Math",
+    -1,
+    "parseFloat",
+    -1,
+    "parseInt",
+    0,
+    "Number"
+  ],
   "requirements": [],
   "exports": [
-    0,
+    1,
     "Number"
   ],
   "references": [
     {
+      "type": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,
@@ -13,6 +26,17 @@
       "init": 0,
       "constructors": [],
       "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "type": "class",
+      "class": {
+        "reference": 0
+      },
+      "init": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -29,7 +53,9 @@
                 "max": 2
               }
             ],
-            "returns": "Number",
+            "returns": {
+              "reference": 1
+            },
             "sealed": true,
             "throws": []
           }
@@ -47,7 +73,9 @@
                 "max": 1
               }
             ],
-            "returns": "Number",
+            "returns": {
+              "reference": 1
+            },
             "sealed": true,
             "throws": []
           }
@@ -65,7 +93,9 @@
                 "max": 1
               }
             ],
-            "returns": "Number",
+            "returns": {
+              "reference": 1
+            },
             "sealed": true,
             "throws": []
           }
@@ -77,7 +107,9 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Number",
+            "returns": {
+              "reference": 1
+            },
             "sealed": true,
             "throws": []
           }
@@ -95,7 +127,9 @@
                 "max": 1
               }
             ],
-            "returns": "Number",
+            "returns": {
+              "reference": 1
+            },
             "sealed": true,
             "throws": []
           }

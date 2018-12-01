@@ -1,0 +1,72 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "CarFactory",
+    1,
+    "Car"
+  ],
+  "references": [
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "makeCar": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 1
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "getType": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

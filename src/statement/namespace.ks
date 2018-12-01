@@ -3,7 +3,7 @@ class NamespaceDeclaration extends Statement {
 		_exports				= {}
 		_name: String
 		_statements: Array
-		_type: NamespaceType
+		_type: NamedContainerType<NamespaceType>
 		_variable: Variable
 	}
 	constructor(data, parent) { // {{{
@@ -11,14 +11,14 @@ class NamespaceDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
-		@type = new NamespaceType(@name, @scope)
-		
+		@type = new NamedContainerType(@name, new NamespaceType(@scope))
+
 		@variable = @scope.parent().define(@name, true, @type, this)
-		
+
 		@statements = []
 		for statement in @data.statements {
 			@statements.push(statement = $compile.statement(statement, this))
-			
+
 			statement.analyse()
 		}
 	} // }}}
@@ -26,7 +26,7 @@ class NamespaceDeclaration extends Statement {
 		for statement in @statements {
 			statement.prepare()
 		}
-		
+
 		for statement in @statements when statement.isExportable() {
 			statement.export(this)
 		}
@@ -41,7 +41,7 @@ class NamespaceDeclaration extends Statement {
 	} // }}}
 	export(name: String, variable) { // {{{
 		@type.addProperty(name, variable.type())
-		
+
 		@exports[name] = variable
 	} // }}}
 	includePath() => null
@@ -50,37 +50,36 @@ class NamespaceDeclaration extends Statement {
 	toExportFragements(fragments) { // {{{
 		const line = fragments.newLine().code('return ')
 		const object = line.newObject()
-		
+
 		let type
 		for name, variable of @exports {
 			type = variable.type()
-			
+
 			if type is not AliasType {
 				object.newLine().code(`\(name): `).compile(variable).done()
-				
+
 				if type is not ReferenceType {
-					type = type.unalias()
-					
+
 					if type.isSealed() {
 						object.line(`__ks_\(name): \(type.sealName())`)
 					}
 				}
 			}
 		}
-		
+
 		object.done()
 		line.done()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const line = fragments.newLine().code($runtime.scope(this), @name, ' = (function()')
 		const block = line.newBlock()
-		
+
 		for statement in @statements {
 			block.compile(statement)
 		}
-		
+
 		this.toExportFragements(block)
-		
+
 		block.done()
 		line.code(')()').done()
 	} // }}}

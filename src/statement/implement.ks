@@ -2,8 +2,8 @@ class ImplementDeclaration extends Statement {
 	private {
 		_properties			= []
 		_sharingProperties	= {}
-		_type: Type
-		_variable
+		_type: NamedType
+		_variable: Variable
 	}
 	analyse() { // {{{
 		if @variable !?= @scope.getVariable(@data.variable.name) {
@@ -13,16 +13,22 @@ class ImplementDeclaration extends Statement {
 	prepare() { // {{{
 		@variable.prepareAlteration()
 
-		@type = @variable.type().unalias()
+		@type = @variable.type()
 
-		if @type is ClassType {
+		unless @type is NamedType {
+			TypeException.throwImplInvalidType(this)
+		}
+
+		const type = @type.type()
+
+		if type is ClassType {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
-						property = new ImplementClassFieldDeclaration(property, this, @type:ClassType)
+						property = new ImplementClassFieldDeclaration(property, this, @type)
 					}
 					NodeKind::MethodDeclaration => {
-						property = new ImplementClassMethodDeclaration(property, this, @type:ClassType)
+						property = new ImplementClassMethodDeclaration(property, this, @type)
 					}
 					=> {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
@@ -34,14 +40,14 @@ class ImplementDeclaration extends Statement {
 				@properties.push(property)
 			}
 		}
-		else if @type is NamespaceType {
+		else if type is NamespaceType {
 			for property in @data.properties {
 				switch property.kind {
 					NodeKind::FieldDeclaration => {
-						property = new ImplementNamespaceVariableDeclaration(property, this, @type:NamespaceType)
+						property = new ImplementNamespaceVariableDeclaration(property, this, @type)
 					}
 					NodeKind::MethodDeclaration => {
-						property = new ImplementNamespaceFunctionDeclaration(property, this, @type:NamespaceType)
+						property = new ImplementNamespaceFunctionDeclaration(property, this, @type)
 					}
 					=> {
 						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
@@ -86,19 +92,25 @@ class ImplementDeclaration extends Statement {
 class ImplementClassFieldDeclaration extends Statement {
 	private {
 		_class: ClassType
+		_classRef: ReferenceType
 		_defaultValue				= null
 		_hasDefaultValue: Boolean	= false
 		_init: Number				= 0
 		_instance: Boolean			= true
 		_name: String
 		_type: ClassVariableType
+		_variable: NamedType<ClassType>
 	}
-	constructor(data, parent, @class) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent)
 
-		if class.isSealed() {
+		@class = @variable.type()
+
+		if @class.isSealed() {
 			TypeException.throwImplFieldToSealedType(this)
 		}
+
+		@classRef = @scope.reference(@variable)
 	} // }}}
 	analyse() { // {{{
 		for i from 0 til @data.modifiers.length while @instance {
@@ -149,7 +161,7 @@ class ImplementClassFieldDeclaration extends Statement {
 			if @instance {
 				const line = fragments.newLine()
 
-				line.code(`\(@class.name()).prototype.__ks_init_\(@init) = function()`)
+				line.code(`\(@variable.name()).prototype.__ks_init_\(@init) = function()`)
 
 				const block = line.newBlock()
 
@@ -159,19 +171,19 @@ class ImplementClassFieldDeclaration extends Statement {
 				line.done()
 			}
 			else {
-				fragments.newLine().code(`\(@class.name()).\(@name) = `).compile(@defaultValue).done()
+				fragments.newLine().code(`\(@variable.name()).\(@name) = `).compile(@defaultValue).done()
 			}
 		}
 	} // }}}
 	toSharedFragments(fragments) { // {{{
 		const line = fragments.newLine()
 
-		line.code(`\(@class.name()).prototype.__ks_init = function()`)
+		line.code(`\(@variable.name()).prototype.__ks_init = function()`)
 
 		const block = line.newBlock()
 
 		for let i from 1 to @init {
-			block.line(`\(@class.name()).prototype.__ks_init_\(i).call(this)`)
+			block.line(`\(@variable.name()).prototype.__ks_init_\(i).call(this)`)
 		}
 
 		block.done()
@@ -185,6 +197,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_aliases: Array			= []
 		_body: Array
 		_class: ClassType
+		_classRef: ReferenceType
 		_isContructor: Boolean	= false
 		_isDestructor: Boolean	= false
 		_instance: Boolean		= true
@@ -195,9 +208,13 @@ class ImplementClassMethodDeclaration extends Statement {
 		_statements
 		_this: Variable
 		_type: Type
+		_variable: NamedType<ClassType>
 	}
-	constructor(data, parent, @class) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
+
+		@class = @variable.type()
+		@classRef = @scope.reference(@variable)
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
@@ -220,7 +237,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 
-		@this = @scope.define('this', true, @class.reference(), this)
+		@this = @scope.define('this', true, @classRef, this)
 
 		@parameters = []
 		for parameter in @data.parameters {
@@ -239,7 +256,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		@type.flagAlteration()
 
 		if @class.isSealed() {
-			@type.seal()
+			@type.flagSealed()
 		}
 
 		if @instance {
@@ -309,14 +326,14 @@ class ImplementClassMethodDeclaration extends Statement {
 			const line = fragments.newLine()
 
 			if @class.isSealed() {
-				line.code(`\(@class.sealName()).\(@internalName) = function(`)
+				line.code(`\(@variable.getSealedName()).\(@internalName) = function(`)
 			}
 			else {
 				if @instance {
-					line.code(`\(@class.name()).prototype.\(@internalName) = function(`)
+					line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
 				}
 				else {
-					line.code(`\(@class.name()).\(@internalName) = function(`)
+					line.code(`\(@variable.name()).\(@internalName) = function(`)
 				}
 			}
 
@@ -339,8 +356,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @class.isSealed() {
-				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, null, (node, fragments) => {
-					const block = fragments.code(`\(@class.sealName())._im_\(@name) = function(that)`).newBlock()
+				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @variable, @class.getInstanceMethods(@name), @name, null, (node, fragments) => {
+					const block = fragments.code(`\(@variable.getSealedName())._im_\(@name) = function(that)`).newBlock()
 
 					block.line('var args = Array.prototype.slice.call(arguments, 1, arguments.length)')
 
@@ -348,30 +365,30 @@ class ImplementClassMethodDeclaration extends Statement {
 				}, (fragments) => fragments.done(), (fragments, method, index) => {
 					if method.max() == 0 {
 						if method.isSealed() {
-							fragments.line(`return \(@class.sealName()).__ks_func_\(@name)_\(index).apply(that)`)
+							fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(index).apply(that)`)
 						}
 						else {
-							fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that)`)
+							fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(index).apply(that)`)
 						}
 					}
 					else {
 						if method.isSealed() {
-							fragments.line(`return \(@class.sealName()).__ks_func_\(@name)_\(index).apply(that, args)`)
+							fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(index).apply(that, args)`)
 						}
 						else {
-							fragments.line(`return \(@class.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
+							fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
 						}
 					}
 				}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
 			}
 			else {
-				ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @class, @class.getInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
+				ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @variable, @class.getInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 			}
 		}
 		else {
 			if @class.isSealed() {
-				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, null, (node, fragments) => {
-					const block = fragments.code(`\(@class.sealName())._cm_\(@name) = function()`).newBlock()
+				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @variable, @class.getClassMethods(@name), @name, null, (node, fragments) => {
+					const block = fragments.code(`\(@variable.getSealedName())._cm_\(@name) = function()`).newBlock()
 
 					block.line('var args = Array.prototype.slice.call(arguments)')
 
@@ -379,24 +396,24 @@ class ImplementClassMethodDeclaration extends Statement {
 				}, (fragments) => fragments.done(), (fragments, method, index) => {
 					if method.max() == 0 {
 						if method.isSealed() {
-							fragments.line(`return \(@class.sealName()).__ks_sttc_\(@name)_\(index)()`)
+							fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(index)()`)
 						}
 						else {
-							fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index)()`)
+							fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(index)()`)
 						}
 					}
 					else {
 						if method.isSealed() {
-							fragments.line(`return \(@class.sealName()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+							fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
 						}
 						else {
-							fragments.line(`return \(@class.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+							fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
 						}
 					}
 				}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
 			}
 			else {
-				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @class, @class.getClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@class.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
+				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @variable, @class.getClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 			}
 		}
 	} // }}}
@@ -408,9 +425,12 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 		_namespace: NamespaceType
 		_value
 		_type: FunctionType
+		_variable: NamedType<NamespaceType>
 	}
-	constructor(data, parent, @namespace) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent)
+
+		@namespace = @variable.type()
 	} // }}}
 	analyse() { // {{{
 		@value = $compile.expression(@data.defaultValue, this)
@@ -423,6 +443,8 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 
 		@type = NamespaceVariableType.fromAST(@data, this)
 
+		@type.flagAlteration()
+
 		@namespace.addProperty(@data.name.name, @type)
 	} // }}}
 	translate() { // {{{
@@ -433,14 +455,14 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 		if @namespace.isSealed() {
 			fragments
 				.newLine()
-				.code(@namespace.sealName(), '.', @data.name.name, ' = ')
+				.code(@variable.getSealedName(), '.', @data.name.name, ' = ')
 				.compile(@value)
 				.done()
 		}
 		else {
 			fragments
 				.newLine()
-				.code(@namespace.name(), '.', @data.name.name, ' = ')
+				.code(@variable.name(), '.', @data.name.name, ' = ')
 				.compile(@value)
 				.done()
 		}
@@ -451,12 +473,17 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 class ImplementNamespaceFunctionDeclaration extends Statement {
 	private {
 		_namespace: NamespaceType
+		_namespaceRef: ReferenceType
 		_parameters: Array
 		_statements: Array
 		_type: FunctionType
+		_variable: NamedType<NamespaceType>
 	}
-	constructor(data, parent, @namespace) { // {{{
+	constructor(data, parent, @variable) { // {{{
 		super(data, parent, new Scope(parent.scope()))
+
+		@namespace = @variable.type()
+		@namespaceRef = @scope.reference(@variable)
 	} // }}}
 	analyse() { // {{{
 		@parameters = []
@@ -472,6 +499,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		}
 
 		@type = NamespaceFunctionType.fromAST(@data, this)
+
+		@type.flagAlteration()
 
 		@namespace.addProperty(@data.name.name, @type)
 	} // }}}
@@ -503,10 +532,10 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		const line = fragments.newLine()
 
 		if @namespace.isSealed() {
-			line.code(@namespace.sealName())
+			line.code(@variable.getSealedName())
 		}
 		else {
-			line.code(@namespace.name())
+			line.code(@variable.name())
 		}
 
 		line.code('.', @data.name.name, ' = function(')

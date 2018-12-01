@@ -8,10 +8,10 @@ class IfExpression extends Expression {
 	analyse() { // {{{
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
-		
+
 		@whenTrue = $compile.expression(@data.whenTrue, this)
 		@whenTrue.analyse()
-		
+
 		if @data.whenFalse? {
 			@whenFalse = $compile.expression(@data.whenFalse, this)
 			@whenFalse.analyse()
@@ -19,20 +19,20 @@ class IfExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@condition.prepare()
-		
+
 		@whenTrue.prepare()
-		
+
 		if @whenFalse? {
 			@whenFalse.prepare()
-			
+
 			const t = @whenTrue.type()
 			const f = @whenFalse.type()
-			
+
 			if t.equals(f) {
 				@type = t
 			}
 			else {
-				@type = Type.union(t, f)
+				@type = Type.union(@scope, t, f)
 			}
 		}
 		else {
@@ -64,16 +64,16 @@ class IfExpression extends Expression {
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
-		
+
 		ctrl.code('if(')
-		
+
 		if @condition.isAssignable() {
 			ctrl.code('(').compileBoolean(@condition).code(')')
 		}
 		else {
 			ctrl.compileBoolean(@condition)
 		}
-		
+
 		ctrl.code(')').step().line(@whenTrue).done()
 	} // }}}
 	type() => @type

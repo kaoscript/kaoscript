@@ -168,7 +168,7 @@ class FunctionDeclaration extends Statement {
 						@main = true
 						@extended = true
 
-						@variable = new FunctionVariable(@name, true)
+						@variable = new FunctionVariable(scope, @name, true)
 
 						@variable.type().addFunction(type)
 
@@ -192,7 +192,8 @@ class FunctionDeclaration extends Statement {
 		}
 		else {
 			@main = true
-			@variable = new FunctionVariable(@name, false)
+
+			@variable = new FunctionVariable(scope, @name, false)
 
 			scope.addVariable(@name, @variable, this)
 
@@ -474,8 +475,8 @@ class FunctionVariable extends Variable {
 		_extended: Boolean							= false
 		_declarators: Array<FunctionDeclarator>		= []
 	}
-	constructor(@name, @extended) { // {{{
-		super(name, true, new OverloadedFunctionType())
+	constructor(scope: AbstractScope, @name, @extended) { // {{{
+		super(name, true, false, new OverloadedFunctionType(scope))
 	} // }}}
 	addDeclarator(declarator: FunctionDeclarator) { // {{{
 		@declarators.push(declarator)

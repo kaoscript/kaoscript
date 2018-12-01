@@ -13,10 +13,12 @@ module.exports = function() {
 				}
 			}
 		}
+		const fox = new FooX();
 		return {
 			FooX: FooX
 		};
 	})();
+	const fox = new T.FooX();
 	class FooY extends T.FooX {
 		__ks_init() {
 			T.FooX.prototype.__ks_init.call(this);
@@ -25,4 +27,5 @@ module.exports = function() {
 			T.FooX.prototype.__ks_cons.call(this, args);
 		}
 	}
+	const foy = new FooY();
 };

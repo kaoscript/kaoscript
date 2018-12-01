@@ -8,14 +8,14 @@ class CreateExpression extends Expression {
 	analyse() { // {{{
 		@class = $compile.expression(@data.class, this)
 		@class.analyse()
-		
+
 		const es5 = @options.format.spreads == 'es5'
-		
+
 		for argument in @data.arguments {
 			@arguments.push(argument = $compile.expression(argument, this))
-			
+
 			argument.analyse()
-			
+
 			if es5 && argument is UnaryOperatorSpread {
 				@flatten = true
 			}
@@ -23,31 +23,31 @@ class CreateExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@class.prepare()
-		
+
 		for argument in @arguments {
 			argument.prepare()
 		}
-		
-		if type !?= @class.type().dereference() {
+
+		if type !?= @class.type() {
 			ReferenceException.throwNotDefined(@class.type().name(), this)
 		}
-		else if type is ClassType {
-			if type.isAbstract() {
+		else if type.isNamed() && type.type() is ClassType {
+			if type.type().isAbstract() {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
-			else if !type.matchArguments([argument.type() for argument in @arguments]) {
+			else if !type.type().matchArguments([argument.type() for argument in @arguments]) {
 				TypeException.throwNoMatchingConstructor(type.name(), this)
 			}
-			
-			@type = type.reference()
+
+			@type = @scope.reference(type)
 		}
-		else if !type.isAny() {
+		else if !type.isAny() && !type.isClass() {
 			TypeException.throwNotClass(type.name(), this)
 		}
 	} // }}}
 	translate() { // {{{
 		@class.translate()
-		
+
 		for argument in @arguments {
 			argument.translate()
 		}
@@ -56,22 +56,22 @@ class CreateExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		if @flatten {
 			this.module().flag('Helper')
-			
+
 			fragments.code(`\($runtime.helper(this)).create(`).compile(@class)
-			
+
 			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
-			
+
 			fragments.code(')')
 		}
 		else {
 			fragments.code('new ').compile(@class).code('(')
-			
+
 			for i from 0 til @arguments.length {
 				fragments.code($comma) if i != 0
-				
+
 				fragments.compile(@arguments[i])
 			}
-			
+
 			fragments.code(')')
 		}
 	} // }}}

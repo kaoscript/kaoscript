@@ -1,5 +1,6 @@
 export class Module {
 	private {
+		_aliens					= {}
 		_binary: Boolean		= false
 		_body
 		_compiler: Compiler
@@ -51,6 +52,9 @@ export class Module {
 
 		@hashes['.'] = @compiler.sha256(file, data)
 	} // }}}
+	addAlien(name: String, type: Type) { // {{{
+		@aliens[name] = type
+	} // }}}
 	addHash(file, hash) { // {{{
 		@hashes[path.relative(@directory, file)] = hash
 	} // }}}
@@ -98,13 +102,15 @@ export class Module {
 		return this
 	} // }}}
 	addRequirement(requirement: Requirement) { // {{{
-		requirement.type().setRequirement(@requirements.length)
-
 		@requirements.push(requirement)
 		@requirementByNames[requirement.name()] = requirement
 
 		if requirement is DynamicRequirement {
 			@dynamicRequirements.push(requirement)
+		}
+
+		if requirement.isAlien() {
+			this.addAlien(requirement.name(), requirement.type())
 		}
 	} // }}}
 	compile() { // {{{
@@ -124,6 +130,8 @@ export class Module {
 		}
 
 		@exports[name] = variable
+
+		variable.type().flagExported()
 	} // }}}
 	exportMacro(name: String, data: String) { // {{{
 		if @binary {
@@ -349,7 +357,7 @@ export class Module {
 
 			let export = 0
 			for :variable of @exports {
-				if variable.type() is not AliasType {
+				if !variable.type().isAlias() {
 					++export
 				}
 			}
@@ -362,14 +370,12 @@ export class Module {
 				for name, variable of @exports {
 					type = variable.type()
 
-					if type is not AliasType {
+					if !type.isAlias() {
 						object.newLine().code(`\(name): `).compile(variable).done()
 
 						if type is not ReferenceType {
-							type = type.unalias()
-
 							if type.isSealed() && type.isExtendable() {
-								object.line(`__ks_\(name): \(type.sealName())`)
+								object.line(`__ks_\(name): \(type.getSealedName())`)
 							}
 						}
 					}
@@ -432,10 +438,15 @@ export class Module {
 	toMetadata() { // {{{
 		if @metadata == null {
 			@metadata = {
+				aliens: []
 				requirements: []
 				exports: []
 				references: []
 				macros: []
+			}
+
+			for name, type of @aliens {
+				@metadata.aliens.push(type.toMetadata(@metadata.references), name)
 			}
 
 			for requirement in @requirements {
