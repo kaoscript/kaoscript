@@ -407,6 +407,9 @@ class CallExpression extends Expression {
 						throw new NotImplementedException(this)
 					}
 				}
+				else if value.isExtending() {
+					this.makeMemberCallee(value.extends(), name)
+				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, this))
 				}
@@ -530,6 +533,15 @@ class CallExpression extends Expression {
 					else {
 						throw new NotImplementedException(this)
 					}
+				}
+				else if value.isExtending() {
+					this.makeMemberCalleeFromReference(value.extends(), reference)
+				}
+				else if	@data.callee.object.kind == NodeKind::Identifier &&
+						(callee ?= @scope.getVariable(@data.callee.object.name)) &&
+						(substitute ?= callee.replaceMemberCall?(@property, @arguments))
+				{
+					this.addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, this))

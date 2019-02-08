@@ -491,8 +491,7 @@ class ImportScope extends Scope {
 			return value.reference(this)
 		}
 		else {
-			/* return super.reference(value) */
-			return Scope.prototype.reference.call(this, value)
+			return super.reference(value)
 		}
 	} // }}}
 }
