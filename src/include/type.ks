@@ -66,6 +66,7 @@ abstract class Type {
 	private {
 		_alien: Boolean				= false
 		_exported: Boolean			= false
+		_referenced: Boolean		= false
 		_referenceIndex: Number		= -1
 		_required: Boolean 			= false
 		_scope: AbstractScope?
@@ -216,7 +217,16 @@ abstract class Type {
 			// console.log('-- fromMetadata --')
 			// console.log(JSON.stringify(data, null, 2))
 
-			if data is String {
+			if data is Number {
+				if type ?= references[data] {
+					return type
+				}
+				else {
+					console.log(data)
+					throw new NotImplementedException(node)
+				}
+			}
+			else if data is String {
 				return data == 'Any' ? Type.Any : scope.reference(data)
 			}
 			else if data is Array {
@@ -252,6 +262,9 @@ abstract class Type {
 			}
 			else {
 				switch data.type {
+					TypeKind::Enum => {
+						return EnumType.fromMetadata(data, references, scope, node)
+					}
 					TypeKind::Function => {
 						return FunctionType.fromMetadata(data, references, scope, node)
 					}
@@ -346,6 +359,16 @@ abstract class Type {
 
 		return this
 	} // }}}
+	flagExported() { // {{{
+		@exported = true
+
+		return this
+	} // }}}
+	flagReferenced() { // {{{
+		@referenced = true
+
+		return this
+	} // }}}
 	flagRequired() { // {{{
 		@required = true
 
@@ -353,11 +376,6 @@ abstract class Type {
 	} // }}}
 	flagSealed() { // {{{
 		@sealed = true
-
-		return this
-	} // }}}
-	flagExported() { // {{{
-		@exported = true
 
 		return this
 	} // }}}
@@ -388,6 +406,7 @@ abstract class Type {
 	isNumber() => false
 	isObject() => false
 	isPredefined() => false
+	isReferenced() => @referenced
 	isRequired() => @required
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
@@ -395,8 +414,20 @@ abstract class Type {
 	matchContentOf(that: Type): Boolean => this.equals(that)
 	matchContentTo(that: Type): Boolean => that.matchContentOf(this)
 	matchSignatureOf(that: Type): Boolean => false
+	reference(scope = @scope) => scope.reference(this)
 	scope() => @scope
-	toExport(references) { // {{{
+	toExportOrIndex(references) { // {{{
+		if @referenceIndex != -1 {
+			return @referenceIndex
+		}
+		else if this.isReferenced() {
+			return this.toMetadata(references)
+		}
+		else {
+			return this.export(references)
+		}
+	} // }}}
+	toExportOrReference(references) { // {{{
 		if @referenceIndex == -1 {
 			return this.export(references)
 		}

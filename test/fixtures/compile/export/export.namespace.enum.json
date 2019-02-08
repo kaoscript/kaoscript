@@ -1,0 +1,54 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "NS"
+  ],
+  "references": [
+    {
+      "type": "namespace",
+      "sealed": false,
+      "properties": {
+        "foo": {
+          "type": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": []
+        },
+        "bar": {
+          "type": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": []
+        },
+        "qux": {
+          "type": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": []
+        },
+        "Type": {
+          "type": "enum",
+          "elements": [
+            "FOO",
+            "BAR",
+            "QUX"
+          ],
+          "index": 2,
+          "kind": 1
+        }
+      }
+    }
+  ],
+  "macros": []
+}

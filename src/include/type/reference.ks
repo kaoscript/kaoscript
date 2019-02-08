@@ -59,6 +59,13 @@ class ReferenceType extends Type {
 		}
 
 	} // }}}
+	flagExported() { // {{{
+		if !this.isAny() && !this.isEnum() && !this.isVoid() {
+			this.type().flagReferenced()
+		}
+
+		return super.flagExported()
+	} // }}}
 	getProperty(name: String): Type { // {{{
 		if this.isAny() {
 			return Type.Any
@@ -290,10 +297,14 @@ class ReferenceType extends Type {
 				fragments.code(`\(tof)(`).compile(node)
 			}
 			else {
-				fragments
-					.code(`\($runtime.type(node)).is(`)
-					.compile(node)
-					.code(`, \(@name)`)
+				fragments.code(`\($runtime.type(node)).is(`).compile(node).code(`, `)
+
+				if @type is NamedType {
+					fragments.code(@type.path())
+				}
+				else {
+					fragments.code(@name)
+				}
 			}
 
 			for parameter in @parameters {

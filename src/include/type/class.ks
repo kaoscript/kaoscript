@@ -404,6 +404,44 @@ class ClassType extends Type {
 	flagAbstract() { // {{{
 		@abstract = true
 	} // }}}
+	flagExported() { // {{{
+		if @exported {
+			return this
+		}
+		else {
+			@exported = true
+		}
+
+		for method in @constructors {
+			method.flagExported()
+		}
+
+		for :variable of @instanceVariables {
+			variable.type().flagExported()
+		}
+
+		for :variable of @classVariables {
+			variable.type().flagExported()
+		}
+
+		for :methods of @instanceMethods when methods is Array {
+			for method in methods {
+				method.flagExported()
+			}
+		}
+
+		for :methods of @classMethods when methods is Array {
+			for method in methods {
+				method.flagExported()
+			}
+		}
+
+		if @extending {
+			@extends.flagExported()
+		}
+
+		return this
+	} // }}}
 	hasExportableAlteration() { // {{{
 		if ?@alterationReference {
 			return @alterationReference._referenceIndex != -1 || @alterationReference.hasExportableAlteration()

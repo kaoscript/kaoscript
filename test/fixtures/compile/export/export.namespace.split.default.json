@@ -1,0 +1,47 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "NS",
+    1,
+    "foobar"
+  ],
+  "references": [
+    {
+      "type": "namespace",
+      "sealed": false,
+      "properties": {
+        "foo": 1,
+        "bar": {
+          "type": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "String",
+          "throws": []
+        },
+        "qux": {
+          "type": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "String",
+          "throws": []
+        }
+      }
+    },
+    {
+      "type": "function",
+      "async": false,
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "String",
+      "throws": []
+    }
+  ],
+  "macros": []
+}

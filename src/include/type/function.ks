@@ -213,6 +213,26 @@ class FunctionType extends Type {
 		returns: @returnType.toReference(references)
 		throws: [throw.toReference(references) for throw in @throws]
 	} // }}}
+	flagExported() { // {{{
+		if @exported {
+			return this
+		}
+		else {
+			@exported = true
+		}
+
+		for parameter in @parameters {
+			parameter.type().flagExported()
+		}
+
+		for error in @throws {
+			error.type().flagExported()
+		}
+
+		@returnType.flagExported()
+
+		return this
+	} // }}}
 	getProperty(name: String) => Type.Any
 	index() => @index
 	index(@index) => this
@@ -476,11 +496,11 @@ class OverloadedFunctionType extends Type {
 		for reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
 				for fn in reference.functions() {
-					functions.push(fn.toExport(references))
+					functions.push(fn.toExportOrReference(references))
 				}
 			}
 			else {
-				functions.push(reference.toExport(references))
+				functions.push(reference.toExportOrReference(references))
 			}
 		}
 

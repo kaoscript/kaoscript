@@ -6,6 +6,14 @@ class EnumType extends Type {
 		_type: Type
 	}
 	static {
+		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+			const type = new EnumType(scope, data.kind)
+
+			type._elements = data.elements
+			type._index = data.index
+
+			return type
+		} // }}}
 		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new EnumType(scope, data.kind)
 

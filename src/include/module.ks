@@ -131,7 +131,7 @@ export class Module {
 
 		@exports[name] = variable
 
-		variable.type().flagExported()
+		variable.type().flagExported().flagReferenced()
 	} // }}}
 	exportMacro(name: String, data: String) { // {{{
 		if @binary {

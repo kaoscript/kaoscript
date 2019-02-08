@@ -15,7 +15,7 @@ class NamespaceType extends Type {
 					type.copyFrom(source.type())
 
 					for name, property of data.properties {
-						type.addPropertyFromMetadata(name, property, references, scope, node)
+						type.addPropertyFromMetadata(name, property, references, node)
 					}
 				})
 			}
@@ -26,7 +26,7 @@ class NamespaceType extends Type {
 
 				queue.push(() => {
 					for name, property of data.properties {
-						type.addPropertyFromMetadata(name, property, references, scope, node)
+						type.addPropertyFromMetadata(name, property, references, node)
 					}
 				})
 			}
@@ -38,15 +38,17 @@ class NamespaceType extends Type {
 		super(new NamespaceScope(scope))
 	} // }}}
 	addProperty(name: String, type: Type) { // {{{
-		@properties[name] = type
+		const variable = new Variable(name, false, false, type)
+
+		@scope.addVariable(name, variable)
+
+		@properties[name] = variable.type()
 
 		if @sealed {
 			@sealProperties[name] = true
 
 			type.flagSealed()
 		}
-
-		@scope.addVariable(name, new Variable(name, false, false, type))
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
 		let type
@@ -60,25 +62,38 @@ class NamespaceType extends Type {
 			throw new NotSupportedException(node)
 		}
 
-		@properties[data.name.name] = type
+		const name = data.name.name
+		const variable = new Variable(name, false, false, type)
+
+		@scope.addVariable(name, variable)
+
+		@properties[name] = variable.type()
 
 		if type.isSealed() {
-			@sealProperties[data.name.name] = true
+			@sealProperties[name] = true
 		}
 	} // }}}
-	addPropertyFromMetadata(name, data, references, scope, node) { // {{{
+	addPropertyFromMetadata(name, data, references, node) { // {{{
 		let type
 		if data.parameters? {
-			type = NamespaceFunctionType.fromMetadata(data, references, scope, node)
+			type = NamespaceFunctionType.fromMetadata(data, references, @scope, node)
 		}
 		else if data.sealed? && data.type? {
-			type = NamespaceVariableType.fromMetadata(data, references, scope, node)
+			type = NamespaceVariableType.fromMetadata(data, references, @scope, node)
 		}
 		else {
-			type = Type.fromMetadata(data, references, scope, node)
+			type = Type.fromMetadata(data, references, @scope, node)
+
+			if type._scope != @scope {
+				type._scope = @scope
+			}
 		}
 
-		@properties[name] = type
+		const variable = new Variable(name, false, false, type)
+
+		@scope.addVariable(name, variable)
+
+		@properties[name] = variable.type()
 
 		if type.isSealed() {
 			@sealProperties[name] = true
@@ -117,7 +132,7 @@ class NamespaceType extends Type {
 			}
 
 			for name, value of @properties when value.isAlteration() {
-				export.properties[name] = value.export(references)
+				export.properties[name] = value.toExportOrIndex(references)
 			}
 
 			return export
@@ -130,14 +145,35 @@ class NamespaceType extends Type {
 			}
 
 			for name, value of @properties {
-				export.properties[name] = value.export(references)
+				export.properties[name] = value.toExportOrIndex(references)
 			}
 
 			return export
 		}
 	} // }}}
-	getProperty(name: String): Type => @properties[name] ?? null
-	hasProperty(name: String): Boolean => @properties[name]?
+	flagExported() { // {{{
+		if @exported {
+			return this
+		}
+		else {
+			@exported = true
+		}
+
+		for :value of @properties {
+			value.flagExported()
+		}
+
+		return this
+	} // }}}
+	getProperty(name: String): Type { // {{{
+		if @properties[name] is Type {
+			return @properties[name]
+		}
+		else {
+			return null
+		}
+	} // }}}
+	hasProperty(name: String): Boolean => @properties[name] is Type
 	isExtendable() => true
 	isFlexible() => @sealed
 	isNamespace() => true

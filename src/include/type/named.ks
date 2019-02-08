@@ -35,6 +35,11 @@ class NamedType extends Type {
 
 		return this
 	} // }}}
+	flagReferenced() { // {{{
+		@type.flagReferenced()
+
+		return this
+	} // }}}
 	flagRequired() { // {{{
 		@type.flagRequired()
 
@@ -72,6 +77,7 @@ class NamedType extends Type {
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
 	isPredefined() => @type.isPredefined()
+	isReferenced() => @type.isReferenced()
 	isRequired() => @type.isRequired()
 	isSealed() => @type.isSealed()
 	isSealedAlien() => @type.isSealedAlien()
