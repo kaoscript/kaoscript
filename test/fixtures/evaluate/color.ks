@@ -1,6 +1,6 @@
 require expect: func
 
-import * from ../compile/color.ks
+import '../compile/color.ks'
 
 let c = new Color('#ff0')
 
