@@ -115,22 +115,17 @@ class Importer extends Statement {
 					for i from 1 til @metadata.exports.length by 2 {
 						const name = @metadata.exports[i]
 
-						if @worker.hasImportedVariable(name) {
-							type.addProperty(name, @worker.getVariable(name))
-						}
-						else {
-							type.addProperty(name, @worker.commit(name))
-						}
+						type.addProperty(name, @worker.getType(name))
 					}
 
 					variable.type(type)
 				}
 				else {
-					if !@worker.hasInternalVariable(name) {
+					if !@worker.hasType(name) {
 						ReferenceException.throwNotDefinedInModule(name, @data.source.value, this)
 					}
 
-					const type = @worker.commit(name)
+					const type = @worker.getType(name)
 
 					if def.newVariable {
 						variable.type(type)
@@ -814,8 +809,6 @@ class ImportDeclarator extends Importer {
 
 class ImportWorker {
 	private {
-		_imports			= {}
-		_internals			= {}
 		_metadata
 		_node
 		_scope: AbstractScope
@@ -823,25 +816,8 @@ class ImportWorker {
 	constructor(@metadata, @node) { // {{{
 		@scope = new ImportScope(node.scope())
 	} // }}}
-	commit(name: String) { // {{{
-		@imports[name] = true
-
-		return @internals[name]
-	} // }}}
-	hasImportedVariable(name: String) => @imports[name] == true
-	hasInternalVariable(name: String) => @internals[name] is Type
-	hasVariable(name: String) => @internals[name] is Type || $natives[name] == true
-	getVariable(name: String) { // {{{
-		if @internals[name] is Type {
-			return @internals[name]
-		}
-		else if $natives[name] == true {
-			return @scope.reference(name)
-		}
-		else {
-			return null
-		}
-	} // }}}
+	hasType(name: String) => @scope.hasLocalVariable(name)
+	getType(name: String) => @scope.getLocalVariable(name).type()
 	prepare(requirements) { // {{{
 		const references = []
 		const queue = []
@@ -900,39 +876,25 @@ class ImportWorker {
 		}
 
 		for i from 0 til @metadata.exports.length by 2 {
-			if @metadata.exports[i] == -1 {
-				@internals[@metadata.exports[i + 1]] = Type.Any
+			index = @metadata.exports[i]
+			name = @metadata.exports[i + 1]
+
+			if index == -1 {
+				type = Type.Any
 			}
 			else {
-				if references[@metadata.exports[i]] is ClassType || references[@metadata.exports[i]] is EnumType || references[@metadata.exports[i]] is NamespaceType {
-					references[@metadata.exports[i]] = new NamedType(@metadata.exports[i + 1], references[@metadata.exports[i]])
+				type = references[@metadata.exports[i]]
+
+				if type is ClassType || type is EnumType || type is NamespaceType {
+					references[@metadata.exports[i]] = type = new NamedType(name, type)
 				}
-
-				@internals[@metadata.exports[i + 1]] = references[@metadata.exports[i]]
-
-				@scope.addVariable(@metadata.exports[i + 1], new Variable(@metadata.exports[i + 1], false, false, references[@metadata.exports[i]]), @node)
 			}
+
+			@scope.addVariable(name, new Variable(name, false, false, type), @node)
 		}
 
 		while queue.length > 0 {
 			queue.shift()()
-		}
-
-		for i from 0 til @metadata.aliens.length by 2 {
-			if @metadata.aliens[i] != -1 {
-				name = @metadata.aliens[i + 1]
-
-				if !?@internals[name] {
-					requirement = @node.scope().getVariable(name)
-
-					if !?requirement {
-						ReferenceException.throwNotDefined(name, @node)
-					}
-					else if !requirement.type().matchSignatureOf(references[@metadata.aliens[i]]) {
-						TypeException.throwNotCompatible(name, name, @node.data().source.value, @node)
-					}
-				}
-			}
 		}
 	} // }}}
 	scope() => @scope

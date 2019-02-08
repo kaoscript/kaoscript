@@ -1,5 +1,3 @@
-extern sealed class SyntaxError
-
 import '@kaoscript/parser' for parse
 
 try {

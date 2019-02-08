@@ -109,7 +109,7 @@ class AbstractScope {
 	addNative(name: String, type: String) { // {{{
 		@natives[name] = new Variable(name, true, false, this.reference(type))
 	} // }}}
-	addVariable(name: String, variable: Variable, node) { // {{{
+	addVariable(name: String, variable: Variable, node?) { // {{{
 		// console.log('addVariable', name, @id)
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
@@ -199,19 +199,16 @@ class AbstractScope {
 	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || @parent?.hasVariable(name)
 	listMacros(name) => @macros[name]
 	parent() => @parent
-	reference(name) { // {{{
-		switch name {
+	reference(value) { // {{{
+		switch value {
 			is AnyType => return this.resolveReference('Any')
-			is ClassVariableType => return this.reference(name.type())
-			is NamedType => {
-				// console.log('reference', name.name(), @id)
-				return name.reference(this)
-			}
-			is ReferenceType => return this.resolveReference(name.name(), name.isNullable())
-			is String => return this.resolveReference(name)
-			is Variable => return this.resolveReference(name.name())
+			is ClassVariableType => return this.reference(value.type())
+			is NamedType => return value.reference(this)
+			is ReferenceType => return this.resolveReference(value.name(), value.isNullable())
+			is String => return this.resolveReference(value)
+			is Variable => return this.resolveReference(value.name())
 			=> {
-				console.log(name)
+				console.log(value)
 				throw new NotImplementedException()
 			}
 		}
@@ -485,6 +482,19 @@ class ModuleScope extends Scope {
 }
 
 class ImportScope extends Scope {
+	reference(value) { // {{{
+		if value is NamedType {
+			if @variables[value.name()] is not Variable {
+				this.addVariable(value.name(), new Variable(value.name(), false, false, value), null)
+			}
+
+			return value.reference(this)
+		}
+		else {
+			/* return super.reference(value) */
+			return Scope.prototype.reference.call(this, value)
+		}
+	} // }}}
 }
 
 class NamespaceScope extends Scope {

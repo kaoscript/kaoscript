@@ -1,8 +1,8 @@
 require("kaoscript/register");
 module.exports = function() {
-	var parse = require("@kaoscript/parser")().parse;
+	var foo = require("../export/export.throw.extern.ne.ks")().foo;
 	try {
-		const ast = parse("const foo = 42");
+		foo();
 	}
 	catch(__ks_0) {
 	}
