@@ -7,17 +7,17 @@ class AssignmentOperatorExpression extends Expression {
 	}
 	analyse() { // {{{
 		let variables = this.assignment(@data)
-		
+
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
-		
+
 		if variables? {
 			@variables = variables
 		}
-		
+
 		@right = $compile.expression(@data.right, this)
 		@right.analyse()
-		
+
 		@await = @right.isAwait()
 	} // }}}
 	prepare() { // {{{
@@ -33,7 +33,7 @@ class AssignmentOperatorExpression extends Expression {
 		while expression._parent is not Statement {
 			expression = expression._parent
 		}
-		
+
 		return expression._parent.assignment(data, expression)
 	} // }}}
 	isAssignable() => true
@@ -113,7 +113,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 	prepare() { // {{{
 		@left.prepare()
 		@right.prepare()
-		
+
 		@right.acquireReusable(true)
 		@right.releaseReusable()
 	} // }}}
@@ -139,7 +139,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 				.compileReusable(@right)
 				.code(')', @data.operator)
 		}
-		
+
 		fragments
 			.code(' ? ')
 			.compile(@left)
@@ -162,7 +162,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 				.compileReusable(@right)
 				.code(')', @data.operator)
 		}
-		
+
 		fragments
 			.code(' ? (')
 			.compile(@left)
@@ -185,6 +185,13 @@ class AssignmentOperatorMultiplication extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
+	prepare() { // {{{
+		@left.prepare()
+		@right.prepare()
+
+		@right.acquireReusable(true)
+		@right.releaseReusable()
+	} // }}}
 	acquireReusable(acquire) { // {{{
 		@right.acquireReusable(true)
 	} // }}}
@@ -207,7 +214,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 				.compileReusable(@right)
 				.code(')', @data.operator)
 		}
-		
+
 		fragments
 			.code(' ? ')
 			.compile(@left)
@@ -230,7 +237,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 				.compileReusable(@right)
 				.code(')', @data.operator)
 		}
-		
+
 		fragments
 			.code(' ? (')
 			.compile(@left)
@@ -245,9 +252,9 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		if @left.isNullable() {
 			fragments.code('(')
-			
+
 			@left.toNullableFragments(fragments)
-			
+
 			fragments
 				.code(' && ' + $runtime.type(this) + '.isValue(')
 				.compile(@left)
@@ -259,7 +266,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 				.compile(@left)
 				.code(')')
 		}
-		
+
 		fragments
 			.code(' ? undefined : ')
 			.compile(@left)
@@ -268,14 +275,14 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()
-		
+
 		ctrl.code('if(!')
-		
+
 		if @left.isNullable() {
 			ctrl.code('(')
-			
+
 			@left.toNullableFragments(ctrl)
-			
+
 			ctrl
 				.code(' && ' + $runtime.type(this) + '.isValue(')
 				.compile(@left)
@@ -287,7 +294,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 				.compile(@left)
 				.code(')')
 		}
-		
+
 		ctrl
 			.code(')')
 			.step()
@@ -296,7 +303,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 			.code($equals)
 			.compile(@right)
 			.done()
-		
+
 		ctrl.done()
 	} // }}}
 }
