@@ -39,7 +39,7 @@ class EnumType extends Type {
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		type: TypeKind::Enum
 		elements: @elements
 		index: @index

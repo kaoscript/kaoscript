@@ -1,5 +1,8 @@
 {
-  "aliens": [],
+  "aliens": [
+    0,
+    "Array"
+  ],
   "requirements": [
     0,
     "Array",
@@ -22,75 +25,64 @@
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
-        "last": [
+        "indexOf": [
           {
             "access": 3,
             "async": false,
             "min": 0,
-            "max": 1,
+            "max": "Infinity",
             "parameters": [
               {
                 "type": "Any",
                 "min": 0,
-                "max": 1
+                "max": "Infinity"
               }
             ],
-            "returns": "Any",
-            "sealed": true,
+            "returns": "Number",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "push": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": "Number",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "slice": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": false,
             "throws": []
           }
         ]
       },
-      "classMethods": {
-        "map": [
-          {
-            "access": 3,
-            "async": false,
-            "min": 2,
-            "max": 2,
-            "parameters": [
-              {
-                "type": {
-                  "reference": 0
-                },
-                "min": 1,
-                "max": 1
-              },
-              {
-                "type": "Function",
-                "min": 1,
-                "max": 1
-              }
-            ],
-            "returns": "Any",
-            "sealed": true,
-            "throws": []
-          },
-          {
-            "access": 3,
-            "async": false,
-            "min": 3,
-            "max": 3,
-            "parameters": [
-              {
-                "type": {
-                  "reference": 0
-                },
-                "min": 1,
-                "max": 1
-              },
-              {
-                "type": "Function",
-                "min": 2,
-                "max": 2
-              }
-            ],
-            "returns": "Any",
-            "sealed": true,
-            "throws": []
-          }
-        ]
-      }
+      "classMethods": {}
     },
     {
       "type": "class",
@@ -114,7 +106,7 @@
                 "max": 2
               }
             ],
-            "returns": "Any",
+            "returns": "Boolean",
             "sealed": true,
             "throws": []
           }
@@ -132,7 +124,9 @@
                 "max": "Infinity"
               }
             ],
-            "returns": "Any",
+            "returns": {
+              "reference": 1
+            },
             "sealed": true,
             "throws": []
           }

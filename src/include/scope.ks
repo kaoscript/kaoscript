@@ -110,7 +110,6 @@ class AbstractScope {
 		@natives[name] = new Variable(name, true, false, this.reference(type))
 	} // }}}
 	addVariable(name: String, variable: Variable, node?) { // {{{
-		// console.log('addVariable', name, @id)
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -217,7 +216,7 @@ class AbstractScope {
 		if @variables[name] is Variable || @natives[name] is Variable || !?@parent {
 			const hash = `\(name)\(nullable ? '?' : '')`
 
-			if !?@references[hash] {
+			if @references[hash] is not ReferenceType {
 				@references[hash] = new ReferenceType(this, name, nullable)
 			}
 
@@ -482,18 +481,6 @@ class ModuleScope extends Scope {
 }
 
 class ImportScope extends Scope {
-	reference(value) { // {{{
-		if value is NamedType {
-			if @variables[value.name()] is not Variable {
-				this.addVariable(value.name(), new Variable(value.name(), false, false, value), null)
-			}
-
-			return value.reference(this)
-		}
-		else {
-			return super.reference(value)
-		}
-	} // }}}
 }
 
 class NamespaceScope extends Scope {

@@ -13,9 +13,9 @@ class SealedType extends Type {
 			return false
 		}
 	}
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		sealed: true
-		type: @type.toReference(references)
+		type: @type.toReference(references, ignoreAlteration)
 	} // }}}
 	isSealed() => true
 	toFragments(fragments, node) => @type.toFragments(fragments, node)

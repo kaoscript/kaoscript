@@ -1,6 +1,6 @@
 class VoidType extends Type {
 	equals(b?): Boolean => b is VoidType
-	export(references) => 'Void'
+	export(references, ignoreAlteration) => 'Void'
 	toFragments(fragments, node) { // {{{
 		fragments.code('Void')
 	} // }}}

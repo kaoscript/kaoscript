@@ -41,7 +41,7 @@ class UnionType extends Type {
 
 		return match == @types.length
 	} // }}}
-	export(references) => [type.toReference(references) for type in @types]
+	export(references, ignoreAlteration) => [type.toReference(references, ignoreAlteration) for type in @types]
 	flagExported() { // {{{
 		if @exported {
 			return this
@@ -92,7 +92,7 @@ class UnionType extends Type {
 
 		return `\(elements.join(', ')) or \(last)`
 	} // }}}
-	toReference(references) => this.export(references)
+	toReference(references, ignoreAlteration) => this.export(references, ignoreAlteration)
 	toTestFragments(fragments, node) { // {{{
 		fragments.code('(')
 

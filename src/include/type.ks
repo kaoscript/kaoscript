@@ -345,7 +345,7 @@ abstract class Type {
 	}
 	constructor(@scope)
 	abstract equals(b?): Boolean
-	abstract export(references)
+	abstract export(references, ignoreAlteration)
 	abstract toQuote(): String
 	abstract toFragments(fragments, node)
 	abstract toTestFragments(fragments, node)
@@ -416,20 +416,20 @@ abstract class Type {
 	matchSignatureOf(that: Type): Boolean => false
 	reference(scope = @scope) => scope.reference(this)
 	scope() => @scope
-	toExportOrIndex(references) { // {{{
+	toExportOrIndex(references, ignoreAlteration) { // {{{
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
 		else if this.isReferenced() {
-			return this.toMetadata(references)
+			return this.toMetadata(references, ignoreAlteration)
 		}
 		else {
-			return this.export(references)
+			return this.export(references, ignoreAlteration)
 		}
 	} // }}}
-	toExportOrReference(references) { // {{{
+	toExportOrReference(references, ignoreAlteration) { // {{{
 		if @referenceIndex == -1 {
-			return this.export(references)
+			return this.export(references, ignoreAlteration)
 		}
 		else {
 			return {
@@ -437,20 +437,20 @@ abstract class Type {
 			}
 		}
 	} // }}}
-	toMetadata(references) { // {{{
+	toMetadata(references, ignoreAlteration) { // {{{
 		if @referenceIndex == -1 {
 			@referenceIndex = references.length
 
 			// reserve position
 			references.push(null)
 
-			references[@referenceIndex] = this.export(references)
+			references[@referenceIndex] = this.export(references, ignoreAlteration)
 		}
 
 		return @referenceIndex
 	} // }}}
-	toReference(references) => { // {{{
-		reference: this.toMetadata(references)
+	toReference(references, ignoreAlteration) => { // {{{
+		reference: this.toMetadata(references, ignoreAlteration)
 	} // }}}
 	type() => this
 }

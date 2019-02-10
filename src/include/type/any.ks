@@ -1,6 +1,6 @@
 class AnyType extends Type {
 	equals(b?): Boolean => b is AnyType
-	export(references) => 'Any'
+	export(references, ignoreAlteration) => 'Any'
 	flagAlien() { // {{{
 		const type = new AnyType(null)
 
@@ -20,9 +20,9 @@ class AnyType extends Type {
 	toFragments(fragments, node) { // {{{
 		fragments.code('Any')
 	} // }}}
-	toMetadata(references) => -1
+	toMetadata(references, ignoreAlteration) => -1
 	toQuote(): String => `'Any'`
-	toReference(references) => 'Any'
+	toReference(references, ignoreAlteration) => 'Any'
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}

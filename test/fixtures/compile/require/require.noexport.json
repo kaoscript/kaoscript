@@ -1,15 +1,29 @@
 {
   "aliens": [
-    0,
+    1,
     "console"
   ],
   "requirements": [
-    1,
+    0,
     "Color",
     true
   ],
   "exports": [],
   "references": [
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
     {
       "type": "object",
       "sealed": false,
@@ -30,20 +44,6 @@
           "throws": []
         }
       }
-    },
-    {
-      "type": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "init": 0,
-      "constructors": [],
-      "destructors": 0,
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {}
     }
   ],
   "macros": []

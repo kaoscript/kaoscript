@@ -425,9 +425,6 @@ abstract class Requirement {
 	isAlien() => false
 	abstract isRequired(): Boolean
 	name() => @name
-	toMetadata(metadata) { // {{{
-		metadata.requirements.push(@type.toMetadata(metadata.references), @name, this.isRequired())
-	} // }}}
 	toNameFragments(fragments) { // {{{
 		fragments.code(@name)
 

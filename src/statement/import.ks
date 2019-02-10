@@ -863,18 +863,6 @@ class ImportWorker {
 			}
 		}
 
-		for i from 0 til @metadata.aliens.length by 2 {
-			index = @metadata.aliens[i]
-
-			if index != -1 {
-				type = references[index]
-
-				if type is ClassType || type is EnumType || type is NamespaceType {
-					references[index] = new NamedType(@metadata.aliens[i + 1], type)
-				}
-			}
-		}
-
 		for i from 0 til @metadata.exports.length by 2 {
 			index = @metadata.exports[i]
 			name = @metadata.exports[i + 1]
@@ -891,6 +879,26 @@ class ImportWorker {
 			}
 
 			@scope.addVariable(name, new Variable(name, false, false, type), @node)
+		}
+
+		for i from 0 til @metadata.aliens.length by 2 {
+			index = @metadata.aliens[i]
+			name = @metadata.aliens[i + 1]
+
+			if index != -1 {
+				type = references[index]
+
+				if type is ClassType || type is EnumType || type is NamespaceType {
+					references[index] = type = new NamedType(name, type)
+				}
+
+				if !@scope.hasVariable(name) {
+					@scope.addVariable(name, new Variable(name, false, false, type), @node)
+				}
+			}
+			else if !@scope.hasVariable(name) {
+				@scope.addVariable(name, new Variable(name, false, false, Type.Any), @node)
+			}
 		}
 
 		while queue.length > 0 {

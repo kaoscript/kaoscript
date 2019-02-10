@@ -17,12 +17,12 @@ class NamedType extends Type {
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
 	equals(b?) => @type.equals(b)
-	export(references) { // {{{
+	export(references, ignoreAlteration) { // {{{
 		if @type is ClassType && (@type.isPredefined() || !(@type.isExported() || @type.isAlien())) {
 			return @name
 		}
 		else {
-			return @type.export(references)
+			return @type.export(references, ignoreAlteration)
 		}
 	} // }}}
 	flagAlien() { // {{{
@@ -130,7 +130,7 @@ class NamedType extends Type {
 		return false
 	} // }}}
 	matchSignatureOf(that) => @type.matchSignatureOf(that.discardName())
-	metaReference(references) => @type.metaReference(references, @name)
+	metaReference(references, ignoreAlteration) => @type.metaReference(references, @name, ignoreAlteration)
 	name() => @name
 	name(@name) => this
 	parent() => @parent
@@ -154,13 +154,13 @@ class NamedType extends Type {
 	} // }}}
 	toQuote() => @name
 	toFragments(fragments, node)
-	toMetadata(references) => @type.toMetadata(references)
-	toReference(references) { // {{{
+	toMetadata(references, ignoreAlteration) => @type.toMetadata(references, ignoreAlteration)
+	toReference(references, ignoreAlteration) { // {{{
 		if @type is ClassType && @type.isPredefined() {
 			return @name
 		}
 		else {
-			return @type.toReference(references)
+			return @type.toReference(references, ignoreAlteration)
 		}
 	} // }}}
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)

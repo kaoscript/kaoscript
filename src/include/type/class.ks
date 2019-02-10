@@ -63,7 +63,6 @@ class ClassType extends Type {
 			const type = new ClassType(scope)
 
 			if data.class? {
-				type._id = 1
 				queue.push(() => {
 					const source = references[data.class.reference]
 
@@ -305,11 +304,11 @@ class ClassType extends Type {
 	equals(b?): Boolean { // {{{
 		return this == b
 	} // }}}
-	export(references) { // {{{
+	export(references, ignoreAlteration) { // {{{
 		if this.hasExportableAlteration() {
 			const export = {
 				type: TypeKind::Class
-				class: @alterationReference.exportAlteration()
+				class: @alterationReference.toAlterationReference()
 				init: @init
 				instanceVariables: {}
 				classVariables: {}
@@ -318,22 +317,22 @@ class ClassType extends Type {
 			}
 
 			for name, variable of @instanceVariables when variable.isAlteration() {
-				export.instanceVariables[name] = variable.export(references)
+				export.instanceVariables[name] = variable.export(references, ignoreAlteration)
 			}
 
 			for name, variable of @classVariables when variable.isAlteration() {
-				export.classVariables[name] = variable.export(references)
+				export.classVariables[name] = variable.export(references, ignoreAlteration)
 			}
 
 			for name, methods of @instanceMethods {
-				const exportedMethods = [method.export(references) for method in methods when method.isAlteration()]
+				const exportedMethods = [method.export(references, ignoreAlteration) for method in methods when method.isAlteration()]
 				if exportedMethods.length > 0 {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
 			for name, methods of @classMethods {
-				const exportedMethods = [method.export(references) for method in methods when method.isAlteration()]
+				const exportedMethods = [method.export(references, ignoreAlteration) for method in methods when method.isAlteration()]
 				if exportedMethods.length > 0 {
 					export.classMethods[name] = exportedMethods
 				}
@@ -349,7 +348,7 @@ class ClassType extends Type {
 				hybrid: @hybrid
 				sealed: @sealed
 				init: @init
-				constructors: [constructor.export(references) for constructor in @constructors]
+				constructors: [constructor.export(references, ignoreAlteration) for constructor in @constructors]
 				destructors: @destructors
 				instanceVariables: {}
 				classVariables: {}
@@ -358,47 +357,34 @@ class ClassType extends Type {
 			}
 
 			for name, variable of @instanceVariables {
-				export.instanceVariables[name] = variable.export(references)
+				export.instanceVariables[name] = variable.export(references, ignoreAlteration)
 			}
 
 			for name, variable of @classVariables {
-				export.classVariables[name] = variable.export(references)
+				export.classVariables[name] = variable.export(references, ignoreAlteration)
 			}
 
 			for name, methods of @instanceMethods {
-				export.instanceMethods[name] = [method.export(references) for method in methods]
+				export.instanceMethods[name] = [method.export(references, ignoreAlteration) for method in methods]
 			}
 
 			for name, methods of @classMethods {
-				export.classMethods[name] = [method.export(references) for method in methods]
+				export.classMethods[name] = [method.export(references, ignoreAlteration) for method in methods]
 			}
 
 			if @abstract {
 				export.abstractMethods = {}
 
 				for name, methods of @abstractMethods {
-					export.abstractMethods[name] = [method.export(references) for method in methods]
+					export.abstractMethods[name] = [method.export(references, ignoreAlteration) for method in methods]
 				}
 			}
 
 			if @extending {
-				export.extends = @extends.metaReference(references)
+				export.extends = @extends.metaReference(references, ignoreAlteration)
 			}
 
 			return export
-		}
-	} // }}}
-	exportAlteration() { // {{{
-		if @referenceIndex != -1 {
-			return {
-				reference: @referenceIndex
-			}
-		}
-		else if ?@alterationReference {
-			return @alterationReference.exportAlteration()
-		}
-		else {
-			throw new NotImplementedException()
 		}
 	} // }}}
 	flagAbstract() { // {{{
@@ -798,15 +784,28 @@ class ClassType extends Type {
 
 		return false
 	} // }}}
-	metaReference(references, name) { // {{{
+	metaReference(references, name, ignoreAlteration) { // {{{
 		if @predefined {
 			return name
 		}
 		else {
-			return [this.toMetadata(references), name]
+			return [this.toMetadata(references, ignoreAlteration), name]
 		}
 	} // }}}
 	setAlterationReference(@alterationReference)
+	toAlterationReference() { // {{{
+		if @referenceIndex != -1 {
+			return {
+				reference: @referenceIndex
+			}
+		}
+		else if ?@alterationReference {
+			return @alterationReference.toAlterationReference()
+		}
+		else {
+			throw new NotImplementedException()
+		}
+	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
@@ -881,9 +880,9 @@ class ClassVariableType extends Type {
 		}
 	} // }}}
 	access(@access) => this
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		access: @access
-		type: @type.toReference(references)
+		type: @type.toReference(references, ignoreAlteration)
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
@@ -912,39 +911,41 @@ class ClassMethodType extends FunctionType {
 		_access: Accessibility	= Accessibility::Public
 		_alteration: Boolean		= false
 	}
-	static fromAST(data, node: AbstractNode) { // {{{
-		const scope = node.scope()
+	static {
+		fromAST(data, node: AbstractNode) { // {{{
+			const scope = node.scope()
 
-		return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
-	} // }}}
-	static fromMetadata(data, references, scope: AbstractScope, node: AbstractNode): ClassMethodType { // {{{
-		const type = new ClassMethodType(scope)
+			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
+		} // }}}
+		fromMetadata(data, references, scope: AbstractScope, node: AbstractNode): ClassMethodType { // {{{
+			const type = new ClassMethodType(scope)
 
-		type._access = data.access
-		type._async = data.async
-		type._min = data.min
-		type._max = data.max
-		type._sealed = data.sealed
-		type._throws = [Type.fromMetadata(throw, references, scope, node) for throw in data.throws]
+			type._access = data.access
+			type._async = data.async
+			type._min = data.min
+			type._max = data.max
+			type._sealed = data.sealed
+			type._throws = [Type.fromMetadata(throw, references, scope, node) for throw in data.throws]
 
-		type._returnType = Type.fromMetadata(data.returns, references, scope, node)
+			type._returnType = Type.fromMetadata(data.returns, references, scope, node)
 
-		type._parameters = [ParameterType.fromMetadata(parameter, references, scope, node) for parameter in data.parameters]
+			type._parameters = [ParameterType.fromMetadata(parameter, references, scope, node) for parameter in data.parameters]
 
-		type.updateArguments()
+			type.updateArguments()
 
-		return type
-	} // }}}
+			return type
+		} // }}}
+	}
 	access(@access) => this
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		access: @access
 		async: @async
 		min: @min
 		max: @max
-		parameters: [parameter.export(references) for parameter in @parameters]
-		returns: @returnType.toReference(references)
+		parameters: [parameter.export(references, ignoreAlteration) for parameter in @parameters]
+		returns: @returnType.toReference(references, ignoreAlteration)
 		sealed: @sealed
-		throws: [throw.toReference(references) for throw in @throws]
+		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
@@ -1028,12 +1029,12 @@ class ClassConstructorType extends FunctionType {
 		return type
 	} // }}}
 	access(@access) => this
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		access: @access
 		min: @min
 		max: @max
-		parameters: [parameter.export(references) for parameter in @parameters]
-		throws: [throw.toReference(references) for throw in @throws]
+		parameters: [parameter.export(references, ignoreAlteration) for parameter in @parameters]
+		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
 	} // }}}
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
@@ -1061,9 +1062,9 @@ class ClassDestructorType extends FunctionType {
 		@max = 1
 	} // }}}
 	access(@access) => this
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		access: @access
-		throws: [throw.toReference(references) for throw in @throws]
+		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
 	} // }}}
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {

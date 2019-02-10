@@ -47,7 +47,7 @@ class ReferenceType extends Type {
 
 		return true
 	} // }}}
-	export(references) { // {{{
+	export(references, ignoreAlteration) { // {{{
 		if @nullable {
 			return {
 				nullable: @nullable
@@ -244,20 +244,20 @@ class ReferenceType extends Type {
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}
-	toMetadata(references) { // {{{
+	toMetadata(references, ignoreAlteration) { // {{{
 		this.resolveType()
 
 		if @predefined {
-			return super.toMetadata(references)
+			return super.toMetadata(references, ignoreAlteration)
 		}
 		else if !@variable.type().isClass() {
-			@referenceIndex = @variable.type().toMetadata(references)
+			@referenceIndex = @variable.type().toMetadata(references, ignoreAlteration)
 		}
 		else if @type.isExported() {
-			@referenceIndex = @variable.type().toMetadata(references)
+			@referenceIndex = @variable.type().toMetadata(references, ignoreAlteration)
 		}
 		else if @type.isAlien() {
-			return super.toMetadata(references)
+			return super.toMetadata(references, ignoreAlteration)
 		}
 		else {
 			console.log(this)
@@ -267,23 +267,28 @@ class ReferenceType extends Type {
 		return @referenceIndex
 	} // }}}
 	toQuote() => `'\(@name)'`
-	toReference(references) { // {{{
+	toReference(references, ignoreAlteration) { // {{{
 		this.resolveType()
 
 		if @predefined {
-			return this.export(references)
+			return this.export(references, ignoreAlteration)
 		}
 		else if !@variable.type().isClass() {
-			return super.toReference(references)
+			return super.toReference(references, ignoreAlteration)
 		}
 		else if @type.isExported() {
-			return super.toReference(references)
+			if ignoreAlteration && @type.type().isAlteration() {
+				return @type.type().toAlterationReference()
+			}
+			else {
+				return super.toReference(references, ignoreAlteration)
+			}
 		}
 		else if @type.isAlien() {
-			return this.export(references)
+			return this.export(references, ignoreAlteration)
 		}
 		else {
-			return this.export(references)
+			return this.export(references, ignoreAlteration)
 		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{

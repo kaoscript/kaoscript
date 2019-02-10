@@ -204,14 +204,14 @@ class FunctionType extends Type {
 
 		return true
 	} // }}}
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		type: TypeKind::Function
 		async: @async
 		min: @min
 		max: @max
-		parameters: [parameter.export(references) for parameter in @parameters]
-		returns: @returnType.toReference(references)
-		throws: [throw.toReference(references) for throw in @throws]
+		parameters: [parameter.export(references, ignoreAlteration) for parameter in @parameters]
+		returns: @returnType.toReference(references, ignoreAlteration)
+		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
 	} // }}}
 	flagExported() { // {{{
 		if @exported {
@@ -490,17 +490,17 @@ class OverloadedFunctionType extends Type {
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references) { // {{{
+	export(references, ignoreAlteration) { // {{{
 		const functions = []
 
 		for reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
 				for fn in reference.functions() {
-					functions.push(fn.toExportOrReference(references))
+					functions.push(fn.toExportOrReference(references, ignoreAlteration))
 				}
 			}
 			else {
-				functions.push(reference.toExportOrReference(references))
+				functions.push(reference.toExportOrReference(references, ignoreAlteration))
 			}
 		}
 

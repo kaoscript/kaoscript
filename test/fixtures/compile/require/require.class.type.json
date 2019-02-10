@@ -63,7 +63,7 @@
               }
             ],
             "returns": {
-              "reference": 2
+              "reference": 1
             },
             "sealed": false,
             "throws": []

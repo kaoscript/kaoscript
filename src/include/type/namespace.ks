@@ -123,16 +123,16 @@ class NamespaceType extends Type {
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references) { // {{{
+	export(references, ignoreAlteration) { // {{{
 		if @alterationReference? {
 			const export = {
 				type: TypeKind::Namespace
-				namespace: @alterationReference.toReference(references)
+				namespace: @alterationReference.toReference(references, ignoreAlteration)
 				properties: {}
 			}
 
 			for name, value of @properties when value.isAlteration() {
-				export.properties[name] = value.toExportOrIndex(references)
+				export.properties[name] = value.toExportOrIndex(references, ignoreAlteration)
 			}
 
 			return export
@@ -145,7 +145,7 @@ class NamespaceType extends Type {
 			}
 
 			for name, value of @properties {
-				export.properties[name] = value.toExportOrIndex(references)
+				export.properties[name] = value.toExportOrIndex(references, ignoreAlteration)
 			}
 
 			return export
@@ -237,9 +237,9 @@ class NamespaceVariableType extends Type {
 			return false
 		}
 	} // }}}
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		sealed: @sealed
-		type: @type.toReference(references)
+		type: @type.toReference(references, ignoreAlteration)
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
@@ -281,14 +281,14 @@ class NamespaceFunctionType extends FunctionType {
 			return type
 		} // }}}
 	}
-	export(references) => { // {{{
+	export(references, ignoreAlteration) => { // {{{
 		async: @async
 		min: @min
 		max: @max
-		parameters: [parameter.export(references) for parameter in @parameters]
-		returns: @returnType.toReference(references)
+		parameters: [parameter.export(references, ignoreAlteration) for parameter in @parameters]
+		returns: @returnType.toReference(references, ignoreAlteration)
 		sealed: @sealed
-		throws: [throw.toReference(references) for throw in @throws]
+		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true

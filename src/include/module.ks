@@ -445,16 +445,20 @@ export class Module {
 				macros: []
 			}
 
-			for name, type of @aliens {
-				@metadata.aliens.push(type.toMetadata(@metadata.references), name)
+			for requirement in @requirements {
+				@metadata.requirements.push(
+					requirement.type().toMetadata(@metadata.references, true)
+					requirement.name()
+					requirement.isRequired()
+				)
 			}
 
-			for requirement in @requirements {
-				requirement.toMetadata(@metadata)
+			for name, type of @aliens {
+				@metadata.aliens.push(type.toMetadata(@metadata.references, false), name)
 			}
 
 			for name, variable of @exports {
-				@metadata.exports.push(variable.type().toMetadata(@metadata.references), name)
+				@metadata.exports.push(variable.type().toMetadata(@metadata.references, false), name)
 			}
 
 			for name, datas of @exportedMacros {

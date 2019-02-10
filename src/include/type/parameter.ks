@@ -20,8 +20,8 @@ class ParameterType extends Type {
 
 		return @min == b.min() && @max == b.max() && @type.equals(b.type())
 	} // }}}
-	export(references) => { // {{{
-		type: @type.toReference(references)
+	export(references, ignoreAlteration) => { // {{{
+		type: @type.toReference(references, ignoreAlteration)
 		min: @min
 		max: @max
 	} // }}}
