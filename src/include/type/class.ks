@@ -308,7 +308,7 @@ class ClassType extends Type {
 		if this.hasExportableAlteration() {
 			const export = {
 				type: TypeKind::Class
-				class: @alterationReference.toAlterationReference()
+				class: @alterationReference.toAlterationReference(references, ignoreAlteration)
 				init: @init
 				instanceVariables: {}
 				classVariables: {}
@@ -793,17 +793,17 @@ class ClassType extends Type {
 		}
 	} // }}}
 	setAlterationReference(@alterationReference)
-	toAlterationReference() { // {{{
+	toAlterationReference(references, ignoreAlteration) { // {{{
 		if @referenceIndex != -1 {
 			return {
 				reference: @referenceIndex
 			}
 		}
 		else if ?@alterationReference {
-			return @alterationReference.toAlterationReference()
+			return @alterationReference.toAlterationReference(references, ignoreAlteration)
 		}
 		else {
-			throw new NotImplementedException()
+			return this.toReference(references, ignoreAlteration)
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{

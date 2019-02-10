@@ -278,7 +278,7 @@ class ReferenceType extends Type {
 		}
 		else if @type.isExported() {
 			if ignoreAlteration && @type.type().isAlteration() {
-				return @type.type().toAlterationReference()
+				return @type.type().toAlterationReference(references, ignoreAlteration)
 			}
 			else {
 				return super.toReference(references, ignoreAlteration)

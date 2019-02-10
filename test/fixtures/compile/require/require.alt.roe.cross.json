@@ -1,0 +1,118 @@
+{
+  "aliens": [
+    0,
+    "Number",
+    1,
+    "String",
+    -1,
+    "parseFloat",
+    -1,
+    "parseInt"
+  ],
+  "requirements": [
+    0,
+    "Number",
+    false,
+    1,
+    "String",
+    false
+  ],
+  "exports": [
+    0,
+    "Number",
+    2,
+    "String"
+  ],
+  "references": [
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "toString": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 1
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "type": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "type": "class",
+      "class": {
+        "reference": 1
+      },
+      "init": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "toFloat": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": true,
+            "throws": []
+          }
+        ],
+        "toInt": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": 1
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": true,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}
