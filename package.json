@@ -34,7 +34,7 @@
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
-		"@kaoscript/ast": "0.6.x",
+		"@kaoscript/ast": "^0.7.1",
 		"@kaoscript/parser": "0.6.x",
 		"@kaoscript/runtime": "^0.5.3",
 		"commander": "2.9.x"
