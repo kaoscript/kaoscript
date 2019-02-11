@@ -2,10 +2,11 @@
 ===================================================
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![npm version](https://img.shields.io/npm/v/kaoscript.svg)](https://www.npmjs.com/package/kaoscript)
-[![Dependency Status](https://img.shields.io/gemnasium/kaoscript/kaoscript.svg)](https://gemnasium.com/github.com/kaoscript/kaoscript)
+[![NPM Version](https://img.shields.io/npm/v/kaoscript.svg)](https://www.npmjs.com/package/kaoscript)
+[![Dependency Status](https://badges.depfu.com/badges//count.svg)](https://depfu.com/github/kaoscript/kaoscript)
 [![Build Status](https://travis-ci.org/kaoscript/kaoscript.svg?branch=master)](https://travis-ci.org/kaoscript/kaoscript)
 [![CircleCI](https://circleci.com/gh/kaoscript/kaoscript/tree/master.svg?style=shield)](https://circleci.com/gh/kaoscript/kaoscript/tree/master)
+[![Coverage Status](https://img.shields.io/coveralls/kaoscript/kaoscript/master.svg)](https://coveralls.io/github/kaoscript/kaoscript)
 [![Known Vulnerabilities](https://snyk.io/test/github/kaoscript/kaoscript/badge.svg)](https://snyk.io/test/github/kaoscript/kaoscript)
 [![Waffle.io](https://img.shields.io/badge/kanban-waffle.io-blue.svg)](https://waffle.io/kaoscript/kaoscript)
 [![Gitter](https://img.shields.io/gitter/room/kaoscript/kaoscript.svg)](https://gitter.im/kaoscript/kaoscript)
@@ -160,7 +161,7 @@ extern console, parseFoat
 
 func alpha(n: Number, percentage = false): float {
 	let i: Number = parseFoat(n)
-	
+
 	return 1 if i is NaN else (percentage ? i / 100 : i).limit(0, 1).round(3)
 }
 ```
@@ -176,12 +177,12 @@ const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]
 
 func disks() async {
 	let stdout: string, stderr = await exec('df -k')
-	
+
 	let disks = []
 	let matches: Array<String?>
 	for line in stdout.lines() {
 		matches = df_regex.exec(line)
-		
+
 		if matches {
 			disks.push({
 				device: matches[1].trim(),
@@ -192,7 +193,7 @@ func disks() async {
 			})
 		}
 	}
-	
+
 	return disks
 }
 
@@ -275,17 +276,17 @@ class Shape {
 	private {
 		_color: String
 	}
-	
+
     constructor(@color)
 	// automatically set the instance variable '_color' as the parameter 'color'
-	
+
 	destructor() {
 		@color = null
 	}
-	
+
 	color() => @color
 	color(@color) => this
-    
+
     draw(): String {
         return `I'm drawing with a \(@color) pen.`
     }
@@ -365,15 +366,15 @@ Abstract class
 ```kaoscript
 abstract class AbstractGreetings {
 	private {
-		_message: String: '' 
+		_message: String: ''
 	}
-	
+
 	constructor() {
 		this('Hello!')
 	}
-	
+
 	constructor(@message)
-	
+
 	abstract greet(name): String
 }
 
@@ -503,9 +504,9 @@ try {
 
 func foo(name): String ~ Error {
 	if name == 'foobar' {
-		throw new Error(`Invalid name '\(name)'`) 
+		throw new Error(`Invalid name '\(name)'`)
 	}
-	
+
 	return name
 }
 

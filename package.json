@@ -57,7 +57,7 @@
 	},
 	"scripts": {
 		"push-coverage": "npm run test-coverage && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
-		"test": "mocha --colors --check-leaks --reporter spec --compilers ks:./register.js",
+		"test": "mocha --colors --check-leaks --reporter spec --require ks:./register.js",
 		"test-coverage": "node node_modules/@zokugun/istanbul.cover/src/cli.js"
 	},
 	"kaoscript": {

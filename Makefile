@@ -17,9 +17,9 @@ endif
 
 testks:
 ifeq ($(g),)
-	node_modules/.bin/mocha --colors --check-leaks --reporter spec --compilers ks:./register.js
+	node_modules/.bin/mocha --colors --check-leaks --reporter spec --require ./register.js
 else
-	node_modules/.bin/mocha --colors --check-leaks --reporter spec --compilers ks:./register.js -g "$(g)"
+	node_modules/.bin/mocha --colors --check-leaks --reporter spec --require ./register.js -g "$(g)"
 endif
 
 coverage:
