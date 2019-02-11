@@ -444,7 +444,7 @@ class ClassDeclaration extends Statement {
 						}
 
 						let indexes = []
-						for :parameter of Object.values(parameters).sort((a, b) => a.weight < b.weight) {
+						for :parameter of [value for :value of parameters].sort((a, b) => a.weight < b.weight) {
 							for hash, type of parameter.types {
 								type.methods:Array.remove(...indexes)
 
