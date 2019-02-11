@@ -92,7 +92,7 @@ const $function = {
 					return true
 				}
 
-				if data.whenFalse? && data.$function.useThisVariable(data.whenFalse, node) {
+				if data.whenFalse? && $function.useThisVariable(data.whenFalse, node) {
 					return true
 				}
 			}

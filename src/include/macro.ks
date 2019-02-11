@@ -8,7 +8,7 @@ enum MacroVariableKind {
 const $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
 func $evaluate(source) { // {{{
-	//console.log(source)
+	// console.log(source)
 
 	const compiler = new Compiler('__ks__', {
 		register: false
@@ -17,7 +17,7 @@ func $evaluate(source) { // {{{
 
 	compiler.compile('#![bin]\nextern console, JSON, __ks_marker\nreturn ' + source)
 
-	//console.log(compiler.toSource())
+	// console.log(compiler.toSource())
 
 	return eval(`(function(__ks_marker) {\(compiler.toSource())})`)(MacroMarker)
 } // }}}
@@ -252,14 +252,14 @@ class MacroDeclaration extends AbstractNode {
 		}
 	} // }}}
 	execute(arguments: Array, parent) { // {{{
-		//console.log(@fn.toString())
+		// console.log(@fn.toString())
 		const module = this.module()
 		++@executeCount
 
 		const args = [$evaluate, $reificate^^(this, parent)].concat(arguments)
 
 		let data = @fn(...args)
-		//console.log('execute =>', data)
+		// console.log('execute =>', data)
 
 		try {
 			data = Parser.parse(data)

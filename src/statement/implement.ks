@@ -312,6 +312,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	} // }}}
 	class() => @class
 	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_cm_\(@name)`
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
 	isInstanceMethod() => @instance
 	parameters() => @parameters
