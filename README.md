@@ -3,7 +3,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![NPM Version](https://img.shields.io/npm/v/kaoscript.svg?colorB=green)](https://www.npmjs.com/package/kaoscript)
-[![Dependency Status](https://badges.depfu.com/badges//count.svg)](https://depfu.com/github/kaoscript/kaoscript)
+[![Dependency Status](https://badges.depfu.com/badges/b4ee54ddcf803c9d89234cca147e59b2/count.svg)](https://depfu.com/github/kaoscript/kaoscript)
 [![Build Status](https://travis-ci.org/kaoscript/kaoscript.svg?branch=master)](https://travis-ci.org/kaoscript/kaoscript)
 [![CircleCI](https://circleci.com/gh/kaoscript/kaoscript/tree/master.svg?style=shield)](https://circleci.com/gh/kaoscript/kaoscript/tree/master)
 [![Coverage Status](https://img.shields.io/coveralls/kaoscript/kaoscript/master.svg)](https://coveralls.io/github/kaoscript/kaoscript)
