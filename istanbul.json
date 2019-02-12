@@ -14,9 +14,9 @@
 			"functions":	[95, 100],
 			"branches":		[95, 100]
 		}
-	}, 
+	},
 	"cover": {
 		"cmd": "@zokugun/istanbul.cover.cmd.mocha",
-		"args": ["--check-leaks", "--compilers", "ks:@kaoscript/coverage-istanbul/register", "--reporter", "spec"]
+		"args": ["--check-leaks", "--require", "@kaoscript/coverage-istanbul/register", "--reporter", "spec"]
 	}
 }

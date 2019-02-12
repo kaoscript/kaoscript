@@ -4,8 +4,6 @@ jobs:
     docker:
       - image: circleci/node:10.15.1
 
-    working_directory: ~/kaoscript
-
     steps:
       - checkout
 
