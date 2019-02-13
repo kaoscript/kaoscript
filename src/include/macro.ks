@@ -159,7 +159,10 @@ func $transformExpression(macro, node, data, writer) { // {{{
 			return macro.addMark(data)
 		}
 		NodeKind::ObjectMember => {
-			if data.value.kind == NodeKind::Identifier || data.value.kind == NodeKind::LambdaExpression {
+			if 	data.value.kind == NodeKind::Identifier ||
+				data.value.kind == NodeKind::LambdaExpression ||
+				data.value.kind == NodeKind::MemberExpression
+			{
 				return {
 					kind: NodeKind::ObjectMember
 					name: data.name
