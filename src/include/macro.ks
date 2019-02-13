@@ -111,9 +111,16 @@ func $serialize(macro, data, context) { // {{{
 			}
 
 			if value is MacroMarker {
-				context.data += `\(key)\(Generator.generate(macro.getMark(value.index), {
-					mode: Generator.KSWriterMode::Property
-				}))`
+				if macro.getMark(value.index + 1) == NodeKind::ObjectMember {
+					context.data += `\(key): \(Generator.generate(macro.getMark(value.index), {
+						mode: Generator.KSWriterMode::Property
+					}))`
+				}
+				else {
+					context.data += `\(key)\(Generator.generate(macro.getMark(value.index), {
+						mode: Generator.KSWriterMode::Property
+					}))`
+				}
 			}
 			else {
 				context.data += `\($quote(key)): `
@@ -147,6 +154,20 @@ func $transformExpression(macro, node, data, writer) { // {{{
 		}
 		NodeKind::FunctionExpression => {
 			return macro.addMark(data)
+		}
+		NodeKind::LambdaExpression => {
+			return macro.addMark(data)
+		}
+		NodeKind::ObjectMember => {
+			if data.value.kind == NodeKind::Identifier || data.value.kind == NodeKind::LambdaExpression {
+				return {
+					kind: NodeKind::ObjectMember
+					name: data.name
+					value: macro.addMark(data.value, NodeKind::ObjectMember)
+					start: data.start
+					end: data.end
+				}
+			}
 		}
 	}
 
@@ -232,10 +253,10 @@ class MacroDeclaration extends AbstractNode {
 	analyse()
 	prepare()
 	translate()
-	addMark(data) { // {{{
+	addMark(data, kind = null) { // {{{
 		const index = @marks.length
 
-		@marks.push(data)
+		@marks.push(data, kind)
 
 		return {
 			kind: NodeKind::CreateExpression
