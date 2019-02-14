@@ -86,6 +86,12 @@ class AssignmentOperatorBitwiseXor extends AssignmentOperatorExpression {
 	} // }}}
 }
 
+class AssignmentOperatorDivision extends AssignmentOperatorExpression {
+	toFragments(fragments, mode) { // {{{
+		fragments.compile(@left).code(' /= ').compile(@right)
+	} // }}}
+}
+
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
 	toFragments(fragments, mode) { // {{{

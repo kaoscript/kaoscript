@@ -1,0 +1,20 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Space"
+  ],
+  "references": [
+    {
+      "type": "enum",
+      "elements": [
+        "RGB",
+        "SRGB"
+      ],
+      "index": -1,
+      "kind": 2
+    }
+  ],
+  "macros": []
+}

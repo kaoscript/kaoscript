@@ -268,6 +268,7 @@ const $assignmentOperators = {
 	`\(AssignmentOperatorKind::BitwiseOr)`			: AssignmentOperatorBitwiseOr
 	`\(AssignmentOperatorKind::BitwiseRightShift)`	: AssignmentOperatorBitwiseRightShift
 	`\(AssignmentOperatorKind::BitwiseXor)`			: AssignmentOperatorBitwiseXor
+	`\(AssignmentOperatorKind::Division)`			: AssignmentOperatorDivision
 	`\(AssignmentOperatorKind::Equality)`			: AssignmentOperatorEquality
 	`\(AssignmentOperatorKind::Existential)`		: AssignmentOperatorExistential
 	`\(AssignmentOperatorKind::Modulo)`				: AssignmentOperatorModulo

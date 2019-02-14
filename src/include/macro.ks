@@ -8,7 +8,7 @@ enum MacroVariableKind {
 const $target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5'
 
 func $evaluate(source) { // {{{
-	// console.log(source)
+	// console.log('--> ', source)
 
 	const compiler = new Compiler('__ks__', {
 		register: false
@@ -17,7 +17,7 @@ func $evaluate(source) { // {{{
 
 	compiler.compile('#![bin]\nextern console, JSON, __ks_marker\nreturn ' + source)
 
-	// console.log(compiler.toSource())
+	// console.log('<-- ', compiler.toSource())
 
 	return eval(`(function(__ks_marker) {\(compiler.toSource())})`)(MacroMarker)
 } // }}}
@@ -138,19 +138,7 @@ func $serialize(macro, data, context) { // {{{
 func $transformExpression(macro, node, data, writer) { // {{{
 	switch data.kind {
 		NodeKind::EnumExpression => {
-			if variable ?= node.scope().getVariable(data.enum.name) {
-				const type = variable.type()
-				if type.isEnum() {
-					switch type.type().kind() {
-						EnumKind::String => {
-							return {
-								kind: NodeKind::Literal
-								value: data.member.name.toLowerCase()
-							}
-						}
-					}
-				}
-			}
+			return macro.addMark(data)
 		}
 		NodeKind::FunctionExpression => {
 			return macro.addMark(data)
@@ -159,7 +147,8 @@ func $transformExpression(macro, node, data, writer) { // {{{
 			return macro.addMark(data)
 		}
 		NodeKind::ObjectMember => {
-			if 	data.value.kind == NodeKind::Identifier ||
+			if 	data.value.kind == NodeKind::EnumExpression ||
+				data.value.kind == NodeKind::Identifier ||
 				data.value.kind == NodeKind::LambdaExpression ||
 				data.value.kind == NodeKind::MemberExpression
 			{

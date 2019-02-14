@@ -49,8 +49,8 @@ module.exports = function() {
 		}
 	};
 	Color.registerSpace({
-		"name": "srgb",
-		"alias": ["rgb"],
+		name: Space.SRGB,
+		"alias": [Space.RGB],
 		"formatters": {
 			hex: $util.formatToHex,
 			srgb: $util.formatToSRGB

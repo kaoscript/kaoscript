@@ -235,11 +235,8 @@ class CallExpression extends Expression {
 			@reuseName = this.statement().scope().acquireTempName(this.statement())
 		}
 
-		if @callees.length == 1 {
-			@callees[0].acquireReusable(acquire)
-		}
-		else {
-			throw new NotImplementedException(this)
+		for callee in @callees {
+			callee.acquireReusable(acquire)
 		}
 	} // }}}
 	addCallee(callee: Callee) { // {{{
@@ -572,11 +569,8 @@ class CallExpression extends Expression {
 	releaseReusable() { // {{{
 		this.statement().scope().releaseTempName(@reuseName) if @reuseName?
 
-		if @callees.length == 1 {
-			@callees[0].releaseReusable()
-		}
-		else {
-			throw new NotImplementedException(this)
+		for callee in @callees {
+			callee.releaseReusable()
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{

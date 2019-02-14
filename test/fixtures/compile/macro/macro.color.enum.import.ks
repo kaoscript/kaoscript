@@ -1,31 +1,28 @@
-enum Space<String> {
-	RGB
-	SRGB
-}
+import '../export/export.enum.space'
 
-export class Color {
+class Color {
 	macro registerSpace(@expression: Object) {
 		if expression.components? {
 			const fields: Array = []
 			const methods: Array = []
-			
+
 			let field
 			for name, component of expression.components {
 				field = `_\(name)`
-				
+
 				fields.push(macro private #i(field): Number)
-				
+
 				methods.push(macro {
 					#i(name)() => this.getField(#(name))
 					#i(name)(value) => this.setField(#(name), value)
 				})
-				
+
 				expression.components[name].field = field
 			}
-			
+
 			macro {
 				Color.registerSpace(#(expression))
-				
+
 				impl Color {
 					#b(fields)
 					#b(methods)
@@ -38,18 +35,23 @@ export class Color {
 	}
 }
 
+enum Space {
+	HSB
+	HSL
+}
+
 Color.registerSpace!({
-	name: Space::SRGB
-	alias: [Space::RGB]
+	name: Space::HSL
 	components: {
-		red: {
-			max: 255
+		hue: {
+			family: Space::HSB
 		}
-		green: {
-			max: 255
+		saturation: {
+			family: Space::HSB
 		}
-		blue: {
-			max: 255
+		lightness: {
+			max: 100
+			round: 1
 		}
 	}
 })

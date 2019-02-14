@@ -17,8 +17,8 @@ module.exports = function() {
 		}
 	}
 	Color.registerSpace({
-		"name": "srgb",
-		"alias": ["rgb"],
+		name: Space.SRGB,
+		"alias": [Space.RGB],
 		"components": {
 			"red": {
 				"max": 255,
@@ -96,8 +96,5 @@ module.exports = function() {
 			return Color.prototype.__ks_func_blue_1.apply(this, arguments);
 		}
 		throw new SyntaxError("wrong number of arguments");
-	};
-	return {
-		Color: Color
 	};
 };
