@@ -1,95 +1,91 @@
 class IfStatement extends Statement {
 	private {
 		_condition
-		_whenFalse
-		_whenTrue
+		_whenFalseExpression
+		_whenFalseScope: AbstractScope
+		_whenTrueExpression
+		_whenTrueScope: AbstractScope
 	}
 	analyse() { // {{{
-		const scope = @scope
-		
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
-		
-		@scope = this.newScope(scope)
-		
-		@whenTrue = $compile.expression($ast.block(@data.whenTrue), this)
-		@whenTrue.analyse()
-		
+
+		@whenTrueScope = this.newScope(@scope)
+
+		@whenTrueExpression = $compile.expression($ast.block(@data.whenTrue), this, @whenTrueScope)
+		@whenTrueExpression.analyse()
+
 		if @data.whenFalse? {
 			if @data.whenFalse.kind == NodeKind::IfStatement {
-				@scope = scope
-				
-				@whenFalse = $compile.statement(@data.whenFalse, this)
-				@whenFalse.analyse()
+				@whenFalseExpression = $compile.statement(@data.whenFalse, this)
+				@whenFalseExpression.analyse()
 			}
 			else {
-				@scope = this.newScope(scope)
-				
-				@whenFalse = $compile.expression($ast.block(@data.whenFalse), this)
-				@whenFalse.analyse()
+				@whenFalseScope = this.newScope(@scope)
+
+				@whenFalseExpression = $compile.expression($ast.block(@data.whenFalse), this, @whenFalseScope)
+				@whenFalseExpression.analyse()
 			}
 		}
-		
-		@scope = scope
 	} // }}}
 	prepare() { // {{{
 		@condition.prepare()
-		
+
 		@condition.acquireReusable(false)
 		@condition.releaseReusable()
-		
-		@whenTrue.prepare()
-		@whenFalse.prepare() if @whenFalse?
+
+		@whenTrueExpression.prepare()
+		@whenFalseExpression.prepare() if @whenFalseExpression?
 	} // }}}
 	translate() { // {{{
 		@condition.translate()
-		@whenTrue.translate()
-		@whenFalse.translate() if @whenFalse?
+		@whenTrueExpression.translate()
+		@whenFalseExpression.translate() if @whenFalseExpression?
 	} // }}}
 	assignments() { // {{{
-		if @whenFalse is IfStatement {
-			return [].concat(@assignments, @whenFalse.assignments())
+		if @whenFalseExpression is IfStatement {
+			return [].concat(@assignments, @whenFalseExpression.assignments())
 		}
 		else {
 			return @assignments
 		}
 	} // }}}
-	isExit() => @whenFalse? && @whenTrue.isExit() && @whenFalse.isExit()
+	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isReturning(type: Type) { // {{{
-		if @whenFalse {
-			return @whenTrue.isReturning(type) && @whenFalse.isReturning(type)
+		if @whenFalseExpression {
+			return @whenTrueExpression.isReturning(type) && @whenFalseExpression.isReturning(type)
 		}
 		else {
-			return @whenTrue.isReturning(type)
+			return @whenTrueExpression.isReturning(type)
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const ctrl = fragments.newControl()
-		
+
 		@toIfFragments(ctrl, mode)
-		
+
 		ctrl.done()
 	} // }}}
 	toIfFragments(fragments, mode) { // {{{
 		fragments.code('if(')
-		
+
 		if @condition.isAssignable() {
 			fragments.code('(').compileBoolean(@condition).code(')')
 		}
 		else {
 			fragments.compileBoolean(@condition)
 		}
-		
-		fragments.code(')').step().compile(@whenTrue, mode)
-		
-		if @whenFalse? {
-			if @whenFalse is IfStatement {
+
+		fragments.code(')').step().compile(@whenTrueExpression, mode)
+
+		if @whenFalseExpression? {
+			if @whenFalseExpression is IfStatement {
 				fragments.step().code('else ')
-				
-				@whenFalse.toIfFragments(fragments, mode)
+
+				@whenFalseExpression.toIfFragments(fragments, mode)
 			}
 			else {
-				fragments.step().code('else').step().compile(@whenFalse, mode)
+				fragments.step().code('else').step().compile(@whenFalseExpression, mode)
 			}
 		}
 	} // }}}

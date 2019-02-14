@@ -2,7 +2,7 @@ const $switch = {
 	length(elements) { // {{{
 		let min = 0
 		let max = 0
-		
+
 		for element in elements {
 			if element.spread {
 				max = Infinity
@@ -12,7 +12,7 @@ const $switch = {
 				++max
 			}
 		}
-		
+
 		return {
 			min: min,
 			max: max
@@ -27,8 +27,6 @@ class SwitchStatement extends Statement {
 		_value
 	}
 	analyse() { // {{{
-		let scope = @scope
-		
 		if @data.expression.kind == NodeKind::Identifier {
 			@name = @data.expression.name
 		}
@@ -36,21 +34,21 @@ class SwitchStatement extends Statement {
 			@value = $compile.expression(@data.expression, this)
 			@value.analyse()
 		}
-		
+
 		let clause, condition, name, exp, value
-		for data in @data.clauses {
+		for data, index in @data.clauses {
 			clause = {
-				hasTest: false
+				hasTest: data.filter?
 				bindings: []
 				conditions: []
 				scope: this.newScope()
 			}
-			
-			@scope = clause.scope
-			
+
+			clause.scope.index = index
+
 			for condition, conditionIdx in data.conditions {
 				if condition.kind == NodeKind::SwitchConditionArray {
-					condition = new SwitchConditionArray(condition, this)
+					condition = new SwitchConditionArray(condition, this, clause.scope)
 				}
 				else if condition.kind == NodeKind::SwitchConditionEnum {
 					throw new NotImplementedException(this)
@@ -59,52 +57,48 @@ class SwitchStatement extends Statement {
 					throw new NotImplementedException(this)
 				}
 				else if condition.kind == NodeKind::SwitchConditionRange {
-					condition = new SwitchConditionRange(condition, this)
+					condition = new SwitchConditionRange(condition, this, clause.scope)
 				}
 				else if condition.kind == NodeKind::SwitchConditionType {
-					condition = new SwitchConditionType(condition, this)
+					condition = new SwitchConditionType(condition, this, clause.scope)
 				}
 				else {
-					condition = new SwitchConditionValue(condition, this)
+					condition = new SwitchConditionValue(condition, this, clause.scope)
 				}
-				
+
 				condition.analyse()
-				
+
 				clause.conditions.push(condition)
 			}
-			
+
 			for binding in data.bindings {
 				if binding.kind == NodeKind::ArrayBinding {
-					binding = new SwitchBindingArray(binding, this)
-					
+					binding = new SwitchBindingArray(binding, this, clause.scope)
+
 					clause.hasTest = true
 				}
 				else if binding.kind == NodeKind::ObjectBinding {
 					throw new NotImplementedException(this)
 				}
 				else if binding.kind == NodeKind::SwitchTypeCasting {
-					binding = new SwitchBindingType(binding, this)
+					binding = new SwitchBindingType(binding, this, clause.scope)
 				}
 				else {
-					binding = new SwitchBindingValue(binding, this)
+					binding = new SwitchBindingValue(binding, this, clause.scope)
 				}
-				
+
 				binding.analyse()
-				
+
 				clause.bindings.push(binding)
 			}
-			
-			clause.filter = new SwitchFilter(data, this)
+
+			clause.filter = new SwitchFilter(data, this, clause.scope)
 			clause.filter.analyse()
-			
-			clause.hasTest = true if data.filter?
-			
-			clause.body = $compile.expression($ast.block(data.body), this)
+
+			clause.body = $compile.expression($ast.block(data.body), this, clause.scope)
 			clause.body.analyse()
-			
+
 			@clauses.push(clause)
-			
-			@scope = scope
 		}
 	} // }}}
 	prepare() { // {{{
@@ -114,41 +108,41 @@ class SwitchStatement extends Statement {
 		else {
 			@name = @scope.acquireTempName()
 		}
-		
+
 		@value.prepare() if @value?
-		
+
 		for clause in @clauses {
 			for condition in clause.conditions {
 				condition.prepare()
 			}
-			
+
 			for binding in clause.bindings {
 				binding.prepare()
 			}
-			
+
 			clause.filter.prepare()
-			
+
 			clause.body.prepare()
 		}
-		
+
 		if @data.expression.kind != NodeKind::Identifier {
 			@scope.releaseTempName(@name)
 		}
 	} // }}}
 	translate() { // {{{
 		@value.translate() if @value?
-		
+
 		for clause in @clauses {
 			for condition in clause.conditions {
 				condition.translate()
 			}
-			
+
 			for binding in clause.bindings {
 				binding.translate()
 			}
-			
+
 			clause.filter.translate()
-			
+
 			clause.body.translate()
 		}
 	} // }}}
@@ -156,7 +150,7 @@ class SwitchStatement extends Statement {
 		if @clauses.length == 0 {
 			return
 		}
-		
+
 		if @value? {
 			fragments
 				.newLine()
@@ -164,47 +158,47 @@ class SwitchStatement extends Statement {
 				.compile(@value)
 				.done()
 		}
-		
+
 		let condition
 		for clause in @clauses {
 			for condition in clause.conditions {
 				condition.toStatementFragments(fragments)
 			}
-			
+
 			clause.filter.toStatementFragments(fragments)
 		}
-		
+
 		let ctrl = fragments.newControl()
 		let we = false
-		
+
 		let i, binding
 		for clause, clauseIdx in @clauses {
 			if clause.conditions.length {
 				if we {
 					SyntaxException.throwAfterDefaultClause(this)
 				}
-				
+
 				if clauseIdx {
 					ctrl.step().code('else if(')
 				}
 				else {
 					ctrl.code('if(')
 				}
-				
+
 				for condition, i in clause.conditions {
 					ctrl.code(' || ') if i
-					
+
 					condition.toBooleanFragments(ctrl, @name)
 				}
-				
+
 				clause.filter.toBooleanFragments(ctrl, true)
-				
+
 				ctrl.code(')').step()
-				
+
 				for binding in clause.bindings {
 					binding.toFragments(ctrl)
 				}
-				
+
 				clause.body.toFragments(ctrl, mode)
 			}
 			else if clause.hasTest {
@@ -214,15 +208,15 @@ class SwitchStatement extends Statement {
 				else {
 					ctrl.code('if(')
 				}
-				
+
 				clause.filter.toBooleanFragments(ctrl, false)
-				
+
 				ctrl.code(')').step()
-				
+
 				for binding in clause.bindings {
 					binding.toFragments(ctrl)
 				}
-				
+
 				clause.body.toFragments(ctrl, mode)
 			}
 			else {
@@ -232,21 +226,21 @@ class SwitchStatement extends Statement {
 				else {
 					ctrl.code('if(true)')
 				}
-				
+
 				we = true
-				
+
 				ctrl.step()
-				
+
 				for binding in clause.bindings {
 					binding.toFragments(ctrl)
 				}
-				
+
 				clause.body.toFragments(ctrl, mode)
 			}
 		}
-		
+
 		ctrl.done()
-		
+
 		@scope.releaseTempName(@name) if @value?
 	} // }}}
 }
@@ -267,9 +261,9 @@ class SwitchBindingArray extends AbstractNode {
 	} // }}}
 	toFragments(fragments) { // {{{
 		let line = fragments.newLine()
-		
+
 		@array.toAssignmentFragments(line, @parent._name)
-		
+
 		line.done()
 	} // }}}
 }
@@ -308,10 +302,10 @@ class SwitchConditionArray extends AbstractNode {
 				nv = false
 			}
 		}
-		
+
 		if !nv {
 			@name = @scope.parent().acquireTempName()
-			
+
 			for value in @data.values {
 				if value.kind != NodeKind::OmittedExpression {
 					if value.kind == NodeKind::SwitchConditionRange {
@@ -320,9 +314,9 @@ class SwitchConditionArray extends AbstractNode {
 					else {
 						value = new SwitchConditionValue(value, this)
 					}
-					
+
 					value.analyse()
-					
+
 					@values.push(value)
 				}
 			}
@@ -340,9 +334,9 @@ class SwitchConditionArray extends AbstractNode {
 	} // }}}
 	toBooleanFragments(fragments, name) { // {{{
 		this.module().flag('Type')
-		
+
 		fragments.code('(', $runtime.typeof('Array', this), '(', name, ')')
-		
+
 		let mm = $switch.length(@data.values)
 		if mm.min == mm.max {
 			if mm.min != Infinity {
@@ -351,29 +345,29 @@ class SwitchConditionArray extends AbstractNode {
 		}
 		else {
 			fragments.code(' && ', name, '.length >= ', mm.min)
-			
+
 			if mm.max != Infinity {
 				fragments.code(' && ', name, '.length <= ', mm.max)
 			}
 		}
-		
+
 		if @name? {
 			fragments.code(' && ', @name, '(', name, ')')
 		}
-		
+
 		fragments.code(')')
-		
+
 		@scope.parent().releaseTempName(@name) if @name?
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		if @values.length > 0 {
 			let line = fragments.newLine()
-			
+
 			line.code($runtime.scope(this), @name, ' = ([')
-			
+
 			for value, i in @data.values {
 				line.code(', ') if i
-				
+
 				if value.kind == NodeKind::OmittedExpression {
 					if value.spread {
 						line.code('...')
@@ -383,20 +377,20 @@ class SwitchConditionArray extends AbstractNode {
 					line.code('__ks_', i)
 				}
 			}
-			
+
 			line.code(']) => ')
-			
+
 			let index = 0
 			for value, i in @data.values {
 				if value.kind != NodeKind::OmittedExpression {
 					line.code(' && ') if index
-					
+
 					@values[index].toBooleanFragments(line, '__ks_' + i)
-					
+
 					index++
 				}
 			}
-			
+
 			line.done()
 		}
 	} // }}}
@@ -417,7 +411,7 @@ class SwitchConditionRange extends AbstractNode {
 			@left = $compile.expression(@data.then, this)
 			@from = false
 		}
-		
+
 		if @data.to? {
 			@right = $compile.expression(@data.to, this)
 		}
@@ -425,7 +419,7 @@ class SwitchConditionRange extends AbstractNode {
 			@right = $compile.expression(@data.til, this)
 			@to = false
 		}
-		
+
 		@left.analyse()
 		@right.analyse()
 	} // }}}
@@ -497,14 +491,14 @@ class SwitchFilter extends AbstractNode {
 		if @data.filter? {
 			if @data.bindings.length > 0 {
 				@name = @scope.parent().acquireTempName()
-				
+
 				for binding in @data.bindings {
 					@bindings.push(binding = $compile.expression(binding, this))
-					
+
 					binding.analyse()
 				}
 			}
-			
+
 			@filter = $compile.expression(@data.filter, this)
 			@filter.analyse()
 		}
@@ -514,7 +508,7 @@ class SwitchFilter extends AbstractNode {
 			for binding in @bindings {
 				binding.prepare()
 			}
-			
+
 			@filter.prepare()
 		}
 	} // }}}
@@ -523,7 +517,7 @@ class SwitchFilter extends AbstractNode {
 			for binding in @bindings {
 				binding.translate()
 			}
-			
+
 			@filter.translate()
 		}
 	} // }}}
@@ -532,16 +526,16 @@ class SwitchFilter extends AbstractNode {
 		for binding in @data.bindings {
 			if binding.kind == NodeKind::ArrayBinding {
 				this.module().flag('Type')
-				
+
 				if nf {
 					fragments.code(' && ')
 				}
 				else {
 					nf = true
 				}
-				
+
 				fragments.code($runtime.typeof('Array', this), '(', @parent._name, ')')
-				
+
 				mm = $switch.length(binding.elements)
 				if mm.min == mm.max {
 					if mm.min != Infinity {
@@ -550,41 +544,41 @@ class SwitchFilter extends AbstractNode {
 				}
 				else {
 					fragments.code(' && ', @parent._name, '.length >= ', mm.min)
-					
+
 					if mm.max != Infinity {
 						fragments.code(' && ', @parent._name, '.length <= ', mm.max)
 					}
 				}
 			}
 		}
-		
+
 		if @name? {
 			fragments.code(' && ') if nf
-			
+
 			fragments.code(@name, '(', @parent._name, ')')
-			
+
 			@scope.parent().releaseTempName(@name)
 		}
 		else if @filter? {
 			fragments.code(' && ') if nf
-			
+
 			fragments.compile(@filter)
 		}
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		if @name? {
 			let line = fragments.newLine()
-			
+
 			line.code($runtime.scope(this), @name, ' = (')
-		
+
 			for binding, i in @bindings {
 				line.code(', ') if i
-				
+
 				line.compile(binding)
 			}
-			
+
 			line.code(') => ').compile(@filter)
-			
+
 			line.done()
 		}
 	} // }}}

@@ -1,4 +1,4 @@
-#![format(destructuring='es5')]
+#![format(destructuring='es5', variables='es5')]
 
 extern console: {
 	log(...args)

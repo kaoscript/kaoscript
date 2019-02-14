@@ -20,25 +20,28 @@ class TryStatement extends Statement {
 		_statements: Array			= []
 	}
 	analyse() { // {{{
-		let scope = @scope
+		let scope
 
 		if @data.catchClauses? {
 			let variable, body, type
 			for clause in @data.catchClauses {
-				if variable !?= scope.getVariable(clause.type.name) {
+				if variable !?= @scope.getVariable(clause.type.name) {
 					ReferenceException.throwNotDefined(clause.type.name, this)
 				}
 
 				if clause.binding? {
-					@scope = new Scope(scope)
+					scope = new Scope(@scope)
 
-					@scope.define(clause.binding.name, false, this)
+					scope.define(clause.binding.name, false, this)
+				}
+				else {
+					scope = @scope
 				}
 
-				body = $compile.expression(clause.body, this)
+				body = $compile.expression(clause.body, this, scope)
 				body.analyse()
 
-				type = $compile.expression(clause.type, this)
+				type = $compile.expression(clause.type, this, scope)
 				type.analyse()
 
 				@catchClauses.push({
@@ -50,15 +53,17 @@ class TryStatement extends Statement {
 
 		if @data.catchClause? {
 			if @data.catchClause.binding? {
-				@scope = new Scope(scope)
-				@scope.define(@data.catchClause.binding.name, false, this)
+				scope = new Scope(@scope)
+
+				scope.define(@data.catchClause.binding.name, false, this)
+			}
+			else {
+				scope = @scope
 			}
 
-			@catchClause = $compile.expression(@data.catchClause.body, this)
+			@catchClause = $compile.expression(@data.catchClause.body, this, scope)
 			@catchClause.analyse()
 		}
-
-		@scope = scope
 
 		for statement in $ast.body(@data.body) {
 			@statements.push(statement = $compile.statement(statement, this))

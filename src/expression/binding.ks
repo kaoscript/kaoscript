@@ -19,11 +19,11 @@ class ArrayBinding extends Expression {
 					++@nonexistingCount
 				}
 			}
-			
+
 			@elements.push(element = $compile.expression(element, this))
-			
+
 			element.analyse()
-			
+
 			if element is BindingElement {
 				element.index(index)
 			}
@@ -50,57 +50,57 @@ class ArrayBinding extends Expression {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @existingCount && @nonexistingCount {
 			fragments.code('[')
-			
+
 			let name
 			for element, i in @data.elements {
 				fragments.code(', ') if i
-				
+
 				if element.kind == NodeKind::BindingElement && !element.name.computed && @existing[element.name.name] {
 					name = @scope.acquireTempName()
-					
+
 					@elements[i].toExistFragments(fragments, name)
-					
+
 					@variables[name] = element.name.name
 				}
 				else {
 					@elements[i].toFragments(fragments)
 				}
 			}
-			
+
 			fragments.code(']')
-			
+
 			this.statement().afterward(this)
 		}
 		else {
 			fragments.code('[')
-			
+
 			for i from 0 til @elements.length {
 				fragments.code(', ') if i
-				
+
 				@elements[i].toFragments(fragments)
 			}
-			
+
 			fragments.code(']')
 		}
 	} // }}}
 	toAfterwardFragments(fragments) { // {{{
 		for name, variable of @variables {
 			fragments.line(variable, ' = ', name)
-			
+
 			@scope.releaseTempName(name)
 		}
 	} // }}}
 	toAssignmentFragments(fragments, value) { // {{{
-		if @nonexistingCount {
+		if @nonexistingCount != 0 {
 			fragments.code('var ')
 		}
-		
+
 		if @options.format.destructuring == 'es5' {
 			this.toFlatFragments(fragments, value)
 		}
@@ -123,7 +123,7 @@ class ArrayBinding extends Expression {
 		else {
 			for i from 0 til @elements.length {
 				fragments.code(', ') if i
-				
+
 				@elements[i].toFlatFragments(fragments, value)
 			}
 		}
@@ -149,33 +149,33 @@ class BindingElement extends Expression {
 		super(data, parent, new Scope(scope))
 	} // }}}
 	analyse() { // {{{
-		const scope = this.statement().scope()
-		
+		const scope = @scope.parent()
+
 		if @data.name.kind == NodeKind::Identifier && !scope.hasVariable(@data.name.name) {
-			@variable = scope.define(@data.name.name, false, this.statement())
-			
+			@variable = scope.define(@data.name.name, false, this)
+
 			@variables.push(@data.name.name)
 		}
-		
+
 		if @data.alias? {
 			@variable = @scope.define(@data.alias.name, false, this)
-			
+
 			@alias = $compile.expression(@data.alias, this)
 			@alias.analyse()
-			
+
 			@variables.push(@data.alias.name)
 		}
-		
+
 		@name = $compile.expression(@data.name, this)
 		@name.analyse()
-		
+
 		if @data.defaultValue? {
 			@defaultValue = $compile.expression(@data.defaultValue, this)
 			@defaultValue.analyse()
-			
+
 			if @options.format.destructuring == 'es5' {
 				@tempName = @scope.acquireTempName(this.statement())
-				
+
 				@scope.releaseTempName(@tempName)
 			}
 		}
@@ -201,7 +201,7 @@ class BindingElement extends Expression {
 		if @data.spread {
 			fragments.code('...')
 		}
-		
+
 		if @alias? {
 			if @data.alias.computed {
 				fragments.code('[').compile(@alias).code(']: ')
@@ -210,9 +210,9 @@ class BindingElement extends Expression {
 				fragments.compile(@alias).code(': ')
 			}
 		}
-		
+
 		fragments.compile(@name)
-		
+
 		if @defaultValue? {
 			fragments.code(' = ').compile(@defaultValue)
 		}
@@ -221,7 +221,7 @@ class BindingElement extends Expression {
 		if @data.spread {
 			fragments.code('...')
 		}
-		
+
 		if @alias? {
 			if @data.alias.computed {
 				fragments.code('[').compile(@alias).code(']: ')
@@ -230,14 +230,14 @@ class BindingElement extends Expression {
 				fragments.compile(@alias).code(': ')
 			}
 		}
-		
+
 		if @index == -1 {
 			fragments.compile(@name).code(': ', name)
 		}
 		else {
 			fragments.code(name)
 		}
-		
+
 		if @defaultValue != null {
 			fragments.code(' = ').compile(@defaultValue)
 		}
@@ -248,7 +248,7 @@ class BindingElement extends Expression {
 		}
 		else if @defaultValue? {
 			const variable = new Literal(false, this, @scope, @tempName)
-			
+
 			fragments
 				.compile(@name)
 				.code($equals, 'Type.isValue(')
@@ -313,18 +313,18 @@ class ObjectBinding extends Expression {
 		if @options.format.destructuring == 'es5' && @data.elements.length > 1 {
 			@name = @scope.acquireTempName(this.statement())
 		}
-		
+
 		for element in @data.elements {
 			if !element.name.computed && element.name.name? && @scope.hasVariable(element.name.name) {
 				@exists = true
 				@existing[element.name.name] = true
 			}
-			
-			@elements.push(element = $compile.expression(element, this))
-			
+
+			@elements.push(element = $compile.expression(element, this, this.statement().scope()))
+
 			element.analyse()
 		}
-		
+
 		if @name != null {
 			@scope.releaseTempName(@name)
 		}
@@ -350,55 +350,55 @@ class ObjectBinding extends Expression {
 				return true
 			}
 		}
-		
+
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @exists {
 			fragments.code('{')
-			
+
 			let name
 			for element, i in @data.elements {
 				fragments.code(', ') if i
-				
+
 				if @existing[element.name.name] {
 					name = @scope.acquireTempName()
-					
+
 					@elements[i].toExistFragments(fragments, name)
-					
+
 					@variables[name] = element.name.name
 				}
 				else {
 					@elements[i].toFragments(fragments)
 				}
 			}
-			
+
 			fragments.code('}')
-			
+
 			this.statement().afterward(this)
 		}
 		else {
 			fragments.code('{')
-			
+
 			for i from 0 til @elements.length {
 				fragments.code(', ') if i
-				
+
 				@elements[i].toFragments(fragments)
 			}
-			
+
 			fragments.code('}')
 		}
 	} // }}}
 	toAfterwardFragments(fragments) { // {{{
 		for name, variable of @variables {
 			fragments.line(variable, ' = ', name)
-			
+
 			@scope.releaseTempName(name)
 		}
 	} // }}}
 	toAssignmentFragments(fragments, value) { // {{{
 		fragments.code('var ')
-		
+
 		if @options.format.destructuring == 'es5' {
 			this.toFlatFragments(fragments, value)
 		}
@@ -416,12 +416,12 @@ class ObjectBinding extends Expression {
 			}
 			else {
 				const variable = new Literal(false, this, @scope, @name)
-				
+
 				@elements[0].toFlatFragments(fragments, new TempBinding(variable, value, this))
-				
+
 				for i from 1 til @elements.length {
 					fragments.code(', ')
-					
+
 					@elements[i].toFlatFragments(fragments, variable)
 				}
 			}
@@ -429,7 +429,7 @@ class ObjectBinding extends Expression {
 		else {
 			for i from 0 til @elements.length {
 				fragments.code(', ') if i
-				
+
 				@elements[i].toFlatFragments(fragments, value)
 			}
 		}

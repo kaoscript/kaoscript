@@ -2326,14 +2326,8 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		if @hasDefaultValue {
 			if @instance {
-				let scope = @scope
-
-				@scope = @parent._instanceVariableScope
-
-				@defaultValue = $compile.expression(@data.defaultValue, this)
+				@defaultValue = $compile.expression(@data.defaultValue, this, @parent._instanceVariableScope)
 				@defaultValue.analyse()
-
-				@scope = scope
 			}
 
 			@defaultValue.prepare()
