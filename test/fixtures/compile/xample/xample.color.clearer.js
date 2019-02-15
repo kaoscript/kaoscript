@@ -38,7 +38,7 @@ module.exports = function() {
 			throw new TypeError("'value' is not of type 'String' or 'Number'");
 		}
 		if(Type.isString(value) && __ks_String._im_endsWith(value, "%")) {
-			return current * ((100 - (Type.isString(value) ? __ks_String._im_toFloat(value) : value.toFloat())) / 100);
+			return current * ((100 - __ks_String._im_toFloat(value)) / 100);
 		}
 		else {
 			return current - (Type.isString(value) ? __ks_String._im_toFloat(value) : value.toFloat());

@@ -743,7 +743,7 @@ module.exports = function() {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			if(Type.isString(value) && value.endsWith("%")) {
-				return this.alpha(this._alpha * ((100 - (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value))) / 100));
+				return this.alpha(this._alpha * ((100 - __ks_String._im_toFloat(value)) / 100));
 			}
 			else {
 				return this.alpha(this._alpha - (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value)));
@@ -1111,7 +1111,7 @@ module.exports = function() {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			if(Type.isString(value) && value.endsWith("%")) {
-				return this.alpha(this._alpha * ((100 + (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value))) / 100));
+				return this.alpha(this._alpha * ((100 + __ks_String._im_toFloat(value)) / 100));
 			}
 			else {
 				return this.alpha(this._alpha + (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value)));

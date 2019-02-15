@@ -22,13 +22,13 @@ class ObjectType extends Type {
 	addProperty(name: String, type: Type) { // {{{
 		@properties[name] = type
 	} // }}}
-	addPropertyFromMetadata(name, data, references, domain, node) { // {{{
+	addPropertyFromMetadata(name, data, references, scope, node) { // {{{
 		let type
 		if data.parameters? {
-			type = FunctionType.fromMetadata(data, references, domain, node)
+			type = FunctionType.fromMetadata(data, references, scope, node)
 		}
 		else {
-			type = Type.fromMetadata(data, references, domain, node)
+			type = Type.fromMetadata(data, references, scope, node)
 		}
 
 		@properties[name] = type

@@ -31,6 +31,10 @@ class IfStatement extends Statement {
 	prepare() { // {{{
 		@condition.prepare()
 
+		for name, type of @condition.reduceTypes() {
+			@whenTrueScope.define(name, true, type, this)
+		}
+
 		@condition.acquireReusable(false)
 		@condition.releaseReusable()
 

@@ -100,6 +100,32 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
+	constructor(@data, @parent, scope = parent.scope()) { // {{{
+		super(data, parent, new Scope(scope))
+	} // }}}
+	prepare() { // {{{
+		@left.prepare()
+
+		const variables = @left.reduceTypes()
+
+		for name, type of variables when !type.isAny() {
+			@scope.define(name, true, type, this)
+		}
+
+		@right.prepare()
+	} // }}}
+	reduceTypes() { // {{{
+		const variables = {}
+
+		for name, type of @left.reduceTypes() {
+			variables[name] = type
+		}
+		for name, type of @right.reduceTypes() {
+			variables[name] = type
+		}
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(@left)
@@ -184,13 +210,39 @@ class BinaryOperatorDivision extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorEquality extends BinaryOperatorExpression {
+	private {
+		_isLeftNaN: Boolean		= false
+		_isRightNaN: Boolean	= false
+	}
+	prepare() { // {{{
+		@left.prepare()
+		@right.prepare()
+
+		@isLeftNaN = @left is IdentifierLiteral && @left.value() == 'NaN'
+		@isRightNaN = @right is IdentifierLiteral && @right.value() == 'NaN'
+	} // }}}
+	isComputed() => !@isLeftNaN && !@isRightNaN
 	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('===', @data.operator)
-			.code($space)
-			.wrap(@right)
+		if @isLeftNaN {
+			fragments
+				.code('isNaN(')
+				.compile(@right)
+				.code(')')
+		}
+		else if @isRightNaN {
+			fragments
+				.code('isNaN(')
+				.compile(@left)
+				.code(')')
+		}
+		else {
+			fragments
+				.wrap(@left)
+				.code($space)
+				.code('===', @data.operator)
+				.code($space)
+				.wrap(@right)
+		}
 	} // }}}
 	type() => @scope.reference('Boolean')
 }
@@ -220,13 +272,39 @@ class BinaryOperatorGreaterThanOrEqual extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorInequality extends BinaryOperatorExpression {
+	private {
+		_isLeftNaN: Boolean		= false
+		_isRightNaN: Boolean	= false
+	}
+	prepare() { // {{{
+		@left.prepare()
+		@right.prepare()
+
+		@isLeftNaN = @left is IdentifierLiteral && @left.value() == 'NaN'
+		@isRightNaN = @right is IdentifierLiteral && @right.value() == 'NaN'
+	} // }}}
+	isComputed() => !@isLeftNaN && !@isRightNaN
 	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('!==', @data.operator)
-			.code($space)
-			.wrap(@right)
+		if @isLeftNaN {
+			fragments
+				.code('!isNaN(')
+				.compile(@right)
+				.code(')')
+		}
+		else if @isRightNaN {
+			fragments
+				.code('!isNaN(')
+				.compile(@left)
+				.code(')')
+		}
+		else {
+			fragments
+				.wrap(@left)
+				.code($space)
+				.code('!==', @data.operator)
+				.code($space)
+				.wrap(@right)
+		}
 	} // }}}
 	type() => @scope.reference('Boolean')
 }
@@ -330,6 +408,25 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorOr extends BinaryOperatorExpression {
+	reduceTypes() { // {{{
+		const variables = {}
+
+		const right = @right.reduceTypes()
+
+		let rtype
+		for name, type of @left.reduceTypes() {
+			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
+				if type.equals(right[name]) {
+					variables[name] = type
+				}
+				else {
+					variables[name] = Type.union(@scope, type, rtype)
+				}
+			}
+		}
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(@left)
@@ -401,6 +498,10 @@ class BinaryOperatorTypeEquality extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
+
+		if !@left.type().isAny() && !@left.type().matchContentTo(@type) {
+			TypeException.throwInvalidTypeChecking(this)
+		}
 	} // }}}
 	translate() { // {{{
 		@left.translate()
@@ -408,6 +509,15 @@ class BinaryOperatorTypeEquality extends Expression {
 	hasExceptions() => false
 	isComputed() => false
 	isNullable() => false
+	reduceTypes() { // {{{
+		const variables = {}
+
+		if @left is IdentifierLiteral {
+			variables[@left.value()] = @type
+		}
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		@type.toTestFragments(fragments, @left)
 	} // }}}
@@ -432,6 +542,10 @@ class BinaryOperatorTypeInequality extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
+
+		if @type.isAny() && @left.type().equals(@type) {
+			TypeException.throwInvalidTypeChecking(this)
+		}
 	} // }}}
 	translate() { // {{{
 		@left.translate()

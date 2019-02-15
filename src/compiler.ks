@@ -119,13 +119,11 @@ const $runtime = {
 	} // }}}
 	typeof(type, node = null) { // {{{
 		if node? {
-			return null unless $typeofs[type]
-
-			if type == 'NaN' {
-				return 'isNaN'
+			if $typeofs[type] {
+				return $runtime.type(node) + '.is' + type
 			}
 			else {
-				return $runtime.type(node) + '.is' + type
+				return null
 			}
 		}
 		else {

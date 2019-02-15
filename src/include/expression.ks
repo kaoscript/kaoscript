@@ -16,6 +16,7 @@ abstract class Expression extends AbstractNode {
 	isEntangled() => true
 	isNullable() => false
 	isNullableComputed() => this.isComputed()
+	reduceTypes() => {}
 	statement(data) { // {{{
 		let expression = this
 

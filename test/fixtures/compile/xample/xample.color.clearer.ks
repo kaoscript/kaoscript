@@ -5,7 +5,7 @@ impl String {
 }
 
 func clearer(current: number, value: string | number): number {
-	if value is String && value:String.endsWith('%') {
+	if value is String && value.endsWith('%') {
 		return current * ((100 - value.toFloat()) / 100)
 	}
 	else {

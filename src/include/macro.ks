@@ -90,7 +90,7 @@ func $serialize(macro, data, context) { // {{{
 		context.data += Generator.generate(macro.getMark(data.index))
 	}
 	else if data is Number {
-		context.data += (data is NaN ? 'NaN' : data)
+		context.data += (data == NaN ? 'NaN' : data)
 	}
 	else if data is RegExp {
 		context.data += data

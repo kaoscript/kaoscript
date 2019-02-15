@@ -113,9 +113,6 @@ abstract class Type {
 					if type ?= scope.getVariable(data.name) {
 						return type.type()
 					}
-					else if type ?= scope.domain().getVariable(data.name) {
-						return type
-					}
 					else if $runtime.isDefined(data.name, node) {
 						return Type.Any
 					}
@@ -340,7 +337,7 @@ abstract class Type {
 				}
 			}
 
-			return new UnionType(scope.domain(), types)
+			return new UnionType(scope, types)
 		} // }}}
 	}
 	constructor(@scope)

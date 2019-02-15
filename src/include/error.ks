@@ -319,6 +319,9 @@ export class TypeException extends Exception {
 		throwInvalidSpread(node) ~ TypeException { // {{{
 			throw new TypeException(`Spread operator require an array`, node)
 		} // }}}
+		throwInvalidTypeChecking(node) ~ TypeException { // {{{
+			throw new TypeException(`type checking has incompatible type`, node)
+		} // }}}
 		throwNoMatchingConstructor(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Constructor of class "\(name)" can't be matched to given arguments`, node)
 		} // }}}
