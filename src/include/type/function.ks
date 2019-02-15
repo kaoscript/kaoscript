@@ -441,6 +441,15 @@ class OverloadedFunctionType extends Type {
 		_references: Array<Type>			= []
 	}
 	static {
+		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+			const type = new OverloadedFunctionType(scope)
+
+			for function in data.functions {
+				type.addFunction(Type.fromMetadata(function, references, scope, node))
+			}
+
+			return type
+		} // }}}
 		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new OverloadedFunctionType(scope)
 

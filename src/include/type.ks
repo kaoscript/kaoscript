@@ -265,6 +265,9 @@ abstract class Type {
 					TypeKind::Function => {
 						return FunctionType.fromMetadata(data, references, scope, node)
 					}
+					TypeKind::OverloadedFunction => {
+						return OverloadedFunctionType.fromMetadata(data, references, scope, node)
+					}
 					=> {
 						console.log(data)
 						throw new NotImplementedException(node)
