@@ -488,19 +488,31 @@ class BinaryOperatorTypeEquality extends Expression {
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
-
-		if @data.right.typeName.kind == NodeKind::Identifier && @data.right.typeName.name == 'NaN' {
-			@type = @scope.reference('NaN')
-		}
-		else {
-			@type = Type.fromAST(@data.right, this)
-		}
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
 
-		if !@left.type().isAny() && !@left.type().matchContentTo(@type) {
-			TypeException.throwInvalidTypeChecking(this)
+		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
+			if variable ?= @scope.getVariable(@data.right.typeName.name) {
+				type = variable.type()
+
+				if type.isClass() {
+					if !@left.type().isAny() && !@left.type().matchContentTo(type) {
+						TypeException.throwInvalidTypeChecking(this)
+					}
+				}
+				else if !type.isAny() {
+					TypeException.throwNotClass(variable.name(), this)
+				}
+
+				@type = Type.fromAST(@data.right, this)
+			}
+			else {
+				ReferenceException.throwNotDefined(@data.right.typeName.name, this)
+			}
+		}
+		else {
+			throw new NotImplementedException(this)
 		}
 	} // }}}
 	translate() { // {{{
@@ -532,19 +544,31 @@ class BinaryOperatorTypeInequality extends Expression {
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 		@left.analyse()
-
-		if @data.right.typeName.kind == NodeKind::Identifier && @data.right.typeName.name == 'NaN' {
-			@type = @scope.reference('NaN')
-		}
-		else {
-			@type = Type.fromAST(@data.right, this)
-		}
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
 
-		if @type.isAny() && @left.type().equals(@type) {
-			TypeException.throwInvalidTypeChecking(this)
+		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
+			if variable ?= @scope.getVariable(@data.right.typeName.name) {
+				type = variable.type()
+
+				if type.isClass() {
+					if !@left.type().isAny() && type.matchContentTo(@left.type()) {
+						TypeException.throwInvalidTypeChecking(this)
+					}
+				}
+				else if !type.isAny() {
+					TypeException.throwNotClass(variable.name(), this)
+				}
+
+				@type = Type.fromAST(@data.right, this)
+			}
+			else {
+				ReferenceException.throwNotDefined(@data.right.typeName.name, this)
+			}
+		}
+		else {
+			throw new NotImplementedException(this)
 		}
 	} // }}}
 	translate() { // {{{

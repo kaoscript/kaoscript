@@ -32,8 +32,8 @@ class ReferenceType extends Type {
 		if @name == 'Any' {
 			return Type.Any
 		}
-		else if (variable ?= @scope.getVariable(@name)) && (variable.type() is not ReferenceType || variable.name() != @name || variable.scope() != @scope) {
-			return variable.type().discardReference()
+		else if (variable ?= @scope.getVariable(@name)) && (type ?= variable.type()) && (type is not ReferenceType || variable.name() != @name || type.scope() != @scope) {
+			return type.discardReference()
 		}
 		else {
 			return null

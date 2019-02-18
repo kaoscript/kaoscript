@@ -476,7 +476,7 @@ class ModuleScope extends Scope {
 			name = $types[name]
 		}
 
-		return @variables[name] is Variable || $natives[name] == true
+		return @variables[name] is Variable || $natives[name] == true || @predefined[`__\(name)`] is Variable
 	} // }}}
 }
 
