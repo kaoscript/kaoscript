@@ -26,7 +26,7 @@ class AliasType extends Type {
 	} // }}}
 	export(references, ignoreAlteration) { // {{{
 		return {
-			type: TypeKind::Alias
+			kind: TypeKind::Alias
 			of: @type.export(references, ignoreAlteration)
 		}
 	} // }}}

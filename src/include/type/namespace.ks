@@ -37,67 +37,66 @@ class NamespaceType extends Type {
 	constructor(scope: AbstractScope) { // {{{
 		super(new NamespaceScope(scope))
 	} // }}}
-	addProperty(name: String, type: Type) { // {{{
+	addProperty(name: String, type: Type, alteration: Boolean = false) { // {{{
 		const variable = new Variable(name, false, false, type)
 
 		@scope.addVariable(name, variable)
 
-		@properties[name] = variable.type()
+		type = variable.type()
+
+		const internalType = this.toPropertyType(type)
+
+		@properties[name] = internalType
 
 		if @sealed {
 			@sealProperties[name] = true
 
-			type.flagSealed()
+			internalType.flagSealed()
 		}
+
+		if alteration {
+			internalType.flagAlteration()
+		}
+
+		return type
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
-		let type
-		if data.kind == NodeKind::VariableDeclarator {
-			type = NamespaceVariableType.fromAST(data, node)
-		}
-		else if data.kind == NodeKind::FunctionDeclaration {
-			type = NamespaceFunctionType.fromAST(data, node)
-		}
-		else {
-			throw new NotSupportedException(node)
-		}
-
 		const name = data.name.name
-		const variable = new Variable(name, false, false, type)
+		const variable = new Variable(name, false, false, Type.fromAST(data, node))
 
 		@scope.addVariable(name, variable)
 
-		@properties[name] = variable.type()
+		const type = variable.type()
+		const internalType = this.toPropertyType(type)
+
+		@properties[name] = internalType
 
 		if type.isSealed() {
 			@sealProperties[name] = true
 		}
+
+		return type
 	} // }}}
 	addPropertyFromMetadata(name, data, references, node) { // {{{
-		let type
-		if data.parameters? {
-			type = NamespaceFunctionType.fromMetadata(data, references, @scope, node)
-		}
-		else if data.sealed? && data.type? {
-			type = NamespaceVariableType.fromMetadata(data, references, @scope, node)
-		}
-		else {
-			type = Type.fromMetadata(data, references, @scope, node)
+		const type = Type.fromMetadata(data, references, @scope, node)
 
-			if type._scope != @scope {
-				type._scope = @scope
-			}
+		if type._scope != @scope {
+			type._scope = @scope
 		}
 
 		const variable = new Variable(name, false, false, type)
 
 		@scope.addVariable(name, variable)
 
-		@properties[name] = variable.type()
+		const internalType = this.toPropertyType(variable.type())
+
+		@properties[name] = internalType
 
 		if type.isSealed() {
 			@sealProperties[name] = true
 		}
+
+		return variable.type()
 	} // }}}
 	clone() { // {{{
 		const that = new NamespaceType(@scope)
@@ -126,7 +125,7 @@ class NamespaceType extends Type {
 	export(references, ignoreAlteration) { // {{{
 		if @alterationReference? {
 			const export = {
-				type: TypeKind::Namespace
+				kind: TypeKind::Namespace
 				namespace: @alterationReference.toReference(references, ignoreAlteration)
 				properties: {}
 			}
@@ -139,7 +138,7 @@ class NamespaceType extends Type {
 		}
 		else {
 			const export = {
-				type: TypeKind::Namespace
+				kind: TypeKind::Namespace
 				sealed: @sealed
 				properties: {}
 			}
@@ -167,7 +166,7 @@ class NamespaceType extends Type {
 	} // }}}
 	getProperty(name: String): Type { // {{{
 		if @properties[name] is Type {
-			return @properties[name]
+			return @properties[name].type()
 		}
 		else {
 			return null
@@ -177,7 +176,7 @@ class NamespaceType extends Type {
 	isExtendable() => true
 	isFlexible() => @sealed
 	isNamespace() => true
-	isSealed() => @sealed
+	isSealable() => true
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
 	setAlterationReference(@alterationReference)
 	toQuote() { // {{{
@@ -185,6 +184,14 @@ class NamespaceType extends Type {
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
+	} // }}}
+	private toPropertyType(type) { // {{{
+		if type.isAny() || type.discardName() is ReferenceType {
+			return new NamespaceVariableType(@scope, type)
+		}
+		else {
+			return new NamespaceDirectType(@scope, type)
+		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
@@ -196,99 +203,28 @@ class NamespaceType extends Type {
 	} // }}}
 }
 
-class NamespaceVariableType extends Type {
+class NamespaceVariableType extends SealableType {
 	private {
 		_alteration: Boolean	= false
-		_type: Type
 	}
-	static {
-		fromAST(data, node: AbstractNode) { // {{{
-			const type = new NamespaceVariableType(node.scope(), Type.fromAST(data.type, node))
-
-			if data.modifiers? {
-				for modifier in data.modifiers {
-					if modifier.kind == ModifierKind::Sealed {
-						type._sealed = true
-					}
-				}
-			}
-
-			return type
-		} // }}}
-		fromMetadata(data, references, scope: AbstractScope, node: AbstractNode): NamespaceVariableType { // {{{
-			const type = new NamespaceVariableType(scope, Type.fromMetadata(data.type, references, scope, node))
-
-			if data.sealed == true {
-				type._sealed = true
-			}
-
-			return type
-		} // }}}
-	}
-	constructor(@scope, @type) { // {{{
-		super(scope)
-	} // }}}
-	discardVariable() => @type
-	equals(b?) { // {{{
-		if b is NamespaceVariableType {
-			return @type.equals(b.type())
-		}
-		else {
-			return false
-		}
-	} // }}}
-	export(references, ignoreAlteration) => { // {{{
-		sealed: @sealed
-		type: @type.toReference(references, ignoreAlteration)
-	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
 
 		return this
 	} // }}}
 	isAlteration() => @alteration
-	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	toQuote() => @type.toQuote()
-	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
-	type() => @type
 }
 
-class NamespaceFunctionType extends FunctionType {
+class NamespaceDirectType extends SealableType {
 	private {
 		_alteration: Boolean	= false
 	}
-	static {
-		fromAST(data, node: AbstractNode) { // {{{
-			const scope = node.scope()
+	export(references, ignoreAlteration) { // {{{
+		const export = @type.export(references, ignoreAlteration)
 
-			return new NamespaceFunctionType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
-		} // }}}
-		fromMetadata(data, references, scope: AbstractScope, node: AbstractNode): NamespaceFunctionType { // {{{
-			const type = new NamespaceFunctionType(scope)
+		export.sealed = this.isSealed()
 
-			type._async = data.async
-			type._min = data.min
-			type._max = data.max
-			type._sealed = data.sealed
-			type._throws = [Type.fromMetadata(throw, references, scope, node) for throw in data.throws]
-
-			type._returnType = Type.fromMetadata(data.returns, references, scope, node)
-
-			type._parameters = [ParameterType.fromMetadata(parameter, references, scope, node) for parameter in data.parameters]
-
-			type.updateArguments()
-
-			return type
-		} // }}}
-	}
-	export(references, ignoreAlteration) => { // {{{
-		async: @async
-		min: @min
-		max: @max
-		parameters: [parameter.export(references, ignoreAlteration) for parameter in @parameters]
-		returns: @returnType.toReference(references, ignoreAlteration)
-		sealed: @sealed
-		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
+		return export
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
@@ -296,14 +232,26 @@ class NamespaceFunctionType extends FunctionType {
 		return this
 	} // }}}
 	isAlteration() => @alteration
-	private processModifiers(modifiers) { // {{{
-		for modifier in modifiers {
-			if modifier.kind == ModifierKind::Async {
-				this.async()
+	toExportOrIndex(references, ignoreAlteration) { // {{{
+		if @type.isSealable() {
+			return @type.toExportOrIndex(references, ignoreAlteration)
+		}
+		else if @type.referenceIndex() != -1 {
+			return {
+				kind: TypeKind::Sealable
+				sealed: @type.isSealed()
+				type: @type.referenceIndex()
 			}
-			else if modifier.kind == ModifierKind::Sealed {
-				@sealed = true
+		}
+		else if @type.isReferenced() {
+			return {
+				kind: TypeKind::Sealable
+				sealed: this.isSealed()
+				type: @type.toMetadata(references, ignoreAlteration)
 			}
+		}
+		else {
+			return this.export(references, ignoreAlteration)
 		}
 	} // }}}
 }

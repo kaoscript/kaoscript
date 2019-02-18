@@ -10,11 +10,11 @@
   ],
   "references": [
     {
-      "type": "namespace",
+      "kind": "namespace",
       "sealed": false,
       "properties": {
         "parse": {
-          "type": "function",
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": 1,
@@ -26,6 +26,7 @@
             }
           ],
           "returns": "Number",
+          "sealed": false,
           "throws": []
         }
       }

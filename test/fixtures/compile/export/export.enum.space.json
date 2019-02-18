@@ -7,13 +7,13 @@
   ],
   "references": [
     {
-      "type": "enum",
+      "kind": "enum",
       "elements": [
         "RGB",
         "SRGB"
       ],
       "index": -1,
-      "kind": 2
+      "type": "string"
     }
   ],
   "macros": []

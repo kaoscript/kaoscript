@@ -7,14 +7,14 @@
   ],
   "references": [
     {
-      "type": "enum",
+      "kind": "enum",
       "elements": [
         "Red",
         "Green",
         "Blue"
       ],
       "index": 2,
-      "kind": 1
+      "type": "number"
     }
   ],
   "macros": []

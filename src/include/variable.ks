@@ -36,12 +36,7 @@ class Variable {
 	}
 	constructor()
 	constructor(@name, @immutable, @predefined, @type = Type.Any) { // {{{
-		if type is AliasType || type is ClassType || type is EnumType || type is NamespaceType {
-			@type = new NamedType(@name, type)
-		}
-		else {
-			@type = type
-		}
+		@type = Type.toNamedType(@name, type)
 	} // }}}
 	isImmutable() => @immutable
 	isPredefined() => @predefined
@@ -57,12 +52,7 @@ class Variable {
 	} // }}}
 	type() => @type
 	type(@type) { // {{{
-		if type is AliasType || type is ClassType || type is EnumType || type is NamespaceType {
-			@type = new NamedType(@name, type)
-		}
-		else {
-			@type = type
-		}
+		@type = Type.toNamedType(@name, type)
 
 		return this
 	} // }}}

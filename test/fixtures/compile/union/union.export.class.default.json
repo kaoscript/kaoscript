@@ -9,7 +9,7 @@
   ],
   "references": [
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,
@@ -23,7 +23,7 @@
       "classMethods": {}
     },
     {
-      "type": "function",
+      "kind": "function",
       "async": false,
       "min": 1,
       "max": 1,

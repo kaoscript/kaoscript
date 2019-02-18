@@ -40,18 +40,6 @@ const $types = { // {{{
 	void: 'Void'
 } // }}}
 
-enum Accessibility {
-	Private = 1
-	Protected
-	Public
-}
-
-enum EnumKind {
-	Flags
-	Number
-	String
-}
-
 enum TypeKind<String> {
 	Alias
 	Class
@@ -60,6 +48,8 @@ enum TypeKind<String> {
 	Namespace
 	Object
 	OverloadedFunction
+	Reference
+	Sealable
 }
 
 abstract class Type {
@@ -98,7 +88,7 @@ abstract class Type {
 
 					return new NamedType(data.name.name, type)
 				}
-				NodeKind::FunctionDeclaration => {
+				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
 					if data.parameters? {
 						return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
 					}
@@ -240,6 +230,28 @@ abstract class Type {
 					return UnionType.fromMetadata(data, references, scope, node)
 				}
 			}
+			else if data.kind? {
+				switch data.kind {
+					TypeKind::Class => {
+						return ClassType.fromMetadata(data, references, scope, node)
+					}
+					TypeKind::Enum => {
+						return EnumType.fromMetadata(data, references, scope, node)
+					}
+					TypeKind::Function => {
+						return FunctionType.fromMetadata(data, references, scope, node)
+					}
+					TypeKind::OverloadedFunction => {
+						return OverloadedFunctionType.fromMetadata(data, references, scope, node)
+					}
+					TypeKind::Reference => {
+						return ReferenceType.fromMetadata(data, references, scope, node)
+					}
+					TypeKind::Sealable => {
+						return SealableType.fromMetadata(data, references, scope, node)
+					}
+				}
+			}
 			else if data.reference? {
 				if type ?= references[data.reference] {
 					if type is NamedType {
@@ -254,30 +266,13 @@ abstract class Type {
 					throw new NotImplementedException(node)
 				}
 			}
-			else if data.name? {
-				return new ReferenceType(scope, data.name, data.nullable, [])
-			}
-			else {
-				switch data.type {
-					TypeKind::Enum => {
-						return EnumType.fromMetadata(data, references, scope, node)
-					}
-					TypeKind::Function => {
-						return FunctionType.fromMetadata(data, references, scope, node)
-					}
-					TypeKind::OverloadedFunction => {
-						return OverloadedFunctionType.fromMetadata(data, references, scope, node)
-					}
-					=> {
-						console.log(data)
-						throw new NotImplementedException(node)
-					}
-				}
-			}
+
+			console.log(data)
+			throw new NotImplementedException(node)
 		} // }}}
 		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
-			//console.log('-- import --')
-			//console.log(JSON.stringify(data, null, 2))
+			// console.log('-- import --')
+			// console.log(JSON.stringify(data, null, 2))
 
 			if data is String {
 				return data == 'Any' ? Type.Any : scope.reference(data)
@@ -295,16 +290,8 @@ abstract class Type {
 					return UnionType.import(data, references, queue, scope, node)
 				}
 			}
-			else if data.reference? {
-				if references[data.reference]? {
-					return references[data.reference]
-				}
-				else {
-					throw new NotImplementedException(node)
-				}
-			}
-			else {
-				switch data.type {
+			else if data.kind? {
+				switch data.kind {
 					TypeKind::Alias => {
 						return AliasType.import(data, references, queue, scope, node)
 					}
@@ -326,11 +313,18 @@ abstract class Type {
 					TypeKind::OverloadedFunction => {
 						return OverloadedFunctionType.import(data, references, queue, scope, node)
 					}
-					=> {
-						console.log(data)
-						throw new NotImplementedException(node)
-					}
 				}
+			}
+
+			console.log(data)
+			throw new NotImplementedException(node)
+		} // }}}
+		toNamedType(name: String, type: Type): Type { // {{{
+			if type is AliasType || type is ClassType || type is EnumType || type is NamespaceType {
+				return new NamedType(name, type)
+			}
+			else {
+				return type
 			}
 		} // }}}
 		union(scope: AbstractScope, ...types) { // {{{
@@ -408,6 +402,7 @@ abstract class Type {
 	isPredefined() => false
 	isReferenced() => @referenced
 	isRequired() => @required
+	isSealable() => false
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
 	isString() => false
@@ -415,6 +410,7 @@ abstract class Type {
 	matchContentTo(that: Type): Boolean => that.matchContentOf(this)
 	matchSignatureOf(that: Type): Boolean => false
 	reference(scope = @scope) => scope.reference(this)
+	referenceIndex() => @referenceIndex
 	scope() => @scope
 	toExportOrIndex(references, ignoreAlteration) { // {{{
 		if @referenceIndex != -1 {
@@ -457,7 +453,9 @@ abstract class Type {
 
 include {
 	'./type/function'
+	'./type/named'
 	'./type/reference'
+	'./type/sealable'
 	'./type/alias'
 	'./type/any'
 	'./type/class'
@@ -465,10 +463,8 @@ include {
 	'./type/namespace'
 	'./type/object'
 	'./type/parameter'
-	'./type/sealed'
 	'./type/union'
 	'./type/void'
-	'./type/named'
 }
 
 Type.Any = new AnyType(null)

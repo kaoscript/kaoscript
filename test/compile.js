@@ -5,6 +5,15 @@ var fs = require('fs');
 var klaw = require('klaw-sync');
 var path = require('path');
 
+function replacer(key, value){
+	if(value === undefined) {
+		// return 'undefined'
+		throw new Error('the value of "' + key + '" is not nullable');
+	}
+
+	return value === Infinity ? 'Infinity' : value;
+}
+
 describe('compile', function() {
 	var files = klaw(path.join(__dirname, 'fixtures', 'compile'), {
 		nodir: true,
@@ -72,7 +81,7 @@ describe('compile', function() {
 				}
 
 				if(metadata) {
-					var data = JSON.stringify(compiler.toMetadata(), function(key, value){return value === Infinity ? 'Infinity' : value;}, 2);
+					var data = JSON.stringify(compiler.toMetadata(), replacer, 2);
 					// console.log(data);
 
 					expect(JSON.parse(data)).to.eql(JSON.parse(metadata));

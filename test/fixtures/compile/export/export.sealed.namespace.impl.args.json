@@ -14,14 +14,16 @@
   ],
   "references": [
     {
-      "type": "namespace",
+      "kind": "namespace",
       "sealed": true,
       "properties": {
         "PI": {
+          "kind": "sealable",
           "sealed": false,
           "type": "Number"
         },
         "pow": {
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": "Infinity",
@@ -32,19 +34,20 @@
               "max": "Infinity"
             }
           ],
-          "returns": "Number",
           "sealed": false,
+          "returns": "Number",
           "throws": []
         }
       }
     },
     {
-      "type": "namespace",
+      "kind": "namespace",
       "namespace": {
         "reference": 0
       },
       "properties": {
         "foo": {
+          "kind": "function",
           "async": false,
           "min": 2,
           "max": 3,
@@ -56,8 +59,9 @@
             },
             {
               "type": {
-                "nullable": true,
-                "name": "Any"
+                "kind": "reference",
+                "name": "Any",
+                "nullable": true
               },
               "min": 1,
               "max": 1

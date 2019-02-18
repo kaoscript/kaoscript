@@ -18,7 +18,7 @@
   ],
   "references": [
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,
@@ -45,16 +45,18 @@
       "classMethods": {}
     },
     {
-      "type": "namespace",
+      "kind": "namespace",
       "sealed": true,
       "properties": {
         "PI": {
+          "kind": "sealable",
           "sealed": false,
           "type": {
             "reference": 0
           }
         },
         "pow": {
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": 0,
@@ -68,18 +70,20 @@
       }
     },
     {
-      "type": "namespace",
+      "kind": "namespace",
       "namespace": {
         "reference": 1
       },
       "properties": {
         "pi": {
+          "kind": "sealable",
           "sealed": true,
           "type": {
             "reference": 0
           }
         },
         "foo": {
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": 0,

@@ -7,16 +7,17 @@
   ],
   "references": [
     {
-      "type": "namespace",
+      "kind": "namespace",
       "sealed": false,
       "properties": {
         "foo": {
-          "type": "function",
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": 0,
           "parameters": [],
           "returns": "Any",
+          "sealed": false,
           "throws": []
         }
       }

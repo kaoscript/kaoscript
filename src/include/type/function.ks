@@ -17,6 +17,15 @@ class FunctionType extends Type {
 		_throws: Array<Type>				= []
 	}
 	static {
+		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
+		fromAST(data, scope: AbstractScope, defined: Boolean, node: AbstractNode): Type { // {{{
+			if data.parameters? {
+				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
+			}
+			else {
+				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
+			}
+		} // }}}
 		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new FunctionType(scope)
 
@@ -34,6 +43,11 @@ class FunctionType extends Type {
 			type._parameters = [ParameterType.fromMetadata(parameter, references, scope, node) for parameter in data.parameters]
 
 			type.updateArguments()
+
+			if data.sealed == true {
+				type.flagSealed()
+			}
+
 
 			return type
 		} // }}}
@@ -205,7 +219,7 @@ class FunctionType extends Type {
 		return true
 	} // }}}
 	export(references, ignoreAlteration) => { // {{{
-		type: TypeKind::Function
+		kind: TypeKind::Function
 		async: @async
 		min: @min
 		max: @max
@@ -514,7 +528,7 @@ class OverloadedFunctionType extends Type {
 		}
 
 		return {
-			type: TypeKind::OverloadedFunction
+			kind: TypeKind::OverloadedFunction
 			functions: functions
 		}
 	} // }}}

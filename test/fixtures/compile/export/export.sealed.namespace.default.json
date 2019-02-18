@@ -12,14 +12,16 @@
   ],
   "references": [
     {
-      "type": "namespace",
+      "kind": "namespace",
       "sealed": true,
       "properties": {
         "PI": {
+          "kind": "sealable",
           "sealed": false,
           "type": "Number"
         },
         "pow": {
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": "Infinity",

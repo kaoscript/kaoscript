@@ -1,5 +1,8 @@
 {
-  "aliens": [],
+  "aliens": [
+    -1,
+    "console"
+  ],
   "requirements": [],
   "exports": [
     0,
@@ -39,17 +42,6 @@
           "returns": "Any",
           "sealed": false,
           "throws": []
-        },
-        "Type": {
-          "kind": "enum",
-          "elements": [
-            "FOO",
-            "BAR",
-            "QUX"
-          ],
-          "index": 2,
-          "type": "number",
-          "sealed": false
         }
       }
     }

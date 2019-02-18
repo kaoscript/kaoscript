@@ -28,7 +28,7 @@
   ],
   "references": [
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,
@@ -42,7 +42,7 @@
       "classMethods": {}
     },
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,
@@ -56,7 +56,7 @@
       "classMethods": {}
     },
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": true,
       "hybrid": false,

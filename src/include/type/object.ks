@@ -6,7 +6,7 @@ class ObjectType extends Type {
 		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new ObjectType(scope)
 
-			if data.sealed {
+			if data.sealed == true {
 				type.flagSealed()
 			}
 
@@ -38,10 +38,14 @@ class ObjectType extends Type {
 	} // }}}
 	export(references, ignoreAlteration) { // {{{
 		const export = {
-			type: TypeKind::Object
-			sealed: @sealed
-			properties: {}
+			kind: TypeKind::Object
 		}
+
+		if @sealed {
+			export.sealed = @sealed
+		}
+
+		export.properties = {}
 
 		for name, value of @properties {
 			export.properties[name] = value.export(references, ignoreAlteration)
@@ -50,6 +54,7 @@ class ObjectType extends Type {
 		return export
 	} // }}}
 	getProperty(name: String): Type => @properties[name] ?? null
+	isSealable() => true
 	matchSignatureOf(value) { // {{{
 		if value is not ObjectType {
 			return false

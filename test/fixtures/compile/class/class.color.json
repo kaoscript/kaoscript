@@ -9,7 +9,7 @@
   ],
   "references": [
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,
@@ -73,12 +73,12 @@
       "classMethods": {}
     },
     {
-      "type": "enum",
+      "kind": "enum",
       "elements": [
         "RGB"
       ],
       "index": -1,
-      "kind": 2
+      "type": "string"
     }
   ],
   "macros": []

@@ -11,7 +11,7 @@
   ],
   "references": [
     {
-      "type": "function",
+      "kind": "function",
       "async": false,
       "min": 0,
       "max": 0,
@@ -20,7 +20,7 @@
       "throws": []
     },
     {
-      "type": "function",
+      "kind": "function",
       "async": false,
       "min": 0,
       "max": 0,
@@ -29,7 +29,7 @@
       "throws": []
     },
     {
-      "type": "function",
+      "kind": "function",
       "async": false,
       "min": 0,
       "max": 0,

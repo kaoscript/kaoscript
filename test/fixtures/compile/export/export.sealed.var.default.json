@@ -10,6 +10,7 @@
   ],
   "references": [
     {
+      "kind": "sealable",
       "sealed": true,
       "type": "Any"
     }

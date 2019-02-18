@@ -53,11 +53,11 @@ abstract class DependencyStatement extends Statement {
 				return variable
 			}
 			NodeKind::EnumDeclaration => {
-				let kind = EnumKind::Number
+				let kind = EnumTypeKind::Number
 
 				if declaration.type? {
 					if Type.fromAST(declaration.type, this).isString() {
-						kind = EnumKind::String
+						kind = EnumTypeKind::String
 					}
 				}
 
@@ -139,11 +139,8 @@ abstract class DependencyStatement extends Statement {
 					if type is ReferenceType && type.isClass() {
 						type = new ClassType(scope)
 					}
-					else if type == Type.Any {
-						type = new SealedType(scope, @scope.reference('Any'))
-					}
-					else if type is ReferenceType {
-						type = new SealedType(scope, type)
+					else if !type.isSealable() {
+						type = new SealableType(scope, type)
 					}
 
 					type.flagSealed()

@@ -7,7 +7,7 @@
   ],
   "references": [
     {
-      "type": "alias",
+      "kind": "alias",
       "of": [
         "Number",
         "String"

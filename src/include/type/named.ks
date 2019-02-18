@@ -45,6 +45,11 @@ class NamedType extends Type {
 
 		return this
 	} // }}}
+	flagSealable() { // {{{
+		@type.flagSealable()
+
+		return this
+	} // }}}
 	flagSealed() { // {{{
 		@type.flagSealed()
 
@@ -79,6 +84,7 @@ class NamedType extends Type {
 	isPredefined() => @type.isPredefined()
 	isReferenced() => @type.isReferenced()
 	isRequired() => @type.isRequired()
+	isSealable() => @type.isSealable()
 	isSealed() => @type.isSealed()
 	isSealedAlien() => @type.isSealedAlien()
 	isNamed() => true
@@ -152,8 +158,10 @@ class NamedType extends Type {
 			return scope.reference(@name)
 		}
 	} // }}}
+	referenceIndex() => @type.referenceIndex()
 	toQuote() => @name
 	toFragments(fragments, node)
+	toExportOrIndex(references, ignoreAlteration) => @type.toExportOrIndex(references, ignoreAlteration)
 	toMetadata(references, ignoreAlteration) => @type.toMetadata(references, ignoreAlteration)
 	toReference(references, ignoreAlteration) { // {{{
 		if @type is ClassType && @type.isPredefined() {

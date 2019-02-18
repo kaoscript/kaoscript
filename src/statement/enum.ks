@@ -18,7 +18,7 @@ class EnumDeclaration extends Statement {
 			const type = Type.fromAST(@data.type, this)
 
 			if type.isString() {
-				@enum = new EnumType(@scope, EnumKind::String)
+				@enum = new EnumType(@scope, EnumTypeKind::String)
 			}
 			else if @data.attributes? {
 				let nf = true
@@ -26,7 +26,7 @@ class EnumDeclaration extends Statement {
 					if attr.kind == NodeKind::AttributeDeclaration && attr.declaration.kind == NodeKind::Identifier && attr.declaration.name == 'flags' {
 						nf = false
 
-						@enum = new EnumType(@scope, EnumKind::Flags)
+						@enum = new EnumType(@scope, EnumTypeKind::Flags)
 					}
 				}
 
@@ -50,7 +50,7 @@ class EnumDeclaration extends Statement {
 		}
 
 		switch @enum.kind() {
-			EnumKind::Flags => {
+			EnumTypeKind::Flags => {
 				for data in @data.members {
 					if data.value? {
 						if data.value.kind == NodeKind::BinaryExpression && data.value.operator.kind == BinaryOperatorKind::BitwiseOr {
@@ -95,7 +95,7 @@ class EnumDeclaration extends Statement {
 					}
 				}
 			}
-			EnumKind::String => {
+			EnumTypeKind::String => {
 				for data in @data.members {
 					@values.push({
 						name: data.name.name
@@ -105,7 +105,7 @@ class EnumDeclaration extends Statement {
 					@enum.addElement(data.name.name)
 				}
 			}
-			EnumKind::Number => {
+			EnumTypeKind::Number => {
 				let value
 				for data in @data.members {
 					if data.value? {

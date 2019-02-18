@@ -10,11 +10,10 @@
   ],
   "references": [
     {
-      "type": "object",
-      "sealed": false,
+      "kind": "object",
       "properties": {
         "log": {
-          "type": "function",
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": "Infinity",
@@ -31,7 +30,7 @@
       }
     },
     {
-      "type": "enum",
+      "kind": "enum",
       "elements": [
         "Red",
         "Green",
@@ -41,7 +40,7 @@
         "DarkBlue"
       ],
       "index": 5,
-      "kind": 1
+      "type": "number"
     }
   ],
   "macros": []

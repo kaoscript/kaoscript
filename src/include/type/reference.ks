@@ -7,6 +7,11 @@ class ReferenceType extends Type {
 		_type: Type
 		_variable: Variable
 	}
+	static {
+		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+			return new ReferenceType(scope, data.name, data.nullable)
+		} // }}}
+	}
 	constructor(@scope, name: String, @nullable = false, @parameters = []) { // {{{
 		super(scope)
 
@@ -50,8 +55,9 @@ class ReferenceType extends Type {
 	export(references, ignoreAlteration) { // {{{
 		if @nullable {
 			return {
-				nullable: @nullable
+				kind: TypeKind::Reference
 				name: @name
+				nullable: @nullable
 			}
 		}
 		else {

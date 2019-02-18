@@ -16,7 +16,7 @@
   ],
   "references": [
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,
@@ -31,7 +31,7 @@
     },
     "Enum",
     {
-      "type": "class",
+      "kind": "class",
       "class": {
         "reference": 0
       },

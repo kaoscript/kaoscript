@@ -10,17 +10,16 @@
   ],
   "references": [
     {
-      "type": "object",
+      "kind": "object",
       "sealed": true,
       "properties": {
         "innerHeight": "Number",
         "innerWidth": "Number",
         "console": {
-          "type": "object",
-          "sealed": false,
+          "kind": "object",
           "properties": {
             "log": {
-              "type": "function",
+              "kind": "function",
               "async": false,
               "min": 0,
               "max": "Infinity",
@@ -37,7 +36,7 @@
           }
         },
         "moveTo": {
-          "type": "function",
+          "kind": "function",
           "async": false,
           "min": 2,
           "max": 2,

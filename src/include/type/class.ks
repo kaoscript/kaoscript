@@ -1,3 +1,9 @@
+enum Accessibility {
+	Private = 1
+	Protected
+	Public
+}
+
 class ClassType extends Type {
 	private {
 		_abstract: Boolean			= false
@@ -307,7 +313,7 @@ class ClassType extends Type {
 	export(references, ignoreAlteration) { // {{{
 		if this.hasExportableAlteration() {
 			const export = {
-				type: TypeKind::Class
+				kind: TypeKind::Class
 				class: @alterationReference.toAlterationReference(references, ignoreAlteration)
 				init: @init
 				instanceVariables: {}
@@ -342,7 +348,7 @@ class ClassType extends Type {
 		}
 		else {
 			const export = {
-				type: TypeKind::Class
+				kind: TypeKind::Class
 				abstract: @abstract
 				alien: @alien
 				hybrid: @hybrid
@@ -704,6 +710,7 @@ class ClassType extends Type {
 	} // }}}
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
+	isSealable() => true
 	matchArguments(arguments: Array<Type>) { // {{{
 		if @constructors.length == 0 {
 			if @extending {
@@ -962,6 +969,7 @@ class ClassMethodType extends FunctionType {
 
 		return false
 	} // }}}
+	isSealable() => true
 	matchSignatureOf(b: ClassMethodType) { // {{{
 		if @min != b._min || @max != b._max || @async != b._async || @parameters.length != b._parameters.length {
 			return false

@@ -16,15 +16,15 @@
   ],
   "references": [
     {
-      "type": "enum",
+      "kind": "enum",
       "elements": [
         "RGB"
       ],
       "index": -1,
-      "kind": 2
+      "type": "string"
     },
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,
@@ -73,7 +73,7 @@
       "classMethods": {}
     },
     {
-      "type": "class",
+      "kind": "class",
       "class": {
         "reference": 1
       },

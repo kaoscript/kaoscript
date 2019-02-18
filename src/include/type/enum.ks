@@ -1,13 +1,19 @@
+enum EnumTypeKind<String> {
+	Flags
+	Number
+	String
+}
+
 class EnumType extends Type {
 	private {
 		_elements: Array	= []
 		_index: Number		= -1
-		_kind: EnumKind
+		_kind: EnumTypeKind
 		_type: Type
 	}
 	static {
 		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
-			const type = new EnumType(scope, data.kind)
+			const type = new EnumType(scope, data.type)
 
 			type._elements = data.elements
 			type._index = data.index
@@ -15,7 +21,7 @@ class EnumType extends Type {
 			return type
 		} // }}}
 		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
-			const type = new EnumType(scope, data.kind)
+			const type = new EnumType(scope, data.type)
 
 			type._elements = data.elements
 			type._index = data.index
@@ -23,10 +29,10 @@ class EnumType extends Type {
 			return type
 		} // }}}
 	}
-	constructor(@scope, @kind = EnumKind::Number) { // {{{
+	constructor(@scope, @kind = EnumTypeKind::Number) { // {{{
 		super(scope)
 
-		if @kind == EnumKind::String {
+		if @kind == EnumTypeKind::String {
 			@type = scope.reference('String')
 		}
 		else {
@@ -40,10 +46,10 @@ class EnumType extends Type {
 		throw new NotImplementedException()
 	} // }}}
 	export(references, ignoreAlteration) => { // {{{
-		type: TypeKind::Enum
+		kind: TypeKind::Enum
 		elements: @elements
 		index: @index
-		kind: @kind
+		type: @kind
 	} // }}}
 	getProperty(name: String) => null
 	hasElement(name: String) { // {{{

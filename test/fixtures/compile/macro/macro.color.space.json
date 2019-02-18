@@ -7,7 +7,7 @@
   ],
   "references": [
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,
@@ -964,20 +964,20 @@
       }
     },
     {
-      "type": "enum",
+      "kind": "enum",
       "elements": [
         "RGB",
         "SRGB"
       ],
       "index": -1,
-      "kind": 2
+      "type": "string"
     },
     {
-      "type": "alias",
+      "kind": "alias",
       "of": "Number"
     },
     {
-      "type": "alias",
+      "kind": "alias",
       "of": "Number"
     }
   ],

@@ -425,7 +425,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 	private {
 		_namespace: NamespaceType
 		_value
-		_type: FunctionType
+		_type: Type
 		_variable: NamedType<NamespaceType>
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -442,11 +442,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 	prepare() { // {{{
 		@value.prepare()
 
-		@type = NamespaceVariableType.fromAST(@data, this)
-
-		@type.flagAlteration()
-
-		@namespace.addProperty(@data.name.name, @type)
+		@type = @namespace.addProperty(@data.name.name, Type.fromAST(@data.type, this), true)
 	} // }}}
 	translate() { // {{{
 		@value.translate()
@@ -499,11 +495,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = NamespaceFunctionType.fromAST(@data, this)
-
-		@type.flagAlteration()
-
-		@namespace.addProperty(@data.name.name, @type)
+		@type = @namespace.addProperty(@data.name.name, Type.fromAST(@data, this), true)
 	} // }}}
 	translate() { // {{{
 		if @data.body? {

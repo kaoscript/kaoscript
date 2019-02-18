@@ -9,32 +9,38 @@
   ],
   "references": [
     {
-      "type": "namespace",
+      "kind": "namespace",
       "sealed": false,
       "properties": {
-        "foo": 1,
+        "foo": {
+          "kind": "sealable",
+          "type": 1,
+          "sealed": false
+        },
         "bar": {
-          "type": "function",
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": 0,
           "parameters": [],
           "returns": "String",
+          "sealed": false,
           "throws": []
         },
         "qux": {
-          "type": "function",
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": 0,
           "parameters": [],
           "returns": "String",
+          "sealed": false,
           "throws": []
         }
       }
     },
     {
-      "type": "function",
+      "kind": "function",
       "async": false,
       "min": 0,
       "max": 0,

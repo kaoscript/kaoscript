@@ -14,7 +14,7 @@
   ],
   "references": [
     {
-      "type": "class",
+      "kind": "class",
       "abstract": false,
       "alien": false,
       "hybrid": false,
@@ -28,11 +28,10 @@
       "classMethods": {}
     },
     {
-      "type": "object",
-      "sealed": false,
+      "kind": "object",
       "properties": {
         "log": {
-          "type": "function",
+          "kind": "function",
           "async": false,
           "min": 0,
           "max": "Infinity",

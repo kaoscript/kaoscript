@@ -417,24 +417,13 @@ class CallExpression extends Expression {
 			is NamedType => {
 				this.makeMemberCallee(value.type(), value)
 			}
-			is NamespaceVariableType => {
-				this.makeMemberCalleeFromReference(value.type())
-			}
 			is NamespaceType => {
 				if property ?= value.getProperty(@property) {
-					if property is FunctionType {
-						if value.isSealedProperty(@property) {
-							this.addCallee(new SealedFunctionCallee(@data, name, property, property.returnType(), this))
-						}
-						else {
-							this.makeCallee(property)
-						}
-					}
-					else if property is OverloadedFunctionType {
-						this.makeCallee(property)
+					if property is SealableType {
+						this.makeNamespaceCallee(property.type(), property.isSealed(), name)
 					}
 					else {
-						this.addCallee(new DefaultCallee(@data, @object, property, this))
+						this.makeNamespaceCallee(property, value.isSealedProperty(@property), name)
 					}
 				}
 				else {
@@ -458,10 +447,13 @@ class CallExpression extends Expression {
 				}
 			}
 			is ParameterType => {
-				this.makeMemberCallee(value.type())
+				this.makeMemberCallee(value.type(), name)
 			}
 			is ReferenceType => {
 				this.makeMemberCalleeFromReference(value)
+			}
+			is SealableType => {
+				this.makeMemberCallee(value.type(), name)
 			}
 			is UnionType => {
 				for let type in value.types() {
@@ -564,6 +556,22 @@ class CallExpression extends Expression {
 			=> {
 				this.addCallee(new DefaultCallee(@data, @object, this))
 			}
+		}
+	} // }}}
+	makeNamespaceCallee(property, sealed, name) { // {{{
+		if property is FunctionType {
+			if sealed {
+				this.addCallee(new SealedFunctionCallee(@data, name, property, property.returnType(), this))
+			}
+			else {
+				this.makeCallee(property)
+			}
+		}
+		else if property is OverloadedFunctionType {
+			this.makeCallee(property)
+		}
+		else {
+			this.addCallee(new DefaultCallee(@data, @object, property, this))
 		}
 	} // }}}
 	releaseReusable() { // {{{
