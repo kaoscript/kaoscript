@@ -190,7 +190,7 @@ class ReferenceType extends Type {
 			}
 		}
 	} // }}}
-	matchSignatureOf(value) { // {{{
+	matchSignatureOf(value, matchables) { // {{{
 		if value is ReferenceType {
 			if this.isEnum() {
 				return value.discardReference() is EnumType
@@ -199,7 +199,7 @@ class ReferenceType extends Type {
 				return this.discardReference() is EnumType
 			}
 			else {
-				return this.discardReference().matchSignatureOf(value.discardReference())
+				return this.discardReference().matchSignatureOf(value.discardReference(), matchables)
 			}
 		}
 		else {

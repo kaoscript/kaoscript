@@ -408,7 +408,7 @@ abstract class Type {
 	isString() => false
 	matchContentOf(that: Type): Boolean => this.equals(that)
 	matchContentTo(that: Type): Boolean => that.matchContentOf(this)
-	matchSignatureOf(that: Type): Boolean => false
+	matchSignatureOf(that: Type, matchables): Boolean => false
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
 	scope() => @scope

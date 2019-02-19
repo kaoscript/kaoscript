@@ -14,7 +14,7 @@ class AnyType extends Type {
 	isInstanceOf(target: Type) => true
 	isNullable() => false
 	matchContentOf(b) => true
-	matchSignatureOf(b) => b.isAny()
+	matchSignatureOf(b, matchables) => b.isAny()
 	parameter() => Type.Any
 	flagRequired() => this
 	toFragments(fragments, node) { // {{{

@@ -467,10 +467,12 @@ class ClassType extends Type {
 			}
 		}
 
+		const matchables = []
+
 		let method, index
 		for name, methods of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
-				if method.isMatched(@instanceMethods[name]) {
+				if method.isMatched(@instanceMethods[name], matchables) {
 					methods.splice(index, 1)
 				}
 			}
@@ -592,10 +594,12 @@ class ClassType extends Type {
 			@extends.type().filterAbstractMethods(abstractMethods)
 		}
 
+		const matchables = []
+
 		let method, index
 		for name, methods of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
-				if method.isMatched(@instanceMethods[name]) {
+				if method.isMatched(@instanceMethods[name], matchables) {
 					methods.splice(index, 1)
 				}
 			}
@@ -733,7 +737,7 @@ class ClassType extends Type {
 	matchClassMethod(name: String, type: ClassMethodType) { // {{{
 		if @classMethods[name] is Array {
 			for method, index in @classMethods[name] {
-				if method.matchSignatureOf(type) {
+				if method.matchSignatureOf(type, []) {
 					return index
 				}
 			}
@@ -749,7 +753,7 @@ class ClassType extends Type {
 	matchInstanceMethod(name: String, type: ClassMethodType) { // {{{
 		if @instanceMethods[name] is Array {
 			for method, index in @instanceMethods[name] {
-				if method.matchSignatureOf(type) {
+				if method.matchSignatureOf(type, []) {
 					return index
 				}
 			}
@@ -762,27 +766,61 @@ class ClassType extends Type {
 			return null
 		}
 	} // }}}
-	matchSignatureOf(that) { // {{{
+	matchSignatureOf(that, matchables) { // {{{
 		if that is ClassType {
+			for i from 0 til matchables.length by 3 {
+				if matchables[i] == this && matchables[i + 1] == that {
+					return matchables[i + 2]
+				}
+			}
+
+			const index = matchables.length
+			matchables.push(this, that, true)
+
 			if @sealed != that._sealed {
+				matchables[index + 2] = false
 				return false
 			}
 
 			for name, variable of that._instanceVariables {
-				if !@instanceVariables[name]?.matchSignatureOf(variable) {
+				if !@instanceVariables[name]?.matchSignatureOf(variable, matchables) {
+					matchables[index + 2] = false
 					return false
 				}
 			}
 
 			for name, variable of that._classVariables {
-				if !@classVariables[name]?.matchSignatureOf(variable) {
+				if !@classVariables[name]?.matchSignatureOf(variable, matchables) {
+					matchables[index + 2] = false
 					return false
 				}
 			}
 
-			for name, methods of @instanceMethods {
-				for method in methods {
+			for name, methods of that._instanceMethods {
+				if !?@instanceMethods[name] {
+					matchables[index + 2] = false
+					return false
+				}
 
+				for method in methods {
+					if !method.isMatched(@instanceMethods[name], matchables) {
+						matchables[index + 2] = false
+						return false
+					}
+				}
+			}
+
+			for name, methods of that._classMethods {
+				if !?@classMethods[name] {
+					matchables[index + 2] = false
+					return false
+				}
+
+				for method in methods {
+					if !method.isMatched(@classMethods[name], matchables) {
+						matchables[index + 2] = false
+						return false
+					}
 				}
 			}
 
@@ -897,7 +935,7 @@ class ClassVariableType extends Type {
 		return this
 	} // }}}
 	isAlteration() => @alteration
-	matchSignatureOf(b: Type): Boolean { // {{{
+	matchSignatureOf(b: Type, matchables): Boolean { // {{{
 		if b is ClassVariableType {
 			return true
 		}
@@ -960,9 +998,9 @@ class ClassMethodType extends FunctionType {
 		return this
 	} // }}}
 	isAlteration() => @alteration
-	isMatched(methods: Array<ClassMethodType>): Boolean { // {{{
+	isMatched(methods: Array<ClassMethodType>, matchables): Boolean { // {{{
 		for method in methods {
-			if method.matchSignatureOf(this) {
+			if method.matchSignatureOf(this, matchables) {
 				return true
 			}
 		}
@@ -970,13 +1008,13 @@ class ClassMethodType extends FunctionType {
 		return false
 	} // }}}
 	isSealable() => true
-	matchSignatureOf(b: ClassMethodType) { // {{{
+	matchSignatureOf(b: ClassMethodType, matchables) { // {{{
 		if @min != b._min || @max != b._max || @async != b._async || @parameters.length != b._parameters.length {
 			return false
 		}
 
 		for parameter, i in @parameters {
-			if !parameter.matchSignatureOf(b._parameters[i]) {
+			if !parameter.matchSignatureOf(b._parameters[i], matchables) {
 				return false
 			}
 		}

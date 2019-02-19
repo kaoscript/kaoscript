@@ -4,6 +4,9 @@ impl Array {
 	contains(item, from = 0) { // {{{
 		return this.indexOf(item, from) != -1
 	} // }}}
+	copy(): Array { // {{{
+		return this
+	} // }}}
 	pushUniq(...args) { // {{{
 		if args.length == 1 {
 			if !this.contains(args[0]) {

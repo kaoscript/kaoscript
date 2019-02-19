@@ -3,11 +3,7 @@
     0,
     "Array"
   ],
-  "requirements": [
-    0,
-    "Array",
-    false
-  ],
+  "requirements": [],
   "exports": [
     1,
     "Array"
@@ -81,6 +77,18 @@
                 "max": "Infinity"
               }
             ],
+            "returns": "Any",
+            "sealed": true,
+            "throws": []
+          }
+        ],
+        "foobar": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
             "returns": "Any",
             "sealed": true,
             "throws": []

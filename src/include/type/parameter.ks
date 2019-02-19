@@ -42,7 +42,7 @@ class ParameterType extends Type {
 			return @type.matchContentTo(value)
 		}
 	} // }}}
-	matchSignatureOf(value: ParameterType) { // {{{
+	matchSignatureOf(value: ParameterType, matchables) { // {{{
 		if @min != value._min || @max != value._max {
 			return false
 		}
@@ -51,7 +51,7 @@ class ParameterType extends Type {
 			return true
 		}
 
-		return @type.matchSignatureOf(value.type())
+		return @type.matchSignatureOf(value.type(), matchables)
 	} // }}}
 	max() => @max
 	min() => @min

@@ -68,7 +68,7 @@ class EnumType extends Type {
 	matchContentTo(value: Type) { // {{{
 		return @type.matchContentTo(value)
 	} // }}}
-	matchSignatureOf(value: Type): Boolean { // {{{
+	matchSignatureOf(value: Type, matchables): Boolean { // {{{
 		if value is EnumType {
 			return true
 		}

@@ -55,7 +55,7 @@ class ObjectType extends Type {
 	} // }}}
 	getProperty(name: String): Type => @properties[name] ?? null
 	isSealable() => true
-	matchSignatureOf(value) { // {{{
+	matchSignatureOf(value, matchables) { // {{{
 		if value is not ObjectType {
 			return false
 		}
@@ -69,7 +69,7 @@ class ObjectType extends Type {
 			nf = true
 
 			for :prop of @properties while nf {
-				if prop.matchSignatureOf(property) {
+				if prop.matchSignatureOf(property, matchables) {
 					nf = false
 				}
 			}

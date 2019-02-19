@@ -261,7 +261,7 @@ class FunctionType extends Type {
 		return false
 	} // }}}
 	isFunction() => true
-	matchSignatureOf(value: Type): Boolean { // {{{
+	matchSignatureOf(value: Type, matchables): Boolean { // {{{
 		// console.log(this)
 		// console.log(value)
 		if value is ReferenceType {
@@ -270,7 +270,7 @@ class FunctionType extends Type {
 		else if value is FunctionType {
 			// console.log(this.matchArguments(value._parameters))
 			// console.log(@returnType.matchSignatureOf(value._returnType))
-			return (@missingParameters || this.matchArguments(value._parameters)) && (@missingReturn || @returnType.matchSignatureOf(value._returnType))
+			return (@missingParameters || this.matchArguments(value._parameters)) && (@missingReturn || @returnType.matchSignatureOf(value._returnType, matchables))
 		}
 		else if value is OverloadedFunctionType {
 			throw new NotImplementedException()
@@ -545,13 +545,13 @@ class OverloadedFunctionType extends Type {
 	isAsync() => @async
 	isFunction() => true
 	isMergeable(type) => type is OverloadedFunctionType && @async == type.isAsync()
-	matchSignatureOf(value: Type) { // {{{
+	matchSignatureOf(value: Type, matchables) { // {{{
 		if value is ReferenceType {
 			return value.isFunction()
 		}
 		else if value is FunctionType {
 			for fn in @functions {
-				if fn.matchSignatureOf(value) {
+				if fn.matchSignatureOf(value, matchables) {
 					return true
 				}
 			}
@@ -562,7 +562,7 @@ class OverloadedFunctionType extends Type {
 				nf = true
 
 				for fn in @functions while nf {
-					if fn.matchSignatureOf(fb) {
+					if fn.matchSignatureOf(fb, matchables) {
 						nf = false
 					}
 				}
@@ -575,7 +575,7 @@ class OverloadedFunctionType extends Type {
 			return true
 		}
 		else if value is NamedType {
-			return this.matchSignatureOf(value.type())
+			return this.matchSignatureOf(value.type(), matchables)
 		}
 
 		return false

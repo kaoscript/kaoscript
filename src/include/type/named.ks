@@ -135,7 +135,7 @@ class NamedType extends Type {
 
 		return false
 	} // }}}
-	matchSignatureOf(that) => @type.matchSignatureOf(that.discardName())
+	matchSignatureOf(that, matchables) => @type.matchSignatureOf(that.discardName(), matchables)
 	metaReference(references, ignoreAlteration) => @type.metaReference(references, @name, ignoreAlteration)
 	name() => @name
 	name(@name) => this

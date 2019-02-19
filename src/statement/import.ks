@@ -106,6 +106,8 @@ class Importer extends Statement {
 
 			@worker.prepare(@requirements)
 
+			const matchables = []
+
 			for name, def of @imports {
 				const variable = @scope.getVariable(def.local)
 
@@ -133,7 +135,7 @@ class Importer extends Statement {
 					else if !variable.isPredefined() && @localToModuleArguments[def.local] is not String {
 						ReferenceException.throwNotPassed(def.local, @data.source.value, this)
 					}
-					else if type.matchSignatureOf(variable.type()) {
+					else if type.matchSignatureOf(variable.type(), matchables) {
 						if variable.type().isAlien() {
 							type.flagAlien()
 						}
@@ -826,13 +828,14 @@ class ImportWorker {
 
 		if @metadata.requirements.length > 0 {
 			for i from 0 til @metadata.requirements.length by 3 {
-				type = Type.import(@metadata.references[@metadata.requirements[i]], references, queue, @scope, @node)
+				index = @metadata.requirements[i]
+				type = Type.import(@metadata.references[index], references, queue, @scope, @node)
 
 				if type is ClassType || type is EnumType || type is NamespaceType {
-					references[@metadata.requirements[i]] = new NamedType(@metadata.requirements[i + 1], type)
+					references[index] = new NamedType(@metadata.requirements[i + 1], type)
 				}
 				else {
-					references[@metadata.requirements[i]] = type
+					references[index] = type
 				}
 			}
 
@@ -840,10 +843,12 @@ class ImportWorker {
 				queue.shift()()
 			}
 
+			const matchables = []
+
 			for i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
-				if (requirement ?= requirements[name]) && !requirement.type.matchSignatureOf(references[@metadata.requirements[i]]) {
+				if (requirement ?= requirements[name]) && !requirement.type.matchSignatureOf(references[@metadata.requirements[i]], matchables) {
 					TypeException.throwNotCompatible(requirement.name, name, @node.data().source.value, @node)
 				}
 			}
@@ -863,6 +868,15 @@ class ImportWorker {
 			}
 		}
 
+		for i from 0 til @metadata.requirements.length by 3 {
+			index = @metadata.requirements[i]
+			type = references[index]
+
+			if type is ClassType || type is EnumType || type is NamespaceType {
+				references[index] = new NamedType(name, type)
+			}
+		}
+
 		for i from 0 til @metadata.exports.length by 2 {
 			index = @metadata.exports[i]
 			name = @metadata.exports[i + 1]
@@ -871,10 +885,10 @@ class ImportWorker {
 				type = Type.Any
 			}
 			else {
-				type = references[@metadata.exports[i]]
+				type = references[index]
 
 				if type is ClassType || type is EnumType || type is NamespaceType {
-					references[@metadata.exports[i]] = type = new NamedType(name, type)
+					references[index] = type = new NamedType(name, type)
 				}
 			}
 
