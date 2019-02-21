@@ -3,8 +3,8 @@ class SealableType extends Type {
 		_type: Type
 	}
 	static {
-		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
-			const type = new SealableType(scope, Type.fromMetadata(data.type, references, scope, node))
+		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
+			const type = new SealableType(scope, Type.fromMetadata(data.type, references, alterations, scope, node))
 
 			if data.sealed {
 				type.flagSealed()
@@ -41,6 +41,14 @@ class SealableType extends Type {
 	} // }}}
 	isSealable() => true
 	isSealed() => @sealed || @type.isSealed()
+	matchSignatureOf(that, matchables) { // {{{
+		if that is SealableType {
+			return @type.matchSignatureOf(that.type(), matchables)
+		}
+		else {
+			return @type.matchSignatureOf(that, matchables)
+		}
+	} // }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote() => @type.toQuote()
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)

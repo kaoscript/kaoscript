@@ -827,9 +827,11 @@ class ImportWorker {
 		let index, name, type, requirement
 
 		if @metadata.requirements.length > 0 {
+			const alterations = {}
+
 			for i from 0 til @metadata.requirements.length by 3 {
 				index = @metadata.requirements[i]
-				type = Type.import(@metadata.references[index], references, queue, @scope, @node)
+				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
 
 				if type is ClassType || type is EnumType || type is NamespaceType {
 					references[index] = new NamedType(@metadata.requirements[i + 1], type)
@@ -862,9 +864,11 @@ class ImportWorker {
 			}
 		}
 
+		const alterations = {}
+
 		for data, index in @metadata.references {
 			if !?references[index] {
-				references[index] = Type.import(data, references, queue, @scope, @node)
+				references[index] = Type.import(index, data, references, alterations, queue, @scope, @node)
 			}
 		}
 

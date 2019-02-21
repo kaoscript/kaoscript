@@ -3,11 +3,11 @@ class AliasType extends Type {
 		_type: Type
 	}
 	static {
-		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new AliasType(scope)
 
 			queue.push(() => {
-				type.type(Type.fromMetadata(data.of, references, scope, node))
+				type.type(Type.fromMetadata(data.of, references, alterations, scope, node))
 			})
 
 			return type

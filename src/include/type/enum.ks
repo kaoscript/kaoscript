@@ -12,7 +12,7 @@ class EnumType extends Type {
 		_type: Type
 	}
 	static {
-		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new EnumType(scope, data.type)
 
 			type._elements = data.elements
@@ -20,7 +20,7 @@ class EnumType extends Type {
 
 			return type
 		} // }}}
-		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new EnumType(scope, data.type)
 
 			type._elements = data.elements

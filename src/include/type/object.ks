@@ -3,7 +3,7 @@ class ObjectType extends Type {
 		_properties: Object			= {}
 	}
 	static {
-		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new ObjectType(scope)
 
 			if data.sealed == true {
@@ -12,7 +12,7 @@ class ObjectType extends Type {
 
 			queue.push(() => {
 				for name, property of data.properties {
-					type.addPropertyFromMetadata(name, property, references, scope, node)
+					type.addPropertyFromMetadata(name, property, references, alterations, scope, node)
 				}
 			})
 
@@ -22,13 +22,13 @@ class ObjectType extends Type {
 	addProperty(name: String, type: Type) { // {{{
 		@properties[name] = type
 	} // }}}
-	addPropertyFromMetadata(name, data, references, scope, node) { // {{{
+	addPropertyFromMetadata(name, data, references, alterations, scope, node) { // {{{
 		let type
 		if data.parameters? {
-			type = FunctionType.fromMetadata(data, references, scope, node)
+			type = FunctionType.fromMetadata(data, references, alterations, scope, node)
 		}
 		else {
-			type = Type.fromMetadata(data, references, scope, node)
+			type = Type.fromMetadata(data, references, alterations, scope, node)
 		}
 
 		@properties[name] = type

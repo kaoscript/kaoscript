@@ -200,12 +200,17 @@ abstract class Type {
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
-		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
 			// console.log('-- fromMetadata --')
 			// console.log(JSON.stringify(data, null, 2))
 
 			if data is Number {
-				if type ?= references[data] {
+				let index = data
+				while alterations[index]? {
+					index = alterations[index]
+				}
+
+				if type ?= references[index] {
 					return type
 				}
 				else {
@@ -227,54 +232,56 @@ abstract class Type {
 					return type
 				}
 				else {
-					return UnionType.fromMetadata(data, references, scope, node)
+					return UnionType.fromMetadata(data, references, alterations, scope, node)
 				}
 			}
 			else if data.kind? {
 				switch data.kind {
 					TypeKind::Class => {
-						return ClassType.fromMetadata(data, references, scope, node)
+						return ClassType.fromMetadata(data, references, alterations, scope, node)
 					}
 					TypeKind::Enum => {
-						return EnumType.fromMetadata(data, references, scope, node)
+						return EnumType.fromMetadata(data, references, alterations, scope, node)
 					}
 					TypeKind::Function => {
-						return FunctionType.fromMetadata(data, references, scope, node)
+						return FunctionType.fromMetadata(data, references, alterations, scope, node)
 					}
 					TypeKind::OverloadedFunction => {
-						return OverloadedFunctionType.fromMetadata(data, references, scope, node)
+						return OverloadedFunctionType.fromMetadata(data, references, alterations, scope, node)
 					}
 					TypeKind::Reference => {
-						return ReferenceType.fromMetadata(data, references, scope, node)
+						return ReferenceType.fromMetadata(data, references, alterations, scope, node)
 					}
 					TypeKind::Sealable => {
-						return SealableType.fromMetadata(data, references, scope, node)
+						return SealableType.fromMetadata(data, references, alterations, scope, node)
 					}
 				}
 			}
 			else if data.reference? {
-				if type ?= references[data.reference] {
-					if type is NamedType {
-						return scope.reference(type)
-					}
-					else {
-						return type
-					}
+				const type = Type.fromMetadata(data.reference, references, alterations, scope, node)
+
+				if type is NamedType {
+					return scope.reference(type)
 				}
 				else {
-					console.log(data)
-					throw new NotImplementedException(node)
+					return type
 				}
+			}
+			else if data.type? {
+				return Type.fromMetadata(data.type, references, alterations, scope, node)
 			}
 
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
-		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data?, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			// console.log('-- import --')
 			// console.log(JSON.stringify(data, null, 2))
 
-			if data is String {
+			if !?data {
+				return Type.Any
+			}
+			else if data is String {
 				return data == 'Any' ? Type.Any : scope.reference(data)
 			}
 			else if data is Array {
@@ -287,31 +294,31 @@ abstract class Type {
 					}
 				}
 				else {
-					return UnionType.import(data, references, queue, scope, node)
+					return UnionType.import(index, data, references, alterations, queue, scope, node)
 				}
 			}
 			else if data.kind? {
 				switch data.kind {
 					TypeKind::Alias => {
-						return AliasType.import(data, references, queue, scope, node)
+						return AliasType.import(index, data, references, alterations, queue, scope, node)
 					}
 					TypeKind::Class => {
-						return ClassType.import(data, references, queue, scope, node)
+						return ClassType.import(index, data, references, alterations, queue, scope, node)
 					}
 					TypeKind::Enum => {
-						return EnumType.import(data, references, queue, scope, node)
+						return EnumType.import(index, data, references, alterations, queue, scope, node)
 					}
 					TypeKind::Function => {
-						return FunctionType.import(data, references, queue, scope, node)
+						return FunctionType.import(index, data, references, alterations, queue, scope, node)
 					}
 					TypeKind::Namespace => {
-						return NamespaceType.import(data, references, queue, scope, node)
+						return NamespaceType.import(index, data, references, alterations, queue, scope, node)
 					}
 					TypeKind::Object => {
-						return ObjectType.import(data, references, queue, scope, node)
+						return ObjectType.import(index, data, references, alterations, queue, scope, node)
 					}
 					TypeKind::OverloadedFunction => {
-						return OverloadedFunctionType.import(data, references, queue, scope, node)
+						return OverloadedFunctionType.import(index, data, references, alterations, queue, scope, node)
 					}
 				}
 			}

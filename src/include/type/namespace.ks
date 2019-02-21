@@ -5,17 +5,19 @@ class NamespaceType extends Type {
 		_sealProperties: Object		= {}
 	}
 	static {
-		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new NamespaceType(scope)
 
 			if data.namespace? {
+				alterations[data.namespace.reference] = index
+
 				queue.push(() => {
 					const source = references[data.namespace.reference]
 
 					type.copyFrom(source.type())
 
 					for name, property of data.properties {
-						type.addPropertyFromMetadata(name, property, references, node)
+						type.addPropertyFromMetadata(name, property, references, alterations, node)
 					}
 				})
 			}
@@ -26,7 +28,7 @@ class NamespaceType extends Type {
 
 				queue.push(() => {
 					for name, property of data.properties {
-						type.addPropertyFromMetadata(name, property, references, node)
+						type.addPropertyFromMetadata(name, property, references, alterations, node)
 					}
 				})
 			}
@@ -37,48 +39,26 @@ class NamespaceType extends Type {
 	constructor(scope: AbstractScope) { // {{{
 		super(new NamespaceScope(scope))
 	} // }}}
-	addProperty(name: String, type: Type, alteration: Boolean = false) { // {{{
-		const variable = new Variable(name, false, false, type)
+	addProperty(name: String, property: Type) { // {{{
+		if property is not NamespacePropertyType {
+			property = new NamespacePropertyType(property.scope(), property)
+		}
+
+		const variable = new Variable(name, false, false, property.type())
 
 		@scope.addVariable(name, variable)
 
-		type = variable.type()
+		@properties[name] = property
 
-		const internalType = this.toPropertyType(type)
-
-		@properties[name] = internalType
-
-		if @sealed {
-			@sealProperties[name] = true
-
-			internalType.flagSealed()
-		}
-
-		if alteration {
-			internalType.flagAlteration()
-		}
-
-		return type
-	} // }}}
-	addPropertyFromAST(data, node) { // {{{
-		const name = data.name.name
-		const variable = new Variable(name, false, false, Type.fromAST(data, node))
-
-		@scope.addVariable(name, variable)
-
-		const type = variable.type()
-		const internalType = this.toPropertyType(type)
-
-		@properties[name] = internalType
-
-		if type.isSealed() {
+		if property.type().isSealed() {
 			@sealProperties[name] = true
 		}
 
-		return type
+		return variable.type()
 	} // }}}
-	addPropertyFromMetadata(name, data, references, node) { // {{{
-		const type = Type.fromMetadata(data, references, @scope, node)
+	addPropertyFromAST(data, node) => this.addProperty(data.name.name, Type.fromAST(data, node))
+	addPropertyFromMetadata(name, data, references, alterations, node) { // {{{
+		const type = Type.fromMetadata(data, references, alterations, @scope, node)
 
 		if type._scope != @scope {
 			type._scope = @scope
@@ -88,11 +68,15 @@ class NamespaceType extends Type {
 
 		@scope.addVariable(name, variable)
 
-		const internalType = this.toPropertyType(variable.type())
+		const property = new NamespacePropertyType(@scope, variable.type())
 
-		@properties[name] = internalType
+		@properties[name] = property
 
-		if type.isSealed() {
+		if data.sealed {
+			property.flagSealed()
+		}
+
+		if property.type().isSealed() {
 			@sealProperties[name] = true
 		}
 
@@ -130,8 +114,8 @@ class NamespaceType extends Type {
 				properties: {}
 			}
 
-			for name, value of @properties when value.isAlteration() {
-				export.properties[name] = value.toExportOrIndex(references, ignoreAlteration)
+			for name, property of @properties when property.isAlteration() {
+				export.properties[name] = property.toExportOrIndex(references, ignoreAlteration)
 			}
 
 			return export
@@ -143,8 +127,8 @@ class NamespaceType extends Type {
 				properties: {}
 			}
 
-			for name, value of @properties {
-				export.properties[name] = value.toExportOrIndex(references, ignoreAlteration)
+			for name, property of @properties {
+				export.properties[name] = property.toExportOrIndex(references, ignoreAlteration)
 			}
 
 			return export
@@ -178,20 +162,25 @@ class NamespaceType extends Type {
 	isNamespace() => true
 	isSealable() => true
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
+	matchSignatureOf(that, matchables) { // {{{
+		if that is NamespaceType {
+			for name, property of that._properties {
+				if !@properties[name]?.matchSignatureOf(property, matchables) {
+					return false
+				}
+			}
+
+			return true
+		}
+
+		return false
+	} // }}}
 	setAlterationReference(@alterationReference)
 	toQuote() { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
-	} // }}}
-	private toPropertyType(type) { // {{{
-		if type.isAny() || type.discardName() is ReferenceType {
-			return new NamespaceVariableType(@scope, type)
-		}
-		else {
-			return new NamespaceDirectType(@scope, type)
-		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
@@ -203,24 +192,40 @@ class NamespaceType extends Type {
 	} // }}}
 }
 
-class NamespaceVariableType extends SealableType {
+class NamespacePropertyType extends Type {
 	private {
 		_alteration: Boolean	= false
+		_type: Type
 	}
-	flagAlteration() { // {{{
-		@alteration = true
-
-		return this
+	static {
+		fromAST(data, node) => new NamespacePropertyType(node.scope(), Type.fromAST(data, node))
+	}
+	constructor(@scope, @type) { // {{{
+		super(scope)
 	} // }}}
-	isAlteration() => @alteration
-}
-
-class NamespaceDirectType extends SealableType {
-	private {
-		_alteration: Boolean	= false
-	}
+	equals(b) { // {{{
+		if b is NamespacePropertyType {
+			return @type.equals(b.type())
+		}
+		else {
+			return false
+		}
+	} // }}}
 	export(references, ignoreAlteration) { // {{{
-		const export = @type.export(references, ignoreAlteration)
+		let export
+
+		if @type is ReferenceType {
+			export = @type.toReference(references, ignoreAlteration)
+
+			if export is String {
+				export = {
+					type: export
+				}
+			}
+		}
+		else {
+			export = @type.export(references, ignoreAlteration)
+		}
 
 		export.sealed = this.isSealed()
 
@@ -231,21 +236,42 @@ class NamespaceDirectType extends SealableType {
 
 		return this
 	} // }}}
+	flagExported() { // {{{
+		@type.flagExported()
+
+		return this
+	} // }}}
+	flagReferenced() { // {{{
+		@type.flagReferenced()
+
+		return this
+	} // }}}
+	flagSealed() { // {{{
+		@type = @type.flagSealed()
+
+		return this
+	} // }}}
 	isAlteration() => @alteration
+	isSealed() => @type.isSealed()
+	matchSignatureOf(b: Type, matchables): Boolean { // {{{
+		if b is NamespacePropertyType {
+			return true
+		}
+
+		return false
+	} // }}}
 	toExportOrIndex(references, ignoreAlteration) { // {{{
 		if @type.isSealable() {
 			return @type.toExportOrIndex(references, ignoreAlteration)
 		}
 		else if @type.referenceIndex() != -1 {
 			return {
-				kind: TypeKind::Sealable
 				sealed: @type.isSealed()
 				type: @type.referenceIndex()
 			}
 		}
 		else if @type.isReferenced() {
 			return {
-				kind: TypeKind::Sealable
 				sealed: this.isSealed()
 				type: @type.toMetadata(references, ignoreAlteration)
 			}
@@ -254,4 +280,8 @@ class NamespaceDirectType extends SealableType {
 			return this.export(references, ignoreAlteration)
 		}
 	} // }}}
+	toFragments(fragments, node) => @type.toFragments(fragments, node)
+	toQuote() => @type.toQuote()
+	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
+	type() => @type
 }

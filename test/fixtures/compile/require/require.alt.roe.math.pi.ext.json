@@ -1,12 +1,22 @@
 {
   "aliens": [
     0,
-    "String"
-  ],
-  "requirements": [],
-  "exports": [
+    "Number",
     1,
-    "String"
+    "Math",
+    -1,
+    "console"
+  ],
+  "requirements": [
+    0,
+    "Number",
+    false
+  ],
+  "exports": [
+    2,
+    "Number",
+    1,
+    "Math"
   ],
   "references": [
     {
@@ -21,28 +31,30 @@
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
-        "replace": [
+        "toString": [
           {
             "access": 3,
             "async": false,
             "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity"
-              }
-            ],
-            "returns": {
-              "reference": 0
-            },
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
             "sealed": false,
             "throws": []
           }
         ]
       },
       "classMethods": {}
+    },
+    {
+      "kind": "namespace",
+      "sealed": true,
+      "properties": {
+        "PI": {
+          "reference": 0,
+          "sealed": false
+        }
+      }
     },
     {
       "kind": "class",
@@ -53,29 +65,21 @@
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
-        "capitalizeWords": [
+        "round": [
           {
             "access": 3,
             "async": false,
             "min": 0,
-            "max": 0,
-            "parameters": [],
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": 1
+              }
+            ],
             "returns": {
-              "reference": 1
-            },
-            "sealed": true,
-            "throws": []
-          }
-        ],
-        "classify": [
-          {
-            "access": 3,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 1
+              "reference": 2
             },
             "sealed": true,
             "throws": []

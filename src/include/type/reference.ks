@@ -8,7 +8,7 @@ class ReferenceType extends Type {
 		_variable: Variable
 	}
 	static {
-		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
 			return new ReferenceType(scope, data.name, data.nullable)
 		} // }}}
 	}

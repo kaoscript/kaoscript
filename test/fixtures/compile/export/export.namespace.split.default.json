@@ -13,7 +13,6 @@
       "sealed": false,
       "properties": {
         "foo": {
-          "kind": "sealable",
           "type": 1,
           "sealed": false
         },

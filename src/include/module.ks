@@ -454,7 +454,7 @@ export class Module {
 			}
 
 			for name, type of @aliens {
-				@metadata.aliens.push(type.toMetadata(@metadata.references, false), name)
+				@metadata.aliens.push(type.toMetadata(@metadata.references, true), name)
 			}
 
 			for name, variable of @exports {

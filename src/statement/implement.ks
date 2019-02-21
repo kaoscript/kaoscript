@@ -436,13 +436,21 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 	analyse() { // {{{
 		@value = $compile.expression(@data.defaultValue, this)
 		@value.analyse()
-
-		//@namespace.addProperty(@data.name.name, Type.fromAST(@data.type, this))
 	} // }}}
 	prepare() { // {{{
 		@value.prepare()
 
-		@type = @namespace.addProperty(@data.name.name, Type.fromAST(@data.type, this), true)
+		const property = NamespacePropertyType.fromAST(@data.type, this)
+
+		property.flagAlteration()
+
+		if @namespace.isSealed() {
+			property.flagSealed()
+		}
+
+		@namespace.addProperty(@data.name.name, property)
+
+		@type = property.type()
 	} // }}}
 	translate() { // {{{
 		@value.translate()
@@ -495,7 +503,17 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = @namespace.addProperty(@data.name.name, Type.fromAST(@data, this), true)
+		const property = NamespacePropertyType.fromAST(@data, this)
+
+		property.flagAlteration()
+
+		if @namespace.isSealed() {
+			property.flagSealed()
+		}
+
+		@namespace.addProperty(@data.name.name, property)
+
+		@type = property.type()
 	} // }}}
 	translate() { // {{{
 		if @data.body? {

@@ -49,11 +49,8 @@
       "sealed": true,
       "properties": {
         "PI": {
-          "kind": "sealable",
-          "sealed": false,
-          "type": {
-            "reference": 0
-          }
+          "reference": 0,
+          "sealed": false
         },
         "pow": {
           "kind": "function",
@@ -76,11 +73,8 @@
       },
       "properties": {
         "pi": {
-          "kind": "sealable",
-          "sealed": true,
-          "type": {
-            "reference": 0
-          }
+          "reference": 0,
+          "sealed": true
         },
         "foo": {
           "kind": "function",

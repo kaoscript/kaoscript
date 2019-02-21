@@ -1,0 +1,1 @@
+TypeException: The variable "Number" and the argument "Number" of the module "../require/require.alt.roe.math.pi.default.ks" aren't compatible (line 9, file "fixtures/compile/import/import.math.pi.method.wa.misfunc.ks")

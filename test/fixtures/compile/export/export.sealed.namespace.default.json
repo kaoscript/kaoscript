@@ -16,7 +16,6 @@
       "sealed": true,
       "properties": {
         "PI": {
-          "kind": "sealable",
           "sealed": false,
           "type": "Number"
         },

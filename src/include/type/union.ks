@@ -3,15 +3,15 @@ class UnionType extends Type {
 		_types: Array<Type>
 	}
 	static {
-		fromMetadata(data, references: Array, scope: AbstractScope, node: AbstractNode) { // {{{
-			return new UnionType(scope, [Type.fromMetadata(type, references, scope, node) for type in data])
+		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
+			return new UnionType(scope, [Type.fromMetadata(type, references, alterations, scope, node) for type in data])
 		} // }}}
-		import(data, references: Array, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new UnionType(scope)
 
 			queue.push(() => {
 				for item in data {
-					type.addType(Type.fromMetadata(item, references, scope, node))
+					type.addType(Type.fromMetadata(item, references, alterations, scope, node))
 				}
 			})
 
