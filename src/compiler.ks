@@ -147,6 +147,7 @@ abstract class AbstractNode {
 	abstract analyse()
 	abstract prepare()
 	abstract translate()
+	bindingScope() => this._parent?.bindingScope()
 	data() => @data
 	directory() => this._parent.directory()
 	file() => this._parent.file()

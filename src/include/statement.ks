@@ -29,6 +29,7 @@ abstract class Statement extends AbstractNode {
 		}
 	} // }}}
 	assignments() => @assignments
+	bindingScope() => @scope
 	export(recipient)
 	isAwait() => false
 	isExit() => false

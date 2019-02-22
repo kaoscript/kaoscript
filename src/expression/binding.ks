@@ -9,7 +9,7 @@ class ArrayBinding extends Expression {
 	}
 	analyse() { // {{{
 		for element, index in @data.elements {
-			if element.kind == NodeKind::BindingElement && !element.name.computed {
+			if element.kind == NodeKind::BindingElement && element.name.kind == NodeKind::Identifier {
 				if @scope.hasVariable(element.name.name) {
 					@existing[element.name.name] = true
 					++@existingCount
@@ -20,7 +20,7 @@ class ArrayBinding extends Expression {
 				}
 			}
 
-			@elements.push(element = $compile.expression(element, this))
+			@elements.push(element = $compile.expression(element, this, this.bindingScope()))
 
 			element.analyse()
 
@@ -54,14 +54,14 @@ class ArrayBinding extends Expression {
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @existingCount && @nonexistingCount {
+		if @existingCount != 0 && @nonexistingCount != 0 {
 			fragments.code('[')
 
 			let name
 			for element, i in @data.elements {
 				fragments.code(', ') if i
 
-				if element.kind == NodeKind::BindingElement && !element.name.computed && @existing[element.name.name] {
+				if element.kind == NodeKind::BindingElement && element.name.kind == NodeKind::Identifier && @existing[element.name.name] {
 					name = @scope.acquireTempName()
 
 					@elements[i].toExistFragments(fragments, name)
@@ -145,20 +145,17 @@ class BindingElement extends Expression {
 		_variable: Variable			= null
 		_variables: Array<String>	= []
 	}
-	constructor(data, parent, scope) { // {{{
-		super(data, parent, new Scope(scope))
-	} // }}}
 	analyse() { // {{{
-		const scope = @scope.parent()
-
-		if @data.name.kind == NodeKind::Identifier && !scope.hasVariable(@data.name.name) {
-			@variable = scope.define(@data.name.name, false, this)
+		if @data.name.kind == NodeKind::Identifier && !@scope.hasVariable(@data.name.name) {
+			@variable = @scope.define(@data.name.name, false, this)
 
 			@variables.push(@data.name.name)
 		}
 
-		if @data.alias? {
-			@variable = @scope.define(@data.alias.name, false, this)
+		if @data.alias?.kind == NodeKind::Identifier {
+			if !@data.alias.computed {
+				@variable = @scope.define(@data.alias.name, false, this)
+			}
 
 			@alias = $compile.expression(@data.alias, this)
 			@alias.analyse()
@@ -309,18 +306,21 @@ class ObjectBinding extends Expression {
 		_name				= null
 		_variables			= {}
 	}
+	constructor(@data, @parent, scope) { // {{{
+		super(data, parent, parent.statement().scope())
+	} // }}}
 	analyse() { // {{{
 		if @options.format.destructuring == 'es5' && @data.elements.length > 1 {
 			@name = @scope.acquireTempName(this.statement())
 		}
 
 		for element in @data.elements {
-			if !element.name.computed && element.name.name? && @scope.hasVariable(element.name.name) {
+			if element.kind == NodeKind::BindingElement && element.name.kind == NodeKind::Identifier && @scope.hasVariable(element.name.name) {
 				@exists = true
 				@existing[element.name.name] = true
 			}
 
-			@elements.push(element = $compile.expression(element, this, this.statement().scope()))
+			@elements.push(element = $compile.expression(element, this, this.bindingScope()))
 
 			element.analyse()
 		}

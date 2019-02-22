@@ -259,6 +259,7 @@ class SwitchBindingArray extends AbstractNode {
 	translate() { // {{{
 		@array.translate()
 	} // }}}
+	bindingScope() => @scope
 	toFragments(fragments) { // {{{
 		let line = fragments.newLine()
 
@@ -521,6 +522,7 @@ class SwitchFilter extends AbstractNode {
 			@filter.translate()
 		}
 	} // }}}
+	bindingScope() => @scope
 	toBooleanFragments(fragments, nf) { // {{{
 		let mm
 		for binding in @data.bindings {
