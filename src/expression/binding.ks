@@ -263,8 +263,11 @@ class BindingElement extends Expression {
 		}
 	} // }}}
 	toFlatFragments(fragments, value) { // {{{
-		if @name is ObjectBinding {
-			@name.toFlatFragments(fragments, new FlatBindingElement(value, @alias ?? @name, this))
+		if @name is ArrayBinding {
+			@name.toFlatFragments(fragments, new FlatArrayBindingElement(value, @index, this))
+		}
+		else if @name is ObjectBinding {
+			@name.toFlatFragments(fragments, new FlatObjectBindingElement(value, @alias ?? @name, this))
 		}
 		else if @defaultValue? {
 			const variable = new Literal(false, this, @scope, @tempName)
@@ -274,7 +277,7 @@ class BindingElement extends Expression {
 				.code($equals, 'Type.isValue(')
 				.compile(variable)
 				.code($equals)
-				.compile(new FlatBindingElement(value, @alias ?? @name, this))
+				.compile(new FlatObjectBindingElement(value, @alias ?? @name, this))
 				.code(') ? ')
 				.compile(variable)
 				.code(' : ')
@@ -301,7 +304,28 @@ class BindingElement extends Expression {
 	} // }}}
 }
 
-class FlatBindingElement extends Expression {
+class FlatArrayBindingElement extends Expression {
+	private {
+		_array
+		_index
+	}
+	constructor(@array, @index, parent) { // {{{
+		super({}, parent)
+	} // }}}
+	analyse()
+	prepare()
+	translate()
+	isComposite() => false
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.wrap(@array)
+			.code('[')
+			.compile(@index)
+			.code(']')
+	} // }}}
+}
+
+class FlatObjectBindingElement extends Expression {
 	private {
 		_item
 		_property
