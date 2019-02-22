@@ -1,0 +1,1 @@
+SyntaxException: Identifier "a" is immutable (line 6, file "fixtures/compile/destruct/destruct.array.exists.const.ks")

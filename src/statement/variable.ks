@@ -240,6 +240,13 @@ class VariableBindingDeclarator extends AbstractNode {
 	}
 	analyse() { // {{{
 		@binding = $compile.expression(@data.name, this)
+
+		@binding.flagAssignement()
+
+		if @parent.isImmutable() {
+			@binding.flagImmutable()
+		}
+
 		@binding.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -261,7 +268,16 @@ class VariableBindingDeclarator extends AbstractNode {
 	} // }}}
 	type(type: Type) { // {{{
 		if !type.isAny() {
-			throw new NotImplementedException()
+			if @binding is ArrayBinding {
+				if !type.isArray() {
+					TypeException.throwInvalidBinding('Array', this)
+				}
+			}
+			else if @binding is ObjectBinding {
+				if !type.isObject() {
+					TypeException.throwInvalidBinding('Object', this)
+				}
+			}
 		}
 	} // }}}
 	walk(fn) { // {{{

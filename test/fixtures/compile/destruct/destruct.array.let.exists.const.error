@@ -1,0 +1,1 @@
+SyntaxException: Identifier "a" has already been declared (line 6, file "fixtures/compile/destruct/destruct.array.let.exists.const.ks")

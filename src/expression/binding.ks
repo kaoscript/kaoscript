@@ -1,23 +1,26 @@
 class ArrayBinding extends Expression {
 	private {
-		_elements			= []
-		_existing			= {}
-		_existingCount		= 0
-		_nonexisting		= {}
-		_nonexistingCount	= 0
-		_variables			= {}
+		_assignement: Boolean	= false
+		_elements				= []
+		_exists: Boolean		= false
+		_existing				= {}
+		_immutable: Boolean		= false
+		_nonexists: Boolean		= false
+		_variables				= {}
 	}
 	analyse() { // {{{
 		for element, index in @data.elements {
 			if element.kind == NodeKind::BindingElement && element.name.kind == NodeKind::Identifier {
 				if @scope.hasVariable(element.name.name) {
 					@existing[element.name.name] = true
-					++@existingCount
+					@exists = true
 				}
 				else {
-					@nonexisting[element.name.name] = true
-					++@nonexistingCount
+					@nonexists = true
 				}
+			}
+			else if element.kind != NodeKind::OmittedExpression {
+				@nonexists = true
 			}
 
 			@elements.push(element = $compile.expression(element, this, this.bindingScope()))
@@ -44,6 +47,14 @@ class ArrayBinding extends Expression {
 			element.export(recipient)
 		}
 	} // }}}
+	flagAssignement() { // {{{
+		@assignement = true
+	} // }}}
+	flagImmutable() { // {{{
+		@immutable = true
+	} // }}}
+	isAssignement() => @assignement
+	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { // {{{
 		for element in @elements {
 			if element.isDeclararingVariable(name) {
@@ -54,7 +65,7 @@ class ArrayBinding extends Expression {
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @existingCount != 0 && @nonexistingCount != 0 {
+		if @exists && @nonexists {
 			fragments.code('[')
 
 			let name
@@ -97,7 +108,7 @@ class ArrayBinding extends Expression {
 		}
 	} // }}}
 	toAssignmentFragments(fragments, value) { // {{{
-		if @nonexistingCount != 0 {
+		if @nonexists {
 			fragments.code('var ')
 		}
 
@@ -146,21 +157,31 @@ class BindingElement extends Expression {
 		_variables: Array<String>	= []
 	}
 	analyse() { // {{{
-		if @data.name.kind == NodeKind::Identifier && !@scope.hasVariable(@data.name.name) {
-			@variable = @scope.define(@data.name.name, false, this)
+		if @data.name.kind == NodeKind::Identifier {
+			if variable ?= @scope.getVariable(@data.name.name) {
+				if this.isAssignement() {
+					SyntaxException.throwAlreadyDeclared(variable.name(), this)
+				}
+				else if variable.isImmutable() {
+					ReferenceException.throwImmutable(variable.name(), this)
+				}
+			}
+			else {
+				@variable = @scope.define(@data.name.name, this.isImmutable(), this)
 
-			@variables.push(@data.name.name)
+				@variables.push(@data.name.name)
+			}
 		}
 
 		if @data.alias?.kind == NodeKind::Identifier {
 			if !@data.alias.computed {
-				@variable = @scope.define(@data.alias.name, false, this)
+				@variable = @scope.define(@data.alias.name, this.isImmutable(), this)
+
+				@variables.push(@data.alias.name)
 			}
 
 			@alias = $compile.expression(@data.alias, this)
 			@alias.analyse()
-
-			@variables.push(@data.alias.name)
 		}
 
 		@name = $compile.expression(@data.name, this)
@@ -193,6 +214,8 @@ class BindingElement extends Expression {
 		}
 	} // }}}
 	index(@index) => this
+	isAssignement() => @parent.isAssignement()
+	isImmutable() => @parent.isImmutable()
 	isDeclararingVariable(name: String) => @variables.contains(name)
 	toFragments(fragments) { // {{{
 		if @data.spread {
@@ -300,11 +323,13 @@ class FlatBindingElement extends Expression {
 
 class ObjectBinding extends Expression {
 	private {
-		_elements			= []
-		_exists				= false
-		_existing			= {}
-		_name				= null
-		_variables			= {}
+		_assignement: Boolean	= false
+		_elements				= []
+		_exists					= false
+		_existing				= {}
+		_immutable: Boolean		= false
+		_name					= null
+		_variables				= {}
 	}
 	constructor(@data, @parent, scope) { // {{{
 		super(data, parent, parent.statement().scope())
@@ -344,6 +369,14 @@ class ObjectBinding extends Expression {
 			element.export(recipient)
 		}
 	} // }}}
+	flagAssignement() { // {{{
+		@assignement = true
+	} // }}}
+	flagImmutable() { // {{{
+		@immutable = true
+	} // }}}
+	isAssignement() => @assignement
+	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { // {{{
 		for element in @elements {
 			if element.isDeclararingVariable(name) {

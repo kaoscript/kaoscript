@@ -1,0 +1,1 @@
+TypeException: The binding is expected to be of type "Object" (line 5, file "fixtures/compile/destruct/destruct.object.const.badtype.ks")

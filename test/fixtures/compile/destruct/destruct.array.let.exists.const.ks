@@ -1,7 +1,7 @@
 extern console
 
-let arr = [1, '', true]
-let a = 10
+const arr = [1, '', true]
+const a = 'foo'
 
 let [a, b, c] = arr
 
