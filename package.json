@@ -39,7 +39,7 @@
 		"commander": "^2.19.0"
 	},
 	"devDependencies": {
-		"@kaoscript/ast": "^0.7.1",
+		"@kaoscript/ast": "github:kaoscript/ast",
 		"@kaoscript/coverage-istanbul": "github:kaoscript/coverage-istanbul",
 		"@kaoscript/parser": "github:kaoscript/parser",
 		"@kaoscript/source-generator": "github:kaoscript/source-generator",
@@ -49,7 +49,7 @@
 		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",
 		"@zokugun/istanbul.reporter.minimap": "^0.5.0",
 		"chai": "^4.2.0",
-		"coveralls": "^3.0.2",
+		"coveralls": "^3.0.3",
 		"istanbul": "^0.4.5",
 		"klaw-sync": "^6.0.0",
 		"mocha": "^5.2.0",

@@ -1,52 +1,47 @@
 class ObjectExpression extends Expression {
 	private {
 		_computed: Boolean		= false
-		_properties				= {}
+		_names					= {}
+		_properties				= []
 		_reuseName: String		= null
-		_templates				= []
 		_type: Type
 	}
 	analyse() { // {{{
 		let ref
 		for property in @data.properties {
 			if property.name.kind == NodeKind::Identifier || property.name.kind == NodeKind::Literal {
-				property = new ObjectMember(property, this)
+				property = new ObjectLiteralMember(property, this)
 				property.analyse()
 
-				ref = property.reference()
-				if @properties[ref]? {
+				if @names[property.reference()] == true {
 					SyntaxException.throwDuplicateKey(property)
 				}
-				else {
-					@properties[ref] = property
-				}
+
+				@names[property.reference()] = true
 			}
 			else {
-				@templates.push(property = new ObjectTemplateMember(property, this))
-
+				property = new ObjectComputedMember(property, this)
 				property.analyse()
+
+				@computed = true
 			}
+
+			@properties.push(property)
 		}
 
-		@computed = @templates.length != 0 && this._options.format.properties == 'es5'
+		if @computed {
+			@computed = this._options.format.properties == 'es5'
+		}
 	} // }}}
 	prepare() { // {{{
-		for :property of @properties {
-			property.prepare()
-		}
-
-		for property in @templates {
+		for property in @properties {
 			property.prepare()
 		}
 
 		@type = @scope.reference('Object')
 	} // }}}
 	translate() { // {{{
-		for :property of @properties {
-			property.translate()
-		}
-
-		for property in @templates {
+		for property in @properties {
 			property.translate()
 		}
 	} // }}}
@@ -55,18 +50,12 @@ class ObjectExpression extends Expression {
 			@reuseName = this.statement().scope().acquireTempName(this.statement())
 		}
 
-		for :property of @properties {
+		for property in @properties {
 			property.acquireReusable(acquire)
 		}
 	} // }}}
 	isUsingVariable(name) { // {{{
-		for :property of @properties {
-			if property.isUsingVariable(name) {
-				return true
-			}
-		}
-
-		for property in @templates {
+		for property in @properties {
 			if property.isUsingVariable(name) {
 				return true
 			}
@@ -81,7 +70,7 @@ class ObjectExpression extends Expression {
 			this.statement().scope().releaseTempName(@reuseName)
 		}
 
-		for :property of @properties {
+		for property in @properties {
 			property.releaseReusable()
 		}
 	} // }}}
@@ -89,24 +78,8 @@ class ObjectExpression extends Expression {
 		if @computed {
 			fragments.code('(', @reuseName, ' = {}', $comma)
 
-			for :property of @properties {
-				fragments
-					.code(@reuseName)
-					.code(property.reference())
-					.code($equals)
-					.compile(property.value())
-					.code($comma)
-			}
-
-			for template in @templates {
-				fragments
-					.code(@reuseName)
-					.code('[')
-					.compile(template.name())
-					.code(']')
-					.code($equals)
-					.compile(template.value())
-					.code($comma)
+			for property in @properties {
+				property.toComputedFragments(fragments, @reuseName)
 			}
 
 			fragments.code(@reuseName, ')')
@@ -114,11 +87,7 @@ class ObjectExpression extends Expression {
 		else {
 			const object = fragments.newObject()
 
-			for :property of @properties {
-				object.newLine().compile(property)
-			}
-
-			for template in @templates {
+			for template in @properties {
 				object.newLine().compile(template)
 			}
 
@@ -128,7 +97,7 @@ class ObjectExpression extends Expression {
 	type() => @type
 }
 
-class ObjectMember extends Expression {
+class ObjectLiteralMember extends Expression {
 	private {
 		_name
 		_value
@@ -155,10 +124,16 @@ class ObjectMember extends Expression {
 		@value.translate()
 	} // }}}
 	acquireReusable(acquire) => @value.acquireReusable(acquire)
-	name() => @name.value()
 	isUsingVariable(name) => @value.isUsingVariable(name)
 	releaseReusable() => @value.releaseReusable()
-	value() => @value
+	toComputedFragments(fragments, name) { // {{{
+		fragments
+			.code(name)
+			.code(this.reference())
+			.code($equals)
+			.compile(@value)
+			.code($comma)
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@name)
 
@@ -170,14 +145,20 @@ class ObjectMember extends Expression {
 	} // }}}
 }
 
-class ObjectTemplateMember extends Expression {
+class ObjectComputedMember extends Expression {
 	private {
 		_name
 		_value
 	}
 	analyse() { // {{{
-		@name = new TemplateExpression(@data.name, this)
-		@name.computing(true)
+		if @data.name.kind == NodeKind::ComputedPropertyName {
+			@name = $compile.expression(@data.name.expression, this)
+		}
+		else {
+			@name = new TemplateExpression(@data.name, this)
+			@name.computing(true)
+		}
+
 		@name.analyse()
 
 		@value = $compile.expression(@data.value, this)
@@ -191,9 +172,25 @@ class ObjectTemplateMember extends Expression {
 		@name.translate()
 		@value.translate()
 	} // }}}
-	name() => @name
+	acquireReusable(acquire) { // {{{
+		@name.acquireReusable(acquire)
+		@value.acquireReusable(acquire)
+	} // }}}
 	isUsingVariable(name) => @name.isUsingVariable(name) || @value.isUsingVariable(name)
-	value() => @value
+	releaseReusable() { // {{{
+		@name.releaseReusable()
+		@value.releaseReusable()
+	} // }}}
+	toComputedFragments(fragments, name) { // {{{
+		fragments
+			.code(name)
+			.code('[')
+			.compile(@name)
+			.code(']')
+			.code($equals)
+			.compile(@value)
+			.code($comma)
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('[')

@@ -352,7 +352,7 @@ const $expressions = {
 	`\(NodeKind::NumericExpression)`			: NumberLiteral
 	`\(NodeKind::ObjectBinding)`				: ObjectBinding
 	`\(NodeKind::ObjectExpression)`				: ObjectExpression
-	`\(NodeKind::ObjectMember)`					: ObjectMember
+	/* `\(NodeKind::ObjectMember)`					: ObjectMember */
 	`\(NodeKind::OmittedExpression)`			: OmittedExpression
 	`\(NodeKind::RegularExpression)`			: RegularExpression
 	`\(NodeKind::SequenceExpression)`			: SequenceExpression
