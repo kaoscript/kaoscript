@@ -90,7 +90,7 @@ module.exports = function() {
 			__ks_Array._im_pushUniq.apply(null, [this].concat(args[0]));
 		}
 		else {
-			for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+			for(let i = 0, __ks_1 = args.length; i < __ks_1; ++i) {
 				__ks_Array._im_pushUniq.apply(null, [this].concat(args[i]));
 			}
 		}
@@ -103,7 +103,7 @@ module.exports = function() {
 		if(fn === void 0 || fn === null) {
 			throw new TypeError("'fn' is not nullable");
 		}
-		for(let index = 0, __ks_0 = this.length, item; index < __ks_0; ++index) {
+		for(let index = 0, __ks_2 = this.length, item; index < __ks_2; ++index) {
 			item = this[index];
 			if(fn(item, index, this)) {
 				return true;
@@ -166,8 +166,8 @@ module.exports = function() {
 			}
 		}
 		else {
-			for(let __ks_0 = 0, __ks_1 = items.length, item; __ks_0 < __ks_1; ++__ks_0) {
-				item = items[__ks_0];
+			for(let __ks_3 = 0, __ks_4 = items.length, item; __ks_3 < __ks_4; ++__ks_3) {
+				item = items[__ks_3];
 				for(let i = this.length - 1; i >= 0; --i) {
 					if(this[i] === item) {
 						this.splice(i, 1);
@@ -202,8 +202,8 @@ module.exports = function() {
 			}
 		}
 		else {
-			for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
-				item = args[__ks_0];
+			for(let __ks_5 = 0, __ks_6 = args.length, item; __ks_5 < __ks_6; ++__ks_5) {
+				item = args[__ks_5];
 				if(!__ks_Array._im_contains(this, item)) {
 					this.push(item);
 				}
@@ -224,7 +224,7 @@ module.exports = function() {
 		if(a.length !== b.length) {
 			return false;
 		}
-		for(let i = 0, __ks_0 = a.length; i < __ks_0; ++i) {
+		for(let i = 0, __ks_7 = a.length; i < __ks_7; ++i) {
 			if(a[i] !== b[i]) {
 				return false;
 			}

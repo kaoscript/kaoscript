@@ -11,7 +11,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_appendArray_0 = function(...args) {
 		console.log(__ks_Array._im_last(args));
-		for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
+		for(let i = 0, __ks_1 = args.length; i < __ks_1; ++i) {
 			console.log(__ks_Array._im_last(args[i]));
 			this.push(...args[i]);
 		}

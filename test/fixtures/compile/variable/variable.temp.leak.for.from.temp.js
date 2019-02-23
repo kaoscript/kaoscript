@@ -4,8 +4,8 @@ module.exports = function() {
 			console.log(args[i]);
 		}
 		let j = 42;
-		let __ks_0;
-		for(j = 0, __ks_0 = args.length; j < __ks_0; ++j) {
+		let __ks_1;
+		for(j = 0, __ks_1 = args.length; j < __ks_1; ++j) {
 			console.log(args[j]);
 		}
 	}

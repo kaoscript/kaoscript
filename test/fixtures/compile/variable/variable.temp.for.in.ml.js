@@ -10,8 +10,8 @@ module.exports = function() {
 			value = x.foo[__ks_0];
 			console.log(value);
 		}
-		for(let __ks_0 = 0, __ks_1 = x.bar.length, value; __ks_0 < __ks_1; ++__ks_0) {
-			value = x.bar[__ks_0];
+		for(let __ks_2 = 0, __ks_3 = x.bar.length, value; __ks_2 < __ks_3; ++__ks_2) {
+			value = x.bar[__ks_2];
 			console.log(value);
 		}
 	}

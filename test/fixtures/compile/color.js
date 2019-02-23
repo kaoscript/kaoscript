@@ -574,14 +574,14 @@ module.exports = function() {
 				}
 				else if(Type.isString(args[0])) {
 					let color = __ks_String._im_lower(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
-					let match, __ks_0;
-					if(Type.isValue(__ks_0 = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+					let match, __ks_1;
+					if(Type.isValue(__ks_1 = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_1, true) : false) {
 						that._space = Space.SRGB;
 						that._red = that._green = that._blue = $caster.ff(match[1]);
 						that._alpha = $caster.alpha(match[2], match[3]);
 						return true;
 					}
-					else if(Type.isValue(__ks_0 = /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+					else if(Type.isValue(__ks_1 = /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_1, true) : false) {
 						that._space = Space.SRGB;
 						that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]));
 						that._alpha = $caster.alpha(match[2], match[3]);
@@ -1427,20 +1427,20 @@ module.exports = function() {
 				}
 			}
 			if(Type.isValue(space.alias)) {
-				for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
-					alias = space.alias[__ks_0];
+				for(let __ks_2 = 0, __ks_3 = space.alias.length, alias; __ks_2 < __ks_3; ++__ks_2) {
+					alias = space.alias[__ks_2];
 					$spaces[space.name].alias[alias] = true;
 					$aliases[alias] = space.name;
 				}
 				if(Type.isValue($parsers[space.name])) {
-					for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
-						alias = space.alias[__ks_0];
+					for(let __ks_4 = 0, __ks_5 = space.alias.length, alias; __ks_4 < __ks_5; ++__ks_4) {
+						alias = space.alias[__ks_4];
 						$parsers[alias] = $parsers[space.name];
 					}
 				}
 				if(Type.isValue($formatters[space.name])) {
-					for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
-						alias = space.alias[__ks_0];
+					for(let __ks_6 = 0, __ks_7 = space.alias.length, alias; __ks_6 < __ks_7; ++__ks_6) {
+						alias = space.alias[__ks_6];
 						$formatters[alias] = $formatters[space.name];
 					}
 				}
@@ -1462,8 +1462,8 @@ module.exports = function() {
 					}
 				}
 			}
-			for(let __ks_0 = 0, __ks_1 = spaces.length, name; __ks_0 < __ks_1; ++__ks_0) {
-				name = spaces[__ks_0];
+			for(let __ks_8 = 0, __ks_9 = spaces.length, name; __ks_8 < __ks_9; ++__ks_8) {
+				name = spaces[__ks_8];
 				if(Type.isValue(!$spaces[name].converters[space.name])) {
 					$find(name, space.name);
 				}

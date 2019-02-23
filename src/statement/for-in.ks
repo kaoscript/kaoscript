@@ -179,8 +179,6 @@ class ForInStatement extends Statement {
 
 		if @expression.isEntangled() {
 			@expressionName = this.greatScope().acquireTempName()
-
-			@scope.updateTempNames()
 		}
 
 		if @defineValue {

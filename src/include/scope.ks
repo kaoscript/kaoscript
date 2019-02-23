@@ -178,6 +178,7 @@ class AbstractScope {
 			SyntaxException.throwUnmatchedMacro(path, parent, data)
 		}
 	} // }}}
+	getNextTempIndex() => @scopeParent.getNextTempIndex()
 	getVariable(name): Variable { // {{{
 		if @variables[name] is Variable {
 			return @variables[name]
@@ -258,13 +259,10 @@ class AbstractScope {
 class Scope extends AbstractScope {
 	private {
 		_stashes				= {}
-		_tempNextIndex 			= 0
 		_tempNames				= {}
 		_tempParentNames		= {}
 	}
 	acquireTempName(statement: Statement = null) { // {{{
-		this.updateTempNames()
-
 		if name ?= @scopeParent?.acquireTempNameFromKid() {
 			@tempParentNames[name] = true
 
@@ -277,11 +275,13 @@ class Scope extends AbstractScope {
 			return name
 		}
 
-		while @tempParentNames[name = '__ks_' + @tempNextIndex] {
-			++@tempNextIndex
+		let index = this.getNextTempIndex()
+
+		while @tempParentNames[name = '__ks_' + index] {
+			index = this.getNextTempIndex()
 		}
 
-		++@tempNextIndex
+		@tempNames[name] = false
 
 		if statement != null {
 			statement._assignments.pushUniq(name)
@@ -365,32 +365,19 @@ class Scope extends AbstractScope {
 	} // }}}
 	releaseTempName(name) { // {{{
 		if name.length > 5 && name.substr(0, 5) == '__ks_' {
-			if @scopeParent? && @tempParentNames[name] {
-				@scopeParent.releaseTempNameFromKid(name)
-
-				@tempParentNames[name] = false
-			}
-			else {
-				@tempNames[name] = true
-			}
+			this.releaseTempNameFromKid(name)
 		}
 
 		return this
 	} // }}}
 	private releaseTempNameFromKid(name) { // {{{
-		if @scopeParent? && @tempParentNames[name] {
+		if @tempParentNames[name]? {
 			@scopeParent.releaseTempNameFromKid(name)
 
 			@tempParentNames[name] = false
 		}
-	} // }}}
-	updateTempNames() { // {{{
-		if @scopeParent? {
-			@scopeParent.updateTempNames()
-
-			if @scopeParent._tempNextIndex > @tempNextIndex {
-				@tempNextIndex = @scopeParent._tempNextIndex
-			}
+		else {
+			@tempNames[name] = true
 		}
 	} // }}}
 }
@@ -423,14 +410,12 @@ class XScope extends AbstractScope {
 
 		return this
 	} // }}}
-	updateTempNames() { // {{{
-		@scopeParent?.updateTempNames()
-	} // }}}
 }
 
 class ModuleScope extends Scope {
 	private {
 		_predefined		= {}
+		_tempIndex 		= -1
 	}
 	constructor() { // {{{
 		super()
@@ -453,6 +438,7 @@ class ModuleScope extends Scope {
 		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
 	} // }}}
+	getNextTempIndex() => ++@tempIndex
 	getVariable(name): Variable { // {{{
 		if $types[name] is String {
 			name = $types[name]

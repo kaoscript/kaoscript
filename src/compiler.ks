@@ -155,15 +155,7 @@ abstract class AbstractNode {
 	greatScope() => this._parent?._scope
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
 	module() => this._parent.module()
-	newScope() { // {{{
-		if this._options.format.variables == 'es6' {
-			return new Scope(this._scope)
-		}
-		else {
-			return new XScope(this._scope)
-		}
-	} // }}}
-	newScope(scope) { // {{{
+	newScope(scope = @scope) { // {{{
 		if this._options.format.variables == 'es6' {
 			return new Scope(scope)
 		}
@@ -352,7 +344,6 @@ const $expressions = {
 	`\(NodeKind::NumericExpression)`			: NumberLiteral
 	`\(NodeKind::ObjectBinding)`				: ObjectBinding
 	`\(NodeKind::ObjectExpression)`				: ObjectExpression
-	/* `\(NodeKind::ObjectMember)`					: ObjectMember */
 	`\(NodeKind::OmittedExpression)`			: OmittedExpression
 	`\(NodeKind::RegularExpression)`			: RegularExpression
 	`\(NodeKind::SequenceExpression)`			: SequenceExpression

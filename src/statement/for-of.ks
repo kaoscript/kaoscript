@@ -20,42 +20,42 @@ class ForOfStatement extends Statement {
 	analyse() { // {{{
 		let keyVariable = null
 		let valueVariable = null
-		
+
 		if @data.key? {
 			keyVariable = @scope.getVariable(@data.key.name)
-			
+
 			if @data.declaration || keyVariable == null {
 				@keyVariable = @scope.define(@data.key.name, false, @scope.reference('String'), this)
-				
+
 				@defineKey = true
 			}
 			else if keyVariable.isImmutable() {
 				ReferenceException.throwImmutable(@data.key.name, this)
 			}
-			
+
 			@key = $compile.expression(@data.key, this)
 			@key.analyse()
 		}
-		
+
 		if @data.value? {
 			valueVariable = @scope.getVariable(@data.value.name)
-			
+
 			if @data.declaration || valueVariable == null {
 				@valueVariable = @scope.define(@data.value.name, false, this)
-				
+
 				@defineValue = true
 			}
 			else if valueVariable.isImmutable() {
 				ReferenceException.throwImmutable(@data.value.name, this)
 			}
-		
+
 			@value = $compile.expression(@data.value, this)
 			@value.analyse()
 		}
-		
+
 		@expression = $compile.expression(@data.expression, this, @parent.scope())
 		@expression.analyse()
-		
+
 		if @key != null && @expression.isUsingVariable(@data.key.name) {
 			if @defineKey {
 				@scope.rename(@data.key.name)
@@ -72,7 +72,7 @@ class ForOfStatement extends Statement {
 				SyntaxException.throwAlreadyDeclared(@data.value.name, this)
 			}
 		}
-		
+
 		if @data.until {
 			@until = $compile.expression(@data.until, this)
 			@until.analyse()
@@ -81,108 +81,106 @@ class ForOfStatement extends Statement {
 			@while = $compile.expression(@data.while, this)
 			@while.analyse()
 		}
-		
+
 		if @data.when {
 			@when = $compile.expression(@data.when, this)
 			@when.analyse()
 		}
-		
+
 		@body = $compile.expression($ast.block(@data.body), this)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
 		@expression.prepare()
-		
+
 		const type = @expression.type()
 		if !(type.isAny() || type.isObject()) {
 			TypeException.throwInvalidForOfExpression(this)
 		}
-		
+
 		if @expression.isEntangled() {
 			@expressionName = this.greatScope().acquireTempName()
-			
-			@scope.updateTempNames()
 		}
-		
+
 		if @defineValue {
 			@valueVariable.type(type.parameter())
 		}
-		
+
 		if @key? {
 			@key.prepare()
 		}
 		else {
 			@keyName = @scope.acquireTempName()
 		}
-		
+
 		if @until? {
 			@until.prepare()
 		}
 		else if @while? {
 			@while.prepare()
 		}
-		
+
 		@when.prepare() if @when?
-		
+
 		@body.prepare()
-		
+
 		this.greatScope().releaseTempName(@expressionName) if @expressionName?
 		@scope.releaseTempName(@keyName) if @keyName?
 	} // }}}
 	translate() { // {{{
 		@expression.translate()
-		
+
 		@key.translate() if @key?
-		
+
 		if @until? {
 			@until.translate()
 		}
 		else if @while? {
 			@while.translate()
 		}
-		
+
 		@when.translate() if @when?
-		
+
 		@body.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {
 			let line = fragments.newLine()
-			
+
 			if !this.greatScope().hasVariable(@expressionName) {
 				line.code($runtime.scope(this))
-				
+
 				this.greatScope().define(@expressionName, false, this)
 			}
-			
+
 			line.code(@expressionName, $equals).compile(@expression).done()
 		}
-		
+
 		let ctrl = fragments.newControl().code('for(')
-		
+
 		if @key != null {
 			if @data.declaration || @defineKey {
 				ctrl.code($runtime.scope(this))
 			}
-			
+
 			ctrl.compile(@key)
 		}
 		else {
 			ctrl.code($runtime.scope(this), @keyName)
 		}
-		
+
 		ctrl.code(' in ').compile(@expressionName ?? @expression).code(')').step()
-		
+
 		if @value != null {
 			let line = ctrl.newLine()
-			
+
 			if @data.declaration || @defineValue {
 				line.code($runtime.scope(this))
 			}
-			
+
 			line.compile(@value).code($equals).compile(@expressionName ?? @expression).code('[').compile(@key ?? @keyName).code(']').done()
 		}
-		
+
 		if @until? {
 			ctrl
 				.newControl()
@@ -203,7 +201,7 @@ class ForOfStatement extends Statement {
 				.line('break')
 				.done()
 		}
-		
+
 		if @when? {
 			ctrl
 				.newControl()
@@ -217,7 +215,7 @@ class ForOfStatement extends Statement {
 		else {
 			ctrl.compile(@body)
 		}
-		
+
 		ctrl.done()
 	} // }}}
 }

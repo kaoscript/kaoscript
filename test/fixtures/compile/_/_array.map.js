@@ -46,7 +46,7 @@ module.exports = function(Array, __ks_Array) {
 			throw new TypeError("'condition' is not of type 'Function'");
 		}
 		let results = [];
-		for(let index = 0, __ks_0 = array.length, item; index < __ks_0; ++index) {
+		for(let index = 0, __ks_1 = array.length, item; index < __ks_1; ++index) {
 			item = array[index];
 			if(condition(item, index)) {
 				results.push(iterator(item, index));
