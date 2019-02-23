@@ -441,6 +441,7 @@ const $targets = {
 				destructuring: 'es5'
 				functions: 'es5'
 				parameters: 'es5'
+				properties: 'es5'
 				spreads: 'es5'
 				variables: 'es5'
 			}
@@ -451,6 +452,7 @@ const $targets = {
 				destructuring: 'es6'
 				functions: 'es6'
 				parameters: 'es6'
+				properties: 'es6'
 				spreads: 'es6'
 				variables: 'es6'
 			}

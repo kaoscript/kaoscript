@@ -31,6 +31,9 @@ class ReturnStatement extends Statement {
 		if @value != null {
 			@value.prepare()
 
+			@value.acquireReusable(false)
+			@value.releaseReusable()
+
 			if @afterwards.length != 0 {
 				@temp = @scope.acquireTempName(this)
 			}
@@ -41,11 +44,28 @@ class ReturnStatement extends Statement {
 			@value.translate()
 		}
 	} // }}}
+	acquireReusable(acquire) {
+		if @value != null {
+			@value.acquireReusable(acquire)
+		}
+	}
 	hasExceptions() => @exceptions
 	isAwait() => @await
 	isExit() => true
-	isReturning(type: Type) => @value.type().isInstanceOf(type)
+	isReturning(type: Type) {
+		if @value != null {
+			return @value.type().isInstanceOf(type)
+		}
+		else {
+			return false
+		}
+	}
 	reference() => @temp
+	releaseReusable() {
+		if @value != null {
+			@value.releaseReusable()
+		}
+	}
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 

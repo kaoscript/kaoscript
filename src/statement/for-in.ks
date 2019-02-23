@@ -24,45 +24,45 @@ class ForInStatement extends Statement {
 	analyse() { // {{{
 		let indexVariable = null
 		let valueVariable = null
-		
+
 		if @data.index? {
 			indexVariable = @scope.getVariable(@data.index.name)
-			
+
 			if @data.declaration || indexVariable == null {
 				@indexVariable = @scope.define(@data.index.name, false, @scope.reference('Number'), this)
-				
+
 				@defineIndex = true
 			}
 			else if indexVariable.isImmutable() {
 				ReferenceException.throwImmutable(@data.index.name, this)
 			}
-			
+
 			@index = $compile.expression(@data.index, this)
 			@index.analyse()
 		}
-		
+
 		if @data.value? {
 			valueVariable = @scope.getVariable(@data.value.name)
-			
+
 			if @data.declaration || valueVariable == null {
 				@valueVariable = @scope.define(@data.value.name, false, this)
-				
+
 				@defineValue = true
 			}
 			else if valueVariable.isImmutable() {
 				ReferenceException.throwImmutable(@data.value.name, this)
 			}
-			
+
 			@value = $compile.expression(@data.value, this)
 			@value.analyse()
 		}
-		
+
 		let renameIndex = false
 		let renameValue = false
-		
+
 		@expression = $compile.expression(@data.expression, this, @parent.scope())
 		@expression.analyse()
-		
+
 		if @index != null && @expression.isUsingVariable(@data.index.name) {
 			if @defineIndex {
 				renameIndex = true
@@ -79,11 +79,11 @@ class ForInStatement extends Statement {
 				SyntaxException.throwAlreadyDeclared(@data.value.name, this)
 			}
 		}
-		
+
 		if @data.from? {
 			@from = $compile.expression(@data.from, this, @parent.scope())
 			@from.analyse()
-			
+
 			if @index != null && @from.isUsingVariable(@data.index.name) {
 				if @defineIndex {
 					renameIndex = true
@@ -101,11 +101,11 @@ class ForInStatement extends Statement {
 				}
 			}
 		}
-		
+
 		if @data.til? {
 			@til = $compile.expression(@data.til, this, @parent.scope())
 			@til.analyse()
-			
+
 			if @index != null && @til.isUsingVariable(@data.index.name) {
 				if @defineIndex {
 					renameIndex = true
@@ -126,7 +126,7 @@ class ForInStatement extends Statement {
 		else if @data.to? {
 			@to = $compile.expression(@data.to, this, @parent.scope())
 			@to.analyse()
-			
+
 			if @index != null && @to.isUsingVariable(@data.index.name) {
 				if @defineIndex {
 					renameIndex = true
@@ -144,14 +144,14 @@ class ForInStatement extends Statement {
 				}
 			}
 		}
-		
+
 		if renameIndex {
 			@scope.rename(@data.index.name)
 		}
 		if renameValue {
 			@scope.rename(@data.value.name)
 		}
-		
+
 		if @data.until? {
 			@until = $compile.expression(@data.until, this)
 			@until.analyse()
@@ -160,99 +160,99 @@ class ForInStatement extends Statement {
 			@while = $compile.expression(@data.while, this)
 			@while.analyse()
 		}
-		
+
 		if @data.when? {
 			@when = $compile.expression(@data.when, this)
 			@when.analyse()
 		}
-		
+
 		@body = $compile.expression($ast.block(@data.body), this)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
 		@expression.prepare()
-		
+
 		const type = @expression.type()
 		if !(type.isAny() || type.isArray()) {
 			TypeException.throwInvalidForInExpression(this)
 		}
-		
+
 		if @expression.isEntangled() {
 			@expressionName = this.greatScope().acquireTempName()
-			
+
 			@scope.updateTempNames()
 		}
-		
+
 		if @defineValue {
 			@valueVariable.type(type.parameter())
 		}
-		
+
 		if !?@index && !(@data.index? && !@data.declaration && this.greatScope().hasVariable(@data.index.name)) {
 			@indexName = @scope.acquireTempName()
 		}
-		
+
 		@boundName = @scope.acquireTempName()
-		
+
 		if @from? {
 			@from.prepare()
 		}
-		
+
 		if @til? {
 			@til.prepare()
 		}
 		else if @to? {
 			@to.prepare()
 		}
-		
+
 		if @until? {
 			@until.prepare()
 		}
 		else if @while? {
 			@while.prepare()
 		}
-		
+
 		if @when? {
 			@when.prepare()
-			
+
 			@when.acquireReusable(false)
 			@when.releaseReusable()
 		}
-		
+
 		@body.prepare()
-		
+
 		this.greatScope().releaseTempName(@expressionName) if @expressionName?
 		@scope.releaseTempName(@indexName) if @indexName?
 		@scope.releaseTempName(@boundName)
 	} // }}}
 	translate() { // {{{
 		@expression.translate()
-		
+
 		if @value? {
 			@value.translate()
 		}
-		
+
 		if @from? {
 			@from.translate()
 		}
-		
+
 		if @til? {
 			@til.translate()
 		}
 		else if @to? {
 			@to.translate()
 		}
-		
+
 		if @until? {
 			@until.translate()
 		}
 		else if @while? {
 			@while.translate()
 		}
-		
+
 		if @when? {
 			@when.translate()
 		}
-		
+
 		@body.translate()
 	} // }}}
 	toBoundFragments(fragments) { // {{{
@@ -384,28 +384,28 @@ class ForInStatement extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {
 			let line = fragments.newLine()
-			
+
 			if !this.greatScope().hasVariable(@expressionName) {
 				line.code($runtime.scope(this))
-				
+
 				this.greatScope().define(@expressionName, false, this)
 			}
-			
+
 			line.code(@expressionName, $equals).compile(@expression).done()
 		}
-		
+
 		let ctrl
-		
+
 		if @index != null && !@data.declaration && !@defineIndex {
 			const line = fragments
 				.newLine()
 				.compile(@index)
 				.code($equals)
-			
+
 			this.toFromFragments(line)
-			
+
 			line.done()
-			
+
 			ctrl = fragments
 				.newControl()
 				.code('for(', $runtime.scope(this))
@@ -416,29 +416,29 @@ class ForInStatement extends Statement {
 				.code('for(', $runtime.scope(this))
 				.compile(@indexName ?? @index)
 				.code($equals)
-			
+
 			this.toFromFragments(ctrl)
-			
+
 			ctrl.code($comma)
 		}
-		
+
 		ctrl.code(@boundName, $equals)
-		
+
 		this.toBoundFragments(ctrl)
-		
+
 		if @defineValue {
 			ctrl.code($comma).compile(@value)
 		}
-		
+
 		ctrl.code('; ')
-		
+
 		if @until? {
 			ctrl.code('!(').compile(@until).code(') && ')
 		}
 		else if @while? {
 			ctrl.compile(@while).code(' && ')
 		}
-		
+
 		if @data.desc {
 			ctrl
 				.compile(@indexName ?? @index)
@@ -451,9 +451,9 @@ class ForInStatement extends Statement {
 				.code(' < ' + @boundName + '; ++')
 				.compile(@indexName ?? @index)
 		}
-		
+
 		ctrl.code(')').step()
-		
+
 		if @value? {
 			ctrl
 				.newLine()
@@ -465,7 +465,7 @@ class ForInStatement extends Statement {
 				.code(']')
 				.done()
 		}
-		
+
 		if @when? {
 			ctrl
 				.newControl()
@@ -479,7 +479,7 @@ class ForInStatement extends Statement {
 		else {
 			ctrl.compile(@body)
 		}
-		
+
 		ctrl.done()
 	} // }}}
 }

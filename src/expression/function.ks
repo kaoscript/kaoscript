@@ -20,7 +20,7 @@ class FunctionExpression extends Expression {
 			parameter.analyse()
 		}
 
-		@isObjectMember = @parent is ObjectMember
+		@isObjectMember = @parent.parent() is ObjectExpression
 	} // }}}
 	prepare() { // {{{
 		for parameter in @parameters {
@@ -73,8 +73,8 @@ class FunctionExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		let surround
 
-		if @isObjectMember {
-			if @options.format.functions == 'es5' {
+		if @options.format.functions == 'es5' {
+			if @isObjectMember && !@parent.parent().hasComputedProperties() {
 				surround = {
 					beforeParameters: ': function('
 					afterParameters: ')'
@@ -83,17 +83,26 @@ class FunctionExpression extends Expression {
 			}
 			else {
 				surround = {
-					beforeParameters: '('
+					beforeParameters: 'function('
 					afterParameters: ')'
 					footer: ''
 				}
 			}
 		}
 		else {
-			surround = {
-				beforeParameters: 'function('
-				afterParameters: ')'
-				footer: ''
+			if @isObjectMember {
+				surround = {
+					beforeParameters: '('
+					afterParameters: ')'
+					footer: ''
+				}
+			}
+			else {
+				surround = {
+					beforeParameters: 'function('
+					afterParameters: ')'
+					footer: ''
+				}
 			}
 		}
 

@@ -290,7 +290,9 @@ class Scope extends AbstractScope {
 		return name
 	} // }}}
 	private acquireTempNameFromKid() { // {{{
-		if name ?= @parent?.acquireTempNameFromKid() {
+		if name ?= @scopeParent?.acquireTempNameFromKid() {
+			@tempParentNames[name] = true
+
 			return name
 		}
 
@@ -363,7 +365,7 @@ class Scope extends AbstractScope {
 	} // }}}
 	releaseTempName(name) { // {{{
 		if name.length > 5 && name.substr(0, 5) == '__ks_' {
-			if @scopeParent && @tempParentNames[name] {
+			if @scopeParent? && @tempParentNames[name] {
 				@scopeParent.releaseTempNameFromKid(name)
 
 				@tempParentNames[name] = false
@@ -376,21 +378,18 @@ class Scope extends AbstractScope {
 		return this
 	} // }}}
 	private releaseTempNameFromKid(name) { // {{{
-		if @parent && @tempParentNames[name] {
-			@parent.releaseTempNameFromKid(name)
+		if @scopeParent? && @tempParentNames[name] {
+			@scopeParent.releaseTempNameFromKid(name)
 
 			@tempParentNames[name] = false
 		}
-		else {
-			@tempNames[name] = true
-		}
 	} // }}}
 	updateTempNames() { // {{{
-		if @parent? {
-			@parent.updateTempNames()
+		if @scopeParent? {
+			@scopeParent.updateTempNames()
 
-			if @parent._tempNextIndex > @tempNextIndex {
-				@tempNextIndex = @parent._tempNextIndex
+			if @scopeParent._tempNextIndex > @tempNextIndex {
+				@tempNextIndex = @scopeParent._tempNextIndex
 			}
 		}
 	} // }}}
@@ -398,7 +397,7 @@ class Scope extends AbstractScope {
 
 class XScope extends AbstractScope {
 	acquireTempName(statement: Statement = null) { // {{{
-		return @parent.acquireTempName(statement)
+		return @scopeParent.acquireTempName(statement)
 	} // }}}
 	getRenamedVariable(name) { // {{{
 		if @renamedVariables[name] is String {
@@ -420,11 +419,12 @@ class XScope extends AbstractScope {
 		}
 	} // }}}
 	releaseTempName(name) { // {{{
-		@parent.releaseTempName(name)
+		@scopeParent.releaseTempName(name)
 
 		return this
 	} // }}}
 	updateTempNames() { // {{{
+		@scopeParent?.updateTempNames()
 	} // }}}
 }
 
