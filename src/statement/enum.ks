@@ -96,10 +96,23 @@ class EnumDeclaration extends Statement {
 				}
 			}
 			EnumTypeKind::String => {
+				let value
 				for data in @data.members {
+					if data.value? {
+						if data.value.kind == NodeKind::Literal {
+							value = $quote(data.value.value)
+						}
+						else {
+							throw new NotSupportedException(this)
+						}
+					}
+					else {
+						value = $quote(data.name.name.toLowerCase())
+					}
+
 					@values.push({
 						name: data.name.name
-						value: $quote(data.name.name.toLowerCase())
+						value: value
 					})
 
 					@enum.addElement(data.name.name)
