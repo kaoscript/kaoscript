@@ -69,10 +69,16 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		@object.acquireReusable(@data.nullable || acquire)
+		if @object.isCallable() {
+			@object.acquireReusable(@data.nullable || acquire)
+		}
+
+		if @data.computed && @property is not String && @property.isCallable() {
+			@property.acquireReusable(@data.nullable || acquire)
+		}
 	} // }}}
 	caller() => @object
-	isCallable() => @object.isCallable()
+	isCallable() => @object.isCallable() || (@data.computed && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
 	isEntangled() =>this.isCallable() || this.isNullable()
 	isMacro() => false
@@ -80,7 +86,13 @@ class MemberExpression extends Expression {
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@data.nullable ? 1 : 0) + (@data.computed && @property.isNullable() ? 1 : 0) > 1
 	isUsingVariable(name) => @object.isUsingVariable(name)
 	releaseReusable() { // {{{
-		@object.releaseReusable()
+		if @object.isCallable() {
+			@object.releaseReusable()
+		}
+
+		if @data.computed && @property is not String && @property.isCallable() {
+			@property.releaseReusable()
+		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if this.isNullable() && !@tested {
@@ -189,41 +201,39 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	toReusableFragments(fragments) { // {{{
-		if @object.isCallable() {
-			if @data.computed {
+		const objectCallable = @object.isCallable()
+
+		if objectCallable {
+			fragments
+				.code('(')
+				.compileReusable(@object)
+				.code(', ')
+				.compile(@object)
+		}
+		else {
+			fragments.wrap(@object)
+		}
+
+		if @data.computed {
+			if @property.isCallable() {
 				fragments
-					.code('(')
-					.compileReusable(@object)
-					.code(', ')
-					.compile(@object)
 					.code('[')
 					.compileReusable(@property)
 					.code(']')
-					.code(')')
 			}
 			else {
 				fragments
-					.code('(')
-					.compileReusable(@object)
-					.code(', ')
-					.compile(@object)
-					.code($dot)
+					.code('[')
 					.compile(@property)
-					.code(')')
+					.code(']')
 			}
 		}
-		else if @data.computed {
-			fragments
-				.wrap(@object)
-				.code('[')
-				.compileReusable(@property)
-				.code(']')
-		}
 		else {
-			fragments
-				.wrap(@object)
-				.code($dot)
-				.compile(@property)
+			fragments.code($dot).compile(@property)
+		}
+
+		if objectCallable {
+			fragments.code(')')
 		}
 	} // }}}
 	type() => @type
