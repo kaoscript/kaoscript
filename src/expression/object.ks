@@ -87,8 +87,8 @@ class ObjectExpression extends Expression {
 		else {
 			const object = fragments.newObject()
 
-			for template in @properties {
-				object.newLine().compile(template)
+			for property in @properties {
+				object.newLine().compile(property)
 			}
 
 			object.done()

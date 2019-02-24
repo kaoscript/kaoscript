@@ -238,6 +238,10 @@ class CallExpression extends Expression {
 		for callee in @callees {
 			callee.acquireReusable(acquire)
 		}
+
+		for argument in @arguments {
+			argument.acquireReusable(acquire)
+		}
 	} // }}}
 	addCallee(callee: Callee) { // {{{
 		if callee is DefaultCallee {
