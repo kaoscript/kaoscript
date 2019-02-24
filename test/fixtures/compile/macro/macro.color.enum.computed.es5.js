@@ -1,29 +1,33 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
-	let Space = {
+	var Space = {
 		RGB: "rgb",
 		SRGB: "srgb",
 		YUV: "yuv"
 	};
-	class Color {
-		constructor() {
+	var Color = Helper.class({
+		$name: "Color",
+		$create: function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
-		}
-		__ks_init() {
-		}
-		__ks_cons(args) {
+		},
+		__ks_init: function() {
+		},
+		__ks_cons: function(args) {
 			if(args.length !== 0) {
 				throw new SyntaxError("wrong number of arguments");
 			}
 		}
-	}
-	let __ks_0;
+	});
+	var __ks_0;
 	Color.registerSpace({
 		name: Space.SRGB,
 		"alias": [Space.RGB],
 		"parsers": {
-			"from": (__ks_0 = {}, __ks_0[Space.YUV] = function() {
-				return "RGB -> UYV";
+			"from": (__ks_0 = {}, __ks_0.hex = function() {
+				return "HEX -> RGB";
+			}, __ks_0[Space.YUV] = function() {
+				return "YUV -> RGB";
 			}, __ks_0)
 		},
 		"components": {

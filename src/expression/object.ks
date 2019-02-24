@@ -129,7 +129,7 @@ class ObjectLiteralMember extends Expression {
 	toComputedFragments(fragments, name) { // {{{
 		fragments
 			.code(name)
-			.code(this.reference())
+			.code(@reference)
 			.code($equals)
 			.compile(@value)
 			.code($comma)

@@ -1,4 +1,4 @@
-#![format(functions='es5', properties='es5')]
+#![target(ecma-v5)]
 
 enum Space<String> {
 	RGB
@@ -46,8 +46,11 @@ Color.registerSpace!({
 	alias: [Space::RGB]
 	parsers: {
 		from: {
+			hex() {
+				return 'HEX -> RGB'
+			}
 			[Space::YUV]() {
-				return 'RGB -> UYV'
+				return 'YUV -> RGB'
 			}
 		}
 	}

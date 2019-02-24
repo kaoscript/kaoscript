@@ -18,14 +18,14 @@ class Attribute {
 		conditional(data, target) { // {{{
 			if data.attributes?.length > 0 {
 				let attribute
-				
+
 				for attr in data.attributes {
 					if attr.declaration.kind == NodeKind::AttributeExpression && (attribute ?= Attribute.get(attr.declaration, AttributeTarget::Conditional)) {
 						return attribute.evaluate(target)
 					}
 				}
 			}
-			
+
 			return true
 		} // }}}
 		configure(data, options, clone, targets) { // {{{
@@ -35,15 +35,15 @@ class Attribute {
 					if attr.declaration.kind == NodeKind::AttributeExpression && (attribute ?= Attribute.get(attr.declaration, targets)) {
 						if clone {
 							options = Object.clone(options)
-							
+
 							clone = false
 						}
-						
+
 						attribute.configure(options)
 					}
 				}
 			}
-			
+
 			return options
 		} // }}}
 		get(data, targets) { // {{{
@@ -56,11 +56,11 @@ class Attribute {
 		} // }}}
 		register(class: Class) { // {{{
 			let name = class.name.toLowerCase()
-			
+
 			if name.length > 9 && name.substr(-9) == 'attribute' {
 				name = name.substr(0, name.length - 9)
 			}
-			
+
 			$attributes[name] = class
 		} // }}}
 	}
@@ -128,7 +128,7 @@ class IfAttribute extends Attribute {
 		if @data.arguments.length != 1 {
 			SyntaxException.throwTooMuchAttributesForIfAttribute()
 		}
-		
+
 		return this.evaluate(@data.arguments[0], target)
 	} // }}}
 	evaluate(data, target) { // {{{
@@ -137,14 +137,14 @@ class IfAttribute extends Attribute {
 				for arg in data.arguments when !this.evaluate(arg, target) {
 					return false
 				}
-				
+
 				return true
 			}
 			else if data.name.name == 'any' {
 				for arg in data.arguments when this.evaluate(arg, target) {
 					return true
 				}
-				
+
 				return false
 			}
 		}
@@ -224,8 +224,42 @@ class RuntimeAttribute extends Attribute {
 	} // }}}
 }
 
+class TargetAttribute extends Attribute {
+	private {
+		_data
+	}
+	static {
+		target() => AttributeTarget::Global | AttributeTarget::Statement
+	}
+	constructor(@data)
+	configure(options) { // {{{
+		for argument in @data.arguments {
+			if argument.kind == NodeKind::Identifier {
+				if match !?= $targetRegex.exec(argument.name) {
+					throw new Error(`Invalid target syntax: \(argument.name)`)
+				}
+
+				target = {
+					name: match[1],
+					version: match[2]
+				}
+
+				if !?$targets[target.name] {
+					throw new Error(`Undefined target '\(target.name)'`)
+				}
+				else if !?$targets[target.name][target.version] {
+					throw new Error(`Undefined target's version '\(target.version)'`)
+				}
+
+				options.format = Object.defaults(options, $targets[target.name][target.version].format)
+			}
+		}
+	} // }}}
+}
+
 Attribute.register(ErrorAttribute)
 Attribute.register(FormatAttribute)
 Attribute.register(IfAttribute)
 Attribute.register(ParseAttribute)
 Attribute.register(RuntimeAttribute)
+Attribute.register(TargetAttribute)
