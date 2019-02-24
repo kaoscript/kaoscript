@@ -257,8 +257,6 @@ class MacroDeclaration extends AbstractNode {
 			source += fragment.code
 		}
 
-		//console.log(source)
-
 		@fn = $evaluate(source)
 
 		@parent.scope().addMacro(@name, this)
