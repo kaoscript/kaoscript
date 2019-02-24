@@ -100,6 +100,7 @@ func $serialize(macro, data, context) { // {{{
 	}
 	else {
 		let empty = true
+		let computed, name
 
 		context.data += '{'
 
@@ -110,17 +111,35 @@ func $serialize(macro, data, context) { // {{{
 				context.data += '\n'
 			}
 
+			computed = /^\_ks\_property\_name\_mark\_(\d+)$/.exec(key)
+
 			if value is MacroMarker {
-				if macro.getMark(value.index + 1) == NodeKind::ObjectMember {
-					context.data += `\(key): \(Generator.generate(macro.getMark(value.index), {
+				if computed? {
+					name = `\(Generator.generate(macro.getMark(computed[1]), {
 						mode: Generator.KSWriterMode::Property
 					}))`
 				}
 				else {
-					context.data += `\(key)\(Generator.generate(macro.getMark(value.index), {
+					name = key
+				}
+
+				if macro.getMark(value.index + 1) == NodeKind::ObjectMember {
+					context.data += `\(name): \(Generator.generate(macro.getMark(value.index), {
 						mode: Generator.KSWriterMode::Property
 					}))`
 				}
+				else {
+					context.data += `\(name)\(Generator.generate(macro.getMark(value.index), {
+						mode: Generator.KSWriterMode::Property
+					}))`
+				}
+			}
+			else if computed? {
+				context.data += `\(Generator.generate(macro.getMark(computed[1]), {
+					mode: Generator.KSWriterMode::Property
+				})): `
+
+				$serialize(macro, value, context)
 			}
 			else {
 				context.data += `\($quote(key)): `
@@ -147,15 +166,17 @@ func $transformExpression(macro, node, data, writer) { // {{{
 			return macro.addMark(data)
 		}
 		NodeKind::ObjectMember => {
-			if 	data.value.kind == NodeKind::EnumExpression ||
-				data.value.kind == NodeKind::Identifier ||
-				data.value.kind == NodeKind::LambdaExpression ||
-				data.value.kind == NodeKind::MemberExpression
-			{
+			const name = data.name.kind == NodeKind::ComputedPropertyName || data.name.kind == NodeKind::TemplateExpression
+			const value = 	data.value.kind == NodeKind::EnumExpression ||
+								data.value.kind == NodeKind::Identifier ||
+								data.value.kind == NodeKind::LambdaExpression ||
+								data.value.kind == NodeKind::MemberExpression
+
+			if name || value {
 				return {
 					kind: NodeKind::ObjectMember
-					name: data.name
-					value: macro.addMark(data.value, NodeKind::ObjectMember)
+					name: name ? macro.addPropertyNameMark(data.name) : data.name
+					value: value ? macro.addMark(data.value, NodeKind::ObjectMember) : data.value
 					start: data.start
 					end: data.end
 				}
@@ -262,6 +283,16 @@ class MacroDeclaration extends AbstractNode {
 					value: index
 				}
 			]
+		}
+	} // }}}
+	addPropertyNameMark(data, kind = null) { // {{{
+		const index = @marks.length
+
+		@marks.push(data, kind)
+
+		return {
+			kind: NodeKind::Identifier
+			name: `_ks_property_name_mark_\(index)`
 		}
 	} // }}}
 	execute(arguments: Array, parent) { // {{{
