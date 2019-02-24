@@ -168,9 +168,9 @@ func $transformExpression(macro, node, data, writer) { // {{{
 		NodeKind::ObjectMember => {
 			const name = data.name.kind == NodeKind::ComputedPropertyName || data.name.kind == NodeKind::TemplateExpression
 			const value = 	data.value.kind == NodeKind::EnumExpression ||
-								data.value.kind == NodeKind::Identifier ||
-								data.value.kind == NodeKind::LambdaExpression ||
-								data.value.kind == NodeKind::MemberExpression
+							(data.value.kind == NodeKind::Identifier && !node.scope().isPredefinedVariable(data.value.name)) ||
+							data.value.kind == NodeKind::LambdaExpression ||
+							data.value.kind == NodeKind::MemberExpression
 
 			if name || value {
 				return {

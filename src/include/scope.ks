@@ -197,6 +197,7 @@ class AbstractScope {
 	hasLocalVariable(name) => @variables[name] is Variable || @natives[name] is Variable
 	hasMacro(name) => @macros[name] is Array
 	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || @parent?.hasVariable(name)
+	isPredefinedVariable(name): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
 	listMacros(name) => @macros[name]
 	parent() => @parent
 	reference(value) { // {{{
