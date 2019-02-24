@@ -1,0 +1,33 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "ClassA"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "_x": {
+          "access": 1,
+          "type": [
+            "Array",
+            "String"
+          ]
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

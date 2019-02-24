@@ -877,17 +877,7 @@ class ClassVariableType extends Type {
 			let type: ClassVariableType
 
 			if data.type? {
-				if data.type.typeName? {
-					if data.type.properties? {
-						throw new NotImplementedException(node)
-					}
-					else {
-						type = new ClassVariableType(scope, new ReferenceType(scope, data.type.typeName.name, data.type.nullable))
-					}
-				}
-				else {
-					throw new NotImplementedException(node)
-				}
+				type = new ClassVariableType(scope, Type.fromAST(data.type, node))
 			}
 			else {
 				type = new ClassVariableType(scope, new ReferenceType(scope, 'Any'))
