@@ -5,6 +5,6 @@ module.exports = function() {
 			y: 2
 		};
 	}
-	var {x, y} = foo();
+	let {x, y} = foo();
 	console.log(x, y);
 };

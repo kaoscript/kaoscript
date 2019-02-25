@@ -2,12 +2,13 @@ class VariableDeclaration extends Statement {
 	private {
 		_autotype: Boolean
 		_await: Boolean
-		_declarators: Array		= []
-		_function				= null
-		_hasInit: Boolean		= false
+		_declarators: Array			= []
+		_destructuring: Boolean		= false
+		_function					= null
+		_hasInit: Boolean			= false
 		_immutable: Boolean
 		_init
-		_toDeclareAll: Boolean	= true
+		_toDeclareAll: Boolean		= true
 		_try
 	}
 	constructor(@data, @parent) { // {{{
@@ -67,9 +68,12 @@ class VariableDeclaration extends Statement {
 			@declarators.push(declarator)
 		}
 
-		if @hasInit {
-			if @declarators.length == 1 && @declarators[0] is VariableIdentifierDeclarator {
+		if @hasInit && @declarators.length == 1 {
+			if @declarators[0] is VariableIdentifierDeclarator {
 				this.reference(@declarators[0].name())
+			}
+			else {
+				@destructuring = true
 			}
 		}
 	} // }}}
@@ -77,7 +81,7 @@ class VariableDeclaration extends Statement {
 		if @hasInit {
 			@init.prepare()
 
-			@init.acquireReusable(false)
+			@init.acquireReusable(@destructuring && @options.format.destructuring == 'es5')
 			@init.releaseReusable()
 
 			if @autotype {
@@ -154,12 +158,11 @@ class VariableDeclaration extends Statement {
 		else {
 			if @hasInit {
 				const declarator = @declarators[0]
-				const binding = declarator is VariableBindingDeclarator
 
 				let line = fragments.newLine()
 
 				if @toDeclareAll {
-					if binding || @options.format.variables == 'es5' {
+					if @options.format.variables == 'es5' {
 						line.code('var ')
 					}
 					else if @data.rebindable {
@@ -170,7 +173,7 @@ class VariableDeclaration extends Statement {
 					}
 				}
 
-				if binding && @options.format.destructuring == 'es5' {
+				if @destructuring && @options.format.destructuring == 'es5' {
 					declarator.toFlatFragments(line, @init)
 				}
 				else {

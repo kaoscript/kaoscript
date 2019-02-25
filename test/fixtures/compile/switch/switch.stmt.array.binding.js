@@ -9,19 +9,19 @@ module.exports = function() {
 		console.log("(0, 0) is at the origin");
 	}
 	else if((Type.isArray(somePoint) && somePoint.length === 2 && __ks_1(somePoint)) && Type.isArray(somePoint) && somePoint.length === 2) {
-		var [x, ] = somePoint;
+		let [x, ] = somePoint;
 		console.log("(" + x + ", 0) is on the x-axis");
 	}
 	else if((Type.isArray(somePoint) && somePoint.length === 2 && __ks_2(somePoint)) && Type.isArray(somePoint) && somePoint.length === 2) {
-		var [, y] = somePoint;
+		let [, y] = somePoint;
 		console.log("(0, " + y + ") is on the y-axis");
 	}
 	else if((Type.isArray(somePoint) && somePoint.length === 2 && __ks_3(somePoint)) && Type.isArray(somePoint) && somePoint.length === 2) {
-		var [x, y] = somePoint;
+		let [x, y] = somePoint;
 		console.log("(" + x + ", " + y + ") is inside the box");
 	}
 	else if(Type.isArray(somePoint) && somePoint.length === 2) {
-		var [x, y] = somePoint;
+		let [x, y] = somePoint;
 		console.log("(" + x + ", " + y + ") is outside of the box");
 	}
 	else {

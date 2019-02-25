@@ -1,6 +1,6 @@
 module.exports = function() {
 	let key = "qux";
-	var {[key]: foo} = {
+	let {[key]: foo} = {
 		qux: "bar"
 	};
 	console.log(foo);

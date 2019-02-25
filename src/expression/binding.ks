@@ -109,7 +109,12 @@ class ArrayBinding extends Expression {
 	} // }}}
 	toAssignmentFragments(fragments, value) { // {{{
 		if @nonexists {
-			fragments.code('var ')
+			if @options.format.variables == 'es5' || @exists {
+				fragments.code('var ')
+			}
+			else {
+				fragments.code('let ')
+			}
 		}
 
 		if @options.format.destructuring == 'es5' {
@@ -124,16 +129,17 @@ class ArrayBinding extends Expression {
 	} // }}}
 	toFlatFragments(fragments, value) { // {{{
 		if value.isComposite() {
-			if @elements.length == 1 {
-				@elements[0].toFlatFragments(fragments, value)
-			}
-			else {
-				throw new NotImplementedException(this)
+			@elements[0].toFlatFragments(fragments, new FlatReusableBindingElement(value, this))
+
+			for i from 1 til @elements.length {
+				fragments.code(', ')
+
+				@elements[i].toFlatFragments(fragments, value)
 			}
 		}
 		else {
 			for i from 0 til @elements.length {
-				fragments.code(', ') if i
+				fragments.code(', ') if i != 0
 
 				@elements[i].toFlatFragments(fragments, value)
 			}
@@ -345,6 +351,25 @@ class FlatObjectBindingElement extends Expression {
 	} // }}}
 }
 
+class FlatReusableBindingElement extends Expression {
+	private {
+		_value
+	}
+	constructor(@value, parent) { // {{{
+		super({}, parent)
+	} // }}}
+	analyse()
+	prepare()
+	translate()
+	isComposite() => false
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.code('(')
+			.compileReusable(@value)
+			.code(')')
+	} // }}}
+}
+
 class ObjectBinding extends Expression {
 	private {
 		_assignement: Boolean	= false
@@ -454,7 +479,12 @@ class ObjectBinding extends Expression {
 		}
 	} // }}}
 	toAssignmentFragments(fragments, value) { // {{{
-		fragments.code('var ')
+		if @options.format.variables == 'es5' || @exists {
+			fragments.code('var ')
+		}
+		else {
+			fragments.code('let ')
+		}
 
 		if @options.format.destructuring == 'es5' {
 			this.toFlatFragments(fragments, value)

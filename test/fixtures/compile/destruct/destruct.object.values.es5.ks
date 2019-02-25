@@ -1,4 +1,4 @@
-#![format(destructuring='es5', variables='es5')]
+#![target(ecma-v5)]
 
 extern console: {
 	log(...args)

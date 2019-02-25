@@ -3,7 +3,7 @@ module.exports = function() {
 		bar: "hello",
 		baz: 3
 	};
-	var {bar: a, baz: b} = foo;
+	let {bar: a, baz: b} = foo;
 	console.log(a);
 	console.log(b);
 };

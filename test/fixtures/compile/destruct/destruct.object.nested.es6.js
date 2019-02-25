@@ -5,6 +5,6 @@ module.exports = function() {
 			n2: "world"
 		}
 	};
-	var {bar: {n1, n2: qux}} = foo;
+	let {bar: {n1, n2: qux}} = foo;
 	console.log(n1, qux);
 };

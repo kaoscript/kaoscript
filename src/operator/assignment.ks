@@ -93,6 +93,16 @@ class AssignmentOperatorDivision extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
+	acquireReusable(acquire) { // {{{
+		if @options.format.destructuring == 'es5' {
+			@right.acquireReusable(true)
+		}
+	} // }}}
+	releaseReusable() { // {{{
+		if @options.format.destructuring == 'es5' {
+			@right.releaseReusable()
+		}
+	} // }}}
 	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
 	toFragments(fragments, mode) { // {{{
 		if @right.isAwaiting() {

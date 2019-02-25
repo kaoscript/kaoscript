@@ -6,7 +6,7 @@ module.exports = function() {
 		};
 	}
 	let foo = (function() {
-		var {gender, age} = min();
+		let {gender, age} = min();
 		return {
 			gender: gender,
 			age: age
