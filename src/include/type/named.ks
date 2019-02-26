@@ -1,7 +1,7 @@
 class NamedType extends Type {
 	private {
+		_container: NamedContainerType	= null
 		_name: String
-		_parent: NamedContainerType	= null
 		_type: Type
 	}
 	constructor(@name, @type) { // {{{
@@ -13,6 +13,8 @@ class NamedType extends Type {
 
 		return this
 	} // }}}
+	container() => @container
+	container(@container) => this
 	discardAlias() => @type.discardAlias()
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
@@ -66,13 +68,14 @@ class NamedType extends Type {
 	getProperty(name: String) => @type.getProperty(name)
 	getSealedName() => `__ks_\(@name)`
 	getSealedPath() { // {{{
-		if @parent? {
-			return `\(@parent.path()).\(this.getSealedName())`
+		if @container? {
+			return `\(@container.path()).\(this.getSealedName())`
 		}
 		else {
 			return this.getSealedName()
 		}
 	} // }}}
+	hasContainer() => ?@container
 	hasProperty(name: String) => @type.hasProperty(name)
 	isAlias() => @type.isAlias()
 	isAlien() => @type.isAlien()
@@ -139,25 +142,15 @@ class NamedType extends Type {
 	metaReference(references, ignoreAlteration) => @type.metaReference(references, @name, ignoreAlteration)
 	name() => @name
 	name(@name) => this
-	parent() => @parent
-	parent(@parent) => this
 	path() { // {{{
-		if @parent? {
-			return `\(@parent.path()).\(@name)`
+		if @container? {
+			return `\(@container.path()).\(@name)`
 		}
 		else {
 			return @name
 		}
 	} // }}}
 	reckonReferenceIndex(references) => @type.reckonReferenceIndex(references)
-	reference(scope = @scope) { // {{{
-		if @parent? {
-			return @parent.scope().reference(@name)
-		}
-		else {
-			return scope.reference(@name)
-		}
-	} // }}}
 	referenceIndex() => @type.referenceIndex()
 	toQuote() => @name
 	toFragments(fragments, node)
@@ -177,16 +170,37 @@ class NamedType extends Type {
 }
 
 class NamedContainerType extends NamedType {
+	private {
+		_properties			= {}
+	}
 	constructor(@name, @type) { // {{{
 		super(name, type)
 	} // }}}
-	addProperty(name: String, type: Type) { // {{{
-		if type is NamedType {
-			type = type.duplicate().parent(this)
+	addProperty(name: String, property: Type) { // {{{
+		if property is NamedType {
+			property = property.duplicate().container(this)
 		}
 
-		@type.addProperty(name, type)
+		@type.addProperty(name, property)
+
+		@properties[name] = property
 	} // }}}
-	getProperty(name: String): Type => @type.getProperty(name)
+	getProperty(name: String): Type { // {{{
+		if @properties[name] is Type {
+			return @properties[name]
+		}
+		else if property ?= @type.getProperty(name) {
+			if property is NamedType {
+				property = property.duplicate().container(this)
+			}
+
+			@properties[name] = property
+
+			return property
+		}
+		else {
+			return null
+		}
+	} // }}}
 	hasProperty(name: String): Boolean => @type.hasProperty(name)
 }

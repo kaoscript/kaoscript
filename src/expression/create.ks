@@ -39,7 +39,7 @@ class CreateExpression extends Expression {
 				TypeException.throwNoMatchingConstructor(type.name(), this)
 			}
 
-			@type = type.reference()
+			@type = @scope.reference(type)
 		}
 		else if !type.isAny() && !type.isClass() {
 			TypeException.throwNotClass(type.name(), this)

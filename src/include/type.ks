@@ -327,8 +327,11 @@ abstract class Type {
 			throw new NotImplementedException(node)
 		} // }}}
 		toNamedType(name: String, type: Type): Type { // {{{
-			if type is AliasType || type is ClassType || type is EnumType || type is NamespaceType {
+			if type is AliasType || type is ClassType || type is EnumType {
 				return new NamedType(name, type)
+			}
+			else if type is NamespaceType {
+				return new NamedContainerType(name, type)
 			}
 			else {
 				return type

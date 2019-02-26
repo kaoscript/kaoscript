@@ -833,12 +833,7 @@ class ImportWorker {
 				index = @metadata.requirements[i]
 				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
 
-				if type is ClassType || type is EnumType || type is NamespaceType {
-					references[index] = new NamedType(@metadata.requirements[i + 1], type)
-				}
-				else {
-					references[index] = type
-				}
+				references[index] = Type.toNamedType(@metadata.requirements[i + 1], type)
 			}
 
 			while queue.length > 0 {
@@ -876,9 +871,7 @@ class ImportWorker {
 			index = @metadata.requirements[i]
 			type = references[index]
 
-			if type is ClassType || type is EnumType || type is NamespaceType {
-				references[index] = new NamedType(name, type)
-			}
+			references[index] = Type.toNamedType(name, type)
 		}
 
 		for i from 0 til @metadata.exports.length by 2 {
@@ -889,11 +882,7 @@ class ImportWorker {
 				type = Type.Any
 			}
 			else {
-				type = references[index]
-
-				if type is ClassType || type is EnumType || type is NamespaceType {
-					references[index] = type = new NamedType(name, type)
-				}
+				type = references[index] = Type.toNamedType(name, references[index])
 			}
 
 			@scope.addVariable(name, new Variable(name, false, false, type), @node)
@@ -904,11 +893,7 @@ class ImportWorker {
 			name = @metadata.aliens[i + 1]
 
 			if index != -1 {
-				type = references[index]
-
-				if type is ClassType || type is EnumType || type is NamespaceType {
-					references[index] = type = new NamedType(name, type)
-				}
+				type = references[index] = Type.toNamedType(name, references[index])
 
 				if !@scope.hasVariable(name) {
 					@scope.addVariable(name, new Variable(name, false, false, type), @node)

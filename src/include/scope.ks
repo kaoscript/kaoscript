@@ -63,7 +63,7 @@ class AbstractScope {
 		_body: Array		= []
 		_macros				= {}
 		_natives			= {}
-		_parent
+		_parent				= null
 		_prepared			= false
 		_references			= {}
 		_renamedIndexes 	= {}
@@ -204,7 +204,14 @@ class AbstractScope {
 		switch value {
 			is AnyType => return this.resolveReference('Any')
 			is ClassVariableType => return this.reference(value.type())
-			is NamedType => return value.reference(this)
+			is NamedType => {
+				if value.hasContainer() {
+					return value.container().scope().reference(value.name())
+				}
+				else {
+					return this.resolveReference(value.name())
+				}
+			}
 			is ReferenceType => return this.resolveReference(value.name(), value.isNullable())
 			is String => return this.resolveReference(value)
 			is Variable => return this.resolveReference(value.name())
