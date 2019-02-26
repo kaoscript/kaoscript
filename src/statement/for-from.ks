@@ -175,15 +175,7 @@ class ForFromStatement extends Statement {
 		let ctrl = fragments.newControl().code('for(')
 
 		if @defineVariable {
-			if @options.format.variables == 'es5' {
-				ctrl.code('var ')
-			}
-			else if @immutableVariable {
-				ctrl.code('const ')
-			}
-			else {
-				ctrl.code('let ')
-			}
+			ctrl.code($runtime.scope(this))
 		}
 
 		ctrl.compile(@variable).code($equals).compile(@from)

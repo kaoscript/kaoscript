@@ -414,19 +414,7 @@ class ForInStatement extends Statement {
 		else {
 			ctrl = fragments
 				.newControl()
-				.code('for(')
-
-			if @options.format.variables == 'es5' {
-				ctrl.code('var ')
-			}
-			else if @immutable {
-				ctrl.code('const ')
-			}
-			else {
-				ctrl.code('let ')
-			}
-
-			ctrl
+				.code('for(', $runtime.scope(this))
 				.compile(@indexName ?? @index)
 				.code($equals)
 
