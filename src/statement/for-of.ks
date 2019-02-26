@@ -8,6 +8,7 @@ class ForOfStatement extends Statement {
 		_key						= null
 		_keyName: String
 		_keyVariable: Variable
+		_immutable: Boolean			= false
 		_until
 		_value						= null
 		_valueVariable: Variable
@@ -21,11 +22,13 @@ class ForOfStatement extends Statement {
 		let keyVariable = null
 		let valueVariable = null
 
+		@immutable = @data.declaration && !@data.rebindable
+
 		if @data.key? {
 			keyVariable = @scope.getVariable(@data.key.name)
 
 			if @data.declaration || keyVariable == null {
-				@keyVariable = @scope.define(@data.key.name, false, @scope.reference('String'), this)
+				@keyVariable = @scope.define(@data.key.name, @immutable, @scope.reference('String'), this)
 
 				@defineKey = true
 			}
@@ -41,7 +44,7 @@ class ForOfStatement extends Statement {
 			valueVariable = @scope.getVariable(@data.value.name)
 
 			if @data.declaration || valueVariable == null {
-				@valueVariable = @scope.define(@data.value.name, false, this)
+				@valueVariable = @scope.define(@data.value.name, @immutable, this)
 
 				@defineValue = true
 			}
@@ -160,7 +163,15 @@ class ForOfStatement extends Statement {
 
 		if @key != null {
 			if @data.declaration || @defineKey {
-				ctrl.code($runtime.scope(this))
+				if @options.format.variables == 'es5' {
+					ctrl.code('var ')
+				}
+				else if @immutable {
+					ctrl.code('const ')
+				}
+				else {
+					ctrl.code('let ')
+				}
 			}
 
 			ctrl.compile(@key)
@@ -175,7 +186,15 @@ class ForOfStatement extends Statement {
 			let line = ctrl.newLine()
 
 			if @data.declaration || @defineValue {
-				line.code($runtime.scope(this))
+				if @options.format.variables == 'es5' {
+					line.code('var ')
+				}
+				else if @immutable {
+					line.code('const ')
+				}
+				else {
+					line.code('let ')
+				}
 			}
 
 			line.compile(@value).code($equals).compile(@expressionName ?? @expression).code('[').compile(@key ?? @keyName).code(']').done()

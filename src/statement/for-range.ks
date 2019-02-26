@@ -4,8 +4,9 @@ class ForRangeStatement extends Statement {
 		_boundName
 		_by
 		_byName
-		_defineValue: Boolean		= false
+		_defineVariable: Boolean		= false
 		_from
+		_immutableVariable: Boolean		= false
 		_til
 		_to
 		_until
@@ -18,30 +19,32 @@ class ForRangeStatement extends Statement {
 		super(data, parent, parent.newScope())
 	} // }}}
 	analyse() { // {{{
+		@immutableVariable = @data.declaration && !@data.rebindable
+
 		const variable = @scope.getVariable(@data.value.name)
 		if @data.declaration || variable == null {
-			@valueVariable = @scope.define(@data.value.name, false, @scope.reference('Number'), this)
-			
-			@defineValue = true
+			@valueVariable = @scope.define(@data.value.name, @immutableVariable, @scope.reference('Number'), this)
+
+			@defineVariable = true
 		}
 		else if variable.isImmutable() {
 			ReferenceException.throwImmutable(@data.value.name, this)
 		}
-		
+
 		@value = $compile.expression(@data.value, this)
 		@value.analyse()
-		
+
 		@from = $compile.expression(@data.from, this)
 		@from.analyse()
-		
+
 		@to = $compile.expression(@data.to, this)
 		@to.analyse()
-		
+
 		if @data.by {
 			@by = $compile.expression(@data.by, this)
 			@by.analyse()
 		}
-		
+
 		if @data.until {
 			@until = $compile.expression(@data.until, this)
 			@until.analyse()
@@ -50,12 +53,12 @@ class ForRangeStatement extends Statement {
 			@while = $compile.expression(@data.while, this)
 			@while.analyse()
 		}
-		
+
 		if @data.when {
 			@when = $compile.expression(@data.when, this)
 			@when.analyse()
 		}
-		
+
 		@body = $compile.expression($ast.block(@data.body), this)
 		@body.analyse()
 	} // }}}
@@ -63,26 +66,26 @@ class ForRangeStatement extends Statement {
 		@value.prepare()
 		@from.prepare()
 		@to.prepare()
-		
+
 		@boundName = @scope.acquireTempName() if @to.isComposite()
-		
+
 		if @by? {
 			@by.prepare()
-			
+
 			@byName = @scope.acquireTempName() if @by.isComposite()
 		}
-		
+
 		if @until? {
 			@until.prepare()
 		}
 		else if @while? {
 			@while.prepare()
 		}
-		
+
 		@when.prepare() if @when?
-		
+
 		@body.prepare()
-		
+
 		@scope.releaseTempName(@boundName) if @boundName?
 		@scope.releaseTempName(@byName) if @byName?
 	} // }}}
@@ -90,46 +93,56 @@ class ForRangeStatement extends Statement {
 		@value.translate()
 		@from.translate()
 		@to.translate()
-		
+
 		@by.translate() if @by?
-		
+
 		if @until? {
 			@until.translate()
 		}
 		else if @while? {
 			@while.translate()
 		}
-		
+
 		@when.translate() if @when?
-		
+
 		@body.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl().code('for(')
-		if @data.declaration || @defineValue {
-			ctrl.code($runtime.scope(this))
+
+		if @defineVariable {
+			if @options.format.variables == 'es5' {
+				ctrl.code('var ')
+			}
+			else if @immutableVariable {
+				ctrl.code('const ')
+			}
+			else {
+				ctrl.code('let ')
+			}
 		}
+
 		ctrl.compile(@value).code($equals).compile(@from)
-		
+
 		if @boundName? {
 			ctrl.code(@boundName, $equals).compile(@to)
 		}
-		
+
 		if @byName? {
 			ctrl.code($comma, @byName, $equals).compile(@by)
 		}
-		
+
 		ctrl.code('; ')
-		
+
 		if @data.until {
 			ctrl.code('!(').compile(@until).code(') && ')
 		}
 		else if @data.while {
 			ctrl.compile(@while).code(' && ')
 		}
-		
+
 		ctrl.compile(@value).code(' <= ').compile(@boundName ?? @to).code('; ')
-		
+
 		if @data.by {
 			if @data.by.kind == NodeKind::NumericExpression {
 				if @data.by.value == 1 {
@@ -146,9 +159,9 @@ class ForRangeStatement extends Statement {
 		else {
 			ctrl.code('++').compile(@value)
 		}
-		
+
 		ctrl.code(')').step()
-		
+
 		if @data.when {
 			ctrl
 				.newControl()
@@ -162,7 +175,7 @@ class ForRangeStatement extends Statement {
 		else {
 			ctrl.compile(@body)
 		}
-		
+
 		ctrl.done()
 	} // }}}
 }

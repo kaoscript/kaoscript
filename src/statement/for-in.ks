@@ -7,6 +7,7 @@ class ForInStatement extends Statement {
 		_expression
 		_expressionName: String
 		_from
+		_immutable: Boolean			= false
 		_index						= null
 		_indexName: String
 		_indexVariable: Variable
@@ -25,11 +26,13 @@ class ForInStatement extends Statement {
 		let indexVariable = null
 		let valueVariable = null
 
+		@immutable = @data.declaration && !@data.rebindable
+
 		if @data.index? {
 			indexVariable = @scope.getVariable(@data.index.name)
 
 			if @data.declaration || indexVariable == null {
-				@indexVariable = @scope.define(@data.index.name, false, @scope.reference('Number'), this)
+				@indexVariable = @scope.define(@data.index.name, @immutable, @scope.reference('Number'), this)
 
 				@defineIndex = true
 			}
@@ -45,7 +48,7 @@ class ForInStatement extends Statement {
 			valueVariable = @scope.getVariable(@data.value.name)
 
 			if @data.declaration || valueVariable == null {
-				@valueVariable = @scope.define(@data.value.name, false, this)
+				@valueVariable = @scope.define(@data.value.name, @immutable, this)
 
 				@defineValue = true
 			}
@@ -411,7 +414,19 @@ class ForInStatement extends Statement {
 		else {
 			ctrl = fragments
 				.newControl()
-				.code('for(', $runtime.scope(this))
+				.code('for(')
+
+			if @options.format.variables == 'es5' {
+				ctrl.code('var ')
+			}
+			else if @immutable {
+				ctrl.code('const ')
+			}
+			else {
+				ctrl.code('let ')
+			}
+
+			ctrl
 				.compile(@indexName ?? @index)
 				.code($equals)
 
