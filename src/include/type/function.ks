@@ -261,6 +261,7 @@ class FunctionType extends Type {
 		return false
 	} // }}}
 	isFunction() => true
+	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
 	matchSignatureOf(value: Type, matchables): Boolean { // {{{
 		// console.log(this)
 		// console.log(value)
