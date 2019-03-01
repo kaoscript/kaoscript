@@ -260,7 +260,11 @@ class ReferenceType extends Type {
 			@referenceIndex = @variable.type().toMetadata(references, ignoreAlteration)
 		}
 		else if @type.isExported() {
-			@referenceIndex = @variable.type().toMetadata(references, ignoreAlteration)
+			@referenceIndex = references.length
+
+			references.push(null)
+
+			references[@referenceIndex] = @variable.type().toReference(references, ignoreAlteration)
 		}
 		else if @type.isAlien() {
 			return super.toMetadata(references, ignoreAlteration)
@@ -287,7 +291,7 @@ class ReferenceType extends Type {
 				return @type.type().toAlterationReference(references, ignoreAlteration)
 			}
 			else {
-				return super.toReference(references, ignoreAlteration)
+				return @type.toReference(references, ignoreAlteration)
 			}
 		}
 		else if @type.isAlien() {

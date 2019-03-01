@@ -861,15 +861,30 @@ class ImportWorker {
 
 		const alterations = {}
 
-		for data, index in @metadata.references {
+		for i from 0 til @metadata.aliens.length by 2 {
+			index = @metadata.aliens[i]
+			name = @metadata.aliens[i + 1]
+
 			if !?references[index] {
-				references[index] = Type.import(index, data, references, alterations, queue, @scope, @node)
+				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
 			}
+			else {
+				type = references[index]
+			}
+
+			type = references[index] = Type.toNamedType(name, type)
 		}
 
 		for i from 0 til @metadata.requirements.length by 3 {
 			index = @metadata.requirements[i]
-			type = references[index]
+			name = @metadata.requirements[i + 1]
+
+			if !?references[index] {
+				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
+			}
+			else {
+				type = references[index]
+			}
 
 			references[index] = Type.toNamedType(name, type)
 		}
@@ -878,12 +893,14 @@ class ImportWorker {
 			index = @metadata.exports[i]
 			name = @metadata.exports[i + 1]
 
-			if index == -1 {
-				type = Type.Any
+			if !?references[index] {
+				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
 			}
 			else {
-				type = references[index] = Type.toNamedType(name, references[index])
+				type = references[index]
 			}
+
+			type = references[index] = Type.toNamedType(name, type)
 
 			@scope.addVariable(name, new Variable(name, false, false, type), @node)
 		}
@@ -892,15 +909,14 @@ class ImportWorker {
 			index = @metadata.aliens[i]
 			name = @metadata.aliens[i + 1]
 
-			if index != -1 {
-				type = references[index] = Type.toNamedType(name, references[index])
-
-				if !@scope.hasVariable(name) {
-					@scope.addVariable(name, new Variable(name, false, false, type), @node)
-				}
+			if !@scope.hasVariable(name) {
+				@scope.addVariable(name, new Variable(name, false, false, references[index]), @node)
 			}
-			else if !@scope.hasVariable(name) {
-				@scope.addVariable(name, new Variable(name, false, false, Type.Any), @node)
+		}
+
+		for data, index in @metadata.references {
+			if !?references[index] {
+				references[index] = Type.import(index, data, references, alterations, queue, @scope, @node)
 			}
 		}
 

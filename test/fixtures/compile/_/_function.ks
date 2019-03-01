@@ -9,6 +9,7 @@ impl Function {
 			}
 		}
 	}
+	toSource(): String => this.toString()
 }
 
 export Function

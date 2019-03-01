@@ -297,6 +297,14 @@ abstract class Type {
 					return UnionType.import(index, data, references, alterations, queue, scope, node)
 				}
 			}
+			else if data.reference? {
+				if references[data.reference]? {
+					return scope.reference(references[data.reference])
+				}
+				else {
+					throw new NotImplementedException(node)
+				}
+			}
 			else if data.kind? {
 				switch data.kind {
 					TypeKind::Alias => {
@@ -322,6 +330,7 @@ abstract class Type {
 					}
 				}
 			}
+
 
 			console.log(data)
 			throw new NotImplementedException(node)

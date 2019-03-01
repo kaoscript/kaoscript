@@ -15,9 +15,19 @@ module.exports = function() {
 			return self.apply(bind, args.concat(additionals));
 		};
 	};
+	__ks_Function.__ks_func_toSource_0 = function() {
+		return this.toString();
+	};
 	__ks_Function._cm_vcurry = function() {
 		var args = Array.prototype.slice.call(arguments);
 		return __ks_Function.__ks_sttc_vcurry_0.apply(null, args);
+	};
+	__ks_Function._im_toSource = function(that) {
+		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		if(args.length === 0) {
+			return __ks_Function.__ks_func_toSource_0.apply(that);
+		}
+		throw new SyntaxError("wrong number of arguments");
 	};
 	return {
 		Function: Function,

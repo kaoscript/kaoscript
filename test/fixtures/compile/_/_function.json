@@ -31,7 +31,20 @@
       "init": 0,
       "instanceVariables": {},
       "classVariables": {},
-      "instanceMethods": {},
+      "instanceMethods": {
+        "toSource": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": true,
+            "throws": []
+          }
+        ]
+      },
       "classMethods": {
         "vcurry": [
           {
