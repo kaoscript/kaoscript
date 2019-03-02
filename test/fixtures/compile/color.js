@@ -787,7 +787,7 @@ module.exports = function() {
 				}
 				ratio = __ks_Number._im_round(ratio, 2);
 				return {
-					ratio: ratio,
+					ratio,
 					error: 0,
 					min: ratio,
 					max: ratio
@@ -802,8 +802,8 @@ module.exports = function() {
 				return {
 					ratio: __ks_Number._im_round((min + max) / 2, 2),
 					error: __ks_Number._im_round((max - min) / 2, 2),
-					min: min,
-					max: max
+					min,
+					max
 				};
 			}
 		}
@@ -1363,7 +1363,7 @@ module.exports = function() {
 				throw new TypeError("'formatter' is not of type 'Function'");
 			}
 			$formatters[format] = {
-				formatter: formatter
+				formatter
 			};
 		}
 		static registerFormatter() {
@@ -1422,7 +1422,7 @@ module.exports = function() {
 					let formatter = space.formatters[name];
 					$formatters[name] = {
 						space: space.name,
-						formatter: formatter
+						formatter
 					};
 				}
 			}

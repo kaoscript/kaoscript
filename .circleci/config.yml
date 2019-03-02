@@ -12,7 +12,7 @@ jobs:
             - dependencies-{{ checksum "package-lock.json" }}
             - dependencies-
 
-      - run: npm install
+      - run: npm ci
 
       - save_cache:
           paths:

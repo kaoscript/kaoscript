@@ -40,8 +40,8 @@ module.exports = function() {
 			throw new TypeError("'name' is not nullable");
 		}
 		return {
-			name: name,
-			item: item
+			name,
+			item
 		};
 	}));
 };

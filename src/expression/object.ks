@@ -30,7 +30,7 @@ class ObjectExpression extends Expression {
 		}
 
 		if @computed {
-			@computed = this._options.format.properties == 'es5'
+			@computed = @options.format.properties == 'es5'
 		}
 	} // }}}
 	prepare() { // {{{
@@ -99,6 +99,8 @@ class ObjectExpression extends Expression {
 
 class ObjectLiteralMember extends Expression {
 	private {
+		_function: Boolean	= false
+		_shorthand: Boolean	= false
 		_name
 		_value
 	}
@@ -114,7 +116,23 @@ class ObjectLiteralMember extends Expression {
 			this.reference('[' + $quote(@data.name.value) + ']')
 		}
 
-		@value = $compile.expression(@data.value, this)
+		if @data.kind == NodeKind::ObjectMember {
+			@value = $compile.expression(@data.value, this)
+
+			@function = @data.value.kind == NodeKind::FunctionExpression
+
+			@shorthand =
+				@options.format.properties != 'es5' &&
+				@data.name.kind == NodeKind::Identifier &&
+				@data.value.kind == NodeKind::Identifier &&
+				@data.name.name == @data.value.name
+		}
+		else {
+			@value = $compile.expression(@data.name, this)
+
+			@shorthand = @options.format.properties != 'es5'
+		}
+
 		@value.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -137,11 +155,13 @@ class ObjectLiteralMember extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@name)
 
-		if @data.value.kind != NodeKind::FunctionExpression {
-			fragments.code(': ')
-		}
+		if !@shorthand {
+			if !@function {
+				fragments.code(': ')
+			}
 
-		fragments.compile(@value)
+			fragments.compile(@value)
+		}
 	} // }}}
 }
 
