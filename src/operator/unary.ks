@@ -104,14 +104,18 @@ class UnaryOperatorNegative extends UnaryOperatorExpression {
 class UnaryOperatorSpread extends UnaryOperatorExpression {
 	prepare() { // {{{
 		@argument.prepare()
-		
+
 		const type = @argument.type()
-		
+
 		unless type.isArray() || type.isAny() {
 			TypeException.throwInvalidSpread(this)
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
+		if @options.format.spreads == 'es5' {
+			throw new NotSupportedException(this)
+		}
+
 		fragments
 			.code('...', @data.operator)
 			.wrap(@argument)
