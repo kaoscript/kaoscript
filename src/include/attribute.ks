@@ -71,7 +71,7 @@ class ErrorAttribute extends Attribute {
 		_data
 	}
 	static {
-		target() => AttributeTarget::Global | AttributeTarget::Statement
+		target() => AttributeTarget::Global | AttributeTarget::Property | AttributeTarget::Statement
 	}
 	constructor(@data)
 	configure(options) { // {{{

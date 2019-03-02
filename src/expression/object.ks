@@ -105,6 +105,8 @@ class ObjectLiteralMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
+		@options = Attribute.configure(@data, @options, true, AttributeTarget::Property)
+
 		if @data.name.kind == NodeKind::Identifier	{
 			@name = new Literal(@data.name, this, @scope, @data.name.name)
 
@@ -171,6 +173,8 @@ class ObjectComputedMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
+		@options = Attribute.configure(@data, @options, true, AttributeTarget::Property)
+
 		if @data.name.kind == NodeKind::ComputedPropertyName {
 			@name = $compile.expression(@data.name.expression, this)
 		}
