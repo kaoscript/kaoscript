@@ -155,7 +155,7 @@ class ObjectLiteralMember extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@name)
 
-		if !@shorthand {
+		if !@shorthand || @value.isRenamed() {
 			if !@function {
 				fragments.code(': ')
 			}

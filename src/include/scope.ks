@@ -331,6 +331,17 @@ class Scope extends AbstractScope {
 			return name
 		}
 	} // }}}
+	isRenamedVariable(name): Boolean { // {{{
+		if @renamedVariables[name] is String {
+			return true
+		}
+		else if @scopeParent? {
+			return @scopeParent.isRenamedVariable(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
 	newRenamedVariable(name, variables = @variables) { // {{{
 		if variables[name]? {
 			let index = @renamedIndexes[name] ? @renamedIndexes[name] : 0

@@ -74,6 +74,7 @@ class IdentifierLiteral extends Literal {
 		}
 	} // }}}
 	isMacro() => @isMacro
+	isRenamed() => @scope.isRenamedVariable(@value)
 	isUsingVariable(name) => @value == name
 	name() => @value
 	toFragments(fragments, mode) { // {{{
