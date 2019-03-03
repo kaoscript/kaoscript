@@ -1,0 +1,29 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [
+    0,
+    "foobar",
+    true
+  ],
+  "exports": [],
+  "references": [
+    {
+      "kind": "object",
+      "properties": {
+        "waldo": {
+          "kind": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "String",
+          "throws": []
+        }
+      }
+    }
+  ],
+  "macros": []
+}

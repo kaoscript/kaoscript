@@ -542,7 +542,9 @@ class Importer extends Statement {
 		let importCodeVariable = false
 		let name, alias, variable
 
-		if @data.arguments?.length != 0 {
+		const hasArguments = @data.arguments?.length != 0
+
+		if hasArguments {
 			let nf = false
 
 			for name of @requirements {
@@ -568,85 +570,95 @@ class Importer extends Statement {
 
 		importCode += ')'
 
-		if @count != 0 && @alias != null {
-			const variable = @scope.acquireTempName()
-
-			fragments.line(`var \(variable) = \(importCode)`)
-
-			importCode = variable
-			importCodeVariable = true
+		if @count == 0 {
+			if @alias != null {
+				fragments.newLine().code('var ', @alias, ' = ', importCode).done()
+			}
+			else if hasArguments {
+				fragments.newLine().code(importCode).done()
+			}
 		}
+		else {
+			if @alias != null {
+				const variable = @scope.acquireTempName()
 
-		if @count == 1 {
-			for name, alias of @variables {
+				fragments.line(`var \(variable) = \(importCode)`)
+
+				importCode = variable
+				importCodeVariable = true
 			}
 
-			fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
-		}
-		else if @count > 0 {
-			if @options.format.destructuring == 'es5' {
-				let variable = importCode
-
-				if !importCodeVariable {
-					fragments.line(`var __ks__ = \(importCode)`)
-
-					variable = '__ks__'
-				}
-
-				let line = fragments.newLine().code('var ')
-
-				let nf = false
+			if @count == 1 {
 				for name, alias of @variables {
-					if nf {
-						line.code(', ')
-					}
-					else {
-						nf = true
-					}
-
-					line.code(`\(alias) = \(variable).\(name)`)
-
-					if @sealedVariables[name] == true {
-						line.code(`, __ks_\(alias) = \(variable).__ks_\(name)`)
-					}
 				}
 
-				line.done()
+				fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
 			}
 			else {
-				let line = fragments.newLine().code('var {')
+				if @options.format.destructuring == 'es5' {
+					let variable = importCode
 
-				let nf = false
-				for name, alias of @variables {
-					if nf {
-						line.code(', ')
-					}
-					else {
-						nf = true
+					if !importCodeVariable {
+						fragments.line(`var __ks__ = \(importCode)`)
+
+						variable = '__ks__'
 					}
 
-					if alias == name {
-						line.code(name)
+					let line = fragments.newLine().code('var ')
+
+					let nf = false
+					for name, alias of @variables {
+						if nf {
+							line.code(', ')
+						}
+						else {
+							nf = true
+						}
+
+						line.code(`\(alias) = \(variable).\(name)`)
 
 						if @sealedVariables[name] == true {
-							line.code(`, __ks_\(name)`)
+							line.code(`, __ks_\(alias) = \(variable).__ks_\(name)`)
 						}
 					}
-					else {
-						line.code(`\(name): \(alias)`)
 
-						if @sealedVariables[name] == true {
-							line.code(`, __ks_\(name): __ks_\(alias)`)
-						}
-					}
+					line.done()
 				}
+				else {
+					let line = fragments.newLine().code('var {')
 
-				line.code('} = ', importCode).done()
+					let nf = false
+					for name, alias of @variables {
+						if nf {
+							line.code(', ')
+						}
+						else {
+							nf = true
+						}
+
+						if alias == name {
+							line.code(name)
+
+							if @sealedVariables[name] == true {
+								line.code(`, __ks_\(name)`)
+							}
+						}
+						else {
+							line.code(`\(name): \(alias)`)
+
+							if @sealedVariables[name] == true {
+								line.code(`, __ks_\(name): __ks_\(alias)`)
+							}
+						}
+					}
+
+					line.code('} = ', importCode).done()
+				}
 			}
-		}
 
-		if @alias != null {
-			fragments.newLine().code('var ', @alias, ' = ', importCode).done()
+			if @alias != null {
+				fragments.newLine().code('var ', @alias, ' = ', importCode).done()
+			}
 		}
 
 		@scope.releaseTempName(importCode)
