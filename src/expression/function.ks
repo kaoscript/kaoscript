@@ -67,6 +67,7 @@ class FunctionExpression extends Expression {
 		}
 	} // }}}
 	isComputed() => true
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	isUsingVariable(name) => false
 	parameters() => @parameters
