@@ -1,0 +1,48 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [
+    0,
+    "Template",
+    false,
+    1,
+    "template",
+    false
+  ],
+  "exports": [],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "compile": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Function",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "reference": 0
+    }
+  ],
+  "macros": []
+}

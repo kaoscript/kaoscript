@@ -259,19 +259,15 @@ class ReferenceType extends Type {
 		else if !@variable.type().isClass() {
 			@referenceIndex = @variable.type().toMetadata(references, ignoreAlteration)
 		}
-		else if @type.isExported() {
+		else if @type.isAlien() {
+			return super.toMetadata(references, ignoreAlteration)
+		}
+		else {
 			@referenceIndex = references.length
 
 			references.push(null)
 
 			references[@referenceIndex] = @variable.type().toReference(references, ignoreAlteration)
-		}
-		else if @type.isAlien() {
-			return super.toMetadata(references, ignoreAlteration)
-		}
-		else {
-			console.log(this)
-			throw new NotImplementedException()
 		}
 
 		return @referenceIndex
