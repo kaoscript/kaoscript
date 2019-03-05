@@ -54,6 +54,7 @@ class ObjectType extends Type {
 		return export
 	} // }}}
 	getProperty(name: String): Type => @properties[name] ?? null
+	isObject() => true
 	isSealable() => true
 	matchSignatureOf(value, matchables) { // {{{
 		if value is not ObjectType {

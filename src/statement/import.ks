@@ -129,21 +129,27 @@ class Importer extends Statement {
 
 					const type = @worker.getType(name)
 
+					if def.type != null && !type.matchSignatureOf(def.type, matchables) {
+						TypeException.throwNotCompatibleDefinition(def.local, name, @data.source.value, this)
+					}
+
 					if def.newVariable {
-						variable.type(type)
+						variable.type(def.type ?? type)
 					}
 					else if !variable.isPredefined() && @localToModuleArguments[def.local] is not String {
 						ReferenceException.throwNotPassed(def.local, @data.source.value, this)
 					}
 					else if type.matchSignatureOf(variable.type(), matchables) {
-						if variable.type().isAlien() {
-							type.flagAlien()
-						}
+						const alien = variable.type().isAlien()
 
-						variable.type(type)
+						variable.type(def.type ?? type)
+
+						if alien {
+							variable.type().flagAlien()
+						}
 					}
 					else {
-						TypeException.throwNotCompatible(def.local, name, @data.source.value, this)
+						TypeException.throwNotCompatibleArgument(def.local, name, @data.source.value, this)
 					}
 
 					if type.isNamed() {
@@ -192,7 +198,7 @@ class Importer extends Statement {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
-	addImport(imported: String, local: String, isAlias: Boolean) { // {{{
+	addImport(imported: String, local: String, isAlias: Boolean, type: Type = null) { // {{{
 		const newVariable = (variable !?= @scope.getVariable(local)) || variable.isPredefined()
 
 		if newVariable {
@@ -208,9 +214,10 @@ class Importer extends Statement {
 		this.module().import(local)
 
 		@imports[imported] = {
-			local: local
-			isAlias: isAlias
-			newVariable: newVariable
+			local
+			isAlias
+			newVariable
+			type
 		}
 	} // }}}
 	addVariable(imported: String, local: String, isVariable: Boolean, type: Type?) { // {{{
@@ -402,13 +409,30 @@ class Importer extends Statement {
 			}
 		}
 		else {
-			let name
+			let name, type
 			for specifier in @data.specifiers {
 				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
 					@alias = specifier.local.name
 				}
 				else {
-					name = specifier.imported.kind == NodeKind::Identifier ? specifier.imported.name : specifier.imported.name.name
+					switch specifier.imported.kind {
+						NodeKind::ClassDeclaration => {
+							name = specifier.imported.name.name
+							type = Type.fromAST(specifier.imported, this)
+						}
+						NodeKind::Identifier => {
+							name = specifier.imported.name
+							type = null
+						}
+						NodeKind::VariableDeclarator => {
+							name = specifier.imported.name.name
+							type = specifier.imported.type ? Type.fromAST(specifier.imported.type, this) : null
+						}
+						=> {
+							console.log(specifier.imported)
+							throw new NotImplementedException()
+						}
+					}
 
 					if macros[name]? {
 						for data in macros[name] {
@@ -416,7 +440,7 @@ class Importer extends Statement {
 						}
 					}
 					else {
-						this.addImport(name, specifier.local.name, false)
+						this.addImport(name, specifier.local.name, false, type)
 					}
 				}
 			}
@@ -843,7 +867,7 @@ class ImportWorker {
 
 			for i from 0 til @metadata.requirements.length by 3 {
 				index = @metadata.requirements[i]
-				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
+				type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
 
 				references[index] = Type.toNamedType(@metadata.requirements[i + 1], type)
 			}
@@ -858,7 +882,7 @@ class ImportWorker {
 				name = @metadata.requirements[i + 1]
 
 				if (requirement ?= requirements[name]) && !requirement.type.matchSignatureOf(references[@metadata.requirements[i]], matchables) {
-					TypeException.throwNotCompatible(requirement.name, name, @node.data().source.value, @node)
+					TypeException.throwNotCompatibleArgument(requirement.name, name, @node.data().source.value, @node)
 				}
 			}
 
@@ -878,7 +902,7 @@ class ImportWorker {
 			name = @metadata.aliens[i + 1]
 
 			if !?references[index] {
-				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
+				type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
 			}
 			else {
 				type = references[index]
@@ -892,7 +916,7 @@ class ImportWorker {
 			name = @metadata.requirements[i + 1]
 
 			if !?references[index] {
-				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
+				type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
 			}
 			else {
 				type = references[index]
@@ -906,7 +930,7 @@ class ImportWorker {
 			name = @metadata.exports[i + 1]
 
 			if !?references[index] {
-				type = Type.import(index, @metadata.references[index], references, alterations, queue, @scope, @node)
+				type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
 			}
 			else {
 				type = references[index]
@@ -926,9 +950,9 @@ class ImportWorker {
 			}
 		}
 
-		for data, index in @metadata.references {
+		for :index in @metadata.references {
 			if !?references[index] {
-				references[index] = Type.import(index, data, references, alterations, queue, @scope, @node)
+				references[index] = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
 			}
 		}
 

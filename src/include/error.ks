@@ -337,8 +337,11 @@ export class TypeException extends Exception {
 		throwNotClass(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a class`, node)
 		} // }}}
-		throwNotCompatible(varname, argname, modname, node) ~ ReferenceException { // {{{
+		throwNotCompatibleArgument(varname, argname, modname, node) ~ ReferenceException { // {{{
 			throw new TypeException(`The variable "\(varname)" and the argument "\(argname)" of the module "\(modname)" aren't compatible`, node)
+		} // }}}
+		throwNotCompatibleDefinition(varname, argname, modname, node) ~ ReferenceException { // {{{
+			throw new TypeException(`The definition for "\(varname)" and the variable "\(argname)" of the module "\(modname)" aren't compatible`, node)
 		} // }}}
 		throwNotNamespace(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a namespace`, node)

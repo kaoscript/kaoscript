@@ -274,9 +274,10 @@ abstract class Type {
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
-		import(index, data?, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			// console.log('-- import --')
 			// console.log(JSON.stringify(data, null, 2))
+			const data = metadata.references[index]
 
 			if !?data {
 				return Type.Any
@@ -302,7 +303,22 @@ abstract class Type {
 					return scope.reference(references[data.reference])
 				}
 				else {
-					throw new NotImplementedException(node)
+					let type = Type.import(data.reference, metadata, references, alterations, queue, scope, node)
+
+					if type is AliasType || type is ClassType || type is EnumType {
+						type = new NamedType(scope.acquireTempName(), type)
+
+						scope.define(type.name(), true, type, node)
+					}
+					else if type is NamespaceType {
+						type = new NamedContainerType(scope.acquireTempName(), type)
+
+						scope.define(type.name(), true, type, node)
+					}
+
+					references[data.reference] = type
+
+					return scope.reference(type)
 				}
 			}
 			else if data.kind? {

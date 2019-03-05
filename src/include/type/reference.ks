@@ -202,6 +202,9 @@ class ReferenceType extends Type {
 				return this.discardReference().matchSignatureOf(value.discardReference(), matchables)
 			}
 		}
+		else if value.isObject() && this.type().isClass() {
+			return @type.type().matchInstanceWith(value, matchables)
+		}
 		else {
 			return false
 		}
@@ -253,21 +256,24 @@ class ReferenceType extends Type {
 	toMetadata(references, ignoreAlteration) { // {{{
 		this.resolveType()
 
-		if @predefined {
+		if @referenceIndex != -1 {
+			return @referenceIndex
+		}
+		else if @predefined {
 			return super.toMetadata(references, ignoreAlteration)
 		}
 		else if !@variable.type().isClass() {
 			@referenceIndex = @variable.type().toMetadata(references, ignoreAlteration)
 		}
-		else if @type.isAlien() {
+		else if @type.isAlien() && @type.isPredefined() {
 			return super.toMetadata(references, ignoreAlteration)
 		}
 		else {
+			const reference = @variable.type().toReference(references, ignoreAlteration)
+
 			@referenceIndex = references.length
 
-			references.push(null)
-
-			references[@referenceIndex] = @variable.type().toReference(references, ignoreAlteration)
+			references.push(reference)
 		}
 
 		return @referenceIndex

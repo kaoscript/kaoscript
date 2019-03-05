@@ -1,17 +1,10 @@
 {
-  "aliens": [
-    -1,
-    "console"
-  ],
-  "requirements": [
-    0,
-    "Template",
-    false,
+  "aliens": [],
+  "requirements": [],
+  "exports": [
     1,
-    "template",
-    false
+    "template"
   ],
-  "exports": [],
   "references": [
     {
       "kind": "class",

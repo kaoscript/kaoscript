@@ -4,14 +4,14 @@
     "console"
   ],
   "requirements": [
-    0,
-    "Template",
-    false,
     1,
     "template",
     false
   ],
-  "exports": [],
+  "exports": [
+    1,
+    "template"
+  ],
   "references": [
     {
       "kind": "class",

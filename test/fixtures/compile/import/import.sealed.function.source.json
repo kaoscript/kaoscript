@@ -31,6 +31,24 @@
             "sealed": false,
             "throws": []
           }
+        ],
+        "run": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          }
         ]
       },
       "classMethods": {}

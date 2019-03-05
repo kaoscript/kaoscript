@@ -1,0 +1,31 @@
+{
+  "aliens": [
+    0,
+    "Object"
+  ],
+  "requirements": [],
+  "exports": [
+    1,
+    "foobar"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "reference": 0
+    }
+  ],
+  "macros": []
+}

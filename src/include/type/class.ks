@@ -768,69 +768,86 @@ class ClassType extends Type {
 			return null
 		}
 	} // }}}
-	matchSignatureOf(that, matchables) { // {{{
-		if that is ClassType {
-			for i from 0 til matchables.length by 3 {
-				if matchables[i] == this && matchables[i + 1] == that {
-					return matchables[i + 2]
+	matchInstanceWith(object: ObjectType, matchables) { // {{{
+		for name, property of object._properties {
+			if @instanceVariables[name]?.matchSignatureOf(property, matchables) {
+			}
+			else if @instanceMethods[name] is Array {
+				let nf = true
+
+				for method in @instanceMethods[name] while nf {
+					if method.matchSignatureOf(property, matchables) {
+						nf = false
+					}
+				}
+
+				if nf {
+					return false
 				}
 			}
+			else {
+				return false
+			}
+		}
 
-			const index = matchables.length
-			matchables.push(this, that, true)
+		return true
+	} // }}}
+	matchSignatureOf(that, matchables) => false
+	matchSignatureOf(that: ClassType, matchables) { // {{{
+		for i from 0 til matchables.length by 3 {
+			if matchables[i] == this && matchables[i + 1] == that {
+				return matchables[i + 2]
+			}
+		}
 
-			if @sealed != that._sealed {
+		const index = matchables.length
+		matchables.push(this, that, true)
+
+		for name, variable of that._instanceVariables {
+			if !@instanceVariables[name]?.matchSignatureOf(variable, matchables) {
+				matchables[index + 2] = false
+				return false
+			}
+		}
+
+		for name, variable of that._classVariables {
+			if !@classVariables[name]?.matchSignatureOf(variable, matchables) {
+				matchables[index + 2] = false
+				return false
+			}
+		}
+
+		for name, methods of that._instanceMethods {
+			if @instanceMethods[name] is not Array {
 				matchables[index + 2] = false
 				return false
 			}
 
-			for name, variable of that._instanceVariables {
-				if !@instanceVariables[name]?.matchSignatureOf(variable, matchables) {
+			for method in methods {
+				if !method.isMatched(@instanceMethods[name], matchables) {
 					matchables[index + 2] = false
 					return false
 				}
 			}
-
-			for name, variable of that._classVariables {
-				if !@classVariables[name]?.matchSignatureOf(variable, matchables) {
-					matchables[index + 2] = false
-					return false
-				}
-			}
-
-			for name, methods of that._instanceMethods {
-				if @instanceMethods[name] is not Array {
-					matchables[index + 2] = false
-					return false
-				}
-
-				for method in methods {
-					if !method.isMatched(@instanceMethods[name], matchables) {
-						matchables[index + 2] = false
-						return false
-					}
-				}
-			}
-
-			for name, methods of that._classMethods {
-				if @classMethods[name] is not Array {
-					matchables[index + 2] = false
-					return false
-				}
-
-				for method in methods {
-					if !method.isMatched(@classMethods[name], matchables) {
-						matchables[index + 2] = false
-						return false
-					}
-				}
-			}
-
-			return true
 		}
 
-		return false
+		for name, methods of that._classMethods {
+			if @classMethods[name] is not Array {
+				matchables[index + 2] = false
+				return false
+			}
+
+			for method in methods {
+				if !method.isMatched(@classMethods[name], matchables) {
+					matchables[index + 2] = false
+					return false
+				}
+			}
+		}
+
+		return true
 	} // }}}
+	matchSignatureOf(that: NamedType, matchables) => this.matchSignatureOf(that.type(), matchables)
 	metaReference(references, name, ignoreAlteration) { // {{{
 		if @predefined {
 			return name
@@ -858,6 +875,14 @@ class ClassType extends Type {
 	} // }}}
 	toQuote(): String { // {{{
 		throw new NotImplementedException()
+	} // }}}
+	toReference(references, ignoreAlteration) { // {{{
+		if !this.isExported() && this.isAlteration() {
+			return @alterationReference.toReference(references, ignoreAlteration)
+		}
+		else {
+			return super.toReference(references, ignoreAlteration)
+		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
@@ -1001,6 +1026,19 @@ class ClassMethodType extends FunctionType {
 	} // }}}
 	isSealable() => true
 	matchSignatureOf(b: ClassMethodType, matchables) { // {{{
+		if @min != b._min || @max != b._max || @async != b._async || @parameters.length != b._parameters.length {
+			return false
+		}
+
+		for parameter, i in @parameters {
+			if !parameter.matchSignatureOf(b._parameters[i], matchables) {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
+	matchSignatureOf(b: FunctionType, matchables) { // {{{
 		if @min != b._min || @max != b._max || @async != b._async || @parameters.length != b._parameters.length {
 			return false
 		}

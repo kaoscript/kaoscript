@@ -1,0 +1,29 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [
+    0,
+    "template",
+    false
+  ],
+  "exports": [],
+  "references": [
+    {
+      "kind": "object",
+      "properties": {
+        "compile": {
+          "kind": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Function",
+          "throws": []
+        }
+      }
+    }
+  ],
+  "macros": []
+}

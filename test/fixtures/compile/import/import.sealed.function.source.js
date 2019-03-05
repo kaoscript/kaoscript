@@ -24,6 +24,11 @@ module.exports = function() {
 			}
 			throw new SyntaxError("wrong number of arguments");
 		}
+		__ks_func_run_0(...args) {
+		}
+		run() {
+			return Template.prototype.__ks_func_run_0.apply(this, arguments);
+		}
 	}
 	const template = new Template();
 	return {
