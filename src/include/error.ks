@@ -147,6 +147,9 @@ export class ReferenceException extends Exception {
 		throwAlreadyDefinedField(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Field "\(name)" is already defined by its parent class`, node)
 		} // }}}
+		throwDefined(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`"\(name)" should not be defined`, node)
+		} // }}}
 		throwImmutable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
 		} // }}}
@@ -206,8 +209,11 @@ export class SyntaxException extends Exception {
 		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
 		} // }}}
-		throwInvalidNamedArgument(name, node) ~ SyntaxException { // {{{
+		/* throwInvalidNamedArgument(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Argument "\(name)" can't be a named argument`, node)
+		} // }}} */
+		throwInvalidImportAliasArgument(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`Aliases arguments can't be used with classic JavaScript module`, node)
 		} // }}}
 		throwInvalidSyncMethods(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)

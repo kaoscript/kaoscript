@@ -76,6 +76,7 @@ class Importer extends Statement {
 		_moduleName: String
 		_requirements				= {}
 		_sealedVariables			= {}
+		_seepedArguments			= {}
 		_variables					= {}
 		_worker: ImportWorker
 	}
@@ -101,10 +102,23 @@ class Importer extends Statement {
 		if @isKSFile {
 			for name, requirement of @requirements {
 				requirement.name = @moduleToLocalArguments[name]
-				requirement.type = @scope.getVariable(@moduleToLocalArguments[name]).type()
+
+				if @seepedArguments[name] == true {
+					requirement.seeped = true
+				}
+				else {
+					requirement.seeped = false
+					requirement.type = @scope.getVariable(@moduleToLocalArguments[name]).type()
+				}
 			}
 
 			@worker.prepare(@requirements)
+
+			const module = this.module()
+
+			for name of @seepedArguments {
+				module.addRequirement(new SeepedRequirement(@requirements[name].name, @requirements[name].type))
+			}
 
 			const matchables = []
 
@@ -177,7 +191,7 @@ class Importer extends Statement {
 	} // }}}
 	translate()
 	addArgument(data) { // {{{
-		if data.kind == NodeKind::Identifier {
+		/* if data.kind == NodeKind::Identifier {
 			unless @scope.hasVariable(data.name) {
 				ReferenceException.throwNotDefined(data.name, this)
 			}
@@ -196,7 +210,23 @@ class Importer extends Statement {
 		else {
 			console.log(data)
 			throw new NotImplementedException(this)
+		} */
+		if data.seeped {
+			if (variable ?= @scope.getVariable(data.local.name)) && !variable.type().isPredefined()  {
+				ReferenceException.throwDefined(data.local.name, this)
+			}
+
+			/* module.addRequirement(new ROIDynamicRequirement(variable, this)) */
+			@seepedArguments[data.imported.name] = true
 		}
+		else {
+			unless @scope.hasVariable(data.local.name) {
+				ReferenceException.throwNotDefined(data.local.name, this)
+			}
+		}
+
+		@localToModuleArguments[data.local.name] = data.imported.name
+		@moduleToLocalArguments[data.imported.name] = data.local.name
 	} // }}}
 	addImport(imported: String, local: String, isAlias: Boolean, type: Type = null) { // {{{
 		const newVariable = (variable !?= @scope.getVariable(local)) || variable.isPredefined()
@@ -462,11 +492,17 @@ class Importer extends Statement {
 
 		if @data.arguments?.length != 0 {
 			for argument in @data.arguments {
-				if argument.kind == NodeKind::NamedArgument {
+				/* if argument.kind == NodeKind::NamedArgument {
 					SyntaxException.throwInvalidNamedArgument(argument.name.name, this)
 				}
 				else {
 					this.addArgument(argument)
+				} */
+				if argument.local == argument.imported {
+					this.addArgument(argument)
+				}
+				else {
+					SyntaxException.throwInvalidImportAliasArgument(this)
 				}
 			}
 		}
@@ -701,7 +737,7 @@ class Importer extends Statement {
 						line.code(', ')
 					}
 
-					line.code(argument.name)
+					line.code(argument.local.name)
 				}
 
 				line.code(')')
@@ -727,7 +763,7 @@ class Importer extends Statement {
 						line.code(', ')
 					}
 
-					line.code(argument.name)
+					line.code(argument.local.name)
 				}
 
 				line.code(')')
@@ -749,7 +785,7 @@ class Importer extends Statement {
 							line.code(', ')
 						}
 
-						line.code(argument.name)
+						line.code(argument.local.name)
 					}
 
 					line.code(')')
@@ -803,7 +839,7 @@ class Importer extends Statement {
 							line.code(', ')
 						}
 
-						line.code(argument.name)
+						line.code(argument.local.name)
 					}
 
 					line.code(')')
@@ -863,13 +899,14 @@ class ImportWorker {
 		let index, name, type, requirement
 
 		if @metadata.requirements.length > 0 {
+			const reqReferences = []
 			const alterations = {}
 
 			for i from 0 til @metadata.requirements.length by 3 {
 				index = @metadata.requirements[i]
-				type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
+				type = Type.import(index, @metadata, reqReferences, alterations, queue, @scope, @node)
 
-				references[index] = Type.toNamedType(@metadata.requirements[i + 1], type)
+				reqReferences[index] = Type.toNamedType(@metadata.requirements[i + 1], type)
 			}
 
 			while queue.length > 0 {
@@ -881,15 +918,17 @@ class ImportWorker {
 			for i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
-				if (requirement ?= requirements[name]) && !requirement.type.matchSignatureOf(references[@metadata.requirements[i]], matchables) {
+				if (requirement ?= requirements[name]) && !requirement.seeped && !requirement.type.matchSignatureOf(reqReferences[@metadata.requirements[i]], matchables) {
 					TypeException.throwNotCompatibleArgument(requirement.name, name, @node.data().source.value, @node)
 				}
 			}
 
-			references.clear()
-
 			for i from 0 til @metadata.requirements.length by 3 {
 				if requirement ?= requirements[@metadata.requirements[i + 1]] {
+					if requirement.seeped {
+						requirement.type = reqReferences[@metadata.requirements[i]]
+					}
+
 					references[@metadata.requirements[i]] = requirement.type
 				}
 			}

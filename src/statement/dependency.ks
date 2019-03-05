@@ -412,6 +412,7 @@ abstract class Requirement {
 		_name: String
 		_type: Type
 	}
+	constructor(@name, @type)
 	constructor(variable: Variable) { // {{{
 		@name = variable.name()
 		@type = variable.type()
@@ -434,6 +435,9 @@ abstract class Requirement {
 }
 
 class StaticRequirement extends Requirement {
+	constructor(@name, @type) { // {{{
+		super(name, type)
+	} // }}}
 	constructor(data, node) { // {{{
 		super(data, DependencyKind::Require, node)
 	} // }}}
@@ -446,6 +450,13 @@ class StaticRequirement extends Requirement {
 			fragments.code(`, __ks_\(@name)`)
 		}
 	} // }}}
+}
+
+class SeepedRequirement extends StaticRequirement {
+	constructor(@name, @type) { // {{{
+		super(name, type)
+	} // }}}
+	isRequired() => false
 }
 
 abstract class DynamicRequirement extends Requirement {
