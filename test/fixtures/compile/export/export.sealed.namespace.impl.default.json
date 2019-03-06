@@ -61,8 +61,8 @@
           "returns": {
             "reference": 0
           },
-          "sealed": false,
-          "throws": []
+          "throws": [],
+          "sealed": false
         }
       }
     },
@@ -85,8 +85,8 @@
           "returns": {
             "reference": 0
           },
-          "sealed": true,
-          "throws": []
+          "throws": [],
+          "sealed": true
         }
       }
     }

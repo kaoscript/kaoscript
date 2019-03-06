@@ -16,8 +16,8 @@
       "sealed": true,
       "properties": {
         "PI": {
-          "sealed": false,
-          "type": "Number"
+          "type": "Number",
+          "sealed": false
         },
         "pow": {
           "kind": "function",
@@ -32,8 +32,8 @@
             }
           ],
           "returns": "Number",
-          "sealed": false,
-          "throws": []
+          "throws": [],
+          "sealed": false
         }
       }
     }

@@ -32,6 +32,18 @@
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
+        "foobar": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": true,
+            "throws": []
+          }
+        ],
         "contains": [
           {
             "access": 3,
@@ -77,18 +89,6 @@
                 "max": "Infinity"
               }
             ],
-            "returns": "Any",
-            "sealed": true,
-            "throws": []
-          }
-        ],
-        "foobar": [
-          {
-            "access": 3,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
             "returns": "Any",
             "sealed": true,
             "throws": []

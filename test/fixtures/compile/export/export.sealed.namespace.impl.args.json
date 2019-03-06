@@ -18,8 +18,8 @@
       "sealed": true,
       "properties": {
         "PI": {
-          "sealed": false,
-          "type": "Number"
+          "type": "Number",
+          "sealed": false
         },
         "pow": {
           "kind": "function",
@@ -33,9 +33,9 @@
               "max": "Infinity"
             }
           ],
-          "sealed": false,
           "returns": "Number",
-          "throws": []
+          "throws": [],
+          "sealed": false
         }
       }
     },
@@ -72,8 +72,8 @@
             }
           ],
           "returns": "String",
-          "sealed": true,
-          "throws": []
+          "throws": [],
+          "sealed": true
         }
       }
     }

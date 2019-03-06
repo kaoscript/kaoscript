@@ -26,8 +26,8 @@
             }
           ],
           "returns": "Number",
-          "sealed": false,
-          "throws": []
+          "throws": [],
+          "sealed": false
         },
         "toString": {
           "kind": "function",
@@ -42,8 +42,8 @@
             }
           ],
           "returns": "String",
-          "sealed": false,
-          "throws": []
+          "throws": [],
+          "sealed": false
         }
       }
     }

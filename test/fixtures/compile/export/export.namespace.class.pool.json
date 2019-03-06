@@ -21,8 +21,8 @@
           "max": 0,
           "parameters": [],
           "returns": "Any",
-          "sealed": false,
-          "throws": []
+          "throws": [],
+          "sealed": false
         },
         "bar": {
           "kind": "function",
@@ -31,8 +31,8 @@
           "max": 0,
           "parameters": [],
           "returns": "Any",
-          "sealed": false,
-          "throws": []
+          "throws": [],
+          "sealed": false
         },
         "qux": {
           "kind": "function",
@@ -41,8 +41,8 @@
           "max": 0,
           "parameters": [],
           "returns": "Any",
-          "sealed": false,
-          "throws": []
+          "throws": [],
+          "sealed": false
         },
         "Foobar": 1
       }

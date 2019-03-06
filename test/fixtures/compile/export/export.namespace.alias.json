@@ -17,8 +17,8 @@
           "max": 0,
           "parameters": [],
           "returns": "Any",
-          "sealed": false,
-          "throws": []
+          "throws": [],
+          "sealed": false
         }
       }
     }

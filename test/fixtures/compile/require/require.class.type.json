@@ -43,8 +43,8 @@
             "max": 0,
             "parameters": [],
             "returns": {
-                  "reference": 0
-                },
+              "reference": 0
+            },
             "sealed": false,
             "throws": []
           },
