@@ -5,7 +5,7 @@ class NamespaceType extends Type {
 		_sealProperties: Object		= {}
 	}
 	static {
-		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new NamespaceType(scope)
 
 			if data.namespace? {
@@ -17,7 +17,7 @@ class NamespaceType extends Type {
 					type.copyFrom(source.type())
 
 					for name, property of data.properties {
-						type.addPropertyFromMetadata(name, property, references, alterations, node)
+						type.addPropertyFromMetadata(name, property, metadata, references, alterations, queue, node)
 					}
 				})
 			}
@@ -28,7 +28,7 @@ class NamespaceType extends Type {
 
 				queue.push(() => {
 					for name, property of data.properties {
-						type.addPropertyFromMetadata(name, property, references, alterations, node)
+						type.addPropertyFromMetadata(name, property, metadata, references, alterations, queue, node)
 					}
 				})
 			}
@@ -57,8 +57,8 @@ class NamespaceType extends Type {
 		return variable.type()
 	} // }}}
 	addPropertyFromAST(data, node) => this.addProperty(data.name.name, Type.fromAST(data, node))
-	addPropertyFromMetadata(name, data, references, alterations, node) { // {{{
-		const type = Type.fromMetadata(data, references, alterations, @scope, node)
+	addPropertyFromMetadata(name, data, metadata, references, alterations, queue, node) { // {{{
+		const type = Type.fromMetadata(data, metadata, references, alterations, queue, @scope, node)
 
 		if type._scope != @scope {
 			type._scope = @scope

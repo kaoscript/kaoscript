@@ -5,8 +5,8 @@ class ParameterType extends Type {
 		_type: Type
 	}
 	static {
-		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
-			return new ParameterType(scope, Type.fromMetadata(data.type, references, alterations, scope, node), data.min, data.max)
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+			return new ParameterType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node), data.min, data.max)
 		} // }}}
 	}
 	constructor(@scope, @type, @min = 1, @max = 1) { // {{{

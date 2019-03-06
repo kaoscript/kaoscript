@@ -1,0 +1,182 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [
+    0,
+    "foobar",
+    false
+  ],
+  "exports": [
+    0,
+    "foobar",
+    2,
+    "String"
+  ],
+  "references": [
+    {
+      "kind": "object",
+      "properties": {
+        "corge": {
+          "kind": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Number",
+          "throws": []
+        },
+        "grault": {
+          "kind": "function",
+          "async": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "type": "Number",
+              "min": 1,
+              "max": 1
+            }
+          ],
+          "returns": "Number",
+          "throws": []
+        },
+        "garply": {
+          "kind": "function",
+          "async": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "type": {
+                "reference": 1
+              },
+              "min": 1,
+              "max": 1
+            }
+          ],
+          "returns": {
+            "reference": 1
+          },
+          "throws": []
+        },
+        "waldo": {
+          "kind": "function",
+          "async": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": {
+            "reference": 1
+          },
+          "throws": []
+        }
+      }
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "toLowerCase": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 1
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "class": {
+        "reference": 1
+      },
+      "init": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "lines": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": 1
+              }
+            ],
+            "returns": "Array",
+            "sealed": true,
+            "throws": []
+          }
+        ],
+        "lower": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 2
+            },
+            "sealed": true,
+            "throws": []
+          }
+        ],
+        "toFloat": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Number",
+            "sealed": true,
+            "throws": []
+          }
+        ],
+        "toInt": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": 1
+              }
+            ],
+            "returns": "Number",
+            "sealed": true,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

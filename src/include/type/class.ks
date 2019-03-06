@@ -23,7 +23,7 @@ class ClassType extends Type {
 		_seal: Object
 	}
 	static {
-		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new ClassType(scope)
 
 			type._abstract = data.abstract
@@ -36,36 +36,36 @@ class ClassType extends Type {
 			}
 
 			if data.extends? {
-				type.extends(Type.fromMetadata(data.extends, references, alterations, scope, node).discardReference())
+				type.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 			}
 
 			for method in data.constructors {
-				type.addConstructor(ClassConstructorType.fromMetadata(method, references, alterations, scope, node))
+				type.addConstructor(ClassConstructorType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 			}
 
 			for name, vtype of data.instanceVariables {
-				type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, references, alterations, scope, node))
+				type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 			}
 
 			for name, vtype of data.classVariables {
-				type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, references, alterations, scope, node))
+				type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 			}
 
 			for name, methods of data.instanceMethods {
 				for method in methods {
-					type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, references, alterations, scope, node))
+					type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
 			for name, methods of data.classMethods {
 				for method in methods {
-					type.addClassMethod(name, ClassMethodType.fromMetadata(method, references, alterations, scope, node))
+					type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
 			return type
 		} // }}}
-		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new ClassType(scope)
 
 			if data.class? {
@@ -77,22 +77,22 @@ class ClassType extends Type {
 					type.copyFrom(source.type())
 
 					for name, vtype of data.instanceVariables {
-						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, references, alterations, scope, node).flagAlteration())
+						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node).flagAlteration())
 					}
 
 					for name, vtype of data.classVariables {
-						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, references, alterations, scope, node).flagAlteration())
+						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node).flagAlteration())
 					}
 
 					for name, methods of data.instanceMethods {
 						for method in methods {
-							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, references, alterations, scope, node).flagAlteration())
+							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node).flagAlteration())
 						}
 					}
 
 					for name, methods of data.classMethods {
 						for method in methods {
-							type.addClassMethod(name, ClassMethodType.fromMetadata(method, references, alterations, scope, node).flagAlteration())
+							type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node).flagAlteration())
 						}
 					}
 				})
@@ -109,30 +109,30 @@ class ClassType extends Type {
 
 				queue.push(() => {
 					if data.extends? {
-						type.extends(Type.fromMetadata(data.extends, references, alterations, scope, node).discardReference())
+						type.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 					}
 
 					for method in data.constructors {
-						type.addConstructor(ClassConstructorType.fromMetadata(method, references, alterations, scope, node))
+						type.addConstructor(ClassConstructorType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 					}
 
 					for name, vtype of data.instanceVariables {
-						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, references, alterations, scope, node))
+						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
 
 					for name, vtype of data.classVariables {
-						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, references, alterations, scope, node))
+						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
 
 					for name, methods of data.instanceMethods {
 						for method in methods {
-							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, references, alterations, scope, node))
+							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
 					for name, methods of data.classMethods {
 						for method in methods {
-							type.addClassMethod(name, ClassMethodType.fromMetadata(method, references, alterations, scope, node))
+							type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 				})
@@ -155,10 +155,16 @@ class ClassType extends Type {
 
 		return index
 	} // }}}
-	addClassMethod(name: String, type: ClassMethodType): Number { // {{{
+	addClassMethod(name: String, type: ClassMethodType): Number? { // {{{
 		let index: Number = 0
 
 		if @classMethods[name] is Array {
+			for method, index in @classMethods[name] {
+				if method.matchSignatureOf(type, []) {
+					return null
+				}
+			}
+
 			index = @classMethods[name].length
 
 			@classMethods[name].push(type)
@@ -182,10 +188,16 @@ class ClassType extends Type {
 	addDestructor() { // {{{
 		@destructors++
 	} // }}}
-	addInstanceMethod(name: String, type: ClassMethodType): Number { // {{{
+	addInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
 		let index: Number = 0
 
 		if @instanceMethods[name] is Array {
+			for method, index in @instanceMethods[name] {
+				if method.matchSignatureOf(type, []) {
+					return null
+				}
+			}
+
 			index = @instanceMethods[name].length
 
 			@instanceMethods[name].push(type)
@@ -921,8 +933,8 @@ class ClassVariableType extends Type {
 
 			return type
 		} // }}}
-		fromMetadata(data, references, alterations, scope: AbstractScope, node: AbstractNode): ClassVariableType { // {{{
-			const type = new ClassVariableType(scope, Type.fromMetadata(data.type, references, alterations, scope, node))
+		fromMetadata(data, metadata, references, alterations, queue, scope: AbstractScope, node: AbstractNode): ClassVariableType { // {{{
+			const type = new ClassVariableType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node))
 
 			type._access = data.access
 
@@ -979,7 +991,7 @@ class ClassMethodType extends FunctionType {
 
 			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
 		} // }}}
-		fromMetadata(data, references, alterations, scope: AbstractScope, node: AbstractNode): ClassMethodType { // {{{
+		fromMetadata(data, metadata, references, alterations, queue: Array, scope: AbstractScope, node: AbstractNode): ClassMethodType { // {{{
 			const type = new ClassMethodType(scope)
 
 			type._access = data.access
@@ -987,11 +999,11 @@ class ClassMethodType extends FunctionType {
 			type._min = data.min
 			type._max = data.max
 			type._sealed = data.sealed
-			type._throws = [Type.fromMetadata(throw, references, alterations, scope, node) for throw in data.throws]
+			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
 
-			type._returnType = Type.fromMetadata(data.returns, references, alterations, scope, node)
+			type._returnType = Type.fromMetadata(data.returns, metadata, references, alterations, queue, scope, node)
 
-			type._parameters = [ParameterType.fromMetadata(parameter, references, alterations, scope, node) for parameter in data.parameters]
+			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
 			type.updateArguments()
 
@@ -1090,15 +1102,15 @@ class ClassConstructorType extends FunctionType {
 	private {
 		_access: Accessibility	= Accessibility::Public
 	}
-	static fromMetadata(data, references, alterations, scope: AbstractScope, node: AbstractNode): ClassConstructorType { // {{{
+	static fromMetadata(data, metadata, references, alterations, queue, scope: AbstractScope, node: AbstractNode): ClassConstructorType { // {{{
 		const type = new ClassConstructorType(scope)
 
 		type._access = data.access
 		type._min = data.min
 		type._max = data.max
 
-		type._throws = [Type.fromMetadata(throw, references, alterations, scope, node) for throw in data.throws]
-		type._parameters = [ParameterType.fromMetadata(parameter, references, alterations, scope, node) for parameter in data.parameters]
+		type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
+		type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
 		type.updateArguments()
 

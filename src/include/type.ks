@@ -200,7 +200,7 @@ abstract class Type {
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
-		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			// console.log('-- fromMetadata --')
 			// console.log(JSON.stringify(data, null, 2))
 
@@ -214,8 +214,22 @@ abstract class Type {
 					return type
 				}
 				else {
-					console.log(data)
-					throw new NotImplementedException(node)
+					let type = Type.import(index, metadata, references, alterations, queue, scope, node)
+
+					if type is AliasType || type is ClassType || type is EnumType {
+						type = new NamedType(scope.acquireTempName(), type)
+
+						scope.define(type.name(), true, type, node)
+					}
+					else if type is NamespaceType {
+						type = new NamedContainerType(scope.acquireTempName(), type)
+
+						scope.define(type.name(), true, type, node)
+					}
+
+					references[index] = type
+
+					return type
 				}
 			}
 			else if data is String {
@@ -232,33 +246,33 @@ abstract class Type {
 					return type
 				}
 				else {
-					return UnionType.fromMetadata(data, references, alterations, scope, node)
+					return UnionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 				}
 			}
 			else if data.kind? {
 				switch data.kind {
 					TypeKind::Class => {
-						return ClassType.fromMetadata(data, references, alterations, scope, node)
+						return ClassType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Enum => {
-						return EnumType.fromMetadata(data, references, alterations, scope, node)
+						return EnumType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Function => {
-						return FunctionType.fromMetadata(data, references, alterations, scope, node)
+						return FunctionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::OverloadedFunction => {
-						return OverloadedFunctionType.fromMetadata(data, references, alterations, scope, node)
+						return OverloadedFunctionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Reference => {
-						return ReferenceType.fromMetadata(data, references, alterations, scope, node)
+						return ReferenceType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Sealable => {
-						return SealableType.fromMetadata(data, references, alterations, scope, node)
+						return SealableType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 				}
 			}
 			else if data.reference? {
-				const type = Type.fromMetadata(data.reference, references, alterations, scope, node)
+				const type = Type.fromMetadata(data.reference, metadata, references, alterations, queue, scope, node)
 
 				if type is NamedType {
 					return scope.reference(type)
@@ -268,16 +282,17 @@ abstract class Type {
 				}
 			}
 			else if data.type? {
-				return Type.fromMetadata(data.type, references, alterations, scope, node)
+				return Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node)
 			}
 
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
 		import(index, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+			const data = metadata.references[index]
+
 			// console.log('-- import --')
 			// console.log(JSON.stringify(data, null, 2))
-			const data = metadata.references[index]
 
 			if !?data {
 				return Type.Any
@@ -295,7 +310,7 @@ abstract class Type {
 					}
 				}
 				else {
-					return UnionType.import(index, data, references, alterations, queue, scope, node)
+					return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
 				}
 			}
 			else if data.reference? {
@@ -324,25 +339,25 @@ abstract class Type {
 			else if data.kind? {
 				switch data.kind {
 					TypeKind::Alias => {
-						return AliasType.import(index, data, references, alterations, queue, scope, node)
+						return AliasType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Class => {
-						return ClassType.import(index, data, references, alterations, queue, scope, node)
+						return ClassType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Enum => {
-						return EnumType.import(index, data, references, alterations, queue, scope, node)
+						return EnumType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Function => {
-						return FunctionType.import(index, data, references, alterations, queue, scope, node)
+						return FunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Namespace => {
-						return NamespaceType.import(index, data, references, alterations, queue, scope, node)
+						return NamespaceType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Object => {
-						return ObjectType.import(index, data, references, alterations, queue, scope, node)
+						return ObjectType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::OverloadedFunction => {
-						return OverloadedFunctionType.import(index, data, references, alterations, queue, scope, node)
+						return OverloadedFunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 				}
 			}

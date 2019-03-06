@@ -200,6 +200,9 @@ export class SyntaxException extends Exception {
 		throwDuplicateKey(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Duplicate key has been found in object`, node)
 		} // }}}
+		throwDuplicateMethod(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The method "\(name)" is matching an existing method`, node)
+		} // }}}
 		throwInvalidAwait(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
 		} // }}}
@@ -209,9 +212,6 @@ export class SyntaxException extends Exception {
 		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
 		} // }}}
-		/* throwInvalidNamedArgument(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Argument "\(name)" can't be a named argument`, node)
-		} // }}} */
 		throwInvalidImportAliasArgument(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Aliases arguments can't be used with classic JavaScript module`, node)
 		} // }}}

@@ -3,8 +3,8 @@ class SealableType extends Type {
 		_type: Type
 	}
 	static {
-		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
-			const type = new SealableType(scope, Type.fromMetadata(data.type, references, alterations, scope, node))
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+			const type = new SealableType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node))
 
 			if data.sealed {
 				type.flagSealed()

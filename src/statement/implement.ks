@@ -260,8 +260,13 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		if @instance {
-			if @override && (index ?= @class.matchInstanceMethod(@name, @type)) {
-				@internalName = `__ks_func_\(@name)_\(index)`
+			if index ?= @class.matchInstanceMethod(@name, @type) {
+				if @override {
+					@internalName = `__ks_func_\(@name)_\(index)`
+				}
+				else {
+					SyntaxException.throwDuplicateMethod(@name, this)
+				}
 			}
 			else {
 				@override = false
@@ -269,8 +274,13 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 		else {
-			if @override && (index ?= @class.matchClassMethod(@name, @type)) {
-				@internalName = `__ks_sttc_\(@name)_\(index)`
+			if index ?= @class.matchClassMethod(@name, @type) {
+				if @override {
+					@internalName = `__ks_sttc_\(@name)_\(index)`
+				}
+				else {
+					SyntaxException.throwDuplicateMethod(@name, this)
+				}
 			}
 			else {
 				@override = false

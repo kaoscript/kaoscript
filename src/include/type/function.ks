@@ -26,21 +26,21 @@ class FunctionType extends Type {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
 			}
 		} // }}}
-		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new FunctionType(scope)
 
 			type._async = data.async
 			type._min = data.min
 			type._max = data.max
 
-			type._throws = [Type.fromMetadata(throw, references, alterations, scope, node) for throw in data.throws]
+			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
 
 			if data.returns? {
-				type._returnType = Type.fromMetadata(data.returns, references, alterations, scope, node)
+				type._returnType = Type.fromMetadata(data.returns, metadata, references, alterations, queue, scope, node)
 				type._missingReturn = false
 			}
 
-			type._parameters = [ParameterType.fromMetadata(parameter, references, alterations, scope, node) for parameter in data.parameters]
+			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
 			type.updateArguments()
 
@@ -51,7 +51,7 @@ class FunctionType extends Type {
 
 			return type
 		} // }}}
-		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new FunctionType(scope)
 
 			type._async = data.async
@@ -59,14 +59,14 @@ class FunctionType extends Type {
 			type._max = data.max
 
 			queue.push(() => {
-				type._throws = [Type.fromMetadata(throw, references, alterations, scope, node) for throw in data.throws]
+				type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
 
 				if data.returns? {
-					type._returnType = Type.fromMetadata(data.returns, references, alterations, scope, node)
+					type._returnType = Type.fromMetadata(data.returns, metadata, references, alterations, queue, scope, node)
 					type._missingReturn = false
 				}
 
-				type._parameters = [ParameterType.fromMetadata(parameter, references, alterations, scope, node) for parameter in data.parameters]
+				type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
 				type.updateArguments()
 			})
@@ -456,21 +456,21 @@ class OverloadedFunctionType extends Type {
 		_references: Array<Type>			= []
 	}
 	static {
-		fromMetadata(data, references: Array, alterations, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new OverloadedFunctionType(scope)
 
 			for function in data.functions {
-				type.addFunction(Type.fromMetadata(function, references, alterations, scope, node))
+				type.addFunction(Type.fromMetadata(function, metadata, references, alterations, queue, scope, node))
 			}
 
 			return type
 		} // }}}
-		import(index, data, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
 			const type = new OverloadedFunctionType(scope)
 
 			queue.push(() => {
 				for function in data.functions {
-					type.addFunction(Type.fromMetadata(function, references, alterations, scope, node))
+					type.addFunction(Type.fromMetadata(function, metadata, references, alterations, queue, scope, node))
 				}
 			})
 

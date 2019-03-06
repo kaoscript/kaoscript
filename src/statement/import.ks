@@ -67,6 +67,7 @@ func $nodeModulesPaths(start) { // {{{
 class Importer extends Statement {
 	private {
 		_alias: String				= null
+		_arguments					= {}
 		_count: Number				= 0
 		_imports					= {}
 		_isKSFile: Boolean
@@ -74,7 +75,6 @@ class Importer extends Statement {
 		_metadata
 		_moduleToLocalArguments		= {}
 		_moduleName: String
-		_requirements				= {}
 		_sealedVariables			= {}
 		_seepedArguments			= {}
 		_variables					= {}
@@ -100,24 +100,24 @@ class Importer extends Statement {
 	} // }}}
 	prepare() { // {{{
 		if @isKSFile {
-			for name, requirement of @requirements {
-				requirement.name = @moduleToLocalArguments[name]
+			for name, argument of @arguments {
+				argument.name = @moduleToLocalArguments[name]
 
 				if @seepedArguments[name] == true {
-					requirement.seeped = true
+					argument.seeped = true
 				}
 				else {
-					requirement.seeped = false
-					requirement.type = @scope.getVariable(@moduleToLocalArguments[name]).type()
+					argument.seeped = false
+					argument.type = @scope.getVariable(@moduleToLocalArguments[name]).type()
 				}
 			}
 
-			@worker.prepare(@requirements)
+			@worker.prepare(@arguments)
 
 			const module = this.module()
 
 			for name of @seepedArguments {
-				module.addRequirement(new SeepedRequirement(@requirements[name].name, @requirements[name].type))
+				module.addRequirement(new SeepedRequirement(@arguments[name].name, @arguments[name].type))
 			}
 
 			const matchables = []
@@ -163,6 +163,8 @@ class Importer extends Statement {
 						}
 					}
 					else {
+						console.log(type)
+						console.log(variable.type())
 						TypeException.throwNotCompatibleArgument(def.local, name, @data.source.value, this)
 					}
 
@@ -191,32 +193,11 @@ class Importer extends Statement {
 	} // }}}
 	translate()
 	addArgument(data) { // {{{
-		/* if data.kind == NodeKind::Identifier {
-			unless @scope.hasVariable(data.name) {
-				ReferenceException.throwNotDefined(data.name, this)
-			}
-
-			@localToModuleArguments[data.name] = data.name
-			@moduleToLocalArguments[data.name] = data.name
-		}
-		else if data.kind == NodeKind::NamedArgument {
-			unless @scope.hasVariable(data.value.name) {
-				ReferenceException.throwNotDefined(data.value.name, this)
-			}
-
-			@localToModuleArguments[data.value.name] = data.name.name
-			@moduleToLocalArguments[data.name.name] = data.value.name
-		}
-		else {
-			console.log(data)
-			throw new NotImplementedException(this)
-		} */
 		if data.seeped {
 			if (variable ?= @scope.getVariable(data.local.name)) && !variable.type().isPredefined()  {
 				ReferenceException.throwDefined(data.local.name, this)
 			}
 
-			/* module.addRequirement(new ROIDynamicRequirement(variable, this)) */
 			@seepedArguments[data.imported.name] = true
 		}
 		else {
@@ -402,13 +383,14 @@ class Importer extends Statement {
 			for i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
-				if @moduleToLocalArguments[name] is not String {
-					SyntaxException.throwMissingRequirement(name, this)
+				if @moduleToLocalArguments[name] is String {
+					@arguments[name] = {
+						index: Math.floor(i / 3) + 1
+						data: @metadata.references[@metadata.requirements[i]]
+					}
 				}
-
-				@requirements[name] = {
-					index: Math.floor(i / 3) + 1
-					data: @metadata.references[@metadata.requirements[i]]
+				else if @metadata.requirements[i + 2] {
+					SyntaxException.throwMissingRequirement(name, this)
 				}
 			}
 		}
@@ -492,12 +474,6 @@ class Importer extends Statement {
 
 		if @data.arguments?.length != 0 {
 			for argument in @data.arguments {
-				/* if argument.kind == NodeKind::NamedArgument {
-					SyntaxException.throwInvalidNamedArgument(argument.name.name, this)
-				}
-				else {
-					this.addArgument(argument)
-				} */
 				if argument.local == argument.imported {
 					this.addArgument(argument)
 				}
@@ -607,7 +583,7 @@ class Importer extends Statement {
 		if hasArguments {
 			let nf = false
 
-			for name of @requirements {
+			for name of @arguments {
 				if nf {
 					importCode += ', '
 				}
@@ -618,7 +594,7 @@ class Importer extends Statement {
 				if @moduleToLocalArguments[name] is String {
 					importCode += @moduleToLocalArguments[name]
 
-					if @requirements[name].type.isSealed() {
+					if @arguments[name].type.isSealed() {
 						importCode += `, __ks_\(@moduleToLocalArguments[name])`
 					}
 				}
@@ -892,11 +868,11 @@ class ImportWorker {
 	} // }}}
 	hasType(name: String) => @scope.hasLocalVariable(name)
 	getType(name: String) => @scope.getLocalVariable(name).type()
-	prepare(requirements) { // {{{
+	prepare(arguments) { // {{{
 		const references = []
 		const queue = []
 
-		let index, name, type, requirement
+		let index, name, type, argument
 
 		if @metadata.requirements.length > 0 {
 			const reqReferences = []
@@ -918,18 +894,18 @@ class ImportWorker {
 			for i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
-				if (requirement ?= requirements[name]) && !requirement.seeped && !requirement.type.matchSignatureOf(reqReferences[@metadata.requirements[i]], matchables) {
-					TypeException.throwNotCompatibleArgument(requirement.name, name, @node.data().source.value, @node)
+				if (argument ?= arguments[name]) && !argument.seeped && !argument.type.matchSignatureOf(reqReferences[@metadata.requirements[i]], matchables) {
+					TypeException.throwNotCompatibleArgument(argument.name, name, @node.data().source.value, @node)
 				}
 			}
 
 			for i from 0 til @metadata.requirements.length by 3 {
-				if requirement ?= requirements[@metadata.requirements[i + 1]] {
-					if requirement.seeped {
-						requirement.type = reqReferences[@metadata.requirements[i]]
+				if argument ?= arguments[@metadata.requirements[i + 1]] {
+					if argument.seeped {
+						argument.type = reqReferences[@metadata.requirements[i]]
 					}
 
-					references[@metadata.requirements[i]] = requirement.type
+					references[@metadata.requirements[i]] = argument.type
 				}
 			}
 		}
