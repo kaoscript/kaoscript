@@ -61,6 +61,7 @@ include {
 	'../statement/class'
 	'../statement/continue'
 	'../statement/destroy'
+	'../statement/disclose'
 	'../statement/do-until'
 	'../statement/do-while'
 	'../statement/enum'

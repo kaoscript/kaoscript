@@ -8,6 +8,7 @@ class ClassType extends Type {
 	private {
 		_abstract: Boolean			= false
 		_abstractMethods: Object	= {}
+		_alteration: Boolean		= false
 		_alterationReference: ClassType
 		_classMethods: Object		= {}
 		_classVariables: Object		= {}
@@ -77,22 +78,22 @@ class ClassType extends Type {
 					type.copyFrom(source.type())
 
 					for name, vtype of data.instanceVariables {
-						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node).flagAlteration())
+						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
 
 					for name, vtype of data.classVariables {
-						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node).flagAlteration())
+						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
 
 					for name, methods of data.instanceMethods {
 						for method in methods {
-							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node).flagAlteration())
+							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
 					for name, methods of data.classMethods {
 						for method in methods {
-							type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node).flagAlteration())
+							type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 				})
@@ -173,6 +174,10 @@ class ClassType extends Type {
 			@classMethods[name] = [type]
 		}
 
+		if @alteration {
+			type.flagAlteration()
+		}
+
 		if type.isSealed() {
 			@seal.classMethods[name] = true
 		}
@@ -181,6 +186,10 @@ class ClassType extends Type {
 	} // }}}
 	addClassVariable(name: String, type: ClassVariableType) { // {{{
 		@classVariables[name] = type
+
+		if @alteration {
+			type.flagAlteration()
+		}
 	} // }}}
 	addConstructor(type: ClassConstructorType) { // {{{
 		@constructors.push(type)
@@ -206,6 +215,10 @@ class ClassType extends Type {
 			@instanceMethods[name] = [type]
 		}
 
+		if @alteration {
+			type.flagAlteration()
+		}
+
 		if type.isSealed() {
 			@seal.instanceMethods[name] = true
 		}
@@ -214,6 +227,10 @@ class ClassType extends Type {
 	} // }}}
 	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
 		@instanceVariables[name] = type
+
+		if @alteration {
+			type.flagAlteration()
+		}
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
 		switch(data.kind) {
@@ -707,7 +724,7 @@ class ClassType extends Type {
 	init() => @init
 	init(@init) => this
 	isAbstract() => @abstract
-	isAlteration() => @alterationReference?
+	isAlteration() => @alteration
 	isClass() => true
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
@@ -868,7 +885,9 @@ class ClassType extends Type {
 			return [this.toMetadata(references, ignoreAlteration), name]
 		}
 	} // }}}
-	setAlterationReference(@alterationReference)
+	setAlterationReference(@alterationReference) { // {{{
+		@alteration = true
+	} // }}}
 	toAlterationReference(references, ignoreAlteration) { // {{{
 		if @referenceIndex != -1 {
 			return {

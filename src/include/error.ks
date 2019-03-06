@@ -337,6 +337,9 @@ export class TypeException extends Exception {
 		throwNoMatchingFunction(node) ~ TypeException { // {{{
 			throw new TypeException(`Function can't be matched to given arguments`, node)
 		} // }}}
+		throwNotAlien(name, node) ~ TypeException { // {{{
+			throw new TypeException(`The type "\(name)" must be declared externally`, node)
+		} // }}}
 		throwNotAsyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not asynchronous`, node)
 		} // }}}

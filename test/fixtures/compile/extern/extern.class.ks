@@ -4,7 +4,7 @@ extern console: {
 
 extern class Shape {
 	Shape(color: string)
-	
+
 	draw(shape, canvas): string
 }
 

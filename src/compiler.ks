@@ -358,6 +358,7 @@ const $statements = {
 	`\(NodeKind::ClassDeclaration)`				: ClassDeclaration
 	`\(NodeKind::ContinueStatement)`			: ContinueStatement
 	`\(NodeKind::DestroyStatement)`				: DestroyStatement
+	`\(NodeKind::DiscloseDeclaration)`			: DiscloseDeclaration
 	`\(NodeKind::DoUntilStatement)`				: DoUntilStatement
 	`\(NodeKind::DoWhileStatement)`				: DoWhileStatement
 	`\(NodeKind::EnumDeclaration)`				: EnumDeclaration

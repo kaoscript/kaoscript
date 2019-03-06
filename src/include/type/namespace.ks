@@ -1,5 +1,6 @@
 class NamespaceType extends Type {
 	private {
+		_alteration: Boolean		= false
 		_alterationReference: NamespaceType
 		_properties: Object			= {}
 		_sealProperties: Object		= {}
@@ -49,6 +50,10 @@ class NamespaceType extends Type {
 		@scope.addVariable(name, variable)
 
 		@properties[name] = property
+
+		if @alteration {
+			property.flagAlteration()
+		}
 
 		if property.type().isSealed() {
 			@sealProperties[name] = true
@@ -175,7 +180,9 @@ class NamespaceType extends Type {
 
 		return false
 	} // }}}
-	setAlterationReference(@alterationReference)
+	setAlterationReference(@alterationReference) { // {{{
+		@alteration = true
+	} // }}}
 	toQuote() { // {{{
 		throw new NotImplementedException()
 	} // }}}

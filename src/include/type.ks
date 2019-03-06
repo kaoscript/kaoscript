@@ -96,7 +96,7 @@ abstract class Type {
 						return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
 					}
 				}
-				NodeKind::FunctionExpression => {
+				NodeKind::FunctionExpression, NodeKind::MethodDeclaration => {
 					return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
 				}
 				NodeKind::Identifier => {
@@ -192,7 +192,7 @@ abstract class Type {
 				NodeKind::UnionType => {
 					return new UnionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
-				NodeKind::VariableDeclarator => {
+				NodeKind::VariableDeclarator, NodeKind::FieldDeclaration => {
 					return Type.fromAST(data.type, scope, defined, node)
 				}
 			}
