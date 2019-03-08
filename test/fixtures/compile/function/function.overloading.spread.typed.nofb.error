@@ -1,0 +1,1 @@
+SyntaxException: Overloaded functions can't be differentiated (line 6, file "fixtures/compile/function/function.overloading.spread.typed.nofb.ks")

@@ -284,6 +284,8 @@ class FunctionDeclaration extends Statement {
 					const declarator = @variable.getDeclarator(index)
 
 					declarator.toSwitchFragments(fragments, Parameter.toWrongDoingFragments)
+
+					return declarator.isExit()
 				}
 				ClassDeclaration.toWrongDoingFragments
 				'arguments'
@@ -364,6 +366,7 @@ class FunctionDeclarator extends AbstractNode {
 		}
 	} // }}}
 	isAwait() => @await
+	isExit() => @exit
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	parameters() => @parameters

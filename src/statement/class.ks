@@ -45,7 +45,7 @@ class ClassDeclaration extends Statement {
 			fragments.line(retCode, variable.name(), '.', fnName, index, '.apply(this, ', argName, ')')
 		}
 	} // }}}
-	static checkMethods(methods, parameters, index, node, fragments, call, argName, returns) { // {{{
+	static checkInfinityMethods(methods, parameters, index, node, fragments, call, argName) { // {{{
 		if !?parameters[index + 1] {
 			SyntaxException.throwNotDifferentiableMethods(node)
 		}
@@ -91,7 +91,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		if tree.length == 0 {
-			return ClassDeclaration.checkMethods(methods, parameters, index + 1, node, fragments, call, argName, returns)
+			return ClassDeclaration.checkInfinityMethods(methods, parameters, index + 1, node, fragments, call, argName)
 		}
 		else if tree.length == 1 {
 			item = tree[0]
@@ -102,7 +102,142 @@ class ClassDeclaration extends Statement {
 				return false
 			}
 			else {
-				return ClassDeclaration.checkMethods(methods, parameters, index + 1, node, fragments, call, argName, returns)
+				return ClassDeclaration.checkInfinityMethods(methods, parameters, index + 1, node, fragments, call)
+			}
+		}
+		else {
+			for usage in usages {
+				let count = usage.types.length
+
+				for type in usage.types while count >= 0 {
+					count -= type.usage
+				}
+
+				if count == 0 {
+					let item = {
+						type: [],
+						path: [],
+						methods: [usage.method]
+						usage: 0
+						weight: 0
+					}
+
+					for type in usage.types {
+						item.type.push(type.type)
+						item.usage += type.usage
+						item.weight += type.weight
+
+						tree.remove(type)
+					}
+
+					tree.push(item)
+				}
+			}
+
+			tree.sort(func(a, b) {
+				if a.weight == 0 && b.weight != 0 {
+					return 1
+				}
+				else if b.weight == 0 {
+					return -1
+				}
+				else if a.type.length == b.type.length {
+					if a.usage == b.usage {
+						return b.weight - a.weight
+					}
+					else {
+						return b.usage - a.usage
+					}
+				}
+				else {
+					return a.type.length - b.type.length
+				}
+			})
+
+			let ctrl = fragments.newControl()
+
+			for item, i in tree {
+				ctrl.step().code('else ') if !ctrl.isFirstStep()
+
+				ctrl.code('if(')
+
+				item.type[0].toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(index)]`))
+
+				ctrl.code(')')
+
+				ctrl.step()
+
+				if item.methods.length == 1 {
+					if !call(ctrl, item.methods[0], item.methods[0].index()) {
+						ctrl.line('return')
+					}
+				}
+				else {
+					ClassDeclaration.checkInfinityMethods(methods, parameters, index + 1, node, ctrl, call, argName)
+				}
+			}
+
+			ctrl.done()
+		}
+	} // }}}
+	static checkMethods(methods, parameters, index, node, fragments, call, argName) { // {{{
+		if !?parameters[index + 1] {
+			SyntaxException.throwNotDifferentiableMethods(node)
+		}
+
+		const tree = []
+		const usages = []
+
+		let type, nf, item, usage
+		for :type of parameters[index + 1].types {
+			tree.push(item = {
+				type: type.type
+				methods: [methods[i] for i in type.methods]
+				usage: type.methods.length
+			})
+
+			if type.type.isAny() {
+				item.weight = 0
+			}
+			else {
+				item.weight = 1_000
+			}
+
+			for i in type.methods {
+				method = methods[i]
+
+				nf = true
+				for usage in usages while nf {
+					if usage.method == method {
+						nf = false
+					}
+				}
+
+				if nf {
+					usages.push(usage = {
+						method: method,
+						types: [item]
+					})
+				}
+				else {
+					usage.types.push(item)
+				}
+			}
+		}
+
+		if tree.length == 0 {
+			return ClassDeclaration.checkMethods(methods, parameters, index + 1, node, fragments, call, argName)
+		}
+		else if tree.length == 1 {
+			item = tree[0]
+
+			if item.methods.length == 1 {
+				call(fragments, item.methods[0], item.methods[0].index())
+
+				return false
+			}
+			else {
+				return ClassDeclaration.checkMethods(methods, parameters, index + 1, node, fragments, call, argName)
 			}
 		}
 		else {
@@ -181,7 +316,7 @@ class ClassDeclaration extends Statement {
 					call(ctrl, item.methods[0], item.methods[0].index())
 				}
 				else {
-					ClassDeclaration.checkMethods(methods, parameters, index + 1, node, ctrl, call, argName, returns)
+					ClassDeclaration.checkMethods(methods, parameters, index + 1, node, ctrl, call, argName)
 				}
 			}
 
@@ -290,6 +425,138 @@ class ClassDeclaration extends Statement {
 			}
 		}
 	} // }}}
+	static toInfinitySwitchFragments(node, fragments, methods, async, call, wrongdoer, argName) { // {{{
+		const begins = []
+		const ends = []
+		const others = []
+		for method in methods {
+			const parameters = method.parameters()
+
+			if parameters[0].min() > 0 && parameters[0].max() < Infinity {
+				begins.push(method)
+			}
+			else if parameters[parameters.length - 1].min() > 0 && parameters[parameters.length - 1].max() < Infinity {
+				ends.push(method)
+			}
+			else {
+				others.push(method)
+			}
+		}
+
+		if others.length > 1 {
+			SyntaxException.throwNotDifferentiableFunction(node)
+		}
+
+		if begins.length != 0 && ends.length != 0 {
+			SyntaxException.throwNotDifferentiableFunction(node)
+		}
+
+		let groups = {}
+		let min = Infinity
+		let max = 0
+
+		if begins.length != 0 {
+			for const index from 0 til methods.length {
+				method = methods[index]
+
+				let nf = true
+				let methodMin = 0
+				let methodMax = 0
+				for const parameter in method.parameters() while nf {
+					if parameter.min() == 0 || parameter.max() == Infinity {
+						if methodMin == 0 {
+							methodMin = Infinity
+						}
+
+						nf = false
+					}
+					else {
+						methodMin += parameter.min()
+						methodMax += parameter.max()
+					}
+				}
+
+				for n from methodMin to methodMax {
+					if groups[n]? {
+						groups[n].methods.push(method)
+					}
+					else {
+						groups[n] = {
+							n: n
+							methods: [method]
+						}
+					}
+				}
+
+				min = Math.min(min, methodMin)
+				max = Math.max(max, methodMax)
+			}
+		}
+		else {
+			throw new NotImplementedException(node)
+		}
+
+		for i from min to max {
+			if group ?= groups[i] {
+				for j from i + 1 to max while (gg ?= groups[j]) && Array.same(gg.methods, group.methods) {
+					if group.n is Array {
+						group.n.push(j)
+					}
+					else {
+						group.n = [i, j]
+					}
+
+					delete groups[j]
+				}
+			}
+		}
+
+		let ctrl = fragments.newControl()
+
+		if begins.length != 0 {
+			for k, group of groups {
+				ctrl.step().code('else ') unless ctrl.isFirstStep()
+
+				ctrl.code(`if(\(argName).length >= \(group.n))`).step()
+
+				const parameters = {}
+				for method in group.methods {
+					ClassDeclaration.mapMethod(method, group.n, parameters)
+				}
+
+				let indexes = []
+				for :parameter of [value for :value of parameters].sort((a, b) => b.weight - a.weight) {
+					for hash, type of parameter.types {
+						type.methods:Array.remove(...indexes)
+
+						if type.methods.length == 0 {
+							delete parameter.types[hash]
+						}
+					}
+
+					for :type of parameter.types {
+						if type.methods.length == 1 {
+							indexes:Array.pushUniq(type.methods[0])
+						}
+					}
+				}
+
+				ClassDeclaration.checkInfinityMethods(methods, parameters, 0, node, ctrl, call, argName)
+			}
+		}
+		else {
+			throw new NotImplementedException(node)
+		}
+
+		if others.length == 0 {
+			wrongdoer(fragments, ctrl, async, true)
+		}
+		else {
+			ctrl.done()
+
+			call(fragments, others[0], others[0].index())
+		}
+	} // }}}
 	static toSwitchFragments(node, fragments, variable, methods, name: String, extend?, header, footer, call, wrongdoer, argName, returns) { // {{{
 		let block = header(node, fragments)
 
@@ -390,16 +657,14 @@ class ClassDeclaration extends Statement {
 				SyntaxException.throwInvalidSyncMethods(node.name(), name, node)
 			}
 
-			if infinities.length {
-				for method in infinities {
-					for group of groups when method.absoluteMin() >= group.n {
-						group.methods.push(method)
-					}
+			for method in infinities {
+				for group of groups when method.absoluteMin() >= group.n {
+					group.methods.push(method)
 				}
 			}
 
 			if min == Infinity {
-				throw new NotImplementedException(node)
+				ClassDeclaration.toInfinitySwitchFragments(node, block, infinities, async, call, wrongdoer, argName)
 			}
 			else {
 				for i from min to max {
@@ -460,7 +725,7 @@ class ClassDeclaration extends Statement {
 							}
 						}
 
-						if ClassDeclaration.checkMethods(methods, parameters, 0, node, ctrl, call, argName, returns) {
+						if ClassDeclaration.checkMethods(methods, parameters, 0, node, ctrl, call, argName) {
 							if returns {
 								fragments.line('throw new Error("Wrong type of arguments")')
 							}
