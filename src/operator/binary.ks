@@ -211,29 +211,59 @@ class BinaryOperatorDivision extends BinaryOperatorExpression {
 
 class BinaryOperatorEquality extends BinaryOperatorExpression {
 	private {
-		_isLeftNaN: Boolean		= false
-		_isRightNaN: Boolean	= false
+		_infinity: Boolean		= false
+		_nanLeft: Boolean		= false
+		_nanRight: Boolean		= false
 	}
 	prepare() { // {{{
 		@left.prepare()
 		@right.prepare()
 
-		@isLeftNaN = @left is IdentifierLiteral && @left.value() == 'NaN'
-		@isRightNaN = @right is IdentifierLiteral && @right.value() == 'NaN'
+		if @left is IdentifierLiteral {
+			if @left.value() == 'NaN' {
+				@nanLeft = true
+			}
+			else if @left.value() == 'Infinity' {
+				@infinity = true
+			}
+		}
+		else if @left is UnaryOperatorNegative && @left.argument() is IdentifierLiteral {
+			@infinity = @left.argument().value() == 'Infinity'
+		}
+
+		if @right is IdentifierLiteral {
+			if @right.value() == 'NaN' {
+				@nanRight = true
+			}
+			else if @right.value() == 'Infinity' {
+				@infinity = true
+			}
+		}
+		else if @right is UnaryOperatorNegative && @right.argument() is IdentifierLiteral {
+			@infinity = @right.argument().value() == 'Infinity'
+		}
 	} // }}}
-	isComputed() => !@isLeftNaN && !@isRightNaN
+	isComputed() => !@nanLeft && !@nanRight
 	toOperatorFragments(fragments) { // {{{
-		if @isLeftNaN {
+		if @nanLeft {
 			fragments
 				.code('isNaN(')
 				.compile(@right)
 				.code(')')
 		}
-		else if @isRightNaN {
+		else if @nanRight {
 			fragments
 				.code('isNaN(')
 				.compile(@left)
 				.code(')')
+		}
+		else if @infinity {
+			fragments
+				.wrap(@left)
+				.code($space)
+				.code('==', @data.operator)
+				.code($space)
+				.wrap(@right)
 		}
 		else {
 			fragments
@@ -273,29 +303,59 @@ class BinaryOperatorGreaterThanOrEqual extends BinaryOperatorExpression {
 
 class BinaryOperatorInequality extends BinaryOperatorExpression {
 	private {
-		_isLeftNaN: Boolean		= false
-		_isRightNaN: Boolean	= false
+		_infinity: Boolean		= false
+		_nanLeft: Boolean		= false
+		_nanRight: Boolean		= false
 	}
 	prepare() { // {{{
 		@left.prepare()
 		@right.prepare()
 
-		@isLeftNaN = @left is IdentifierLiteral && @left.value() == 'NaN'
-		@isRightNaN = @right is IdentifierLiteral && @right.value() == 'NaN'
+		if @left is IdentifierLiteral {
+			if @left.value() == 'NaN' {
+				@nanLeft = true
+			}
+			else if @left.value() == 'Infinity' {
+				@infinity = true
+			}
+		}
+		else if @left is UnaryOperatorNegative && @left.argument() is IdentifierLiteral {
+			@infinity = @left.argument().value() == 'Infinity'
+		}
+
+		if @right is IdentifierLiteral {
+			if @right.value() == 'NaN' {
+				@nanRight = true
+			}
+			else if @right.value() == 'Infinity' {
+				@infinity = true
+			}
+		}
+		else if @right is UnaryOperatorNegative && @right.argument() is IdentifierLiteral {
+			@infinity = @right.argument().value() == 'Infinity'
+		}
 	} // }}}
-	isComputed() => !@isLeftNaN && !@isRightNaN
+	isComputed() => !@nanLeft && !@nanRight
 	toOperatorFragments(fragments) { // {{{
-		if @isLeftNaN {
+		if @nanLeft {
 			fragments
 				.code('!isNaN(')
 				.compile(@right)
 				.code(')')
 		}
-		else if @isRightNaN {
+		else if @nanRight {
 			fragments
 				.code('!isNaN(')
 				.compile(@left)
 				.code(')')
+		}
+		else if @infinity {
+			fragments
+				.wrap(@left)
+				.code($space)
+				.code('!=', @data.operator)
+				.code($space)
+				.wrap(@right)
 		}
 		else {
 			fragments
