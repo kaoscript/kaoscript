@@ -161,6 +161,9 @@ class AbstractScope {
 					}
 				}
 			}
+			else if @parent? {
+				return @parent.getMacro(data, parent)
+			}
 
 			SyntaxException.throwUnmatchedMacro(data.callee.name, parent, data)
 		}
@@ -173,6 +176,9 @@ class AbstractScope {
 						return macro
 					}
 				}
+			}
+			else if @parent? {
+				return @parent.getMacro(data, parent)
 			}
 
 			SyntaxException.throwUnmatchedMacro(path, parent, data)
@@ -195,10 +201,28 @@ class AbstractScope {
 	} // }}}
 	hasDeclaredLocalVariable(name) => @variables[name] is Variable || @variables[name] == false
 	hasLocalVariable(name) => @variables[name] is Variable || @natives[name] is Variable
-	hasMacro(name) => @macros[name] is Array
+	hasMacro(name) => @macros[name] is Array || @parent?.hasMacro(name)
 	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || @parent?.hasVariable(name)
 	isPredefinedVariable(name): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
-	listMacros(name) => @macros[name]
+	listLocalMacros(name): Array { // {{{
+		if @macros[name] is Array {
+			return @macros[name]
+		}
+		else {
+			return []
+		}
+	} // }}}
+	listMacros(name): Array { // {{{
+		if @macros[name] is Array {
+			return @macros[name]
+		}
+		else if @parent? {
+			return @parent.listMacros(name)
+		}
+		else {
+			return []
+		}
+	} // }}}
 	parent() => @parent
 	reference(value) { // {{{
 		switch value {

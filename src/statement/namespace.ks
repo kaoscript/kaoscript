@@ -44,9 +44,20 @@ class NamespaceDeclaration extends Statement {
 
 		@exports[name] = variable
 	} // }}}
+	exportMacro(name, macro) { // {{{
+		@parent.exportMacro(`\(@name).\(name)`, macro)
+	} // }}}
 	includePath() => null
 	name() => @name
+	publishMacro(name, macro) { // {{{
+		@scope.addMacro(name, macro)
+
+		@parent.registerMacro(`\(@name).\(name)`, macro)
+	} // }}}
 	recipient() => this
+	registerMacro(name, macro) { // {{{
+		@scope.addMacro(name, macro)
+	} // }}}
 	toExportFragements(fragments) { // {{{
 		const line = fragments.newLine().code('return ')
 		const object = line.newObject()

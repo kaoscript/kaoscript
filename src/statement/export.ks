@@ -57,6 +57,12 @@ class ExportDeclaration extends Statement {
 		}
 	} // }}}
 	isExportable() => true
+	exportMacro(name, macro) { // {{{
+		@parent.exportMacro(name, macro)
+	} // }}}
+	registerMacro(name, macro) { // {{{
+		@parent.publishMacro(name, macro)
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		for statement in @statements {
 			statement.toFragments(fragments, Mode::None)
@@ -77,13 +83,19 @@ class ExportNamedSpecifier extends AbstractNode {
 	prepare() { // {{{
 		@expression = $compile.expression(@data.local, @parent)
 		@expression.analyse()
+
+		if @expression.isMacro() {
+			for const macro in @scope.listMacros(@expression.name()) {
+				@parent.registerMacro(@data.exported.name, macro)
+			}
+		}
 	} // }}}
 	translate()
 	export(recipient) { // {{{
 		@expression.prepare()
 
 		if @expression.isMacro() {
-			for macro in @parent.scope().listMacros(@expression.name()) {
+			for macro in @scope.listMacros(@expression.name()) {
 				macro.export(recipient, @data.exported.name)
 			}
 		}

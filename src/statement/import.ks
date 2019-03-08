@@ -563,6 +563,9 @@ class Importer extends Statement {
 			return null
 		}
 	} // }}}
+	registerMacro(name, macro) { // {{{
+		@parent.registerMacro(name, macro)
+	} // }}}
 	toImportFragments(fragments) { // {{{
 		if @isKSFile {
 			this.toKSFileFragments(fragments)
@@ -844,6 +847,9 @@ class ImportDeclaration extends Statement {
 		}
 	} // }}}
 	translate()
+	registerMacro(name, macro) { // {{{
+		@parent.registerMacro(name, macro)
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		for declarator in @declarators {
 			declarator.toFragments(fragments, mode)

@@ -1,0 +1,16 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "NS"
+  ],
+  "references": [
+    {
+      "kind": "namespace",
+      "sealed": false,
+      "properties": {}
+    }
+  ],
+  "macros": []
+}

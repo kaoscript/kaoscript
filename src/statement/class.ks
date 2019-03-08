@@ -585,7 +585,7 @@ class ClassDeclaration extends Statement {
 				NodeKind::MacroDeclaration => {
 					const name = data.name.name
 
-					declaration = new MacroDeclaration(data, this, `\(@name).\(name)`)
+					declaration = new MacroDeclaration(data, this)
 
 					if @macros[name] is Array {
 						@macros[name].push(declaration)
@@ -702,6 +702,12 @@ class ClassDeclaration extends Statement {
 		if @extending && !@abstract && (notImplemented = @class.getMissingAbstractMethods()).length != 0 {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
+
+		for :macros of @macros {
+			for macro in macros {
+				macro.export(this)
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		for :variable of @classVariables {
@@ -778,14 +784,9 @@ class ClassDeclaration extends Statement {
 	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
-
-		for name, macros of @macros {
-			const path = `\(@name).\(name)`
-
-			for macro in macros {
-				macro.export(recipient, path)
-			}
-		}
+	} // }}}
+	exportMacro(name, macro) { // {{{
+		@parent.exportMacro(`\(@name).\(name)`, macro)
 	} // }}}
 	extends() => @extendsType
 	hasConstructors() => @constructors.length != 0
@@ -811,6 +812,11 @@ class ClassDeclaration extends Statement {
 		}
 
 		return scope
+	} // }}}
+	registerMacro(name, macro) { // {{{
+		@scope.addMacro(name, macro)
+
+		@parent.registerMacro(`\(@name).\(name)`, macro)
 	} // }}}
 	toContinousES5Fragments(fragments) { // {{{
 		this.module().flag('Helper')

@@ -138,12 +138,15 @@ export class Module {
 			SyntaxException.throwNotBinary('export', this)
 		}
 
-		if @exportedMacros[name]? {
+		if @exportedMacros[name] is Array {
 			@exportedMacros[name].push(data)
 		}
 		else {
 			@exportedMacros[name] = [data]
 		}
+	} // }}}
+	exportMacro(name: String, macro: MacroDeclaration) { // {{{
+		@body.exportMacro(name, macro)
 	} // }}}
 	file() => @file
 	flag(name) { // {{{
@@ -506,10 +509,19 @@ class ModuleBlock extends AbstractNode {
 		}
 	} // }}}
 	directory() => @module.directory()
+	exportMacro(name, macro) { // {{{
+		@module.exportMacro(name, macro.toMetadata())
+	} // }}}
 	file() => @module.file()
 	isConsumedError(error): Boolean => @module.isBinary()
 	includePath() => null
 	module() => @module
+	publishMacro(name, macro) { // {{{
+		@scope.addMacro(name, macro)
+	} // }}}
+	registerMacro(name, macro) { // {{{
+		@scope.addMacro(name, macro)
+	} // }}}
 	recipient() => @module
 	toFragments(fragments) { // {{{
 		let index = -1

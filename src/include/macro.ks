@@ -259,7 +259,7 @@ class MacroDeclaration extends AbstractNode {
 
 		@fn = $evaluate(source)
 
-		@parent.scope().addMacro(@name, this)
+		@parent.registerMacro(@name, this)
 	} // }}}
 	analyse()
 	prepare()
@@ -322,12 +322,7 @@ class MacroDeclaration extends AbstractNode {
 		return statements
 	} // }}}
 	export(recipient, name = @name) { // {{{
-		const data = {
-			parameters: @data.parameters
-			body: @data.body
-		}
-
-		recipient.exportMacro(name, Buffer.from(JSON.stringify(data)).toString('base64'))
+		recipient.exportMacro(name, this)
 	} // }}}
 	private filter(statement, data, fragments) { // {{{
 		if data.kind == NodeKind::MacroExpression {
@@ -373,6 +368,10 @@ class MacroDeclaration extends AbstractNode {
 	name() => @name
 	statement() => this
 	toFragments(fragments, mode)
+	toMetadata() => Buffer.from(JSON.stringify({
+		parameters: @data.parameters
+		body: @data.body
+	})).toString('base64')
 	type() => @type
 }
 
@@ -461,6 +460,9 @@ class MacroParameterType extends ParameterType {
 		}
 
 		switch @type.name() {
+			'Array' => {
+				return value.kind == NodeKind::ArrayExpression
+			}
 			'Expression' => {
 				return	value.kind == NodeKind::UnaryExpression ||
 						value.kind == NodeKind::BinaryExpression ||
