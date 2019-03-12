@@ -8,15 +8,15 @@ class AwaitExpression extends Expression {
 	}
 	constructor(@data, @parent, @scope = null) { // {{{
 		super(data, parent, scope)
-		
+
 		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
 			if parent is TryStatement {
 				@try = parent
 			}
-			
+
 			parent = parent.parent()
 		}
-		
+
 		if parent? {
 			@function = parent
 		}
@@ -30,7 +30,7 @@ class AwaitExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@operation.prepare()
-		
+
 		@reuseName = @scope.acquireTempName()
 	} // }}}
 	translate() { // {{{
@@ -40,24 +40,24 @@ class AwaitExpression extends Expression {
 	isAwaiting() => @awaiting
 	toAwaitExpressionFragments(fragments, statements) { // {{{
 		fragments.code(`(__ks_e, \(@reuseName)) =>`)
-		
+
 		const block = fragments.newBlock()
-		
+
 		let index = -1
 		let item
-		
+
 		for statement, i in statements while index == -1 {
 			if item ?= statement.toFragments(block, Mode::None) {
 				index = i
 			}
 		}
-		
+
 		if index != -1 {
 			item(statements.slice(index + 1))
 		}
-		
+
 		block.done()
-		
+
 		fragments.code(')').done()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
@@ -67,7 +67,7 @@ class AwaitExpression extends Expression {
 			}
 			else {
 				@awaiting = false
-				
+
 				if @try? {
 					return @try.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName, this)])
 				}

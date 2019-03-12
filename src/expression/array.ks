@@ -27,6 +27,15 @@ class ArrayExpression extends Expression {
 			value.translate()
 		}
 	} // }}}
+	isUsingVariable(name) { // {{{
+		for const value in @values {
+			if value.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @flatten {
 			CallExpression.toFlattenArgumentsFragments(fragments, @values)
@@ -83,6 +92,7 @@ class ArrayRange extends Expression {
 			@by.translate()
 		}
 	} // }}}
+	isUsingVariable(name) => @from.isUsingVariable(name) || @to.isUsingVariable(name) || @to?.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 
