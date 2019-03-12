@@ -45,6 +45,7 @@ include {
 	'../expression/enum'
 	'../expression/function'
 	'../expression/if'
+	'../expression/if-variable'
 	'../expression/member'
 	'../expression/object'
 	'../expression/omitted'

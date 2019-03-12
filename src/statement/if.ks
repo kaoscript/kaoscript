@@ -1,5 +1,6 @@
 class IfStatement extends Statement {
 	private {
+		_bindingScope
 		_condition
 		_whenFalseExpression
 		_whenFalseScope: AbstractScope
@@ -7,10 +8,21 @@ class IfStatement extends Statement {
 		_whenTrueScope: AbstractScope
 	}
 	analyse() { // {{{
-		@condition = $compile.expression(@data.condition, this)
-		@condition.analyse()
+		if @data.condition.kind == NodeKind::VariableDeclaration {
+			@bindingScope = new BleedingScope(this)
 
-		@whenTrueScope = this.newScope(@scope)
+			@condition = new IfVariableDeclarationExpression(@data.condition, this, @bindingScope)
+
+			@whenTrueScope = this.newScope(@bindingScope)
+		}
+		else {
+			@whenTrueScope = this.newScope(@scope)
+			@bindingScope = @whenTrueScope
+
+			@condition = $compile.expression(@data.condition, this)
+		}
+
+		@condition.analyse()
 
 		@whenTrueExpression = $compile.expression($ast.block(@data.whenTrue), this, @whenTrueScope)
 		@whenTrueExpression.analyse()
@@ -53,6 +65,10 @@ class IfStatement extends Statement {
 		else {
 			return @assignments
 		}
+	} // }}}
+	bindingScope() => @bindingScope
+	declareVariable(name: String) { // {{{
+		@assignments.push(name)
 	} // }}}
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isReturning(type: Type) { // {{{

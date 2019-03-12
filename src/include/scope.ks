@@ -114,7 +114,7 @@ class AbstractScope {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		if $keywords[name] == true {
+		if $keywords[name] == true || @renamedIndexes[name] is Number {
 			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
 
@@ -348,8 +348,8 @@ class Scope extends AbstractScope {
 		if @renamedVariables[name] is String {
 			return @renamedVariables[name]
 		}
-		else if @scopeParent? {
-			return @scopeParent.getRenamedVariable(name)
+		else if @parent? {
+			return @parent.getRenamedVariable(name)
 		}
 		else {
 			return name
@@ -359,8 +359,8 @@ class Scope extends AbstractScope {
 		if @renamedVariables[name] is String {
 			return true
 		}
-		else if @scopeParent? {
-			return @scopeParent.isRenamedVariable(name)
+		else if @parent? {
+			return @parent.isRenamedVariable(name)
 		}
 		else {
 			return false
@@ -368,7 +368,7 @@ class Scope extends AbstractScope {
 	} // }}}
 	newRenamedVariable(name, variables = @variables) { // {{{
 		if variables[name]? {
-			let index = @renamedIndexes[name] ? @renamedIndexes[name] : 0
+			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 			let newName = '__ks_' + name + '_' + (++index)
 
 			while variables[newName] {
@@ -527,6 +527,62 @@ class NamespaceScope extends Scope {
 		}
 
 		@variables[name] = variable
+
+		return this
+	} // }}}
+}
+
+class BleedingScope extends AbstractScope {
+	private {
+		_node: AbstractNode
+	}
+	constructor(@node) { // {{{
+		super(node.scope())
+	} // }}}
+	acquireTempName(statement: Statement = null) => @parent.acquireTempName(statement)
+	addVariable(name: String, variable: Variable, node?) { // {{{
+		if @scopeParent.hasLocalVariable(name) {
+			const newName = @parent.newRenamedVariable(name)
+
+			@renamedVariables[name] = newName
+
+			@node.declareVariable(newName)
+		}
+		else {
+			@parent._renamedIndexes[name] = 0
+
+			@node.declareVariable(name)
+		}
+
+		super.addVariable(name, variable, node)
+
+		return this
+	} // }}}
+	getRenamedVariable(name) { // {{{
+		if @renamedVariables[name] is String {
+			return @renamedVariables[name]
+		}
+		else if @variables[name] is Variable {
+			return name
+		}
+		else {
+			return @parent.getRenamedVariable(name)
+		}
+	} // }}}
+	isRenamedVariable(name): Boolean { // {{{
+		if @renamedVariables[name] is String {
+			return true
+		}
+		else if @variables[name] is Variable {
+			return false
+		}
+		else {
+			return @parent.isRenamedVariable(name)
+		}
+	} // }}}
+	newRenamedVariable(name, variables = null) => @parent.newRenamedVariable(name, variables)
+	releaseTempName(name) { // {{{
+		@parent.releaseTempName(name)
 
 		return this
 	} // }}}
