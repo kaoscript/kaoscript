@@ -1,0 +1,16 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "foo"
+  ],
+  "references": [
+    {
+      "kind": "reference",
+      "name": "Array",
+      "nullable": true
+    }
+  ],
+  "macros": []
+}

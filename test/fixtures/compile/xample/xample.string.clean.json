@@ -38,7 +38,15 @@
                 "max": "Infinity"
               }
             ],
-            "returns": "Array",
+            "returns": {
+              "kind": "reference",
+              "name": "Array",
+              "parameters": [
+                {
+                  "reference": 0
+                }
+              ]
+            },
             "sealed": false,
             "throws": []
           }

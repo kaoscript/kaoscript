@@ -23,7 +23,23 @@ class ConditionalExpression extends Expression {
 		const t = @whenTrue.type()
 		const f = @whenFalse.type()
 
-		@type = t.equals(f) ? t : new UnionType(this.scope(), [t, f])
+		/* @type = t.equals(f) ? t : new UnionType(this.scope(), [t, f]) */
+		/* console.log(t)
+		console.log(f)
+		console.log(@whenFalse) */
+
+		if t.equals(f) {
+			@type = t
+		}
+		else if f.isNull() {
+			@type = t.flagNullable()
+		}
+		else if t.isNull() {
+			@type = f.flagNullable()
+		}
+		else {
+			@type = Type.union(@scope, t, f)
+		}
 	} // }}}
 	translate() { // {{{
 		@condition.translate()

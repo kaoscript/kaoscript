@@ -167,7 +167,12 @@ class ArrayComprehensionForIn extends Expression {
 
 		@body.prepare()
 
-		@type = Type.arrayOf(@body.type(), @scope)
+		if @body.type().isAny() {
+			@type = @scope.reference('Array')
+		}
+		else {
+			@type = Type.arrayOf(@body.type(), @scope)
+		}
 
 		if @when? {
 			@when.prepare()

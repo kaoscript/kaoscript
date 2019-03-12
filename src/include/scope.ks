@@ -478,7 +478,7 @@ class ModuleScope extends Scope {
 		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
 
 		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
-		@predefined.__null = new Variable('null', true, true, Type.Any)
+		@predefined.__null = new Variable('null', true, true, Type.Null)
 		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
 		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
 		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))

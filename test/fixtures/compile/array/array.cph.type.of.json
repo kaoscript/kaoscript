@@ -1,0 +1,12 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "spicyHeroes"
+  ],
+  "references": [
+    "Array"
+  ],
+  "macros": []
+}

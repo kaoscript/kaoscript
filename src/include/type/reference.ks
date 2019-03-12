@@ -9,7 +9,7 @@ class ReferenceType extends Type {
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
-			return new ReferenceType(scope, data.name, data.nullable)
+			return new ReferenceType(scope, data.name, data.nullable, ?data.parameters ? [Type.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null)
 		} // }}}
 	}
 	constructor(@scope, name: String, @nullable = false, @parameters = []) { // {{{
@@ -53,17 +53,25 @@ class ReferenceType extends Type {
 		return true
 	} // }}}
 	export(references, ignoreAlteration) { // {{{
-		if @nullable {
-			return {
+		if @nullable || @parameters.length != 0 {
+			const export = {
 				kind: TypeKind::Reference
 				name: @name
-				nullable: @nullable
 			}
+
+			if @nullable {
+				export.nullable = @nullable
+			}
+
+			if @parameters.length != 0 {
+				export.parameters = [parameter.toReference(references, ignoreAlteration) for parameter in @parameters]
+			}
+
+			return export
 		}
 		else {
 			return @name
 		}
-
 	} // }}}
 	flagExported() { // {{{
 		if !this.isAny() && !this.isEnum() && !this.isVoid() {
@@ -72,6 +80,7 @@ class ReferenceType extends Type {
 
 		return super.flagExported()
 	} // }}}
+	flagNullable(): ReferenceType => new ReferenceType(@scope, @name, true, @parameters)
 	getProperty(name: String): Type { // {{{
 		if this.isAny() {
 			return Type.Any

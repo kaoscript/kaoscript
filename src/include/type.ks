@@ -448,6 +448,7 @@ abstract class Type {
 	isNamed() => false
 	isNamespace() => false
 	isNumber() => false
+	isNull() => this == Type.Null
 	isObject() => false
 	isPredefined() => false
 	isReferenced() => @referenced
@@ -518,6 +519,7 @@ include {
 }
 
 Type.Any = new AnyType(null)
+Type.Null = new AnyType(null)
 Type.Void = new VoidType(null)
 
 ParameterType.Any = new ParameterType(null, Type.Any)

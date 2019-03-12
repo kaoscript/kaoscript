@@ -31,6 +31,12 @@ class IfExpression extends Expression {
 			if t.equals(f) {
 				@type = t
 			}
+			else if f.isNull() {
+				@type = t.flagNullable()
+			}
+			else if t.isNull() {
+				@type = f.flagNullable()
+			}
 			else {
 				@type = Type.union(@scope, t, f)
 			}
