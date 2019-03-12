@@ -1,0 +1,134 @@
+{
+  "aliens": [
+    0,
+    "Array",
+    1,
+    "String"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Array",
+    2,
+    "String"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "class": {
+        "reference": 1
+      },
+      "init": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "split": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": {
+              "kind": "reference",
+              "name": 0,
+              "parameters": [
+                {
+                  "reference": 2
+                }
+              ]
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "replace": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity"
+              }
+            ],
+            "returns": {
+              "reference": 2
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "trim": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 2
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "foobar": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "kind": "reference",
+              "name": 0,
+              "nullable": true
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

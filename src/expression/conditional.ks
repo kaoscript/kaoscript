@@ -23,11 +23,6 @@ class ConditionalExpression extends Expression {
 		const t = @whenTrue.type()
 		const f = @whenFalse.type()
 
-		/* @type = t.equals(f) ? t : new UnionType(this.scope(), [t, f]) */
-		/* console.log(t)
-		console.log(f)
-		console.log(@whenFalse) */
-
 		if t.equals(f) {
 			@type = t
 		}

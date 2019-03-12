@@ -9,7 +9,10 @@ class ReferenceType extends Type {
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
-			return new ReferenceType(scope, data.name, data.nullable, ?data.parameters ? [Type.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null)
+			const name = data.name is Number ? Type.fromMetadata(data.name, metadata, references, alterations, queue, scope, node).name() : data.name
+			const parameters = ?data.parameters ? [Type.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
+
+			return new ReferenceType(scope, name, data.nullable, parameters)
 		} // }}}
 	}
 	constructor(@scope, name: String, @nullable = false, @parameters = []) { // {{{
@@ -52,11 +55,12 @@ class ReferenceType extends Type {
 
 		return true
 	} // }}}
-	export(references, ignoreAlteration) { // {{{
+	export(references, ignoreAlteration) => this.export(references, ignoreAlteration, @name)
+	export(references, ignoreAlteration, name) { // {{{
 		if @nullable || @parameters.length != 0 {
 			const export = {
 				kind: TypeKind::Reference
-				name: @name
+				name: name.reference ?? name
 			}
 
 			if @nullable {
@@ -70,7 +74,7 @@ class ReferenceType extends Type {
 			return export
 		}
 		else {
-			return @name
+			return name
 		}
 	} // }}}
 	flagExported() { // {{{
@@ -299,10 +303,10 @@ class ReferenceType extends Type {
 		}
 		else if @type.isExported() {
 			if ignoreAlteration && @type.type().isAlteration() {
-				return @type.type().toAlterationReference(references, ignoreAlteration)
+				return this.export(references, ignoreAlteration, @type.type().toAlterationReference(references, ignoreAlteration))
 			}
 			else {
-				return @type.toReference(references, ignoreAlteration)
+				return this.export(references, ignoreAlteration, @type.toReference(references, ignoreAlteration))
 			}
 		}
 		else if @type.isAlien() {
