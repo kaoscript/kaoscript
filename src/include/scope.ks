@@ -61,6 +61,7 @@ let $keywords = { // {{{
 class AbstractScope {
 	private {
 		_body: Array		= []
+		_hasParent: Boolean	= false
 		_macros				= {}
 		_natives			= {}
 		_parent				= null
@@ -73,6 +74,8 @@ class AbstractScope {
 	}
 	constructor(@parent = null) { // {{{
 		if parent? {
+			@hasParent = true
+
 			while parent? && !(parent is Scope) {
 				parent = parent._parent
 			}
@@ -161,7 +164,7 @@ class AbstractScope {
 					}
 				}
 			}
-			else if @parent? {
+			else if @hasParent {
 				return @parent.getMacro(data, parent)
 			}
 
@@ -177,7 +180,7 @@ class AbstractScope {
 					}
 				}
 			}
-			else if @parent? {
+			else if @hasParent {
 				return @parent.getMacro(data, parent)
 			}
 
@@ -192,7 +195,7 @@ class AbstractScope {
 		else if @natives[name] is Variable {
 			return @natives[name]
 		}
-		else if @parent? {
+		else if @hasParent {
 			return @parent.getVariable(name)
 		}
 		else {
@@ -201,8 +204,8 @@ class AbstractScope {
 	} // }}}
 	hasDeclaredLocalVariable(name) => @variables[name] is Variable || @variables[name] == false
 	hasLocalVariable(name) => @variables[name] is Variable || @natives[name] is Variable
-	hasMacro(name) => @macros[name] is Array || @parent?.hasMacro(name)
-	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || @parent?.hasVariable(name)
+	hasMacro(name) => @macros[name] is Array || (@hasParent && @parent.hasMacro(name))
+	hasVariable(name) => @variables[name] is Variable || @natives[name] is Variable || (@hasParent && @parent.hasVariable(name))
 	isPredefinedVariable(name): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
 	listLocalMacros(name): Array { // {{{
 		if @macros[name] is Array {
@@ -216,7 +219,7 @@ class AbstractScope {
 		if @macros[name] is Array {
 			return @macros[name]
 		}
-		else if @parent? {
+		else if @hasParent {
 			return @parent.listMacros(name)
 		}
 		else {
@@ -268,8 +271,8 @@ class AbstractScope {
 		if @variables[name] is Variable {
 			@variables[name] = false
 		}
-		else {
-			@parent?.removeVariable(name)
+		else if @hasParent {
+			@parent.removeVariable(name)
 		}
 
 		return this
@@ -348,7 +351,7 @@ class Scope extends AbstractScope {
 		if @renamedVariables[name] is String {
 			return @renamedVariables[name]
 		}
-		else if @parent? {
+		else if @hasParent {
 			return @parent.getRenamedVariable(name)
 		}
 		else {
@@ -359,7 +362,7 @@ class Scope extends AbstractScope {
 		if @renamedVariables[name] is String {
 			return true
 		}
-		else if @parent? {
+		else if @hasParent {
 			return @parent.isRenamedVariable(name)
 		}
 		else {
