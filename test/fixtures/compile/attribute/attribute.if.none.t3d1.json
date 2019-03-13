@@ -1,0 +1,28 @@
+{
+  "aliens": [
+    0,
+    "String"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "String"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

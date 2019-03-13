@@ -147,34 +147,34 @@ abstract class AbstractNode {
 	abstract analyse()
 	abstract prepare()
 	abstract translate()
-	bindingScope() => this._parent?.bindingScope()
+	bindingScope() => @parent?.bindingScope()
 	data() => @data
-	directory() => this._parent.directory()
-	file() => this._parent.file()
-	greatParent() => this._parent?._parent
-	greatScope() => this._parent?._scope
+	directory() => @parent.directory()
+	file() => @parent.file()
+	greatParent() => @parent?._parent
+	greatScope() => @parent?._scope
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
-	module() => this._parent.module()
+	module() => @parent.module()
 	newScope(scope = @scope) { // {{{
-		if this._options.format.variables == 'es6' {
+		if @options.format.variables == 'es6' {
 			return new Scope(scope)
 		}
 		else {
 			return new XScope(scope)
 		}
 	} // }}}
-	parent() => this._parent
+	parent() => @parent
 	reference() { // {{{
-		if this._parent? && this._parent.reference()? {
-			return this._parent.reference() + this._reference
+		if @parent?.reference()? {
+			return @parent.reference() + @reference
 		}
 		else {
-			return this._reference
+			return @reference
 		}
 	} // }}}
 	reference(@reference)
-	scope() => this._scope
-	statement() => this._parent?.statement()
+	scope() => @scope
+	statement() => @parent?.statement()
 }
 
 include {
@@ -241,7 +241,7 @@ const $compile = {
 		return expression
 	} // }}}
 	statement(data, parent) { // {{{
-		if Attribute.conditional(data, parent.module()._compiler._target) {
+		if Attribute.conditional(data, parent) {
 			let clazz = $statements[data.kind] ?? $statements.default
 
 			return new clazz(data, parent)
@@ -459,7 +459,6 @@ export class Compiler {
 		_hashes
 		_module
 		_options
-		_target
 	}
 	static {
 		registerTarget(target, options) { // {{{
@@ -503,51 +502,52 @@ export class Compiler {
 		@options = Object.merge({
 			target: 'ecma-v6'
 			register: true
-			config: {
-				header: true
-				error: {
-					level: 'fatal'
-					ignore: []
-					raise: []
+			header: true
+			error: {
+				level: 'fatal'
+				ignore: []
+				raise: []
+			}
+			parse: {
+				parameters: 'kaoscript'
+			}
+			format: {}
+			runtime: {
+				helper: {
+					alias: 'Helper'
+					member: 'Helper'
+					package: '@kaoscript/runtime'
 				}
-				parse: {
-					parameters: 'kaoscript'
-				}
-				format: {}
-				runtime: {
-					helper: {
-						alias: 'Helper'
-						member: 'Helper'
-						package: '@kaoscript/runtime'
-					}
-					type: {
-						alias: 'Type'
-						member: 'Type'
-						package: '@kaoscript/runtime'
-					}
+				type: {
+					alias: 'Type'
+					member: 'Type'
+					package: '@kaoscript/runtime'
 				}
 			}
 		}, options)
 
-		if target !?= $targetRegex.exec(@options.target) {
-			throw new Error(`Invalid target syntax: \(@options.target)`)
+		if @options.target is String {
+			if target !?= $targetRegex.exec(@options.target) {
+				throw new Error(`Invalid target syntax: \(@options.target)`)
+			}
+
+			@options.target = {
+				name: target[1],
+				version: target[2]
+			}
+		}
+		else if @options.target is not Object || !$targetRegex.test(`\(@options.target.name)-v\(@options.target.version)`) {
+			throw new Error(`Undefined target`)
 		}
 
-		@target = {
-			name: target[1],
-			version: target[2]
+		if !?$targets[@options.target.name] {
+			throw new Error(`Undefined target '\(@options.target.name)'`)
+		}
+		else if !?$targets[@options.target.name][@options.target.version] {
+			throw new Error(`Undefined target's version '\(@options.target.version)'`)
 		}
 
-		if !?$targets[@target.name] {
-			throw new Error(`Undefined target '\(@target.name)'`)
-		}
-		else if !?$targets[@target.name][@target.version] {
-			throw new Error(`Undefined target's version '\(@target.version)'`)
-		}
-
-		@options.target = `\(@target.name)-v\(@target.version)`
-
-		@options.config = Object.defaults($targets[@target.name][@target.version], @options.config)
+		@options = Object.defaults($targets[@options.target.name][@options.target.version], @options)
 	} // }}}
 	compile(data = null) { // {{{
 		//console.time('parse')
@@ -565,21 +565,19 @@ export class Compiler {
 		return this
 	} // }}}
 	createServant(file) { // {{{
-		return new Compiler(file, {
-			config: @options.config
+		return new Compiler(file, Object.defaults(@options, {
 			register: false
-			target: @options.target
-		}, @hashes)
+		}), @hashes)
 	} // }}}
 	readFile() => fs.readFile(@file)
 	sha256(file, data = null) { // {{{
-		return this._hashes[file] ?? (this._hashes[file] = fs.sha256(data ?? fs.readFile(file)))
+		return @hashes[file] ?? (@hashes[file] = fs.sha256(data ?? fs.readFile(file)))
 	} // }}}
 	toHashes() { // {{{
-		return this._module.toHashes()
+		return @module.toHashes()
 	} // }}}
 	toMetadata() { // {{{
-		return this._module.toMetadata()
+		return @module.toMetadata()
 	} // }}}
 	toSource() { // {{{
 		let source = ''
@@ -596,20 +594,20 @@ export class Compiler {
 		}
 	} // }}}
 	toSourceMap() { // {{{
-		return this._module.toSourceMap()
+		return @module.toSourceMap()
 	} // }}}
 	writeFiles() { // {{{
-		fs.mkdir(path.dirname(this._file))
+		fs.mkdir(path.dirname(@file))
 
-		fs.writeFile(getBinaryPath(this._file, this._options.target), this.toSource())
+		fs.writeFile(getBinaryPath(@file, @options.target), this.toSource())
 
-		if !this._module._binary {
+		if !@module._binary {
 			const metadata = this.toMetadata()
 
-			fs.writeFile(getMetadataPath(this._file, this._options.target), JSON.stringify(metadata, func(key, value) => key == 'max' && value == Infinity ? 'Infinity' : value))
+			fs.writeFile(getMetadataPath(@file, @options.target), JSON.stringify(metadata, func(key, value) => key == 'max' && value == Infinity ? 'Infinity' : value))
 		}
 
-		fs.writeFile(getHashPath(this._file, this._options.target), JSON.stringify(this._module.toHashes()))
+		fs.writeFile(getHashPath(@file, @options.target), JSON.stringify(@module.toHashes()))
 	} // }}}
 	writeMetadata() { // {{{
 		if !@options.output {
@@ -645,11 +643,11 @@ export func compileFile(file, options = null) { // {{{
 	return compiler.compile().toSource()
 } // }}}
 
-export func getBinaryPath(file, target) => fs.hidden(file, target, $extensions.binary)
+export func getBinaryPath(file, target) => fs.hidden(file, target.name, target.version, $extensions.binary)
 
-export func getHashPath(file, target) => fs.hidden(file, target, $extensions.hash)
+export func getHashPath(file, target) => fs.hidden(file, target.name, target.version, $extensions.hash)
 
-export func getMetadataPath(file, target) => fs.hidden(file, target, $extensions.metadata)
+export func getMetadataPath(file, target) => fs.hidden(file, target.name, target.version, $extensions.metadata)
 
 export func isUpToDate(file, target, source) { // {{{
 	let hashes

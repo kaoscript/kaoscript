@@ -1,7 +1,8 @@
 abstract class Statement extends AbstractNode {
 	private {
-		_afterwards: Array	= []
-		_assignments: Array	= []
+		_afterwards: Array		= []
+		_assignments: Array		= []
+		_attributeDatas			= {}
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
@@ -31,12 +32,17 @@ abstract class Statement extends AbstractNode {
 	assignments() => @assignments
 	bindingScope() => @scope
 	export(recipient)
+	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	isAwait() => false
 	isExit() => false
 	isExportable() => false
 	includePath() => @parent.includePath()
 	isReturning(type: Type) => true
+	setAttributeData(key: AttributeData, data) { // {{{
+		@attributeDatas[key] = data
+	} // }}}
 	statement() => this
+	target() => @options.target
 	toFragments(fragments, mode) { // {{{
 		const variables = this.assignments()
 		if variables.length != 0 {

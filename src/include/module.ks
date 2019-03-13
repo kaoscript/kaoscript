@@ -28,7 +28,7 @@ export class Module {
 		@data = this.parse(data, file)
 
 		@directory = path.dirname(file)
-		@options = Attribute.configure(@data, @compiler._options.config, true, AttributeTarget::Global)
+		@options = Attribute.configure(@data, @compiler._options, true, AttributeTarget::Global)
 
 		for attr in @data.attributes {
 			if attr.declaration.kind == NodeKind::Identifier &&	attr.declaration.name == 'bin' {
@@ -475,6 +475,7 @@ export class Module {
 
 class ModuleBlock extends AbstractNode {
 	private {
+		_attributeDatas			= {}
 		_module
 		_statements: Array		= []
 	}
@@ -513,6 +514,7 @@ class ModuleBlock extends AbstractNode {
 		@module.exportMacro(name, macro.toMetadata())
 	} // }}}
 	file() => @module.file()
+	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	isConsumedError(error): Boolean => @module.isBinary()
 	includePath() => null
 	module() => @module
@@ -523,6 +525,10 @@ class ModuleBlock extends AbstractNode {
 		@scope.addMacro(name, macro)
 	} // }}}
 	recipient() => @module
+	setAttributeData(key: AttributeData, data) { // {{{
+		@attributeDatas[key] = data
+	} // }}}
+	target() => @options.target
 	toFragments(fragments) { // {{{
 		let index = -1
 		let item

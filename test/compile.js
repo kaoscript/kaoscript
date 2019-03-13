@@ -5,6 +5,8 @@ var fs = require('fs');
 var klaw = require('klaw-sync');
 var path = require('path');
 
+require('@kaoscript/target-commons')(Compiler)
+
 function replacer(key, value){
 	if(value === undefined) {
 		// return 'undefined'
@@ -34,9 +36,7 @@ describe('compile', function() {
 			this.timeout(5000);
 
 			var compiler = new Compiler(file, {
-				config: {
-					header: false
-				}
+				header: false
 			});
 
 			try {
