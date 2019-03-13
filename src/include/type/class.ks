@@ -235,7 +235,19 @@ class ClassType extends Type {
 	addPropertyFromAST(data, node) { // {{{
 		switch(data.kind) {
 			NodeKind::FieldDeclaration => {
-				throw new NotImplementedException(node)
+				let instance = true
+				for i from 0 til data.modifiers.length while instance {
+					instance = false if data.modifiers[i].kind == ModifierKind::Static
+				}
+
+				const type = ClassVariableType.fromAST(data, node)
+
+				if instance {
+					this.addInstanceVariable(data.name.name, type)
+				}
+				else {
+					this.addClassVariable(data.name.name, type)
+				}
 			}
 			NodeKind::MethodDeclaration => {
 				if this.isConstructor(data.name.name) {
