@@ -493,10 +493,6 @@ export class Compiler {
 	}
 	static {
 		registerTarget(target: String, fn: Function) { // {{{
-			if ?$targets[target] {
-				throw new Error(`Invalid target syntax: \(target)`)
-			}
-
 			$targets[target] = fn
 		} // }}}
 		registerTarget(target: String, options: Object) { // {{{
