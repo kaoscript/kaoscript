@@ -15,7 +15,7 @@ enum AttributeTarget {
 }
 
 const $attributes = {}
-const $semverRegex = /(\w+)(?:\-v(0|[1-9]\d*))?$/
+const $semverRegex = /^(\w+)(?:-v((?:\d+)(?:\.\d+)?(?:\.\d+)?))?$/
 
 class Attribute {
 	static {
@@ -212,7 +212,7 @@ class IfAttribute extends Attribute {
 				}
 				'gt' => {
 					if const match = $semverRegex.exec(data.arguments[0].name) {
-						if match[1] != target.name {
+						if match[1] != target.name || !?match[2] {
 							return false
 						}
 
@@ -227,6 +227,9 @@ class IfAttribute extends Attribute {
 						if match[1] != target.name {
 							return false
 						}
+						else if !?match[2] {
+							return true
+						}
 
 						return this.compareVersion(target.version, match[2]) >= 0
 					}
@@ -236,7 +239,7 @@ class IfAttribute extends Attribute {
 				}
 				'lt' => {
 					if const match = $semverRegex.exec(data.arguments[0].name) {
-						if match[1] != target.name {
+						if match[1] != target.name || !?match[2] {
 							return false
 						}
 
@@ -250,6 +253,9 @@ class IfAttribute extends Attribute {
 					if const match = $semverRegex.exec(data.arguments[0].name) {
 						if match[1] != target.name {
 							return false
+						}
+						else if !?match[2] {
+							return true
 						}
 
 						return this.compareVersion(target.version, match[2]) <= 0
