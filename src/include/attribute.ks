@@ -155,6 +155,33 @@ class IfAttribute extends Attribute {
 		target() => AttributeTarget::Conditional
 	}
 	constructor(@data)
+	compareVersion(a, b) { // {{{
+		a = a.split('.')
+		b = b.split('.')
+
+		let ai = parseInt(a[0])
+		let bi = parseInt(b[0])
+		if ai < bi {
+			return -1
+		}
+		else if ai > bi {
+			return 1
+		}
+		else {
+			ai = a.length == 1 ? 0 : parseInt(a[1])
+			bi = b.length == 1 ? 0 : parseInt(b[1])
+
+			if ai < bi {
+				return -1
+			}
+			else if ai > bi {
+				return 1
+			}
+			else {
+				return 0
+			}
+		}
+	} // }}}
 	evaluate(node) { // {{{
 		if @data.arguments.length != 1 {
 			SyntaxException.throwTooMuchAttributesForIfAttribute()
@@ -168,35 +195,89 @@ class IfAttribute extends Attribute {
 	} // }}}
 	evaluate(data, target) { // {{{
 		if data.kind == NodeKind::AttributeExpression {
-			if data.name.name == 'all' {
-				for arg in data.arguments when !this.evaluate(arg, target) {
-					return false
-				}
+			switch data.name.name {
+				'all' => {
+					for arg in data.arguments when !this.evaluate(arg, target) {
+						return false
+					}
 
-				return true
-			}
-			else if data.name.name == 'any' {
-				for arg in data.arguments when this.evaluate(arg, target) {
 					return true
 				}
+				'any' => {
+					for arg in data.arguments when this.evaluate(arg, target) {
+						return true
+					}
 
-				return false
-			}
-			else if data.name.name == 'none' {
-				for arg in data.arguments when this.evaluate(arg, target) {
 					return false
 				}
+				'gt' => {
+					if const match = $semverRegex.exec(data.arguments[0].name) {
+						if match[1] != target.name {
+							return false
+						}
 
-				return true
-			}
-			else if data.name.name == 'one' {
-				let count = 0
-
-				for arg in data.arguments when this.evaluate(arg, target) {
-					++count
+						return this.compareVersion(target.version, match[2]) > 0
+					}
+					else {
+						return false
+					}
 				}
+				'gte' => {
+					if const match = $semverRegex.exec(data.arguments[0].name) {
+						if match[1] != target.name {
+							return false
+						}
 
-				return count == 1
+						return this.compareVersion(target.version, match[2]) >= 0
+					}
+					else {
+						return false
+					}
+				}
+				'lt' => {
+					if const match = $semverRegex.exec(data.arguments[0].name) {
+						if match[1] != target.name {
+							return false
+						}
+
+						return this.compareVersion(target.version, match[2]) < 0
+					}
+					else {
+						return false
+					}
+				}
+				'lte' => {
+					if const match = $semverRegex.exec(data.arguments[0].name) {
+						if match[1] != target.name {
+							return false
+						}
+
+						return this.compareVersion(target.version, match[2]) <= 0
+					}
+					else {
+						return false
+					}
+				}
+				'none' => {
+					for arg in data.arguments when this.evaluate(arg, target) {
+						return false
+					}
+
+					return true
+				}
+				'one' => {
+					let count = 0
+
+					for arg in data.arguments when this.evaluate(arg, target) {
+						++count
+					}
+
+					return count == 1
+				}
+				=> {
+					console.log(data)
+					throw new NotImplementedException()
+				}
 			}
 		}
 		else if data.kind == NodeKind::Identifier {
@@ -299,14 +380,7 @@ class TargetAttribute extends Attribute {
 					version: match[2]
 				}
 
-				if !?$targets[options.target.name] {
-					throw new Error(`Undefined target '\(options.target.name)'`)
-				}
-				else if !?$targets[options.target.name][options.target.version] {
-					throw new Error(`Undefined target's version '\(options.target.version)'`)
-				}
-
-				options = Object.defaults(options, $targets[options.target.name][options.target.version])
+				options = $expandOptions(options)
 			}
 		}
 

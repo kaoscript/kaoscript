@@ -1,4 +1,4 @@
-#![target(ecma-v6)]
+#![target(jsc-v8)]
 
 class Shape {
 	private {

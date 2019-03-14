@@ -12,7 +12,7 @@ var fs = require('./fs.js');
 var path = require('path');
 
 var Compiler = _.Compiler;
-var target = parseInt(/^v(\d+)\./.exec(process.version)[1]) >= 6 ? 'ecma-v6' : 'ecma-v5';
+var target = 'v8-v' + process.versions.v8.split('.').slice(0, 2).join('.');
 
 var loadFile = function(module, filename) { // {{{
 	var source = fs.readFile(filename);

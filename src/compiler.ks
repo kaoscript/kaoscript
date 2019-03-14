@@ -31,7 +31,7 @@ const $extensions = { // {{{
 	source: '.ks'
 } // }}}
 
-const $targetRegex = /^(\w+)-v(\d+)(?:\.\d+)?(?:\.\d+)?$/
+const $targetRegex = /^(\w+)-v((?:\d+)(?:\.\d+)?(?:\.\d+)?)$/
 
 const $typeofs = { // {{{
 	Any: true
@@ -425,6 +425,29 @@ const $unaryOperators = {
 	`\(UnaryOperatorKind::Spread)`				: UnaryOperatorSpread
 }
 
+func $expandOptions(options) { // {{{
+	const engine = $targets[options.target.name]
+	if !?engine {
+		throw new Error(`Undefined target '\(options.target.name)'`)
+	}
+
+	if engine is Function {
+		if const opts = engine(options.target.version.split('.').map(v => parseInt(v)), $targets) {
+			return Object.defaults(options, opts)
+		}
+		else {
+			throw new Error(`Undefined target's version '\(options.target.version)'`)
+		}
+	}
+	else {
+		if !?engine[options.target.version] {
+			throw new Error(`Undefined target's version '\(options.target.version)'`)
+		}
+
+		return Object.defaults(options, engine[options.target.version])
+	}
+} // }}}
+
 const $targets = {
 	ecma: { // {{{
 		'5': {
@@ -450,6 +473,14 @@ const $targets = {
 			}
 		}
 	} // }}}
+	v8(version, targets) { // {{{
+		if version[0] < 5 {
+			return targets.ecma['5']
+		}
+		else {
+			return targets.ecma['6']
+		}
+	} // }}}
 }
 
 export class Compiler {
@@ -461,7 +492,14 @@ export class Compiler {
 		_options
 	}
 	static {
-		registerTarget(target, options) { // {{{
+		registerTarget(target: String, fn: Function) { // {{{
+			if ?$targets[target] {
+				throw new Error(`Invalid target syntax: \(target)`)
+			}
+
+			$targets[target] = fn
+		} // }}}
+		registerTarget(target: String, options: Object) { // {{{
 			if target !?= $targetRegex.exec(target) {
 				throw new Error(`Invalid target syntax: \(target)`)
 			}
@@ -479,23 +517,30 @@ export class Compiler {
 				}
 			}
 		} // }}}
-		registerTargetAlias(target, alias) { // {{{
-			if target !?= $targetRegex.exec(target) {
-				throw new Error(`Invalid target syntax: \(target)`)
-			}
+		registerTargetAlias(target: String, alias: String) { // {{{
 			if alias !?= $targetRegex.exec(alias) {
-				throw new Error(`Invalid target syntax: \(alias)`)
-			}
+				if !?$targets[alias] || $targets[alias] is not Function {
+					throw new Error(`Invalid target syntax: \(alias)`)
+				}
 
-			if !?$targets[alias[1]] {
-				throw new Error(`Undefined target '\(alias[1])'`)
+				$targets[target] = $targets[alias]
 			}
-			else if !?$targets[alias[1]][alias[2]] {
-				throw new Error(`Undefined target's version '\(alias[2])'`)
-			}
+			else {
+				if target !?= $targetRegex.exec(target) {
+					throw new Error(`Invalid target syntax: \(target)`)
+				}
 
-			$targets[target[1]] ??= {}
-			$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]]
+
+				if !?$targets[alias[1]] {
+					throw new Error(`Undefined target '\(alias[1])'`)
+				}
+				else if !?$targets[alias[1]][alias[2]] {
+					throw new Error(`Undefined target's version '\(alias[2])'`)
+				}
+
+				$targets[target[1]] ??= {}
+				$targets[target[1]][target[2]] = $targets[alias[1]][alias[2]]
+			}
 		} // }}}
 	}
 	constructor(@file, options = null, @hashes = {}) { // {{{
@@ -540,14 +585,7 @@ export class Compiler {
 			throw new Error(`Undefined target`)
 		}
 
-		if !?$targets[@options.target.name] {
-			throw new Error(`Undefined target '\(@options.target.name)'`)
-		}
-		else if !?$targets[@options.target.name][@options.target.version] {
-			throw new Error(`Undefined target's version '\(@options.target.version)'`)
-		}
-
-		@options = Object.defaults($targets[@options.target.name][@options.target.version], @options)
+		@options = $expandOptions(@options)
 	} // }}}
 	compile(data = null) { // {{{
 		//console.time('parse')

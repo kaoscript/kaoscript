@@ -1,4 +1,4 @@
-#![target(safari-v8)]
+#![target(jsc-v8)]
 
 class Shape {
 	private {
@@ -8,7 +8,7 @@ class Shape {
 	constructor(@color)
 }
 
-#[if(any(trident, safari-v8))]
+#[if(any(trident, gt(jsc-v10)))]
 impl Shape {
 	draw_trident(canvas): string {
 		return `I'm drawing a \(this._color) rectangle.`

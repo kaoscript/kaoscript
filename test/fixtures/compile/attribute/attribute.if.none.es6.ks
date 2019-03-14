@@ -2,7 +2,7 @@
 
 extern sealed class String
 
-#[if(none(trident, safari-v8))]
+#[if(none(trident, jsc-v8))]
 disclose String {
 	endsWith(search: String, length: Number = -1): Boolean
 }
