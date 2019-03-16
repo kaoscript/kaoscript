@@ -56,6 +56,24 @@ class UnionType extends Type {
 
 		return this
 	} // }}}
+	getProperty(name: String) { // {{{
+		const types = []
+
+		for const type in @types {
+			const property = type.getProperty(name)
+
+			if !types.some(t => t.matchContentTo(property)) {
+				types.push(property)
+			}
+		}
+
+		if types.length == 1 {
+			return types[0]
+		}
+		else {
+			return Type.union(@scope, ...types)
+		}
+	} // }}}
 	isInstanceOf(target) { // {{{
 		for type in @types {
 			if type.isInstanceOf(target) {
@@ -75,13 +93,34 @@ class UnionType extends Type {
 		return false
 	} // }}}
 	matchContentTo(value: Type) { // {{{
-		for type in @types {
-			if type.matchContentOf(value) {
-				return true
-			}
-		}
+		if value is UnionType {
+			let nf
 
-		return false
+			for const vType in value._types {
+				nf = true
+
+				for const tType in @types while nf {
+					if tType.matchContentOf(vType) {
+						nf = false
+					}
+				}
+
+				if nf {
+					return false
+				}
+			}
+
+			return true
+		}
+		else {
+			for type in @types {
+				if type.matchContentOf(value) {
+					return true
+				}
+			}
+
+			return false
+		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)

@@ -261,12 +261,6 @@ class CallExpression extends Expression {
 
 						@defaultCallee = t2
 					}
-					else if t1.isInstanceOf(t2, this) {
-						@defaultCallee = t2
-					}
-					else if !t2.isInstanceOf(t1, this) {
-						@defaultCallee.type(new UnionType(this.scope(), [t1, t2]))
-					}
 				}
 			}
 			else {
