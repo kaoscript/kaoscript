@@ -1,0 +1,1 @@
+import '@zokugun/istanbul.reporter.minimap'

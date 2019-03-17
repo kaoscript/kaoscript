@@ -488,11 +488,21 @@ class Importer extends Statement {
 
 		if @data.specifiers.length == 0 {
 			const parts = @data.source.value.split('/')
-			for i from 0 til parts.length {
+			for const i from 0 til parts.length while @alias == null {
 				if !/(?:^\.+$|^@)/.test(parts[i]) {
-					@alias = parts[i].split('.')[0]
+					const dots = parts[i].split('.')
+					const last = dots.length - 1
 
-					break
+					if last == 0 {
+						@alias = dots[0].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
+					}
+					else {
+						for const dot, index in dots desc while @alias == null {
+							unless index == last && dot.length <= 3 {
+								@alias = dot.replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
+							}
+						}
+					}
 				}
 			}
 
