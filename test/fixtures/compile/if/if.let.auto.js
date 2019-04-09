@@ -3,8 +3,8 @@ module.exports = function() {
 	function foobar() {
 		return "foobar";
 	}
-	let x;
-	if(Type.isValue(x = foobar())) {
+	let x = foobar();
+	if(Type.isValue(x)) {
 		console.log(x);
 	}
 };

@@ -18,7 +18,7 @@ class FunctionType extends Type {
 	}
 	static {
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
-		fromAST(data, scope: AbstractScope, defined: Boolean, node: AbstractNode): Type { // {{{
+		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
 			if data.parameters? {
 				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
 			}
@@ -26,7 +26,7 @@ class FunctionType extends Type {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
 			}
 		} // }}}
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new FunctionType(scope)
 
 			type._async = data.async
@@ -51,7 +51,7 @@ class FunctionType extends Type {
 
 			return type
 		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new FunctionType(scope)
 
 			type._async = data.async
@@ -456,7 +456,7 @@ class OverloadedFunctionType extends Type {
 		_references: Array<Type>			= []
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new OverloadedFunctionType(scope)
 
 			for function in data.functions {
@@ -465,7 +465,7 @@ class OverloadedFunctionType extends Type {
 
 			return type
 		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new OverloadedFunctionType(scope)
 
 			queue.push(() => {

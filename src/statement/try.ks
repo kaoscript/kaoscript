@@ -30,7 +30,7 @@ class TryStatement extends Statement {
 				}
 
 				if clause.binding? {
-					scope = new Scope(@scope)
+					scope = this.newScope(@scope, ScopeType::InlineBlock)
 
 					scope.define(clause.binding.name, false, this)
 				}
@@ -53,7 +53,7 @@ class TryStatement extends Statement {
 
 		if @data.catchClause? {
 			if @data.catchClause.binding? {
-				scope = new Scope(@scope)
+				scope = this.newScope(@scope, ScopeType::InlineBlock)
 
 				scope.define(@data.catchClause.binding.name, false, this)
 			}
@@ -137,7 +137,7 @@ class TryStatement extends Statement {
 			return @data.catchClause.binding.name
 		}
 		else {
-			return @scope.acquireTempName()
+			return @scope.acquireTempName(false)
 		}
 	} // }}}
 	isAwait() => @await

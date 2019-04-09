@@ -7,9 +7,8 @@ module.exports = function() {
 			throw new TypeError("'option' is not nullable");
 		}
 		let files = [];
-		let __ks_0 = option.split(",");
-		for(let __ks_1 = 0, __ks_2 = __ks_0.length, item; __ks_1 < __ks_2; ++__ks_1) {
-			item = __ks_0[__ks_1];
+		for(let __ks_0 = 0, __ks_1 = option.split(","), __ks_2 = __ks_1.length, item; __ks_0 < __ks_2; ++__ks_0) {
+			item = __ks_1[__ks_0];
 			item = item.split("=");
 			files.push({
 				input: item[0],

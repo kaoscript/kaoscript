@@ -8,7 +8,7 @@ class FunctionExpression extends Expression {
 		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
-		super(data, parent, new Scope(scope))
+		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
 		@scope.define('this', true, this)
@@ -155,7 +155,7 @@ class LambdaExpression extends Expression {
 		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
-		super(data, parent, new Scope(scope))
+		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
 		@parameters = []

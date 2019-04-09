@@ -498,36 +498,34 @@ export class Color {
 		_blue: int = 0
 	}
 
-	macro {
-		registerSpace(@space: Object) {
-			if space.components? {
-				const fields: Array = []
-				const methods: Array = []
+	macro registerSpace(@space: Object) {
+		if space.components? {
+			const fields: Array = []
+			const methods: Array = []
 
-				let field
-				for name, component of space.components {
-					field = `_\(name)`
+			let field
+			for name, component of space.components {
+				field = `_\(name)`
 
-					fields.push(macro private #i(field): Number)
+				fields.push(macro private #i(field): Number)
 
-					methods.push(macro {
-						override #i(name)() => this.getField(#(name))
-						override #i(name)(value) => this.setField(#(name), value)
-					})
-				}
+				methods.push(macro {
+					override #i(name)() => this.getField(#(name))
+					override #i(name)(value) => this.setField(#(name), value)
+				})
+			}
 
-				macro {
-					Color.registerSpace(#(space))
+			macro {
+				Color.registerSpace(#(space))
 
-					impl Color {
-						#b(fields)
-						#b(methods)
-					}
+				impl Color {
+					#b(fields)
+					#b(methods)
 				}
 			}
-			else {
-				macro Color.registerSpace(#(space))
-			}
+		}
+		else {
+			macro Color.registerSpace(#(space))
 		}
 	}
 

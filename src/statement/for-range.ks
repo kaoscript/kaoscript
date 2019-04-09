@@ -1,12 +1,14 @@
 class ForRangeStatement extends Statement {
 	private {
+		_bindingScope
+		_bodyScope
 		_body
 		_boundName
 		_by
 		_byName
 		_defineVariable: Boolean		= false
 		_from
-		_immutableVariable: Boolean		= false
+		_immutable: Boolean		= false
 		_til
 		_to
 		_until
@@ -15,15 +17,15 @@ class ForRangeStatement extends Statement {
 		_when
 		_while
 	}
-	constructor(data, parent) { // {{{
-		super(data, parent, parent.newScope())
-	} // }}}
 	analyse() { // {{{
-		@immutableVariable = @data.declaration && !@data.rebindable
+		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+
+		@immutable = @data.declaration && !@data.rebindable
 
 		const variable = @scope.getVariable(@data.value.name)
 		if @data.declaration || variable == null {
-			@valueVariable = @scope.define(@data.value.name, @immutableVariable, @scope.reference('Number'), this)
+			@valueVariable = @bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), this)
 
 			@defineVariable = true
 		}
@@ -31,35 +33,35 @@ class ForRangeStatement extends Statement {
 			ReferenceException.throwImmutable(@data.value.name, this)
 		}
 
-		@value = $compile.expression(@data.value, this)
+		@value = $compile.expression(@data.value, this, @bindingScope)
 		@value.analyse()
 
-		@from = $compile.expression(@data.from, this)
+		@from = $compile.expression(@data.from, this, @scope)
 		@from.analyse()
 
-		@to = $compile.expression(@data.to, this)
+		@to = $compile.expression(@data.to, this, @scope)
 		@to.analyse()
 
 		if @data.by {
-			@by = $compile.expression(@data.by, this)
+			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 		}
 
 		if @data.until {
-			@until = $compile.expression(@data.until, this)
+			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
 		else if @data.while {
-			@while = $compile.expression(@data.while, this)
+			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
 		if @data.when {
-			@when = $compile.expression(@data.when, this)
+			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
 
-		@body = $compile.expression($ast.block(@data.body), this)
+		@body = $compile.expression($ast.block(@data.body), this, @bodyScope)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -67,12 +69,12 @@ class ForRangeStatement extends Statement {
 		@from.prepare()
 		@to.prepare()
 
-		@boundName = @scope.acquireTempName() if @to.isComposite()
+		@boundName = @bindingScope.acquireTempName() if @to.isComposite()
 
 		if @by? {
 			@by.prepare()
 
-			@byName = @scope.acquireTempName() if @by.isComposite()
+			@byName = @bindingScope.acquireTempName() if @by.isComposite()
 		}
 
 		if @until? {
@@ -86,8 +88,8 @@ class ForRangeStatement extends Statement {
 
 		@body.prepare()
 
-		@scope.releaseTempName(@boundName) if @boundName?
-		@scope.releaseTempName(@byName) if @byName?
+		@bindingScope.releaseTempName(@boundName) if @boundName?
+		@bindingScope.releaseTempName(@byName) if @byName?
 	} // }}}
 	translate() { // {{{
 		@value.translate()

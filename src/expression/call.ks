@@ -232,7 +232,7 @@ class CallExpression extends Expression {
 	} // }}}
 	acquireReusable(acquire) { // {{{
 		if acquire {
-			@reuseName = this.statement().scope().acquireTempName(this.statement())
+			@reuseName = @scope.acquireTempName()
 		}
 
 		for callee in @callees {
@@ -573,7 +573,9 @@ class CallExpression extends Expression {
 		}
 	} // }}}
 	releaseReusable() { // {{{
-		this.statement().scope().releaseTempName(@reuseName) if @reuseName?
+		if @reuseName? {
+			@scope.releaseTempName(@reuseName)
+		}
 
 		for callee in @callees {
 			callee.releaseReusable()

@@ -59,13 +59,13 @@ abstract class Type {
 		_referenced: Boolean		= false
 		_referenceIndex: Number		= -1
 		_required: Boolean 			= false
-		_scope: AbstractScope?
+		_scope: Scope?
 		_sealed: Boolean			= false
 	}
 	static {
-		arrayOf(parameter: Type, scope: AbstractScope) => new ReferenceType(scope, 'Array', false, [parameter])
+		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
 		fromAST(data?, node: AbstractNode): Type => Type.fromAST(data, node.scope(), true, node)
-		fromAST(data?, scope: AbstractScope, defined: Boolean, node: AbstractNode): Type { // {{{
+		fromAST(data?, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
 			if !?data {
 				return Type.Any
 			}
@@ -200,7 +200,7 @@ abstract class Type {
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			// console.log('-- fromMetadata --')
 			// console.log(JSON.stringify(data, null, 2))
 
@@ -288,7 +288,7 @@ abstract class Type {
 			console.log(data)
 			throw new NotImplementedException(node)
 		} // }}}
-		import(index, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const data = metadata.references[index]
 
 			// console.log('-- import --')
@@ -377,7 +377,7 @@ abstract class Type {
 				return type
 			}
 		} // }}}
-		union(scope: AbstractScope, ...types) { // {{{
+		union(scope: Scope, ...types) { // {{{
 			for type in types {
 				if type.isAny() {
 					return Type.Any

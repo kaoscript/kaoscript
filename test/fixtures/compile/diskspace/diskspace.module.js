@@ -24,9 +24,8 @@ module.exports = function() {
 			else {
 				let disks = [];
 				let matches;
-				let __ks_0 = __ks_String._im_lines(stdout);
-				for(let __ks_1 = 0, __ks_2 = __ks_0.length, line; __ks_1 < __ks_2; ++__ks_1) {
-					line = __ks_0[__ks_1];
+				for(let __ks_0 = 0, __ks_1 = __ks_String._im_lines(stdout), __ks_2 = __ks_1.length, line; __ks_0 < __ks_2; ++__ks_0) {
+					line = __ks_1[__ks_0];
 					matches = df_regex.exec(line);
 					if(matches) {
 						disks.push({

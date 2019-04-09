@@ -197,8 +197,8 @@ class MacroDeclaration extends AbstractNode {
 		_referenceIndex: Number		= -1
 		_type: MacroType
 	}
-	constructor(@data, @parent, @name = data.name.name) { // {{{
-		super(data, parent, new Scope())
+	constructor(@data, @parent, :Scope?, @name = data.name.name) { // {{{
+		super(data, parent, new MacroScope())
 
 		@scope.addNative('Identifier')
 		@scope.addNative('Expression')
@@ -381,7 +381,7 @@ class MacroType extends FunctionType {
 
 		return new MacroType([MacroParameterType.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
 	} // }}}
-	static import(data, references, scope: AbstractScope, node: AbstractNode): MacroType { // {{{
+	static import(data, references, scope: Scope, node: AbstractNode): MacroType { // {{{
 		const type = new MacroType(scope)
 
 		type._min = data.min
@@ -425,7 +425,7 @@ class MacroType extends FunctionType {
 
 class MacroParameterType extends ParameterType {
 	static {
-		fromAST(data, scope: AbstractScope, defined: Boolean, node: AbstractNode) { // {{{
+		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode) { // {{{
 			const type = Type.fromAST(data.type, scope, false, node)
 
 			let min: Number = data.defaultValue? ? 0 : 1

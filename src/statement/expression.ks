@@ -15,18 +15,20 @@ class ExpressionStatement extends Statement {
 		@expression.acquireReusable(false)
 		@expression.releaseReusable()
 
+		this.assignTempVariables(@scope)
+
 		@expression.translate()
 	} // }}}
-	assignment(data, expression) { // {{{
+	assignment(data, scope, expression) { // {{{
 		if data.left.kind == NodeKind::Identifier {
 			let variable
-			if variable ?= @scope.getVariable(data.left.name) {
+			if variable ?= scope.getVariable(data.left.name) {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(data.left.name, this)
 				}
 			}
 			else {
-				if !expression.isAssignable() || @variable.length {
+				if !expression.isAssignable() || @variable.length != 0 {
 					@assignments.push(data.left.name)
 				}
 				else {

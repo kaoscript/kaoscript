@@ -4,8 +4,8 @@ class ThrowStatement extends Statement {
 		_inSource: Boolean	= true
 		_value		= null
 	}
-	constructor(@data, @parent) { // {{{
-		super(data, parent)
+	constructor(@data, @parent, @scope) { // {{{
+		super(data, parent, scope)
 
 		do {
 			if	parent is FunctionExpression ||

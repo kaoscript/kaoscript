@@ -26,7 +26,7 @@ module.exports = function() {
 					}
 				}
 				else {
-					for(let i = 0, __ks_1 = args.length; i < __ks_1; ++i) {
+					for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
 						this.splice.apply(this, [].concat([index, 0], args[i]));
 						index += [].concat(args[i]).length;
 					}

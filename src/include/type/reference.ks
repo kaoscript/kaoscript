@@ -8,7 +8,7 @@ class ReferenceType extends Type {
 		_variable: Variable
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const name = data.name is Number ? Type.fromMetadata(data.name, metadata, references, alterations, queue, scope, node).name() : data.name
 			const parameters = ?data.parameters ? [Type.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
 

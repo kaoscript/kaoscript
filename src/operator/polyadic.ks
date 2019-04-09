@@ -375,26 +375,26 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	private {
 		_type: Type
 	}
-	constructor(@data, @parent, @scope = new Scope(parent.scope())) { // {{{
-		super(data, parent, scope)
-	} // }}}
 	analyse() { // {{{
 		@operands = []
 		for operand in @data.operands {
-			@operands.push(operand = $compile.expression(operand, this, this.newScope()))
+			@operands.push(operand = $compile.expression(operand, this))
 
 			operand.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
 		const types = []
+		const last = @operands.length - 1
 
 		let operandType, type, ne
-		for operand in @operands {
+		for operand, index in @operands {
 			operand.prepare()
 
-			operand.acquireReusable(true)
-			operand.releaseReusable()
+			if index < last {
+				operand.acquireReusable(true)
+				operand.releaseReusable()
+			}
 
 			operandType = operand.type()
 			ne = true
@@ -416,14 +416,6 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		else {
 			@type = new UnionType(@scope, types)
 		}
-	} // }}}
-	acquireReusable(acquire) { // {{{
-		for i from 0 to @operands.length - 2 {
-			@operands[i].acquireReusable(true)
-			@operands[i].releaseReusable()
-		}
-	} // }}}
-	releaseReusable() { // {{{
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Type')

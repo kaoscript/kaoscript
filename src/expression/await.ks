@@ -31,7 +31,7 @@ class AwaitExpression extends Expression {
 	prepare() { // {{{
 		@operation.prepare()
 
-		@reuseName = @scope.acquireTempName()
+		@reuseName = @scope.acquireTempName(false)
 	} // }}}
 	translate() { // {{{
 		@operation.translate()

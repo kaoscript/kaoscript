@@ -34,7 +34,7 @@ module.exports = function() {
 			__ks_Array._im_pushUniq.apply(null, [this].concat(args[0]));
 		}
 		else {
-			for(let i = 0, __ks_2 = args.length; i < __ks_2; ++i) {
+			for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
 				__ks_Array._im_pushUniq.apply(null, [this].concat(args[i]));
 			}
 		}

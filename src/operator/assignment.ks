@@ -30,11 +30,11 @@ class AssignmentOperatorExpression extends Expression {
 	} // }}}
 	assignment(data) { // {{{
 		let expression = this
-		while expression._parent is not Statement {
-			expression = expression._parent
+		while expression.parent() is not Statement {
+			expression = expression.parent()
 		}
 
-		return expression._parent.assignment(data, expression)
+		return expression.parent().assignment(data, @scope, expression)
 	} // }}}
 	isAssignable() => true
 	isAwait() => @await
@@ -133,12 +133,6 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		@right.acquireReusable(true)
 		@right.releaseReusable()
 	} // }}}
-	acquireReusable(acquire) { // {{{
-		@right.acquireReusable(true)
-	} // }}}
-	releaseReusable() { // {{{
-		@right.releaseReusable()
-	} // }}}
 	isAssignable() => false
 	toFragments(fragments, mode) { // {{{
 		if @right.isNullable() {
@@ -206,12 +200,6 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 		@right.prepare()
 
 		@right.acquireReusable(true)
-		@right.releaseReusable()
-	} // }}}
-	acquireReusable(acquire) { // {{{
-		@right.acquireReusable(true)
-	} // }}}
-	releaseReusable() { // {{{
 		@right.releaseReusable()
 	} // }}}
 	isAssignable() => false

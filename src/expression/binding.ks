@@ -196,18 +196,22 @@ class BindingElement extends Expression {
 		if @data.defaultValue? {
 			@defaultValue = $compile.expression(@data.defaultValue, this)
 			@defaultValue.analyse()
-
-			if @options.format.destructuring == 'es5' {
-				@tempName = @scope.acquireTempName(this.statement())
-
-				@scope.releaseTempName(@tempName)
-			}
 		}
 	} // }}}
 	prepare() { // {{{
 		@alias.prepare() if @alias?
 		@name.prepare()
-		@defaultValue.prepare() if @defaultValue?
+
+		if @defaultValue? {
+			@defaultValue.prepare()
+
+			if @options.format.destructuring == 'es5' {
+				@tempName = @scope.acquireTempName()
+				@scope.releaseTempName(@tempName)
+			}
+		}
+
+		this.statement().assignTempVariables(@scope)
 	} // }}}
 	translate() { // {{{
 		@alias.translate() if @alias?
@@ -384,10 +388,6 @@ class ObjectBinding extends Expression {
 		super(data, parent, parent.statement().scope())
 	} // }}}
 	analyse() { // {{{
-		if @options.format.destructuring == 'es5' && @data.elements.length > 1 {
-			@name = @scope.acquireTempName(this.statement())
-		}
-
 		for element in @data.elements {
 			if element.kind == NodeKind::BindingElement && element.name.kind == NodeKind::Identifier && @scope.hasVariable(element.name.name) {
 				@exists = true
@@ -398,15 +398,18 @@ class ObjectBinding extends Expression {
 
 			element.analyse()
 		}
-
-		if @name != null {
-			@scope.releaseTempName(@name)
-		}
 	} // }}}
 	prepare() { // {{{
+		if @options.format.destructuring == 'es5' && @data.elements.length > 1 {
+			@name = @scope.acquireTempName()
+			@scope.releaseTempName(@name)
+		}
+
 		for element in @elements {
 			element.prepare()
 		}
+
+		this.statement().assignTempVariables(@scope)
 	} // }}}
 	translate() { // {{{
 		for element in @elements {

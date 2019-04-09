@@ -7,38 +7,40 @@ func $return(data = null) { // {{{
 
 class ArrayComprehensionForFrom extends Expression {
 	private {
+		_bindingScope
 		_body
+		_bodyScope
 		_by			= null
 		_from
 		_to
 		_variable
 		_when
 	}
-	constructor(data, parent, scope) { // {{{
-		super(data, parent, parent.newScope(scope))
-	} // }}}
 	analyse() { // {{{
-		@scope.define(@data.loop.variable.name, false, @scope.reference('Number'), this)
+		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		@variable = $compile.expression(@data.loop.variable, this)
+		@bindingScope.define(@data.loop.variable.name, false, @scope.reference('Number'), this)
+
+		@variable = $compile.expression(@data.loop.variable, this, @bindingScope)
 		@variable.analyse()
 
-		@from = $compile.expression(@data.loop.from, this)
+		@from = $compile.expression(@data.loop.from, this, @scope)
 		@from.analyse()
 
-		@to = $compile.expression(@data.loop.to ?? @data.loop.til, this)
+		@to = $compile.expression(@data.loop.to ?? @data.loop.til, this, @scope)
 		@to.analyse()
 
 		if @data.loop.by? {
-			@by = $compile.expression(@data.loop.by, this)
+			@by = $compile.expression(@data.loop.by, this, @scope)
 			@by.analyse()
 		}
 
-		@body = $compile.statement($return(@data.body), this)
+		@body = $compile.statement($return(@data.body), this, @bodyScope)
 		@body.analyse()
 
 		if @data.loop.when? {
-			@when = $compile.statement($return(@data.loop.when), this)
+			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
 			@when.analyse()
 		}
 	} // }}}
@@ -108,7 +110,9 @@ class ArrayComprehensionForFrom extends Expression {
 
 class ArrayComprehensionForIn extends Expression {
 	private {
+		_bindingScope
 		_body
+		_bodyScope
 		_expression
 		_index
 		_indexVariable: Variable
@@ -118,39 +122,39 @@ class ArrayComprehensionForIn extends Expression {
 		_valueVariable: Variable
 		_when
 	}
-	constructor(data, parent, scope) { // {{{
-		super(data, parent, parent.newScope(scope))
-	} // }}}
 	analyse() { // {{{
-		@expression = $compile.expression(@data.loop.expression, this)
+		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+
+		@expression = $compile.expression(@data.loop.expression, this, @scope)
 		@expression.analyse()
 
 		if @data.loop.value? {
-			@valueVariable = @scope.define(@data.loop.value.name, false, this)
+			@valueVariable = @bindingScope.define(@data.loop.value.name, false, this)
 
-			@value = $compile.expression(@data.loop.value, this)
+			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.analyse()
 		}
 		else {
-			@valueName = @scope.acquireTempName()
+			@valueName = @bindingScope.acquireTempName()
 		}
 
 		if @data.loop.index? {
-			@indexVariable = @scope.define(@data.loop.index.name, false, @scope.reference('Number'), this)
+			@indexVariable = @bindingScope.define(@data.loop.index.name, false, @bindingScope.reference('Number'), this)
 
-			@index = $compile.expression(@data.loop.index, this)
+			@index = $compile.expression(@data.loop.index, this, @bindingScope)
 			@index.analyse()
 		}
 
-		@body = $compile.statement($return(@data.body), this)
+		@body = $compile.statement($return(@data.body), this, @bodyScope)
 		@body.analyse()
 
 		if @data.loop.when? {
-			@when = $compile.statement($return(@data.loop.when), this)
+			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
 			@when.analyse()
 		}
 
-		@scope.releaseTempName(@valueName) if @valueName?
+		@bindingScope.releaseTempName(@valueName) if @valueName?
 	} // }}}
 	prepare() { // {{{
 		@expression.prepare()
@@ -233,46 +237,48 @@ class ArrayComprehensionForIn extends Expression {
 
 class ArrayComprehensionForOf extends Expression {
 	private {
+		_bindingScope
 		_body
+		_bodyScope
 		_expression
 		_key
 		_keyName
 		_value
 		_when
 	}
-	constructor(data, parent, scope) { // {{{
-		super(data, parent, parent.newScope(scope))
-	} // }}}
 	analyse() { // {{{
-		@expression = $compile.expression(@data.loop.expression, this)
+		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+
+		@expression = $compile.expression(@data.loop.expression, this, @scope)
 		@expression.analyse()
 
 		if @data.loop.key? {
-			@scope.define(@data.loop.key.name, false, @scope.reference('String'), this)
+			@bindingScope.define(@data.loop.key.name, false, @bindingScope.reference('String'), this)
 
-			@key = $compile.expression(@data.loop.key, this)
+			@key = $compile.expression(@data.loop.key, this, @bindingScope)
 			@key.analyse()
 		}
 		else {
-			@keyName = @scope.acquireTempName()
+			@keyName = @bindingScope.acquireTempName()
 		}
 
 		if @data.loop.value? {
-			@scope.define(@data.loop.value.name, false, this)
+			@bindingScope.define(@data.loop.value.name, false, this)
 
-			@value = $compile.expression(@data.loop.value, this)
+			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.analyse()
 		}
 
-		@body = $compile.statement($return(@data.body), this)
+		@body = $compile.statement($return(@data.body), this, @bodyScope)
 		@body.analyse()
 
 		if @data.loop.when? {
-			@when = $compile.statement($return(@data.loop.when), this)
+			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
 			@when.analyse()
 		}
 
-		@scope.releaseTempName(@keyName) if @keyName?
+		@bindingScope.releaseTempName(@keyName) if @keyName?
 	} // }}}
 	prepare() { // {{{
 		@expression.prepare()
@@ -336,38 +342,40 @@ class ArrayComprehensionForOf extends Expression {
 
 class ArrayComprehensionForRange extends Expression {
 	private {
+		_bindingScope
 		_body
+		_bodyScope
 		_by
 		_from
 		_to
 		_value
 		_when
 	}
-	constructor(data, parent, scope) { // {{{
-		super(data, parent, parent.newScope(scope))
-	} // }}}
 	analyse() { // {{{
-		@scope.define(@data.loop.value.name, false, @scope.reference('Number'), this)
+		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		@value = $compile.expression(@data.loop.value, this)
+		@bindingScope.define(@data.loop.value.name, false, @scope.reference('Number'), this)
+
+		@value = $compile.expression(@data.loop.value, this, @bindingScope)
 		@value.analyse()
 
-		@from = $compile.expression(@data.loop.from, this)
+		@from = $compile.expression(@data.loop.from, this, @scope)
 		@from.analyse()
 
-		@to = $compile.expression(@data.loop.to, this)
+		@to = $compile.expression(@data.loop.to, this, @scope)
 		@to.analyse()
 
 		if @data.loop.by? {
-			@by = $compile.expression(@data.loop.by, this)
+			@by = $compile.expression(@data.loop.by, this, @scope)
 			@body.analyse()
 		}
 
-		@body = $compile.statement($return(@data.body), this)
+		@body = $compile.statement($return(@data.body), this, @bodyScope)
 		@body.analyse()
 
 		if @data.loop.when? {
-			@when = $compile.statement($return(@data.loop.when), this)
+			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
 			@when.analyse()
 		}
 	} // }}}

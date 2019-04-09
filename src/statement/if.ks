@@ -1,28 +1,38 @@
 class IfStatement extends Statement {
 	private {
 		_bindingScope
+		_bleeding: Boolean
 		_condition
+		_declared: Boolean				= false
+		_variable
 		_whenFalseExpression
-		_whenFalseScope: AbstractScope
+		_whenFalseScope: Scope
 		_whenTrueExpression
-		_whenTrueScope: AbstractScope
+		_whenTrueScope: Scope
 	}
 	analyse() { // {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
-			@bindingScope = new BleedingScope(this)
+			@declared = true
+			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
 
-			@condition = new IfVariableDeclarationExpression(@data.condition, this, @bindingScope)
+			@variable = new VariableDeclaration(@data.condition, this, @bindingScope, @scope)
 
-			@whenTrueScope = this.newScope(@bindingScope)
+			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 		}
 		else {
-			@whenTrueScope = this.newScope(@scope)
-			@bindingScope = @whenTrueScope
+			@bindingScope = @scope
+			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-			@condition = $compile.expression(@data.condition, this)
+			@condition = $compile.expression(@data.condition, this, @bindingScope)
 		}
 
-		@condition.analyse()
+		if @declared {
+			@variable.analyse()
+			@variable.checkNames()
+		}
+		else {
+			@condition.analyse()
+		}
 
 		@whenTrueExpression = $compile.expression($ast.block(@data.whenTrue), this, @whenTrueScope)
 		@whenTrueExpression.analyse()
@@ -33,7 +43,7 @@ class IfStatement extends Statement {
 				@whenFalseExpression.analyse()
 			}
 			else {
-				@whenFalseScope = this.newScope(@scope)
+				@whenFalseScope = this.newScope(@scope, ScopeType::InlineBlock)
 
 				@whenFalseExpression = $compile.expression($ast.block(@data.whenFalse), this, @whenFalseScope)
 				@whenFalseExpression.analyse()
@@ -41,20 +51,34 @@ class IfStatement extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		@condition.prepare()
+		if @declared {
+			@variable.prepare()
+			@bleeding = @bindingScope.isBleeding() || !@variable.isDuplicate(@scope)
+		}
+		else {
+			@condition.prepare()
 
-		for name, type of @condition.reduceTypes() {
-			@whenTrueScope.define(name, true, type, this)
+			for name, type of @condition.reduceTypes() {
+				@whenTrueScope.replaceVariable(name, true, type)
+			}
+
+			@condition.acquireReusable(false)
+			@condition.releaseReusable()
 		}
 
-		@condition.acquireReusable(false)
-		@condition.releaseReusable()
+		this.assignTempVariables(@bindingScope)
 
 		@whenTrueExpression.prepare()
 		@whenFalseExpression.prepare() if @whenFalseExpression?
 	} // }}}
 	translate() { // {{{
-		@condition.translate()
+		if @declared {
+			@variable.translate()
+		}
+		else {
+			@condition.translate()
+		}
+
 		@whenTrueExpression.translate()
 		@whenFalseExpression.translate() if @whenFalseExpression?
 	} // }}}
@@ -80,23 +104,66 @@ class IfStatement extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		const ctrl = fragments.newControl()
+		if @declared {
+			if @bleeding {
+				fragments.compile(@variable)
 
-		@toIfFragments(ctrl, mode)
+				const ctrl = fragments.newControl()
 
-		ctrl.done()
+				@toIfFragments(ctrl, mode)
+
+				ctrl.done()
+			}
+			else {
+				const block = fragments.newBlock()
+
+				block.compile(@variable)
+
+				const ctrl = block.newControl()
+
+				@toIfFragments(ctrl, mode)
+
+				ctrl.done()
+				block.done()
+			}
+		}
+		else {
+			const ctrl = fragments.newControl()
+
+			@toIfFragments(ctrl, mode)
+
+			ctrl.done()
+		}
 	} // }}}
 	toIfFragments(fragments, mode) { // {{{
 		fragments.code('if(')
 
-		if @condition.isAssignable() {
-			fragments.code('(').compileBoolean(@condition).code(')')
+		if @declared {
+			let first = true
+
+			@variable.walk(name => {
+				if first {
+					first = false
+				}
+				else {
+					fragments.code(' && ')
+				}
+
+				fragments.code($runtime.type(this) + '.isValue(', name, ')')
+			})
 		}
 		else {
-			fragments.compileBoolean(@condition)
+			if @condition.isAssignable() {
+				fragments.code('(').compileBoolean(@condition).code(')')
+			}
+			else {
+				fragments.compileBoolean(@condition)
+			}
 		}
 
-		fragments.code(')').step().compile(@whenTrueExpression, mode)
+		fragments.code(')').step()
+
+		fragments.compile(@whenTrueExpression, mode)
 
 		if @whenFalseExpression? {
 			if @whenFalseExpression is IfStatement {
@@ -105,7 +172,9 @@ class IfStatement extends Statement {
 				@whenFalseExpression.toIfFragments(fragments, mode)
 			}
 			else {
-				fragments.step().code('else').step().compile(@whenFalseExpression, mode)
+				fragments.step().code('else').step()
+
+				fragments.compile(@whenFalseExpression, mode)
 			}
 		}
 	} // }}}

@@ -24,7 +24,7 @@ class ClassType extends Type {
 		_seal: Object
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new ClassType(scope)
 
 			type._abstract = data.abstract
@@ -66,7 +66,7 @@ class ClassType extends Type {
 
 			return type
 		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new ClassType(scope)
 
 			if data.class? {
@@ -964,7 +964,7 @@ class ClassVariableType extends Type {
 
 			return type
 		} // }}}
-		fromMetadata(data, metadata, references, alterations, queue, scope: AbstractScope, node: AbstractNode): ClassVariableType { // {{{
+		fromMetadata(data, metadata, references, alterations, queue, scope: Scope, node: AbstractNode): ClassVariableType { // {{{
 			const type = new ClassVariableType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node))
 
 			type._access = data.access
@@ -1022,7 +1022,7 @@ class ClassMethodType extends FunctionType {
 
 			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
 		} // }}}
-		fromMetadata(data, metadata, references, alterations, queue: Array, scope: AbstractScope, node: AbstractNode): ClassMethodType { // {{{
+		fromMetadata(data, metadata, references, alterations, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { // {{{
 			const type = new ClassMethodType(scope)
 
 			type._access = data.access
@@ -1133,7 +1133,7 @@ class ClassConstructorType extends FunctionType {
 	private {
 		_access: Accessibility	= Accessibility::Public
 	}
-	static fromMetadata(data, metadata, references, alterations, queue, scope: AbstractScope, node: AbstractNode): ClassConstructorType { // {{{
+	static fromMetadata(data, metadata, references, alterations, queue, scope: Scope, node: AbstractNode): ClassConstructorType { // {{{
 		const type = new ClassConstructorType(scope)
 
 		type._access = data.access

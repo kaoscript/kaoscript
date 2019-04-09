@@ -1,0 +1,1 @@
+SyntaxException: Identifier "value" is immutable (line 4, file "fixtures/compile/for/for.temp.in.while.const.ks")

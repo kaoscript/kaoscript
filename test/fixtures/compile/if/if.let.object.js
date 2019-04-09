@@ -6,8 +6,8 @@ module.exports = function() {
 			y: 2
 		};
 	}
-	let x, y;
-	if(Type.isValue({x, y} = foobar())) {
+	let {x, y} = foobar();
+	if(Type.isValue(x) && Type.isValue(y)) {
 		console.log("" + x);
 	}
 };

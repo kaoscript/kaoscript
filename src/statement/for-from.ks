@@ -1,12 +1,15 @@
 class ForFromStatement extends Statement {
 	private {
+		_bindingScope
 		_body
+		_bodyScope
 		_boundName: String
 		_by
 		_byName: String
-		_defineVariable: Boolean		= false
+		_conditionalTempVariables: Array	= []
+		_declared: Boolean					= false
 		_from
-		_immutableVariable: Boolean		= false
+		_immutable: Boolean					= false
 		_til
 		_to
 		_until
@@ -15,21 +18,27 @@ class ForFromStatement extends Statement {
 		_when
 		_while
 	}
-	constructor(data, parent) { // {{{
-		super(data, parent, parent.newScope())
-	} // }}}
 	analyse() { // {{{
 		let rename = false
 		const variable = @scope.getVariable(@data.variable.name)
 
-		@defineVariable = @data.declaration || variable == null
-		@immutableVariable = @data.declaration && !@data.rebindable
+		@declared = @data.declaration || variable == null
+		@immutable = @data.declaration && !@data.rebindable
 
-		@from = $compile.expression(@data.from, this, @parent.scope())
+		if @declared {
+			@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
+		}
+		else {
+			@bindingScope = @scope
+		}
+
+		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
+
+		@from = $compile.expression(@data.from, this, @scope)
 		@from.analyse()
 
 		if @from.isUsingVariable(@data.variable.name) {
-			if @defineVariable {
+			if @declared {
 				rename = true
 			}
 			else {
@@ -38,11 +47,11 @@ class ForFromStatement extends Statement {
 		}
 
 		if @data.til {
-			@til = $compile.expression(@data.til, this, @parent.scope())
+			@til = $compile.expression(@data.til, this, @scope)
 			@til.analyse()
 
 			if @til.isUsingVariable(@data.variable.name) {
-				if @defineVariable {
+				if @declared {
 					rename = true
 				}
 				else {
@@ -51,11 +60,11 @@ class ForFromStatement extends Statement {
 			}
 		}
 		else {
-			@to = $compile.expression(@data.to, this, @parent.scope())
+			@to = $compile.expression(@data.to, this, @scope)
 			@to.analyse()
 
 			if @to.isUsingVariable(@data.variable.name) {
-				if @defineVariable {
+				if @declared {
 					rename = true
 				}
 				else {
@@ -65,11 +74,11 @@ class ForFromStatement extends Statement {
 		}
 
 		if @data.by {
-			@by = $compile.expression(@data.by, this, @parent.scope())
+			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 
 			if @by.isUsingVariable(@data.variable.name) {
-				if @defineVariable {
+				if @declared {
 					rename = true
 				}
 				else {
@@ -78,35 +87,35 @@ class ForFromStatement extends Statement {
 			}
 		}
 
-		if @defineVariable {
-			@variableVariable = @scope.define(@data.variable.name, @immutableVariable, @scope.reference('Number'), this)
+		if @declared {
+			@variableVariable = @bindingScope.define(@data.variable.name, @immutable, @bindingScope.reference('Number'), this)
 
 			if rename {
-				@scope.rename(@data.variable.name)
+				@bindingScope.rename(@data.variable.name)
 			}
 		}
 		else if variable.isImmutable() {
 			ReferenceException.throwImmutable(@data.variable.name, this)
 		}
 
-		@variable = $compile.expression(@data.variable, this)
+		@variable = $compile.expression(@data.variable, this, @bindingScope)
 		@variable.analyse()
 
 		if @data.until {
-			@until = $compile.expression(@data.until, this)
+			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
 		else if @data.while {
-			@while = $compile.expression(@data.while, this)
+			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
 		if @data.when {
-			@when = $compile.expression(@data.when, this)
+			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
 
-		@body = $compile.expression($ast.block(@data.body), this)
+		@body = $compile.expression($ast.block(@data.body), this, @bodyScope)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -114,38 +123,46 @@ class ForFromStatement extends Statement {
 
 		@from.prepare()
 
-		let context = @defineVariable ? null : this
-
 		if @til? {
 			@til.prepare()
 
-			@boundName = @scope.acquireTempName(context) if @til.isComposite()
+			@boundName = @bindingScope.acquireTempName(!@declared) if @til.isComposite()
 		}
 		else {
 			@to.prepare()
 
-			@boundName = @scope.acquireTempName(context) if @to.isComposite()
+			@boundName = @bindingScope.acquireTempName(!@declared) if @to.isComposite()
 		}
 
 		if @by? {
 			@by.prepare()
 
-			@byName = @scope.acquireTempName(context) if @by.isComposite()
+			@byName = @bindingScope.acquireTempName(!@declared) if @by.isComposite()
 		}
+
+		this.assignTempVariables(@bindingScope)
 
 		if @until? {
 			@until.prepare()
+
+			this.assignTempVariables(@bodyScope)
 		}
 		else if @while? {
 			@while.prepare()
+
+			this.assignTempVariables(@bodyScope)
 		}
 
-		@when.prepare() if @when?
+		if @when? {
+			@when.prepare()
+
+			@bodyScope.commitTempVariables(@conditionalTempVariables)
+		}
 
 		@body.prepare()
 
-		@scope.releaseTempName(@boundName) if ?@boundName
-		@scope.releaseTempName(@byName) if ?@byName
+		@bindingScope.releaseTempName(@boundName) if ?@boundName
+		@bindingScope.releaseTempName(@byName) if ?@byName
 	} // }}}
 	translate() { // {{{
 		@variable.translate()
@@ -174,7 +191,7 @@ class ForFromStatement extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl().code('for(')
 
-		if @defineVariable {
+		if @declared {
 			ctrl.code($runtime.scope(this))
 		}
 
@@ -253,6 +270,8 @@ class ForFromStatement extends Statement {
 		ctrl.code(')').step()
 
 		if @data.when {
+			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
+
 			ctrl
 				.newControl()
 				.code('if(')

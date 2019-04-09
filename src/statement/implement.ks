@@ -211,7 +211,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_variable: NamedType<ClassType>
 	}
 	constructor(data, parent, @variable) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+		super(data, parent, parent.scope(), ScopeType::Block)
 
 		@class = @variable.type()
 		@classRef = @scope.reference(@variable)
@@ -495,7 +495,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		_variable: NamedType<NamespaceType>
 	}
 	constructor(data, parent, @variable) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+		super(data, parent, parent.scope(), ScopeType::Block)
 
 		@namespace = @variable.type()
 		@namespaceRef = @scope.reference(@variable)

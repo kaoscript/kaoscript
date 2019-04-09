@@ -100,8 +100,8 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
-	constructor(@data, @parent, scope = parent.scope()) { // {{{
-		super(data, parent, new Scope(scope))
+	constructor(@data, @parent, @scope) { // {{{
+		super(data, parent, scope, ScopeType::Refinable)
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -109,10 +109,12 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 		const variables = @left.reduceTypes()
 
 		for name, type of variables when !type.isAny() {
-			@scope.define(name, true, type, this)
+			@scope.replaceVariable(name, true, type)
 		}
 
 		@right.prepare()
+
+		this.statement().assignTempVariables(@scope)
 	} // }}}
 	reduceTypes() { // {{{
 		const variables = {}

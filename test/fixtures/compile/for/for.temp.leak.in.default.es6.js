@@ -1,0 +1,25 @@
+module.exports = function() {
+	function init(data, builder) {
+		if(arguments.length < 2) {
+			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+		}
+		if(data === void 0 || data === null) {
+			throw new TypeError("'data' is not nullable");
+		}
+		if(builder === void 0 || builder === null) {
+			throw new TypeError("'builder' is not nullable");
+		}
+		const block = builder.newBlock();
+		for(let __ks_0 = 0, __ks_1 = data.block(data.body).statements, __ks_2 = __ks_1.length, statement; __ks_0 < __ks_2; ++__ks_0) {
+			statement = __ks_1[__ks_0];
+			block.statement(statement);
+		}
+		block.done();
+		let source = "";
+		for(let __ks_0 = 0, __ks_1 = builder.toArray(), __ks_2 = __ks_1.length, fragment; __ks_0 < __ks_2; ++__ks_0) {
+			fragment = __ks_1[__ks_0];
+			source += fragment.code;
+		}
+		return source;
+	}
+};

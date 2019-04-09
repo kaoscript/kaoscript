@@ -1,34 +1,36 @@
 class ForOfStatement extends Statement {
 	private {
+		_bindingScope
+		_bleeding: Boolean					= false
+		_bodyScope
 		_body
-		_defineKey: Boolean			= false
-		_defineValue: Boolean		= false
+		_conditionalTempVariables: Array	= []
+		_defineKey: Boolean					= false
+		_defineValue: Boolean				= false
 		_expression
 		_expressionName: String
-		_key						= null
+		_key								= null
 		_keyName: String
 		_keyVariable: Variable
-		_immutable: Boolean			= false
+		_immutable: Boolean					= false
+		_loopTempVariables: Array			= []
 		_until
-		_value						= null
+		_value								= null
 		_valueVariable: Variable
 		_when
 		_while
 	}
-	constructor(data, parent) { // {{{
-		super(data, parent, parent.newScope())
-	} // }}}
 	analyse() { // {{{
-		let keyVariable = null
-		let valueVariable = null
+		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
+		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
 		@immutable = @data.declaration && !@data.rebindable
 
 		if @data.key? {
-			keyVariable = @scope.getVariable(@data.key.name)
+			const keyVariable = @scope.getVariable(@data.key.name)
 
 			if @data.declaration || keyVariable == null {
-				@keyVariable = @scope.define(@data.key.name, @immutable, @scope.reference('String'), this)
+				@keyVariable = @bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), this)
 
 				@defineKey = true
 			}
@@ -36,15 +38,15 @@ class ForOfStatement extends Statement {
 				ReferenceException.throwImmutable(@data.key.name, this)
 			}
 
-			@key = $compile.expression(@data.key, this)
+			@key = $compile.expression(@data.key, this, @bindingScope)
 			@key.analyse()
 		}
 
 		if @data.value? {
-			valueVariable = @scope.getVariable(@data.value.name)
+			const valueVariable = @scope.getVariable(@data.value.name)
 
 			if @data.declaration || valueVariable == null {
-				@valueVariable = @scope.define(@data.value.name, @immutable, this)
+				@valueVariable = @bindingScope.define(@data.value.name, @immutable, this)
 
 				@defineValue = true
 			}
@@ -52,16 +54,16 @@ class ForOfStatement extends Statement {
 				ReferenceException.throwImmutable(@data.value.name, this)
 			}
 
-			@value = $compile.expression(@data.value, this)
+			@value = $compile.expression(@data.value, this, @bindingScope)
 			@value.analyse()
 		}
 
-		@expression = $compile.expression(@data.expression, this, @parent.scope())
+		@expression = $compile.expression(@data.expression, this, @scope)
 		@expression.analyse()
 
 		if @key != null && @expression.isUsingVariable(@data.key.name) {
 			if @defineKey {
-				@scope.rename(@data.key.name)
+				@bindingScope.rename(@data.key.name)
 			}
 			else {
 				SyntaxException.throwAlreadyDeclared(@data.key.name, this)
@@ -69,7 +71,7 @@ class ForOfStatement extends Statement {
 		}
 		if @value != null && @expression.isUsingVariable(@data.value.name) {
 			if @defineValue {
-				@scope.rename(@data.value.name)
+				@bindingScope.rename(@data.value.name)
 			}
 			else {
 				SyntaxException.throwAlreadyDeclared(@data.value.name, this)
@@ -77,20 +79,20 @@ class ForOfStatement extends Statement {
 		}
 
 		if @data.until {
-			@until = $compile.expression(@data.until, this)
+			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
 		else if @data.while {
-			@while = $compile.expression(@data.while, this)
+			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
 		if @data.when {
-			@when = $compile.expression(@data.when, this)
+			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
 
-		@body = $compile.expression($ast.block(@data.body), this)
+		@body = $compile.expression($ast.block(@data.body), this, @bodyScope)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -102,7 +104,9 @@ class ForOfStatement extends Statement {
 		}
 
 		if @expression.isEntangled() {
-			@expressionName = this.greatScope().acquireTempName()
+			@expressionName = @bindingScope.acquireTempName(false)
+
+			@bleeding = @bindingScope.isBleeding()
 		}
 
 		if @defineValue {
@@ -113,22 +117,32 @@ class ForOfStatement extends Statement {
 			@key.prepare()
 		}
 		else {
-			@keyName = @scope.acquireTempName()
+			@keyName = @bindingScope.acquireTempName(false)
 		}
+
+		this.assignTempVariables(@bindingScope)
 
 		if @until? {
 			@until.prepare()
+
+			@bodyScope.commitTempVariables(@loopTempVariables)
 		}
 		else if @while? {
 			@while.prepare()
+
+			@bodyScope.commitTempVariables(@loopTempVariables)
 		}
 
-		@when.prepare() if @when?
+		if @when? {
+			@when.prepare()
+
+			@bodyScope.commitTempVariables(@conditionalTempVariables)
+		}
 
 		@body.prepare()
 
-		this.greatScope().releaseTempName(@expressionName) if @expressionName?
-		@scope.releaseTempName(@keyName) if @keyName?
+		@bindingScope.releaseTempName(@expressionName) if @expressionName?
+		@bindingScope.releaseTempName(@keyName) if @keyName?
 	} // }}}
 	translate() { // {{{
 		@expression.translate()
@@ -148,17 +162,34 @@ class ForOfStatement extends Statement {
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {
-			let line = fragments.newLine()
+			if @bleeding {
+				fragments
+					.newLine()
+					.code($runtime.scope(this), @expressionName, $equals)
+					.compile(@expression)
+					.done()
 
-			if !this.greatScope().hasVariable(@expressionName) {
-				line.code($runtime.scope(this))
-
-				this.greatScope().define(@expressionName, false, this)
+				this.toLoopFragments(fragments, mode)
 			}
+			else {
+				const block = fragments.newBlock()
 
-			line.code(@expressionName, $equals).compile(@expression).done()
+				block
+					.newLine()
+					.code($runtime.scope(this), @expressionName, $equals)
+					.compile(@expression)
+					.done()
+
+				this.toLoopFragments(block, mode)
+
+				block.done()
+			}
 		}
-
+		else {
+			this.toLoopFragments(fragments, mode)
+		}
+	} // }}}
+	toLoopFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl().code('for(')
 
 		if @key != null {
@@ -201,20 +232,24 @@ class ForOfStatement extends Statement {
 		}
 
 		if @until? {
+			this.toDeclarationFragments(@loopTempVariables, ctrl)
+
 			ctrl
 				.newControl()
 				.code('if(')
-				.compile(@until)
+				.compileBoolean(@until)
 				.code(')')
 				.step()
 				.line('break')
 				.done()
 		}
 		else if @while? {
+			this.toDeclarationFragments(@loopTempVariables, ctrl)
+
 			ctrl
 				.newControl()
 				.code('if(!(')
-				.compile(@while)
+				.compileBoolean(@while)
 				.code('))')
 				.step()
 				.line('break')
@@ -222,6 +257,8 @@ class ForOfStatement extends Statement {
 		}
 
 		if @when? {
+			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
+
 			ctrl
 				.newControl()
 				.code('if(')

@@ -784,12 +784,12 @@ class ClassDeclaration extends Statement {
 			ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
 		}
 	} // }}}
-	constructor(data, parent) { // {{{
-		super(data, parent)
+	constructor(data, parent, scope) { // {{{
+		super(data, parent, scope)
 
-		@constructorScope = new Scope(parent.scope())
-		@destructorScope = new Scope(parent.scope())
-		@instanceVariableScope = new Scope(parent.scope())
+		@constructorScope = this.newScope(@scope, ScopeType::Block)
+		@destructorScope = this.newScope(@scope, ScopeType::Block)
+		@instanceVariableScope = this.newScope(@scope, ScopeType::Block)
 		@es5 = @options.format.classes == 'es5'
 	} // }}}
 	analyse() { // {{{
@@ -850,7 +850,7 @@ class ClassDeclaration extends Statement {
 				NodeKind::MacroDeclaration => {
 					const name = data.name.name
 
-					declaration = new MacroDeclaration(data, this)
+					declaration = new MacroDeclaration(data, this, null)
 
 					if @macros[name] is Array {
 						@macros[name].push(declaration)
@@ -1068,7 +1068,7 @@ class ClassDeclaration extends Statement {
 	isHybrid() => @hybrid
 	name() => @name
 	newInstanceMethodScope(method: ClassMethodDeclaration) { // {{{
-		let scope = new Scope(@scope)
+		const scope = this.newScope(@scope, ScopeType::Block)
 
 		scope.define('this', true, @scope.reference(@name), this)
 
@@ -2182,7 +2182,7 @@ class ClassConstructorDeclaration extends Statement {
 		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, 'constructor', extend, header, footer, ClassDeclaration.callMethod^^(node, variable, 'prototype.__ks_cons_', 'args', ''), ClassDeclaration.toWrongDoingFragments, 'args', false)
 	} // }}}
 	constructor(data, parent) { // {{{
-		super(data, parent, new Scope(parent._constructorScope))
+		super(data, parent, parent.newScope(parent._constructorScope, ScopeType::Block))
 
 		@internalName = `__ks_cons_\(parent._constructors.length)`
 
@@ -2465,7 +2465,7 @@ class ClassDestructorDeclaration extends Statement {
 		ctrl.done() unless node._es5
 	} // }}}
 	constructor(data, parent) { // {{{
-		super(data, parent, new Scope(parent._destructorScope))
+		super(data, parent, parent.newScope(parent._destructorScope, ScopeType::Block))
 
 		@internalName = `__ks_destroy_0`
 

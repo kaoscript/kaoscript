@@ -20,6 +20,7 @@ class EnumExpression extends Expression {
 	translate() { // {{{
 		@enum.translate()
 	} // }}}
+	isUsingVariable(name) => false
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@enum).code('.', @data.member.name)
 	} // }}}

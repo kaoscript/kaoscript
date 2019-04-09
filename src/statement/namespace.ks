@@ -6,8 +6,9 @@ class NamespaceDeclaration extends Statement {
 		_type: NamedContainerType<NamespaceType>
 		_variable: Variable
 	}
-	constructor(data, parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+	constructor(data, parent, scope) { // {{{
+		/* super(data, parent, new Scope(parent.scope())) */
+		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name

@@ -41,7 +41,7 @@ class SwitchStatement extends Statement {
 				hasTest: data.filter?
 				bindings: []
 				conditions: []
-				scope: this.newScope()
+				scope: this.newScope(@scope, ScopeType::InlineBlock)
 			}
 
 			clause.scope.index = index
@@ -106,7 +106,7 @@ class SwitchStatement extends Statement {
 			@name = @data.expression.name
 		}
 		else {
-			@name = @scope.acquireTempName()
+			@name = @scope.acquireTempName(false)
 		}
 
 		@value.prepare() if @value?
@@ -305,7 +305,7 @@ class SwitchConditionArray extends AbstractNode {
 		}
 
 		if !nv {
-			@name = @scope.parent().acquireTempName()
+			@name = @scope.parent().acquireTempName(false)
 
 			for value in @data.values {
 				if value.kind != NodeKind::OmittedExpression {
@@ -491,7 +491,7 @@ class SwitchFilter extends AbstractNode {
 	analyse() { // {{{
 		if @data.filter? {
 			if @data.bindings.length > 0 {
-				@name = @scope.parent().acquireTempName()
+				@name = @scope.parent().acquireTempName(false)
 
 				for binding in @data.bindings {
 					@bindings.push(binding = $compile.expression(binding, this))

@@ -47,7 +47,7 @@ class ObjectExpression extends Expression {
 	} // }}}
 	acquireReusable(acquire) { // {{{
 		if @computed {
-			@reuseName = this.statement().scope().acquireTempName(this.statement())
+			@reuseName = @scope.acquireTempName()
 		}
 
 		for property in @properties {
@@ -67,7 +67,7 @@ class ObjectExpression extends Expression {
 	reference() => @parent.reference()
 	releaseReusable() { // {{{
 		if @computed {
-			this.statement().scope().releaseTempName(@reuseName)
+			@scope.releaseTempName(@reuseName)
 		}
 
 		for property in @properties {

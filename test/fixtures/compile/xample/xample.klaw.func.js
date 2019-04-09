@@ -1,5 +1,5 @@
 module.exports = function() {
-	let __ks_0 = klaw(path.join(__dirname, "fixtures"), {
+	for(let __ks_0 = 0, __ks_1 = klaw(path.join(__dirname, "fixtures"), {
 		nodir: true,
 		traverseAll: true,
 		filter(item) {
@@ -11,9 +11,8 @@ module.exports = function() {
 			}
 			return item.path.slice(-5) === ".json";
 		}
-	});
-	for(let __ks_1 = 0, __ks_2 = __ks_0.length, file; __ks_1 < __ks_2; ++__ks_1) {
-		file = __ks_0[__ks_1];
+	}), __ks_2 = __ks_1.length, file; __ks_0 < __ks_2; ++__ks_0) {
+		file = __ks_1[__ks_0];
 		prepare(file.path);
 	}
 };

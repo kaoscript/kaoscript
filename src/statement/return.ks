@@ -6,8 +6,8 @@ class ReturnStatement extends Statement {
 		_value					= null
 		_temp: String			= null
 	}
-	constructor(@data, @parent) { // {{{
-		super(data, parent)
+	constructor(@data, @parent, @scope) { // {{{
+		super(data, parent, scope)
 
 		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
 			parent = parent.parent()
@@ -37,6 +37,8 @@ class ReturnStatement extends Statement {
 			if @afterwards.length != 0 {
 				@temp = @scope.acquireTempName(this)
 			}
+
+			this.assignTempVariables(@scope)
 		}
 	} // }}}
 	translate() { // {{{
@@ -44,28 +46,28 @@ class ReturnStatement extends Statement {
 			@value.translate()
 		}
 	} // }}}
-	acquireReusable(acquire) {
+	acquireReusable(acquire) { // {{{
 		if @value != null {
 			@value.acquireReusable(acquire)
 		}
-	}
+	} // }}}
 	hasExceptions() => @exceptions
 	isAwait() => @await
 	isExit() => true
-	isReturning(type: Type) {
+	isReturning(type: Type) { // {{{
 		if @value != null {
 			return @value.type().isInstanceOf(type)
 		}
 		else {
 			return false
 		}
-	}
+	} // }}}
 	reference() => @temp
-	releaseReusable() {
+	releaseReusable() { // {{{
 		if @value != null {
 			@value.releaseReusable()
 		}
-	}
+	} // }}}
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 

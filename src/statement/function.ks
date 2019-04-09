@@ -144,8 +144,8 @@ class FunctionDeclaration extends Statement {
 		_oldVariableName: String
 		_variable: FunctionVariable
 	}
-	constructor(@data, @parent) { // {{{
-		super(data, parent, new Scope(parent.scope()))
+	constructor(@data, @parent, @scope) { // {{{
+		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
 		@scope.define('this', true, this)
@@ -154,7 +154,7 @@ class FunctionDeclaration extends Statement {
 
 		const scope = this.greatScope()
 
-		if @variable ?= scope.getLocalVariable(@name) {
+		if @variable ?= scope.getDefinedVariable(@name) {
 			if @variable is FunctionVariable {
 				const declarator = new FunctionDeclarator(@variable, @data, this)
 
@@ -174,7 +174,7 @@ class FunctionDeclaration extends Statement {
 
 						scope.replaceVariable(@name, @variable)
 
-						@oldVariableName = scope.newRenamedVariable(@name)
+						@oldVariableName = scope.getNewName(@name)
 					}
 					else {
 						SyntaxException.throwNotOverloadableFunction(@name, this)
@@ -195,7 +195,7 @@ class FunctionDeclaration extends Statement {
 
 			@variable = new FunctionVariable(scope, @name, false)
 
-			scope.addVariable(@name, @variable, this)
+			scope.defineVariable(@variable, this)
 
 			const declarator = new FunctionDeclarator(@variable, @data, this)
 
@@ -478,7 +478,7 @@ class FunctionVariable extends Variable {
 		_extended: Boolean							= false
 		_declarators: Array<FunctionDeclarator>		= []
 	}
-	constructor(scope: AbstractScope, @name, @extended) { // {{{
+	constructor(scope: Scope, @name, @extended) { // {{{
 		super(name, true, false, new OverloadedFunctionType(scope))
 	} // }}}
 	addDeclarator(declarator: FunctionDeclarator) { // {{{

@@ -119,7 +119,6 @@ class EnumDeclaration extends Statement {
 				}
 			}
 			EnumTypeKind::Number => {
-				let value
 				for data in @data.members {
 					if data.value? {
 						if data.value.kind == NodeKind::NumericExpression {

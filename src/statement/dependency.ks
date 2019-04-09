@@ -466,12 +466,12 @@ abstract class DynamicRequirement extends Requirement {
 	constructor(variable: Variable, node) { // {{{
 		super(variable)
 
-		@parameter = node.module().scope().acquireTempName()
+		@parameter = node.module().scope().acquireTempName(false)
 	} // }}}
 	constructor(data, kind, node) { // {{{
 		super(data, kind, node)
 
-		@parameter = node.module().scope().acquireTempName()
+		@parameter = node.module().scope().acquireTempName(false)
 	} // }}}
 	isRequired() => false
 	parameter() => @parameter

@@ -9,13 +9,20 @@ abstract class Statement extends AbstractNode {
 
 		@options = Attribute.configure(data, parent._options, true, AttributeTarget::Statement)
 	} // }}}
+	constructor(@data, @parent, scope: Scope, kind: ScopeType) { // {{{
+		super(data, parent, scope, kind)
+
+		@options = Attribute.configure(data, parent._options, true, AttributeTarget::Statement)
+	} // }}}
+	addAssignments(variables) { // {{{
+		@assignments.pushUniq(...variables)
+	} // }}}
 	afterward(node) { // {{{
 		@afterwards.push(node)
 	} // }}}
-	assignment(data, expression) { // {{{
+	assignment(data, scope, expression) { // {{{
 		if data.left.kind == NodeKind::Identifier {
-			let variable
-			if variable ?= @scope.getVariable(data.left.name) {
+			if const variable = scope.getVariable(data.left.name) {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(data.left.name, this)
 				}
@@ -23,11 +30,16 @@ abstract class Statement extends AbstractNode {
 			else {
 				@assignments.push(data.left.name)
 
-				@scope.define(data.left.name, false, this)
+				scope.define(data.left.name, false, this)
 
 				return [data.left.name]
 			}
 		}
+
+		return null
+	} // }}}
+	assignTempVariables(scope: Scope) { // {{{
+		scope.commitTempVariables(@assignments)
 	} // }}}
 	assignments() => @assignments
 	bindingScope() => @scope
@@ -43,6 +55,11 @@ abstract class Statement extends AbstractNode {
 	} // }}}
 	statement() => this
 	target() => @options.target
+	toDeclarationFragments(variables, fragments) { // {{{
+		if variables.length != 0 {
+			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
+		}
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		const variables = this.assignments()
 		if variables.length != 0 {

@@ -568,7 +568,7 @@ class Parameter extends AbstractNode {
 		}
 
 		if @anonymous {
-			const name = @scope.acquireTempName()
+			const name = @scope.acquireTempName(false)
 
 			@variable = @scope.define(name, false, this)
 

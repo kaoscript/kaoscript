@@ -6,7 +6,7 @@ class NamespaceType extends Type {
 		_sealProperties: Object		= {}
 	}
 	static {
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new NamespaceType(scope)
 
 			if data.namespace? {
@@ -37,7 +37,7 @@ class NamespaceType extends Type {
 			return type
 		} // }}}
 	}
-	constructor(scope: AbstractScope) { // {{{
+	constructor(scope: Scope) { // {{{
 		super(new NamespaceScope(scope))
 	} // }}}
 	addProperty(name: String, property: Type) { // {{{

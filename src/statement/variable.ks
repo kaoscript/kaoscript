@@ -8,11 +8,12 @@ class VariableDeclaration extends Statement {
 		_hasInit: Boolean			= false
 		_immutable: Boolean
 		_init
+		_initScope: Scope
 		_toDeclareAll: Boolean		= true
 		_try
 	}
-	constructor(@data, @parent) { // {{{
-		super(data, parent)
+	constructor(@data, @parent, @scope = parent.scope()) { // {{{
+		super(data, parent, scope)
 
 		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
 			if parent is TryStatement {
@@ -26,6 +27,9 @@ class VariableDeclaration extends Statement {
 			@function = parent
 		}
 	} // }}}
+	constructor(@data, @parent, @scope, @initScope) { // {{{
+		this(data, parent, scope)
+	} // }}}
 	analyse() { // {{{
 		@immutable = !@data.rebindable
 		@autotype = @immutable || @data.autotype
@@ -35,10 +39,12 @@ class VariableDeclaration extends Statement {
 			SyntaxException.throwInvalidAwait(this)
 		}
 
+		@initScope ??= @scope
+
 		if @data.init? {
 			@hasInit = true
 
-			@init = $compile.expression(@data.init, this)
+			@init = $compile.expression(@data.init, this, @initScope)
 			@init.analyse()
 		}
 
@@ -87,6 +93,8 @@ class VariableDeclaration extends Statement {
 			if @autotype {
 				@declarators[0].type(@init.type())
 			}
+
+			this.assignTempVariables(@initScope)
 		}
 
 		for declarator in @declarators {
@@ -102,10 +110,26 @@ class VariableDeclaration extends Statement {
 			declarator.translate()
 		}
 	} // }}}
+	checkNames() { // {{{
+		if @hasInit {
+			for const declarator in @declarators {
+				declarator.checkNames(@init)
+			}
+		}
+	} // }}}
 	export(recipient) { // {{{
 		for declarator in @declarators {
 			declarator.export(recipient)
 		}
+	} // }}}
+	isDuplicate(scope) { // {{{
+		for const declarator in @declarators {
+			if declarator.isDuplicate(scope) {
+				return true
+			}
+		}
+
+		return false
 	} // }}}
 	hasInit() => @hasInit
 	init() => @init
@@ -207,26 +231,17 @@ class VariableDeclaration extends Statement {
 				line.done()
 			}
 			else {
-				const toDeclare = [declarator for declarator in @declarators when !declarator.isAlreadyDeclared()]
+				let line = fragments.newLine()
 
-				if toDeclare.length != 0 {
-					let line = fragments.newLine()
+				for declarator, index in @declarators {
+					line.code($comma) if index != 0
 
-					if @options.format.variables == 'es5' {
-						line.code('var ')
-					}
-					else {
-						line.code('let ')
-					}
-
-					for declarator, index in toDeclare {
-						line.code($comma) if index != 0
-
-						line.compile(declarator)
-					}
-
-					line.done()
+					line.compile(declarator)
 				}
+
+				line.code(' = undefined')
+
+				line.done()
 			}
 		}
 	} // }}}
@@ -258,11 +273,21 @@ class VariableBindingDeclarator extends AbstractNode {
 	translate() { // {{{
 		@binding.translate()
 	} // }}}
+	checkNames(init) { // {{{
+		@binding.walk(name => {
+			if init.isUsingVariable(name) {
+				@scope.rename(name)
+			}
+		})
+	} // }}}
 	export(recipient) { // {{{
 		@binding.export(recipient)
 	} // }}}
 	isAlreadyDeclared() => false
 	isDeclararingVariable(name: String) => @binding.isDeclararingVariable(name)
+	isDuplicate(scope) { // {{{
+		return false
+	} // }}}
 	toFlatFragments(fragments, init) { // {{{
 		@binding.toFlatFragments(fragments, init)
 	} // }}}
@@ -290,7 +315,7 @@ class VariableBindingDeclarator extends AbstractNode {
 
 class VariableIdentifierDeclarator extends AbstractNode {
 	private {
-		_alreadyDeclared: Boolean		= false
+		_alreadyDeclared: Boolean
 		_identifier: IdentifierLiteral
 		_name: String
 		_variable: Variable
@@ -298,17 +323,11 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	analyse() { // {{{
 		@name = @data.name.name
 
-		if @scope.hasLocalVariable(@name) {
+		if @scope.hasDefinedVariable(@name) {
 			SyntaxException.throwAlreadyDeclared(@name, this)
 		}
 
-		if @options.format.variables == 'es5' {
-			@scope.rename(@name)
-		}
-
-		if @scope.hasDeclaredLocalVariable(@name) {
-			@alreadyDeclared = true
-		}
+		@alreadyDeclared = @scope.hasDeclaredVariable(@name)
 
 		@variable = @scope.define(@name, @parent.isImmutable(), null, this)
 
@@ -325,8 +344,28 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	translate() { // {{{
 		@identifier.translate()
 	} // }}}
+	checkNames(init) { // {{{
+		if init.isUsingVariable(@name) {
+			@scope.rename(@name)
+		}
+	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
+	} // }}}
+	isDuplicate(scope) { // {{{
+		if scope.hasDeclaredVariable(@name) {
+			return true
+		}
+
+		while scope.isInline() {
+			scope = scope.parent()
+
+			if scope.hasDeclaredVariable(@name) {
+				return true
+			}
+		}
+
+		return false
 	} // }}}
 	isAlreadyDeclared() => @alreadyDeclared
 	isDeclararingVariable(name: String) => @name == name
@@ -338,6 +377,6 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		@variable.type(type)
 	} // }}}
 	walk(fn) { // {{{
-		fn(@name, @variable.type())
+		fn(@scope.getRenamedVariable(@name), @variable.type())
 	} // }}}
 }

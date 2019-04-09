@@ -5,7 +5,7 @@ class ParameterType extends Type {
 		_type: Type
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			return new ParameterType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node), data.min, data.max)
 		} // }}}
 	}

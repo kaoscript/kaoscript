@@ -416,7 +416,7 @@ class Importer extends Statement {
 
 			for name, datas of macros {
 				for data in datas {
-					new MacroDeclaration(data, this, name)
+					new MacroDeclaration(data, this, null, name)
 				}
 			}
 		}
@@ -448,7 +448,7 @@ class Importer extends Statement {
 
 					if macros[name]? {
 						for data in macros[name] {
-							new MacroDeclaration(data, this, specifier.local.name)
+							new MacroDeclaration(data, this, null, specifier.local.name)
 						}
 					}
 					else {
@@ -496,12 +496,11 @@ class Importer extends Statement {
 					if last == 0 {
 						@alias = dots[0].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
 					}
+					else if dots[last].length <= 3 {
+						@alias = dots[last - 1].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
+					}
 					else {
-						for const dot, index in dots desc while @alias == null {
-							unless index == last && dot.length <= 3 {
-								@alias = dot.replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
-							}
-						}
+						@alias = dots[last].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
 					}
 				}
 			}
@@ -710,7 +709,9 @@ class Importer extends Statement {
 			}
 		}
 
-		@scope.releaseTempName(importCode)
+		if Scope.isTempName(importCode) {
+			@scope.releaseTempName(importCode)
+		}
 	} // }}}
 	toNodeFileFragments(fragments) { // {{{
 		if @alias != null {
@@ -877,13 +878,13 @@ class ImportWorker {
 	private {
 		_metadata
 		_node
-		_scope: AbstractScope
+		_scope: Scope
 	}
 	constructor(@metadata, @node) { // {{{
 		@scope = new ImportScope(node.scope())
 	} // }}}
-	hasType(name: String) => @scope.hasLocalVariable(name)
-	getType(name: String) => @scope.getLocalVariable(name).type()
+	hasType(name: String) => @scope.hasDefinedVariable(name)
+	getType(name: String) => @scope.getDefinedVariable(name).type()
 	prepare(arguments) { // {{{
 		const references = []
 		const queue = []

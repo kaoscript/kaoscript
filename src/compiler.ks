@@ -138,11 +138,16 @@ abstract class AbstractNode {
 		_options
 		_parent: AbstractNode	= null
 		_reference
-		_scope: AbstractScope	= null
+		_scope: Scope			= null
 	}
 	constructor()
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		@options = parent._options
+	} // }}}
+	constructor(@data, @parent, scope: Scope, kind: ScopeType) { // {{{
+		@options = parent._options
+
+		@scope = this.newScope(scope, kind)
 	} // }}}
 	abstract analyse()
 	abstract prepare()
@@ -155,12 +160,30 @@ abstract class AbstractNode {
 	greatScope() => @parent?._scope
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
 	module() => @parent.module()
-	newScope(scope = @scope) { // {{{
-		if @options.format.variables == 'es6' {
-			return new Scope(scope)
-		}
-		else {
-			return new XScope(scope)
+	newScope(scope: Scope, type: ScopeType) { // {{{
+		switch type {
+			ScopeType::Bleeding => {
+				if @options.format.variables == 'es6' {
+					return new InlineBlockScope(scope)
+				}
+				else {
+					return new BleedingScope(scope)
+				}
+			}
+			ScopeType::Block => {
+				return new BlockScope(scope)
+			}
+			ScopeType::InlineBlock => {
+				if @options.format.variables == 'es6' {
+					return new InlineBlockScope(scope)
+				}
+				else {
+					return new LaxInlineBlockScope(scope)
+				}
+			}
+			ScopeType::Refinable => {
+				return new RefinableScope(scope)
+			}
 		}
 	} // }}}
 	parent() => @parent
@@ -240,11 +263,11 @@ const $compile = {
 
 		return expression
 	} // }}}
-	statement(data, parent) { // {{{
+	statement(data, parent, scope = parent.scope()) { // {{{
 		if Attribute.conditional(data, parent) {
 			let clazz = $statements[data.kind] ?? $statements.default
 
-			return new clazz(data, parent)
+			return new clazz(data, parent, scope)
 		}
 		else {
 			return null

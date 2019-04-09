@@ -3,7 +3,7 @@ class ObjectType extends Type {
 		_properties: Object			= {}
 	}
 	static {
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: AbstractScope, node: AbstractNode) { // {{{
+		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new ObjectType(scope)
 
 			if data.sealed == true {

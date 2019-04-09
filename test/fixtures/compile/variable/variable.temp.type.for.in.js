@@ -4,9 +4,8 @@ module.exports = function() {
 	function foo() {
 		return ["1", "8", "F"];
 	}
-	let __ks_0 = foo();
-	for(let __ks_1 = 0, __ks_2 = __ks_0.length, item; __ks_1 < __ks_2; ++__ks_1) {
-		item = __ks_0[__ks_1];
+	for(let __ks_0 = 0, __ks_1 = foo(), __ks_2 = __ks_1.length, item; __ks_0 < __ks_2; ++__ks_0) {
+		item = __ks_1[__ks_0];
 		console.log(__ks_String._im_toInt(item, 16));
 	}
 };
