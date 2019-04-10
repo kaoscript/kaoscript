@@ -17,6 +17,7 @@ class BleedingScope extends Scope {
 
 		return name
 	} // }}}
+	acquireUnusedTempName() => @parent.acquireUnusedTempName()
 	commitTempVariables(variables: Array) { // {{{
 		variables.pushUniq(...@tempDeclarations)
 
@@ -93,7 +94,6 @@ class BleedingScope extends Scope {
 		}
 	} // }}}
 	parent() => @parent
-	primary() => @parent.primary()
 	reference(value) => @parent.reference(value)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name) { // {{{

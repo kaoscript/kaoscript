@@ -3,15 +3,7 @@ class InlineBlockScope extends BlockScope {
 		_tempParentNames	= {}
 	}
 	acquireTempName(declare: Boolean = true): String { // {{{
-		if const name = this.primary().acquireUnusedTempName() {
-			@tempParentNames[name] = true
-
-			return name
-		}
-
-		for const name of @tempNames when @tempNames[name] {
-			@tempNames[name] = false
-
+		if const name = this.acquireUnusedTempName() {
 			return name
 		}
 
@@ -28,6 +20,21 @@ class InlineBlockScope extends BlockScope {
 		}
 
 		return name
+	} // }}}
+	acquireUnusedTempName() { // {{{
+		for const name of @tempNames when @tempNames[name] {
+			@tempNames[name] = false
+
+			return name
+		}
+
+		if const name = this.parent().acquireUnusedTempName() {
+			@tempParentNames[name] = true
+
+			return name
+		}
+
+		return null
 	} // }}}
 	private declareVariable(name: String) { // {{{
 		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Variable) {
@@ -54,10 +61,9 @@ class InlineBlockScope extends BlockScope {
 		return @tempIndex
 	} // }}}
 	isInline() => true
-	primary() => @parent.primary()
 	releaseTempName(name) { // {{{
 		if @tempParentNames[name] == true {
-			this.primary().releaseTempName(name)
+			this.parent().releaseTempName(name)
 
 			@tempParentNames[name] = false
 		}

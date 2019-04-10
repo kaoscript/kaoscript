@@ -223,7 +223,6 @@ class ModuleScope extends Scope {
 			return []
 		}
 	} // }}}
-	primary() => this
 	processStash(name) { // {{{
 		const stash = @stashes[name]
 		if ?stash {

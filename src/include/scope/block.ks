@@ -204,7 +204,6 @@ class BlockScope extends Scope {
 		}
 	} // }}}
 	parent() => @parent
-	primary() => this
 	processStash(name) { // {{{
 		const stash = @stashes[name]
 		if ?stash {
