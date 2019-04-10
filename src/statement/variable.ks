@@ -9,6 +9,7 @@ class VariableDeclaration extends Statement {
 		_immutable: Boolean
 		_init
 		_initScope: Scope
+		_rebindable: Boolean
 		_toDeclareAll: Boolean		= true
 		_try
 	}
@@ -32,6 +33,7 @@ class VariableDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@immutable = !@data.rebindable
+		@rebindable = !@immutable
 		@autotype = @immutable || @data.autotype
 		@await = @data.await
 
@@ -46,6 +48,10 @@ class VariableDeclaration extends Statement {
 
 			@init = $compile.expression(@data.init, this, @initScope)
 			@init.analyse()
+
+			if @immutable {
+				@rebindable = @scope != @initScope
+			}
 		}
 
 		let declarator
@@ -189,7 +195,7 @@ class VariableDeclaration extends Statement {
 					if @options.format.variables == 'es5' {
 						line.code('var ')
 					}
-					else if @data.rebindable {
+					else if @rebindable {
 						line.code('let ')
 					}
 					else {
@@ -215,7 +221,7 @@ class VariableDeclaration extends Statement {
 				if @options.format.variables == 'es5' {
 					line.code('var ')
 				}
-				else if @data.rebindable {
+				else if @rebindable {
 					line.code('let ')
 				}
 				else {
@@ -330,6 +336,10 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		@alreadyDeclared = @scope.hasDeclaredVariable(@name)
 
 		@variable = @scope.define(@name, @parent.isImmutable(), null, this)
+
+		if @alreadyDeclared {
+			@alreadyDeclared = @scope.getRenamedVariable(@name) == @name
+		}
 
 		@identifier = new IdentifierLiteral(@data.name, this)
 		@identifier.analyse()

@@ -18,7 +18,7 @@ module.exports = function() {
 		if(filter === void 0 || filter === null) {
 			throw new TypeError("'filter' is not nullable");
 		}
-		const z = filter(x, y, Qux.abc);
+		let z = filter(x, y, Qux.abc);
 		if(Type.isValue(z)) {
 			return z;
 		}

@@ -163,12 +163,7 @@ abstract class AbstractNode {
 	newScope(scope: Scope, type: ScopeType) { // {{{
 		switch type {
 			ScopeType::Bleeding => {
-				if @options.format.variables == 'es6' {
-					return new InlineBlockScope(scope)
-				}
-				else {
-					return new BleedingScope(scope)
-				}
+				return new BleedingScope(scope)
 			}
 			ScopeType::Block => {
 				return new BlockScope(scope)

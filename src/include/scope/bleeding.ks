@@ -79,7 +79,7 @@ class BleedingScope extends Scope {
 			return @parent.getVariable(name)
 		}
 	} // }}}
-	hasDeclaredVariable(name: String) => @variables[name] is Variable
+	hasDeclaredVariable(name: String) => @variables[name] is Variable || @parent.hasDeclaredVariable(name)
 	hasDefinedVariable(name: String) => @variables[name] is Variable
 	hasVariable(name: String) => @variables[name] is Variable || @parent.hasVariable(name)
 	isBleeding() => true

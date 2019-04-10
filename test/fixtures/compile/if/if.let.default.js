@@ -7,4 +7,8 @@ module.exports = function() {
 	if(Type.isValue(x)) {
 		console.log("" + x);
 	}
+	x = foobar();
+	if(Type.isValue(x)) {
+		console.log("" + x);
+	}
 };

@@ -7,7 +7,6 @@ class NamespaceDeclaration extends Statement {
 		_variable: Variable
 	}
 	constructor(data, parent, scope) { // {{{
-		/* super(data, parent, new Scope(parent.scope())) */
 		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{

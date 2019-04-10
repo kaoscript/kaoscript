@@ -5,11 +5,9 @@ module.exports = function() {
 	}
 	const x = "barfoo";
 	console.log(x);
-	{
-		let x = foobar();
-		if(Type.isValue(x)) {
-			console.log("" + x);
-		}
+	let __ks_x_1 = foobar();
+	if(Type.isValue(__ks_x_1)) {
+		console.log("" + __ks_x_1);
 	}
 	console.log(x);
 };

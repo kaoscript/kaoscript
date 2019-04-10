@@ -1,7 +1,6 @@
 class IfStatement extends Statement {
 	private {
 		_bindingScope
-		_bleeding: Boolean
 		_condition
 		_declared: Boolean				= false
 		_variable
@@ -53,7 +52,6 @@ class IfStatement extends Statement {
 	prepare() { // {{{
 		if @declared {
 			@variable.prepare()
-			@bleeding = @bindingScope.isBleeding() || !@variable.isDuplicate(@scope)
 		}
 		else {
 			@condition.prepare()
@@ -105,27 +103,13 @@ class IfStatement extends Statement {
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @declared {
-			if @bleeding {
-				fragments.compile(@variable)
+			fragments.compile(@variable)
 
-				const ctrl = fragments.newControl()
+			const ctrl = fragments.newControl()
 
-				@toIfFragments(ctrl, mode)
+			@toIfFragments(ctrl, mode)
 
-				ctrl.done()
-			}
-			else {
-				const block = fragments.newBlock()
-
-				block.compile(@variable)
-
-				const ctrl = block.newControl()
-
-				@toIfFragments(ctrl, mode)
-
-				ctrl.done()
-				block.done()
-			}
+			ctrl.done()
 		}
 		else {
 			const ctrl = fragments.newControl()

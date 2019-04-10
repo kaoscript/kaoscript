@@ -8,7 +8,6 @@
 [![CircleCI](https://circleci.com/gh/kaoscript/kaoscript/tree/master.svg?style=shield)](https://circleci.com/gh/kaoscript/kaoscript/tree/master)
 [![Coverage Status](https://img.shields.io/coveralls/kaoscript/kaoscript/master.svg)](https://coveralls.io/github/kaoscript/kaoscript)
 [![Known Vulnerabilities](https://snyk.io/test/github/kaoscript/kaoscript/badge.svg)](https://snyk.io/test/github/kaoscript/kaoscript)
-[![Waffle.io](https://img.shields.io/badge/kanban-waffle.io-blue.svg)](https://waffle.io/kaoscript/kaoscript)
 [![Gitter](https://img.shields.io/gitter/room/kaoscript/kaoscript.svg)](https://gitter.im/kaoscript/kaoscript)
 
 [![NPM](https://nodei.co/npm/kaoscript.png?downloads=true&stars=true)](https://www.npmjs.com/package/kaoscript)
