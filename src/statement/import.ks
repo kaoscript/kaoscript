@@ -108,7 +108,7 @@ class Importer extends Statement {
 				}
 				else {
 					argument.seeped = false
-					argument.type = @scope.getVariable(@moduleToLocalArguments[name]).type()
+					argument.type = @scope.getVariable(@moduleToLocalArguments[name]).getDeclaredType()
 				}
 			}
 
@@ -134,7 +134,7 @@ class Importer extends Statement {
 						type.addProperty(name, @worker.getType(name))
 					}
 
-					variable.type(type)
+					variable.setDeclaredType(type)
 				}
 				else {
 					if !@worker.hasType(name) {
@@ -148,23 +148,21 @@ class Importer extends Statement {
 					}
 
 					if def.newVariable {
-						variable.type(def.type ?? type)
+						variable.setDeclaredType(def.type ?? type)
 					}
 					else if !variable.isPredefined() && @localToModuleArguments[def.local] is not String {
 						ReferenceException.throwNotPassed(def.local, @data.source.value, this)
 					}
-					else if type.matchSignatureOf(variable.type(), matchables) {
-						const alien = variable.type().isAlien()
+					else if type.matchSignatureOf(variable.getDeclaredType(), matchables) {
+						const alien = variable.getDeclaredType().isAlien()
 
-						variable.type(def.type ?? type)
+						variable.setDeclaredType(def.type ?? type)
 
 						if alien {
-							variable.type().flagAlien()
+							variable.getDeclaredType().flagAlien()
 						}
 					}
 					else {
-						console.log(type)
-						console.log(variable.type())
 						TypeException.throwNotCompatibleArgument(def.local, name, @data.source.value, this)
 					}
 
@@ -194,7 +192,7 @@ class Importer extends Statement {
 	translate()
 	addArgument(data) { // {{{
 		if data.seeped {
-			if (variable ?= @scope.getVariable(data.local.name)) && !variable.type().isPredefined()  {
+			if (variable ?= @scope.getVariable(data.local.name)) && !variable.getDeclaredType().isPredefined()  {
 				ReferenceException.throwDefined(data.local.name, this)
 			}
 
@@ -241,8 +239,8 @@ class Importer extends Statement {
 				if @localToModuleArguments[local] is not String {
 					ReferenceException.throwNotPassed(local, @data.source.value, this)
 				}
-				else if variable.type().isMergeable(type) {
-					variable.type().merge(type, this)
+				else if variable.getDeclared().isMergeable(type) {
+					variable.getDeclared().merge(type, this)
 				}
 				else {
 					ReferenceException.throwNotMergeable(local, @data.source.value, this)
@@ -884,7 +882,7 @@ class ImportWorker {
 		@scope = new ImportScope(node.scope())
 	} // }}}
 	hasType(name: String) => @scope.hasDefinedVariable(name)
-	getType(name: String) => @scope.getDefinedVariable(name).type()
+	getType(name: String) => @scope.getDefinedVariable(name).getDeclaredType()
 	prepare(arguments) { // {{{
 		const references = []
 		const queue = []

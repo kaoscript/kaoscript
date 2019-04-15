@@ -7,6 +7,28 @@ extern console: {
 
 type T = number | string
 
-let x: T = 0
+let n: T = 0
 
-console.log(x.toInt())
+console.log(n.toInt())
+
+let s: T = ''
+
+console.log(s.toInt())
+
+func foobar(x: T) {
+	console.log(x.toInt())
+}
+
+n = ''
+
+console.log(n.toInt())
+
+n = 42
+
+console.log(n.toInt())
+
+func qux(): T => 42
+
+n = qux()
+
+console.log(n.toInt())

@@ -4,25 +4,12 @@ class BleedingScope extends Scope {
 		_parent: Scope
 		_renamedIndexes 			= {}
 		_renamedVariables			= {}
-		_tempDeclarations: Array	= []
 		_variables					= {}
 	}
 	constructor(@parent)
-	acquireTempName(declare: Boolean = true): String { // {{{
-		const name = @parent.acquireTempName(false)
-
-		if declare {
-			@tempDeclarations.push(name)
-		}
-
-		return name
-	} // }}}
+	acquireTempName(declare: Boolean = true): String => @parent.acquireTempName(declare)
 	acquireUnusedTempName() => @parent.acquireUnusedTempName()
-	commitTempVariables(variables: Array) { // {{{
-		variables.pushUniq(...@tempDeclarations)
-
-		@tempDeclarations.clear()
-	} // }}}
+	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
 	private declareVariable(name: String) => @parent.declareVariable(name)
 	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable { // {{{
 		if @variables[name] is Variable {
@@ -56,7 +43,6 @@ class BleedingScope extends Scope {
 			return null
 		}
 	} // }}}
-	getNextTempIndex() => @parent.getNextTempIndex()
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
 	getRenamedVariable(name: String) { // {{{
 		if @variables[name] is Variable {

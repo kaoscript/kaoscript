@@ -84,6 +84,27 @@ class NamedType extends Type {
 	isExported() => @type.isExported()
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
+	isMorePreciseThan(that: Type) { // {{{
+		if that is NamedType {
+			if this.isClass() && that.isClass() {
+				return @name != that.name() && this.matchInheritanceOf(that)
+			}
+			else if that.isAlias() {
+				return this.isMorePreciseThan(that.discardAlias())
+			}
+		}
+		else if that is UnionType {
+			for const type in that.types() {
+				if this.matchContentOf(type) {
+					return true
+				}
+			}
+
+			return false
+		}
+
+		return false
+	} // }}}
 	isPredefined() => @type.isPredefined()
 	isReferenced() => @type.isReferenced()
 	isRequired() => @type.isRequired()
@@ -97,9 +118,32 @@ class NamedType extends Type {
 			if @type is ClassType && that.type() is ClassType {
 				return this.matchInheritanceOf(that)
 			}
+			else if @type is EnumType && that.type() is EnumType {
+				return @name == that.name()
+			}
+			else if that.isAlias() {
+				if this.isAlias() {
+					return @name == that.name()
+				}
+				else {
+					return this.matchContentOf(that.discardAlias())
+				}
+			}
 			else {
 				return @type.matchContentOf(that.type())
 			}
+		}
+		else if that is UnionType {
+			for const type in that.types() {
+				if this.matchContentOf(type) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else if that is ReferenceType {
+			return @name == that.name()
 		}
 		else {
 			return @type.matchContentOf(that)
@@ -113,6 +157,18 @@ class NamedType extends Type {
 			else {
 				return @type.matchContentTo(that.type())
 			}
+		}
+		else if that is UnionType {
+			for const type in that.types() {
+				if this.matchContentTo(type) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else if that is ReferenceType {
+			return @name == that.name()
 		}
 		else {
 			return @type.matchContentTo(that)

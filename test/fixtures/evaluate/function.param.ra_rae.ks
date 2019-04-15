@@ -1,8 +1,6 @@
 require expect: func
 
-let foo = func(...{1,3}items, ...{1,3}values) {
-	return [items, values]
-}
+let foo = (() => (...{1,3}items, ...{1,3}values) => [items, values])()
 
 expect(() => foo()).to.throw()
 

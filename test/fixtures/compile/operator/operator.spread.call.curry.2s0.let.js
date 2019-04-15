@@ -10,6 +10,6 @@ module.exports = function() {
 	let directory = "xfer";
 	let user = "john";
 	let info = [directory, " ", user, ": "];
-	let logHello = Helper.curry(log, null, [].concat([machine, ":"], info));
+	let logHello = Helper.vcurry(log, null, machine, ":", ...info);
 	logHello("foo");
 };

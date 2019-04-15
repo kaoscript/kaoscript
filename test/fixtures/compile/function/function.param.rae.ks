@@ -1,8 +1,6 @@
 require expect: func
 
-let foo = func(...{,3}items) {
-	return [items]
-}
+let foo = (() => (...{,3}items) => [items])()
 
 expect(foo()).to.eql([[]])
 

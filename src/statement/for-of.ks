@@ -110,7 +110,7 @@ class ForOfStatement extends Statement {
 		}
 
 		if @defineValue {
-			@valueVariable.type(type.parameter())
+			@valueVariable.setRealType(type.parameter())
 		}
 
 		if @key? {

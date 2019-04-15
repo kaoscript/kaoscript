@@ -2,6 +2,7 @@ class DestroyStatement extends Statement {
 	private {
 		_expression
 		_hasVariable: Boolean	= false
+		_type: Type
 		_variable: Variable
 	}
 	analyse() { // {{{
@@ -10,20 +11,25 @@ class DestroyStatement extends Statement {
 		@expression.analyse()
 
 		if @data.variable.kind == NodeKind::Identifier {
-			@variable = @scope.getVariable(@data.variable.name)
 			@hasVariable = true
+
+			@variable = @scope.getVariable(@data.variable.name)
 
 			@scope.removeVariable(@data.variable.name)
 		}
 	} // }}}
 	prepare() { // {{{
 		@expression.prepare()
+
+		if @hasVariable {
+			@type = @variable.getRealType()
+		}
 	} // }}}
 	translate() { // {{{
 		@expression.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if @hasVariable && (type = @variable.type().discardReference()).isClass() && type.type().hasDestructors() {
+		if @hasVariable && (type = @type.discardReference()).isClass() && type.type().hasDestructors() {
 			fragments.newLine().code(type.path(), '.__ks_destroy(').compile(@expression).code(')').done()
 		}
 

@@ -1,0 +1,51 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "corge",
+    1,
+    "grault",
+    2,
+    "x",
+    -1,
+    "y"
+  ],
+  "references": [
+    {
+      "kind": "function",
+      "async": false,
+      "min": 1,
+      "max": 1,
+      "parameters": [
+        {
+          "type": "String",
+          "min": 1,
+          "max": 1
+        }
+      ],
+      "returns": "Any",
+      "throws": []
+    },
+    {
+      "kind": "function",
+      "async": false,
+      "min": 1,
+      "max": 1,
+      "parameters": [
+        {
+          "type": "Any",
+          "min": 1,
+          "max": 1
+        }
+      ],
+      "returns": "Any",
+      "throws": []
+    },
+    "String"
+  ],
+  "macros": []
+}

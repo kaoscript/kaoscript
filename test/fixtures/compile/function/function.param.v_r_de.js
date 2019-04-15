@@ -1,14 +1,16 @@
 module.exports = function(expect) {
-	let foo = function(x, ...items) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		let y = 42;
-		return [x, items, y];
-	};
+	let foo = (function() {
+		return function(x, ...items) {
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(x === void 0 || x === null) {
+				throw new TypeError("'x' is not nullable");
+			}
+			let y = 42;
+			return [x, items, y];
+		};
+	})();
 	expect(function() {
 		return foo();
 	}).to.throw();

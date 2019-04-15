@@ -1,5 +1,11 @@
+extern console
+
 let foo = 'bar'
+
+console.log(`\(foo)`)
 
 delete foo
 
-let foo = 'bar'
+let foo = 42
+
+console.log(`\(foo)`)

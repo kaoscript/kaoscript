@@ -29,10 +29,10 @@ class Literal extends Expression {
 class IdentifierLiteral extends Literal {
 	private {
 		_assignenement			= null
+		_declaredType: Type
 		_isMacro: Boolean		= false
 		_isVariable: Boolean	= false
-		_variable: Variable
-		_type: Type
+		_realType: Type
 	}
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.name)
@@ -55,11 +55,11 @@ class IdentifierLiteral extends Literal {
 		if @assignenement != null && @assignenement.isDeclararingVariable(@name) {
 			ReferenceException.throwSelfDefinedVariable(@value, this)
 		}
-		else if @variable ?= @scope.getVariable(@value) {
+		else if @scope.hasVariable(@value) {
 			@isVariable = true
 		}
 		else if $runtime.isDefined(@value, @parent) {
-			@type = Type.Any
+			@realType = @declaredType = Type.Any
 		}
 		else if @scope.hasMacro(@value) {
 			@isMacro = true
@@ -70,9 +70,13 @@ class IdentifierLiteral extends Literal {
 	} // }}}
 	prepare() { // {{{
 		if @isVariable {
-			@type = @variable.type()
+			const variable = @scope.getVariable(@value)
+
+			@declaredType = variable.getDeclaredType()
+			@realType = variable.getRealType()
 		}
 	} // }}}
+	getDeclaredType() => @declaredType
 	isMacro() => @isMacro
 	isRenamed() => @scope.isRenamedVariable(@value)
 	isUsingVariable(name) => @value == name
@@ -80,10 +84,13 @@ class IdentifierLiteral extends Literal {
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@scope.getRenamedVariable(@value), @data)
 	} // }}}
-	type() => @type
+	type() => @realType
+	type(type: Type, scope: Scope, node) { // {{{
+		scope.replaceVariable(@name, type, node)
+	} // }}}
 	walk(fn) { // {{{
 		if @isVariable {
-			fn(@value, @type)
+			fn(@value, @realType)
 		}
 		else {
 			throw new NotSupportedException()

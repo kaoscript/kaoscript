@@ -1,0 +1,86 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foo",
+    1,
+    "Bar",
+    2,
+    "x",
+    2,
+    "y",
+    3,
+    "z"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "foo": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "bar": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {},
+      "extends": [
+        0,
+        "Foo"
+      ]
+    },
+    {
+      "reference": 0
+    },
+    {
+      "reference": 1
+    }
+  ],
+  "macros": []
+}

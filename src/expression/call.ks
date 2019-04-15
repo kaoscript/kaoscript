@@ -125,7 +125,7 @@ class CallExpression extends Expression {
 		}
 		else {
 			if @data.callee.kind == NodeKind::Identifier && (variable ?= @scope.getVariable(@data.callee.name)) {
-				const type = variable.type()
+				const type = variable.getRealType()
 
 				if type.isFunction() {
 					if type.isAsync() {

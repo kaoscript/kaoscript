@@ -707,7 +707,7 @@ module.exports = function() {
 					percentage = (w + a) / (1 + (w * a));
 				}
 			}
-			space = $aliases[space] || space;
+			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
 			this.space(space);
 			color = color.like(space);
 			let components = $spaces[space].components;

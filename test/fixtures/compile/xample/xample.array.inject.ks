@@ -8,7 +8,7 @@ impl Array {
 			}
 			while index < 0
 		}
-		
+
 		if args.length > 1 {
 			if index {
 				if index >= this.length {
@@ -19,7 +19,7 @@ impl Array {
 				else {
 					for i from 0 til args.length {
 						this.splice(index, 0, ...args[i])
-						
+
 						index += [].concat(args[i]).length
 					}
 				}
@@ -43,7 +43,7 @@ impl Array {
 				this.unshift(...args[0])
 			}
 		}
-		
+
 		return this
 	}
 }

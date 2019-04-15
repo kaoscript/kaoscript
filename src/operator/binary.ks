@@ -101,7 +101,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
 	constructor(@data, @parent, @scope) { // {{{
-		super(data, parent, scope, ScopeType::Refinable)
+		super(data, parent, scope, ScopeType::Operation)
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -109,7 +109,7 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 		const variables = @left.reduceTypes()
 
 		for name, type of variables when !type.isAny() {
-			@scope.replaceVariable(name, true, type)
+			@scope.replaceVariable(name, type, this)
 		}
 
 		@right.prepare()
@@ -556,7 +556,7 @@ class BinaryOperatorTypeEquality extends Expression {
 
 		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
 			if variable ?= @scope.getVariable(@data.right.typeName.name) {
-				type = variable.type()
+				type = variable.getRealType()
 
 				if type.isClass() {
 					if !@left.type().isAny() && !@left.type().matchContentTo(type) {
@@ -612,7 +612,7 @@ class BinaryOperatorTypeInequality extends Expression {
 
 		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
 			if variable ?= @scope.getVariable(@data.right.typeName.name) {
-				type = variable.type()
+				type = variable.getRealType()
 
 				if type.isClass() {
 					if !@left.type().isAny() && type.matchContentTo(@left.type()) {

@@ -2,12 +2,15 @@ class Variable {
 	private {
 		// true: can be altered by `impl` declaration
 		_altereable: Boolean	= false
+		_declaredType: Type		= Type.Any
+		// true: the type can't be changed
+		_definitive: Boolean	= false
 		// true: the value can be set only once
 		_immutable: Boolean		= true
 		_name: String
 		_new: Boolean			= true
 		_predefined: Boolean	= false
-		_type: Type				= Type.Any
+		_realType: Type			= Type.Any
 	}
 	static {
 		createPredefinedClass(name, scope) { // {{{
@@ -35,25 +38,59 @@ class Variable {
 		} // }}}
 	}
 	constructor()
-	constructor(@name, @immutable, @predefined, @type = Type.Any) { // {{{
-		@type = Type.toNamedType(@name, type)
+	constructor(@name, @immutable, @predefined, @declaredType = Type.Any) { // {{{
+		@declaredType = Type.toNamedType(@name, declaredType)
+		@realType = @declaredType
+		@definitive = @immutable
 	} // }}}
+	clone() { // {{{
+		const clone = new Variable()
+
+		clone._name = @name
+		clone._immutable = @immutable
+		clone._predefined = @predefined
+		clone._declaredType = @declaredType
+		clone._realType = @realType
+		clone._definitive = @definitive
+
+		return clone
+	} // }}}
+	flagDefinitive() { // {{{
+		@definitive = true
+
+		return this
+	} // }}}
+	getDeclaredType() => @declaredType
+	getRealType() => @realType
+	isDefinitive() => @definitive
 	isImmutable() => @immutable
 	isPredefined() => @predefined
 	name() => @name
 	prepareAlteration() { // {{{
-		if (@type.isRequired() || @type.isAlien()) && !@altereable {
-			@type = @type.clone()
+		if (@declaredType.isRequired() || @declaredType.isAlien()) && !@altereable {
+			@declaredType = @declaredType.clone()
+			@realType = @declaredType
 			@altereable = true
 		}
 	} // }}}
-	toFragments(fragments, mode) { // {{{
-		fragments.code(@name)
-	} // }}}
-	type() => @type
-	type(@type) { // {{{
-		@type = Type.toNamedType(@name, type)
+	setDeclaredType(@declaredType) { // {{{
+		@declaredType = Type.toNamedType(@name, declaredType)
+
+		@realType = @declaredType
 
 		return this
+	} // }}}
+	setRealType(type: Type) { // {{{
+		if type.isMorePreciseThan(@declaredType) {
+			@realType = type
+		}
+		else {
+			@realType = @declaredType
+		}
+
+		return this
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments.code(@name)
 	} // }}}
 }

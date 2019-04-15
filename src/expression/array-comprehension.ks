@@ -160,7 +160,7 @@ class ArrayComprehensionForIn extends Expression {
 		@expression.prepare()
 
 		if @value? {
-			@valueVariable.type(@expression.type().parameter())
+			@valueVariable.setRealType(@expression.type().parameter())
 
 			@value.prepare()
 		}

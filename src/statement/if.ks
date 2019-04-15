@@ -19,7 +19,7 @@ class IfStatement extends Statement {
 			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 		}
 		else {
-			@bindingScope = @scope
+			@bindingScope = this.newScope(@scope, ScopeType::Hollow)
 			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
@@ -57,7 +57,7 @@ class IfStatement extends Statement {
 			@condition.prepare()
 
 			for name, type of @condition.reduceTypes() {
-				@whenTrueScope.replaceVariable(name, true, type)
+				@whenTrueScope.replaceVariable(name, type, this)
 			}
 
 			@condition.acquireReusable(false)
@@ -89,9 +89,6 @@ class IfStatement extends Statement {
 		}
 	} // }}}
 	bindingScope() => @bindingScope
-	declareVariable(name: String) { // {{{
-		@assignments.push(name)
-	} // }}}
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isReturning(type: Type) { // {{{
 		if @whenFalseExpression {

@@ -9,7 +9,9 @@ module.exports = function() {
 	let machine = "tesla";
 	let directory = "xfer";
 	let user = "john";
-	let info = [machine, ":", directory, " "];
+	let info = (function() {
+		return [machine, ":", directory, " "];
+	})();
 	let logHello = Helper.curry(log, null, [].concat(info, [user, ": "]));
 	logHello("foo");
 };

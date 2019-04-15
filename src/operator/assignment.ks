@@ -93,6 +93,13 @@ class AssignmentOperatorDivision extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
+	prepare() { // {{{
+		super.prepare()
+		
+		if @left is IdentifierLiteral {
+			@left.type(@right.type(), @scope, this)
+		}
+	} // }}}
 	acquireReusable(acquire) { // {{{
 		if @options.format.destructuring == 'es5' {
 			@right.acquireReusable(true)

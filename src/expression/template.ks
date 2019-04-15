@@ -2,18 +2,22 @@ class TemplateExpression extends Expression {
 	private {
 		_computing: Boolean		= false
 		_elements: Array
+		_types: Array
 	}
 	analyse() { // {{{
 		@elements = []
 		for element in @data.elements {
 			@elements.push(element = $compile.expression(element, this))
-			
+
 			element.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
+		@types = []
 		for element in @elements {
 			element.prepare()
+
+			@types.push(element.type().isString())
 		}
 	} // }}}
 	translate() { // {{{
@@ -37,7 +41,7 @@ class TemplateExpression extends Expression {
 		else {
 			for element, index in @elements {
 				if index == 0 {
-					if element.type().isString() {
+					if @types[index] {
 						fragments.wrap(element)
 					}
 					else {

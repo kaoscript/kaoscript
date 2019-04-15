@@ -696,7 +696,7 @@ export class Color {
 			}
 		}
 
-		space = $aliases[space] || space
+		space = $aliases[space] ?? space
 
 		this.space(space)
 		color = color.like(space)

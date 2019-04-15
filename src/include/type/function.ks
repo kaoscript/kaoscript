@@ -261,6 +261,13 @@ class FunctionType extends Type {
 		return false
 	} // }}}
 	isFunction() => true
+	isMorePreciseThan(type: Type) { // {{{
+		if type.isAny() {
+			return true
+		}
+
+		return false
+	} // }}}
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
 	matchSignatureOf(value: Type, matchables): Boolean { // {{{
 		// console.log(this)
@@ -546,6 +553,13 @@ class OverloadedFunctionType extends Type {
 	isAsync() => @async
 	isFunction() => true
 	isMergeable(type) => type is OverloadedFunctionType && @async == type.isAsync()
+	isMorePreciseThan(type: Type) { // {{{
+		if type.isAny() {
+			return true
+		}
+
+		return false
+	} // }}}
 	matchSignatureOf(value: Type, matchables) { // {{{
 		if value is ReferenceType {
 			return value.isFunction()

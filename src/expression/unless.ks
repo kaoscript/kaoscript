@@ -1,18 +1,21 @@
 class UnlessExpression extends Expression {
 	private {
 		_condition
+		_type: Type
 		_whenFalse
 	}
 	analyse() { // {{{
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
-		
+
 		@whenFalse = $compile.expression(@data.whenFalse, this)
 		@whenFalse.analyse()
 	} // }}}
 	prepare() { // {{{
 		@condition.prepare()
 		@whenFalse.prepare()
+
+		@type = @whenFalse.type().flagNullable()
 	} // }}}
 	translate() { // {{{
 		@condition.translate()
@@ -35,4 +38,5 @@ class UnlessExpression extends Expression {
 			.line(@whenFalse)
 			.done()
 	} // }}}
+	type() => @type
 }

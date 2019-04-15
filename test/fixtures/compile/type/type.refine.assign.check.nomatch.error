@@ -1,0 +1,1 @@
+TypeException: The assignement's types are incompatible (line 13, file "fixtures/compile/type/type.refine.assign.check.nomatch.ks")

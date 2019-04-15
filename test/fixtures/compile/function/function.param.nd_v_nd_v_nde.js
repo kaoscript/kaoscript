@@ -1,23 +1,25 @@
 module.exports = function(expect) {
-	let foo = function() {
-		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		let __ks_i = -1;
-		let __ks__;
-		let u = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-		let v = arguments[++__ks_i];
-		if(v === void 0 || v === null) {
-			throw new TypeError("'v' is not nullable");
-		}
-		let x = arguments.length > 3 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-		let y = arguments[++__ks_i];
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		let z = arguments.length > 4 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-		return [u, v, x, y, z];
-	};
+	let foo = (function() {
+		return function() {
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			let __ks_i = -1;
+			let __ks__;
+			let u = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
+			let v = arguments[++__ks_i];
+			if(v === void 0 || v === null) {
+				throw new TypeError("'v' is not nullable");
+			}
+			let x = arguments.length > 3 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
+			let y = arguments[++__ks_i];
+			if(y === void 0 || y === null) {
+				throw new TypeError("'y' is not nullable");
+			}
+			let z = arguments.length > 4 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
+			return [u, v, x, y, z];
+		};
+	})();
 	expect(function() {
 		return foo();
 	}).to.throw();

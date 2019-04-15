@@ -45,7 +45,7 @@ class EnumDeclaration extends Statement {
 	} // }}}
 	prepare() { // {{{
 		if !@new {
-			@type = @variable.type()
+			@type = @variable.getRealType()
 			@enum = @type.type()
 		}
 

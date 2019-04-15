@@ -90,6 +90,8 @@ class VariableDeclaration extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
+		const declarator = @declarators[0]
+
 		if @hasInit {
 			@init.prepare()
 
@@ -97,14 +99,22 @@ class VariableDeclaration extends Statement {
 			@init.releaseReusable()
 
 			if @autotype {
-				@declarators[0].type(@init.type())
+				declarator.setDeclaredType(@init.type())
+				declarator.flagDefinitive()
+			}
+			else {
+				declarator.setRealType(@init.type())
 			}
 
 			this.assignTempVariables(@initScope)
 		}
 
-		for declarator in @declarators {
+		for const declarator in @declarators {
 			declarator.prepare()
+		}
+
+		if @hasInit && !@autotype {
+			declarator.setRealType(@init.type())
 		}
 	} // }}}
 	translate() { // {{{
@@ -289,18 +299,16 @@ class VariableBindingDeclarator extends AbstractNode {
 	export(recipient) { // {{{
 		@binding.export(recipient)
 	} // }}}
+	flagDefinitive() { // {{{
+
+	} // }}}
 	isAlreadyDeclared() => false
 	isDeclararingVariable(name: String) => @binding.isDeclararingVariable(name)
 	isDuplicate(scope) { // {{{
 		return false
 	} // }}}
-	toFlatFragments(fragments, init) { // {{{
-		@binding.toFlatFragments(fragments, init)
-	} // }}}
-	toFragments(fragments, mode) { // {{{
-		fragments.compile(@binding)
-	} // }}}
-	type(type: Type) { // {{{
+	setDeclaredType(type: Type) => this.setRealType(type)
+	setRealType(type: Type) { // {{{
 		if !type.isAny() {
 			if @binding is ArrayBinding {
 				if !type.isArray() {
@@ -313,6 +321,12 @@ class VariableBindingDeclarator extends AbstractNode {
 				}
 			}
 		}
+	} // }}}
+	toFlatFragments(fragments, init) { // {{{
+		@binding.toFlatFragments(fragments, init)
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments.compile(@binding)
 	} // }}}
 	walk(fn) { // {{{
 		@binding.walk(fn)
@@ -346,7 +360,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	prepare() { // {{{
 		if @data.type? {
-			@variable.type(Type.fromAST(@data.type, this))
+			@variable.setDeclaredType(Type.fromAST(@data.type, this)).flagDefinitive()
 		}
 
 		@identifier.prepare()
@@ -361,6 +375,9 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
+	} // }}}
+	flagDefinitive() { // {{{
+		@variable.flagDefinitive()
 	} // }}}
 	isDuplicate(scope) { // {{{
 		if scope.hasDeclaredVariable(@name) {
@@ -379,14 +396,13 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	isAlreadyDeclared() => @alreadyDeclared
 	isDeclararingVariable(name: String) => @name == name
+	name() => @name
+	setDeclaredType(type: Type) => @variable.setDeclaredType(type)
+	setRealType(type: Type) => @variable.setRealType(type)
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@identifier)
 	} // }}}
-	name() => @name
-	type(type: Type) { // {{{
-		@variable.type(type)
-	} // }}}
 	walk(fn) { // {{{
-		fn(@scope.getRenamedVariable(@name), @variable.type())
+		fn(@scope.getRenamedVariable(@name), @variable.getRealType())
 	} // }}}
 }

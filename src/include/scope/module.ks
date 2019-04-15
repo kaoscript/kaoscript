@@ -267,6 +267,9 @@ class ModuleScope extends Scope {
 			}
 		}
 	} // }}}
+	/* reference(value: String, nullable: Boolean = false) { // {{{
+		return this.resolveReference(value, nullable)
+	} // }}} */
 	releaseTempName(name) { // {{{
 		@tempNames[name] = true
 	} // }}}
@@ -278,10 +281,27 @@ class ModuleScope extends Scope {
 	replaceVariable(name: String, variable: Variable) { // {{{
 		@variables[name] = variable
 	} // }}}
-	replaceVariable(name: String, immutable: Boolean, type: Type) { // {{{
-		@variables[name] = new Variable(name, immutable, false, type)
+	replaceVariable(name: String, type: Type, node) { // {{{
+		const variable = this.getVariable(name)
+
+		if variable.isDefinitive() {
+			return if type.isAny()
+
+			if !type.matchContentOf(variable.getDeclaredType()) {
+				TypeException.throwInvalidAssignement(node)
+			}
+		}
+
+		if !type.equals(variable.getRealType()) {
+			if @variables[name] is Variable {
+				variable.setRealType(type)
+			}
+			else {
+				@variables[name] = variable.clone().setRealType(type)
+			}
+		}
 	} // }}}
-	private resolveReference(name: String, nullable = false) { // {{{
+	private resolveReference(name: String, nullable: Boolean = false) { // {{{
 		const hash = `\(name)\(nullable ? '?' : '')`
 
 		if @references[hash] is not ReferenceType {

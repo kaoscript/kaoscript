@@ -40,7 +40,7 @@ class NamespaceDeclaration extends Statement {
 		recipient.export(@name, @variable)
 	} // }}}
 	export(name: String, variable) { // {{{
-		@type.addProperty(name, variable.type())
+		@type.addProperty(name, variable.getDeclaredType())
 
 		@exports[name] = variable
 	} // }}}
@@ -64,7 +64,7 @@ class NamespaceDeclaration extends Statement {
 
 		let type
 		for name, variable of @exports {
-			type = variable.type()
+			type = variable.getDeclaredType()
 
 			if type is not AliasType {
 				object.newLine().code(`\(name): `).compile(variable).done()

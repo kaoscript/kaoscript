@@ -1,4 +1,7 @@
 class AnyType extends Type {
+	private {
+		_nullable: Boolean	= false
+	}
 	equals(b?): Boolean => b is AnyType
 	export(references, ignoreAlteration) => 'Any'
 	flagAlien() { // {{{
@@ -8,11 +11,19 @@ class AnyType extends Type {
 
 		return type
 	} // }}}
+	flagNullable() { // {{{
+		const type = new AnyType(null)
+
+		type._nullable = true
+
+		return type
+	} // }}}
 	getProperty(name) => Type.Any
 	hashCode() => 'Any'
 	isAny() => true
 	isInstanceOf(target: Type) => true
-	isNullable() => false
+	isMorePreciseThan(type: Type) => false
+	isNullable() => @nullable
 	matchContentOf(b) => true
 	matchSignatureOf(b, matchables) => b.isAny()
 	parameter() => Type.Any

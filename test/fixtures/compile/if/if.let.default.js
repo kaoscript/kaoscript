@@ -5,10 +5,10 @@ module.exports = function() {
 	}
 	let x = foobar();
 	if(Type.isValue(x)) {
-		console.log("" + x);
+		console.log(x);
 	}
 	x = foobar();
 	if(Type.isValue(x)) {
-		console.log("" + x);
+		console.log(x);
 	}
 };

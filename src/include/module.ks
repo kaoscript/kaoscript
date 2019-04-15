@@ -124,14 +124,48 @@ export class Module {
 	} // }}}
 	compiler() => @compiler
 	directory() => @directory
-	export(name: String, variable) { // {{{
+	export(name: String, variable: IdentifierLiteral) { // {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
 
-		@exports[name] = variable
+		const type = variable.getDeclaredType()
 
-		variable.type().flagExported().flagReferenced()
+		@exports[name] = {
+			type
+			variable
+		}
+
+		type.flagExported().flagReferenced()
+	} // }}}
+	export(name: String, expression: Expression | ExportProperty) { // {{{
+		if @binary {
+			SyntaxException.throwNotBinary('export', this)
+		}
+
+		const type = expression.type()
+
+		@exports[name] = {
+			type
+			variable: expression
+		}
+
+		type.flagExported().flagReferenced()
+	} // }}}
+	/* export(name: String, variable: Variable | IdentifierLiteral) { // {{{ */
+	export(name: String, variable: Variable) { // {{{
+		if @binary {
+			SyntaxException.throwNotBinary('export', this)
+		}
+
+		const type = variable.getDeclaredType()
+
+		@exports[name] = {
+			type
+			variable
+		}
+
+		type.flagExported().flagReferenced()
 	} // }}}
 	exportMacro(name: String, data: String) { // {{{
 		if @binary {
@@ -358,23 +392,23 @@ export class Module {
 
 			@body.toFragments(block)
 
-			let export = 0
-			for :variable of @exports {
-				if !variable.type().isAlias() {
-					++export
+			let exportCount = 0
+			for :export of @exports {
+				if !export.type.isAlias() {
+					++exportCount
 				}
 			}
 
-			if export != 0 {
+			if exportCount != 0 {
 				const line = block.newLine().code('return ')
 				const object = line.newObject()
 
 				let type
-				for name, variable of @exports {
-					type = variable.type()
+				for name, export of @exports {
+					type = export.type
 
 					if !type.isAlias() {
-						object.newLine().code(`\(name): `).compile(variable).done()
+						object.newLine().code(`\(name): `).compile(export.variable).done()
 
 						if type is not ReferenceType {
 							if type.isSealed() && type.isExtendable() {
@@ -460,8 +494,8 @@ export class Module {
 				@metadata.aliens.push(type.toMetadata(@metadata.references, true), name)
 			}
 
-			for name, variable of @exports {
-				@metadata.exports.push(variable.type().toMetadata(@metadata.references, false), name)
+			for name, export of @exports {
+				@metadata.exports.push(export.type.toMetadata(@metadata.references, false), name)
 			}
 
 			for name, datas of @exportedMacros {

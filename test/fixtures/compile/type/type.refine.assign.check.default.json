@@ -1,0 +1,27 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "foo",
+    -1,
+    "x",
+    -1,
+    "y"
+  ],
+  "references": [
+    {
+      "kind": "function",
+      "async": false,
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "String",
+      "throws": []
+    }
+  ],
+  "macros": []
+}

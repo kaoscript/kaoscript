@@ -601,7 +601,9 @@ class Parameter extends AbstractNode {
 				}
 			}
 
-			type ??= Type.fromAST(@data.type, this)
+			if @data.type? && type == null {
+				type ??= Type.fromAST(@data.type, this)
+			}
 		}
 		else {
 			for modifier in @data.modifiers {
@@ -610,10 +612,14 @@ class Parameter extends AbstractNode {
 				}
 			}
 
-			type = Type.fromAST(@data.type, this)
+			if @data.type? {
+				type = Type.fromAST(@data.type, this)
+			}
 		}
 
-		@nullable = type.isNullable()
+		if type != null {
+			@nullable = type.isNullable()
+		}
 
 		let min: Number = 1
 		let max: Number = 1
@@ -648,9 +654,16 @@ class Parameter extends AbstractNode {
 			min = 0
 		}
 
-		@type = new ParameterType(@scope, type, min, max)
+		if type != null {
+			@type = new ParameterType(@scope, type, min, max)
 
-		@variable.type(@rest ? Type.arrayOf(type, @scope) : type)
+			@variable.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type).flagDefinitive()
+		}
+		else {
+			@type = new ParameterType(@scope, Type.Any, min, max)
+
+			@variable.setDeclaredType(@rest ? Type.arrayOf(Type.Any, @scope) : Type.Any)
+		}
 	} // }}}
 	translate() { // {{{
 		if @hasDefaultValue {
@@ -710,7 +723,7 @@ class Parameter extends AbstractNode {
 
 				ctrl.code('!')
 
-				@variable.type().toTestFragments(ctrl, this)
+				@variable.getRealType().toTestFragments(ctrl, this)
 
 				ctrl
 					.code(')')
@@ -770,11 +783,11 @@ class Parameter extends AbstractNode {
 			}
 
 			if @rest {
-				if !@variable.type().parameter().isAny() {
+				if !@variable.getDeclaredType().parameter().isAny() {
 					throw new NotImplementedException(this)
 				}
 			}
-			else if !@variable.type().isAny() {
+			else if !@variable.getDeclaredType().isAny() {
 				if ctrl? {
 					ctrl.step().code('else ')
 				}
@@ -790,7 +803,7 @@ class Parameter extends AbstractNode {
 
 				ctrl.code('!')
 
-				@variable.type().toTestFragments(ctrl, this)
+				@variable.getDeclaredType().toTestFragments(ctrl, this)
 
 				ctrl
 					.code(')')

@@ -2,7 +2,7 @@
 
 extern console
 
-func foobar(): String => 'foobar'
+func foobar() => 'foobar'
 
 const x = 'barfoo'
 

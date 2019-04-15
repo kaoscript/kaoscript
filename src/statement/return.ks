@@ -1,10 +1,12 @@
 class ReturnStatement extends Statement {
 	private {
 		_await: Boolean			= false
+		_async: Boolean			= false
 		_function				= null
 		_exceptions: Boolean	= false
 		_value					= null
 		_temp: String			= null
+		_type: Type				= Type.Any
 	}
 	constructor(@data, @parent, @scope) { // {{{
 		super(data, parent, scope)
@@ -39,6 +41,12 @@ class ReturnStatement extends Statement {
 			}
 
 			this.assignTempVariables(@scope)
+
+			@type = @value.type()
+		}
+
+		if @function? {
+			@async = @function.type().isAsync()
 		}
 	} // }}}
 	translate() { // {{{
@@ -79,7 +87,7 @@ class ReturnStatement extends Statement {
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @value == null {
-			if @function?.type().isAsync() {
+			if @async {
 				fragments.line('return __ks_cb()')
 			}
 			else {
@@ -95,7 +103,7 @@ class ReturnStatement extends Statement {
 				return this.toAwaitStatementFragments^@(fragments)
 			}
 			else {
-				if @function?.type().isAsync() {
+				if @async {
 					fragments
 						.newLine()
 						.code('return __ks_cb(null, ')
@@ -133,7 +141,7 @@ class ReturnStatement extends Statement {
 					afterward.toAfterwardFragments(fragments)
 				}
 
-				if @function?.type().isAsync() {
+				if @async {
 					fragments.line(`return __ks_cb(null, \(@temp))`)
 				}
 				else {

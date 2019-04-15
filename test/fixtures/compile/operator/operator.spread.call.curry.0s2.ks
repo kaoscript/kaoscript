@@ -16,7 +16,7 @@ let machine = 'tesla'
 let directory = 'xfer'
 let user = 'john'
 
-let info = [machine, ':', directory, ' ']
+let info = (() => [machine, ':', directory, ' '])()
 
 let logHello = log^^(...info, user, ': ')
 

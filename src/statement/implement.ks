@@ -13,7 +13,7 @@ class ImplementDeclaration extends Statement {
 	prepare() { // {{{
 		@variable.prepareAlteration()
 
-		@type = @variable.type()
+		@type = @variable.getDeclaredType()
 
 		unless @type is NamedType {
 			TypeException.throwImplInvalidType(this)

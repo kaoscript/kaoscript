@@ -61,9 +61,10 @@ let $keywords = { // {{{
 enum ScopeType {
 	Bleeding
 	Block
+	Hollow
 	InlineBlock
 	Macro
-	Refinable
+	Operation
 }
 
 abstract class Scope {
@@ -90,10 +91,11 @@ abstract class Scope {
 include {
 	'./scope/bleeding'
 	'./scope/block'
+	'./scope/hollow'
 	'./scope/inline'
 	'./scope/import'
 	'./scope/macro'
 	'./scope/namespace'
 	'./scope/module'
-	'./scope/refinable'
+	'./scope/operation'
 }

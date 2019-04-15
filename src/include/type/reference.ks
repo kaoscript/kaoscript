@@ -24,8 +24,8 @@ class ReferenceType extends Type {
 		if @name == 'Any' {
 			return Type.Any
 		}
-		else if (variable ?= @scope.getVariable(@name)) && (variable.type() is not ReferenceType || variable.name() != @name || variable.scope() != @scope) {
-			return variable.type().discardAlias()
+		else if (variable ?= @scope.getVariable(@name)) && (variable.getRealType() is not ReferenceType || variable.name() != @name || variable.scope() != @scope) {
+			return variable.getRealType().discardAlias()
 		}
 		else {
 			return this
@@ -35,7 +35,7 @@ class ReferenceType extends Type {
 		if @name == 'Any' {
 			return Type.Any
 		}
-		else if (variable ?= @scope.getVariable(@name)) && (type ?= variable.type()) && (type is not ReferenceType || variable.name() != @name || type.scope() != @scope) {
+		else if (variable ?= @scope.getVariable(@name)) && (type ?= variable.getRealType()) && (type is not ReferenceType || variable.name() != @name || type.scope() != @scope) {
 			return type.discardReference()
 		}
 		else {
@@ -85,6 +85,13 @@ class ReferenceType extends Type {
 		return super.flagExported()
 	} // }}}
 	flagNullable(): ReferenceType => new ReferenceType(@scope, @name, true, @parameters)
+	flagSealed(): ReferenceType { // {{{
+		const type = new ReferenceType(@scope, @name, @nullable, @parameters)
+
+		type._sealed = true
+
+		return type
+	} // }}}
 	getProperty(name: String): Type { // {{{
 		if this.isAny() {
 			return Type.Any
@@ -138,30 +145,67 @@ class ReferenceType extends Type {
 			return true
 		}
 
-		if (thisClass ?= this.discardAlias()) && thisClass is ClassType && (targetClass ?= target.discardAlias()) && targetClass is ClassType {
-			return thisClass.isInstanceOf(targetClass)
+		if const type = target.discardAlias() {
+			if type is ClassType {
+				if (thisClass ?= this.discardAlias()) && thisClass is ClassType {
+					return thisClass.isInstanceOf(type)
+				}
+			}
+			else if type is UnionType {
+				for const type in type.types() {
+					if this.isInstanceOf(type) {
+						return true
+					}
+				}
+			}
 		}
 
 		return false
+	} // }}}
+	isInstanceOf(target: UnionType) { // {{{
+		for type in target.types() {
+			if this.isInstanceOf(type) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	isMorePreciseThan(that: Type) { // {{{
+		if that.isAny() {
+			return !this.isAny()
+		}
+		else if this.isAny() {
+			return false
+		}
+		else {
+			const a = this.discardReference()
+			const b = that.discardReference()
+
+			return a.isMorePreciseThan(b)
+		}
 	} // }}}
 	isNullable() => @nullable
 	isNumber() => @name == 'Number' || @name == 'number'
 	isObject() => @name == 'Object' || @name == 'object'
 	isString() => @name == 'String' || @name == 'string'
 	isVoid() => @name == 'Void' || @name == 'void'
-	matchContentOf(b) { // {{{
-		if this.isAny() {
-			return b.isAny()
+	matchContentOf(that: Type) { // {{{
+		if this == that || that.isAny() {
+			return true
+		}
+		else if this.isAny() {
+			return that.isAny()
 		}
 		else if this.isEnum() {
-			return b.isEnum()
+			return that.isEnum()
 		}
 		else if this.isFunction() {
-			return b.isFunction()
+			return that.isFunction()
 		}
 		else {
-			a = this.discardReference()
-			b = b.discardReference()
+			const a = this.discardReference()
+			const b = that.discardReference()
 
 			if a is ReferenceType {
 				if b is ReferenceType {
@@ -176,19 +220,22 @@ class ReferenceType extends Type {
 			}
 		}
 	} // }}}
-	matchContentTo(b) { // {{{
-		if this.isAny() {
-			return b.isAny()
+	matchContentTo(that) { // {{{
+		if this == that {
+			return true
+		}
+		else if this.isAny() {
+			return that.isAny()
 		}
 		else if this.isEnum() {
-			return b.isEnum()
+			return that.isEnum()
 		}
 		else if this.isFunction() {
-			return b.isFunction()
+			return that.isFunction()
 		}
 		else {
-			a = this.discardReference()
-			b = b.discardReference()
+			const a = this.discardReference()
+			const b = that.discardReference()
 
 			if a is ReferenceType {
 				if b is ReferenceType {
@@ -247,7 +294,7 @@ class ReferenceType extends Type {
 				@predefined = true
 			}
 			else if @variable ?= @scope.getVariable(@name) {
-				@type = @variable.type()
+				@type = @variable.getRealType()
 				@predefined = @type.isPredefined()
 
 				if @type is AliasType {
@@ -275,14 +322,14 @@ class ReferenceType extends Type {
 		else if @predefined {
 			return super.toMetadata(references, ignoreAlteration)
 		}
-		else if !@variable.type().isClass() {
-			@referenceIndex = @variable.type().toMetadata(references, ignoreAlteration)
+		else if !@variable.getRealType().isClass() {
+			@referenceIndex = @variable.getRealType().toMetadata(references, ignoreAlteration)
 		}
 		else if @type.isAlien() && @type.isPredefined() {
 			return super.toMetadata(references, ignoreAlteration)
 		}
 		else {
-			const reference = @variable.type().toReference(references, ignoreAlteration)
+			const reference = @variable.getRealType().toReference(references, ignoreAlteration)
 
 			@referenceIndex = references.length
 
@@ -298,7 +345,7 @@ class ReferenceType extends Type {
 		if @predefined {
 			return this.export(references, ignoreAlteration)
 		}
-		else if !@variable.type().isClass() {
+		else if !@variable.getDeclaredType().isClass() {
 			return super.toReference(references, ignoreAlteration)
 		}
 		else if @type.isExported() {
@@ -319,8 +366,8 @@ class ReferenceType extends Type {
 	toTestFragments(fragments, node) { // {{{
 		this.resolveType()
 
-		if @variable.type().isAlias() {
-			@variable.type().toTestFragments(fragments, node)
+		if @variable.getRealType().isAlias() {
+			@variable.getRealType().toTestFragments(fragments, node)
 		}
 		else {
 			if tof ?= $runtime.typeof(@name, node) {

@@ -277,6 +277,20 @@ class ClassDeclaration extends Statement {
 					return -1
 				}
 				else if a.type.length == b.type.length {
+					if a.type.length == 1 && b.type.length == 1 {
+						const ac = a.type[0].type()
+						const bc = b.type[0].type()
+
+						if ac.isClass() && bc.isClass() {
+							if ac.matchInheritanceOf(bc) {
+								return -1
+							}
+							else if bc.matchInheritanceOf(ac) {
+								return 1
+							}
+						}
+					}
+
 					if a.usage == b.usage {
 						return b.weight - a.weight
 					}
@@ -525,7 +539,7 @@ class ClassDeclaration extends Statement {
 				}
 
 				let indexes = []
-				for :parameter of [value for :value of parameters].sort((a, b) => b.weight - a.weight) {
+				for parameter in [value for :value of parameters].sort((a, b) => b.weight - a.weight) {
 					for hash, type of parameter.types {
 						type.methods:Array.remove(...indexes)
 
@@ -709,7 +723,7 @@ class ClassDeclaration extends Statement {
 						}
 
 						let indexes = []
-						for :parameter of [value for :value of parameters].sort((a, b) => b.weight - a.weight) {
+						for parameter in [value for :value of parameters].sort((a, b) => b.weight - a.weight) {
 							for hash, type of parameter.types {
 								type.methods:Array.remove(...indexes)
 
@@ -1691,7 +1705,7 @@ class ClassDeclaration extends Statement {
 	type() => @type
 	updateMethodScope(method) { // {{{
 		if @extending {
-			const variable = method.scope().getVariable('super').type(@scope.reference(@extendsName))
+			const variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
 
 			if @es5 {
 				variable.replaceCall = (data, arguments) => new CallSuperMethodES5Substitude(data, arguments, method, @type)

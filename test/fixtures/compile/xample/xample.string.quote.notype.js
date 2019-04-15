@@ -12,7 +12,7 @@ module.exports = function() {
 		if(escape === void 0 || escape === null) {
 			throw new TypeError("'escape' is not nullable");
 		}
-		return quote + __ks_String._im_replaceAll(this, escape, escape + escape).replaceAll(quote, escape + quote) + quote;
+		return quote + __ks_String._im_replaceAll(__ks_String._im_replaceAll(this, escape, escape + escape), quote, escape + quote) + quote;
 	};
 	__ks_String.__ks_func_replaceAll_0 = function(find, replacement) {
 		if(arguments.length < 2) {

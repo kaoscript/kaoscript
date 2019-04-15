@@ -168,6 +168,9 @@ abstract class AbstractNode {
 			ScopeType::Block => {
 				return new BlockScope(scope)
 			}
+			ScopeType::Hollow => {
+				return new HollowScope(scope)
+			}
 			ScopeType::InlineBlock => {
 				if @options.format.variables == 'es6' {
 					return new InlineBlockScope(scope)
@@ -176,8 +179,8 @@ abstract class AbstractNode {
 					return new LaxInlineBlockScope(scope)
 				}
 			}
-			ScopeType::Refinable => {
-				return new RefinableScope(scope)
+			ScopeType::Operation => {
+				return new OperationScope(scope)
 			}
 		}
 	} // }}}

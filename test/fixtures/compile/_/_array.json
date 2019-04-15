@@ -18,7 +18,12 @@
       "init": 0,
       "constructors": [],
       "destructors": 0,
-      "instanceVariables": {},
+      "instanceVariables": {
+        "length": {
+          "access": 3,
+          "type": "Number"
+        }
+      },
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {}

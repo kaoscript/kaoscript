@@ -83,6 +83,9 @@ class UnionType extends Type {
 
 		return false
 	} // }}}
+	isMorePreciseThan(that: Type) { // {{{
+		return that is UnionType && @types.length < that._types.length
+	} // }}}
 	isNullable() { // {{{
 		for type in @types {
 			if type.isNullable() {
@@ -92,11 +95,20 @@ class UnionType extends Type {
 
 		return false
 	} // }}}
-	matchContentTo(value: Type) { // {{{
-		if value is UnionType {
+	matchContentOf(that: Type) { // {{{
+		for const type in @types {
+			if !type.matchContentOf(that) {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
+	matchContentTo(that: Type) { // {{{
+		if that is UnionType {
 			let nf
 
-			for const vType in value._types {
+			for const vType in that._types {
 				nf = true
 
 				for const tType in @types while nf {
@@ -114,7 +126,7 @@ class UnionType extends Type {
 		}
 		else {
 			for type in @types {
-				if type.matchContentOf(value) {
+				if type.matchContentOf(that) {
 					return true
 				}
 			}

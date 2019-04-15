@@ -162,7 +162,7 @@ class FunctionDeclaration extends Statement {
 			}
 			else {
 				scope.addStash(@name, variable => {
-					const type = variable.type()
+					const type = variable.getRealType()
 
 					if type.isFunction() {
 						@main = true
@@ -170,7 +170,7 @@ class FunctionDeclaration extends Statement {
 
 						@variable = new FunctionVariable(scope, @name, true)
 
-						@variable.type().addFunction(type)
+						@variable.getRealType().addFunction(type)
 
 						scope.replaceVariable(@name, @variable)
 
@@ -225,7 +225,7 @@ class FunctionDeclaration extends Statement {
 			ClassDeclaration.toSwitchFragments(
 				this
 				fragments.newLine()
-				@variable.type()
+				@variable.getRealType()
 				[declarator.type() for declarator in @variable._declarators]
 				@name
 				null
@@ -268,7 +268,7 @@ class FunctionDeclaration extends Statement {
 			ClassDeclaration.toSwitchFragments(
 				this
 				fragments.newLine()
-				@variable.type()
+				@variable.getRealType()
 				[declarator.type() for declarator in @variable._declarators]
 				@name
 				null
@@ -293,10 +293,10 @@ class FunctionDeclaration extends Statement {
 			).done()
 		}
 	} // }}}
-	type() => @variable.type()
+	type() => @variable.getDeclaredType()
 	walk(fn) { // {{{
 		if @main {
-			fn(@name, @variable.type())
+			fn(@name, @variable.getDeclaredType())
 		}
 	} // }}}
 }
@@ -498,24 +498,24 @@ class FunctionVariable extends Variable {
 				if type.isAsync() != @async {
 					SyntaxException.throwMixedOverloadedFunction(declarator)
 				}
-				else if @type.hasFunction(type) {
+				else if @declaredType.hasFunction(type) {
 					SyntaxException.throwNotDifferentiableFunction(declarator)
 				}
 
-				@type.addFunction(type)
+				@declaredType.addFunction(type)
 			}
 		}
 		else if @declarators.length == 1 {
 			@declarators[0].prepare()
 
-			@type = @declarators[0].type()
+			this.setDeclaredType(@declarators[0].type())
 		}
 		else {
 			let declarator = @declarators[0]
 			declarator.prepare()
 
 			let type = declarator.type()
-			@type.addFunction(type)
+			@declaredType.addFunction(type)
 
 			const async = type.isAsync()
 
@@ -527,11 +527,11 @@ class FunctionVariable extends Variable {
 				if type.isAsync() != async {
 					SyntaxException.throwMixedOverloadedFunction(declarator)
 				}
-				else if @type.hasFunction(type) {
+				else if @declaredType.hasFunction(type) {
 					SyntaxException.throwNotDifferentiableFunction(declarator)
 				}
 
-				@type.addFunction(type)
+				@declaredType.addFunction(type)
 			}
 		}
 	} // }}}

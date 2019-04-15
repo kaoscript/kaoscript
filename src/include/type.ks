@@ -100,8 +100,8 @@ abstract class Type {
 					return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
 				}
 				NodeKind::Identifier => {
-					if type ?= scope.getVariable(data.name) {
-						return type.type()
+					if const variable = scope.getVariable(data.name) {
+						return variable.getDeclaredType()
 					}
 					else if $runtime.isDefined(data.name, node) {
 						return Type.Any
@@ -160,15 +160,18 @@ abstract class Type {
 					else if data.typeName? {
 						if data.typeName.kind == NodeKind::Identifier {
 							if !defined || scope.hasVariable(data.typeName.name) {
-								const type = new ReferenceType(scope, data.typeName.name, data.nullable)
-
 								if data.typeParameters? {
+									const type = new ReferenceType(scope, data.typeName.name, data.nullable)
+
 									for parameter in data.typeParameters {
 										type._parameters.push(Type.fromAST(parameter, scope, defined, node))
 									}
-								}
 
-								return type
+									return type
+								}
+								else {
+									return scope.resolveReference(data.typeName.name, data.nullable)
+								}
 							}
 							else {
 								ReferenceException.throwNotDefined(data.typeName.name, node)

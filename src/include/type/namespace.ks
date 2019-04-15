@@ -59,7 +59,7 @@ class NamespaceType extends Type {
 			@sealProperties[name] = true
 		}
 
-		return variable.type()
+		return variable.getDeclaredType()
 	} // }}}
 	addPropertyFromAST(data, node) => this.addProperty(data.name.name, Type.fromAST(data, node))
 	addPropertyFromMetadata(name, data, metadata, references, alterations, queue, node) { // {{{
@@ -73,7 +73,7 @@ class NamespaceType extends Type {
 
 		@scope.addVariable(name, variable)
 
-		const property = new NamespacePropertyType(@scope, variable.type())
+		const property = new NamespacePropertyType(@scope, variable.getDeclaredType())
 
 		@properties[name] = property
 
@@ -85,7 +85,7 @@ class NamespaceType extends Type {
 			@sealProperties[name] = true
 		}
 
-		return variable.type()
+		return variable.getDeclaredType()
 	} // }}}
 	clone() { // {{{
 		const that = new NamespaceType(@scope)

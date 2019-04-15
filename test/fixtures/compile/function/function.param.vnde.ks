@@ -1,8 +1,6 @@
 require expect: func
 
-let foo = func(x = null) {
-	return [x]
-}
+let foo = (() => (x = null) => [x])()
 
 expect(foo()).to.eql([null])
 

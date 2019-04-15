@@ -2,7 +2,7 @@
 
 extern console
 
-func foobar(): String => 'foobar'
+func foobar() => 'foobar'
 
 if let x = foobar() {
 	console.log(`\(x)`)

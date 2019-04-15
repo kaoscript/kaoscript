@@ -19,11 +19,11 @@ abstract class DependencyStatement extends Statement {
 					if superVar !?= @scope.getVariable(declaration.extends.name) {
 						ReferenceException.throwNotDefined(declaration.extends.name, this)
 					}
-					else if !superVar.type().isClass() {
+					else if !superVar.getDeclaredType().isClass() {
 						TypeException.throwNotClass(declaration.extends.name, this)
 					}
 
-					type.extends(superVar.type())
+					type.extends(superVar.getDeclaredType())
 				}
 
 				if kind != DependencyKind::Extern {
@@ -193,16 +193,16 @@ class ExternDeclaration extends DependencyStatement {
 
 					const type = new FunctionType(parameters, declaration, this)
 
-					if variable.type() is FunctionType {
+					if variable.getDeclaredType() is FunctionType {
 						const newType = new OverloadedFunctionType(@scope)
 
-						newType.addFunction(variable.type())
+						newType.addFunction(variable.getDeclaredType())
 						newType.addFunction(type)
 
-						variable.type(newType)
+						variable.setDeclaredType(newType)
 					}
-					else if variable.type() is OverloadedFunctionType {
-						variable.type().addFunction(type)
+					else if variable.getDeclaredType() is OverloadedFunctionType {
+						variable.getDeclaredType().addFunction(type)
 					}
 					else {
 						SyntaxException.throwAlreadyDeclared(declaration.name.name, this)
@@ -211,8 +211,8 @@ class ExternDeclaration extends DependencyStatement {
 				else if @parent.includePath() == null {
 					variable = this.define(declaration, DependencyKind::Extern)
 
-					if variable.type().isSealed() && variable.type().isExtendable() {
-						@lines.push(`var \(variable.type().getSealedName()) = {}`)
+					if variable.getDeclaredType().isSealed() && variable.getDeclaredType().isExtendable() {
+						@lines.push(`var \(variable.getDeclaredType().getSealedName()) = {}`)
 					}
 				}
 				else {
@@ -222,12 +222,12 @@ class ExternDeclaration extends DependencyStatement {
 			else {
 				variable = this.define(declaration, DependencyKind::Extern)
 
-				if variable.type().isSealed() && variable.type().isExtendable() {
-					@lines.push(`var \(variable.type().getSealedName()) = {}`)
+				if variable.getDeclaredType().isSealed() && variable.getDeclaredType().isExtendable() {
+					@lines.push(`var \(variable.getDeclaredType().getSealedName()) = {}`)
 				}
 			}
 
-			module.addAlien(variable.name(), variable.type())
+			module.addAlien(variable.name(), variable.getDeclaredType())
 		}
 	} // }}}
 	prepare()
@@ -259,17 +259,17 @@ class RequireDeclaration extends DependencyStatement {
 
 					const type = new FunctionType(parameters, declaration, this)
 
-					if variable.type() is FunctionType {
+					if variable.getDeclaredType() is FunctionType {
 						const newType = new OverloadedFunctionType(@scope)
 
-						newType.addFunction(variable.type())
+						newType.addFunction(variable.getDeclaredType())
 						newType.addFunction(type)
 
-						variable.type(newType)
+						variable.setDeclaredType(newType)
 						requirement.type(newType)
 					}
-					else if variable.type() is OverloadedFunctionType {
-						variable.type().addFunction(type)
+					else if variable.getDeclaredType() is OverloadedFunctionType {
+						variable.getDeclaredType().addFunction(type)
 					}
 					else {
 						SyntaxException.throwAlreadyDeclared(declaration.name.name, this)
@@ -415,7 +415,7 @@ abstract class Requirement {
 	constructor(@name, @type)
 	constructor(variable: Variable) { // {{{
 		@name = variable.name()
-		@type = variable.type()
+		@type = variable.getDeclaredType()
 	} // }}}
 	constructor(data, kind: DependencyKind, node) { // {{{
 		this(node.define(data, kind))
@@ -614,7 +614,7 @@ class ROIDynamicRequirement extends DynamicRequirement {
 	constructor(variable: Variable, importer) { // {{{
 		super(variable, @importer = importer)
 
-		variable.type().condense()
+		variable.getDeclaredType().condense()
 	} // }}}
 	toLoneAltFragments(fragments) { // {{{
 		const ctrl = fragments

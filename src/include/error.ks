@@ -313,6 +313,9 @@ export class TypeException extends Exception {
 		throwInvalid(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Invalid type "\(name)"`, node)
 		} // }}}
+		throwInvalidAssignement(node) ~ TypeException { // {{{
+			throw new TypeException(`The assignement's types are incompatible`, node)
+		} // }}}
 		throwInvalidBinding(expected, node) ~ TypeException { // {{{
 			throw new TypeException(`The binding is expected to be of type "\(expected)"`, node)
 		} // }}}

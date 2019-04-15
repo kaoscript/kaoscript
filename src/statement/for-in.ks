@@ -191,7 +191,7 @@ class ForInStatement extends Statement {
 		}
 
 		if @declareValue {
-			@valueVariable.type(type.parameter())
+			@valueVariable.setRealType(type.parameter())
 		}
 
 		if !?@index && !(@data.index? && !@data.declaration && @scope.hasVariable(@data.index.name)) {
