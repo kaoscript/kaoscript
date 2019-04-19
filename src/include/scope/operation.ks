@@ -12,11 +12,17 @@ class OperationScope extends InlineBlockScope {
 		}
 
 		if !type.equals(variable.getRealType()) {
-			if @variables[name] is Variable {
+			/* if @variables[name] is Variable {
 				variable.setRealType(type)
 			}
 			else {
 				@variables[name] = variable.clone().setRealType(type)
+			} */
+			if @variables[name] is Array {
+				variable.setRealType(type)
+			}
+			else {
+				@variables[name] = [@line, variable.clone().setRealType(type)]
 			}
 		}
 	} // }}}

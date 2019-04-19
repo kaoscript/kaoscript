@@ -64,6 +64,15 @@ class ArrayBinding extends Expression {
 
 		return false
 	} // }}}
+	isRedeclared() { // {{{
+		for const element in @elements {
+			if element.isRedeclared() {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @exists && @nonexists {
 			fragments.code('[')
@@ -227,6 +236,15 @@ class BindingElement extends Expression {
 	isAssignement() => @parent.isAssignement()
 	isImmutable() => @parent.isImmutable()
 	isDeclararingVariable(name: String) => @variables.contains(name)
+	isRedeclared() {
+		for const name in @variables {
+			if @scope.isRedeclaredVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	}
 	toFragments(fragments) { // {{{
 		if @data.spread {
 			fragments.code('...')
@@ -432,6 +450,15 @@ class ObjectBinding extends Expression {
 	isDeclararingVariable(name: String) { // {{{
 		for element in @elements {
 			if element.isDeclararingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	isRedeclared() { // {{{
+		for const element in @elements {
+			if element.isRedeclared() {
 				return true
 			}
 		}

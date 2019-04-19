@@ -36,11 +36,27 @@ class InlineBlockScope extends BlockScope {
 
 		return null
 	} // }}}
-	private declareVariable(name: String) { // {{{
+	/* private declareVariable(name: String) { // {{{
 		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Variable) {
 			const newName = this.getNewName(name)
 
 			if @variables[name] is not Variable {
+				@declarations[newName] = true
+			}
+
+			return newName
+		}
+		else {
+			@declarations[name] = true
+
+			return null
+		}
+	} // }}} */
+	private declareVariable(name: String) { // {{{
+		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Array) {
+			const newName = this.getNewName(name)
+
+			if @variables[name] is not Array {
 				@declarations[newName] = true
 			}
 

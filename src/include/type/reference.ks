@@ -35,7 +35,7 @@ class ReferenceType extends Type {
 		if @name == 'Any' {
 			return Type.Any
 		}
-		else if (variable ?= @scope.getVariable(@name)) && (type ?= variable.getRealType()) && (type is not ReferenceType || variable.name() != @name || type.scope() != @scope) {
+		else if (variable ?= @scope.getVariable(@name, -1)) && (type ?= variable.getRealType()) && (type is not ReferenceType || variable.name() != @name || type.scope() != @scope) {
 			return type.discardReference()
 		}
 		else {
@@ -293,7 +293,7 @@ class ReferenceType extends Type {
 				@type = Type.Void
 				@predefined = true
 			}
-			else if @variable ?= @scope.getVariable(@name) {
+			else if @variable ?= @scope.getVariable(@name, -1) {
 				@type = @variable.getRealType()
 				@predefined = @type.isPredefined()
 

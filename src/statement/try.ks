@@ -66,6 +66,8 @@ class TryStatement extends Statement {
 		}
 
 		for statement in $ast.body(@data.body) {
+			@scope.line(statement.start.line)
+
 			@statements.push(statement = $compile.statement(statement, this))
 
 			statement.analyse()
@@ -83,6 +85,8 @@ class TryStatement extends Statement {
 	prepare() { // {{{
 		let exit = false
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.prepare()
 
 			if exit {
@@ -121,6 +125,8 @@ class TryStatement extends Statement {
 	} // }}}
 	translate() { // {{{
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.translate()
 		}
 

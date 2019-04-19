@@ -205,7 +205,7 @@ class IncludeDeclarator extends Statement {
 		_includePath: String
 	}
 	constructor(@file, moduleName: String = null, @parent) { // {{{
-		super({}, parent)
+		super(parent.data(), parent)
 
 		@directory = path.dirname(file)
 

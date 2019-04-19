@@ -159,7 +159,7 @@ abstract class Type {
 					}
 					else if data.typeName? {
 						if data.typeName.kind == NodeKind::Identifier {
-							if !defined || scope.hasVariable(data.typeName.name) {
+							if !defined || scope.hasVariable(data.typeName.name, -1) {
 								if data.typeParameters? {
 									const type = new ReferenceType(scope, data.typeName.name, data.nullable)
 

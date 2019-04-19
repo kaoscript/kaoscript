@@ -335,6 +335,8 @@ class FunctionDeclarator extends AbstractNode {
 		}
 
 		for statement in $ast.body(@data.body) {
+			@scope.line(statement.start.line)
+
 			@statements.push(statement = $compile.statement(statement, this))
 
 			statement.analyse()
@@ -348,6 +350,8 @@ class FunctionDeclarator extends AbstractNode {
 		const na = !rtype.isAny()
 
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.prepare()
 
 			if @exit {
@@ -362,6 +366,8 @@ class FunctionDeclarator extends AbstractNode {
 		}
 
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.translate()
 		}
 	} // }}}

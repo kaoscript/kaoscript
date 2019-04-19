@@ -2,6 +2,7 @@ func $return(data = null) { // {{{
 	return {
 		kind: NodeKind::ReturnStatement
 		value: data
+		start: data.start
 	}
 } // }}}
 

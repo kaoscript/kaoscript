@@ -595,7 +595,7 @@ class Parameter extends AbstractNode {
 				}
 
 				if @thisAlias {
-					const alias = new AliasStatement(@data.name.name, @setterAlias, this)
+					const alias = new AliasStatement(@data.name, @setterAlias, this)
 
 					type = @scope.reference(alias.type())
 				}
@@ -1117,30 +1117,32 @@ class AliasStatement extends Statement {
 		_type: Type
 		_variableName: String
 	}
-	constructor(@name, @setter, @parameter) { // {{{
-		super({}, parameter.parent())
+	constructor(@data, @setter, @parameter) { // {{{
+		super(data, parameter.parent())
+
+		@name = data.name
 
 		parameter.parent().addAliasStatement(this)
 
 		const class = parameter.parent().parent().type().discardAlias()
 
 		if setter {
-			if @type !?= class.getPropertySetter(name) {
-				ReferenceException.throwNotDefinedMember(name, @parameter)
+			if @type !?= class.getPropertySetter(@name) {
+				ReferenceException.throwNotDefinedMember(@name, @parameter)
 			}
 		}
 		else {
-			if @type ?= class.getInstanceVariable(name) {
-				@variableName = name
+			if @type ?= class.getInstanceVariable(@name) {
+				@variableName = @name
 			}
-			else if @type ?= class.getInstanceVariable(`_\(name)`) {
-				@variableName = `_\(name)`
+			else if @type ?= class.getInstanceVariable(`_\(@name)`) {
+				@variableName = `_\(@name)`
 			}
-			else if @type ?= class.getPropertySetter(name) {
+			else if @type ?= class.getPropertySetter(@name) {
 				@setter = true
 			}
 			else {
-				ReferenceException.throwNotDefinedMember(name, @parameter)
+				ReferenceException.throwNotDefinedMember(@name, @parameter)
 			}
 		}
 	} // }}}

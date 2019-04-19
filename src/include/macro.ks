@@ -191,6 +191,7 @@ class MacroDeclaration extends AbstractNode {
 	private {
 		_executeCount				= 0
 		_fn: Function
+		_line: Number
 		_marks:	Array				= []
 		_name: String
 		_parameters: Object			= {}
@@ -204,6 +205,7 @@ class MacroDeclaration extends AbstractNode {
 		@scope.addNative('Expression')
 
 		@type = MacroType.fromAST(data, this)
+		@line = data.start?.line ?? -1
 
 		const builder = new Generator.KSWriter({
 			filters: {
@@ -364,6 +366,7 @@ class MacroDeclaration extends AbstractNode {
 	getMark(index) => @marks[index]
 	isExportable() => false
 	isInstanceMethod() => false
+	line() => @line
 	matchArguments(arguments: Array) => @type.matchArguments(arguments)
 	name() => @name
 	statement() => this

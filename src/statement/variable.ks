@@ -10,6 +10,7 @@ class VariableDeclaration extends Statement {
 		_init
 		_initScope: Scope
 		_rebindable: Boolean
+		_redeclared: Boolean		= false
 		_toDeclareAll: Boolean		= true
 		_try
 	}
@@ -111,6 +112,10 @@ class VariableDeclaration extends Statement {
 
 		for const declarator in @declarators {
 			declarator.prepare()
+
+			if declarator.isRedeclared() {
+				@redeclared = true
+			}
 		}
 
 		if @hasInit && !@autotype {
@@ -205,7 +210,7 @@ class VariableDeclaration extends Statement {
 					if @options.format.variables == 'es5' {
 						line.code('var ')
 					}
-					else if @rebindable {
+					else if @rebindable || @redeclared {
 						line.code('let ')
 					}
 					else {
@@ -231,7 +236,7 @@ class VariableDeclaration extends Statement {
 				if @options.format.variables == 'es5' {
 					line.code('var ')
 				}
-				else if @rebindable {
+				else if @rebindable || @redeclared {
 					line.code('let ')
 				}
 				else {
@@ -304,6 +309,7 @@ class VariableBindingDeclarator extends AbstractNode {
 	} // }}}
 	isAlreadyDeclared() => false
 	isDeclararingVariable(name: String) => @binding.isDeclararingVariable(name)
+	isRedeclared() => @binding.isRedeclared()
 	isDuplicate(scope) { // {{{
 		return false
 	} // }}}
@@ -396,6 +402,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	isAlreadyDeclared() => @alreadyDeclared
 	isDeclararingVariable(name: String) => @name == name
+	isRedeclared() => @scope.isRedeclaredVariable(@name)
 	name() => @name
 	setDeclaredType(type: Type) => @variable.setDeclaredType(type)
 	setRealType(type: Type) => @variable.setRealType(type)

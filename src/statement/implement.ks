@@ -302,16 +302,22 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		for statement in @body {
+			@scope.line(statement.start.line)
+
 			@statements.push(statement = $compile.statement(statement, this))
 
 			statement.analyse()
 		}
 
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.prepare()
 		}
 
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.translate()
 		}
 	} // }}}

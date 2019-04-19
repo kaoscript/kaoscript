@@ -7,10 +7,12 @@ class BlockExpression extends Expression {
 	analyse() { // {{{
 		if @data.statements {
 			for statement in @data.statements {
+				@scope.line(statement.start.line)
+
 				@statements.push(statement = $compile.statement(statement, this))
-				
+
 				statement.analyse()
-				
+
 				if statement.isAwait() {
 					@await = true
 				}
@@ -19,8 +21,10 @@ class BlockExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.prepare()
-			
+
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
 			}
@@ -31,6 +35,8 @@ class BlockExpression extends Expression {
 	} // }}}
 	translate() { // {{{
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.translate()
 		}
 	} // }}}
@@ -42,20 +48,20 @@ class BlockExpression extends Expression {
 				return false
 			}
 		}
-		
+
 		return true
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @await {
 			let index = -1
 			let item
-			
+
 			for statement, i in @statements while index == -1 {
 				if item ?= statement.toFragments(fragments, Mode::None) {
 					index = i
 				}
 			}
-			
+
 			if index != -1 {
 				item(@statements.slice(index + 1))
 			}

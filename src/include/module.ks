@@ -520,8 +520,10 @@ class ModuleBlock extends AbstractNode {
 		@scope = new ModuleScope()
 	} // }}}
 	analyse() { // {{{
-		for statement in @data.body {
-			if statement ?= $compile.statement(statement, this) {
+		for const statement in @data.body {
+			@scope.line(statement.start.line)
+
+			if const statement = $compile.statement(statement, this) {
 				@statements.push(statement)
 
 				statement.analyse()
@@ -529,17 +531,23 @@ class ModuleBlock extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		for statement in @statements {
+		for const statement in @statements {
+			@scope.line(statement.line())
+
 			statement.prepare()
 		}
 
 		const recipient = this.recipient()
-		for statement in @statements when statement.isExportable() {
+		for const statement in @statements when statement.isExportable() {
+			@scope.line(statement.line())
+
 			statement.export(recipient)
 		}
 	} // }}}
 	translate() { // {{{
-		for statement in @statements {
+		for const statement in @statements {
+			@scope.line(statement.line())
+
 			statement.translate()
 		}
 	} // }}}

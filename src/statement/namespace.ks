@@ -17,6 +17,8 @@ class NamespaceDeclaration extends Statement {
 
 		@statements = []
 		for statement in @data.statements {
+			@scope.line(statement.start.line)
+
 			@statements.push(statement = $compile.statement(statement, this))
 
 			statement.analyse()
@@ -24,15 +26,21 @@ class NamespaceDeclaration extends Statement {
 	} // }}}
 	prepare() { // {{{
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.prepare()
 		}
 
 		for statement in @statements when statement.isExportable() {
+			@scope.line(statement.line())
+
 			statement.export(this)
 		}
 	} // }}}
 	translate() { // {{{
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.translate()
 		}
 	} // }}}
