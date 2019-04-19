@@ -22,19 +22,6 @@ class BleedingScope extends Scope {
 
 		return variable
 	} // }}}
-	/* defineVariable(variable: Variable, node: AbstractNode) { // {{{
-		const name = variable.name()
-
-		if @variables[name] is Variable {
-			SyntaxException.throwAlreadyDeclared(name, node)
-		}
-
-		@variables[name] = variable
-
-		if const newName = @parent.declareVariable(name) {
-			@renamedVariables[name] = newName
-		}
-	} // }}} */
 	defineVariable(variable: Variable, node: AbstractNode) { // {{{
 		const name = variable.name()
 
@@ -48,14 +35,6 @@ class BleedingScope extends Scope {
 			@renamedVariables[name] = newName
 		}
 	} // }}}
-	/* getDefinedVariable(name: String) { // {{{
-		if @variables[name] is Variable {
-			return @variables[name]
-		}
-		else {
-			return null
-		}
-	} // }}} */
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			const variables:Array = @variables[name]
@@ -84,7 +63,6 @@ class BleedingScope extends Scope {
 	} // }}}
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
 	getRenamedVariable(name: String) { // {{{
-		/* if @variables[name] is Variable { */
 		if @variables[name] is Array {
 			if @renamedVariables[name] is String {
 				return @renamedVariables[name]
@@ -98,44 +76,8 @@ class BleedingScope extends Scope {
 		}
 	} // }}}
 	getTempIndex() => @parent.getTempIndex()
-	/* getVariable(name): Variable { // {{{
-		if @variables[name] is Variable {
-			return @variables[name]
-		}
-		else {
-			return @parent.getVariable(name)
-		}
-	} // }}} */
-	/* getVariable(name): Variable => this.getVariable(name, 0)
-	getVariable(name, delta: Number): Variable { // {{{
-		if @variables[name] is Array {
-			const variables:Array = @variables[name]
-			let variable = null
-
-			if @parent.isAtLastLine() {
-				variable = variables.last()
-			}
-			else {
-				const line = @parent.line() + delta
-
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
-					variable = variables[i + 1]
-				}
-			}
-
-			if variable == false {
-				return @parent.getVariable(name)
-			}
-			else if variable != null {
-				return variable
-			}
-		}
-
-		return @parent.getVariable(name)
-	} // }}} */
 	getVariable(name): Variable => this.getVariable(name, @parent.line())
 	getVariable(name, line: Number): Variable { // {{{
-		/* console.log('bleeding', name, line) */
 		if @variables[name] is Array {
 			const variables:Array = @variables[name]
 			const currentLine = @parent.line()
@@ -149,7 +91,6 @@ class BleedingScope extends Scope {
 					variable = variables[i + 1]
 				}
 			}
-			/* console.log(variable == false, variable != null) */
 
 			if variable == false {
 				return @parent.getVariable(name, -1)
@@ -161,14 +102,9 @@ class BleedingScope extends Scope {
 
 		return @parent.getVariable(name, -1)
 	} // }}}
-	/* hasDeclaredVariable(name: String) => @variables[name] is Variable || @parent.hasDeclaredVariable(name)
-	hasDefinedVariable(name: String) => @variables[name] is Variable
-	hasVariable(name: String) => @variables[name] is Variable || @parent.hasVariable(name) */
-	/* hasDeclaredVariable(name: String) => @variables[name] is Array || @parent.hasDeclaredVariable(name) */
 	hasDeclaredVariable(name: String) => @variables[name] is Array || @parent.hasDeclaredVariable(name)
-	/* hasDefinedVariable(name: String) => @variables[name] is Array */
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @parent.line())
-	hasDefinedVariable(name: String, line: Number) {
+	hasDefinedVariable(name: String, line: Number) { // {{{
 		if @variables[name] is Array {
 			const variables:Array = @variables[name]
 			const currentLine = @parent.line()
@@ -189,21 +125,20 @@ class BleedingScope extends Scope {
 		}
 
 		return false
-	}
+	} // }}}
 	hasVariable(name: String) => @variables[name] is Array || @parent.hasVariable(name)
 	hasVariable(name: String, line: Number) => @variables[name] is Array || @parent.hasVariable(name, line)
 	isBleeding() => true
 	isInline() => true
-	isRedeclaredVariable(name: String) {
+	isRedeclaredVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			return @variables[name].length != 2
 		}
 		else {
 			return false
 		}
-	}
+	} // }}}
 	isRenamedVariable(name: String) { // {{{
-		/* if @variables[name] is Variable { */
 		if @variables[name] is Array {
 			return @renamedVariables[name] is String
 		}

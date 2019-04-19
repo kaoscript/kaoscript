@@ -97,20 +97,6 @@ class ModuleScope extends Scope {
 		@tempDeclarations.clear()
 	} // }}}
 	private declareVariable(name: String) { // {{{
-		/* if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Variable) {
-			const newName = this.getNewName(name)
-
-			if @variables[name] is not Variable {
-				@declarations[newName] = true
-			}
-
-			return newName
-		}
-		else {
-			@declarations[name] = true
-
-			return null
-		} */
 		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Array) {
 			const newName = this.getNewName(name)
 
@@ -127,7 +113,6 @@ class ModuleScope extends Scope {
 		}
 	} // }}}
 	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable { // {{{
-		/* if @variables[name] is Variable { */
 		if this.hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
@@ -141,13 +126,6 @@ class ModuleScope extends Scope {
 	defineVariable(variable: Variable, node: AbstractNode) { // {{{
 		const name = variable.name()
 
-		/* if @variables[name] is Variable {
-			SyntaxException.throwAlreadyDeclared(name, node)
-		}
-
-		if const newName = this.declareVariable(name) {
-			@renamedVariables[name] = newName
-		} */
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 
@@ -164,17 +142,7 @@ class ModuleScope extends Scope {
 
 			@variables[name] = [@line, variable]
 		}
-
-		/* @variables[name] = variable */
 	} // }}}
-	/* getDefinedVariable(name: String) { // {{{
-		if @variables[name] is Variable {
-			return @variables[name]
-		}
-		else {
-			return null
-		}
-	} // }}} */
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			const variables:Array = @variables[name]
@@ -247,54 +215,8 @@ class ModuleScope extends Scope {
 		}
 	} // }}}
 	getTempIndex() => @tempIndex
-	/* getVariable(name): Variable => this.getVariable(name, 0)
-	getVariable(name, delta: Number): Variable { // {{{
-		if $types[name] is String {
-			name = $types[name]
-		}
-
-		/* if @variables[name] is Variable {
-			return @variables[name]
-		}
-		else if @predefined[`__\(name)`] is Variable {
-			return @predefined[`__\(name)`]
-		}
-		else {
-			return null
-		} */
-		if @variables[name] is Array {
-			const variables:Array = @variables[name]
-			let variable = null
-
-			if @lastLine {
-				variable = variables.last()
-			}
-			else {
-				const line = @line + delta
-
-				for const i from 0 til variables.length by 2 while variables[i] <= line {
-					variable = variables[i + 1]
-				}
-			}
-
-			if variable == false {
-				return null
-			}
-			else if variable != null {
-				return variable
-			}
-		}
-
-		if @predefined[`__\(name)`] is Variable {
-			return @predefined[`__\(name)`]
-		}
-		else {
-			return null
-		}
-	} // }}} */
 	getVariable(name): Variable => this.getVariable(name, @line)
 	getVariable(name, line: Number): Variable { // {{{
-		/* console.log('module', name, line) */
 		if $types[name] is String {
 			name = $types[name]
 		}
@@ -311,7 +233,6 @@ class ModuleScope extends Scope {
 					variable = variables[i + 1]
 				}
 			}
-			/* console.log(variable == false, variable != null) */
 
 			if variable == false {
 				return null
@@ -329,10 +250,8 @@ class ModuleScope extends Scope {
 		}
 	} // }}}
 	hasDeclaredVariable(name: String) => @declarations[name] == true
-	/* hasDefinedVariable(name: String) =>	@variables[name] is Variable */
-	/* hasDefinedVariable(name: String) =>	@variables[name] is Array */
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line)
-	hasDefinedVariable(name: String, line: Number) {
+	hasDefinedVariable(name: String, line: Number) { // {{{
 		if @variables[name] is Array {
 			const variables:Array = @variables[name]
 			let variable = null
@@ -352,35 +271,10 @@ class ModuleScope extends Scope {
 		}
 
 		return false
-	}
+	} // }}}
 	hasMacro(name) => @macros[name] is Array
-	/* hasVariable(name: String) =>	@variables[name] is Variable
-									|| $types[name] is String
-									|| $natives[name] == true
-									|| @predefined[`__\(name)`] is Variable */
-	/* hasVariable(name: String) {
-		if @variables[name] is Array {
-			const variables:Array = @variables[name]
-			let variable = null
-
-			if @lastLine {
-				variable = variables.last()
-			}
-			else {
-				for const i from 0 til variables.length by 2 while variables[i] <= @line {
-					variable = variables[i + 1]
-				}
-			}
-
-			if variable != null {
-				return variable != false
-			}
-		}
-
-		return $types[name] is String || $natives[name] == true	|| @predefined[`__\(name)`] is Variable
-	} */
 	hasVariable(name: String) => this.hasVariable(name, @line)
-	hasVariable(name: String, line: Number) {
+	hasVariable(name: String, line: Number) { // {{{
 		if @variables[name] is Array {
 			const variables:Array = @variables[name]
 			let variable = null
@@ -400,29 +294,21 @@ class ModuleScope extends Scope {
 		}
 
 		return $types[name] is String || $natives[name] == true	|| @predefined[`__\(name)`] is Variable
-	}
+	} // }}}
 	isAtLastLine() => @lastLine
-	isRedeclaredVariable(name: String) {
+	isRedeclaredVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			return @variables[name].length != 2
 		}
 		else {
 			return false
 		}
-	}
+	} // }}}
 	isRenamedVariable(name: String) { // {{{
 		return @renamedVariables[name] is String
 	} // }}}
 	line() => @line
 	line(@line)
-	/* line(line: Number) {
-		if @line <= line {
-			@line = line
-		}
-		else {
-			@lastLine = true
-		}
-	} */
 	listMacros(name): Array { // {{{
 		if @macros[name] is Array {
 			return @macros[name]
@@ -475,23 +361,14 @@ class ModuleScope extends Scope {
 			}
 		}
 	} // }}}
-	/* reference(value: String, nullable: Boolean = false) { // {{{
-		return this.resolveReference(value, nullable)
-	} // }}} */
 	releaseTempName(name) { // {{{
 		@tempNames[name] = true
 	} // }}}
 	removeVariable(name) { // {{{
-		/* if @variables[name] is Variable {
-			@variables[name] = false
-		} */
 		if @variables[name] is Array {
 			@variables[name].push(@line, false)
 		}
 	} // }}}
-	/* replaceVariable(name: String, variable: Variable) { // {{{
-		@variables[name] = variable
-	} // }}} */
 	replaceVariable(name: String, variable: Variable) { // {{{
 		if @variables[name] is Array {
 			const variables:Array = @variables[name]
@@ -521,12 +398,10 @@ class ModuleScope extends Scope {
 		}
 
 		if !type.equals(variable.getRealType()) {
-			/* if @variables[name] is Variable { */
 			if @variables[name] is Array {
 				variable.setRealType(type)
 			}
 			else {
-				/* @variables[name] = variable.clone().setRealType(type) */
 				@variables[name] = [@line, variable.clone().setRealType(type)]
 			}
 		}
