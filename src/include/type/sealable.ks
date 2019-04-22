@@ -29,8 +29,8 @@ class SealableType extends Type {
 		sealed: this.isSealed()
 		type: @type.toReference(references, ignoreAlteration)
 	} // }}}
-	flagExported() { // {{{
-		@type.flagExported()
+	flagExported(explicitly: Boolean) { // {{{
+		@type.flagExported(explicitly)
 
 		return this
 	} // }}}

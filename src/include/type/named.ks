@@ -32,8 +32,8 @@ class NamedType extends Type {
 
 		return this
 	} // }}}
-	flagExported() { // {{{
-		@type.flagExported()
+	flagExported(explicitly: Boolean) { // {{{
+		@type.flagExported(explicitly)
 
 		return this
 	} // }}}
@@ -79,8 +79,11 @@ class NamedType extends Type {
 	hasProperty(name: String) => @type.hasProperty(name)
 	isAlias() => @type.isAlias()
 	isAlien() => @type.isAlien()
+	isAlteration() => @type.isAlteration()
 	isClass() => @type.isClass()
 	isEnum() => @type.isEnum()
+	isExplicitlyExported() => @type.isExplicitlyExported()
+	isExportable() => @type.isExportable()
 	isExported() => @type.isExported()
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
@@ -105,6 +108,7 @@ class NamedType extends Type {
 
 		return false
 	} // }}}
+	isNative() => $natives[@name] == true
 	isPredefined() => @type.isPredefined()
 	isReferenced() => @type.isReferenced()
 	isRequired() => @type.isRequired()
@@ -208,10 +212,11 @@ class NamedType extends Type {
 	} // }}}
 	reckonReferenceIndex(references) => @type.reckonReferenceIndex(references)
 	referenceIndex() => @type.referenceIndex()
-	toQuote() => @name
-	toFragments(fragments, node)
+	toAlterationReference(references, ignoreAlteration) => @type.toAlterationReference(references, ignoreAlteration)
 	toExportOrIndex(references, ignoreAlteration) => @type.toExportOrIndex(references, ignoreAlteration)
+	toFragments(fragments, node)
 	toMetadata(references, ignoreAlteration) => @type.toMetadata(references, ignoreAlteration)
+	toQuote() => @name
 	toReference(references, ignoreAlteration) { // {{{
 		if @type is ClassType && @type.isPredefined() {
 			return @name

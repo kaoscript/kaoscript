@@ -26,6 +26,7 @@ class ParameterType extends Type {
 		max: @max
 	} // }}}
 	isAny() => @type.isAny()
+	isExportable() => @type.isExportable()
 	matchContentTo(value: Type) { // {{{
 		if value is ParameterType {
 			if @min != value._min || @max != value._max {

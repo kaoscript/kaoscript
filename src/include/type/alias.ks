@@ -32,6 +32,7 @@ class AliasType extends Type {
 	} // }}}
 	getProperty(name: String): Type => @type.getProperty(name)
 	isAlias() => true
+	isExportable() => @type.isExportable()
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
 	matchContentTo(that: Type): Boolean => @type.matchContentTo(that)
 	type() => @type

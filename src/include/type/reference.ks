@@ -77,12 +77,12 @@ class ReferenceType extends Type {
 			return name
 		}
 	} // }}}
-	flagExported() { // {{{
+	flagExported(explicitly: Boolean) { // {{{
 		if !this.isAny() && !this.isEnum() && !this.isVoid() {
-			this.type().flagReferenced()
+			this.type().flagExported(explicitly).flagReferenced()
 		}
 
-		return super.flagExported()
+		return super.flagExported(explicitly)
 	} // }}}
 	flagNullable(): ReferenceType => new ReferenceType(@scope, @name, true, @parameters)
 	flagSealed(): ReferenceType { // {{{
@@ -133,11 +133,15 @@ class ReferenceType extends Type {
 
 		return hash
 	} // }}}
+	isAlien() => this.type().isAlien()
 	isAny() => @name == 'Any' || @name == 'any'
 	isArray() => @name == 'Array' || @name == 'array'
 	isAsync() => false
 	isClass() => @name == 'Class' || @name == 'class'
 	isEnum() => @name == 'Enum' || @name == 'enum'
+	isExplicitlyExported() => this.type().isExplicitlyExported()
+	isExportable() => this.isEnum() || this.type().isExportable()
+	isExported() => this.type().isExported()
 	isFunction() => @name == 'Function' || @name == 'function'
 	isInstanceOf(target: AnyType) => true
 	isInstanceOf(target: ReferenceType) { // {{{
@@ -185,9 +189,11 @@ class ReferenceType extends Type {
 			return a.isMorePreciseThan(b)
 		}
 	} // }}}
+	isNative() => $natives[@name] == true
 	isNullable() => @nullable
 	isNumber() => @name == 'Number' || @name == 'number'
 	isObject() => @name == 'Object' || @name == 'object'
+	isRequired() => this.type().isRequired()
 	isString() => @name == 'String' || @name == 'string'
 	isVoid() => @name == 'Void' || @name == 'void'
 	matchContentOf(that: Type) { // {{{
@@ -348,19 +354,19 @@ class ReferenceType extends Type {
 		else if !@variable.getDeclaredType().isClass() {
 			return super.toReference(references, ignoreAlteration)
 		}
-		else if @type.isExported() {
-			if ignoreAlteration && @type.type().isAlteration() {
-				return this.export(references, ignoreAlteration, @type.type().toAlterationReference(references, ignoreAlteration))
+		else if @type.isExplicitlyExported() {
+			if ignoreAlteration && @type.isAlteration() {
+				return this.export(references, ignoreAlteration, @type.toAlterationReference(references, ignoreAlteration))
 			}
 			else {
 				return this.export(references, ignoreAlteration, @type.toReference(references, ignoreAlteration))
 			}
 		}
-		else if @type.isAlien() {
+		else if this.isNative() {
 			return this.export(references, ignoreAlteration)
 		}
 		else {
-			return this.export(references, ignoreAlteration)
+			return this.export(references, ignoreAlteration, @type.toReference(references, ignoreAlteration))
 		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{

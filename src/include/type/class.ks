@@ -6,21 +6,22 @@ enum Accessibility {
 
 class ClassType extends Type {
 	private {
-		_abstract: Boolean			= false
-		_abstractMethods: Object	= {}
-		_alteration: Boolean		= false
+		_abstract: Boolean				= false
+		_abstractMethods: Object		= {}
+		_alteration: Boolean			= false
 		_alterationReference: ClassType
-		_classMethods: Object		= {}
-		_classVariables: Object		= {}
-		_constructors: Array		= []
-		_destructors: Number		= 0
-		_extending: Boolean			= false
+		_classMethods: Object			= {}
+		_classVariables: Object			= {}
+		_constructors: Array			= []
+		_destructors: Number			= 0
+		_explicitlyExported: Boolean	= false
+		_extending: Boolean				= false
 		_extends: NamedType<ClassType>
-		_hybrid: Boolean			= false
-		_init: Number				= 0
-		_instanceMethods: Object	= {}
-		_instanceVariables: Object	= {}
-		_predefined: Boolean		= false
+		_hybrid: Boolean				= false
+		_init: Number					= 0
+		_instanceMethods: Object		= {}
+		_instanceVariables: Object		= {}
+		_predefined: Boolean			= false
 		_seal: Object
 	}
 	static {
@@ -233,7 +234,7 @@ class ClassType extends Type {
 		}
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
-		switch(data.kind) {
+		switch data.kind {
 			NodeKind::FieldDeclaration => {
 				let instance = true
 				for i from 0 til data.modifiers.length while instance {
@@ -414,7 +415,11 @@ class ClassType extends Type {
 			}
 
 			for name, methods of @instanceMethods {
-				export.instanceMethods[name] = [method.export(references, ignoreAlteration) for method in methods]
+				const m = [method.export(references, ignoreAlteration) for const method in methods when method.isExportable()]
+
+				if m.length != 0 {
+					export.instanceMethods[name] = m
+				}
 			}
 
 			for name, methods of @classMethods {
@@ -439,40 +444,40 @@ class ClassType extends Type {
 	flagAbstract() { // {{{
 		@abstract = true
 	} // }}}
-	flagExported() { // {{{
-		if @exported {
+	flagExported(explicitly: Boolean) { // {{{
+		if @exported && (@explicitlyExported || !explicitly) {
 			return this
 		}
-		else {
-			@exported = true
-		}
+
+		@exported = true
+		@explicitlyExported = explicitly
 
 		for method in @constructors {
-			method.flagExported()
+			method.flagExported(false)
 		}
 
 		for :variable of @instanceVariables {
-			variable.type().flagExported()
+			variable.type().flagExported(false)
 		}
 
 		for :variable of @classVariables {
-			variable.type().flagExported()
+			variable.type().flagExported(false)
 		}
 
 		for :methods of @instanceMethods when methods is Array {
 			for method in methods {
-				method.flagExported()
+				method.flagExported(false)
 			}
 		}
 
 		for :methods of @classMethods when methods is Array {
 			for method in methods {
-				method.flagExported()
+				method.flagExported(false)
 			}
 		}
 
 		if @extending {
-			@extends.flagExported()
+			@extends.flagExported(explicitly)
 		}
 
 		return this
@@ -740,6 +745,7 @@ class ClassType extends Type {
 	isClass() => true
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
+	isExplicitlyExported() => @explicitlyExported
 	isExtendable() => true
 	isExtending() => @extending
 	isFlexible() => @sealed
@@ -920,7 +926,7 @@ class ClassType extends Type {
 		throw new NotImplementedException()
 	} // }}}
 	toReference(references, ignoreAlteration) { // {{{
-		if !this.isExported() && this.isAlteration() {
+		if @alteration && !@explicitlyExported {
 			return @alterationReference.toReference(references, ignoreAlteration)
 		}
 		else {

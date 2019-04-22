@@ -139,7 +139,7 @@ class NamespaceType extends Type {
 			return export
 		}
 	} // }}}
-	flagExported() { // {{{
+	flagExported(explicitly: Boolean) { // {{{
 		if @exported {
 			return this
 		}
@@ -148,7 +148,7 @@ class NamespaceType extends Type {
 		}
 
 		for :value of @properties {
-			value.flagExported()
+			value.flagExported(explicitly)
 		}
 
 		return this
@@ -243,8 +243,8 @@ class NamespacePropertyType extends Type {
 
 		return this
 	} // }}}
-	flagExported() { // {{{
-		@type.flagExported()
+	flagExported(explicitly: Boolean) { // {{{
+		@type.flagExported(explicitly)
 
 		return this
 	} // }}}

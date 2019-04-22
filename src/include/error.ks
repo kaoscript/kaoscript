@@ -174,6 +174,9 @@ export class ReferenceException extends Exception {
 		throwNotDefinedProperty(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Property "\(name)" is not defined`, node)
 		} // }}}
+		throwNotExportable(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The exported variable "\(name)" is not exportable`, node)
+		} // }}}
 		throwNotPassed(name, module, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
 		} // }}}

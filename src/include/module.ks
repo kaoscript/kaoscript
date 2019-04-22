@@ -121,22 +121,28 @@ export class Module {
 		@body.prepare()
 
 		@body.translate()
+
+		for name, export of @exports {
+			if !export.type.isExportable() {
+				ReferenceException.throwNotExportable(name, @body)
+			}
+		}
 	} // }}}
 	compiler() => @compiler
 	directory() => @directory
-	export(name: String, variable: IdentifierLiteral) { // {{{
+	export(name: String, identifier: IdentifierLiteral) { // {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
 		}
 
-		const type = variable.getDeclaredType()
+		const type = identifier.getDeclaredType()
 
 		@exports[name] = {
 			type
-			variable
+			variable: identifier
 		}
 
-		type.flagExported().flagReferenced()
+		type.flagExported(true).flagReferenced()
 	} // }}}
 	export(name: String, expression: Expression | ExportProperty) { // {{{
 		if @binary {
@@ -150,9 +156,8 @@ export class Module {
 			variable: expression
 		}
 
-		type.flagExported().flagReferenced()
+		type.flagExported(true).flagReferenced()
 	} // }}}
-	/* export(name: String, variable: Variable | IdentifierLiteral) { // {{{ */
 	export(name: String, variable: Variable) { // {{{
 		if @binary {
 			SyntaxException.throwNotBinary('export', this)
@@ -165,7 +170,7 @@ export class Module {
 			variable
 		}
 
-		type.flagExported().flagReferenced()
+		type.flagExported(false).flagReferenced()
 	} // }}}
 	exportMacro(name: String, data: String) { // {{{
 		if @binary {

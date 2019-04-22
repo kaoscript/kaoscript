@@ -223,27 +223,22 @@ class FunctionType extends Type {
 		async: @async
 		min: @min
 		max: @max
-		parameters: [parameter.export(references, ignoreAlteration) for parameter in @parameters]
+		parameters: [parameter.export(references, ignoreAlteration) for const parameter in @parameters]
 		returns: @returnType.toReference(references, ignoreAlteration)
-		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
+		throws: [throw.toReference(references, ignoreAlteration) for const throw in @throws]
 	} // }}}
-	flagExported() { // {{{
+	flagExported(explicitly: Boolean) { // {{{
 		if @exported {
 			return this
 		}
-		else {
-			@exported = true
-		}
 
-		for parameter in @parameters {
-			parameter.type().flagExported()
-		}
+		@exported = true
 
 		for error in @throws {
-			error.type().flagExported()
+			error.flagExported(false)
 		}
 
-		@returnType.flagExported()
+		@returnType.flagExported(false)
 
 		return this
 	} // }}}
@@ -259,6 +254,15 @@ class FunctionType extends Type {
 		}
 
 		return false
+	} // }}}
+	isExportable() { // {{{
+		for const parameter in @parameters {
+			if !parameter.isExportable() {
+				return false
+			}
+		}
+
+		return true
 	} // }}}
 	isFunction() => true
 	isMorePreciseThan(type: Type) { // {{{
@@ -524,13 +528,13 @@ class OverloadedFunctionType extends Type {
 	export(references, ignoreAlteration) { // {{{
 		const functions = []
 
-		for reference in @references {
+		for const reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
-				for fn in reference.functions() {
+				for const fn in reference.functions() when fn.isExportable() {
 					functions.push(fn.toExportOrReference(references, ignoreAlteration))
 				}
 			}
-			else {
+			else if reference.isExportable() {
 				functions.push(reference.toExportOrReference(references, ignoreAlteration))
 			}
 		}
@@ -551,6 +555,15 @@ class OverloadedFunctionType extends Type {
 		return false
 	} // }}}
 	isAsync() => @async
+	isExportable() { // {{{
+		for const reference in @references {
+			if reference.isExportable() {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	isFunction() => true
 	isMergeable(type) => type is OverloadedFunctionType && @async == type.isAsync()
 	isMorePreciseThan(type: Type) { // {{{

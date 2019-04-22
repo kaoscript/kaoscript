@@ -406,7 +406,7 @@ abstract class Type {
 
 		return this
 	} // }}}
-	flagExported() { // {{{
+	flagExported(explicitly: Boolean) { // {{{
 		@exported = true
 
 		return this
@@ -443,6 +443,8 @@ abstract class Type {
 		return false
 	} // }}}
 	isEnum() => false
+	isExplicitlyExported() => @exported
+	isExportable() => this.isAlien() || this.isExported() || this.isNative() || this.isRequired()
 	isExported() => @exported
 	isExtendable() => false
 	isFlexible() => false
@@ -450,6 +452,7 @@ abstract class Type {
 	isMergeable(type) => false
 	isNamed() => false
 	isNamespace() => false
+	isNative() => false
 	isNumber() => false
 	isNull() => this == Type.Null
 	isObject() => false

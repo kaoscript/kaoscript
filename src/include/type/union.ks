@@ -42,7 +42,7 @@ class UnionType extends Type {
 		return match == @types.length
 	} // }}}
 	export(references, ignoreAlteration) => [type.toReference(references, ignoreAlteration) for type in @types]
-	flagExported() { // {{{
+	flagExported(explicitly: Boolean) { // {{{
 		if @exported {
 			return this
 		}
@@ -51,7 +51,7 @@ class UnionType extends Type {
 		}
 
 		for type in @types {
-			type.flagExported()
+			type.flagExported(explicitly)
 		}
 
 		return this
@@ -73,6 +73,15 @@ class UnionType extends Type {
 		else {
 			return Type.union(@scope, ...types)
 		}
+	} // }}}
+	isExportable() { // {{{
+		for type in @types {
+			if !type.isExportable() {
+				return false
+			}
+		}
+
+		return true
 	} // }}}
 	isInstanceOf(target) { // {{{
 		for type in @types {

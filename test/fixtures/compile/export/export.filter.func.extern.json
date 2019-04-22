@@ -1,0 +1,65 @@
+{
+  "aliens": [
+    0,
+    "Foobar"
+  ],
+  "requirements": [],
+  "exports": [
+    1,
+    "foobar"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "overloadedfunction",
+      "functions": [
+        {
+          "kind": "function",
+          "async": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "type": "String",
+              "min": 1,
+              "max": 1
+            }
+          ],
+          "returns": "Any",
+          "throws": []
+        },
+        {
+          "kind": "function",
+          "async": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "type": {
+                "reference": 0
+              },
+              "min": 1,
+              "max": 1
+            }
+          ],
+          "returns": "Any",
+          "throws": []
+        }
+      ]
+    }
+  ],
+  "macros": []
+}
