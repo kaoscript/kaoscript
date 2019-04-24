@@ -13,6 +13,7 @@ module.exports = function() {
 				else if(!Type.isString(x)) {
 					throw new TypeError("'x' is not of type 'String'");
 				}
+				return x;
 			}
 			else {
 				let __ks_i = -1;
@@ -23,6 +24,7 @@ module.exports = function() {
 				else if(!Type.is(x, Shape)) {
 					throw new TypeError("'x' is not of type 'Shape'");
 				}
+				return x;
 			}
 		}
 		else {

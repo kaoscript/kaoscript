@@ -12,6 +12,15 @@ module.exports = function() {
 				throw new SyntaxError("wrong number of arguments");
 			}
 		}
+		__ks_func_toString_0() {
+			return "foobar";
+		}
+		toString() {
+			if(arguments.length === 0) {
+				return Foobar.prototype.__ks_func_toString_0.apply(this);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
 	}
 	function foobar() {
 		if(arguments.length === 1) {
@@ -24,6 +33,7 @@ module.exports = function() {
 				else if(!Type.isString(x)) {
 					throw new TypeError("'x' is not of type 'String'");
 				}
+				return x;
 			}
 			else {
 				let __ks_i = -1;
@@ -34,6 +44,7 @@ module.exports = function() {
 				else if(!Type.is(x, Foobar)) {
 					throw new TypeError("'x' is not of type 'Foobar'");
 				}
+				return x;
 			}
 		}
 		else {

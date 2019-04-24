@@ -982,7 +982,20 @@ class ImportWorker {
 
 		for :index in @metadata.references {
 			if !?references[index] {
-				references[index] = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
+				let type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
+
+				if type is AliasType || type is ClassType || type is EnumType {
+					type = new NamedType(@scope.acquireTempName(), type)
+
+					@scope.define(type.name(), true, type, @node)
+				}
+				else if type is NamespaceType {
+					type = new NamedContainerType(@scope.acquireTempName(), type)
+
+					@scope.define(type.name(), true, type, @node)
+				}
+
+				references[index] = type
 			}
 		}
 

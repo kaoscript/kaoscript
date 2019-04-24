@@ -30,7 +30,20 @@
       "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
-      "instanceMethods": {},
+      "instanceMethods": {
+        "toString": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
       "classMethods": {}
     },
     {
@@ -48,7 +61,7 @@
               "max": 1
             }
           ],
-          "returns": "Any",
+          "returns": "String",
           "throws": []
         },
         {
@@ -65,7 +78,9 @@
               "max": 1
             }
           ],
-          "returns": "Any",
+          "returns": {
+            "reference": 1
+          },
           "throws": []
         }
       ]

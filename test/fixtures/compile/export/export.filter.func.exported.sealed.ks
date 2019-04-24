@@ -1,5 +1,5 @@
 extern sealed class Foobar {
-
+	toString(): String
 }
 
 impl Foobar {
@@ -10,12 +10,8 @@ impl Foobar {
 
 func foobar(): Foobar => new Foobar()
 
-func qux(x: String) {
+func qux(x: String): String => x
 
-}
-
-func qux(x: Foobar) {
-
-}
+func qux(x: Foobar): Foobar => x
 
 export foobar, qux
