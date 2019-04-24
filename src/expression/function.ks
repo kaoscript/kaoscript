@@ -11,7 +11,7 @@ class FunctionExpression extends Expression {
 		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
-		@scope.define('this', true, this)
+		@scope.define('this', true, Type.Any, this)
 
 		@parameters = []
 		for parameter in @data.parameters {

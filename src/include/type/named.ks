@@ -1,5 +1,6 @@
 class NamedType extends Type {
 	private {
+		_cloned: Boolean 				= false
 		_container: NamedContainerType	= null
 		_name: String
 		_type: Type
@@ -7,7 +8,11 @@ class NamedType extends Type {
 	constructor(@name, @type) { // {{{
 		super(type.scope())
 	} // }}}
-	clone() => new NamedType(@name, @type.clone())
+	clone() { // {{{
+		@cloned = true
+
+		return new NamedType(@name, @type.clone())
+	} // }}}
 	condense() { // {{{
 		@type.condense()
 
@@ -80,6 +85,7 @@ class NamedType extends Type {
 	isAlias() => @type.isAlias()
 	isAlien() => @type.isAlien()
 	isAlteration() => @type.isAlteration()
+	isCloned() => @cloned
 	isClass() => @type.isClass()
 	isEnum() => @type.isEnum()
 	isExplicitlyExported() => @type.isExplicitlyExported()

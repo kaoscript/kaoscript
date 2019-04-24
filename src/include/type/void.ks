@@ -1,4 +1,7 @@
 class VoidType extends Type {
+	constructor() { // {{{
+		super(null)
+	} // }}}
 	equals(b?): Boolean => b is VoidType
 	export(references, ignoreAlteration) => 'Void'
 	toFragments(fragments, node) { // {{{

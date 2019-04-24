@@ -86,7 +86,9 @@ class IdentifierLiteral extends Literal {
 	} // }}}
 	type() => @realType
 	type(type: Type, scope: Scope, node) { // {{{
-		scope.replaceVariable(@name, type, node)
+		if @isVariable {
+			@realType = scope.replaceVariable(@name, type, node).getRealType()
+		}
 	} // }}}
 	walk(fn) { // {{{
 		if @isVariable {

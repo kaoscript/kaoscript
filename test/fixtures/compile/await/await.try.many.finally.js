@@ -50,35 +50,35 @@ module.exports = function() {
 			});
 		};
 		let __ks_7 = (__ks_8) => {
-			foo(2, 4, (__ks_e, __ks_3) => {
+			foo(2, 4, (__ks_e, __ks_0) => {
 				if(__ks_e) {
 					__ks_6();
 				}
 				else {
-					x = __ks_3;
+					x = __ks_0;
 					__ks_6();
 				}
 			});
 		};
 		try {
-			foo(42, 24, (__ks_e, __ks_0) => {
+			foo(42, 24, (__ks_e, __ks_1) => {
 				if(__ks_e) {
 					__ks_7(__ks_e);
 				}
 				else {
 					try {
-						foo(4, 2, (__ks_e, __ks_1) => {
+						foo(4, 2, (__ks_e, __ks_2) => {
 							if(__ks_e) {
 								__ks_7(__ks_e);
 							}
 							else {
 								try {
-									foo(__ks_0, __ks_1, (__ks_e, __ks_2) => {
+									foo(__ks_1, __ks_2, (__ks_e, __ks_3) => {
 										if(__ks_e) {
 											__ks_7(__ks_e);
 										}
 										else {
-											x = __ks_2;
+											x = __ks_3;
 											__ks_6();
 										}
 									});

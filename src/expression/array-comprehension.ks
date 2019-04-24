@@ -131,7 +131,7 @@ class ArrayComprehensionForIn extends Expression {
 		@expression.analyse()
 
 		if @data.loop.value? {
-			@valueVariable = @bindingScope.define(@data.loop.value.name, false, this)
+			@valueVariable = @bindingScope.define(@data.loop.value.name, false, Type.Any, this)
 
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.analyse()
@@ -265,7 +265,7 @@ class ArrayComprehensionForOf extends Expression {
 		}
 
 		if @data.loop.value? {
-			@bindingScope.define(@data.loop.value.name, false, this)
+			@bindingScope.define(@data.loop.value.name, false, Type.Any, this)
 
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.analyse()

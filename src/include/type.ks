@@ -432,6 +432,7 @@ abstract class Type {
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
+	isCloned() => false
 	isClass() => false
 	isContainedIn(types) { // {{{
 		for type in types {
@@ -454,7 +455,7 @@ abstract class Type {
 	isNamespace() => false
 	isNative() => false
 	isNumber() => false
-	isNull() => this == Type.Null
+	isNull() => false
 	isObject() => false
 	isPredefined() => false
 	isReferenced() => @referenced
@@ -518,14 +519,15 @@ include {
 	'./type/class'
 	'./type/enum'
 	'./type/namespace'
+	'./type/null'
 	'./type/object'
 	'./type/parameter'
 	'./type/union'
 	'./type/void'
 }
 
-Type.Any = new AnyType(null)
-Type.Null = new AnyType(null)
-Type.Void = new VoidType(null)
+Type.Any = new AnyType()
+Type.Null = new NullType()
+Type.Void = new VoidType()
 
 ParameterType.Any = new ParameterType(null, Type.Any)

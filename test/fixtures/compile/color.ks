@@ -987,9 +987,9 @@ export class Color {
 
 	#[error(off)]
 	private setField(name, value: number | string): Color { // {{{
-		let component
+		let component = $components[name]
 
-		if $components[name].spaces[this._space]? {
+		if component.spaces[this._space]? {
 			component = $spaces[this._space].components[name]
 		}
 		else if component.families.length > 1 {

@@ -148,7 +148,7 @@ class FunctionDeclaration extends Statement {
 		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
-		@scope.define('this', true, this)
+		@scope.define('this', true, Type.Any, this)
 
 		@name = @data.name.name
 

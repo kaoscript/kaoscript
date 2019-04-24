@@ -54,7 +54,7 @@ class ForInStatement extends Statement {
 			valueVariable = @bindingScope.getVariable(@data.value.name)
 
 			if @data.declaration || valueVariable == null {
-				@valueVariable = @bindingScope.define(@data.value.name, @immutable, this)
+				@valueVariable = @bindingScope.define(@data.value.name, @immutable, Type.Any, this)
 
 				@declareValue = true
 			}

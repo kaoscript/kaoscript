@@ -8,15 +8,15 @@ class ExpressionStatement extends Statement {
 
 		@expression.analyse()
 	} // }}}
-	prepare()
-	translate() { // {{{
+	prepare() { // {{{
 		@expression.prepare()
 
 		@expression.acquireReusable(false)
 		@expression.releaseReusable()
 
 		this.assignTempVariables(@scope)
-
+	} // }}}
+	translate() { // {{{
 		@expression.translate()
 	} // }}}
 	assignment(data, scope, expression) { // {{{

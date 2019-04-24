@@ -200,7 +200,7 @@ class FunctionType extends Type {
 	} // }}}
 	equals(b?): Boolean { // {{{
 		if b is ReferenceType {
-			return b.name() == 'Function'
+			return b.name() == 'Function' && @min == 0 && @max == Infinity
 		}
 		else if b is not FunctionType {
 			return false
@@ -370,15 +370,6 @@ class FunctionType extends Type {
 					}
 
 					++a
-				}
-
-				return true
-			}
-			else if arguments.length == @parameters.length {
-				for parameter, i in @parameters {
-					if !parameter.matchContentTo(arguments[i]) {
-						return false
-					}
 				}
 
 				return true

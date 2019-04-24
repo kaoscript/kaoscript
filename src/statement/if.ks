@@ -68,6 +68,23 @@ class IfStatement extends Statement {
 
 		@whenTrueExpression.prepare()
 		@whenFalseExpression.prepare() if @whenFalseExpression?
+
+		if @whenFalseScope? {
+			const trueVariables = @whenTrueScope.listReplacedVariables()
+			const falseVariables = @whenFalseScope.listReplacedVariables()
+
+			for const name of trueVariables when falseVariables[name]? {
+				const trueType = trueVariables[name].getRealType()
+				const falseType = falseVariables[name].getRealType()
+
+				if trueType.equals(falseType) {
+					@scope.replaceVariable(name, trueType, this)
+				}
+				else {
+					@scope.replaceVariable(name, Type.union(@scope, trueType, falseType), this)
+				}
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		if @declared {

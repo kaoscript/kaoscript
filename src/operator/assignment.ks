@@ -95,7 +95,7 @@ class AssignmentOperatorDivision extends AssignmentOperatorExpression {
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	prepare() { // {{{
 		super.prepare()
-		
+
 		if @left is IdentifierLiteral {
 			@left.type(@right.type(), @scope, this)
 		}
@@ -139,6 +139,10 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 		@right.acquireReusable(true)
 		@right.releaseReusable()
+
+		if @left is IdentifierLiteral {
+			@left.type(@right.type(), @scope, this)
+		}
 	} // }}}
 	isAssignable() => false
 	toFragments(fragments, mode) { // {{{

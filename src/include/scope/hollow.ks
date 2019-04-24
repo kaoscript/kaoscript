@@ -98,11 +98,13 @@ class HollowScope extends Scope {
 	parent() => @parent
 	reference(value): ReferenceType => @parent.reference(value)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
-	replaceVariable(name: String, type: Type, node) { // {{{
-		const variable = this.getVariable(name)
+	replaceVariable(name: String, type: Type, node): Variable { // {{{
+		let variable = this.getVariable(name)
 
 		if variable.isDefinitive() {
-			return if type.isAny()
+			if type.isAny() {
+				return variable
+			}
 
 			if !type.matchContentOf(variable.getDeclaredType()) {
 				TypeException.throwInvalidAssignement(node)
@@ -114,9 +116,13 @@ class HollowScope extends Scope {
 				variable.setRealType(type)
 			}
 			else {
-				@variables[name] = [@parent.line(), variable.clone().setRealType(type)]
+				variable = variable.clone().setRealType(type)
+
+				@variables[name] = [@parent.line(), variable]
 			}
 		}
+
+		return variable
 	} // }}}
 	private resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable)
 }

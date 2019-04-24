@@ -1,10 +1,12 @@
 class OperationScope extends InlineBlockScope {
 	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable => @parent.define(name, immutable, type, node)
-	replaceVariable(name: String, type: Type, node) { // {{{
-		const variable = this.getVariable(name)
+	replaceVariable(name: String, type: Type, node): Variable { // {{{
+		let variable = this.getVariable(name)
 
 		if variable.isDefinitive() {
-			return if type.isAny()
+			if type.isAny() {
+				return variable
+			}
 
 			if !type.matchContentOf(variable.getDeclaredType()) {
 				TypeException.throwInvalidAssignement(node)
@@ -16,8 +18,12 @@ class OperationScope extends InlineBlockScope {
 				variable.setRealType(type)
 			}
 			else {
-				@variables[name] = [@line, variable.clone().setRealType(type)]
+				variable = variable.clone().setRealType(type)
+
+				@variables[name] = [@line, variable]
 			}
 		}
+
+		return variable
 	} // }}}
 }

@@ -2,17 +2,20 @@ class AnyType extends Type {
 	private {
 		_nullable: Boolean	= false
 	}
+	constructor() { // {{{
+		super(null)
+	} // }}}
 	equals(b?): Boolean => b is AnyType
 	export(references, ignoreAlteration) => 'Any'
 	flagAlien() { // {{{
-		const type = new AnyType(null)
+		const type = new AnyType()
 
 		type._alien = true
 
 		return type
 	} // }}}
 	flagNullable() { // {{{
-		const type = new AnyType(null)
+		const type = new AnyType()
 
 		type._nullable = true
 

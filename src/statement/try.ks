@@ -32,7 +32,7 @@ class TryStatement extends Statement {
 				if clause.binding? {
 					scope = this.newScope(@scope, ScopeType::InlineBlock)
 
-					scope.define(clause.binding.name, false, this)
+					scope.define(clause.binding.name, false, Type.Any, this)
 				}
 				else {
 					scope = @scope
@@ -55,7 +55,7 @@ class TryStatement extends Statement {
 			if @data.catchClause.binding? {
 				scope = this.newScope(@scope, ScopeType::InlineBlock)
 
-				scope.define(@data.catchClause.binding.name, false, this)
+				scope.define(@data.catchClause.binding.name, false, Type.Any, this)
 			}
 			else {
 				scope = @scope
@@ -84,22 +84,9 @@ class TryStatement extends Statement {
 	} // }}}
 	prepare() { // {{{
 		let exit = false
-		for statement in @statements {
-			@scope.line(statement.line())
-
-			statement.prepare()
-
-			if exit {
-				SyntaxException.throwDeadCode(statement)
-			}
-			else {
-				exit = statement.isExit()
-			}
-		}
-
 		@hasCatch = @catchClauses.length != 0
 
-		for clause in @catchClauses {
+		for const clause in @catchClauses {
 			clause.body.prepare()
 			clause.type.prepare()
 
@@ -110,8 +97,23 @@ class TryStatement extends Statement {
 			@catchClause.prepare()
 
 			@hasCatch = true
-			@exit = exit && @catchClause.isExit()
 		}
+
+		let deadCode = false
+		for const statement in @statements {
+			@scope.line(statement.line())
+
+			statement.prepare()
+
+			if deadCode {
+				SyntaxException.throwDeadCode(statement)
+			}
+			else {
+				exit = deadCode = statement.isExit()
+			}
+		}
+
+		@exit = @hasCatch && exit && @catchClause.isExit()
 
 		if @finalizer? {
 			@finalizer.prepare()

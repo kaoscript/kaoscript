@@ -287,7 +287,7 @@ class ReferenceType extends Type {
 	parameters() => @parameters
 	reassign(@name, @scope) => this
 	resolveType() { // {{{
-		if !?@type {
+		if !?@type || @type.isCloned() {
 			if this.isAny() {
 				@type = Type.Any
 				@predefined = true

@@ -478,7 +478,7 @@ class BinaryOperatorOr extends BinaryOperatorExpression {
 		let rtype
 		for name, type of @left.reduceTypes() {
 			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
-				if type.equals(right[name]) {
+				if type.equals(rtype) {
 					variables[name] = type
 				}
 				else {
@@ -555,11 +555,11 @@ class BinaryOperatorTypeEquality extends Expression {
 		@left.prepare()
 
 		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
-			if variable ?= @scope.getVariable(@data.right.typeName.name) {
-				type = variable.getRealType()
+			if const variable = @scope.getVariable(@data.right.typeName.name) {
+				const type = variable.getRealType()
 
 				if type.isClass() {
-					if !@left.type().isAny() && !@left.type().matchContentTo(type) {
+					if (!@left.type().isAny() && !@left.type().matchContentTo(type)) || @left.type().isNull() {
 						TypeException.throwInvalidTypeChecking(this)
 					}
 				}

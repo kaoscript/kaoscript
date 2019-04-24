@@ -364,7 +364,7 @@ class BlockScope extends Scope {
 			@renamedVariables[name] = newName
 		}
 	} // }}}
-	replaceVariable(name: String, variable: Variable) { // {{{
+	replaceVariable(name: String, variable: Variable): Variable { // {{{
 		if @variables[name] is Array {
 			const variables:Array = @variables[name]
 
@@ -380,12 +380,16 @@ class BlockScope extends Scope {
 		else {
 			@variables[name] = [@line, variable]
 		}
+
+		return variable
 	} // }}}
-	replaceVariable(name: String, type: Type, node) { // {{{
-		const variable = this.getVariable(name)
+	replaceVariable(name: String, type: Type, node): Variable { // {{{
+		let variable = this.getVariable(name)
 
 		if variable.isDefinitive() {
-			return if type.isAny()
+			if type.isAny() {
+				return variable
+			}
 
 			if !type.matchContentOf(variable.getDeclaredType()) {
 				TypeException.throwInvalidAssignement(node)
@@ -397,9 +401,13 @@ class BlockScope extends Scope {
 				variable.setRealType(type)
 			}
 			else {
-				@variables[name] = [@line, variable.clone().setRealType(type)]
+				variable = variable.clone().setRealType(type)
+
+				@variables[name] = [@line, variable]
 			}
 		}
+
+		return variable
 	} // }}}
 	private resolveReference(name: String, nullable = false) { // {{{
 		if @variables[name] is Array {

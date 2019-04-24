@@ -10,7 +10,7 @@ class Variable {
 		_name: String
 		_new: Boolean			= true
 		_predefined: Boolean	= false
-		_realType: Type			= Type.Any
+		_realType: Type			= Type.Null
 	}
 	static {
 		createPredefinedClass(name, scope) { // {{{
@@ -38,9 +38,16 @@ class Variable {
 		} // }}}
 	}
 	constructor()
-	constructor(@name, @immutable, @predefined, @declaredType = Type.Any) { // {{{
-		@declaredType = Type.toNamedType(@name, declaredType)
-		@realType = @declaredType
+	constructor(@name, @immutable, @predefined, declaredType = null) { // {{{
+		if declaredType == null {
+			@declaredType = Type.toNamedType(@name, Type.Any)
+			@realType = Type.Null
+		}
+		else {
+			@declaredType = Type.toNamedType(@name, declaredType)
+			@realType = @declaredType
+		}
+
 		@definitive = @immutable
 	} // }}}
 	clone() { // {{{
