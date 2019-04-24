@@ -251,7 +251,7 @@ class CallExpression extends Expression {
 					const t2 = callee.type()
 
 					if t2.isAny() {
-						@defaultCallee = t2
+						@defaultCallee = callee
 					}
 					else if t1 is UnionType {
 						t1.addType(t2)
@@ -259,7 +259,7 @@ class CallExpression extends Expression {
 					else if t2 is UnionType {
 						t2.addType(t1)
 
-						@defaultCallee = t2
+						@defaultCallee = callee
 					}
 				}
 			}
