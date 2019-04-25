@@ -6,7 +6,7 @@ class NullType extends Type {
 	export(references, ignoreAlteration)
 	getProperty(name) => Type.Any
 	isInstanceOf(target: Type) => true
-	isMorePreciseThan(type: Type) => true
+	isMorePreciseThan(type: Type) => type.isAny() || type.isNullable()
 	isAny() => true
 	isNull() => true
 	toQuote()
