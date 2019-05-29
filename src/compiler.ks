@@ -299,12 +299,6 @@ const $binaryOperators = {
 	`\(BinaryOperatorKind::BitwiseRightShift)`	: BinaryOperatorBitwiseRightShift
 	`\(BinaryOperatorKind::BitwiseXor)`			: BinaryOperatorBitwiseXor
 	`\(BinaryOperatorKind::Division)`			: BinaryOperatorDivision
-	`\(BinaryOperatorKind::Equality)`			: BinaryOperatorEquality
-	`\(BinaryOperatorKind::GreaterThan)`		: BinaryOperatorGreaterThan
-	`\(BinaryOperatorKind::GreaterThanOrEqual)`	: BinaryOperatorGreaterThanOrEqual
-	`\(BinaryOperatorKind::Inequality)`			: BinaryOperatorInequality
-	`\(BinaryOperatorKind::LessThan)`			: BinaryOperatorLessThan
-	`\(BinaryOperatorKind::LessThanOrEqual)`	: BinaryOperatorLessThanOrEqual
 	`\(BinaryOperatorKind::Modulo)`				: BinaryOperatorModulo
 	`\(BinaryOperatorKind::Multiplication)`		: BinaryOperatorMultiplication
 	`\(BinaryOperatorKind::NullCoalescing)`		: BinaryOperatorNullCoalescing
@@ -352,6 +346,7 @@ const $expressions = {
 			throw new NotImplementedException(parent)
 		}
 	}
+	`\(NodeKind::ComparisonExpression)`			: ComparisonExpression
 	`\(NodeKind::ConditionalExpression)`		: ConditionalExpression
 	`\(NodeKind::CreateExpression)`				: CreateExpression
 	`\(NodeKind::CurryExpression)`				: CurryExpression
@@ -422,11 +417,6 @@ const $polyadicOperators = {
 	`\(BinaryOperatorKind::BitwiseRightShift)`	: PolyadicOperatorBitwiseRightShift
 	`\(BinaryOperatorKind::BitwiseXor)`			: PolyadicOperatorBitwiseXor
 	`\(BinaryOperatorKind::Division)`			: PolyadicOperatorDivision
-	`\(BinaryOperatorKind::Equality)`			: PolyadicOperatorEquality
-	`\(BinaryOperatorKind::GreaterThan)`		: PolyadicOperatorGreaterThan
-	`\(BinaryOperatorKind::GreaterThanOrEqual)`	: PolyadicOperatorGreaterThanOrEqual
-	`\(BinaryOperatorKind::LessThan)`			: PolyadicOperatorLessThan
-	`\(BinaryOperatorKind::LessThanOrEqual)`	: PolyadicOperatorLessThanOrEqual
 	`\(BinaryOperatorKind::Modulo)`				: PolyadicOperatorModulo
 	`\(BinaryOperatorKind::Multiplication)`		: PolyadicOperatorMultiplication
 	`\(BinaryOperatorKind::NullCoalescing)`		: PolyadicOperatorNullCoalescing

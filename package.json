@@ -36,7 +36,7 @@
 	},
 	"dependencies": {
 		"@kaoscript/runtime": "^0.6.0",
-		"commander": "^2.19.0"
+		"commander": "^2.20.0"
 	},
 	"devDependencies": {
 		"@kaoscript/ast": "github:kaoscript/ast",

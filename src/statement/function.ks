@@ -74,6 +74,14 @@ const $function = {
 					}
 				}
 			}
+			NodeKind::ComparisonExpression => {
+				// for const operand in data.values by 2 {
+				for const i from 0 til data.values.length by 2 {
+					if $function.useThisVariable(data.values[i], node) {
+						return true
+					}
+				}
+			}
 			NodeKind::CreateExpression => {
 				if $function.useThisVariable(data.class, node) {
 					return true

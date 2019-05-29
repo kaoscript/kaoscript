@@ -1,10 +1,9 @@
 class PolyadicOperatorExpression extends Expression {
 	private {
-		_operands
-		_tested = false
+		_operands			= []
+		_tested: Boolean	= false
 	}
 	analyse() { // {{{
-		@operands = []
 		for operand in @data.operands {
 			@operands.push(operand = $compile.expression(operand, this))
 
@@ -249,86 +248,6 @@ class PolyadicOperatorDivision extends PolyadicOperatorExpression {
 		}
 	} // }}}
 	type() => @scope.reference('Number')
-}
-
-class PolyadicOperatorEquality extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let l = @operands.length - 1
-
-		for i from 0 til l {
-			fragments.code(' && ') if i
-
-			fragments
-				.compile(@operands[i])
-				.code(' === ')
-				.compile(@operands[i + 1])
-		}
-	} // }}}
-	type() => @scope.reference('Boolean')
-}
-
-class PolyadicOperatorGreaterThan extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		for i from 0 til @operands.length - 1 {
-			fragments.code(' && ') if i
-
-			fragments
-				.wrap(@operands[i])
-				.code($space)
-				.code('>', @data.operator)
-				.code($space)
-				.wrap(@operands[i + 1])
-		}
-	} // }}}
-	type() => @scope.reference('Boolean')
-}
-
-class PolyadicOperatorGreaterThanOrEqual extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		for i from 0 til @operands.length - 1 {
-			fragments.code(' && ') if i
-
-			fragments
-				.wrap(@operands[i])
-				.code($space)
-				.code('>=', @data.operator)
-				.code($space)
-				.wrap(@operands[i + 1])
-		}
-	} // }}}
-	type() => @scope.reference('Boolean')
-}
-
-class PolyadicOperatorLessThan extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		for i from 0 til @operands.length - 1 {
-			fragments.code(' && ') if i
-
-			fragments
-				.wrap(@operands[i])
-				.code($space)
-				.code('<', @data.operator)
-				.code($space)
-				.wrap(@operands[i + 1])
-		}
-	} // }}}
-	type() => @scope.reference('Boolean')
-}
-
-class PolyadicOperatorLessThanOrEqual extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		for i from 0 til @operands.length - 1 {
-			fragments.code(' && ') if i
-
-			fragments
-				.wrap(@operands[i])
-				.code($space)
-				.code('<=', @data.operator)
-				.code($space)
-				.wrap(@operands[i + 1])
-		}
-	} // }}}
-	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {

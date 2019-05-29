@@ -38,6 +38,7 @@ include {
 	'../expression/binding'
 	'../expression/block'
 	'../expression/call'
+	'../expression/comparison'
 	'../expression/conditional'
 	'../expression/create'
 	'../expression/curry'
