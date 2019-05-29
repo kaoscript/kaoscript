@@ -287,6 +287,7 @@ const $assignmentOperators = {
 	`\(AssignmentOperatorKind::Multiplication)`		: AssignmentOperatorMultiplication
 	`\(AssignmentOperatorKind::NonExistential)`		: AssignmentOperatorNonExistential
 	`\(AssignmentOperatorKind::NullCoalescing)`		: AssignmentOperatorNullCoalescing
+	`\(AssignmentOperatorKind::Quotient)`			: AssignmentOperatorQuotient
 	`\(AssignmentOperatorKind::Subtraction)`		: AssignmentOperatorSubtraction
 }
 
@@ -299,14 +300,17 @@ const $binaryOperators = {
 	`\(BinaryOperatorKind::BitwiseRightShift)`	: BinaryOperatorBitwiseRightShift
 	`\(BinaryOperatorKind::BitwiseXor)`			: BinaryOperatorBitwiseXor
 	`\(BinaryOperatorKind::Division)`			: BinaryOperatorDivision
+	`\(BinaryOperatorKind::Imply)`				: BinaryOperatorImply
 	`\(BinaryOperatorKind::Modulo)`				: BinaryOperatorModulo
 	`\(BinaryOperatorKind::Multiplication)`		: BinaryOperatorMultiplication
 	`\(BinaryOperatorKind::NullCoalescing)`		: BinaryOperatorNullCoalescing
 	`\(BinaryOperatorKind::Or)`					: BinaryOperatorOr
+	`\(BinaryOperatorKind::Quotient)`			: BinaryOperatorQuotient
 	`\(BinaryOperatorKind::Subtraction)`		: BinaryOperatorSubtraction
 	`\(BinaryOperatorKind::TypeCasting)`		: BinaryOperatorTypeCasting
 	`\(BinaryOperatorKind::TypeEquality)`		: BinaryOperatorTypeEquality
 	`\(BinaryOperatorKind::TypeInequality)`		: BinaryOperatorTypeInequality
+	`\(BinaryOperatorKind::Xor)`				: BinaryOperatorXor
 }
 
 const $expressions = {
@@ -418,10 +422,13 @@ const $polyadicOperators = {
 	`\(BinaryOperatorKind::BitwiseXor)`			: PolyadicOperatorBitwiseXor
 	`\(BinaryOperatorKind::Division)`			: PolyadicOperatorDivision
 	`\(BinaryOperatorKind::Modulo)`				: PolyadicOperatorModulo
+	`\(BinaryOperatorKind::Imply)`				: PolyadicOperatorImply
 	`\(BinaryOperatorKind::Multiplication)`		: PolyadicOperatorMultiplication
 	`\(BinaryOperatorKind::NullCoalescing)`		: PolyadicOperatorNullCoalescing
 	`\(BinaryOperatorKind::Or)`					: PolyadicOperatorOr
+	`\(BinaryOperatorKind::Quotient)`			: PolyadicOperatorQuotient
 	`\(BinaryOperatorKind::Subtraction)`		: PolyadicOperatorSubtraction
+	`\(BinaryOperatorKind::Xor)`				: PolyadicOperatorXor
 }
 
 const $unaryOperators = {

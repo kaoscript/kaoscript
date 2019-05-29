@@ -323,6 +323,15 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 	} // }}}
 }
 
+class AssignmentOperatorQuotient extends AssignmentOperatorExpression {
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.compile(@left)
+			.code($equals)
+			.code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
+	} // }}}
+}
+
 class AssignmentOperatorSubtraction extends AssignmentOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@left).code(' -= ').compile(@right)

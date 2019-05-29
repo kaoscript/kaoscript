@@ -211,6 +211,36 @@ class BinaryOperatorDivision extends BinaryOperatorExpression {
 	type() => @scope.reference('Number')
 }
 
+class BinaryOperatorImply extends BinaryOperatorExpression {
+	reduceTypes() { // {{{
+		const variables = {}
+
+		const right = @right.reduceTypes()
+
+		let rtype
+		for name, type of @left.reduceTypes() {
+			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
+				if type.equals(rtype) {
+					variables[name] = type
+				}
+				else {
+					variables[name] = Type.union(@scope, type, rtype)
+				}
+			}
+		}
+
+		return variables
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.code('!')
+			.wrapBoolean(@left)
+			.code(' || ')
+			.wrapBoolean(@right)
+	} // }}}
+	type() => @scope.reference('Boolean')
+}
+
 class BinaryOperatorModulo extends BinaryOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		fragments
@@ -314,6 +344,20 @@ class BinaryOperatorOr extends BinaryOperatorExpression {
 			.wrapBoolean(@right)
 	} // }}}
 	type() => @scope.reference('Boolean')
+}
+
+class BinaryOperatorQuotient extends BinaryOperatorExpression {
+	toOperatorFragments(fragments) { // {{{
+		fragments
+			.code('Number.parseInt(')
+			.wrap(@left)
+			.code($space)
+			.code('/', @data.operator)
+			.code($space)
+			.wrap(@right)
+			.code(')')
+	} // }}}
+	type() => @scope.reference('Number')
 }
 
 class BinaryOperatorSubtraction extends BinaryOperatorExpression {
@@ -471,6 +515,37 @@ class BinaryOperatorTypeInequality extends Expression {
 		else {
 			throw new NotImplementedException(this)
 		}
+	} // }}}
+	type() => @scope.reference('Boolean')
+}
+
+class BinaryOperatorXor extends BinaryOperatorExpression {
+	reduceTypes() { // {{{
+		const variables = {}
+
+		const right = @right.reduceTypes()
+
+		let rtype
+		for name, type of @left.reduceTypes() {
+			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
+				if type.equals(rtype) {
+					variables[name] = type
+				}
+				else {
+					variables[name] = Type.union(@scope, type, rtype)
+				}
+			}
+		}
+
+		return variables
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.wrapBoolean(@left)
+			.code($space)
+			.code('!==', @data.operator)
+			.code($space)
+			.wrapBoolean(@right)
 	} // }}}
 	type() => @scope.reference('Boolean')
 }

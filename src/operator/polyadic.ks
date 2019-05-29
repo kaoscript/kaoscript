@@ -250,6 +250,22 @@ class PolyadicOperatorDivision extends PolyadicOperatorExpression {
 	type() => @scope.reference('Number')
 }
 
+class PolyadicOperatorImply extends PolyadicOperatorExpression {
+	toFragments(fragments, mode) { // {{{
+		const l = @operands.length - 2
+		fragments.code('!('.repeat(l))
+
+		fragments.code('!').wrapBoolean(@operands[0])
+
+		for const operand in @operands from 1 til -1 {
+			fragments.code(' || ').wrapBoolean(operand).code(')')
+		}
+
+		fragments.code(' || ').wrapBoolean(@operands[@operands.length - 1])
+	} // }}}
+	type() => @scope.reference('Boolean')
+}
+
 class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
@@ -393,6 +409,20 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
+class PolyadicOperatorQuotient extends PolyadicOperatorExpression {
+	toFragments(fragments, mode) { // {{{
+		const l = @operands.length - 1
+		fragments.code('Number.parseInt('.repeat(l))
+
+		fragments.wrap(@operands[0])
+
+		for const operand in @operands from 1 {
+			fragments.code(' / ').wrap(operand).code(')')
+		}
+	} // }}}
+	type() => @scope.reference('Boolean')
+}
+
 class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
 	toOperatorFragments(fragments) { // {{{
 		let nf = false
@@ -411,4 +441,20 @@ class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
 		}
 	} // }}}
 	type() => @scope.reference('Number')
+}
+
+class PolyadicOperatorXor extends PolyadicOperatorExpression {
+	toFragments(fragments, mode) { // {{{
+		const l = @operands.length - 2
+		fragments.code('('.repeat(l))
+
+		fragments.wrapBoolean(@operands[0])
+
+		for const operand in @operands from 1 til -1 {
+			fragments.code(' !== ').wrapBoolean(operand).code(')')
+		}
+
+		fragments.code(' !== ').wrapBoolean(@operands[@operands.length - 1])
+	} // }}}
+	type() => @scope.reference('Boolean')
 }
