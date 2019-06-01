@@ -4,6 +4,8 @@ class ForInStatement extends Statement {
 		_body
 		_bodyScope
 		_boundName: String
+		_by
+		_byName: String
 		_conditionalTempVariables: Array	= []
 		_declared: Boolean					= false
 		_declareIndex: Boolean				= false
@@ -154,6 +156,28 @@ class ForInStatement extends Statement {
 			}
 		}
 
+		if @data.by {
+			@by = $compile.expression(@data.by, this, @scope)
+			@by.analyse()
+
+			if @index != null && @by.isUsingVariable(@data.index.name) {
+				if @declareIndex {
+					renameIndex = true
+				}
+				else {
+					SyntaxException.throwAlreadyDeclared(@data.index.name, this)
+				}
+			}
+			if @value != null && @by.isUsingVariable(@data.value.name) {
+				if @declareValue {
+					renameValue = true
+				}
+				else {
+					SyntaxException.throwAlreadyDeclared(@data.value.name, this)
+				}
+			}
+		}
+
 		if renameIndex {
 			@bindingScope.rename(@data.index.name)
 		}
@@ -215,6 +239,12 @@ class ForInStatement extends Statement {
 			@to.prepare()
 		}
 
+		if @by? {
+			@by.prepare()
+
+			@byName = @bindingScope.acquireTempName(false) if @by.isComposite()
+		}
+
 		this.assignTempVariables(@bindingScope)
 
 		if @until? {
@@ -270,6 +300,8 @@ class ForInStatement extends Statement {
 		else if @to? {
 			@to.translate()
 		}
+
+		@by.translate() if @by?
 
 		if @until? {
 			@until.translate()
@@ -473,15 +505,32 @@ class ForInStatement extends Statement {
 			}
 		}
 
-		if @data.desc {
-			ctrl
-				.code('; --')
-				.compile(@indexName ?? @index)
+		ctrl.code('; ')
+
+		if @data.by {
+			if @data.by.kind == NodeKind::NumericExpression {
+				if @data.by.value == 1 {
+					ctrl.code('++').compile(@indexName ?? @index)
+				}
+				else if @data.by.value == -1 {
+					ctrl.code('--').compile(@indexName ?? @index)
+				}
+				else if @data.by.value >= 0 {
+					ctrl.compile(@indexName ?? @index).code(' += ').compile(@by)
+				}
+				else {
+					ctrl.compile(@indexName ?? @index).code(' -= ', -@data.by.value)
+				}
+			}
+			else {
+				ctrl.compile(@indexName ?? @index).code(' += ').compile(@byName ?? @by)
+			}
+		}
+		else if @data.desc {
+			ctrl.code('--').compile(@indexName ?? @index)
 		}
 		else {
-			ctrl
-				.code('; ++')
-				.compile(@indexName ?? @index)
+			ctrl.code('++').compile(@indexName ?? @index)
 		}
 
 		ctrl.code(')').step()
