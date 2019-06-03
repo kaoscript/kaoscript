@@ -9,7 +9,7 @@ class CallExpression extends Expression {
 		_hasDefaultCallee: Boolean		= false
 		_nullable: Boolean				= false
 		_nullableComputed: Boolean		= false
-		_object
+		_object							= null
 		_property: String
 		_reusable: Boolean				= false
 		_reuseName: String				= null
@@ -93,6 +93,11 @@ class CallExpression extends Expression {
 				}
 			}
 		}
+
+		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.computed {
+			@object = $compile.expression(@data.callee.object, this)
+			@object.analyse()
+		}
 	} // }}}
 	prepare() { // {{{
 		for argument in @arguments {
@@ -114,9 +119,7 @@ class CallExpression extends Expression {
 			}
 		}
 
-		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.computed {
-			@object = $compile.expression(@data.callee.object, this)
-			@object.analyse()
+		if @object != null {
 			@object.prepare()
 
 			@property = @data.callee.property.name
@@ -288,7 +291,7 @@ class CallExpression extends Expression {
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	isUsingVariable(name) { // {{{
-		if @object? {
+		if @object != null {
 			if @object.isUsingVariable(name) {
 				return true
 			}

@@ -3,22 +3,18 @@ class AssignmentOperatorExpression extends Expression {
 		_await: Boolean				= false
 		_left
 		_right
-		_variables: Array<String>	= []
+		_variable: String			= null
 	}
 	analyse() { // {{{
-		let variables = this.assignment(@data)
-
-		@left = $compile.expression(@data.left, this)
-		@left.analyse()
-
-		if variables? {
-			@variables = variables
-		}
-
 		@right = $compile.expression(@data.right, this)
 		@right.analyse()
 
 		@await = @right.isAwait()
+
+		@variable = this.assignment(@data)
+
+		@left = $compile.expression(@data.left, this)
+		@left.analyse()
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -40,7 +36,7 @@ class AssignmentOperatorExpression extends Expression {
 	isAwait() => @await
 	isAwaiting() => @right.isAwaiting()
 	isComputed() => true
-	isDeclararingVariable(name: String) => @variables.contains(name)
+	isDeclararingVariable(name: String) => @variable == name
 	isNullable() => @right.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	toNullableFragments(fragments) { // {{{

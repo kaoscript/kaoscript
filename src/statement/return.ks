@@ -70,6 +70,7 @@ class ReturnStatement extends Statement {
 			return false
 		}
 	} // }}}
+	isUsingVariable(name) => @value != null && @value.isUsingVariable(name)
 	reference() => @temp
 	releaseReusable() { // {{{
 		if @value != null {

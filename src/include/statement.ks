@@ -35,7 +35,7 @@ abstract class Statement extends AbstractNode {
 
 				scope.define(data.left.name, false, this)
 
-				return [data.left.name]
+				return data.left.name
 			}
 		}
 

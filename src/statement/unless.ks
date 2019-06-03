@@ -1,22 +1,28 @@
 class UnlessStatement extends Statement {
 	private {
 		_condition
-		_whenFalse
+		_whenFalseExpression
+		_whenFalseScope: Scope
 	}
 	analyse() { // {{{
-		@condition = $compile.expression(@data.condition, this)
+		@whenFalseScope = this.newScope(@scope, ScopeType::InlineBlock)
+
+		@condition = $compile.expression(@data.condition, this, @scope)
 		@condition.analyse()
-		
-		@whenFalse = $compile.expression($ast.block(@data.whenFalse), this)
-		@whenFalse.analyse()
+
+		@whenFalseExpression = $compile.expression($ast.block(@data.whenFalse), this, @whenFalseScope)
+		@whenFalseExpression.analyse()
 	} // }}}
 	prepare() { // {{{
 		@condition.prepare()
-		@whenFalse.prepare()
+
+		this.assignTempVariables(@scope)
+
+		@whenFalseExpression.prepare()
 	} // }}}
 	translate() { // {{{
 		@condition.translate()
-		@whenFalse.translate()
+		@whenFalseExpression.translate()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
@@ -25,7 +31,7 @@ class UnlessStatement extends Statement {
 			.wrapBoolean(@condition)
 			.code(')')
 			.step()
-			.compile(@whenFalse)
+			.compile(@whenFalseExpression)
 			.done()
 	} // }}}
 }

@@ -28,7 +28,6 @@ class Literal extends Expression {
 
 class IdentifierLiteral extends Literal {
 	private {
-		_assignenement			= null
 		_declaredType: Type
 		_isMacro: Boolean		= false
 		_isVariable: Boolean	= false
@@ -36,26 +35,9 @@ class IdentifierLiteral extends Literal {
 	}
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.name)
-
-		const statement = parent.statement()
-		while parent != statement {
-			if parent is AssignmentOperatorExpression {
-				@assignenement = parent
-				break
-			}
-
-			parent = parent.parent()
-		}
-
-		if @assignenement == null && statement is VariableDeclaration {
-			@assignenement = statement
-		}
 	} // }}}
 	analyse() { // {{{
-		if @assignenement != null && @assignenement.isDeclararingVariable(@name) {
-			ReferenceException.throwSelfDefinedVariable(@value, this)
-		}
-		else if @scope.hasVariable(@value) {
+		if @scope.hasVariable(@value) {
 			@isVariable = true
 		}
 		else if $runtime.isDefined(@value, @parent) {

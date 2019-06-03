@@ -6,12 +6,15 @@ class DoUntilStatement extends Statement {
 	analyse() { // {{{
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
-		
+
 		@body = $compile.expression(@data.body, this)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
 		@condition.prepare()
+
+		this.assignTempVariables(@scope)
+
 		@body.prepare()
 	} // }}}
 	translate() { // {{{

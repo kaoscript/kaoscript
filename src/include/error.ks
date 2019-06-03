@@ -180,9 +180,6 @@ export class ReferenceException extends Exception {
 		throwNotPassed(name, module, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
 		} // }}}
-		throwSelfDefinedVariable(name, node) ~ ReferenceException { // {{{
-			throw new ReferenceException(`Variable "\(name)" is being self-defined`, node)
-		} // }}}
 	}
 }
 

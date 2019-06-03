@@ -6,13 +6,16 @@ class DoWhileStatement extends Statement {
 	analyse() { // {{{
 		@body = $compile.expression(@data.body, this)
 		@body.analyse()
-		
+
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
 	} // }}}
 	prepare() { // {{{
-		@body.prepare()
 		@condition.prepare()
+
+		this.assignTempVariables(@scope)
+
+		@body.prepare()
 	} // }}}
 	translate() { // {{{
 		@body.translate()

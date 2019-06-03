@@ -95,6 +95,7 @@ class HollowScope extends Scope {
 			return false
 		}
 	} // }}}
+	isRenamedVariable(name: String): Boolean => @parent.isRenamedVariable(name)
 	parent() => @parent
 	reference(value): ReferenceType => @parent.reference(value)
 	releaseTempName(name: String) => @parent.releaseTempName(name)

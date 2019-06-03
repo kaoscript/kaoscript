@@ -11,11 +11,11 @@ class ArrayComprehensionForFrom extends Expression {
 		_bindingScope
 		_body
 		_bodyScope
-		_by			= null
+		_by				= null
 		_from
 		_to
 		_variable
-		_when
+		_when			= null
 	}
 	analyse() { // {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
@@ -61,6 +61,11 @@ class ArrayComprehensionForFrom extends Expression {
 		@body.translate()
 		@when.translate() if @when?
 	} // }}}
+	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
+								@to.isUsingVariable(name) ||
+								(@by != null && @by.isUsingVariable(name)) ||
+								(@when != null && @when.isUsingVariable(name)) ||
+								@body.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 
@@ -121,7 +126,7 @@ class ArrayComprehensionForIn extends Expression {
 		_value
 		_valueName: String
 		_valueVariable: Variable
-		_when
+		_when						= null
 	}
 	analyse() { // {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
@@ -190,6 +195,7 @@ class ArrayComprehensionForIn extends Expression {
 		@body.translate()
 		@when.translate() if @when?
 	} // }}}
+	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 
@@ -245,7 +251,7 @@ class ArrayComprehensionForOf extends Expression {
 		_key
 		_keyName
 		_value
-		_when
+		_when			= null
 	}
 	analyse() { // {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
@@ -295,6 +301,7 @@ class ArrayComprehensionForOf extends Expression {
 		@body.translate()
 		@when.translate() if @when?
 	} // }}}
+	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 
@@ -346,11 +353,11 @@ class ArrayComprehensionForRange extends Expression {
 		_bindingScope
 		_body
 		_bodyScope
-		_by
+		_by				= null
 		_from
 		_to
 		_value
-		_when
+		_when			= null
 	}
 	analyse() { // {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
@@ -396,6 +403,11 @@ class ArrayComprehensionForRange extends Expression {
 		@body.translate()
 		@when.translate() if @when?
 	} // }}}
+	isUsingVariable(name) =>	@from.isUsingVariable(name) ||
+								@to.isUsingVariable(name) ||
+								(@by != null && @by.isUsingVariable(name)) ||
+								(@when != null && @when.isUsingVariable(name)) ||
+								@body.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 

@@ -28,18 +28,24 @@ class ExpressionStatement extends Statement {
 				}
 			}
 			else {
-				if !expression.isAssignable() || @variable.length != 0 {
+				if !expression.isAssignable() {
 					@assignments.push(data.left.name)
 				}
 				else {
+					if @variable.length != 0 {
+						@assignments.push(@variable)
+					}
+
 					@variable = data.left.name
 				}
 
 				@scope.define(data.left.name, false, this)
 
-				return [data.left.name]
+				return data.left.name
 			}
 		}
+
+		return null
 	} // }}}
 	hasExceptions() => @expression.hasExceptions()
 	isAwait() => @expression.isAwait()
