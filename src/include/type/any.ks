@@ -24,6 +24,7 @@ class AnyType extends Type {
 	getProperty(name) => Type.Any
 	hashCode() => 'Any'
 	isAny() => true
+	isExportable() => true
 	isInstanceOf(target: Type) => true
 	isMorePreciseThan(type: Type) => false
 	isNullable() => @nullable

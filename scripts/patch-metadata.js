@@ -1,9 +1,9 @@
-var Compiler = require('./lib/compiler.js')().Compiler;
+var Compiler = require('../lib/compiler.js')().Compiler;
 var fs = require('fs');
 var klaw = require('klaw-sync');
 var path = require('path');
 
-var files = klaw(path.join(__dirname, 'test', 'fixtures', 'compile'), {
+var files = klaw(path.join(__dirname, '..', 'test', 'fixtures', 'compile'), {
 	nodir: true,
 	traverseAll: true,
 	filter: function(item) {
@@ -18,24 +18,24 @@ for(var i = 0; i < files.length; i++) {
 function patch(file) {
 	var root = path.dirname(file)
 	var name = path.basename(file).slice(0, -3);
-	
+
 	console.log('patching ' + name + '.ks')
-	
+
 	try {
 		fs.readFileSync(path.join(root, name + '.json'), {
 			encoding: 'utf8'
 		});
-		
+
 		var compiler = new Compiler(path.join(root, name + '.ks'), {
 			config: {
 				header: false
 			}
 		});
-		
+
 		compiler.compile().toSource();
-		
+
 		var data = compiler.toMetadata();
-		
+
 		fs.writeFileSync(
 			path.join(root, name + '.json'),
 			JSON.stringify(data, function(key, value){return value === Infinity ? 'Infinity' : value;}, 2),

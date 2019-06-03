@@ -1,4 +1,4 @@
-var Compiler = require('./lib/compiler.js')().Compiler;
+var Compiler = require('../lib/compiler.js')().Compiler;
 var fs = require('fs');
 var klaw = require('klaw-sync');
 var path = require('path');
@@ -18,7 +18,7 @@ if (program.args.length > 0) {
 	}
 }
 
-var files = klaw(path.join(__dirname, 'test', 'fixtures', 'compile'), {
+var files = klaw(path.join(__dirname, '..', 'test', 'fixtures', 'compile'), {
 	nodir: true,
 	traverseAll: true,
 	filter: filter
