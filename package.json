@@ -27,7 +27,7 @@
 		"register.js",
 		"bin",
 		"lib",
-		"scripts/install-helper.js",
+		"scripts/install.js",
 		"src/fs.js",
 		"src/register.js"
 	],

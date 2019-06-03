@@ -3,8 +3,9 @@ node_modules
 *.ksh
 *.ksm
 *.marks
+lib/compiler.js
 lib/compiler2.js
+lib/compiler3.js
 coverage
-compiler3.js
 .coveralls.yml
 testlibs.sh
