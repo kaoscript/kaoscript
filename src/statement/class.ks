@@ -2231,7 +2231,7 @@ class ClassConstructorDeclaration extends Statement {
 		let index = 1
 		if @body.length == 0 {
 			if @parent._extending {
-				this.callParentConstructor(@body)
+				this.addCallToParentConstructor()
 
 				index = 0
 			}
@@ -2282,30 +2282,32 @@ class ClassConstructorDeclaration extends Statement {
 			@aliases.push(statement)
 		}
 	} // }}}
-	private callParentConstructor(body) { // {{{
-		// list maybe parent's variables
-		const type = @parent.type()
+	private addCallToParentConstructor() { // {{{
+		// only add call if parent has an empty constructor
+		const extendedType = @parent.extends().type()
 
-		let parameters = [
-			parameter
-			for parameter in @parameters
-			when	!parameter.isAnonymous() &&
-					!parameter.isThisAlias()
-		]
-
-		if parameters.length == 0 {
-			if @parent.extends().type().hasConstructors() {
-				SyntaxException.throwNoSuperCall(this)
+		if extendedType.matchArguments([]) {
+			if extendedType.hasConstructors() {
+				@body.push({
+					kind: NodeKind::CallExpression
+					scope: {
+						kind: ScopeKind::This
+					}
+					callee: {
+						kind: NodeKind::Identifier
+						name: 'super'
+						start: @data.start
+						end: @data.start
+					}
+					arguments: []
+					nullable: false
+					attributes: []
+					start: @data.start
+					end: @data.start
+				})
 			}
 		}
 		else {
-			// map parent's constructors
-			// select constructors with most match
-			// if only one, select it
-			// if multiple, throw an error (ConflictConstructor)
-			// if none, select empty constructor
-			// if no empty constructor, throw an error (NoEmptyConstructor)
-			// add call to parent's constructor
 			SyntaxException.throwNoSuperCall(this)
 		}
 	} // }}}

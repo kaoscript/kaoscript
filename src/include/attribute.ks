@@ -80,9 +80,7 @@ class ElseAttribute extends Attribute {
 	static {
 		target() => AttributeTarget::Conditional
 	}
-	constructor(data) { // {{{
-		super()
-	} // }}}
+	constructor(data)
 	evaluate(node) { // {{{
 		if const flag = node.getAttributeData(AttributeData::Conditional) {
 			return !flag
