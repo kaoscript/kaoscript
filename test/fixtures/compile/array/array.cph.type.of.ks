@@ -6,4 +6,4 @@ const likes = {
 
 const flag = false
 
-export const spicyHeroes = flag ? [hero for hero, like of likes when like == 'spice'] : []
+export const spicyHeroes = flag ? [hero for like, hero of likes when like == 'spice'] : []

@@ -108,7 +108,7 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 
 		const variables = @left.reduceTypes()
 
-		for name, type of variables when !type.isAny() {
+		for const type, name of variables when !type.isAny() {
 			@scope.replaceVariable(name, type, this)
 		}
 
@@ -119,10 +119,10 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 	reduceTypes() { // {{{
 		const variables = {}
 
-		for name, type of @left.reduceTypes() {
+		for const type, name of @left.reduceTypes() {
 			variables[name] = type
 		}
-		for name, type of @right.reduceTypes() {
+		for const type, name of @right.reduceTypes() {
 			variables[name] = type
 		}
 
@@ -218,7 +218,7 @@ class BinaryOperatorImply extends BinaryOperatorExpression {
 		const right = @right.reduceTypes()
 
 		let rtype
-		for name, type of @left.reduceTypes() {
+		for const type, name of @left.reduceTypes() {
 			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
 				if type.equals(rtype) {
 					variables[name] = type
@@ -322,7 +322,7 @@ class BinaryOperatorOr extends BinaryOperatorExpression {
 		const right = @right.reduceTypes()
 
 		let rtype
-		for name, type of @left.reduceTypes() {
+		for const type, name of @left.reduceTypes() {
 			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
 				if type.equals(rtype) {
 					variables[name] = type
@@ -526,7 +526,7 @@ class BinaryOperatorXor extends BinaryOperatorExpression {
 		const right = @right.reduceTypes()
 
 		let rtype
-		for name, type of @left.reduceTypes() {
+		for const type, name of @left.reduceTypes() {
 			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
 				if type.equals(rtype) {
 					variables[name] = type

@@ -61,7 +61,7 @@ export class Module {
 	addHashes(file, hashes) { // {{{
 		let root = path.dirname(file)
 
-		for name, hash of hashes {
+		for const hash, name of hashes {
 			if name == '.' {
 				@hashes[path.relative(@directory, file)] = hash
 			}
@@ -122,7 +122,7 @@ export class Module {
 
 		@body.translate()
 
-		for name, export of @exports {
+		for const export, name of @exports {
 			if !export.type.isExportable() {
 				ReferenceException.throwNotExportable(name, @body)
 			}
@@ -213,7 +213,7 @@ export class Module {
 
 		let root = path.dirname(file)
 
-		for name, hash of hashes {
+		for const hash, name of hashes {
 			if name == '.' {
 				return null if @compiler.sha256(file, data) != hash
 			}
@@ -398,7 +398,7 @@ export class Module {
 			@body.toFragments(block)
 
 			let exportCount = 0
-			for :export of @exports {
+			for const export of @exports {
 				if !export.type.isAlias() {
 					++exportCount
 				}
@@ -409,7 +409,7 @@ export class Module {
 				const object = line.newObject()
 
 				let type
-				for name, export of @exports {
+				for const export, name of @exports {
 					type = export.type
 
 					if !type.isAlias() {
@@ -495,15 +495,15 @@ export class Module {
 				)
 			}
 
-			for name, type of @aliens {
+			for const type, name of @aliens {
 				@metadata.aliens.push(type.toMetadata(@metadata.references, true), name)
 			}
 
-			for name, export of @exports {
+			for const export, name of @exports {
 				@metadata.exports.push(export.type.toMetadata(@metadata.references, false), name)
 			}
 
-			for name, datas of @exportedMacros {
+			for const datas, name of @exportedMacros {
 				@metadata.macros.push(name, datas)
 			}
 		}

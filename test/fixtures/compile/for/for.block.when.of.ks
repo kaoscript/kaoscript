@@ -8,6 +8,6 @@ likes = {
 	duncan: 'murbella'
 }
 
-for key, value of likes when key.indexOf('a') != 0 {
+for value, key of likes when key.indexOf('a') != 0 {
 	console.log(`\(key) likes \(value)`)
 }

@@ -45,21 +45,21 @@ class ClassType extends Type {
 				type.addConstructor(ClassConstructorType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 			}
 
-			for name, vtype of data.instanceVariables {
+			for const vtype, name of data.instanceVariables {
 				type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 			}
 
-			for name, vtype of data.classVariables {
+			for const vtype, name of data.classVariables {
 				type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 			}
 
-			for name, methods of data.instanceMethods {
+			for const methods, name of data.instanceMethods {
 				for method in methods {
 					type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
-			for name, methods of data.classMethods {
+			for const methods, name of data.classMethods {
 				for method in methods {
 					type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 				}
@@ -78,21 +78,21 @@ class ClassType extends Type {
 
 					type.copyFrom(source.type())
 
-					for name, vtype of data.instanceVariables {
+					for const vtype, name of data.instanceVariables {
 						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
 
-					for name, vtype of data.classVariables {
+					for const vtype, name of data.classVariables {
 						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
 
-					for name, methods of data.instanceMethods {
+					for const methods, name of data.instanceMethods {
 						for method in methods {
 							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
-					for name, methods of data.classMethods {
+					for const methods, name of data.classMethods {
 						for method in methods {
 							type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
@@ -118,21 +118,21 @@ class ClassType extends Type {
 						type.addConstructor(ClassConstructorType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 					}
 
-					for name, vtype of data.instanceVariables {
+					for const vtype, name of data.instanceVariables {
 						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
 
-					for name, vtype of data.classVariables {
+					for const vtype, name of data.classVariables {
 						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
 
-					for name, methods of data.instanceMethods {
+					for const methods, name of data.instanceMethods {
 						for method in methods {
 							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
-					for name, methods of data.classMethods {
+					for const methods, name of data.classMethods {
 						for method in methods {
 							type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
@@ -284,26 +284,26 @@ class ClassType extends Type {
 		return that.copyFrom(this)
 	} // }}}
 	condense() { // {{{
-		for :methods of this._abstractMethods {
+		for const methods of this._abstractMethods {
 			for method in methods {
 				method.unflagAlteration()
 			}
 		}
-		for :methods of this._classMethods {
+		for const methods of this._classMethods {
 			for method in methods {
 				method.unflagAlteration()
 			}
 		}
-		for :methods of this._instanceMethods {
+		for const methods of this._instanceMethods {
 			for method in methods {
 				method.unflagAlteration()
 			}
 		}
 
-		for :variable of this._classVariables {
+		for const variable of this._classVariables {
 			variable.unflagAlteration()
 		}
-		for :variable of this._instanceVariables {
+		for const variable of this._instanceVariables {
 			variable.unflagAlteration()
 		}
 
@@ -321,20 +321,20 @@ class ClassType extends Type {
 		@init = src._init
 		@sealed = src._sealed
 
-		for name, methods of src._abstractMethods {
+		for const methods, name of src._abstractMethods {
 			@abstractMethods[name] = [].concat(methods)
 		}
-		for name, methods of src._classMethods {
+		for const methods, name of src._classMethods {
 			@classMethods[name] = [].concat(methods)
 		}
-		for name, methods of src._instanceMethods {
+		for const methods, name of src._instanceMethods {
 			@instanceMethods[name] = [].concat(methods)
 		}
 
-		for name, variable of src._classVariables {
+		for const variable, name of src._classVariables {
 			@classVariables[name] = variable
 		}
-		for name, variable of src._instanceVariables {
+		for const variable, name of src._instanceVariables {
 			@instanceVariables[name] = variable
 		}
 
@@ -366,22 +366,22 @@ class ClassType extends Type {
 				classMethods: {}
 			}
 
-			for name, variable of @instanceVariables when variable.isAlteration() {
+			for const variable, name of @instanceVariables when variable.isAlteration() {
 				export.instanceVariables[name] = variable.export(references, ignoreAlteration)
 			}
 
-			for name, variable of @classVariables when variable.isAlteration() {
+			for const variable, name of @classVariables when variable.isAlteration() {
 				export.classVariables[name] = variable.export(references, ignoreAlteration)
 			}
 
-			for name, methods of @instanceMethods {
+			for const methods, name of @instanceMethods {
 				const exportedMethods = [method.export(references, ignoreAlteration) for method in methods when method.isAlteration()]
 				if exportedMethods.length > 0 {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
-			for name, methods of @classMethods {
+			for const methods, name of @classMethods {
 				const exportedMethods = [method.export(references, ignoreAlteration) for method in methods when method.isAlteration()]
 				if exportedMethods.length > 0 {
 					export.classMethods[name] = exportedMethods
@@ -406,15 +406,15 @@ class ClassType extends Type {
 				classMethods: {}
 			}
 
-			for name, variable of @instanceVariables {
+			for const variable, name of @instanceVariables {
 				export.instanceVariables[name] = variable.export(references, ignoreAlteration)
 			}
 
-			for name, variable of @classVariables {
+			for const variable, name of @classVariables {
 				export.classVariables[name] = variable.export(references, ignoreAlteration)
 			}
 
-			for name, methods of @instanceMethods {
+			for const methods, name of @instanceMethods {
 				const m = [method.export(references, ignoreAlteration) for const method in methods when method.isExportable()]
 
 				if m.length != 0 {
@@ -422,14 +422,14 @@ class ClassType extends Type {
 				}
 			}
 
-			for name, methods of @classMethods {
+			for const methods, name of @classMethods {
 				export.classMethods[name] = [method.export(references, ignoreAlteration) for method in methods]
 			}
 
 			if @abstract {
 				export.abstractMethods = {}
 
-				for name, methods of @abstractMethods {
+				for const methods, name of @abstractMethods {
 					export.abstractMethods[name] = [method.export(references, ignoreAlteration) for method in methods]
 				}
 			}
@@ -456,21 +456,21 @@ class ClassType extends Type {
 			method.flagExported(false)
 		}
 
-		for :variable of @instanceVariables {
+		for const variable of @instanceVariables {
 			variable.type().flagExported(false)
 		}
 
-		for :variable of @classVariables {
+		for const variable of @classVariables {
 			variable.type().flagExported(false)
 		}
 
-		for :methods of @instanceMethods when methods is Array {
+		for const methods of @instanceMethods when methods is Array {
 			for method in methods {
 				method.flagExported(false)
 			}
 		}
 
-		for :methods of @classMethods when methods is Array {
+		for const methods of @classMethods when methods is Array {
 			for method in methods {
 				method.flagExported(false)
 			}
@@ -506,7 +506,7 @@ class ClassType extends Type {
 		}
 
 		if @abstract {
-			for name, methods of @abstractMethods {
+			for const methods, name of @abstractMethods {
 				if abstractMethods[name] is not Array {
 					abstractMethods[name] = []
 				}
@@ -518,7 +518,7 @@ class ClassType extends Type {
 		const matchables = []
 
 		let method, index
-		for name, methods of abstractMethods when @instanceMethods[name] is Array {
+		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
 				if method.isMatched(@instanceMethods[name], matchables) {
 					methods.splice(index, 1)
@@ -645,7 +645,7 @@ class ClassType extends Type {
 		const matchables = []
 
 		let method, index
-		for name, methods of abstractMethods when @instanceMethods[name] is Array {
+		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
 				if method.isMatched(@instanceMethods[name], matchables) {
 					methods.splice(index, 1)
@@ -816,7 +816,7 @@ class ClassType extends Type {
 		}
 	} // }}}
 	matchInstanceWith(object: ObjectType, matchables) { // {{{
-		for name, property of object._properties {
+		for const property, name of object._properties {
 			if @instanceVariables[name]?.matchSignatureOf(property, matchables) {
 			}
 			else if @instanceMethods[name] is Array {
@@ -850,21 +850,21 @@ class ClassType extends Type {
 		const index = matchables.length
 		matchables.push(this, that, true)
 
-		for name, variable of that._instanceVariables {
+		for const variable, name of that._instanceVariables {
 			if !@instanceVariables[name]?.matchSignatureOf(variable, matchables) {
 				matchables[index + 2] = false
 				return false
 			}
 		}
 
-		for name, variable of that._classVariables {
+		for const variable, name of that._classVariables {
 			if !@classVariables[name]?.matchSignatureOf(variable, matchables) {
 				matchables[index + 2] = false
 				return false
 			}
 		}
 
-		for name, methods of that._instanceMethods {
+		for const methods, name of that._instanceMethods {
 			if @instanceMethods[name] is not Array {
 				matchables[index + 2] = false
 				return false
@@ -878,7 +878,7 @@ class ClassType extends Type {
 			}
 		}
 
-		for name, methods of that._classMethods {
+		for const methods, name of that._classMethods {
 			if @classMethods[name] is not Array {
 				matchables[index + 2] = false
 				return false

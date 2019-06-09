@@ -100,7 +100,7 @@ class Importer extends Statement {
 	} // }}}
 	prepare() { // {{{
 		if @isKSFile {
-			for name, argument of @arguments {
+			for const argument, name of @arguments {
 				argument.name = @moduleToLocalArguments[name]
 
 				if @seepedArguments[name] == true {
@@ -116,13 +116,13 @@ class Importer extends Statement {
 
 			const module = this.module()
 
-			for name of @seepedArguments {
+			for const :name of @seepedArguments {
 				module.addRequirement(new SeepedRequirement(@arguments[name].name, @arguments[name].type))
 			}
 
 			const matchables = []
 
-			for name, def of @imports {
+			for const def, name of @imports {
 				const variable = @scope.getVariable(def.local)
 
 				if def.isAlias {
@@ -321,7 +321,7 @@ class Importer extends Statement {
 			return this.loadKSFile(x + $extensions.source, moduleName)
 		}
 		else {
-			for ext of require.extensions {
+			for const :ext of require.extensions {
 				if fs.isFile(x + ext) {
 					return this.loadNodeFile(x, moduleName)
 				}
@@ -412,7 +412,7 @@ class Importer extends Statement {
 				this.addImport(name, name, false)
 			}
 
-			for name, datas of macros {
+			for const datas, name of macros {
 				for data in datas {
 					new MacroDeclaration(data, this, null, name)
 				}
@@ -593,7 +593,7 @@ class Importer extends Statement {
 		if hasArguments {
 			let nf = false
 
-			for name of @arguments {
+			for const :name of @arguments {
 				if nf {
 					importCode += ', '
 				}
@@ -635,7 +635,9 @@ class Importer extends Statement {
 			}
 
 			if @count == 1 {
-				for name, alias of @variables {
+				let alias, name
+
+				for alias, name of @variables {
 				}
 
 				fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
@@ -653,7 +655,7 @@ class Importer extends Statement {
 					let line = fragments.newLine().code('var ')
 
 					let nf = false
-					for name, alias of @variables {
+					for const alias, name of @variables {
 						if nf {
 							line.code(', ')
 						}
@@ -674,7 +676,7 @@ class Importer extends Statement {
 					let line = fragments.newLine().code('var {')
 
 					let nf = false
-					for name, alias of @variables {
+					for const alias, name of @variables {
 						if nf {
 							line.code(', ')
 						}
@@ -736,7 +738,9 @@ class Importer extends Statement {
 
 		let name, alias
 		if @count == 1 {
-			for name, alias of @variables {
+			let alias, name
+
+			for alias, name of @variables {
 			}
 
 			const line = fragments
@@ -784,7 +788,7 @@ class Importer extends Statement {
 				line = fragments.newLine().code('var ')
 
 				let nf = false
-				for name, alias of @variables {
+				for const alias, name of @variables {
 					if nf {
 						line.code(', ')
 					}
@@ -801,7 +805,7 @@ class Importer extends Statement {
 				let line = fragments.newLine().code('var {')
 
 				let nf = false
-				for name, alias of @variables {
+				for const alias, name of @variables {
 					if nf {
 						line.code(', ')
 					}

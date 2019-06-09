@@ -17,8 +17,8 @@ module.exports = function(Helper, Type) {
 			throw new TypeError("'iterator' is not of type 'Function'");
 		}
 		let results = [];
-		for(let item in object) {
-			let index = object[item];
+		for(let index in object) {
+			let item = object[index];
 			results.push(iterator(item, index));
 		}
 		return results;
@@ -46,8 +46,8 @@ module.exports = function(Helper, Type) {
 			throw new TypeError("'condition' is not of type 'Function'");
 		}
 		let results = [];
-		for(let item in object) {
-			let index = object[item];
+		for(let index in object) {
+			let item = object[index];
 			if(condition(item, index)) {
 				results.push(iterator(item, index));
 			}

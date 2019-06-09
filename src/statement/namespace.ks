@@ -71,7 +71,7 @@ class NamespaceDeclaration extends Statement {
 		const object = line.newObject()
 
 		let type
-		for name, variable of @exports {
+		for const variable, name of @exports {
 			type = variable.getDeclaredType()
 
 			if type is not AliasType {

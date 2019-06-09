@@ -11,7 +11,8 @@ module.exports = function() {
 		++i;
 		while(i < l) {
 			if(Type.isArray(args[i])) {
-				for(let value in args[i]) {
+				for(let __ks_0 = 0, __ks_1 = args[i].length, value; __ks_0 < __ks_1; ++__ks_0) {
+					value = args[i][__ks_0];
 					source.pushUniq(value);
 				}
 			}

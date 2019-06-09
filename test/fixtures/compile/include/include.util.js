@@ -54,7 +54,7 @@ module.exports = function() {
 			if(current === void 0 || current === null) {
 				throw new TypeError("'current' is not nullable");
 			}
-			for(let key in current) {
+			for(const key in current) {
 				if(source[key]) {
 					$merge.merge(source, key, current[key]);
 				}
@@ -187,7 +187,8 @@ module.exports = function() {
 		++i;
 		while(i < l) {
 			if(KSType.isArray(args[i])) {
-				for(let value in args[i]) {
+				for(let __ks_0 = 0, __ks_1 = args[i].length, value; __ks_0 < __ks_1; ++__ks_0) {
+					value = args[i][__ks_0];
 					source.pushUniq(value);
 				}
 			}
@@ -314,8 +315,8 @@ module.exports = function() {
 			return object.clone();
 		}
 		let clone = {};
-		for(let key in object) {
-			let value = object[key];
+		for(const key in object) {
+			const value = object[key];
 			clone[key] = $clone(value);
 		}
 		return clone;
@@ -330,7 +331,7 @@ module.exports = function() {
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
 		}
-		for(let key in item) {
+		for(const key in item) {
 			if(item.hasOwnProperty(key)) {
 				return false;
 			}
@@ -347,8 +348,8 @@ module.exports = function() {
 		++i;
 		while(i < l) {
 			if(KSType.isObject(args[i])) {
-				for(let key in args[i]) {
-					let value = args[i][key];
+				for(const key in args[i]) {
+					const value = args[i][key];
 					$merge.merge(source, key, value);
 				}
 			}

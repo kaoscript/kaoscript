@@ -110,7 +110,7 @@ class ArrayBinding extends Expression {
 		}
 	} // }}}
 	toAfterwardFragments(fragments) { // {{{
-		for name, variable of @variables {
+		for const variable, name of @variables {
 			fragments.line(variable, ' = ', name)
 
 			@scope.releaseTempName(name)
@@ -502,7 +502,7 @@ class ObjectBinding extends Expression {
 		}
 	} // }}}
 	toAfterwardFragments(fragments) { // {{{
-		for name, variable of @variables {
+		for const variable, name of @variables {
 			fragments.line(variable, ' = ', name)
 
 			@scope.releaseTempName(name)

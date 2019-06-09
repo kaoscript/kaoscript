@@ -522,7 +522,7 @@ export class Compiler {
 			$targets[target[1]][target[2]] = options
 		} // }}}
 		registerTargets(targets) { // {{{
-			for name, data of targets {
+			for const data, name of targets {
 				if data is String {
 					Compiler.registerTargetAlias(name, data)
 				}
@@ -712,7 +712,7 @@ export func isUpToDate(file, target, source) { // {{{
 
 	let root = path.dirname(file)
 
-	for name, hash of hashes {
+	for const hash, name of hashes {
 		if name == '.' {
 			return null if fs.sha256(source) != hash
 		}

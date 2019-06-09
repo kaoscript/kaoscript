@@ -6,6 +6,6 @@ likes = {
 	duncan: 'murbella'
 }
 
-spicyHeroes = [hero for hero, like of likes when like == 'spice']
+spicyHeroes = [hero for like, hero of likes when like == 'spice']
 
 expect(spicyHeroes).to.eql(['leto'])

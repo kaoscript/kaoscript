@@ -9,7 +9,7 @@ likes = {
 }
 
 let key, value
-for key, value of likes {
+for value, key of likes {
 }
 
 console.log(`\(key) likes \(value)`)

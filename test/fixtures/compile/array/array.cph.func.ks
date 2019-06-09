@@ -5,5 +5,5 @@ likes = {
 }
 
 func spicyHeroes() {
-	return [hero for hero, like of likes when like == 'spice']
+	return [hero for like, hero of likes when like == 'spice']
 }

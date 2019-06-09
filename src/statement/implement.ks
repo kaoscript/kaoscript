@@ -82,7 +82,7 @@ class ImplementDeclaration extends Statement {
 			property.toFragments(fragments, Mode::None)
 		}
 
-		for :property of @sharingProperties {
+		for const property of @sharingProperties {
 			property.toSharedFragments(fragments)
 		}
 	} // }}}

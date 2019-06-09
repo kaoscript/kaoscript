@@ -11,7 +11,7 @@ class ObjectType extends Type {
 			}
 
 			queue.push(() => {
-				for name, property of data.properties {
+				for const property, name of data.properties {
 					if property.parameters? {
 						type.addProperty(name, FunctionType.fromMetadata(property, metadata, references, alterations, queue, scope, node))
 					}
@@ -41,7 +41,7 @@ class ObjectType extends Type {
 
 		export.properties = {}
 
-		for name, value of @properties {
+		for const value, name of @properties {
 			export.properties[name] = value.export(references, ignoreAlteration)
 		}
 
@@ -60,10 +60,10 @@ class ObjectType extends Type {
 		}
 
 		let nf
-		for :property of value._properties {
+		for const property of value._properties {
 			nf = true
 
-			for :prop of @properties while nf {
+			for const prop of @properties while nf {
 				if prop.matchSignatureOf(property, matchables) {
 					nf = false
 				}
@@ -86,7 +86,7 @@ class ObjectType extends Type {
 		throw new NotImplementedException()
 	} // }}}
 	walk(fn) { // {{{
-		for name, type of @properties {
+		for const type, name of @properties {
 			fn(name, type)
 		}
 	} // }}}

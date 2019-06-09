@@ -105,7 +105,7 @@ else {
 	compiler.compile()
 
 	const sandbox = {}
-	for key of global {
+	for const :key of global {
 		sandbox[key] = global[key]
 	}
 

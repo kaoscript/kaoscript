@@ -8,6 +8,6 @@ likes = {
 	duncan: 'murbella'
 }
 
-for key, value of likes until value == 'chani' {
+for value, key of likes until value == 'chani' {
 	console.log(`\(key) likes \(value)`)
 }

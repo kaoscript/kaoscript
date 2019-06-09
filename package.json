@@ -36,6 +36,7 @@
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
+		"@kaoscript/compiler-bin-es6": "github:kaoscript/compiler-bin-js-es6",
 		"@kaoscript/runtime": "^0.6.0",
 		"commander": "^2.20.0"
 	},
@@ -46,12 +47,12 @@
 		"@kaoscript/source-generator": "github:kaoscript/source-generator",
 		"@kaoscript/target-commons": "github:kaoscript/target-commons",
 		"@kaoscript/test-import": "github:kaoscript/test-import",
-		"@kaoscript/util": "^0.1.0",
+		"@kaoscript/util": "github:kaoscript/util",
 		"@zokugun/istanbul.cover": "^0.5.0",
 		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",
 		"@zokugun/istanbul.reporter.minimap": "^0.5.0",
 		"chai": "^4.2.0",
-		"coveralls": "^3.0.3",
+		"coveralls": "^3.0.4",
 		"istanbul": "^0.4.5",
 		"klaw-sync": "^6.0.0",
 		"mocha": "^5.2.0",

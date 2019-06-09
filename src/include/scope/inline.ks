@@ -23,7 +23,7 @@ class InlineBlockScope extends BlockScope {
 		return name
 	} // }}}
 	acquireUnusedTempName() { // {{{
-		for const name of @tempNames when @tempNames[name] {
+		for const :name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
 			return name

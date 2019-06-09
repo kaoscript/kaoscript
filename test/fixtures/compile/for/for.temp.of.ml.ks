@@ -1,11 +1,11 @@
 extern console
 
 func foo(x) {
-	for key, value of x.foo {
+	for value, key of x.foo {
 		console.log(key, value)
 	}
 
-	for key, value of x.bar {
+	for value, key of x.bar {
 		console.log(key, value)
 	}
 }

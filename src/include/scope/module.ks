@@ -37,7 +37,7 @@ class ModuleScope extends Scope {
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
 	} // }}}
 	acquireTempName(declare: Boolean = true): String { // {{{
-		for const name of @tempNames when @tempNames[name] {
+		for const :name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
 			return name
@@ -54,7 +54,7 @@ class ModuleScope extends Scope {
 		return name
 	} // }}}
 	acquireUnusedTempName(): String { // {{{
-		for const name of @tempNames when @tempNames[name] {
+		for const :name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
 			return name

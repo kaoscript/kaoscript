@@ -104,7 +104,7 @@ func $serialize(macro, data, context) { // {{{
 
 		context.data += '{'
 
-		for key, value of data {
+		for const value, key of data {
 			if empty {
 				empty = false
 
@@ -237,7 +237,7 @@ class MacroDeclaration extends AbstractNode {
 
 		const block = line.code(')').newBlock()
 
-		for name, kind of @parameters {
+		for const kind, name of @parameters {
 			if kind == MacroVariableKind::AutoEvaluated {
 				block.line(`\(name) = __ks_evaluate(__ks_reificate(\(name), true, 3))`)
 			}

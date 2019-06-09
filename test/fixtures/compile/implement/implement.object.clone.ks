@@ -8,10 +8,10 @@ impl Object {
 		if object.constructor.prototype.clone is Function {
 			return object.clone()
 		}
-		
+
 		let clone = {}
-		
-		for key, value of object {
+
+		for value, key of object {
 			if value is array {
 				clone[key] = value.clone()
 			}
@@ -22,7 +22,7 @@ impl Object {
 				clone[key] = value
 			}
 		}
-		
+
 		return clone
 	}
 }

@@ -17,7 +17,7 @@ class NamespaceType extends Type {
 
 					type.copyFrom(source.type())
 
-					for name, property of data.properties {
+					for const property, name of data.properties {
 						type.addPropertyFromMetadata(name, property, metadata, references, alterations, queue, node)
 					}
 				})
@@ -28,7 +28,7 @@ class NamespaceType extends Type {
 				}
 
 				queue.push(() => {
-					for name, property of data.properties {
+					for const property, name of data.properties {
 						type.addPropertyFromMetadata(name, property, metadata, references, alterations, queue, node)
 					}
 				})
@@ -95,10 +95,10 @@ class NamespaceType extends Type {
 	copyFrom(src: NamespaceType) { // {{{
 		@sealed = src._sealed
 
-		for name, property of src._properties {
+		for const property, name of src._properties {
 			@properties[name] = property
 		}
-		for name, property of src._sealProperties {
+		for const property, name of src._sealProperties {
 			@sealProperties[name] = property
 		}
 
@@ -119,7 +119,7 @@ class NamespaceType extends Type {
 				properties: {}
 			}
 
-			for name, property of @properties when property.isAlteration() {
+			for const property, name of @properties when property.isAlteration() {
 				export.properties[name] = property.toExportOrIndex(references, ignoreAlteration)
 			}
 
@@ -132,7 +132,7 @@ class NamespaceType extends Type {
 				properties: {}
 			}
 
-			for name, property of @properties {
+			for const property, name of @properties {
 				export.properties[name] = property.toExportOrIndex(references, ignoreAlteration)
 			}
 
@@ -147,7 +147,7 @@ class NamespaceType extends Type {
 			@exported = true
 		}
 
-		for :value of @properties {
+		for const value of @properties {
 			value.flagExported(explicitly)
 		}
 
@@ -169,7 +169,7 @@ class NamespaceType extends Type {
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
 	matchSignatureOf(that, matchables) { // {{{
 		if that is NamespaceType {
-			for name, property of that._properties {
+			for const property, name of that._properties {
 				if !@properties[name]?.matchSignatureOf(property, matchables) {
 					return false
 				}
@@ -193,7 +193,7 @@ class NamespaceType extends Type {
 		throw new NotImplementedException()
 	} // }}}
 	walk(fn) { // {{{
-		for name, type of @properties {
+		for const type, name of @properties {
 			fn(name, type)
 		}
 	} // }}}

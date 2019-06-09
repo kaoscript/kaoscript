@@ -54,7 +54,7 @@ class ClassDeclaration extends Statement {
 		const usages = []
 
 		let type, nf, item, usage
-		for :type of parameters[index + 1].types {
+		for const type of parameters[index + 1].types {
 			tree.push(item = {
 				type: type.type
 				methods: [methods[i] for i in type.methods]
@@ -189,7 +189,7 @@ class ClassDeclaration extends Statement {
 		const usages = []
 
 		let type, nf, item, usage
-		for :type of parameters[index + 1].types {
+		for const type of parameters[index + 1].types {
 			tree.push(item = {
 				type: type.type
 				methods: [methods[i] for i in type.methods]
@@ -528,7 +528,7 @@ class ClassDeclaration extends Statement {
 		let ctrl = fragments.newControl()
 
 		if begins.length != 0 {
-			for k, group of groups {
+			for const group, k of groups {
 				ctrl.step().code('else ') unless ctrl.isFirstStep()
 
 				ctrl.code(`if(\(argName).length >= \(group.n))`).step()
@@ -539,8 +539,8 @@ class ClassDeclaration extends Statement {
 				}
 
 				let indexes = []
-				for parameter in [value for :value of parameters].sort((a, b) => b.weight - a.weight) {
-					for hash, type of parameter.types {
+				for parameter in [value for const value of parameters].sort((a, b) => b.weight - a.weight) {
+					for const type, hash of parameter.types {
 						type.methods:Array.remove(...indexes)
 
 						if type.methods.length == 0 {
@@ -548,7 +548,7 @@ class ClassDeclaration extends Statement {
 						}
 					}
 
-					for :type of parameter.types {
+					for const type of parameter.types {
 						if type.methods.length == 1 {
 							indexes:Array.pushUniq(type.methods[0])
 						}
@@ -672,7 +672,7 @@ class ClassDeclaration extends Statement {
 			}
 
 			for method in infinities {
-				for group of groups when method.absoluteMin() >= group.n {
+				for const :group of groups when method.absoluteMin() >= group.n {
 					group.methods.push(method)
 				}
 			}
@@ -698,7 +698,7 @@ class ClassDeclaration extends Statement {
 
 				let ctrl = block.newControl()
 
-				for k, group of groups {
+				for const group, k of groups {
 					ctrl.step().code('else ') unless ctrl.isFirstStep()
 
 					if group.n is Array {
@@ -723,8 +723,8 @@ class ClassDeclaration extends Statement {
 						}
 
 						let indexes = []
-						for parameter in [value for :value of parameters].sort((a, b) => b.weight - a.weight) {
-							for hash, type of parameter.types {
+						for parameter in [value for const value of parameters].sort((a, b) => b.weight - a.weight) {
+							for const type, hash of parameter.types {
 								type.methods:Array.remove(...indexes)
 
 								if type.methods.length == 0 {
@@ -732,7 +732,7 @@ class ClassDeclaration extends Statement {
 								}
 							}
 
-							for :type of parameter.types {
+							for const type of parameter.types {
 								if type.methods.length == 1 {
 									indexes:Array.pushUniq(type.methods[0])
 								}
@@ -930,13 +930,13 @@ class ClassDeclaration extends Statement {
 			@instanceVariableScope.define('super', true, @scope.reference(@extendsName), this)
 		}
 
-		for name, variable of @classVariables {
+		for const variable, name of @classVariables {
 			variable.prepare()
 
 			@class.addClassVariable(name, variable.type())
 		}
 
-		for name, methods of @classMethods {
+		for const methods, name of @classMethods {
 			for method in methods {
 				method.prepare()
 
@@ -944,13 +944,13 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for name, variable of @instanceVariables {
+		for const variable, name of @instanceVariables {
 			variable.prepare()
 
 			@class.addInstanceVariable(name, variable.type())
 		}
 
-		for name, methods of @instanceMethods {
+		for const methods, name of @instanceMethods {
 			for method in methods {
 				method.prepare()
 
@@ -958,7 +958,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for name, methods of @abstractMethods {
+		for const methods, name of @abstractMethods {
 			for method in methods {
 				method.prepare()
 
@@ -982,18 +982,18 @@ class ClassDeclaration extends Statement {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 
-		for :macros of @macros {
+		for const macros of @macros {
 			for macro in macros {
 				macro.export(this)
 			}
 		}
 	} // }}}
 	translate() { // {{{
-		for :variable of @classVariables {
+		for const variable of @classVariables {
 			variable.translate()
 		}
 
-		for :variable of @instanceVariables {
+		for const variable of @instanceVariables {
 			variable.translate()
 		}
 
@@ -1003,19 +1003,19 @@ class ClassDeclaration extends Statement {
 
 		@destructor.translate() if @destructor?
 
-		for :methods of @instanceMethods {
+		for const methods of @instanceMethods {
 			for method in methods {
 				method.translate()
 			}
 		}
 
-		for :methods of @abstractMethods {
+		for const methods of @abstractMethods {
 			for method in methods {
 				method.translate()
 			}
 		}
 
-		for :methods of @classMethods {
+		for const methods of @classMethods {
 			for method in methods {
 				method.translate()
 			}
@@ -1070,7 +1070,7 @@ class ClassDeclaration extends Statement {
 	extends() => @extendsType
 	hasConstructors() => @constructors.length != 0
 	hasInits() { // {{{
-		for :field of @instanceVariables {
+		for const field of @instanceVariables {
 			if field.hasDefaultValue() {
 				return true
 			}
@@ -1125,7 +1125,7 @@ class ClassDeclaration extends Statement {
 				ClassDestructorDeclaration.toSwitchFragments(this, ctrl, @type)
 			}
 
-			for name, methods of @classMethods {
+			for const methods, name of @classMethods {
 				m.clear()
 
 				for method in methods {
@@ -1155,7 +1155,7 @@ class ClassDeclaration extends Statement {
 				.code('__ks_init_1: function()')
 				.step()
 
-			for :field of @instanceVariables {
+			for const field of @instanceVariables {
 				field.toFragments(ctrl)
 			}
 
@@ -1198,7 +1198,7 @@ class ClassDeclaration extends Statement {
 
 		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
 
-		for name, methods of @instanceMethods {
+		for const methods, name of @instanceMethods {
 			m.clear()
 
 			for method in methods {
@@ -1241,7 +1241,7 @@ class ClassDeclaration extends Statement {
 				.code('__ks_init_1()')
 				.step()
 
-			for :field of @instanceVariables {
+			for const field of @instanceVariables {
 				field.toFragments(ctrl)
 			}
 
@@ -1289,7 +1289,7 @@ class ClassDeclaration extends Statement {
 			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
 		}
 
-		for name, methods of @instanceMethods {
+		for const methods, name of @instanceMethods {
 			m.clear()
 
 			for method in methods {
@@ -1303,7 +1303,7 @@ class ClassDeclaration extends Statement {
 			})
 		}
 
-		for name, methods of @classMethods {
+		for const methods, name of @classMethods {
 			m.clear()
 
 			for method in methods {
@@ -1393,7 +1393,7 @@ class ClassDeclaration extends Statement {
 				.code('__ks_init_1()')
 				.step()
 
-			for :field of @instanceVariables {
+			for const field of @instanceVariables {
 				field.toFragments(ctrl)
 			}
 
@@ -1435,7 +1435,7 @@ class ClassDeclaration extends Statement {
 			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
 		}
 
-		for name, methods of @instanceMethods {
+		for const methods, name of @instanceMethods {
 			m.clear()
 
 			for method in methods {
@@ -1449,7 +1449,7 @@ class ClassDeclaration extends Statement {
 			})
 		}
 
-		for name, methods of @classMethods {
+		for const methods, name of @classMethods {
 			m.clear()
 
 			for method in methods {
@@ -1493,7 +1493,7 @@ class ClassDeclaration extends Statement {
 				ClassDestructorDeclaration.toSwitchFragments(this, ctrl, @type)
 			}
 
-			for name, methods of @classMethods {
+			for const methods, name of @classMethods {
 				m.clear()
 
 				for method in methods {
@@ -1517,7 +1517,7 @@ class ClassDeclaration extends Statement {
 			ctrl.line(@extendsName, '.prototype.__ks_init.call(this)')
 
 			if this.hasInits() {
-				for :field of @instanceVariables {
+				for const field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
 			}
@@ -1529,7 +1529,7 @@ class ClassDeclaration extends Statement {
 				.step()
 
 			if this.hasInits() {
-				for :field of @instanceVariables {
+				for const field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
 			}
@@ -1547,7 +1547,7 @@ class ClassDeclaration extends Statement {
 
 		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
 
-		for name, methods of @instanceMethods {
+		for const methods, name of @instanceMethods {
 			m.clear()
 
 			for method in methods {
@@ -1583,7 +1583,7 @@ class ClassDeclaration extends Statement {
 			ctrl.line(@extendsName, '.prototype.__ks_init.call(this)')
 
 			if this.hasInits() {
-				for :field of @instanceVariables {
+				for const field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
 			}
@@ -1597,7 +1597,7 @@ class ClassDeclaration extends Statement {
 				.step()
 
 			if this.hasInits() {
-				for :field of @instanceVariables {
+				for const field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
 			}
@@ -1625,7 +1625,7 @@ class ClassDeclaration extends Statement {
 			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
 		}
 
-		for name, methods of @instanceMethods {
+		for const methods, name of @instanceMethods {
 			m.clear()
 
 			for method in methods {
@@ -1639,7 +1639,7 @@ class ClassDeclaration extends Statement {
 			})
 		}
 
-		for name, methods of @classMethods {
+		for const methods, name of @classMethods {
 			m.clear()
 
 			for method in methods {
@@ -1676,7 +1676,7 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for :variable of @classVariables {
+		for const variable of @classVariables {
 			variable.toFragments(fragments)
 		}
 

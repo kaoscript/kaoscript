@@ -12,8 +12,8 @@ module.exports = function() {
 			throw new TypeError("'iterator' is not of type 'Function'");
 		}
 		let results = [];
-		for(let item in this) {
-			let index = this[item];
+		for(let index in this) {
+			let item = this[index];
 			results.push(iterator(item, index));
 		}
 		return results;

@@ -381,7 +381,7 @@ class RequireOrImportDeclarator extends Importer {
 		if @count != 0 {
 			if @parent.includePath() != null {
 				let variable
-				for :alias of @variables {
+				for const alias of @variables {
 					if variable ?= @scope.getVariable(alias) {
 						// TODO: check & merge type
 					}
@@ -391,7 +391,7 @@ class RequireOrImportDeclarator extends Importer {
 				}
 			}
 			else {
-				for :alias of @variables {
+				for const alias of @variables {
 					module.addRequirement(new ROIDynamicRequirement(@scope.getVariable(alias), this))
 				}
 			}

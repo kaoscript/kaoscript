@@ -56,7 +56,7 @@ class IfStatement extends Statement {
 		else {
 			@condition.prepare()
 
-			for name, type of @condition.reduceTypes() {
+			for const type, name of @condition.reduceTypes() {
 				@whenTrueScope.replaceVariable(name, type, this)
 			}
 
@@ -73,7 +73,7 @@ class IfStatement extends Statement {
 			const trueVariables = @whenTrueScope.listReplacedVariables()
 			const falseVariables = @whenFalseScope.listReplacedVariables()
 
-			for const name of trueVariables when falseVariables[name]? {
+			for const :name of trueVariables when falseVariables[name]? {
 				const trueType = trueVariables[name].getRealType()
 				const falseType = falseVariables[name].getRealType()
 

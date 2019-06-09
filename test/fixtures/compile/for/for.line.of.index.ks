@@ -8,4 +8,4 @@ likes = {
 	duncan: 'murbella'
 }
 
-console.log('%s likes %s', key, value) for key, value of likes
+console.log('%s likes %s', key, value) for value, key of likes
