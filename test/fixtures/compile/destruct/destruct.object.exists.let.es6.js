@@ -1,8 +1,10 @@
 module.exports = function() {
-	var foo = {
+	const foo = {
 		bar: "hello",
 		baz: 3
 	};
-	var bar = foo.bar, baz = foo.baz;
+	let bar = "foo";
+	let baz;
+	({bar, baz} = foo);
 	console.log(bar, baz);
 };

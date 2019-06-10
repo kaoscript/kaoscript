@@ -146,6 +146,17 @@ class SwitchStatement extends Statement {
 			clause.body.translate()
 		}
 	} // }}}
+	defineVariables(declarator, scope) { // {{{
+		let alreadyDeclared
+
+		for const name in declarator.listAssignments([]) {
+			if scope.hasDefinedVariable(name) {
+				SyntaxException.throwAlreadyDeclared(name, this)
+			}
+
+			scope.define(name, false, null, this)
+		}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @clauses.length == 0 {
 			return
@@ -251,7 +262,10 @@ class SwitchBindingArray extends AbstractNode {
 	}
 	analyse() { // {{{
 		@array = $compile.expression(@data, this)
+		@array.setAssignment(AssignmentType::Expression)
 		@array.analyse()
+
+		@parent.defineVariables(@array, @scope)
 	} // }}}
 	prepare() { // {{{
 		@array.prepare()
@@ -262,6 +276,8 @@ class SwitchBindingArray extends AbstractNode {
 	bindingScope() => @scope
 	toFragments(fragments) { // {{{
 		let line = fragments.newLine()
+
+		line.code($runtime.scope(this))
 
 		@array.toAssignmentFragments(line, @parent._name)
 

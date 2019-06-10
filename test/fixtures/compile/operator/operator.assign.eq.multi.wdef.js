@@ -1,3 +1,4 @@
 module.exports = function() {
-	let x += 42;
+	let x, y, z;
+	x = y = z = 42;
 };

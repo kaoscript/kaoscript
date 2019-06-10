@@ -1,11 +1,11 @@
 class ExpressionStatement extends Statement {
 	private {
+		_declaration: Boolean	= false
 		_expression
-		_variable			= ''
+		_variable				= null
 	}
 	analyse() { // {{{
 		@expression = $compile.expression(@data, this)
-
 		@expression.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -19,33 +19,41 @@ class ExpressionStatement extends Statement {
 	translate() { // {{{
 		@expression.translate()
 	} // }}}
-	assignment(data, scope, expression) { // {{{
-		if data.left.kind == NodeKind::Identifier {
-			let variable
-			if variable ?= scope.getVariable(data.left.name) {
+	defineVariables(left, scope, expression, leftMost) { // {{{
+		const assignments = []
+		let variable = null
+
+		const variables = left.listAssignments([])
+		let declaration = variables.length != 0
+
+		for const name in variables {
+			if const variable = scope.getVariable(name) {
 				if variable.isImmutable() {
-					ReferenceException.throwImmutable(data.left.name, this)
+					ReferenceException.throwImmutable(name, this)
 				}
+
+				declaration = false
 			}
 			else {
-				if !expression.isAssignable() {
-					@assignments.push(data.left.name)
-				}
-				else {
-					if @variable.length != 0 {
-						@assignments.push(@variable)
-					}
+				assignments.push(name)
 
-					@variable = data.left.name
-				}
-
-				@scope.define(data.left.name, false, this)
-
-				return data.left.name
+				@scope.define(name, false, this)
 			}
 		}
 
-		return null
+		if declaration && @expression.isAssignable() {
+			@declaration = true
+
+			if leftMost {
+				left.setAssignment(AssignmentType::Declaration)
+			}
+			else {
+				@assignments.push(...assignments)
+			}
+		}
+		else {
+			@assignments.push(...assignments)
+		}
 	} // }}}
 	hasExceptions() => @expression.hasExceptions()
 	isAwait() => @expression.isAwait()
@@ -71,7 +79,7 @@ class ExpressionStatement extends Statement {
 
 			let line = fragments.newLine()
 
-			if @variable.length != 0 {
+			if @declaration {
 				line.code($runtime.scope(this))
 			}
 
@@ -84,29 +92,20 @@ class ExpressionStatement extends Statement {
 
 			line.done()
 		}
-		else if @expression.toStatementFragments? {
-			if @variable.length != 0 {
-				@assignments.unshift(@variable)
-			}
-
-			if @assignments.length != 0 {
-				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
-			}
-
-			@expression.toStatementFragments(fragments, Mode::None)
-		}
 		else {
 			if @assignments.length != 0 {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}
 
-			let line = fragments.newLine()
-
-			if @variable.length {
-				line.code($runtime.scope(this))
+			if @expression.toStatementFragments? {
+				@expression.toStatementFragments(fragments, Mode::None)
 			}
-
-			line.compile(@expression, Mode::None).done()
+			else {
+				fragments
+					.newLine()
+					.compile(@expression, Mode::None)
+					.done()
+			}
 		}
 
 		for afterward in @afterwards {

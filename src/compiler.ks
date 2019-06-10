@@ -199,6 +199,7 @@ abstract class AbstractNode {
 }
 
 include {
+	'./include/assignment'
 	'./include/attribute'
 	'./include/fragment'
 	'./include/type'

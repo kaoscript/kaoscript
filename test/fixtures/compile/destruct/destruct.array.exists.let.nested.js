@@ -2,8 +2,7 @@ module.exports = function() {
 	let arr = [[1, "", true], [1, "", true]];
 	let a = "foo";
 	let f = "bar";
-	let [[__ks_0, b, c], [d, e, __ks_1]] = arr;
-	a = __ks_0;
-	f = __ks_1;
+	let b, c, d, e;
+	[[a, b, c], [d, e, f]] = arr;
 	console.log(a, b, c, d, e, f);
 };

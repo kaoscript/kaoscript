@@ -10,7 +10,7 @@ module.exports = function() {
 		else if(!Type.is(x, Foo)) {
 			throw new TypeError("'x' is not of type 'Foo'");
 		}
-		while(!(Type.is(x, Bar))) {
+		while(!Type.is(x, Bar)) {
 		}
 	}
 	class Foo {

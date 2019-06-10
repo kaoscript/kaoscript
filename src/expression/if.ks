@@ -73,12 +73,7 @@ class IfExpression extends Expression {
 
 		ctrl.code('if(')
 
-		if @condition.isAssignable() {
-			ctrl.code('(').compileBoolean(@condition).code(')')
-		}
-		else {
-			ctrl.compileBoolean(@condition)
-		}
+		ctrl.compileBoolean(@condition)
 
 		ctrl.code(')').step().line(@whenTrue).done()
 	} // }}}

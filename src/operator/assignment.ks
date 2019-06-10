@@ -1,20 +1,40 @@
 class AssignmentOperatorExpression extends Expression {
 	private {
 		_await: Boolean				= false
-		_left
-		_right
-		_variable: String			= null
+		_left						= null
+		_right						= null
 	}
 	analyse() { // {{{
+		@left = $compile.expression(@data.left, this)
+
+		if this.isDeclararing() {
+			@left.setAssignment(AssignmentType::Expression)
+		}
+
+		@left.analyse()
+
 		@right = $compile.expression(@data.right, this)
+
+		if @right.isAssignable() {
+			@right.setAssignment(AssignmentType::Expression)
+		}
+
 		@right.analyse()
 
 		@await = @right.isAwait()
 
-		@variable = this.assignment(@data)
-
-		@left = $compile.expression(@data.left, this)
-		@left.analyse()
+		if this.isDeclararing() {
+			this.defineVariables(@left)
+		}
+		else {
+			if @left is IdentifierLiteral {
+				if const variable = @scope.getVariable(@left.name()) {
+					if variable.isImmutable() {
+						ReferenceException.throwImmutable(@left.name(), this)
+					}
+				}
+			}
+		}
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -24,21 +44,26 @@ class AssignmentOperatorExpression extends Expression {
 		@left.translate()
 		@right.translate()
 	} // }}}
-	assignment(data) { // {{{
+	defineVariables(left) { // {{{
+		let leftMost = true
 		let expression = this
+
 		while expression.parent() is not Statement {
 			expression = expression.parent()
+			leftMost = false
 		}
 
-		return expression.parent().assignment(data, @scope, expression)
+		expression.parent().defineVariables(left, @scope, expression, leftMost)
 	} // }}}
-	isAssignable() => true
 	isAwait() => @await
 	isAwaiting() => @right.isAwaiting()
 	isComputed() => true
-	isDeclararingVariable(name: String) => @variable == name
+	isDeclararing() => false
+	isDeclararingVariable(name: String) => this.isDeclararing() && @left.isDeclararingVariable(name)
 	isNullable() => @right.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
+	listAssignments(array) => @left.listAssignments(@right.listAssignments(array))
+	setAssignment(assignment)
 	toNullableFragments(fragments) { // {{{
 		fragments.compileNullable(@right)
 	} // }}}
@@ -97,16 +122,14 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		if @options.format.destructuring == 'es5' {
-			@right.acquireReusable(true)
-		}
-	} // }}}
-	releaseReusable() { // {{{
-		if @options.format.destructuring == 'es5' {
-			@right.releaseReusable()
-		}
+		@right.acquireReusable(@left.isSplitAssignment())
 	} // }}}
 	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
+	isAssignable() => @left == null || @left.isAssignable()
+	isDeclararing() => true
+	releaseReusable() { // {{{
+		@right.releaseReusable()
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @right.isAwaiting() {
 			return @right.toFragments(fragments, mode)
@@ -140,7 +163,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			@left.type(@right.type(), @scope, this)
 		}
 	} // }}}
-	isAssignable() => false
+	isDeclararing() => true
 	toFragments(fragments, mode) { // {{{
 		if @right.isNullable() {
 			fragments
@@ -157,12 +180,16 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 				.code(')', @data.operator)
 		}
 
-		fragments
-			.code(' ? ')
-			.compile(@left)
-			.code($equals)
-			.wrap(@right)
-			.code(' : undefined')
+		fragments.code(' ? ')
+
+		if @left.toAssignmentFragments? {
+			@left.toAssignmentFragments(fragments, @right)
+		}
+		else {
+			fragments.compile(@left).code($equals).wrap(@right)
+		}
+
+		fragments.code(' : undefined')
 	} // }}}
 	toBooleanFragments(fragments, mode) { // {{{
 		if @right.isNullable() {
@@ -180,12 +207,16 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 				.code(')', @data.operator)
 		}
 
-		fragments
-			.code(' ? (')
-			.compile(@left)
-			.code($equals)
-			.wrap(@right)
-			.code(', true) : false')
+		fragments.code(' ? (')
+
+		if @left.toAssignmentFragments? {
+			@left.toAssignmentFragments(fragments, @right)
+		}
+		else {
+			fragments.compile(@left).code($equals).wrap(@right)
+		}
+
+		fragments.code(', true) : false')
 	} // }}}
 }
 
@@ -209,7 +240,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 		@right.acquireReusable(true)
 		@right.releaseReusable()
 	} // }}}
-	isAssignable() => false
+	isDeclararing() => true
 	toFragments(fragments, mode) { // {{{
 		if @right.isNullable() {
 			fragments
@@ -259,7 +290,6 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
-	isAssignable() => false
 	toFragments(fragments, mode) { // {{{
 		if @left.isNullable() {
 			fragments.code('(')

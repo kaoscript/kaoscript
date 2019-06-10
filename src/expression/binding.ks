@@ -1,29 +1,17 @@
 class ArrayBinding extends Expression {
 	private {
-		_assignement: Boolean	= false
-		_elements				= []
-		_exists: Boolean		= false
-		_existing				= {}
-		_immutable: Boolean		= false
-		_nonexists: Boolean		= false
-		_variables				= {}
+		_assignment: AssignmentType		= AssignmentType::Neither
+		_elements						= []
+		_flatten: Boolean				= false
+		_immutable: Boolean				= false
 	}
 	analyse() { // {{{
-		for element, index in @data.elements {
-			if element.kind == NodeKind::BindingElement && element.name.kind == NodeKind::Identifier {
-				if @scope.hasVariable(element.name.name) {
-					@existing[element.name.name] = true
-					@exists = true
-				}
-				else {
-					@nonexists = true
-				}
-			}
-			else if element.kind != NodeKind::OmittedExpression {
-				@nonexists = true
-			}
+		@flatten = @options.format.destructuring == 'es5'
 
+		for element, index in @data.elements {
 			@elements.push(element = $compile.expression(element, this, this.bindingScope()))
+
+			element.setAssignment(@assignment)
 
 			element.analyse()
 
@@ -47,13 +35,10 @@ class ArrayBinding extends Expression {
 			element.export(recipient)
 		}
 	} // }}}
-	flagAssignement() { // {{{
-		@assignement = true
-	} // }}}
 	flagImmutable() { // {{{
 		@immutable = true
 	} // }}}
-	isAssignement() => @assignement
+	isAssignable() => true
 	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { // {{{
 		for element in @elements {
@@ -73,60 +58,28 @@ class ArrayBinding extends Expression {
 
 		return false
 	} // }}}
-	toFragments(fragments, mode) { // {{{
-		if @exists && @nonexists {
-			fragments.code('[')
-
-			let name
-			for element, i in @data.elements {
-				fragments.code(', ') if i
-
-				if element.kind == NodeKind::BindingElement && element.name.kind == NodeKind::Identifier && @existing[element.name.name] {
-					name = @scope.acquireTempName()
-
-					@elements[i].toExistFragments(fragments, name)
-
-					@variables[name] = element.name.name
-				}
-				else {
-					@elements[i].toFragments(fragments)
-				}
-			}
-
-			fragments.code(']')
-
-			this.statement().afterward(this)
+	isSplitAssignment() => @flatten && @elements.length > 1
+	listAssignments(array) { // {{{
+		for const element in @elements {
+			element.listAssignments(array)
 		}
-		else {
-			fragments.code('[')
 
-			for i from 0 til @elements.length {
-				fragments.code(', ') if i
-
-				@elements[i].toFragments(fragments)
-			}
-
-			fragments.code(']')
-		}
+		return array
 	} // }}}
-	toAfterwardFragments(fragments) { // {{{
-		for const variable, name of @variables {
-			fragments.line(variable, ' = ', name)
+	setAssignment(@assignment)
+	toFragments(fragments, mode) { // {{{
+		fragments.code('[')
 
-			@scope.releaseTempName(name)
+		for i from 0 til @elements.length {
+			fragments.code(', ') if i
+
+			@elements[i].toFragments(fragments)
 		}
+
+		fragments.code(']')
 	} // }}}
 	toAssignmentFragments(fragments, value) { // {{{
-		if @nonexists {
-			if @options.format.variables == 'es5' || @exists {
-				fragments.code('var ')
-			}
-			else {
-				fragments.code('let ')
-			}
-		}
-
-		if @options.format.destructuring == 'es5' {
+		if @flatten {
 			this.toFlatFragments(fragments, value)
 		}
 		else {
@@ -137,20 +90,18 @@ class ArrayBinding extends Expression {
 		}
 	} // }}}
 	toFlatFragments(fragments, value) { // {{{
-		if value.isComposite() {
-			@elements[0].toFlatFragments(fragments, new FlatReusableBindingElement(value, this))
-
-			for i from 1 til @elements.length {
-				fragments.code(', ')
-
-				@elements[i].toFlatFragments(fragments, value)
-			}
+		if @elements.length == 1 {
+			@elements[0].toFlatFragments(fragments, value)
 		}
 		else {
-			for i from 0 til @elements.length {
-				fragments.code(', ') if i != 0
+			const reusableValue = new ReusableExpression(value, this)
 
-				@elements[i].toFlatFragments(fragments, value)
+			@elements[0].toFlatFragments(fragments, reusableValue)
+
+			for const element in @elements from 1 {
+				fragments.code(', ')
+
+				element.toFlatFragments(fragments, reusableValue)
 			}
 		}
 	} // }}}
@@ -164,87 +115,49 @@ class ArrayBinding extends Expression {
 class BindingElement extends Expression {
 	private {
 		_alias
-		_defaultValue				= null
-		_index						= -1
+		_assignment: AssignmentType		= AssignmentType::Neither
+		_defaultValue					= null
+		_hasDefaultValue: Boolean		= false
+		_index							= -1
 		_name
-		_tempName: String
-		_variable: Variable			= null
-		_variables: Array<String>	= []
 	}
 	analyse() { // {{{
-		if @data.name.kind == NodeKind::Identifier {
-			if variable ?= @scope.getVariable(@data.name.name) {
-				if this.isAssignement() {
-					SyntaxException.throwAlreadyDeclared(variable.name(), this)
-				}
-				else if variable.isImmutable() {
-					ReferenceException.throwImmutable(variable.name(), this)
-				}
-			}
-			else {
-				@variable = @scope.define(@data.name.name, this.isImmutable(), this)
-
-				@variables.push(@data.name.name)
-			}
-		}
-
-		if @data.alias?.kind == NodeKind::Identifier {
-			if !@data.alias.computed {
-				@variable = @scope.define(@data.alias.name, this.isImmutable(), this)
-
-				@variables.push(@data.alias.name)
-			}
-
-			@alias = $compile.expression(@data.alias, this)
-			@alias.analyse()
-		}
-
 		@name = $compile.expression(@data.name, this)
+		@name.setAssignment(@assignment)
 		@name.analyse()
 
+		if @data.alias? {
+			@alias = $compile.expression(@data.alias, this)
+		}
+
 		if @data.defaultValue? {
+			@hasDefaultValue = true
+
 			@defaultValue = $compile.expression(@data.defaultValue, this)
 			@defaultValue.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
-		@alias.prepare() if @alias?
 		@name.prepare()
 
-		if @defaultValue? {
+		if @hasDefaultValue {
 			@defaultValue.prepare()
-
-			if @options.format.destructuring == 'es5' {
-				@tempName = @scope.acquireTempName()
-				@scope.releaseTempName(@tempName)
-			}
 		}
 
 		this.statement().assignTempVariables(@scope)
 	} // }}}
 	translate() { // {{{
-		@alias.translate() if @alias?
 		@name.translate()
-		@defaultValue.translate() if @defaultValue?
+		@defaultValue.translate() if @hasDefaultValue
 	} // }}}
-	export(recipient) { // {{{
-		if @variable != null {
-			recipient.export(@variable.name(), @variable)
-		}
-	} // }}}
+	export(recipient) => @name.export(recipient)
+	hasDefaultValue() => @hasDefaultValue
 	index(@index) => this
-	isAssignement() => @parent.isAssignement()
 	isImmutable() => @parent.isImmutable()
-	isDeclararingVariable(name: String) => @variables.contains(name)
-	isRedeclared() {
-		for const name in @variables {
-			if @scope.isRedeclaredVariable(name) {
-				return true
-			}
-		}
-
-		return false
-	}
+	isDeclararingVariable(name: String) => @name.isDeclararingVariable(name)
+	isRedeclared() => @name.isRedeclared()
+	listAssignments(array) => @name.listAssignments(array)
+	setAssignment(@assignment)
 	toFragments(fragments) { // {{{
 		if @data.spread {
 			fragments.code('...')
@@ -261,7 +174,7 @@ class BindingElement extends Expression {
 
 		fragments.compile(@name)
 
-		if @defaultValue? {
+		if @hasDefaultValue {
 			fragments.code(' = ').compile(@defaultValue)
 		}
 	} // }}}
@@ -297,19 +210,14 @@ class BindingElement extends Expression {
 		else if @name is ObjectBinding {
 			@name.toFlatFragments(fragments, new FlatObjectBindingElement(value, @alias ?? @name, this))
 		}
-		else if @defaultValue? {
-			const variable = new Literal(false, this, @scope, @tempName)
-
+		else if @hasDefaultValue {
 			fragments
 				.compile(@name)
-				.code($equals, 'Type.isValue(')
-				.compile(variable)
-				.code($equals)
-				.compile(new FlatObjectBindingElement(value, @alias ?? @name, this))
-				.code(') ? ')
-				.compile(variable)
-				.code(' : ')
+				.code($equals, $runtime.helper(this), '.default(')
+				.wrap(new FlatObjectBindingElement(value, @alias ?? @name, this))
+				.code($comma)
 				.compile(@defaultValue)
+				.code(')')
 		}
 		else if @index == -1 {
 			fragments
@@ -394,40 +302,33 @@ class FlatReusableBindingElement extends Expression {
 
 class ObjectBinding extends Expression {
 	private {
-		_assignement: Boolean	= false
-		_elements				= []
-		_exists					= false
-		_existing				= {}
-		_immutable: Boolean		= false
-		_name					= null
-		_variables				= {}
+		_assignment: AssignmentType		= AssignmentType::Neither
+		_elements						= []
+		_flatten: Boolean				= false
+		_immutable: Boolean				= false
 	}
 	constructor(@data, @parent, scope) { // {{{
 		super(data, parent, parent.statement().scope())
 	} // }}}
 	analyse() { // {{{
-		for element in @data.elements {
-			if element.kind == NodeKind::BindingElement && element.name.kind == NodeKind::Identifier && @scope.hasVariable(element.name.name) {
-				@exists = true
-				@existing[element.name.name] = true
-			}
+		@flatten = @options.format.destructuring == 'es5'
 
+		for let element in @data.elements {
 			@elements.push(element = $compile.expression(element, this, this.bindingScope()))
 
+			element.setAssignment(@assignment)
+
 			element.analyse()
+
+			if element.hasDefaultValue() {
+				@flatten = true
+			}
 		}
 	} // }}}
 	prepare() { // {{{
-		if @options.format.destructuring == 'es5' && @data.elements.length > 1 {
-			@name = @scope.acquireTempName()
-			@scope.releaseTempName(@name)
-		}
-
-		for element in @elements {
+		for const element in @elements {
 			element.prepare()
 		}
-
-		this.statement().assignTempVariables(@scope)
 	} // }}}
 	translate() { // {{{
 		for element in @elements {
@@ -439,13 +340,10 @@ class ObjectBinding extends Expression {
 			element.export(recipient)
 		}
 	} // }}}
-	flagAssignement() { // {{{
-		@assignement = true
-	} // }}}
 	flagImmutable() { // {{{
 		@immutable = true
 	} // }}}
-	isAssignement() => @assignement
+	isAssignable() => true
 	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { // {{{
 		for element in @elements {
@@ -465,89 +363,58 @@ class ObjectBinding extends Expression {
 
 		return false
 	} // }}}
-	toFragments(fragments, mode) { // {{{
-		if @exists {
-			fragments.code('{')
-
-			let name
-			for element, i in @data.elements {
-				fragments.code(', ') if i
-
-				if @existing[element.name.name] {
-					name = @scope.acquireTempName()
-
-					@elements[i].toExistFragments(fragments, name)
-
-					@variables[name] = element.name.name
-				}
-				else {
-					@elements[i].toFragments(fragments)
-				}
-			}
-
-			fragments.code('}')
-
-			this.statement().afterward(this)
+	isSplitAssignment() => @flatten && @elements.length > 1
+	listAssignments(array) { // {{{
+		for const element in @elements {
+			element.listAssignments(array)
 		}
-		else {
-			fragments.code('{')
 
-			for i from 0 til @elements.length {
-				fragments.code(', ') if i
-
-				@elements[i].toFragments(fragments)
-			}
-
-			fragments.code('}')
-		}
+		return array
 	} // }}}
-	toAfterwardFragments(fragments) { // {{{
-		for const variable, name of @variables {
-			fragments.line(variable, ' = ', name)
+	setAssignment(@assignment)
+	toFragments(fragments, mode) { // {{{
+		fragments.code('{')
 
-			@scope.releaseTempName(name)
+		for i from 0 til @elements.length {
+			fragments.code(', ') if i
+
+			@elements[i].toFragments(fragments)
 		}
+
+		fragments.code('}')
 	} // }}}
 	toAssignmentFragments(fragments, value) { // {{{
-		if @options.format.variables == 'es5' || @exists {
-			fragments.code('var ')
-		}
-		else {
-			fragments.code('let ')
-		}
-
-		if @options.format.destructuring == 'es5' {
+		if @flatten {
 			this.toFlatFragments(fragments, value)
 		}
-		else {
+		else if @assignment == AssignmentType::Declaration {
 			fragments
 				.compile(this)
 				.code($equals)
 				.compile(value)
 		}
+		else {
+			fragments
+				.code('(')
+				.compile(this)
+				.code($equals)
+				.compile(value)
+				.code(')')
+		}
 	} // }}}
 	toFlatFragments(fragments, value) { // {{{
-		if value.isComposite() {
-			if @elements.length == 1 {
-				@elements[0].toFlatFragments(fragments, value)
-			}
-			else {
-				const variable = new Literal(false, this, @scope, @name)
-
-				@elements[0].toFlatFragments(fragments, new TempBinding(variable, value, this))
-
-				for i from 1 til @elements.length {
-					fragments.code(', ')
-
-					@elements[i].toFlatFragments(fragments, variable)
-				}
-			}
+		if @elements.length == 1 {
+			@elements[0].toFlatFragments(fragments, value)
 		}
 		else {
-			for i from 0 til @elements.length {
-				fragments.code(', ') if i
+			const reusableValue = new ReusableExpression(value, this)
 
-				@elements[i].toFlatFragments(fragments, value)
+			@elements[0].toFlatFragments(fragments, reusableValue)
+
+			for const element in @elements from 1 {
+				fragments.code(', ')
+
+				element.toFlatFragments(fragments, reusableValue)
 			}
 		}
 	} // }}}
@@ -558,22 +425,26 @@ class ObjectBinding extends Expression {
 	} // }}}
 }
 
-class TempBinding extends Expression {
+class ReusableExpression extends Expression {
 	private {
-		_name
+		_count: Number	= 0
 		_value
 	}
-	constructor(@name, @value, parent) { // {{{
+	constructor(@value, parent) { // {{{
 		super({}, parent)
 	} // }}}
 	analyse()
 	prepare()
 	translate()
-	isComputed() => true
+	isComputed() => @count == 0 && @value.isComposite()
 	toFragments(fragments, mode) { // {{{
-		fragments
-			.compile(@name)
-			.code($equals)
-			.compile(@value)
+		if @count == 0 && @value.isComposite() {
+			fragments.compileReusable(@value)
+		}
+		else {
+			fragments.compile(@value)
+		}
+
+		++@count
 	} // }}}
 }

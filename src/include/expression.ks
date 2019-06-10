@@ -1,20 +1,29 @@
 abstract class Expression extends AbstractNode {
-	acquireReusable(acquire) { // {{{
-	} // }}}
-	releaseReusable() { // {{{
-	} // }}}
+	acquireReusable(acquire)
+	releaseReusable()
+	// if the expression can throw an expception
 	hasExceptions() => true
+	// if the expression is an assignment and can be transformed as a declaration
 	isAssignable() => false
+	// if the expression is an `await` expression
 	isAwait() => false
+	// if the expression is awaiting to be resolved
 	isAwaiting() => false
+	// if the generated code, to cast the expression has a boolean, requires to be wrapped inside parentheses
 	isBooleanComputed() => this.isComputed()
+	// if the expression contains a call
 	isCallable() => false
+	// if the expression needs to be assign to a temp variable to be reused
 	isComposite() => true
+	// if parentheses are required around the expression to be wrapped
 	isComputed() => false
-	isConditional() => this.isNullable()
 	isEntangled() => true
+	// if the expression is nullable
 	isNullable() => false
+	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
 	isNullableComputed() => this.isComputed()
+	// if the expression generates multiple assignments
+	isSplitAssignment() => false
 	reduceTypes() => {}
 	statement(data) { // {{{
 		let expression = this

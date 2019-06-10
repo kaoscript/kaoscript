@@ -3,6 +3,7 @@ class ObjectExpression extends Expression {
 		_computed: Boolean		= false
 		_names					= {}
 		_properties				= []
+		_reusable: Boolean		= false
 		_reuseName: String		= null
 		_type: Type
 	}
@@ -46,7 +47,7 @@ class ObjectExpression extends Expression {
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		if @computed {
+		if acquire || @computed {
 			@reuseName = @scope.acquireTempName()
 		}
 
@@ -54,6 +55,7 @@ class ObjectExpression extends Expression {
 			property.acquireReusable(acquire)
 		}
 	} // }}}
+	isComputed() => true
 	isUsingVariable(name) { // {{{
 		for property in @properties {
 			if property.isUsingVariable(name) {
@@ -66,7 +68,7 @@ class ObjectExpression extends Expression {
 	hasComputedProperties() => @computed
 	reference() => @parent.reference()
 	releaseReusable() { // {{{
-		if @computed {
+		if @reuseName != null {
 			@scope.releaseTempName(@reuseName)
 		}
 
@@ -75,7 +77,10 @@ class ObjectExpression extends Expression {
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @computed {
+		if @reusable {
+			fragments.code(@reuseName)
+		}
+		else if @computed {
 			fragments.code('(', @reuseName, ' = {}', $comma)
 
 			for property in @properties {
@@ -93,6 +98,13 @@ class ObjectExpression extends Expression {
 
 			object.done()
 		}
+	} // }}}
+	toReusableFragments(fragments) { // {{{
+		fragments
+			.code(@reuseName, $equals)
+			.compile(this)
+
+		@reusable = true
 	} // }}}
 	type() => @type
 }

@@ -24,9 +24,9 @@ class UntilStatement extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()
-			.code('while(!(')
-			.compileBoolean(@condition)
-			.code('))')
+			.code('while(!')
+			.wrapBoolean(@condition)
+			.code(')')
 			.step()
 			.compile(@body)
 			.done()

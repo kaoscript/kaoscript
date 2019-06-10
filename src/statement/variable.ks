@@ -1,15 +1,14 @@
 class VariableDeclaration extends Statement {
 	private {
-		_autotype: Boolean
-		_await: Boolean
+		_autotype: Boolean			= false
+		_await: Boolean				= false
 		_declarators: Array			= []
-		_destructuring: Boolean		= false
 		_function					= null
 		_hasInit: Boolean			= false
-		_immutable: Boolean
+		_immutable: Boolean			= false
 		_init
 		_initScope: Scope
-		_rebindable: Boolean
+		_rebindable: Boolean		= true
 		_redeclared: Boolean		= false
 		_toDeclareAll: Boolean		= true
 		_try
@@ -74,19 +73,12 @@ class VariableDeclaration extends Statement {
 
 			declarator.analyse()
 
-			if @toDeclareAll && declarator.isAlreadyDeclared() {
-				@toDeclareAll = false
-			}
-
 			@declarators.push(declarator)
 		}
 
 		if @hasInit && @declarators.length == 1 {
 			if @declarators[0] is VariableIdentifierDeclarator {
 				this.reference(@declarators[0].name())
-			}
-			else {
-				@destructuring = true
 			}
 		}
 	} // }}}
@@ -95,9 +87,6 @@ class VariableDeclaration extends Statement {
 
 		if @hasInit {
 			@init.prepare()
-
-			@init.acquireReusable(@destructuring && @options.format.destructuring == 'es5')
-			@init.releaseReusable()
 
 			if @autotype {
 				declarator.setDeclaredType(@init.type())
@@ -118,8 +107,15 @@ class VariableDeclaration extends Statement {
 			}
 		}
 
-		if @hasInit && !@autotype {
-			declarator.setRealType(@init.type())
+		if @hasInit {
+			if !@autotype {
+				declarator.setRealType(@init.type())
+			}
+
+			@init.acquireReusable(declarator.isSplitAssignment())
+			@init.releaseReusable()
+
+			this.statement().assignTempVariables(@scope)
 		}
 	} // }}}
 	translate() { // {{{
@@ -135,6 +131,27 @@ class VariableDeclaration extends Statement {
 		if @hasInit {
 			for const declarator in @declarators {
 				declarator.checkNames(@init)
+			}
+		}
+	} // }}}
+	defineVariables(declarator) { // {{{
+		let alreadyDeclared
+
+		for const name in declarator.listAssignments([]) {
+			if @scope.hasDefinedVariable(name) {
+				SyntaxException.throwAlreadyDeclared(name, this)
+			}
+
+			alreadyDeclared = @scope.hasDeclaredVariable(name)
+
+			@scope.define(name, this.isImmutable(), null, this)
+
+			if alreadyDeclared {
+				alreadyDeclared = @scope.getRenamedVariable(name) == name
+			}
+
+			if alreadyDeclared && @toDeclareAll {
+				@toDeclareAll = false
 			}
 		}
 	} // }}}
@@ -218,15 +235,7 @@ class VariableDeclaration extends Statement {
 					}
 				}
 
-				if @destructuring && @options.format.destructuring == 'es5' {
-					declarator.toFlatFragments(line, @init)
-				}
-				else {
-					line
-						.compile(declarator)
-						.code($equals)
-						.compile(@init)
-				}
+				declarator.toAssignmentFragments(line, @init)
 
 				line.done()
 			}
@@ -280,13 +289,15 @@ class VariableBindingDeclarator extends AbstractNode {
 	analyse() { // {{{
 		@binding = $compile.expression(@data.name, this)
 
-		@binding.flagAssignement()
+		@binding.setAssignment(AssignmentType::Declaration)
 
 		if @parent.isImmutable() {
 			@binding.flagImmutable()
 		}
 
 		@binding.analyse()
+
+		@parent.defineVariables(@binding)
 	} // }}}
 	prepare() { // {{{
 		@binding.prepare()
@@ -307,12 +318,12 @@ class VariableBindingDeclarator extends AbstractNode {
 	flagDefinitive() { // {{{
 
 	} // }}}
-	isAlreadyDeclared() => false
 	isDeclararingVariable(name: String) => @binding.isDeclararingVariable(name)
-	isRedeclared() => @binding.isRedeclared()
 	isDuplicate(scope) { // {{{
 		return false
 	} // }}}
+	isRedeclared() => @binding.isRedeclared()
+	isSplitAssignment() => @binding.isSplitAssignment()
 	setDeclaredType(type: Type) => this.setRealType(type)
 	setRealType(type: Type) { // {{{
 		if !type.isAny() {
@@ -328,12 +339,10 @@ class VariableBindingDeclarator extends AbstractNode {
 			}
 		}
 	} // }}}
-	toFlatFragments(fragments, init) { // {{{
-		@binding.toFlatFragments(fragments, init)
-	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@binding)
 	} // }}}
+	toAssignmentFragments(fragments, value) => @binding.toAssignmentFragments(fragments, value)
 	walk(fn) { // {{{
 		@binding.walk(fn)
 	} // }}}
@@ -341,7 +350,6 @@ class VariableBindingDeclarator extends AbstractNode {
 
 class VariableIdentifierDeclarator extends AbstractNode {
 	private {
-		_alreadyDeclared: Boolean
 		_identifier: IdentifierLiteral
 		_name: String
 		_variable: Variable
@@ -349,20 +357,13 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	analyse() { // {{{
 		@name = @data.name.name
 
-		if @scope.hasDefinedVariable(@name) {
-			SyntaxException.throwAlreadyDeclared(@name, this)
-		}
-
-		@alreadyDeclared = @scope.hasDeclaredVariable(@name)
-
-		@variable = @scope.define(@name, @parent.isImmutable(), null, this)
-
-		if @alreadyDeclared {
-			@alreadyDeclared = @scope.getRenamedVariable(@name) == @name
-		}
-
 		@identifier = new IdentifierLiteral(@data.name, this)
+		@identifier.setAssignment(AssignmentType::Declaration)
 		@identifier.analyse()
+
+		@parent.defineVariables(@identifier)
+
+		@variable = @identifier.variable()
 	} // }}}
 	prepare() { // {{{
 		if @data.type? {
@@ -400,14 +401,20 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 		return false
 	} // }}}
-	isAlreadyDeclared() => @alreadyDeclared
 	isDeclararingVariable(name: String) => @name == name
 	isRedeclared() => @scope.isRedeclaredVariable(@name)
+	isSplitAssignment() => false
 	name() => @name
 	setDeclaredType(type: Type) => @variable.setDeclaredType(type)
 	setRealType(type: Type) => @variable.setRealType(type)
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@identifier)
+	} // }}}
+	toAssignmentFragments(fragments, value) { // {{{
+		fragments
+			.compile(@identifier)
+			.code($equals)
+			.compile(value)
 	} // }}}
 	walk(fn) { // {{{
 		fn(@scope.getRenamedVariable(@name), @variable.getRealType())

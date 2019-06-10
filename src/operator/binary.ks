@@ -310,7 +310,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			.code(' ? ')
 			.compile(@left)
 			.code(' : ')
-			.wrap(@right)
+			.compile(@right)
 	} // }}}}
 	type() => @type
 }

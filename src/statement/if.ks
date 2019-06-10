@@ -151,12 +151,7 @@ class IfStatement extends Statement {
 			})
 		}
 		else {
-			if @condition.isAssignable() {
-				fragments.code('(').compileBoolean(@condition).code(')')
-			}
-			else {
-				fragments.compileBoolean(@condition)
-			}
+			fragments.compileBoolean(@condition)
 		}
 
 		fragments.code(')').step()

@@ -23,29 +23,25 @@ abstract class Statement extends AbstractNode {
 	afterward(node) { // {{{
 		@afterwards.push(node)
 	} // }}}
-	assignment(data, scope, expression) { // {{{
-		if data.left.kind == NodeKind::Identifier {
-			if const variable = scope.getVariable(data.left.name) {
-				if variable.isImmutable() {
-					ReferenceException.throwImmutable(data.left.name, this)
-				}
-			}
-			else {
-				@assignments.push(data.left.name)
-
-				scope.define(data.left.name, false, this)
-
-				return data.left.name
-			}
-		}
-
-		return null
-	} // }}}
 	assignTempVariables(scope: Scope) { // {{{
 		scope.commitTempVariables(@assignments)
 	} // }}}
 	assignments() => @assignments
 	bindingScope() => @scope
+	defineVariables(left, scope, expression = null, leftMost = false) { // {{{
+		for const name in left.listAssignments([]) {
+			if const variable = scope.getVariable(name) {
+				if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, this)
+				}
+			}
+			else {
+				@assignments.push(name)
+
+				@scope.define(name, false, this)
+			}
+		}
+	} // }}}
 	export(recipient)
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	isAwait() => false

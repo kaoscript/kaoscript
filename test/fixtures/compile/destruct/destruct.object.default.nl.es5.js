@@ -3,7 +3,6 @@ module.exports = function() {
 		bar: "hello",
 		baz: 3
 	};
-	var __ks_0;
 	var bar = foo.bar, baz = foo.baz;
 	console.log(bar);
 	console.log(baz);

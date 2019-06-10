@@ -287,6 +287,7 @@ class CallExpression extends Expression {
 		return false
 	} // }}}
 	isCallable() => !@reusable
+	isComposite() => !@reusable
 	isComputed() => (@nullable || @callees.length > 1) && !@tested
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed

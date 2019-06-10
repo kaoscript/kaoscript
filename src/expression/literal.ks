@@ -28,26 +28,32 @@ class Literal extends Expression {
 
 class IdentifierLiteral extends Literal {
 	private {
+		_assignment: AssignmentType		= AssignmentType::Neither
 		_declaredType: Type
-		_isMacro: Boolean		= false
-		_isVariable: Boolean	= false
+		_isMacro: Boolean				= false
+		_isVariable: Boolean			= false
 		_realType: Type
 	}
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.name)
 	} // }}}
 	analyse() { // {{{
-		if @scope.hasVariable(@value) {
-			@isVariable = true
-		}
-		else if $runtime.isDefined(@value, @parent) {
-			@realType = @declaredType = Type.Any
-		}
-		else if @scope.hasMacro(@value) {
-			@isMacro = true
+		if @assignment == AssignmentType::Neither {
+			if @scope.hasVariable(@value) {
+				@isVariable = true
+			}
+			else if $runtime.isDefined(@value, @parent) {
+				@realType = @declaredType = Type.Any
+			}
+			else if @scope.hasMacro(@value) {
+				@isMacro = true
+			}
+			else {
+				ReferenceException.throwNotDefined(@value, this)
+			}
 		}
 		else {
-			ReferenceException.throwNotDefined(@value, this)
+			@isVariable = true
 		}
 	} // }}}
 	prepare() { // {{{
@@ -58,11 +64,23 @@ class IdentifierLiteral extends Literal {
 			@realType = variable.getRealType()
 		}
 	} // }}}
+	export(recipient) { // {{{
+		recipient.export(@value, this)
+	} // }}}
 	getDeclaredType() => @declaredType
+	isAssignable() => true
+	isDeclararingVariable(name: String) => @value == name
 	isMacro() => @isMacro
+	isRedeclared() => @scope.isRedeclaredVariable(@value)
 	isRenamed() => @scope.isRenamedVariable(@value)
 	isUsingVariable(name) => @value == name
+	listAssignments(array) { // {{{
+		array.push(@name)
+
+		return array
+	} // }}}
 	name() => @value
+	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@scope.getRenamedVariable(@value), @data)
 	} // }}}
@@ -72,6 +90,7 @@ class IdentifierLiteral extends Literal {
 			@realType = scope.replaceVariable(@name, type, node).getRealType()
 		}
 	} // }}}
+	variable() => @scope.getVariable(@value)
 	walk(fn) { // {{{
 		if @isVariable {
 			fn(@value, @realType)
