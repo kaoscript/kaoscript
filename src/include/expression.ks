@@ -63,4 +63,6 @@ include {
 	'../expression/this'
 	'../expression/template'
 	'../expression/unless'
+
+	'../expression/misc'
 }

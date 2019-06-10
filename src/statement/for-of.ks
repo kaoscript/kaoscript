@@ -1,6 +1,7 @@
 class ForOfStatement extends Statement {
 	private {
 		_bindingScope
+		_bindingValue						= null
 		_bleeding: Boolean					= false
 		_bodyScope
 		_body
@@ -11,12 +12,10 @@ class ForOfStatement extends Statement {
 		_expressionName: String
 		_key								= null
 		_keyName: String
-		_keyVariable: Variable
 		_immutable: Boolean					= false
 		_loopTempVariables: Array			= []
 		_until
 		_value								= null
-		_valueVariable: Variable
 		_when
 		_while
 	}
@@ -30,7 +29,7 @@ class ForOfStatement extends Statement {
 			const keyVariable = @scope.getVariable(@data.key.name)
 
 			if @data.declaration || keyVariable == null {
-				@keyVariable = @bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), this)
+				@bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), this)
 
 				@defineKey = true
 			}
@@ -43,39 +42,33 @@ class ForOfStatement extends Statement {
 		}
 
 		if @data.value? {
-			const valueVariable = @scope.getVariable(@data.value.name)
-
-			if @data.declaration || valueVariable == null {
-				@valueVariable = @bindingScope.define(@data.value.name, @immutable, Type.Any, this)
-
-				@defineValue = true
-			}
-			else if valueVariable.isImmutable() {
-				ReferenceException.throwImmutable(@data.value.name, this)
-			}
-
 			@value = $compile.expression(@data.value, this, @bindingScope)
+			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
+
+			for const name in @value.listAssignments([]) {
+				const variable = @scope.getVariable(name)
+
+				if @data.declaration || variable == null {
+					@defineValue = true
+
+					@bindingScope.define(name, @immutable, Type.Any, this)
+				}
+				else if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, this)
+				}
+			}
 		}
+
+		const variables = []
 
 		@expression = $compile.expression(@data.expression, this, @scope)
 		@expression.analyse()
 
-		if @key != null && @expression.isUsingVariable(@data.key.name) {
-			if @defineKey {
-				@bindingScope.rename(@data.key.name)
-			}
-			else {
-				SyntaxException.throwAlreadyDeclared(@data.key.name, this)
-			}
-		}
-		if @value != null && @expression.isUsingVariable(@data.value.name) {
-			if @defineValue {
-				@bindingScope.rename(@data.value.name)
-			}
-			else {
-				SyntaxException.throwAlreadyDeclared(@data.value.name, this)
-			}
+		this.checkForRenamedVariables(@expression, variables)
+
+		for const variable in variables {
+			@bindingScope.rename(variable)
 		}
 
 		if @data.until {
@@ -110,7 +103,7 @@ class ForOfStatement extends Statement {
 		}
 
 		if @defineValue {
-			@valueVariable.setRealType(type.parameter())
+			@value.type(type.parameter(), @bindingScope, this)
 		}
 
 		if @key? {
@@ -118,6 +111,12 @@ class ForOfStatement extends Statement {
 		}
 		else {
 			@keyName = @bindingScope.acquireTempName(false)
+		}
+
+		if @options.format.destructuring == 'es5' && @value is not IdentifierLiteral {
+			@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @key ?? @keyName, true, this, @bindingScope)
+
+			@bindingValue.acquireReusable(true)
 		}
 
 		this.assignTempVariables(@bindingScope)
@@ -159,6 +158,29 @@ class ForOfStatement extends Statement {
 		@when.translate() if @when?
 
 		@body.translate()
+	} // }}}
+	checkForRenamedVariables(expression, variables: Array) { // {{{
+		if @key != null && expression.isUsingVariable(@data.key.name) {
+			if @defineKey {
+				variables.pushUniq(@data.key.name)
+			}
+			else {
+				SyntaxException.throwAlreadyDeclared(@data.key.name, this)
+			}
+		}
+
+		if @value != null {
+			for const variable in @value.listAssignments([]) {
+				if expression.isUsingVariable(variable) {
+					if @defineValue {
+						variables.pushUniq(variable)
+					}
+					else {
+						SyntaxException.throwAlreadyDeclared(variable, this)
+					}
+				}
+			}
+		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {
@@ -228,7 +250,20 @@ class ForOfStatement extends Statement {
 				}
 			}
 
-			line.compile(@value).code($equals).compile(@expressionName ?? @expression).code('[').compile(@key ?? @keyName).code(']').done()
+			if @bindingValue == null {
+				line
+					.compile(@value)
+					.code($equals)
+					.compile(@expressionName ?? @expression)
+					.code('[')
+					.compile(@key ?? @keyName)
+					.code(']')
+			}
+			else {
+				@value.toAssignmentFragments(line, @bindingValue)
+			}
+
+			line.done()
 		}
 
 		if @until? {

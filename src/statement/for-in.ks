@@ -1,6 +1,7 @@
 class ForInStatement extends Statement {
 	private {
 		_bindingScope
+		_bindingValue						= null
 		_body
 		_bodyScope
 		_boundName: String
@@ -8,6 +9,7 @@ class ForInStatement extends Statement {
 		_byName: String
 		_conditionalTempVariables: Array	= []
 		_declared: Boolean					= false
+		_declaredVariables: Array			= []
 		_declareIndex: Boolean				= false
 		_declareValue: Boolean				= false
 		_expression
@@ -16,12 +18,10 @@ class ForInStatement extends Statement {
 		_immutable: Boolean					= false
 		_index								= null
 		_indexName: String
-		_indexVariable: Variable
 		_loopTempVariables: Array			= []
 		_until
 		_useBreak: Boolean					= false
 		_value								= null
-		_valueVariable: Variable
 		_when
 		_while
 		_til
@@ -31,20 +31,17 @@ class ForInStatement extends Statement {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		let indexVariable = null
-		let valueVariable = null
-
 		@immutable = @data.declaration && !@data.rebindable
 
 		if @data.index? {
-			indexVariable = @bindingScope.getVariable(@data.index.name)
+			const variable = @bindingScope.getVariable(@data.index.name)
 
-			if @data.declaration || indexVariable == null {
-				@indexVariable = @bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), this)
+			if @data.declaration || variable == null {
+				@bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), this)
 
 				@declareIndex = true
 			}
-			else if indexVariable.isImmutable() {
+			else if variable.isImmutable() {
 				ReferenceException.throwImmutable(@data.index.name, this)
 			}
 
@@ -53,149 +50,75 @@ class ForInStatement extends Statement {
 		}
 
 		if @data.value? {
-			valueVariable = @bindingScope.getVariable(@data.value.name)
-
-			if @data.declaration || valueVariable == null {
-				@valueVariable = @bindingScope.define(@data.value.name, @immutable, Type.Any, this)
-
-				@declareValue = true
-			}
-			else if valueVariable.isImmutable() {
-				ReferenceException.throwImmutable(@data.value.name, this)
-			}
-
 			@value = $compile.expression(@data.value, this, @bindingScope)
+			@value.setAssignment(AssignmentType::Expression)
 			@value.analyse()
+
+			for const name in @value.listAssignments([]) {
+				const variable = @scope.getVariable(name)
+
+				if @data.declaration || variable == null {
+					@declareValue = true
+
+					@bindingScope.define(name, @immutable, Type.Any, this)
+
+					@declaredVariables.push(name)
+				}
+				else if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, this)
+				}
+			}
 		}
 
-		let renameIndex = false
-		let renameValue = false
+		const variables = []
 
 		@expression = $compile.expression(@data.expression, this, @scope)
 		@expression.analyse()
 
-		if @index != null && @expression.isUsingVariable(@data.index.name) {
-			if @declareIndex {
-				renameIndex = true
-			}
-			else {
-				SyntaxException.throwAlreadyDeclared(@data.index.name, this)
-			}
-		}
-		if @value != null && @expression.isUsingVariable(@data.value.name) {
-			if @declareValue {
-				renameValue = true
-			}
-			else {
-				SyntaxException.throwAlreadyDeclared(@data.value.name, this)
-			}
-		}
+		this.checkForRenamedVariables(@expression, variables)
 
 		if @data.from? {
 			@from = $compile.expression(@data.from, this, @scope)
 			@from.analyse()
 
-			if @index != null && @from.isUsingVariable(@data.index.name) {
-				if @declareIndex {
-					renameIndex = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.index.name, this)
-				}
-			}
-			if @value != null && @from.isUsingVariable(@data.value.name) {
-				if @declareValue {
-					renameValue = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.value.name, this)
-				}
-			}
+			this.checkForRenamedVariables(@from, variables)
 		}
 
 		if @data.til? {
 			@til = $compile.expression(@data.til, this, @scope)
 			@til.analyse()
 
-			if @index != null && @til.isUsingVariable(@data.index.name) {
-				if @declareIndex {
-					renameIndex = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.index.name, this)
-				}
-			}
-			if @value != null && @til.isUsingVariable(@data.value.name) {
-				if @declareValue {
-					renameValue = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.value.name, this)
-				}
-			}
+			this.checkForRenamedVariables(@til, variables)
 		}
 		else if @data.to? {
 			@to = $compile.expression(@data.to, this, @scope)
 			@to.analyse()
 
-			if @index != null && @to.isUsingVariable(@data.index.name) {
-				if @declareIndex {
-					renameIndex = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.index.name, this)
-				}
-			}
-			if @value != null && @to.isUsingVariable(@data.value.name) {
-				if @declareValue {
-					renameValue = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.value.name, this)
-				}
-			}
+			this.checkForRenamedVariables(@to, variables)
 		}
 
 		if @data.by {
 			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 
-			if @index != null && @by.isUsingVariable(@data.index.name) {
-				if @declareIndex {
-					renameIndex = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.index.name, this)
-				}
-			}
-			if @value != null && @by.isUsingVariable(@data.value.name) {
-				if @declareValue {
-					renameValue = true
-				}
-				else {
-					SyntaxException.throwAlreadyDeclared(@data.value.name, this)
-				}
-			}
+			this.checkForRenamedVariables(@by, variables)
 		}
 
-		if renameIndex {
-			@bindingScope.rename(@data.index.name)
-		}
-		if renameValue {
-			@bindingScope.rename(@data.value.name)
+		for const variable in variables {
+			@bindingScope.rename(variable)
 		}
 
 		if @data.until? {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 
-			@useBreak = @value? && @until.isUsingVariable(@data.value.name)
+			this.checkForBreak(@until)
 		}
 		else if @data.while? {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 
-			@useBreak = @value? && @while.isUsingVariable(@data.value.name)
+			this.checkForBreak(@while)
 		}
 
 		if @data.when? {
@@ -215,7 +138,7 @@ class ForInStatement extends Statement {
 		}
 
 		if @declareValue {
-			@valueVariable.setRealType(type.parameter())
+			@value.type(type.parameter(), @bindingScope, this)
 		}
 
 		if !?@index && !(@data.index? && !@data.declaration && @scope.hasVariable(@data.index.name)) {
@@ -227,6 +150,12 @@ class ForInStatement extends Statement {
 		}
 
 		@boundName = @bindingScope.acquireTempName(false)
+
+		if @options.format.destructuring == 'es5' && @value is not IdentifierLiteral {
+			@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @indexName ?? @index, true, this, @bindingScope)
+
+			@bindingValue.acquireReusable(true)
+		}
 
 		if @from? {
 			@from.prepare()
@@ -315,6 +244,38 @@ class ForInStatement extends Statement {
 		}
 
 		@body.translate()
+	} // }}}
+	checkForBreak(expression) { // {{{
+		if !@useBreak && @value != null {
+			for const variable in @value.listAssignments([]) until @useBreak {
+				if expression.isUsingVariable(variable) {
+					@useBreak = true
+				}
+			}
+		}
+	} // }}}
+	checkForRenamedVariables(expression, variables: Array) { // {{{
+		if @index != null && expression.isUsingVariable(@data.index.name) {
+			if @declareIndex {
+				variables.pushUniq(@data.index.name)
+			}
+			else {
+				SyntaxException.throwAlreadyDeclared(@data.index.name, this)
+			}
+		}
+
+		if @value != null {
+			for const variable in @value.listAssignments([]) {
+				if expression.isUsingVariable(variable) {
+					if @declareValue {
+						variables.pushUniq(variable)
+					}
+					else {
+						SyntaxException.throwAlreadyDeclared(variable, this)
+					}
+				}
+			}
+		}
 	} // }}}
 	toBoundFragments(fragments) { // {{{
 		if @data.desc {
@@ -480,7 +441,9 @@ class ForInStatement extends Statement {
 		this.toBoundFragments(ctrl)
 
 		if @declareValue {
-			ctrl.code($comma).compile(@value)
+			for const name in @declaredVariables {
+				ctrl.code($comma, @bindingScope.getRenamedVariable(name))
+			}
 		}
 
 		ctrl.code('; ')
@@ -536,15 +499,24 @@ class ForInStatement extends Statement {
 		ctrl.code(')').step()
 
 		if @value? {
-			ctrl
-				.newLine()
-				.compile(@value)
-				.code($equals)
-				.compile(@expressionName ?? @expression)
-				.code('[')
-				.compile(@indexName ?? @index)
-				.code(']')
-				.done()
+			if @bindingValue == null {
+				ctrl
+					.newLine()
+					.compile(@value)
+					.code($equals)
+					.compile(@expressionName ?? @expression)
+					.code('[')
+					.compile(@indexName ?? @index)
+					.code(']')
+					.done()
+			}
+			else {
+				const line = ctrl.newLine()
+
+				@value.toAssignmentFragments(line, @bindingValue)
+
+				line.done()
+			}
 
 			if @useBreak {
 				if @until? {

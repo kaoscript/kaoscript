@@ -94,7 +94,7 @@ class ArrayBinding extends Expression {
 			@elements[0].toFlatFragments(fragments, value)
 		}
 		else {
-			const reusableValue = new ReusableExpression(value, this)
+			const reusableValue = new TempReusableExpression(value, this)
 
 			@elements[0].toFlatFragments(fragments, reusableValue)
 
@@ -105,6 +105,7 @@ class ArrayBinding extends Expression {
 			}
 		}
 	} // }}}
+	type(type: Type, scope: Scope, node)
 	walk(fn) { // {{{
 		for element in @elements {
 			element.walk(fn)
@@ -407,7 +408,7 @@ class ObjectBinding extends Expression {
 			@elements[0].toFlatFragments(fragments, value)
 		}
 		else {
-			const reusableValue = new ReusableExpression(value, this)
+			const reusableValue = new TempReusableExpression(value, this)
 
 			@elements[0].toFlatFragments(fragments, reusableValue)
 
@@ -418,33 +419,10 @@ class ObjectBinding extends Expression {
 			}
 		}
 	} // }}}
+	type(type: Type, scope: Scope, node)
 	walk(fn) { // {{{
 		for element in @elements {
 			element.walk(fn)
 		}
-	} // }}}
-}
-
-class ReusableExpression extends Expression {
-	private {
-		_count: Number	= 0
-		_value
-	}
-	constructor(@value, parent) { // {{{
-		super({}, parent)
-	} // }}}
-	analyse()
-	prepare()
-	translate()
-	isComputed() => @count == 0 && @value.isComposite()
-	toFragments(fragments, mode) { // {{{
-		if @count == 0 && @value.isComposite() {
-			fragments.compileReusable(@value)
-		}
-		else {
-			fragments.compile(@value)
-		}
-
-		++@count
 	} // }}}
 }
