@@ -59,7 +59,7 @@
 		"rimraf": "^2.6.3"
 	},
 	"scripts": {
-		"postinstall": "npm install `node ./scripts/install.js dependency` && node ./scripts/install.js binary",
+		"postinstall": "npm install --no-save `node ./scripts/install.js dependency` && node ./scripts/install.js binary",
 		"push-coverage": "npm run test-coverage && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
 		"test": "mocha --colors --check-leaks --reporter spec --require ./register.js",
 		"test-coverage": "node node_modules/@zokugun/istanbul.cover/src/cli.js"

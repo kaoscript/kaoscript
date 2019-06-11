@@ -504,7 +504,7 @@ export class Color {
 			const methods: Array = []
 
 			let field
-			for name, component of space.components {
+			for const component, name of space.components {
 				field = `_\(name)`
 
 				fields.push(macro private #i(field): Number)
