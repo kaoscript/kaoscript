@@ -80,7 +80,7 @@ class MemberExpression extends Expression {
 	caller() => @object
 	isCallable() => @object.isCallable() || (@data.computed && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
-	isEntangled() =>this.isCallable() || this.isNullable()
+	isLooseComposite() => this.isCallable() || this.isNullable()
 	isMacro() => false
 	isNullable() => @data.nullable || @object.isNullable() || (@data.computed && @property.isNullable())
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@data.nullable ? 1 : 0) + (@data.computed && @property.isNullable() ? 1 : 0) > 1

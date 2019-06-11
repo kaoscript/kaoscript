@@ -40,5 +40,6 @@ ok:
 	make comp
 	make comp
 	make testks
+	make build
 
 .PHONY: test build bin comp coverage

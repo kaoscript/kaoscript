@@ -96,7 +96,7 @@ class ForOfStatement extends Statement {
 			TypeException.throwInvalidForOfExpression(this)
 		}
 
-		if @expression.isEntangled() {
+		if @expression.isLooseComposite() {
 			@expressionName = @bindingScope.acquireTempName(false)
 
 			@bleeding = @bindingScope.isBleeding()

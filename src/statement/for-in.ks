@@ -145,7 +145,7 @@ class ForInStatement extends Statement {
 			@indexName = @bindingScope.acquireTempName(false)
 		}
 
-		if @expression.isEntangled() {
+		if @expression.isLooseComposite() {
 			@expressionName = @bindingScope.acquireTempName(false)
 		}
 

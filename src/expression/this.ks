@@ -2,7 +2,7 @@ class ThisExpression extends Expression {
 	private {
 		_calling: Boolean			= false
 		_class: ClassType
-		_entangled: Boolean			= false
+		_composite: Boolean			= false
 		_fragment
 		_method: ClassMethodType
 		_name: String
@@ -70,7 +70,7 @@ class ThisExpression extends Expression {
 			}
 			else if @type ?= @class.type().getPropertyGetter(@name) {
 				@fragment = `this.\(@name)()`
-				@entangled = true
+				@composite = true
 			}
 			else {
 				ReferenceException.throwNotDefinedField(@name, this)
@@ -78,7 +78,7 @@ class ThisExpression extends Expression {
 		}
 	} // }}}
 	translate()
-	isEntangled() => @entangled
+	isComposite() => @composite
 	isUsingVariable(name) => false
 	listAssignments(array) => array
 	setAssignment(assignment)

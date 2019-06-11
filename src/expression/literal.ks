@@ -13,7 +13,6 @@ class Literal extends Expression {
 	translate()
 	hasExceptions() => false
 	isComposite() => false
-	isEntangled() => false
 	isUsingVariable(name) => false
 	toFragments(fragments, mode) { // {{{
 		if @data {
