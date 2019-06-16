@@ -46,7 +46,6 @@ include {
 	'../expression/array-comprehension'
 	'../expression/await'
 	'../expression/binding'
-	'../expression/block'
 	'../expression/call'
 	'../expression/comparison'
 	'../expression/conditional'

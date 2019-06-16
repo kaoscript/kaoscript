@@ -1903,13 +1903,12 @@ class ClassMethodDeclaration extends Statement {
 		_aliases: Array			= []
 		_analysed: Boolean		= false
 		_awaiting: Boolean		= false
-		_body: Array
+		_block: Block
 		_exit: Boolean			= false
 		_instance: Boolean		= true
 		_internalName: String
 		_name: String
 		_parameters: Array
-		_statements: Array
 		_type: Type
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
@@ -2028,7 +2027,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		@body = $ast.body(@data.body)
+		@block = $compile.block($ast.body(@data), this)
 
 		@parameters = []
 		for parameter in @data.parameters {
@@ -2070,47 +2069,19 @@ class ClassMethodDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		@statements = []
+		@block.analyse(@aliases)
 
-		for statement in @aliases {
-			@statements.push(statement)
+		@block.analyse()
 
-			statement.analyse()
+		@block.type(@type.returnType()).prepare()
 
-			if statement.isAwait() {
-				@awaiting = true
-			}
-		}
+		@block.translate()
 
-		for statement in @body {
-			@statements.push(statement = $compile.statement(statement, this))
-
-			statement.analyse()
-		}
-
-		const rtype = @type.returnType()
-		const na = !rtype.isAny()
-
-		for statement in @statements {
-			statement.prepare()
-
-			if @exit {
-				SyntaxException.throwDeadCode(statement)
-			}
-			else if na && !statement.isReturning(rtype) {
-				TypeException.throwUnexpectedReturnedType(rtype, statement)
-			}
-			else {
-				@exit = statement.isExit()
-			}
-		}
-
-		for statement in @statements {
-			statement.translate()
-		}
+		@awaiting = @block.isAwait()
+		@exit = @block.isExit()
 	} // }}}
 	addAliasStatement(statement: AliasStatement) { // {{{
-		if !ClassDeclaration.isAssigningAlias(@body, statement.name(), false, false) {
+		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
 	} // }}}
@@ -2141,9 +2112,7 @@ class ClassMethodDeclaration extends Statement {
 			throw new NotImplementedException(this)
 		}
 		else {
-			for statement in @statements {
-				ctrl.compile(statement)
-			}
+			ctrl.compile(@block)
 
 			if !@exit && @type.isAsync() {
 				ctrl.line('__ks_cb()')
@@ -2167,10 +2136,9 @@ class ClassMethodDeclaration extends Statement {
 class ClassConstructorDeclaration extends Statement {
 	private {
 		_aliases: Array				= []
-		_body: Array
+		_block: Block
 		_internalName: String
 		_parameters
-		_statements
 		_type: Type
 	}
 	static toSwitchFragments(node, fragments, variable, methods, header, footer) { // {{{
@@ -2207,7 +2175,7 @@ class ClassConstructorDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		@body = $ast.body(@data.body)
+		@block = $compile.block($ast.body(@data), this)
 
 		@parameters = []
 		for parameter in @data.parameters {
@@ -2229,56 +2197,34 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		let index = 1
-		if @body.length == 0 {
+		if @block.isEmpty() {
 			if @parent._extending {
 				this.addCallToParentConstructor()
 
 				index = 0
 			}
 		}
-		else if (index = this.getConstructorIndex(@body)) == -1 && @parent._extending {
+		else if (index = this.getConstructorIndex(@block.statements())) == -1 && @parent._extending {
 			SyntaxException.throwNoSuperCall(this)
 		}
 
-		@statements = []
-
 		if @aliases.length == 0 {
-			for statement in @body {
-				@statements.push(statement = $compile.statement(statement, this))
-
-				statement.analyse()
-			}
+			@block.analyse()
 		}
 		else {
-			for statement in @body to index {
-				@statements.push(statement = $compile.statement(statement, this))
+			@block.analyse(0, index)
 
-				statement.analyse()
-			}
+			@block.analyse(@aliases)
 
-			for statement in @aliases {
-				@statements.push(statement)
-
-				statement.analyse()
-			}
-
-			for statement in @body from index + 1 {
-				@statements.push(statement = $compile.statement(statement, this))
-
-				statement.analyse()
-			}
+			@block.analyse(index + 1)
 		}
 
-		for statement in @statements {
-			statement.prepare()
-		}
+		@block.prepare()
 
-		for statement in @statements {
-			statement.translate()
-		}
+		@block.translate()
 	} // }}}
 	addAliasStatement(statement: AliasStatement) { // {{{
-		if !ClassDeclaration.isAssigningAlias(@body, statement.name(), true, @parent._extending) {
+		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), true, @parent._extending) {
 			@aliases.push(statement)
 		}
 	} // }}}
@@ -2288,7 +2234,7 @@ class ClassConstructorDeclaration extends Statement {
 
 		if extendedType.matchArguments([]) {
 			if extendedType.hasConstructors() {
-				@body.push({
+				@block.addStatement({
 					kind: NodeKind::CallExpression
 					scope: {
 						kind: ScopeKind::This
@@ -2365,32 +2311,24 @@ class ClassConstructorDeclaration extends Statement {
 		})
 
 		if @parent._extendsType.isSealedAlien() {
-			const index = this.getSuperIndex(@body)
+			const index = this.getSuperIndex(@block.statements())
 
 			if index == -1 {
 				ctrl.line('super()')
 				ctrl.line('this.constructor.prototype.__ks_init()')
 
-				for statement in @statements {
-					ctrl.compile(statement)
-				}
+				ctrl.compile(@block)
 			}
 			else {
-				for statement in @statements to index {
-					ctrl.compile(statement)
-				}
+				@block.toRangeFragments(ctrl, 0, index)
 
 				ctrl.line('this.constructor.prototype.__ks_init()')
 
-				for statement in @statements from index + 1 {
-					ctrl.compile(statement)
-				}
+				@block.toRangeFragments(ctrl, index + 1)
 			}
 		}
 		else {
-			for statement in @statements {
-				ctrl.compile(statement)
-			}
+			ctrl.compile(@block)
 		}
 
 		ctrl.done()
@@ -2405,23 +2343,17 @@ class ClassConstructorDeclaration extends Statement {
 				return node.code(') =>').newBlock()
 			})
 
-			const index = this.getSuperIndex(@body)
+			const index = this.getSuperIndex(@block.statements())
 
 			if index == -1 {
-				for statement in @statements {
-					block.compile(statement)
-				}
+				block.compile(@block)
 			}
 			else {
-				for statement in @statements to index {
-					block.compile(statement)
-				}
+				@block.toRangeFragments(block, 0, index)
 
 				block.line('this.__ks_init()')
 
-				for statement in @statements from index + 1 {
-					block.compile(statement)
-				}
+				@block.toRangeFragments(block, index + 1)
 			}
 
 			block.done()
@@ -2441,9 +2373,7 @@ class ClassConstructorDeclaration extends Statement {
 				return node.code(')').step()
 			})
 
-			for statement in @statements {
-				ctrl.compile(statement)
-			}
+			ctrl.compile(@block)
 
 			ctrl.done() unless @parent._es5
 		}
@@ -2453,9 +2383,9 @@ class ClassConstructorDeclaration extends Statement {
 
 class ClassDestructorDeclaration extends Statement {
 	private {
+		_block: Block
 		_internalName: String
 		_parameters: Array
-		_statements
 		_type: Type
 	}
 	static toSwitchFragments(node, fragments, variable) { // {{{
@@ -2504,20 +2434,10 @@ class ClassDestructorDeclaration extends Statement {
 		@type = new ClassDestructorType(@data, this)
 	} // }}}
 	translate() { // {{{
-		@statements = []
-		for statement in $ast.body(@data.body) {
-			@statements.push(statement = $compile.statement(statement, this))
-
-			statement.analyse()
-		}
-
-		for statement in @statements {
-			statement.prepare()
-		}
-
-		for statement in @statements {
-			statement.translate()
-		}
+		@block = $compile.block($ast.body(@data), this)
+		@block.analyse()
+		@block.prepare()
+		@block.translate()
 	} // }}}
 	isAbstract() { // {{{
 		for modifier in @data.modifiers {
@@ -2545,9 +2465,7 @@ class ClassDestructorDeclaration extends Statement {
 			return node.code(')').step()
 		})
 
-		for statement in @statements {
-			ctrl.compile(statement)
-		}
+		ctrl.compile(@block)
 
 		ctrl.done() unless @parent._es5
 	} // }}}

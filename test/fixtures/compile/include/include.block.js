@@ -90,7 +90,8 @@ module.exports = function() {
 			return this.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
 		}
 		else {
-			return this.match(/[^\r\n]+/g) || [];
+			let __ks_0;
+			return Type.isValue(__ks_0 = this.match(/[^\r\n]+/g)) ? __ks_0 : [];
 		}
 	};
 	__ks_String.__ks_func_lower_0 = function() {

@@ -7,7 +7,7 @@ class WhileStatement extends Statement {
 		@condition = $compile.expression(@data.condition, this)
 		@condition.analyse()
 
-		@body = $compile.expression(@data.body, this)
+		@body = $compile.block(@data.body, this)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{

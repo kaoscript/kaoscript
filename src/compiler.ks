@@ -48,31 +48,39 @@ const $typeofs = { // {{{
 
 const $ast = {
 	block(data) { // {{{
-		return data if data.kind == NodeKind::Block
-
-		return {
-			kind: NodeKind::Block
-			statements: [
-				data
-			]
+		if data.kind == NodeKind::Block {
+			return data
+		}
+		else {
+			return {
+				kind: NodeKind::Block
+				statements: [
+					data
+				]
+				start: data.start
+				end: data.end
+			}
 		}
 	} // }}}
 	body(data?) { // {{{
-		if !?data {
-			return []
+		if !?data.body {
+			return {
+				kind: NodeKind::Block
+				statements: []
+				start: data.start
+				end: data.end
+			}
 		}
-		else if data.kind == NodeKind::Block {
-			return data.statements
+		else if data.body.kind == NodeKind::Block {
+			return data.body
 		}
 		else {
-			return [
-				{
-					kind: NodeKind::ReturnStatement
-					value: data
-					start: data.start
-					end: data.end
-				}
-			]
+			return {
+				kind: NodeKind::ReturnStatement
+				value: data.body
+				start: data.body.start
+				end: data.body.end
+			}
 		}
 	} // }}}
 	identifier(name) { // {{{
@@ -213,10 +221,12 @@ include {
 	'./operator/binary'
 	'./operator/polyadic'
 	'./operator/unary'
+	'./include/block'
 	'./include/macro'
 }
 
 const $compile = {
+	block(data, parent, scope = parent.scope()) => new Block($ast.block(data), parent, scope)
 	expression(data, parent, scope = parent.scope()) { // {{{
 		let expression
 
@@ -337,7 +347,6 @@ const $expressions = {
 	`\(NodeKind::ArrayRange)`					: ArrayRange
 	`\(NodeKind::AwaitExpression)`				: AwaitExpression
 	`\(NodeKind::BindingElement)`				: BindingElement
-	`\(NodeKind::Block)`						: BlockExpression
 	`\(NodeKind::CallExpression)`				: CallExpression
 	`\(NodeKind::CallMacroExpression)`	 		: func(data, parent, scope) {
 		const macro = scope.getMacro(data, parent)

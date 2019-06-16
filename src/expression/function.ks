@@ -1,10 +1,10 @@
 class FunctionExpression extends Expression {
 	private {
 		_awaiting: Boolean				= false
+		_block: Block
 		_exit: Boolean					= false
 		_isObjectMember: Boolean		= false
 		_parameters: Array<Parameter>
-		_statements						= []
 		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
@@ -34,37 +34,14 @@ class FunctionExpression extends Expression {
 			parameter.translate()
 		}
 
-		@statements = []
-		for statement in $ast.body(@data.body) {
-			@statements.push(statement = $compile.statement(statement, this))
+		@block = $compile.block($ast.body(@data), this)
+		@block.analyse()
 
-			statement.analyse()
+		@awaiting = @block.isAwait()
 
-			if statement.isAwait() {
-				@awaiting = true
-			}
-		}
+		@block.prepare()
 
-		const rtype = @type.returnType()
-		const na = !rtype.isAny()
-
-		for statement in @statements {
-			statement.prepare()
-
-			if @exit {
-				SyntaxException.throwDeadCode(statement)
-			}
-			else if na && !statement.isReturning(rtype) {
-				TypeException.throwUnexpectedReturnedType(rtype, statement)
-			}
-			else {
-				@exit = statement.isExit()
-			}
-		}
-
-		for statement in @statements {
-			statement.translate()
-		}
+		@block.translate()
 	} // }}}
 	isComputed() => true
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
@@ -113,28 +90,10 @@ class FunctionExpression extends Expression {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 
-		if @awaiting {
-			let index = -1
-			let item
+		block.compile(@block)
 
-			for statement, i in @statements while index == -1 {
-				if item ?= statement.toFragments(block, Mode::None) {
-					index = i
-				}
-			}
-
-			if index != -1 {
-				item(@statements.slice(index + 1))
-			}
-		}
-		else {
-			for statement in @statements {
-				block.compile(statement)
-			}
-
-			if !@exit && @type.isAsync() {
-				block.line('__ks_cb()')
-			}
+		if !@awaiting && !@exit && @type.isAsync() {
+			block.line('__ks_cb()')
 		}
 
 		block.done()
@@ -149,15 +108,17 @@ class FunctionExpression extends Expression {
 class LambdaExpression extends Expression {
 	private {
 		_awaiting: Boolean		= false
+		_block: Block
 		_exit: Boolean			= false
 		_parameters
-		_statements				= []
 		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
+		@block = $compile.block($ast.body(@data), this)
+
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
@@ -177,37 +138,12 @@ class LambdaExpression extends Expression {
 			parameter.translate()
 		}
 
-		@statements = []
-		for statement in $ast.body(@data.body) {
-			@statements.push(statement = $compile.statement(statement, this))
+		@block.analyse()
+		@block.prepare()
+		@block.translate()
 
-			statement.analyse()
-
-			if statement.isAwait() {
-				@awaiting = true
-			}
-		}
-
-		const rtype = @type.returnType()
-		const na = !rtype.isAny()
-
-		for statement in @statements {
-			statement.prepare()
-
-			if @exit {
-				SyntaxException.throwDeadCode(statement)
-			}
-			else if na && !statement.isReturning(rtype) {
-				TypeException.throwUnexpectedReturnedType(rtype, statement)
-			}
-			else {
-				@exit = statement.isExit()
-			}
-		}
-
-		for statement in @statements {
-			statement.translate()
-		}
+		@awaiting = @block.isAwait()
+		@exit = @block.isExit()
 	} // }}}
 	isComputed() => true
 	isInstanceMethod() => false
@@ -218,13 +154,7 @@ class LambdaExpression extends Expression {
 			}
 		}
 
-		for statement in @statements {
-			if statement.isUsingVariable(name) {
-				return true
-			}
-		}
-
-		return false
+		return @block.isUsingVariable(name)
 	} // }}}
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
@@ -236,28 +166,10 @@ class LambdaExpression extends Expression {
 			return fragments.code(surround.afterParameters).newBlock()
 		})
 
-		if @awaiting {
-			let index = -1
-			let item
+		block.compile(@block)
 
-			for statement, i in @statements while index == -1 {
-				if item ?= statement.toFragments(block, Mode::None) {
-					index = i
-				}
-			}
-
-			if index != -1 {
-				item(@statements.slice(index + 1))
-			}
-		}
-		else {
-			for statement in @statements {
-				block.compile(statement)
-			}
-
-			if !@exit && @type.isAsync() {
-				block.line('__ks_cb()')
-			}
+		if !@awaiting && !@exit && @type.isAsync() {
+			block.line('__ks_cb()')
 		}
 
 		block.done()

@@ -7,6 +7,7 @@ enum TryState {
 class TryStatement extends Statement {
 	private {
 		_await: Boolean				= false
+		_block: Block
 		_catchVarname: String
 		_catchClause
 		_catchClauses: Array		= []
@@ -17,7 +18,6 @@ class TryStatement extends Statement {
 		_hasCatch: Boolean			= false
 		_hasFinally: Boolean		= false
 		_state: TryState
-		_statements: Array			= []
 	}
 	analyse() { // {{{
 		let scope
@@ -38,7 +38,7 @@ class TryStatement extends Statement {
 					scope = @scope
 				}
 
-				body = $compile.expression(clause.body, this, scope)
+				body = $compile.block(clause.body, this, scope)
 				body.analyse()
 
 				type = $compile.expression(clause.type, this, scope)
@@ -61,36 +61,26 @@ class TryStatement extends Statement {
 				scope = @scope
 			}
 
-			@catchClause = $compile.expression(@data.catchClause.body, this, scope)
+			@catchClause = $compile.block(@data.catchClause.body, this, scope)
 			@catchClause.analyse()
 		}
 
-		for statement in $ast.body(@data.body) {
-			@scope.line(statement.start.line)
+		@block = $compile.block($ast.body(@data), this)
+		@block.analyse()
 
-			@statements.push(statement = $compile.statement(statement, this))
-
-			statement.analyse()
-
-			if statement.isAwait() {
-				@await = true
-			}
-		}
+		@await = @block.isAwait()
 
 		if @data.finalizer? {
-			@finalizer = $compile.expression(@data.finalizer, this)
+			@finalizer = $compile.block(@data.finalizer, this)
 			@finalizer.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
-		let exit = false
 		@hasCatch = @catchClauses.length != 0
 
 		for const clause in @catchClauses {
 			clause.body.prepare()
 			clause.type.prepare()
-
-			exit = exit && clause.body.isExit()
 		}
 
 		if @catchClause? {
@@ -99,21 +89,9 @@ class TryStatement extends Statement {
 			@hasCatch = true
 		}
 
-		let deadCode = false
-		for const statement in @statements {
-			@scope.line(statement.line())
+		@block.prepare()
 
-			statement.prepare()
-
-			if deadCode {
-				SyntaxException.throwDeadCode(statement)
-			}
-			else {
-				exit = deadCode = statement.isExit()
-			}
-		}
-
-		@exit = @hasCatch && exit && @catchClause.isExit()
+		@exit = @block.isExit() && @hasCatch && @catchClause.isExit()
 
 		if @finalizer? {
 			@finalizer.prepare()
@@ -126,11 +104,7 @@ class TryStatement extends Statement {
 		}
 	} // }}}
 	translate() { // {{{
-		for statement in @statements {
-			@scope.line(statement.line())
-
-			statement.translate()
-		}
+		@block.translate()
 
 		for clause in @catchClauses {
 			clause.body.translate()
@@ -164,15 +138,7 @@ class TryStatement extends Statement {
 		}
 	} // }}}
 	isExit() => @exit
-	isReturning(type: Type) { // {{{
-		for statement in @statements {
-			if !statement.isReturning(type) {
-				return false
-			}
-		}
-
-		return true
-	} // }}}
+	isReturning(type: Type) => @block.isReturning(type)
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		if statements.length != 0 {
 			@continueVarname = @scope.acquireTempName()
@@ -245,18 +211,7 @@ class TryStatement extends Statement {
 			.code('try')
 			.step()
 
-		let index = -1
-		let item
-
-		for statement, i in @statements while index == -1 {
-			if item ?= statement.toFragments(ctrl, Mode::None) {
-				index = i
-			}
-		}
-
-		if index != -1 {
-			item(@statements.slice(index + 1))
-		}
+		ctrl.compile(@block, Mode::None)
 
 		ctrl
 			.step()
@@ -513,9 +468,7 @@ class TryStatement extends Statement {
 				.code('try')
 				.step()
 
-			for statement in @statements {
-				ctrl.compile(statement, Mode::None)
-			}
+			ctrl.compile(@block, Mode::None)
 
 			if @finallyVarname? {
 				ctrl.line(`\(@finallyVarname)()`)

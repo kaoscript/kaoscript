@@ -33,7 +33,7 @@ class IfStatement extends Statement {
 			@condition.analyse()
 		}
 
-		@whenTrueExpression = $compile.expression($ast.block(@data.whenTrue), this, @whenTrueScope)
+		@whenTrueExpression = $compile.block(@data.whenTrue, this, @whenTrueScope)
 		@whenTrueExpression.analyse()
 
 		if @data.whenFalse? {
@@ -44,7 +44,7 @@ class IfStatement extends Statement {
 			else {
 				@whenFalseScope = this.newScope(@scope, ScopeType::InlineBlock)
 
-				@whenFalseExpression = $compile.expression($ast.block(@data.whenFalse), this, @whenFalseScope)
+				@whenFalseExpression = $compile.block(@data.whenFalse, this, @whenFalseScope)
 				@whenFalseExpression.analyse()
 			}
 		}

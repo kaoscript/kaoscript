@@ -4,7 +4,7 @@ class DoWhileStatement extends Statement {
 		_condition
 	}
 	analyse() { // {{{
-		@body = $compile.expression(@data.body, this)
+		@body = $compile.block(@data.body, this)
 		@body.analyse()
 
 		@condition = $compile.expression(@data.condition, this)

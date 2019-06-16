@@ -10,7 +10,7 @@ class UnlessStatement extends Statement {
 		@condition = $compile.expression(@data.condition, this, @scope)
 		@condition.analyse()
 
-		@whenFalseExpression = $compile.expression($ast.block(@data.whenFalse), this, @whenFalseScope)
+		@whenFalseExpression = $compile.block(@data.whenFalse, this, @whenFalseScope)
 		@whenFalseExpression.analyse()
 	} // }}}
 	prepare() { // {{{

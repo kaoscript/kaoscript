@@ -310,10 +310,10 @@ class FunctionDeclaration extends Statement {
 
 class FunctionDeclarator extends AbstractNode {
 	private {
-		_await: Boolean				= false
+		_awaiting: Boolean				= false
+		_block: Block
 		_exit: Boolean				= false
 		_parameters: Array			= []
-		_statements: Array			= []
 		_variable: FunctionVariable
 		_type: FunctionType
 	}
@@ -341,44 +341,17 @@ class FunctionDeclarator extends AbstractNode {
 			parameter.translate()
 		}
 
-		for statement in $ast.body(@data.body) {
-			@scope.line(statement.start.line)
+		@block = $compile.block($ast.body(@data), this)
+		@block.analyse()
 
-			@statements.push(statement = $compile.statement(statement, this))
+		@block.type(@type.returnType()).prepare()
 
-			statement.analyse()
+		@block.translate()
 
-			if statement.isAwait() {
-				@await = true
-			}
-		}
-
-		const rtype = @type.returnType()
-		const na = !rtype.isAny()
-
-		for statement in @statements {
-			@scope.line(statement.line())
-
-			statement.prepare()
-
-			if @exit {
-				SyntaxException.throwDeadCode(statement)
-			}
-			else if na && !statement.isReturning(rtype) {
-				TypeException.throwUnexpectedReturnedType(rtype, statement)
-			}
-			else {
-				@exit = statement.isExit()
-			}
-		}
-
-		for statement in @statements {
-			@scope.line(statement.line())
-
-			statement.translate()
-		}
+		@awaiting = @block.isAwait()
+		@exit = @block.isExit()
 	} // }}}
-	isAwait() => @await
+	isAwait() => @awaiting
 	isExit() => @exit
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
@@ -429,28 +402,10 @@ class FunctionDeclarator extends AbstractNode {
 			return fragments.code(')').step()
 		})
 
-		if @await {
-			let index = -1
-			let item
+		ctrl.compile(@block, Mode::None)
 
-			for statement, i in @statements while index == -1 {
-				if item ?= statement.toFragments(ctrl, Mode::None) {
-					index = i
-				}
-			}
-
-			if index != -1 {
-				item(@statements.slice(index + 1))
-			}
-		}
-		else {
-			for statement in @statements {
-				ctrl.compile(statement, Mode::None)
-			}
-
-			if !@exit && @type.isAsync() {
-				ctrl.line('__ks_cb()')
-			}
+		if !@awaiting && !@exit && @type.isAsync() {
+			ctrl.line('__ks_cb()')
 		}
 
 		ctrl.done()
@@ -458,28 +413,10 @@ class FunctionDeclarator extends AbstractNode {
 	toSwitchFragments(fragments, wrongdoer) { // {{{
 		Parameter.toFragments(this, fragments, ParameterMode::OverloadedFunction, (fragments) => fragments, wrongdoer)
 
-		if @await {
-			let index = -1
-			let item
+		fragments.compile(@block, Mode::None)
 
-			for statement, i in @statements while index == -1 {
-				if item ?= statement.toFragments(fragments, Mode::None) {
-					index = i
-				}
-			}
-
-			if index != -1 {
-				item(@statements.slice(index + 1))
-			}
-		}
-		else {
-			for statement in @statements {
-				fragments.compile(statement, Mode::None)
-			}
-
-			if !@exit && @type.isAsync() {
-				fragments.line('__ks_cb()')
-			}
+		if !@awaiting && !@exit && @type.isAsync() {
+			fragments.line('__ks_cb()')
 		}
 	} // }}}
 	type() => @type

@@ -195,7 +195,7 @@ class ImplementClassFieldDeclaration extends Statement {
 class ImplementClassMethodDeclaration extends Statement {
 	private {
 		_aliases: Array			= []
-		_body: Array
+		_block: Block
 		_class: ClassType
 		_classRef: ReferenceType
 		_isContructor: Boolean	= false
@@ -205,7 +205,6 @@ class ImplementClassMethodDeclaration extends Statement {
 		_name: String
 		_override: Boolean		= false
 		_parameters: Array<Parameter>
-		_statements
 		_this: Variable
 		_type: Type
 		_variable: NamedType<ClassType>
@@ -218,7 +217,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
-		@body = $ast.body(@data.body)
+		@block = $compile.block($ast.body(@data), this)
 
 		if @isContructor = (@data.name.kind == NodeKind::Identifier && @class.isConstructor(@name)) {
 			throw new NotImplementedException(this)
@@ -293,36 +292,16 @@ class ImplementClassMethodDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		@statements = []
+		@block.analyse(@aliases)
 
-		for statement in @aliases {
-			@statements.push(statement)
+		@block.analyse()
 
-			statement.analyse()
-		}
+		@block.type(@type.returnType()).prepare()
 
-		for statement in @body {
-			@scope.line(statement.start.line)
-
-			@statements.push(statement = $compile.statement(statement, this))
-
-			statement.analyse()
-		}
-
-		for statement in @statements {
-			@scope.line(statement.line())
-
-			statement.prepare()
-		}
-
-		for statement in @statements {
-			@scope.line(statement.line())
-
-			statement.translate()
-		}
+		@block.translate()
 	} // }}}
 	addAliasStatement(statement: AliasStatement) { // {{{
-		if !ClassDeclaration.isAssigningAlias(@body, statement.name(), false, false) {
+		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
 	} // }}}
@@ -360,9 +339,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				return line.newBlock()
 			})
 
-			for statement in @statements {
-				block.compile(statement)
-			}
+			block.compile(@block)
 
 			block.done()
 			line.done()
@@ -493,10 +470,10 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 
 class ImplementNamespaceFunctionDeclaration extends Statement {
 	private {
+		_block: Block
 		_namespace: NamespaceType
 		_namespaceRef: ReferenceType
 		_parameters: Array
-		_statements: Array
 		_type: FunctionType
 		_variable: NamedType<NamespaceType>
 	}
@@ -532,25 +509,12 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@type = property.type()
 	} // }}}
 	translate() { // {{{
-		if @data.body? {
-			@statements = []
-			for statement in $ast.body(@data.body) {
-				@statements.push(statement = $compile.statement(statement, this))
+		@block = $compile.block($ast.body(@data), this)
+		@block.analyse()
 
-				statement.analyse()
-			}
+		@block.type(@type.returnType()).prepare()
 
-			for statement in @statements {
-				statement.prepare()
-			}
-
-			for statement in @statements {
-				statement.translate()
-			}
-		}
-		else {
-			@statements = []
-		}
+		@block.translate()
 	} // }}}
 	getSharedName() => null
 	isInstanceMethod() => false
@@ -571,9 +535,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			return fragments.code(')').newBlock()
 		})
 
-		for statement in @statements {
-			block.compile(statement)
-		}
+		block.compile(@block)
 
 		block.done()
 

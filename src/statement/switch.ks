@@ -95,7 +95,7 @@ class SwitchStatement extends Statement {
 			clause.filter = new SwitchFilter(data, this, clause.scope)
 			clause.filter.analyse()
 
-			clause.body = $compile.expression($ast.block(data.body), this, clause.scope)
+			clause.body = $compile.block(data.body, this, clause.scope)
 			clause.body.analyse()
 
 			@clauses.push(clause)

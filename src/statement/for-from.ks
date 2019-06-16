@@ -115,7 +115,7 @@ class ForFromStatement extends Statement {
 			@when.analyse()
 		}
 
-		@body = $compile.expression($ast.block(@data.body), this, @bodyScope)
+		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
