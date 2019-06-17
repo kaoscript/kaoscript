@@ -67,16 +67,18 @@ func $nodeModulesPaths(start) { // {{{
 class Importer extends Statement {
 	private {
 		_alias: String				= null
-		_arguments					= {}
+		_arguments: Array			= []
+		_argumentNames				= {}
+		_argumentValues				= {}
 		_count: Number				= 0
+		_hasArguments: Boolean		= true
 		_imports					= {}
 		_isKSFile: Boolean
-		_localToModuleArguments		= {}
 		_metadata
-		_moduleToLocalArguments		= {}
 		_moduleName: String
+		_reusable: Boolean			= false
+		_reuseName: String
 		_sealedVariables			= {}
-		_seepedArguments			= {}
 		_variables					= {}
 		_worker: ImportWorker
 	}
@@ -100,24 +102,21 @@ class Importer extends Statement {
 	} // }}}
 	prepare() { // {{{
 		if @isKSFile {
-			for const argument, name of @arguments {
-				argument.name = @moduleToLocalArguments[name]
-
-				if @seepedArguments[name] == true {
-					argument.seeped = true
-				}
-				else {
-					argument.seeped = false
-					argument.type = @scope.getVariable(@moduleToLocalArguments[name]).getDeclaredType()
-				}
-			}
-
-			@worker.prepare(@arguments)
-
 			const module = this.module()
 
-			for const :name of @seepedArguments {
-				module.addRequirement(new SeepedRequirement(@arguments[name].name, @arguments[name].type))
+			const arguments = {}
+
+			for const argument in @arguments {
+				argument.value.prepare()
+				argument.type = argument.value.type()
+
+				arguments[argument.name] = argument
+			}
+
+			@worker.prepare(arguments)
+
+			for const argument in @arguments when argument.seeped {
+				module.addRequirement(new SeepedRequirement(argument.name, argument.type))
 			}
 
 			const matchables = []
@@ -150,7 +149,7 @@ class Importer extends Statement {
 					if def.newVariable {
 						variable.setDeclaredType(def.type ?? type)
 					}
-					else if !variable.isPredefined() && @localToModuleArguments[def.local] is not String {
+					else if !variable.isPredefined() && @argumentValues[def.local] is not Number {
 						ReferenceException.throwNotPassed(def.local, @data.source.value, this)
 					}
 					else if type.matchSignatureOf(variable.getDeclaredType(), matchables) {
@@ -184,28 +183,70 @@ class Importer extends Statement {
 				}
 			}
 
-			if @data.arguments?.length != 0 || @count != 0 || @alias? {
+			if @count != 0 || @alias != null {
 				this.module().flagRegister()
+			}
+
+			if @count != 0 && @alias != null {
+				@reuseName = @scope.acquireTempName(false)
+				@scope.releaseTempName(@reuseName)
+			}
+		}
+		else {
+			for const argument in @arguments {
+				argument.value.prepare()
+				argument.type = argument.value.type()
 			}
 		}
 	} // }}}
-	translate()
+	translate() { // {{{
+		for const argument in @arguments {
+			argument.value.translate()
+		}
+	} // }}}
 	addArgument(data) { // {{{
+		const argument = {
+			index: @isKSFile ? null : 0
+			isIdentifier: false
+			isNamed: false
+			seeped: data.seeped
+			value: $compile.expression(data.value, this)
+		}
+
 		if data.seeped {
-			if (variable ?= @scope.getVariable(data.local.name)) && !variable.getDeclaredType().isPredefined()  {
-				ReferenceException.throwDefined(data.local.name, this)
+			if (variable ?= @scope.getVariable(data.value.name)) && !variable.getDeclaredType().isPredefined()  {
+				ReferenceException.throwDefined(data.value.name, this)
 			}
 
-			@seepedArguments[data.imported.name] = true
+			argument.isNamed = true
+			argument.name = data.name?.name ?? data.value.name
+
+			argument.isIdentifier = true
+			argument.identifier = data.value.name
+
+			@argumentNames[argument.name] = @arguments.length
+			@argumentValues[data.value.name] = @arguments.length
 		}
-		else {
-			unless @scope.hasVariable(data.local.name) {
-				ReferenceException.throwNotDefined(data.local.name, this)
-			}
+		else if data.value.kind == NodeKind::Identifier {
+			argument.isNamed = true
+			argument.name = data.name?.name ?? data.value.name
+
+			argument.isIdentifier = true
+			argument.identifier = data.value.name
+
+			@argumentNames[argument.name] = @arguments.length
+			@argumentValues[data.value.name] = @arguments.length
+		}
+		else if data.name? {
+			argument.isNamed = true
+			argument.name = data.name.name
+
+			@argumentNames[argument.name] = @arguments.length
 		}
 
-		@localToModuleArguments[data.local.name] = data.imported.name
-		@moduleToLocalArguments[data.imported.name] = data.local.name
+		argument.value.analyse()
+
+		@arguments.push(argument)
 	} // }}}
 	addImport(imported: String, local: String, isAlias: Boolean, type: Type = null) { // {{{
 		const newVariable = (variable !?= @scope.getVariable(local)) || variable.isPredefined()
@@ -236,7 +277,7 @@ class Importer extends Statement {
 				return
 			}
 			else if isVariable {
-				if @localToModuleArguments[local] is not String {
+				if @argumentValues[local] is not Number {
 					ReferenceException.throwNotPassed(local, @data.source.value, this)
 				}
 				else if variable.getDeclared().isMergeable(type) {
@@ -377,20 +418,38 @@ class Importer extends Statement {
 				this.addArgument(argument)
 			}
 
-			let name
-			for i from 0 til @metadata.requirements.length by 3 {
-				name = @metadata.requirements[i + 1]
+			const requirements = []
 
-				if @moduleToLocalArguments[name] is String {
-					@arguments[name] = {
-						index: Math.floor(i / 3) + 1
-						data: @metadata.references[@metadata.requirements[i]]
-					}
+			for i from 0 til @metadata.requirements.length by 3 {
+				const name = @metadata.requirements[i + 1]
+
+				if @argumentNames[name] is Number {
+					@arguments[@argumentNames[name]].index = @metadata.requirements[i]
 				}
-				else if @metadata.requirements[i + 2] {
-					SyntaxException.throwMissingRequirement(name, this)
+				else {
+					requirements.push(@metadata.requirements.slice(i, i + 3))
 				}
 			}
+
+			const len = @arguments.length
+			let nextArgument = 0
+			for const requirement in requirements {
+				while nextArgument < len && @arguments[nextArgument].index != null {
+					++nextArgument
+				}
+
+				if nextArgument == len {
+					if requirement[2] {
+						SyntaxException.throwMissingRequirement(requirement[1], this)
+					}
+				}
+				else {
+					@arguments[nextArgument].index = requirement[0]
+					@arguments[nextArgument].name = requirement[1]
+				}
+			}
+
+			@arguments.sort((a, b) => a.index - b.index)
 		}
 		else {
 			for i from 1 til @metadata.requirements.length by 3 {
@@ -470,15 +529,18 @@ class Importer extends Statement {
 			file = moduleName = module.path(x, @data.source.value)
 		}
 
-		if @data.arguments?.length != 0 {
-			for argument in @data.arguments {
-				if argument.local == argument.imported {
-					this.addArgument(argument)
-				}
-				else {
+		if @data.arguments? {
+			for const argument in @data.arguments {
+				if argument.name? {
 					SyntaxException.throwInvalidImportAliasArgument(this)
 				}
+				else {
+					this.addArgument(argument)
+				}
 			}
+		}
+		else {
+			@hasArguments = false
 		}
 
 		@isKSFile = false
@@ -582,56 +644,33 @@ class Importer extends Statement {
 		}
 	} // }}}
 	toKSFileFragments(fragments) { // {{{
-		const modulePath = $localFileRegex.test(@moduleName) && @parent.includePath() != null ? path.join(path.dirname(@parent.includePath()), @moduleName) : @moduleName
-
-		let importCode = `require(\($quote(modulePath)))(`
-		let importCodeVariable = false
-		let name, alias, variable
-
-		const hasArguments = @data.arguments?.length != 0
-
-		if hasArguments {
-			let nf = false
-
-			for const :name of @arguments {
-				if nf {
-					importCode += ', '
-				}
-				else {
-					nf = true
-				}
-
-				if @moduleToLocalArguments[name] is String {
-					importCode += @moduleToLocalArguments[name]
-
-					if @arguments[name].type.isSealed() {
-						importCode += `, __ks_\(@moduleToLocalArguments[name])`
-					}
-				}
-				else {
-					importCode += 'null'
-				}
-			}
-		}
-
-		importCode += ')'
-
 		if @count == 0 {
 			if @alias != null {
-				fragments.newLine().code('var ', @alias, ' = ', importCode).done()
+				const line = fragments
+					.newLine()
+					.code('var ', @alias, ' = ')
+
+				this.toRequireFragments(line)
+
+				line.done()
 			}
-			else if hasArguments {
-				fragments.newLine().code(importCode).done()
+			else if @arguments.length != 0 {
+				const line = fragments.newLine()
+
+				this.toRequireFragments(line)
+
+				line.done()
 			}
 		}
 		else {
 			if @alias != null {
-				const variable = @scope.acquireTempName()
+				const line = fragments
+					.newLine()
+					.code('var ', @reuseName, ' = ')
 
-				fragments.line(`var \(variable) = \(importCode)`)
+				this.toRequireFragments(line)
 
-				importCode = variable
-				importCodeVariable = true
+				line.done()
 			}
 
 			if @count == 1 {
@@ -640,14 +679,29 @@ class Importer extends Statement {
 				for alias, name of @variables {
 				}
 
-				fragments.newLine().code(`var \(alias) = \(importCode).\(name)`).done()
+				const line = fragments
+					.newLine()
+					.code(`var \(alias) = `)
+
+				this.toRequireFragments(line)
+
+				line.code(`.\(name)`).done()
 			}
 			else {
 				if @options.format.destructuring == 'es5' {
-					let variable = importCode
+					let variable
 
-					if !importCodeVariable {
-						fragments.line(`var __ks__ = \(importCode)`)
+					if @reusable {
+						variable = @reuseName
+					}
+					else {
+						const line = fragments
+							.newLine()
+							.code('var __ks__ = ')
+
+						this.toRequireFragments(line)
+
+						line.done()
 
 						variable = '__ks__'
 					}
@@ -700,38 +754,32 @@ class Importer extends Statement {
 						}
 					}
 
-					line.code('} = ', importCode).done()
+					line.code('} = ')
+
+					this.toRequireFragments(line)
+
+					line.done()
 				}
 			}
 
 			if @alias != null {
-				fragments.newLine().code('var ', @alias, ' = ', importCode).done()
-			}
-		}
+				const line = fragments
+					.newLine()
+					.code('var ', @alias, ' = ')
 
-		if Scope.isTempName(importCode) {
-			@scope.releaseTempName(importCode)
+				this.toRequireFragments(line)
+
+				line.done()
+			}
 		}
 	} // }}}
 	toNodeFileFragments(fragments) { // {{{
 		if @alias != null {
 			const line = fragments
 				.newLine()
-				.code(`var \(@alias) = require(\($quote(@moduleName)))`)
+				.code(`var \(@alias) = `)
 
-			if @data.arguments? {
-				line.code('(')
-
-				for argument, index in @data.arguments {
-					if index != 0 {
-						line.code(', ')
-					}
-
-					line.code(argument.local.name)
-				}
-
-				line.code(')')
-			}
+			this.toRequireFragments(line)
 
 			line.done()
 		}
@@ -745,21 +793,9 @@ class Importer extends Statement {
 
 			const line = fragments
 				.newLine()
-				.code(`var \(alias) = require(\($quote(@moduleName)))`)
+				.code(`var \(alias) = `)
 
-			if @data.arguments? {
-				line.code('(')
-
-				for argument, index in @data.arguments {
-					if index != 0 {
-						line.code(', ')
-					}
-
-					line.code(argument.local.name)
-				}
-
-				line.code(')')
-			}
+			this.toRequireFragments(line)
 
 			line.code(`.\(alias)`).done()
 		}
@@ -767,21 +803,9 @@ class Importer extends Statement {
 			if @options.format.destructuring == 'es5' {
 				let line = fragments
 					.newLine()
-					.code(`var __ks__ = require(\($quote(@moduleName)))`)
+					.code(`var __ks__ = `)
 
-				if @data.arguments? {
-					line.code('(')
-
-					for argument, index in @data.arguments {
-						if index != 0 {
-							line.code(', ')
-						}
-
-						line.code(argument.local.name)
-					}
-
-					line.code(')')
-				}
+				this.toRequireFragments(line)
 
 				line.done()
 
@@ -821,24 +845,47 @@ class Importer extends Statement {
 					}
 				}
 
-				line.code(`} = require(\($quote(@moduleName)))`)
+				line.code(`} = `)
 
-				if @data.arguments? {
-					line.code('(')
-
-					for argument, index in @data.arguments {
-						if index != 0 {
-							line.code(', ')
-						}
-
-						line.code(argument.local.name)
-					}
-
-					line.code(')')
-				}
+				this.toRequireFragments(line)
 
 				line.done()
 			}
+		}
+	} // }}}
+	toRequireFragments(fragments) { // {{{
+		if @reusable {
+			fragments.code(@reuseName)
+		}
+		else {
+			const modulePath = @isKSFile && $localFileRegex.test(@moduleName) && @parent.includePath() != null ? path.join(path.dirname(@parent.includePath()), @moduleName) : @moduleName
+
+			fragments.code(`require(\($quote(modulePath)))`)
+
+			if @hasArguments {
+				fragments.code(`(`)
+
+				let nf = false
+
+				for const argument in @arguments when argument.index != null {
+					if nf {
+						fragments.code($comma)
+					}
+					else {
+						nf = true
+					}
+
+					fragments.compile(argument.value)
+
+					if argument.isIdentifier && argument.type.isSealed() {
+						fragments.code(`, __ks_\(argument.identifier)`)
+					}
+				}
+
+				fragments.code(`)`)
+			}
+
+			@reusable = true
 		}
 	} // }}}
 }

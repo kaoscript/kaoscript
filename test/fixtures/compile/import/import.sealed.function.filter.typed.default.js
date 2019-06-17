@@ -1,12 +1,14 @@
 require("kaoscript/register");
 function __ks_require(__ks_0) {
+	var req = [];
 	if(Type.isValue(__ks_0)) {
-		return [__ks_0];
+		req.push(__ks_0);
 	}
 	else {
 		var template = require("./import.sealed.function.source.ks")().template;
-		return [template];
+		req.push(template);
 	}
+	return req;
 }
 module.exports = function(__ks_0) {
 	var [template] = __ks_require(__ks_0);

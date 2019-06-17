@@ -1,12 +1,14 @@
 require("kaoscript/register");
 function __ks_require(__ks_0, __ks___ks_0) {
+	var req = [];
 	if(Type.isValue(__ks_0)) {
-		return [__ks_0, __ks___ks_0];
+		req.push(__ks_0, __ks___ks_0);
 	}
 	else {
 		var {Date, __ks_Date} = require("../_/_date.ks")();
-		return [Date, __ks_Date];
+		req.push(Date, __ks_Date);
 	}
+	return req;
 }
 module.exports = function(__ks_0, __ks___ks_0) {
 	var [Date, __ks_Date] = __ks_require(__ks_0, __ks___ks_0);

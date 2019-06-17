@@ -313,18 +313,13 @@ export class Module {
 
 				ctrl.code(')').step()
 
-				if @dynamicRequirements.length == 1 {
-					@dynamicRequirements[0].toLoneAltFragments(ctrl)
-				}
-				else {
-					ctrl.line('var req = []')
+				ctrl.line('var req = []')
 
-					for requirement in @dynamicRequirements {
-						requirement.toManyAltFragments(ctrl)
-					}
-
-					ctrl.line('return req')
+				for requirement in @dynamicRequirements {
+					requirement.toAltFragments(ctrl)
 				}
+
+				ctrl.line('return req')
 
 				ctrl.done()
 			}

@@ -1,0 +1,16 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [
+    0,
+    "file",
+    true
+  ],
+  "exports": [],
+  "references": [
+    "String"
+  ],
+  "macros": []
+}

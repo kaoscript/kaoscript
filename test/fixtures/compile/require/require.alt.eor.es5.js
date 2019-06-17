@@ -1,11 +1,13 @@
 var Type = require("@kaoscript/runtime").Type;
 function __ks_require(__ks_0, __ks___ks_0) {
+	var req = [];
 	if(Type.isValue(Array)) {
-		return [Array, typeof __ks_Array === "undefined" ? {} : __ks_Array];
+		req.push(Array, typeof __ks_Array === "undefined" ? {} : __ks_Array);
 	}
 	else {
-		return [__ks_0, __ks___ks_0];
+		req.push(__ks_0, __ks___ks_0);
 	}
+	return req;
 }
 module.exports = function(__ks_0, __ks___ks_0) {
 	var __ks__ = __ks_require(__ks_0, __ks___ks_0);

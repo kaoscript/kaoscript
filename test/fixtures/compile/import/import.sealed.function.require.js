@@ -1,19 +1,15 @@
 require("kaoscript/register");
 function __ks_require(__ks_0, __ks_1) {
 	var req = [];
-	if(Type.isValue(__ks_0)) {
-		req.push(__ks_0);
+	var __ks_0_valuable = Type.isValue(__ks_0);
+	var __ks_1_valuable = Type.isValue(__ks_1);
+	if(!__ks_0_valuable || !__ks_1_valuable) {
+		var {Template, template} = require("./import.sealed.function.source.ks")();
+		req.push(__ks_0_valuable ? __ks_0 : Template);
+		req.push(__ks_1_valuable ? __ks_1 : template);
 	}
 	else {
-		var {Template, template} = require("./import.sealed.function.source.ks")();
-		req.push(Template);
-	}
-	if(Type.isValue(__ks_1)) {
-		req.push(__ks_1);
-	}
-	else {
-		var {Template, template} = require("./import.sealed.function.source.ks")();
-		req.push(template);
+		req.push(__ks_0, __ks_1);
 	}
 	return req;
 }

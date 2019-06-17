@@ -356,25 +356,35 @@ class RequireOrImportDeclaration extends Statement {
 		_declarators = []
 	}
 	analyse() { // {{{
-		for declarator in @data.declarations {
+		for let declarator in @data.declarations {
 			@declarators.push(declarator = new RequireOrImportDeclarator(declarator, this))
 
 			declarator.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
-		for declarator in @declarators {
+		for const declarator in @declarators {
 			declarator.prepare()
 		}
 	} // }}}
-	translate()
+	translate() { // {{{
+		for const declarator in @declarators {
+			declarator.translate()
+		}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
 
 class RequireOrImportDeclarator extends Importer {
+	static {
+		_printed: Boolean		= false
+		_requirements: Array	= []
+	}
 	prepare() { // {{{
 		super.prepare()
+
+		this._requirements = []
 
 		const module = this.module()
 
@@ -386,13 +396,20 @@ class RequireOrImportDeclarator extends Importer {
 						// TODO: check & merge type
 					}
 					else {
-						module.addRequirement(new ROIDynamicRequirement(variable, this))
+						const requirement = new ROIDynamicRequirement(variable, this)
+
+						// @requirements.push(requirement)
+						this._requirements.push(requirement)
+						module.addRequirement(requirement)
 					}
 				}
 			}
 			else {
 				for const alias of @variables {
-					module.addRequirement(new ROIDynamicRequirement(@scope.getVariable(alias), this))
+					const requirement = new ROIDynamicRequirement(@scope.getVariable(alias), this)
+
+					this._requirements.push(requirement)
+					module.addRequirement(requirement)
 				}
 			}
 		}
@@ -401,8 +418,93 @@ class RequireOrImportDeclarator extends Importer {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
-	translate()
 	metadata() => @metadata
+	toAltFragments(fragments) { // {{{
+		return if this._printed
+
+		if this._requirements.length == 1 {
+			const requirement = this._requirements[0]
+
+			const ctrl = fragments.newControl().code(`if(Type.isValue(\(requirement.parameter())))`).step()
+
+			if requirement.isFlexible() {
+				ctrl
+					.line(`req.push(\(requirement.parameter()), __ks_\(requirement.parameter()))`)
+					.step()
+					.code('else')
+					.step()
+
+				this.toImportFragments(ctrl)
+
+				ctrl.line(`req.push(\(requirement.name()), __ks_\(requirement.name()))`)
+
+				ctrl.done()
+			}
+			else {
+				ctrl
+					.line(`req.push(\(requirement.parameter()))`)
+					.step()
+					.code('else')
+					.step()
+
+				this.toImportFragments(ctrl)
+
+				ctrl.line(`req.push(\(requirement.name()))`)
+
+				ctrl.done()
+			}
+		}
+		else {
+			for const requirement in this._requirements {
+				fragments.line(`var \(requirement.parameter())_valuable = Type.isValue(\(requirement.parameter()))`)
+			}
+
+			const ctrl = fragments.newControl().code(`if(`)
+
+			for const requirement, index in this._requirements {
+				if index != 0 {
+					ctrl.code(' || ')
+				}
+
+				ctrl.code(`!\(requirement.parameter())_valuable`)
+			}
+
+			ctrl.code(')').step()
+
+			this.toImportFragments(ctrl)
+
+			for const requirement in this._requirements {
+				if requirement.isFlexible() {
+				}
+				else {
+					ctrl.line(`req.push(\(requirement.parameter())_valuable ? \(requirement.parameter()) : \(requirement.name()))`)
+				}
+			}
+
+			ctrl.step().code('else').step()
+
+			const line = ctrl.newLine().code('req.push(')
+
+			for const requirement, index in this._requirements {
+				if index != 0 {
+					line.code($comma)
+				}
+
+				if requirement.isFlexible() {
+					line.code(`\(requirement.parameter()), __ks_\(requirement.parameter())`)
+				}
+				else {
+					line.code(requirement.parameter())
+				}
+			}
+
+			line.code(')').done()
+
+			ctrl.done()
+		}
+
+		this._printed = true
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
@@ -421,6 +523,7 @@ abstract class Requirement {
 		this(node.define(data, kind))
 	} // }}}
 	isAlien() => false
+	isFlexible() => @type.isFlexible()
 	abstract isRequired(): Boolean
 	name() => @name
 	toNameFragments(fragments) { // {{{
@@ -498,32 +601,7 @@ class EORDynamicRequirement extends DynamicRequirement {
 		super(data, DependencyKind::ExternOrRequire, node)
 	} // }}}
 	isAlien() => true
-	toLoneAltFragments(fragments) { // {{{
-		const ctrl = fragments
-			.newControl()
-			.code(`if(Type.isValue(\(@name)))`)
-			.step()
-
-		if @type.isFlexible() {
-			ctrl
-				.line(`return [\(@name), typeof __ks_\(@name) === "undefined" ? {} : __ks_\(@name)]`)
-				.step()
-				.code('else')
-				.step()
-				.line(`return [\(@parameter), __ks_\(@parameter)]`)
-		}
-		else {
-			ctrl
-				.line(`return [\(@name)]`)
-				.step()
-				.code('else')
-				.step()
-				.line(`return [\(@parameter)]`)
-		}
-
-		ctrl.done()
-	} // }}}
-	toManyAltFragments(fragments) { // {{{
+	toAltFragments(fragments) { // {{{
 		const ctrl = fragments
 			.newControl()
 			.code(`if(Type.isValue(\(@name)))`)
@@ -555,32 +633,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 		super(data, DependencyKind::RequireOrExtern, node)
 	} // }}}
 	isAlien() => true
-	toLoneAltFragments(fragments) { // {{{
-		const ctrl = fragments
-			.newControl()
-			.code(`if(Type.isValue(\(@parameter)))`)
-			.step()
-
-		if @type.isFlexible() {
-			ctrl
-				.line(`return [\(@parameter), __ks_\(@parameter)]`)
-				.step()
-				.code('else')
-				.step()
-				.line(`return [\(@name), typeof __ks_\(@name) === "undefined" ? {} : __ks_\(@name)]`)
-		}
-		else {
-			ctrl
-				.line(`return [\(@parameter)]`)
-				.step()
-				.code('else')
-				.step()
-				.line(`return [\(@name)]`)
-		}
-
-		ctrl.done()
-	} // }}}
-	toManyAltFragments(fragments) { // {{{
+	toAltFragments(fragments) { // {{{
 		const ctrl = fragments
 			.newControl()
 			.code(`if(Type.isValue(\(@parameter)))`)
@@ -616,66 +669,5 @@ class ROIDynamicRequirement extends DynamicRequirement {
 
 		variable.getDeclaredType().condense()
 	} // }}}
-	toLoneAltFragments(fragments) { // {{{
-		const ctrl = fragments
-			.newControl()
-			.code(`if(Type.isValue(\(@parameter)))`)
-			.step()
-
-		if @type.isFlexible() {
-			ctrl
-				.line(`return [\(@parameter), __ks_\(@parameter)]`)
-				.step()
-				.code('else')
-				.step()
-
-			@importer.toImportFragments(ctrl)
-
-			ctrl.line(`return [\(@name), __ks_\(@name)]`).done()
-		}
-		else {
-			ctrl
-				.line(`return [\(@parameter)]`)
-				.step()
-				.code('else')
-				.step()
-
-			@importer.toImportFragments(ctrl)
-
-			ctrl.line(`return [\(@name)]`).done()
-		}
-
-		ctrl.done()
-	} // }}}
-	toManyAltFragments(fragments) { // {{{
-		const ctrl = fragments
-			.newControl()
-			.code(`if(Type.isValue(\(@parameter)))`)
-			.step()
-
-		if @type.isFlexible() {
-			ctrl
-				.line(`req.push(\(@parameter), __ks_\(@parameter))`)
-				.step()
-				.code('else')
-				.step()
-
-			@importer.toImportFragments(ctrl)
-
-			ctrl.line(`req.push(\(@name), __ks_\(@name))`).done()
-		}
-		else {
-			ctrl
-				.line(`req.push(\(@parameter))`)
-				.step()
-				.code('else')
-				.step()
-
-			@importer.toImportFragments(ctrl)
-
-			ctrl.line(`req.push(\(@name))`).done()
-		}
-
-		ctrl.done()
-	} // }}}
+	toAltFragments(fragments) => @importer.toAltFragments(fragments)
 }
