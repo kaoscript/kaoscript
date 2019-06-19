@@ -555,7 +555,7 @@ class StaticRequirement extends Requirement {
 	} // }}}
 }
 
-class SeepedRequirement extends StaticRequirement {
+class ImportingRequirement extends StaticRequirement {
 	constructor(@name, @type) { // {{{
 		super(name, type)
 	} // }}}

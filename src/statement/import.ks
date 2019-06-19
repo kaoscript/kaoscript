@@ -115,8 +115,8 @@ class Importer extends Statement {
 
 			@worker.prepare(arguments)
 
-			for const argument in @arguments when argument.seeped {
-				module.addRequirement(new SeepedRequirement(argument.name, argument.type))
+			for const argument in @arguments when argument.required {
+				module.addRequirement(new ImportingRequirement(argument.name, argument.type))
 			}
 
 			const matchables = []
@@ -209,11 +209,11 @@ class Importer extends Statement {
 			index: @isKSFile ? null : 0
 			isIdentifier: false
 			isNamed: false
-			seeped: data.seeped
+			required: data.required
 			value: $compile.expression(data.value, this)
 		}
 
-		if data.seeped {
+		if data.required {
 			if (variable ?= @scope.getVariable(data.value.name)) && !variable.getDeclaredType().isPredefined()  {
 				ReferenceException.throwDefined(data.value.name, this)
 			}
@@ -960,14 +960,14 @@ class ImportWorker {
 			for i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
-				if (argument ?= arguments[name]) && !argument.seeped && !argument.type.matchSignatureOf(reqReferences[@metadata.requirements[i]], matchables) {
+				if (argument ?= arguments[name]) && !argument.required && !argument.type.matchSignatureOf(reqReferences[@metadata.requirements[i]], matchables) {
 					TypeException.throwNotCompatibleArgument(argument.name, name, @node.data().source.value, @node)
 				}
 			}
 
 			for i from 0 til @metadata.requirements.length by 3 {
 				if argument ?= arguments[@metadata.requirements[i + 1]] {
-					if argument.seeped {
+					if argument.required {
 						argument.type = reqReferences[@metadata.requirements[i]]
 					}
 
