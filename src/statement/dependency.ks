@@ -377,14 +377,12 @@ class RequireOrImportDeclaration extends Statement {
 }
 
 class RequireOrImportDeclarator extends Importer {
-	static {
+	private {
 		_printed: Boolean		= false
 		_requirements: Array	= []
 	}
 	prepare() { // {{{
 		super.prepare()
-
-		this._requirements = []
 
 		const module = this.module()
 
@@ -398,8 +396,7 @@ class RequireOrImportDeclarator extends Importer {
 					else {
 						const requirement = new ROIDynamicRequirement(variable, this)
 
-						// @requirements.push(requirement)
-						this._requirements.push(requirement)
+						@requirements.push(requirement)
 						module.addRequirement(requirement)
 					}
 				}
@@ -408,7 +405,7 @@ class RequireOrImportDeclarator extends Importer {
 				for const alias of @variables {
 					const requirement = new ROIDynamicRequirement(@scope.getVariable(alias), this)
 
-					this._requirements.push(requirement)
+					@requirements.push(requirement)
 					module.addRequirement(requirement)
 				}
 			}
