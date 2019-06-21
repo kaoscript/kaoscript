@@ -123,17 +123,37 @@ class NamedType extends Type {
 	isSealedAlien() => @type.isSealedAlien()
 	isNamed() => true
 	isNamespace() => @type.isNamespace()
-	matchContentOf(that: Type) { // {{{
+	matchClassName(that: Type) { // {{{
 		if that is NamedType {
+			if @type is ClassType && that.type() is ClassType {
+				return @name == that.name()
+			}
+		}
+		else if that is ReferenceType {
+			return @name == that.name() || this.matchClassName(that.discardReference())
+		}
+
+		return false
+	} // }}}
+	matchContentOf(that: Type) { // {{{
+		if that.isAny() {
+			return true
+		}
+		else if that is NamedType {
 			if @type is ClassType && that.type() is ClassType {
 				return this.matchInheritanceOf(that)
 			}
-			else if @type is EnumType && that.type() is EnumType {
-				return @name == that.name()
+			else if that.type() is EnumType {
+				if @type is EnumType {
+					return @name == that.name()
+				}
+				else {
+					return this.matchContentOf(that.type().type())
+				}
 			}
 			else if that.isAlias() {
 				if this.isAlias() {
-					return @name == that.name()
+					return @name == that.name() || this.discardAlias().matchContentOf(that.discardAlias())
 				}
 				else {
 					return this.matchContentOf(that.discardAlias())
@@ -153,35 +173,10 @@ class NamedType extends Type {
 			return false
 		}
 		else if that is ReferenceType {
-			return @name == that.name()
+			return @name == that.name() || this.matchContentOf(that.discardReference())
 		}
 		else {
 			return @type.matchContentOf(that)
-		}
-	} // }}}
-	matchContentTo(that: Type) { // {{{
-		if that is NamedType {
-			if @type is ClassType && that.type() is ClassType {
-				return that.matchInheritanceOf(this)
-			}
-			else {
-				return @type.matchContentTo(that.type())
-			}
-		}
-		else if that is UnionType {
-			for const type in that.types() {
-				if this.matchContentTo(type) {
-					return true
-				}
-			}
-
-			return false
-		}
-		else if that is ReferenceType {
-			return @name == that.name()
-		}
-		else {
-			return @type.matchContentTo(that)
 		}
 	} // }}}
 	matchInheritanceOf(base: Type) { // {{{

@@ -273,6 +273,8 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 		else {
+			// console.log(@class._classMethods.map)
+			// console.log(@type)
 			if index ?= @class.matchClassMethod(@name, @type) {
 				if @override {
 					@internalName = `__ks_sttc_\(@name)_\(index)`

@@ -6,11 +6,21 @@ module.exports = function() {
 			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		let __ks_i = -1;
-		let __ks__;
-		let quote = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "\"";
+		let quote;
+		if(arguments.length > 1 && (quote = arguments[++__ks_i]) !== void 0 && quote !== null) {
+			if(!Type.isString(quote)) {
+				throw new TypeError("'quote' is not of type 'String'");
+			}
+		}
+		else {
+			quote = "\"";
+		}
 		let escape = arguments[++__ks_i];
 		if(escape === void 0 || escape === null) {
 			throw new TypeError("'escape' is not nullable");
+		}
+		else if(!Type.isString(escape)) {
+			throw new TypeError("'escape' is not of type 'String'");
 		}
 		return quote + __ks_String._im_replaceAll(__ks_String._im_replaceAll(this, escape, escape + escape), quote, escape + quote) + quote;
 	};

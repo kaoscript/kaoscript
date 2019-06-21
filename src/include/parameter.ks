@@ -654,13 +654,16 @@ class Parameter extends AbstractNode {
 			min = 0
 		}
 
+		const name = !@anonymous && @name is IdentifierLiteral ? @name.name() : null
+		const default = @hasDefaultValue ? 1 : 0
+
 		if type != null {
-			@type = new ParameterType(@scope, type, min, max)
+			@type = new ParameterType(@scope, name, type, min, max, default)
 
 			@variable.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type).flagDefinitive()
 		}
 		else {
-			@type = new ParameterType(@scope, Type.Any, min, max)
+			@type = new ParameterType(@scope, name, Type.Any, min, max, default)
 
 			@variable.setDeclaredType(@rest ? Type.arrayOf(Type.Any, @scope) : Type.Any)
 		}

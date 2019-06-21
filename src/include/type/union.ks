@@ -62,7 +62,7 @@ class UnionType extends Type {
 		for const type in @types {
 			const property = type.getProperty(name)
 
-			if !types.some(t => t.matchContentTo(property)) {
+			if !types.some(t => property.matchContentOf(t)) {
 				types.push(property)
 			}
 		}
@@ -112,36 +112,6 @@ class UnionType extends Type {
 		}
 
 		return true
-	} // }}}
-	matchContentTo(that: Type) { // {{{
-		if that is UnionType {
-			let nf
-
-			for const vType in that._types {
-				nf = true
-
-				for const tType in @types while nf {
-					if tType.matchContentOf(vType) {
-						nf = false
-					}
-				}
-
-				if nf {
-					return false
-				}
-			}
-
-			return true
-		}
-		else {
-			for type in @types {
-				if type.matchContentOf(that) {
-					return true
-				}
-			}
-
-			return false
-		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)

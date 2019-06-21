@@ -60,7 +60,8 @@
               {
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": {
@@ -86,7 +87,8 @@
               {
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": {

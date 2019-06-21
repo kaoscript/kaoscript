@@ -65,17 +65,18 @@ class ModuleScope extends Scope {
 	addMacro(name: String, macro: MacroDeclaration) { // {{{
 		if @macros[name] is Array {
 			const type = macro.type()
-			let na = true
+			let notAdded = true
+			let found = false
 
-			for m, index in @macros[name] while na {
-				if m.type().matchContentTo(type) {
+			for m, index in @macros[name] while notAdded {
+				if type.matchSignatureOf(m.type(), []) {
 					@macros[name].splice(index, 0, macro)
 
-					na = false
+					notAdded = false
 				}
 			}
 
-			if na {
+			if notAdded {
 				@macros[name].push(macro)
 			}
 		}
@@ -356,7 +357,7 @@ class ModuleScope extends Scope {
 			is String => return this.resolveReference(value)
 			is Variable => return this.resolveReference(value.name())
 			=> {
-				console.log(value)
+				console.info(value)
 				throw new NotImplementedException()
 			}
 		}

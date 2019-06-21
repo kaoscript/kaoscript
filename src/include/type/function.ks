@@ -73,6 +73,23 @@ class FunctionType extends Type {
 
 			return type
 		} // }}}
+		isOptional(parameters, index, step) { // {{{
+			if index >= parameters.length {
+				return true
+			}
+
+			if step <= parameters[index].min() {
+				return false
+			}
+
+			for const parameter in parameters from index + 1 {
+				if parameter.min() != 0 {
+					return false
+				}
+			}
+
+			return true
+		} // }}}
 	}
 	constructor(@scope) { // {{{
 		super(scope)
@@ -85,43 +102,8 @@ class FunctionType extends Type {
 			@missingReturn = false
 		}
 
-		let last: Type = null
-
 		for parameter in parameters {
-			if last == null {
-				@parameters.push(last = parameter.clone())
-			}
-			else if !parameter._type.equals(last._type) {
-				if last._max == Infinity {
-					if @max == Infinity {
-						SyntaxException.throwTooMuchRestParameter(node)
-					}
-					else {
-						@max = Infinity
-					}
-				}
-				else {
-					@max += last._max
-				}
-
-				@min += last._min
-
-				@parameters.push(last = parameter.clone())
-			}
-			else {
-				if parameter._max == Infinity {
-					last._max = Infinity
-				}
-				else {
-					last._max += parameter._max
-				}
-
-				last._min += parameter._min
-			}
-		}
-
-		if last != null {
-			if last._max == Infinity {
+			if parameter._max == Infinity {
 				if @max == Infinity {
 					SyntaxException.throwTooMuchRestParameter(node)
 				}
@@ -130,10 +112,12 @@ class FunctionType extends Type {
 				}
 			}
 			else {
-				@max += last._max
+				@max += parameter._max
 			}
 
-			@min += last._min
+			@min += parameter._min
+
+			@parameters.push(parameter)
 		}
 
 		if data.modifiers? {
@@ -158,21 +142,7 @@ class FunctionType extends Type {
 	absoluteMax() => @async ? @max + 1 : @max
 	absoluteMin() => @async ? @min + 1 : @min
 	addParameter(type: Type, min = 1, max = 1) { // {{{
-		let last
-
-		if @parameters.length == 0 {
-			@parameters.push(new ParameterType(@scope, type, min, max))
-		}
-		else if type.equals((last = @parameters[@parameters.length - 1])._type) {
-			if max == Infinity {
-				last._max = Infinity
-			}
-			else {
-				last._max += max
-			}
-
-			last._min += min
-		}
+		@parameters.push(new ParameterType(@scope, type, min, max))
 
 		if @hasRest {
 			@max += max
@@ -273,6 +243,90 @@ class FunctionType extends Type {
 		return false
 	} // }}}
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
+	matchContentOf(type: Type) => type.isAny() || type.isFunction()
+	matchParametersOf(arguments: Array, matchables): Boolean => this.matchParametersOf(0, -1, arguments, 0, -1, matchables)
+	matchParametersOf(pIndex, pStep, arguments, aIndex, aStep, matchables) { // {{{
+		if aStep == -1 {
+			if aIndex >= arguments.length {
+				return FunctionType.isOptional(@parameters, pIndex, pStep)
+			}
+
+			const argument = arguments[aIndex]
+
+			if argument.max() == Infinity {
+				return this.matchParametersOf(pIndex, pStep, arguments, aIndex, 1, matchables)
+			}
+
+			for const i from 1 to argument.min() {
+				if !this.matchParametersOf(pIndex, pStep, arguments, aIndex, i, matchables) {
+					return false
+				}
+			}
+
+			if argument.min() == argument.max() {
+				return true
+			}
+
+			for const i from argument.min() + 1 to argument.max() {
+				if this.matchParametersOf(pIndex, pStep, arguments, aIndex, i, matchables) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else if aStep > arguments[aIndex].max() {
+			return this.matchParametersOf(pIndex, pStep, arguments, aIndex + 1, -1, matchables)
+		}
+		else if pStep == -1 {
+			if pIndex >= @parameters.length {
+				return FunctionType.isOptional(arguments, aIndex, aStep)
+			}
+
+			const parameter = @parameters[pIndex]
+
+			if parameter.max() == Infinity {
+				return this.matchParametersOf(pIndex, 1, arguments, aIndex, aStep, matchables)
+			}
+
+			for const i from 1 to parameter.min() {
+				if !this.matchParametersOf(pIndex, i, arguments, aIndex, aStep, matchables) {
+					return false
+				}
+			}
+
+			if parameter.min() == parameter.max() {
+				return true
+			}
+
+			for const i from parameter.min() + 1 to parameter.max() {
+				if this.matchParametersOf(pIndex, i, arguments, aIndex, aStep, matchables) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else if pStep > @parameters[pIndex].max() {
+			return this.matchParametersOf(pIndex + 1, -1, arguments, aIndex, aStep, matchables)
+		}
+		else if @parameters[pIndex].matchSignatureOf(arguments[aIndex], matchables) {
+			if arguments[aIndex].max() == Infinity {
+				if @parameters[pIndex].max() == Infinity {
+					return true
+				}
+				else {
+					return this.matchParametersOf(pIndex, pStep + 1, arguments, aIndex, aStep, matchables)
+				}
+			}
+			else {
+				return this.matchParametersOf(pIndex, pStep + 1, arguments, aIndex, aStep + 1, matchables)
+			}
+		}
+		else {
+			return false
+		}
+	} // }}}
 	matchSignatureOf(value: Type, matchables): Boolean { // {{{
 		// console.log(this)
 		// console.log(value)
@@ -280,9 +334,7 @@ class FunctionType extends Type {
 			return value.isFunction()
 		}
 		else if value is FunctionType {
-			// console.log(this.matchArguments(value._parameters))
-			// console.log(@returnType.matchSignatureOf(value._returnType))
-			return (@missingParameters || this.matchArguments(value._parameters)) && (@missingReturn || @returnType.matchSignatureOf(value._returnType, matchables))
+			return (@missingParameters || this.matchParametersOf(value._parameters, matchables)) && (@missingReturn || @returnType.matchSignatureOf(value._returnType, matchables))
 		}
 		else if value is OverloadedFunctionType {
 			throw new NotImplementedException()
@@ -296,19 +348,6 @@ class FunctionType extends Type {
 		if arguments.length == 0 {
 			return @min == 0
 		}
-		else if arguments[0] is ParameterType {
-			if @parameters.length != arguments.length {
-				return false
-			}
-
-			for parameter, i in @parameters {
-				if !parameter.matchContentTo(arguments[i]) {
-					return false
-				}
-			}
-
-			return true
-		}
 		else {
 			if !(@min <= arguments.length <= @max) {
 				return false
@@ -321,7 +360,7 @@ class FunctionType extends Type {
 				const parameter = @parameters[0]
 
 				for argument in arguments {
-					if !parameter.matchContentTo(argument) {
+					if !parameter.matchArgument(argument) {
 						return false
 					}
 				}
@@ -336,7 +375,7 @@ class FunctionType extends Type {
 					parameter = @parameters[i]
 
 					for j from 0 til parameter.min() {
-						if !parameter.matchContentTo(arguments[b]) {
+						if !parameter.matchArgument(arguments[b]) {
 							return false
 						}
 
@@ -350,14 +389,14 @@ class FunctionType extends Type {
 					parameter = @parameters[i]
 
 					for j from 0 til parameter.min() {
-						if !parameter.matchContentTo(arguments[a]) {
+						if !parameter.matchArgument(arguments[a]) {
 							return false
 						}
 
 						++a
 					}
 
-					for j from parameter.min() til parameter.max() while optional != 0 when parameter.matchContentTo(arguments[a]) {
+					for j from parameter.min() til parameter.max() while optional != 0 when parameter.matchArgument(arguments[a]) {
 						++a
 						--optional
 					}
@@ -365,7 +404,7 @@ class FunctionType extends Type {
 
 				parameter = @parameters[@restIndex]
 				for j from 0 til parameter.min() {
-					if !parameter.matchContentTo(arguments[a]) {
+					if !parameter.matchArgument(arguments[a]) {
 						return false
 					}
 
@@ -375,14 +414,16 @@ class FunctionType extends Type {
 				return true
 			}
 			else if arguments.length == @max {
-				let a = -1
+				let a = 0
 
 				let p
 				for parameter in @parameters {
 					for p from 0 til parameter.max() {
-						if !parameter.matchContentTo(arguments[++a]) {
+						if !parameter.matchArgument(arguments[a]) {
 							return false
 						}
+
+						++a
 					}
 				}
 
@@ -394,14 +435,14 @@ class FunctionType extends Type {
 
 				for parameter in @parameters {
 					for i from 0 til parameter.min() {
-						if !parameter.matchContentTo(arguments[a]) {
+						if !parameter.matchArgument(arguments[a]) {
 							return false
 						}
 
 						++a
 					}
 
-					for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchContentTo(arguments[a]) {
+					for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
 						++a
 						--optional
 					}

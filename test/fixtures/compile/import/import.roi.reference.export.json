@@ -34,9 +34,11 @@
           "max": 1,
           "parameters": [
             {
+              "name": "n",
               "type": "Number",
               "min": 1,
-              "max": 1
+              "max": 1,
+              "default": 0
             }
           ],
           "returns": "Number",
@@ -49,11 +51,13 @@
           "max": 1,
           "parameters": [
             {
+              "name": "s",
               "type": {
                 "reference": 1
               },
               "min": 1,
-              "max": 1
+              "max": 1,
+              "default": 0
             }
           ],
           "returns": {
@@ -120,9 +124,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "emptyLines",
                 "type": "Any",
                 "min": 0,
-                "max": 1
+                "max": 1,
+                "default": 1
               }
             ],
             "returns": "Array",
@@ -164,9 +170,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "base",
                 "type": "Any",
                 "min": 0,
-                "max": 1
+                "max": 1,
+                "default": 1
               }
             ],
             "returns": "Number",

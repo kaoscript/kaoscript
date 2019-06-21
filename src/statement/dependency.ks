@@ -387,27 +387,16 @@ class RequireOrImportDeclarator extends Importer {
 		const module = this.module()
 
 		if @count != 0 {
-			if @parent.includePath() != null {
-				let variable
-				for const alias of @variables {
-					if variable ?= @scope.getVariable(alias) {
-						// TODO: check & merge type
-					}
-					else {
-						const requirement = new ROIDynamicRequirement(variable, this)
-
-						@requirements.push(requirement)
-						module.addRequirement(requirement)
-					}
-				}
-			}
-			else {
+			if @parent.includePath() == null {
 				for const alias of @variables {
 					const requirement = new ROIDynamicRequirement(@scope.getVariable(alias), this)
 
 					@requirements.push(requirement)
 					module.addRequirement(requirement)
 				}
+			}
+			else {
+				throw new NotImplementedException(this)
 			}
 		}
 

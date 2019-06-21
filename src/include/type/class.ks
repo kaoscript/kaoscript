@@ -544,17 +544,17 @@ class ClassType extends Type {
 
 		return this
 	} // }}}
-	getAsbtractMethod(name: String, arguments: Array) { // {{{
+	getAbstractMethod(name: String, type: Type) { // {{{
 		if @abstractMethods[name] is Array {
 			for method in @abstractMethods[name] {
-				if method.matchArguments(arguments) {
+				if method.matchSignatureOf(type, []) {
 					return method
 				}
 			}
 		}
 
 		if @extending {
-			return @extends.type().getAsbtractMethod(name, arguments)
+			return @extends.type().getAbstractMethod(name, type)
 		}
 		else {
 			return null
@@ -1066,7 +1066,7 @@ class ClassMethodType extends FunctionType {
 	isAlteration() => @alteration
 	isMatched(methods: Array<ClassMethodType>, matchables): Boolean { // {{{
 		for method in methods {
-			if method.matchSignatureOf(this, matchables) {
+			if this.matchSignatureOf(method, matchables) {
 				return true
 			}
 		}
@@ -1074,32 +1074,6 @@ class ClassMethodType extends FunctionType {
 		return false
 	} // }}}
 	isSealable() => true
-	matchSignatureOf(b: ClassMethodType, matchables) { // {{{
-		if @min != b._min || @max != b._max || @async != b._async || @parameters.length != b._parameters.length {
-			return false
-		}
-
-		for parameter, i in @parameters {
-			if !parameter.matchSignatureOf(b._parameters[i], matchables) {
-				return false
-			}
-		}
-
-		return true
-	} // }}}
-	matchSignatureOf(b: FunctionType, matchables) { // {{{
-		if @min != b._min || @max != b._max || @async != b._async || @parameters.length != b._parameters.length {
-			return false
-		}
-
-		for parameter, i in @parameters {
-			if !parameter.matchSignatureOf(b._parameters[i], matchables) {
-				return false
-			}
-		}
-
-		return true
-	} // }}}
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Async {

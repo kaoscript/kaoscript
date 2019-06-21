@@ -40,9 +40,11 @@
             "max": "Infinity",
             "parameters": [
               {
+                "name": "args",
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": "Any",

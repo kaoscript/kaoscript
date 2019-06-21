@@ -34,9 +34,11 @@
           "max": "Infinity",
           "parameters": [
             {
+              "name": "args",
               "type": "Any",
               "min": 0,
-              "max": "Infinity"
+              "max": "Infinity",
+              "default": 0
             }
           ],
           "throws": []
@@ -95,12 +97,14 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": [
                   "String",
                   "Number"
                 ],
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -118,30 +122,38 @@
             "max": 4,
             "parameters": [
               {
+                "name": "color",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "percentage",
                 "type": {
                   "reference": 3
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "space",
                 "type": {
                   "reference": 0
                 },
                 "min": 0,
-                "max": 1
+                "max": 1,
+                "default": 1
               },
               {
+                "name": "alpha",
                 "type": "Boolean",
                 "min": 0,
-                "max": 1
+                "max": 1,
+                "default": 1
               }
             ],
             "returns": {
@@ -161,12 +173,14 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": [
                   "String",
                   "Number"
                 ],
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -198,11 +212,13 @@
             "max": 1,
             "parameters": [
               {
+                "name": "color",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -220,11 +236,13 @@
             "max": 1,
             "parameters": [
               {
+                "name": "target",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -242,11 +260,13 @@
             "max": 1,
             "parameters": [
               {
+                "name": "color",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -264,11 +284,13 @@
             "max": 1,
             "parameters": [
               {
+                "name": "color",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Boolean",
@@ -284,9 +306,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "format",
                 "type": "String",
                 "min": 0,
-                "max": 1
+                "max": 1,
+                "default": 1
               }
             ],
             "returns": "Any",
@@ -302,9 +326,11 @@
             "max": "Infinity",
             "parameters": [
               {
+                "name": "args",
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": {
@@ -322,9 +348,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "name",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -340,18 +368,22 @@
             "max": 2,
             "parameters": [
               {
+                "name": "endColor",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "length",
                 "type": {
                   "reference": 2
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -375,9 +407,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "model",
                 "type": "String",
                 "min": 0,
-                "max": 1
+                "max": 1,
+                "default": 1
               }
             ],
             "returns": {
@@ -443,9 +477,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "space",
                 "type": "String",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -489,12 +525,14 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": [
                   "String",
                   "Number"
                 ],
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -512,16 +550,20 @@
             "max": 2,
             "parameters": [
               {
+                "name": "color",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "tripleA",
                 "type": "Boolean",
                 "min": 0,
-                "max": 1
+                "max": 1,
+                "default": 1
               }
             ],
             "returns": "Boolean",
@@ -539,6 +581,7 @@
             "max": 1,
             "parameters": [
               {
+                "name": "functions",
                 "type": {
                   "kind": "reference",
                   "name": "Array",
@@ -547,7 +590,8 @@
                   ]
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -571,17 +615,21 @@
             "max": 2,
             "parameters": [
               {
+                "name": "name",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "value",
                 "type": [
                   "Number",
                   "String"
                 ],
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -599,11 +647,13 @@
             "max": 1,
             "parameters": [
               {
+                "name": "percentage",
                 "type": {
                   "reference": 3
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -633,9 +683,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "space",
                 "type": "String",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -655,11 +707,13 @@
             "max": 1,
             "parameters": [
               {
+                "name": "percentage",
                 "type": {
                   "reference": 3
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -677,11 +731,13 @@
             "max": 1,
             "parameters": [
               {
+                "name": "percentage",
                 "type": {
                   "reference": 3
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": {
@@ -709,9 +765,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -737,9 +795,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -765,9 +825,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -785,9 +847,11 @@
             "max": "Infinity",
             "parameters": [
               {
+                "name": "args",
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": [
@@ -808,9 +872,11 @@
             "max": "Infinity",
             "parameters": [
               {
+                "name": "args",
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": [
@@ -831,9 +897,11 @@
             "max": "Infinity",
             "parameters": [
               {
+                "name": "args",
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": [
@@ -854,9 +922,11 @@
             "max": "Infinity",
             "parameters": [
               {
+                "name": "args",
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": [
@@ -877,14 +947,18 @@
             "max": 2,
             "parameters": [
               {
+                "name": "format",
                 "type": "String",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "formatter",
                 "type": "Function",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Void",
@@ -900,14 +974,18 @@
             "max": 2,
             "parameters": [
               {
+                "name": "format",
                 "type": "String",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "parser",
                 "type": "Function",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Void",
@@ -923,9 +1001,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "space",
                 "type": "Object",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",

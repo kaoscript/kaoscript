@@ -1,9 +1,9 @@
 class ForOfStatement extends Statement {
 	private {
-		_bindingScope
+		_bindingScope: Scope
 		_bindingValue						= null
 		_bleeding: Boolean					= false
-		_bodyScope
+		_bodyScope: Scope
 		_body
 		_conditionalTempVariables: Array	= []
 		_defineKey: Boolean					= false
@@ -35,6 +35,9 @@ class ForOfStatement extends Statement {
 			}
 			else if keyVariable.isImmutable() {
 				ReferenceException.throwImmutable(@data.key.name, this)
+			}
+			else {
+				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
 			}
 
 			@key = $compile.expression(@data.key, this, @bindingScope)

@@ -39,6 +39,6 @@ class AnyType extends Type {
 	toQuote(): String => `'Any'`
 	toReference(references, ignoreAlteration) => 'Any'
 	toTestFragments(fragments, node) { // {{{
-		throw new NotImplementedException(node)
+		throw new NotImplementedException()
 	} // }}}
 }

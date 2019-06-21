@@ -9,6 +9,7 @@ class NullType extends Type {
 	isMorePreciseThan(type: Type) => type.isAny() || type.isNullable()
 	isAny() => true
 	isNull() => true
+	matchContentOf(type: Type) => type.isAny() || type.isNullable()
 	toQuote()
 	toFragments(fragments, node)
 	toTestFragments(fragments, node)

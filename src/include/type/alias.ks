@@ -34,7 +34,6 @@ class AliasType extends Type {
 	isAlias() => true
 	isExportable() => @type.isExportable()
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
-	matchContentTo(that: Type): Boolean => @type.matchContentTo(that)
 	type() => @type
 	type(@type) => this
 	toFragments(fragments, node) { // {{{

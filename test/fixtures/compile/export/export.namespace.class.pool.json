@@ -82,9 +82,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "name",
                 "type": "String",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -113,11 +115,13 @@
       "max": 1,
       "parameters": [
         {
+          "name": "item",
           "type": {
             "reference": 1
           },
           "min": 1,
-          "max": 1
+          "max": 1,
+          "default": 0
         }
       ],
       "returns": "Any",

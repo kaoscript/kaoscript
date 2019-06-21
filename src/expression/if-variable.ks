@@ -25,7 +25,7 @@ class IfVariableDeclarationExpression extends Expression {
 					declarator = new VariableBindingDeclarator(data, this)
 				}
 				=> {
-					console.log(data)
+					console.info(data)
 					throw new NotImplementedException(this)
 				}
 			}

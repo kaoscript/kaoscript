@@ -59,9 +59,11 @@
           "max": 1,
           "parameters": [
             {
+              "name": "x",
               "type": "String",
               "min": 1,
-              "max": 1
+              "max": 1,
+              "default": 0
             }
           ],
           "returns": "String",
@@ -74,11 +76,13 @@
           "max": 1,
           "parameters": [
             {
+              "name": "x",
               "type": {
                 "reference": 0
               },
               "min": 1,
-              "max": 1
+              "max": 1,
+              "default": 0
             }
           ],
           "returns": {

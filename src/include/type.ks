@@ -126,8 +126,14 @@ abstract class Type {
 				NodeKind::Parameter => {
 					const type = Type.fromAST(data.type, scope, defined, node)
 
-					let min: Number = data.defaultValue? ? 0 : 1
+					let default: Number = 0
+					let min: Number = 1
 					let max: Number = 1
+
+					if data.defaultValue? {
+						default = 1
+						min = 0
+					}
 
 					let nf = true
 					for modifier in data.modifiers while nf {
@@ -145,7 +151,12 @@ abstract class Type {
 						}
 					}
 
-					return new ParameterType(scope, type, min, max)
+					let name = null
+					if data.name?.kind == NodeKind::Identifier {
+						name = data.name.name
+					}
+
+					return new ParameterType(scope, name, type, min, max, default)
 				}
 				NodeKind::TypeReference => {
 					if data.properties? {
@@ -200,7 +211,7 @@ abstract class Type {
 				}
 			}
 
-			console.log(data)
+			console.info(data)
 			throw new NotImplementedException(node)
 		} // }}}
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
@@ -288,7 +299,7 @@ abstract class Type {
 				return Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node)
 			}
 
-			console.log(data)
+			console.info(data)
 			throw new NotImplementedException(node)
 		} // }}}
 		import(index, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
@@ -366,7 +377,7 @@ abstract class Type {
 			}
 
 
-			console.log(data)
+			console.info(data)
 			throw new NotImplementedException(node)
 		} // }}}
 		toNamedType(name: String, type: Type): Type { // {{{
@@ -465,7 +476,6 @@ abstract class Type {
 	isSealedAlien() => @alien && @sealed
 	isString() => false
 	matchContentOf(that: Type): Boolean => this.equals(that)
-	matchContentTo(that: Type): Boolean => that.matchContentOf(this)
 	matchSignatureOf(that: Type, matchables): Boolean => false
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex

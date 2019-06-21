@@ -49,9 +49,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -77,9 +79,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -105,9 +109,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "value",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",

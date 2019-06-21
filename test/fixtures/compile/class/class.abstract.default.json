@@ -21,9 +21,11 @@
           "max": "Infinity",
           "parameters": [
             {
+              "name": "args",
               "type": "Any",
               "min": 0,
-              "max": "Infinity"
+              "max": "Infinity",
+              "default": 0
             }
           ],
           "returns": "Any",
@@ -52,9 +54,11 @@
           "max": 1,
           "parameters": [
             {
+              "name": "message",
               "type": "String",
               "min": 1,
-              "max": 1
+              "max": 1,
+              "default": 0
             }
           ],
           "throws": []
@@ -79,9 +83,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "name",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "String",
@@ -111,9 +117,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "name",
                 "type": "Any",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "String",

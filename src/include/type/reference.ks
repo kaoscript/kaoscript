@@ -55,8 +55,7 @@ class ReferenceType extends Type {
 
 		return true
 	} // }}}
-	export(references, ignoreAlteration) => this.export(references, ignoreAlteration, @name)
-	export(references, ignoreAlteration, name) { // {{{
+	export(references, ignoreAlteration, name = @name) { // {{{
 		if @nullable || @parameters.length != 0 {
 			const export = {
 				kind: TypeKind::Reference
@@ -197,11 +196,8 @@ class ReferenceType extends Type {
 	isString() => @name == 'String' || @name == 'string'
 	isVoid() => @name == 'Void' || @name == 'void'
 	matchContentOf(that: Type) { // {{{
-		if this == that || that.isAny() {
+		if this == that || this.isAny() || that.isAny() {
 			return true
-		}
-		else if this.isAny() {
-			return that.isAny()
 		}
 		else if this.isEnum() {
 			return that.isEnum()
@@ -226,36 +222,6 @@ class ReferenceType extends Type {
 			}
 		}
 	} // }}}
-	matchContentTo(that) { // {{{
-		if this == that {
-			return true
-		}
-		else if this.isAny() {
-			return that.isAny()
-		}
-		else if this.isEnum() {
-			return that.isEnum()
-		}
-		else if this.isFunction() {
-			return that.isFunction()
-		}
-		else {
-			const a = this.discardReference()
-			const b = that.discardReference()
-
-			if a is ReferenceType {
-				if b is ReferenceType {
-					return a._name == b._name
-				}
-				else {
-					return false
-				}
-			}
-			else {
-				return a.matchContentTo(b)
-			}
-		}
-	} // }}}
 	matchSignatureOf(value, matchables) { // {{{
 		if value is ReferenceType {
 			if this.isEnum() {
@@ -272,7 +238,7 @@ class ReferenceType extends Type {
 			return @type.type().matchInstanceWith(value, matchables)
 		}
 		else {
-			return false
+			return value.isAny()
 		}
 	} // }}}
 	name() => @name
@@ -311,7 +277,7 @@ class ReferenceType extends Type {
 				}
 			}
 			else {
-				console.log(this)
+				console.info(this)
 				throw new NotImplementedException()
 			}
 		}

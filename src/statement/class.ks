@@ -31,7 +31,7 @@ class ClassDeclaration extends Statement {
 		_instanceVariables			= {}
 		_instanceVariableScope
 		_macros						= {}
-		_name
+		_name: String
 		_references					= {}
 		_sealed: Boolean 			= false
 		_type: NamedType<ClassType>
@@ -156,14 +156,16 @@ class ClassDeclaration extends Statement {
 
 			let ctrl = fragments.newControl()
 
-			for item, i in tree {
+			for const item, i in tree {
 				ctrl.step().code('else ') if !ctrl.isFirstStep()
 
-				ctrl.code('if(')
+				if !item.type[0].isAny() {
+					ctrl.code('if(')
 
-				item.type[0].toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(index)]`))
+					item.type[0].toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(index)]`))
 
-				ctrl.code(')')
+					ctrl.code(')')
+				}
 
 				ctrl.step()
 
@@ -2044,12 +2046,12 @@ class ClassMethodDeclaration extends Statement {
 				parameter.prepare()
 			}
 
-			const arguments = [parameter.type() for parameter in @parameters]
+			const arguments = [parameter.type() for const parameter in @parameters]
 			@type = new ClassMethodType(arguments, @data, this)
 
 			if @parent.isExtending() {
 				const extends = @parent.extends().type()
-				if method ?= extends.getInstanceMethod(@name, arguments) ?? extends.getAsbtractMethod(@name, arguments) {
+				if const method = extends.getInstanceMethod(@name, arguments) ?? extends.getAbstractMethod(@name, @type) {
 					if @data.type? {
 						if !@type.returnType().isInstanceOf(method.returnType()) {
 							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)

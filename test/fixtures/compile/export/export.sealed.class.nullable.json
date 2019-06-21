@@ -21,9 +21,11 @@
           "max": "Infinity",
           "parameters": [
             {
+              "name": "args",
               "type": "Any",
               "min": 0,
-              "max": "Infinity"
+              "max": "Infinity",
+              "default": 0
             }
           ],
           "returns": "Any",
@@ -45,9 +47,11 @@
           "max": 1,
           "parameters": [
             {
+              "name": "shape",
               "type": "String",
               "min": 1,
-              "max": 1
+              "max": 1,
+              "default": 0
             }
           ],
           "throws": []
@@ -70,13 +74,15 @@
             "max": 1,
             "parameters": [
               {
+                "name": "color",
                 "type": {
                   "kind": "reference",
                   "name": "Any",
                   "nullable": true
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "String",

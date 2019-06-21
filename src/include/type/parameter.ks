@@ -1,18 +1,23 @@
 class ParameterType extends Type {
 	private {
+		_default: Number
 		_min: Number
 		_max: Number
+		_name: String?		= null
 		_type: Type
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			return new ParameterType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node), data.min, data.max)
+			return new ParameterType(scope, data.name, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node), data.min, data.max, data.default)
 		} // }}}
 	}
-	constructor(@scope, @type, @min = 1, @max = 1) { // {{{
+	constructor(@scope, @type, @min = 1, @max = 1, @default = 0) { // {{{
 		super(scope)
 	} // }}}
-	clone() => new ParameterType(@scope, @type, @min, @max)
+	constructor(@scope, @name, @type, @min = 1, @max = 1, @default = 0) { // {{{
+		super(scope)
+	} // }}}
+	clone() => new ParameterType(@scope, @name, @type, @min, @max, @default)
 	equals(b?): Boolean { // {{{
 		if b is not ParameterType {
 			return false
@@ -20,42 +25,30 @@ class ParameterType extends Type {
 
 		return @min == b.min() && @max == b.max() && @type.equals(b.type())
 	} // }}}
-	export(references, ignoreAlteration) => { // {{{
-		type: @type.toReference(references, ignoreAlteration)
-		min: @min
-		max: @max
+	export(references, ignoreAlteration) { // {{{
+		const export = {}
+
+		if @name != null {
+			export.name = @name
+		}
+
+		export.type = @type.toReference(references, ignoreAlteration)
+		export.min = @min
+		export.max = @max
+		export.default = @default
+
+		return export
 	} // }}}
+	hasDefaultValue() => @default != 0
 	isAny() => @type.isAny()
 	isExportable() => @type.isExportable()
-	matchContentTo(value: Type) { // {{{
-		if value is ParameterType {
-			if @min != value._min || @max != value._max {
-				return false
-			}
-
-			return @type.matchContentTo(value.type())
-		}
-		else {
-			if @type.isAny() || value.isAny() {
-				return true
-			}
-
-			return @type.matchContentTo(value)
-		}
-	} // }}}
-	matchSignatureOf(value: ParameterType, matchables) { // {{{
-		if @min != value._min || @max != value._max {
-			return false
-		}
-
-		if @type.isAny() {
-			return true
-		}
-
-		return @type.matchSignatureOf(value.type(), matchables)
-	} // }}}
+	matchContentOf(type: Type) => @type.matchContentOf(type)
+	matchContentOf(type: ParameterType) => @type.matchContentOf(type.type())
+	matchArgument(value: Type) => value.matchContentOf(@type) || (value.isNull() && @default != 0)
+	matchSignatureOf(type: ParameterType, matchables) => @type.matchSignatureOf(type.type(), matchables)
 	max() => @max
 	min() => @min
+	name() => @name
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}

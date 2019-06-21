@@ -1,17 +1,36 @@
 // natives
 class MacroScope extends Scope {
 	private {
-		_natives			= {}
+		_predefined			= {}
 		_references			= {}
 		_renamedIndexes 	= {}
 		_renamedVariables	= {}
 		_variables			= {}
 	}
-	addNative(name: String) { // {{{
-		@natives[name] = new Variable(name, true, false, Type.Any)
-	} // }}}
-	addNative(name: String, type: String) { // {{{
-		@natives[name] = new Variable(name, true, false, this.reference(type))
+	constructor() { // {{{
+		super()
+
+		@predefined.__Array = Variable.createPredefinedClass('Array', this)
+		@predefined.__Boolean = Variable.createPredefinedClass('Boolean', this)
+		@predefined.__Class = Variable.createPredefinedClass('Class', this)
+		@predefined.__Date = Variable.createPredefinedClass('Date', this)
+		@predefined.__Error = Variable.createPredefinedClass('Error', this)
+		@predefined.__Function = Variable.createPredefinedClass('Function', this)
+		@predefined.__Number = Variable.createPredefinedClass('Number', this)
+		@predefined.__Object = Variable.createPredefinedClass('Object', this)
+		@predefined.__String = Variable.createPredefinedClass('String', this)
+		@predefined.__RegExp = Variable.createPredefinedClass('RegExp', this)
+
+		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
+		@predefined.__null = new Variable('null', true, true, Type.Null)
+		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
+		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
+		@predefined.__Math = new Variable('Math', true, true, this.reference('Object'))
+		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
+
+		// macro types
+		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)
+		@predefined.__Identifier = Variable.createPredefinedClass('Identifier', this)
 	} // }}}
 	private declareVariable(name: String) { // {{{
 		if $keywords[name] == true || @renamedIndexes[name] is Number {
@@ -71,12 +90,12 @@ class MacroScope extends Scope {
 			return name
 		}
 	} // }}}
-	getVariable(name): Variable { // {{{
+	getVariable(name, line = -1): Variable { // {{{
 		if @variables[name] is Variable {
 			return @variables[name]
 		}
-		else if @natives[name] is Variable {
-			return @natives[name]
+		else if @predefined[`__\(name)`] is Variable {
+			return @predefined[`__\(name)`]
 		}
 		else {
 			return null
@@ -101,7 +120,7 @@ class MacroScope extends Scope {
 			is String => return this.resolveReference(value)
 			is Variable => return this.resolveReference(value.name())
 			=> {
-				console.log(value)
+				console.info(value)
 				throw new NotImplementedException()
 			}
 		}

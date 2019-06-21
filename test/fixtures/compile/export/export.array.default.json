@@ -40,9 +40,11 @@
             "max": 1,
             "parameters": [
               {
+                "name": "index",
                 "type": "Any",
                 "min": 0,
-                "max": 1
+                "max": 1,
+                "default": 1
               }
             ],
             "returns": "Any",
@@ -60,16 +62,20 @@
             "max": 2,
             "parameters": [
               {
+                "name": "array",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "iterator",
                 "type": "Function",
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",
@@ -83,16 +89,27 @@
             "max": 3,
             "parameters": [
               {
+                "name": "array",
                 "type": {
                   "reference": 1
                 },
                 "min": 1,
-                "max": 1
+                "max": 1,
+                "default": 0
               },
               {
+                "name": "iterator",
                 "type": "Function",
-                "min": 2,
-                "max": 2
+                "min": 1,
+                "max": 1,
+                "default": 0
+              },
+              {
+                "name": "condition",
+                "type": "Function",
+                "min": 1,
+                "max": 1,
+                "default": 0
               }
             ],
             "returns": "Any",

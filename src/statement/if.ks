@@ -1,6 +1,6 @@
 class IfStatement extends Statement {
 	private {
-		_bindingScope
+		_bindingScope: Scope
 		_condition
 		_declared: Boolean				= false
 		_variable

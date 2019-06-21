@@ -1,9 +1,9 @@
 class ForInStatement extends Statement {
 	private {
-		_bindingScope
+		_bindingScope: Scope
 		_bindingValue						= null
 		_body
-		_bodyScope
+		_bodyScope: Scope
 		_boundName: String
 		_by
 		_byName: String
@@ -43,6 +43,9 @@ class ForInStatement extends Statement {
 			}
 			else if variable.isImmutable() {
 				ReferenceException.throwImmutable(@data.index.name, this)
+			}
+			else {
+				@bindingScope.replaceVariable(@data.index.name, @bindingScope.reference('Number'), this)
 			}
 
 			@index = $compile.expression(@data.index, this, @bindingScope)

@@ -20,9 +20,11 @@
           "max": "Infinity",
           "parameters": [
             {
+              "name": "messages",
               "type": "Any",
               "min": 0,
-              "max": "Infinity"
+              "max": "Infinity",
+              "default": 0
             }
           ],
           "throws": []

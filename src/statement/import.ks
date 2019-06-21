@@ -498,7 +498,7 @@ class Importer extends Statement {
 							type = specifier.imported.type ? Type.fromAST(specifier.imported.type, this) : null
 						}
 						=> {
-							console.log(specifier.imported)
+							console.info(specifier.imported)
 							throw new NotImplementedException()
 						}
 					}

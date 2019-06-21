@@ -201,9 +201,6 @@ class MacroDeclaration extends AbstractNode {
 	constructor(@data, @parent, :Scope?, @name = data.name.name) { // {{{
 		super(data, parent, new MacroScope())
 
-		@scope.addNative('Identifier')
-		@scope.addNative('Expression')
-
 		@type = MacroType.fromAST(data, this)
 		@line = data.start?.line ?? -1
 
@@ -401,7 +398,7 @@ class MacroType extends FunctionType {
 		max: @max
 		parameters: [parameter.export() for parameter in @parameters]
 	} // }}}
-	matchContentTo(that: MacroType): Boolean { // {{{
+	matchContentOf(that: MacroType): Boolean { // {{{
 		if that.min() < @min || that.max() > @max {
 			return false
 		}
@@ -410,7 +407,7 @@ class MacroType extends FunctionType {
 
 		if @parameters.length == params.length {
 			for parameter, i in @parameters {
-				if !parameter.matchContentTo(params[i]) {
+				if !params[i].matchContentOf(parameter) {
 					return false
 				}
 			}
@@ -431,8 +428,14 @@ class MacroParameterType extends ParameterType {
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode) { // {{{
 			const type = Type.fromAST(data.type, scope, false, node)
 
-			let min: Number = data.defaultValue? ? 0 : 1
+			let default: Number = 0
+			let min: Number = 1
 			let max: Number = 1
+
+			if data.defaultValue? {
+				default = 1
+				min = 0
+			}
 
 			let nf = true
 			for modifier in data.modifiers while nf {
@@ -450,14 +453,16 @@ class MacroParameterType extends ParameterType {
 				}
 			}
 
-			return new MacroParameterType(scope, type, min, max)
+			let name = null
+			if data.name?.kind == NodeKind::Identifier {
+				name = data.name.name
+			}
+
+			return new MacroParameterType(scope, name, type, min, max, default)
 		} // }}}
 	}
-	clone() => new MacroParameterType(@scope, @type, @min, @max)
-	matchContentTo(value) { // {{{
-		//console.log(@type)
-		//console.log(value)
-
+	clone() => new MacroParameterType(@scope, @name, @type, @min, @max, @default)
+	matchArgument(value) { // {{{
 		if @type.isAny() {
 			return true
 		}

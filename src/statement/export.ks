@@ -22,7 +22,7 @@ class ExportDeclaration extends Statement {
 						statement = new ExportWildcardSpecifier(declaration, this)
 					}
 					=> {
-						console.log(declaration)
+						console.info(declaration)
 						throw new NotImplementedException(this)
 					}
 				}

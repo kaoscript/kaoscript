@@ -419,7 +419,7 @@ class BinaryOperatorTypeEquality extends Expression {
 				const type = variable.getRealType()
 
 				if type.isClass() {
-					if (!@left.type().isAny() && !@left.type().matchContentTo(type)) || @left.type().isNull() {
+					if (!@left.type().isAny() && !type.matchContentOf(@left.type())) || @left.type().isNull() {
 						TypeException.throwInvalidTypeChecking(this)
 					}
 				}
@@ -475,7 +475,7 @@ class BinaryOperatorTypeInequality extends Expression {
 				type = variable.getRealType()
 
 				if type.isClass() {
-					if !@left.type().isAny() && type.matchContentTo(@left.type()) {
+					if !@left.type().isAny() && (!type.matchContentOf(@left.type()) || type.matchClassName(@left.type())) {
 						TypeException.throwInvalidTypeChecking(this)
 					}
 				}

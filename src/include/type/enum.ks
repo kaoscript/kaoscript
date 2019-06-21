@@ -65,9 +65,8 @@ class EnumType extends Type {
 	index(@index)
 	isEnum() => true
 	isMergeable(type) => type.isEnum()
-	matchContentTo(value: Type) { // {{{
-		return @type.matchContentTo(value)
-	} // }}}
+	kind() => @kind
+	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
 	matchSignatureOf(value: Type, matchables): Boolean { // {{{
 		if value is EnumType {
 			return true
@@ -78,8 +77,6 @@ class EnumType extends Type {
 
 		return false
 	} // }}}
-	kind() => @kind
-	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
 	step(): EnumType { // {{{
 		@index++
 

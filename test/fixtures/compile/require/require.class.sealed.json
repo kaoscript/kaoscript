@@ -41,9 +41,18 @@
             "max": 2,
             "parameters": [
               {
+                "name": "item",
                 "type": "Any",
                 "min": 1,
-                "max": 2
+                "max": 1,
+                "default": 0
+              },
+              {
+                "name": "from",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": 1
               }
             ],
             "returns": "Any",
@@ -59,9 +68,11 @@
             "max": "Infinity",
             "parameters": [
               {
+                "name": "args",
                 "type": "Any",
                 "min": 0,
-                "max": "Infinity"
+                "max": "Infinity",
+                "default": 0
               }
             ],
             "returns": "Any",

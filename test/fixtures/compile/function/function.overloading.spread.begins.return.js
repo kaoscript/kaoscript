@@ -26,14 +26,17 @@ module.exports = function() {
 				let args = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
 				return "String";
 			}
+			else  {
+				let __ks_i = -1;
+				let value = arguments[++__ks_i];
+				if(value === void 0 || value === null) {
+					throw new TypeError("'value' is not nullable");
+				}
+				let args = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
+				return "Any";
+			}
 		}
-		let __ks_i = -1;
-		let value = arguments[++__ks_i];
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		let args = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
-		return "Any";
+		throw new SyntaxError("wrong number of arguments");
 	};
 	return {
 		foobar: foobar

@@ -279,7 +279,7 @@ class IfAttribute extends Attribute {
 					return count == 1
 				}
 				=> {
-					console.log(data)
+					console.info(data)
 					throw new NotImplementedException()
 				}
 			}
