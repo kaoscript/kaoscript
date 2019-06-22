@@ -461,6 +461,15 @@ class RequireOrImportDeclarator extends Importer {
 
 			for const requirement in this._requirements {
 				if requirement.isFlexible() {
+					const control = ctrl.newControl().code(`if(\(requirement.parameter())_valuable)`).step()
+
+					control.line(`req.push(\(requirement.parameter()), __ks_\(requirement.parameter()))`).step()
+
+					control.code('else').step()
+
+					control.line(`req.push(\(requirement.name()), \(requirement.type().getSealedName()))`)
+
+					control.done()
 				}
 				else {
 					ctrl.line(`req.push(\(requirement.parameter())_valuable ? \(requirement.parameter()) : \(requirement.name()))`)
