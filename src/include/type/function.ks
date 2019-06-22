@@ -371,10 +371,8 @@ class FunctionType extends Type {
 				let a = 0
 				let b = arguments.length - 1
 
-				for i from @parameters.length - 1 til @restIndex by -1 {
-					parameter = @parameters[i]
-
-					for j from 0 til parameter.min() {
+				for const parameter in @parameters from @parameters.length - 1 til @restIndex by -1 {
+					for const j from 0 til parameter.min() {
 						if !parameter.matchArgument(arguments[b]) {
 							return false
 						}
@@ -383,12 +381,8 @@ class FunctionType extends Type {
 					}
 				}
 
-				let optional = @maxBefore - @minBefore
-
-				for i from 0 til @restIndex {
-					parameter = @parameters[i]
-
-					for j from 0 til parameter.min() {
+				for const parameter in @parameters from 0 til @restIndex {
+					for const j from 0 til parameter.min() {
 						if !parameter.matchArgument(arguments[a]) {
 							return false
 						}
@@ -396,14 +390,14 @@ class FunctionType extends Type {
 						++a
 					}
 
-					for j from parameter.min() til parameter.max() while optional != 0 when parameter.matchArgument(arguments[a]) {
+					for const j from parameter.min() til parameter.max() while a < b && parameter.matchArgument(arguments[a]) {
 						++a
-						--optional
 					}
 				}
 
-				parameter = @parameters[@restIndex]
-				for j from 0 til parameter.min() {
+				const parameter = @parameters[@restIndex]
+
+				for const j from 0 til parameter.min() {
 					if !parameter.matchArgument(arguments[a]) {
 						return false
 					}
