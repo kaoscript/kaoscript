@@ -942,7 +942,7 @@ class ClassDeclaration extends Statement {
 			for method in methods {
 				method.prepare()
 
-				@class.addClassMethod(name, method.type())
+				@class.dedupClassMethod(name, method.type())
 			}
 		}
 
@@ -956,7 +956,7 @@ class ClassDeclaration extends Statement {
 			for method in methods {
 				method.prepare()
 
-				@class.addInstanceMethod(name, method.type())
+				@class.dedupInstanceMethod(name, method.type())
 			}
 		}
 

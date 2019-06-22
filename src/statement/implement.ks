@@ -246,11 +246,11 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		for parameter in @parameters {
+		for const parameter in @parameters {
 			parameter.prepare()
 		}
 
-		@type = new ClassMethodType([parameter.type() for parameter in @parameters], @data, this)
+		@type = new ClassMethodType([parameter.type() for const parameter in @parameters], @data, this)
 
 		@type.flagAlteration()
 
@@ -259,7 +259,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		if @instance {
-			if index ?= @class.matchInstanceMethod(@name, @type) {
+			if const index = @class.matchInstanceMethod(@name, @type) {
 				if @override {
 					@internalName = `__ks_func_\(@name)_\(index)`
 				}
@@ -273,9 +273,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 		else {
-			// console.log(@class._classMethods.map)
-			// console.log(@type)
-			if index ?= @class.matchClassMethod(@name, @type) {
+			if const index = @class.matchClassMethod(@name, @type) {
 				if @override {
 					@internalName = `__ks_sttc_\(@name)_\(index)`
 				}

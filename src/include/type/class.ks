@@ -55,13 +55,13 @@ class ClassType extends Type {
 
 			for const methods, name of data.instanceMethods {
 				for method in methods {
-					type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+					type.dedupInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
 			for const methods, name of data.classMethods {
 				for method in methods {
-					type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+					type.dedupClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 				}
 			}
 
@@ -88,13 +88,13 @@ class ClassType extends Type {
 
 					for const methods, name of data.instanceMethods {
 						for method in methods {
-							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+							type.dedupInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
 					for const methods, name of data.classMethods {
 						for method in methods {
-							type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+							type.dedupClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 				})
@@ -128,13 +128,13 @@ class ClassType extends Type {
 
 					for const methods, name of data.instanceMethods {
 						for method in methods {
-							type.addInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+							type.dedupInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
 					for const methods, name of data.classMethods {
 						for method in methods {
-							type.addClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+							type.dedupClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 				})
@@ -158,22 +158,13 @@ class ClassType extends Type {
 		return index
 	} // }}}
 	addClassMethod(name: String, type: ClassMethodType): Number? { // {{{
-		let index: Number = 0
-
-		if @classMethods[name] is Array {
-			for method, index in @classMethods[name] {
-				if method.matchSignatureOf(type, []) {
-					return null
-				}
-			}
-
-			index = @classMethods[name].length
-
-			@classMethods[name].push(type)
+		if @classMethods[name] is not Array {
+			@classMethods[name] = []
 		}
-		else {
-			@classMethods[name] = [type]
-		}
+
+		const index = @classMethods[name].length
+
+		@classMethods[name].push(type)
 
 		if @alteration {
 			type.flagAlteration()
@@ -199,22 +190,13 @@ class ClassType extends Type {
 		@destructors++
 	} // }}}
 	addInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
-		let index: Number = 0
-
-		if @instanceMethods[name] is Array {
-			for method, index in @instanceMethods[name] {
-				if method.matchSignatureOf(type, []) {
-					return null
-				}
-			}
-
-			index = @instanceMethods[name].length
-
-			@instanceMethods[name].push(type)
+		if @instanceMethods[name] is not Array {
+			@instanceMethods[name] = []
 		}
-		else {
-			@instanceMethods[name] = [type]
-		}
+
+		const index = @instanceMethods[name].length
+
+		@instanceMethods[name].push(type)
 
 		if @alteration {
 			type.flagAlteration()
@@ -266,10 +248,10 @@ class ClassType extends Type {
 					const type = ClassMethodType.fromAST(data, node)
 
 					if instance {
-						this.addInstanceMethod(data.name.name, type)
+						this.dedupInstanceMethod(data.name.name, type)
 					}
 					else {
-						this.addClassMethod(data.name.name, type)
+						this.dedupClassMethod(data.name.name, type)
 					}
 				}
 			}
@@ -349,6 +331,22 @@ class ClassType extends Type {
 		}
 
 		return this
+	} // }}}
+	dedupClassMethod(name: String, type: ClassMethodType): Number? { // {{{
+		if this.matchClassMethod(name, type) == null {
+			return this.addClassMethod(name, type)
+		}
+		else {
+			return null
+		}
+	} // }}}
+	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
+		if this.matchInstanceMethod(name, type) == null {
+			return this.addInstanceMethod(name, type)
+		}
+		else {
+			return null
+		}
 	} // }}}
 	destructors() => @destructors
 	equals(b?): Boolean { // {{{
@@ -785,8 +783,8 @@ class ClassType extends Type {
 	} // }}}
 	matchClassMethod(name: String, type: ClassMethodType) { // {{{
 		if @classMethods[name] is Array {
-			for method, index in @classMethods[name] {
-				if method.matchSignatureOf(type, []) {
+			for const method, index in @classMethods[name] {
+				if method.equals(type) {
 					return index
 				}
 			}
@@ -801,8 +799,8 @@ class ClassType extends Type {
 	} // }}}
 	matchInstanceMethod(name: String, type: ClassMethodType) { // {{{
 		if @instanceMethods[name] is Array {
-			for method, index in @instanceMethods[name] {
-				if method.matchSignatureOf(type, []) {
+			for const method, index in @instanceMethods[name] {
+				if method.equals(type) {
 					return index
 				}
 			}
