@@ -1,0 +1,6 @@
+import {
+	'chai' {
+		* => chai
+		expect
+	}
+}

@@ -186,16 +186,23 @@ class Importer extends Statement {
 			if @count != 0 || @alias != null {
 				this.module().flagRegister()
 			}
-
-			if @count != 0 && @alias != null {
-				@reuseName = @scope.acquireTempName(false)
-				@scope.releaseTempName(@reuseName)
-			}
 		}
 		else {
 			for const argument in @arguments {
 				argument.value.prepare()
 				argument.type = argument.value.type()
+			}
+		}
+
+		if @count != 0 {
+			if @alias == null {
+				if @count > 1 {
+					@reuseName = @scope.acquireTempName(false)
+					@scope.releaseTempName(@reuseName)
+				}
+			}
+			else {
+				@reuseName = @alias
 			}
 		}
 	} // }}}
@@ -761,7 +768,10 @@ class Importer extends Statement {
 					line.done()
 				}
 			}
-
+		}
+	} // }}}
+	toNodeFileFragments(fragments) { // {{{
+		if @count == 0 {
 			if @alias != null {
 				const line = fragments
 					.newLine()
@@ -772,84 +782,84 @@ class Importer extends Statement {
 				line.done()
 			}
 		}
-	} // }}}
-	toNodeFileFragments(fragments) { // {{{
-		if @alias != null {
-			const line = fragments
-				.newLine()
-				.code(`var \(@alias) = `)
-
-			this.toRequireFragments(line)
-
-			line.done()
-		}
-
-		let name, alias
-		if @count == 1 {
-			let alias, name
-
-			for alias, name of @variables {
-			}
-
-			const line = fragments
-				.newLine()
-				.code(`var \(alias) = `)
-
-			this.toRequireFragments(line)
-
-			line.code(`.\(alias)`).done()
-		}
-		else if @count > 0 {
-			if @options.format.destructuring == 'es5' {
-				let line = fragments
+		else {
+			if @alias != null {
+				const line = fragments
 					.newLine()
-					.code(`var __ks__ = `)
+					.code('var ', @reuseName, ' = ')
 
 				this.toRequireFragments(line)
-
-				line.done()
-
-				line = fragments.newLine().code('var ')
-
-				let nf = false
-				for const alias, name of @variables {
-					if nf {
-						line.code(', ')
-					}
-					else {
-						nf = true
-					}
-
-					line.code(`\(alias) = __ks__.\(name)`)
-				}
 
 				line.done()
 			}
-			else {
-				let line = fragments.newLine().code('var {')
 
-				let nf = false
-				for const alias, name of @variables {
-					if nf {
-						line.code(', ')
-					}
-					else {
-						nf = true
-					}
+			let name, alias
+			if @count == 1 {
+				let alias, name
 
-					if alias == name {
-						line.code(name)
-					}
-					else {
-						line.code(name, ': ', alias)
-					}
+				for alias, name of @variables {
 				}
 
-				line.code(`} = `)
+				const line = fragments
+					.newLine()
+					.code(`var \(alias) = `)
 
 				this.toRequireFragments(line)
 
-				line.done()
+				line.code(`.\(alias)`).done()
+			}
+			else if @count > 0 {
+				if @options.format.destructuring == 'es5' {
+					let line = fragments
+						.newLine()
+						.code(`var __ks__ = `)
+
+					this.toRequireFragments(line)
+
+					line.done()
+
+					line = fragments.newLine().code('var ')
+
+					let nf = false
+					for const alias, name of @variables {
+						if nf {
+							line.code(', ')
+						}
+						else {
+							nf = true
+						}
+
+						line.code(`\(alias) = __ks__.\(name)`)
+					}
+
+					line.done()
+				}
+				else {
+					let line = fragments.newLine().code('var {')
+
+					let nf = false
+					for const alias, name of @variables {
+						if nf {
+							line.code(', ')
+						}
+						else {
+							nf = true
+						}
+
+						if alias == name {
+							line.code(name)
+						}
+						else {
+							line.code(name, ': ', alias)
+						}
+					}
+
+					line.code(`} = `)
+
+					this.toRequireFragments(line)
+
+					line.done()
+				}
 			}
 		}
 	} // }}}
