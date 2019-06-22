@@ -32,7 +32,7 @@ else
 endif
 
 clean:
-	find -L . -type f \( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksm" \) -exec rm {} \;
+	./bin/kaoscript --clean
 
 ok:
 	make clean
