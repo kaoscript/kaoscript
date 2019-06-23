@@ -163,6 +163,9 @@ class NamedType extends Type {
 				return @type.matchContentOf(that.type())
 			}
 		}
+		else if this.isAlias() {
+			return this.discardAlias().matchContentOf(that)
+		}
 		else if that is UnionType {
 			for const type in that.types() {
 				if this.matchContentOf(type) {
