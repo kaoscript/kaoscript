@@ -34,6 +34,9 @@ class ExpressionStatement extends Statement {
 
 				declaration = false
 			}
+			else if @options.rules.noUndefined {
+				ReferenceException.throwNotDefined(name, this)
+			}
 			else {
 				assignments.push(name)
 

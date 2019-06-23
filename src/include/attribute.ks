@@ -319,6 +319,27 @@ class ParseAttribute extends Attribute {
 	} // }}}
 }
 
+class RulesAttribute extends Attribute {
+	private {
+		_data
+	}
+	static {
+		target() => AttributeTarget::Global
+	}
+	constructor(@data)
+	configure(options) { // {{{
+		for const argument in @data.arguments {
+			if argument.kind == NodeKind::Identifier {
+				const name = argument.name.toLowerCase().replace(/[-_\s]+(.)/g, (m, l) => l.toUpperCase())
+
+				options.rules[name] = true
+			}
+		}
+
+		return options
+	} // }}}
+}
+
 class RuntimeAttribute extends Attribute {
 	private {
 		_data
@@ -397,5 +418,6 @@ Attribute.register(ErrorAttribute)
 Attribute.register(FormatAttribute)
 Attribute.register(IfAttribute)
 Attribute.register(ParseAttribute)
+Attribute.register(RulesAttribute)
 Attribute.register(RuntimeAttribute)
 Attribute.register(TargetAttribute)

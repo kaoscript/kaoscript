@@ -35,6 +35,9 @@ abstract class Statement extends AbstractNode {
 					ReferenceException.throwImmutable(name, this)
 				}
 			}
+			else if @options.rules.noUndefined {
+				ReferenceException.throwNotDefined(name, this)
+			}
 			else {
 				@assignments.push(name)
 

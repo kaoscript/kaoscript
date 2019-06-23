@@ -153,8 +153,12 @@ class SwitchStatement extends Statement {
 			if scope.hasDefinedVariable(name) {
 				SyntaxException.throwAlreadyDeclared(name, this)
 			}
-
-			scope.define(name, false, null, this)
+			else if @options.rules.noUndefined {
+				ReferenceException.throwNotDefined(name, this)
+			}
+			else {
+				scope.define(name, false, null, this)
+			}
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{

@@ -581,6 +581,9 @@ export class Compiler {
 				parameters: 'kaoscript'
 			}
 			format: {}
+			rules: {
+				noUndefined: false
+			}
 			runtime: {
 				helper: {
 					alias: 'Helper'
