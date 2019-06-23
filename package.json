@@ -37,7 +37,7 @@
 	},
 	"dependencies": {
 		"@kaoscript/compiler-bin-es6": "github:kaoscript/compiler-bin-js-es6",
-		"@kaoscript/runtime": "^0.6.0",
+		"@kaoscript/runtime": "github:kaoscript/runtime",
 		"commander": "^2.20.0"
 	},
 	"devDependencies": {

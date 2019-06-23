@@ -5,12 +5,21 @@ class ObjectExpression extends Expression {
 		_properties				= []
 		_reusable: Boolean		= false
 		_reuseName: String		= null
+		_spread: Boolean		= false
 		_type: Type
 	}
 	analyse() { // {{{
 		let ref
 		for let property in @data.properties {
-			if property.name.kind == NodeKind::Identifier || property.name.kind == NodeKind::Literal {
+			if property.kind == NodeKind::UnaryExpression {
+				property = new ObjectSpreadMember(property, this)
+				property.analyse()
+
+				@spread = true
+
+				this.module().flag('Helper')
+			}
+			else if property.name.kind == NodeKind::Identifier || property.name.kind == NodeKind::Literal {
 				property = new ObjectLiteralMember(property, this)
 				property.analyse()
 
@@ -23,6 +32,12 @@ class ObjectExpression extends Expression {
 			else if property.name.kind == NodeKind::ThisExpression {
 				property = new ObjectThisMember(property, this)
 				property.analyse()
+
+				if @names[property.reference()] == true {
+					SyntaxException.throwDuplicateKey(property)
+				}
+
+				@names[property.reference()] = true
 			}
 			else {
 				property = new ObjectComputedMember(property, this)
@@ -83,6 +98,44 @@ class ObjectExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		if @reusable {
 			fragments.code(@reuseName)
+		}
+		else if @spread {
+			fragments.code($runtime.helper(this), '.concatObject(')
+			let opened = false
+
+			for const property, index in @properties {
+				if property is ObjectSpreadMember {
+					if opened {
+						fragments.code('}, ')
+
+						opened = false
+					}
+					else if index != 0 {
+						fragments.code($comma)
+					}
+
+					fragments.compile(property)
+				}
+				else {
+					if index != 0 {
+						fragments.code($comma)
+					}
+
+					if !opened {
+						fragments.code('{')
+
+						opened = true
+					}
+
+					fragments.compile(property)
+				}
+			}
+
+			if opened {
+				fragments.code('}')
+			}
+
+			fragments.code(')')
 		}
 		else if @computed {
 			fragments.code('(', @reuseName, ' = {}', $comma)
@@ -257,6 +310,40 @@ class ObjectThisMember extends Expression {
 
 		@value = $compile.expression(@data.name, this)
 		@value.analyse()
+
+		this.reference(`.\(@name.value())`)
+	} // }}}
+	prepare() { // {{{
+		@value.prepare()
+	} // }}}
+	translate() { // {{{
+		@value.translate()
+	} // }}}
+	toComputedFragments(fragments, name) { // {{{
+		fragments
+			.code(name)
+			.code(@reference)
+			.code($equals)
+			.compile(@value)
+			.code($comma)
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments
+			.compile(@name)
+			.code(': ')
+			.compile(@value)
+	} // }}}
+}
+
+class ObjectSpreadMember extends Expression {
+	private {
+		_value
+	}
+	analyse() { // {{{
+		@options = Attribute.configure(@data, @options, true, AttributeTarget::Property)
+
+		@value = $compile.expression(@data.argument, this)
+		@value.analyse()
 	} // }}}
 	prepare() { // {{{
 		@value.prepare()
@@ -265,9 +352,6 @@ class ObjectThisMember extends Expression {
 		@value.translate()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		fragments
-			.compile(@name)
-			.code(': ')
-			.compile(@value)
+		fragments.compile(@value)
 	} // }}}
 }
