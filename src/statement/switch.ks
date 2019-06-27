@@ -24,7 +24,7 @@ class SwitchStatement extends Statement {
 	private {
 		_clauses	= []
 		_name
-		_value
+		_value		= null
 	}
 	analyse() { // {{{
 		if @data.expression.kind == NodeKind::Identifier {
@@ -102,14 +102,11 @@ class SwitchStatement extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		if @data.expression.kind == NodeKind::Identifier {
-			@name = @data.expression.name
-		}
-		else {
+		if @value != null {
+			@value.prepare()
+
 			@name = @scope.acquireTempName(false)
 		}
-
-		@value.prepare() if @value?
 
 		for clause in @clauses {
 			for condition in clause.conditions {
@@ -125,12 +122,14 @@ class SwitchStatement extends Statement {
 			clause.body.prepare()
 		}
 
-		if @data.expression.kind != NodeKind::Identifier {
+		if @value != null {
 			@scope.releaseTempName(@name)
 		}
 	} // }}}
 	translate() { // {{{
-		@value.translate() if @value?
+		if @value != null {
+			@value.translate()
+		}
 
 		for clause in @clauses {
 			for condition in clause.conditions {
@@ -166,7 +165,7 @@ class SwitchStatement extends Statement {
 			return
 		}
 
-		if @value? {
+		if @value != null {
 			fragments
 				.newLine()
 				.code($runtime.scope(this), @name, ' = ')
@@ -255,8 +254,6 @@ class SwitchStatement extends Statement {
 		}
 
 		ctrl.done()
-
-		@scope.releaseTempName(@name) if @value?
 	} // }}}
 }
 
@@ -283,7 +280,7 @@ class SwitchBindingArray extends AbstractNode {
 
 		line.code($runtime.scope(this))
 
-		@array.toAssignmentFragments(line, @parent._name)
+		@array.toAssignmentFragments(line, new Literal(@parent._name, this))
 
 		line.done()
 	} // }}}
@@ -313,37 +310,33 @@ class SwitchBindingValue extends AbstractNode {
 
 class SwitchConditionArray extends AbstractNode {
 	private {
-		_name
-		_values = []
+		_flatten: Boolean	= false
+		_name: String		= null
+		_values				= []
 	}
 	analyse() { // {{{
-		let nv = true
-		for i from 0 til @data.values.length while nv {
-			if @data.values[i].kind != NodeKind::OmittedExpression {
-				nv = false
-			}
-		}
+		@flatten = @options.format.destructuring == 'es5'
 
-		if !nv {
-			@name = @scope.parent().acquireTempName(false)
-
-			for value in @data.values {
-				if value.kind != NodeKind::OmittedExpression {
-					if value.kind == NodeKind::SwitchConditionRange {
-						value = new SwitchConditionRange(value, this)
-					}
-					else {
-						value = new SwitchConditionValue(value, this)
-					}
-
-					value.analyse()
-
-					@values.push(value)
+		for let value in @data.values {
+			if value.kind != NodeKind::OmittedExpression {
+				if value.kind == NodeKind::SwitchConditionRange {
+					value = new SwitchConditionRange(value, this)
 				}
+				else {
+					value = new SwitchConditionValue(value, this)
+				}
+
+				value.analyse()
+
+				@values.push(value)
 			}
 		}
 	} // }}}
 	prepare() { // {{{
+		if @values.length > 0 {
+			@name = @scope.parent().acquireTempName(false)
+		}
+
 		for value in @values {
 			value.prepare()
 		}
@@ -377,38 +370,53 @@ class SwitchConditionArray extends AbstractNode {
 		}
 
 		fragments.code(')')
-
-		@scope.parent().releaseTempName(@name) if @name?
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 		if @values.length > 0 {
 			let line = fragments.newLine()
 
-			line.code($runtime.scope(this), @name, ' = ([')
+			if @flatten {
+				const name = new Literal('__ks__', this)
 
-			for value, i in @data.values {
-				line.code(', ') if i
+				line.code($runtime.scope(this), @name, ' = function(__ks__)')
 
-				if value.kind == NodeKind::OmittedExpression {
-					if value.spread {
-						line.code('...')
+				const block = line.newBlock()
+
+				console.log(@data)
+
+				block.done()
+			}
+			else {
+				line.code($runtime.scope(this), @name, ' = ([')
+
+				for value, i in @data.values {
+					if i != 0 {
+						line.code(', ')
+					}
+
+					if value.kind == NodeKind::OmittedExpression {
+						if value.spread {
+							line.code('...')
+						}
+					}
+					else {
+						line.code('__ks_', i)
 					}
 				}
-				else {
-					line.code('__ks_', i)
-				}
-			}
 
-			line.code(']) => ')
+				line.code(']) => ')
 
-			let index = 0
-			for value, i in @data.values {
-				if value.kind != NodeKind::OmittedExpression {
-					line.code(' && ') if index
+				let index = 0
+				for value, i in @data.values {
+					if value.kind != NodeKind::OmittedExpression {
+						if index != 0 {
+							line.code(' && ')
+						}
 
-					@values[index].toBooleanFragments(line, '__ks_' + i)
+						@values[index].toBooleanFragments(line, '__ks_' + i)
 
-					index++
+						index++
+					}
 				}
 			}
 
@@ -504,19 +512,24 @@ class SwitchConditionValue extends AbstractNode {
 
 class SwitchFilter extends AbstractNode {
 	private {
-		_bindings = []
-		_filter
-		_name
+		_bindings			= []
+		_filter				= null
+		_flatten: Boolean	= false
+		_name				= null
 	}
 	analyse() { // {{{
+		@flatten = @options.format.destructuring == 'es5'
+
 		if @data.filter? {
 			if @data.bindings.length > 0 {
 				@name = @scope.parent().acquireTempName(false)
 
-				for binding in @data.bindings {
-					@bindings.push(binding = $compile.expression(binding, this))
+				for const data in @data.bindings {
+					const binding = $compile.expression(data, this)
 
 					binding.analyse()
+
+					@bindings.push(binding)
 				}
 			}
 
@@ -525,7 +538,7 @@ class SwitchFilter extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		if @filter? {
+		if @filter != null {
 			for binding in @bindings {
 				binding.prepare()
 			}
@@ -588,18 +601,47 @@ class SwitchFilter extends AbstractNode {
 		}
 	} // }}}
 	toStatementFragments(fragments) { // {{{
-		if @name? {
+		if @name != null {
 			let line = fragments.newLine()
 
-			line.code($runtime.scope(this), @name, ' = (')
+			if @flatten {
+				const name = new Literal('__ks__', this)
 
-			for binding, i in @bindings {
-				line.code(', ') if i
+				line.code($runtime.scope(this), @name, ' = function(__ks__)')
 
-				line.compile(binding)
+				const block = line.newBlock()
+
+				const ln = block.newLine().code($runtime.scope(this))
+
+				let comma = false
+				for const binding in @bindings {
+					if comma {
+						line.code(', ')
+					}
+					else {
+						comma = true
+					}
+
+					binding.toFlatFragments(ln, name)
+				}
+
+				ln.done()
+
+				block.newLine().code('return ').compile(@filter).done()
+
+				block.done()
 			}
+			else {
+				line.code($runtime.scope(this), @name, ' = (')
 
-			line.code(') => ').compile(@filter)
+				for binding, i in @bindings {
+					line.code(', ') if i != 0
+
+					line.compile(binding)
+				}
+
+				line.code(') => ').compile(@filter)
+			}
 
 			line.done()
 		}

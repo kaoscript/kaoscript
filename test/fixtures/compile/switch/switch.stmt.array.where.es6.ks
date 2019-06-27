@@ -1,6 +1,4 @@
-extern console: {
-	log(...args)
-}
+extern console
 
 let somePoint = [1, 1]
 

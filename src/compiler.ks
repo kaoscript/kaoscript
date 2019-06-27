@@ -346,7 +346,6 @@ const $expressions = {
 	`\(NodeKind::ArrayExpression)`				: ArrayExpression
 	`\(NodeKind::ArrayRange)`					: ArrayRange
 	`\(NodeKind::AwaitExpression)`				: AwaitExpression
-	`\(NodeKind::BindingElement)`				: BindingElement
 	`\(NodeKind::CallExpression)`				: CallExpression
 	`\(NodeKind::CallMacroExpression)`	 		: func(data, parent, scope) {
 		const macro = scope.getMacro(data, parent)

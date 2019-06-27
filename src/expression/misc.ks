@@ -1,6 +1,6 @@
 class TempReusableExpression extends Expression {
 	private {
-		_count: Number	= 0
+		_count: Number			= 0
 		_value
 	}
 	constructor(@value, parent) { // {{{

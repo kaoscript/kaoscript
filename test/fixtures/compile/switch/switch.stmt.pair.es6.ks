@@ -1,6 +1,4 @@
-extern console: {
-	log(...args)
-}
+extern console
 
 let pair = [2, -2]
 

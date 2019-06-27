@@ -8,16 +8,16 @@ class ArrayBinding extends Expression {
 	analyse() { // {{{
 		@flatten = @options.format.destructuring == 'es5'
 
-		for element, index in @data.elements {
-			@elements.push(element = $compile.expression(element, this, this.bindingScope()))
+		for const data, index in @data.elements {
+			const element = new ArrayBindingElement(data, this, this.bindingScope())
 
 			element.setAssignment(@assignment)
 
+			element.index(index)
+
 			element.analyse()
 
-			if element is BindingElement {
-				element.index(index)
-			}
+			@elements.push(element)
 		}
 	} // }}}
 	prepare() { // {{{
@@ -96,10 +96,14 @@ class ArrayBinding extends Expression {
 		else {
 			const reusableValue = new TempReusableExpression(value, this)
 
-			@elements[0].toFlatFragments(fragments, reusableValue)
-
-			for const element in @elements from 1 {
-				fragments.code(', ')
+			let comma = false
+			for const element in @elements when !element.isAnonymous() {
+				if comma {
+					fragments.code(', ')
+				}
+				else {
+					comma = true
+				}
 
 				element.toFlatFragments(fragments, reusableValue)
 			}
@@ -113,131 +117,114 @@ class ArrayBinding extends Expression {
 	} // }}}
 }
 
-class BindingElement extends Expression {
+class ArrayBindingElement extends Expression {
 	private {
-		_alias
 		_assignment: AssignmentType		= AssignmentType::Neither
 		_defaultValue					= null
-		_hasDefaultValue: Boolean		= false
 		_index							= -1
-		_name
+		_name							= null
+		_named: Boolean					= false
+		_rest: Boolean					= false
+		_thisAlias: Boolean				= false
+		_type: Type						= Type.Any
 	}
 	analyse() { // {{{
-		@name = $compile.expression(@data.name, this)
-		@name.setAssignment(@assignment)
-		@name.analyse()
+		if @data.name? {
+			@name = $compile.expression(@data.name, this)
+			@name.setAssignment(@assignment)
+			@name.analyse()
 
-		if @data.alias? {
-			@alias = $compile.expression(@data.alias, this)
+			@named = true
+
+			if @data.defaultValue? {
+				@defaultValue = $compile.expression(@data.defaultValue, this)
+				@defaultValue.analyse()
+			}
 		}
 
-		if @data.defaultValue? {
-			@hasDefaultValue = true
-
-			@defaultValue = $compile.expression(@data.defaultValue, this)
-			@defaultValue.analyse()
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Rest {
+				@rest = true
+			}
+			else if modifier.kind == ModifierKind::ThisAlias {
+				@thisAlias = true
+			}
 		}
 	} // }}}
 	prepare() { // {{{
-		@name.prepare()
+		if @named {
+			@name.prepare()
 
-		if @hasDefaultValue {
-			@defaultValue.prepare()
+			@defaultValue?.prepare()
+		}
+
+		if @data.type? {
+			@type = Type.fromAST(@data.type, this)
 		}
 
 		this.statement().assignTempVariables(@scope)
 	} // }}}
 	translate() { // {{{
-		@name.translate()
-		@defaultValue.translate() if @hasDefaultValue
+		if @named {
+			@name.translate()
+
+			@defaultValue?.translate()
+		}
 	} // }}}
-	export(recipient) => @name.export(recipient)
-	hasDefaultValue() => @hasDefaultValue
+	export(recipient) => @named ? @name.export(recipient) : null
 	index(@index) => this
 	isImmutable() => @parent.isImmutable()
-	isDeclararingVariable(name: String) => @name.isDeclararingVariable(name)
-	isRedeclared() => @name.isRedeclared()
-	listAssignments(array) => @name.listAssignments(array)
+	isDeclararingVariable(name: String) => @named ? @name.isDeclararingVariable(name) : false
+	isAnonymous() => !@named
+	isRedeclared() => @named ? @name.isRedeclared() : false
+	isRest() => @rest
+	listAssignments(array) => @named ? @name.listAssignments(array) : array
+	max() => @rest ? Infinity : 1
+	min() => @rest ? 0 : 1
 	setAssignment(@assignment)
 	toFragments(fragments) { // {{{
-		if @data.spread {
+		if @rest {
 			fragments.code('...')
 		}
 
-		if @alias? {
-			if @data.alias.computed {
-				fragments.code('[').compile(@alias).code(']: ')
-			}
-			else {
-				fragments.compile(@alias).code(': ')
-			}
-		}
+		if @named {
+			fragments.compile(@name)
 
-		fragments.compile(@name)
-
-		if @hasDefaultValue {
-			fragments.code(' = ').compile(@defaultValue)
+			if @defaultValue != null {
+				fragments.code(' = ').compile(@defaultValue)
+			}
 		}
 	} // }}}
 	toExistFragments(fragments, name) { // {{{
-		if @data.spread {
+		if @rest {
 			fragments.code('...')
 		}
 
-		if @alias? {
-			if @data.alias.computed {
-				fragments.code('[').compile(@alias).code(']: ')
+		if @named {
+			if @defaultValue != null {
+				fragments.code(' = ').compile(@defaultValue)
 			}
-			else {
-				fragments.compile(@alias).code(': ')
-			}
-		}
-
-		if @index == -1 {
-			fragments.compile(@name).code(': ', name)
-		}
-		else {
-			fragments.code(name)
-		}
-
-		if @defaultValue != null {
-			fragments.code(' = ').compile(@defaultValue)
 		}
 	} // }}}
 	toFlatFragments(fragments, value) { // {{{
-		if @name is ArrayBinding {
-			@name.toFlatFragments(fragments, new FlatArrayBindingElement(value, @index, this))
-		}
-		else if @name is ObjectBinding {
-			@name.toFlatFragments(fragments, new FlatObjectBindingElement(value, @alias ?? @name, this))
-		}
-		else if @hasDefaultValue {
-			fragments
-				.compile(@name)
-				.code($equals, $runtime.helper(this), '.default(')
-				.wrap(new FlatObjectBindingElement(value, @alias ?? @name, this))
-				.code($comma)
-				.compile(@defaultValue)
-				.code(')')
-		}
-		else if @index == -1 {
-			fragments
-				.compile(@name)
-				.code($equals)
-				.wrap(value)
-				.code('.')
-				.compile(@alias ?? @name)
-		}
-		else {
-			fragments
-				.compile(@name)
-				.code($equals)
-				.wrap(value)
-				.code(`[\(@index)]`)
+		if @named {
+			if @name is ArrayBinding {
+				@name.toFlatFragments(fragments, new FlatArrayBindingElement(value, @index, this))
+			}
+			else {
+				fragments
+					.compile(@name)
+					.code($equals)
+					.wrap(value)
+					.code(`[\(@index)]`)
+			}
 		}
 	} // }}}
+	type() => @type
 	walk(fn) { // {{{
-		@name.walk(fn)
+		if @named {
+			@name.walk(fn)
+		}
 	} // }}}
 }
 
@@ -314,8 +301,8 @@ class ObjectBinding extends Expression {
 	analyse() { // {{{
 		@flatten = @options.format.destructuring == 'es5'
 
-		for let element in @data.elements {
-			@elements.push(element = $compile.expression(element, this, this.bindingScope()))
+		for const data in @data.elements {
+			const element = new ObjectBindingElement(data, this, this.bindingScope())
 
 			element.setAssignment(@assignment)
 
@@ -324,6 +311,8 @@ class ObjectBinding extends Expression {
 			if element.hasDefaultValue() {
 				@flatten = true
 			}
+
+			@elements.push(element)
 		}
 	} // }}}
 	prepare() { // {{{
@@ -424,5 +413,133 @@ class ObjectBinding extends Expression {
 		for element in @elements {
 			element.walk(fn)
 		}
+	} // }}}
+}
+
+class ObjectBindingElement extends Expression {
+	private {
+		_alias							= null
+		_assignment: AssignmentType		= AssignmentType::Neither
+		_computed: Boolean				= false
+		_defaultValue					= null
+		_hasDefaultValue: Boolean		= false
+		_name
+		_rest: Boolean					= false
+		_thisAlias: Boolean				= false
+	}
+	analyse() { // {{{
+		@name = $compile.expression(@data.name, this)
+		@computed = @data.name.computed
+
+		if @data.alias? {
+			@alias = $compile.expression(@data.alias, this)
+		}
+		else  {
+			@alias = @name
+		}
+
+		@alias.setAssignment(@assignment)
+		@alias.analyse()
+
+		if @data.defaultValue? {
+			@hasDefaultValue = true
+
+			@defaultValue = $compile.expression(@data.defaultValue, this)
+			@defaultValue.analyse()
+		}
+
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Rest {
+				@rest = true
+			}
+			else if modifier.kind == ModifierKind::ThisAlias {
+				@thisAlias = true
+			}
+		}
+	} // }}}
+	prepare() { // {{{
+		@alias.prepare()
+
+		if @hasDefaultValue {
+			@defaultValue.prepare()
+		}
+
+		this.statement().assignTempVariables(@scope)
+	} // }}}
+	translate() { // {{{
+		@alias.translate()
+
+		if @hasDefaultValue {
+			@defaultValue.translate()
+		}
+	} // }}}
+	export(recipient) => @alias.export(recipient)
+	hasDefaultValue() => @hasDefaultValue
+	isImmutable() => @parent.isImmutable()
+	isDeclararingVariable(name: String) => @alias.isDeclararingVariable(name)
+	isRedeclared() => @alias.isRedeclared()
+	listAssignments(array) => @alias.listAssignments(array)
+	setAssignment(@assignment)
+	toFragments(fragments) { // {{{
+		if @rest {
+			fragments.code('...')
+		}
+
+		if @computed {
+			fragments.code('[').compile(@name).code(']: ').compile(@alias)
+		}
+		else if @name != @alias {
+			fragments.compile(@name).code(': ').compile(@alias)
+		}
+		else {
+			fragments.compile(@alias)
+		}
+
+		if @hasDefaultValue {
+			fragments.code(' = ').compile(@defaultValue)
+		}
+	} // }}}
+	toExistFragments(fragments, name) { // {{{
+		if @rest {
+			fragments.code('...')
+		}
+
+		if @computed {
+			fragments.code('[').compile(@name).code(']: ', name)
+		}
+		else {
+			fragments.compile(@name).code(': ', name)
+		}
+
+		if @hasDefaultValue {
+			fragments.code(' = ').compile(@defaultValue)
+		}
+	} // }}}
+	toFlatFragments(fragments, value) { // {{{
+		if @alias is ObjectBinding {
+			@alias.toFlatFragments(fragments, new FlatObjectBindingElement(value, @name, this))
+		}
+		else if @hasDefaultValue {
+			fragments
+				.compile(@alias)
+				.code($equals, $runtime.helper(this), '.default(')
+				.wrap(value)
+				.code('.')
+				.compile(@name)
+				.code($comma)
+				.compile(@defaultValue)
+				.code(')')
+		}
+		else {
+			fragments
+				.compile(@alias)
+				.code($equals)
+				.wrap(value)
+				.code('.')
+				.compile(@name)
+		}
+	} // }}}
+	walk(fn) { // {{{
+		@alias.walk(fn)
 	} // }}}
 }
