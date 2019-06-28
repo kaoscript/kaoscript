@@ -87,6 +87,7 @@ class Variable {
 
 		return this
 	} // }}}
+	setDefinitive(@definitive) => this
 	setRealType(type: Type) { // {{{
 		if type.isMorePreciseThan(@declaredType) {
 			@realType = type

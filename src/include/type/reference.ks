@@ -192,6 +192,7 @@ class ReferenceType extends Type {
 	isNullable() => @nullable
 	isNumber() => @name == 'Number' || @name == 'number'
 	isObject() => @name == 'Object' || @name == 'object'
+	isReference() => true
 	isRequired() => this.type().isRequired()
 	isString() => @name == 'String' || @name == 'string'
 	isVoid() => @name == 'Void' || @name == 'void'

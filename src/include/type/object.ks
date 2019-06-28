@@ -47,7 +47,8 @@ class ObjectType extends Type {
 
 		return export
 	} // }}}
-	getProperty(name: String): Type => @properties[name] ?? null
+	getProperty(name: String): Type => @properties[name] ?? Type.Any
+	isNullable() => false
 	isObject() => true
 	isSealable() => true
 	matchSignatureOf(value, matchables) { // {{{

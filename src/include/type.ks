@@ -42,6 +42,7 @@ const $types = { // {{{
 
 enum TypeKind<String> {
 	Alias
+	Array
 	Class
 	Enum
 	Function
@@ -159,7 +160,16 @@ abstract class Type {
 					return new ParameterType(scope, name, type, min, max, default)
 				}
 				NodeKind::TypeReference => {
-					if data.properties? {
+					if data.elements? {
+						const type = new ArrayType(scope)
+
+						for const element in data.elements {
+							type.addElement(Type.fromAST(element, scope, defined, node))
+						}
+
+						return type
+					}
+					else if data.properties? {
 						const type = new ObjectType(scope)
 
 						for property in data.properties {
@@ -469,6 +479,7 @@ abstract class Type {
 	isNull() => false
 	isObject() => false
 	isPredefined() => false
+	isReference() => false
 	isReferenced() => @referenced
 	isRequired() => @required
 	isSealable() => false
@@ -526,6 +537,7 @@ include {
 	'./type/sealable'
 	'./type/alias'
 	'./type/any'
+	'./type/array'
 	'./type/class'
 	'./type/enum'
 	'./type/namespace'

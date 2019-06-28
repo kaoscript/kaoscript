@@ -382,8 +382,6 @@ class SwitchConditionArray extends AbstractNode {
 
 				const block = line.newBlock()
 
-				console.log(@data)
-
 				block.done()
 			}
 			else {

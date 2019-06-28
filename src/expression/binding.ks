@@ -9,7 +9,7 @@ class ArrayBinding extends Expression {
 		@flatten = @options.format.destructuring == 'es5'
 
 		for const data, index in @data.elements {
-			const element = new ArrayBindingElement(data, this, this.bindingScope())
+			const element = this.newElement(data)
 
 			element.setAssignment(@assignment)
 
@@ -66,6 +66,7 @@ class ArrayBinding extends Expression {
 
 		return array
 	} // }}}
+	newElement(data) => new ArrayBindingElement(data, this, this.bindingScope())
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
 		fragments.code('[')
@@ -130,7 +131,7 @@ class ArrayBindingElement extends Expression {
 	}
 	analyse() { // {{{
 		if @data.name? {
-			@name = $compile.expression(@data.name, this)
+			@name = this.compileVariable(@data.name)
 			@name.setAssignment(@assignment)
 			@name.analyse()
 
@@ -171,6 +172,7 @@ class ArrayBindingElement extends Expression {
 			@defaultValue?.translate()
 		}
 	} // }}}
+	compileVariable(data) => $compile.expression(data, this)
 	export(recipient) => @named ? @name.export(recipient) : null
 	index(@index) => this
 	isImmutable() => @parent.isImmutable()
@@ -295,14 +297,14 @@ class ObjectBinding extends Expression {
 		_flatten: Boolean				= false
 		_immutable: Boolean				= false
 	}
-	constructor(@data, @parent, scope) { // {{{
+	constructor(@data, @parent, scope = null) { // {{{
 		super(data, parent, parent.statement().scope())
 	} // }}}
 	analyse() { // {{{
 		@flatten = @options.format.destructuring == 'es5'
 
 		for const data in @data.elements {
-			const element = new ObjectBindingElement(data, this, this.bindingScope())
+			const element = this.newElement(data)
 
 			element.setAssignment(@assignment)
 
@@ -361,6 +363,7 @@ class ObjectBinding extends Expression {
 
 		return array
 	} // }}}
+	newElement(data) => new ObjectBindingElement(data, this, this.bindingScope())
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
 		fragments.code('{')
@@ -428,13 +431,16 @@ class ObjectBindingElement extends Expression {
 		_thisAlias: Boolean				= false
 	}
 	analyse() { // {{{
-		@name = $compile.expression(@data.name, this)
 		@computed = @data.name.computed
 
 		if @data.alias? {
-			@alias = $compile.expression(@data.alias, this)
+			@name = $compile.expression(@data.name, this)
+
+			@alias = this.compileVariable(@data.alias)
 		}
-		else  {
+		else {
+			@name = this.compileVariable(@data.name)
+
 			@alias = @name
 		}
 
@@ -473,12 +479,14 @@ class ObjectBindingElement extends Expression {
 			@defaultValue.translate()
 		}
 	} // }}}
+	compileVariable(data) => $compile.expression(data, this)
 	export(recipient) => @alias.export(recipient)
 	hasDefaultValue() => @hasDefaultValue
 	isImmutable() => @parent.isImmutable()
 	isDeclararingVariable(name: String) => @alias.isDeclararingVariable(name)
 	isRedeclared() => @alias.isRedeclared()
 	listAssignments(array) => @alias.listAssignments(array)
+	name(): String => @name.value()
 	setAssignment(@assignment)
 	toFragments(fragments) { // {{{
 		if @rest {

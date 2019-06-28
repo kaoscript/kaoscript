@@ -103,7 +103,7 @@ class FunctionType extends Type {
 		}
 
 		for parameter in parameters {
-			if parameter._max == Infinity {
+			if parameter.max() == Infinity {
 				if @max == Infinity {
 					SyntaxException.throwTooMuchRestParameter(node)
 				}
@@ -112,10 +112,10 @@ class FunctionType extends Type {
 				}
 			}
 			else {
-				@max += parameter._max
+				@max += parameter.max()
 			}
 
-			@min += parameter._min
+			@min += parameter.min()
 
 			@parameters.push(parameter)
 		}
