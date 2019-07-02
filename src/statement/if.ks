@@ -4,10 +4,10 @@ class IfStatement extends Statement {
 		_condition
 		_declared: Boolean				= false
 		_variable
-		_whenFalseExpression
-		_whenFalseScope: Scope
-		_whenTrueExpression
-		_whenTrueScope: Scope
+		_whenFalseExpression			= null
+		_whenFalseScope: Scope			= null
+		_whenTrueExpression				= null
+		_whenTrueScope: Scope			= null
 	}
 	analyse() { // {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
@@ -27,7 +27,6 @@ class IfStatement extends Statement {
 
 		if @declared {
 			@variable.analyse()
-			@variable.checkNames()
 		}
 		else {
 			@condition.analyse()
@@ -67,21 +66,24 @@ class IfStatement extends Statement {
 		this.assignTempVariables(@bindingScope)
 
 		@whenTrueExpression.prepare()
-		@whenFalseExpression.prepare() if @whenFalseExpression?
 
-		if @whenFalseScope? {
-			const trueVariables = @whenTrueScope.listReplacedVariables()
-			const falseVariables = @whenFalseScope.listReplacedVariables()
+		if @whenFalseExpression != null {
+			@whenFalseExpression.prepare()
 
-			for const :name of trueVariables when falseVariables[name]? {
-				const trueType = trueVariables[name].getRealType()
-				const falseType = falseVariables[name].getRealType()
+			if @whenFalseScope != null {
+				const trueVariables = @whenTrueScope.listReplacedVariables()
+				const falseVariables = @whenFalseScope.listReplacedVariables()
 
-				if trueType.equals(falseType) {
-					@scope.replaceVariable(name, trueType, this)
-				}
-				else {
-					@scope.replaceVariable(name, Type.union(@scope, trueType, falseType), this)
+				for const :name of trueVariables when falseVariables[name]? {
+					const trueType = trueVariables[name].getRealType()
+					const falseType = falseVariables[name].getRealType()
+
+					if trueType.equals(falseType) {
+						@scope.replaceVariable(name, trueType, this)
+					}
+					else {
+						@scope.replaceVariable(name, Type.union(@scope, trueType, falseType), this)
+					}
 				}
 			}
 		}
@@ -95,7 +97,7 @@ class IfStatement extends Statement {
 		}
 
 		@whenTrueExpression.translate()
-		@whenFalseExpression.translate() if @whenFalseExpression?
+		@whenFalseExpression?.translate()
 	} // }}}
 	assignments() { // {{{
 		if @whenFalseExpression is IfStatement {
@@ -105,16 +107,11 @@ class IfStatement extends Statement {
 			return @assignments
 		}
 	} // }}}
-	bindingScope() => @bindingScope
-	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
-	isReturning(type: Type) { // {{{
-		if @whenFalseExpression {
-			return @whenTrueExpression.isReturning(type) && @whenFalseExpression.isReturning(type)
-		}
-		else {
-			return @whenTrueExpression.isReturning(type)
-		}
+	checkReturnType(type: Type) { // {{{
+		@whenTrueExpression.checkReturnType(type)
+		@whenFalseExpression?.checkReturnType(type)
 	} // }}}
+	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	toStatementFragments(fragments, mode) { // {{{
 		if @declared {
 			fragments.compile(@variable)

@@ -209,7 +209,7 @@ class Parameter extends AbstractNode {
 					if rest == -1 {
 						ctrl
 							.newControl()
-							.code(`if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+							.code(`if(arguments.length > 0 && \($runtime.type(node)).isFunction((__ks_cb = arguments[arguments.length - 1])))`)
 							.step()
 							.line(`return __ks_cb(__ks_error)`)
 							.step()
@@ -221,7 +221,7 @@ class Parameter extends AbstractNode {
 					else {
 						ctrl
 							.newControl()
-							.code(`if(Type.isFunction(__ks_cb))`)
+							.code(`if(\($runtime.type(node)).isFunction(__ks_cb))`)
 							.step()
 							.line(`return __ks_cb(__ks_error)`)
 							.step()
@@ -233,7 +233,7 @@ class Parameter extends AbstractNode {
 
 					ctrl
 						.step()
-						.code(`else if(!Type.isFunction(__ks_cb))`)
+						.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
 						.step()
 						.line(`throw new TypeError("'callback' must be a function")`)
 
@@ -408,7 +408,7 @@ class Parameter extends AbstractNode {
 
 					ctrl
 						.newControl()
-						.code(`if(Type.isFunction(__ks_cb))`)
+						.code(`if(\($runtime.type(node)).isFunction(__ks_cb))`)
 						.step()
 						.line(`return __ks_cb(__ks_error)`)
 						.step()
@@ -419,7 +419,7 @@ class Parameter extends AbstractNode {
 
 					ctrl
 						.step()
-						.code(`else if(!Type.isFunction(__ks_cb))`)
+						.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
 						.step()
 						.line(`throw new TypeError("'callback' must be a function")`)
 
@@ -603,7 +603,7 @@ class Parameter extends AbstractNode {
 
 		const definitive = type != null
 		if !definitive {
-			type = Type.Any
+			type = @anonymous ? AnyType.NullableUnexplicit : Type.Any
 		}
 
 		let min: Number = 1
@@ -631,7 +631,7 @@ class Parameter extends AbstractNode {
 
 		if @hasDefaultValue {
 			if !type.isNullable() && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
-				type = type.flagNullable()
+				type = type.setNullable(true)
 			}
 
 			@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && type.isNullable() || @name is not IdentifierLiteral
@@ -1117,7 +1117,7 @@ class IdentifierParameter extends IdentifierLiteral {
 
 class ArrayBindingParameter extends ArrayBinding {
 	addAliasParameter(data, name, setter) => @parent.addAliasParameter(data, name, setter)
-	newElement(data) => new ArrayBindingParameterElement(data, this, this.bindingScope())
+	newElement(data) => new ArrayBindingParameterElement(data, this, @scope)
 	setDeclaredType(type, definitive: Boolean = false) { // {{{
 		if type.isAny() {
 			for const element in @elements {
@@ -1162,7 +1162,7 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 
 class ObjectBindingParameter extends ObjectBinding {
 	addAliasParameter(data, name, setter) => @parent.addAliasParameter(data, name, setter)
-	newElement(data) => new ObjectBindingParameterElement(data, this, this.bindingScope())
+	newElement(data) => new ObjectBindingParameterElement(data, this, @scope)
 	setDeclaredType(type, definitive: Boolean = false) { // {{{
 		if type.isAny() {
 			for const element in @elements {
@@ -1218,7 +1218,7 @@ class AnonymousParameter extends AbstractNode {
 	applyModifiers(modifiers, node) => null
 	setDeclaredType(@type, definitive)
 	toFragments(fragments, mode) { // {{{
-		fragments.code(@scope.getRenamedVariable(@name), @data)
+		fragments.code(@name)
 	} // }}}
 	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
 		if !@type.isAny() {

@@ -4,7 +4,7 @@ enum AttributeData {
 
 #[flags]
 enum AttributeTarget {
-	Class			= 0
+	Class			= 1
 	Conditional
 	Constructor
 	Field
@@ -30,14 +30,28 @@ class Attribute {
 
 			return true
 		} // }}}
-		configure(data, options, clone, targets) { // {{{
+		configure(data, options, mode, force = false) { // {{{
 			if data.attributes?.length > 0 {
-				for const attr in data.attributes {
-					if const attribute = Attribute.get(attr.declaration, targets) {
-						if clone {
-							options = Object.clone(options)
+				const clone = !force && AttributeTarget::Global & mode == 0
+				const cloned = {}
 
-							clone = false
+				if force {
+					options = Object.clone(options)
+				}
+				else if clone {
+					const original = options
+
+					options = {}
+
+					for const value, key of original {
+						options[key] = value
+					}
+				}
+
+				for const attr in data.attributes {
+					if const attribute = Attribute.get(attr.declaration, mode) {
+						if clone {
+							options = attribute.clone(options, cloned)
 						}
 
 						options = attribute.configure(options)
@@ -81,6 +95,7 @@ class ElseAttribute extends Attribute {
 		target() => AttributeTarget::Conditional
 	}
 	constructor(data)
+	clone(options, cloned) => options
 	evaluate(node) { // {{{
 		if const flag = node.getAttributeData(AttributeData::Conditional) {
 			return !flag
@@ -99,6 +114,15 @@ class ErrorAttribute extends Attribute {
 		target() => AttributeTarget::Global | AttributeTarget::Property | AttributeTarget::Statement
 	}
 	constructor(@data)
+	clone(options, cloned) {
+		if !?cloned.error {
+			options.error = Object.clone(options.error)
+
+			cloned.error = true
+		}
+
+		return options
+	}
 	configure(options) { // {{{
 		for arg in @data.arguments {
 			switch arg.kind {
@@ -134,6 +158,15 @@ class FormatAttribute extends Attribute {
 		target() => AttributeTarget::Global | AttributeTarget::Statement
 	}
 	constructor(@data)
+	clone(options, cloned) {
+		if !?cloned.format {
+			options.format = Object.clone(options.format)
+
+			cloned.format = true
+		}
+
+		return options
+	}
 	configure(options) { // {{{
 		for arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
@@ -153,6 +186,7 @@ class IfAttribute extends Attribute {
 		target() => AttributeTarget::Conditional
 	}
 	constructor(@data)
+	clone(options, cloned) => options
 	compareVersion(a, b) { // {{{
 		a = a.split('.')
 		b = b.split('.')
@@ -308,6 +342,15 @@ class ParseAttribute extends Attribute {
 		target() => AttributeTarget::Global | AttributeTarget::Statement
 	}
 	constructor(@data)
+	clone(options, cloned) {
+		if !?cloned.parse {
+			options.parse = Object.clone(options.parse)
+
+			cloned.parse = true
+		}
+
+		return options
+	}
 	configure(options) { // {{{
 		for arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
@@ -393,6 +436,25 @@ class TargetAttribute extends Attribute {
 		target() => AttributeTarget::Global | AttributeTarget::Statement
 	}
 	constructor(@data)
+	clone(options, cloned) {
+		if !?cloned.target {
+			options.target = Object.clone(options.target)
+
+			cloned.target = true
+		}
+		if !?cloned.parse {
+			options.parse = Object.clone(options.parse)
+
+			cloned.parse = true
+		}
+		if !?cloned.format {
+			options.format = Object.clone(options.format)
+
+			cloned.format = true
+		}
+
+		return options
+	}
 	configure(options) { // {{{
 		for argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {

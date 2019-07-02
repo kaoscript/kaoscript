@@ -59,17 +59,24 @@ class ReturnStatement extends Statement {
 			@value.acquireReusable(acquire)
 		}
 	} // }}}
+	checkReturnType(type: Type) { // {{{
+		if @value == null {
+			if !type.isVoid() {
+				TypeException.throwUnexpectedReturnedType(type, this)
+			}
+		}
+		else {
+			if type.isVoid() {
+				TypeException.throwUnexpectedReturnedValue(this)
+			}
+			else if !@value.type().matchContentOf(type) {
+				TypeException.throwUnexpectedReturnedType(type, this)
+			}
+		}
+	} // }}}
 	hasExceptions() => @exceptions
 	isAwait() => @await
 	isExit() => true
-	isReturning(type: Type) { // {{{
-		if @value != null {
-			return @value.type().isInstanceOf(type)
-		}
-		else {
-			return false
-		}
-	} // }}}
 	isUsingVariable(name) => @value != null && @value.isUsingVariable(name)
 	reference() => @temp
 	releaseReusable() { // {{{

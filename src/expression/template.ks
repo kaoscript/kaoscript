@@ -26,6 +26,15 @@ class TemplateExpression extends Expression {
 		}
 	} // }}}
 	computing(@computing)
+	isUsingVariable(name) { // {{{
+		for const element in @elements {
+			if element.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	isComputed() => @elements.length > 1
 	toFragments(fragments, mode) { // {{{
 		if @computing {

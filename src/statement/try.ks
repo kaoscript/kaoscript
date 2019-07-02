@@ -114,6 +114,16 @@ class TryStatement extends Statement {
 		@catchClause.translate() if @catchClause?
 		@finalizer.translate() if @finalizer?
 	} // }}}
+	checkReturnType(type: Type) { // {{{
+		@block.checkReturnType(type)
+
+		for const clause in @catchClauses {
+			clause.body.translate()
+		}
+
+		@catchClause?.checkReturnType(type)
+		@finalizer?.checkReturnType(type)
+	} // }}}
 	getErrorVarname() { // {{{
 		if @catchClauses.length == 0 && @data.catchClause?.binding? {
 			return @data.catchClause.binding.name
@@ -138,7 +148,6 @@ class TryStatement extends Statement {
 		}
 	} // }}}
 	isExit() => @exit
-	isReturning(type: Type) => @block.isReturning(type)
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		if statements.length != 0 {
 			@continueVarname = @scope.acquireTempName()

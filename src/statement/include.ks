@@ -2,7 +2,7 @@ const $localFileRegex = /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/
 
 class IncludeDeclaration extends Statement {
 	private {
-		_statements = []
+		_declarators			= []
 	}
 	analyse() { // {{{
 		let directory = this.directory()
@@ -101,13 +101,13 @@ class IncludeDeclaration extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		for statement in @statements {
-			statement.prepare()
+		for const declarator in @declarators {
+			declarator.prepare()
 		}
 	} // }}}
 	translate() { // {{{
-		for statement in @statements {
-			statement.translate()
+		for const declarator in @declarators {
+			declarator.translate()
 		}
 	} // }}}
 	canLoadLocalFile(file) => !this.module().hasInclude(file)
@@ -125,14 +125,13 @@ class IncludeDeclaration extends Statement {
 		}
 	} // }}}
 	export(recipient) { // {{{
-		for statement in @statements when statement.isExportable() {
-			statement.export(recipient)
+		for const declarator in @declarators {
+			declarator.export(recipient)
 		}
 	} // }}}
 	isExportable() => true
 	loadLocalFile(path) { // {{{
 		const module = this.module()
-		const declarator = new IncludeDeclarator(path, this)
 
 		let data = fs.readFile(path)
 
@@ -150,17 +149,14 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 
-		Attribute.configure(data, this.module()._options, false, AttributeTarget::Global)
+		const declarator = new IncludeDeclarator(data, path, this)
 
-		for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-			@statements.push(statement)
+		declarator.analyse()
 
-			statement.analyse()
-		}
+		@declarators.push(declarator)
 	} // }}}
 	loadModuleFile(path, moduleName, modulePath, moduleVersion) { // {{{
 		const module = this.module()
-		const declarator = new IncludeDeclarator(path, moduleName, this)
 
 		let data = fs.readFile(path)
 
@@ -178,17 +174,15 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 
-		Attribute.configure(data, this.module()._options, false, AttributeTarget::Global)
+		const declarator = new IncludeDeclarator(data, path, moduleName, this)
 
-		for statement in data.body when statement ?= $compile.statement(statement, declarator) {
-			@statements.push(statement)
+		declarator.analyse()
 
-			statement.analyse()
-		}
+		@declarators.push(declarator)
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		for statement in @statements {
-			statement.toFragments(fragments, mode)
+		for const declarator in @declarators {
+			declarator.toFragments(fragments, mode)
 		}
 	} // }}}
 }
@@ -203,9 +197,12 @@ class IncludeDeclarator extends Statement {
 		_directory: String
 		_file: String
 		_includePath: String
+		_offsetEnd: Number		= 0
+		_offsetStart: Number	= 0
+		_statements				= []
 	}
-	constructor(@file, moduleName: String = null, @parent) { // {{{
-		super(parent.data(), parent)
+	constructor(@data, @file, moduleName: String = null, @parent) { // {{{
+		super(data, parent)
 
 		@directory = path.dirname(file)
 
@@ -219,11 +216,65 @@ class IncludeDeclarator extends Statement {
 			@includePath = path.join(parent.includePath(), moduleName)
 		}
 	} // }}}
-	analyse()
-	prepare()
-	translate()
+	analyse() { // {{{
+		Attribute.configure(@data, this.module()._options, AttributeTarget::Global)
+
+		const offset = @scope.getLineOffset()
+
+		@offsetStart = @scope.line()
+
+		@scope.setLineOffset(@offsetStart)
+
+		for const data in @data.body {
+			@scope.line(data.start.line)
+
+			if const statement = $compile.statement(data, this) {
+				@statements.push(statement)
+
+				statement.analyse()
+			}
+		}
+
+		@scope.line(@data.end.line)
+
+		@offsetEnd = offset + @scope.line() - @offsetStart
+
+		@scope.setLineOffset(@offsetEnd)
+	} // }}}
+	prepare() { // {{{
+		@scope.setLineOffset(@offsetStart)
+
+		for const statement in @statements {
+			@scope.line(statement.line())
+
+			statement.prepare()
+		}
+
+		@scope.setLineOffset(@offsetEnd)
+	} // }}}
+	translate() { // {{{
+		@scope.setLineOffset(@offsetStart)
+
+		for const statement in @statements {
+			@scope.line(statement.line())
+
+			statement.translate()
+		}
+
+		@scope.setLineOffset(@offsetEnd)
+	} // }}}
 	directory() => @directory
+	export(recipient) { // {{{
+		for const statement in @statements when statement.isExportable() {
+			statement.export(recipient)
+		}
+	} // }}}
 	file() => @file
 	includePath() => @includePath
 	recipient() => this.module()
+	toFragments(fragments, mode) { // {{{
+		for const statement in @statements {
+			statement.toFragments(fragments, mode)
+		}
+	} // }}}
 }

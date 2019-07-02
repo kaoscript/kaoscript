@@ -21,6 +21,9 @@ class UntilStatement extends Statement {
 		@condition.translate()
 		@body.translate()
 	} // }}}
+	checkReturnType(type: Type) { // {{{
+		@body.checkReturnType(type)
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()

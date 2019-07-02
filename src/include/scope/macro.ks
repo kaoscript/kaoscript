@@ -71,6 +71,8 @@ class MacroScope extends Scope {
 
 		if const newName = this.declareVariable(name) {
 			@renamedVariables[name] = newName
+
+			variable.renameAs(newName)
 		}
 	} // }}}
 	getDefinedVariable(name: String) { // {{{
@@ -82,15 +84,7 @@ class MacroScope extends Scope {
 		}
 	} // }}}
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-	getRenamedVariable(name: String) { // {{{
-		if @renamedVariables[name] is String {
-			return @renamedVariables[name]
-		}
-		else {
-			return name
-		}
-	} // }}}
-	getVariable(name, line = -1): Variable { // {{{
+	getVariable(name, line = -1): Variable? { // {{{
 		if @variables[name] is Variable {
 			return @variables[name]
 		}

@@ -4,10 +4,11 @@ class Shape {
 	private {
 		_color: String
 	}
-	
+
 	constructor(@color)
-	
+
 	draw(): String {
+		return @color
 	}
 }
 
@@ -20,7 +21,7 @@ class Rectangle extends Shape {
 			super(color)
 		}
 	}
-	
+
 	draw() {
 		return `I'm drawing a \(@color) rectangle.`
 	}

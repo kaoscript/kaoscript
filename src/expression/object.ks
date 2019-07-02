@@ -174,7 +174,7 @@ class ObjectLiteralMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		@options = Attribute.configure(@data, @options, true, AttributeTarget::Property)
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
 
 		if @data.name.kind == NodeKind::Identifier	{
 			@name = new Literal(@data.name, this, @scope, @data.name.name)
@@ -242,7 +242,7 @@ class ObjectComputedMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		@options = Attribute.configure(@data, @options, true, AttributeTarget::Property)
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
 
 		if @data.name.kind == NodeKind::ComputedPropertyName {
 			@name = $compile.expression(@data.name.expression, this)
@@ -304,7 +304,7 @@ class ObjectThisMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		@options = Attribute.configure(@data, @options, true, AttributeTarget::Property)
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
 
 		@name = new Literal(@data.name.name, this, @scope, @data.name.name.name)
 
@@ -340,7 +340,7 @@ class ObjectSpreadMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		@options = Attribute.configure(@data, @options, true, AttributeTarget::Property)
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
 
 		@value = $compile.expression(@data.argument, this)
 		@value.analyse()
@@ -351,6 +351,7 @@ class ObjectSpreadMember extends Expression {
 	translate() { // {{{
 		@value.translate()
 	} // }}}
+	isUsingVariable(name) => false
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@value)
 	} // }}}

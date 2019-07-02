@@ -114,11 +114,18 @@ class AssignmentOperatorDivision extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
+	private {
+		_ignorable: Boolean		= false
+	}
 	prepare() { // {{{
 		super.prepare()
 
 		if @left is IdentifierLiteral {
 			@left.type(@right.type(), @scope, this)
+
+			if @right is IdentifierLiteral || @right is BinaryOperatorTypeCasting {
+				@ignorable = @left.name() == @right.name()
+			}
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
@@ -127,6 +134,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
 	isAssignable() => @left == null || @left.isAssignable()
 	isDeclararing() => true
+	isIgnorable() => @ignorable
 	releaseReusable() { // {{{
 		@right.releaseReusable()
 	} // }}}

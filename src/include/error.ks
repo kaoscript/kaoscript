@@ -364,6 +364,9 @@ export class TypeException extends Exception {
 		throwRequireClass(node) ~ TypeException { // {{{
 			throw new TypeException(`An instance is required`, node)
 		} // }}}
+		throwUnexpectedReturnedValue(node) ~ TypeException { // {{{
+			throw new TypeException(`No values are expected to be returned`, node)
+		} // }}}
 		throwUnexpectedReturnedType(type, node) ~ TypeException { // {{{
 			throw new TypeException(`Expected returned type \(type.toQuote())`, node)
 		} // }}}

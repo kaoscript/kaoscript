@@ -386,6 +386,8 @@ class CallExpression extends Expression {
 						}
 					}
 
+					name = name as NamedType
+
 					if types.length == 0 {
 						if sealed {
 							this.addCallee(new SealedMethodCallee(@data, name, false, this))

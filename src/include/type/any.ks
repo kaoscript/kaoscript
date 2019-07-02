@@ -1,37 +1,62 @@
 class AnyType extends Type {
 	private {
+		_explicit: Boolean	= true
 		_nullable: Boolean	= false
 	}
 	constructor() { // {{{
 		super(null)
 	} // }}}
-	equals(b?): Boolean => b is AnyType
+	constructor(@explicit, @nullable) { // {{{
+		super(null)
+	} // }}}
+	equals(b?): Boolean { // {{{
+		if b is AnyType {
+			return @nullable == b.isNullable()
+		}
+		else if b is ReferenceType {
+			return b.isAny() && @nullable == b.isNullable()
+		}
+		else {
+			return false
+		}
+	} // }}}
 	export(references, ignoreAlteration) => 'Any'
 	flagAlien() { // {{{
-		const type = new AnyType()
+		const type = new AnyType(@explicit, @nullable)
 
 		type._alien = true
 
 		return type
 	} // }}}
-	flagNullable() { // {{{
-		const type = new AnyType()
-
-		type._nullable = true
-
-		return type
-	} // }}}
-	getProperty(name) => Type.Any
+	flagRequired() => this
+	getProperty(name) => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
 	hashCode() => 'Any'
 	isAny() => true
+	isExplicit() => @explicit
 	isExportable() => true
 	isInstanceOf(target: Type) => true
 	isMorePreciseThan(type: Type) => false
 	isNullable() => @nullable
-	matchContentOf(b) => true
+	matchContentOf(b) => !@explicit || (b.isAny() && (@nullable -> !b.isNullable()))
 	matchSignatureOf(b, matchables) => b.isAny()
-	parameter() => Type.Any
-	flagRequired() => this
+	parameter() => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+	setNullable(nullable: Boolean): Type { // {{{
+		let type
+
+		if @explicit {
+			type = @nullable ? this : AnyType.NullableExplicit
+		}
+		else {
+			type = @nullable ? this : AnyType.NullableUnexplicit
+		}
+
+		if @alien {
+			return type.flagAlien()
+		}
+		else {
+			return type
+		}
+	} // }}}
 	toFragments(fragments, node) { // {{{
 		fragments.code('Any')
 	} // }}}
@@ -42,3 +67,8 @@ class AnyType extends Type {
 		throw new NotImplementedException()
 	} // }}}
 }
+
+AnyType.Explicit = new AnyType(true, false)
+AnyType.NullableExplicit = new AnyType(true, true)
+AnyType.Unexplicit = new AnyType(false, false)
+AnyType.NullableUnexplicit = new AnyType(false, true)

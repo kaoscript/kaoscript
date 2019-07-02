@@ -32,6 +32,7 @@ module.exports = function() {
 		else if(!Type.isString(x)) {
 			throw new TypeError("'x' is not of type 'String'");
 		}
+		return new Foobar();
 	}
 	return {
 		foobar: foobar

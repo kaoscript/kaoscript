@@ -312,13 +312,7 @@ class MacroDeclaration extends AbstractNode {
 			throw error
 		}
 
-		const statements = []
-
-		for statement in data.body when statement ?= $compile.statement(statement, parent) {
-			statements.push(statement)
-		}
-
-		return statements
+		return data
 	} // }}}
 	export(recipient, name = @name) { // {{{
 		recipient.exportMacro(name, this)
@@ -497,26 +491,53 @@ class MacroParameterType extends ParameterType {
 
 class CallMacroStatement extends Statement {
 	private {
-		_statements: Array
+		_offsetEnd: Number		= 0
+		_offsetStart: Number	= 0
+		_statements: Array		= []
 	}
 	analyse() { // {{{
-		const macro = this.scope().getMacro(@data, this)
+		const macro = @scope.getMacro(@data, this)
 
-		@statements = macro.execute(@data.arguments, this)
+		const data = macro.execute(@data.arguments, this)
 
-		for statement in @statements {
-			statement.analyse()
+		const offset = @scope.getLineOffset()
+
+		@offsetStart = @scope.line()
+
+		@scope.setLineOffset(@offsetStart)
+
+		for const data in data.body {
+			@scope.line(data.start.line)
+
+			if const statement = $compile.statement(data, this) {
+				@statements.push(statement)
+
+				statement.analyse()
+			}
 		}
+
+		@scope.line(data.end.line)
+
+		@offsetEnd = offset + @scope.line() - @offsetStart
+		@scope.setLineOffset(@offsetEnd)
 	} // }}}
 	prepare() { // {{{
+		@scope.setLineOffset(@offsetStart)
+
 		for statement in @statements {
 			statement.prepare()
 		}
+
+		@scope.setLineOffset(@offsetEnd)
 	} // }}}
 	translate() { // {{{
+		@scope.setLineOffset(@offsetStart)
+
 		for statement in @statements {
 			statement.translate()
 		}
+
+		@scope.setLineOffset(@offsetEnd)
 	} // }}}
 	isAwait() { // {{{
 		for statement in @statements {

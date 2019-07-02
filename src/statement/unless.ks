@@ -24,6 +24,9 @@ class UnlessStatement extends Statement {
 		@condition.translate()
 		@whenFalseExpression.translate()
 	} // }}}
+	checkReturnType(type: Type) { // {{{
+		@whenFalseExpression.checkReturnType(type)
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()

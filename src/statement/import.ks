@@ -397,6 +397,8 @@ class Importer extends Statement {
 			let source = fs.readFile(x)
 			let target = @options.target
 
+			x = x as String
+
 			if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (@metadata ?= this.readMetadata(getMetadataPath(x, target))) {
 				module.addHashes(x, hashes)
 			}

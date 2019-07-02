@@ -1,9 +1,8 @@
 class BlockScope extends Scope {
 	private {
 		_declarations				= {}
-		_lastLine: Boolean			= false
-		_line: Number				= 0
 		_macros						= {}
+		_module: ModuleScope
 		_parent: Scope
 		_references					= {}
 		_renamedIndexes 			= {}
@@ -14,7 +13,11 @@ class BlockScope extends Scope {
 		_tempNames					= {}
 		_variables					= {}
 	}
-	constructor(@parent)
+	constructor(@parent) { // {{{
+		super()
+
+		@module = @parent.module()
+	} // }}}
 	acquireTempName(declare: Boolean = true): String { // {{{
 		for const :name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
@@ -32,7 +35,7 @@ class BlockScope extends Scope {
 
 		return name
 	} // }}}
-	acquireUnusedTempName(): String { // {{{
+	acquireUnusedTempName(): String? { // {{{
 		for const :name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
@@ -117,6 +120,8 @@ class BlockScope extends Scope {
 		else {
 			if const newName = this.declareVariable(name) {
 				@renamedVariables[name] = newName
+
+				variable.renameAs(newName)
 			}
 
 			@variables[name] = [@line, variable]
@@ -127,7 +132,7 @@ class BlockScope extends Scope {
 			const variables:Array = @variables[name]
 			let variable = null
 
-			if @lastLine {
+			if this.isAtLastLine() {
 				variable = variables.last()
 			}
 			else {
@@ -146,6 +151,7 @@ class BlockScope extends Scope {
 
 		return null
 	} // }}}
+	getLineOffset() => @module.getLineOffset()
 	getMacro(data, parent) { // {{{
 		if data.callee.kind == NodeKind::Identifier {
 			if @macros[data.callee.name]? {
@@ -190,21 +196,14 @@ class BlockScope extends Scope {
 
 		return newName
 	} // }}}
+	getRawLine() => @module.getRawLine()
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-	getRenamedVariable(name: String) { // {{{
-		if @renamedVariables[name] is String {
-			return @renamedVariables[name]
-		}
-		else {
-			return @parent.getRenamedVariable(name)
-		}
-	} // }}}
 	getTempIndex() => @tempIndex
 	getVariable(name): Variable => this.getVariable(name, @line)
 	getVariable(name, line: Number): Variable { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
-			let variable = null
+			const variables: Array = @variables[name]
+			let variable: Variable = null
 
 			if line == -1 || line > @line {
 				variable = variables.last()
@@ -271,7 +270,7 @@ class BlockScope extends Scope {
 
 		return @parent.hasVariable(name, -1)
 	} // }}}
-	isAtLastLine() => @lastLine
+	isAtLastLine() => @module.isAtLastLine()
 	isRedeclaredVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			return @variables[name].length != 2
@@ -288,8 +287,8 @@ class BlockScope extends Scope {
 			return @parent.isRenamedVariable(name)
 		}
 	} // }}}
-	line() => @line
-	line(@line)
+	line() => @module.line()
+	line(line: Number) => @module.line(line)
 	listMacros(name): Array { // {{{
 		if @macros[name] is Array {
 			return @macros[name]
@@ -298,6 +297,7 @@ class BlockScope extends Scope {
 			return @parent.listMacros(name)
 		}
 	} // }}}
+	module() => @module
 	parent() => @parent
 	processStash(name) { // {{{
 		const stash = @stashes[name]
@@ -362,6 +362,10 @@ class BlockScope extends Scope {
 	rename(name, newName) { // {{{
 		if newName != name {
 			@renamedVariables[name] = newName
+
+			const variable = this.getVariable(name)
+
+			variable.renameAs(newName)
 		}
 	} // }}}
 	replaceVariable(name: String, variable: Variable): Variable { // {{{
@@ -387,7 +391,7 @@ class BlockScope extends Scope {
 		let variable = this.getVariable(name)
 
 		if variable.isDefinitive() {
-			if type.isAny() {
+			if type.isAny() && !variable.getDeclaredType().isAny() {
 				return variable
 			}
 
@@ -423,4 +427,5 @@ class BlockScope extends Scope {
 			return @parent.resolveReference(name, nullable)
 		}
 	} // }}}
+	setLineOffset(offset: Number) => @module.setLineOffset(offset)
 }

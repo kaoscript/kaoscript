@@ -188,6 +188,9 @@ class ForFromStatement extends Statement {
 
 		@body.translate()
 	} // }}}
+	checkReturnType(type: Type) { // {{{
+		@body.checkReturnType(type)
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl().code('for(')
 

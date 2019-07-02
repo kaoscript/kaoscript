@@ -66,7 +66,7 @@ class ArrayBinding extends Expression {
 
 		return array
 	} // }}}
-	newElement(data) => new ArrayBindingElement(data, this, this.bindingScope())
+	newElement(data) => new ArrayBindingElement(data, this, @scope)
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
 		fragments.code('[')
@@ -297,9 +297,6 @@ class ObjectBinding extends Expression {
 		_flatten: Boolean				= false
 		_immutable: Boolean				= false
 	}
-	constructor(@data, @parent, scope = null) { // {{{
-		super(data, parent, parent.statement().scope())
-	} // }}}
 	analyse() { // {{{
 		@flatten = @options.format.destructuring == 'es5'
 
@@ -363,7 +360,7 @@ class ObjectBinding extends Expression {
 
 		return array
 	} // }}}
-	newElement(data) => new ObjectBindingElement(data, this, this.bindingScope())
+	newElement(data) => new ObjectBindingElement(data, this, @scope)
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
 		fragments.code('{')

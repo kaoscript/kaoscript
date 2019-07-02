@@ -33,6 +33,8 @@ class BleedingScope extends Scope {
 
 		if const newName = @parent.declareVariable(name) {
 			@renamedVariables[name] = newName
+
+			variable.renameAs(newName)
 		}
 	} // }}}
 	getDefinedVariable(name: String) { // {{{
@@ -62,26 +64,13 @@ class BleedingScope extends Scope {
 		return null
 	} // }}}
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
-	getRenamedVariable(name: String) { // {{{
-		if @variables[name] is Array {
-			if @renamedVariables[name] is String {
-				return @renamedVariables[name]
-			}
-			else {
-				return name
-			}
-		}
-		else {
-			return @parent.getRenamedVariable(name)
-		}
-	} // }}}
 	getTempIndex() => @parent.getTempIndex()
 	getVariable(name): Variable => this.getVariable(name, @parent.line())
 	getVariable(name, line: Number): Variable { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
+			const variables: Array = @variables[name]
 			const currentLine = @parent.line()
-			let variable = null
+			let variable: Variable = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
@@ -146,6 +135,8 @@ class BleedingScope extends Scope {
 			return @parent.isRenamedVariable(name)
 		}
 	} // }}}
+	line() => @parent.line()
+	module() => @parent.module()
 	parent() => @parent
 	reference(value) => @parent.reference(value)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
@@ -158,6 +149,10 @@ class BleedingScope extends Scope {
 
 		@renamedIndexes[name] = index
 		@renamedVariables[name] = newName
+
+		const variable = this.getVariable(name)
+
+		variable.renameAs(newName)
 	} // }}}
 	private resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable)
 }

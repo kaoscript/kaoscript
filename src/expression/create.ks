@@ -53,6 +53,19 @@ class CreateExpression extends Expression {
 		}
 	} // }}}
 	isComputed() => true
+	isUsingVariable(name) { // {{{
+		if @class.isUsingVariable(name) {
+			return true
+		}
+
+		for const argument in @arguments {
+			if argument.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @flatten {
 			this.module().flag('Helper')

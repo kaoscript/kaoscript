@@ -20,6 +20,15 @@ class SequenceExpression extends Expression {
 			expression.translate()
 		}
 	} // }}}
+	isUsingVariable(name) { // {{{
+		for const expression in @expressions {
+			if expression.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.code('(')
 

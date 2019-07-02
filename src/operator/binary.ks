@@ -94,7 +94,7 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 			return @left.type()
 		}
 		else {
-			return new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')])
+			return new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')], false)
 		}
 	} // }}}
 }
@@ -275,11 +275,13 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		@left.acquireReusable(true)
 		@left.releaseReusable()
 
-		if @left.type().equals(@right.type()) {
-			@type = @left.type()
+		const leftType = @left.type().setNullable(false)
+
+		if leftType.equals(@right.type()) {
+			@type = leftType
 		}
 		else {
-			@type = new UnionType(@scope, [@left.type(), @right.type()])
+			@type = new UnionType(@scope, [leftType, @right.type()])
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
@@ -396,6 +398,8 @@ class BinaryOperatorTypeCasting extends Expression {
 	hasExceptions() => false
 	isComputed() => false
 	isNullable() => @left.isNullable()
+	isUsingVariable(name) => @left.isUsingVariable(name)
+	name() => @left is IdentifierLiteral ? @left.name() : null
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@left)
 	} // }}}
@@ -443,6 +447,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	hasExceptions() => false
 	isComputed() => false
 	isNullable() => false
+	isUsingVariable(name) => @left.isUsingVariable(name)
 	reduceTypes() { // {{{
 		const variables = {}
 
@@ -499,6 +504,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	hasExceptions() => false
 	isComputed() => false
 	isNullable() => false
+	isUsingVariable(name) => @left.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		if @data.right.kind == NodeKind::TypeReference {
 			fragments.code('!')

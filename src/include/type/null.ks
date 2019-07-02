@@ -10,7 +10,7 @@ class NullType extends Type {
 	isAny() => true
 	isNull() => true
 	matchContentOf(type: Type) => type.isAny() || type.isNullable()
-	toQuote()
+	toQuote() => `null`
 	toFragments(fragments, node)
 	toTestFragments(fragments, node)
 }

@@ -81,7 +81,9 @@
             "max": 0,
             "parameters": [],
             "returns": {
-              "reference": 2
+              "kind": "reference",
+              "name": 2,
+              "nullable": true
             },
             "sealed": false,
             "throws": []

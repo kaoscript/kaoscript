@@ -76,7 +76,6 @@ abstract class Scope {
 	abstract defineVariable(variable: Variable, node: AbstractNode)
 	abstract getDefinedVariable(name: String): Variable?
 	abstract getRenamedIndex(name: String): Number
-	abstract getRenamedVariable(name: String): String
 	abstract getVariable(name: String): Variable
 	abstract hasDefinedVariable(name: String): Boolean
 	abstract hasDeclaredVariable(name: String): Boolean

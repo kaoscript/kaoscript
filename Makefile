@@ -5,9 +5,9 @@ comp:
 	time ./bin/kaoscript -c -t ecma-v6 -o lib -m src/compiler.ks
 
 build:
-	./bin/kaoscript -c -t ecma-v5 -o lib src/compiler.ks
+	time ./bin/kaoscript -c -t ecma-v5 -o lib src/compiler.ks
 	cp lib/compiler.js ../compiler-bin-js-es5
-	./bin/kaoscript -c -t ecma-v6 -o lib src/compiler.ks
+	time ./bin/kaoscript -c -t ecma-v6 -o lib src/compiler.ks
 	cp lib/compiler.js ../compiler-bin-js-es6
 
 test:

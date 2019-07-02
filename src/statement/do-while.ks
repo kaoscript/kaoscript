@@ -21,6 +21,9 @@ class DoWhileStatement extends Statement {
 		@body.translate()
 		@condition.translate()
 	} // }}}
+	checkReturnType(type: Type) { // {{{
+		@body.checkReturnType(type)
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()

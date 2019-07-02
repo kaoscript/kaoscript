@@ -13,6 +13,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_draw_0() {
+			return "";
 		}
 		draw() {
 			if(arguments.length === 0) {

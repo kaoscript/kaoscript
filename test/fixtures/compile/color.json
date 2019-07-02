@@ -905,9 +905,7 @@
               }
             ],
             "returns": [
-              {
-                "reference": 1
-              },
+              "String",
               "Boolean"
             ],
             "sealed": false,

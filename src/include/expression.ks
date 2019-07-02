@@ -17,6 +17,8 @@ abstract class Expression extends AbstractNode {
 	isComposite() => true
 	// if parentheses are required around the expression to be wrapped
 	isComputed() => false
+	// if the expression can be ignored (like a variable casting)
+	isIgnorable() => false
 	// if the expression needs to be assign to a temp variable to be reused, expect for simple member expression
 	isLooseComposite() => this.isComposite()
 	// if the expression is nullable

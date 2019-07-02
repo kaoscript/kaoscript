@@ -634,11 +634,13 @@ class ClassType extends Type {
 		return null
 	} // }}}
 	getMissingAbstractMethods() { // {{{
+		unless @extending {
+			return []
+		}
+
 		const abstractMethods = {}
 
-		if @extending {
-			@extends.type().filterAbstractMethods(abstractMethods)
-		}
+		@extends.type().filterAbstractMethods(abstractMethods)
 
 		const matchables = []
 
@@ -952,7 +954,7 @@ class ClassVariableType extends Type {
 				type = new ClassVariableType(scope, Type.fromAST(data.type, node))
 			}
 			else {
-				type = new ClassVariableType(scope, new ReferenceType(scope, 'Any'))
+				type = new ClassVariableType(scope, Type.Any)
 			}
 
 			if data.modifiers? {

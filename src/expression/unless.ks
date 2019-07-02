@@ -15,13 +15,14 @@ class UnlessExpression extends Expression {
 		@condition.prepare()
 		@whenFalse.prepare()
 
-		@type = @whenFalse.type().flagNullable()
+		@type = @whenFalse.type().setNullable(true)
 	} // }}}
 	translate() { // {{{
 		@condition.translate()
 		@whenFalse.translate()
 	} // }}}
 	isComputed() => true
+	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenFalse.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(@condition)

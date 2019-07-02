@@ -46,8 +46,14 @@ class VariableDeclaration extends Statement {
 		if @data.init? {
 			@hasInit = true
 
+			const line = @initScope.getRawLine()
+
+			@initScope.line(line - 1)
+
 			@init = $compile.expression(@data.init, this, @initScope)
 			@init.analyse()
+
+			@initScope.line(line)
 
 			if @immutable {
 				@rebindable = @scope != @initScope
@@ -72,6 +78,10 @@ class VariableDeclaration extends Statement {
 			}
 
 			declarator.analyse()
+
+			if @hasInit {
+				declarator.checkNames(@init)
+			}
 
 			@declarators.push(declarator)
 		}
@@ -127,13 +137,6 @@ class VariableDeclaration extends Statement {
 			declarator.translate()
 		}
 	} // }}}
-	checkNames() { // {{{
-		if @hasInit {
-			for const declarator in @declarators {
-				declarator.checkNames(@init)
-			}
-		}
-	} // }}}
 	defineVariables(declarator) { // {{{
 		let alreadyDeclared
 
@@ -144,10 +147,10 @@ class VariableDeclaration extends Statement {
 
 			alreadyDeclared = @scope.hasDeclaredVariable(name)
 
-			@scope.define(name, this.isImmutable(), null, this)
+			const variable = @scope.define(name, this.isImmutable(), null, this)
 
 			if alreadyDeclared {
-				alreadyDeclared = @scope.getRenamedVariable(name) == name
+				alreadyDeclared = !variable.isRenamed()
 			}
 
 			if alreadyDeclared && @toDeclareAll {
@@ -315,9 +318,7 @@ class VariableBindingDeclarator extends AbstractNode {
 	export(recipient) { // {{{
 		@binding.export(recipient)
 	} // }}}
-	flagDefinitive() { // {{{
-
-	} // }}}
+	flagDefinitive()
 	isDeclararingVariable(name: String) => @binding.isDeclararingVariable(name)
 	isDuplicate(scope) { // {{{
 		return false
@@ -417,6 +418,6 @@ class VariableIdentifierDeclarator extends AbstractNode {
 			.compile(value)
 	} // }}}
 	walk(fn) { // {{{
-		fn(@scope.getRenamedVariable(@name), @variable.getRealType())
+		fn(@variable.getSecureName(), @variable.getRealType())
 	} // }}}
 }

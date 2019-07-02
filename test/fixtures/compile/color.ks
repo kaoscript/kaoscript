@@ -550,7 +550,7 @@ export class Color {
 			return false if color._dummy else color.greyscale(model)
 		} // }}}
 
-		hex(...args): Color | bool { // {{{
+		hex(...args): String | bool { // {{{
 			let color = $from(new Color(), args)
 
 			return false if color._dummy else color.hex()

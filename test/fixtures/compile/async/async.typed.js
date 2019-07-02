@@ -25,6 +25,6 @@ module.exports = function() {
 		else if(!Type.isNumber(qux)) {
 			return __ks_cb(new TypeError("'qux' is not of type 'Number'"));
 		}
-		__ks_cb();
+		return __ks_cb(null, "foobar");
 	}
 };

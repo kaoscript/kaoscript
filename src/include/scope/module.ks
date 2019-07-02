@@ -4,6 +4,7 @@ class ModuleScope extends Scope {
 		_declarations				= {}
 		_lastLine: Boolean			= false
 		_line: Number				= 0
+		_lineOffset: Number			= 0
 		_macros						= {}
 		_predefined					= {}
 		_references					= {}
@@ -53,7 +54,7 @@ class ModuleScope extends Scope {
 
 		return name
 	} // }}}
-	acquireUnusedTempName(): String { // {{{
+	acquireUnusedTempName(): String? { // {{{
 		for const :name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
@@ -139,6 +140,8 @@ class ModuleScope extends Scope {
 		else {
 			if const newName = this.declareVariable(name) {
 				@renamedVariables[name] = newName
+
+				variable.renameAs(newName)
 			}
 
 			@variables[name] = [@line, variable]
@@ -146,8 +149,8 @@ class ModuleScope extends Scope {
 	} // }}}
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
-			let variable = null
+			const variables: Array = @variables[name]
+			let variable: Variable = null
 
 			if @lastLine {
 				variable = variables.last()
@@ -168,6 +171,7 @@ class ModuleScope extends Scope {
 
 		return null
 	} // }}}
+	getLineOffset() => @lineOffset
 	getMacro(data, parent) { // {{{
 		if data.callee.kind == NodeKind::Identifier {
 			if @macros[data.callee.name]? {
@@ -206,19 +210,12 @@ class ModuleScope extends Scope {
 
 		return newName
 	} // }}}
+	getRawLine() => @line - @lineOffset
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
-	getRenamedVariable(name: String) { // {{{
-		if @renamedVariables[name] is String {
-			return @renamedVariables[name]
-		}
-		else {
-			return name
-		}
-	} // }}}
 	getTempIndex() => @tempIndex
-	getVariable(name): Variable => this.getVariable(name, @line)
-	getVariable(name, line: Number): Variable { // {{{
-		if $types[name] is String {
+	getVariable(name): Variable? => this.getVariable(name, @line)
+	getVariable(name, line: Number): Variable? { // {{{
+		if @variables[name] is not Array && $types[name] is String {
 			name = $types[name]
 		}
 
@@ -309,7 +306,9 @@ class ModuleScope extends Scope {
 		return @renamedVariables[name] is String
 	} // }}}
 	line() => @line
-	line(@line)
+	line(line: Number) { // {{{
+		@line = line + @lineOffset
+	} // }}}
 	listMacros(name): Array { // {{{
 		if @macros[name] is Array {
 			return @macros[name]
@@ -318,6 +317,7 @@ class ModuleScope extends Scope {
 			return []
 		}
 	} // }}}
+	module() => this
 	processStash(name) { // {{{
 		const stash = @stashes[name]
 		if ?stash {
@@ -362,6 +362,7 @@ class ModuleScope extends Scope {
 			}
 		}
 	} // }}}
+	reference(name: String, nullable: Boolean) => this.resolveReference(name, nullable)
 	releaseTempName(name) { // {{{
 		@tempNames[name] = true
 	} // }}}
@@ -390,10 +391,10 @@ class ModuleScope extends Scope {
 		return variable
 	} // }}}
 	replaceVariable(name: String, type: Type, node): Variable { // {{{
-		let variable = this.getVariable(name)
+		let variable: Variable = this.getVariable(name)
 
 		if variable.isDefinitive() {
-			if type.isAny() {
+			if type.isAny() && !variable.getDeclaredType().isAny() {
 				return variable
 			}
 
@@ -424,4 +425,5 @@ class ModuleScope extends Scope {
 
 		return @references[hash]
 	} // }}}
+	setLineOffset(@lineOffset)
 }

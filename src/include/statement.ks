@@ -8,13 +8,13 @@ abstract class Statement extends AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
 
-		@options = Attribute.configure(data, parent._options, true, AttributeTarget::Statement)
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
 		@line = data.start.line
 	} // }}}
 	constructor(@data, @parent, scope: Scope, kind: ScopeType) { // {{{
 		super(data, parent, scope, kind)
 
-		@options = Attribute.configure(data, parent._options, true, AttributeTarget::Statement)
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
 		@line = data.start.line
 	} // }}}
 	addAssignments(variables) { // {{{
@@ -27,7 +27,7 @@ abstract class Statement extends AbstractNode {
 		scope.commitTempVariables(@assignments)
 	} // }}}
 	assignments() => @assignments
-	bindingScope() => @scope
+	checkReturnType(type: Type)
 	defineVariables(left, scope, expression = null, leftMost = false) { // {{{
 		for const name in left.listAssignments([]) {
 			if const variable = scope.getVariable(name) {
@@ -51,7 +51,6 @@ abstract class Statement extends AbstractNode {
 	isExit() => false
 	isExportable() => false
 	includePath() => @parent.includePath()
-	isReturning(type: Type) => true
 	line() => @line
 	setAttributeData(key: AttributeData, data) { // {{{
 		@attributeDatas[key] = data

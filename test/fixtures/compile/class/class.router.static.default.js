@@ -88,6 +88,7 @@ module.exports = function() {
 			else if(!Type.is(node, AbstractNode)) {
 				throw new TypeError("'node' is not of type 'AbstractNode'");
 			}
+			return new FoobarType();
 		}
 		static import() {
 			if(arguments.length === 4) {
@@ -102,6 +103,14 @@ module.exports = function() {
 				return Type.__ks_sttc_import_2.apply(this, arguments);
 			}
 			throw new SyntaxError("wrong number of arguments");
+		}
+	}
+	class FoobarType extends Type {
+		__ks_init() {
+			Type.prototype.__ks_init.call(this);
+		}
+		__ks_cons(args) {
+			Type.prototype.__ks_cons.call(this, args);
 		}
 	}
 };

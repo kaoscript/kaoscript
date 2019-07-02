@@ -28,8 +28,8 @@ class HollowScope extends Scope {
 	} // }}}
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
-			let variable = null
+			const variables: Array = @variables[name]
+			let variable: Variable = null
 
 			if @parent.isAtLastLine() {
 				variable = variables.last()
@@ -53,14 +53,13 @@ class HollowScope extends Scope {
 		return null
 	} // }}}
 	getRenamedIndex(name: String): Number => @parent.getRenamedIndex(name)
-	getRenamedVariable(name: String): String => @parent.getRenamedVariable(name)
 	getTempIndex() => @parent.getTempIndex()
 	getVariable(name): Variable => this.getVariable(name, @parent.line())
 	getVariable(name, line: Number): Variable { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
+			const variables: Array = @variables[name]
 			const currentLine = @parent.line()
-			let variable = null
+			let variable: Variable = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
@@ -96,6 +95,8 @@ class HollowScope extends Scope {
 		}
 	} // }}}
 	isRenamedVariable(name: String): Boolean => @parent.isRenamedVariable(name)
+	line() => @parent.line()
+	module() => @parent.module()
 	parent() => @parent
 	reference(value): ReferenceType => @parent.reference(value)
 	releaseTempName(name: String) => @parent.releaseTempName(name)

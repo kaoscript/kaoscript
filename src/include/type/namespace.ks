@@ -88,7 +88,7 @@ class NamespaceType extends Type {
 		return variable.getDeclaredType()
 	} // }}}
 	clone() { // {{{
-		const that = new NamespaceType(@scope)
+		const that = new NamespaceType(@scope:Scope)
 
 		return that.copyFrom(this)
 	} // }}}
@@ -153,7 +153,7 @@ class NamespaceType extends Type {
 
 		return this
 	} // }}}
-	getProperty(name: String): Type { // {{{
+	getProperty(name: String): Type? { // {{{
 		if @properties[name] is Type {
 			return @properties[name].type()
 		}

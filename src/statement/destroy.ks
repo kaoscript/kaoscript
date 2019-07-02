@@ -36,12 +36,14 @@ class DestroyStatement extends Statement {
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @identifier {
+			const variable = @scope.getVariable(@data.variable.name, @scope.line() - 1)
 			const type = @type.discardReference()
+
 			if type.isClass() && type.type().hasDestructors() {
-				fragments.newLine().code(type.path(), '.__ks_destroy(').code(@scope.getRenamedVariable(@data.variable.name)).code(')').done()
+				fragments.newLine().code(type.path(), '.__ks_destroy(').compile(variable).code(')').done()
 			}
 
-			fragments.newLine().code(@scope.getRenamedVariable(@data.variable.name)).code(' = undefined').done()
+			fragments.newLine().compile(variable).code(' = undefined').done()
 		}
 		else {
 			fragments.newLine().code('delete ').compile(@expression).done()

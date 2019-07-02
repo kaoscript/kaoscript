@@ -27,10 +27,10 @@ class ConditionalExpression extends Expression {
 			@type = t
 		}
 		else if f.isNull() {
-			@type = t.flagNullable()
+			@type = t.setNullable(true)
 		}
 		else if t.isNull() {
-			@type = f.flagNullable()
+			@type = f.setNullable(true)
 		}
 		else {
 			@type = Type.union(@scope, t, f)
@@ -42,6 +42,7 @@ class ConditionalExpression extends Expression {
 		@whenFalse.translate()
 	} // }}}
 	isComputed() => true
+	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrue.isUsingVariable(name) || @whenFalse.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(@condition)

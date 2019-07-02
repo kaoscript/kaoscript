@@ -9,7 +9,7 @@ class Block extends AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
 
-		@options = Attribute.configure(data, parent._options, true, AttributeTarget::Statement)
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
 
 		if !?@data.statements {
 			@data.statements = []
@@ -55,9 +55,9 @@ class Block extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		const na = @type != null && !@type.isAny()
+		const notAny = @type != null && !@type.isAny()
 
-		for statement in @statements {
+		for const statement in @statements {
 			@scope.line(statement.line())
 
 			statement.prepare()
@@ -65,11 +65,21 @@ class Block extends AbstractNode {
 			if @exit {
 				SyntaxException.throwDeadCode(statement)
 			}
-			else if na && !statement.isReturning(@type) {
-				TypeException.throwUnexpectedReturnedType(@type, statement)
+			else {
+				if notAny {
+					statement.checkReturnType(@type)
+				}
+
+				@exit = statement.isExit()
+			}
+		}
+
+		if !@exit && @type != null && !@type.isAny() && !@type.isVoid() {
+			if @statements.length == 0 {
+				TypeException.throwUnexpectedReturnedType(@type, this)
 			}
 			else {
-				@exit = statement.isExit()
+				@statements[@statements.length - 1].checkReturnType(@type)
 			}
 		}
 	} // }}}
@@ -83,6 +93,11 @@ class Block extends AbstractNode {
 	addStatement(statement) { // {{{
 		@data.statements.push(statement)
 	} // }}}
+	checkReturnType(type: Type) { // {{{
+		for const statement in @statements {
+			statement.checkReturnType(type)
+		}
+	} // }}}
 	isAwait() => @awaiting
 	isEmpty() => @empty
 	isExit() => @exit
@@ -94,15 +109,6 @@ class Block extends AbstractNode {
 		}
 
 		return false
-	} // }}}
-	isReturning(type: Type) { // {{{
-		for statement in @statements {
-			if !statement.isReturning(type) {
-				return false
-			}
-		}
-
-		return true
 	} // }}}
 	statements() => @data.statements
 	toFragments(fragments, mode) { // {{{

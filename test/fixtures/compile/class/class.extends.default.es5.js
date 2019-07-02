@@ -29,6 +29,7 @@ module.exports = function() {
 			}
 		},
 		__ks_func_draw_0: function() {
+			return this._color;
 		},
 		draw: function() {
 			if(arguments.length === 0) {

@@ -11,6 +11,7 @@ class Variable {
 		_new: Boolean			= true
 		_predefined: Boolean	= false
 		_realType: Type			= Type.Null
+		_secureName: String
 	}
 	static {
 		createPredefinedClass(name, scope) { // {{{
@@ -49,11 +50,13 @@ class Variable {
 		}
 
 		@definitive = @immutable
+		@secureName = @name
 	} // }}}
 	clone() { // {{{
 		const clone = new Variable()
 
 		clone._name = @name
+		clone._secureName = @secureName
 		clone._immutable = @immutable
 		clone._predefined = @predefined
 		clone._declaredType = @declaredType
@@ -69,9 +72,11 @@ class Variable {
 	} // }}}
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
+	getSecureName() => @secureName
 	isDefinitive() => @definitive
 	isImmutable() => @immutable
 	isPredefined() => @predefined
+	isRenamed() => @name != @secureName
 	name() => @name
 	prepareAlteration() { // {{{
 		if (@declaredType.isRequired() || @declaredType.isAlien()) && !@altereable {
@@ -80,6 +85,7 @@ class Variable {
 			@altereable = true
 		}
 	} // }}}
+	renameAs(@secureName)
 	setDeclaredType(@declaredType) { // {{{
 		@declaredType = Type.toNamedType(@name, declaredType)
 
@@ -99,6 +105,6 @@ class Variable {
 		return this
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		fragments.code(@name)
+		fragments.code(@secureName)
 	} // }}}
 }

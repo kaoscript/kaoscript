@@ -216,8 +216,9 @@ class ImplementClassMethodDeclaration extends Statement {
 		@classRef = @scope.reference(@variable)
 	} // }}}
 	analyse() { // {{{
+		@scope.line(@data.start.line)
+
 		@name = @data.name.name
-		@block = $compile.block($ast.body(@data), this)
 
 		if @isContructor = (@data.name.kind == NodeKind::Identifier && @class.isConstructor(@name)) {
 			throw new NotImplementedException(this)
@@ -244,8 +245,12 @@ class ImplementClassMethodDeclaration extends Statement {
 
 			parameter.analyse()
 		}
+
+		@block = $compile.block($ast.body(@data), this)
 	} // }}}
 	prepare() { // {{{
+		@scope.line(@data.start.line)
+
 		for const parameter in @parameters {
 			parameter.prepare()
 		}

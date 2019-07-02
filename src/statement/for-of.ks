@@ -50,7 +50,7 @@ class ForOfStatement extends Statement {
 			@value.analyse()
 
 			for const name in @value.listAssignments([]) {
-				const variable = @scope.getVariable(name)
+				const variable = @bindingScope.getVariable(name)
 
 				if @data.declaration || variable == null {
 					@defineValue = true
@@ -184,6 +184,9 @@ class ForOfStatement extends Statement {
 				}
 			}
 		}
+	} // }}}
+	checkReturnType(type: Type) { // {{{
+		@body.checkReturnType(type)
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {

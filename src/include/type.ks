@@ -74,6 +74,8 @@ abstract class Type {
 				return data:Type
 			}
 
+			data = data as Any
+
 			switch data.kind {
 				NodeKind::ClassDeclaration => {
 					const type = new ClassType(scope)
@@ -125,7 +127,7 @@ abstract class Type {
 					return scope.reference('Number')
 				}
 				NodeKind::Parameter => {
-					const type = Type.fromAST(data.type, scope, defined, node)
+					let type = Type.fromAST(data.type, scope, defined, node)
 
 					let default: Number = 0
 					let min: Number = 1
@@ -153,9 +155,15 @@ abstract class Type {
 					}
 
 					let name = null
-					if data.name?.kind == NodeKind::Identifier {
-						name = data.name.name
+					if data.name? {
+						if data.name.kind == NodeKind::Identifier {
+							name = data.name.name
+						}
 					}
+					else {
+						type = type.setNullable(true)
+					}
+
 
 					return new ParameterType(scope, name, type, min, max, default)
 				}
@@ -486,11 +494,13 @@ abstract class Type {
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
 	isString() => false
+	isVoid() => false
 	matchContentOf(that: Type): Boolean => this.equals(that)
 	matchSignatureOf(that: Type, matchables): Boolean => false
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
 	scope() => @scope
+	setNullable(nullable: Boolean) => this
 	toExportOrIndex(references, ignoreAlteration) { // {{{
 		if @referenceIndex != -1 {
 			return @referenceIndex
@@ -548,8 +558,6 @@ include {
 	'./type/void'
 }
 
-Type.Any = new AnyType()
+Type.Any = AnyType.Unexplicit
 Type.Null = new NullType()
 Type.Void = new VoidType()
-
-ParameterType.Any = new ParameterType(null, Type.Any)

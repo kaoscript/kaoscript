@@ -1,5 +1,5 @@
 extern console: {
-	log(...args)
+	log(...)
 }
 
 func foo(item = 1) {

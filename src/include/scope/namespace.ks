@@ -8,6 +8,8 @@ class NamespaceScope extends BlockScope {
 			}
 
 			@renamedVariables[name] = newName
+
+			variable.renameAs(newName)
 		}
 		else {
 			@declarations[name] = true

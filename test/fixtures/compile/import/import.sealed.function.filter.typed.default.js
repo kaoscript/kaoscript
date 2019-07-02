@@ -1,4 +1,5 @@
 require("kaoscript/register");
+var Type = require("@kaoscript/runtime").Type;
 function __ks_require(__ks_0) {
 	var req = [];
 	if(Type.isValue(__ks_0)) {

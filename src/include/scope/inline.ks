@@ -5,7 +5,7 @@ class InlineBlockScope extends BlockScope {
 	}
 	acquireTempName(declare: Boolean = true): String { // {{{
 		if const name = this.acquireUnusedTempName() {
-			return name
+			return name:String
 		}
 
 		if @tempIndex == -1 {
@@ -22,7 +22,7 @@ class InlineBlockScope extends BlockScope {
 
 		return name
 	} // }}}
-	acquireUnusedTempName() { // {{{
+	acquireUnusedTempName(): String? { // {{{
 		for const :name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
@@ -93,6 +93,10 @@ class InlineBlockScope extends BlockScope {
 
 		@renamedVariables[name] = newName
 		@declarations[newName] = true
+
+		const variable = this.getVariable(name)
+
+		variable.renameAs(newName)
 
 		return newName
 	} // }}}

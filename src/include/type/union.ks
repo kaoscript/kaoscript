@@ -1,5 +1,6 @@
 class UnionType extends Type {
 	private {
+		_explicit: Boolean
 		_types: Array<Type>
 	}
 	static {
@@ -18,7 +19,7 @@ class UnionType extends Type {
 			return type
 		} // }}}
 	}
-	constructor(@scope, @types = []) { // {{{
+	constructor(@scope, @types = [], @explicit = true) { // {{{
 		super(scope)
 	} // }}}
 	addType(type: Type) { // {{{
@@ -74,6 +75,7 @@ class UnionType extends Type {
 			return Type.union(@scope, ...types)
 		}
 	} // }}}
+	isExplicit() => @explicit
 	isExportable() { // {{{
 		for type in @types {
 			if !type.isExportable() {
@@ -105,13 +107,24 @@ class UnionType extends Type {
 		return false
 	} // }}}
 	matchContentOf(that: Type) { // {{{
-		for const type in @types {
-			if !type.matchContentOf(that) {
-				return false
+		if @explicit {
+			for const type in @types {
+				if !type.matchContentOf(that) {
+					return false
+				}
 			}
-		}
 
-		return true
+			return true
+		}
+		else {
+			for const type in @types {
+				if type.matchContentOf(that) {
+					return true
+				}
+			}
+
+			return false
+		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)

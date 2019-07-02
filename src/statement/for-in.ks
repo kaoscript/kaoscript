@@ -280,6 +280,9 @@ class ForInStatement extends Statement {
 			}
 		}
 	} // }}}
+	checkReturnType(type: Type) { // {{{
+		@body.checkReturnType(type)
+	} // }}}
 	toBoundFragments(fragments) { // {{{
 		if @data.desc {
 			if @from? {
@@ -445,7 +448,7 @@ class ForInStatement extends Statement {
 
 		if @declareValue {
 			for const name in @declaredVariables {
-				ctrl.code($comma, @bindingScope.getRenamedVariable(name))
+				ctrl.code($comma).compile(@bindingScope.getVariable(name))
 			}
 		}
 

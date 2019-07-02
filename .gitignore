@@ -9,3 +9,4 @@ lib/compiler3.js
 coverage
 .coveralls.yml
 testlibs.sh
+*.no

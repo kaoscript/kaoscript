@@ -1003,7 +1003,9 @@ class ClassDeclaration extends Statement {
 			method.translate()
 		}
 
-		@destructor.translate() if @destructor?
+		if @destructor? {
+			@destructor.translate()
+		}
 
 		for const methods of @instanceMethods {
 			for method in methods {
@@ -2029,14 +2031,14 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		@block = $compile.block($ast.body(@data), this)
-
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
 
 			parameter.analyse()
 		}
+
+		@block = $compile.block($ast.body(@data), this)
 	} // }}}
 	prepare() { // {{{
 		if !@analysed {
@@ -2075,7 +2077,11 @@ class ClassMethodDeclaration extends Statement {
 
 		@block.analyse()
 
-		@block.type(@type.returnType()).prepare()
+		if !@abstract {
+			@block.type(@type.returnType())
+		}
+
+		@block.prepare()
 
 		@block.translate()
 
@@ -2177,14 +2183,14 @@ class ClassConstructorDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		@block = $compile.block($ast.body(@data), this)
-
 		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
 
 			parameter.analyse()
 		}
+
+		@block = $compile.block($ast.body(@data), this)
 	} // }}}
 	prepare() { // {{{
 		for parameter in @parameters {
@@ -2514,7 +2520,9 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		@parent.addReference(@type = ClassVariableType.fromAST(@data, this), this)
+		@type = ClassVariableType.fromAST(@data, this)
+
+		@parent.addReference(@type, this)
 
 		if @parent.isExtending() {
 			const type = @parent._extendsType.type()

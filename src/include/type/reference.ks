@@ -12,7 +12,7 @@ class ReferenceType extends Type {
 			const name = data.name is Number ? Type.fromMetadata(data.name, metadata, references, alterations, queue, scope, node).name() : data.name
 			const parameters = ?data.parameters ? [Type.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
 
-			return new ReferenceType(scope, name, data.nullable, parameters)
+			return new ReferenceType(scope, name, data.nullable, parameters:Array)
 		} // }}}
 	}
 	constructor(@scope, name: String, @nullable = false, @parameters = []) { // {{{
@@ -33,7 +33,7 @@ class ReferenceType extends Type {
 	} // }}}
 	discardReference() { // {{{
 		if @name == 'Any' {
-			return Type.Any
+			return @nullable ? AnyType.NullableExplicit : AnyType.Explicit
 		}
 		else if (variable ?= @scope.getVariable(@name, -1)) && (type ?= variable.getRealType()) && (type is not ReferenceType || variable.name() != @name || type.scope() != @scope) {
 			return type.discardReference()
@@ -83,7 +83,6 @@ class ReferenceType extends Type {
 
 		return super.flagExported(explicitly)
 	} // }}}
-	flagNullable(): ReferenceType => new ReferenceType(@scope, @name, true, @parameters)
 	flagSealed(): ReferenceType { // {{{
 		const type = new ReferenceType(@scope, @name, @nullable, @parameters)
 
@@ -176,10 +175,13 @@ class ReferenceType extends Type {
 	} // }}}
 	isMorePreciseThan(that: Type) { // {{{
 		if that.isAny() {
-			return !this.isAny()
+			return !this.isAny() || (that.isNullable() && !@nullable)
 		}
 		else if this.isAny() {
 			return false
+		}
+		else if that.isNullable() && !@nullable {
+			return true
 		}
 		else {
 			const a = this.discardReference()
@@ -197,7 +199,13 @@ class ReferenceType extends Type {
 	isString() => @name == 'String' || @name == 'string'
 	isVoid() => @name == 'Void' || @name == 'void'
 	matchContentOf(that: Type) { // {{{
-		if this == that || this.isAny() || that.isAny() {
+		if this == that {
+			return true
+		}
+		else if @nullable && !that.isNullable() {
+			return false
+		}
+		else if that.isAny() {
 			return true
 		}
 		else if this.isEnum() {
@@ -242,7 +250,7 @@ class ReferenceType extends Type {
 			return value.isAny()
 		}
 	} // }}}
-	name() => @name
+	name(): String => @name
 	parameter(index: Number = 0) { // {{{
 		if index >= @parameters.length {
 			return Type.Any
@@ -281,6 +289,14 @@ class ReferenceType extends Type {
 				console.info(this)
 				throw new NotImplementedException()
 			}
+		}
+	} // }}}
+	setNullable(nullable: Boolean): ReferenceType { // {{{
+		if @nullable == nullable {
+			return this
+		}
+		else {
+			return @scope.reference(@name, nullable)
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{

@@ -108,7 +108,7 @@ class SwitchStatement extends Statement {
 			@name = @scope.acquireTempName(false)
 		}
 
-		for clause in @clauses {
+		for const clause in @clauses {
 			for condition in clause.conditions {
 				condition.prepare()
 			}
@@ -158,6 +158,11 @@ class SwitchStatement extends Statement {
 			else {
 				scope.define(name, false, null, this)
 			}
+		}
+	} // }}}
+	checkReturnType(type: Type) { // {{{
+		for const clause in @clauses {
+			clause.body.checkReturnType(type)
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
@@ -274,7 +279,6 @@ class SwitchBindingArray extends AbstractNode {
 	translate() { // {{{
 		@array.translate()
 	} // }}}
-	bindingScope() => @scope
 	toFragments(fragments) { // {{{
 		let line = fragments.newLine()
 
@@ -553,7 +557,6 @@ class SwitchFilter extends AbstractNode {
 			@filter.translate()
 		}
 	} // }}}
-	bindingScope() => @scope
 	toBooleanFragments(fragments, nf) { // {{{
 		let mm
 		for binding in @data.bindings {

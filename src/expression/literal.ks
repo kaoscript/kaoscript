@@ -31,6 +31,7 @@ class IdentifierLiteral extends Literal {
 		_declaredType: Type
 		_isMacro: Boolean				= false
 		_isVariable: Boolean			= false
+		_line: Number
 		_realType: Type
 	}
 	constructor(data, parent, scope = parent.scope()) { // {{{
@@ -40,6 +41,7 @@ class IdentifierLiteral extends Literal {
 		if @assignment == AssignmentType::Neither {
 			if @scope.hasVariable(@value) {
 				@isVariable = true
+				@line = @scope.line()
 			}
 			else if $runtime.isDefined(@value, @parent) {
 				@realType = @declaredType = Type.Any
@@ -53,11 +55,12 @@ class IdentifierLiteral extends Literal {
 		}
 		else {
 			@isVariable = true
+			@line = @scope.line()
 		}
 	} // }}}
 	prepare() { // {{{
 		if @isVariable {
-			const variable = @scope.getVariable(@value)
+			const variable = @scope.getVariable(@value, @line)
 
 			@declaredType = variable.getDeclaredType()
 			@realType = variable.getRealType()
@@ -81,7 +84,12 @@ class IdentifierLiteral extends Literal {
 	name() => @value
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
-		fragments.code(@scope.getRenamedVariable(@value), @data)
+		if @isVariable {
+			fragments.compile(@scope.getVariable(@value, @line))
+		}
+		else {
+			fragments.code(@value, @data)
+		}
 	} // }}}
 	type() => @realType
 	type(type: Type, scope: Scope, node) { // {{{
@@ -89,7 +97,7 @@ class IdentifierLiteral extends Literal {
 			@realType = scope.replaceVariable(@name, type, node).getRealType()
 		}
 	} // }}}
-	variable() => @scope.getVariable(@value)
+	variable() => @scope.getVariable(@value, @line)
 	walk(fn) { // {{{
 		if @isVariable {
 			fn(@value, @realType)

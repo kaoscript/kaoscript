@@ -45,7 +45,24 @@ class UnaryOperatorDecrementPrefix extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
+	private {
+		_type: Type
+	}
 	isComputed() => @argument.isNullable()
+	prepare() { // {{{
+		@argument.prepare()
+
+		@type = @argument.type().setNullable(false)
+	} // }}}
+	reduceTypes() { // {{{
+		const variables = {}
+
+		if @argument is IdentifierLiteral {
+			variables[@argument.value()] = @type
+		}
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @argument.isNullable() {
 			fragments

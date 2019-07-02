@@ -12,6 +12,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_clone_0() {
+			return new Foo();
 		}
 		clone() {
 			if(arguments.length === 0) {

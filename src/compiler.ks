@@ -160,7 +160,6 @@ abstract class AbstractNode {
 	abstract analyse()
 	abstract prepare()
 	abstract translate()
-	bindingScope() => @parent?.bindingScope()
 	data() => @data
 	directory() => @parent.directory()
 	file() => @parent.file()
@@ -350,10 +349,10 @@ const $expressions = {
 	`\(NodeKind::CallMacroExpression)`	 		: func(data, parent, scope) {
 		const macro = scope.getMacro(data, parent)
 
-		const statements = macro.execute(data.arguments, parent)
+		const result = macro.execute(data.arguments, parent)
 
-		if statements.length == 1 && statements[0] is ExpressionStatement {
-			return $compile.expression(statements[0].data(), parent)
+		if result.body.length == 1 {
+			return $compile.expression(result.body[0], parent)
 		}
 		else {
 			throw new NotImplementedException(parent)

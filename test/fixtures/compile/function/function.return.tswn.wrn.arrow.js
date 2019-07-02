@@ -1,5 +1,5 @@
 module.exports = function() {
-	function foo() {
+	function foobar() {
 		return null;
 	}
 };

@@ -330,6 +330,8 @@ class FunctionDeclarator extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
+		@scope.line(@data.start.line)
+
 		for parameter in @parameters {
 			parameter.prepare()
 		}

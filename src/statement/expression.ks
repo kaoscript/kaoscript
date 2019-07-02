@@ -2,6 +2,7 @@ class ExpressionStatement extends Statement {
 	private {
 		_declaration: Boolean	= false
 		_expression
+		_ignorable: Boolean		= false
 		_variable				= null
 	}
 	analyse() { // {{{
@@ -11,8 +12,12 @@ class ExpressionStatement extends Statement {
 	prepare() { // {{{
 		@expression.prepare()
 
-		@expression.acquireReusable(false)
-		@expression.releaseReusable()
+		@ignorable = @expression.isIgnorable()
+
+		if !@ignorable {
+			@expression.acquireReusable(false)
+			@expression.releaseReusable()
+		}
 
 		this.assignTempVariables(@scope)
 	} // }}}
@@ -72,6 +77,8 @@ class ExpressionStatement extends Statement {
 		line.done()
 	} // }}}
 	toFragments(fragments, mode) { // {{{
+		return if @ignorable
+
 		if @expression.isAwaiting() {
 			return this.toAwaitStatementFragments^@(fragments)
 		}

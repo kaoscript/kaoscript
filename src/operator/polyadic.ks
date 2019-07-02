@@ -105,7 +105,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 			return @operands[0].type()
 		}
 		else {
-			return new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')])
+			return new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')], false)
 		}
 	} // }}}
 }
@@ -329,9 +329,13 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			if index < last {
 				operand.acquireReusable(true)
 				operand.releaseReusable()
+
+				operandType = operand.type().setNullable(false)
+			}
+			else {
+				operandType = operand.type()
 			}
 
-			operandType = operand.type()
 			ne = true
 
 			for type in types while ne {

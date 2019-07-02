@@ -7,7 +7,7 @@ class Bar {
 		_foo: Foo?
 	}
 	constructor(@foo)
-	foo(): Foo => @foo
+	foo(): Foo? => @foo
 }
 
 class Qux extends Bar {

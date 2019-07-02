@@ -16,5 +16,6 @@ module.exports = function() {
 		else if(!Type.isNumber(qux)) {
 			throw new TypeError("'qux' is not of type 'Number'");
 		}
+		return bar;
 	}
 };

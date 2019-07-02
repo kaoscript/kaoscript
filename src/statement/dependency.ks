@@ -411,7 +411,7 @@ class RequireOrImportDeclarator extends Importer {
 		if this._requirements.length == 1 {
 			const requirement = this._requirements[0]
 
-			const ctrl = fragments.newControl().code(`if(Type.isValue(\(requirement.parameter())))`).step()
+			const ctrl = fragments.newControl().code(`if(\($runtime.type(this)).isValue(\(requirement.parameter())))`).step()
 
 			if requirement.isFlexible() {
 				ctrl
@@ -442,7 +442,7 @@ class RequireOrImportDeclarator extends Importer {
 		}
 		else {
 			for const requirement in this._requirements {
-				fragments.line(`var \(requirement.parameter())_valuable = Type.isValue(\(requirement.parameter()))`)
+				fragments.line(`var \(requirement.parameter())_valuable = \($runtime.type(this)).isValue(\(requirement.parameter()))`)
 			}
 
 			const ctrl = fragments.newControl().code(`if(`)
@@ -560,15 +560,17 @@ class ImportingRequirement extends StaticRequirement {
 abstract class DynamicRequirement extends Requirement {
 	private {
 		_parameter: String
+		_node: AbstractNode
 	}
-	constructor(variable: Variable, node) { // {{{
+	constructor(variable: Variable, @node) { // {{{
 		super(variable)
 
-		@parameter = node.module().scope().acquireTempName(false)
+		@parameter = @node.module().scope().acquireTempName(false)
 	} // }}}
-	constructor(data, kind, node) { // {{{
+	constructor(data, kind, @node) { // {{{
 		super(data, kind, node)
 
+		@node = node
 		@parameter = node.module().scope().acquireTempName(false)
 	} // }}}
 	isRequired() => false
@@ -592,14 +594,14 @@ abstract class DynamicRequirement extends Requirement {
 }
 
 class EORDynamicRequirement extends DynamicRequirement {
-	constructor(data, node) { // {{{
+	constructor(data, @node) { // {{{
 		super(data, DependencyKind::ExternOrRequire, node)
 	} // }}}
 	isAlien() => true
 	toAltFragments(fragments) { // {{{
 		const ctrl = fragments
 			.newControl()
-			.code(`if(Type.isValue(\(@name)))`)
+			.code(`if(\($runtime.type(@node)).isValue(\(@name)))`)
 			.step()
 
 		if @type.isFlexible() {
@@ -624,14 +626,14 @@ class EORDynamicRequirement extends DynamicRequirement {
 }
 
 class ROEDynamicRequirement extends DynamicRequirement {
-	constructor(data, node) { // {{{
+	constructor(data, @node) { // {{{
 		super(data, DependencyKind::RequireOrExtern, node)
 	} // }}}
 	isAlien() => true
 	toAltFragments(fragments) { // {{{
 		const ctrl = fragments
 			.newControl()
-			.code(`if(Type.isValue(\(@parameter)))`)
+			.code(`if(\($runtime.type(@node)).isValue(\(@parameter)))`)
 			.step()
 
 		if @type.isFlexible() {

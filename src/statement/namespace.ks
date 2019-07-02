@@ -77,11 +77,8 @@ class NamespaceDeclaration extends Statement {
 			if type is not AliasType {
 				object.newLine().code(`\(name): `).compile(variable).done()
 
-				if type is not ReferenceType {
-
-					if type.isSealed() {
-						object.line(`__ks_\(name): \(type.sealName())`)
-					}
+				if type is not ReferenceType && type.isSealed() {
+					object.line(`__ks_\(name): \(type.getSealedName())`)
 				}
 			}
 		}

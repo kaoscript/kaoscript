@@ -250,7 +250,7 @@ class NamedContainerType extends NamedType {
 
 		@properties[name] = property
 	} // }}}
-	getProperty(name: String): Type { // {{{
+	getProperty(name: String): Type? { // {{{
 		if @properties[name] is Type {
 			return @properties[name]
 		}
