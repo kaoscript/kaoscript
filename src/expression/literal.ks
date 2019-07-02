@@ -71,6 +71,7 @@ class IdentifierLiteral extends Literal {
 	} // }}}
 	getDeclaredType() => @declaredType
 	isAssignable() => true
+	isDeclarable() => true
 	isDeclararingVariable(name: String) => @value == name
 	isMacro() => @isMacro
 	isRedeclared() => @scope.isRedeclaredVariable(@value)

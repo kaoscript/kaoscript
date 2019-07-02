@@ -153,6 +153,12 @@ export class ReferenceException extends Exception {
 		throwImmutable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
 		} // }}}
+		throwInvalidAssignment(node) ~ TypeException { // {{{
+			throw new ReferenceException(`Invalid left-hand side in assignment`, node)
+		} // }}}
+		throwLoopingAlias(name, node) ~ SyntaxException { // {{{
+			throw new ReferenceException(`Alias "@\(name)" is looping on itself`, node)
+		} // }}}
 		throwNotDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
 		} // }}}
@@ -181,6 +187,7 @@ export class ReferenceException extends Exception {
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
 		} // }}}
 	}
+
 }
 
 export class SyntaxException extends Exception {

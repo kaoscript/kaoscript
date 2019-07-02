@@ -44,7 +44,7 @@ class ParameterType extends Type {
 	isExportable() => @type.isExportable()
 	matchContentOf(type: Type) => @type.matchContentOf(type)
 	matchContentOf(type: ParameterType) => @type.matchContentOf(type.type())
-	matchArgument(value: Type) => value.matchContentOf(@type) || (value.isNull() && @default != 0)
+	matchArgument(value: Type) => value.matchContentOf(@type) || (value.isNullable() && @default != 0)
 	matchSignatureOf(type: ParameterType, matchables) => @type.matchSignatureOf(type.type(), matchables)
 	max() => @max
 	min() => @min

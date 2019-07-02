@@ -932,12 +932,6 @@ class ClassDeclaration extends Statement {
 			@instanceVariableScope.define('super', true, @scope.reference(@extendsName), this)
 		}
 
-		for const variable, name of @classVariables {
-			variable.prepare()
-
-			@class.addClassVariable(name, variable.type())
-		}
-
 		for const methods, name of @classMethods {
 			for method in methods {
 				method.prepare()
@@ -978,6 +972,12 @@ class ClassDeclaration extends Statement {
 			@destructor.prepare()
 
 			@class.addDestructor()
+		}
+
+		for const variable, name of @classVariables {
+			variable.prepare()
+
+			@class.addClassVariable(name, variable.type())
 		}
 
 		if @extending && !@abstract && (notImplemented = @class.getMissingAbstractMethods()).length != 0 {

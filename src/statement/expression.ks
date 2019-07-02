@@ -49,7 +49,7 @@ class ExpressionStatement extends Statement {
 			}
 		}
 
-		if declaration && @expression.isAssignable() {
+		if declaration && @expression.isDeclarable() {
 			@declaration = true
 
 			if leftMost {
@@ -82,7 +82,7 @@ class ExpressionStatement extends Statement {
 		if @expression.isAwaiting() {
 			return this.toAwaitStatementFragments^@(fragments)
 		}
-		else if @expression.isAssignable() {
+		else if @expression.isDeclarable() {
 			if @assignments.length != 0 {
 				fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 			}

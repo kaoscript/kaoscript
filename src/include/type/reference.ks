@@ -12,7 +12,7 @@ class ReferenceType extends Type {
 			const name = data.name is Number ? Type.fromMetadata(data.name, metadata, references, alterations, queue, scope, node).name() : data.name
 			const parameters = ?data.parameters ? [Type.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
 
-			return new ReferenceType(scope, name, data.nullable, parameters:Array)
+			return new ReferenceType(scope, name, data.nullable, parameters)
 		} // }}}
 	}
 	constructor(@scope, name: String, @nullable = false, @parameters = []) { // {{{

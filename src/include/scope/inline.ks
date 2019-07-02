@@ -5,7 +5,7 @@ class InlineBlockScope extends BlockScope {
 	}
 	acquireTempName(declare: Boolean = true): String { // {{{
 		if const name = this.acquireUnusedTempName() {
-			return name:String
+			return name
 		}
 
 		if @tempIndex == -1 {

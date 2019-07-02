@@ -39,6 +39,7 @@ class ArrayBinding extends Expression {
 		@immutable = true
 	} // }}}
 	isAssignable() => true
+	isDeclarable() => true
 	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { // {{{
 		for element in @elements {
@@ -333,6 +334,7 @@ class ObjectBinding extends Expression {
 		@immutable = true
 	} // }}}
 	isAssignable() => true
+	isDeclarable() => true
 	isImmutable() => @immutable
 	isDeclararingVariable(name: String) { // {{{
 		for element in @elements {

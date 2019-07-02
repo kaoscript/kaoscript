@@ -485,6 +485,7 @@ abstract class Type {
 	isNative() => false
 	isNumber() => false
 	isNull() => false
+	isNullable() => false
 	isObject() => false
 	isPredefined() => false
 	isReference() => false

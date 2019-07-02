@@ -95,15 +95,23 @@ class VariableDeclaration extends Statement {
 	prepare() { // {{{
 		const declarator = @declarators[0]
 
+		let type = null
+
 		if @hasInit {
 			@init.prepare()
 
+			type = @init.type()
+
+			if @parent is IfStatement {
+				type = type.setNullable(false)
+			}
+
 			if @autotype {
-				declarator.setDeclaredType(@init.type())
+				declarator.setDeclaredType(type)
 				declarator.flagDefinitive()
 			}
 			else {
-				declarator.setRealType(@init.type())
+				declarator.setRealType(type)
 			}
 
 			this.assignTempVariables(@initScope)
@@ -119,7 +127,7 @@ class VariableDeclaration extends Statement {
 
 		if @hasInit {
 			if !@autotype {
-				declarator.setRealType(@init.type())
+				declarator.setRealType(type)
 			}
 
 			@init.acquireReusable(declarator.isSplitAssignment())

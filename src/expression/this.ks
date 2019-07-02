@@ -4,8 +4,8 @@ class ThisExpression extends Expression {
 		_class: ClassType
 		_composite: Boolean			= false
 		_fragment
-		_method: ClassMethodType
 		_name: String
+		_namesake: Boolean			= false
 		_type
 	}
 	analyse() { // {{{
@@ -22,7 +22,15 @@ class ThisExpression extends Expression {
 					SyntaxException.throwUnexpectedAlias(@name, this)
 				}
 
+
 				@class = parent.parent().type()
+
+				if parent is ClassMethodDeclaration && parent.parameters().length == 0{
+					if parent.name() == @name {
+						@namesake = true
+					}
+				}
+
 				break
 			}
 			else if parent is ClassConstructorDeclaration || parent is ClassDestructorDeclaration {
@@ -69,6 +77,10 @@ class ThisExpression extends Expression {
 				@type = variable.type()
 			}
 			else if @type ?= @class.type().getPropertyGetter(@name) {
+				if @namesake {
+					ReferenceException.throwLoopingAlias(@name, this)
+				}
+
 				@fragment = `this.\(@name)()`
 				@composite = true
 			}
@@ -78,6 +90,7 @@ class ThisExpression extends Expression {
 		}
 	} // }}}
 	translate()
+	isAssignable() => !@calling && !@composite
 	isComposite() => @composite
 	isUsingVariable(name) => false
 	listAssignments(array) => array

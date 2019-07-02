@@ -3,7 +3,7 @@ abstract class Expression extends AbstractNode {
 	releaseReusable()
 	// if the expression can throw an expception
 	hasExceptions() => true
-	// if the expression is an assignment and can be transformed as a declaration
+	// if the expression can be an assignment
 	isAssignable() => false
 	// if the expression is an `await` expression
 	isAwait() => false
@@ -17,6 +17,8 @@ abstract class Expression extends AbstractNode {
 	isComposite() => true
 	// if parentheses are required around the expression to be wrapped
 	isComputed() => false
+	// if the expression can be an assignment and be transformed as a declaration
+	isDeclarable() => false
 	// if the expression can be ignored (like a variable casting)
 	isIgnorable() => false
 	// if the expression needs to be assign to a temp variable to be reused, expect for simple member expression
@@ -28,6 +30,7 @@ abstract class Expression extends AbstractNode {
 	// if the expression generates multiple assignments
 	isSplitAssignment() => false
 	reduceTypes() => {}
+	setAssignment(type: AssignmentType)
 	statement(data) { // {{{
 		let expression = this
 

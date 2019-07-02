@@ -1,0 +1,3 @@
+class Foobar {
+	foobar() => @foobar
+}

@@ -78,6 +78,7 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	caller() => @object
+	isAssignable() => true
 	isCallable() => @object.isCallable() || (@data.computed && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
 	isLooseComposite() => this.isCallable() || this.isNullable()

@@ -115,6 +115,7 @@ class NamedType extends Type {
 		return false
 	} // }}}
 	isNative() => $natives[@name] == true
+	isNullable() => @type.isNullable()
 	isPredefined() => @type.isPredefined()
 	isReferenced() => @type.isReferenced()
 	isRequired() => @type.isRequired()

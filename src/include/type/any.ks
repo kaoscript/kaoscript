@@ -1,4 +1,10 @@
 class AnyType extends Type {
+	static {
+		Explicit = new AnyType(true, false)
+		NullableExplicit = new AnyType(true, true)
+		Unexplicit = new AnyType(false, false)
+		NullableUnexplicit = new AnyType(false, true)
+	}
 	private {
 		_explicit: Boolean	= true
 		_nullable: Boolean	= false
@@ -67,8 +73,3 @@ class AnyType extends Type {
 		throw new NotImplementedException()
 	} // }}}
 }
-
-AnyType.Explicit = new AnyType(true, false)
-AnyType.NullableExplicit = new AnyType(true, true)
-AnyType.Unexplicit = new AnyType(false, false)
-AnyType.NullableUnexplicit = new AnyType(false, true)

@@ -15,9 +15,7 @@ class AssignmentOperatorExpression extends Expression {
 
 		@right = $compile.expression(@data.right, this)
 
-		if @right.isAssignable() {
-			@right.setAssignment(AssignmentType::Expression)
-		}
+		@right.setAssignment(AssignmentType::Expression)
 
 		@right.analyse()
 
@@ -38,6 +36,11 @@ class AssignmentOperatorExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
+
+		unless @left.isAssignable() {
+			ReferenceException.throwInvalidAssignment(this)
+		}
+
 		@right.prepare()
 	} // }}}
 	translate() { // {{{
@@ -132,7 +135,8 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		@right.acquireReusable(@left.isSplitAssignment())
 	} // }}}
 	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
-	isAssignable() => @left == null || @left.isAssignable()
+	isAssignable() => @left.isAssignable()
+	isDeclarable() => @left.isDeclarable()
 	isDeclararing() => true
 	isIgnorable() => @ignorable
 	releaseReusable() { // {{{
