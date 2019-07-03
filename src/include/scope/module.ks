@@ -291,7 +291,7 @@ class ModuleScope extends Scope {
 			}
 		}
 
-		return $types[name] is String || $natives[name] == true	|| @predefined[`__\(name)`] is Variable
+		return @predefined[`__\(name)`] is Variable
 	} // }}}
 	isAtLastLine() => @lastLine
 	isRedeclaredVariable(name: String) { // {{{

@@ -934,12 +934,12 @@ class IdentifierParameter extends IdentifierLiteral {
 					if @declaredType.isNullable() {
 						line.code('(__ks__ === null || ')
 
-						@declaredType.toTestFragments(line, new Literal(false, this, @scope, '__ks__'))
+						@declaredType.toTestFragments(line, new Literal(false, this, @scope:Scope, '__ks__'))
 
 						line.code(')')
 					}
 					else {
-						@declaredType.toTestFragments(line, new Literal(false, this, @scope, '__ks__'))
+						@declaredType.toTestFragments(line, new Literal(false, this, @scope:Scope, '__ks__'))
 					}
 
 					line

@@ -144,9 +144,9 @@ abstract class AbstractNode {
 	private {
 		_data
 		_options
-		_parent: AbstractNode	= null
+		_parent: AbstractNode?	= null
 		_reference
-		_scope: Scope			= null
+		_scope: Scope?			= null
 	}
 	constructor()
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{

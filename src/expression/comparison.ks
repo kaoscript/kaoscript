@@ -5,7 +5,7 @@ class ComparisonExpression extends Expression {
 		_computed: Boolean	= true
 		_operands			= []
 		_operators			= []
-		_reuseName: String	= null
+		_reuseName: String?	= null
 		_tested: Boolean	= false
 	}
 	analyse() { // {{{

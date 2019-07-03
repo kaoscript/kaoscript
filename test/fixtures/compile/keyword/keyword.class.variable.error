@@ -1,0 +1,1 @@
+ReferenceException: "class" is not defined (line 2, file "fixtures/compile/keyword/keyword.class.variable.ks")

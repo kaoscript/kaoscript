@@ -2546,6 +2546,10 @@ class ClassVariableDeclaration extends AbstractNode {
 			}
 
 			@defaultValue.prepare()
+
+			if !@defaultValue.type().matchContentOf(@type.type()) {
+				TypeException.throwInvalidAssignement(this)
+			}
 		}
 	} // }}}
 	translate() { // {{{

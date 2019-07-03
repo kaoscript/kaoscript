@@ -3,7 +3,7 @@ class AwaitExpression extends Expression {
 		_awaiting: Boolean		= true
 		_function
 		_operation
-		_reuseName: String		= null
+		_reuseName: String?		= null
 		_try
 	}
 	constructor(@data, @parent, @scope = null) { // {{{
@@ -69,10 +69,10 @@ class AwaitExpression extends Expression {
 				@awaiting = false
 
 				if @try? {
-					return @try.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName, this)])
+					return @try.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName:String, this)])
 				}
 				else if @function?.type().isAsync() {
-					return @function.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName, this)])
+					return @function.toAwaitExpressionFragments^@(fragments, [new Literal(@reuseName:String, this)])
 				}
 				else {
 					return this.toAwaitExpressionFragments^@(fragments)

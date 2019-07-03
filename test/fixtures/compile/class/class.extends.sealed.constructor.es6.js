@@ -27,10 +27,10 @@ module.exports = function() {
 					throw new TypeError("'message' is not of type 'String'");
 				}
 				let fileName = __ks_arguments[++__ks_i];
-				if(fileName === void 0 || fileName === null) {
-					throw new TypeError("'fileName' is not nullable");
+				if(fileName === void 0) {
+					fileName = null;
 				}
-				else if(!Type.isString(fileName)) {
+				else if(fileName !== null && !Type.isString(fileName)) {
 					throw new TypeError("'fileName' is not of type 'String'");
 				}
 				let lineNumber = __ks_arguments[++__ks_i];

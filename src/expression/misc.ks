@@ -28,7 +28,7 @@ class TempMemberExpression extends Expression {
 		_object
 		_property
 		_reusable: Boolean		= false
-		_reuseName: String		= null
+		_reuseName: String?		= null
 	}
 	constructor(@object, @property, @computed, @parent, @scope) { // {{{
 		super({}, parent, scope)

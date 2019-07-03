@@ -4,7 +4,7 @@ class ObjectExpression extends Expression {
 		_names					= {}
 		_properties				= []
 		_reusable: Boolean		= false
-		_reuseName: String		= null
+		_reuseName: String?		= null
 		_spread: Boolean		= false
 		_type: Type
 	}
@@ -177,7 +177,7 @@ class ObjectLiteralMember extends Expression {
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
 
 		if @data.name.kind == NodeKind::Identifier	{
-			@name = new Literal(@data.name, this, @scope, @data.name.name)
+			@name = new Literal(@data.name, this, @scope:Scope, @data.name.name)
 
 			this.reference('.' + @data.name.name)
 		}
@@ -306,7 +306,7 @@ class ObjectThisMember extends Expression {
 	analyse() { // {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
 
-		@name = new Literal(@data.name.name, this, @scope, @data.name.name.name)
+		@name = new Literal(@data.name.name, this, @scope:Scope, @data.name.name.name)
 
 		@value = $compile.expression(@data.name, this)
 		@value.analyse()

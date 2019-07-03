@@ -12,7 +12,7 @@ Error.prepareStackTrace = func(error: Error, stack: Array) { // {{{
 
 export class Exception extends Error {
 	public {
-		fileName: String		= null
+		fileName: String?		= null
 		lineNumber: Number		= 0
 		message: String
 		name: String

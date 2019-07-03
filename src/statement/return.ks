@@ -5,7 +5,7 @@ class ReturnStatement extends Statement {
 		_function				= null
 		_exceptions: Boolean	= false
 		_value					= null
-		_temp: String			= null
+		_temp: String?			= null
 		_type: Type				= Type.Any
 	}
 	constructor(@data, @parent, @scope) { // {{{

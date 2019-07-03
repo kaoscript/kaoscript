@@ -1,7 +1,7 @@
 class NamedType extends Type {
 	private {
 		_cloned: Boolean 				= false
-		_container: NamedContainerType	= null
+		_container: NamedContainerType?	= null
 		_name: String
 		_type: Type
 	}

@@ -66,7 +66,7 @@ func $nodeModulesPaths(start) { // {{{
 
 class Importer extends Statement {
 	private {
-		_alias: String				= null
+		_alias: String?				= null
 		_arguments: Array			= []
 		_argumentNames				= {}
 		_argumentValues				= {}
@@ -125,7 +125,7 @@ class Importer extends Statement {
 				const variable = @scope.getVariable(def.local)
 
 				if def.isAlias {
-					const type = new NamedContainerType(def.local, new NamespaceType(@scope))
+					const type = new NamedContainerType(def.local, new NamespaceType(@scope:Scope))
 
 					for i from 1 til @metadata.exports.length by 2 {
 						const name = @metadata.exports[i]
@@ -587,7 +587,7 @@ class Importer extends Statement {
 					@alias = specifier.local.name
 
 					if specifier.specifiers?.length != 0 {
-						type = new NamespaceType(@scope)
+						type = new NamespaceType(@scope:Scope)
 
 						for s in specifier.specifiers {
 							if s.imported.kind == NodeKind::Identifier {

@@ -4,7 +4,7 @@ class Block extends AbstractNode {
 		_empty: Boolean		= false
 		_exit: Boolean		= false
 		_statements: Array	= []
-		_type: Type			= null
+		_type: Type?		= null
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)

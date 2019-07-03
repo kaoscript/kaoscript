@@ -315,7 +315,7 @@ class SwitchBindingValue extends AbstractNode {
 class SwitchConditionArray extends AbstractNode {
 	private {
 		_flatten: Boolean	= false
-		_name: String		= null
+		_name: String?		= null
 		_values				= []
 	}
 	analyse() { // {{{
@@ -484,7 +484,7 @@ class SwitchConditionType extends AbstractNode {
 	} // }}}
 	translate()
 	toBooleanFragments(fragments, name) { // {{{
-		@type.toTestFragments(fragments, new Literal(false, this, @scope, name))
+		@type.toTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
 	} // }}}
 	toStatementFragments(fragments)
 }

@@ -12,7 +12,7 @@ class CallExpression extends Expression {
 		_object							= null
 		_property: String
 		_reusable: Boolean				= false
-		_reuseName: String				= null
+		_reuseName: String?				= null
 		_tested: Boolean				= false
 		_type: Type
 	}

@@ -11,7 +11,7 @@ class NamespaceDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
-		@type = new NamedContainerType(@name, new NamespaceType(@scope))
+		@type = new NamedContainerType(@name, new NamespaceType(@scope:Scope))
 
 		@variable = @scope.parent().define(@name, true, @type, this)
 

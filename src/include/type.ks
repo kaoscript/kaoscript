@@ -188,9 +188,11 @@ abstract class Type {
 					}
 					else if data.typeName? {
 						if data.typeName.kind == NodeKind::Identifier {
-							if !defined || scope.hasVariable(data.typeName.name, -1) {
+							const name = Type.renameNative(data.typeName.name)
+
+							if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
 								if data.typeParameters? {
-									const type = new ReferenceType(scope, data.typeName.name, data.nullable)
+									const type = new ReferenceType(scope, name, data.nullable)
 
 									for parameter in data.typeParameters {
 										type._parameters.push(Type.fromAST(parameter, scope, defined, node))
@@ -199,7 +201,7 @@ abstract class Type {
 									return type
 								}
 								else {
-									return scope.resolveReference(data.typeName.name, data.nullable)
+									return scope.resolveReference(name, data.nullable)
 								}
 							}
 							else {
@@ -398,6 +400,8 @@ abstract class Type {
 			console.info(data)
 			throw new NotImplementedException(node)
 		} // }}}
+		isNative(name: String) => $natives[name] == true
+		renameNative(name: String) => $types[name] is String ? $types[name] : name
 		toNamedType(name: String, type: Type): Type { // {{{
 			if type is AliasType || type is ClassType || type is EnumType {
 				return new NamedType(name, type)

@@ -5,16 +5,16 @@ class IfStatement extends Statement {
 		_declared: Boolean				= false
 		_variable
 		_whenFalseExpression			= null
-		_whenFalseScope: Scope			= null
+		_whenFalseScope: Scope?			= null
 		_whenTrueExpression				= null
-		_whenTrueScope: Scope			= null
+		_whenTrueScope: Scope?			= null
 	}
 	analyse() { // {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
 			@declared = true
 			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
 
-			@variable = new VariableDeclaration(@data.condition, this, @bindingScope, @scope)
+			@variable = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope)
 
 			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 		}

@@ -39,10 +39,10 @@ module.exports = function() {
 			else if(!Type.isString(message)) {
 				throw new TypeError("'message' is not of type 'String'");
 			}
-			if(fileName === void 0 || fileName === null) {
-				throw new TypeError("'fileName' is not nullable");
+			if(fileName === void 0) {
+				fileName = null;
 			}
-			else if(!Type.isString(fileName)) {
+			else if(fileName !== null && !Type.isString(fileName)) {
 				throw new TypeError("'fileName' is not of type 'String'");
 			}
 			if(lineNumber === void 0 || lineNumber === null) {
