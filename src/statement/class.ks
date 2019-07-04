@@ -803,9 +803,9 @@ class ClassDeclaration extends Statement {
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, scope)
 
-		@constructorScope = this.newScope(@scope, ScopeType::Block)
-		@destructorScope = this.newScope(@scope, ScopeType::Block)
-		@instanceVariableScope = this.newScope(@scope, ScopeType::Block)
+		@constructorScope = this.newScope(@scope, ScopeType::Function)
+		@destructorScope = this.newScope(@scope, ScopeType::Function)
+		@instanceVariableScope = this.newScope(@scope, ScopeType::Function)
 		@es5 = @options.format.classes == 'es5'
 	} // }}}
 	analyse() { // {{{
@@ -900,6 +900,9 @@ class ClassDeclaration extends Statement {
 	} // }}}
 	prepare() { // {{{
 		if @extending {
+			@constructorScope.flagExtending()
+			@instanceVariableScope.flagExtending()
+
 			if @extendsType !?= Type.fromAST(@data.extends, this) {
 				ReferenceException.throwNotDefined(@extendsName, this)
 			}
@@ -1086,11 +1089,13 @@ class ClassDeclaration extends Statement {
 	isHybrid() => @hybrid
 	name() => @name
 	newInstanceMethodScope(method: ClassMethodDeclaration) { // {{{
-		const scope = this.newScope(@scope, ScopeType::Block)
+		const scope = this.newScope(@scope, ScopeType::Function)
 
 		scope.define('this', true, @scope.reference(@name), this)
 
 		if @extending {
+			scope.flagExtending()
+
 			scope.define('super', true, null, this)
 		}
 
@@ -2552,16 +2557,16 @@ class ClassVariableDeclaration extends AbstractNode {
 				@defaultValue = $compile.expression(@data.defaultValue, this, @parent._instanceVariableScope)
 				@defaultValue.analyse()
 			}
-
+		}
+	} // }}}
+	translate() { // {{{
+		if @hasDefaultValue {
 			@defaultValue.prepare()
 
 			if !@defaultValue.type().matchContentOf(@type.type()) {
 				TypeException.throwInvalidAssignement(this)
 			}
-		}
-	} // }}}
-	translate() { // {{{
-		if @hasDefaultValue {
+
 			@defaultValue.translate()
 		}
 	} // }}}

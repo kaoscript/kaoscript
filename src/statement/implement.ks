@@ -210,7 +210,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_variable: NamedType<ClassType>
 	}
 	constructor(data, parent, @variable) { // {{{
-		super(data, parent, parent.scope(), ScopeType::Block)
+		super(data, parent, parent.scope(), ScopeType::Function)
 
 		@class = @variable.type()
 		@classRef = @scope.reference(@variable)

@@ -176,6 +176,9 @@ abstract class AbstractNode {
 			ScopeType::Block => {
 				return new BlockScope(scope)
 			}
+			ScopeType::Function => {
+				return new FunctionScope(scope)
+			}
 			ScopeType::Hollow => {
 				return new HollowScope(scope)
 			}

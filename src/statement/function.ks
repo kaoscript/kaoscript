@@ -152,7 +152,7 @@ class FunctionDeclaration extends Statement {
 		_variable: FunctionVariable
 	}
 	constructor(@data, @parent, @scope) { // {{{
-		super(data, parent, scope, ScopeType::Block)
+		super(data, parent, scope, ScopeType::Function)
 	} // }}}
 	analyse() { // {{{
 		@scope.define('this', true, Type.Any, this)

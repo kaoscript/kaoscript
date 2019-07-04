@@ -44,8 +44,10 @@ let $keywords = { // {{{
 	sealed: true
 	short: true
 	static: true
+	super: true
 	switch: true
 	synchronized: true
+	this: true
 	throw: true
 	throws: true
 	transient: true
@@ -61,6 +63,7 @@ let $keywords = { // {{{
 enum ScopeType {
 	Bleeding
 	Block
+	Function
 	Hollow
 	InlineBlock
 	Macro
@@ -92,6 +95,7 @@ abstract class Scope {
 include {
 	'./scope/bleeding'
 	'./scope/block'
+	'./scope/function'
 	'./scope/hollow'
 	'./scope/inline'
 	'./scope/import'

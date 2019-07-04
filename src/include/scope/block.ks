@@ -78,7 +78,7 @@ class BlockScope extends Scope {
 
 		@tempDeclarations.clear()
 	} // }}}
-	private declareVariable(name: String) { // {{{
+	protected declareVariable(name: String) { // {{{
 		if $keywords[name] == true || @declarations[name] == true {
 			const newName = this.getNewName(name)
 
