@@ -210,6 +210,9 @@ class NamespacePropertyType extends Type {
 	constructor(@scope, @type) { // {{{
 		super(scope)
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	equals(b) { // {{{
 		if b is NamespacePropertyType {
 			return @type.equals(b.type())

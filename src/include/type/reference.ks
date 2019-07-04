@@ -20,6 +20,9 @@ class ReferenceType extends Type {
 
 		@name = $types[name] ?? name
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	discardAlias() { // {{{
 		if @name == 'Any' {
 			return Type.Any
@@ -31,7 +34,7 @@ class ReferenceType extends Type {
 			return this
 		}
 	} // }}}
-	discardReference() { // {{{
+	discardReference(): Type? { // {{{
 		if @name == 'Any' {
 			return @nullable ? AnyType.NullableExplicit : AnyType.Explicit
 		}
@@ -101,7 +104,7 @@ class ReferenceType extends Type {
 			type = type.type()
 		}
 
-		if type is ClassType {
+		if type.isClass() {
 			return type.getInstanceProperty(name)
 		}
 		else {
@@ -119,7 +122,7 @@ class ReferenceType extends Type {
 					hash += ','
 				}
 
-				hash += parameter.hashCode()
+				hash += parameter:ReferenceType.hashCode()
 			}
 
 			hash += '>'
@@ -137,10 +140,12 @@ class ReferenceType extends Type {
 	isAsync() => false
 	isClass() => @name == 'Class' || @name == 'class'
 	isEnum() => @name == 'Enum' || @name == 'enum'
+	isExhaustive(node) => !(node._options.rules.nonExhaustive || this.isAlien() || @type.isHybrid() || @type.isSealed())
 	isExplicitlyExported() => this.type().isExplicitlyExported()
 	isExportable() => this.isEnum() || this.type().isExportable()
 	isExported() => this.type().isExported()
 	isFunction() => @name == 'Function' || @name == 'function'
+	isHybrid() => this.type().isHybrid()
 	isInstanceOf(target: AnyType) => true
 	isInstanceOf(target: ReferenceType) { // {{{
 		if @name == target.name() || target.isAny() {
@@ -184,8 +189,8 @@ class ReferenceType extends Type {
 			return true
 		}
 		else {
-			const a = this.discardReference()
-			const b = that.discardReference()
+			const a: Type = this.discardReference()
+			const b: Type = that.discardReference()
 
 			return a.isMorePreciseThan(b)
 		}
@@ -215,8 +220,8 @@ class ReferenceType extends Type {
 			return that.isFunction()
 		}
 		else {
-			const a = this.discardReference()
-			const b = that.discardReference()
+			const a: Type = this.discardReference()
+			const b: Type = that.discardReference()
 
 			if a is ReferenceType {
 				if b is ReferenceType {
@@ -240,7 +245,7 @@ class ReferenceType extends Type {
 				return this.discardReference() is EnumType
 			}
 			else {
-				return this.discardReference().matchSignatureOf(value.discardReference(), matchables)
+				return this.discardReference():Type.matchSignatureOf(value.discardReference():Type, matchables)
 			}
 		}
 		else if value.isObject() && this.type().isClass() {
@@ -339,7 +344,7 @@ class ReferenceType extends Type {
 		}
 		else if @type.isExplicitlyExported() {
 			if ignoreAlteration && @type.isAlteration() {
-				return this.export(references, ignoreAlteration, @type.toAlterationReference(references, ignoreAlteration))
+				return this.export(references, ignoreAlteration, @type:ClassType.toAlterationReference(references, ignoreAlteration))
 			}
 			else {
 				return this.export(references, ignoreAlteration, @type.toReference(references, ignoreAlteration))
@@ -366,7 +371,7 @@ class ReferenceType extends Type {
 				fragments.code(`\($runtime.type(node)).is(`).compile(node).code(`, `)
 
 				if @type is NamedType {
-					fragments.code(@type.path())
+					fragments.code(@type:NamedType.path())
 				}
 				else {
 					fragments.code(@name)

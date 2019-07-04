@@ -8,6 +8,7 @@
  * http://www.opensource.org/licenses/mit-license.php
  **/
 #![error(off)]
+#![rules(non-exhaustive)]
 
 import {
 	'../package.json'	=> metadata
@@ -580,6 +581,7 @@ export class Compiler {
 			}
 			format: {}
 			rules: {
+				nonExhaustive: false
 				noUndefined: false
 			}
 			runtime: {

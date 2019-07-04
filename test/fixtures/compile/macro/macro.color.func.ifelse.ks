@@ -1,3 +1,5 @@
+#![rules(non-exhaustive)]
+
 export class Color {
 	macro registerSpace(@expression: Object) {
 		macro Color.registerSpace(#(expression))

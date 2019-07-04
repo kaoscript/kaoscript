@@ -18,7 +18,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_height_0() {
-			return this._float;
+			return this._height;
 		}
 		__ks_func_height_1(height) {
 			if(arguments.length < 1) {

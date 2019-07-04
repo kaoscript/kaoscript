@@ -413,7 +413,7 @@ class BlockScope extends Scope {
 
 		return variable
 	} // }}}
-	private resolveReference(name: String, nullable = false) { // {{{
+	resolveReference(name: String, nullable = false) { // {{{
 		if @variables[name] is Array {
 			const hash = `\(name)\(nullable ? '?' : '')`
 

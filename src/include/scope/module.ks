@@ -416,7 +416,7 @@ class ModuleScope extends Scope {
 
 		return variable
 	} // }}}
-	private resolveReference(name: String, nullable: Boolean = false) { // {{{
+	resolveReference(name: String, nullable: Boolean = false) { // {{{
 		const hash = `\(name)\(nullable ? '?' : '')`
 
 		if @references[hash] is not ReferenceType {

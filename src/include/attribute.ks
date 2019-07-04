@@ -114,7 +114,7 @@ class ErrorAttribute extends Attribute {
 		target() => AttributeTarget::Global | AttributeTarget::Property | AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) {
+	clone(options, cloned) { // {{{
 		if !?cloned.error {
 			options.error = Object.clone(options.error)
 
@@ -122,7 +122,7 @@ class ErrorAttribute extends Attribute {
 		}
 
 		return options
-	}
+	} // }}}
 	configure(options) { // {{{
 		for arg in @data.arguments {
 			switch arg.kind {
@@ -158,7 +158,7 @@ class FormatAttribute extends Attribute {
 		target() => AttributeTarget::Global | AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) {
+	clone(options, cloned) { // {{{
 		if !?cloned.format {
 			options.format = Object.clone(options.format)
 
@@ -166,7 +166,7 @@ class FormatAttribute extends Attribute {
 		}
 
 		return options
-	}
+	} // }}}
 	configure(options) { // {{{
 		for arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
@@ -342,7 +342,7 @@ class ParseAttribute extends Attribute {
 		target() => AttributeTarget::Global | AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) {
+	clone(options, cloned) { // {{{
 		if !?cloned.parse {
 			options.parse = Object.clone(options.parse)
 
@@ -350,7 +350,7 @@ class ParseAttribute extends Attribute {
 		}
 
 		return options
-	}
+	} // }}}
 	configure(options) { // {{{
 		for arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
@@ -367,9 +367,18 @@ class RulesAttribute extends Attribute {
 		_data
 	}
 	static {
-		target() => AttributeTarget::Global
+		target() => AttributeTarget::Global | AttributeTarget::Statement
 	}
 	constructor(@data)
+	clone(options, cloned) { // {{{
+		if !?cloned.rules {
+			options.rules = Object.clone(options.rules)
+
+			cloned.rules = true
+		}
+
+		return options
+	} // }}}
 	configure(options) { // {{{
 		for const argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {
@@ -436,7 +445,7 @@ class TargetAttribute extends Attribute {
 		target() => AttributeTarget::Global | AttributeTarget::Statement
 	}
 	constructor(@data)
-	clone(options, cloned) {
+	clone(options, cloned) { // {{{
 		if !?cloned.target {
 			options.target = Object.clone(options.target)
 
@@ -454,7 +463,7 @@ class TargetAttribute extends Attribute {
 		}
 
 		return options
-	}
+	} // }}}
 	configure(options) { // {{{
 		for argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {

@@ -27,6 +27,9 @@ class ObjectType extends Type {
 	addProperty(name: String, type: Type) { // {{{
 		@properties[name] = type
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}

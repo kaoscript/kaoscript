@@ -36,7 +36,7 @@ class CreateExpression extends Expression {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
 			else if !type.type().matchArguments([argument.type() for argument in @arguments]) {
-				TypeException.throwNoMatchingConstructor(type.name(), this)
+				ReferenceException.throwNoMatchingConstructor(type.name(), this)
 			}
 
 			@type = @scope.reference(type)

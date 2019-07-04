@@ -15,6 +15,9 @@ class AnyType extends Type {
 	constructor(@explicit, @nullable) { // {{{
 		super(null)
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	equals(b?): Boolean { // {{{
 		if b is AnyType {
 			return @nullable == b.isNullable()

@@ -26,6 +26,8 @@ export class Color {
 			}
 		}
 	}
+	getField(name)
+	setField(name, value)
 }
 
 Color.registerSpace!({

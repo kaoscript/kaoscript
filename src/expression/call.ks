@@ -313,7 +313,7 @@ class CallExpression extends Expression {
 		switch type {
 			is FunctionType => {
 				if !type.matchArguments([argument.type() for argument in @arguments]) {
-					TypeException.throwNoMatchingFunction(this)
+					ReferenceException.throwNoMatchingFunction(this)
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, type, this))
@@ -330,7 +330,7 @@ class CallExpression extends Expression {
 				}
 
 				if matches.length == 0 {
-					TypeException.throwNoMatchingFunction(this)
+					ReferenceException.throwNoMatchingFunction(this)
 				}
 				else if matches.length == 1 {
 					this.addCallee(new DefaultCallee(@data, matches[0], this))
@@ -479,7 +479,9 @@ class CallExpression extends Expression {
 				this.makeMemberCalleeFromReference(value.type())
 			}
 			is ClassType => {
-				if methods ?= value.getInstanceMethods(@property) {
+				const arguments = [argument.type() for const argument in @arguments]
+
+				if const methods = value.getInstanceMethods(@property) {
 					let sealed = false
 					const types = []
 					const m = []
@@ -490,7 +492,7 @@ class CallExpression extends Expression {
 							sealed = true
 						}
 
-						if method.matchArguments([argument.type() for argument in @arguments]) {
+						if method.matchArguments(arguments) {
 							m.push(method)
 
 							type = method.returnType()
@@ -502,11 +504,16 @@ class CallExpression extends Expression {
 					}
 
 					if types.length == 0 {
-						if sealed {
-							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, this))
+						if reference.isExhaustive(this) {
+							ReferenceException.throwNoMatchingMethod(@property, reference.name(), this)
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, this))
+							if sealed {
+								this.addCallee(new SealedMethodCallee(@data, reference.type(), true, this))
+							}
+							else {
+								this.addCallee(new DefaultCallee(@data, @object, this))
+							}
 						}
 					}
 					else if types.length == 1 {
@@ -515,7 +522,7 @@ class CallExpression extends Expression {
 						}
 						else if	@data.callee.object.kind == NodeKind::Identifier &&
 								(callee ?= @scope.getVariable(@data.callee.object.name)) &&
-								(substitute ?= callee.replaceMemberCall?(@property, @arguments))
+								(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
 						{
 							this.addCallee(new SubstituteCallee(@data, substitute, types[0], this))
 						}
@@ -532,12 +539,20 @@ class CallExpression extends Expression {
 				}
 				else if	@data.callee.object.kind == NodeKind::Identifier &&
 						(callee ?= @scope.getVariable(@data.callee.object.name)) &&
-						(substitute ?= callee.replaceMemberCall?(@property, @arguments))
+						(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
 				{
 					this.addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, this))
+					if value.getAbstractMethod(@property, arguments) {
+						this.addCallee(new DefaultCallee(@data, @object, this))
+					}
+					else if reference.isExhaustive(this) {
+						ReferenceException.throwNoMatchingMethod(@property, reference.name(), this)
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, @object, this))
+					}
 				}
 			}
 			is FunctionType => {

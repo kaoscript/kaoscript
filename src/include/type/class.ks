@@ -542,6 +542,22 @@ class ClassType extends Type {
 
 		return this
 	} // }}}
+	getAbstractMethod(name: String, arguments: Array) { // {{{
+		if @abstractMethods[name] is Array {
+			for method in @abstractMethods[name] {
+				if method.matchArguments(arguments) {
+					return method
+				}
+			}
+		}
+
+		if @extending {
+			return @extends.type().getAbstractMethod(name, arguments)
+		}
+		else {
+			return null
+		}
+	} // }}}
 	getAbstractMethod(name: String, type: Type) { // {{{
 		if @abstractMethods[name] is Array {
 			for method in @abstractMethods[name] {
@@ -612,16 +628,23 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
-	getInstanceProperty(name: String): Type { // {{{
+	getInstanceProperty(name: String) { // {{{
 		if @instanceMethods[name] is Array {
-			return new ClassMethodSetType(@scope, @instanceMethods[name])
+			if @instanceMethods[name].length == 1 {
+				return @instanceMethods[name][0]
+			}
+			else {
+				return new ClassMethodSetType(@scope, @instanceMethods[name])
+			}
 		}
 		else if @instanceVariables[name] is ClassVariableType {
 			return @instanceVariables[name]
 		}
-		else {
-			return Type.Any
+		else if @extending {
+			return @extends.type().getInstanceProperty(name)
 		}
+
+		return null
 	} // }}}
 	getInstanceVariable(name: String) { // {{{
 		if @instanceVariables[name]? {
@@ -981,6 +1004,9 @@ class ClassVariableType extends Type {
 	constructor(@scope, @type) { // {{{
 		super(scope)
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	discardVariable() => @type
 	equals(b?) { // {{{
 		if b is ClassVariableType {
@@ -1073,6 +1099,7 @@ class ClassMethodType extends FunctionType {
 
 		return false
 	} // }}}
+	isMethod() => true
 	isSealable() => true
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
@@ -1107,6 +1134,7 @@ class ClassMethodSetType extends OverloadedFunctionType {
 			}
 		}
 	} // }}}
+	isMethod() => true
 }
 
 class ClassConstructorType extends FunctionType {

@@ -1,0 +1,1 @@
+ReferenceException: The method "foo" of the class "Foobar" can't be matched to given arguments (line 8, file "fixtures/compile/class/class.method.missing.ks")

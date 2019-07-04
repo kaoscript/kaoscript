@@ -52,11 +52,6 @@ class NamedType extends Type {
 
 		return this
 	} // }}}
-	flagSealable() { // {{{
-		@type.flagSealable()
-
-		return this
-	} // }}}
 	flagSealed() { // {{{
 		@type.flagSealed()
 
@@ -64,7 +59,7 @@ class NamedType extends Type {
 	} // }}}
 	getHierarchy() { // {{{
 		if @type is ClassType {
-			return @type.getHierarchy(@name)
+			return @type:ClassType.getHierarchy(@name)
 		}
 		else {
 			return [@name]
@@ -88,11 +83,13 @@ class NamedType extends Type {
 	isCloned() => @cloned
 	isClass() => @type.isClass()
 	isEnum() => @type.isEnum()
+	isExhaustive(node) => !(node._options.rules.nonExhaustive || @type.isAlien() || @type.isHybrid() || @type.isSealed())
 	isExplicitlyExported() => @type.isExplicitlyExported()
 	isExportable() => @type.isExportable()
 	isExported() => @type.isExported()
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
+	isHybrid() => @type.isHybrid()
 	isMorePreciseThan(that: Type) { // {{{
 		if that is NamedType {
 			if this.isClass() && that.isClass() {
@@ -124,8 +121,11 @@ class NamedType extends Type {
 	isSealedAlien() => @type.isSealedAlien()
 	isNamed() => true
 	isNamespace() => @type.isNamespace()
-	matchClassName(that: Type) { // {{{
-		if that is NamedType {
+	matchClassName(that: Type?) { // {{{
+		if that == null {
+			return false
+		}
+		else if that is NamedType {
 			if @type is ClassType && that.type() is ClassType {
 				return @name == that.name()
 			}
@@ -136,8 +136,11 @@ class NamedType extends Type {
 
 		return false
 	} // }}}
-	matchContentOf(that: Type) { // {{{
-		if that.isAny() {
+	matchContentOf(that: Type?) { // {{{
+		if that == null {
+			return false
+		}
+		else if that.isAny() {
 			return true
 		}
 		else if that is NamedType {
@@ -165,7 +168,7 @@ class NamedType extends Type {
 			}
 		}
 		else if this.isAlias() {
-			return this.discardAlias().matchContentOf(that)
+			return this.discardAlias().matchContentOf(that:Type)
 		}
 		else if that is UnionType {
 			for const type in that.types() {
@@ -180,7 +183,7 @@ class NamedType extends Type {
 			return @name == that.name() || this.matchContentOf(that.discardReference())
 		}
 		else {
-			return @type.matchContentOf(that)
+			return @type.matchContentOf(that:Type)
 		}
 	} // }}}
 	matchInheritanceOf(base: Type) { // {{{
@@ -188,7 +191,7 @@ class NamedType extends Type {
 			return false
 		}
 
-		if @name == base.name() {
+		if @name == base:NamedType.name() {
 			return true
 		}
 
@@ -196,7 +199,7 @@ class NamedType extends Type {
 		while that.type().isExtending() {
 			that = that.type().extends()
 
-			if that.name() == base.name() {
+			if that.name() == base:NamedType.name() {
 				return true
 			}
 		}
@@ -204,7 +207,7 @@ class NamedType extends Type {
 		return false
 	} // }}}
 	matchSignatureOf(that, matchables) => @type.matchSignatureOf(that.discardName(), matchables)
-	metaReference(references, ignoreAlteration) => @type.metaReference(references, @name, ignoreAlteration)
+	metaReference(references, ignoreAlteration) => @type:ClassType.metaReference(references, @name, ignoreAlteration)
 	name() => @name
 	name(@name) => this
 	path() { // {{{
@@ -215,9 +218,8 @@ class NamedType extends Type {
 			return @name
 		}
 	} // }}}
-	reckonReferenceIndex(references) => @type.reckonReferenceIndex(references)
 	referenceIndex() => @type.referenceIndex()
-	toAlterationReference(references, ignoreAlteration) => @type.toAlterationReference(references, ignoreAlteration)
+	toAlterationReference(references, ignoreAlteration) => @type:ClassType.toAlterationReference(references, ignoreAlteration)
 	toExportOrIndex(references, ignoreAlteration) => @type.toExportOrIndex(references, ignoreAlteration)
 	toFragments(fragments, node)
 	toMetadata(references, ignoreAlteration) => @type.toMetadata(references, ignoreAlteration)
@@ -232,7 +234,7 @@ class NamedType extends Type {
 	} // }}}
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
 	type() => @type
-	walk(fn) => @type.walk(fn)
+	walk(fn) => @type:ObjectType.walk(fn)
 }
 
 class NamedContainerType extends NamedType {
@@ -247,7 +249,7 @@ class NamedContainerType extends NamedType {
 			property = property.duplicate().container(this)
 		}
 
-		@type.addProperty(name, property)
+		@type:ObjectType.addProperty(name, property)
 
 		@properties[name] = property
 	} // }}}

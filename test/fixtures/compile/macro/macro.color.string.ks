@@ -31,6 +31,8 @@ export class Color {
 			macro Color.registerSpace(#(expression))
 		}
 	}
+	getField(name)
+	setField(name, value)
 }
 
 Color.registerSpace!({

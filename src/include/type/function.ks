@@ -168,6 +168,9 @@ class FunctionType extends Type {
 	async() { // {{{
 		@async = true
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	equals(b?): Boolean { // {{{
 		if b is ReferenceType {
 			return b.name() == 'Function' && @min == 0 && @max == Infinity
@@ -547,6 +550,9 @@ class OverloadedFunctionType extends Type {
 		@functions.push(fn)
 
 		@references.pushUniq(type)
+	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
 	} // }}}
 	equals(b?) { // {{{
 		throw new NotImplementedException()

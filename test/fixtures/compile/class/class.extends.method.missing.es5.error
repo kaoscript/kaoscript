@@ -1,0 +1,1 @@
+ReferenceException: Property "foobar" is not defined (line 8, file "fixtures/compile/class/class.extends.method.missing.es5.ks")

@@ -31,6 +31,53 @@
       },
       "classVariables": {},
       "instanceMethods": {
+        "getField": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "name",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": 0
+              }
+            ],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "setField": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "name": "name",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": 0
+              },
+              {
+                "name": "value",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": 0
+              }
+            ],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          }
+        ],
         "red": [
           {
             "access": 3,

@@ -424,6 +424,7 @@ abstract class Type {
 		} // }}}
 	}
 	constructor(@scope)
+	abstract clone(): Type
 	abstract equals(b?): Boolean
 	abstract export(references, ignoreAlteration)
 	abstract toQuote(): String
@@ -459,6 +460,8 @@ abstract class Type {
 
 		return this
 	} // }}}
+	getProperty(name: String) => null
+	hasProperty(name: String): Boolean => false
 	isAlias() => false
 	isAlien() => @alien
 	isAlteration() => false
@@ -483,7 +486,10 @@ abstract class Type {
 	isExtendable() => false
 	isFlexible() => false
 	isFunction() => false
+	isHybrid() => false
 	isMergeable(type) => false
+	isMethod() => false
+	isMorePreciseThan(that: Type): Boolean => false
 	isNamed() => false
 	isNamespace() => false
 	isNative() => false

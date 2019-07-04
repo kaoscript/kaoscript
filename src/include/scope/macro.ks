@@ -32,6 +32,9 @@ class MacroScope extends Scope {
 		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)
 		@predefined.__Identifier = Variable.createPredefinedClass('Identifier', this)
 	} // }}}
+	acquireTempName(declare: Boolean = true) { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	private declareVariable(name: String) { // {{{
 		if $keywords[name] == true || @renamedIndexes[name] is Number {
 			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
@@ -119,7 +122,7 @@ class MacroScope extends Scope {
 			}
 		}
 	} // }}}
-	private resolveReference(name: String, nullable = false) { // {{{
+	resolveReference(name: String, nullable = false) { // {{{
 		const hash = `\(name)\(nullable ? '?' : '')`
 
 		if @references[hash] is not ReferenceType {

@@ -6,6 +6,9 @@ enum Space<String> {
 }
 
 export class Color {
+	private {
+		_alpha: Number
+	}
 	macro registerSpace(@expression: Object) {
 		if expression.components? {
 			const fields: Array = []
@@ -38,6 +41,8 @@ export class Color {
 			macro Color.registerSpace(#(expression))
 		}
 	}
+	getField(name)
+	setField(name, value)
 }
 
 func formatToHex(that: Color): String => $hex(that)

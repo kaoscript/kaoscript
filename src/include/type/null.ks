@@ -2,6 +2,9 @@ class NullType extends Type {
 	constructor() { // {{{
 		super(null)
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	equals(b?): Boolean => b is NullType
 	export(references, ignoreAlteration)
 	getProperty(name) => Type.Any

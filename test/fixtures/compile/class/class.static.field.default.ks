@@ -1,3 +1,5 @@
+#![rules(non-exhaustive)]
+
 extern console: {
 	log(...args)
 }

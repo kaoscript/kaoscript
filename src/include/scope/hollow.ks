@@ -126,5 +126,5 @@ class HollowScope extends Scope {
 
 		return variable
 	} // }}}
-	private resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable)
+	resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable)
 }

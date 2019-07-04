@@ -19,6 +19,9 @@ class AliasType extends Type {
 	constructor(@scope, @type) { // {{{
 		super(scope)
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	discardAlias() => @type.discardAlias()
 	discardReference() => @type.discardAlias()
 	equals(b?): Boolean { // {{{

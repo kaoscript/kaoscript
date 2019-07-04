@@ -1,1 +1,1 @@
-TypeException: Function can't be matched to given arguments (line 3, file "fixtures/compile/function/function.call.error.quant.ks")
+ReferenceException: Function can't be matched to given arguments (line 3, file "fixtures/compile/function/function.call.error.quant.ks")

@@ -154,5 +154,5 @@ class BleedingScope extends Scope {
 
 		variable.renameAs(newName)
 	} // }}}
-	private resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable)
+	resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable)
 }

@@ -34,6 +34,24 @@ module.exports = function() {
 				throw new SyntaxError("wrong number of arguments");
 			}
 		}
+		__ks_func_x_0() {
+			return this._x;
+		}
+		x() {
+			if(arguments.length === 0) {
+				return Point2D.prototype.__ks_func_x_0.apply(this);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
+		__ks_func_y_0() {
+			return this._y;
+		}
+		y() {
+			if(arguments.length === 0) {
+				return Point2D.prototype.__ks_func_y_0.apply(this);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
 	}
 	class Point3D extends Point2D {
 		__ks_init() {
@@ -71,6 +89,18 @@ module.exports = function() {
 			else {
 				throw new SyntaxError("wrong number of arguments");
 			}
+		}
+		__ks_func_z_0() {
+			return this._z;
+		}
+		z() {
+			if(arguments.length === 0) {
+				return Point3D.prototype.__ks_func_z_0.apply(this);
+			}
+			else if(Point2D.prototype.z) {
+				return Point2D.prototype.z.apply(this, arguments);
+			}
+			throw new SyntaxError("wrong number of arguments");
 		}
 	}
 	function x(point) {

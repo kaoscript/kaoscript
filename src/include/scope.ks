@@ -71,20 +71,22 @@ abstract class Scope {
 	static {
 		isTempName(name: String): Boolean => name.length > 5 && name.substr(0, 5) == '__ks_'
 	}
+	abstract acquireTempName(declare: Boolean = true): String
 	private abstract declareVariable(name: String): String?
 	abstract define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable
 	abstract defineVariable(variable: Variable, node: AbstractNode)
 	abstract getDefinedVariable(name: String): Variable?
 	abstract getRenamedIndex(name: String): Number
-	abstract getVariable(name: String): Variable
-	abstract hasDefinedVariable(name: String): Boolean
+	abstract getVariable(name: String, line: Number = -1): Variable
 	abstract hasDeclaredVariable(name: String): Boolean
-	abstract hasVariable(name: String): Boolean
+	abstract hasDefinedVariable(name: String): Boolean
+	abstract hasVariable(name: String, line: Number = -1): Boolean
 	hasMacro(name: String): Boolean => false
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
 	isPredefinedVariable(name: String): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
-	abstract reference(value): ReferenceType
+	abstract reference(value, nullable: Boolean = false): ReferenceType
+	abstract resolveReference(name: String, nullable: Boolean = false)
 }
 
 include {

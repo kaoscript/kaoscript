@@ -11,6 +11,37 @@ module.exports = function() {
 				throw new SyntaxError("wrong number of arguments");
 			}
 		}
+		__ks_func_getField_0(name) {
+			if(arguments.length < 1) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
+			}
+		}
+		getField() {
+			if(arguments.length === 1) {
+				return Color.prototype.__ks_func_getField_0.apply(this, arguments);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
+		__ks_func_setField_0(name, value) {
+			if(arguments.length < 2) {
+				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			}
+			if(name === void 0 || name === null) {
+				throw new TypeError("'name' is not nullable");
+			}
+			if(value === void 0 || value === null) {
+				throw new TypeError("'value' is not nullable");
+			}
+		}
+		setField() {
+			if(arguments.length === 2) {
+				return Color.prototype.__ks_func_setField_0.apply(this, arguments);
+			}
+			throw new SyntaxError("wrong number of arguments");
+		}
 	}
 	Color.registerSpace({
 		"name": "srgb",

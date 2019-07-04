@@ -6,6 +6,8 @@ class Point2D {
 		_y: Number
 	}
 	constructor(@x, @y)
+	x() => @x
+	y() => @y
 }
 
 class Point3D extends Point2D {
@@ -15,6 +17,7 @@ class Point3D extends Point2D {
 	constructor(@x, @y, @z) {
 		super(x, y)
 	}
+	z() => @z
 }
 
 func x(point: Point2D) => point.x()

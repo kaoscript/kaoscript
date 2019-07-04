@@ -5,6 +5,9 @@ class ArrayType extends Type {
 	addElement(type: Type) { // {{{
 		@elements.push(type)
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}

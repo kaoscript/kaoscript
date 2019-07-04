@@ -25,6 +25,9 @@ class UnionType extends Type {
 	addType(type: Type) { // {{{
 		@types.push(type)
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	equals(b?): Boolean { // {{{
 		if !?b || b is not UnionType || @types.length != b._types.length {
 			return false
@@ -61,7 +64,7 @@ class UnionType extends Type {
 		const types = []
 
 		for const type in @types {
-			const property = type.getProperty(name)
+			const property = type.getProperty(name) ?? Type.Any
 
 			if !types.some(t => property.matchContentOf(t)) {
 				types.push(property)

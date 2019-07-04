@@ -1714,7 +1714,7 @@ class ClassDeclaration extends Statement {
 			if @es5 {
 				variable.replaceCall = (data, arguments) => new CallSuperMethodES5Substitude(data, arguments, method, @type)
 
-				variable.replaceMemberCall= (property, arguments) => new MemberSuperMethodES5Substitude(property, arguments, @type)
+				variable.replaceMemberCall= (property, arguments, node) => new MemberSuperMethodES5Substitude(property, arguments, @type, node)
 			}
 			else {
 				variable.replaceCall = (data, arguments) => new CallSuperMethodES6Substitude(data, arguments, method, @type)
@@ -1884,7 +1884,15 @@ class MemberSuperMethodES5Substitude {
 		_class: NamedType<ClassType>
 		_property: String
 	}
-	constructor(@property, @arguments, @class)
+	constructor(@property, @arguments, @class, node) {
+		const superClass = @class.type().extends().type()
+
+		if const property = superClass.getInstanceProperty(@property) {
+		}
+		else if !(superClass.isAlien() || superClass.isHybrid()) {
+			ReferenceException.throwNotDefinedProperty(@property, node)
+		}
+	}
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`\(@class.discardName().extends().name()).prototype.\(@property).apply(this, [`)

@@ -40,16 +40,17 @@ class MemberExpression extends Expression {
 
 				const type = @object.type()
 
-				if property !?= type.getProperty(@property) {
+				if const property = type.getProperty(@property) {
+					@type = property.discardVariable()
+				}
+				else {
 					if type.isEnum() {
 						SyntaxException.throwInvalidEnumAccess(this)
 					}
-					else {
+					else if type.isExhaustive(this) {
 						ReferenceException.throwNotDefinedProperty(@property, this)
 					}
 				}
-
-				@type = property.discardVariable()
 			}
 		}
 		else if @data.computed {
@@ -128,10 +129,8 @@ class MemberExpression extends Expression {
 				fragments.code($dot).compile(@property)
 			}
 
-			if @type is ClassMethodSetType {
-				if @parent is not UnaryOperatorExpression {
-					fragments.code('.bind(').compile(@object).code(')')
-				}
+			if @prepareObject && @type.isMethod() && @parent is not UnaryOperatorExpression{
+				fragments.code('.bind(').compile(@object).code(')')
 			}
 		}
 	} // }}}

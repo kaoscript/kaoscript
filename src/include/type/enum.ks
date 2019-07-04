@@ -42,6 +42,9 @@ class EnumType extends Type {
 	addElement(name: String) { // {{{
 		@elements.push(name)
 	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
@@ -51,7 +54,6 @@ class EnumType extends Type {
 		index: @index
 		type: @kind
 	} // }}}
-	getProperty(name: String) => null
 	hasElement(name: String) { // {{{
 		for element in @elements {
 			if element == name {

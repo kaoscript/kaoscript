@@ -1,1 +1,1 @@
-TypeException: Function can't be matched to given arguments (line 3, file "fixtures/compile/extern/extern.func.bad.0arg.ks")
+ReferenceException: Function can't be matched to given arguments (line 3, file "fixtures/compile/extern/extern.func.bad.0arg.ks")

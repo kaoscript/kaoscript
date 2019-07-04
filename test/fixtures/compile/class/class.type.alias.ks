@@ -8,8 +8,8 @@ class Person {
 	private {
 		_height: float
 	}
-	
+
 	constructor()
-	height(): float => this._float
+	height(): float => this._height
 	height(@height) => this
 }

@@ -20,6 +20,8 @@ export class Exception extends Error {
 
 	static {
 		validateReportedError(error: Type, node) { // {{{
+			#![rules(non-exhaustive)]
+
 			until error is NamedType {
 				if error.isExtending() {
 					error = error.extends()
@@ -158,6 +160,15 @@ export class ReferenceException extends Exception {
 		} // }}}
 		throwLoopingAlias(name, node) ~ SyntaxException { // {{{
 			throw new ReferenceException(`Alias "@\(name)" is looping on itself`, node)
+		} // }}}
+		throwNoMatchingConstructor(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`Constructor of class "\(name)" can't be matched to given arguments`, node)
+		} // }}}
+		throwNoMatchingFunction(node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`Function can't be matched to given arguments`, node)
+		} // }}}
+		throwNoMatchingMethod(method, class, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments`, node)
 		} // }}}
 		throwNotDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
@@ -340,12 +351,6 @@ export class TypeException extends Exception {
 		} // }}}
 		throwInvalidTypeChecking(node) ~ TypeException { // {{{
 			throw new TypeException(`Type checking has incompatible type`, node)
-		} // }}}
-		throwNoMatchingConstructor(name, node) ~ TypeException { // {{{
-			throw new TypeException(`Constructor of class "\(name)" can't be matched to given arguments`, node)
-		} // }}}
-		throwNoMatchingFunction(node) ~ TypeException { // {{{
-			throw new TypeException(`Function can't be matched to given arguments`, node)
 		} // }}}
 		throwNotAlien(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The type "\(name)" must be declared externally`, node)
