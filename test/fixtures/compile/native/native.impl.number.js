@@ -25,7 +25,7 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_Number.__ks_func_mod_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	console.log(__ks_Number._im_mod(42, 3));
 };

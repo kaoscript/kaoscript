@@ -19,7 +19,7 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_String.__ks_func_endsWith_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	function clearer(current, value) {
 		if(arguments.length < 2) {

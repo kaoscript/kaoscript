@@ -40,7 +40,7 @@ module.exports = function() {
 			else if(ClassA.prototype.x) {
 				return ClassA.prototype.x.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_y_0() {
 			return this._y;
@@ -52,7 +52,7 @@ module.exports = function() {
 			else if(ClassA.prototype.y) {
 				return ClassA.prototype.y.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	class ClassC extends ClassB {

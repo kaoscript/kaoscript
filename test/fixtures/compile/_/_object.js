@@ -62,7 +62,7 @@ module.exports = function(Helper, Type) {
 		else if(args.length === 3) {
 			return __ks_Object.__ks_sttc_map_1.apply(null, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
 		Object: Object,

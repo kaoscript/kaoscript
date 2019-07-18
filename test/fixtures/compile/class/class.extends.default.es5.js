@@ -25,7 +25,7 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		},
 		__ks_func_draw_0: function() {
@@ -35,7 +35,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Shape.prototype.__ks_func_draw_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	});
 	let Rectangle = Helper.class({
@@ -58,7 +58,7 @@ module.exports = function() {
 				Rectangle.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		},
 		__ks_func_draw_0: function() {

@@ -8,7 +8,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_makeCar_0() {
@@ -18,7 +18,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return CarFactory.prototype.__ks_func_makeCar_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	class Car {
@@ -30,7 +30,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_getType_0() {
@@ -40,7 +40,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Car.prototype.__ks_func_getType_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	const factory = new CarFactory();

@@ -27,13 +27,13 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_evaluate_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_String._im_startsWith = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length === 1) {
 			return __ks_String.__ks_func_startsWith_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 };

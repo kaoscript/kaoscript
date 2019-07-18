@@ -11,14 +11,14 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_capitalizeWords_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_String._im_classify = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length === 0) {
 			return __ks_String.__ks_func_classify_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
 		String: String,

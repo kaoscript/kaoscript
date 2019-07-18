@@ -20,7 +20,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		static __ks_sttc_foo_0(x) {
@@ -38,7 +38,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return ClassZ.__ks_sttc_foo_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	class ClassA {
@@ -50,7 +50,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	}

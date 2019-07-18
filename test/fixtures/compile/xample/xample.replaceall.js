@@ -29,6 +29,6 @@ module.exports = function() {
 		if(args.length === 2) {
 			return __ks_String.__ks_func_replaceAll_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 };

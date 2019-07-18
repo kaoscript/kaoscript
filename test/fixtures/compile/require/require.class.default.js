@@ -23,7 +23,7 @@ module.exports = function(Color, Space) {
 		else if(arguments.length === 1) {
 			return Color.prototype.__ks_func_luma_1.apply(this, arguments);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
 		Color: Color,

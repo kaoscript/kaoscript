@@ -31,6 +31,6 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_Array.__ks_func_pluck_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 };

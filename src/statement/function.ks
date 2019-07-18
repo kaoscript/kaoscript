@@ -229,25 +229,19 @@ class FunctionDeclaration extends Statement {
 		if @extended {
 			fragments.line($const(this), @oldVariableName, $equals, @name)
 
-			ClassDeclaration.toSwitchFragments(
-				this
-				fragments.newLine()
-				@variable.getRealType()
-				[declarator.type() for declarator in @variable._declarators]
-				@name
-				null
-				(node, fragments) => {
-					const block = fragments.code(`function \(@name)()`).newBlock()
+			const assessment = Router.assess(@name, @variable.getRealType(), [declarator.type() for const declarator in @variable._declarators], true, this)
 
-					return block
-				}
-				(fragments) => {
-					fragments.done()
-				}
+			Router.toFragments(
+				assessment
+				fragments.newLine()
+				'arguments'
+				false
+				(node, fragments) => fragments.code(`function \(@name)()`).newBlock()
+				(fragments) => fragments.done()
 				(fragments, method, index) => {
 					const declarator = @variable.getDeclarator(index)
 
-					declarator.toSwitchFragments(fragments, (fragments, wrongdoing, data) => {
+					declarator.toRouterFragments(fragments, (fragments, wrongdoing, data) => {
 						if this._options.format.spreads == 'es5' {
 							fragments.line(`return \(@oldVariableName).apply(null, arguments)`)
 						}
@@ -255,6 +249,8 @@ class FunctionDeclaration extends Statement {
 							fragments.line(`return \(@oldVariableName)(...arguments)`)
 						}
 					})
+
+					return false
 				}
 				(block, ctrl, async, returns) => {
 					if this._options.format.spreads == 'es5' {
@@ -264,40 +260,60 @@ class FunctionDeclaration extends Statement {
 						ctrl.step().code('else').step().line(`return \(@oldVariableName)(...arguments)`).done()
 					}
 				}
-				'arguments'
-				false
+				this
 			).done()
 		}
 		else if @variable.length() == 1 {
-			@variable.getDeclarator(0).toStatementFragments(fragments, mode)
+			@variable.getDeclarator(0).toStatementFragments(fragments, @name, mode)
 		}
 		else {
-			ClassDeclaration.toSwitchFragments(
-				this
-				fragments.newLine()
-				@variable.getRealType()
-				[declarator.type() for declarator in @variable._declarators]
-				@name
-				null
-				(node, fragments) => {
-					const block = fragments.code(`function \(@name)()`).newBlock()
+			const assessment = Router.assess(@name, @variable.getRealType(), [declarator.type() for const declarator in @variable._declarators], true, this)
 
-					return block
-				}
-				(fragments) => {
-					fragments.done()
-				}
-				(fragments, method, index) => {
-					const declarator = @variable.getDeclarator(index)
+			if assessment.flattenable {
+				Router.toFragments(
+					assessment
+					fragments.newLine()
+					'arguments'
+					false
+					(node, fragments) => fragments.code(`function \(@name)()`).newBlock()
+					(fragments) => fragments.done()
+					(fragments, method, index) => {
+						const declarator = @variable.getDeclarator(index)
 
-					declarator.toSwitchFragments(fragments, Parameter.toWrongDoingFragments)
+						declarator.toRouterFragments(fragments, Parameter.toWrongDoingFragments)
 
-					return declarator.isExit()
-				}
-				ClassDeclaration.toWrongDoingFragments
-				'arguments'
-				false
-			).done()
+						return declarator.isExit()
+					}
+					ClassDeclaration.toWrongDoingFragments
+					this
+				).done()
+			}
+			else {
+				@variable.toStatementFragments(fragments, mode)
+
+				Router.toFragments(
+					assessment
+					fragments.newLine()
+					'arguments'
+					false
+					(node, fragments) => fragments.code(`function \(@name)()`).newBlock()
+					(fragments) => fragments.done()
+					(fragments, method, index) => {
+						const name = @variable.getDeclaratorName(index)
+
+						if this._options.format.spreads == 'es5' {
+							fragments.line(`return \(name).apply(null, arguments)`)
+						}
+						else {
+							fragments.line(`return \(name)(...arguments)`)
+						}
+
+						return false
+					}
+					ClassDeclaration.toWrongDoingFragments
+					this
+				).done()
+			}
 		}
 	} // }}}
 	type() => @variable.getDeclaredType()
@@ -397,8 +413,17 @@ class FunctionDeclarator extends AbstractNode {
 
 		fragments.code(')').done()
 	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
-		const ctrl = fragments.newControl().code(`function \(@parent.name())(`)
+	toRouterFragments(fragments, wrongdoer) { // {{{
+		Parameter.toFragments(this, fragments, ParameterMode::OverloadedFunction, (fragments) => fragments, wrongdoer)
+
+		fragments.compile(@block, Mode::None)
+
+		if !@awaiting && !@exit && @type.isAsync() {
+			fragments.line('__ks_cb()')
+		}
+	} // }}}
+	toStatementFragments(fragments, name, mode) { // {{{
+		const ctrl = fragments.newControl().code(`function \(name)(`)
 
 		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').step()
@@ -412,15 +437,6 @@ class FunctionDeclarator extends AbstractNode {
 
 		ctrl.done()
 	} // }}}
-	toSwitchFragments(fragments, wrongdoer) { // {{{
-		Parameter.toFragments(this, fragments, ParameterMode::OverloadedFunction, (fragments) => fragments, wrongdoer)
-
-		fragments.compile(@block, Mode::None)
-
-		if !@awaiting && !@exit && @type.isAsync() {
-			fragments.line('__ks_cb()')
-		}
-	} // }}}
 	type() => @type
 }
 
@@ -433,11 +449,6 @@ class FunctionVariable extends Variable {
 	constructor(scope: Scope, @name, @extended) { // {{{
 		super(name, true, false, new OverloadedFunctionType(scope))
 	} // }}}
-	addDeclarator(declarator: FunctionDeclarator) { // {{{
-		@declarators.push(declarator)
-	} // }}}
-	getDeclarator(index: Number) => @declarators[index]
-	length() => @declarators.length
 	prepare() { // {{{
 		if @extended {
 			let type
@@ -490,6 +501,17 @@ class FunctionVariable extends Variable {
 	translate() { // {{{
 		for declarator in @declarators {
 			declarator.translate()
+		}
+	} // }}}
+	addDeclarator(declarator: FunctionDeclarator) { // {{{
+		@declarators.push(declarator)
+	} // }}}
+	getDeclarator(index: Number) => @declarators[index]
+	getDeclaratorName(index) => `__ks_\(@name)_\(index)`
+	length() => @declarators.length
+	toStatementFragments(fragments, mode) { // {{{
+		for const declarator, index in @declarators {
+			declarator.toStatementFragments(fragments, `__ks_\(@name)_\(index)`, mode)
 		}
 	} // }}}
 }

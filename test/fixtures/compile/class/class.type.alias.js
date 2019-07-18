@@ -14,7 +14,7 @@ module.exports = function() {
 				Person.prototype.__ks_cons_0.apply(this);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_height_0() {
@@ -40,7 +40,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Person.prototype.__ks_func_height_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 };

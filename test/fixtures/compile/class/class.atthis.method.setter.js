@@ -34,7 +34,7 @@ module.exports = function() {
 				Greetings.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_message_0(message) {
@@ -60,7 +60,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Greetings.prototype.__ks_func_message_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 };

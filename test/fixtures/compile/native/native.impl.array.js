@@ -11,7 +11,7 @@ module.exports = function() {
 		if(args.length >= 0 && args.length <= 1) {
 			return __ks_Array.__ks_func_last_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	console.log(__ks_Array._im_last([1, 2, 3]));
 };

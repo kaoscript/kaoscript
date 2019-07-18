@@ -34,6 +34,6 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_Object.__ks_sttc_clone_0.apply(null, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 };

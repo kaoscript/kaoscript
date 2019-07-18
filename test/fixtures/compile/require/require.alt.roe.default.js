@@ -48,14 +48,14 @@ module.exports = function(__ks_0, __ks___ks_0) {
 		if(args.length >= 1 && args.length <= 2) {
 			return __ks_Array.__ks_func_contains_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_copy = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length === 0) {
 			return __ks_Array.__ks_func_copy_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_pushUniq = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

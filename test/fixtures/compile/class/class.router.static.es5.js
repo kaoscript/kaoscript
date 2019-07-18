@@ -100,7 +100,7 @@ module.exports = function() {
 				else if(arguments.length === 5) {
 					return Type.__ks_sttc_import_2.apply(this, arguments);
 				}
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		},
 		$create: function() {
@@ -111,7 +111,7 @@ module.exports = function() {
 		},
 		__ks_cons: function(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	});

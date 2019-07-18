@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_camelize_0(value) {
@@ -33,7 +33,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Formatter.prototype.__ks_func_camelize_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_toLowerCase_0(value) {
 			if(arguments.length < 1) {
@@ -48,7 +48,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Formatter.prototype.__ks_func_toLowerCase_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_toUpperCase_0(value) {
 			if(arguments.length < 1) {
@@ -63,7 +63,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Formatter.prototype.__ks_func_toUpperCase_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	const formatter = new Formatter();

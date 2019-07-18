@@ -8,7 +8,7 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_Foobar.__ks_func_foobar_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	function foo(x) {
 		if(arguments.length < 1) {

@@ -8,7 +8,7 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_Object.__ks_sttc_clone_0();
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	const foobar = {
 		qux: 42

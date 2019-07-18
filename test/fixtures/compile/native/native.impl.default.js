@@ -8,7 +8,7 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_lowerFirst_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	let foo = "HELLO!";
 	console.log(foo);

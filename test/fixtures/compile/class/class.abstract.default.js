@@ -34,7 +34,7 @@ module.exports = function() {
 				AbstractGreetings.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	}
@@ -61,7 +61,7 @@ module.exports = function() {
 			else if(AbstractGreetings.prototype.greet) {
 				return AbstractGreetings.prototype.greet.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	const hello = new Greetings("Hello world!");

@@ -226,6 +226,7 @@ include {
 	'./operator/unary'
 	'./include/block'
 	'./include/macro'
+	'./include/router'
 }
 
 const $compile = {

@@ -34,28 +34,28 @@ module.exports = function() {
 			if(args.length >= 0 && args.length <= 1) {
 				return __ks_String.__ks_func_lines_0.apply(that, args);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		};
 		__ks_String._im_lower = function(that) {
 			var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 			if(args.length === 0) {
 				return __ks_String.__ks_func_lower_0.apply(that);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		};
 		__ks_String._im_toFloat = function(that) {
 			var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 			if(args.length === 0) {
 				return __ks_String.__ks_func_toFloat_0.apply(that);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		};
 		__ks_String._im_toInt = function(that) {
 			var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 			if(args.length >= 0 && args.length <= 1) {
 				return __ks_String.__ks_func_toInt_0.apply(that, args);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		};
 		return {
 			String: String,

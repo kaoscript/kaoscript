@@ -36,7 +36,7 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		static __ks_sttc_makeCircle_0(color) {
@@ -55,7 +55,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Shape.__ks_sttc_makeCircle_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		static __ks_sttc_makeRectangle_0(color) {
 			if(arguments.length < 1) {
@@ -73,7 +73,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Shape.__ks_sttc_makeRectangle_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	let r = Shape.makeRectangle("black");

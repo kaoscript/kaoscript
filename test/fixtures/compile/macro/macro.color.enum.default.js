@@ -12,7 +12,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_getField_0(name) {
@@ -27,7 +27,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_getField_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_setField_0(name, value) {
 			if(arguments.length < 2) {
@@ -44,7 +44,7 @@ module.exports = function() {
 			if(arguments.length === 2) {
 				return Color.prototype.__ks_func_setField_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	Color.registerSpace({
@@ -108,7 +108,7 @@ module.exports = function() {
 		else if(arguments.length === 1) {
 			return Color.prototype.__ks_func_red_1.apply(this, arguments);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	Color.prototype.green = function() {
 		if(arguments.length === 0) {
@@ -117,7 +117,7 @@ module.exports = function() {
 		else if(arguments.length === 1) {
 			return Color.prototype.__ks_func_green_1.apply(this, arguments);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	Color.prototype.blue = function() {
 		if(arguments.length === 0) {
@@ -126,6 +126,6 @@ module.exports = function() {
 		else if(arguments.length === 1) {
 			return Color.prototype.__ks_func_blue_1.apply(this, arguments);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 };

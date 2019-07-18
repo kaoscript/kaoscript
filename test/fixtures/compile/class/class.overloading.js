@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_foo_0(...args) {
@@ -60,7 +60,7 @@ module.exports = function() {
 			else if(arguments.length >= 1 && arguments.length <= 3) {
 				return Greetings.prototype.__ks_func_baz_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_qux_0() {
 		}
@@ -117,7 +117,7 @@ module.exports = function() {
 			else if(arguments.length === 2 || arguments.length === 3) {
 				return Greetings.prototype.__ks_func_corge_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_grault_0(name) {
 			if(arguments.length < 1) {
@@ -152,7 +152,7 @@ module.exports = function() {
 			else if(arguments.length === 2 || arguments.length === 3) {
 				return Greetings.prototype.__ks_func_grault_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_garply_0(name) {
 			if(arguments.length < 1) {
@@ -230,7 +230,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Greetings.prototype.__ks_func_garply_0.apply(this, arguments);
 			}
-			else if(arguments.length === 2 || arguments.length === 3) {
+			else if(arguments.length === 2) {
 				if(Type.isString(arguments[1])) {
 					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
 				}
@@ -238,7 +238,15 @@ module.exports = function() {
 					return Greetings.prototype.__ks_func_garply_2.apply(this, arguments);
 				}
 			}
-			throw new SyntaxError("wrong number of arguments");
+			else if(arguments.length === 3) {
+				if(Type.isNumber(arguments[2])) {
+					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
+				}
+				else {
+					return Greetings.prototype.__ks_func_garply_2.apply(this, arguments);
+				}
+			}
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_waldo_0() {
 		}

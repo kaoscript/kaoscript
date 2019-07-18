@@ -9,7 +9,7 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_Boolean.__ks_func_toBoolean_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_String.__ks_func_toBoolean_0 = function() {
 		return /^(?:true|1|on|yes)$/i.test(this);
@@ -19,7 +19,7 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_String.__ks_func_toBoolean_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	console.log(__ks_Boolean._im_toBoolean(true));
 	console.log(__ks_String._im_toBoolean("true"));

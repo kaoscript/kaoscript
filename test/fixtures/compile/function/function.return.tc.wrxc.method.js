@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_foobar_0(test) {
@@ -33,7 +33,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	class Quxbaz extends Foobar {

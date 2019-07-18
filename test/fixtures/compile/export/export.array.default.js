@@ -69,14 +69,14 @@ module.exports = function() {
 		else if(args.length === 3) {
 			return __ks_Array.__ks_sttc_map_1.apply(null, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_last = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length >= 0 && args.length <= 1) {
 			return __ks_Array.__ks_func_last_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
 		Array: Array,

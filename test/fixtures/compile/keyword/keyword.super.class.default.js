@@ -13,7 +13,7 @@ module.exports = function() {
 				Foobar.prototype.__ks_cons_0.apply(this);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_foobar_0() {
@@ -22,7 +22,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Foobar.prototype.__ks_func_foobar_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	class Quzbaz extends Foobar {
@@ -37,7 +37,7 @@ module.exports = function() {
 				Quzbaz.prototype.__ks_cons_0.apply(this);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_foobar_0() {

@@ -21,7 +21,7 @@ module.exports = function(__ks_0, __ks___ks_0) {
 		if(args.length === 0) {
 			return __ks_Array.__ks_func_foo_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
 		Array: Array,

@@ -36,7 +36,7 @@ module.exports = function() {
 			else if(ClassB.prototype.x) {
 				return ClassB.prototype.x.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 };

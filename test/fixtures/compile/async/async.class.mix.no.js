@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_foo_0(__ks_cb) {
@@ -53,7 +53,7 @@ module.exports = function() {
 				return Foo.prototype.__ks_func_foo_1.apply(this, arguments);
 			}
 			else {
-				let __ks_cb, __ks_error = new SyntaxError("wrong number of arguments");
+				let __ks_cb, __ks_error = new SyntaxError("Wrong number of arguments");
 				if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1]))) {
 					return __ks_cb(__ks_error);
 				}

@@ -16,7 +16,7 @@ module.exports = function() {
 			}
 			__ks_cons(args) {
 				if(args.length !== 0) {
-					throw new SyntaxError("wrong number of arguments");
+					throw new SyntaxError("Wrong number of arguments");
 				}
 			}
 			__ks_func_name_0() {
@@ -42,7 +42,7 @@ module.exports = function() {
 				else if(arguments.length === 1) {
 					return Foobar.prototype.__ks_func_name_1.apply(this, arguments);
 				}
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		return {

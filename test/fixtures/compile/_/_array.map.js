@@ -62,7 +62,7 @@ module.exports = function(Array, __ks_Array) {
 		else if(args.length === 3) {
 			return __ks_Array.__ks_sttc_map_1.apply(null, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
 		Array: Array,

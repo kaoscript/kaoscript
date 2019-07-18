@@ -245,42 +245,42 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_Array.__ks_func_any_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_clear = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length === 0) {
 			return __ks_Array.__ks_func_clear_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_clone = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length === 0) {
 			return __ks_Array.__ks_func_clone_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_contains = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length >= 1 && args.length <= 2) {
 			return __ks_Array.__ks_func_contains_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._cm_from = function() {
 		var args = Array.prototype.slice.call(arguments);
 		if(args.length === 1) {
 			return __ks_Array.__ks_sttc_from_0.apply(null, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_last = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length >= 0 && args.length <= 1) {
 			return __ks_Array.__ks_func_last_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_remove = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
@@ -299,7 +299,7 @@ module.exports = function() {
 		if(args.length === 2) {
 			return __ks_Array.__ks_sttc_same_0.apply(null, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Object.__ks_sttc_clone_0 = function(object) {
 		if(arguments.length < 1) {
@@ -362,7 +362,7 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_Object.__ks_sttc_clone_0.apply(null, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Object._cm_defaults = function() {
 		var args = Array.prototype.slice.call(arguments);
@@ -373,7 +373,7 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_Object.__ks_sttc_isEmpty_0.apply(null, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Object._cm_merge = function() {
 		var args = Array.prototype.slice.call(arguments);

@@ -19,7 +19,7 @@ module.exports = function() {
 				ClassA.prototype.__ks_cons_0.apply(this);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	}

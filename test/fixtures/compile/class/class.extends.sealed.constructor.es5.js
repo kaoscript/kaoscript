@@ -63,7 +63,7 @@ module.exports = function() {
 				Exception.prototype.__ks_cons_1.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	});

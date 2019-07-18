@@ -14,7 +14,7 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_Number.__ks_func_zeroPad_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	var __ks_String = {};
 	__ks_String.__ks_func_lpad_0 = function(length, pad) {
@@ -34,6 +34,6 @@ module.exports = function() {
 		if(args.length === 2) {
 			return __ks_String.__ks_func_lpad_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 };

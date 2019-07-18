@@ -16,7 +16,7 @@ class ClassType extends Type {
 		_destructors: Number			= 0
 		_explicitlyExported: Boolean	= false
 		_extending: Boolean				= false
-		_extends: NamedType<ClassType>
+		_extends: NamedType<ClassType>?	= null
 		_hybrid: Boolean				= false
 		_init: Number					= 0
 		_instanceMethods: Object		= {}
@@ -710,6 +710,18 @@ class ClassType extends Type {
 		}
 
 		return null
+	} // }}}
+	hasAbstractMethod(name) { // {{{
+		if @abstractMethods[name] is Array {
+			return true
+		}
+
+		if @extending {
+			return @extends.type().hasAbstractMethod(name)
+		}
+		else {
+			return false
+		}
 	} // }}}
 	hasClassMethod(name) { // {{{
 		if @classMethods[name] is Array {

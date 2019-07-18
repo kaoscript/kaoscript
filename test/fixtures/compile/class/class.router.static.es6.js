@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		static __ks_sttc_import_0(data, references, domain, node) {
@@ -108,7 +108,7 @@ module.exports = function() {
 			else if(arguments.length === 5) {
 				return Type.__ks_sttc_import_2.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	class FoobarType extends Type {

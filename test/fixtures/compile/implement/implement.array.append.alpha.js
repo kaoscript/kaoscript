@@ -49,7 +49,7 @@ module.exports = function() {
 		if(args.length >= 1 && args.length <= 2) {
 			return __ks_Array.__ks_func_contains_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Array._im_pushUniq = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

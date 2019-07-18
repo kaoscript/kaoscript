@@ -24,7 +24,7 @@ module.exports = function() {
 				Foobar.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_export_0() {
@@ -36,7 +36,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Foobar.prototype.__ks_func_export_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 };

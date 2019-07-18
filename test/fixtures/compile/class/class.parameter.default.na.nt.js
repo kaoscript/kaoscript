@@ -47,7 +47,7 @@ module.exports = function() {
 				}
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	}

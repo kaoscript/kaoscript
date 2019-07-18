@@ -23,7 +23,7 @@ module.exports = function() {
 		if(args.length === 1) {
 			return __ks_Object.__ks_func_map_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	console.log(__ks_Object._im_map({
 		leto: "spice",

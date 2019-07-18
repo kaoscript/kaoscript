@@ -62,16 +62,14 @@ module.exports = function() {
 				Foo.prototype.__ks_cons_0.apply(this, args);
 			}
 			else if(args.length === 2) {
-				if(Type.isString(args[0])) {
+				if(Type.isString(args[1])) {
+					Foo.prototype.__ks_cons_0.apply(this, args);
+				}
+				else if(Type.isString(args[0])) {
 					Foo.prototype.__ks_cons_1.apply(this, args);
 				}
 				else {
-					if(Type.isString(args[1])) {
-						Foo.prototype.__ks_cons_0.apply(this, args);
-					}
-					else {
-						Foo.prototype.__ks_cons_2.apply(this, args);
-					}
+					Foo.prototype.__ks_cons_2.apply(this, args);
 				}
 			}
 			else if(args.length === 3) {
@@ -83,7 +81,7 @@ module.exports = function() {
 				}
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	}

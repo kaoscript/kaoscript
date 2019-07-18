@@ -10,7 +10,7 @@ module.exports = function(Array, __ks_Array) {
 		if(args.length >= 0 && args.length <= 1) {
 			return __ks_Array.__ks_func_last_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
 		Array: Array,

@@ -30,7 +30,7 @@ module.exports = function() {
 			else if(Error.throw) {
 				return Error.throw.apply(null, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	try {

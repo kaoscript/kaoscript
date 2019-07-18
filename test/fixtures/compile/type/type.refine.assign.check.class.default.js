@@ -8,7 +8,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_foo_0() {
@@ -18,7 +18,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Foo.prototype.__ks_func_foo_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	class Bar extends Foo {
@@ -38,7 +38,7 @@ module.exports = function() {
 			else if(Foo.prototype.bar) {
 				return Foo.prototype.bar.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	function bar() {

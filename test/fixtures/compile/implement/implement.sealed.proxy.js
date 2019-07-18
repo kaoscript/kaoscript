@@ -22,7 +22,7 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_draw_0() {
@@ -44,7 +44,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Shape.prototype.__ks_func_draw_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	var __ks_Shape = {};
@@ -71,7 +71,7 @@ module.exports = function() {
 		else if(args.length === 2) {
 			return __ks_Shape.__ks_func_draw_2.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	class Proxy {
 		constructor() {
@@ -94,7 +94,7 @@ module.exports = function() {
 				Proxy.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_draw_0() {
@@ -131,7 +131,7 @@ module.exports = function() {
 			else if(arguments.length === 2) {
 				return Proxy.prototype.__ks_func_draw_2.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	let shape = new Proxy("yellow");

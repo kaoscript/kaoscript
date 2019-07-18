@@ -24,7 +24,7 @@ module.exports = function(__ks_0, __ks___ks_0, Math, __ks_Math) {
 		if(args.length >= 0 && args.length <= 1) {
 			return __ks_Number.__ks_func_round_0.apply(that, args);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	console.log(__ks_Number._im_round(Math.PI).toString());
 	return {

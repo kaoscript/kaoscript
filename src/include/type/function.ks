@@ -246,6 +246,110 @@ class FunctionType extends Type {
 		return false
 	} // }}}
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
+	matchArguments(arguments: Array<Type>) { // {{{
+		// console.log(@parameters)
+		// console.log(arguments)
+		if arguments.length == 0 {
+			return @min == 0
+		}
+		else {
+			if !(@min <= arguments.length <= @max) {
+				return false
+			}
+
+			if arguments.length == 0 {
+				return true
+			}
+			else if @parameters.length == 1 {
+				const parameter = @parameters[0]
+
+				for argument in arguments {
+					if !parameter.matchArgument(argument) {
+						return false
+					}
+				}
+
+				return true
+			}
+			else if @hasRest {
+				let a = 0
+				let b = arguments.length - 1
+
+				for const parameter in @parameters from @parameters.length - 1 til @restIndex by -1 {
+					for const j from 0 til parameter.min() {
+						if !parameter.matchArgument(arguments[b]) {
+							return false
+						}
+
+						--b
+					}
+				}
+
+				for const parameter in @parameters from 0 til @restIndex {
+					for const j from 0 til parameter.min() {
+						if !parameter.matchArgument(arguments[a]) {
+							return false
+						}
+
+						++a
+					}
+
+					for const j from parameter.min() til parameter.max() while a < b && parameter.matchArgument(arguments[a]) {
+						++a
+					}
+				}
+
+				const parameter = @parameters[@restIndex]
+
+				for const j from 0 til parameter.min() {
+					if !parameter.matchArgument(arguments[a]) {
+						return false
+					}
+
+					++a
+				}
+
+				return true
+			}
+			else if arguments.length == @max {
+				let a = 0
+
+				let p
+				for parameter in @parameters {
+					for p from 0 til parameter.max() {
+						if !parameter.matchArgument(arguments[a]) {
+							return false
+						}
+
+						++a
+					}
+				}
+
+				return true
+			}
+			else {
+				let a = 0
+				let optional = arguments.length - @min
+
+				for const parameter in @parameters {
+					for i from 0 til parameter.min() {
+						if !parameter.matchArgument(arguments[a]) {
+							return false
+						}
+
+						++a
+					}
+
+					for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
+						++a
+						--optional
+					}
+				}
+
+				return optional == 0
+			}
+		}
+	} // }}}
 	matchContentOf(type: Type) => type.isAny() || type.isFunction()
 	matchParametersOf(arguments: Array, matchables): Boolean => this.matchParametersOf(0, -1, arguments, 0, -1, matchables)
 	matchParametersOf(pIndex, pStep, arguments, aIndex, aStep, matchables) { // {{{
@@ -344,110 +448,6 @@ class FunctionType extends Type {
 		}
 
 		return false
-	} // }}}
-	matchArguments(arguments: Array<Type>) { // {{{
-		// console.log(@parameters)
-		// console.log(arguments)
-		if arguments.length == 0 {
-			return @min == 0
-		}
-		else {
-			if !(@min <= arguments.length <= @max) {
-				return false
-			}
-
-			if arguments.length == 0 {
-				return true
-			}
-			else if @parameters.length == 1 {
-				const parameter = @parameters[0]
-
-				for argument in arguments {
-					if !parameter.matchArgument(argument) {
-						return false
-					}
-				}
-
-				return true
-			}
-			else if @hasRest {
-				let a = 0
-				let b = arguments.length - 1
-
-				for const parameter in @parameters from @parameters.length - 1 til @restIndex by -1 {
-					for const j from 0 til parameter.min() {
-						if !parameter.matchArgument(arguments[b]) {
-							return false
-						}
-
-						--b
-					}
-				}
-
-				for const parameter in @parameters from 0 til @restIndex {
-					for const j from 0 til parameter.min() {
-						if !parameter.matchArgument(arguments[a]) {
-							return false
-						}
-
-						++a
-					}
-
-					for const j from parameter.min() til parameter.max() while a < b && parameter.matchArgument(arguments[a]) {
-						++a
-					}
-				}
-
-				const parameter = @parameters[@restIndex]
-
-				for const j from 0 til parameter.min() {
-					if !parameter.matchArgument(arguments[a]) {
-						return false
-					}
-
-					++a
-				}
-
-				return true
-			}
-			else if arguments.length == @max {
-				let a = 0
-
-				let p
-				for parameter in @parameters {
-					for p from 0 til parameter.max() {
-						if !parameter.matchArgument(arguments[a]) {
-							return false
-						}
-
-						++a
-					}
-				}
-
-				return true
-			}
-			else {
-				let a = 0
-				let optional = arguments.length - @min
-
-				for parameter in @parameters {
-					for i from 0 til parameter.min() {
-						if !parameter.matchArgument(arguments[a]) {
-							return false
-						}
-
-						++a
-					}
-
-					for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
-						++a
-						--optional
-					}
-				}
-
-				return optional == 0
-			}
-		}
 	} // }}}
 	max() => @max
 	min() => @min

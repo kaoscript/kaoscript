@@ -52,7 +52,7 @@ module.exports = function() {
 					__ks_cons_1(__ks_arguments);
 				}
 				else {
-					throw new SyntaxError("wrong number of arguments");
+					throw new SyntaxError("Wrong number of arguments");
 				}
 			};
 			__ks_cons(arguments);

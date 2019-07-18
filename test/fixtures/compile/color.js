@@ -657,7 +657,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Color.prototype.__ks_func_alpha_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_blend_0() {
 			if(arguments.length < 2) {
@@ -730,7 +730,7 @@ module.exports = function() {
 			if(arguments.length >= 2 && arguments.length <= 4) {
 				return Color.prototype.__ks_func_blend_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_clearer_0(value) {
 			if(arguments.length < 1) {
@@ -753,7 +753,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_clearer_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_clone_0() {
 			return this.copy(new Color());
@@ -762,7 +762,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_clone_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_contrast_0(color) {
 			if(arguments.length < 1) {
@@ -811,7 +811,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_contrast_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_copy_0(target) {
 			if(arguments.length < 1) {
@@ -840,7 +840,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_copy_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_distance_0(color) {
 			if(arguments.length < 1) {
@@ -860,7 +860,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_distance_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_equals_0(color) {
 			if(arguments.length < 1) {
@@ -878,7 +878,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_equals_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_format_0(format) {
 			if(format === void 0 || format === null) {
@@ -898,7 +898,7 @@ module.exports = function() {
 			if(arguments.length >= 0 && arguments.length <= 1) {
 				return Color.prototype.__ks_func_format_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_from_0(...args) {
 			return $from(this, args);
@@ -928,7 +928,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_getField_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_gradient_0(endColor, length) {
 			if(arguments.length < 2) {
@@ -970,7 +970,7 @@ module.exports = function() {
 			if(arguments.length === 2) {
 				return Color.prototype.__ks_func_gradient_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_greyscale_0(model) {
 			if(model === void 0 || model === null) {
@@ -1001,7 +1001,7 @@ module.exports = function() {
 			if(arguments.length >= 0 && arguments.length <= 1) {
 				return Color.prototype.__ks_func_greyscale_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_hex_0() {
 			return $hex(this.like(Space.SRGB));
@@ -1010,7 +1010,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_hex_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_isBlack_0() {
 			let that = this.like(Space.SRGB);
@@ -1020,7 +1020,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_isBlack_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_isTransparent_0() {
 			if(this._alpha === 0) {
@@ -1035,7 +1035,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_isTransparent_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_isWhite_0() {
 			let that = this.like(Space.SRGB);
@@ -1045,7 +1045,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_isWhite_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_like_0(space) {
 			if(arguments.length < 1) {
@@ -1069,7 +1069,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_like_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_luminance_0() {
 			let that = this.like(Space.SRGB);
@@ -1085,7 +1085,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_luminance_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_negative_0() {
 			this.space(Space.SRGB);
@@ -1098,7 +1098,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Color.prototype.__ks_func_negative_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_opaquer_0(value) {
 			if(arguments.length < 1) {
@@ -1121,7 +1121,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_opaquer_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_readable_0() {
 			if(arguments.length < 1) {
@@ -1155,7 +1155,7 @@ module.exports = function() {
 			if(arguments.length >= 1 && arguments.length <= 2) {
 				return Color.prototype.__ks_func_readable_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_scheme_0(functions) {
 			if(arguments.length < 1) {
@@ -1175,7 +1175,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_scheme_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_setField_0(name, value) {
 			if(arguments.length < 2) {
@@ -1216,7 +1216,7 @@ module.exports = function() {
 			if(arguments.length === 2) {
 				return Color.prototype.__ks_func_setField_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_shade_0(percentage) {
 			if(arguments.length < 1) {
@@ -1234,7 +1234,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_shade_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_space_0() {
 			return this._space;
@@ -1273,7 +1273,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Color.prototype.__ks_func_space_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_tint_0(percentage) {
 			if(arguments.length < 1) {
@@ -1291,7 +1291,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_tint_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_tone_0(percentage) {
 			if(arguments.length < 1) {
@@ -1309,7 +1309,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.prototype.__ks_func_tone_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		static __ks_sttc_from_0(...args) {
 			let color = $from(new Color(), args);
@@ -1370,7 +1370,7 @@ module.exports = function() {
 			if(arguments.length === 2) {
 				return Color.__ks_sttc_registerFormatter_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		static __ks_sttc_registerParser_0(format, parser) {
 			if(arguments.length < 2) {
@@ -1394,7 +1394,7 @@ module.exports = function() {
 			if(arguments.length === 2) {
 				return Color.__ks_sttc_registerParser_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		static __ks_sttc_registerSpace_0(space) {
 			if(arguments.length < 1) {
@@ -1504,7 +1504,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return Color.__ks_sttc_registerSpace_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	Color.registerSpace({
@@ -1596,7 +1596,7 @@ module.exports = function() {
 		else if(arguments.length === 1) {
 			return Color.prototype.__ks_func_red_1.apply(this, arguments);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	Color.prototype.green = function() {
 		if(arguments.length === 0) {
@@ -1605,7 +1605,7 @@ module.exports = function() {
 		else if(arguments.length === 1) {
 			return Color.prototype.__ks_func_green_1.apply(this, arguments);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	Color.prototype.blue = function() {
 		if(arguments.length === 0) {
@@ -1614,7 +1614,7 @@ module.exports = function() {
 		else if(arguments.length === 1) {
 			return Color.prototype.__ks_func_blue_1.apply(this, arguments);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	let $static = {
 		black: Color.from("#000"),

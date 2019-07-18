@@ -22,7 +22,7 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_draw_0() {
@@ -32,7 +32,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Shape.prototype.__ks_func_draw_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		static __ks_sttc_makeBlue_0() {
 			return new Shape("blue");
@@ -41,7 +41,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return Shape.__ks_sttc_makeBlue_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	var __ks_Shape = {};
@@ -57,14 +57,14 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_Shape.__ks_func_makeRed_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Shape._cm_makeRed = function() {
 		var args = Array.prototype.slice.call(arguments);
 		if(args.length === 0) {
 			return __ks_Shape.__ks_sttc_makeRed_0();
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	console.log((new Shape("blue")).draw());
 	console.log(__ks_Shape._im_makeRed(new Shape("blue")).draw());

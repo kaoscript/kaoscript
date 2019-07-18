@@ -45,302 +45,6 @@ class ClassDeclaration extends Statement {
 			fragments.line(retCode, variable.name(), '.', fnName, index, '.apply(this, ', argName, ')')
 		}
 	} // }}}
-	static checkInfinityMethods(methods, parameters, index, node, fragments, call, argName) { // {{{
-		if !?parameters[index + 1] {
-			SyntaxException.throwNotDifferentiableMethods(node)
-		}
-
-		const tree = []
-		const usages = []
-
-		let type, nf, item, usage
-		for const type of parameters[index + 1].types {
-			tree.push(item = {
-				type: type.type
-				methods: [methods[i] for i in type.methods]
-				usage: type.methods.length
-			})
-
-			if type.type.isAny() {
-				item.weight = 0
-			}
-			else {
-				item.weight = 1_000
-			}
-
-			for i in type.methods {
-				method = methods[i]
-
-				nf = true
-				for usage in usages while nf {
-					if usage.method == method {
-						nf = false
-					}
-				}
-
-				if nf {
-					usages.push(usage = {
-						method: method,
-						types: [item]
-					})
-				}
-				else {
-					usage.types.push(item)
-				}
-			}
-		}
-
-		if tree.length == 0 {
-			return ClassDeclaration.checkInfinityMethods(methods, parameters, index + 1, node, fragments, call, argName)
-		}
-		else if tree.length == 1 {
-			item = tree[0]
-
-			if item.methods.length == 1 {
-				call(fragments, item.methods[0], item.methods[0].index())
-
-				return false
-			}
-			else {
-				return ClassDeclaration.checkInfinityMethods(methods, parameters, index + 1, node, fragments, call)
-			}
-		}
-		else {
-			for usage in usages {
-				let count = usage.types.length
-
-				for type in usage.types while count >= 0 {
-					count -= type.usage
-				}
-
-				if count == 0 {
-					let item = {
-						type: [],
-						path: [],
-						methods: [usage.method]
-						usage: 0
-						weight: 0
-					}
-
-					for type in usage.types {
-						item.type.push(type.type)
-						item.usage += type.usage
-						item.weight += type.weight
-
-						tree.remove(type)
-					}
-
-					tree.push(item)
-				}
-			}
-
-			tree.sort(func(a, b) {
-				if a.weight == 0 && b.weight != 0 {
-					return 1
-				}
-				else if b.weight == 0 {
-					return -1
-				}
-				else if a.type.length == b.type.length {
-					if a.usage == b.usage {
-						return b.weight - a.weight
-					}
-					else {
-						return b.usage - a.usage
-					}
-				}
-				else {
-					return a.type.length - b.type.length
-				}
-			})
-
-			let ctrl = fragments.newControl()
-
-			for const item, i in tree {
-				ctrl.step().code('else ') if !ctrl.isFirstStep()
-
-				if !item.type[0].isAny() {
-					ctrl.code('if(')
-
-					item.type[0].toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(index)]`))
-
-					ctrl.code(')')
-				}
-
-				ctrl.step()
-
-				if item.methods.length == 1 {
-					if !call(ctrl, item.methods[0], item.methods[0].index()) {
-						ctrl.line('return')
-					}
-				}
-				else {
-					ClassDeclaration.checkInfinityMethods(methods, parameters, index + 1, node, ctrl, call, argName)
-				}
-			}
-
-			ctrl.done()
-		}
-	} // }}}
-	static checkMethods(methods, parameters, index, node, fragments, call, argName) { // {{{
-		if !?parameters[index + 1] {
-			SyntaxException.throwNotDifferentiableMethods(node)
-		}
-
-		const tree = []
-		const usages = []
-
-		let type, nf, item, usage
-		for const type of parameters[index + 1].types {
-			tree.push(item = {
-				type: type.type
-				methods: [methods[i] for i in type.methods]
-				usage: type.methods.length
-			})
-
-			if type.type.isAny() {
-				item.weight = 0
-			}
-			else {
-				item.weight = 1_000
-			}
-
-			for i in type.methods {
-				method = methods[i]
-
-				nf = true
-				for usage in usages while nf {
-					if usage.method == method {
-						nf = false
-					}
-				}
-
-				if nf {
-					usages.push(usage = {
-						method: method,
-						types: [item]
-					})
-				}
-				else {
-					usage.types.push(item)
-				}
-			}
-		}
-
-		if tree.length == 0 {
-			return ClassDeclaration.checkMethods(methods, parameters, index + 1, node, fragments, call, argName)
-		}
-		else if tree.length == 1 {
-			item = tree[0]
-
-			if item.methods.length == 1 {
-				call(fragments, item.methods[0], item.methods[0].index())
-
-				return false
-			}
-			else {
-				return ClassDeclaration.checkMethods(methods, parameters, index + 1, node, fragments, call, argName)
-			}
-		}
-		else {
-			for usage in usages {
-				let count = usage.types.length
-
-				for type in usage.types while count >= 0 {
-					count -= type.usage
-				}
-
-				if count == 0 {
-					let item = {
-						type: [],
-						path: [],
-						methods: [usage.method]
-						usage: 0
-						weight: 0
-					}
-
-					for type in usage.types {
-						item.type.push(type.type)
-						item.usage += type.usage
-						item.weight += type.weight
-
-						tree.remove(type)
-					}
-
-					tree.push(item)
-				}
-			}
-
-			tree.sort(func(a, b) {
-				if a.weight == 0 && b.weight != 0 {
-					return 1
-				}
-				else if b.weight == 0 {
-					return -1
-				}
-				else if a.type.length == b.type.length {
-					if a.type.length == 1 && b.type.length == 1 {
-						const ac = a.type[0].type()
-						const bc = b.type[0].type()
-
-						if ac.isClass() && bc.isClass() {
-							if ac.matchInheritanceOf(bc) {
-								return -1
-							}
-							else if bc.matchInheritanceOf(ac) {
-								return 1
-							}
-						}
-					}
-
-					if a.usage == b.usage {
-						return b.weight - a.weight
-					}
-					else {
-						return b.usage - a.usage
-					}
-				}
-				else {
-					return a.type.length - b.type.length
-				}
-			})
-
-			let ctrl = fragments.newControl()
-			let ne = true
-
-			for item, i in tree {
-				if i + 1 == tree.length {
-					if !ctrl.isFirstStep() {
-						ctrl.step().code('else')
-
-						ne = false
-					}
-				}
-				else {
-					ctrl.step().code('else ') if !ctrl.isFirstStep()
-
-					ctrl.code('if(')
-
-					item.type[0].toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(index)]`))
-
-					ctrl.code(')')
-				}
-
-				ctrl.step()
-
-				if item.methods.length == 1 {
-					call(ctrl, item.methods[0], item.methods[0].index())
-				}
-				else {
-					ClassDeclaration.checkMethods(methods, parameters, index + 1, node, ctrl, call, argName)
-				}
-			}
-
-			ctrl.done()
-
-			return ne
-		}
-	} // }}}
 	static isAssigningAlias(data, name, constructor, extending) { // {{{
 		if data is Array {
 			for d in data {
@@ -380,424 +84,47 @@ class ClassDeclaration extends Statement {
 
 		return false
 	} // }}}
-	static mapMethod(method, target, map) { // {{{
-		let index = 1
-		let count = method.min()
-		let item
-
-		for parameter, p in method.parameters() {
-			for i from 1 to parameter.min() {
-				if item !?= map[index] {
-					item = map[index] = {
-						index: index
-						types: {}
-						weight: 0
-					}
-				}
-
-				ClassDeclaration.mapParameter(parameter.type(), method.index(), item)
-
-				++index
-			}
-
-			for i from parameter.min() + 1 to parameter.max() while count < target {
-				if item !?= map[index] {
-					item = map[index] = {
-						index: index
-						types: {}
-						weight: 0
-					}
-				}
-
-				ClassDeclaration.mapParameter(parameter.type(), method.index(), item)
-
-				++index
-				++count
-			}
-		}
-	} // }}}
-	static mapParameter(type, index, map) { // {{{
-		if type is UnionType {
-			for value in type.types() {
-				ClassDeclaration.mapParameter(value, index, map)
-			}
-		}
-		else {
-			if map.types[type.hashCode()] is Object {
-				map.types[type.hashCode()].methods.push(index)
-			}
-			else {
-				map.types[type.hashCode()] = {
-					type: type
-					methods: [index]
-				}
-
-				if type.isAny() {
-					map.weight += 1
-				}
-				else {
-					map.weight += 1_000
-				}
-			}
-		}
-	} // }}}
-	static toInfinitySwitchFragments(node, fragments, methods, async, call, wrongdoer, argName) { // {{{
-		const begins = []
-		const ends = []
-		const others = []
-		for method in methods {
-			const parameters = method.parameters()
-
-			if parameters[0].min() > 0 && parameters[0].max() < Infinity {
-				begins.push(method)
-			}
-			else if parameters[parameters.length - 1].min() > 0 && parameters[parameters.length - 1].max() < Infinity {
-				ends.push(method)
-			}
-			else {
-				others.push(method)
-			}
-		}
-
-		if others.length > 1 {
-			SyntaxException.throwNotDifferentiableFunction(node)
-		}
-
-		if begins.length != 0 && ends.length != 0 {
-			SyntaxException.throwNotDifferentiableFunction(node)
-		}
-
-		let groups = {}
-		let min = Infinity
-		let max = 0
-
-		if begins.length != 0 {
-			for const index from 0 til methods.length {
-				method = methods[index]
-
-				let nf = true
-				let methodMin = 0
-				let methodMax = 0
-				for const parameter in method.parameters() while nf {
-					if parameter.min() == 0 || parameter.max() == Infinity {
-						if methodMin == 0 {
-							methodMin = Infinity
-						}
-
-						nf = false
-					}
-					else {
-						methodMin += parameter.min()
-						methodMax += parameter.max()
-					}
-				}
-
-				for n from methodMin to methodMax {
-					if groups[n]? {
-						groups[n].methods.push(method)
-					}
-					else {
-						groups[n] = {
-							n: n
-							methods: [method]
-						}
-					}
-				}
-
-				min = Math.min(min, methodMin)
-				max = Math.max(max, methodMax)
-			}
-		}
-		else {
-			throw new NotImplementedException(node)
-		}
-
-		for i from min to max {
-			if group ?= groups[i] {
-				for j from i + 1 to max while (gg ?= groups[j]) && Array.same(gg.methods, group.methods) {
-					if group.n is Array {
-						group.n.push(j)
-					}
-					else {
-						group.n = [i, j]
-					}
-
-					delete groups[j]
-				}
-			}
-		}
-
-		let ctrl = fragments.newControl()
-
-		if begins.length != 0 {
-			for const group, k of groups {
-				ctrl.step().code('else ') unless ctrl.isFirstStep()
-
-				ctrl.code(`if(\(argName).length >= \(group.n))`).step()
-
-				const parameters = {}
-				for method in group.methods {
-					ClassDeclaration.mapMethod(method, group.n, parameters)
-				}
-
-				let indexes = []
-				for parameter in [value for const value of parameters].sort((a, b) => b.weight - a.weight) {
-					for const type, hash of parameter.types {
-						type.methods:Array.remove(...indexes)
-
-						if type.methods.length == 0 {
-							delete parameter.types[hash]
-						}
-					}
-
-					for const type of parameter.types {
-						if type.methods.length == 1 {
-							indexes:Array.pushUniq(type.methods[0])
-						}
-					}
-				}
-
-				ClassDeclaration.checkInfinityMethods(methods, parameters, 0, node, ctrl, call, argName)
-			}
-		}
-		else {
-			throw new NotImplementedException(node)
-		}
-
-		if others.length == 0 {
-			wrongdoer(fragments, ctrl, async, true)
-		}
-		else {
-			ctrl.done()
-
-			call(fragments, others[0], others[0].index())
-		}
-	} // }}}
-	static toSwitchFragments(node, fragments, variable, methods, name: String, extend?, header, footer, call, wrongdoer, argName, returns) { // {{{
-		let block = header(node, fragments)
-
-		let method
-		if methods.length == 0 {
-			if extend? {
-				extend(node, block, null, variable)
+	static toWrongDoingFragments(block, ctrl?, argName, async, returns) { // {{{
+		if ctrl == null {
+			if async {
+				throw new NotImplementedException()
 			}
 			else {
 				block
 					.newControl()
 					.code(`if(\(argName).length !== 0)`)
 					.step()
-					.line('throw new SyntaxError("wrong number of arguments")')
+					.line('throw new SyntaxError("Wrong number of arguments")')
 					.done()
 			}
 		}
-		else if methods.length == 1 {
-			method = methods[0]
+		else {
+			if async {
+				ctrl.step().code('else').step()
 
-			const async = method.isAsync()
-			const min = method.absoluteMin()
-			const max = method.absoluteMax()
+				ctrl.line(`let __ks_cb, __ks_error = new SyntaxError("Wrong number of arguments")`)
 
-			if min == 0 && max >= Infinity {
-				call(block, method, 0)
+				ctrl
+					.newControl()
+					.code(`if(\(argName).length > 0 && Type.isFunction((__ks_cb = \(argName)[\(argName).length - 1])))`)
+					.step()
+					.line(`return __ks_cb(__ks_error)`)
+					.step()
+					.code(`else`)
+					.step()
+					.line(`throw __ks_error`)
+					.done()
+
+				ctrl.done()
 			}
-			else if min == max {
-				const ctrl = block.newControl()
+			else if returns {
+				ctrl.done()
 
-				ctrl.code(`if(\(argName).length === \(min))`).step()
-
-				call(ctrl, method, 0)
-
-				if extend {
-					extend(node, block, ctrl, variable)
-				}
-				else {
-					wrongdoer(block, ctrl, async, returns)
-				}
-			}
-			else if max < Infinity {
-				let ctrl = block.newControl()
-
-				ctrl.code(`if(\(argName).length >= \(min) && \(argName).length <= \(max))`).step()
-
-				call(ctrl, method, 0)
-
-				wrongdoer(block, ctrl, async, returns)
+				block.line('throw new SyntaxError("Wrong number of arguments")')
 			}
 			else {
-				call(block, method, 0)
+				ctrl.step().code('else').step().line('throw new SyntaxError("Wrong number of arguments")').done()
 			}
-		}
-		else {
-			const async = methods[0].isAsync()
-
-			let groups = {}
-			let infinities = []
-			let min = Infinity
-			let max = 0
-			let asyncCount = 0
-			let syncCount = 0
-
-			for index from 0 til methods.length {
-				method = methods[index]
-				method.index(index)
-
-				if method.isAsync() {
-					++asyncCount
-				}
-				else {
-					++syncCount
-				}
-
-				if method.absoluteMax() == Infinity {
-					infinities.push(method)
-				}
-				else {
-					for n from method.absoluteMin() to method.absoluteMax() {
-						if groups[n]? {
-							groups[n].methods.push(method)
-						}
-						else {
-							groups[n] = {
-								n: n
-								methods: [method]
-							}
-						}
-					}
-
-					min = Math.min(min, method.absoluteMin())
-					max = Math.max(max, method.absoluteMax())
-				}
-			}
-
-			if asyncCount != 0 && syncCount != 0 {
-				SyntaxException.throwInvalidSyncMethods(node.name(), name, node)
-			}
-
-			for method in infinities {
-				for const :group of groups when method.absoluteMin() >= group.n {
-					group.methods.push(method)
-				}
-			}
-
-			if min == Infinity {
-				ClassDeclaration.toInfinitySwitchFragments(node, block, infinities, async, call, wrongdoer, argName)
-			}
-			else {
-				for i from min to max {
-					if group ?= groups[i] {
-						for j from i + 1 to max while (gg ?= groups[j]) && Array.same(gg.methods, group.methods) {
-							if group.n is Array {
-								group.n.push(j)
-							}
-							else {
-								group.n = [i, j]
-							}
-
-							delete groups[j]
-						}
-					}
-				}
-
-				let ctrl = block.newControl()
-
-				for const group, k of groups {
-					ctrl.step().code('else ') unless ctrl.isFirstStep()
-
-					if group.n is Array {
-						if group.n.length == 2 {
-							ctrl.code(`if(\(argName).length === \(group.n[0]) || \(argName).length === \(group.n[1]))`).step()
-						}
-						else {
-							ctrl.code(`if(\(argName).length >= \(group.n[0]) && \(argName).length <= \(group.n[group.n.length - 1]))`).step()
-						}
-					}
-					else {
-						ctrl.code(`if(\(argName).length === \(group.n))`).step()
-					}
-
-					if group.methods.length == 1 {
-						call(ctrl, group.methods[0], group.methods[0].index())
-					}
-					else {
-						const parameters = {}
-						for method in group.methods {
-							ClassDeclaration.mapMethod(method, group.n, parameters)
-						}
-
-						let indexes = []
-						for parameter in [value for const value of parameters].sort((a, b) => b.weight - a.weight) {
-							for const type, hash of parameter.types {
-								type.methods:Array.remove(...indexes)
-
-								if type.methods.length == 0 {
-									delete parameter.types[hash]
-								}
-							}
-
-							for const type of parameter.types {
-								if type.methods.length == 1 {
-									indexes:Array.pushUniq(type.methods[0])
-								}
-							}
-						}
-
-						if ClassDeclaration.checkMethods(methods, parameters, 0, node, ctrl, call, argName) {
-							if returns {
-								fragments.line('throw new Error("Wrong type of arguments")')
-							}
-							else {
-								fragments.step().code('else').step().code('throw new Error("Wrong type of arguments")')
-							}
-						}
-					}
-				}
-
-				if infinities.length == 0 {
-					wrongdoer(block, ctrl, async, returns)
-				}
-				else if infinities.length == 1 {
-					ctrl.step().code('else').step()
-
-					call(ctrl, infinities[0], infinities[0].index())
-
-					ctrl.done()
-				}
-				else {
-					throw new NotImplementedException(node)
-				}
-			}
-		}
-
-		footer(block)
-
-		return fragments
-	} // }}}
-	static toWrongDoingFragments(block, ctrl, async, returns) { // {{{
-		if async {
-			ctrl.step().code('else').step()
-
-			ctrl.line(`let __ks_cb, __ks_error = new SyntaxError("wrong number of arguments")`)
-
-			ctrl
-				.newControl()
-				.code(`if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1])))`)
-				.step()
-				.line(`return __ks_cb(__ks_error)`)
-				.step()
-				.code(`else`)
-				.step()
-				.line(`throw __ks_error`)
-				.done()
-
-			ctrl.done()
-		}
-		else if returns {
-			ctrl.done()
-
-			block.line('throw new SyntaxError("wrong number of arguments")')
-		}
-		else {
-			ctrl.step().code('else').step().line('throw new SyntaxError("wrong number of arguments")').done()
 		}
 	} // }}}
 	constructor(data, parent, scope) { // {{{
@@ -1131,7 +458,7 @@ class ClassDeclaration extends Statement {
 			if @destructor? {
 				@destructor.toFragments(ctrl, Mode::None)
 
-				ClassDestructorDeclaration.toSwitchFragments(this, ctrl, @type)
+				ClassDestructorDeclaration.toRouterFragments(this, ctrl, @type)
 			}
 
 			for const methods, name of @classMethods {
@@ -1205,7 +532,7 @@ class ClassDeclaration extends Statement {
 			m.push(method.type())
 		}
 
-		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
+		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
 
 		for const methods, name of @instanceMethods {
 			m.clear()
@@ -1288,14 +615,14 @@ class ClassDeclaration extends Statement {
 			m.push(method.type())
 		}
 
-		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons(args)').step(), func(fragments) {
+		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons(args)').step(), func(fragments) {
 			fragments.done()
 		})
 
 		if @destructor? {
 			@destructor.toFragments(clazz, Mode::None)
 
-			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
+			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
 
 		for const methods, name of @instanceMethods {
@@ -1369,14 +696,13 @@ class ClassDeclaration extends Statement {
 				.newLine()
 				.code('const __ks_cons = (__ks_arguments) =>')
 
-			ClassDeclaration.toSwitchFragments(
-				this
+			const assessment = Router.assess('constructor', @type, m, false, this)
+
+			Router.toFragments(
+				assessment
 				line.newBlock()
-				@type
-				m
-				'constructor'
-				func(node, fragments, ctrl, variable) {
-				}
+				'__ks_arguments'
+				false
 				func(node, fragments) => fragments
 				func(fragments) {
 					fragments.done()
@@ -1385,8 +711,7 @@ class ClassDeclaration extends Statement {
 					fragments.line(`__ks_cons_\(index)(__ks_arguments)`)
 				}
 				ClassDeclaration.toWrongDoingFragments
-				'__ks_arguments'
-				false
+				this
 			)
 
 			line.done()
@@ -1441,7 +766,7 @@ class ClassDeclaration extends Statement {
 		if @destructor? {
 			@destructor.toFragments(clazz, Mode::None)
 
-			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
+			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
 
 		for const methods, name of @instanceMethods {
@@ -1499,7 +824,7 @@ class ClassDeclaration extends Statement {
 			if @destructor? {
 				@destructor.toFragments(ctrl, Mode::None)
 
-				ClassDestructorDeclaration.toSwitchFragments(this, ctrl, @type)
+				ClassDestructorDeclaration.toRouterFragments(this, ctrl, @type)
 			}
 
 			for const methods, name of @classMethods {
@@ -1554,7 +879,7 @@ class ClassDeclaration extends Statement {
 			m.push(method.type())
 		}
 
-		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
+		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
 
 		for const methods, name of @instanceMethods {
 			m.clear()
@@ -1624,14 +949,14 @@ class ClassDeclaration extends Statement {
 			m.push(method.type())
 		}
 
-		ClassConstructorDeclaration.toSwitchFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons(args)').step(), func(fragments) {
+		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons(args)').step(), func(fragments) {
 			fragments.done()
 		})
 
 		if @destructor? {
 			@destructor.toFragments(clazz, Mode::None)
 
-			ClassDestructorDeclaration.toSwitchFragments(this, clazz, @type)
+			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
 		}
 
 		for const methods, name of @instanceMethods {
@@ -1929,58 +1254,102 @@ class ClassMethodDeclaration extends Statement {
 		_type: Type
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
-		let extend = null
+		const assessment = Router.assess(name, variable, methods, false, node)
+
 		if variable.type().isExtending() {
-			extend = func(node, fragments, ctrl?, variable) {
-				const extends = variable.type().extends()
-				const parent = extends.name()
+			return Router.toFragments(
+				assessment
+				fragments
+				'arguments'
+				true
+				header
+				footer
+				ClassDeclaration.callMethod^^(node, variable, `__ks_sttc_\(name)_`, 'arguments', 'return ')
+				(block, ctrl?, argName, async, returns) => {
+					const extends = variable.type().extends()
+					const parent = extends.name()
 
-				if extends.type().hasClassMethod(name) {
-					ctrl.done()
+					if extends.type().hasClassMethod(name) {
+						ctrl.done()
 
-					fragments.line(`return \(parent).\(name).apply(null, arguments)`)
+						block.line(`return \(parent).\(name).apply(null, arguments)`)
+					}
+					else {
+						ctrl
+							.step()
+							.code(`else if(\(parent).\(name))`)
+							.step()
+							.line(`return \(parent).\(name).apply(null, arguments)`)
+							.done()
+
+						block.line('throw new SyntaxError("Wrong number of arguments")')
+					}
 				}
-				else {
-					ctrl
-						.step()
-						.code(`else if(\(parent).\(name))`)
-						.step()
-						.line(`return \(parent).\(name).apply(null, arguments)`)
-						.done()
-
-					fragments.line('throw new SyntaxError("wrong number of arguments")')
-				}
-			}
+				node
+			)
 		}
-
-		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, name, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, `__ks_sttc_\(name)_`, 'arguments', 'return '), ClassDeclaration.toWrongDoingFragments, 'arguments', true)
+		else {
+			return Router.toFragments(
+				assessment
+				fragments
+				'arguments'
+				true
+				header
+				footer
+				ClassDeclaration.callMethod^^(node, variable, `__ks_sttc_\(name)_`, 'arguments', 'return ')
+				ClassDeclaration.toWrongDoingFragments
+				node
+			)
+		}
 	} // }}}
 	static toInstanceSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
-		let extend = null
+		const assessment = Router.assess(name, variable, methods, false, node)
+
 		if variable.type().isExtending() {
-			extend = func(node, fragments, ctrl?, variable) {
-				const extends = variable.type().extends()
-				const parent = extends.name()
+			return Router.toFragments(
+				assessment
+				fragments
+				'arguments'
+				true
+				header
+				footer
+				ClassDeclaration.callMethod^^(node, variable, `prototype.__ks_func_\(name)_`, 'arguments', 'return ')
+				(block, ctrl?, argName, async, returns) => {
+					const extends = variable.type().extends()
+					const parent = extends.name()
 
-				if extends.type().hasInstanceMethod(name) {
-					ctrl.done()
+					if extends.type().hasInstanceMethod(name) {
+						ctrl.done()
 
-					fragments.line(`return \(parent).prototype.\(name).apply(this, arguments)`)
+						block.line(`return \(parent).prototype.\(name).apply(this, arguments)`)
+					}
+					else {
+						ctrl
+							.step()
+							.code(`else if(\(parent).prototype.\(name))`)
+							.step()
+							.line(`return \(parent).prototype.\(name).apply(this, arguments)`)
+							.done()
+
+						block.line('throw new SyntaxError("Wrong number of arguments")')
+					}
 				}
-				else {
-					ctrl
-						.step()
-						.code(`else if(\(parent).prototype.\(name))`)
-						.step()
-						.line(`return \(parent).prototype.\(name).apply(this, arguments)`)
-						.done()
-
-					fragments.line('throw new SyntaxError("wrong number of arguments")')
-				}
-			}
+				node
+			)
 		}
-
-		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, name, extend, header, footer, ClassDeclaration.callMethod^^(node, variable, `prototype.__ks_func_\(name)_`, 'arguments', 'return '), ClassDeclaration.toWrongDoingFragments, 'arguments', true)
+		else {
+			return Router.toFragments(
+				assessment
+				fragments
+				'arguments'
+				true
+				header
+				footer
+				ClassDeclaration.callMethod^^(node, variable, `prototype.__ks_func_\(name)_`, 'arguments', 'return ')
+				ClassDeclaration.toWrongDoingFragments
+				node
+			)
+		}
 	} // }}}
 	constructor(data, parent) { // {{{
 		super(data, parent, parent.newInstanceMethodScope(this))
@@ -2162,27 +1531,50 @@ class ClassConstructorDeclaration extends Statement {
 		_parameters
 		_type: Type
 	}
-	static toSwitchFragments(node, fragments, variable, methods, header, footer) { // {{{
-		let extend = null
+	static toRouterFragments(node, fragments, variable, methods, header, footer) { // {{{
+		const assessment = Router.assess('constructor', variable, methods, false, node)
+
 		if node.isExtending() {
-			extend = func(node, fragments, ctrl?, variable) {
-				if variable.type().hasConstructors() {
-					ctrl
-						.step()
-						.code('else')
-						.step()
-						.line(`throw new SyntaxError("wrong number of arguments")`)
-						.done()
-				}
-				else {
-					const constructorName = variable.type().extends().isSealedAlien() ? 'constructor' : '__ks_cons'
+			return Router.toFragments(
+				assessment
+				fragments
+				'args'
+				false
+				header
+				footer
+				ClassDeclaration.callMethod^^(node, variable, 'prototype.__ks_cons_', 'args', '')
+				(block, ctrl?, argName, async, returns) => {
+					if variable.type().hasConstructors() {
+						ctrl
+							.step()
+							.code('else')
+							.step()
+							.line(`throw new SyntaxError("Wrong number of arguments")`)
+							.done()
+					}
+					else {
+						const constructorName = variable.type().extends().isSealedAlien() ? 'constructor' : '__ks_cons'
 
-					fragments.line(`\(variable.type().extends().path()).prototype.\(constructorName).call(this, args)`)
+						block.line(`\(variable.type().extends().path()).prototype.\(constructorName).call(this, args)`)
+					}
 				}
-			}
+				node
+			)
+
 		}
-
-		return ClassDeclaration.toSwitchFragments(node, fragments, variable, methods, 'constructor', extend, header, footer, ClassDeclaration.callMethod^^(node, variable, 'prototype.__ks_cons_', 'args', ''), ClassDeclaration.toWrongDoingFragments, 'args', false)
+		else {
+			return Router.toFragments(
+				assessment
+				fragments
+				'args'
+				false
+				header
+				footer
+				ClassDeclaration.callMethod^^(node, variable, 'prototype.__ks_cons_', 'args', '')
+				ClassDeclaration.toWrongDoingFragments
+				node
+			)
+		}
 	} // }}}
 	constructor(data, parent) { // {{{
 		super(data, parent, parent.newScope(parent._constructorScope, ScopeType::Block))
@@ -2409,7 +1801,7 @@ class ClassDestructorDeclaration extends Statement {
 		_parameters: Array
 		_type: Type
 	}
-	static toSwitchFragments(node, fragments, variable) { // {{{
+	static toRouterFragments(node, fragments, variable) { // {{{
 		let ctrl = fragments.newControl()
 
 		if node._es5 {

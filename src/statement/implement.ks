@@ -355,30 +355,42 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @class.isSealed() {
-				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @variable, @class.getInstanceMethods(@name), @name, null, (node, fragments) => {
-					const block = fragments.code(`\(@variable.getSealedName())._im_\(@name) = function(that)`).newBlock()
+				const assessment = Router.assess(@name, @variable, @class.getInstanceMethods(@name), false, this)
 
-					block.line('var args = Array.prototype.slice.call(arguments, 1, arguments.length)')
+				Router.toFragments(
+					assessment
+					fragments.newLine()
+					'args'
+					true
+					(node, fragments) => {
+						const block = fragments.code(`\(@variable.getSealedName())._im_\(@name) = function(that)`).newBlock()
 
-					return block
-				}, (fragments) => fragments.done(), (fragments, method, index) => {
-					if method.max() == 0 {
-						if method.isSealed() {
-							fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(index).apply(that)`)
+						block.line('var args = Array.prototype.slice.call(arguments, 1, arguments.length)')
+
+						return block
+					}
+					(fragments) => fragments.done()
+					(fragments, method, index) => {
+						if method.max() == 0 {
+							if method.isSealed() {
+								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(index).apply(that)`)
+							}
+							else {
+								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(index).apply(that)`)
+							}
 						}
 						else {
-							fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(index).apply(that)`)
+							if method.isSealed() {
+								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(index).apply(that, args)`)
+							}
+							else {
+								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
+							}
 						}
 					}
-					else {
-						if method.isSealed() {
-							fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(index).apply(that, args)`)
-						}
-						else {
-							fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
-						}
-					}
-				}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
+					ClassDeclaration.toWrongDoingFragments
+					this
+				).done()
 			}
 			else {
 				ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @variable, @class.getInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
@@ -386,30 +398,42 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 		else {
 			if @class.isSealed() {
-				ClassDeclaration.toSwitchFragments(this, fragments.newLine(), @variable, @class.getClassMethods(@name), @name, null, (node, fragments) => {
-					const block = fragments.code(`\(@variable.getSealedName())._cm_\(@name) = function()`).newBlock()
+				const assessment = Router.assess(@name, @variable, @class.getClassMethods(@name), false, this)
 
-					block.line('var args = Array.prototype.slice.call(arguments)')
+				Router.toFragments(
+					assessment
+					fragments.newLine()
+					'args'
+					true
+					(node, fragments) => {
+						const block = fragments.code(`\(@variable.getSealedName())._cm_\(@name) = function()`).newBlock()
 
-					return block
-				}, (fragments) => fragments.done(), (fragments, method, index) => {
-					if method.max() == 0 {
-						if method.isSealed() {
-							fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(index)()`)
+						block.line('var args = Array.prototype.slice.call(arguments)')
+
+						return block
+					}
+					(fragments) => fragments.done()
+					(fragments, method, index) => {
+						if method.max() == 0 {
+							if method.isSealed() {
+								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(index)()`)
+							}
+							else {
+								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(index)()`)
+							}
 						}
 						else {
-							fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(index)()`)
+							if method.isSealed() {
+								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+							}
+							else {
+								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+							}
 						}
 					}
-					else {
-						if method.isSealed() {
-							fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
-						}
-						else {
-							fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
-						}
-					}
-				}, ClassDeclaration.toWrongDoingFragments, 'args', true).done()
+					ClassDeclaration.toWrongDoingFragments
+					this
+				).done()
 			}
 			else {
 				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @variable, @class.getClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()

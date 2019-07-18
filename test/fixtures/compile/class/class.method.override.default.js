@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_format_0(message) {
@@ -28,7 +28,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return LetterBox.prototype.__ks_func_format_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	LetterBox.prototype.__ks_func_format_0 = function(message) {

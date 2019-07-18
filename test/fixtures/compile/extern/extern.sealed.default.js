@@ -8,7 +8,7 @@ module.exports = function() {
 		if(args.length === 0) {
 			return __ks_Number.__ks_func_zeroPad_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	var __ks_Math = {};
 	__ks_Number._im_zeroPad(Math.pow(3, 2));

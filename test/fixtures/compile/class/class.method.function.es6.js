@@ -36,7 +36,7 @@ module.exports = function() {
 				LetterBox.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_build_01_0() {
@@ -56,7 +56,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_01_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_build_02_0() {
 			return this._messages.map((...__ks_arguments) => {
@@ -81,7 +81,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_02_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_build_03_0() {
 			return this._messages.map((...__ks_arguments) => {
@@ -106,7 +106,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_03_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_build_04_0() {
 			return this._messages.map((...__ks_arguments) => {
@@ -131,7 +131,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_04_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_build_05_0() {
 			return this._messages.map(function(message) {
@@ -154,7 +154,7 @@ module.exports = function() {
 			if(arguments.length === 0) {
 				return LetterBox.prototype.__ks_func_build_05_0.apply(this);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_format_0(message) {
 			if(arguments.length < 1) {
@@ -172,7 +172,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return LetterBox.prototype.__ks_func_format_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		static __ks_sttc_compose_00_0(box) {
 			if(arguments.length < 1) {
@@ -195,7 +195,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return LetterBox.__ks_sttc_compose_00_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		static __ks_sttc_compose_01_0(box) {
 			if(arguments.length < 1) {
@@ -224,7 +224,7 @@ module.exports = function() {
 			if(arguments.length === 1) {
 				return LetterBox.__ks_sttc_compose_01_0.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 };

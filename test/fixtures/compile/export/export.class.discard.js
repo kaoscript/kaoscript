@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	}
@@ -64,7 +64,7 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_2.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 		__ks_func_color_0() {
@@ -90,7 +90,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Shape.prototype.__ks_func_color_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_name_0() {
 			return this._name;
@@ -115,7 +115,7 @@ module.exports = function() {
 			else if(arguments.length === 1) {
 				return Shape.prototype.__ks_func_name_1.apply(this, arguments);
 			}
-			throw new SyntaxError("wrong number of arguments");
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
 	return {

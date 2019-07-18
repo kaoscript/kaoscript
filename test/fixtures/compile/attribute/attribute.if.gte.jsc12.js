@@ -28,7 +28,7 @@ module.exports = function() {
 				Shape.prototype.__ks_cons_0.apply(this, args);
 			}
 			else {
-				throw new SyntaxError("wrong number of arguments");
+				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
 	}
@@ -45,6 +45,6 @@ module.exports = function() {
 		if(arguments.length === 1) {
 			return Shape.prototype.__ks_func_draw_trident_0.apply(this, arguments);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 };

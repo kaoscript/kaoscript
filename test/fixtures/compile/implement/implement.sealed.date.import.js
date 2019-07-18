@@ -28,14 +28,14 @@ module.exports = function(__ks_0, __ks___ks_0) {
 		if(args.length === 0) {
 			return __ks_Date.__ks_sttc_today_0();
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	__ks_Date._im_midnight = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length === 0) {
 			return __ks_Date.__ks_func_midnight_0.apply(that);
 		}
-		throw new SyntaxError("wrong number of arguments");
+		throw new SyntaxError("Wrong number of arguments");
 	};
 	console.log(__ks_Date._cm_today());
 	console.log(__ks_Date._im_midnight(new Date()));
