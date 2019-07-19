@@ -1,0 +1,1 @@
+SyntaxException: The bit flags enum "Foobar" can only have at most 53 bits. (line 1, file "fixtures/compile/enum/enum.flags.overflow.list.ks")

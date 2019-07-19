@@ -221,6 +221,9 @@ export class SyntaxException extends Exception {
 		throwDuplicateMethod(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The method "\(name)" is matching an existing method`, node)
 		} // }}}
+		throwEnumOverflow(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The bit flags enum "\(name)" can only have at most 53 bits.`, node)
+		} // }}}
 		throwInvalidAwait(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
 		} // }}}

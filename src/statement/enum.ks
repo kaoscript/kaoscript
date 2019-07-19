@@ -71,6 +71,10 @@ class EnumDeclaration extends Statement {
 						}
 						else {
 							if data.value.kind == NodeKind::NumericExpression {
+								if data.value.value > 53 {
+									SyntaxException.throwEnumOverflow(@name, this)
+								}
+
 								@enum.index(data.value.value)
 							}
 							else {
@@ -79,16 +83,20 @@ class EnumDeclaration extends Statement {
 
 							@values.push({
 								name: data.name.name
-								value: @enum.index() <= 0 ? 0 : 1 << (@enum.index() - 1)
+								value: @enum.index() <= 0 ? 0 : Math.pow(2, @enum.index() - 1)
 							})
 
 							@enum.addElement(data.name.name)
 						}
 					}
 					else {
+						if @enum.step() > 53 {
+							SyntaxException.throwEnumOverflow(@name, this)
+						}
+
 						@values.push({
 							name: data.name.name
-							value: @enum.step().index() <= 0 ? 0 : 1 << (@enum.index() - 1)
+							value: @enum.index() <= 0 ? 0 : Math.pow(2, @enum.index() - 1)
 						})
 
 						@enum.addElement(data.name.name)

@@ -79,11 +79,7 @@ class EnumType extends Type {
 
 		return false
 	} // }}}
-	step(): EnumType { // {{{
-		@index++
-
-		return this
-	} // }}}
+	step() => ++@index
 	toQuote() { // {{{
 		throw new NotImplementedException()
 	} // }}}
