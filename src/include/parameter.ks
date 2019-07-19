@@ -15,6 +15,7 @@ class Parameter extends AbstractNode {
 		_anonymous: Boolean
 		_arity								= null
 		_defaultValue						= null
+		_explicitlyRequired: Boolean		= false
 		_hasDefaultValue: Boolean			= false
 		_header: Boolean					= false
 		_maybeHeadedDefaultValue: Boolean	= false
@@ -579,13 +580,6 @@ class Parameter extends AbstractNode {
 
 				@scope.define(name, false, null, this)
 			}
-
-			if @data.defaultValue? {
-				@defaultValue = $compile.expression(@data.defaultValue, @parent)
-				@defaultValue.analyse()
-
-				@hasDefaultValue = true
-			}
 		}
 	} // }}}
 	prepare() { // {{{
@@ -609,8 +603,7 @@ class Parameter extends AbstractNode {
 		let min: Number = 1
 		let max: Number = 1
 
-		let nf = true
-		for modifier in @data.modifiers while nf {
+		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Rest {
 				@rest = true
 
@@ -624,21 +617,30 @@ class Parameter extends AbstractNode {
 					min = 0
 					max = Infinity
 				}
-
-				nf = true
+			}
+			else if modifier.kind == ModifierKind::Required {
+				@explicitlyRequired = true
 			}
 		}
 
-		if @hasDefaultValue {
+		if @data.defaultValue? {
 			if !type.isNullable() && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
 				type = type.setNullable(true)
 			}
 
-			@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && type.isNullable() || @name is not IdentifierLiteral
+			if !(@explicitlyRequired && type.isNullable()) {
+				@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && type.isNullable() || @name is not IdentifierLiteral
 
-			@defaultValue.prepare()
+				@defaultValue = $compile.expression(@data.defaultValue, @parent)
+				@defaultValue.analyse()
+				@defaultValue.prepare()
 
-			min = 0
+				@hasDefaultValue = true
+
+				if !@explicitlyRequired {
+					min = 0
+				}
+			}
 		}
 
 		const name = !@anonymous && @name is IdentifierLiteral ? @name.name() : null
