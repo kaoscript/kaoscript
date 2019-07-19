@@ -59,7 +59,7 @@ class NamedType extends Type {
 	} // }}}
 	getHierarchy() { // {{{
 		if @type is ClassType {
-			return @type:ClassType.getHierarchy(@name)
+			return @type.getHierarchy(@name)
 		}
 		else {
 			return [@name]

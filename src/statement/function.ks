@@ -326,10 +326,11 @@ class FunctionDeclaration extends Statement {
 
 class FunctionDeclarator extends AbstractNode {
 	private {
-		_awaiting: Boolean				= false
+		_awaiting: Boolean			= false
 		_block: Block
 		_exit: Boolean				= false
 		_parameters: Array			= []
+		_returnNull: Boolean		= false
 		_variable: FunctionVariable
 		_type: FunctionType
 	}
@@ -358,6 +359,8 @@ class FunctionDeclarator extends AbstractNode {
 		for parameter in @parameters {
 			parameter.translate()
 		}
+
+		@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
 
 		@block = $compile.block($ast.body(@data), this)
 		@block.analyse()
@@ -418,8 +421,13 @@ class FunctionDeclarator extends AbstractNode {
 
 		fragments.compile(@block, Mode::None)
 
-		if !@awaiting && !@exit && @type.isAsync() {
-			fragments.line('__ks_cb()')
+		if !@exit {
+			if !@awaiting && @type.isAsync() {
+				fragments.line('__ks_cb()')
+			}
+			else if @returnNull {
+				fragments.line('return null')
+			}
 		}
 	} // }}}
 	toStatementFragments(fragments, name, mode) { // {{{
@@ -431,8 +439,13 @@ class FunctionDeclarator extends AbstractNode {
 
 		ctrl.compile(@block, Mode::None)
 
-		if !@awaiting && !@exit && @type.isAsync() {
-			ctrl.line('__ks_cb()')
+		if !@exit {
+			if !@awaiting && @type.isAsync() {
+				ctrl.line('__ks_cb()')
+			}
+			else if @returnNull {
+				ctrl.line('return null')
+			}
 		}
 
 		ctrl.done()

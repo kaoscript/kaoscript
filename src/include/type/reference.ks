@@ -371,7 +371,7 @@ class ReferenceType extends Type {
 				fragments.code(`\($runtime.type(node)).is(`).compile(node).code(`, `)
 
 				if @type is NamedType {
-					fragments.code(@type:NamedType.path())
+					fragments.code(@type.path())
 				}
 				else {
 					fragments.code(@name)

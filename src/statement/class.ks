@@ -1251,6 +1251,7 @@ class ClassMethodDeclaration extends Statement {
 		_internalName: String
 		_name: String
 		_parameters: Array
+		_returnNull: Boolean	= false
 		_type: Type
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
@@ -1420,6 +1421,10 @@ class ClassMethodDeclaration extends Statement {
 			parameter.analyse()
 		}
 
+		if @data.body? {
+			@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
+		}
+
 		@block = $compile.block($ast.body(@data), this)
 	} // }}}
 	prepare() { // {{{
@@ -1504,8 +1509,13 @@ class ClassMethodDeclaration extends Statement {
 		else {
 			ctrl.compile(@block)
 
-			if !@exit && @type.isAsync() {
-				ctrl.line('__ks_cb()')
+			if !@exit {
+				if @type.isAsync() {
+					ctrl.line('__ks_cb()')
+				}
+				else if @returnNull {
+					ctrl.line('return null')
+				}
 			}
 		}
 
@@ -1898,10 +1908,25 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		@name = data.name.name
 
-		for i from 0 til data.modifiers.length while @instance {
-			if data.modifiers[i].kind == ModifierKind::Static {
-				@instance = false
+		let public = false
+		let alias = false
+
+		for const modifier in data.modifiers {
+			switch modifier.kind {
+				ModifierKind::Public => {
+					public = true
+				}
+				ModifierKind::Static => {
+					@instance = false
+				}
+				ModifierKind::ThisAlias => {
+					alias = true
+				}
 			}
+		}
+
+		if alias && !public {
+			@name = `_\(@name)`
 		}
 
 		if @instance {
