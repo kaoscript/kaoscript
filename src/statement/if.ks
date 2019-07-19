@@ -36,15 +36,17 @@ class IfStatement extends Statement {
 		@whenTrueExpression.analyse()
 
 		if @data.whenFalse? {
+			@whenFalseScope = this.newScope(@scope, ScopeType::InlineBlock)
+
 			if @data.whenFalse.kind == NodeKind::IfStatement {
-				@whenFalseExpression = $compile.statement(@data.whenFalse, this)
+				@whenFalseExpression = $compile.statement(@data.whenFalse, this, @whenFalseScope)
 				@whenFalseExpression.analyse()
 			}
 			else {
-				@whenFalseScope = this.newScope(@scope, ScopeType::InlineBlock)
-
 				@whenFalseExpression = $compile.block(@data.whenFalse, this, @whenFalseScope)
 				@whenFalseExpression.analyse()
+
+
 			}
 		}
 	} // }}}
@@ -67,23 +69,36 @@ class IfStatement extends Statement {
 
 		@whenTrueExpression.prepare()
 
-		if @whenFalseExpression != null {
+		if @whenFalseExpression == null {
+			if @whenTrueExpression.isExit() {
+				if !@declared {
+					for const type, name of @condition.reduceContraryTypes() {
+						@scope.replaceVariable(name, type, this)
+					}
+				}
+			}
+		}
+		else {
+			if !@declared {
+				for const type, name of @condition.reduceContraryTypes() {
+					@whenFalseScope.replaceVariable(name, type, this)
+				}
+			}
+
 			@whenFalseExpression.prepare()
 
-			if @whenFalseScope != null {
-				const trueVariables = @whenTrueScope.listReplacedVariables()
-				const falseVariables = @whenFalseScope.listReplacedVariables()
+			const trueVariables = @whenTrueScope.listReplacedVariables()
+			const falseVariables = @whenFalseScope.listReplacedVariables()
 
-				for const :name of trueVariables when falseVariables[name]? {
-					const trueType = trueVariables[name].getRealType()
-					const falseType = falseVariables[name].getRealType()
+			for const :name of trueVariables when falseVariables[name]? {
+				const trueType = trueVariables[name].getRealType()
+				const falseType = falseVariables[name].getRealType()
 
-					if trueType.equals(falseType) {
-						@scope.replaceVariable(name, trueType, this)
-					}
-					else {
-						@scope.replaceVariable(name, Type.union(@scope, trueType, falseType), this)
-					}
+				if trueType.equals(falseType) {
+					@scope.replaceVariable(name, trueType, this)
+				}
+				else {
+					@scope.replaceVariable(name, Type.union(@scope, trueType, falseType), this)
 				}
 			}
 		}

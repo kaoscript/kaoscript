@@ -19,6 +19,12 @@ class UnlessStatement extends Statement {
 		this.assignTempVariables(@scope)
 
 		@whenFalseExpression.prepare()
+
+		if @whenFalseExpression.isExit() {
+			for const type, name of @condition.reduceTypes() {
+				@scope.replaceVariable(name, type, this)
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		@condition.translate()

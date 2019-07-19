@@ -108,6 +108,22 @@ class ComparisonExpression extends Expression {
 
 		return false
 	} // }}}
+	reduceTypes() { // {{{
+		if @operators.length == 1 {
+			return @operators[0].reduceTypes()
+		}
+		else {
+			return {}
+		}
+	} // }}}
+	reduceContraryTypes() { // {{{
+		if @operators.length == 1 {
+			return @operators[0].reduceContraryTypes()
+		}
+		else {
+			return {}
+		}
+	} // }}}
 	releaseReusable() { // {{{
 		if @composite {
 			@scope.releaseTempName(@reuseName)
@@ -171,6 +187,8 @@ abstract class ComparisonOperator {
 	constructor(@left, @right)
 	prepare()
 	isComputed() => true
+	reduceTypes() => {}
+	reduceContraryTypes() => {}
 }
 
 class EqualityOperator extends ComparisonOperator {
@@ -205,6 +223,20 @@ class EqualityOperator extends ComparisonOperator {
 		}
 	} // }}}
 	isComputed() => !@nanLeft && !@nanRight
+	reduceContraryTypes() { // {{{
+		const variables = {}
+
+		if @left is IdentifierLiteral && @right is IdentifierLiteral {
+			if @left.value() == 'null' {
+				variables[@right.value()] = @right.type().setNullable(false)
+			}
+			else if @right.value() == 'null' {
+				variables[@left.value()] = @left.type().setNullable(false)
+			}
+		}
+
+		return variables
+	} // }}}
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {
@@ -248,6 +280,8 @@ class EqualityOperator extends ComparisonOperator {
 }
 
 class InequalityOperator extends EqualityOperator {
+	reduceTypes() => super.reduceContraryTypes()
+	reduceContraryTypes() => super.reduceTypes()
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {
@@ -294,9 +328,9 @@ class DirtyComparisonOperator extends ComparisonOperator {
 	private {
 		_operator: String
 	}
-	constructor(@left, @right, @operator) {
+	constructor(@left, @right, @operator) { // {{{
 		super(left, right)
-	}
+	} // }}}
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if leftReusable && reuseName != null  {
 			fragments.code(reuseName)

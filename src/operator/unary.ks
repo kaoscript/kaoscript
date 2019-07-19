@@ -101,6 +101,8 @@ class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
+	reduceTypes() => @argument.reduceContraryTypes()
+	reduceContraryTypes() => @argument.reduceTypes()
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('!', @data.operator)

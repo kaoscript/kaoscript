@@ -30,6 +30,7 @@ abstract class Expression extends AbstractNode {
 	// if the expression generates multiple assignments
 	isSplitAssignment() => false
 	reduceTypes() => {}
+	reduceContraryTypes() => {}
 	setAssignment(type: AssignmentType)
 	statement(data) { // {{{
 		let expression = this
