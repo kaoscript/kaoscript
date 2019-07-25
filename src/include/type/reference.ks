@@ -2,7 +2,7 @@ class ReferenceType extends Type {
 	private {
 		_name: String
 		_nullable: Boolean = false
-		_parameters: Array<Type>
+		_parameters: Array<ReferenceType>
 		_predefined: Boolean = false
 		_type: Type
 		_variable: Variable
@@ -117,12 +117,12 @@ class ReferenceType extends Type {
 		if @parameters.length != 0 {
 			hash += '<'
 
-			for parameter, i in @parameters {
+			for const parameter, i in @parameters {
 				if i {
 					hash += ','
 				}
 
-				hash += parameter:ReferenceType.hashCode()
+				hash += parameter.hashCode()
 			}
 
 			hash += '>'
@@ -177,6 +177,41 @@ class ReferenceType extends Type {
 		}
 
 		return false
+	} // }}}
+	isMatching(value: Type, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Exact {
+			if value is ReferenceType {
+				if @name != value._name || @nullable != value._nullable || @parameters.length != value._parameters.length {
+					return false
+				}
+
+				// TODO: test @parameters
+
+				return true
+			}
+			else {
+				return value.isMatching(this, mode)
+			}
+		}
+		else {
+			if value is ReferenceType {
+				if this.isEnum() {
+					return value.discardReference() is EnumType
+				}
+				else if value.isEnum() {
+					return this.discardReference() is EnumType
+				}
+				else {
+					return this.discardReference():Type.isMatching(value.discardReference():Type, mode)
+				}
+			}
+			else if value.isObject() && this.type().isClass() {
+				return @type.type().matchInstanceWith(value, [])
+			}
+			else {
+				return value.isAny()
+			}
+		}
 	} // }}}
 	isMorePreciseThan(that: Type) { // {{{
 		if that.isAny() {

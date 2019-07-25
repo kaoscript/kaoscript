@@ -1,6 +1,7 @@
 // predefined
 class ModuleScope extends Scope {
 	private {
+		_chunkTypes					= {}
 		_declarations				= {}
 		_lastLine: Boolean			= false
 		_line: Number				= 0
@@ -147,6 +148,28 @@ class ModuleScope extends Scope {
 			@variables[name] = [@line, variable]
 		}
 	} // }}}
+	getChunkType(name) => this.getChunkType(name, @line)
+	getChunkType(name, line: Number) { // {{{
+		if @chunkTypes[name] is Array {
+			const types: Array = @chunkTypes[name]
+			let type = null
+
+			if line == -1 || line > @line {
+				type = types.last()
+			}
+			else {
+				for const i from 0 til types.length by 2 while types[i] <= line {
+					type = types[i + 1]
+				}
+			}
+
+			if type != null {
+				return type
+			}
+		}
+
+		return null
+	} // }}}
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
@@ -220,7 +243,7 @@ class ModuleScope extends Scope {
 		}
 
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
+			const variables: Array = @variables[name]
 			let variable = null
 
 			if line == -1 || line > @line {
@@ -251,7 +274,7 @@ class ModuleScope extends Scope {
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line)
 	hasDefinedVariable(name: String, line: Number) { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
+			const variables: Array = @variables[name]
 			let variable = null
 
 			if line == -1 || line > @line {
@@ -274,7 +297,7 @@ class ModuleScope extends Scope {
 	hasVariable(name: String) => this.hasVariable(name, @line)
 	hasVariable(name: String, line: Number) { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
+			const variables: Array = @variables[name]
 			let variable = null
 
 			if line == -1 || line > @line {
@@ -373,7 +396,7 @@ class ModuleScope extends Scope {
 	} // }}}
 	replaceVariable(name: String, variable: Variable): Variable { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
+			const variables: Array = @variables[name]
 
 			let i = 0
 			while variables[i + 2] <= @line {
@@ -426,4 +449,17 @@ class ModuleScope extends Scope {
 		return @references[hash]
 	} // }}}
 	setLineOffset(@lineOffset)
+	updateInferable(name, data, node) { // {{{
+		if data.isVariable {
+			this.replaceVariable(name, data.type, node)
+		}
+		else {
+			if @chunkTypes[name] is Array {
+				@chunkTypes.push(@line, data.type)
+			}
+			else {
+				@chunkTypes[name] = [@line, data.type]
+			}
+		}
+	} // }}}
 }

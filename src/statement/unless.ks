@@ -21,8 +21,8 @@ class UnlessStatement extends Statement {
 		@whenFalseExpression.prepare()
 
 		if @whenFalseExpression.isExit() {
-			for const type, name of @condition.reduceTypes() {
-				@scope.replaceVariable(name, type, this)
+			for const data, name of @condition.inferTypes() {
+				@scope.updateInferable(name, data, this)
 			}
 		}
 	} // }}}

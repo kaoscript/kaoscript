@@ -98,7 +98,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_draw_0() {
-			return __ks_Shape._im_draw(this._shape);
+			return this._shape.draw();
 		}
 		__ks_func_draw_1(shape) {
 			if(arguments.length < 1) {
@@ -107,7 +107,7 @@ module.exports = function() {
 			if(shape === void 0 || shape === null) {
 				throw new TypeError("'shape' is not nullable");
 			}
-			return __ks_Shape._im_draw(this._shape, shape);
+			return this._shape.draw(shape);
 		}
 		__ks_func_draw_2(color, shape) {
 			if(arguments.length < 2) {

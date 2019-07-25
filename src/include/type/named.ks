@@ -168,7 +168,7 @@ class NamedType extends Type {
 			}
 		}
 		else if this.isAlias() {
-			return this.discardAlias().matchContentOf(that:Type)
+			return this.discardAlias().matchContentOf(that)
 		}
 		else if that is UnionType {
 			for const type in that.types() {
@@ -183,15 +183,17 @@ class NamedType extends Type {
 			return @name == that.name() || this.matchContentOf(that.discardReference())
 		}
 		else {
-			return @type.matchContentOf(that:Type)
+			return @type.matchContentOf(that)
 		}
 	} // }}}
 	matchInheritanceOf(base: Type) { // {{{
-		unless base is NamedType || !this.isClass() || !base.isClass() {
+		if base is not NamedType || !this.isClass() || !base.isClass() {
 			return false
 		}
 
-		if @name == base:NamedType.name() {
+		const basename = base.name()
+
+		if @name == basename {
 			return true
 		}
 
@@ -199,7 +201,7 @@ class NamedType extends Type {
 		while that.type().isExtending() {
 			that = that.type().extends()
 
-			if that.name() == base:NamedType.name() {
+			if that.name() == basename {
 				return true
 			}
 		}
@@ -207,7 +209,14 @@ class NamedType extends Type {
 		return false
 	} // }}}
 	matchSignatureOf(that, matchables) => @type.matchSignatureOf(that.discardName(), matchables)
-	metaReference(references, ignoreAlteration) => @type:ClassType.metaReference(references, @name, ignoreAlteration)
+	metaReference(references, ignoreAlteration) { // {{{
+		if @type is ClassType {
+			return @type.metaReference(references, @name, ignoreAlteration)
+		}
+		else {
+			throw new NotSupportedException()
+		}
+	} // }}}
 	name() => @name
 	name(@name) => this
 	path() { // {{{
@@ -219,7 +228,14 @@ class NamedType extends Type {
 		}
 	} // }}}
 	referenceIndex() => @type.referenceIndex()
-	toAlterationReference(references, ignoreAlteration) => @type:ClassType.toAlterationReference(references, ignoreAlteration)
+	toAlterationReference(references, ignoreAlteration) { // {{{
+		if @type is ClassType {
+			return @type.toAlterationReference(references, ignoreAlteration)
+		}
+		else {
+			throw new NotSupportedException()
+		}
+	} // }}}
 	toExportOrIndex(references, ignoreAlteration) => @type.toExportOrIndex(references, ignoreAlteration)
 	toFragments(fragments, node)
 	toMetadata(references, ignoreAlteration) => @type.toMetadata(references, ignoreAlteration)
@@ -234,7 +250,14 @@ class NamedType extends Type {
 	} // }}}
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
 	type() => @type
-	walk(fn) => @type:ObjectType.walk(fn)
+	walk(fn) { // {{{
+		if @type is ObjectType || @type is NamespaceType {
+			@type.walk(fn)
+		}
+		else {
+			throw new NotSupportedException()
+		}
+	} // }}}
 }
 
 class NamedContainerType extends NamedType {

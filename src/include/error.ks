@@ -121,6 +121,12 @@ export class IOException extends Exception {
 }
 
 export class NotImplementedException extends Exception {
+	static {
+		/* throw(...arguments) ~ NotImplementedException => throw new NotImplementedException(...arguments) */
+		throw(...arguments) ~ NotImplementedException { // {{{
+			throw new NotImplementedException(...arguments)
+		} // }}}
+	}
 	constructor(message = 'Not Implemented') { // {{{
 		super(message)
 	} // }}}
@@ -136,6 +142,11 @@ export class NotImplementedException extends Exception {
 }
 
 export class NotSupportedException extends Exception {
+	static {
+		throw(...arguments) ~ NotSupportedException { // {{{
+			throw new NotSupportedException(...arguments)
+		} // }}}
+	}
 	constructor(message = 'Not Supported') { // {{{
 		super(message)
 	} // }}}
@@ -224,6 +235,15 @@ export class SyntaxException extends Exception {
 		throwEnumOverflow(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The bit flags enum "\(name)" can only have at most 53 bits.`, node)
 		} // }}}
+		throwIdenticalConstructor(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The constructor is identical with another constructor`, node)
+		} // }}}
+		throwIdenticalFunction(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The function "\(name)" is identical with another function "\(name)"`, node)
+		} // }}}
+		throwIdenticalMethod(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The method "\(name)" is identical with another method "\(name)"`, node)
+		} // }}}
 		throwInvalidAwait(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
 		} // }}}
@@ -274,12 +294,6 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwNotCompatibleConstructor(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parent's constructor of class "\(name)" can't be called`, node)
-		} // }}}
-		throwNotDifferentiableFunction(node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Overloaded functions can't be differentiated`, node)
-		} // }}}
-		throwNotDifferentiableMethods(node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Methods can't be differentiated`, node)
 		} // }}}
 		throwNotNamedParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter must be named`, node)

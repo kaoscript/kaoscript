@@ -44,7 +44,15 @@ class AnyType extends Type {
 	isExplicit() => @explicit
 	isExportable() => true
 	isInstanceOf(target: Type) => true
-	isMorePreciseThan(type: Type) => false
+	isMatching(value: Type, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Exact {
+			return value.isAny() && @nullable == value.isNullable()
+		}
+		else {
+			return value.isAny()
+		}
+	} // }}}
+	isMorePreciseThan(type: Type) => type.isAny() && @nullable != type.isNullable()
 	isNullable() => @nullable
 	matchContentOf(b) => !@explicit || (b.isAny() && (@nullable -> !b.isNullable()))
 	matchSignatureOf(b, matchables) => b.isAny()

@@ -1,6 +1,8 @@
 class UnionType extends Type {
 	private {
+		_any: Boolean			= false
 		_explicit: Boolean
+		_nullable: Boolean		= false
 		_types: Array<Type>
 	}
 	static {
@@ -23,7 +25,32 @@ class UnionType extends Type {
 		super(scope)
 	} // }}}
 	addType(type: Type) { // {{{
-		@types.push(type)
+		if @any {
+			if !@nullable && type.isNullable() {
+				@types[0] = AnyType.NullableUnexplicit
+
+				@nullable = true
+			}
+		}
+		else if type.isAny() {
+			@types = [type]
+
+			@any = true
+			@nullable = type.isNullable()
+		}
+		else {
+			let notMatched = true
+
+			for const t in @types while notMatched {
+				if t.matchContentOf(type) {
+					notMatched = false
+				}
+			}
+
+			if notMatched {
+				@types.push(type)
+			}
+		}
 	} // }}}
 	clone() { // {{{
 		throw new NotSupportedException()
@@ -97,6 +124,23 @@ class UnionType extends Type {
 
 		return false
 	} // }}}
+	isMatching(value: Type, mode: MatchingMode) { // {{{
+		if value is not UnionType || @types.length != value._types.length {
+			return false
+		}
+
+		let match = 0
+		for aType in @types {
+			for bType in value._types {
+				if aType.isMatching(bType, mode) {
+					match++
+					break
+				}
+			}
+		}
+
+		return match == @types.length
+	} // }}}
 	isMorePreciseThan(that: Type) { // {{{
 		return that is UnionType && @types.length < that._types.length
 	} // }}}
@@ -109,6 +153,7 @@ class UnionType extends Type {
 
 		return false
 	} // }}}
+	length() => @types.length
 	matchContentOf(that: Type) { // {{{
 		if @explicit {
 			for const type in @types {
@@ -151,6 +196,14 @@ class UnionType extends Type {
 		}
 
 		fragments.code(')')
+	} // }}}
+	type() { // {{{
+		if @types.length == 1 {
+			return @types[0]
+		}
+		else {
+			return this
+		}
 	} // }}}
 	types() => @types
 }

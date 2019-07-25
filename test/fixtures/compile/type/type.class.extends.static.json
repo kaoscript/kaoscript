@@ -1,0 +1,75 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar",
+    1,
+    "Quxbaz"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {
+        "get": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "extends": [
+        1,
+        "Quxbaz"
+      ]
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {
+        "get": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 1
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      }
+    }
+  ],
+  "macros": []
+}

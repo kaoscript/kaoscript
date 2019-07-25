@@ -57,8 +57,8 @@ class IfStatement extends Statement {
 		else {
 			@condition.prepare()
 
-			for const type, name of @condition.reduceTypes() {
-				@whenTrueScope.replaceVariable(name, type, this)
+			for const data, name of @condition.inferTypes() {
+				@whenTrueScope.updateInferable(name, data, this)
 			}
 
 			@condition.acquireReusable(false)
@@ -70,35 +70,69 @@ class IfStatement extends Statement {
 		@whenTrueExpression.prepare()
 
 		if @whenFalseExpression == null {
-			if @whenTrueExpression.isExit() {
-				if !@declared {
-					for const type, name of @condition.reduceContraryTypes() {
-						@scope.replaceVariable(name, type, this)
+			if !@declared {
+				if @whenTrueExpression.isExit() {
+					for const data, name of @condition.inferContraryTypes() {
+						@scope.updateInferable(name, data, this)
+					}
+				}
+				else {
+					const conditionInferables = @condition.inferContraryTypes()
+					const trueInferables = @whenTrueScope.listUpdatedInferables()
+
+					for const :name of trueInferables when conditionInferables[name]? {
+						const trueType = trueInferables[name].type
+						const conditionType = conditionInferables[name].type
+
+						if trueType.equals(conditionType) {
+							@scope.updateInferable(name, trueInferables[name], this)
+						}
+						else {
+							@scope.updateInferable(name, {
+								isVariable: trueInferables[name].isVariable
+								type: Type.union(@scope, trueType, conditionType)
+							}, this)
+						}
 					}
 				}
 			}
 		}
 		else {
 			if !@declared {
-				for const type, name of @condition.reduceContraryTypes() {
-					@whenFalseScope.replaceVariable(name, type, this)
+				for const data, name of @condition.inferContraryTypes() {
+					@whenFalseScope.updateInferable(name, data, this)
 				}
 			}
 
 			@whenFalseExpression.prepare()
 
-			const trueVariables = @whenTrueScope.listReplacedVariables()
-			const falseVariables = @whenFalseScope.listReplacedVariables()
-
-			for const :name of trueVariables when falseVariables[name]? {
-				const trueType = trueVariables[name].getRealType()
-				const falseType = falseVariables[name].getRealType()
-
-				if trueType.equals(falseType) {
-					@scope.replaceVariable(name, trueType, this)
+			if @whenTrueExpression.isExit() {
+				for const data, name of @whenFalseScope.listUpdatedInferables() {
+					@scope.updateInferable(name, data, this)
 				}
-				else {
-					@scope.replaceVariable(name, Type.union(@scope, trueType, falseType), this)
+			}
+			else if @whenFalseExpression.isExit() {
+				for const data, name of @whenTrueScope.listUpdatedInferables() {
+					@scope.updateInferable(name, data, this)
+				}
+			}
+			else {
+				const trueInferables = @whenTrueScope.listUpdatedInferables()
+				const falseInferables = @whenFalseScope.listUpdatedInferables()
+
+				for const :name of trueInferables when falseInferables[name]? {
+					const trueType = trueInferables[name].type
+					const falseType = falseInferables[name].type
+
+					if trueType.equals(falseType) {
+						@scope.updateInferable(name, trueInferables[name], this)
+					}
+					else {
+						@scope.updateInferable(name, {
+							isVariable: trueInferables[name].isVariable
+							type: Type.union(@scope, trueType, falseType)
+						}, this)
+					}
 				}
 			}
 		}

@@ -48,20 +48,23 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 	private {
 		_type: Type
 	}
+	inferTypes() { // {{{
+		const inferables = {}
+
+		if @argument.isInferable() {
+			inferables[@argument.path()] = {
+				isVariable: @argument is IdentifierLiteral
+				type: @type
+			}
+		}
+
+		return inferables
+	} // }}}
 	isComputed() => @argument.isNullable()
 	prepare() { // {{{
 		@argument.prepare()
 
 		@type = @argument.type().setNullable(false)
-	} // }}}
-	reduceTypes() { // {{{
-		const variables = {}
-
-		if @argument is IdentifierLiteral {
-			variables[@argument.value()] = @type
-		}
-
-		return variables
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @argument.isNullable() {
@@ -101,8 +104,8 @@ class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
-	reduceTypes() => @argument.reduceContraryTypes()
-	reduceContraryTypes() => @argument.reduceTypes()
+	inferTypes() => @argument.inferContraryTypes()
+	inferContraryTypes() => @argument.inferTypes()
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('!', @data.operator)

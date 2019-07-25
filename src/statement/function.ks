@@ -229,7 +229,7 @@ class FunctionDeclaration extends Statement {
 		if @extended {
 			fragments.line($const(this), @oldVariableName, $equals, @name)
 
-			const assessment = Router.assess(@name, @variable.getRealType(), [declarator.type() for const declarator in @variable._declarators], true, this)
+			const assessment = Router.assess([declarator.type() for const declarator in @variable._declarators], true)
 
 			Router.toFragments(
 				assessment
@@ -267,7 +267,7 @@ class FunctionDeclaration extends Statement {
 			@variable.getDeclarator(0).toStatementFragments(fragments, @name, mode)
 		}
 		else {
-			const assessment = Router.assess(@name, @variable.getRealType(), [declarator.type() for const declarator in @variable._declarators], true, this)
+			const assessment = this.type().assessment()
 
 			if assessment.flattenable {
 				Router.toFragments(
@@ -475,7 +475,7 @@ class FunctionVariable extends Variable {
 					SyntaxException.throwMixedOverloadedFunction(declarator)
 				}
 				else if @declaredType.hasFunction(type) {
-					SyntaxException.throwNotDifferentiableFunction(declarator)
+					SyntaxException.throwIdenticalFunction(@name, declarator)
 				}
 
 				@declaredType.addFunction(type)
@@ -504,7 +504,7 @@ class FunctionVariable extends Variable {
 					SyntaxException.throwMixedOverloadedFunction(declarator)
 				}
 				else if @declaredType.hasFunction(type) {
-					SyntaxException.throwNotDifferentiableFunction(declarator)
+					SyntaxException.throwIdenticalFunction(@name, declarator)
 				}
 
 				@declaredType.addFunction(type)

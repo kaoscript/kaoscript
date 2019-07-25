@@ -111,9 +111,32 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorAnd extends PolyadicOperatorExpression {
+	inferTypes() { // {{{
+		const inferables = {}
+
+		for const operand in @operands {
+			for const data, name of operand.inferTypes() {
+				inferables[name] = data
+			}
+		}
+
+		return inferables
+	} // }}}
+	inferContraryTypes() { // {{{
+		const inferables = {}
+
+		for const operand in @operands {
+			for const data, name of operand.inferContraryTypes() {
+				inferables[name] = data
+			}
+		}
+
+		return inferables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		let nf = false
-		for operand in @operands {
+
+		for const operand in @operands {
 			if nf {
 				fragments
 					.code($space)
@@ -394,9 +417,54 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorOr extends PolyadicOperatorExpression {
+	inferTypes() { // {{{
+		const inferables = {}
+
+		for const data, name of @operands[0].inferTypes() {
+			if !data.type.isAny() {
+				for const operand in @operands from 1 {
+					const types = operand.inferTypes()
+
+					if types[name]? && !types[name].type.isAny() {
+						data.type = Type.union(@scope, data.type, types[name].type)
+					}
+					else {
+						break
+					}
+				}
+
+				inferables[name] = data
+			}
+		}
+
+		return inferables
+	} // }}}
+	inferContraryTypes() { // {{{
+		const inferables = {}
+
+		for const data, name of @operands[0].inferContraryTypes() {
+			if !data.type.isAny() {
+				for const operand in @operands from 1 {
+					const types = operand.inferContraryTypes()
+
+					if types[name]? && !types[name].type.isAny() {
+						data.type = Type.union(@scope, data.type, types[name].type)
+					}
+					else {
+						break
+					}
+				}
+
+				inferables[name] = data
+			}
+		}
+
+		return inferables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		let nf = false
-		for operand in @operands {
+
+		for const operand in @operands {
 			if nf {
 				fragments
 					.code($space)

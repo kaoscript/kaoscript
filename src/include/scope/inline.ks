@@ -1,7 +1,7 @@
 class InlineBlockScope extends BlockScope {
 	private {
-		_replacedVariables	= {}
 		_tempParentNames	= {}
+		_upatedInferables	= {}
 	}
 	acquireTempName(declare: Boolean = true): String { // {{{
 		if const name = this.acquireUnusedTempName() {
@@ -62,7 +62,7 @@ class InlineBlockScope extends BlockScope {
 		return @tempIndex
 	} // }}}
 	isInline() => true
-	listReplacedVariables() => @replacedVariables
+	listUpdatedInferables() => @upatedInferables
 	releaseTempName(name) { // {{{
 		if @tempParentNames[name] == true {
 			this.parent().releaseTempName(name)
@@ -103,8 +103,11 @@ class InlineBlockScope extends BlockScope {
 	replaceVariable(name: String, variable: Variable): Variable { // {{{
 		variable = super.replaceVariable(name, variable)
 
-		if !variable.isDefinitive() && @declarations[name] != true {
-			@replacedVariables[name] = variable
+		if @declarations[name] != true {
+			@upatedInferables[name] = {
+				isVariable: true
+				type: variable.getRealType()
+			}
 		}
 
 		return variable
@@ -112,8 +115,11 @@ class InlineBlockScope extends BlockScope {
 	replaceVariable(name: String, type: Type, node): Variable { // {{{
 		const variable = super.replaceVariable(name, type, node)
 
-		if !variable.isDefinitive() && @declarations[name] != true {
-			@replacedVariables[name] = variable
+		if @declarations[name] != true {
+			@upatedInferables[name] = {
+				isVariable: true
+				type: variable.getRealType()
+			}
 		}
 
 		return variable

@@ -248,10 +248,10 @@ class ClassType extends Type {
 					const type = ClassMethodType.fromAST(data, node)
 
 					if instance {
-						this.dedupInstanceMethod(data.name.name, type)
+						this.dedupInstanceMethod(data.name.name:String, type)
 					}
 					else {
-						this.dedupClassMethod(data.name.name, type)
+						this.dedupClassMethod(data.name.name:String, type)
 					}
 				}
 			}
@@ -773,10 +773,77 @@ class ClassType extends Type {
 			return false
 		}
 	} // }}}
+	hasMatchingClassMethod(name, type: FunctionType, mode: MatchingMode) { // {{{
+		if @classMethods[name] is Array {
+			for const method in @classMethods[name] {
+				if method.isMatching(type, mode) {
+					return true
+				}
+			}
+		}
+
+		return false
+	} // }}}
+	hasMatchingConstructor(type: FunctionType, mode: MatchingMode) { // {{{
+		if @constructors.length != 0 {
+			for const constructor in @constructors {
+				if constructor.isMatching(type, mode) {
+					return true
+				}
+			}
+		}
+
+		return false
+	} // }}}
+	hasMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { // {{{
+		if @instanceMethods[name] is Array {
+			for const method in @instanceMethods[name] {
+				if method.isMatching(type, mode) {
+					return true
+				}
+			}
+		}
+
+		if @abstract && @abstractMethods[name] is Array {
+			for const method in @abstractMethods[name] {
+				if method.isMatching(type, mode) {
+					return true
+				}
+			}
+		}
+
+		return false
+	} // }}}
 	init() => @init
 	init(@init) => this
 	isAbstract() => @abstract
 	isAlteration() => @alteration
+	isAsyncClassMethod(name) { // {{{
+		if @classMethods[name] is Array {
+			return @classMethods[name][0].isAsync()
+		}
+		else if @extending {
+			return @extends.type().isAsyncClassMethod(name)
+		}
+		else {
+			return null
+		}
+	} // }}}
+	isAsyncInstanceMethod(name) { // {{{
+		if @instanceMethods[name] is Array {
+			return @instanceMethods[name][0].isAsync()
+		}
+
+		if @abstract && @abstractMethods[name] is Array {
+			return @abstractMethods[name][0].isAsync()
+		}
+
+		if @extending {
+			return @extends.type().isAsyncInstanceMethod(name)
+		}
+
+		return null
+	} // }}}
 	isClass() => true
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
@@ -799,6 +866,38 @@ class ClassType extends Type {
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true
+	listMatchingClassMethods(name: String, arguments: Array, methods = []) { // {{{
+		if @classMethods[name] is Array {
+			for method in @classMethods[name] {
+				if method.matchArguments(arguments) {
+					method.pushTo(methods)
+				}
+			}
+		}
+
+		if @extending {
+			return @extends.type().listMatchingClassMethods(name, arguments, methods)
+		}
+		else {
+			return methods
+		}
+	} // }}}
+	listMatchingInstanceMethods(name: String, arguments: Array, methods = []) { // {{{
+		if @instanceMethods[name] is Array {
+			for method in @instanceMethods[name] {
+				if method.matchArguments(arguments) {
+					method.pushTo(methods)
+				}
+			}
+		}
+
+		if @extending {
+			return @extends.type().listMatchingInstanceMethods(name, arguments, methods)
+		}
+		else {
+			return methods
+		}
+	} // }}}
 	matchArguments(arguments: Array<Type>) { // {{{
 		if @constructors.length == 0 {
 			if @extending {
@@ -1061,7 +1160,7 @@ class ClassMethodType extends FunctionType {
 		_alteration: Boolean		= false
 	}
 	static {
-		fromAST(data, node: AbstractNode) { // {{{
+		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
 			const scope = node.scope()
 
 			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)

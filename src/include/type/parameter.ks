@@ -25,6 +25,7 @@ class ParameterType extends Type {
 
 		return @min == b.min() && @max == b.max() && @type.equals(b.type())
 	} // }}}
+	isMatching(value: ParameterType, mode: MatchingMode) => @min == value.min() && @max == value.max() && @type.isMatching(value.type(), mode)
 	export(references, ignoreAlteration) { // {{{
 		const export = {}
 

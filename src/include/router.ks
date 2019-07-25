@@ -1,5 +1,5 @@
 namespace Router {
-	export func assess(name, variable, methods, flattenable, node) { // {{{
+	export func assess(methods, flattenable) { // {{{
 		if methods.length == 0 {
 			return {
 				async: false
@@ -25,18 +25,9 @@ namespace Router {
 		const infinities = []
 		let min = Infinity
 		let max = 0
-		let asyncCount = 0
-		let syncCount = 0
 
 		for const method, index in methods {
 			method.index(index)
-
-			if method.isAsync() {
-				++asyncCount
-			}
-			else {
-				++syncCount
-			}
 
 			if method.absoluteMax() == Infinity {
 				infinities.push(method)
@@ -59,16 +50,12 @@ namespace Router {
 			}
 		}
 
-		if asyncCount != 0 && syncCount != 0 {
-			SyntaxException.throwInvalidSyncMethods(node.name(), name, node)
-		}
-
-		const async = asyncCount != 0
+		const async = methods[0].isAsync()
 
 		if min == Infinity {
 			const assessment = {
 				async
-				methods: assessUnbounded(name, variable, methods, infinities, async, node)
+				methods: assessUnbounded(methods, infinities, async)
 			}
 
 			assessment.flattenable = flattenable && isFlattenable(assessment.methods)
@@ -84,7 +71,7 @@ namespace Router {
 
 			const assessment = {
 				async
-				methods: assessBounded(name, variable, methods, groups, min, max, node)
+				methods: assessBounded(methods, groups, min, max)
 			}
 
 			if infinities.length == 1 {
@@ -99,7 +86,7 @@ namespace Router {
 				})
 			}
 			else if infinities.length > 1 {
-				throw new NotImplementedException(node)
+				throw new NotImplementedException()
 			}
 
 			assessment.flattenable = flattenable && isFlattenable(assessment.methods)
@@ -108,7 +95,7 @@ namespace Router {
 		}
 	} // }}}
 
-	func assessBounded(name, variable, methods, groups, min, max, node) { // {{{
+	func assessBounded(methods, groups, min, max) { // {{{
 		for const i from min to max {
 			if const group = groups[i] {
 				for const j from i + 1 to max while (gg ?= groups[j]) && gg.methods.length == 1 == group.methods.length && Array.same(gg.methods, group.methods) {
@@ -184,14 +171,14 @@ namespace Router {
 					}
 				}
 
-				checkMethods(methods, parameters, min, max, 0, sortedIndexes, assessment, [], node)
+				checkMethods(methods, parameters, min, max, 0, sortedIndexes, assessment, [])
 			}
 		}
 
 		return assessment
 	} // }}}
 
-	func assessUnbounded(name, variable, methods, infinities, async, node) { // {{{
+	func assessUnbounded(methods, infinities, async) { // {{{
 		let groups = {}
 		let min = Infinity
 		let max = 0
@@ -263,17 +250,17 @@ namespace Router {
 				}
 			}
 
-			checkInfinityMethods(methods, parameters, group.n, 0, assessment, [], node)
+			checkInfinityMethods(methods, parameters, group.n, 0, assessment, [])
 		}
 
 		return assessment
 	} // }}}
 
-	func checkMethods(methods, parameters, min, max, sortedIndex, sortedIndexes, assessment, filters, node) { // {{{
+	func checkMethods(methods, parameters, min, max, sortedIndex, sortedIndexes, assessment, filters) { // {{{
 		const index = sortedIndexes[sortedIndex]
 
 		if !?parameters[index + 1] {
-			SyntaxException.throwNotDifferentiableMethods(node)
+			NotSupportedException.throw()
 		}
 
 		const tree = []
@@ -320,7 +307,7 @@ namespace Router {
 		}
 
 		if tree.length == 0 {
-			checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters, node)
+			checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters)
 		}
 		else if tree.length == 1 {
 			item = tree[0]
@@ -343,7 +330,7 @@ namespace Router {
 							maxed = method
 						}
 						else {
-							SyntaxException.throwNotDifferentiableMethods(node)
+							NotSupportedException.throw()
 						}
 					}
 				}
@@ -358,11 +345,11 @@ namespace Router {
 					})
 				}
 				else {
-					SyntaxException.throwNotDifferentiableMethods(node)
+					NotSupportedException.throw()
 				}
 			}
 			else {
-				checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters, node)
+				checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters)
 			}
 		}
 		else {
@@ -437,10 +424,14 @@ namespace Router {
 							min
 							max
 							filters
+							lastFilter: {
+								index
+								type: item.type[0]
+							}
 						})
 					}
 					else {
-						checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters, node)
+						checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters)
 					}
 				}
 				else {
@@ -461,16 +452,16 @@ namespace Router {
 						})
 					}
 					else {
-						checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters, node)
+						checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters)
 					}
 				}
 			}
 		}
 	} // }}}
 
-	func checkInfinityMethods(methods, parameters, min, index, assessment, filters, node) { // {{{
+	func checkInfinityMethods(methods, parameters, min, index, assessment, filters) { // {{{
 		if !?parameters[index + 1] {
-			SyntaxException.throwNotDifferentiableMethods(node)
+			NotSupportedException.throw()
 		}
 		else if parameters[index + 1] is Number {
 			index = parameters[index + 1] - 1
@@ -517,7 +508,7 @@ namespace Router {
 		}
 
 		if tree.length == 0 {
-			checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters, node)
+			checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters)
 		}
 		else if tree.length == 1 {
 			item = tree[0]
@@ -532,7 +523,7 @@ namespace Router {
 				})
 			}
 			else {
-				checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters, node)
+				checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters)
 			}
 		}
 		else {
@@ -596,7 +587,7 @@ namespace Router {
 						})
 					}
 					else {
-						checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters, node)
+						checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters)
 					}
 				}
 				else {
@@ -617,7 +608,7 @@ namespace Router {
 						})
 					}
 					else {
-						checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters, node)
+						checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters)
 					}
 				}
 			}
@@ -730,6 +721,51 @@ namespace Router {
 				map.weight += weight
 			}
 		}
+	} // }}}
+
+	export func matchArguments(assessment, arguments) { // {{{
+		const matches = []
+
+		const length = arguments.length
+
+		for const method in assessment.methods when method.min <= length <= method.max {
+			if method.filters.length == 0 && !?method.lastFilter {
+				matches.push(method.method)
+			}
+			else {
+				let matched = true
+				let perfect = true
+
+				for const filter in method.filters while matched {
+					if arguments[filter.index].isAny() {
+						perfect = false
+					}
+					else if !arguments[filter.index].matchContentOf(filter.type) {
+						matched = false
+					}
+				}
+
+				if method.lastFilter? {
+					if arguments[method.lastFilter.index].isAny() {
+						perfect = false
+					}
+					else if !arguments[method.lastFilter.index].matchContentOf(method.lastFilter.type) {
+						matched = false
+					}
+				}
+
+				if matched {
+					if perfect {
+						return [method.method]
+					}
+					else {
+						matches.push(method.method)
+					}
+				}
+			}
+		}
+
+		return matches
 	} // }}}
 
 	func sortTreeMin(methods, max) { // {{{

@@ -189,7 +189,50 @@ class FunctionType extends Type {
 			}
 		}
 
-		return true
+		if @missingReturn || b._missingReturn {
+			return true
+		}
+
+		return @returnType.equals(b._returnType)
+	} // }}}
+	isMatching(value: FunctionType, mode: MatchingMode) { // {{{
+		if @async != value._async {
+			return false
+		}
+
+		if @hasRest != value._hasRest || @max != value._max || @min != value._min || @restIndex != value._restIndex || @parameters.length != value._parameters.length {
+			return false
+		}
+
+		if mode & MatchingMode::ExactParameter {
+			for const parameter, index in @parameters {
+				if !parameter.isMatching(value._parameters[index], MatchingMode::Exact) {
+					return false
+				}
+			}
+		}
+		else if mode & MatchingMode::SimilarParameter {
+			for const parameter, index in @parameters {
+				if !parameter.isMatching(value._parameters[index], MatchingMode::Similar) {
+					return false
+				}
+			}
+		}
+
+
+		if mode & MatchingMode::ExactReturn {
+			return @returnType.isMatching(value._returnType, MatchingMode::Exact)
+		}
+		else if mode & MatchingMode::SimilarReturn {
+			if @missingReturn || value._missingReturn {
+				return true
+			}
+
+			return @returnType.isMatching(value._returnType, MatchingMode::Similar)
+		}
+		else {
+			return true
+		}
 	} // }}}
 	export(references, ignoreAlteration) => { // {{{
 		kind: TypeKind::Function
@@ -246,6 +289,19 @@ class FunctionType extends Type {
 		return false
 	} // }}}
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
+	isSimilarTo(b: FunctionType) { // {{{
+		if @async != b._async || @hasRest != b._hasRest || @max != b._max || @min != b._min || @restIndex != b._restIndex || @parameters.length != b._parameters.length {
+			return false
+		}
+
+		for parameter, index in @parameters {
+			if !parameter.equals(b._parameters[index]) {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
 	matchArguments(arguments: Array<Type>) { // {{{
 		// console.log(@parameters)
 		// console.log(arguments)
@@ -460,6 +516,15 @@ class FunctionType extends Type {
 			}
 		}
 	} // }}}
+	pushTo(methods) { // {{{
+		for const method in methods {
+			if this.isSimilarTo(method) {
+				return
+			}
+		}
+
+		methods.push(this)
+	} // }}}
 	returnType() => @returnType
 	throws() => @throws
 	toFragments(fragments, node) { // {{{
@@ -491,6 +556,7 @@ class FunctionType extends Type {
 
 class OverloadedFunctionType extends Type {
 	private {
+		_assessment							= null
 		_async: Boolean						= false
 		_functions: Array<FunctionType>		= []
 		_references: Array<Type>			= []
@@ -551,6 +617,13 @@ class OverloadedFunctionType extends Type {
 
 		@references.pushUniq(type)
 	} // }}}
+	assessment() { // {{{
+		if @assessment == null {
+			@assessment = Router.assess(@functions, true)
+		}
+
+		return @assessment
+	} // }}}
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
@@ -605,6 +678,7 @@ class OverloadedFunctionType extends Type {
 
 		return false
 	} // }}}
+	length() => @functions.length
 	matchSignatureOf(value: Type, matchables) { // {{{
 		if value is ReferenceType {
 			return value.isFunction()

@@ -263,10 +263,20 @@ class ClassDeclaration extends Statement {
 		}
 
 		for const methods, name of @classMethods {
+			const async = @extendsType?.type().isAsyncClassMethod(name) ?? methods[0].type().isAsync()
+
 			for method in methods {
 				method.prepare()
 
-				@class.dedupClassMethod(name, method.type())
+				if async != method.type().isAsync() {
+					SyntaxException.throwInvalidSyncMethods(@name, name, this)
+				}
+
+				if @class.hasMatchingClassMethod(name, method.type(), MatchingMode::ExactParameter) {
+					SyntaxException.throwIdenticalMethod(name, method)
+				}
+
+				@class.addClassMethod(name, method.type())
 			}
 		}
 
@@ -277,16 +287,36 @@ class ClassDeclaration extends Statement {
 		}
 
 		for const methods, name of @instanceMethods {
+			const async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
+
 			for method in methods {
 				method.prepare()
 
-				@class.dedupInstanceMethod(name, method.type())
+				if async != method.type().isAsync() {
+					SyntaxException.throwInvalidSyncMethods(@name, name, this)
+				}
+
+				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameter) {
+					SyntaxException.throwIdenticalMethod(name, method)
+				}
+
+				@class.addInstanceMethod(name, method.type())
 			}
 		}
 
 		for const methods, name of @abstractMethods {
+			const async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
+
 			for method in methods {
 				method.prepare()
+
+				if async != method.type().isAsync() {
+					SyntaxException.throwInvalidSyncMethods(@name, name, this)
+				}
+
+				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameter) {
+					SyntaxException.throwIdenticalMethod(name, method)
+				}
 
 				@class.addAbstractMethod(name, method.type())
 			}
@@ -294,6 +324,10 @@ class ClassDeclaration extends Statement {
 
 		for method in @constructors {
 			method.prepare()
+
+			if @class.hasMatchingConstructor(method.type(), MatchingMode::ExactParameter) {
+				SyntaxException.throwIdenticalConstructor(method)
+			}
 
 			@class.addConstructor(method.type())
 		}
@@ -696,7 +730,7 @@ class ClassDeclaration extends Statement {
 				.newLine()
 				.code('const __ks_cons = (__ks_arguments) =>')
 
-			const assessment = Router.assess('constructor', @type, m, false, this)
+			const assessment = Router.assess(m, false)
 
 			Router.toFragments(
 				assessment
@@ -1214,7 +1248,7 @@ class MemberSuperMethodES5Substitude {
 		_class: NamedType<ClassType>
 		_property: String
 	}
-	constructor(@property, @arguments, @class, node) {
+	constructor(@property, @arguments, @class, node) { // {{{
 		const superClass = @class.type().extends().type()
 
 		if const property = superClass.getInstanceProperty(@property) {
@@ -1222,7 +1256,7 @@ class MemberSuperMethodES5Substitude {
 		else if !(superClass.isAlien() || superClass.isHybrid()) {
 			ReferenceException.throwNotDefinedProperty(@property, node)
 		}
-	}
+	} // }}}
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`\(@class.discardName().extends().name()).prototype.\(@property).apply(this, [`)
@@ -1255,7 +1289,7 @@ class ClassMethodDeclaration extends Statement {
 		_type: Type
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
-		const assessment = Router.assess(name, variable, methods, false, node)
+		const assessment = Router.assess(methods, false)
 
 		if variable.type().isExtending() {
 			return Router.toFragments(
@@ -1304,7 +1338,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	static toInstanceSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
-		const assessment = Router.assess(name, variable, methods, false, node)
+		const assessment = Router.assess(methods, false)
 
 		if variable.type().isExtending() {
 			return Router.toFragments(
@@ -1542,7 +1576,7 @@ class ClassConstructorDeclaration extends Statement {
 		_type: Type
 	}
 	static toRouterFragments(node, fragments, variable, methods, header, footer) { // {{{
-		const assessment = Router.assess('constructor', variable, methods, false, node)
+		const assessment = Router.assess(methods, false)
 
 		if node.isExtending() {
 			return Router.toFragments(
@@ -1656,7 +1690,7 @@ class ClassConstructorDeclaration extends Statement {
 		const extendedType = @parent.extends().type()
 
 		if extendedType.matchArguments([]) {
-			if extendedType.hasConstructors() {
+			if extendedType.hasConstructors() || extendedType.isSealed() {
 				@block.addStatement({
 					kind: NodeKind::CallExpression
 					scope: {
@@ -1774,7 +1808,9 @@ class ClassConstructorDeclaration extends Statement {
 			else {
 				@block.toRangeFragments(block, 0, index)
 
-				block.line('this.__ks_init()')
+				if @parent.extends().isSealed() {
+					block.line('this.__ks_init()')
+				}
 
 				@block.toRangeFragments(block, index + 1)
 			}

@@ -355,7 +355,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @class.isSealed() {
-				const assessment = Router.assess(@name, @variable, @class.getInstanceMethods(@name), false, this)
+				const assessment = Router.assess(@class.getInstanceMethods(@name), false)
 
 				Router.toFragments(
 					assessment
@@ -398,7 +398,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 		else {
 			if @class.isSealed() {
-				const assessment = Router.assess(@name, @variable, @class.getClassMethods(@name), false, this)
+				const assessment = Router.assess(@class.getClassMethods(@name), false)
 
 				Router.toFragments(
 					assessment

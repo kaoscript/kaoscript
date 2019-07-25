@@ -40,6 +40,18 @@ const $types = { // {{{
 	void: 'Void'
 } // }}}
 
+#[flags]
+enum MatchingMode {
+	Default
+
+	Exact
+	ExactParameter
+	ExactReturn
+	Similar
+	SimilarParameter
+	SimilarReturn
+}
+
 enum TypeKind<String> {
 	Alias
 	Array
@@ -414,13 +426,17 @@ abstract class Type {
 			}
 		} // }}}
 		union(scope: Scope, ...types) { // {{{
-			for type in types {
-				if type.isAny() {
-					return Type.Any
-				}
+			if types.length == 1 {
+				return types[0]
 			}
 
-			return new UnionType(scope, types)
+			const union = new UnionType(scope)
+
+			for const type in types {
+				union.addType(type)
+			}
+
+			return union.type()
 		} // }}}
 	}
 	constructor(@scope)
@@ -506,7 +522,7 @@ abstract class Type {
 	isSealedAlien() => @alien && @sealed
 	isString() => false
 	isVoid() => false
-	matchContentOf(that: Type): Boolean => this.equals(that)
+	matchContentOf(that: Type?): Boolean => this.equals(that)
 	matchSignatureOf(that: Type, matchables): Boolean => false
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex

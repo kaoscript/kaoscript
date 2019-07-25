@@ -3,10 +3,10 @@ class ThisExpression extends Expression {
 		_calling: Boolean			= false
 		_class: ClassType
 		_composite: Boolean			= false
-		_fragment
+		_fragment: String
 		_name: String
 		_namesake: Boolean			= false
-		_type
+		_type: Type
 	}
 	analyse() { // {{{
 		@name = @data.name.name
@@ -70,11 +70,11 @@ class ThisExpression extends Expression {
 		else {
 			if variable ?= @class.type().getInstanceVariable(@name) {
 				@fragment = `this.\(@name)`
-				@type = variable.type()
+				@type = @scope.getChunkType(@fragment) ?? variable.type()
 			}
 			else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
 				@fragment = `this._\(@name)`
-				@type = variable.type()
+				@type = @scope.getChunkType(@fragment) ?? variable.type()
 			}
 			else if @type ?= @class.type().getPropertyGetter(@name) {
 				if @namesake {
@@ -92,8 +92,10 @@ class ThisExpression extends Expression {
 	translate()
 	isAssignable() => !@calling && !@composite
 	isComposite() => @composite
+	isInferable() => !@calling && !@composite
 	isUsingVariable(name) => false
 	listAssignments(array) => array
+	path() => @fragment
 	setAssignment(assignment)
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@fragment)

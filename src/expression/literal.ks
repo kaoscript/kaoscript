@@ -76,6 +76,7 @@ class IdentifierLiteral extends Literal {
 	isMacro() => @isMacro
 	isRedeclared() => @scope.isRedeclaredVariable(@value)
 	isRenamed() => @scope.isRenamedVariable(@value)
+	isInferable() => true
 	isUsingVariable(name) => @value == name
 	listAssignments(array) { // {{{
 		array.push(@name)
@@ -83,6 +84,7 @@ class IdentifierLiteral extends Literal {
 		return array
 	} // }}}
 	name() => @value
+	path() => @value
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
 		if @isVariable {

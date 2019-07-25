@@ -75,6 +75,22 @@ class ComparisonExpression extends Expression {
 		}
 	} // }}}
 	hasExceptions() => false
+	inferTypes() { // {{{
+		if @operators.length == 1 {
+			return @operators[0].inferTypes()
+		}
+		else {
+			return {}
+		}
+	} // }}}
+	inferContraryTypes() { // {{{
+		if @operators.length == 1 {
+			return @operators[0].inferContraryTypes()
+		}
+		else {
+			return {}
+		}
+	} // }}}
 	isComputed() => @computed
 	isNullable() { // {{{
 		for const operand in @operands {
@@ -107,22 +123,6 @@ class ComparisonExpression extends Expression {
 		}
 
 		return false
-	} // }}}
-	reduceTypes() { // {{{
-		if @operators.length == 1 {
-			return @operators[0].reduceTypes()
-		}
-		else {
-			return {}
-		}
-	} // }}}
-	reduceContraryTypes() { // {{{
-		if @operators.length == 1 {
-			return @operators[0].reduceContraryTypes()
-		}
-		else {
-			return {}
-		}
 	} // }}}
 	releaseReusable() { // {{{
 		if @composite {
@@ -186,9 +186,9 @@ abstract class ComparisonOperator {
 	}
 	constructor(@left, @right)
 	prepare()
+	inferTypes() => {}
+	inferContraryTypes() => {}
 	isComputed() => true
-	reduceTypes() => {}
-	reduceContraryTypes() => {}
 }
 
 class EqualityOperator extends ComparisonOperator {
@@ -223,19 +223,23 @@ class EqualityOperator extends ComparisonOperator {
 		}
 	} // }}}
 	isComputed() => !@nanLeft && !@nanRight
-	reduceContraryTypes() { // {{{
-		const variables = {}
+	inferContraryTypes() { // {{{
+		const inferables = {}
 
-		if @left is IdentifierLiteral && @right is IdentifierLiteral {
-			if @left.value() == 'null' {
-				variables[@right.value()] = @right.type().setNullable(false)
+		if @left is IdentifierLiteral && @left.value() == 'null' && @right.isInferable() {
+			inferables[@right.path()] = {
+				isVariable: @right is IdentifierLiteral
+				type: @right.type().setNullable(false)
 			}
-			else if @right.value() == 'null' {
-				variables[@left.value()] = @left.type().setNullable(false)
+		}
+		else if @right is IdentifierLiteral && @right.value() == 'null' && @left.isInferable() {
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type: @left.type().setNullable(false)
 			}
 		}
 
-		return variables
+		return inferables
 	} // }}}
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if @nanLeft {
@@ -280,8 +284,8 @@ class EqualityOperator extends ComparisonOperator {
 }
 
 class InequalityOperator extends EqualityOperator {
-	reduceTypes() => super.reduceContraryTypes()
-	reduceContraryTypes() => super.reduceTypes()
+	inferTypes() => super.inferContraryTypes()
+	inferContraryTypes() => super.inferTypes()
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {

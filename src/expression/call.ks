@@ -100,19 +100,19 @@ class CallExpression extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
-		for argument in @arguments {
+		for const argument in @arguments {
 			argument.prepare()
 		}
 
 		if @options.format.spreads == 'es5' {
-			for argument in @arguments until @flatten {
+			for const argument in @arguments until @flatten {
 				if argument is UnaryOperatorSpread {
 					@flatten = true
 				}
 			}
 		}
 		else {
-			for argument in @arguments until @flatten {
+			for const argument in @arguments until @flatten {
 				if argument is UnaryOperatorSpread && !argument.argument().type().isArray() {
 					@flatten = true
 				}
@@ -205,12 +205,8 @@ class CallExpression extends Expression {
 				}
 			}
 
-			if types.length == 1 {
-				@type = types[0]
-			}
-			else {
-				@type = new UnionType(this.scope(), types)
-			}
+			@type = Type.union(this.scope(), ...types)
+
 		}
 		// console.log('-- callees --')
 		// console.log(@callees)
@@ -320,14 +316,7 @@ class CallExpression extends Expression {
 				}
 			}
 			is OverloadedFunctionType => {
-				const args = [argument.type() for argument in @arguments]
-				const matches = []
-
-				for function in type.functions() {
-					if function.matchArguments(args) {
-						matches.push(function)
-					}
-				}
+				const matches = Router.matchArguments(type.assessment(), [argument.type() for argument in @arguments])
 
 				if matches.length == 0 {
 					ReferenceException.throwNoMatchingFunction(this)
@@ -336,13 +325,13 @@ class CallExpression extends Expression {
 					this.addCallee(new DefaultCallee(@data, matches[0], this))
 				}
 				else {
-					const type = new UnionType(this.scope())
+					const union = new UnionType(this.scope())
 
 					for function in matches {
-						type.addType(function.returnType())
+						union.addType(function.returnType())
 					}
 
-					this.addCallee(new DefaultCallee(@data, @object, type, this))
+					this.addCallee(new DefaultCallee(@data, @object, union.type(), this))
 				}
 			}
 			=> {
@@ -363,32 +352,27 @@ class CallExpression extends Expression {
 				this.makeMemberCalleeFromReference(value.type())
 			}
 			is ClassType => {
-				if methods ?= value.getClassMethods(@property) {
-					let sealed = false
-					const types = []
-					const m = []
-					const args = [argument.type() for argument in @arguments]
+				if value.hasClassMethod(@property) {
+					const arguments = [argument.type() for const argument in @arguments]
 
-					let type
-					for method in methods {
+					const assessment = Router.assess(value.listMatchingClassMethods(@property, arguments), false)
+
+					const methods = Router.matchArguments(assessment, arguments)
+
+					const union = new UnionType(this.scope())
+					let sealed = false
+
+					for const method in methods {
 						if method.isSealed() {
 							sealed = true
 						}
 
-						if method.matchArguments(args) {
-							m.push(method)
-
-							type = method.returnType()
-
-							if !type.isContainedIn(types) {
-								types.push(type)
-							}
-						}
+						union.addType(method.returnType())
 					}
 
 					name = name as NamedType
 
-					if types.length == 0 {
+					if union.length() == 0 {
 						if sealed {
 							this.addCallee(new SealedMethodCallee(@data, name, false, this))
 						}
@@ -396,20 +380,14 @@ class CallExpression extends Expression {
 							this.addCallee(new DefaultCallee(@data, @object, this))
 						}
 					}
-					else if types.length == 1 {
+					else {
 						if sealed {
-							this.addCallee(new SealedMethodCallee(@data, name, false, m, types[0], this))
+							this.addCallee(new SealedMethodCallee(@data, name, false, methods, union.type(), this))
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, m, types[0], this))
+							this.addCallee(new DefaultCallee(@data, @object, methods, union.type(), this))
 						}
 					}
-					else {
-						throw new NotImplementedException(this)
-					}
-				}
-				else if value.isExtending() {
-					this.makeMemberCallee(value.extends(), name)
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, this))
@@ -479,63 +457,49 @@ class CallExpression extends Expression {
 				this.makeMemberCalleeFromReference(value.type())
 			}
 			is ClassType => {
-				const arguments = [argument.type() for const argument in @arguments]
+				if value.hasInstanceMethod(@property) {
+					const arguments = [argument.type() for const argument in @arguments]
 
-				if const methods = value.getInstanceMethods(@property) {
+					const assessment = Router.assess(value.listMatchingInstanceMethods(@property, arguments), false)
+
+					const methods = Router.matchArguments(assessment, arguments)
+
+					const union = new UnionType(this.scope())
 					let sealed = false
-					const types = []
-					const m = []
 
-					let type
-					for method in methods {
+					for const method in methods {
 						if method.isSealed() {
 							sealed = true
 						}
 
-						if method.matchArguments(arguments) {
-							m.push(method)
-
-							type = method.returnType()
-
-							if !type.isContainedIn(types) {
-								types.push(type)
-							}
-						}
+						union.addType(method.returnType())
 					}
 
-					if types.length == 0 {
+					if union.length() == 0 {
 						if reference.isExhaustive(this) {
 							ReferenceException.throwNoMatchingMethod(@property, reference.name(), this)
 						}
+						else if sealed {
+							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, this))
+						}
 						else {
-							if sealed {
-								this.addCallee(new SealedMethodCallee(@data, reference.type(), true, this))
-							}
-							else {
-								this.addCallee(new DefaultCallee(@data, @object, this))
-							}
+							this.addCallee(new DefaultCallee(@data, @object, this))
 						}
 					}
-					else if types.length == 1 {
+					else {
 						if sealed {
-							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, m, types[0], this))
+							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, methods, union.type(), this))
 						}
 						else if	@data.callee.object.kind == NodeKind::Identifier &&
 								(callee ?= @scope.getVariable(@data.callee.object.name)) &&
 								(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
 						{
-							this.addCallee(new SubstituteCallee(@data, substitute, types[0], this))
+							this.addCallee(new SubstituteCallee(@data, substitute, union.type(), this))
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, m, types[0], this))
+							this.addCallee(new DefaultCallee(@data, @object, methods, union.type(), this))
 						}
 					}
-					else {
-						throw new NotImplementedException(this)
-					}
-				}
-				else if value.isExtending() {
-					this.makeMemberCalleeFromReference(value.extends(), reference)
 				}
 				else if	@data.callee.object.kind == NodeKind::Identifier &&
 						(callee ?= @scope.getVariable(@data.callee.object.name)) &&
@@ -544,6 +508,8 @@ class CallExpression extends Expression {
 					this.addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
 				}
 				else {
+					const arguments = [argument.type() for const argument in @arguments]
+
 					if value.getAbstractMethod(@property, arguments) {
 						this.addCallee(new DefaultCallee(@data, @object, this))
 					}

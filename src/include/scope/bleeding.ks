@@ -37,9 +37,10 @@ class BleedingScope extends Scope {
 			variable.renameAs(newName)
 		}
 	} // }}}
+	getChunkType(name, line) => @parent.getChunkType(name, line)
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
+			const variables: Array = @variables[name]
 			let variable = null
 
 			if @parent.isAtLastLine() {
@@ -95,7 +96,7 @@ class BleedingScope extends Scope {
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @parent.line())
 	hasDefinedVariable(name: String, line: Number) { // {{{
 		if @variables[name] is Array {
-			const variables:Array = @variables[name]
+			const variables: Array = @variables[name]
 			const currentLine = @parent.line()
 			let variable = null
 

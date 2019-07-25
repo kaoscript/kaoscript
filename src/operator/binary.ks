@@ -106,27 +106,37 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 	prepare() { // {{{
 		@left.prepare()
 
-		const variables = @left.reduceTypes()
-
-		for const type, name of variables when !type.isAny() {
-			@scope.replaceVariable(name, type, this)
+		for const data, name of @left.inferTypes() when !data.type.isAny() {
+			@scope.updateInferable(name, data, this)
 		}
 
 		@right.prepare()
 
 		this.statement().assignTempVariables(@scope)
 	} // }}}
-	reduceTypes() { // {{{
-		const variables = {}
+	inferTypes() { // {{{
+		const inferables = {}
 
-		for const type, name of @left.reduceTypes() {
-			variables[name] = type
+		for const data, name of @left.inferTypes() {
+			inferables[name] = data
 		}
-		for const type, name of @right.reduceTypes() {
-			variables[name] = type
+		for const data, name of @right.inferTypes() {
+			inferables[name] = data
 		}
 
-		return variables
+		return inferables
+	} // }}}
+	inferContraryTypes() { // {{{
+		const inferables = {}
+
+		for const data, name of @left.inferContraryTypes() {
+			inferables[name] = data
+		}
+		for const data, name of @right.inferContraryTypes() {
+			inferables[name] = data
+		}
+
+		return inferables
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
@@ -212,24 +222,23 @@ class BinaryOperatorDivision extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorImply extends BinaryOperatorExpression {
-	reduceTypes() { // {{{
-		const variables = {}
+	inferTypes() { // {{{
+		const inferables = {}
 
-		const right = @right.reduceTypes()
+		const right = @right.inferTypes()
 
 		let rtype
-		for const type, name of @left.reduceTypes() {
-			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
-				if type.equals(rtype) {
-					variables[name] = type
-				}
-				else {
-					variables[name] = Type.union(@scope, type, rtype)
+		for const data, name of @left.inferTypes() {
+			if (rtype ?= right[name].type) && !data.type.isAny() && !rtype.isAny() {
+				inferables[name] = data
+
+				if !data.type.equals(rtype) {
+					inferables[name].type = Type.union(@scope, data.type, rtype)
 				}
 			}
 		}
 
-		return variables
+		return inferables
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
@@ -318,24 +327,53 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorOr extends BinaryOperatorExpression {
-	reduceTypes() { // {{{
-		const variables = {}
+	inferTypes() { // {{{
+		const inferables = {}
 
-		const right = @right.reduceTypes()
+		const right = @right.inferTypes()
 
-		let rtype
-		for const type, name of @left.reduceTypes() {
-			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
-				if type.equals(rtype) {
-					variables[name] = type
+		for const data, name of @left.inferTypes() {
+			if right[name]? {
+				const rtype = right[name].type
+
+				if !data.type.isAny() && !rtype.isAny() {
+					inferables[name] = data
+
+					if !data.type.equals(rtype) {
+						inferables[name].type = Type.union(@scope, data.type, rtype)
+					}
 				}
-				else {
-					variables[name] = Type.union(@scope, type, rtype)
-				}
+			}
+			else {
+				inferables[name] = data
 			}
 		}
 
-		return variables
+		return inferables
+	} // }}}
+	inferContraryTypes() { // {{{
+		const inferables = {}
+
+		const right = @right.inferContraryTypes()
+
+		for const data, name of @left.inferContraryTypes() {
+			if right[name]? {
+				const rtype = right[name].type
+
+				if !data.type.isAny() && !rtype.isAny() {
+					inferables[name] = data
+
+					if !data.type.equals(rtype) {
+						inferables[name].type = Type.union(@scope, data.type, rtype)
+					}
+				}
+			}
+			else {
+				inferables[name] = data
+			}
+		}
+
+		return inferables
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
@@ -445,18 +483,21 @@ class BinaryOperatorTypeEquality extends Expression {
 		@left.translate()
 	} // }}}
 	hasExceptions() => false
+	inferTypes() { // {{{
+		const inferables = {}
+
+		if @left.isInferable() {
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type: @type
+			}
+		}
+
+		return inferables
+	} // }}}
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)
-	reduceTypes() { // {{{
-		const variables = {}
-
-		if @left is IdentifierLiteral {
-			variables[@left.value()] = @type
-		}
-
-		return variables
-	} // }}}
 	toFragments(fragments, mode) { // {{{
 		@type.toTestFragments(fragments, @left)
 	} // }}}
@@ -505,6 +546,18 @@ class BinaryOperatorTypeInequality extends Expression {
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)
+	inferContraryTypes() { // {{{
+		const inferables = {}
+
+		if @left.isInferable() {
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type: @type
+			}
+		}
+
+		return inferables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @data.right.kind == NodeKind::TypeReference {
 			fragments.code('!')
@@ -526,25 +579,6 @@ class BinaryOperatorTypeInequality extends Expression {
 }
 
 class BinaryOperatorXor extends BinaryOperatorExpression {
-	reduceTypes() { // {{{
-		const variables = {}
-
-		const right = @right.reduceTypes()
-
-		let rtype
-		for const type, name of @left.reduceTypes() {
-			if (rtype ?= right[name]) && !type.isAny() && !rtype.isAny() {
-				if type.equals(rtype) {
-					variables[name] = type
-				}
-				else {
-					variables[name] = Type.union(@scope, type, rtype)
-				}
-			}
-		}
-
-		return variables
-	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(@left)
