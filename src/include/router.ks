@@ -149,6 +149,18 @@ namespace Router {
 					}
 				}
 
+				const length = group.methods.length
+
+				for const parameter, name of parameters {
+					for const type, name of parameter.types {
+						if type.methods.length == length {
+							parameter.weight -= type.weight
+
+							delete parameter[name]
+						}
+					}
+				}
+
 				const sortedParameters = [value for const value of parameters].sort((a, b) => b.weight - a.weight)
 				const sortedIndexes = [value.index - 1 for const value in sortedParameters]
 
