@@ -14,7 +14,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_import_0(data, references, domain, node) {
 			if(arguments.length < 4) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 4)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 4)");
 			}
 			if(data === void 0 || data === null) {
 				throw new TypeError("'data' is not nullable");
@@ -38,7 +38,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_import_1(name, data, references, node) {
 			if(arguments.length < 4) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 4)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 4)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
@@ -62,7 +62,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_import_2(name, data, references, domain, node) {
 			if(arguments.length < 5) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 5)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 5)");
 			}
 			if(name === void 0) {
 				name = null;

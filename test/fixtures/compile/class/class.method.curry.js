@@ -22,7 +22,7 @@ module.exports = function() {
 	const hello = Helper.vcurry(Message.build, null, "Hello!");
 	function print(name, printer) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(name === void 0 || name === null) {
 			throw new TypeError("'name' is not nullable");

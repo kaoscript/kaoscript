@@ -30,7 +30,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_throwFoobar_0(name) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");

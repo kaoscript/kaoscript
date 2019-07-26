@@ -8,7 +8,7 @@ module.exports = function() {
 		}
 		__ks_cons_0(foo, bar, qux) {
 			if(arguments.length < 3) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 			}
 			if(foo === void 0 || foo === null) {
 				throw new TypeError("'foo' is not nullable");
@@ -22,7 +22,7 @@ module.exports = function() {
 		}
 		__ks_cons_1(foo, qux) {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			if(foo === void 0 || foo === null) {
 				throw new TypeError("'foo' is not nullable");

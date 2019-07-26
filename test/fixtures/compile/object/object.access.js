@@ -1,7 +1,7 @@
 module.exports = function() {
 	function dot(foo) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(foo === void 0 || foo === null) {
 			throw new TypeError("'foo' is not nullable");
@@ -10,7 +10,7 @@ module.exports = function() {
 	}
 	function bracket(foo, bar) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(foo === void 0 || foo === null) {
 			throw new TypeError("'foo' is not nullable");

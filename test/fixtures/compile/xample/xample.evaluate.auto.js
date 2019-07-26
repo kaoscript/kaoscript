@@ -12,7 +12,7 @@ module.exports = function() {
 	};
 	__ks_String.__ks_func_startsWith_0 = function(value) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");

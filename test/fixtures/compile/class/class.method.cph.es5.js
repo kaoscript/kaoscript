@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons_0(messages) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(messages === void 0 || messages === null) {
 				throw new TypeError("'messages' is not nullable");
@@ -40,7 +40,7 @@ module.exports = function() {
 		}
 		__ks_func_format_0(message) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(message === void 0 || message === null) {
 				throw new TypeError("'message' is not nullable");

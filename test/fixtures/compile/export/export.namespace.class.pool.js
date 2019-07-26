@@ -24,7 +24,7 @@ module.exports = function() {
 			}
 			__ks_func_name_1(name) {
 				if(arguments.length < 1) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
 				if(name === void 0 || name === null) {
 					throw new TypeError("'name' is not nullable");
@@ -63,7 +63,7 @@ module.exports = function() {
 	}
 	function release(item) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");

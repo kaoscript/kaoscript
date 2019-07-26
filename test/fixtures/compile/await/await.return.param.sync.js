@@ -2,7 +2,7 @@ var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function foo(x, y, __ks_cb) {
 		if(arguments.length < 3) {
-			let __ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for 2 + 1)");
+			let __ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2 + 1)");
 			if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1]))) {
 				return __ks_cb(__ks_error);
 			}
@@ -23,7 +23,7 @@ module.exports = function() {
 	}
 	function bar(__ks_cb) {
 		if(arguments.length < 1) {
-			let __ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for 0 + 1)");
+			let __ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for 0 + 1)");
 			if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1]))) {
 				return __ks_cb(__ks_error);
 			}
@@ -52,7 +52,7 @@ module.exports = function() {
 	}
 	function qux(x, y) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");

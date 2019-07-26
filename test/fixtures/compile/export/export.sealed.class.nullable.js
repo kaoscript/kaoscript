@@ -6,7 +6,7 @@ module.exports = function() {
 		}
 		__ks_cons_0(shape) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(shape === void 0 || shape === null) {
 				throw new TypeError("'shape' is not nullable");
@@ -28,7 +28,7 @@ module.exports = function() {
 	var __ks_Shape = {};
 	__ks_Shape.__ks_func_draw_0 = function(color) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(color === void 0) {
 			color = null;

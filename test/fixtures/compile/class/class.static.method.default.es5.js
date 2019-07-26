@@ -6,7 +6,7 @@ module.exports = function() {
 		$static: {
 			__ks_sttc_makeCircle_0: function(color) {
 				if(arguments.length < 1) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
 				if(color === void 0 || color === null) {
 					throw new TypeError("'color' is not nullable");
@@ -24,7 +24,7 @@ module.exports = function() {
 			},
 			__ks_sttc_makeRectangle_0: function(color) {
 				if(arguments.length < 1) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
 				if(color === void 0 || color === null) {
 					throw new TypeError("'color' is not nullable");
@@ -54,7 +54,7 @@ module.exports = function() {
 		},
 		__ks_cons_0: function(type, color) {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			if(type === void 0 || type === null) {
 				throw new TypeError("'type' is not nullable");

@@ -1,7 +1,7 @@
 module.exports = function() {
 	function init(data, builder) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(data === void 0 || data === null) {
 			throw new TypeError("'data' is not nullable");

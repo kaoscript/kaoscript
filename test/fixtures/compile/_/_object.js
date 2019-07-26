@@ -2,7 +2,7 @@ module.exports = function(Helper, Type) {
 	var __ks_Object = {};
 	__ks_Object.__ks_sttc_map_0 = function(object, iterator) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(object === void 0 || object === null) {
 			throw new TypeError("'object' is not nullable");
@@ -25,7 +25,7 @@ module.exports = function(Helper, Type) {
 	};
 	__ks_Object.__ks_sttc_map_1 = function(object, iterator, condition) {
 		if(arguments.length < 3) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 		}
 		if(object === void 0 || object === null) {
 			throw new TypeError("'object' is not nullable");

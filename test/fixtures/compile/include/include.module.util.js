@@ -17,7 +17,7 @@ module.exports = function() {
 	const $merge = {
 		merge(source, key, value) {
 			if(arguments.length < 3) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 			}
 			if(source === void 0 || source === null) {
 				throw new TypeError("'source' is not nullable");
@@ -46,7 +46,7 @@ module.exports = function() {
 		},
 		object(source, current) {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			if(source === void 0 || source === null) {
 				throw new TypeError("'source' is not nullable");
@@ -98,7 +98,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_any_0 = function(fn) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(fn === void 0 || fn === null) {
 			throw new TypeError("'fn' is not nullable");
@@ -125,7 +125,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_func_contains_0 = function() {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		let __ks_i = -1;
 		let item = arguments[++__ks_i];
@@ -138,7 +138,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_sttc_from_0 = function(item) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
@@ -214,7 +214,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_sttc_same_0 = function(a, b) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(a === void 0 || a === null) {
 			throw new TypeError("'a' is not nullable");
@@ -303,7 +303,7 @@ module.exports = function() {
 	};
 	__ks_Object.__ks_sttc_clone_0 = function(object) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(object === void 0 || object === null) {
 			throw new TypeError("'object' is not nullable");
@@ -326,7 +326,7 @@ module.exports = function() {
 	};
 	__ks_Object.__ks_sttc_isEmpty_0 = function(item) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");

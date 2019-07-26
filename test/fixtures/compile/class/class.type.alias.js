@@ -22,7 +22,7 @@ module.exports = function() {
 		}
 		__ks_func_height_1(height) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(height === void 0 || height === null) {
 				throw new TypeError("'height' is not nullable");

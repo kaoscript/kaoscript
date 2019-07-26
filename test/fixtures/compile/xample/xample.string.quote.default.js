@@ -3,7 +3,7 @@ module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_quote_0 = function() {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		let __ks_i = -1;
 		let quote;
@@ -26,7 +26,7 @@ module.exports = function() {
 	};
 	__ks_String.__ks_func_replaceAll_0 = function(find, replacement) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(find === void 0 || find === null) {
 			throw new TypeError("'find' is not nullable");

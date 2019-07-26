@@ -1,7 +1,7 @@
 module.exports = function() {
 	function rewire(option) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(option === void 0 || option === null) {
 			throw new TypeError("'option' is not nullable");

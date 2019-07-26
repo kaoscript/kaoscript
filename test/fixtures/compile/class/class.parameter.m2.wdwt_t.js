@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons_0() {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];
@@ -28,7 +28,7 @@ module.exports = function() {
 		}
 		__ks_cons_1() {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];

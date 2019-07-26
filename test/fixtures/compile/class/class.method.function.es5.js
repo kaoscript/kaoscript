@@ -2,7 +2,7 @@ var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function $format(message) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(message === void 0 || message === null) {
 			throw new TypeError("'message' is not nullable");
@@ -21,7 +21,7 @@ module.exports = function() {
 		}
 		__ks_cons_0(messages) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(messages === void 0 || messages === null) {
 				throw new TypeError("'messages' is not nullable");
@@ -42,7 +42,7 @@ module.exports = function() {
 		__ks_func_build_01_0() {
 			return this._messages.map(Helper.vcurry(function(message) {
 				if(arguments.length < 1) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
@@ -59,7 +59,7 @@ module.exports = function() {
 		__ks_func_build_02_0() {
 			return this._messages.map(Helper.vcurry(function() {
 				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				let __ks_i = -1;
 				let message = arguments[++__ks_i];
@@ -84,7 +84,7 @@ module.exports = function() {
 		__ks_func_build_03_0() {
 			return this._messages.map(Helper.vcurry(function() {
 				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				let __ks_i = -1;
 				let message = arguments[++__ks_i];
@@ -109,7 +109,7 @@ module.exports = function() {
 		__ks_func_build_04_0() {
 			return this._messages.map(Helper.vcurry(function(message) {
 				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
@@ -132,7 +132,7 @@ module.exports = function() {
 		__ks_func_build_05_0() {
 			return this._messages.map(function(message) {
 				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
@@ -154,7 +154,7 @@ module.exports = function() {
 		}
 		__ks_func_format_0(message) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(message === void 0 || message === null) {
 				throw new TypeError("'message' is not nullable");
@@ -172,14 +172,14 @@ module.exports = function() {
 		}
 		static __ks_sttc_compose_00_0(box) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(box === void 0 || box === null) {
 				throw new TypeError("'box' is not nullable");
 			}
 			return box._messages.map(function(message) {
 				if(arguments.length < 1) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
@@ -195,14 +195,14 @@ module.exports = function() {
 		}
 		static __ks_sttc_compose_01_0(box) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(box === void 0 || box === null) {
 				throw new TypeError("'box' is not nullable");
 			}
 			return box._messages.map(function(message) {
 				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");

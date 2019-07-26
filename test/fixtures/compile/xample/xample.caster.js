@@ -5,7 +5,7 @@ module.exports = function() {
 	let $caster = {
 		hex(n) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(n === void 0 || n === null) {
 				throw new TypeError("'n' is not nullable");

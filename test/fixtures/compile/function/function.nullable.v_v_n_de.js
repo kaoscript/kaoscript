@@ -2,7 +2,7 @@ var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function foobar() {
 		if(arguments.length < 3) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 		}
 		let __ks_i = -1;
 		let x = arguments[++__ks_i];

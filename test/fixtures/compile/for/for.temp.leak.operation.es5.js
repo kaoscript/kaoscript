@@ -4,7 +4,7 @@ module.exports = function() {
 	}
 	function translate(statements, extending) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(statements === void 0 || statements === null) {
 			throw new TypeError("'statements' is not nullable");

@@ -1,7 +1,7 @@
 module.exports = function() {
 	function foobar(a, b, c, d, e) {
 		if(arguments.length < 5) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 5)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 5)");
 		}
 		if(a === void 0 || a === null) {
 			throw new TypeError("'a' is not nullable");

@@ -3,7 +3,7 @@ module.exports = function() {
 	var __ks_Object = {};
 	__ks_Object.__ks_func_map_0 = function(iterator) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(iterator === void 0 || iterator === null) {
 			throw new TypeError("'iterator' is not nullable");
@@ -31,7 +31,7 @@ module.exports = function() {
 		duncan: "murbella"
 	}, function(item, name) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");

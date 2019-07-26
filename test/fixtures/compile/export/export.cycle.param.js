@@ -14,7 +14,7 @@ module.exports = function() {
 		}
 		__ks_func_equals_0(b) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(b === void 0 || b === null) {
 				throw new TypeError("'b' is not nullable");

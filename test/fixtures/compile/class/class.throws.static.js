@@ -3,7 +3,7 @@ module.exports = function() {
 	class Exception extends Error {
 		constructor(message) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(message === void 0 || message === null) {
 				throw new TypeError("'message' is not nullable");
@@ -16,7 +16,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_throw_0(message) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(message === void 0 || message === null) {
 				throw new TypeError("'message' is not nullable");

@@ -13,7 +13,7 @@ module.exports = function() {
 		}
 		__ks_func_foobar_0([x, y]) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			this._x = x;
 			this._y = y;

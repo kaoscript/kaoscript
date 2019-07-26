@@ -22,7 +22,7 @@ module.exports = function() {
 		}
 		__ks_func_bar_1(name, ...messages) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
@@ -41,7 +41,7 @@ module.exports = function() {
 		}
 		__ks_func_baz_1() {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			let __ks_i = -1;
 			let foo = arguments[++__ks_i];
@@ -66,7 +66,7 @@ module.exports = function() {
 		}
 		__ks_func_qux_1(name, priority, ...messages) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
@@ -86,7 +86,7 @@ module.exports = function() {
 		}
 		__ks_func_corge_0(name) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
@@ -95,7 +95,7 @@ module.exports = function() {
 		}
 		__ks_func_corge_1() {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			let __ks_i = -1;
 			let name = arguments[++__ks_i];
@@ -121,7 +121,7 @@ module.exports = function() {
 		}
 		__ks_func_grault_0(name) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
@@ -130,7 +130,7 @@ module.exports = function() {
 		}
 		__ks_func_grault_1() {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			let __ks_i = -1;
 			let name = arguments[++__ks_i];
@@ -156,7 +156,7 @@ module.exports = function() {
 		}
 		__ks_func_garply_0(name) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
@@ -168,7 +168,7 @@ module.exports = function() {
 		}
 		__ks_func_garply_1() {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			let __ks_i = -1;
 			let name = arguments[++__ks_i];
@@ -198,7 +198,7 @@ module.exports = function() {
 		}
 		__ks_func_garply_2() {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			let __ks_i = -1;
 			let name = arguments[++__ks_i];
@@ -252,7 +252,7 @@ module.exports = function() {
 		}
 		__ks_func_waldo_1(name, ...messages) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");

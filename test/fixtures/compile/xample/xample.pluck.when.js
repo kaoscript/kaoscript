@@ -3,7 +3,7 @@ module.exports = function() {
 	var __ks_Array = {};
 	__ks_Array.__ks_func_pluck_0 = function(name) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(name === void 0 || name === null) {
 			throw new TypeError("'name' is not nullable");

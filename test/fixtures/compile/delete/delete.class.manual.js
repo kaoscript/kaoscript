@@ -13,7 +13,7 @@ module.exports = function() {
 		}
 		static __ks_destroy_0(that) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(that === void 0 || that === null) {
 				throw new TypeError("'that' is not nullable");

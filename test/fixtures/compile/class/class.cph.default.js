@@ -14,7 +14,7 @@ module.exports = function() {
 		}
 		__ks_func_list_0(fn) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(fn === void 0 || fn === null) {
 				throw new TypeError("'fn' is not nullable");

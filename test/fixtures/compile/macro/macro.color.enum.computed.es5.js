@@ -20,7 +20,7 @@ module.exports = function() {
 		},
 		__ks_func_getField_0: function(name) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
@@ -34,7 +34,7 @@ module.exports = function() {
 		},
 		__ks_func_setField_0: function(name, value) {
 			if(arguments.length < 2) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
@@ -81,7 +81,7 @@ module.exports = function() {
 	};
 	Color.prototype.__ks_func_red_1 = function(value) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");
@@ -93,7 +93,7 @@ module.exports = function() {
 	};
 	Color.prototype.__ks_func_green_1 = function(value) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");
@@ -105,7 +105,7 @@ module.exports = function() {
 	};
 	Color.prototype.__ks_func_blue_1 = function(value) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");

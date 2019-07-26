@@ -14,7 +14,7 @@ module.exports = function() {
 		}
 		__ks_func_foo_0(__ks_cb) {
 			if(arguments.length < 1) {
-				let __ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for 0 + 1)");
+				let __ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for 0 + 1)");
 				if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1]))) {
 					return __ks_cb(__ks_error);
 				}

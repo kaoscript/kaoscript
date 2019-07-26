@@ -10,7 +10,7 @@ module.exports = function() {
 	AnimalFlags.Predator = AnimalFlags.CanFly | AnimalFlags.HasClaws;
 	function printAnimalAbilities(animal) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(animal === void 0 || animal === null) {
 			throw new TypeError("'animal' is not nullable");

@@ -2,7 +2,7 @@ module.exports = function(expect) {
 	let foo = (function() {
 		return function(x, __ks_0, y) {
 			if(arguments.length < 3) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 			}
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");

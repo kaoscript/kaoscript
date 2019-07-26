@@ -3,7 +3,7 @@ module.exports = function() {
 	var __ks_Array = {};
 	__ks_Array.__ks_sttc_map_0 = function(array, iterator) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(array === void 0 || array === null) {
 			throw new TypeError("'array' is not nullable");
@@ -26,7 +26,7 @@ module.exports = function() {
 	};
 	__ks_Array.__ks_sttc_map_1 = function(array, iterator, condition) {
 		if(arguments.length < 3) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 		}
 		if(array === void 0 || array === null) {
 			throw new TypeError("'array' is not nullable");

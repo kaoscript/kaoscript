@@ -36,9 +36,7 @@ function patch(file) {
 
 	try {
 		var compiler = new Compiler(path.join(root, name + '.ks'), {
-			config: {
-				header: false
-			}
+			header: false
 		});
 
 		var data = compiler.compile().toSource();

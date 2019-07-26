@@ -205,7 +205,7 @@ class Parameter extends AbstractNode {
 						.newControl()
 						.code(`if(arguments.length < \(signature.min() + 1))`)
 						.step()
-						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
+						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
 
 					if rest == -1 {
 						ctrl
@@ -245,7 +245,7 @@ class Parameter extends AbstractNode {
 						.newControl()
 						.code(`if(arguments.length < \(signature.min()))`)
 						.step()
-						.line(`throw new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min()))")`)
+						.line(`throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()))")`)
 						.done()
 				}
 			}
@@ -405,7 +405,7 @@ class Parameter extends AbstractNode {
 						.newControl()
 						.code(`if(arguments.length < \(signature.min() + 1))`)
 						.step()
-						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
+						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
 
 					ctrl
 						.newControl()
@@ -431,7 +431,7 @@ class Parameter extends AbstractNode {
 						.newControl()
 						.code(`if(\(name).length < \(signature.min()))`)
 						.step()
-						.line(`throw new SyntaxError("wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
+						.line(`throw new SyntaxError("Wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
 						.done()
 				}
 			}

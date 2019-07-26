@@ -13,14 +13,14 @@ module.exports = function() {
 		}
 		__ks_func_camelize_0(value) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
 			return this.toLowerCase(value.charAt(0)) + value.substr(1).replace(/[-_\s]+(.)/g, (...__ks_arguments) => {
 				if(__ks_arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + __ks_arguments.length + " for 2)");
+					throw new SyntaxError("Wrong number of arguments (" + __ks_arguments.length + " for 2)");
 				}
 				let __ks_i = -1;
 				++__ks_i;
@@ -39,7 +39,7 @@ module.exports = function() {
 		}
 		__ks_func_toLowerCase_0(value) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
@@ -54,7 +54,7 @@ module.exports = function() {
 		}
 		__ks_func_toUpperCase_0(value) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");

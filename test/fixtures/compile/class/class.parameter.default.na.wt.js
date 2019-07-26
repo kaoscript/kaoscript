@@ -15,7 +15,7 @@ module.exports = function() {
 		}
 		__ks_cons_1(message) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(message === void 0 || message === null) {
 				throw new TypeError("'message' is not nullable");
@@ -27,7 +27,7 @@ module.exports = function() {
 		}
 		__ks_cons_2(number) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(number === void 0 || number === null) {
 				throw new TypeError("'number' is not nullable");

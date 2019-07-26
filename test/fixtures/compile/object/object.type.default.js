@@ -3,7 +3,7 @@ module.exports = function() {
 	var __ks_Object = {};
 	__ks_Object.__ks_sttc_size_0 = function(item) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");

@@ -19,7 +19,7 @@ module.exports = function() {
 		"formatters": {
 			foo(t1, t2, t3) {
 				if(arguments.length < 3) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 				}
 				if(t1 === void 0 || t1 === null) {
 					throw new TypeError("'t1' is not nullable");
@@ -34,7 +34,7 @@ module.exports = function() {
 			},
 			bar(h, i) {
 				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				if(h === void 0 || h === null) {
 					throw new TypeError("'h' is not nullable");

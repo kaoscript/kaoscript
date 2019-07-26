@@ -41,7 +41,7 @@ module.exports = function() {
 	class ClassC extends ClassB {
 		constructor(x, y, z) {
 			if(arguments.length < 3) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 			}
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");

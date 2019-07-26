@@ -4,7 +4,7 @@ module.exports = function() {
 	var {String, __ks_String} = require("../_/_string.ks")();
 	__ks_String.__ks_func_endsWith_0 = function(value) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");
@@ -23,7 +23,7 @@ module.exports = function() {
 	};
 	function clearer(current, value) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(current === void 0 || current === null) {
 			throw new TypeError("'current' is not nullable");

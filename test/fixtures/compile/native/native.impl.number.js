@@ -2,7 +2,7 @@ module.exports = function() {
 	var __ks_Number = {};
 	__ks_Number.__ks_func_mod_0 = function(max) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(max === void 0 || max === null) {
 			throw new TypeError("'max' is not nullable");

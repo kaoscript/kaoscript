@@ -3,7 +3,7 @@ module.exports = function() {
 	function foo(x) {
 		let __ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null;
 		if(arguments.length < 3) {
-			let __ks_error = new SyntaxError("wrong number of arguments (" + arguments.length + " for 2 + 1)");
+			let __ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2 + 1)");
 			if(Type.isFunction(__ks_cb)) {
 				return __ks_cb(__ks_error);
 			}

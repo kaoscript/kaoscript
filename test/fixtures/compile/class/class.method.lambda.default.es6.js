@@ -13,14 +13,14 @@ module.exports = function() {
 		}
 		__ks_func_camelize_0(value) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
 			return value.charAt(0).toLowerCase() + value.substr(1).replace(/[-_\s]+(.)/g, function(__ks_0, l) {
 				if(arguments.length < 2) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
 				if(l === void 0 || l === null) {
 					throw new TypeError("'l' is not nullable");

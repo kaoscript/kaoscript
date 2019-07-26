@@ -5,7 +5,7 @@ module.exports = function() {
 	}
 	function bar(x, ...items) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
@@ -14,7 +14,7 @@ module.exports = function() {
 	}
 	function baz(x) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
@@ -29,7 +29,7 @@ module.exports = function() {
 	}
 	function qux(x, ...items) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
@@ -53,7 +53,7 @@ module.exports = function() {
 	}
 	function grault() {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		let __ks_i;
 		let items = arguments.length > 1 ? Array.prototype.slice.call(arguments, 0, __ks_i = arguments.length - 1) : (__ks_i = 0, []);
@@ -69,7 +69,7 @@ module.exports = function() {
 	}
 	function waldo() {
 		if(arguments.length < 3) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 		}
 		let __ks_i;
 		let items = arguments.length > 3 ? Array.prototype.slice.call(arguments, 0, __ks_i = arguments.length - 3) : (__ks_i = 0, []);
@@ -89,7 +89,7 @@ module.exports = function() {
 	}
 	function fred() {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		let __ks_i;
 		let items = arguments.length > 2 ? Array.prototype.slice.call(arguments, 0, __ks_i = arguments.length - 2) : (__ks_i = 0, []);

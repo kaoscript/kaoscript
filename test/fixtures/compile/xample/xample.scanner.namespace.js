@@ -24,7 +24,7 @@ module.exports = function() {
 			}
 			__ks_func_skip_0(index) {
 				if(arguments.length < 1) {
-					throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
 				if(index === void 0 || index === null) {
 					throw new TypeError("'index' is not nullable");

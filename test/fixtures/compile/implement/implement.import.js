@@ -3,7 +3,7 @@ module.exports = function() {
 	var Shape = require("../export/export.class.default.ks")().Shape;
 	Shape.prototype.__ks_func_draw_0 = function(canvas) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(canvas === void 0 || canvas === null) {
 			throw new TypeError("'canvas' is not nullable");

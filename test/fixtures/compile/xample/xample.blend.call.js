@@ -4,7 +4,7 @@ module.exports = function() {
 	var {Number, __ks_Number} = require("../_/_number.ks")();
 	function blend(x, y, percentage) {
 		if(arguments.length < 3) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 3)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 		}
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");

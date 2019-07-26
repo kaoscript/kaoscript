@@ -4,7 +4,7 @@ var disks = require("./diskspace.module.ks")().disks;
 describe("diskspace", function() {
 	it("print", function(done) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(done === void 0 || done === null) {
 			throw new TypeError("'done' is not nullable");

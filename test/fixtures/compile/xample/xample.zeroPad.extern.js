@@ -2,7 +2,7 @@ module.exports = function() {
 	var __ks_Number = {};
 	__ks_Number.__ks_func_zeroPad_0 = function(length) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(length === void 0 || length === null) {
 			throw new TypeError("'length' is not nullable");
@@ -19,7 +19,7 @@ module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_lpad_0 = function(length, pad) {
 		if(arguments.length < 2) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 2)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		if(length === void 0 || length === null) {
 			throw new TypeError("'length' is not nullable");

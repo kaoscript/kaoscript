@@ -14,7 +14,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_foobar_0(x) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
@@ -26,7 +26,7 @@ module.exports = function() {
 		}
 		static __ks_sttc_foobar_1(x) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
@@ -50,7 +50,7 @@ module.exports = function() {
 	}
 	function foobar(a) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(a === void 0 || a === null) {
 			throw new TypeError("'a' is not nullable");

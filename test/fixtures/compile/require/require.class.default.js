@@ -5,7 +5,7 @@ module.exports = function(Color, Space) {
 	};
 	Color.prototype.__ks_func_luma_1 = function(luma) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(luma === void 0 || luma === null) {
 			throw new TypeError("'luma' is not nullable");

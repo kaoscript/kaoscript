@@ -7,7 +7,7 @@ module.exports = function() {
 			"from": {
 				srgb(red, green, blue, that) {
 					if(arguments.length < 4) {
-						throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 4)");
+						throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 4)");
 					}
 					if(red === void 0 || red === null) {
 						throw new TypeError("'red' is not nullable");
@@ -29,7 +29,7 @@ module.exports = function() {
 			"to": {
 				srgb(rouge, vert, blue, that) {
 					if(arguments.length < 4) {
-						throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 4)");
+						throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 4)");
 					}
 					if(rouge === void 0 || rouge === null) {
 						throw new TypeError("'rouge' is not nullable");
@@ -66,7 +66,7 @@ module.exports = function() {
 	};
 	Color.prototype.__ks_func_rouge_1 = function(value) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");
@@ -78,7 +78,7 @@ module.exports = function() {
 	};
 	Color.prototype.__ks_func_vert_1 = function(value) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");
@@ -90,7 +90,7 @@ module.exports = function() {
 	};
 	Color.prototype.__ks_func_blue_1 = function(value) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");

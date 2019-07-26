@@ -3,7 +3,7 @@ module.exports = function() {
 	var __ks_Object = {};
 	__ks_Object.__ks_sttc_clone_0 = function(object) {
 		if(arguments.length < 1) {
-			throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(object === void 0 || object === null) {
 			throw new TypeError("'object' is not nullable");

@@ -14,7 +14,7 @@ module.exports = function() {
 		}
 		__ks_func_foo_0() {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			let __ks_i = -1;
 			let x;

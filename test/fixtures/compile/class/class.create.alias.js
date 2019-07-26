@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons_0(line) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(line === void 0 || line === null) {
 				throw new TypeError("'line' is not nullable");

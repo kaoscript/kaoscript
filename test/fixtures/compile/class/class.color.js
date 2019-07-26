@@ -27,7 +27,7 @@ module.exports = function() {
 		}
 		__ks_func_space_1(space) {
 			if(arguments.length < 1) {
-				throw new SyntaxError("wrong number of arguments (" + arguments.length + " for 1)");
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			if(space === void 0 || space === null) {
 				throw new TypeError("'space' is not nullable");
