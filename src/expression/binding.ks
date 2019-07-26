@@ -430,7 +430,13 @@ class ObjectBindingElement extends Expression {
 		_thisAlias: Boolean				= false
 	}
 	analyse() { // {{{
-		@computed = @data.name.computed
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Computed {
+				@computed = true
+
+				break
+			}
+		}
 
 		if @data.alias? {
 			@name = $compile.expression(@data.name, this)

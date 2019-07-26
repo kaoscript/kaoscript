@@ -216,8 +216,16 @@ class Importer extends Statement {
 			index: @isKSFile ? null : 0
 			isIdentifier: false
 			isNamed: false
-			required: data.required
+			required: false
 			value: $compile.expression(data.value, this)
+		}
+
+		for const modifer in data.modifiers {
+			if modifer.kind == ModifierKind::Required {
+				argument.required = true
+
+				break
+			}
 		}
 
 		if data.required {
