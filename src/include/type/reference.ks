@@ -179,7 +179,10 @@ class ReferenceType extends Type {
 		return false
 	} // }}}
 	isMatching(value: Type, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact {
+		if this == value {
+			return true
+		}
+		else if mode & MatchingMode::Exact {
 			if value is ReferenceType {
 				if @name != value._name || @nullable != value._nullable || @parameters.length != value._parameters.length {
 					return false

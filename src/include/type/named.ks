@@ -119,6 +119,61 @@ class NamedType extends Type {
 	isSealable() => @type.isSealable()
 	isSealed() => @type.isSealed()
 	isSealedAlien() => @type.isSealedAlien()
+	isMatching(value: Type, mode: MatchingMode) { // {{{
+		if this == value {
+			return true
+		}
+		else if mode & MatchingMode::Exact {
+			NotImplementedException.throw()
+		}
+		else {
+			if value.isAny() {
+				return true
+			}
+			else if value is NamedType {
+				if @type is ClassType && value.type() is ClassType {
+					return this.matchInheritanceOf(value)
+				}
+				else if value.type() is EnumType {
+					if @type is EnumType {
+						return @name == value.name()
+					}
+					else {
+						return this.isMatching(value.type().type(), mode)
+					}
+				}
+				else if value.isAlias() {
+					if this.isAlias() {
+						return @name == value.name() || this.discardAlias().isMatching(value.discardAlias(), mode)
+					}
+					else {
+						return this.isMatching(value.discardAlias(), mode)
+					}
+				}
+				else {
+					return @type.isMatching(value.type(), mode)
+				}
+			}
+			else if this.isAlias() {
+				return this.discardAlias().isMatching(value, mode)
+			}
+			else if value is UnionType {
+				for const type in value.types() {
+					if this.isMatching(type, mode) {
+						return true
+					}
+				}
+
+				return false
+			}
+			else if value is ReferenceType {
+				return @name == value.name() || this.isMatching(value.discardReference(), mode)
+			}
+			else {
+				return @type.isMatching(value, mode)
+			}
+		}
+	} // }}}
 	isNamed() => true
 	isNamespace() => @type.isNamespace()
 	matchClassName(that: Type?) { // {{{

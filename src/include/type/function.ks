@@ -289,19 +289,6 @@ class FunctionType extends Type {
 		return false
 	} // }}}
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
-	isSimilarTo(b: FunctionType) { // {{{
-		if @async != b._async || @hasRest != b._hasRest || @max != b._max || @min != b._min || @restIndex != b._restIndex || @parameters.length != b._parameters.length {
-			return false
-		}
-
-		for parameter, index in @parameters {
-			if !parameter.equals(b._parameters[index]) {
-				return false
-			}
-		}
-
-		return true
-	} // }}}
 	matchArguments(arguments: Array<Type>) { // {{{
 		// console.log(@parameters)
 		// console.log(arguments)
@@ -518,7 +505,7 @@ class FunctionType extends Type {
 	} // }}}
 	pushTo(methods) { // {{{
 		for const method in methods {
-			if this.isSimilarTo(method) {
+			if this.isMatching(method, MatchingMode::SimilarParameter) {
 				return
 			}
 		}
