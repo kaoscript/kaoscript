@@ -24,6 +24,7 @@ class UntilStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
 	toStatementFragments(fragments, mode) { // {{{
 		fragments
 			.newControl()

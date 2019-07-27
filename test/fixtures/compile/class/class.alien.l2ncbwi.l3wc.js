@@ -60,8 +60,7 @@ module.exports = function() {
 	}
 	class ClassC extends ClassB {
 		constructor() {
-			const __ks_cons_0 = (__ks_arguments) => {
-				let __ks_i = -1;
+			const __ks_cons_0 = () => {
 				super("foobar");
 			};
 			const __ks_cons_1 = (__ks_arguments) => {

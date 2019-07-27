@@ -112,6 +112,15 @@ class ForRangeStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isUsingVariable(name) => // {{{
+			@from.isUsingVariable(name)
+		||	@to.isUsingVariable(name)
+		||	@by?.isUsingVariable(name)
+		||	@until?.isUsingVariable(name)
+		||	@while?.isUsingVariable(name)
+		||	@when?.isUsingVariable(name)
+		||	@body.isUsingVariable(name)
+	// }}}
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl().code('for(')
 

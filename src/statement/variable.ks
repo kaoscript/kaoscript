@@ -16,7 +16,7 @@ class VariableDeclaration extends Statement {
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
 
-		while parent? && !(parent is FunctionExpression || parent is LambdaExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
+		while parent? && !(parent is AnonymousFunctionExpression || parent is ArrowFunctionExpression || parent is FunctionDeclarator || parent is ClassMethodDeclaration || parent is ImplementClassMethodDeclaration || parent is ImplementNamespaceFunctionDeclaration) {
 			if parent is TryStatement {
 				@try = parent
 			}
@@ -193,6 +193,7 @@ class VariableDeclaration extends Statement {
 		return false
 	} // }}}
 	isImmutable() => @immutable
+	isUsingVariable(name) => @hasInit && @init.isUsingVariable(name)
 	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
 		fragments.code('(__ks_e')
 

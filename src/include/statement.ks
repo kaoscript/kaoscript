@@ -47,10 +47,11 @@ abstract class Statement extends AbstractNode {
 	} // }}}
 	export(recipient)
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
+	includePath() => @parent.includePath()
 	isAwait() => false
 	isExit() => false
 	isExportable() => false
-	includePath() => @parent.includePath()
+	isUsingVariable(name) => false
 	line() => @line
 	setAttributeData(key: AttributeData, data) { // {{{
 		@attributeDatas[key] = data

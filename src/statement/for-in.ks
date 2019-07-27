@@ -283,6 +283,17 @@ class ForInStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isUsingVariable(name) => // {{{
+			@expression.isUsingVariable(name)
+		||	@from?.isUsingVariable(name)
+		||	@til?.isUsingVariable(name)
+		||	@to?.isUsingVariable(name)
+		||	@by?.isUsingVariable(name)
+		||	@until?.isUsingVariable(name)
+		||	@while?.isUsingVariable(name)
+		||	@when?.isUsingVariable(name)
+		||	@body.isUsingVariable(name)
+	// }}}
 	toBoundFragments(fragments) { // {{{
 		if @data.desc {
 			if @from? {

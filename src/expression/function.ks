@@ -1,4 +1,4 @@
-class FunctionExpression extends Expression {
+class AnonymousFunctionExpression extends Expression {
 	private {
 		_awaiting: Boolean				= false
 		_block: Block
@@ -8,7 +8,7 @@ class FunctionExpression extends Expression {
 		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
-		super(data, parent, scope, ScopeType::Block)
+		super(data, parent, scope, ScopeType::Function)
 	} // }}}
 	analyse() { // {{{
 		@scope.define('this', true, Type.Any, this)
@@ -105,7 +105,7 @@ class FunctionExpression extends Expression {
 	type() => @type
 }
 
-class LambdaExpression extends Expression {
+class ArrowFunctionExpression extends Expression {
 	private {
 		_awaiting: Boolean		= false
 		_block: Block
@@ -158,7 +158,33 @@ class LambdaExpression extends Expression {
 	} // }}}
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
-		let surround = $function.surround(this)
+		let surround
+		if this.isUsingVariable('this') {
+			if @options.format.functions == 'es5' {
+				surround = {
+					arrow: false
+					beforeParameters: '(function('
+					afterParameters: ')'
+					footer: ').bind(this)'
+				}
+			}
+			else {
+				surround = {
+					arrow: true
+					beforeParameters: '('
+					afterParameters: ') =>'
+					footer: ''
+				}
+			}
+		}
+		else {
+			surround = {
+				arrow: false
+				beforeParameters: 'function('
+				afterParameters: ')'
+				footer: ''
+			}
+		}
 
 		fragments.code(surround.beforeParameters)
 

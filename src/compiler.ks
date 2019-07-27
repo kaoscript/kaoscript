@@ -376,10 +376,10 @@ const $expressions = {
 	`\(NodeKind::CreateExpression)`				: CreateExpression
 	`\(NodeKind::CurryExpression)`				: CurryExpression
 	`\(NodeKind::EnumExpression)`				: EnumExpression
-	`\(NodeKind::FunctionExpression)`			: FunctionExpression
+	`\(NodeKind::FunctionExpression)`			: AnonymousFunctionExpression
 	`\(NodeKind::Identifier)`					: IdentifierLiteral
 	`\(NodeKind::IfExpression)`					: IfExpression
-	`\(NodeKind::LambdaExpression)`				: LambdaExpression
+	`\(NodeKind::LambdaExpression)`				: ArrowFunctionExpression
 	`\(NodeKind::Literal)`						: StringLiteral
 	`\(NodeKind::MemberExpression)`				: MemberExpression
 	`\(NodeKind::NumericExpression)`			: NumberLiteral

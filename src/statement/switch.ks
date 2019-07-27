@@ -165,6 +165,19 @@ class SwitchStatement extends Statement {
 			clause.body.checkReturnType(type)
 		}
 	} // }}}
+	isUsingVariable(name) { // {{{
+		if @value.isUsingVariable(name) {
+			return true
+		}
+
+		for const clause in @clauses {
+			if clause.body.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @clauses.length == 0 {
 			return

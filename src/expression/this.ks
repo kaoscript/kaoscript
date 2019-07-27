@@ -93,7 +93,7 @@ class ThisExpression extends Expression {
 	isAssignable() => !@calling && !@composite
 	isComposite() => @composite
 	isInferable() => !@calling && !@composite
-	isUsingVariable(name) => false
+	isUsingVariable(name) => name == 'this'
 	listAssignments(array) => array
 	path() => @fragment
 	setAssignment(assignment)

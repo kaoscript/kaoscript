@@ -8,8 +8,8 @@ class ThrowStatement extends Statement {
 		super(data, parent, scope)
 
 		do {
-			if	parent is FunctionExpression ||
-				parent is LambdaExpression ||
+			if	parent is AnonymousFunctionExpression ||
+				parent is ArrowFunctionExpression ||
 				parent is FunctionDeclarator ||
 				parent is ClassMethodDeclaration ||
 				parent is ImplementClassMethodDeclaration ||
@@ -49,6 +49,7 @@ class ThrowStatement extends Statement {
 		}
 	} // }}}
 	isExit() => true
+	isUsingVariable(name) => @value.isUsingVariable(name)
 	translate() { // {{{
 		@value.translate()
 	} // }}}

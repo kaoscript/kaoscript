@@ -385,7 +385,7 @@ class Parameter extends AbstractNode {
 				}
 			}
 		} // }}}
-		else { // {{{
+		else if signature.max() > 0 { // {{{
 			if mode == ParameterMode::ArrowFunction {
 				fragments.code(`...\(name)`)
 			}
@@ -504,6 +504,9 @@ class Parameter extends AbstractNode {
 				}
 			} // }}}
 		} // }}}
+		else {
+			fragments = fn(fragments)
+		}
 
 		if ra != 0 || maxa != 0 { // {{{
 			parameter = parameters[rest]

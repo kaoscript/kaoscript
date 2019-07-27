@@ -188,6 +188,13 @@ class ForOfStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isUsingVariable(name) => // {{{
+			@expression.isUsingVariable(name)
+		||	@until?.isUsingVariable(name)
+		||	@while?.isUsingVariable(name)
+		||	@when?.isUsingVariable(name)
+		||	@body.isUsingVariable(name)
+	// }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @expressionName? {
 			if @bleeding {

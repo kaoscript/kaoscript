@@ -9,11 +9,11 @@ class TryStatement extends Statement {
 		_await: Boolean				= false
 		_block: Block
 		_catchVarname: String
-		_catchClause
+		_catchClause				= null
 		_catchClauses: Array		= []
 		_continueVarname: String
 		_exit: Boolean				= false
-		_finalizer
+		_finalizer					= null
 		_finallyVarname: String
 		_hasCatch: Boolean			= false
 		_hasFinally: Boolean		= false
@@ -83,7 +83,7 @@ class TryStatement extends Statement {
 			clause.type.prepare()
 		}
 
-		if @catchClause? {
+		if @catchClause != null {
 			@catchClause.prepare()
 
 			@hasCatch = true
@@ -93,7 +93,7 @@ class TryStatement extends Statement {
 
 		@exit = @block.isExit() && @hasCatch && @catchClause.isExit()
 
-		if @finalizer? {
+		if @finalizer != null {
 			@finalizer.prepare()
 
 			@hasFinally = true
@@ -148,6 +148,23 @@ class TryStatement extends Statement {
 		}
 	} // }}}
 	isExit() => @exit
+	isUsingVariable(name) { // {{{
+		if @block.isUsingVariable(name) {
+			return true
+		}
+
+		for const clause in @catchClauses {
+			if clause.body.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		if @catchClause != null && @catchClause.isUsingVariable(name) {
+			return true
+		}
+
+		return @hasFinally && @finalizer.isUsingVariable(name)
+	} // }}}
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		if statements.length != 0 {
 			@continueVarname = @scope.acquireTempName()

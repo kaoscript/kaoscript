@@ -161,6 +161,24 @@ class IfStatement extends Statement {
 		@whenFalseExpression?.checkReturnType(type)
 	} // }}}
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
+	isUsingVariable(name) { // {{{
+		if @declared {
+			if @variable.isUsingVariable(name) {
+				return true
+			}
+		}
+		else {
+			if @condition.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		if @whenTrueExpression.isUsingVariable(name) {
+			return true
+		}
+
+		return @whenFalseExpression != null && @whenFalseExpression.isUsingVariable(name)
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @declared {
 			fragments.compile(@variable)

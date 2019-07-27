@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function $format(message) {
 		if(arguments.length < 1) {
@@ -40,7 +40,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_build_01_0() {
-			return this._messages.map(Helper.vcurry(function(message) {
+			return this._messages.map((function(message) {
 				if(arguments.length < 1) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
@@ -48,7 +48,7 @@ module.exports = function() {
 					throw new TypeError("'message' is not nullable");
 				}
 				return this.format(message);
-			}, this));
+			}).bind(this));
 		}
 		build_01() {
 			if(arguments.length === 0) {
@@ -57,7 +57,7 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_build_02_0() {
-			return this._messages.map(Helper.vcurry(function() {
+			return this._messages.map((function() {
 				if(arguments.length < 2) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
@@ -73,7 +73,7 @@ module.exports = function() {
 					throw new TypeError("'bar' is not nullable");
 				}
 				return this.format(message);
-			}, this));
+			}).bind(this));
 		}
 		build_02() {
 			if(arguments.length === 0) {
@@ -82,7 +82,7 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_build_03_0() {
-			return this._messages.map(Helper.vcurry(function() {
+			return this._messages.map((function() {
 				if(arguments.length < 2) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
@@ -98,7 +98,7 @@ module.exports = function() {
 					throw new TypeError("'bar' is not nullable");
 				}
 				return this.format(message);
-			}, this));
+			}).bind(this));
 		}
 		build_03() {
 			if(arguments.length === 0) {
@@ -107,7 +107,7 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_build_04_0() {
-			return this._messages.map(Helper.vcurry(function(message) {
+			return this._messages.map((function(message) {
 				if(arguments.length < 2) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
@@ -121,7 +121,7 @@ module.exports = function() {
 					throw new TypeError("'bar' is not nullable");
 				}
 				return this.format(message);
-			}, this));
+			}).bind(this));
 		}
 		build_04() {
 			if(arguments.length === 0) {
