@@ -344,7 +344,7 @@ class ClassDeclaration extends Statement {
 			@class.addClassVariable(name, variable.type())
 		}
 
-		if @extending && !@abstract && (notImplemented = @class.getMissingAbstractMethods()).length != 0 {
+		if @extending && !@abstract && (notImplemented = @class.listMissingAbstractMethods()).length != 0 {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 

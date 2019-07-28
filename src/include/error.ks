@@ -122,7 +122,6 @@ export class IOException extends Exception {
 
 export class NotImplementedException extends Exception {
 	static {
-		/* throw(...arguments) ~ NotImplementedException => throw new NotImplementedException(...arguments) */
 		throw(...arguments) ~ NotImplementedException { // {{{
 			throw new NotImplementedException(...arguments)
 		} // }}}

@@ -10,6 +10,7 @@ class ClassType extends Type {
 		_abstractMethods: Object		= {}
 		_alteration: Boolean			= false
 		_alterationReference: ClassType
+		_classAssessments: Object		= {}
 		_classMethods: Object			= {}
 		_classVariables: Object			= {}
 		_constructors: Array			= []
@@ -19,6 +20,7 @@ class ClassType extends Type {
 		_extends: NamedType<ClassType>?	= null
 		_hybrid: Boolean				= false
 		_init: Number					= 0
+		_instanceAssessments: Object	= {}
 		_instanceMethods: Object		= {}
 		_instanceVariables: Object		= {}
 		_predefined: Boolean			= false
@@ -574,12 +576,34 @@ class ClassType extends Type {
 			return null
 		}
 	} // }}}
-	getClassMethods(name: String) { // {{{
-		if @classMethods[name] is Array {
-			return @classMethods[name]
+	getClassAssessment(name: String) { // {{{
+		if @classMethods[name] is not Array {
+			if @extending {
+				return @extends.type().getClassAssessment(name)
+			}
+			else {
+				return null
+			}
 		}
 
-		return null
+		if @classAssessments[name] is not Object {
+			const methods = [...@classMethods[name]]
+
+			let that = this
+			while that.isExtending() {
+				that = that.extends().type()
+
+				if const m = that.listClassMethods(name) {
+					for const method in m {
+						method.pushTo(methods)
+					}
+				}
+			}
+
+			@classAssessments[name] = Router.assess(methods, false)
+		}
+
+		return @classAssessments[name]
 	} // }}}
 	getClassProperty(name: String): Type { // {{{
 		if @classMethods[name] is Array {
@@ -605,6 +629,35 @@ class ClassType extends Type {
 			return [name]
 		}
 	} // }}}
+	getInstanceAssessment(name: String) { // {{{
+		if @instanceMethods[name] is not Array {
+			if @extending {
+				return @extends.type().getInstanceAssessment(name)
+			}
+			else {
+				return null
+			}
+		}
+
+		if @instanceAssessments[name] is not Object {
+			const methods = [...@instanceMethods[name]]
+
+			let that = this
+			while that.isExtending() {
+				that = that.extends().type()
+
+				if const m = that.listInstanceMethods(name) {
+					for const method in m {
+						method.pushTo(methods)
+					}
+				}
+			}
+
+			@instanceAssessments[name] = Router.assess(methods, false)
+		}
+
+		return @instanceAssessments[name]
+	} // }}}
 	getInstanceMethod(name: String, arguments: Array) { // {{{
 		if @instanceMethods[name] is Array {
 			for method in @instanceMethods[name] {
@@ -620,13 +673,6 @@ class ClassType extends Type {
 		else {
 			return null
 		}
-	} // }}}
-	getInstanceMethods(name: String) { // {{{
-		if @instanceMethods[name] is Array {
-			return @instanceMethods[name]
-		}
-
-		return null
 	} // }}}
 	getInstanceProperty(name: String) { // {{{
 		if @instanceMethods[name] is Array {
@@ -655,32 +701,6 @@ class ClassType extends Type {
 		}
 
 		return null
-	} // }}}
-	getMissingAbstractMethods() { // {{{
-		unless @extending {
-			return []
-		}
-
-		const abstractMethods = {}
-
-		@extends.type().filterAbstractMethods(abstractMethods)
-
-		const matchables = []
-
-		let method, index
-		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
-			for method, index in methods desc {
-				if method.isMatched(@instanceMethods[name], matchables) {
-					methods.splice(index, 1)
-				}
-			}
-
-			if methods.length == 0 {
-				delete abstractMethods[name]
-			}
-		}
-
-		return Object.keys(abstractMethods)
 	} // }}}
 	getProperty(name: String) => this.getClassProperty(name)
 	getPropertyGetter(name: String) { // {{{
@@ -866,37 +886,45 @@ class ClassType extends Type {
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true
-	listMatchingClassMethods(name: String, arguments: Array, methods = []) { // {{{
+	listClassMethods(name: String) { // {{{
 		if @classMethods[name] is Array {
-			for method in @classMethods[name] {
-				if method.matchArguments(arguments) {
-					method.pushTo(methods)
-				}
-			}
+			return @classMethods[name]
 		}
 
-		if @extending {
-			return @extends.type().listMatchingClassMethods(name, arguments, methods)
-		}
-		else {
-			return methods
-		}
+		return null
 	} // }}}
-	listMatchingInstanceMethods(name: String, arguments: Array, methods = []) { // {{{
+	listInstanceMethods(name: String) { // {{{
 		if @instanceMethods[name] is Array {
-			for method in @instanceMethods[name] {
-				if method.matchArguments(arguments) {
-					method.pushTo(methods)
+			return @instanceMethods[name]
+		}
+
+		return null
+	} // }}}
+	listMissingAbstractMethods() { // {{{
+		unless @extending {
+			return []
+		}
+
+		const abstractMethods = {}
+
+		@extends.type().filterAbstractMethods(abstractMethods)
+
+		const matchables = []
+
+		let method, index
+		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
+			for method, index in methods desc {
+				if method.isMatched(@instanceMethods[name], matchables) {
+					methods.splice(index, 1)
 				}
+			}
+
+			if methods.length == 0 {
+				delete abstractMethods[name]
 			}
 		}
 
-		if @extending {
-			return @extends.type().listMatchingInstanceMethods(name, arguments, methods)
-		}
-		else {
-			return methods
-		}
+		return Object.keys(abstractMethods)
 	} // }}}
 	matchArguments(arguments: Array<Type>) { // {{{
 		if @constructors.length == 0 {

@@ -9,6 +9,31 @@ namespace Router {
 		else if methods.length == 1 {
 			const method = methods[0]
 
+			method.index(0)
+
+			const argFilters = []
+
+			if method.absoluteMax() == Infinity {
+				const rest = method.restIndex()
+				const min = method.absoluteMin()
+
+				if rest < min {
+					argFilters.push(buildArgFilter(method, min, Infinity))
+				}
+				else {
+					for const n from min til rest {
+						argFilters.push(buildArgFilter(method, n, n))
+					}
+
+					argFilters.push(buildArgFilter(method, min, Infinity))
+				}
+			}
+			else {
+				for const n from method.absoluteMin() to method.absoluteMax() {
+					argFilters.push(buildArgFilter(method, n, n))
+				}
+			}
+
 			return {
 				async: method.isAsync()
 				methods: [{
@@ -17,6 +42,7 @@ namespace Router {
 					min: method.absoluteMin()
 					max: method.absoluteMax()
 					filters: []
+					argFilters
 				}]
 			}
 		}
@@ -63,11 +89,11 @@ namespace Router {
 			return assessment
 		}
 		else {
-			for const method in infinities {
-				for const :group of groups when method.absoluteMin() >= group.n {
-					group.methods.push(method)
-				}
-			}
+			// for const method in infinities {
+			// 	for const group of groups when method.absoluteMin() <= group.n {
+			// 		group.methods.push(method)
+			// 	}
+			// }
 
 			const assessment = {
 				async
@@ -268,6 +294,52 @@ namespace Router {
 		return assessment
 	} // }}}
 
+	func buildArgFilter(method, min, max) { // {{{
+		const line = {
+			min
+			max
+			filters: []
+		}
+
+		let count = method.min()
+		let index = 0
+
+		for const parameter, p in method.parameters() {
+			const type = parameter.type()
+
+			for const i from 1 to parameter.min() {
+				line.filters.push({
+					index
+					type
+				})
+
+				++index
+			}
+
+			if parameter.max() == Infinity {
+				line.rest = {
+					index
+					type
+				}
+
+				index = count - min
+			}
+			else {
+				for const i from parameter.min() + 1 to parameter.max() while count < min {
+					line.filters.push({
+						index
+						type
+					})
+
+					++index
+					++count
+				}
+			}
+		}
+
+		return line
+	} // }}}
+
 	func checkMethods(methods, parameters, min, max, sortedIndex, sortedIndexes, assessment, filters) { // {{{
 		const index = sortedIndexes[sortedIndex]
 
@@ -436,10 +508,18 @@ namespace Router {
 							min
 							max
 							filters
-							lastFilter: {
-								index
-								type: item.type[0]
-							}
+							argFilters: [
+								{
+									min
+									max
+									filters: [
+										{
+											index
+											type: item.type[0]
+										}
+									]
+								}
+							]
 						})
 					}
 					else {
@@ -741,7 +821,7 @@ namespace Router {
 		const length = arguments.length
 
 		for const method in assessment.methods when method.min <= length <= method.max {
-			if method.filters.length == 0 && !?method.lastFilter {
+			if method.filters.length == 0 && !?method.argFilters {
 				matches.push(method.method)
 			}
 			else {
@@ -757,11 +837,29 @@ namespace Router {
 					}
 				}
 
-				if method.lastFilter? {
-					if arguments[method.lastFilter.index].isAny() {
-						perfect = false
+				if method.argFilters? {
+					let notFound = true
+
+					for const line in method.argFilters while notFound when line.min <= length <= line.max {
+						let isMatched = true
+						let isPerfect = perfect
+
+						for const filter in line.filters while isMatched {
+							if arguments[filter.index].isAny() {
+								isPerfect = false
+							}
+							else if !arguments[filter.index].matchContentOf(filter.type) {
+								isMatched = false
+							}
+						}
+
+						if isMatched {
+							notFound = false
+							perfect = isPerfect
+						}
 					}
-					else if !arguments[method.lastFilter.index].matchContentOf(method.lastFilter.type) {
+
+					if notFound {
 						matched = false
 					}
 				}

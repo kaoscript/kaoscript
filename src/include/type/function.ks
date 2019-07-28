@@ -13,7 +13,7 @@ class FunctionType extends Type {
 		_missingReturn: Boolean				= true
 		_parameters: Array<ParameterType>	= []
 		_restIndex: Number					= -1
-		_returnType: Type					= Type.Any
+		_returnType: Type					= AnyType.NullableUnexplicit
 		_throws: Array<Type>				= []
 	}
 	static {
@@ -512,6 +512,7 @@ class FunctionType extends Type {
 
 		methods.push(this)
 	} // }}}
+	restIndex() => @restIndex
 	returnType() => @returnType
 	throws() => @throws
 	toFragments(fragments, node) { // {{{

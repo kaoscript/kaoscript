@@ -355,7 +355,7 @@ class CallExpression extends Expression {
 				if value.hasClassMethod(@property) {
 					const arguments = [argument.type() for const argument in @arguments]
 
-					const assessment = Router.assess(value.listMatchingClassMethods(@property, arguments), false)
+					const assessment = value.getClassAssessment(@property)
 
 					const methods = Router.matchArguments(assessment, arguments)
 
@@ -460,7 +460,7 @@ class CallExpression extends Expression {
 				if value.hasInstanceMethod(@property) {
 					const arguments = [argument.type() for const argument in @arguments]
 
-					const assessment = Router.assess(value.listMatchingInstanceMethods(@property, arguments), false)
+					const assessment = value.getInstanceAssessment(@property)
 
 					const methods = Router.matchArguments(assessment, arguments)
 

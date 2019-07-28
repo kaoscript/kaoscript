@@ -355,7 +355,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @class.isSealed() {
-				const assessment = Router.assess(@class.getInstanceMethods(@name), false)
+				const assessment = Router.assess(@class.listInstanceMethods(@name), false)
 
 				Router.toFragments(
 					assessment
@@ -393,12 +393,12 @@ class ImplementClassMethodDeclaration extends Statement {
 				).done()
 			}
 			else {
-				ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @variable, @class.getInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
+				ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @variable, @class.listInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 			}
 		}
 		else {
 			if @class.isSealed() {
-				const assessment = Router.assess(@class.getClassMethods(@name), false)
+				const assessment = Router.assess(@class.listClassMethods(@name), false)
 
 				Router.toFragments(
 					assessment
@@ -436,7 +436,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				).done()
 			}
 			else {
-				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @variable, @class.getClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
+				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @variable, @class.listClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 			}
 		}
 	} // }}}
