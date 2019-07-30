@@ -291,6 +291,7 @@ class ClassType extends Type {
 			variable.unflagAlteration()
 		}
 
+		@alteration = false
 		@alterationReference = null
 
 		return this
@@ -867,6 +868,22 @@ class ClassType extends Type {
 	isClass() => true
 	isConstructor(name: String) => name == 'constructor'
 	isDestructor(name: String) => name == 'destructor'
+	isExhaustive() { // {{{
+		if @exhaustive {
+			return true
+		}
+
+		if @alteration {
+			return @alterationReference.isExhaustive()
+		}
+
+		if @extending {
+			return @extends.isExhaustive()
+		}
+		else {
+			return super.isExhaustive()
+		}
+	} // }}}
 	isExplicitlyExported() => @explicitlyExported
 	isExtendable() => true
 	isExtending() => @extending

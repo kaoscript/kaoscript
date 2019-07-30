@@ -46,9 +46,79 @@
       "init": 0,
       "constructors": [],
       "destructors": 0,
-      "instanceVariables": {},
+      "instanceVariables": {
+        "length": {
+          "access": 3,
+          "type": {
+            "reference": 0
+          }
+        }
+      },
       "classVariables": {},
       "instanceMethods": {
+        "match": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "kind": "reference",
+              "name": "Array",
+              "nullable": true
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "replace": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 1
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "split": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": "Array",
+            "sealed": false,
+            "throws": []
+          }
+        ],
         "toLowerCase": [
           {
             "access": 3,

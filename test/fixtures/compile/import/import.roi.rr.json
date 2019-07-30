@@ -27,6 +27,25 @@
       },
       "classVariables": {},
       "instanceMethods": {
+        "push": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          }
+        ],
         "last": [
           {
             "access": 3,

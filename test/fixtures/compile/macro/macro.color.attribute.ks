@@ -34,6 +34,8 @@ export class Color {
 		}
 	}
 
+	static registerSpace(data)
+
 	getField(name) ~ Error {
 		throw new Error('Not Implemented')
 	}

@@ -1,0 +1,1 @@
+ReferenceException: Property "foobar" is not defined (line 5, file "fixtures/compile/attribute/attribute.rule.nex.namespace.ext.decl.iex.ks")

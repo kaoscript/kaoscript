@@ -29,6 +29,6 @@ impl Shape {
 	}
 }
 
-let shape = Shape.makeRed()
+let shape = Shape.makeBlue()
 
 console.log(shape.draw())

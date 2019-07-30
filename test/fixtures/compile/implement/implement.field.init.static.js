@@ -51,6 +51,6 @@ module.exports = function() {
 		}
 	}
 	Shape.NAME = "it's a rectangle";
-	let shape = Shape.makeRed();
+	let shape = Shape.makeBlue();
 	console.log(shape.draw());
 };

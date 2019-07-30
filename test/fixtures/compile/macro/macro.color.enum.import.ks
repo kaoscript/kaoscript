@@ -33,6 +33,7 @@ class Color {
 			macro Color.registerSpace(#(expression))
 		}
 	}
+	static registerSpace(data)
 	getField(name)
 	setField(name, value)
 }

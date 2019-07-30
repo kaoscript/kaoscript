@@ -1,0 +1,4 @@
+namespace NS {
+}
+
+NS.foobar()

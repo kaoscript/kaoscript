@@ -1,4 +1,4 @@
-#![rules(non-exhaustive)]
+#![rules(ignore-misfit)]
 
 extern console: {
 	log(...args)

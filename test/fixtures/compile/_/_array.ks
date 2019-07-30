@@ -1,5 +1,6 @@
 extern sealed class Array {
 	length: Number
+	push(...)
 }
 
 impl Array {

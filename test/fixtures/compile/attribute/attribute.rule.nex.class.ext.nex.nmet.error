@@ -1,0 +1,1 @@
+ReferenceException: The method "foobar" of the class "Foobar" can't be matched to given arguments (line 6, file "fixtures/compile/attribute/attribute.rule.nex.class.ext.nex.nmet.ks")

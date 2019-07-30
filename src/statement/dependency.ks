@@ -46,8 +46,16 @@ abstract class DependencyStatement extends Statement {
 					}
 				}
 
-				for member in declaration.members {
-					type.addPropertyFromAST(member, this)
+				if declaration.members.length != 0 {
+					for member in declaration.members {
+						type.addPropertyFromAST(member, this)
+					}
+
+					type.setExhaustive(true)
+				}
+
+				if @options.rules.nonExhaustive {
+					type.setExhaustive(false)
 				}
 
 				return variable
@@ -75,8 +83,16 @@ abstract class DependencyStatement extends Statement {
 					type = type.flagAlien()
 				}
 
-				for member in declaration.members {
-					type.addElement(member.name.name)
+				if declaration.members.length != 0 {
+					for member in declaration.members {
+						type.addElement(member.name.name)
+					}
+
+					type.setExhaustive(true)
+				}
+
+				if @options.rules.nonExhaustive {
+					type.setExhaustive(false)
 				}
 
 				return variable
@@ -85,7 +101,9 @@ abstract class DependencyStatement extends Statement {
 				let type
 				if declaration.parameters? {
 					const parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
+
 					type = new FunctionType(parameters, declaration, this)
+					type.setExhaustive(true)
 				}
 				else {
 					type = this.scope().reference('Function')
@@ -95,6 +113,17 @@ abstract class DependencyStatement extends Statement {
 
 				if kind != DependencyKind::Extern {
 					type.flagRequired()
+				}
+
+				if	kind == DependencyKind::Extern ||
+					kind == DependencyKind::ExternOrRequire ||
+					kind == DependencyKind::RequireOrExtern
+				{
+					type = type.flagAlien()
+				}
+
+				if @options.rules.nonExhaustive {
+					type.setExhaustive(false)
 				}
 
 				return variable
@@ -120,8 +149,16 @@ abstract class DependencyStatement extends Statement {
 					}
 				}
 
-				for statement in declaration.statements {
-					type.addPropertyFromAST(statement, this)
+				if declaration.statements.length != 0 {
+					for statement in declaration.statements {
+						type.addPropertyFromAST(statement, this)
+					}
+
+					type.setExhaustive(true)
+				}
+
+				if @options.rules.nonExhaustive {
+					type.setExhaustive(false)
 				}
 
 				return variable

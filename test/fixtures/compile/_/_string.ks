@@ -1,6 +1,10 @@
 extern parseFloat, parseInt
 
 extern sealed class String {
+	length: Number
+	match(...): Array?
+	replace(...): String
+	split(...): Array
 	toLowerCase(): String
 }
 

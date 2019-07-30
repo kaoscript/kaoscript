@@ -7,6 +7,7 @@ export class Color {
 	macro registerSpace(@expression: Object) {
 		macro Color.registerSpace(#(expression))
 	}
+	static registerSpace(data)
 }
 
 Color.registerSpace!({

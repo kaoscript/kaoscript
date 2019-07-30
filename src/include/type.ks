@@ -68,6 +68,7 @@ enum TypeKind<String> {
 abstract class Type {
 	private {
 		_alien: Boolean				= false
+		_exhaustive: Boolean 		= false
 		_exported: Boolean			= false
 		_referenced: Boolean		= false
 		_referenceIndex: Number		= -1
@@ -496,6 +497,8 @@ abstract class Type {
 		return false
 	} // }}}
 	isEnum() => false
+	isExhaustive() => @exhaustive || (!@alien && !@required)
+	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
 	isExplicitlyExported() => @exported
 	isExportable() => this.isAlien() || this.isExported() || this.isNative() || this.isRequired()
 	isExported() => @exported
@@ -527,6 +530,7 @@ abstract class Type {
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
 	scope() => @scope
+	setExhaustive(@exhaustive) => this
 	setNullable(nullable: Boolean) => this
 	toExportOrIndex(references, ignoreAlteration) { // {{{
 		if @referenceIndex != -1 {

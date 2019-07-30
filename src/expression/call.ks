@@ -308,7 +308,7 @@ class CallExpression extends Expression {
 	makeCallee(type) { // {{{
 		switch type {
 			is FunctionType => {
-				if !type.matchArguments([argument.type() for argument in @arguments]) {
+				if type.isExhaustive(this) && !type.matchArguments([argument.type() for argument in @arguments]) {
 					ReferenceException.throwNoMatchingFunction(this)
 				}
 				else {
@@ -319,7 +319,12 @@ class CallExpression extends Expression {
 				const matches = Router.matchArguments(type.assessment(), [argument.type() for argument in @arguments])
 
 				if matches.length == 0 {
-					ReferenceException.throwNoMatchingFunction(this)
+					if type.isExhaustive(this) {
+						ReferenceException.throwNoMatchingFunction(this)
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, @object, this))
+					}
 				}
 				else if matches.length == 1 {
 					this.addCallee(new DefaultCallee(@data, matches[0], this))
@@ -327,7 +332,7 @@ class CallExpression extends Expression {
 				else {
 					const union = new UnionType(this.scope())
 
-					for function in matches {
+					for const function in matches {
 						union.addType(function.returnType())
 					}
 
@@ -389,6 +394,9 @@ class CallExpression extends Expression {
 						}
 					}
 				}
+				else if value.isExhaustive(this) {
+					ReferenceException.throwNoMatchingMethod(@property, name:NamedType.name(), this)
+				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, this))
 				}
@@ -400,7 +408,7 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), value)
 			}
 			is NamespaceType => {
-				if property ?= value.getProperty(@property) {
+				if const property = value.getProperty(@property) {
 					if property is SealableType {
 						this.makeNamespaceCallee(property.type(), property.isSealed(), name)
 					}
@@ -408,12 +416,15 @@ class CallExpression extends Expression {
 						this.makeNamespaceCallee(property, value.isSealedProperty(@property), name)
 					}
 				}
+				else if value.isExhaustive(this) {
+					ReferenceException.throwNotDefinedProperty(@property, this)
+				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, this))
 				}
 			}
 			is ObjectType => {
-				if property ?= value.getProperty(@property) {
+				if const property = value.getProperty(@property) {
 					if property is FunctionType {
 						this.makeCallee(property)
 					}
@@ -438,7 +449,7 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), name)
 			}
 			is UnionType => {
-				for let type in value.types() {
+				for const type in value.types() {
 					this.makeMemberCallee(type)
 				}
 			}
@@ -534,7 +545,7 @@ class CallExpression extends Expression {
 				this.makeMemberCalleeFromReference(value.type(), value)
 			}
 			is UnionType => {
-				for let type in value.types() {
+				for const type in value.types() {
 					this.makeMemberCallee(type)
 				}
 			}

@@ -1,5 +1,6 @@
 extern console
 
+#[rules(non-exhaustive)]
 extern sealed class Array {
 	toString(): String
 }

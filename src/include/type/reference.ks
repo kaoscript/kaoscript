@@ -140,7 +140,7 @@ class ReferenceType extends Type {
 	isAsync() => false
 	isClass() => @name == 'Class' || @name == 'class'
 	isEnum() => @name == 'Enum' || @name == 'enum'
-	isExhaustive(node) => !(node._options.rules.nonExhaustive || this.isAlien() || @type.isHybrid() || @type.isSealed())
+	isExhaustive() => this.type().isExhaustive()
 	isExplicitlyExported() => this.type().isExplicitlyExported()
 	isExportable() => this.isEnum() || this.type().isExportable()
 	isExported() => this.type().isExported()

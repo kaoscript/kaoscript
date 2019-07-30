@@ -2,6 +2,7 @@ extern console: {
 	log(...args)
 }
 
+#[rules(non-exhaustive)]
 extern class Shape {
 	Shape(color: string)
 

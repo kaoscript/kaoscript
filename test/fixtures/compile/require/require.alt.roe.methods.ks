@@ -1,3 +1,4 @@
+#[rules(non-exhaustive)]
 require|extern sealed class Array {
 	indexOf(...): Number
 	push(...): Number

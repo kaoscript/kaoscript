@@ -31,6 +31,7 @@ export class Color {
 			}
 		}
 	}
+	static registerSpace(data)
 	getField(name)
 	setField(name, value)
 }

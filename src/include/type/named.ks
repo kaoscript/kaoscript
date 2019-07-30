@@ -83,7 +83,8 @@ class NamedType extends Type {
 	isCloned() => @cloned
 	isClass() => @type.isClass()
 	isEnum() => @type.isEnum()
-	isExhaustive(node) => !(node._options.rules.nonExhaustive || @type.isAlien() || @type.isHybrid() || @type.isSealed())
+	isExhaustive() => @type.isExhaustive()
+	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
 	isExplicitlyExported() => @type.isExplicitlyExported()
 	isExportable() => @type.isExportable()
 	isExported() => @type.isExported()

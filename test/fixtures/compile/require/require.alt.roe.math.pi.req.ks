@@ -2,6 +2,7 @@ require|extern sealed class Number {
 	toString(): String
 }
 
+#[rules(non-exhaustive)]
 require sealed namespace Math {
 	PI: Number
 }

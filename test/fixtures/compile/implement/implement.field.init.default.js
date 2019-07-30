@@ -116,7 +116,7 @@ module.exports = function() {
 		}
 		throw new SyntaxError("Wrong number of arguments");
 	};
-	let shape = Shape.makeRed();
+	let shape = Shape.makeBlue();
 	console.log(shape.draw());
 	console.log(shape.toString());
 };

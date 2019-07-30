@@ -20,7 +20,7 @@ export class Exception extends Error {
 
 	static {
 		validateReportedError(error: Type, node) { // {{{
-			#![rules(non-exhaustive)]
+			#![rules(ignore-misfit)]
 
 			until error is NamedType {
 				if error.isExtending() {

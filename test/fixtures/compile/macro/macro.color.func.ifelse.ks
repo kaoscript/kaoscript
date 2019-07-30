@@ -1,4 +1,4 @@
-#![rules(non-exhaustive)]
+#![rules(ignore-misfit)]
 
 export class Color {
 	macro registerSpace(@expression: Object) {

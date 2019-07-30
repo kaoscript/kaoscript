@@ -47,6 +47,20 @@ module.exports = function() {
 			}
 			throw new SyntaxError("Wrong number of arguments");
 		}
+		static __ks_sttc_registerSpace_0(data) {
+			if(arguments.length < 1) {
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+			}
+			if(data === void 0 || data === null) {
+				throw new TypeError("'data' is not nullable");
+			}
+		}
+		static registerSpace() {
+			if(arguments.length === 1) {
+				return Color.__ks_sttc_registerSpace_0.apply(this, arguments);
+			}
+			throw new SyntaxError("Wrong number of arguments");
+		}
 	}
 	function formatToHex(that) {
 		if(arguments.length < 1) {
