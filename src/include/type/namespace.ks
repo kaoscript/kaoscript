@@ -162,6 +162,17 @@ class NamespaceType extends Type {
 		}
 	} // }}}
 	hasProperty(name: String): Boolean => @properties[name] is Type
+	isExhaustive() { // {{{
+		if @exhaustive {
+			return true
+		}
+
+		if @alteration {
+			return @alterationReference.isExhaustive()
+		}
+
+		return super.isExhaustive()
+	} // }}}
 	isExtendable() => true
 	isFlexible() => @sealed
 	isNamespace() => true
