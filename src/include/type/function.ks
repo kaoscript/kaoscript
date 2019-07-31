@@ -393,7 +393,21 @@ class FunctionType extends Type {
 			}
 		}
 	} // }}}
-	matchContentOf(type: Type) => type.isAny() || type.isFunction()
+	matchContentOf(type: Type) { // {{{
+		if type.isAny() || type.isFunction() {
+			return true
+		}
+
+		if type is UnionType {
+			for const type in type.types() {
+				if this.matchContentOf(type) {
+					return true
+				}
+			}
+		}
+
+		return false
+	} // }}}
 	matchParametersOf(arguments: Array, matchables): Boolean => this.matchParametersOf(0, -1, arguments, 0, -1, matchables)
 	matchParametersOf(pIndex, pStep, arguments, aIndex, aStep, matchables) { // {{{
 		if aStep == -1 {
