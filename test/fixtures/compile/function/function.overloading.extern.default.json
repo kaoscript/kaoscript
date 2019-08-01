@@ -12,6 +12,7 @@
     "Function",
     {
       "kind": "overloadedfunction",
+      "exhaustive": true,
       "functions": [
         {
           "reference": 0

@@ -27,10 +27,10 @@ class AliasType extends Type {
 	equals(b?): Boolean { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references, ignoreAlteration) { // {{{
+	export(references, mode) { // {{{
 		return {
 			kind: TypeKind::Alias
-			of: @type.export(references, ignoreAlteration)
+			of: @type.export(references, mode)
 		}
 	} // }}}
 	getProperty(name: String): Type => @type.getProperty(name)

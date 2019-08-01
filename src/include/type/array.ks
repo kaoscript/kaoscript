@@ -11,7 +11,7 @@ class ArrayType extends Type {
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references, ignoreAlteration) { // {{{
+	export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Array
 		}
@@ -20,7 +20,7 @@ class ArrayType extends Type {
 			export.sealed = @sealed
 		}
 
-		export.elements = [element.export(references, ignoreAlteration) for const element in @elements]
+		export.elements = [element.export(references, mode) for const element in @elements]
 
 		return export
 	} // }}}

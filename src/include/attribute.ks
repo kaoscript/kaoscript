@@ -30,9 +30,16 @@ class Attribute {
 
 			return true
 		} // }}}
-		configure(data, options, mode, force = false) { // {{{
+		configure(data, options!?, mode, force = false) { // {{{
+			const clone = !force && options != null && AttributeTarget::Global & mode == 0
+
+			if options == null {
+				options = {
+					rules: {}
+				}
+			}
+
 			if data.attributes?.length > 0 {
-				const clone = !force && AttributeTarget::Global & mode == 0
 				const cloned = {}
 
 				if force {
@@ -367,7 +374,7 @@ class RulesAttribute extends Attribute {
 		_data
 	}
 	static {
-		target() => AttributeTarget::Global | AttributeTarget::Statement
+		target() => AttributeTarget::Global | AttributeTarget::Property | AttributeTarget::Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { // {{{

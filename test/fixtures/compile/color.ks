@@ -1,3 +1,5 @@
+#![rules(ignore-misfit)]
+
 extern console
 
 import {
@@ -818,7 +820,7 @@ export class Color {
 	/* format(format: string = this._space): string | bool ~ Error { // {{{ */
 	#[error(off)]
 	format(format: string = this._space) { // {{{
-		if format ?= $formatters[format] {
+		if const format = $formatters[format] {
 			return format.formatter(?format.space ? this.like(format.space) : this)
 		}
 		else {

@@ -484,18 +484,18 @@ export class Module {
 
 			for requirement in @requirements {
 				@metadata.requirements.push(
-					requirement.type().toMetadata(@metadata.references, true)
+					requirement.type().toMetadata(@metadata.references, ExportMode::IgnoreAlteration)
 					requirement.name()
 					requirement.isRequired()
 				)
 			}
 
 			for const type, name of @aliens {
-				@metadata.aliens.push(type.toMetadata(@metadata.references, true), name)
+				@metadata.aliens.push(type.toMetadata(@metadata.references, ExportMode::IgnoreAlteration), name)
 			}
 
 			for const export, name of @exports {
-				@metadata.exports.push(export.type.toMetadata(@metadata.references, false), name)
+				@metadata.exports.push(export.type.toMetadata(@metadata.references, ExportMode::Default), name)
 			}
 
 			for const datas, name of @exportedMacros {

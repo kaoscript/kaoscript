@@ -2,7 +2,7 @@ var Compiler = require('../lib/compiler.js')().Compiler;
 var fs = require('fs');
 var klaw = require('klaw-sync');
 var path = require('path');
-var program = require("commander");
+var program = require('commander');
 
 program.parse(process.argv);
 

@@ -8,6 +8,7 @@
   "references": [
     {
       "kind": "enum",
+      "exhaustive": true,
       "elements": [
         "Red",
         "Green",

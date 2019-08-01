@@ -1,0 +1,17 @@
+{
+  "aliens": [
+    -1,
+    "console",
+    0,
+    "foobar"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "foobar"
+  ],
+  "references": [
+    "Function"
+  ],
+  "macros": []
+}

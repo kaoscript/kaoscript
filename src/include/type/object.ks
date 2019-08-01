@@ -33,7 +33,7 @@ class ObjectType extends Type {
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references, ignoreAlteration) { // {{{
+	export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Object
 		}
@@ -45,7 +45,7 @@ class ObjectType extends Type {
 		export.properties = {}
 
 		for const value, name of @properties {
-			export.properties[name] = value.export(references, ignoreAlteration)
+			export.properties[name] = value.export(references, mode)
 		}
 
 		return export

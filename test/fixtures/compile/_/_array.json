@@ -15,6 +15,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+      "exhaustive": true,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -26,7 +27,99 @@
       },
       "classVariables": {},
       "instanceMethods": {
+        "concat": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "indexOf": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": "Number",
+            "sealed": false,
+            "throws": []
+          }
+        ],
         "push": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "shift": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "splice": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "unshift": [
           {
             "access": 3,
             "async": false,
@@ -53,6 +146,7 @@
       "class": {
         "reference": 0
       },
+      "exhaustive": true,
       "init": 0,
       "instanceVariables": {},
       "classVariables": {},

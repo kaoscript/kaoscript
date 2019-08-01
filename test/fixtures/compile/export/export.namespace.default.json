@@ -9,10 +9,12 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "exhaustive": true,
       "properties": {
         "foo": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],
@@ -23,6 +25,7 @@
         "bar": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],
@@ -33,6 +36,7 @@
         "qux": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],

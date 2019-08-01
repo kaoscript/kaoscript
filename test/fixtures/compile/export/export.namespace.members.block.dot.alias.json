@@ -13,6 +13,7 @@
     {
       "kind": "function",
       "async": false,
+      "exhaustive": true,
       "min": 0,
       "max": 0,
       "parameters": [],
@@ -22,6 +23,7 @@
     {
       "kind": "function",
       "async": false,
+      "exhaustive": true,
       "min": 0,
       "max": 0,
       "parameters": [],
@@ -31,6 +33,7 @@
     {
       "kind": "function",
       "async": false,
+      "exhaustive": true,
       "min": 0,
       "max": 0,
       "parameters": [],

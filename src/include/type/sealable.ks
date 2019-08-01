@@ -27,10 +27,10 @@ class SealableType extends Type {
 			return false
 		}
 	} // }}}
-	export(references, ignoreAlteration) => { // {{{
+	export(references, mode) => { // {{{
 		kind: TypeKind::Sealable
 		sealed: this.isSealed()
-		type: @type.toReference(references, ignoreAlteration)
+		type: @type.toReference(references, mode)
 	} // }}}
 	flagExported(explicitly: Boolean) { // {{{
 		@type.flagExported(explicitly)

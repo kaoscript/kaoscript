@@ -378,7 +378,10 @@ class CallExpression extends Expression {
 					name = name as NamedType
 
 					if union.length() == 0 {
-						if sealed {
+						if value.isExhaustiveClassMethod(@property, this) {
+							ReferenceException.throwNoMatchingMethod(@property, name:NamedType.name(), this)
+						}
+						else if sealed {
 							this.addCallee(new SealedMethodCallee(@data, name, false, this))
 						}
 						else {
@@ -487,7 +490,7 @@ class CallExpression extends Expression {
 					}
 
 					if union.length() == 0 {
-						if reference.isExhaustive(this) {
+						if value.isExhaustiveInstanceMethod(@property, this) {
 							ReferenceException.throwNoMatchingMethod(@property, reference.name(), this)
 						}
 						else if sealed {

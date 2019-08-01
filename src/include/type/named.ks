@@ -24,12 +24,12 @@ class NamedType extends Type {
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
 	equals(b?) => @type.equals(b)
-	export(references, ignoreAlteration) { // {{{
+	export(references, mode) { // {{{
 		if @type is ClassType && (@type.isPredefined() || !(@type.isExported() || @type.isAlien())) {
 			return @name
 		}
 		else {
-			return @type.export(references, ignoreAlteration)
+			return @type.export(references, mode)
 		}
 	} // }}}
 	flagAlien() { // {{{
@@ -265,9 +265,9 @@ class NamedType extends Type {
 		return false
 	} // }}}
 	matchSignatureOf(that, matchables) => @type.matchSignatureOf(that.discardName(), matchables)
-	metaReference(references, ignoreAlteration) { // {{{
+	metaReference(references, mode) { // {{{
 		if @type is ClassType {
-			return @type.metaReference(references, @name, ignoreAlteration)
+			return @type.metaReference(references, @name, mode)
 		}
 		else {
 			throw new NotSupportedException()
@@ -284,24 +284,24 @@ class NamedType extends Type {
 		}
 	} // }}}
 	referenceIndex() => @type.referenceIndex()
-	toAlterationReference(references, ignoreAlteration) { // {{{
+	toAlterationReference(references, mode) { // {{{
 		if @type is ClassType {
-			return @type.toAlterationReference(references, ignoreAlteration)
+			return @type.toAlterationReference(references, mode)
 		}
 		else {
 			throw new NotSupportedException()
 		}
 	} // }}}
-	toExportOrIndex(references, ignoreAlteration) => @type.toExportOrIndex(references, ignoreAlteration)
+	toExportOrIndex(references, mode) => @type.toExportOrIndex(references, mode)
 	toFragments(fragments, node)
-	toMetadata(references, ignoreAlteration) => @type.toMetadata(references, ignoreAlteration)
+	toMetadata(references, mode) => @type.toMetadata(references, mode)
 	toQuote() => @name
-	toReference(references, ignoreAlteration) { // {{{
+	toReference(references, mode) { // {{{
 		if @type is ClassType && @type.isPredefined() {
 			return @name
 		}
 		else {
-			return @type.toReference(references, ignoreAlteration)
+			return @type.toReference(references, mode)
 		}
 	} // }}}
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)

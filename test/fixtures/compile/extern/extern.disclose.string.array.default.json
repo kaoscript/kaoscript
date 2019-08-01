@@ -19,6 +19,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+      "exhaustive": false,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -33,6 +34,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+      "exhaustive": false,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -46,6 +48,7 @@
       "class": {
         "reference": 1
       },
+      "exhaustive": true,
       "init": 0,
       "instanceVariables": {},
       "classVariables": {},

@@ -1,0 +1,31 @@
+{
+  "aliens": [
+    -1,
+    "console",
+    0,
+    "Foobar"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": false,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

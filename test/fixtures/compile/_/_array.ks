@@ -1,6 +1,11 @@
 extern sealed class Array {
 	length: Number
+	concat(...): Array
+	indexOf(...): Number
 	push(...)
+	shift(): Any
+	splice(...): Array
+	unshift(...)
 }
 
 impl Array {

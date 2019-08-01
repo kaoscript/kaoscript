@@ -9,10 +9,12 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "exhaustive": true,
       "properties": {
         "MD": {
           "kind": "namespace",
           "sealed": false,
+          "exhaustive": true,
           "properties": {}
         }
       }

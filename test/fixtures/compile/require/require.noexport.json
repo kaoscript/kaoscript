@@ -16,6 +16,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
+      "exhaustive": false,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -30,6 +31,7 @@
         "log": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": "Infinity",
           "parameters": [

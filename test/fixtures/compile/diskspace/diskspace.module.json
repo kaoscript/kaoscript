@@ -9,6 +9,7 @@
     {
       "kind": "function",
       "async": true,
+      "exhaustive": true,
       "min": 0,
       "max": 0,
       "parameters": [],

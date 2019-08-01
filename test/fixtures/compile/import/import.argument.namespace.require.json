@@ -13,10 +13,12 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "exhaustive": true,
       "properties": {
         "waldo": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],

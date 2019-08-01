@@ -1,0 +1,22 @@
+{
+  "aliens": [
+    -1,
+    "console",
+    0,
+    "NS"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "NS"
+  ],
+  "references": [
+    {
+      "kind": "namespace",
+      "sealed": false,
+      "exhaustive": false,
+      "properties": {}
+    }
+  ],
+  "macros": []
+}

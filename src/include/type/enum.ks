@@ -15,6 +15,7 @@ class EnumType extends Type {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new EnumType(scope, data.type)
 
+			type._exhaustive = data.exhaustive
 			type._elements = data.elements
 			type._index = data.index
 
@@ -23,6 +24,7 @@ class EnumType extends Type {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new EnumType(scope, data.type)
 
+			type._exhaustive = data.exhaustive
 			type._elements = data.elements
 			type._index = data.index
 
@@ -48,8 +50,9 @@ class EnumType extends Type {
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references, ignoreAlteration) => { // {{{
+	export(references, mode) => { // {{{
 		kind: TypeKind::Enum
+		exhaustive: this.isExhaustive()
 		elements: @elements
 		index: @index
 		type: @kind

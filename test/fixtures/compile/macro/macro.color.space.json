@@ -12,6 +12,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
+      "exhaustive": true,
       "init": 1,
       "constructors": [
         {
@@ -1069,6 +1070,7 @@
     },
     {
       "kind": "enum",
+      "exhaustive": true,
       "elements": [
         "RGB",
         "SRGB"

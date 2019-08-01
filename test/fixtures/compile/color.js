@@ -887,8 +887,9 @@ module.exports = function() {
 			else if(!Type.isString(format)) {
 				throw new TypeError("'format' is not of type 'String'");
 			}
-			if(Type.isValue($formatters[format]) ? (format = $formatters[format], true) : false) {
-				return format.formatter(Type.isValue(format.space) ? this.like(format.space) : this);
+			let __ks_format_1 = $formatters[format];
+			if(Type.isValue(__ks_format_1)) {
+				return __ks_format_1.formatter(Type.isValue(__ks_format_1.space) ? this.like(__ks_format_1.space) : this);
 			}
 			else {
 				return false;

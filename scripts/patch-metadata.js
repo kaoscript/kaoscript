@@ -2,13 +2,26 @@ var Compiler = require('../lib/compiler.js')().Compiler;
 var fs = require('fs');
 var klaw = require('klaw-sync');
 var path = require('path');
+var program = require('commander');
+
+program.parse(process.argv);
+
+var filter = function(item) {
+	return item.path.slice(-3) === '.js'
+}
+
+if (program.args.length > 0) {
+	var directory = program.args[0];
+
+	filter = function(item) {
+		return item.path.slice(-3) === '.js' && path.basename(path.dirname(item.path)) === directory
+	}
+}
 
 var files = klaw(path.join(__dirname, '..', 'test', 'fixtures', 'compile'), {
 	nodir: true,
 	traverseAll: true,
-	filter: function(item) {
-		return item.path.slice(-3) === '.ks'
-	}
+	filter: filter
 });
 
 for(var i = 0; i < files.length; i++) {

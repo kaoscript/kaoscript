@@ -9,6 +9,7 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "exhaustive": true,
       "properties": {}
     }
   ],

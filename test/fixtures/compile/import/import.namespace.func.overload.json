@@ -12,9 +12,11 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "exhaustive": true,
       "properties": {
         "reverse": {
           "kind": "overloadedfunction",
+          "exhaustive": true,
           "functions": [
             {
               "kind": "function",

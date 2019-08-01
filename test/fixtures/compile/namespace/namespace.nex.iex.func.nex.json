@@ -1,0 +1,34 @@
+{
+  "aliens": [
+    -1,
+    "console",
+    0,
+    "NS"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "NS"
+  ],
+  "references": [
+    {
+      "kind": "namespace",
+      "sealed": false,
+      "exhaustive": true,
+      "properties": {
+        "foobar": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": [],
+          "sealed": false
+        }
+      }
+    }
+  ],
+  "macros": []
+}

@@ -11,6 +11,7 @@
   "references": [
     {
       "kind": "overloadedfunction",
+      "exhaustive": true,
       "functions": [
         {
           "kind": "function",
@@ -50,6 +51,7 @@
     },
     {
       "kind": "overloadedfunction",
+      "exhaustive": true,
       "functions": [
         {
           "reference": 0

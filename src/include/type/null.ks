@@ -6,7 +6,7 @@ class NullType extends Type {
 		throw new NotSupportedException()
 	} // }}}
 	equals(b?): Boolean => b is NullType
-	export(references, ignoreAlteration)
+	export(references, mode)
 	getProperty(name) => Type.Any
 	isInstanceOf(target: Type) => true
 	isMorePreciseThan(type: Type) => type.isAny() || type.isNullable()

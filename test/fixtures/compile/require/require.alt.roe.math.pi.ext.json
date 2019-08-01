@@ -25,6 +25,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+      "exhaustive": true,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -49,6 +50,7 @@
     {
       "kind": "namespace",
       "sealed": true,
+      "exhaustive": false,
       "properties": {
         "PI": {
           "reference": 0,
@@ -61,6 +63,7 @@
       "class": {
         "reference": 0
       },
+      "exhaustive": true,
       "init": 0,
       "instanceVariables": {},
       "classVariables": {},

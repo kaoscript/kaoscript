@@ -29,7 +29,7 @@ class AnyType extends Type {
 			return false
 		}
 	} // }}}
-	export(references, ignoreAlteration) => 'Any'
+	export(references, mode) => 'Any'
 	flagAlien() { // {{{
 		const type = new AnyType(@explicit, @nullable)
 
@@ -77,9 +77,9 @@ class AnyType extends Type {
 	toFragments(fragments, node) { // {{{
 		fragments.code('Any')
 	} // }}}
-	toMetadata(references, ignoreAlteration) => -1
+	toMetadata(references, mode) => -1
 	toQuote(): String => `'Any'`
-	toReference(references, ignoreAlteration) => 'Any'
+	toReference(references, mode) => 'Any'
 	toTestFragments(fragments, node) { // {{{
 		throw new NotSupportedException(node)
 	} // }}}

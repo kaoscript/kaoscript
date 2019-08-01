@@ -19,6 +19,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+      "exhaustive": true,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -30,6 +31,27 @@
       },
       "classVariables": {},
       "instanceMethods": {
+        "charAt": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
         "match": [
           {
             "access": 3,
@@ -54,6 +76,27 @@
           }
         ],
         "replace": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "slice": [
           {
             "access": 3,
             "async": false,
@@ -106,6 +149,20 @@
             "sealed": false,
             "throws": []
           }
+        ],
+        "trim": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": false,
+            "throws": []
+          }
         ]
       },
       "classMethods": {}
@@ -115,6 +172,7 @@
       "class": {
         "reference": 0
       },
+      "exhaustive": true,
       "init": 0,
       "instanceVariables": {},
       "classVariables": {},

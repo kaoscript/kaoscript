@@ -11,6 +11,7 @@
     {
       "kind": "function",
       "async": false,
+      "exhaustive": true,
       "min": 0,
       "max": 0,
       "parameters": [],
@@ -25,6 +26,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
+      "exhaustive": true,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -48,6 +50,7 @@
     },
     {
       "kind": "overloadedfunction",
+      "exhaustive": true,
       "functions": [
         {
           "kind": "function",

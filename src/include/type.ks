@@ -41,6 +41,14 @@ const $types = { // {{{
 } // }}}
 
 #[flags]
+enum ExportMode {
+	Default
+
+	IgnoreAlteration
+	OverloadedFunction
+}
+
+#[flags]
 enum MatchingMode {
 	Default
 
@@ -68,7 +76,7 @@ enum TypeKind<String> {
 abstract class Type {
 	private {
 		_alien: Boolean				= false
-		_exhaustive: Boolean 		= false
+		_exhaustive: Boolean? 		= null
 		_exported: Boolean			= false
 		_referenced: Boolean		= false
 		_referenceIndex: Number		= -1
@@ -443,7 +451,7 @@ abstract class Type {
 	constructor(@scope)
 	abstract clone(): Type
 	abstract equals(b?): Boolean
-	abstract export(references, ignoreAlteration)
+	abstract export(references, mode)
 	abstract toQuote(): String
 	abstract toFragments(fragments, node)
 	abstract toTestFragments(fragments, node)
@@ -497,7 +505,15 @@ abstract class Type {
 		return false
 	} // }}}
 	isEnum() => false
-	isExhaustive() => @exhaustive || (!@alien && !@required)
+	/* isExhaustive() => @exhaustive || (!@alien && !@required) */
+	isExhaustive() { // {{{
+		if @exhaustive == null {
+			return !@alien && !@required
+		}
+		else {
+			return @exhaustive
+		}
+	} // }}}
 	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
 	isExplicitlyExported() => @exported
 	isExportable() => this.isAlien() || this.isExported() || this.isNative() || this.isRequired()
@@ -532,20 +548,20 @@ abstract class Type {
 	scope() => @scope
 	setExhaustive(@exhaustive) => this
 	setNullable(nullable: Boolean) => this
-	toExportOrIndex(references, ignoreAlteration) { // {{{
+	toExportOrIndex(references, mode) { // {{{
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
 		else if this.isReferenced() {
-			return this.toMetadata(references, ignoreAlteration)
+			return this.toMetadata(references, mode)
 		}
 		else {
-			return this.export(references, ignoreAlteration)
+			return this.export(references, mode)
 		}
 	} // }}}
-	toExportOrReference(references, ignoreAlteration) { // {{{
+	toExportOrReference(references, mode) { // {{{
 		if @referenceIndex == -1 {
-			return this.export(references, ignoreAlteration)
+			return this.export(references, mode)
 		}
 		else {
 			return {
@@ -553,20 +569,20 @@ abstract class Type {
 			}
 		}
 	} // }}}
-	toMetadata(references, ignoreAlteration) { // {{{
+	toMetadata(references, mode) { // {{{
 		if @referenceIndex == -1 {
 			@referenceIndex = references.length
 
 			// reserve position
 			references.push(null)
 
-			references[@referenceIndex] = this.export(references, ignoreAlteration)
+			references[@referenceIndex] = this.export(references, mode)
 		}
 
 		return @referenceIndex
 	} // }}}
-	toReference(references, ignoreAlteration) => { // {{{
-		reference: this.toMetadata(references, ignoreAlteration)
+	toReference(references, mode) => { // {{{
+		reference: this.toMetadata(references, mode)
 	} // }}}
 	type() => this
 }

@@ -2,10 +2,13 @@ extern parseFloat, parseInt
 
 extern sealed class String {
 	length: Number
+	charAt(...): String
 	match(...): Array?
 	replace(...): String
+	slice(...): String
 	split(...): Array
 	toLowerCase(): String
+	trim(): String
 }
 
 impl String {

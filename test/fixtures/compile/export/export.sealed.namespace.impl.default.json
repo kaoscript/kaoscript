@@ -23,6 +23,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+      "exhaustive": true,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -47,6 +48,7 @@
     {
       "kind": "namespace",
       "sealed": true,
+      "exhaustive": true,
       "properties": {
         "PI": {
           "reference": 0,
@@ -55,6 +57,7 @@
         "pow": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],
@@ -68,6 +71,7 @@
     },
     {
       "kind": "namespace",
+      "exhaustive": true,
       "namespace": {
         "reference": 1
       },
@@ -79,6 +83,7 @@
         "foo": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],

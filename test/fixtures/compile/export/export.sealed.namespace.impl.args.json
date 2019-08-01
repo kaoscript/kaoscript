@@ -16,6 +16,7 @@
     {
       "kind": "namespace",
       "sealed": true,
+      "exhaustive": true,
       "properties": {
         "PI": {
           "type": "Number",
@@ -24,6 +25,7 @@
         "pow": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": "Infinity",
           "parameters": [
@@ -42,6 +44,7 @@
     },
     {
       "kind": "namespace",
+      "exhaustive": true,
       "namespace": {
         "reference": 0
       },
@@ -49,6 +52,7 @@
         "foo": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 2,
           "max": 3,
           "parameters": [

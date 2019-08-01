@@ -58,7 +58,7 @@ class ReferenceType extends Type {
 
 		return true
 	} // }}}
-	export(references, ignoreAlteration, name = @name) { // {{{
+	export(references, mode, name = @name) { // {{{
 		if @nullable || @parameters.length != 0 {
 			const export = {
 				kind: TypeKind::Reference
@@ -70,7 +70,7 @@ class ReferenceType extends Type {
 			}
 
 			if @parameters.length != 0 {
-				export.parameters = [parameter.toReference(references, ignoreAlteration) for parameter in @parameters]
+				export.parameters = [parameter.toReference(references, mode) for parameter in @parameters]
 			}
 
 			return export
@@ -345,23 +345,23 @@ class ReferenceType extends Type {
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}
-	toMetadata(references, ignoreAlteration) { // {{{
+	toMetadata(references, mode) { // {{{
 		this.resolveType()
 
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
 		else if @predefined {
-			return super.toMetadata(references, ignoreAlteration)
+			return super.toMetadata(references, mode)
 		}
 		else if !@variable.getRealType().isClass() {
-			@referenceIndex = @variable.getRealType().toMetadata(references, ignoreAlteration)
+			@referenceIndex = @variable.getRealType().toMetadata(references, mode)
 		}
 		else if @type.isAlien() && @type.isPredefined() {
-			return super.toMetadata(references, ignoreAlteration)
+			return super.toMetadata(references, mode)
 		}
 		else {
-			const reference = @variable.getRealType().toReference(references, ignoreAlteration)
+			const reference = @variable.getRealType().toReference(references, mode)
 
 			@referenceIndex = references.length
 
@@ -371,28 +371,28 @@ class ReferenceType extends Type {
 		return @referenceIndex
 	} // }}}
 	toQuote() => `'\(@name)'`
-	toReference(references, ignoreAlteration) { // {{{
+	toReference(references, mode) { // {{{
 		this.resolveType()
 
 		if @predefined {
-			return this.export(references, ignoreAlteration)
+			return this.export(references, mode)
 		}
 		else if !@variable.getDeclaredType().isClass() {
-			return super.toReference(references, ignoreAlteration)
+			return super.toReference(references, mode)
 		}
 		else if @type.isExplicitlyExported() {
-			if ignoreAlteration && @type.isAlteration() {
-				return this.export(references, ignoreAlteration, @type:ClassType.toAlterationReference(references, ignoreAlteration))
+			if (mode & ExportMode::IgnoreAlteration) && @type.isAlteration() {
+				return this.export(references, mode, @type:ClassType.toAlterationReference(references, mode))
 			}
 			else {
-				return this.export(references, ignoreAlteration, @type.toReference(references, ignoreAlteration))
+				return this.export(references, mode, @type.toReference(references, mode))
 			}
 		}
 		else if this.isNative() {
-			return this.export(references, ignoreAlteration)
+			return this.export(references, mode)
 		}
 		else {
-			return this.export(references, ignoreAlteration, @type.toReference(references, ignoreAlteration))
+			return this.export(references, mode, @type.toReference(references, mode))
 		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{

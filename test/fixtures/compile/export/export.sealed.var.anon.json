@@ -21,6 +21,7 @@
             "log": {
               "kind": "function",
               "async": false,
+              "exhaustive": true,
               "min": 0,
               "max": "Infinity",
               "parameters": [
@@ -39,6 +40,7 @@
         "moveTo": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 2,
           "max": 2,
           "parameters": [

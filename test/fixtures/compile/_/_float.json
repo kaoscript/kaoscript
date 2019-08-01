@@ -12,10 +12,12 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "exhaustive": true,
       "properties": {
         "parse": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 1,
           "parameters": [

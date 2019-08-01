@@ -21,6 +21,7 @@
         "corge": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],
@@ -30,6 +31,7 @@
         "grault": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -47,6 +49,7 @@
         "garply": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -68,6 +71,7 @@
         "waldo": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],
@@ -84,6 +88,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+      "exhaustive": true,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -95,6 +100,27 @@
       },
       "classVariables": {},
       "instanceMethods": {
+        "charAt": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 1
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
         "match": [
           {
             "access": 3,
@@ -119,6 +145,27 @@
           }
         ],
         "replace": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 1
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ],
+        "slice": [
           {
             "access": 3,
             "async": false,
@@ -171,6 +218,20 @@
             "sealed": false,
             "throws": []
           }
+        ],
+        "trim": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 1
+            },
+            "sealed": false,
+            "throws": []
+          }
         ]
       },
       "classMethods": {}
@@ -180,6 +241,7 @@
       "class": {
         "reference": 1
       },
+      "exhaustive": true,
       "init": 0,
       "instanceVariables": {},
       "classVariables": {},

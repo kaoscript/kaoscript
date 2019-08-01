@@ -9,6 +9,7 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "exhaustive": true,
       "properties": {
         "Foobar": {
           "kind": "class",
@@ -16,6 +17,7 @@
           "alien": false,
           "hybrid": false,
           "sealed": false,
+          "exhaustive": true,
           "init": 0,
           "constructors": [],
           "destructors": 0,

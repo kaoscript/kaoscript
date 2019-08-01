@@ -9,6 +9,10 @@ class NamespaceType extends Type {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new NamespaceType(scope)
 
+			if data.exhaustive? {
+				type._exhaustive = data.exhaustive
+			}
+
 			if data.namespace? {
 				alterations[data.namespace.reference] = index
 
@@ -23,7 +27,7 @@ class NamespaceType extends Type {
 				})
 			}
 			else {
-				if data.sealed {
+				if data.sealed == true {
 					type.flagSealed()
 				}
 
@@ -61,7 +65,17 @@ class NamespaceType extends Type {
 
 		return variable.getDeclaredType()
 	} // }}}
-	addPropertyFromAST(data, node) => this.addProperty(data.name.name, Type.fromAST(data, node))
+	/* addPropertyFromAST(data, node) => this.addProperty(data.name.name, Type.fromAST(data, node)) */
+	addPropertyFromAST(data, node) { // {{{
+		const type = Type.fromAST(data, node)
+		const options = Attribute.configure(data, null, AttributeTarget::Property)
+
+		if options.rules.nonExhaustive {
+			type.setExhaustive(false)
+		}
+
+		return this.addProperty(data.name.name, type)
+	} // }}}
 	addPropertyFromMetadata(name, data, metadata, references, alterations, queue, node) { // {{{
 		const type = Type.fromMetadata(data, metadata, references, alterations, queue, @scope, node)
 
@@ -111,16 +125,17 @@ class NamespaceType extends Type {
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references, ignoreAlteration) { // {{{
+	export(references, mode) { // {{{
 		if @alterationReference? {
 			const export = {
 				kind: TypeKind::Namespace
-				namespace: @alterationReference.toReference(references, ignoreAlteration)
+				exhaustive: this.isExhaustive()
+				namespace: @alterationReference.toReference(references, mode)
 				properties: {}
 			}
 
 			for const property, name of @properties when property.isAlteration() {
-				export.properties[name] = property.toExportOrIndex(references, ignoreAlteration)
+				export.properties[name] = property.toExportOrIndex(references, mode)
 			}
 
 			return export
@@ -129,11 +144,12 @@ class NamespaceType extends Type {
 			const export = {
 				kind: TypeKind::Namespace
 				sealed: @sealed
+				exhaustive: this.isExhaustive()
 				properties: {}
 			}
 
 			for const property, name of @properties {
-				export.properties[name] = property.toExportOrIndex(references, ignoreAlteration)
+				export.properties[name] = property.toExportOrIndex(references, mode)
 			}
 
 			return export
@@ -232,11 +248,11 @@ class NamespacePropertyType extends Type {
 			return false
 		}
 	} // }}}
-	export(references, ignoreAlteration) { // {{{
+	export(references, mode) { // {{{
 		let export
 
 		if @type is ReferenceType {
-			export = @type.toReference(references, ignoreAlteration)
+			export = @type.toReference(references, mode)
 
 			if export is String {
 				export = {
@@ -245,7 +261,7 @@ class NamespacePropertyType extends Type {
 			}
 		}
 		else {
-			export = @type.export(references, ignoreAlteration)
+			export = @type.export(references, mode)
 		}
 
 		export.sealed = this.isSealed()
@@ -281,9 +297,9 @@ class NamespacePropertyType extends Type {
 
 		return false
 	} // }}}
-	toExportOrIndex(references, ignoreAlteration) { // {{{
+	toExportOrIndex(references, mode) { // {{{
 		if @type.isSealable() {
-			return @type.toExportOrIndex(references, ignoreAlteration)
+			return @type.toExportOrIndex(references, mode)
 		}
 		else if @type.referenceIndex() != -1 {
 			return {
@@ -294,11 +310,11 @@ class NamespacePropertyType extends Type {
 		else if @type.isReferenced() {
 			return {
 				sealed: this.isSealed()
-				type: @type.toMetadata(references, ignoreAlteration)
+				type: @type.toMetadata(references, mode)
 			}
 		}
 		else {
-			return this.export(references, ignoreAlteration)
+			return this.export(references, mode)
 		}
 	} // }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)

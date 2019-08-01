@@ -33,6 +33,10 @@ class FunctionType extends Type {
 			type._min = data.min
 			type._max = data.max
 
+			if data.exhaustive? {
+				type._exhaustive = data.exhaustive
+			}
+
 			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
 
 			if data.returns? {
@@ -57,6 +61,10 @@ class FunctionType extends Type {
 			type._async = data.async
 			type._min = data.min
 			type._max = data.max
+
+			if data.exhaustive? {
+				type._exhaustive = data.exhaustive
+			}
 
 			queue.push(() => {
 				type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
@@ -234,14 +242,30 @@ class FunctionType extends Type {
 			return true
 		}
 	} // }}}
-	export(references, ignoreAlteration) => { // {{{
-		kind: TypeKind::Function
-		async: @async
-		min: @min
-		max: @max
-		parameters: [parameter.export(references, ignoreAlteration) for const parameter in @parameters]
-		returns: @returnType.toReference(references, ignoreAlteration)
-		throws: [throw.toReference(references, ignoreAlteration) for const throw in @throws]
+	export(references, mode) { // {{{
+		if mode & ExportMode::OverloadedFunction {
+			return {
+				kind: TypeKind::Function
+				async: @async
+				min: @min
+				max: @max
+				parameters: [parameter.export(references, mode) for const parameter in @parameters]
+				returns: @returnType.toReference(references, mode)
+				throws: [throw.toReference(references, mode) for const throw in @throws]
+			}
+		}
+		else {
+			return {
+				kind: TypeKind::Function
+				async: @async
+				exhaustive: this.isExhaustive()
+				min: @min
+				max: @max
+				parameters: [parameter.export(references, mode) for const parameter in @parameters]
+				returns: @returnType.toReference(references, mode)
+				throws: [throw.toReference(references, mode) for const throw in @throws]
+			}
+		}
 	} // }}}
 	flagExported(explicitly: Boolean) { // {{{
 		if @exported {
@@ -567,6 +591,10 @@ class OverloadedFunctionType extends Type {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new OverloadedFunctionType(scope)
 
+			if data.exhaustive? {
+				type._exhaustive = data.exhaustive
+			}
+
 			for function in data.functions {
 				type.addFunction(Type.fromMetadata(function, metadata, references, alterations, queue, scope, node))
 			}
@@ -575,6 +603,10 @@ class OverloadedFunctionType extends Type {
 		} // }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new OverloadedFunctionType(scope)
+
+			if data.exhaustive? {
+				type._exhaustive = data.exhaustive
+			}
 
 			queue.push(() => {
 				for function in data.functions {
@@ -593,16 +625,34 @@ class OverloadedFunctionType extends Type {
 		@functions.push(type)
 
 		@references.pushUniq(type)
+
+		if type._exhaustive != null {
+			if type._exhaustive {
+				@exhaustive = true
+			}
+			else if @exhaustive == null {
+				@exhaustive = false
+			}
+		}
 	} // }}}
 	addFunction(type: OverloadedFunctionType) { // {{{
 		if @functions.length == 0 {
 			@async = type.isAsync()
 		}
 
-		for fn in type.functions() {
-			@functions.push(fn)
+		@references.pushUniq(type)
 
-			@references.pushUniq(type)
+		for const function in type.functions() {
+			@functions.push(function)
+
+			if function._exhaustive != null {
+				if function._exhaustive {
+					@exhaustive = true
+				}
+				else if @exhaustive == null {
+					@exhaustive = false
+				}
+			}
 		}
 	} // }}}
 	addFunction(type: ReferenceType) { // {{{
@@ -632,22 +682,25 @@ class OverloadedFunctionType extends Type {
 	equals(b?) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	export(references, ignoreAlteration) { // {{{
+	export(references, mode) { // {{{
 		const functions = []
+
+		const overloadedMode = mode | ExportMode::OverloadedFunction
 
 		for const reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
 				for const fn in reference.functions() when fn.isExportable() {
-					functions.push(fn.toExportOrReference(references, ignoreAlteration))
+					functions.push(fn.toExportOrReference(references, overloadedMode))
 				}
 			}
 			else if reference.isExportable() {
-				functions.push(reference.toExportOrReference(references, ignoreAlteration))
+				functions.push(reference.toExportOrReference(references, overloadedMode))
 			}
 		}
 
 		return {
 			kind: TypeKind::OverloadedFunction
+			exhaustive: this.isExhaustive()
 			functions: functions
 		}
 	} // }}}

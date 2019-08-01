@@ -6,7 +6,7 @@ class VoidType extends Type {
 		throw new NotSupportedException()
 	} // }}}
 	equals(b?): Boolean => b is VoidType
-	export(references, ignoreAlteration) => 'Void'
+	export(references, mode) => 'Void'
 	isVoid() => true
 	toFragments(fragments, node) { // {{{
 		fragments.code('Void')

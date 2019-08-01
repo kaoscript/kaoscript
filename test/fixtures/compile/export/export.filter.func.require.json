@@ -16,6 +16,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
+      "exhaustive": false,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -26,6 +27,7 @@
     },
     {
       "kind": "overloadedfunction",
+      "exhaustive": true,
       "functions": [
         {
           "kind": "function",

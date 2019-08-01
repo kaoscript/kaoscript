@@ -15,6 +15,11 @@ class ClassType extends Type {
 		_classVariables: Object			= {}
 		_constructors: Array			= []
 		_destructors: Number			= 0
+		_exhaustiveness					= {
+			constructor: null
+			classMethods: {}
+			instanceMethods: {}
+		}
 		_explicitlyExported: Boolean	= false
 		_extending: Boolean				= false
 		_extends: NamedType<ClassType>?	= null
@@ -34,6 +39,22 @@ class ClassType extends Type {
 			type._alien = data.alien
 			type._hybrid = data.hybrid
 			type._init = data.init
+
+			type._exhaustive = data.exhaustive
+
+			if data.exhaustive && data.exhaustiveness? {
+				if data.exhaustive.constructor {
+					type._exhaustiveness.constructor = true
+				}
+
+				if data.exhaustiveness.classMethods? {
+					type._exhaustiveness.classMethods = data.exhaustiveness.classMethods
+				}
+
+				if data.exhaustiveness.instanceMethods? {
+					type._exhaustiveness.instanceMethods = data.exhaustiveness.instanceMethods
+				}
+			}
 
 			if data.sealed {
 				type.flagSealed()
@@ -71,6 +92,22 @@ class ClassType extends Type {
 		} // }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new ClassType(scope)
+
+			type._exhaustive = data.exhaustive
+
+			if data.exhaustive && data.exhaustiveness? {
+				if data.exhaustiveness.constructor {
+					type._exhaustiveness.constructor = true
+				}
+
+				if data.exhaustiveness.classMethods? {
+					type._exhaustiveness.classMethods = data.exhaustiveness.classMethods
+				}
+
+				if data.exhaustiveness.instanceMethods? {
+					type._exhaustiveness.instanceMethods = data.exhaustiveness.instanceMethods
+				}
+			}
 
 			if data.class? {
 				alterations[data.class.reference] = index
@@ -218,6 +255,8 @@ class ClassType extends Type {
 		}
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
+		const options = Attribute.configure(data, null, AttributeTarget::Property)
+
 		switch data.kind {
 			NodeKind::FieldDeclaration => {
 				let instance = true
@@ -248,6 +287,18 @@ class ClassType extends Type {
 					}
 
 					const type = ClassMethodType.fromAST(data, node)
+
+					/* if options.rules.nonExhaustive {
+						type.setExhaustive(false)
+					} */
+					if options.rules.nonExhaustive {
+						if instance {
+							@exhaustiveness.instanceMethods[data.name.name] = false
+						}
+						else {
+							@exhaustiveness.classMethods[data.name.name] = false
+						}
+					}
 
 					if instance {
 						this.dedupInstanceMethod(data.name.name:String, type)
@@ -355,11 +406,16 @@ class ClassType extends Type {
 	equals(b?): Boolean { // {{{
 		return this == b
 	} // }}}
-	export(references, ignoreAlteration) { // {{{
+	export(references, mode) { // {{{
+		const exhaustive = this.isExhaustive()
+
+		let export
+
 		if this.hasExportableAlteration() {
-			const export = {
+			export = {
 				kind: TypeKind::Class
-				class: @alterationReference.toAlterationReference(references, ignoreAlteration)
+				class: @alterationReference.toAlterationReference(references, mode)
+				exhaustive
 				init: @init
 				instanceVariables: {}
 				classVariables: {}
@@ -368,38 +424,37 @@ class ClassType extends Type {
 			}
 
 			for const variable, name of @instanceVariables when variable.isAlteration() {
-				export.instanceVariables[name] = variable.export(references, ignoreAlteration)
+				export.instanceVariables[name] = variable.export(references, mode)
 			}
 
 			for const variable, name of @classVariables when variable.isAlteration() {
-				export.classVariables[name] = variable.export(references, ignoreAlteration)
+				export.classVariables[name] = variable.export(references, mode)
 			}
 
 			for const methods, name of @instanceMethods {
-				const exportedMethods = [method.export(references, ignoreAlteration) for method in methods when method.isAlteration()]
+				const exportedMethods = [method.export(references, mode) for method in methods when method.isAlteration()]
 				if exportedMethods.length > 0 {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
 			for const methods, name of @classMethods {
-				const exportedMethods = [method.export(references, ignoreAlteration) for method in methods when method.isAlteration()]
+				const exportedMethods = [method.export(references, mode) for method in methods when method.isAlteration()]
 				if exportedMethods.length > 0 {
 					export.classMethods[name] = exportedMethods
 				}
 			}
-
-			return export
 		}
 		else {
-			const export = {
+			export = {
 				kind: TypeKind::Class
 				abstract: @abstract
 				alien: @alien
 				hybrid: @hybrid
 				sealed: @sealed
+				exhaustive
 				init: @init
-				constructors: [constructor.export(references, ignoreAlteration) for constructor in @constructors]
+				constructors: [constructor.export(references, mode) for constructor in @constructors]
 				destructors: @destructors
 				instanceVariables: {}
 				classVariables: {}
@@ -408,15 +463,15 @@ class ClassType extends Type {
 			}
 
 			for const variable, name of @instanceVariables {
-				export.instanceVariables[name] = variable.export(references, ignoreAlteration)
+				export.instanceVariables[name] = variable.export(references, mode)
 			}
 
 			for const variable, name of @classVariables {
-				export.classVariables[name] = variable.export(references, ignoreAlteration)
+				export.classVariables[name] = variable.export(references, mode)
 			}
 
 			for const methods, name of @instanceMethods {
-				const m = [method.export(references, ignoreAlteration) for const method in methods when method.isExportable()]
+				const m = [method.export(references, mode) for const method in methods when method.isExportable()]
 
 				if m.length != 0 {
 					export.instanceMethods[name] = m
@@ -424,23 +479,47 @@ class ClassType extends Type {
 			}
 
 			for const methods, name of @classMethods {
-				export.classMethods[name] = [method.export(references, ignoreAlteration) for method in methods]
+				export.classMethods[name] = [method.export(references, mode) for method in methods]
 			}
 
 			if @abstract {
 				export.abstractMethods = {}
 
 				for const methods, name of @abstractMethods {
-					export.abstractMethods[name] = [method.export(references, ignoreAlteration) for method in methods]
+					export.abstractMethods[name] = [method.export(references, mode) for method in methods]
 				}
 			}
 
 			if @extending {
-				export.extends = @extends.metaReference(references, ignoreAlteration)
+				export.extends = @extends.metaReference(references, mode)
+			}
+		}
+
+		if exhaustive {
+			const exhaustiveness = {}
+			let notEmpty = false
+
+			if @exhaustiveness.constructor == false {
+				exhaustiveness.constructor = false
+				notEmpty = true
 			}
 
-			return export
+			if !Object.isEmpty(@exhaustiveness.classMethods) {
+				exhaustiveness.classMethods = @exhaustiveness.classMethods
+				notEmpty = true
+			}
+
+			if !Object.isEmpty(@exhaustiveness.instanceMethods) {
+				exhaustiveness.instanceMethods = @exhaustiveness.instanceMethods
+				notEmpty = true
+			}
+
+			if notEmpty {
+				export.exhaustiveness = exhaustiveness
+			}
 		}
+
+		return export
 	} // }}}
 	flagAbstract() { // {{{
 		@abstract = true
@@ -884,6 +963,57 @@ class ClassType extends Type {
 			return super.isExhaustive()
 		}
 	} // }}}
+	isExhaustiveClassMethod(name) { // {{{
+		/* if @classMethods[name] is Array {
+			for method in @classMethods[name] {
+				if !method.isExhaustive() {
+					return false
+				}
+			}
+		} */
+		if @exhaustiveness.classMethods[name] == false {
+			return false
+		}
+		else if @extending {
+			return @extends.type().isExhaustiveClassMethod(name)
+		}
+		else {
+			return true
+		}
+	} // }}}
+	isExhaustiveClassMethod(name, node) { // {{{
+		if !this.isExhaustive(node) {
+			return false
+		}
+
+		return this.isExhaustiveClassMethod(name)
+	} // }}}
+	isExhaustiveInstanceMethod(name) { // {{{
+		/* if @instanceMethods[name] is Array {
+			for method in @instanceMethods[name] {
+				if !method.isExhaustive() {
+					return false
+				}
+			}
+		} */
+
+		if @exhaustiveness.instanceMethods[name] == false {
+			return false
+		}
+		else if @extending {
+			return @extends.type().isExhaustiveInstanceMethod(name)
+		}
+		else {
+			return true
+		}
+	} // }}}
+	isExhaustiveInstanceMethod(name, node) { // {{{
+		if !this.isExhaustive(node) {
+			return false
+		}
+
+		return this.isExhaustiveInstanceMethod(name)
+	} // }}}
 	isExplicitlyExported() => @explicitlyExported
 	isExtendable() => true
 	isExtending() => @extending
@@ -1074,28 +1204,28 @@ class ClassType extends Type {
 		return true
 	} // }}}
 	matchSignatureOf(that: NamedType, matchables) => this.matchSignatureOf(that.type(), matchables)
-	metaReference(references, name, ignoreAlteration) { // {{{
+	metaReference(references, name, mode) { // {{{
 		if @predefined {
 			return name
 		}
 		else {
-			return [this.toMetadata(references, ignoreAlteration), name]
+			return [this.toMetadata(references, mode), name]
 		}
 	} // }}}
 	setAlterationReference(@alterationReference) { // {{{
 		@alteration = true
 	} // }}}
-	toAlterationReference(references, ignoreAlteration) { // {{{
+	toAlterationReference(references, mode) { // {{{
 		if @referenceIndex != -1 {
 			return {
 				reference: @referenceIndex
 			}
 		}
 		else if ?@alterationReference {
-			return @alterationReference.toAlterationReference(references, ignoreAlteration)
+			return @alterationReference.toAlterationReference(references, mode)
 		}
 		else {
-			return this.toReference(references, ignoreAlteration)
+			return this.toReference(references, mode)
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
@@ -1104,12 +1234,12 @@ class ClassType extends Type {
 	toQuote(): String { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	toReference(references, ignoreAlteration) { // {{{
+	toReference(references, mode) { // {{{
 		if @alteration && !@explicitlyExported {
-			return @alterationReference.toReference(references, ignoreAlteration)
+			return @alterationReference.toReference(references, mode)
 		}
 		else {
-			return super.toReference(references, ignoreAlteration)
+			return super.toReference(references, mode)
 		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
@@ -1173,9 +1303,9 @@ class ClassVariableType extends Type {
 		}
 	} // }}}
 	access(@access) => this
-	export(references, ignoreAlteration) => { // {{{
+	export(references, mode) => { // {{{
 		access: @access
-		type: @type.toReference(references, ignoreAlteration)
+		type: @type.toReference(references, mode)
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
@@ -1230,15 +1360,15 @@ class ClassMethodType extends FunctionType {
 		} // }}}
 	}
 	access(@access) => this
-	export(references, ignoreAlteration) => { // {{{
+	export(references, mode) => { // {{{
 		access: @access
 		async: @async
 		min: @min
 		max: @max
-		parameters: [parameter.export(references, ignoreAlteration) for parameter in @parameters]
-		returns: @returnType.toReference(references, ignoreAlteration)
+		parameters: [parameter.export(references, mode) for parameter in @parameters]
+		returns: @returnType.toReference(references, mode)
 		sealed: @sealed
-		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
+		throws: [throw.toReference(references, mode) for throw in @throws]
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
@@ -1312,12 +1442,12 @@ class ClassConstructorType extends FunctionType {
 		return type
 	} // }}}
 	access(@access) => this
-	export(references, ignoreAlteration) => { // {{{
+	export(references, mode) => { // {{{
 		access: @access
 		min: @min
 		max: @max
-		parameters: [parameter.export(references, ignoreAlteration) for parameter in @parameters]
-		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
+		parameters: [parameter.export(references, mode) for parameter in @parameters]
+		throws: [throw.toReference(references, mode) for throw in @throws]
 	} // }}}
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
@@ -1345,9 +1475,9 @@ class ClassDestructorType extends FunctionType {
 		@max = 1
 	} // }}}
 	access(@access) => this
-	export(references, ignoreAlteration) => { // {{{
+	export(references, mode) => { // {{{
 		access: @access
-		throws: [throw.toReference(references, ignoreAlteration) for throw in @throws]
+		throws: [throw.toReference(references, mode) for throw in @throws]
 	} // }}}
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {

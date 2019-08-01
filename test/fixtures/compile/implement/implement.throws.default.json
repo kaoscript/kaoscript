@@ -12,6 +12,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
+      "exhaustive": true,
       "init": 1,
       "constructors": [
         {

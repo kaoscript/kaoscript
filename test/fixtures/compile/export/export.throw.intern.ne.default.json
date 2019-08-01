@@ -9,6 +9,7 @@
     {
       "kind": "function",
       "async": false,
+      "exhaustive": true,
       "min": 0,
       "max": 0,
       "parameters": [],
@@ -25,6 +26,7 @@
       "alien": false,
       "hybrid": true,
       "sealed": false,
+      "exhaustive": false,
       "init": 0,
       "constructors": [],
       "destructors": 0,

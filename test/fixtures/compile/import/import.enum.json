@@ -15,6 +15,7 @@
         "log": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": "Infinity",
           "parameters": [
@@ -33,6 +34,7 @@
     },
     {
       "kind": "enum",
+      "exhaustive": true,
       "elements": [
         "Red",
         "Green",

@@ -9,10 +9,12 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "exhaustive": true,
       "properties": {
         "corge": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],
@@ -23,6 +25,7 @@
         "grault": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -41,6 +44,7 @@
         "garply": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -59,6 +63,7 @@
         "waldo": {
           "kind": "function",
           "async": false,
+          "exhaustive": true,
           "min": 0,
           "max": 0,
           "parameters": [],

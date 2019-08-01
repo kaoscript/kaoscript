@@ -21,6 +21,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
+      "exhaustive": false,
       "init": 0,
       "constructors": [],
       "destructors": 0,
@@ -35,6 +36,7 @@
       "class": {
         "reference": 0
       },
+      "exhaustive": false,
       "init": 0,
       "instanceVariables": {
         "_luma": {
