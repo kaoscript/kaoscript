@@ -505,7 +505,6 @@ abstract class Type {
 		return false
 	} // }}}
 	isEnum() => false
-	/* isExhaustive() => @exhaustive || (!@alien && !@required) */
 	isExhaustive() { // {{{
 		if @exhaustive == null {
 			return !@alien && !@required

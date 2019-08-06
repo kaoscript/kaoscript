@@ -65,7 +65,6 @@ class NamespaceType extends Type {
 
 		return variable.getDeclaredType()
 	} // }}}
-	/* addPropertyFromAST(data, node) => this.addProperty(data.name.name, Type.fromAST(data, node)) */
 	addPropertyFromAST(data, node) { // {{{
 		const type = Type.fromAST(data, node)
 		const options = Attribute.configure(data, null, AttributeTarget::Property)

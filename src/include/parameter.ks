@@ -636,7 +636,6 @@ class Parameter extends AbstractNode {
 
 				@defaultValue = $compile.expression(@data.defaultValue, @parent)
 				@defaultValue.analyse()
-				@defaultValue.prepare()
 
 				@hasDefaultValue = true
 
@@ -657,6 +656,7 @@ class Parameter extends AbstractNode {
 		@name.translate()
 
 		if @hasDefaultValue {
+			@defaultValue.prepare()
 			@defaultValue.translate()
 		}
 	} // }}}

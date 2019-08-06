@@ -288,9 +288,6 @@ class ClassType extends Type {
 
 					const type = ClassMethodType.fromAST(data, node)
 
-					/* if options.rules.nonExhaustive {
-						type.setExhaustive(false)
-					} */
 					if options.rules.nonExhaustive {
 						if instance {
 							@exhaustiveness.instanceMethods[data.name.name] = false
@@ -964,13 +961,6 @@ class ClassType extends Type {
 		}
 	} // }}}
 	isExhaustiveClassMethod(name) { // {{{
-		/* if @classMethods[name] is Array {
-			for method in @classMethods[name] {
-				if !method.isExhaustive() {
-					return false
-				}
-			}
-		} */
 		if @exhaustiveness.classMethods[name] == false {
 			return false
 		}
@@ -989,14 +979,6 @@ class ClassType extends Type {
 		return this.isExhaustiveClassMethod(name)
 	} // }}}
 	isExhaustiveInstanceMethod(name) { // {{{
-		/* if @instanceMethods[name] is Array {
-			for method in @instanceMethods[name] {
-				if !method.isExhaustive() {
-					return false
-				}
-			}
-		} */
-
 		if @exhaustiveness.instanceMethods[name] == false {
 			return false
 		}

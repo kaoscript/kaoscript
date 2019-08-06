@@ -525,6 +525,8 @@ class CallMacroStatement extends Statement {
 		@scope.setLineOffset(@offsetStart)
 
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.prepare()
 		}
 
@@ -534,6 +536,8 @@ class CallMacroStatement extends Statement {
 		@scope.setLineOffset(@offsetStart)
 
 		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.translate()
 		}
 
