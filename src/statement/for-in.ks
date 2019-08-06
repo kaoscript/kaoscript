@@ -63,9 +63,7 @@ class ForInStatement extends Statement {
 				if @data.declaration || variable == null {
 					@declareValue = true
 
-					@bindingScope.define(name, @immutable, Type.Any, this)
-
-					@declaredVariables.push(name)
+					@declaredVariables.push(@bindingScope.define(name, @immutable, Type.Any, this))
 				}
 				else if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, this)
@@ -458,8 +456,8 @@ class ForInStatement extends Statement {
 		this.toBoundFragments(ctrl)
 
 		if @declareValue {
-			for const name in @declaredVariables {
-				ctrl.code($comma).compile(@bindingScope.getVariable(name))
+			for const variable in @declaredVariables {
+				ctrl.code($comma).compile(variable)
 			}
 		}
 
