@@ -18,7 +18,7 @@ program
 	.command('dependency')
 	.action(function() {
 		if(metadata._requested && metadata._requested.registry) {
-			console.log('@kaoscript/' + getPackage())
+			console.log('@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.'))
 		}
 		else {
 			console.log('github:kaoscript/' + getPackage('github'))
