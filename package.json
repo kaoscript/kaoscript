@@ -42,9 +42,9 @@
 	},
 	"devDependencies": {
 		"@kaoscript/ast": "^0.8.0",
-		"@kaoscript/coverage-istanbul": "github:kaoscript/coverage-istanbul",
+		"@kaoscript/coverage-istanbul": "^0.2.0",
 		"@kaoscript/parser": "^0.7.0",
-		"@kaoscript/source-generator": "github:kaoscript/source-generator",
+		"@kaoscript/source-generator": "^0.1.0",
 		"@kaoscript/target-commons": "^0.2.0",
 		"@kaoscript/test-import": "^0.2.1",
 		"@kaoscript/util": "^0.1.1",

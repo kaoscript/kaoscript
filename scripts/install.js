@@ -17,7 +17,7 @@ function getPackage(source) {
 program
 	.command('dependency')
 	.action(function() {
-		if(metadata._requested && metadata._requested.type === 'tag') {
+		if(metadata._requested && metadata._requested.registry) {
 			console.log('@kaoscript/' + getPackage())
 		}
 		else {
