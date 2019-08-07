@@ -1,7 +1,7 @@
 {
 	"name": "kaoscript",
 	"description": "Programming language combining features from ES7, CoffeeScript, TypeScript, Rust, Swift, C# and more",
-	"version": "0.9.0",
+	"version": "0.9.1",
 	"author": {
 		"name": "Baptiste Augrain",
 		"email": "daiyam@zokugun.org"
@@ -60,6 +60,7 @@
 	},
 	"scripts": {
 		"postinstall": "npm install --no-save `node ./scripts/install.js dependency` && node ./scripts/install.js binary",
+		"prepublish": "rm -f ./lib/compiler.js",
 		"push-coverage": "npm run test-coverage && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
 		"test": "mocha --colors --check-leaks --reporter spec --require ./register.js",
 		"test-coverage": "node node_modules/@zokugun/istanbul.cover/src/cli.js"
