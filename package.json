@@ -46,7 +46,7 @@
 		"@kaoscript/parser": "^0.7.0",
 		"@kaoscript/source-generator": "^0.1.0",
 		"@kaoscript/target-commons": "^0.2.0",
-		"@kaoscript/test-import": "^0.2.1",
+		"@kaoscript/test-import": "^0.2.2",
 		"@kaoscript/util": "^0.1.1",
 		"@zokugun/istanbul.cover": "^0.5.0",
 		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",
@@ -60,7 +60,7 @@
 	},
 	"scripts": {
 		"postinstall": "npm install --no-save `node ./scripts/install.js dependency` && node ./scripts/install.js binary",
-		"prepublish": "rm -f ./lib/compiler.js",
+		"prepublishOnly": "rm -f ./lib/compiler.js",
 		"push-coverage": "npm run test-coverage && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
 		"test": "mocha --colors --check-leaks --reporter spec --require ./register.js",
 		"test-coverage": "node node_modules/@zokugun/istanbul.cover/src/cli.js"
