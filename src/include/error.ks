@@ -171,14 +171,29 @@ export class ReferenceException extends Exception {
 		throwLoopingAlias(name, node) ~ SyntaxException { // {{{
 			throw new ReferenceException(`Alias "@\(name)" is looping on itself`, node)
 		} // }}}
-		throwNoMatchingConstructor(name, node) ~ ReferenceException { // {{{
-			throw new ReferenceException(`Constructor of class "\(name)" can't be matched to given arguments`, node)
+		throwNoMatchingConstructor(name, arguments, node) ~ ReferenceException { // {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
+			}
 		} // }}}
-		throwNoMatchingFunction(node) ~ ReferenceException { // {{{
-			throw new ReferenceException(`Function can't be matched to given arguments`, node)
+		throwNoMatchingFunction(name, arguments, node) ~ ReferenceException { // {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The function "\(name)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
+			}
 		} // }}}
-		throwNoMatchingMethod(method, class, node) ~ ReferenceException { // {{{
-			throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments`, node)
+		throwNoMatchingMethod(method, class, arguments, node) ~ ReferenceException { // {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
+			}
 		} // }}}
 		throwNotDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
@@ -195,14 +210,14 @@ export class ReferenceException extends Exception {
 		throwNotDefinedMember(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Member "\(name)" is not defined`, node)
 		} // }}}
-		throwNotDefinedMethod(name, node) ~ ReferenceException { // {{{
-			throw new ReferenceException(`Method "\(name)" is not defined`, node)
-		} // }}}
 		throwNotDefinedProperty(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Property "\(name)" is not defined`, node)
 		} // }}}
 		throwNotExportable(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`The exported variable "\(name)" is not exportable`, node)
+		} // }}}
+		throwNotFoundMethod(method, class, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The method "\(method)" can't be found in the class "\(class)"`, node)
 		} // }}}
 		throwNotPassed(name, module, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
@@ -347,8 +362,8 @@ export class TypeException extends Exception {
 		throwInvalid(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Invalid type "\(name)"`, node)
 		} // }}}
-		throwInvalidAssignement(node) ~ TypeException { // {{{
-			throw new TypeException(`The assignement's types are incompatible`, node)
+		throwInvalidAssignement(name, declaredType, valueType, node) ~ TypeException { // {{{
+			throw new TypeException(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
 		} // }}}
 		throwInvalidBinding(expected, node) ~ TypeException { // {{{
 			throw new TypeException(`The binding is expected to be of type "\(expected)"`, node)
@@ -365,8 +380,8 @@ export class TypeException extends Exception {
 		throwInvalidSpread(node) ~ TypeException { // {{{
 			throw new TypeException(`Spread operator require an array`, node)
 		} // }}}
-		throwInvalidTypeChecking(node) ~ TypeException { // {{{
-			throw new TypeException(`Type checking has incompatible type`, node)
+		throwInvalidTypeChecking(left, right, node) ~ TypeException { // {{{
+			throw new TypeException(`The variable of type \(left.toQuote(true)) can never be of type \(right.toQuote(true))`, node)
 		} // }}}
 		throwNotAlien(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The type "\(name)" must be declared externally`, node)
@@ -389,6 +404,9 @@ export class TypeException extends Exception {
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)
 		} // }}}
+		throwNullTypeChecking(type, node) ~ TypeException { // {{{
+			throw new TypeException(`The variable is "null" and can't be checked against the type \(type.toQuote(true))`, node)
+		} // }}}
 		throwRequireClass(node) ~ TypeException { // {{{
 			throw new TypeException(`An instance is required`, node)
 		} // }}}
@@ -396,7 +414,10 @@ export class TypeException extends Exception {
 			throw new TypeException(`No values are expected to be returned`, node)
 		} // }}}
 		throwUnexpectedReturnedType(type, node) ~ TypeException { // {{{
-			throw new TypeException(`Expected returned type \(type.toQuote())`, node)
+			throw new TypeException(`Expected returned type \(type.toQuote(true))`, node)
+		} // }}}
+		throwUnnecessaryTypeChecking(type, node) ~ TypeException { // {{{
+			throw new TypeException(`The variable is always of type \(type.toQuote(true))`, node)
 		} // }}}
 	}
 }

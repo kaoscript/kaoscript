@@ -419,13 +419,15 @@ class BlockScope extends Scope {
 			}
 
 			if !type.matchContentOf(variable.getDeclaredType()) {
-				TypeException.throwInvalidAssignement(node)
+				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
 			}
 		}
 
 		if !type.equals(variable.getRealType()) {
 			if @variables[name] is Array {
-				variable.setRealType(type)
+				variable = variable.setRealType(type)
+
+				@variables[name].push(@line, variable)
 			}
 			else {
 				variable = variable.clone().setRealType(type)

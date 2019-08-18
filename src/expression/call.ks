@@ -154,10 +154,10 @@ class CallExpression extends Expression {
 				}
 
 				if type is FunctionType {
-					this.makeCallee(type)
+					this.makeCallee(type, variable.name())
 				}
 				else if type is OverloadedFunctionType {
-					this.makeCallee(type)
+					this.makeCallee(type, variable.name())
 				}
 				else {
 					if substitute ?= variable.replaceCall?(@data, @arguments) {
@@ -305,22 +305,26 @@ class CallExpression extends Expression {
 
 		return false
 	} // }}}
-	makeCallee(type) { // {{{
+	makeCallee(type, name) { // {{{
 		switch type {
 			is FunctionType => {
-				if type.isExhaustive(this) && !type.matchArguments([argument.type() for argument in @arguments]) {
-					ReferenceException.throwNoMatchingFunction(this)
+				const arguments = [argument.type() for argument in @arguments]
+
+				if type.isExhaustive(this) && !type.matchArguments(arguments) {
+					ReferenceException.throwNoMatchingFunction(name, arguments, this)
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, type, this))
 				}
 			}
 			is OverloadedFunctionType => {
-				const matches = Router.matchArguments(type.assessment(), [argument.type() for argument in @arguments])
+				const arguments = [argument.type() for argument in @arguments]
+
+				const matches = Router.matchArguments(type.assessment(), arguments)
 
 				if matches.length == 0 {
 					if type.isExhaustive(this) {
-						ReferenceException.throwNoMatchingFunction(this)
+						ReferenceException.throwNoMatchingFunction(name, arguments, this)
 					}
 					else {
 						this.addCallee(new DefaultCallee(@data, @object, this))
@@ -379,7 +383,7 @@ class CallExpression extends Expression {
 
 					if union.length() == 0 {
 						if value.isExhaustiveClassMethod(@property, this) {
-							ReferenceException.throwNoMatchingMethod(@property, name:NamedType.name(), this)
+							ReferenceException.throwNoMatchingMethod(@property, name:NamedType.name(), arguments, this)
 						}
 						else if sealed {
 							this.addCallee(new SealedMethodCallee(@data, name, false, this))
@@ -398,7 +402,7 @@ class CallExpression extends Expression {
 					}
 				}
 				else if value.isExhaustive(this) {
-					ReferenceException.throwNoMatchingMethod(@property, name:NamedType.name(), this)
+					ReferenceException.throwNotFoundMethod(@property, name:NamedType.name(), this)
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, this))
@@ -429,10 +433,10 @@ class CallExpression extends Expression {
 			is ObjectType => {
 				if const property = value.getProperty(@property) {
 					if property is FunctionType {
-						this.makeCallee(property)
+						this.makeCallee(property, @property)
 					}
 					else if property is OverloadedFunctionType {
-						this.makeCallee(property)
+						this.makeCallee(property, @property)
 					}
 					else {
 						this.addCallee(new DefaultCallee(@data, @object, property, this))
@@ -491,7 +495,7 @@ class CallExpression extends Expression {
 
 					if union.length() == 0 {
 						if value.isExhaustiveInstanceMethod(@property, this) {
-							ReferenceException.throwNoMatchingMethod(@property, reference.name(), this)
+							ReferenceException.throwNoMatchingMethod(@property, reference.name(), arguments, this)
 						}
 						else if sealed {
 							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, this))
@@ -528,7 +532,7 @@ class CallExpression extends Expression {
 						this.addCallee(new DefaultCallee(@data, @object, this))
 					}
 					else if reference.isExhaustive(this) {
-						ReferenceException.throwNoMatchingMethod(@property, reference.name(), this)
+						ReferenceException.throwNotFoundMethod(@property, reference.name(), this)
 					}
 					else {
 						this.addCallee(new DefaultCallee(@data, @object, this))
@@ -563,11 +567,11 @@ class CallExpression extends Expression {
 				this.addCallee(new SealedFunctionCallee(@data, name, property, property.returnType(), this))
 			}
 			else {
-				this.makeCallee(property)
+				this.makeCallee(property, @property)
 			}
 		}
 		else if property is OverloadedFunctionType {
-			this.makeCallee(property)
+			this.makeCallee(property, @property)
 		}
 		else {
 			this.addCallee(new DefaultCallee(@data, @object, property, this))

@@ -111,6 +111,15 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorAnd extends PolyadicOperatorExpression {
+	prepare() { // {{{
+		for operand in @operands {
+			operand.prepare()
+
+			for const data, name of operand.inferTypes() when !data.type.isAny() {
+				@scope.updateInferable(name, data, this)
+			}
+		}
+	} // }}}
 	inferTypes() { // {{{
 		const inferables = {}
 
@@ -125,9 +134,26 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	inferContraryTypes() { // {{{
 		const inferables = {}
 
-		for const operand in @operands {
+		const last = @operands.length - 1
+
+		const operandTypes = [null]
+		for const operand in @operands til last {
+			operandTypes.push(operand.inferContraryTypes())
+		}
+
+		for const operand in @operands[last] {
 			for const data, name of operand.inferContraryTypes() {
-				inferables[name] = data
+				let nf = false
+
+				for const index from 0 til @operands.length until nf {
+					if !?operandTypes[index][name] {
+						nf = true
+					}
+				}
+
+				if !nf {
+					inferables[name] = data
+				}
 			}
 		}
 
@@ -442,20 +468,30 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	inferContraryTypes() { // {{{
 		const inferables = {}
 
+		const operandTypes = [null]
+		for const operand in @operands from 1 {
+			operandTypes.push(operand.inferTypes())
+		}
+
 		for const data, name of @operands[0].inferContraryTypes() {
 			if !data.type.isAny() {
-				for const operand in @operands from 1 {
-					const types = operand.inferContraryTypes()
+				let type = data.type
+
+				for const index from 1 til @operands.length {
+					const types = operandTypes[index]
 
 					if types[name]? && !types[name].type.isAny() {
-						data.type = Type.union(@scope, data.type, types[name].type)
+						type = type.reduce(types[name].type)
 					}
 					else {
 						break
 					}
 				}
 
-				inferables[name] = data
+				inferables[name] = {
+					isVariable: data.isVariable
+					type
+				}
 			}
 		}
 

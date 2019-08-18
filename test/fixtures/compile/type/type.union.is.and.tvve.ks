@@ -1,0 +1,14 @@
+class Foobar {
+}
+
+func foobar(x: Foobar | String | Number, y, z) {
+	if x is String && y == 0 && z == 0 {
+		x = new Foobar()
+	}
+
+	quxbaz(x)
+}
+
+func quxbaz(x: Foobar) {
+
+}

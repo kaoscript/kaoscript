@@ -37,7 +37,7 @@ module.exports = function() {
 				foo = null;
 			}
 			else if(foo !== null && !Type.is(foo, Foo)) {
-				throw new TypeError("'foo' is not of type 'Foo'");
+				throw new TypeError("'foo' is not of type 'Foo?'");
 			}
 			this._foo = foo;
 		}

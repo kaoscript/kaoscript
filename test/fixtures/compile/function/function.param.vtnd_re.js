@@ -6,7 +6,7 @@ module.exports = function(expect) {
 			let x;
 			if(arguments.length > 0 && (x = arguments[++__ks_i]) !== void 0) {
 				if(x !== null && !Type.isNumber(x)) {
-					throw new TypeError("'x' is not of type 'Number'");
+					throw new TypeError("'x' is not of type 'Number?'");
 				}
 			}
 			else {

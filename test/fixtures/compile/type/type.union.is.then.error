@@ -1,0 +1,1 @@
+ReferenceException: The function "quxbaz" can't be matched to given arguments (String) (line 6, file "fixtures/compile/type/type.union.is.then.ks")

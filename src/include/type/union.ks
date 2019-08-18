@@ -23,6 +23,12 @@ class UnionType extends Type {
 	}
 	constructor(@scope, @types = [], @explicit = true) { // {{{
 		super(scope)
+
+		for const type in @types until @nullable {
+			if type.isNullable() {
+				@nullable = true
+			}
+		}
 	} // }}}
 	addType(type: Type) { // {{{
 		if @any {
@@ -38,6 +44,11 @@ class UnionType extends Type {
 			@any = true
 			@nullable = type.isNullable()
 		}
+		else if type.isUnion() {
+			for const type in type.discardAlias().types() {
+				this.addType(type)
+			}
+		}
 		else {
 			let notMatched = true
 
@@ -49,6 +60,10 @@ class UnionType extends Type {
 
 			if notMatched {
 				@types.push(type)
+
+				if !@nullable && type.isNullable() {
+					@nullable = true
+				}
 			}
 		}
 	} // }}}
@@ -142,17 +157,26 @@ class UnionType extends Type {
 		return match == @types.length
 	} // }}}
 	isMorePreciseThan(that: Type) { // {{{
-		return that is UnionType && @types.length < that._types.length
-	} // }}}
-	isNullable() { // {{{
-		for type in @types {
-			if type.isNullable() {
+		if that is ReferenceType {
+			if !@nullable && that.isNullable() {
 				return true
 			}
+
+			that = that.discardAlias()
+		}
+
+		if that is UnionType {
+			if !@nullable && that.isNullable() {
+				return true
+			}
+
+			return @types.length < that.types().length
 		}
 
 		return false
 	} // }}}
+	isNullable() => @nullable
+	isUnion() => true
 	length() => @types.length
 	matchContentOf(that: Type) { // {{{
 		if @explicit {
@@ -174,14 +198,30 @@ class UnionType extends Type {
 			return false
 		}
 	} // }}}
+	reduce(type: Type) { // {{{
+		const types = [t for const t in @types when !t.matchContentOf(type)]
+
+		if types.length == 1 {
+			return types[0]
+		}
+		else {
+			return Type.union(@scope, ...types)
+		}
+	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toQuote(): String { // {{{
+	toQuote() => [type.toQuote() for const type in @types].join('|')
+	toQuote(double: Boolean): String { // {{{
 		const elements = [type.toQuote() for type in @types]
 		const last = elements.pop()
 
-		return `\(elements.join(', ')) or \(last)`
+		if double {
+			return `"\(elements.join(`", "`))" or "\(last)"`
+		}
+		else {
+			return `'\(elements.join(`', '`))' or '\(last)'`
+		}
 	} // }}}
 	toReference(references, mode) => this.export(references, mode)
 	toTestFragments(fragments, node) { // {{{

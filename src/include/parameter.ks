@@ -540,18 +540,18 @@ class Parameter extends AbstractNode {
 			ParameterWrongDoing::BadType => {
 				if data.name? {
 					if data.async {
-						fragments.line(`return __ks_cb(new TypeError("'\(data.name)' is not of type \(data.type.toQuote())"))`)
+						fragments.line(`return __ks_cb(new TypeError("'\(data.name)' is not of type \(data.type.toQuote(false))"))`)
 					}
 					else {
-						fragments.line(`throw new TypeError("'\(data.name)' is not of type \(data.type.toQuote())")`)
+						fragments.line(`throw new TypeError("'\(data.name)' is not of type \(data.type.toQuote(false))")`)
 					}
 				}
 				else {
 					if data.async {
-						fragments.line(`return __ks_cb(new TypeError("anonymous argument is not of type \(data.type.toQuote())"))`)
+						fragments.line(`return __ks_cb(new TypeError("anonymous argument is not of type \(data.type.toQuote(false))"))`)
 					}
 					else {
-						fragments.line(`throw new TypeError("anonymous argument is not of type \(data.type.toQuote())")`)
+						fragments.line(`throw new TypeError("anonymous argument is not of type \(data.type.toQuote(false))")`)
 					}
 				}
 			}

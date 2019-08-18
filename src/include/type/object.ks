@@ -80,9 +80,6 @@ class ObjectType extends Type {
 
 		return true
 	} // }}}
-	toQuote() { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}

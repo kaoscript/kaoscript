@@ -1213,9 +1213,6 @@ class ClassType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toQuote(): String { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	toReference(references, mode) { // {{{
 		if @alteration && !@explicitlyExported {
 			return @alterationReference.toReference(references, mode)
@@ -1303,7 +1300,7 @@ class ClassVariableType extends Type {
 		return false
 	} // }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	toQuote() => @type.toQuote()
+	toQuote(...args) => @type.toQuote(...args)
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
 	type() => @type
 	unflagAlteration() { // {{{

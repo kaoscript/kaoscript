@@ -53,7 +53,7 @@ class ParameterType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toQuote() => @type.toQuote()
+	toQuote(...args) => @type.toQuote(...args)
 	toTestFragments(fragments, node) { // {{{
 		@type.toTestFragments(fragments, node)
 	} // }}}

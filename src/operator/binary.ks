@@ -129,11 +129,10 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 	inferContraryTypes() { // {{{
 		const inferables = {}
 
-		for const data, name of @left.inferContraryTypes() {
-			inferables[name] = data
-		}
-		for const data, name of @right.inferContraryTypes() {
-			inferables[name] = data
+		const rightTypes = @right.inferContraryTypes()
+
+		for const :name of @left.inferContraryTypes() when rightTypes[name]? {
+			inferables[name] = rightTypes[name]
 		}
 
 		return inferables
@@ -354,17 +353,16 @@ class BinaryOperatorOr extends BinaryOperatorExpression {
 	inferContraryTypes() { // {{{
 		const inferables = {}
 
-		const right = @right.inferContraryTypes()
+		const right = @right.inferTypes()
 
 		for const data, name of @left.inferContraryTypes() {
 			if right[name]? {
 				const rtype = right[name].type
 
 				if !data.type.isAny() && !rtype.isAny() {
-					inferables[name] = data
-
-					if !data.type.equals(rtype) {
-						inferables[name].type = Type.union(@scope, data.type, rtype)
+					inferables[name] = {
+						isVariable: data.isVariable
+						type: data.type.reduce(rtype)
 					}
 				}
 			}
@@ -446,8 +444,9 @@ class BinaryOperatorTypeCasting extends Expression {
 
 class BinaryOperatorTypeEquality extends Expression {
 	private {
+		_falseType: Type
 		_left
-		_type: Type
+		_trueType: Type
 	}
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
@@ -460,16 +459,22 @@ class BinaryOperatorTypeEquality extends Expression {
 			if const variable = @scope.getVariable(@data.right.typeName.name) {
 				const type = variable.getRealType()
 
-				if type.isClass() {
-					if (!@left.type().isAny() && !type.matchContentOf(@left.type())) || @left.type().isNull() {
-						TypeException.throwInvalidTypeChecking(this)
-					}
-				}
-				else if !type.isAny() {
+				unless type.isClass() {
 					TypeException.throwNotClass(variable.name(), this)
 				}
 
-				@type = Type.fromAST(@data.right, this)
+				if @left.type().isNull() {
+					TypeException.throwNullTypeChecking(type, this)
+				}
+				else if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
+					TypeException.throwInvalidTypeChecking(@left.type(), type, this)
+				}
+
+				@trueType = type.reference()
+
+				if @left.isInferable() {
+					@falseType = @left.type().reduce(type)
+				}
 			}
 			else {
 				ReferenceException.throwNotDefined(@data.right.typeName.name, this)
@@ -489,7 +494,19 @@ class BinaryOperatorTypeEquality extends Expression {
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
-				type: @type
+				type: @trueType
+			}
+		}
+
+		return inferables
+	} // }}}
+	inferContraryTypes() { // {{{
+		const inferables = {}
+
+		if @left.isInferable() {
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type: @falseType
 			}
 		}
 
@@ -499,15 +516,16 @@ class BinaryOperatorTypeEquality extends Expression {
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
-		@type.toTestFragments(fragments, @left)
+		@trueType.toTestFragments(fragments, @left)
 	} // }}}
 	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorTypeInequality extends Expression {
 	private {
+		_falseType: Type
 		_left
-		_type: Type
+		_trueType: Type
 	}
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
@@ -520,16 +538,22 @@ class BinaryOperatorTypeInequality extends Expression {
 			if variable ?= @scope.getVariable(@data.right.typeName.name) {
 				type = variable.getRealType()
 
-				if type.isClass() {
-					if !@left.type().isAny() && (!type.matchContentOf(@left.type()) || type.matchClassName(@left.type())) {
-						TypeException.throwInvalidTypeChecking(this)
-					}
-				}
-				else if !type.isAny() {
+				unless type.isClass() {
 					TypeException.throwNotClass(variable.name(), this)
 				}
 
-				@type = Type.fromAST(@data.right, this)
+				if @left.type().isNull() {
+					TypeException.throwNullTypeChecking(type, this)
+				}
+				else if !@left.type().isAny() && (!type.matchContentOf(@left.type()) || type.matchClassName(@left.type())) {
+					TypeException.throwUnnecessaryTypeChecking(type, this)
+				}
+
+				@falseType = type.reference()
+
+				if @left.isInferable() {
+					@trueType = @left.type().reduce(type)
+				}
 			}
 			else {
 				ReferenceException.throwNotDefined(@data.right.typeName.name, this)
@@ -546,34 +570,34 @@ class BinaryOperatorTypeInequality extends Expression {
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)
+	inferTypes() { // {{{
+		const inferables = {}
+
+		if @left.isInferable() {
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type: @trueType
+			}
+		}
+
+		return inferables
+	} // }}}
 	inferContraryTypes() { // {{{
 		const inferables = {}
 
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
-				type: @type
+				type: @falseType
 			}
 		}
 
 		return inferables
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @data.right.kind == NodeKind::TypeReference {
-			fragments.code('!')
+		fragments.code('!')
 
-			@type.toTestFragments(fragments, @left)
-		}
-		else if @data.right.types? {
-			fragments.code('!(')
-
-			@type.toTestFragments(fragments, @left)
-
-			fragments.code(')')
-		}
-		else {
-			throw new NotImplementedException(this)
-		}
+		@falseType.toTestFragments(fragments, @left)
 	} // }}}
 	type() => @scope.reference('Boolean')
 }

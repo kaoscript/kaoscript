@@ -1,1 +1,1 @@
-ReferenceException: Constructor of class "Shape" can't be matched to given arguments (line 7, file "fixtures/compile/import/import.sealed.alias.all.typed.ks")
+ReferenceException: The constructor of class "Shape" can't be matched to given arguments (String) (line 7, file "fixtures/compile/import/import.sealed.alias.all.typed.ks")

@@ -43,7 +43,7 @@ module.exports = function() {
 				fileName = null;
 			}
 			else if(fileName !== null && !Type.isString(fileName)) {
-				throw new TypeError("'fileName' is not of type 'String'");
+				throw new TypeError("'fileName' is not of type 'String?'");
 			}
 			if(lineNumber === void 0 || lineNumber === null) {
 				throw new TypeError("'lineNumber' is not nullable");

@@ -32,11 +32,15 @@ class IfStatement extends Statement {
 			@condition.analyse()
 		}
 
+		@scope.line(@data.whenTrue.start.line)
+
 		@whenTrueExpression = $compile.block(@data.whenTrue, this, @whenTrueScope)
 		@whenTrueExpression.analyse()
 
 		if @data.whenFalse? {
 			@whenFalseScope = this.newScope(@scope, ScopeType::InlineBlock)
+
+			@scope.line(@data.whenFalse.start.line)
 
 			if @data.whenFalse.kind == NodeKind::IfStatement {
 				@whenFalseExpression = $compile.statement(@data.whenFalse, this, @whenFalseScope)
@@ -45,8 +49,6 @@ class IfStatement extends Statement {
 			else {
 				@whenFalseExpression = $compile.block(@data.whenFalse, this, @whenFalseScope)
 				@whenFalseExpression.analyse()
-
-
 			}
 		}
 	} // }}}
@@ -67,9 +69,13 @@ class IfStatement extends Statement {
 
 		this.assignTempVariables(@bindingScope)
 
+		@scope.line(@data.whenTrue.start.line)
+
 		@whenTrueExpression.prepare()
 
 		if @whenFalseExpression == null {
+			@scope.line(@data.end.line)
+
 			if !@declared {
 				if @whenTrueExpression.isExit() {
 					for const data, name of @condition.inferContraryTypes() {
@@ -104,7 +110,11 @@ class IfStatement extends Statement {
 				}
 			}
 
+			@scope.line(@data.whenFalse.start.line)
+
 			@whenFalseExpression.prepare()
+
+			@scope.line(@data.end.line)
 
 			if @whenTrueExpression.isExit() {
 				for const data, name of @whenFalseScope.listUpdatedInferables() {

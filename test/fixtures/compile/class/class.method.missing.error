@@ -1,1 +1,1 @@
-ReferenceException: The method "foo" of the class "Foobar" can't be matched to given arguments (line 8, file "fixtures/compile/class/class.method.missing.ks")
+ReferenceException: The method "foo" can't be found in the class "Foobar" (line 8, file "fixtures/compile/class/class.method.missing.ks")

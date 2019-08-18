@@ -83,9 +83,6 @@ class EnumType extends Type {
 		return false
 	} // }}}
 	step() => ++@index
-	toQuote() { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}

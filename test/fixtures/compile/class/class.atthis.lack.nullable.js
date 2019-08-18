@@ -9,7 +9,7 @@ module.exports = function() {
 		}
 		__ks_cons_0(message = "Hello!") {
 			if(message !== null && !Type.isString(message)) {
-				throw new TypeError("'message' is not of type 'String'");
+				throw new TypeError("'message' is not of type 'String?'");
 			}
 			this._message = message;
 		}

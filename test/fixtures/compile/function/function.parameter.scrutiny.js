@@ -47,13 +47,13 @@ module.exports = function() {
 			x = null;
 		}
 		else if(x !== null && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'String'");
+			throw new TypeError("'x' is not of type 'String?'");
 		}
 		console.log(x);
 	}
 	function grault(x = null) {
 		if(x !== null && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'String'");
+			throw new TypeError("'x' is not of type 'String?'");
 		}
 		console.log(x);
 	}
@@ -68,13 +68,13 @@ module.exports = function() {
 	}
 	function waldo(x = null) {
 		if(x !== null && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'String'");
+			throw new TypeError("'x' is not of type 'String?'");
 		}
 		console.log(x);
 	}
 	function fred(x = "foobar") {
 		if(x !== null && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'String'");
+			throw new TypeError("'x' is not of type 'String?'");
 		}
 		console.log(x);
 	}

@@ -241,6 +241,7 @@ class ReferenceType extends Type {
 	isRequired() => this.type().isRequired()
 	isString() => @name == 'String' || @name == 'string'
 	isVoid() => @name == 'Void' || @name == 'void'
+	isUnion() => this.type().isUnion()
 	matchContentOf(that: Type) { // {{{
 		if this == that {
 			return true
@@ -370,7 +371,14 @@ class ReferenceType extends Type {
 
 		return @referenceIndex
 	} // }}}
-	toQuote() => `'\(@name)'`
+	toQuote() { // {{{
+		if @nullable {
+			return `\(@name)?`
+		}
+		else {
+			return @name
+		}
+	} // }}}
 	toReference(references, mode) { // {{{
 		this.resolveType()
 

@@ -1,0 +1,1 @@
+ReferenceException: The function "quxbaz" can't be matched to given arguments (String) (line 9, file "fixtures/compile/type/type.union.isnt.nelse.return.ks")

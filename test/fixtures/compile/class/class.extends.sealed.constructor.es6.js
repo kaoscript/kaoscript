@@ -31,7 +31,7 @@ module.exports = function() {
 					fileName = null;
 				}
 				else if(fileName !== null && !Type.isString(fileName)) {
-					throw new TypeError("'fileName' is not of type 'String'");
+					throw new TypeError("'fileName' is not of type 'String?'");
 				}
 				let lineNumber = __ks_arguments[++__ks_i];
 				if(lineNumber === void 0 || lineNumber === null) {

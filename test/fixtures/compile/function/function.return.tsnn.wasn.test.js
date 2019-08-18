@@ -8,7 +8,7 @@ module.exports = function() {
 			foobar = null;
 		}
 		else if(foobar !== null && !Type.isString(foobar)) {
-			throw new TypeError("'foobar' is not of type 'String'");
+			throw new TypeError("'foobar' is not of type 'String?'");
 		}
 		if(Type.isValue(foobar)) {
 			return foobar;

@@ -209,9 +209,6 @@ class NamespaceType extends Type {
 	setAlterationReference(@alterationReference) { // {{{
 		@alteration = true
 	} // }}}
-	toQuote() { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
@@ -317,7 +314,7 @@ class NamespacePropertyType extends Type {
 		}
 	} // }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	toQuote() => @type.toQuote()
+	toQuote(...args) => @type.toQuote(...args)
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
 	type() => @type
 }

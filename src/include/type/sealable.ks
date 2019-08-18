@@ -53,7 +53,7 @@ class SealableType extends Type {
 		}
 	} // }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	toQuote() => @type.toQuote()
+	toQuote(...args) => @type.toQuote(...args)
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
 	type() => @type
 }

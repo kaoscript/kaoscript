@@ -1,1 +1,1 @@
-ReferenceException: Function can't be matched to given arguments (line 9, file "fixtures/compile/namespace/namespace.func.nooverload.ks")
+ReferenceException: The function "reverse" can't be matched to given arguments (String, Number) (line 9, file "fixtures/compile/namespace/namespace.func.nooverload.ks")

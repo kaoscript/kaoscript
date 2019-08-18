@@ -9,7 +9,7 @@ class OperationScope extends InlineBlockScope {
 			}
 
 			if !type.matchContentOf(variable.getDeclaredType()) {
-				TypeException.throwInvalidAssignement(node)
+				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
 			}
 		}
 

@@ -74,7 +74,7 @@ module.exports = function() {
 				name = null;
 			}
 			else if(name !== null && !Type.isString(name)) {
-				throw new TypeError("'name' is not of type 'String'");
+				throw new TypeError("'name' is not of type 'String?'");
 			}
 			if(data === void 0 || data === null) {
 				throw new TypeError("'data' is not nullable");

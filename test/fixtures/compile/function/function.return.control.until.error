@@ -1,1 +1,1 @@
-TypeException: Expected returned type 'String' (line 3, file "fixtures/compile/function/function.return.control.until.ks")
+TypeException: Expected returned type "String" (line 3, file "fixtures/compile/function/function.return.control.until.ks")

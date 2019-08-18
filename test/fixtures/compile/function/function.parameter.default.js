@@ -26,7 +26,7 @@ module.exports = function() {
 	}
 	function quux(item = 1) {
 		if(item !== null && !Type.isNumber(item)) {
-			throw new TypeError("'item' is not of type 'Number'");
+			throw new TypeError("'item' is not of type 'Number?'");
 		}
 		console.log(item);
 	}

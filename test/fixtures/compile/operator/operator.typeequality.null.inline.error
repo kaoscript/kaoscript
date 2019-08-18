@@ -1,1 +1,1 @@
-TypeException: Type checking has incompatible type (line 3, file "fixtures/compile/operator/operator.typeequality.null.inline.ks")
+TypeException: The variable is "null" and can't be checked against the type "Array" (line 3, file "fixtures/compile/operator/operator.typeequality.null.inline.ks")

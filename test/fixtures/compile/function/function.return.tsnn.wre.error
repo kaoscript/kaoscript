@@ -1,1 +1,1 @@
-TypeException: Expected returned type 'String' (line 2, file "fixtures/compile/function/function.return.tsnn.wre.ks")
+TypeException: Expected returned type "String" (line 2, file "fixtures/compile/function/function.return.tsnn.wre.ks")

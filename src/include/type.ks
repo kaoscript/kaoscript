@@ -60,6 +60,13 @@ enum MatchingMode {
 	SimilarReturn
 }
 
+#[flags]
+enum QuoteMode {
+	None
+	Double
+	Single
+}
+
 enum TypeKind<String> {
 	Alias
 	Array
@@ -452,7 +459,6 @@ abstract class Type {
 	abstract clone(): Type
 	abstract equals(b?): Boolean
 	abstract export(references, mode)
-	abstract toQuote(): String
 	abstract toFragments(fragments, node)
 	abstract toTestFragments(fragments, node)
 	condense(): Type => this
@@ -539,9 +545,11 @@ abstract class Type {
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
 	isString() => false
+	isUnion() => false
 	isVoid() => false
 	matchContentOf(that: Type?): Boolean => this.equals(that)
 	matchSignatureOf(that: Type, matchables): Boolean => false
+	reduce(type: Type) => this
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
 	scope() => @scope
@@ -579,6 +587,17 @@ abstract class Type {
 		}
 
 		return @referenceIndex
+	} // }}}
+	toQuote(): String { // {{{
+		throw new NotSupportedException()
+	} // }}}
+	toQuote(double: Boolean): String { // {{{
+		if double {
+			return `"\(this.toQuote())"`
+		}
+		else {
+			return `'\(this.toQuote())'`
+		}
 	} // }}}
 	toReference(references, mode) => { // {{{
 		reference: this.toMetadata(references, mode)

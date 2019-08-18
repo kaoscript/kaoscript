@@ -3,7 +3,7 @@ module.exports = function(expect) {
 	let foo = (function() {
 		return function(x = null) {
 			if(x !== null && !Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
+				throw new TypeError("'x' is not of type 'Number?'");
 			}
 			return [x];
 		};

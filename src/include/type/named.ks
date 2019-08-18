@@ -91,35 +91,6 @@ class NamedType extends Type {
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
 	isHybrid() => @type.isHybrid()
-	isMorePreciseThan(that: Type) { // {{{
-		if that is NamedType {
-			if this.isClass() && that.isClass() {
-				return @name != that.name() && this.matchInheritanceOf(that)
-			}
-			else if that.isAlias() {
-				return this.isMorePreciseThan(that.discardAlias())
-			}
-		}
-		else if that is UnionType {
-			for const type in that.types() {
-				if this.matchContentOf(type) {
-					return true
-				}
-			}
-
-			return false
-		}
-
-		return false
-	} // }}}
-	isNative() => $natives[@name] == true
-	isNullable() => @type.isNullable()
-	isPredefined() => @type.isPredefined()
-	isReferenced() => @type.isReferenced()
-	isRequired() => @type.isRequired()
-	isSealable() => @type.isSealable()
-	isSealed() => @type.isSealed()
-	isSealedAlien() => @type.isSealedAlien()
 	isMatching(value: Type, mode: MatchingMode) { // {{{
 		if this == value {
 			return true
@@ -175,8 +146,38 @@ class NamedType extends Type {
 			}
 		}
 	} // }}}
+	isMorePreciseThan(that: Type) { // {{{
+		if that is NamedType {
+			if this.isClass() && that.isClass() {
+				return @name != that.name() && this.matchInheritanceOf(that)
+			}
+			else if that.isAlias() {
+				return this.isMorePreciseThan(that.discardAlias())
+			}
+		}
+		else if that is UnionType {
+			for const type in that.types() {
+				if this.matchContentOf(type) {
+					return true
+				}
+			}
+
+			return false
+		}
+
+		return false
+	} // }}}
 	isNamed() => true
 	isNamespace() => @type.isNamespace()
+	isNative() => $natives[@name] == true
+	isNullable() => @type.isNullable()
+	isPredefined() => @type.isPredefined()
+	isReferenced() => @type.isReferenced()
+	isRequired() => @type.isRequired()
+	isSealable() => @type.isSealable()
+	isSealed() => @type.isSealed()
+	isSealedAlien() => @type.isSealedAlien()
+	isUnion() => @type.isUnion()
 	matchClassName(that: Type?) { // {{{
 		if that == null {
 			return false

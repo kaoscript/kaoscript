@@ -1,1 +1,1 @@
-TypeException: Expected returned type 'String' (line 9, file "fixtures/compile/function/function.return.control.if.elif.false.ks")
+TypeException: Expected returned type "String" (line 9, file "fixtures/compile/function/function.return.control.if.elif.false.ks")

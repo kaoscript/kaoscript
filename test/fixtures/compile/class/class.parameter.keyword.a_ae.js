@@ -22,7 +22,7 @@ module.exports = function() {
 				__ks_class_1 = null;
 			}
 			else if(__ks_class_1 !== null && !Type.isString(__ks_class_1)) {
-				throw new TypeError("'class' is not of type 'String'");
+				throw new TypeError("'class' is not of type 'String?'");
 			}
 			let __ks_default_1;
 			if(arguments.length > 1 && (__ks_default_1 = arguments[++__ks_i]) !== void 0 && __ks_default_1 !== null) {

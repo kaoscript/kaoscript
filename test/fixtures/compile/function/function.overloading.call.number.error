@@ -1,1 +1,1 @@
-ReferenceException: Function can't be matched to given arguments (line 4, file "fixtures/compile/function/function.overloading.call.number.ks")
+ReferenceException: The function "reverse" can't be matched to given arguments (Number) (line 4, file "fixtures/compile/function/function.overloading.call.number.ks")

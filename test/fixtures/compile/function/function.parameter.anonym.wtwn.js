@@ -11,7 +11,7 @@ module.exports = function() {
 		}
 		let __ks_0 = arguments[++__ks_i];
 		if(__ks_0 !== null && !Type.isObject(__ks_0)) {
-			throw new TypeError("anonymous argument is not of type 'Object'");
+			throw new TypeError("anonymous argument is not of type 'Object?'");
 		}
 		let name;
 		if(arguments.length > 2 && (name = arguments[++__ks_i]) !== void 0 && name !== null) {

@@ -57,6 +57,7 @@ class AnyType extends Type {
 	matchContentOf(b) => !@explicit || (b.isAny() && (@nullable -> !b.isNullable()))
 	matchSignatureOf(b, matchables) => b.isAny()
 	parameter() => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+	reference() => this
 	setNullable(nullable: Boolean): Type { // {{{
 		let type
 
@@ -78,7 +79,7 @@ class AnyType extends Type {
 		fragments.code('Any')
 	} // }}}
 	toMetadata(references, mode) => -1
-	toQuote(): String => `'Any'`
+	toQuote(): String => `Any`
 	toReference(references, mode) => 'Any'
 	toTestFragments(fragments, node) { // {{{
 		throw new NotSupportedException(node)

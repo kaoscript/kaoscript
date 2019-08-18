@@ -556,9 +556,6 @@ class FunctionType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toQuote(): String { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
@@ -768,9 +765,6 @@ class OverloadedFunctionType extends Type {
 		}
 
 		return false
-	} // }}}
-	toQuote() { // {{{
-		throw new NotImplementedException()
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()

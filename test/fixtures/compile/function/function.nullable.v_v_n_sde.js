@@ -18,7 +18,7 @@ module.exports = function() {
 			z = null;
 		}
 		else if(z !== null && !Type.isString(z)) {
-			throw new TypeError("'z' is not of type 'String'");
+			throw new TypeError("'z' is not of type 'String?'");
 		}
 		let d;
 		if(arguments.length > 3 && (d = arguments[++__ks_i]) !== void 0 && d !== null) {

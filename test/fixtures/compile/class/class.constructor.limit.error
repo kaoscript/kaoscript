@@ -1,1 +1,1 @@
-ReferenceException: Constructor of class "Point3D" can't be matched to given arguments (line 18, file "fixtures/compile/class/class.constructor.limit.ks")
+ReferenceException: The constructor of class "Point3D" can't be matched to given arguments (Number, Number) (line 18, file "fixtures/compile/class/class.constructor.limit.ks")

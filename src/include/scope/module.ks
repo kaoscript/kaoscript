@@ -422,7 +422,7 @@ class ModuleScope extends Scope {
 			}
 
 			if !type.matchContentOf(variable.getDeclaredType()) {
-				TypeException.throwInvalidAssignement(node)
+				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
 			}
 		}
 

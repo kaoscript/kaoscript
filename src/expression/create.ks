@@ -35,8 +35,12 @@ class CreateExpression extends Expression {
 			if type.type().isAbstract() {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
-			else if !type.type().matchArguments([argument.type() for argument in @arguments]) {
-				ReferenceException.throwNoMatchingConstructor(type.name(), this)
+			else {
+				const arguments = [argument.type() for argument in @arguments]
+
+				if !type.type().matchArguments(arguments) {
+					ReferenceException.throwNoMatchingConstructor(type.name(), arguments, this)
+				}
 			}
 
 			@type = @scope.reference(type)
