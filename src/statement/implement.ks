@@ -538,6 +538,10 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@type = property.type()
 	} // }}}
 	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+
 		@block = $compile.block($ast.body(@data), this)
 		@block.analyse()
 

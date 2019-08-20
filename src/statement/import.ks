@@ -1,5 +1,17 @@
 extern process, require
 
+const $importExts = { // {{{
+	data: {
+		json: true
+	}
+	source: {
+		coffee: true
+		js: true
+		ks: true
+		ts: true
+	}
+} // }}}
+
 const $nodeModules = { // {{{
 	assert: true
 	buffer: true
@@ -565,20 +577,22 @@ class Importer extends Statement {
 
 		if @data.specifiers.length == 0 {
 			const parts = @data.source.value.split('/')
-			for const i from 0 til parts.length while @alias == null {
-				if !/(?:^\.+$|^@)/.test(parts[i]) {
-					const dots = parts[i].split('.')
-					const last = dots.length - 1
 
-					if last == 0 {
-						@alias = dots[0].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
-					}
-					else if dots[last].length <= 3 {
-						@alias = dots[last - 1].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
-					}
-					else {
-						@alias = dots[last].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
-					}
+			for const part in parts desc while @alias == null when !/(?:^\.+$|^@)/.test(part) {
+				const dots = part.split('.')
+				const last = dots.length - 1
+
+				if last == 0 {
+					@alias = dots[0].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
+				}
+				else if $importExts.data[dots[last]] == true {
+					@alias = dots.slice(0, last).join('.').replace(/[-_.]+(.)/g, (m, l) => l.toUpperCase())
+				}
+				else if $importExts.source[dots[last]] == true {
+					@alias = dots[last - 1].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
+				}
+				else {
+					@alias = dots[last].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
 				}
 			}
 
@@ -590,7 +604,7 @@ class Importer extends Statement {
 		}
 		else {
 			let type
-			for specifier in @data.specifiers {
+			for const specifier in @data.specifiers {
 				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
 					@alias = specifier.local.name
 
@@ -816,7 +830,7 @@ class Importer extends Statement {
 
 				this.toRequireFragments(line)
 
-				line.code(`.\(alias)`).done()
+				line.code(`.\(name)`).done()
 			}
 			else if @count > 0 {
 				if @options.format.destructuring == 'es5' {
@@ -980,7 +994,7 @@ class ImportWorker {
 			for i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
-				if (argument ?= arguments[name]) && !argument.required && !argument.type.matchSignatureOf(reqReferences[@metadata.requirements[i]], matchables) {
+				if (argument ?= arguments[name]) && !argument.required && !reqReferences[@metadata.requirements[i]].isAny() && !argument.type.matchSignatureOf(reqReferences[@metadata.requirements[i]], matchables) {
 					TypeException.throwNotCompatibleArgument(argument.name, name, @node.data().source.value, @node)
 				}
 			}

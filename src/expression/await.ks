@@ -38,6 +38,7 @@ class AwaitExpression extends Expression {
 	} // }}}
 	isAwait() => true
 	isAwaiting() => @awaiting
+	isUsingVariable(name) => @operation.isUsingVariable(name)
 	toAwaitExpressionFragments(fragments, statements) { // {{{
 		fragments.code(`(__ks_e, \(@reuseName)) =>`)
 

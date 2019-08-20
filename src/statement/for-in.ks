@@ -15,9 +15,11 @@ class ForInStatement extends Statement {
 		_expression
 		_expressionName: String
 		_from
+		_fromDesc: Boolean					= false
 		_immutable: Boolean					= false
 		_index								= null
 		_indexName: String
+		_isDesc: Boolean					= false
 		_loopTempVariables: Array			= []
 		_until
 		_useBreak: Boolean					= false
@@ -129,6 +131,13 @@ class ForInStatement extends Statement {
 
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
+
+		@isDesc = @data.desc == true
+		@fromDesc = @data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0
+
+		if @isDesc && @fromDesc {
+			@isDesc = @fromDesc = false
+		}
 	} // }}}
 	prepare() { // {{{
 		@expression.prepare()
@@ -293,7 +302,7 @@ class ForInStatement extends Statement {
 		||	@body.isUsingVariable(name)
 	// }}}
 	toBoundFragments(fragments) { // {{{
-		if @data.desc {
+		if @isDesc {
 			if @from? {
 				if @from is NumberLiteral && @from.value() < 0 {
 					fragments
@@ -311,52 +320,67 @@ class ForInStatement extends Statement {
 		}
 		else {
 			if @til? {
-				if @til is NumberLiteral && @til.value() < 0 {
-					fragments
-						.compile(@expressionName ?? @expression)
-						.code(`.length - \(-@til.value())`)
+				if @fromDesc {
+					fragments.compile(@til)
 				}
 				else {
-					fragments
-						.code('Math.min(')
-						.compile(@expressionName ?? @expression)
-						.code('.length, ')
-						.compile(@til)
-						.code(')')
-				}
-			}
-			else if @to? {
-				if @to is NumberLiteral {
-					if @to.value() < 0 {
+					if @til is NumberLiteral && @til.value() < 0 {
 						fragments
 							.compile(@expressionName ?? @expression)
-							.code(`.length - \(-@to.value() - 1)`)
+							.code(`.length - \(-@til.value())`)
 					}
 					else {
 						fragments
 							.code('Math.min(')
 							.compile(@expressionName ?? @expression)
-							.code(`.length, \(@to.value() + 1))`)
+							.code('.length, ')
+							.compile(@til)
+							.code(')')
 					}
 				}
+			}
+			else if @to? {
+				if @fromDesc {
+					fragments.compile(@to)
+				}
 				else {
-					fragments
-						.code('Math.min(')
-						.compile(@expressionName ?? @expression)
-						.code('.length, ')
-						.compile(@to)
-						.code(' + 1)')
+					if @to is NumberLiteral {
+						if @to.value() < 0 {
+							fragments
+								.compile(@expressionName ?? @expression)
+								.code(`.length - \(-@to.value() - 1)`)
+						}
+						else {
+							fragments
+								.code('Math.min(')
+								.compile(@expressionName ?? @expression)
+								.code(`.length, \(@to.value() + 1))`)
+						}
+					}
+					else {
+						fragments
+							.code('Math.min(')
+							.compile(@expressionName ?? @expression)
+							.code('.length, ')
+							.compile(@to)
+							.code(' + 1)')
+					}
 				}
 			}
 			else {
-				fragments
-					.compile(@expressionName ?? @expression)
-					.code('.length')
+				if @fromDesc {
+					fragments.code('0')
+				}
+				else {
+					fragments
+						.compile(@expressionName ?? @expression)
+						.code('.length')
+				}
 			}
 		}
 	} // }}}
 	toFromFragments(fragments) { // {{{
-		if @data.desc {
+		if @isDesc {
 			if @til? {
 				if @til is NumberLiteral && @til.value() < 0 {
 					fragments
@@ -383,14 +407,14 @@ class ForInStatement extends Statement {
 						fragments
 							.code('Math.min(')
 							.compile(@expressionName ?? @expression)
-							.code(`.length, \(@to.value()))`)
+							.code(`.length - 1, \(@to.value()))`)
 					}
 				}
 				else {
 					fragments
 						.code('Math.min(')
 						.compile(@expressionName ?? @expression)
-						.code('.length, ')
+						.code('.length - 1, ')
 						.compile(@to)
 						.code(')')
 				}
@@ -402,19 +426,34 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if @from? {
-				if @from is NumberLiteral && @from.value() < 0 {
+			if @fromDesc {
+				if @from? {
 					fragments
-						.code('Math.max(0, ')
+						.code('Math.min(')
 						.compile(@expressionName ?? @expression)
-						.code(`.length - \(-@from.value()))`)
+						.code(`.length - 1, `)
+						.compile(@from)
+						.code(`)`)
 				}
 				else {
-					fragments.compile(@from)
+					fragments.compile(@expressionName ?? @expression).code('.length - 1')
 				}
 			}
 			else {
-				fragments.code('0')
+				if @from? {
+					if @from is NumberLiteral && @from.value() < 0 {
+						fragments
+							.code('Math.max(0, ')
+							.compile(@expressionName ?? @expression)
+							.code(`.length - \(-@from.value()))`)
+					}
+					else {
+						fragments.compile(@from)
+					}
+				}
+				else {
+					fragments.code('0')
+				}
 			}
 		}
 	} // }}}
@@ -463,7 +502,7 @@ class ForInStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if @data.desc {
+		if @isDesc || @fromDesc {
 			ctrl
 				.compile(@indexName ?? @index)
 				.code(' >= ' + @boundName)
@@ -485,30 +524,41 @@ class ForInStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if @data.by {
-			if @data.by.kind == NodeKind::NumericExpression {
-				if @data.by.value == 1 {
-					ctrl.code('++').compile(@indexName ?? @index)
-				}
-				else if @data.by.value == -1 {
-					ctrl.code('--').compile(@indexName ?? @index)
-				}
-				else if @data.by.value >= 0 {
-					ctrl.compile(@indexName ?? @index).code(' += ').compile(@by)
+		if @isDesc || @fromDesc {
+			if @data.by {
+				if @data.by.kind == NodeKind::NumericExpression {
+					if Math.abs(@data.by.value) == 1 {
+						ctrl.code('--').compile(@indexName ?? @index)
+					}
+					else {
+						ctrl.compile(@indexName ?? @index).code(' -= ', Math.abs(@data.by.value))
+					}
 				}
 				else {
-					ctrl.compile(@indexName ?? @index).code(' -= ', -@data.by.value)
+					ctrl.compile(@indexName ?? @index).code(' -= ').compile(@byName ?? @by)
 				}
 			}
 			else {
-				ctrl.compile(@indexName ?? @index).code(' += ').compile(@byName ?? @by)
+				ctrl.code('--').compile(@indexName ?? @index)
 			}
 		}
-		else if @data.desc {
-			ctrl.code('--').compile(@indexName ?? @index)
-		}
 		else {
-			ctrl.code('++').compile(@indexName ?? @index)
+			if @data.by {
+				if @data.by.kind == NodeKind::NumericExpression {
+					if Math.abs(@data.by.value) == 1 {
+						ctrl.code('++').compile(@indexName ?? @index)
+					}
+					else {
+						ctrl.compile(@indexName ?? @index).code(' += ', Math.abs(@data.by.value))
+					}
+				}
+				else {
+					ctrl.compile(@indexName ?? @index).code(' += ').compile(@byName ?? @by)
+				}
+			}
+			else {
+				ctrl.code('++').compile(@indexName ?? @index)
+			}
 		}
 
 		ctrl.code(')').step()

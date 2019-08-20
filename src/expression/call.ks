@@ -297,7 +297,7 @@ class CallExpression extends Expression {
 			return true
 		}
 
-		for argument in @arguments {
+		for const argument in @arguments {
 			if argument.isUsingVariable(name) {
 				return true
 			}

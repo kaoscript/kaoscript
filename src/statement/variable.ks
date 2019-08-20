@@ -214,23 +214,23 @@ class VariableDeclaration extends Statement {
 		fragments.code(')').done()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		if @await {
-			let line = fragments.newLine()
+		if @hasInit {
+			if @await {
+				let line = fragments.newLine()
 
-			@init.toFragments(line, Mode::Async)
+				@init.toFragments(line, Mode::Async)
 
-			if @try? {
-				return @try.toAwaitExpressionFragments^@(line, @declarators)
-			}
-			else if @function?.type().isAsync() {
-				return @function.toAwaitExpressionFragments^@(line, @declarators)
+				if @try? {
+					return @try.toAwaitExpressionFragments^@(line, @declarators)
+				}
+				else if @function?.type().isAsync() {
+					return @function.toAwaitExpressionFragments^@(line, @declarators)
+				}
+				else {
+					return this.toAwaitExpressionFragments^@(line, @declarators)
+				}
 			}
 			else {
-				return this.toAwaitExpressionFragments^@(line, @declarators)
-			}
-		}
-		else {
-			if @hasInit {
 				const declarator = @declarators[0]
 
 				let line = fragments.newLine()
@@ -251,40 +251,40 @@ class VariableDeclaration extends Statement {
 
 				line.done()
 			}
-			else if @toDeclareAll {
-				let line = fragments.newLine()
+		}
+		else if @toDeclareAll {
+			let line = fragments.newLine()
 
-				if @options.format.variables == 'es5' {
-					line.code('var ')
-				}
-				else if @rebindable || @redeclared {
-					line.code('let ')
-				}
-				else {
-					line.code('const ')
-				}
-
-				for declarator, index in @declarators {
-					line.code($comma) if index != 0
-
-					line.compile(declarator)
-				}
-
-				line.done()
+			if @options.format.variables == 'es5' {
+				line.code('var ')
+			}
+			else if @rebindable || @redeclared {
+				line.code('let ')
 			}
 			else {
-				let line = fragments.newLine()
-
-				for declarator, index in @declarators {
-					line.code($comma) if index != 0
-
-					line.compile(declarator)
-				}
-
-				line.code(' = undefined')
-
-				line.done()
+				line.code('const ')
 			}
+
+			for declarator, index in @declarators {
+				line.code($comma) if index != 0
+
+				line.compile(declarator)
+			}
+
+			line.done()
+		}
+		else {
+			let line = fragments.newLine()
+
+			for declarator, index in @declarators {
+				line.code($comma) if index != 0
+
+				line.compile(declarator)
+			}
+
+			line.code(' = undefined')
+
+			line.done()
 		}
 	} // }}}
 	walk(fn) { // {{{

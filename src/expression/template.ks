@@ -35,7 +35,7 @@ class TemplateExpression extends Expression {
 
 		return false
 	} // }}}
-	isComputed() => @elements.length > 1
+	isComputed() => @elements.length > 1 || !@types[0]
 	toFragments(fragments, mode) { // {{{
 		if @computing {
 			for element, index in @elements {

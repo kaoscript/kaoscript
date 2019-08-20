@@ -1,0 +1,11 @@
+{
+  "aliens": [],
+  "requirements": [
+    -1,
+    "Foobar",
+    true
+  ],
+  "exports": [],
+  "references": [],
+  "macros": []
+}
