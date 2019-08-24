@@ -7,15 +7,14 @@ module.exports = function() {
 		}
 		__ks_init() {
 		}
-		__ks_cons_0() {
+		__ks_cons_0(x) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
+			let __ks_i = 0;
 			let __ks__;
 			let y = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
 			let z = arguments[++__ks_i];
@@ -26,15 +25,14 @@ module.exports = function() {
 				throw new TypeError("'z' is not of type 'Number'");
 			}
 		}
-		__ks_cons_1() {
+		__ks_cons_1(x) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
+			let __ks_i = 0;
 			let __ks__;
 			let y = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
 			let z = arguments[++__ks_i];

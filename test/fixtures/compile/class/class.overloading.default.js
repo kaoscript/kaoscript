@@ -39,18 +39,19 @@ module.exports = function() {
 		}
 		__ks_func_baz_0() {
 		}
-		__ks_func_baz_1() {
+		__ks_func_baz_1(foo, bar, qux) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
-			let __ks_i = -1;
-			let foo = arguments[++__ks_i];
 			if(foo === void 0 || foo === null) {
 				throw new TypeError("'foo' is not nullable");
 			}
-			let __ks__;
-			let bar = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "bar";
-			let qux = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "qux";
+			if(bar === void 0 || bar === null) {
+				bar = "bar";
+			}
+			if(qux === void 0 || qux === null) {
+				qux = "qux";
+			}
 			console.log(foo, bar, qux);
 		}
 		baz() {
@@ -93,21 +94,19 @@ module.exports = function() {
 			}
 			console.log(name);
 		}
-		__ks_func_corge_1() {
+		__ks_func_corge_1(name, message, priority) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			let __ks_i = -1;
-			let name = arguments[++__ks_i];
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
-			let message = arguments[++__ks_i];
 			if(message === void 0 || message === null) {
 				throw new TypeError("'message' is not nullable");
 			}
-			let __ks__;
-			let priority = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 1;
+			if(priority === void 0 || priority === null) {
+				priority = 1;
+			}
 			console.log(name, priority, message);
 		}
 		corge() {
@@ -128,15 +127,14 @@ module.exports = function() {
 			}
 			console.log(name);
 		}
-		__ks_func_grault_1() {
+		__ks_func_grault_1(name) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			let __ks_i = -1;
-			let name = arguments[++__ks_i];
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
+			let __ks_i = 0;
 			let __ks__;
 			let priority = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 1;
 			let message = arguments[++__ks_i];
@@ -166,48 +164,41 @@ module.exports = function() {
 			}
 			console.log(name);
 		}
-		__ks_func_garply_1() {
+		__ks_func_garply_1(name, message, priority) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			let __ks_i = -1;
-			let name = arguments[++__ks_i];
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
 			else if(!Type.isString(name)) {
 				throw new TypeError("'name' is not of type 'String'");
 			}
-			let message = arguments[++__ks_i];
 			if(message === void 0 || message === null) {
 				throw new TypeError("'message' is not nullable");
 			}
 			else if(!Type.isString(message)) {
 				throw new TypeError("'message' is not of type 'String'");
 			}
-			let priority;
-			if(arguments.length > 2 && (priority = arguments[++__ks_i]) !== void 0 && priority !== null) {
-				if(!Type.isNumber(priority)) {
-					throw new TypeError("'priority' is not of type 'Number'");
-				}
-			}
-			else {
+			if(priority === void 0 || priority === null) {
 				priority = 1;
+			}
+			else if(!Type.isNumber(priority)) {
+				throw new TypeError("'priority' is not of type 'Number'");
 			}
 			console.log(name, priority, message);
 		}
-		__ks_func_garply_2() {
+		__ks_func_garply_2(name) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			let __ks_i = -1;
-			let name = arguments[++__ks_i];
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
 			else if(!Type.isString(name)) {
 				throw new TypeError("'name' is not of type 'String'");
 			}
+			let __ks_i = 0;
 			let priority;
 			if(arguments.length > 2 && (priority = arguments[++__ks_i]) !== void 0 && priority !== null) {
 				if(!Type.isNumber(priority)) {

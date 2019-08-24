@@ -7,8 +7,7 @@ module.exports = function() {
 			if(begin === void 0 || begin === null) {
 				throw new TypeError("'begin' is not nullable");
 			}
-			let args = arguments.length > __ks_i + 2 ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - 1) : [];
-			__ks_i += args.length;
+			let args = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
 			let end = arguments[__ks_i];
 			if(end === void 0 || end === null) {
 				throw new TypeError("'end' is not nullable");
@@ -24,8 +23,7 @@ module.exports = function() {
 			if(begin === void 0 || begin === null) {
 				throw new TypeError("'begin' is not nullable");
 			}
-			let args = arguments.length > __ks_i + 2 ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - 1) : [];
-			__ks_i += args.length;
+			let args = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
 			let end = arguments[__ks_i];
 			if(end === void 0 || end === null) {
 				throw new TypeError("'end' is not nullable");
@@ -41,8 +39,7 @@ module.exports = function() {
 			if(begin === void 0 || begin === null) {
 				throw new TypeError("'begin' is not nullable");
 			}
-			let args = arguments.length > __ks_i + 2 ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - 1) : [];
-			__ks_i += args.length;
+			let args = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
 			let end = arguments[__ks_i];
 			if(end === void 0 || end === null) {
 				throw new TypeError("'end' is not nullable");

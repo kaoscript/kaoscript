@@ -1,3 +1,4 @@
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	let Parser = (function() {
 		let Token = {
@@ -15,7 +16,17 @@ module.exports = function() {
 					throw new SyntaxError("Wrong number of arguments");
 				}
 			}
-			__ks_func_match_0(...tokens) {
+			__ks_func_match_0() {
+				let __ks_i = -1;
+				let tokens = [];
+				while(arguments.length > ++__ks_i) {
+					if(Type.isArray(arguments[__ks_i], Token)) {
+						tokens.push(arguments[__ks_i]);
+					}
+					else {
+						throw new TypeError("'tokens' is not of type 'Array'");
+					}
+				}
 				const c = this.skip(tokens.length);
 				return Token.INVALID;
 			}

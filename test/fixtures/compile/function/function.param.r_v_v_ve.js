@@ -4,8 +4,8 @@ module.exports = function(expect) {
 			if(arguments.length < 3) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 			}
-			let __ks_i;
-			let items = arguments.length > 3 ? Array.prototype.slice.call(arguments, 0, __ks_i = arguments.length - 3) : (__ks_i = 0, []);
+			let __ks_i = -1;
+			let items = arguments.length > ++__ks_i + 3 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 3) : [];
 			let x = arguments[__ks_i];
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");

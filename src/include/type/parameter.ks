@@ -43,6 +43,7 @@ class ParameterType extends Type {
 	hasDefaultValue() => @default != 0
 	isAny() => @type.isAny()
 	isExportable() => @type.isExportable()
+	isNullable() => @type.isNullable()
 	matchContentOf(type: Type) => @type.matchContentOf(type)
 	matchContentOf(type: ParameterType) => @type.matchContentOf(type.type())
 	matchArgument(value: Type) => value.matchContentOf(@type) || (value.isNullable() && @default != 0)

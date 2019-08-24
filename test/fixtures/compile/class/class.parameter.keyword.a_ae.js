@@ -12,26 +12,21 @@ module.exports = function() {
 				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
-		__ks_func_foobar_0() {
+		__ks_func_foobar_0(__ks_class_1, __ks_default_1) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
-			let __ks_i = -1;
-			let __ks_class_1 = arguments[++__ks_i];
 			if(__ks_class_1 === void 0) {
 				__ks_class_1 = null;
 			}
 			else if(__ks_class_1 !== null && !Type.isString(__ks_class_1)) {
 				throw new TypeError("'class' is not of type 'String?'");
 			}
-			let __ks_default_1;
-			if(arguments.length > 1 && (__ks_default_1 = arguments[++__ks_i]) !== void 0 && __ks_default_1 !== null) {
-				if(!Type.isNumber(__ks_default_1)) {
-					throw new TypeError("'default' is not of type 'Number'");
-				}
-			}
-			else {
+			if(__ks_default_1 === void 0 || __ks_default_1 === null) {
 				__ks_default_1 = 0;
+			}
+			else if(!Type.isNumber(__ks_default_1)) {
+				throw new TypeError("'default' is not of type 'Number'");
 			}
 			this._class = __ks_class_1;
 			this._default = __ks_default_1;

@@ -268,29 +268,27 @@ module.exports = function() {
 		$components[name].families.push(space);
 		$components[name].spaces[space] = true;
 	}
-	function $convert() {
+	function $convert(that, space, result) {
 		if(arguments.length < 2) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
-		let __ks_i = -1;
-		let that = arguments[++__ks_i];
 		if(that === void 0 || that === null) {
 			throw new TypeError("'that' is not nullable");
 		}
 		else if(!Type.is(that, Color)) {
 			throw new TypeError("'that' is not of type 'Color'");
 		}
-		let space = arguments[++__ks_i];
 		if(space === void 0 || space === null) {
 			throw new TypeError("'space' is not nullable");
 		}
 		else if(!Type.isString(space)) {
 			throw new TypeError("'space' is not of type 'String'");
 		}
-		let __ks__;
-		let result = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : {
-			_alpha: 0
-		};
+		if(result === void 0 || result === null) {
+			result = {
+				_alpha: 0
+			};
+		}
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
 			let args = Helper.mapObject(s.components, function(name, component) {
@@ -659,36 +657,40 @@ module.exports = function() {
 			}
 			throw new SyntaxError("Wrong number of arguments");
 		}
-		__ks_func_blend_0() {
+		__ks_func_blend_0(color, percentage) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			let __ks_i = -1;
-			let color = arguments[++__ks_i];
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.is(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
-			let percentage = arguments[++__ks_i];
 			if(percentage === void 0 || percentage === null) {
 				throw new TypeError("'percentage' is not nullable");
 			}
 			else if(!Type.isNumber(percentage)) {
 				throw new TypeError("'percentage' is not of type 'float'");
 			}
+			let __ks_i = 1;
 			let space;
-			if(arguments.length > 2 && (space = arguments[++__ks_i]) !== void 0 && space !== null) {
+			if(arguments.length > ++__ks_i && (space = arguments[__ks_i]) !== void 0 && space !== null) {
 				if(!Type.is(space, Space)) {
-					throw new TypeError("'space' is not of type 'Space'");
+					if(arguments.length - __ks_i < 2) {
+						space = Space.SRGB;
+						--__ks_i;
+					}
+					else {
+						throw new TypeError("'space' is not of type 'Space'");
+					}
 				}
 			}
 			else {
 				space = Space.SRGB;
 			}
 			let alpha;
-			if(arguments.length > 3 && (alpha = arguments[++__ks_i]) !== void 0 && alpha !== null) {
+			if(arguments.length > ++__ks_i && (alpha = arguments[__ks_i]) !== void 0 && alpha !== null) {
 				if(!Type.isBoolean(alpha)) {
 					throw new TypeError("'alpha' is not of type 'Boolean'");
 				}
@@ -1124,26 +1126,21 @@ module.exports = function() {
 			}
 			throw new SyntaxError("Wrong number of arguments");
 		}
-		__ks_func_readable_0() {
+		__ks_func_readable_0(color, tripleA) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
-			let __ks_i = -1;
-			let color = arguments[++__ks_i];
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
 			else if(!Type.is(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
-			let tripleA;
-			if(arguments.length > 1 && (tripleA = arguments[++__ks_i]) !== void 0 && tripleA !== null) {
-				if(!Type.isBoolean(tripleA)) {
-					throw new TypeError("'tripleA' is not of type 'Boolean'");
-				}
-			}
-			else {
+			if(tripleA === void 0 || tripleA === null) {
 				tripleA = false;
+			}
+			else if(!Type.isBoolean(tripleA)) {
+				throw new TypeError("'tripleA' is not of type 'Boolean'");
 			}
 			if(tripleA) {
 				return this.contrast(color).ratio >= 7;

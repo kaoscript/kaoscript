@@ -6,6 +6,6 @@ module.exports = function() {
 		if(bar === void 0 || bar === null) {
 			throw new TypeError("'bar' is not nullable");
 		}
-		let qux = Array.prototype.slice.call(arguments, 1, arguments.length);
+		let qux = arguments.length > 0 ? Array.prototype.slice.call(arguments, 1, arguments.length) : [];
 	}
 };

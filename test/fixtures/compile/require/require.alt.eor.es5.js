@@ -12,17 +12,16 @@ function __ks_require(__ks_0, __ks___ks_0) {
 module.exports = function(__ks_0, __ks___ks_0) {
 	var __ks__ = __ks_require(__ks_0, __ks___ks_0);
 	var Array = __ks__[0], __ks_Array = __ks__[1];
-	__ks_Array.__ks_func_contains_0 = function() {
+	__ks_Array.__ks_func_contains_0 = function(item, from) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
-		let __ks_i = -1;
-		let item = arguments[++__ks_i];
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
 		}
-		let __ks__;
-		let from = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
+		if(from === void 0 || from === null) {
+			from = 0;
+		}
 		return this.indexOf(item, from) !== -1;
 	};
 	__ks_Array.__ks_func_pushUniq_0 = function(...args) {

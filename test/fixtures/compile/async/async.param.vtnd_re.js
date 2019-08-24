@@ -16,15 +16,16 @@ module.exports = function() {
 		}
 		let __ks_i = -1;
 		let x;
-		if(arguments.length > 0 && (x = arguments[++__ks_i]) !== void 0) {
+		if(arguments.length > ++__ks_i && (x = arguments[__ks_i]) !== void 0) {
 			if(x !== null && !Type.isNumber(x)) {
-				return __ks_cb(new TypeError("'x' is not of type 'Number?'"));
+				x = null;
+				--__ks_i;
 			}
 		}
 		else {
 			x = null;
 		}
-		let items = arguments.length > __ks_i + 2 ? Array.prototype.slice.call(arguments, __ks_i + 1, arguments.length - 1) : [];
+		let items = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
 		__ks_cb();
 	}
 };

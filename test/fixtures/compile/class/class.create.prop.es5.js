@@ -29,7 +29,7 @@ module.exports = function() {
 			}
 		},
 		__ks_func_newLine_0: function() {
-			let args = Array.prototype.slice.call(arguments, 0, arguments.length);
+			let args = arguments.length > 0 ? Array.prototype.slice.call(arguments, 0, arguments.length) : [];
 			return Helper.create(this.Line, args);
 		},
 		newLine: function() {

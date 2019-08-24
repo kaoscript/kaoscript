@@ -7,15 +7,14 @@ module.exports = function() {
 		}
 		__ks_init() {
 		}
-		__ks_cons_0() {
+		__ks_cons_0(foo) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
-			let __ks_i = -1;
-			let foo = arguments[++__ks_i];
 			if(foo === void 0 || foo === null) {
 				throw new TypeError("'foo' is not nullable");
 			}
+			let __ks_i = 0;
 			let __ks__;
 			let bar = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
 			let qux = arguments[++__ks_i];
@@ -23,15 +22,14 @@ module.exports = function() {
 				throw new TypeError("'qux' is not nullable");
 			}
 		}
-		__ks_cons_1() {
+		__ks_cons_1(foo) {
 			if(arguments.length < 3) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 			}
-			let __ks_i = -1;
-			let foo = arguments[++__ks_i];
 			if(foo === void 0 || foo === null) {
 				throw new TypeError("'foo' is not nullable");
 			}
+			let __ks_i = 0;
 			let __ks__;
 			let bar = arguments.length > 3 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
 			let qux = arguments[++__ks_i];

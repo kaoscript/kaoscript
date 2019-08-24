@@ -1,19 +1,18 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	function foobar() {
+	function foobar(f, x) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
-		let __ks_i = -1;
-		let f = arguments[++__ks_i];
 		if(f === void 0 || f === null) {
 			throw new TypeError("'f' is not nullable");
 		}
 		else if(!Type.is(f, Foobar)) {
 			throw new TypeError("'f' is not of type 'Foobar'");
 		}
-		let __ks__;
-		let x = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : f.foobar();
+		if(x === void 0 || x === null) {
+			x = f.foobar();
+		}
 	}
 	class Foobar {
 		constructor() {

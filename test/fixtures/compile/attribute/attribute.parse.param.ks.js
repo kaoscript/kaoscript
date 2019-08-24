@@ -9,8 +9,8 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			y = 1;
 		}
-		let __ks_i;
-		let args = arguments.length > 3 ? Array.prototype.slice.call(arguments, 2, __ks_i = arguments.length - 1) : (__ks_i = 2, []);
+		let __ks_i = 1;
+		let args = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
 		let z = arguments[__ks_i];
 		if(z === void 0 || z === null) {
 			throw new TypeError("'z' is not nullable");
