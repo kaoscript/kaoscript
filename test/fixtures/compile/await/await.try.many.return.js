@@ -28,33 +28,35 @@ module.exports = function() {
 		else if(!Type.isFunction(__ks_cb)) {
 			throw new TypeError("'callback' must be a function");
 		}
-		let __ks_0 = (__ks_1) => {
+		let __ks_2 = (__ks_3) => {
 			return __ks_cb(null, 0);
 		};
 		try {
-			foo(42, 24, (__ks_e, d) => {
+			foo(42, 24, (__ks_e, __ks_0) => {
 				if(__ks_e) {
-					__ks_0(__ks_e);
+					__ks_2(__ks_e);
 				}
 				else {
 					try {
-						foo(4, 2, (__ks_e, e) => {
+						let d = __ks_0;
+						foo(4, 2, (__ks_e, __ks_1) => {
 							if(__ks_e) {
-								__ks_0(__ks_e);
+								__ks_2(__ks_e);
 							}
 							else {
+								let e = __ks_1;
 								return __ks_cb(null, d * e);
 							}
 						});
 					}
 					catch(__ks_e) {
-						return __ks_0(__ks_e);
+						return __ks_2(__ks_e);
 					}
 				}
 			});
 		}
 		catch(__ks_e) {
-			__ks_0(__ks_e);
+			__ks_2(__ks_e);
 		}
 	}
 };

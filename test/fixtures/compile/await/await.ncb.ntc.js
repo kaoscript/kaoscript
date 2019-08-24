@@ -28,11 +28,12 @@ module.exports = function() {
 		else if(!Type.isFunction(__ks_cb)) {
 			throw new TypeError("'callback' must be a function");
 		}
-		foo(42, 24, (__ks_e, d) => {
+		foo(42, 24, (__ks_e, __ks_0) => {
 			if(__ks_e) {
 				__ks_cb(__ks_e);
 			}
 			else {
+				let d = __ks_0;
 				return __ks_cb(null, d * 3);
 			}
 		});

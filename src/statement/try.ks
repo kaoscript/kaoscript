@@ -305,7 +305,11 @@ class TryStatement extends Statement {
 		const statement = statements[statements.length - 1]
 
 		if @state == TryState::Body {
-			if statements.length == 1 && !statement.hasExceptions() {
+			if !statement.hasExceptions() && (statements.length == 1 || (statements.length == 2 && statements[0] is VariableDeclaration && statements[0].isAwait())) {
+				if statements.length == 2 {
+					ctrl.compile(statements[0])
+				}
+
 				ctrl.compile(statement)
 
 				if statement is not ReturnStatement {

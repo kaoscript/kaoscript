@@ -28,26 +28,27 @@ module.exports = function() {
 		if(cb === void 0 || cb === null) {
 			throw new TypeError("'cb' is not nullable");
 		}
-		let __ks_0 = (__ks_1) => {
+		let __ks_1 = (__ks_2) => {
 			cb(0);
 		};
 		try {
-			foo(42, 24, (__ks_e, d) => {
+			foo(42, 24, (__ks_e, __ks_0) => {
 				if(__ks_e) {
-					__ks_0(__ks_e);
+					__ks_1(__ks_e);
 				}
 				else {
 					try {
+						let d = __ks_0;
 						cb(d);
 					}
 					catch(__ks_e) {
-						return __ks_0(__ks_e);
+						return __ks_1(__ks_e);
 					}
 				}
 			});
 		}
 		catch(__ks_e) {
-			__ks_0(__ks_e);
+			__ks_1(__ks_e);
 		}
 	}
 };

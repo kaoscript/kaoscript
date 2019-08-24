@@ -11,15 +11,16 @@ module.exports = function() {
 		else if(!Type.isFunction(__ks_cb)) {
 			throw new TypeError("'callback' must be a function");
 		}
-		exec("df -k", (__ks_e, stdout, stderr) => {
+		exec("df -k", (__ks_e, __ks_0) => {
 			if(__ks_e) {
 				__ks_cb(__ks_e);
 			}
 			else {
+				let stdout = __ks_0;
 				let disks = [];
 				let matches;
-				for(let __ks_0 = 0, __ks_1 = __ks_String._im_lines(stdout), __ks_2 = __ks_1.length, line; __ks_0 < __ks_2; ++__ks_0) {
-					line = __ks_1[__ks_0];
+				for(let __ks_1 = 0, __ks_2 = __ks_String._im_lines(stdout), __ks_3 = __ks_2.length, line; __ks_1 < __ks_3; ++__ks_1) {
+					line = __ks_2[__ks_1];
 					matches = df_regex.exec(line);
 					if(matches) {
 						disks.push({

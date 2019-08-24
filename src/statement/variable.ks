@@ -35,11 +35,6 @@ class VariableDeclaration extends Statement {
 		@immutable = !@data.rebindable
 		@rebindable = !@immutable
 		@autotype = @immutable || @data.autotype
-		@await = @data.await
-
-		if @await && !?@function && !this.module().isBinary() {
-			SyntaxException.throwInvalidAwait(this)
-		}
 
 		@initScope ??= @scope
 
@@ -57,6 +52,12 @@ class VariableDeclaration extends Statement {
 
 			if @immutable {
 				@rebindable = @scope != @initScope
+			}
+
+			@await = @init.isAwait()
+
+			if @await && !?@function && !this.module().isBinary() {
+				SyntaxException.throwInvalidAwait(this)
 			}
 		}
 
@@ -171,15 +172,6 @@ class VariableDeclaration extends Statement {
 			declarator.export(recipient)
 		}
 	} // }}}
-	isDuplicate(scope) { // {{{
-		for const declarator in @declarators {
-			if declarator.isDuplicate(scope) {
-				return true
-			}
-		}
-
-		return false
-	} // }}}
 	hasInit() => @hasInit
 	init() => @init
 	isAwait() => @await
@@ -192,43 +184,37 @@ class VariableDeclaration extends Statement {
 
 		return false
 	} // }}}
+	isDuplicate(scope) { // {{{
+		for const declarator in @declarators {
+			if declarator.isDuplicate(scope) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	isImmutable() => @immutable
 	isUsingVariable(name) => @hasInit && @init.isUsingVariable(name)
-	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
-		fragments.code('(__ks_e')
+	toAwaitStatementFragments(fragments, statements) { // {{{
+		const line = fragments.newLine()
 
-		for parameter in parameters {
-			fragments.code($comma).compile(parameter)
-		}
+		const item = @init.toFragments(line, Mode::None)
 
-		fragments.code(') =>')
+		statements.unshift(this)
 
-		const block = fragments.newBlock()
+		item(statements)
 
-		for statement in statements {
-			block.compile(statement, Mode::None)
-		}
-
-		block.done()
-
-		fragments.code(')').done()
+		line.done()
 	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
+	toFragments(fragments, mode) { // {{{
+		const variables = this.assignments()
+		if variables.length != 0 {
+			fragments.newLine().code($runtime.scope(this) + variables.join(', ')).done()
+		}
+
 		if @hasInit {
-			if @await {
-				let line = fragments.newLine()
-
-				@init.toFragments(line, Mode::Async)
-
-				if @try? {
-					return @try.toAwaitExpressionFragments^@(line, @declarators)
-				}
-				else if @function?.type().isAsync() {
-					return @function.toAwaitExpressionFragments^@(line, @declarators)
-				}
-				else {
-					return this.toAwaitExpressionFragments^@(line, @declarators)
-				}
+			if @init.isAwaiting() {
+				return this.toAwaitStatementFragments^@(fragments)
 			}
 			else {
 				const declarator = @declarators[0]

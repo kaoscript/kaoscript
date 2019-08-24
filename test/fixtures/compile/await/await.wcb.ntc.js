@@ -28,7 +28,8 @@ module.exports = function() {
 		if(cb === void 0 || cb === null) {
 			throw new TypeError("'cb' is not nullable");
 		}
-		foo(42, 24, (__ks_e, d) => {
+		foo(42, 24, (__ks_e, __ks_0) => {
+			let d = __ks_0;
 			cb(Type.isValue(d) ? d : 0);
 		});
 	}
