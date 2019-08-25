@@ -10,7 +10,7 @@ module.exports = function() {
 			else if(!Type.isArray(value)) {
 				throw new TypeError("'value' is not of type 'Array'");
 			}
-			let args = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
+			let args = Array.prototype.slice.call(arguments, ++__ks_i, arguments.length);
 			console.log("Array");
 		}
 		else if(arguments.length >= 1 && Type.isString(arguments[0])) {
@@ -22,7 +22,7 @@ module.exports = function() {
 			else if(!Type.isString(value)) {
 				throw new TypeError("'value' is not of type 'String'");
 			}
-			let args = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
+			let args = Array.prototype.slice.call(arguments, ++__ks_i, arguments.length);
 			console.log("String");
 		}
 		else {

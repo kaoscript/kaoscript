@@ -194,7 +194,7 @@ class Parameter extends AbstractNode {
 		fragments = fn(fragments)
 
 		if mode == ParameterMode::Default || mode == ParameterMode::ArrowFunction {
-			Parameter.toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeaderParameter, restIndex, minBefore, minAfter)
+			Parameter.toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeaderParameter, restIndex, minBefore, minRest, minAfter)
 		}
 
 		for const parameter in parameters til lastHeaderParameterIndex {
@@ -286,8 +286,8 @@ class Parameter extends AbstractNode {
 			return false
 		}
 	} // }}}
-	static toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeader, restIndex, minBefore, minAfter) { // {{{
-		if minBefore + minAfter != 0 {
+	static toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeader, restIndex, minBefore, minRest, minAfter) { // {{{
+		if minBefore + minRest + minAfter != 0 {
 			if signature.isAsync() {
 				node.module().flag('Type')
 
@@ -368,38 +368,6 @@ class Parameter extends AbstractNode {
 					.done()
 			}
 		}
-		else if restIndex != -1 {
-			const parameter = parameters[restIndex]
-			const min = parameter.type().min()
-
-			if min > 0 {
-				const ctrl = fragments
-					.newControl()
-					.code(`if(`)
-					.compile(parameter)
-					.code(`.length < \(min))`)
-					.step()
-
-				if signature.isAsync() {
-					ctrl
-						.newLine()
-						.code(`return __ks_cb(new SyntaxError("Wrong number of rest values (" + `)
-						.compile(parameter)
-						.code(`.length + " for at least \(min))"))`)
-						.done()
-				}
-				else {
-					ctrl
-						.newLine()
-						.code(`throw new SyntaxError("Wrong number of rest values (" + `)
-						.compile(parameter)
-						.code(`.length + " for at least \(min))")`)
-						.done()
-				}
-
-				ctrl.done()
-			}
-		}
 	} // }}}
 	static toAfterRestParameterFragments(fragments, name, parameters, restIndex, beforeContext, wrongdoer) { // {{{
 		parameter = parameters[restIndex]
@@ -427,21 +395,26 @@ class Parameter extends AbstractNode {
 				}
 
 				if parameter.isAnonymous() {
-					fragments
-						.newControl()
-						.code(`if(arguments.length > \(context.increment ? '++__ks_i' : '__ks_i') + \(minAfter))`)
-						.step()
-						.line(`__ks_i = arguments.length - \(minAfter)`)
-						.done()
+					fragments.line(`__ks_i = arguments.length - \(minAfter)`)
 				}
 				else {
-					fragments
-						.newLine()
-						.code($runtime.scope(node))
-						.compile(parameter)
-						.code(` = arguments.length > \(context.increment ? '++__ks_i' : '__ks_i') + \(minAfter) ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - \(minAfter)) : `)
-						.compile(parameter.hasDefaultValue() ? parameter._defaultValue : '[]')
-						.done()
+					if parameter.hasDefaultValue() && parameter.type().min() == 0 {
+						fragments
+							.newLine()
+							.code($runtime.scope(node))
+							.compile(parameter)
+							.code(` = arguments.length > \(context.increment ? '++__ks_i' : '__ks_i') + \(minAfter) ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - \(minAfter)) : `)
+							.compile(parameter._defaultValue)
+							.done()
+					}
+					else {
+						fragments
+							.newLine()
+							.code($runtime.scope(node))
+							.compile(parameter)
+							.code(` = Array.prototype.slice.call(arguments, \(context.increment ? '++__ks_i' : '__ks_i'), __ks_i = arguments.length - \(minAfter))`)
+							.done()
+					}
 				}
 
 				context.increment = true
@@ -450,22 +423,42 @@ class Parameter extends AbstractNode {
 				return if parameter.isAnonymous()
 
 				if declared {
-					fragments
-						.newLine()
-						.code($runtime.scope(node))
-						.compile(parameter)
-						.code(` = \(name).length > \(context.increment ? '++__ks_i' : '__ks_i') ? Array.prototype.slice.call(\(name), __ks_i, __ks_i = \(name).length) : `)
-						.compile(parameter.hasDefaultValue() ? parameter._defaultValue : '[]')
-						.done()
+					if parameter.hasDefaultValue() && parameter.type().min() == 0 {
+						fragments
+							.newLine()
+							.code($runtime.scope(node))
+							.compile(parameter)
+							.code(` = \(name).length > \(context.increment ? '++__ks_i' : '__ks_i') ? Array.prototype.slice.call(\(name), __ks_i, \(name).length) : `)
+							.compile(parameter._defaultValue)
+							.done()
+					}
+					else {
+						fragments
+							.newLine()
+							.code($runtime.scope(node))
+							.compile(parameter)
+							.code(` = Array.prototype.slice.call(\(name), \(context.increment ? '++__ks_i' : '__ks_i'), \(name).length)`)
+							.done()
+					}
 				}
 				else {
-					fragments
-						.newLine()
-						.code($runtime.scope(node))
-						.compile(parameter)
-						.code(` = \(name).length > 0 ? Array.prototype.slice.call(\(name), \(minBefore), \(name).length) : `)
-						.compile(parameter.hasDefaultValue() ? parameter._defaultValue : '[]')
-						.done()
+					if parameter.hasDefaultValue() && parameter.type().min() == 0 {
+						fragments
+							.newLine()
+							.code($runtime.scope(node))
+							.compile(parameter)
+							.code(` = \(name).length > 0 ? Array.prototype.slice.call(\(name), \(minBefore), \(name).length) : `)
+							.compile(parameter._defaultValue)
+							.done()
+					}
+					else {
+						fragments
+							.newLine()
+							.code($runtime.scope(node))
+							.compile(parameter)
+							.code(` = Array.prototype.slice.call(\(name), \(minBefore), \(name).length)`)
+							.done()
+					}
 				}
 			}
 		}
@@ -554,6 +547,35 @@ class Parameter extends AbstractNode {
 					.code($equals)
 					.compile(parameter._defaultValue)
 					.done()
+
+				ctrl.done()
+			}
+
+			const min = parameter.type().min()
+			if min > 0 {
+				const ctrl = fragments
+					.newControl()
+					.code(`if(`)
+					.compile(parameter)
+					.code(`.length < \(min))`)
+					.step()
+
+				if context.async {
+					ctrl
+						.newLine()
+						.code(`return __ks_cb(new SyntaxError("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
+						.compile(parameter)
+						.code(`.length + ")"))`)
+						.done()
+				}
+				else {
+					ctrl
+						.newLine()
+						.code(`throw new SyntaxError("The rest parameter must have at least \(min) argument\(min > 1 ? 's' : '') (" + `)
+						.compile(parameter)
+						.code(`.length + ")")`)
+						.done()
+				}
 
 				ctrl.done()
 			}

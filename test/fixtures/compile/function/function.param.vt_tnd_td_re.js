@@ -32,7 +32,7 @@ module.exports = function(expect) {
 			else {
 				z = false;
 			}
-			let args = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
+			let args = Array.prototype.slice.call(arguments, ++__ks_i, arguments.length);
 			return [x, y, z, args];
 		};
 	})();

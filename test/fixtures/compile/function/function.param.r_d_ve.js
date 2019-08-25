@@ -5,7 +5,7 @@ module.exports = function(expect) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
 			let __ks_i = -1;
-			let items = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
+			let items = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
 			let x = 42;
 			let y = arguments[__ks_i];
 			if(y === void 0 || y === null) {

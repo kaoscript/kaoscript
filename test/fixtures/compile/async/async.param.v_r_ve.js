@@ -18,7 +18,7 @@ module.exports = function() {
 			return __ks_cb(new TypeError("'x' is not nullable"));
 		}
 		let __ks_i = 0;
-		let items = arguments.length > ++__ks_i + 2 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 2) : [];
+		let items = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 2);
 		let y = arguments[__ks_i];
 		if(y === void 0 || y === null) {
 			return __ks_cb(new TypeError("'y' is not nullable"));

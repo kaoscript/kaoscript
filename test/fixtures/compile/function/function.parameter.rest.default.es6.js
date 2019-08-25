@@ -20,7 +20,7 @@ module.exports = function() {
 			throw new TypeError("'x' is not nullable");
 		}
 		let __ks_i = 0;
-		let items = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
+		let items = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
 		let z = arguments[__ks_i];
 		if(z === void 0 || z === null) {
 			throw new TypeError("'z' is not nullable");
@@ -55,7 +55,7 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		let __ks_i = -1;
-		let items = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
+		let items = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
 		let z = arguments[__ks_i];
 		if(z === void 0 || z === null) {
 			throw new TypeError("'z' is not nullable");
@@ -71,7 +71,7 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 		}
 		let __ks_i = -1;
-		let items = arguments.length > ++__ks_i + 3 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 3) : [];
+		let items = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 3);
 		let x = arguments[__ks_i];
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
@@ -91,7 +91,7 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 		}
 		let __ks_i = -1;
-		let items = arguments.length > ++__ks_i + 2 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 2) : [];
+		let items = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 2);
 		let x = arguments[__ks_i];
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");

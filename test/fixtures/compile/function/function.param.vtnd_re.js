@@ -12,7 +12,7 @@ module.exports = function(expect) {
 			else {
 				x = null;
 			}
-			let items = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
+			let items = Array.prototype.slice.call(arguments, ++__ks_i, arguments.length);
 			return [x, items];
 		};
 	})();

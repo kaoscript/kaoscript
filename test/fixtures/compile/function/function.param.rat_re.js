@@ -23,7 +23,7 @@ module.exports = function(expect) {
 					items.push(__ks__);
 				}
 			}
-			let values = arguments.length > __ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
+			let values = Array.prototype.slice.call(arguments, __ks_i, arguments.length);
 			return [items, values];
 		};
 	})();

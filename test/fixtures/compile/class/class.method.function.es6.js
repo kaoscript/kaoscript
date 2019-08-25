@@ -118,7 +118,7 @@ module.exports = function() {
 				if(message === void 0 || message === null) {
 					throw new TypeError("'message' is not nullable");
 				}
-				let foo = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
+				let foo = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
 				let bar = __ks_arguments[__ks_i];
 				if(bar === void 0 || bar === null) {
 					throw new TypeError("'bar' is not nullable");
@@ -141,7 +141,7 @@ module.exports = function() {
 					throw new TypeError("'message' is not nullable");
 				}
 				let __ks_i = 0;
-				let foo = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
+				let foo = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
 				let bar = arguments[__ks_i];
 				if(bar === void 0 || bar === null) {
 					throw new TypeError("'bar' is not nullable");
@@ -211,7 +211,7 @@ module.exports = function() {
 					throw new TypeError("'message' is not nullable");
 				}
 				let __ks_i = 0;
-				let foo = arguments.length > ++__ks_i + 1 ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length - 1) : [];
+				let foo = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
 				let bar = arguments[__ks_i];
 				if(bar === void 0 || bar === null) {
 					throw new TypeError("'bar' is not nullable");

@@ -7,7 +7,7 @@ module.exports = function(expect) {
 			let __ks_i = -1;
 			let items = Array.prototype.slice.call(arguments, __ks_i + 1, Math.min(arguments.length, __ks_i + 4));
 			__ks_i += items.length;
-			let values = arguments.length > ++__ks_i ? Array.prototype.slice.call(arguments, __ks_i, __ks_i = arguments.length) : [];
+			let values = Array.prototype.slice.call(arguments, ++__ks_i, arguments.length);
 			return [items, values];
 		};
 	})();
