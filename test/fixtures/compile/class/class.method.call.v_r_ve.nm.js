@@ -11,14 +11,19 @@ module.exports = function() {
 				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
-		__ks_func_foo_0(x, ...items) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_func_foo_0(x) {
+			if(arguments.length < 2) {
+				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			let y = 42;
+			let __ks_i = 0;
+			let items = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
+			let y = arguments[__ks_i];
+			if(y === void 0 || y === null) {
+				throw new TypeError("'y' is not nullable");
+			}
 			return "[" + x + ", " + items + ", " + y + "]";
 		}
 		foo() {
@@ -26,7 +31,7 @@ module.exports = function() {
 		}
 	}
 	const x = new Foobar();
-	console.log(x.foo(1));
 	console.log(x.foo(1, 2));
+	console.log(x.foo(1, 2, 3));
 	console.log(x.foo(1, 2, 3, 4));
 };

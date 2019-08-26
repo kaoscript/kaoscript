@@ -18,19 +18,19 @@ namespace Router {
 				const min = method.absoluteMin()
 
 				if rest < min {
-					argFilters.push(buildArgFilter(method, min, Infinity))
+					buildArgFilter(method, argFilters, min, Infinity)
 				}
 				else {
 					for const n from min til rest {
-						argFilters.push(buildArgFilter(method, n, n))
+						buildArgFilter(method, argFilters, n, n)
 					}
 
-					argFilters.push(buildArgFilter(method, min, Infinity))
+					buildArgFilter(method, argFilters, min, Infinity)
 				}
 			}
 			else {
 				for const n from method.absoluteMin() to method.absoluteMax() {
-					argFilters.push(buildArgFilter(method, n, n))
+					buildArgFilter(method, argFilters, n, n)
 				}
 			}
 
@@ -294,50 +294,74 @@ namespace Router {
 		return assessment
 	} // }}}
 
-	func buildArgFilter(method, min, max) { // {{{
+	func buildArgFilter(method, lines, min, max) { // {{{
 		const line = {
 			min
 			max
 			filters: []
 		}
 
-		let count = method.min()
-		let index = 0
+		buildArgFilter(method.parameters(), 0, lines, line, 0, method.min(), min)
+	} // }}}
 
-		for const parameter, p in method.parameters() {
-			const type = parameter.type()
+	func buildArgFilter(parameters, pIndex, lines, line, index, count, limit) { // {{{
+		if pIndex == parameters.length {
+			if count == limit {
+				lines.push(line)
+			}
 
-			for const i from 1 to parameter.min() {
+			return
+		}
+
+		const parameter = parameters[pIndex]
+
+		const type = parameter.type()
+
+		for const i from 1 to parameter.min() {
+			line.filters.push({
+				index
+				type
+			})
+
+			++index
+		}
+
+		if parameter.max() == Infinity {
+			line.rest = {
+				index
+				type
+			}
+
+			index = count - limit
+
+			buildArgFilter(parameters, pIndex + 1, lines, line, index, count, limit)
+		}
+		else if count < limit && parameter.max() > parameter.min() {
+			buildArgFilter(parameters, pIndex + 1, lines, {
+				min: line.min
+				max: line.max
+				filters: [...line.filters]
+			}, index, count, limit)
+
+			for const i from parameter.min() + 1 to parameter.max() while count < limit {
 				line.filters.push({
 					index
 					type
 				})
 
 				++index
-			}
+				++count
 
-			if parameter.max() == Infinity {
-				line.rest = {
-					index
-					type
-				}
-
-				index = count - min
-			}
-			else {
-				for const i from parameter.min() + 1 to parameter.max() while count < min {
-					line.filters.push({
-						index
-						type
-					})
-
-					++index
-					++count
-				}
+				buildArgFilter(parameters, pIndex + 1, lines, {
+					min: line.min
+					max: line.max
+					filters: [...line.filters]
+				}, index, count, limit)
 			}
 		}
-
-		return line
+		else {
+			buildArgFilter(parameters, pIndex + 1, lines, line, index, count, limit)
+		}
 	} // }}}
 
 	func checkMethods(methods, parameters, min, max, sortedIndex, sortedIndexes, assessment, filters) { // {{{
