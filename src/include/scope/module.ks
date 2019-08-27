@@ -332,6 +332,15 @@ class ModuleScope extends Scope {
 	line(line: Number) { // {{{
 		@line = line + @lineOffset
 	} // }}}
+	listDefinedVariables() { // {{{
+		const variables = []
+
+		for const array of @variables {
+			variables.push(array[array.length - 1])
+		}
+
+		return variables
+	} // }}}
 	listMacros(name): Array { // {{{
 		if @macros[name] is Array {
 			return @macros[name]

@@ -12,6 +12,9 @@ class ExportDeclaration extends Statement {
 					NodeKind::ExportDeclarationSpecifier => {
 						statement = $compile.statement(declaration.declaration, this)
 					}
+					NodeKind::ExportExclusionSpecifier => {
+						statement = new ExportExclusionSpecifier(declaration, this)
+					}
 					NodeKind::ExportNamedSpecifier => {
 						statement = new ExportNamedSpecifier(declaration, this)
 					}
@@ -73,6 +76,23 @@ class ExportDeclaration extends Statement {
 			statement.walk(fn)
 		}
 	} // }}}
+}
+
+class ExportExclusionSpecifier extends AbstractNode {
+	private {
+		_expression
+	}
+	analyse()
+	prepare()
+	translate()
+	export(recipient) { // {{{
+		const exclusions = [exclusion.name for exclusion in @data.exclusions]
+
+		for const variable in @parent.parent().scope().listDefinedVariables() when exclusions.indexOf(variable.name()) == -1 {
+			recipient.export(variable.name(), variable)
+		}
+	} // }}}
+	toFragments(fragments, mode)
 }
 
 class ExportNamedSpecifier extends AbstractNode {

@@ -1,0 +1,98 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar",
+    1,
+    "foobar",
+    2,
+    "Color"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "toString": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "kind": "overloadedfunction",
+      "exhaustive": true,
+      "functions": [
+        {
+          "kind": "function",
+          "async": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "name": "x",
+              "type": "String",
+              "min": 1,
+              "max": 1,
+              "default": 0
+            }
+          ],
+          "returns": "String",
+          "throws": []
+        },
+        {
+          "kind": "function",
+          "async": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "name": "x",
+              "type": {
+                "reference": 0
+              },
+              "min": 1,
+              "max": 1,
+              "default": 0
+            }
+          ],
+          "returns": {
+            "reference": 0
+          },
+          "throws": []
+        }
+      ]
+    },
+    {
+      "kind": "enum",
+      "exhaustive": true,
+      "elements": [
+        "Red",
+        "Green",
+        "Blue"
+      ],
+      "index": 2,
+      "type": "number"
+    }
+  ],
+  "macros": []
+}

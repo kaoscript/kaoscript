@@ -1,0 +1,1 @@
+NotSupportedException: JavaScript import doesn't support exclusions (line 1, file "fixtures/compile/import/import.but.js.ks")

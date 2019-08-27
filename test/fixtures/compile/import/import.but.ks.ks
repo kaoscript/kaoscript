@@ -1,0 +1,1 @@
+import '@kaoscript/test-import' but Color

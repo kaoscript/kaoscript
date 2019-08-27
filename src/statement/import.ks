@@ -494,7 +494,7 @@ class Importer extends Statement {
 		}
 
 		if @data.specifiers.length == 0 {
-			for i from 1 til @metadata.exports.length by 2 {
+			for const i from 1 til @metadata.exports.length by 2 {
 				name = @metadata.exports[i]
 
 				this.addImport(name, name, false)
@@ -509,7 +509,22 @@ class Importer extends Statement {
 		else {
 			let name, type
 			for specifier in @data.specifiers {
-				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
+				if specifier.kind == NodeKind::ImportExclusionSpecifier {
+					const exclusions = [exclusion.name for exclusion in specifier.exclusions]
+
+					for const i from 1 til @metadata.exports.length by 2 when exclusions.indexOf(@metadata.exports[i]) == -1 {
+						name = @metadata.exports[i]
+
+						this.addImport(name, name, false)
+					}
+
+					for const datas, name of macros when exclusions.indexOf(name) == -1 {
+						for data in datas {
+							new MacroDeclaration(data, this, null, name)
+						}
+					}
+				}
+				else if specifier.kind == NodeKind::ImportNamespaceSpecifier {
 					@alias = specifier.local.name
 				}
 				else {
@@ -605,7 +620,10 @@ class Importer extends Statement {
 		else {
 			let type
 			for const specifier in @data.specifiers {
-				if specifier.kind == NodeKind::ImportNamespaceSpecifier {
+				if specifier.kind == NodeKind::ImportExclusionSpecifier {
+					NotSupportedException.throw(`JavaScript import doesn't support exclusions`, this)
+				}
+				else if specifier.kind == NodeKind::ImportNamespaceSpecifier {
 					@alias = specifier.local.name
 
 					if specifier.specifiers?.length != 0 {

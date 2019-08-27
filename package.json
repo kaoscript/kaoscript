@@ -41,7 +41,7 @@
 		"commander": "^2.20.0"
 	},
 	"devDependencies": {
-		"@kaoscript/ast": "^0.8.0",
+		"@kaoscript/ast": "github:kaoscript/ast",
 		"@kaoscript/coverage-istanbul": "^0.2.1",
 		"@kaoscript/parser": "github:kaoscript/parser",
 		"@kaoscript/source-generator": "^0.1.0",
