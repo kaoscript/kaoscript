@@ -50,8 +50,8 @@ class BlockScope extends Scope {
 			const type = macro.type()
 			let notAdded = true
 
-			for m, index in @macros[name] while notAdded {
-				if type.matchContentOf(m.type()) {
+			for const m, index in @macros[name] while notAdded {
+				if m.type().matchSignatureOf(type, []) {
 					@macros[name].splice(index, 0, macro)
 
 					notAdded = false
@@ -359,21 +359,21 @@ class BlockScope extends Scope {
 			@references[oldName].reassign(newName, newScope)
 		}
 	} // }}}
-	reference(value) { // {{{
+	reference(value, nullable: Boolean = false) { // {{{
 		switch value {
-			is AnyType => return this.resolveReference('Any')
-			is ClassVariableType => return this.reference(value.type())
+			is AnyType => return this.resolveReference('Any', nullable)
+			is ClassVariableType => return this.reference(value.type(), nullable)
 			is NamedType => {
 				if value.hasContainer() {
-					return value.container().scope().reference(value.name())
+					return value.container().scope().reference(value.name(), nullable)
 				}
 				else {
-					return this.resolveReference(value.name())
+					return this.resolveReference(value.name(), nullable)
 				}
 			}
 			is ReferenceType => return this.resolveReference(value.name(), value.isNullable())
-			is String => return this.resolveReference(value)
-			is Variable => return this.resolveReference(value.name())
+			is String => return this.resolveReference(value, nullable)
+			is Variable => return this.resolveReference(value.name(), nullable)
 			=> {
 				console.info(value)
 				throw new NotImplementedException()
@@ -447,7 +447,7 @@ class BlockScope extends Scope {
 
 		return variable
 	} // }}}
-	resolveReference(name: String, nullable = false) { // {{{
+	resolveReference(name: String, nullable: Boolean = false) { // {{{
 		if @variables[name] is Array {
 			const hash = `\(name)\(nullable ? '?' : '')`
 

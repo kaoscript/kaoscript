@@ -277,7 +277,15 @@ export class SyntaxException extends Exception {
 			throw new SyntaxException(`Inclusions of "\(name)" should have the same version`, node)
 		} // }}}
 		throwMissingAbstractMethods(name, methods, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Class "\(name)" doesn't implement the following abstract methods: "\(methods.join('", "'))"`, node)
+			const fragments = []
+
+			for const methods, name of methods {
+				for const method in methods {
+					fragments.push(`"\(name)\(method.toQuote())"`)
+				}
+			}
+
+			throw new SyntaxException(`Class "\(name)" doesn't implement the following abstract method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
 		} // }}}
 		throwMissingRequirement(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`import is missing the argument "\(name)"`, node)

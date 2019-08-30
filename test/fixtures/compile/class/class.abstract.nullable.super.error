@@ -1,0 +1,1 @@
+SyntaxException: Class "FunctionType" doesn't implement the following abstract method: "equals(b: Any?)" (line 5, file "fixtures/compile/class/class.abstract.nullable.super.ks")

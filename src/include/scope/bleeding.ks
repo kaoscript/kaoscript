@@ -139,7 +139,7 @@ class BleedingScope extends Scope {
 	line() => @parent.line()
 	module() => @parent.module()
 	parent() => @parent
-	reference(value) => @parent.reference(value)
+	reference(value, nullable: Boolean = false) => @parent.reference(value, nullable)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name) { // {{{
 		return if @renamedVariables[name] is String

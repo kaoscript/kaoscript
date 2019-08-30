@@ -640,7 +640,7 @@ class ClassType extends Type {
 	getAbstractMethod(name: String, type: Type) { // {{{
 		if @abstractMethods[name] is Array {
 			for method in @abstractMethods[name] {
-				if method.matchSignatureOf(type, []) {
+				if type.matchSignatureOf(method, []) {
 					return method
 				}
 			}
@@ -1053,7 +1053,7 @@ class ClassType extends Type {
 			}
 		}
 
-		return Object.keys(abstractMethods)
+		return abstractMethods
 	} // }}}
 	matchArguments(arguments: Array<Type>) { // {{{
 		if @constructors.length == 0 {
@@ -1357,7 +1357,7 @@ class ClassMethodType extends FunctionType {
 	isAlteration() => @alteration
 	isMatched(methods: Array<ClassMethodType>, matchables): Boolean { // {{{
 		for method in methods {
-			if this.matchSignatureOf(method, matchables) {
+			if method.matchSignatureOf(this, matchables) {
 				return true
 			}
 		}

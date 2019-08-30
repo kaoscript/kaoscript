@@ -1,1 +1,0 @@
-SyntaxException: Class "Greetings" doesn't implement the following abstract methods: "greet" (line 15, file "fixtures/compile/class/class.abstract.error.badsign.ks")

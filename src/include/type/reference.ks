@@ -290,8 +290,11 @@ class ReferenceType extends Type {
 		else if value.isObject() && this.type().isClass() {
 			return @type.type().matchInstanceWith(value, matchables)
 		}
+		else if value is AnyType {
+			return this.discardReference():Type.matchSignatureOf(value, matchables)
+		}
 		else {
-			return value.isAny()
+			return false
 		}
 	} // }}}
 	name(): String => @name

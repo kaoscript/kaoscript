@@ -468,7 +468,7 @@ class FunctionType extends Type {
 		}
 		else if pStep == -1 {
 			if pIndex >= @parameters.length {
-				return FunctionType.isOptional(arguments, aIndex, aStep)
+				return false
 			}
 
 			const parameter = @parameters[pIndex]
@@ -516,8 +516,6 @@ class FunctionType extends Type {
 		}
 	} // }}}
 	matchSignatureOf(value: Type, matchables): Boolean { // {{{
-		// console.log(this)
-		// console.log(value)
 		if value is ReferenceType {
 			return value.isFunction()
 		}
@@ -555,6 +553,23 @@ class FunctionType extends Type {
 	throws() => @throws
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
+	} // }}}
+	toQuote() { // {{{
+		const fragments = []
+
+		fragments.push('(')
+
+		for const parameter, index in @parameters {
+			if index != 0 {
+				fragments.push(', ')
+			}
+
+			fragments.push(parameter.toQuote())
+		}
+
+		fragments.push(')')
+
+		return fragments.join('')
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)

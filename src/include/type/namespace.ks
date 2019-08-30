@@ -236,7 +236,7 @@ class NamespacePropertyType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b) { // {{{
+	equals(b?) { // {{{
 		if b is NamespacePropertyType {
 			return @type.equals(b.type())
 		}

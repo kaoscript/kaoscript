@@ -489,6 +489,19 @@ class MacroParameterType extends ParameterType {
 	} // }}}
 }
 
+func $callMacroExpression(data, parent, scope) { // {{{
+	const macro = scope.getMacro(data, parent)
+
+	const result = macro.execute(data.arguments, parent)
+
+	if result.body.length == 1 {
+		return $compile.expression(result.body[0], parent)
+	}
+	else {
+		throw new NotImplementedException(parent)
+	}
+} // }}}
+
 class CallMacroStatement extends Statement {
 	private {
 		_offsetEnd: Number		= 0

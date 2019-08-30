@@ -55,7 +55,7 @@ class AnyType extends Type {
 	isMorePreciseThan(type: Type) => type.isAny() && @nullable != type.isNullable()
 	isNullable() => @nullable
 	matchContentOf(b) => !@explicit || (b.isAny() && (@nullable -> !b.isNullable()))
-	matchSignatureOf(b, matchables) => b.isAny()
+	matchSignatureOf(b, matchables) => (@nullable || !b.isNullable()) && (!@explicit || b.isAny())
 	parameter() => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
 	reference() => this
 	setNullable(nullable: Boolean): Type { // {{{

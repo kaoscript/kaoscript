@@ -359,18 +359,7 @@ const $expressions = {
 	`\(NodeKind::ArrayRange)`					: ArrayRange
 	`\(NodeKind::AwaitExpression)`				: AwaitExpression
 	`\(NodeKind::CallExpression)`				: CallExpression
-	`\(NodeKind::CallMacroExpression)`	 		: func(data, parent, scope) {
-		const macro = scope.getMacro(data, parent)
-
-		const result = macro.execute(data.arguments, parent)
-
-		if result.body.length == 1 {
-			return $compile.expression(result.body[0], parent)
-		}
-		else {
-			throw new NotImplementedException(parent)
-		}
-	}
+	`\(NodeKind::CallMacroExpression)`	 		: $callMacroExpression
 	`\(NodeKind::ComparisonExpression)`			: ComparisonExpression
 	`\(NodeKind::ConditionalExpression)`		: ConditionalExpression
 	`\(NodeKind::CreateExpression)`				: CreateExpression

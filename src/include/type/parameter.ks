@@ -54,7 +54,17 @@ class ParameterType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toQuote(...args) => @type.toQuote(...args)
+	toQuote() { // {{{
+		const fragments = []
+
+		if @name != null {
+			fragments.push(@name)
+		}
+
+		fragments.push(': ', @type.toQuote())
+
+		return fragments.join('')
+	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		@type.toTestFragments(fragments, node)
 	} // }}}
