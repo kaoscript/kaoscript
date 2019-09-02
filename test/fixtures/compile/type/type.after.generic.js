@@ -15,7 +15,7 @@ module.exports = function() {
 				throw new TypeError("'values' is not nullable");
 			}
 			else if(!Type.isArray(values, ClassA)) {
-				throw new TypeError("'values' is not of type 'Array'");
+				throw new TypeError("'values' is not of type 'Array<ClassA>'");
 			}
 		}
 		__ks_cons(args) {

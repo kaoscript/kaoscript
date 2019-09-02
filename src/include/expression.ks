@@ -26,6 +26,8 @@ abstract class Expression extends AbstractNode {
 	isInferable() => false
 	// if the expression needs to be assign to a temp variable to be reused, expect for simple member expression
 	isLooseComposite() => this.isComposite()
+	// if the type is matching the given type
+	isMatchingType(type: Type) => this.type().matchContentOf(type)
 	// if the expression is nullable
 	isNullable() => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
@@ -45,6 +47,17 @@ abstract class Expression extends AbstractNode {
 	} // }}}
 	toBooleanFragments(fragments, mode = Mode::None) => this.toFragments(fragments, mode)
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
+	toQuote(): String { // {{{
+		throw new NotSupportedException()
+	} // }}}
+	toQuote(double: Boolean): String { // {{{
+		if double {
+			return `"\(this.toQuote())"`
+		}
+		else {
+			return `'\(this.toQuote())'`
+		}
+	} // }}}
 	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
 }
 

@@ -121,7 +121,8 @@ class HollowScope extends Scope {
 	line() => @parent.line()
 	module() => @parent.module()
 	parent() => @parent
-	reference(value, nullable: Boolean = false): ReferenceType => @parent.reference(value, nullable)
+	/* reference(value, nullable: Boolean = false): ReferenceType => @parent.reference(value, nullable) */
+	reference(...args) => @parent.reference(...args)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
 	replaceVariable(name: String, type: Type, node): Variable { // {{{
 		let variable = this.getVariable(name)
@@ -149,7 +150,8 @@ class HollowScope extends Scope {
 
 		return variable
 	} // }}}
-	resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable)
+	/* resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable) */
+	resolveReference(...args) => @parent.resolveReference(...args)
 	updateInferable(name, data, node) { // {{{
 		if data.isVariable {
 			this.replaceVariable(name, data.type, node)

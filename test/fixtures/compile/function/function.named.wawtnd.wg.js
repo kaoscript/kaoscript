@@ -8,7 +8,7 @@ module.exports = function() {
 			throw new TypeError("'bar' is not nullable");
 		}
 		else if(!Type.isArray(bar, String)) {
-			throw new TypeError("'bar' is not of type 'Array'");
+			throw new TypeError("'bar' is not of type 'Array<String>'");
 		}
 	}
 };

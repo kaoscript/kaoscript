@@ -175,6 +175,18 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			@left.type(@right.type(), @scope, this)
 		}
 	} // }}}
+	inferTypes() { // {{{
+		const inferables = {}
+
+		if @left.isInferable() {
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type: @left.type().setNullable(false)
+			}
+		}
+
+		return inferables
+	} // }}}
 	isDeclararing() => true
 	toFragments(fragments, mode) { // {{{
 		if @right.isNullable() {

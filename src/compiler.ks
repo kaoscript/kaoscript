@@ -158,7 +158,7 @@ abstract class AbstractNode {
 		_scope: Scope?			= null
 	}
 	constructor()
-	constructor(@data, @parent, @scope = parent.scope()) { // {{{
+	constructor(@data, @parent, @scope = parent?.scope()) { // {{{
 		@options = parent._options
 	} // }}}
 	constructor(@data, @parent, scope: Scope, kind: ScopeType) { // {{{
@@ -170,12 +170,12 @@ abstract class AbstractNode {
 	abstract prepare()
 	abstract translate()
 	data() => @data
-	directory() => @parent.directory()
-	file() => @parent.file()
+	directory() => @parent?.directory()
+	file() => @parent?.file()
 	greatParent() => @parent?._parent
 	greatScope() => @parent?._scope
-	isConsumedError(error): Boolean => @parent.isConsumedError(error)
-	module() => @parent.module()
+	isConsumedError(error): Boolean => @parent?.isConsumedError(error)
+	module() => @parent?.module()
 	newScope(scope: Scope, type: ScopeType) { // {{{
 		switch type {
 			ScopeType::Bleeding => {
@@ -206,6 +206,7 @@ abstract class AbstractNode {
 	parent() => @parent
 	reference() { // {{{
 		if @parent?.reference()? {
+		/* if @parent? && @parent.reference()? { */
 			return @parent.reference() + @reference
 		}
 		else {

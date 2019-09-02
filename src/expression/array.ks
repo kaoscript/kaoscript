@@ -1,30 +1,58 @@
 class ArrayExpression extends Expression {
 	private {
 		_flatten: Boolean	= false
-		_values
+		_type: Type
+		_values: Array		= []
 	}
 	analyse() { // {{{
 		const es5 = @options.format.spreads == 'es5'
 
-		@values = []
-		for value in @data.values {
-			@values.push(value = $compile.expression(value, this))
+		for const data in @data.values {
+			const value = $compile.expression(data, this)
 
 			value.analyse()
 
 			if es5 && value is UnaryOperatorSpread {
 				@flatten = true
 			}
+
+			@values.push(value)
 		}
 	} // }}}
 	prepare() { // {{{
-		for value in @values {
+		let type = null
+
+		for const value, index in @values {
 			value.prepare()
+
+			if index == 0 {
+				type = value.type()
+			}
+			else if type != null {
+				if !type.equals(value.type()) {
+					type = null
+				}
+			}
+		}
+
+		if type == null {
+			@type = @scope.reference('Array')
+		}
+		else {
+			@type = Type.arrayOf(type, @scope)
 		}
 	} // }}}
 	translate() { // {{{
 		for value in @values {
 			value.translate()
+		}
+	} // }}}
+	isMatchingType(type: Type) { // {{{
+		if @values.length == 0 {
+			return type.isAny() || type.isArray()
+		}
+		else {
+			return @type.matchContentOf(type)
 		}
 	} // }}}
 	isUsingVariable(name) { // {{{
@@ -54,7 +82,7 @@ class ArrayExpression extends Expression {
 			fragments.code(']')
 		}
 	} // }}}
-	type() => @scope.reference('Array')
+	type() => @type
 }
 
 class ArrayRange extends Expression {

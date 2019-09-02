@@ -1163,7 +1163,7 @@ module.exports = function() {
 				throw new TypeError("'functions' is not nullable");
 			}
 			else if(!Type.isArray(functions, Function)) {
-				throw new TypeError("'functions' is not of type 'Array'");
+				throw new TypeError("'functions' is not of type 'Array<(color: Color): Color>'");
 			}
 			return Helper.mapArray(functions, (fn) => {
 				return fn(this.clone());
@@ -1447,7 +1447,7 @@ module.exports = function() {
 				if(Type.isValue(space.converters.from)) {
 					for(let name in space.converters.from) {
 						let converter = space.converters.from[name];
-						if(Type.isValue(!$spaces[name])) {
+						if(!Type.isValue($spaces[name])) {
 							$space(name);
 						}
 						$spaces[name].converters[space.name] = converter;
@@ -1462,10 +1462,10 @@ module.exports = function() {
 			}
 			for(let __ks_0 = 0, __ks_1 = spaces.length, name; __ks_0 < __ks_1; ++__ks_0) {
 				name = spaces[__ks_0];
-				if(Type.isValue(!$spaces[name].converters[space.name])) {
+				if(!Type.isValue($spaces[name].converters[space.name])) {
 					$find(name, space.name);
 				}
-				if(Type.isValue(!$spaces[space.name].converters[name])) {
+				if(!Type.isValue($spaces[space.name].converters[name])) {
 					$find(space.name, name);
 				}
 			}

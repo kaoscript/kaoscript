@@ -1,1 +1,1 @@
-SyntaxException: Class "Greetings" doesn't implement the following abstract method: "greet(name: Any)" (line 15, file "fixtures/compile/class/class.abstract.error.noimpl.ks")
+SyntaxException: Class "Greetings" doesn't implement the following abstract method: "greet(name: Any): String" (line 15, file "fixtures/compile/class/class.abstract.error.noimpl.ks")

@@ -49,7 +49,7 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 		_type: Type
 	}
 	inferTypes() { // {{{
-		const inferables = {}
+		const inferables = @argument.inferTypes()
 
 		if @argument.isInferable() {
 			inferables[@argument.path()] = {
@@ -63,6 +63,10 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 	isComputed() => @argument.isNullable()
 	prepare() { // {{{
 		@argument.prepare()
+
+		// if !@argument.isNullable() {
+		// 	TypeException.throwNotNullableExistential(@argument, this)
+		// }
 
 		@type = @argument.type().setNullable(false)
 	} // }}}

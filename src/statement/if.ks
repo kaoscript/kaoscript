@@ -55,6 +55,10 @@ class IfStatement extends Statement {
 	prepare() { // {{{
 		if @declared {
 			@variable.prepare()
+
+			// if const variable = @variable.getIdentifierVariable() {
+			// 	variable.setRealType(variable.getRealType().setNullable(false))
+			// }
 		}
 		else {
 			@condition.prepare()
@@ -195,14 +199,14 @@ class IfStatement extends Statement {
 
 			const ctrl = fragments.newControl()
 
-			@toIfFragments(ctrl, mode)
+			this.toIfFragments(ctrl, mode)
 
 			ctrl.done()
 		}
 		else {
 			const ctrl = fragments.newControl()
 
-			@toIfFragments(ctrl, mode)
+			this.toIfFragments(ctrl, mode)
 
 			ctrl.done()
 		}

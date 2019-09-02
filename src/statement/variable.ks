@@ -173,6 +173,14 @@ class VariableDeclaration extends Statement {
 		}
 	} // }}}
 	hasInit() => @hasInit
+	getIdentifierVariable() { // {{{
+		if @declarators.length == 1 && @declarators[0] is VariableIdentifierDeclarator {
+			return @declarators[0]._variable
+		}
+		else {
+			return null
+		}
+	} // }}}
 	init() => @init
 	isAwait() => @await
 	isDeclararingVariable(name: String) { // {{{

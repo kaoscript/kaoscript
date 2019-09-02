@@ -22,6 +22,7 @@ class Literal extends Expression {
 			fragments.code(@value)
 		}
 	} // }}}
+	toQuote() => @value
 	value() => @value
 }
 
@@ -74,6 +75,7 @@ class IdentifierLiteral extends Literal {
 	isDeclarable() => true
 	isDeclararingVariable(name: String) => @value == name
 	isMacro() => @isMacro
+	// isNullable() => @realType.isNullable()
 	isRedeclared() => @scope.isRedeclaredVariable(@value)
 	isRenamed() => @scope.isRenamedVariable(@value)
 	isInferable() => true
@@ -111,17 +113,17 @@ class IdentifierLiteral extends Literal {
 	} // }}}
 }
 
-class NumberLiteral extends Literal { // {{{
+class NumberLiteral extends Literal {
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.value)
 	} // }}}
 	isUsingVariable(name) => false
 	type() => @scope.reference('Number')
-} // }}}
+}
 
-class StringLiteral extends Literal { // {{{
+class StringLiteral extends Literal {
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, $quote(data.value))
 	} // }}}
 	type() => @scope.reference('String')
-} // }}}
+}

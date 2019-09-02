@@ -7,7 +7,7 @@ class ExportDeclaration extends Statement {
 		let statement
 
 		if @parent.includePath() == null {
-			for declaration in @data.declarations {
+			for const declaration in @data.declarations {
 				switch declaration.kind {
 					NodeKind::ExportDeclarationSpecifier => {
 						statement = $compile.statement(declaration.declaration, this)
@@ -37,7 +37,7 @@ class ExportDeclaration extends Statement {
 			}
 		}
 		else {
-			for declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
+			for const declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
 				@statements.push(statement = $compile.statement(declaration.declaration, this))
 
 				statement.analyse()
@@ -45,17 +45,17 @@ class ExportDeclaration extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		for statement in @statements {
+		for const statement in @statements {
 			statement.prepare()
 		}
 	} // }}}
 	translate() { // {{{
-		for statement in @statements {
+		for const statement in @statements {
 			statement.translate()
 		}
 	} // }}}
 	export(recipient) { // {{{
-		for declaration in @declarations {
+		for const declaration in @declarations {
 			declaration.export(recipient)
 		}
 	} // }}}
@@ -115,12 +115,22 @@ class ExportNamedSpecifier extends AbstractNode {
 		@expression.prepare()
 
 		if @expression.isMacro() {
-			for macro in @scope.listMacros(@expression.name()) {
+			for const macro in @scope.listMacros(@expression.name()) {
 				macro.export(recipient, @data.exported.name)
 			}
 		}
 		else {
 			recipient.export(@data.exported.name, @expression)
+
+			const type = @expression.type()
+
+			if type.isClass() || type.isNamespace() {
+				const regex = new RegExp(`^\(@expression.name())`)
+
+				for const macro in @scope.listCompositeMacros(@expression.name()) {
+					macro.export(recipient, macro.name().replace(regex, @data.exported.name))
+				}
+			}
 		}
 	} // }}}
 	toFragments(fragments, mode)

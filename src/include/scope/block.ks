@@ -312,6 +312,16 @@ class BlockScope extends Scope {
 	} // }}}
 	line() => @module.line()
 	line(line: Number) => @module.line(line)
+	listCompositeMacros(name) { // {{{
+		const regex = new RegExp(`^\(name)\.`)
+		const list = []
+
+		for m, n of @macros when regex.test(n) {
+			list.push(...m)
+		}
+
+		return list
+	} // }}}
 	listDefinedVariables() { // {{{
 		const variables = []
 
@@ -359,7 +369,7 @@ class BlockScope extends Scope {
 			@references[oldName].reassign(newName, newScope)
 		}
 	} // }}}
-	reference(value, nullable: Boolean = false) { // {{{
+	/* reference(value, nullable: Boolean = false) { // {{{
 		switch value {
 			is AnyType => return this.resolveReference('Any', nullable)
 			is ClassVariableType => return this.reference(value.type(), nullable)
@@ -374,6 +384,27 @@ class BlockScope extends Scope {
 			is ReferenceType => return this.resolveReference(value.name(), value.isNullable())
 			is String => return this.resolveReference(value, nullable)
 			is Variable => return this.resolveReference(value.name(), nullable)
+			=> {
+				console.info(value)
+				throw new NotImplementedException()
+			}
+		}
+	} // }}} */
+	reference(value, nullable: Boolean = false, parameters: Array = []) { // {{{
+		switch value {
+			is AnyType => return this.resolveReference('Any', nullable, parameters)
+			is ClassVariableType => return this.reference(value.type(), nullable, parameters)
+			is NamedType => {
+				if value.hasContainer() {
+					return value.container().scope().reference(value.name(), nullable, parameters)
+				}
+				else {
+					return this.resolveReference(value.name(), nullable, parameters)
+				}
+			}
+			is ReferenceType => return this.resolveReference(value.name(), value.isNullable(), parameters)
+			is String => return this.resolveReference(value, nullable, parameters)
+			is Variable => return this.resolveReference(value.name(), nullable, parameters)
 			=> {
 				console.info(value)
 				throw new NotImplementedException()
@@ -447,7 +478,7 @@ class BlockScope extends Scope {
 
 		return variable
 	} // }}}
-	resolveReference(name: String, nullable: Boolean = false) { // {{{
+	/* resolveReference(name: String, nullable: Boolean = false) { // {{{
 		if @variables[name] is Array {
 			const hash = `\(name)\(nullable ? '?' : '')`
 
@@ -460,6 +491,20 @@ class BlockScope extends Scope {
 		else {
 			return @parent.resolveReference(name, nullable)
 		}
+	} // }}} */
+	resolveReference(name: String, nullable: Boolean, parameters: Array) { // {{{
+		if @variables[name] is Array {
+			const hash = ReferenceType.toQuote(name, nullable, parameters)
+
+			if @references[hash] is not ReferenceType {
+				@references[hash] = new ReferenceType(this, name, nullable, parameters)
+			}
+
+			return @references[hash]
+		}
+		else {
+			return @parent.resolveReference(name, nullable, parameters)
+		}
 	} // }}}
 	setLineOffset(offset: Number) => @module.setLineOffset(offset)
 	updateInferable(name, data, node) { // {{{
@@ -468,7 +513,7 @@ class BlockScope extends Scope {
 		}
 		else {
 			if @chunkTypes[name] is Array {
-				@chunkTypes.push(@line, data.type)
+				@chunkTypes[name].push(@line, data.type)
 			}
 			else {
 				@chunkTypes[name] = [@line, data.type]

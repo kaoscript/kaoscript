@@ -14,6 +14,29 @@ class ReferenceType extends Type {
 
 			return new ReferenceType(scope, name, data.nullable, parameters)
 		} // }}}
+		toQuote(name, nullable, parameters) { // {{{
+			const fragments = [name]
+
+			if parameters.length != 0 {
+				fragments.push('<')
+
+				for const parameter, index in parameters {
+					if index != 0 {
+						fragments.push(', ')
+					}
+
+					fragments.push(parameter.toQuote())
+				}
+
+				fragments.push('>')
+			}
+
+			if nullable {
+				fragments.push('?')
+			}
+
+			return fragments.join('')
+		} // }}}
 	}
 	constructor(@scope, name: String, @nullable = false, @parameters = []) { // {{{
 		super(scope)
@@ -46,11 +69,13 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	equals(b?): Boolean { // {{{
-		if b is not ReferenceType {
+		if b == null {
+			return false
+		}
+		else if b is not ReferenceType {
 			return b.equals(this)
 		}
-
-		if @name != b._name || @nullable != b._nullable || @parameters.length != b._parameters.length {
+		else if @name != b._name || @nullable != b._nullable || @parameters.length != b._parameters.length {
 			return false
 		}
 
@@ -134,6 +159,7 @@ class ReferenceType extends Type {
 
 		return hash
 	} // }}}
+	hasParameters() => @parameters.length != 0
 	isAlien() => this.type().isAlien()
 	isAny() => @name == 'Any' || @name == 'any'
 	isArray() => @name == 'Array' || @name == 'array'
@@ -262,13 +288,35 @@ class ReferenceType extends Type {
 			const a: Type = this.discardReference()
 			const b: Type = that.discardReference()
 
-			if a is ReferenceType {
+			/* if a is ReferenceType {
 				if b is ReferenceType {
 					return a._name == b._name
 				}
 				else {
 					return false
 				}
+			}
+			else {
+				return a.matchContentOf(b)
+			} */
+			if a is ReferenceType || b is ReferenceType {
+				return false
+			}
+
+			if that is ReferenceType && that.hasParameters() {
+				const parameters = that.parameters()
+
+				if @parameters.length != parameters.length || !a.matchContentOf(b) {
+					return false
+				}
+
+				for const parameter, index in @parameters {
+					if !parameter.matchContentOf(parameters[index]) {
+						return false
+					}
+				}
+
+				return true
 			}
 			else {
 				return a.matchContentOf(b)
@@ -343,7 +391,7 @@ class ReferenceType extends Type {
 			return this
 		}
 		else {
-			return @scope.reference(@name, nullable)
+			return @scope.reference(@name, nullable, [...@parameters])
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
@@ -374,14 +422,36 @@ class ReferenceType extends Type {
 
 		return @referenceIndex
 	} // }}}
-	toQuote() { // {{{
+	/* toQuote() { // {{{
+		const fragments = [@name]
+
+		if @parameters.length != 0 {
+			fragments.push('<')
+
+			for const parameter, index in @parameters {
+				if index != 0 {
+					fragments.push(', ')
+				}
+
+				fragments.push(parameter.toQuote())
+			}
+
+			fragments.push('>')
+		}
+
 		if @nullable {
+			fragments.push('?')
+		}
+
+		return fragments.join('')
+		/* if @nullable {
 			return `\(@name)?`
 		}
 		else {
 			return @name
-		}
-	} // }}}
+		} */
+	} // }}} */
+	toQuote() => ReferenceType.toQuote(@name, @nullable, @parameters)
 	toReference(references, mode) { // {{{
 		this.resolveType()
 

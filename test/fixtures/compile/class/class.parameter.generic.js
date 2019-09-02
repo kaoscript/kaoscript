@@ -33,7 +33,7 @@ module.exports = function() {
 				throw new TypeError("'lines' is not nullable");
 			}
 			else if(!Type.isArray(lines, String)) {
-				throw new TypeError("'lines' is not of type 'Array'");
+				throw new TypeError("'lines' is not of type 'Array<String>'");
 			}
 			Greetings.prototype.__ks_cons.call(this, [lines.join("\n")]);
 		}

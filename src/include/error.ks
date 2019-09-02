@@ -409,8 +409,14 @@ export class TypeException extends Exception {
 		throwNotNamespace(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a namespace`, node)
 		} // }}}
+		throwNotNullableExistential(expression, node) ~ TypeException { // {{{
+			throw new TypeException(`The existentiality test of \(expression.toQuote(true)) is always positive`, node)
+		} // }}}
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)
+		} // }}}
+		throwNullableCaller(property, node) ~ TypeException { // {{{
+			throw new TypeException(`The caller of "\(property)" can't be nullable`, node)
 		} // }}}
 		throwNullTypeChecking(type, node) ~ TypeException { // {{{
 			throw new TypeException(`The variable is "null" and can't be checked against the type \(type.toQuote(true))`, node)

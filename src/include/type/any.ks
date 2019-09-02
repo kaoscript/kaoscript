@@ -31,6 +31,10 @@ class AnyType extends Type {
 	} // }}}
 	export(references, mode) => 'Any'
 	flagAlien() { // {{{
+		if @alien == true {
+			return this
+		}
+
 		const type = new AnyType(@explicit, @nullable)
 
 		type._alien = true
@@ -61,11 +65,14 @@ class AnyType extends Type {
 	setNullable(nullable: Boolean): Type { // {{{
 		let type
 
-		if @explicit {
-			type = @nullable ? this : AnyType.NullableExplicit
+		if @nullable == nullable {
+			return this
+		}
+		else if @explicit {
+			type = nullable ? AnyType.NullableExplicit : AnyType.Explicit
 		}
 		else {
-			type = @nullable ? this : AnyType.NullableUnexplicit
+			type = nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
 		}
 
 		if @alien {

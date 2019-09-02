@@ -121,14 +121,14 @@ abstract class Type {
 				}
 				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
 					if data.parameters? {
-						return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
+						return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
 					}
 					else {
-						return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
+						return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)] as Array<ParameterType>, data, node)
 					}
 				}
 				NodeKind::FunctionExpression, NodeKind::MethodDeclaration => {
-					return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
+					return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
 				}
 				NodeKind::Identifier => {
 					if const variable = scope.getVariable(data.name) {
@@ -229,7 +229,7 @@ abstract class Type {
 									return type
 								}
 								else {
-									return scope.resolveReference(name, data.nullable)
+									return scope.reference(name, data.nullable)
 								}
 							}
 							else {

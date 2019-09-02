@@ -255,7 +255,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = new ClassMethodType([parameter.type() for const parameter in @parameters], @data, this)
+		@type = new ClassMethodType([parameter.type() for const parameter in @parameters] as Array<ParameterType>, @data, this)
 
 		@type.flagAlteration()
 

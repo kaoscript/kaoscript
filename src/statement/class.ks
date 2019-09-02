@@ -1469,7 +1469,7 @@ class ClassMethodDeclaration extends Statement {
 				parameter.prepare()
 			}
 
-			const arguments = [parameter.type() for const parameter in @parameters]
+			const arguments: Array<ParameterType> = [parameter.type() for const parameter in @parameters]
 			@type = new ClassMethodType(arguments, @data, this)
 
 			if @parent.isExtending() {
@@ -1646,7 +1646,7 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = new ClassConstructorType([parameter.type() for parameter in @parameters], @data, this)
+		@type = new ClassConstructorType([parameter.type() for parameter in @parameters] as Array<ParameterType>, @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
@@ -2016,7 +2016,8 @@ class ClassVariableDeclaration extends AbstractNode {
 		if @hasDefaultValue {
 			@defaultValue.prepare()
 
-			if !@defaultValue.type().matchContentOf(@type.type()) {
+			/* if !@defaultValue.type().matchContentOf(@type.type()) { */
+			if !@defaultValue.isMatchingType(@type.type()) {
 				TypeException.throwInvalidAssignement(@name, @type, @defaultValue.type(), this)
 			}
 

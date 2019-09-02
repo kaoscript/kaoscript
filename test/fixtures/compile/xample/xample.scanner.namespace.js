@@ -24,7 +24,7 @@ module.exports = function() {
 						tokens.push(arguments[__ks_i]);
 					}
 					else {
-						throw new TypeError("'tokens' is not of type 'Array'");
+						throw new TypeError("'tokens' is not of type 'Array<Token>'");
 					}
 				}
 				const c = this.skip(tokens.length);

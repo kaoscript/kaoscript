@@ -20,7 +20,7 @@ class FunctionType extends Type {
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
 			if data.parameters? {
-				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
+				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
 			}
 			else {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
@@ -110,7 +110,7 @@ class FunctionType extends Type {
 			@missingReturn = false
 		}
 
-		for parameter in parameters {
+		for const parameter in parameters {
 			if parameter.max() == Infinity {
 				if @max == Infinity {
 					SyntaxException.throwTooMuchRestParameter(node)
@@ -135,7 +135,7 @@ class FunctionType extends Type {
 		if data.throws? {
 			let type
 
-			for throw in data.throws {
+			for const throw in data.throws {
 				if (type ?= Type.fromAST(throw, node).discardReference()) && type.isNamed() && type.isClass() {
 					@throws.push(type)
 				}
@@ -552,7 +552,7 @@ class FunctionType extends Type {
 	returnType() => @returnType
 	throws() => @throws
 	toFragments(fragments, node) { // {{{
-		throw new NotImplementedException(node)
+		fragments.code('Function')
 	} // }}}
 	toQuote() { // {{{
 		const fragments = []
@@ -569,10 +569,17 @@ class FunctionType extends Type {
 
 		fragments.push(')')
 
+		if !@returnType.isAny() || !@returnType.isNullable() {
+			fragments.push(': ', @returnType.toQuote())
+		}
+
 		return fragments.join('')
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
-		throw new NotImplementedException(node)
+		fragments
+			.code($runtime.type(node) + '.isFunction(')
+			.compile(node)
+			.code(')')
 	} // }}}
 	updateArguments() { // {{{
 		for parameter, i in @parameters {

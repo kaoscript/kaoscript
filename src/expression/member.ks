@@ -1,7 +1,9 @@
 class MemberExpression extends Expression {
 	private {
 		_callee
+		_inferable: Boolean		= false
 		_object
+		_path: String
 		_prepareObject: Boolean	= true
 		_property
 		_tested: Boolean		= false
@@ -34,6 +36,23 @@ class MemberExpression extends Expression {
 				if @object.type().isArray() {
 					@type = @object.type().parameter()
 				}
+
+				if @object.isInferable() {
+					if @property is NumberLiteral {
+						@inferable = true
+						@path = `\(@object.path())[\(@property.value())]`
+					}
+					else if @property is StringLiteral {
+						@inferable = true
+						@path = `\(@object.path())['\(@property.value())']`
+					}
+
+					if @inferable {
+						if const type = @scope.getChunkType(@path) {
+							@type = type
+						}
+					}
+				}
 			}
 			else {
 				@property = @data.property.name
@@ -51,6 +70,11 @@ class MemberExpression extends Expression {
 						ReferenceException.throwNotDefinedProperty(@property, this)
 					}
 				}
+
+				if @object.isInferable() {
+					@inferable = true
+					@path = `\(@object.path()).\(@property)`
+				}
 			}
 		}
 		else if @data.computed {
@@ -61,6 +85,10 @@ class MemberExpression extends Expression {
 		else {
 			@property = @data.property.name
 		}
+
+		// if @data.nullable && !@object.isNullable() {
+		// 	TypeException.throwNotNullableExistential(@object, this)
+		// }
 	} // }}}
 	translate() { // {{{
 		@object.translate()
@@ -82,12 +110,27 @@ class MemberExpression extends Expression {
 	isAssignable() => true
 	isCallable() => @object.isCallable() || (@data.computed && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
+	isInferable() => @inferable
 	isLooseComposite() => this.isCallable() || this.isNullable()
 	isMacro() => false
 	isNullable() => @data.nullable || @object.isNullable() || (@data.computed && @property.isNullable())
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@data.nullable ? 1 : 0) + (@data.computed && @property.isNullable() ? 1 : 0) > 1
 	isUsingVariable(name) => @object.isUsingVariable(name)
 	listAssignments(array) => array
+	/* path() {
+		if @data.computed {
+			if @property is NumberLiteral {
+				return `\(@object.path())[\(@property.value())]`
+			}
+			else {
+				return `\(@object.path())['\(@property.value())']`
+			}
+		}
+		else {
+			return `\(@object.path()).\(@property)`
+		}
+	} */
+	path() => @path
 	releaseReusable() { // {{{
 		if @object.isCallable() {
 			@object.releaseReusable()
@@ -202,6 +245,22 @@ class MemberExpression extends Expression {
 			}
 		}
 	} // }}}
+	toQuote() { // {{{
+		const fragments = [@object.toQuote()]
+
+		if @data.nullable {
+			fragments.push('?')
+		}
+
+		if @data.computed {
+			fragments.push('[', @property.toQuote(), ']')
+		}
+		else {
+			fragments.push('.', @property)
+		}
+
+		return fragments.join('')
+	} // }}}
 	toReusableFragments(fragments) { // {{{
 		const objectCallable = @object.isCallable()
 
@@ -239,4 +298,8 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	type() => @type
+	/* type() {
+		console.log('type')
+		return @type
+	} */
 }

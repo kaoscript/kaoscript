@@ -1,0 +1,1 @@
+TypeException: The caller of "foobar" can't be nullable (line 15, file "fixtures/compile/generics/generics.array.param.method.null.nt.ks")

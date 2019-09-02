@@ -353,7 +353,7 @@ class FunctionDeclarator extends AbstractNode {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters] as Array<ParameterType>, @data, this)
 	} // }}}
 	translate() { // {{{
 		@scope.line(@data.start.line)

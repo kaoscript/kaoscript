@@ -2,7 +2,7 @@ extern sealed class Array
 
 impl Array {
 	static merge(...args) {
-		let source
+		let source: Array
 
 		let i = 0
 		let l = args.length

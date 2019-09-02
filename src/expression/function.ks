@@ -27,7 +27,7 @@ class AnonymousFunctionExpression extends Expression {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters] as Array<ParameterType>, @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
@@ -131,7 +131,7 @@ class ArrowFunctionExpression extends Expression {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters] as Array<ParameterType>, @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {

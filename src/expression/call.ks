@@ -272,6 +272,22 @@ class CallExpression extends Expression {
 		}
 	} // }}}
 	arguments() => @arguments
+	inferTypes() { // {{{
+		if @object == null {
+			return {}
+		}
+
+		const inferables = @object.inferTypes()
+
+		if @nullable && @object.isInferable() {
+			inferables[@object.path()] = {
+				isVariable: @object is IdentifierLiteral
+				type: @object.type().setNullable(false)
+			}
+		}
+
+		return inferables
+	} // }}}
 	isAwait() => @await
 	isAwaiting() { // {{{
 		for argument in @arguments {
@@ -450,6 +466,10 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), name)
 			}
 			is ReferenceType => {
+				if value.isNullable() && !@data.callee.nullable && !this._options.rules.ignoreMisfit {
+					TypeException.throwNullableCaller(@property, this)
+				}
+
 				this.makeMemberCalleeFromReference(value)
 			}
 			is SealableType => {
@@ -1034,8 +1054,8 @@ class SealedMethodCallee extends Callee {
 		@object = node._object
 		@property = node._property
 
-		nullable = data.nullable || node._object.isNullable()
-		nullableComputed = data.nullable && node._object.isNullable()
+		@nullable = data.nullable || data.callee.nullable
+		@nullableComputed = data.nullable && data.callee.nullable
 
 		for method in methods {
 			this.validate(method, node)
@@ -1099,6 +1119,33 @@ class SealedMethodCallee extends Callee {
 				}
 			}
 		}
+	} // }}}
+	toNullableFragments(fragments, node) { // {{{
+		/* if @data.nullable {
+			if @object.isNullable() {
+				fragments
+					.compileNullable(@object)
+					.code(' && ')
+			}
+
+			fragments
+				.code($runtime.type(node) + '.isFunction(')
+				.compile(@object)
+				.code(')')
+		}
+		else if @object.isNullable() {
+			fragments.compileNullable(@object)
+		}
+		else {
+			fragments
+				.code($runtime.type(node) + '.isValue(')
+				.compile(@object)
+				.code(')')
+		} */
+		fragments
+			.code($runtime.type(node) + '.isValue(')
+			.compile(@object)
+			.code(')')
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		@node.scope().reference(@variable).toTestFragments(fragments, @object)

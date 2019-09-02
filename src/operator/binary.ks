@@ -106,7 +106,8 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 	prepare() { // {{{
 		@left.prepare()
 
-		for const data, name of @left.inferTypes() when !data.type.isAny() {
+		/* for const data, name of @left.inferTypes() when !data.type.isAny() { */
+		for const data, name of @left.inferTypes() {
 			@scope.updateInferable(name, data, this)
 		}
 

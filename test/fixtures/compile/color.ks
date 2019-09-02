@@ -620,7 +620,7 @@ export class Color {
 			if ?space.converters {
 				if ?space.converters.from {
 					for converter, name of space.converters.from {
-						$space(name) if ?!$spaces[name]
+						$space(name) if !?$spaces[name]
 
 						$spaces[name].converters[space.name] = converter
 					}
@@ -633,11 +633,11 @@ export class Color {
 			}
 
 			for name in spaces {
-				if ?!$spaces[name].converters[space.name] {
+				if !?$spaces[name].converters[space.name] {
 					$find(name, space.name)
 				}
 
-				if ?!$spaces[space.name].converters[name] {
+				if !?$spaces[space.name].converters[name] {
 					$find(space.name, name)
 				}
 			}
@@ -983,7 +983,7 @@ export class Color {
 		}
 	} // }}}
 
-	scheme(functions: array<func>): array<Color> { // {{{
+	scheme(functions: array<(color: Color): Color>): array<Color> { // {{{
 		return [fn(this.clone()) for fn in functions]
 	} // }}}
 

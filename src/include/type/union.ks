@@ -52,9 +52,17 @@ class UnionType extends Type {
 		else {
 			let notMatched = true
 
-			for const t in @types while notMatched {
+			for const t, i in @types while notMatched {
 				if t.matchContentOf(type) {
 					notMatched = false
+
+					if !t.equals(type) {
+						@types[i] = type
+
+						if !@nullable && type.isNullable() {
+							@nullable = true
+						}
+					}
 				}
 			}
 

@@ -1317,7 +1317,7 @@ class ClassMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
 			const scope = node.scope()
 
-			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
+			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
 		} // }}}
 		fromMetadata(data, metadata, references, alterations, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { // {{{
 			const type = new ClassMethodType(scope)

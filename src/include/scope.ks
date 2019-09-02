@@ -88,8 +88,8 @@ abstract class Scope {
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
 	isPredefinedVariable(name: String): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
-	abstract reference(value, nullable: Boolean = false): ReferenceType
-	abstract resolveReference(name: String, nullable: Boolean = false)
+	abstract reference(value, nullable: Boolean = false, parameters: Array = []): ReferenceType
+	abstract resolveReference(name: String, nullable: Boolean, parameters: Array): ReferenceType
 }
 
 include {

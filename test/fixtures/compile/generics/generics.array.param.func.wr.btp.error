@@ -1,0 +1,1 @@
+ReferenceException: The function "fn" can't be matched to given arguments (Number) (line 2, file "fixtures/compile/generics/generics.array.param.func.wr.btp.ks")
