@@ -133,10 +133,10 @@ class MemberExpression extends Expression {
 			fragments.wrapNullable(this).code(' ? ').compile(@object)
 
 			if @data.computed {
-				fragments.code('[').compile(@property).code('] : undefined')
+				fragments.code('[').compile(@property).code('] : null')
 			}
 			else {
-				fragments.code($dot).compile(@property).code(' : undefined')
+				fragments.code($dot).compile(@property).code(' : null')
 			}
 		}
 		else {

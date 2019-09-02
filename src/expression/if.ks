@@ -66,7 +66,7 @@ class IfExpression extends Expression {
 				.wrapBoolean(@condition)
 				.code(' ? ')
 				.compile(@whenTrue)
-				.code(' : undefined')
+				.code(' : null')
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{

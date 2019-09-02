@@ -21,7 +21,7 @@ class Parameter extends AbstractNode {
 		_maybeHeadedDefaultValue: Boolean	= false
 		_name
 		_rest: Boolean						= false
-		_type: Type
+		_type: ParameterType
 	}
 	static compileExpression(data, node) {
 		switch data.kind {
@@ -783,7 +783,7 @@ class Parameter extends AbstractNode {
 			@name.toValidationFragments(fragments, wrongdoer, @rest, @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
 		}
 	} // }}}
-	type() => @type
+	type(): ParameterType => @type
 }
 
 class AliasStatement extends Statement {

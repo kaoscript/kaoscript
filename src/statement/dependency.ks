@@ -8,7 +8,7 @@ enum DependencyKind {
 
 abstract class DependencyStatement extends Statement {
 	define(declaration, kind) { // {{{
-		const scope = this.greatScope()
+		const scope = @parent.scope()
 
 		switch declaration.kind {
 			NodeKind::ClassDeclaration => {

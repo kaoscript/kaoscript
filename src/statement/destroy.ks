@@ -43,7 +43,7 @@ class DestroyStatement extends Statement {
 				fragments.newLine().code(type.path(), '.__ks_destroy(').compile(variable).code(')').done()
 			}
 
-			fragments.newLine().compile(variable).code(' = undefined').done()
+			fragments.newLine().compile(variable).code(' = void 0').done()
 		}
 		else {
 			fragments.newLine().code('delete ').compile(@expression).done()

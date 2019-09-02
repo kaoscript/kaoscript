@@ -170,12 +170,10 @@ abstract class AbstractNode {
 	abstract prepare()
 	abstract translate()
 	data() => @data
-	directory() => @parent?.directory()
-	file() => @parent?.file()
-	greatParent() => @parent?._parent
-	greatScope() => @parent?._scope
-	isConsumedError(error): Boolean => @parent?.isConsumedError(error)
-	module() => @parent?.module()
+	directory() => @parent.directory()
+	file() => @parent.file()
+	isConsumedError(error): Boolean => @parent.isConsumedError(error)
+	module() => @parent.module()
 	newScope(scope: Scope, type: ScopeType) { // {{{
 		switch type {
 			ScopeType::Bleeding => {

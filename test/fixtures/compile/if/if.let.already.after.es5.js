@@ -7,6 +7,6 @@ module.exports = function() {
 	if(Type.isValue(x)) {
 		console.log("" + x);
 	}
-	x = undefined;
+	x = null;
 	console.log("" + x);
 };

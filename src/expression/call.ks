@@ -629,7 +629,7 @@ class CallExpression extends Expression {
 
 				this.toFragments(fragments, mode)
 
-				fragments.code(' : undefined')
+				fragments.code(' : null')
 			}
 			else {
 				for argument in @arguments {

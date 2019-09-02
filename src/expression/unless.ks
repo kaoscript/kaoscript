@@ -26,7 +26,7 @@ class UnlessExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(@condition)
-			.code(' ? undefined : ')
+			.code(' ? null : ')
 			.compile(@whenFalse)
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{

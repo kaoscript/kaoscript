@@ -15,6 +15,6 @@ module.exports = function() {
 	const regex = /foo/;
 	let match = regex.exec("foobar");
 	if(Type.isValue(match)) {
-		Type.isValue(match[0]) ? __ks_String._im_foobar(match[0]) : undefined;
+		Type.isValue(match[0]) ? __ks_String._im_foobar(match[0]) : null;
 	}
 };

@@ -159,7 +159,7 @@ class FunctionDeclaration extends Statement {
 
 		@name = @data.name.name
 
-		const scope = this.greatScope()
+		const scope = @parent.scope()
 
 		if @variable ?= scope.getDefinedVariable(@name) {
 			if @variable is FunctionVariable {
@@ -210,7 +210,7 @@ class FunctionDeclaration extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		if @main || this.greatScope().processStash(@name) {
+		if @main || @parent.scope().processStash(@name) {
 			@variable.prepare()
 		}
 	} // }}}
@@ -326,11 +326,11 @@ class FunctionDeclaration extends Statement {
 
 class FunctionDeclarator extends AbstractNode {
 	private {
-		_awaiting: Boolean			= false
+		_awaiting: Boolean				= false
 		_block: Block
-		_exit: Boolean				= false
-		_parameters: Array			= []
-		_returnNull: Boolean		= false
+		_exit: Boolean					= false
+		_parameters: Array<Parameter>	= []
+		_returnNull: Boolean			= false
 		_variable: FunctionVariable
 		_type: FunctionType
 	}
@@ -353,7 +353,7 @@ class FunctionDeclarator extends AbstractNode {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters] as Array<ParameterType>, @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
 		@scope.line(@data.start.line)

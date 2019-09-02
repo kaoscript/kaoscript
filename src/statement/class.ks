@@ -1275,17 +1275,17 @@ class MemberSuperMethodES5Substitude {
 
 class ClassMethodDeclaration extends Statement {
 	private {
-		_abstract: Boolean		= false
-		_aliases: Array			= []
-		_analysed: Boolean		= false
-		_awaiting: Boolean		= false
+		_abstract: Boolean				= false
+		_aliases: Array					= []
+		_analysed: Boolean				= false
+		_awaiting: Boolean				= false
 		_block: Block
-		_exit: Boolean			= false
-		_instance: Boolean		= true
+		_exit: Boolean					= false
+		_instance: Boolean				= true
 		_internalName: String
 		_name: String
-		_parameters: Array
-		_returnNull: Boolean	= false
+		_parameters: Array<Parameter>
+		_returnNull: Boolean			= false
 		_type: Type
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
@@ -1469,7 +1469,8 @@ class ClassMethodDeclaration extends Statement {
 				parameter.prepare()
 			}
 
-			const arguments: Array<ParameterType> = [parameter.type() for const parameter in @parameters]
+			const arguments = [parameter.type() for const parameter in @parameters]
+
 			@type = new ClassMethodType(arguments, @data, this)
 
 			if @parent.isExtending() {
@@ -1569,10 +1570,10 @@ class ClassMethodDeclaration extends Statement {
 
 class ClassConstructorDeclaration extends Statement {
 	private {
-		_aliases: Array				= []
+		_aliases: Array					= []
 		_block: Block
 		_internalName: String
-		_parameters
+		_parameters: Array<Parameter>
 		_type: Type
 	}
 	static toRouterFragments(node, fragments, variable, methods, header, footer) { // {{{
@@ -1646,7 +1647,7 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = new ClassConstructorType([parameter.type() for parameter in @parameters] as Array<ParameterType>, @data, this)
+		@type = new ClassConstructorType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {

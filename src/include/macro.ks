@@ -373,7 +373,7 @@ class MacroType extends FunctionType {
 	static fromAST(data, node: AbstractNode) { // {{{
 		const scope = node.scope()
 
-		return new MacroType([MacroParameterType.fromAST(parameter, scope, false, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
+		return new MacroType([MacroParameterType.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
 	} // }}}
 	static import(data, references, scope: Scope, node: AbstractNode): MacroType { // {{{
 		const type = new MacroType(scope)
@@ -419,7 +419,7 @@ class MacroType extends FunctionType {
 
 class MacroParameterType extends ParameterType {
 	static {
-		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode) { // {{{
+		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): MacroParameterType { // {{{
 			const type = Type.fromAST(data.type, scope, false, node)
 
 			let default: Number = 0

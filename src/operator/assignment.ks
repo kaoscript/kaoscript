@@ -213,7 +213,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			fragments.compile(@left).code($equals).wrap(@right)
 		}
 
-		fragments.code(' : undefined')
+		fragments.code(' : null')
 	} // }}}
 	toBooleanFragments(fragments, mode) { // {{{
 		if @right.isNullable() {
@@ -286,7 +286,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			.compile(@left)
 			.code($equals)
 			.wrap(@right)
-			.code(' : undefined')
+			.code(' : null')
 	} // }}}
 	toBooleanFragments(fragments, mode) { // {{{
 		if @right.isNullable() {
@@ -333,7 +333,7 @@ class AssignmentOperatorNullCoalescing extends AssignmentOperatorExpression {
 		}
 
 		fragments
-			.code(' ? undefined : ')
+			.code(' ? null : ')
 			.compile(@left)
 			.code($equals)
 			.compile(@right)

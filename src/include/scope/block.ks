@@ -128,8 +128,7 @@ class BlockScope extends Scope {
 			@variables[name] = [@line, variable]
 		}
 	} // }}}
-	getChunkType(name) => this.getChunkType(name, @line)
-	getChunkType(name, line: Number) { // {{{
+	getChunkType(name, line: Number = @line) { // {{{
 		if @chunkTypes[name] is Array {
 			const types: Array = @chunkTypes[name]
 			let type = null

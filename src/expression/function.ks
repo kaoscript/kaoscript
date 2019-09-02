@@ -27,7 +27,7 @@ class AnonymousFunctionExpression extends Expression {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters] as Array<ParameterType>, @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
@@ -107,10 +107,10 @@ class AnonymousFunctionExpression extends Expression {
 
 class ArrowFunctionExpression extends Expression {
 	private {
-		_awaiting: Boolean		= false
+		_awaiting: Boolean				= false
 		_block: Block
-		_exit: Boolean			= false
-		_parameters
+		_exit: Boolean					= false
+		_parameters: Array<Parameter>
 		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
@@ -131,7 +131,7 @@ class ArrowFunctionExpression extends Expression {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters] as Array<ParameterType>, @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {

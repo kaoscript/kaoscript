@@ -1,5 +1,5 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	let m = ["qux"];
-	let qux = Type.isValue(foo) ? foo[m[0]] : undefined;
+	let qux = Type.isValue(foo) ? foo[m[0]] : null;
 };

@@ -194,16 +194,16 @@ class ImplementClassFieldDeclaration extends Statement {
 
 class ImplementClassMethodDeclaration extends Statement {
 	private {
-		_aliases: Array			= []
+		_aliases: Array					= []
 		_block: Block
 		_class: ClassType
 		_classRef: ReferenceType
-		_isContructor: Boolean	= false
-		_isDestructor: Boolean	= false
-		_instance: Boolean		= true
+		_isContructor: Boolean			= false
+		_isDestructor: Boolean			= false
+		_instance: Boolean				= true
 		_internalName: String
 		_name: String
-		_override: Boolean		= false
+		_override: Boolean				= false
 		_parameters: Array<Parameter>
 		_this: Variable
 		_type: Type
@@ -255,7 +255,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = new ClassMethodType([parameter.type() for const parameter in @parameters] as Array<ParameterType>, @data, this)
+		@type = new ClassMethodType([parameter.type() for const parameter in @parameters], @data, this)
 
 		@type.flagAlteration()
 

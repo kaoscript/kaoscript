@@ -276,7 +276,7 @@ class VariableDeclaration extends Statement {
 				line.compile(declarator)
 			}
 
-			line.code(' = undefined')
+			line.code(' = null')
 
 			line.done()
 		}
