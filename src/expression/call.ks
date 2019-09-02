@@ -1121,27 +1121,6 @@ class SealedMethodCallee extends Callee {
 		}
 	} // }}}
 	toNullableFragments(fragments, node) { // {{{
-		/* if @data.nullable {
-			if @object.isNullable() {
-				fragments
-					.compileNullable(@object)
-					.code(' && ')
-			}
-
-			fragments
-				.code($runtime.type(node) + '.isFunction(')
-				.compile(@object)
-				.code(')')
-		}
-		else if @object.isNullable() {
-			fragments.compileNullable(@object)
-		}
-		else {
-			fragments
-				.code($runtime.type(node) + '.isValue(')
-				.compile(@object)
-				.code(')')
-		} */
 		fragments
 			.code($runtime.type(node) + '.isValue(')
 			.compile(@object)

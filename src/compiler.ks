@@ -206,7 +206,6 @@ abstract class AbstractNode {
 	parent() => @parent
 	reference() { // {{{
 		if @parent?.reference()? {
-		/* if @parent? && @parent.reference()? { */
 			return @parent.reference() + @reference
 		}
 		else {

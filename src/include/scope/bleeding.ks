@@ -139,7 +139,6 @@ class BleedingScope extends Scope {
 	line() => @parent.line()
 	module() => @parent.module()
 	parent() => @parent
-	/* reference(value, nullable: Boolean = false) => @parent.reference(value, nullable) */
 	reference(...args) => @parent.reference(...args)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name) { // {{{
@@ -156,6 +155,5 @@ class BleedingScope extends Scope {
 
 		variable.renameAs(newName)
 	} // }}}
-	/* resolveReference(name: String, nullable = false) => @parent.resolveReference(name, nullable) */
 	resolveReference(...args) => @parent.resolveReference(...args)
 }

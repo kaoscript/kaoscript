@@ -117,19 +117,6 @@ class MemberExpression extends Expression {
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@data.nullable ? 1 : 0) + (@data.computed && @property.isNullable() ? 1 : 0) > 1
 	isUsingVariable(name) => @object.isUsingVariable(name)
 	listAssignments(array) => array
-	/* path() {
-		if @data.computed {
-			if @property is NumberLiteral {
-				return `\(@object.path())[\(@property.value())]`
-			}
-			else {
-				return `\(@object.path())['\(@property.value())']`
-			}
-		}
-		else {
-			return `\(@object.path()).\(@property)`
-		}
-	} */
 	path() => @path
 	releaseReusable() { // {{{
 		if @object.isCallable() {
@@ -298,8 +285,4 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	type() => @type
-	/* type() {
-		console.log('type')
-		return @type
-	} */
 }

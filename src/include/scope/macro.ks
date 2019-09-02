@@ -101,36 +101,6 @@ class MacroScope extends Scope {
 	hasDeclaredVariable(name: String) => @variables[name] is Variable
 	hasDefinedVariable(name: String) => @variables[name] is Variable
 	hasVariable(name: String, line = -1) => @variables[name] is Variable
-	/* reference(value, nullable: Boolean = false) { // {{{
-		switch value {
-			is AnyType => return this.resolveReference('Any', nullable)
-			is ClassVariableType => return this.reference(value.type(), nullable)
-			is NamedType => {
-				if value.hasContainer() {
-					return value.container().scope().reference(value.name(), nullable)
-				}
-				else {
-					return this.resolveReference(value.name(), nullable)
-				}
-			}
-			is ReferenceType => return this.resolveReference(value.name(), value.isNullable())
-			is String => return this.resolveReference(value, nullable)
-			is Variable => return this.resolveReference(value.name(), nullable)
-			=> {
-				console.info(value)
-				throw new NotImplementedException()
-			}
-		}
-	} // }}}
-	resolveReference(name: String, nullable = false) { // {{{
-		const hash = `\(name)\(nullable ? '?' : '')`
-
-		if @references[hash] is not ReferenceType {
-			@references[hash] = new ReferenceType(this, name, nullable)
-		}
-
-		return @references[hash]
-	} // }}} */
 	reference(value, nullable: Boolean = false, parameters: Array = []) { // {{{
 		switch value {
 			is AnyType => return this.resolveReference('Any', nullable, parameters)

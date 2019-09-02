@@ -403,7 +403,6 @@ class ModuleScope extends Scope {
 			}
 		}
 	} // }}}
-	/* reference(name: String, nullable: Boolean) => this.resolveReference(name, nullable) */
 	releaseTempName(name) { // {{{
 		@tempNames[name] = true
 	} // }}}
@@ -458,7 +457,6 @@ class ModuleScope extends Scope {
 		return variable
 	} // }}}
 	resolveReference(name: String, nullable: Boolean, parameters: Array) { // {{{
-		/* const hash = `\(name)\(nullable ? '?' : '')` */
 		const hash = ReferenceType.toQuote(name, nullable, parameters)
 
 		if @references[hash] is not ReferenceType {

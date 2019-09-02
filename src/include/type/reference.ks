@@ -288,17 +288,6 @@ class ReferenceType extends Type {
 			const a: Type = this.discardReference()
 			const b: Type = that.discardReference()
 
-			/* if a is ReferenceType {
-				if b is ReferenceType {
-					return a._name == b._name
-				}
-				else {
-					return false
-				}
-			}
-			else {
-				return a.matchContentOf(b)
-			} */
 			if a is ReferenceType || b is ReferenceType {
 				return false
 			}
@@ -422,35 +411,6 @@ class ReferenceType extends Type {
 
 		return @referenceIndex
 	} // }}}
-	/* toQuote() { // {{{
-		const fragments = [@name]
-
-		if @parameters.length != 0 {
-			fragments.push('<')
-
-			for const parameter, index in @parameters {
-				if index != 0 {
-					fragments.push(', ')
-				}
-
-				fragments.push(parameter.toQuote())
-			}
-
-			fragments.push('>')
-		}
-
-		if @nullable {
-			fragments.push('?')
-		}
-
-		return fragments.join('')
-		/* if @nullable {
-			return `\(@name)?`
-		}
-		else {
-			return @name
-		} */
-	} // }}} */
 	toQuote() => ReferenceType.toQuote(@name, @nullable, @parameters)
 	toReference(references, mode) { // {{{
 		this.resolveType()

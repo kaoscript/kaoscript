@@ -2016,7 +2016,6 @@ class ClassVariableDeclaration extends AbstractNode {
 		if @hasDefaultValue {
 			@defaultValue.prepare()
 
-			/* if !@defaultValue.type().matchContentOf(@type.type()) { */
 			if !@defaultValue.isMatchingType(@type.type()) {
 				TypeException.throwInvalidAssignement(@name, @type, @defaultValue.type(), this)
 			}
