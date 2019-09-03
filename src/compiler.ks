@@ -444,10 +444,12 @@ const $unaryOperators = {
 	`\(UnaryOperatorKind::DecrementPostfix)`	: UnaryOperatorDecrementPostfix
 	`\(UnaryOperatorKind::DecrementPrefix)`		: UnaryOperatorDecrementPrefix
 	`\(UnaryOperatorKind::Existential)`			: UnaryOperatorExistential
+	`\(UnaryOperatorKind::ForcedTypeCasting)`	: UnaryOperatorForcedTypeCasting
 	`\(UnaryOperatorKind::IncrementPostfix)`	: UnaryOperatorIncrementPostfix
 	`\(UnaryOperatorKind::IncrementPrefix)`		: UnaryOperatorIncrementPrefix
 	`\(UnaryOperatorKind::Negation)`			: UnaryOperatorNegation
 	`\(UnaryOperatorKind::Negative)`			: UnaryOperatorNegative
+	`\(UnaryOperatorKind::NullableTypeCasting)`	: UnaryOperatorNullableTypeCasting
 	`\(UnaryOperatorKind::Spread)`				: UnaryOperatorSpread
 }
 

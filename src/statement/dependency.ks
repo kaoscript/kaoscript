@@ -100,9 +100,9 @@ abstract class DependencyStatement extends Statement {
 			NodeKind::FunctionDeclaration => {
 				let type
 				if declaration.parameters? {
-					const parameters: Array<ParameterType> = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
+					const parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
 
-					type = new FunctionType(parameters, declaration, this)
+					type = new FunctionType(parameters!!, declaration, this)
 					type.setExhaustive(true)
 				}
 				else {
@@ -228,7 +228,7 @@ class ExternDeclaration extends DependencyStatement {
 						parameters = [new ParameterType(@scope, Type.Any, 0, Infinity)]
 					}
 
-					const type = new FunctionType(parameters as Array<ParameterType>, declaration, this)
+					const type = new FunctionType(parameters!!, declaration, this)
 
 					if variable.getDeclaredType() is FunctionType {
 						const newType = new OverloadedFunctionType(@scope)
@@ -294,7 +294,7 @@ class RequireDeclaration extends DependencyStatement {
 						parameters = [new ParameterType(@scope, Type.Any, 0, Infinity)]
 					}
 
-					const type = new FunctionType(parameters as Array<ParameterType>, declaration, this)
+					const type = new FunctionType(parameters!!, declaration, this)
 
 					if variable.getDeclaredType() is FunctionType {
 						const newType = new OverloadedFunctionType(@scope)

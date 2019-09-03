@@ -20,7 +20,7 @@ class FunctionType extends Type {
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
 			if data.parameters? {
-				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
+				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters]!!, data, node)
 			}
 			else {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)

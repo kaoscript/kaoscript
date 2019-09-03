@@ -121,7 +121,7 @@ abstract class Type {
 				}
 				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
 					if data.parameters? {
-						return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
+						return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters]!!, data, node)
 					}
 					else {
 						return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)] as Array<ParameterType>, data, node)

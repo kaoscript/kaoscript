@@ -89,6 +89,13 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
+class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
+	toFragments(fragments, mode) { // {{{
+		fragments.compile(@argument)
+	} // }}}
+	type() => AnyType.Unexplicit
+}
+
 class UnaryOperatorIncrementPostfix extends UnaryOperatorExpression {
 	toFragments(fragments, mode) { // {{{
 		fragments
@@ -125,6 +132,21 @@ class UnaryOperatorNegative extends UnaryOperatorExpression {
 			.wrap(@argument)
 	} // }}}
 	type() => @scope.reference('Number')
+}
+
+class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
+	private {
+		_type: Type
+	}
+	prepare() { // {{{
+		@argument.prepare()
+
+		@type = @argument.type().setNullable(false)
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments.compile(@argument)
+	} // }}}
+	type() => @type
 }
 
 class UnaryOperatorSpread extends UnaryOperatorExpression {
