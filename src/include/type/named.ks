@@ -80,6 +80,7 @@ class NamedType extends Type {
 	isAlias() => @type.isAlias()
 	isAlien() => @type.isAlien()
 	isAlteration() => @type.isAlteration()
+	isArray() => @type.isArray()
 	isCloned() => @cloned
 	isClass() => @type.isClass()
 	isEnum() => @type.isEnum()
@@ -276,6 +277,7 @@ class NamedType extends Type {
 	} // }}}
 	name() => @name
 	name(@name) => this
+	parameter() => @type.parameter()
 	path() { // {{{
 		if @container? {
 			return `\(@container.path()).\(@name)`

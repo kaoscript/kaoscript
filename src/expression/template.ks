@@ -1,27 +1,27 @@
 class TemplateExpression extends Expression {
 	private {
 		_computing: Boolean		= false
-		_elements: Array
-		_types: Array
+		_elements: Array		= []
+		_types: Array			= []
 	}
 	analyse() { // {{{
-		@elements = []
-		for element in @data.elements {
-			@elements.push(element = $compile.expression(element, this))
+		for const data in @data.elements {
+			const element = $compile.expression(data, this)
 
 			element.analyse()
+
+			@elements.push(element)
 		}
 	} // }}}
 	prepare() { // {{{
-		@types = []
-		for element in @elements {
+		for const element in @elements {
 			element.prepare()
 
-			@types.push(element.type().isString())
+			@types.push(element.type().isString() && !element.type().isNullable())
 		}
 	} // }}}
 	translate() { // {{{
-		for element in @elements {
+		for const element in @elements {
 			element.translate()
 		}
 	} // }}}
@@ -38,7 +38,7 @@ class TemplateExpression extends Expression {
 	isComputed() => @elements.length > 1 || !@types[0]
 	toFragments(fragments, mode) { // {{{
 		if @computing {
-			for element, index in @elements {
+			for const element, index in @elements {
 				if index == 0 {
 					fragments.wrap(element)
 				}
@@ -48,7 +48,7 @@ class TemplateExpression extends Expression {
 			}
 		}
 		else {
-			for element, index in @elements {
+			for const element, index in @elements {
 				if index == 0 {
 					if @types[index] {
 						fragments.wrap(element)

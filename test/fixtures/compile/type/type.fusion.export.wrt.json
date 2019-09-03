@@ -1,0 +1,57 @@
+{
+  "aliens": [
+    0,
+    "exec"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "exec",
+    1,
+    "RegExpExecArray"
+  ],
+  "references": [
+    {
+      "kind": "function",
+      "async": false,
+      "exhaustive": true,
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": {
+        "reference": 1
+      },
+      "throws": []
+    },
+    {
+      "kind": "alias",
+      "of": {
+        "kind": "fusion",
+        "types": [
+          {
+            "kind": "reference",
+            "name": "Array",
+            "parameters": [
+              {
+                "kind": "reference",
+                "name": "String",
+                "nullable": true
+              }
+            ]
+          },
+          {
+            "reference": 2
+          }
+        ]
+      }
+    },
+    {
+      "kind": "object",
+      "properties": {
+        "index": "Number",
+        "input": "String"
+      }
+    }
+  ],
+  "macros": []
+}

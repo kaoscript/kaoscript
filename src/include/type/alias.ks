@@ -35,9 +35,11 @@ class AliasType extends Type {
 	} // }}}
 	getProperty(name: String): Type => @type.getProperty(name)
 	isAlias() => true
+	isArray() => @type.isArray()
 	isUnion() => @type.isUnion()
 	isExportable() => @type.isExportable()
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
+	parameter() => @type.parameter()
 	type() => @type
 	type(@type) => this
 	toFragments(fragments, node) { // {{{

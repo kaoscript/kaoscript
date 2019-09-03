@@ -162,7 +162,7 @@ class ReferenceType extends Type {
 	hasParameters() => @parameters.length != 0
 	isAlien() => this.type().isAlien()
 	isAny() => @name == 'Any' || @name == 'any'
-	isArray() => @name == 'Array' || @name == 'array'
+	isArray() => @name == 'Array' || @name == 'array' || this.type().isArray()
 	isAsync() => false
 	isClass() => @name == 'Class' || @name == 'class'
 	isEnum() => @name == 'Enum' || @name == 'enum'
@@ -336,7 +336,10 @@ class ReferenceType extends Type {
 	} // }}}
 	name(): String => @name
 	parameter(index: Number = 0) { // {{{
-		if index >= @parameters.length {
+		if @parameters.length == 0 && this.isArray() {
+			return this.type().parameter()
+		}
+		else if index >= @parameters.length {
 			return Type.Any
 		}
 		else {

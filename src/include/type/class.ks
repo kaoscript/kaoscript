@@ -1194,6 +1194,7 @@ class ClassType extends Type {
 			return [this.toMetadata(references, mode), name]
 		}
 	} // }}}
+	parameter() => AnyType.NullableUnexplicit
 	setAlterationReference(@alterationReference) { // {{{
 		@alteration = true
 	} // }}}

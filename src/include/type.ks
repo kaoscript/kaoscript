@@ -73,6 +73,7 @@ enum TypeKind<String> {
 	Class
 	Enum
 	Function
+	Fusion
 	Namespace
 	Object
 	OverloadedFunction
@@ -129,6 +130,9 @@ abstract class Type {
 				}
 				NodeKind::FunctionExpression, NodeKind::MethodDeclaration => {
 					return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
+				}
+				NodeKind::FusionType => {
+					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
 				NodeKind::Identifier => {
 					if const variable = scope.getVariable(data.name) {
@@ -321,6 +325,9 @@ abstract class Type {
 					}
 					TypeKind::Function => {
 						return FunctionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind::Fusion => {
+						return FusionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::OverloadedFunction => {
 						return OverloadedFunctionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
@@ -619,6 +626,7 @@ include {
 	'./type/null'
 	'./type/object'
 	'./type/parameter'
+	'./type/fusion'
 	'./type/union'
 	'./type/void'
 }
