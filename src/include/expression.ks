@@ -3,7 +3,7 @@ abstract class Expression extends AbstractNode {
 	// if the expression can throw an expception
 	hasExceptions() => true
 	inferTypes() => {}
-	inferContraryTypes() => {}
+	inferContraryTypes(isExit) => {}
 	// if the expression can be an assignment
 	isAssignable() => false
 	// if the expression is an `await` expression

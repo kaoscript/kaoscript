@@ -82,12 +82,12 @@ class IfStatement extends Statement {
 
 			if !@declared {
 				if @whenTrueExpression.isExit() {
-					for const data, name of @condition.inferContraryTypes() {
+					for const data, name of @condition.inferContraryTypes(true) {
 						@scope.updateInferable(name, data, this)
 					}
 				}
 				else {
-					const conditionInferables = @condition.inferContraryTypes()
+					const conditionInferables = @condition.inferContraryTypes(false)
 					const trueInferables = @whenTrueScope.listUpdatedInferables()
 
 					for const :name of trueInferables when conditionInferables[name]? {
@@ -109,7 +109,7 @@ class IfStatement extends Statement {
 		}
 		else {
 			if !@declared {
-				for const data, name of @condition.inferContraryTypes() {
+				for const data, name of @condition.inferContraryTypes(false) {
 					@whenFalseScope.updateInferable(name, data, this)
 				}
 			}

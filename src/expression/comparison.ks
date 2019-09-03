@@ -83,7 +83,7 @@ class ComparisonExpression extends Expression {
 			return {}
 		}
 	} // }}}
-	inferContraryTypes() { // {{{
+	inferContraryTypes(isExit) { // {{{
 		if @operators.length == 1 {
 			return @operators[0].inferContraryTypes()
 		}

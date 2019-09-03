@@ -131,18 +131,18 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 
 		return inferables
 	} // }}}
-	inferContraryTypes() { // {{{
+	inferContraryTypes(isExit) { // {{{
 		const inferables = {}
 
 		const last = @operands.length - 1
 
 		const operandTypes = [null]
 		for const operand in @operands til last {
-			operandTypes.push(operand.inferContraryTypes())
+			operandTypes.push(operand.inferContraryTypes(false))
 		}
 
 		for const operand in @operands[last] {
-			for const data, name of operand.inferContraryTypes() {
+			for const data, name of operand.inferContraryTypes(false) {
 				let nf = false
 
 				for const index from 0 til @operands.length until nf {
@@ -465,7 +465,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 		return inferables
 	} // }}}
-	inferContraryTypes() { // {{{
+	inferContraryTypes(isExit) { // {{{
 		const inferables = {}
 
 		const operandTypes = [null]
@@ -473,7 +473,7 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 			operandTypes.push(operand.inferTypes())
 		}
 
-		for const data, name of @operands[0].inferContraryTypes() {
+		for const data, name of @operands[0].inferContraryTypes(false) {
 			if !data.type.isAny() {
 				let type = data.type
 

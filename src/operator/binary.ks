@@ -126,12 +126,12 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 
 		return inferables
 	} // }}}
-	inferContraryTypes() { // {{{
+	inferContraryTypes(isExit) { // {{{
 		const inferables = {}
 
-		const rightTypes = @right.inferContraryTypes()
+		const rightTypes = @right.inferContraryTypes(false)
 
-		for const :name of @left.inferContraryTypes() when rightTypes[name]? {
+		for const :name of @left.inferContraryTypes(false) when rightTypes[name]? {
 			inferables[name] = rightTypes[name]
 		}
 
@@ -350,28 +350,51 @@ class BinaryOperatorOr extends BinaryOperatorExpression {
 
 		return inferables
 	} // }}}
-	inferContraryTypes() { // {{{
-		const inferables = {}
+	inferContraryTypes(isExit) { // {{{
+		if isExit {
+			const inferables = @left.inferContraryTypes(false)
 
-		const right = @right.inferTypes()
+			for const data, name of @right.inferContraryTypes(false) {
+				if inferables[name]? {
+					const itype = inferables[name].type
 
-		for const data, name of @left.inferContraryTypes() {
-			if right[name]? {
-				const rtype = right[name].type
-
-				if !data.type.isAny() && !rtype.isAny() {
-					inferables[name] = {
-						isVariable: data.isVariable
-						type: data.type.reduce(rtype)
+					if !data.type.isAny() && !itype.isAny() {
+						inferables[name] = {
+							isVariable: data.isVariable
+							type: data.type.reduce(itype)
+						}
 					}
 				}
+				else {
+					inferables[name] = data
+				}
 			}
-			else {
-				inferables[name] = data
-			}
-		}
 
-		return inferables
+			return inferables
+		}
+		else {
+			const inferables = {}
+
+			const right = @right.inferTypes()
+
+			for const data, name of @left.inferContraryTypes(false) {
+				if right[name]? {
+					const rtype = right[name].type
+
+					if !data.type.isAny() && !rtype.isAny() {
+						inferables[name] = {
+							isVariable: data.isVariable
+							type: data.type.reduce(rtype)
+						}
+					}
+				}
+				else {
+					inferables[name] = data
+				}
+			}
+
+			return inferables
+		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
@@ -500,7 +523,7 @@ class BinaryOperatorTypeEquality extends Expression {
 
 		return inferables
 	} // }}}
-	inferContraryTypes() { // {{{
+	inferContraryTypes(isExit) { // {{{
 		const inferables = {}
 
 		if @left.isInferable() {
@@ -582,7 +605,7 @@ class BinaryOperatorTypeInequality extends Expression {
 
 		return inferables
 	} // }}}
-	inferContraryTypes() { // {{{
+	inferContraryTypes(isExit) { // {{{
 		const inferables = {}
 
 		if @left.isInferable() {

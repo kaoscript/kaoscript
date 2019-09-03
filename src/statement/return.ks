@@ -69,7 +69,7 @@ class ReturnStatement extends Statement {
 			if type.isVoid() {
 				TypeException.throwUnexpectedReturnedValue(this)
 			}
-			else if !@value.type().matchContentOf(type) {
+			else if !@value.isMatchingType(type) {
 				TypeException.throwUnexpectedReturnedType(type, this)
 			}
 		}
