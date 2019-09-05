@@ -76,7 +76,7 @@ class Block extends AbstractNode {
 
 		if !@exit && @type != null && !@type.isAny() && !@type.isVoid() {
 			if @statements.length == 0 {
-				TypeException.throwUnexpectedReturnedType(@type, this)
+				TypeException.throwExpectedReturnedValue(this)
 			}
 			else {
 				@statements[@statements.length - 1].checkReturnType(@type)

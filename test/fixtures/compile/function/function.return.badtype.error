@@ -1,1 +1,1 @@
-TypeException: Expected returned type "String" (line 1, file "fixtures/compile/function/function.return.badtype.ks")
+TypeException: The return type must be "String" and not "Number" (line 1, file "fixtures/compile/function/function.return.badtype.ks")

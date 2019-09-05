@@ -62,7 +62,7 @@ class ReturnStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		if @value == null {
 			if !type.isVoid() {
-				TypeException.throwUnexpectedReturnedType(type, this)
+				TypeException.throwExpectedReturnedValue(this)
 			}
 		}
 		else {
@@ -70,7 +70,7 @@ class ReturnStatement extends Statement {
 				TypeException.throwUnexpectedReturnedValue(this)
 			}
 			else if !@value.isMatchingType(type) {
-				TypeException.throwUnexpectedReturnedType(type, this)
+				TypeException.throwUnexpectedReturnType(type, @value.type(), this)
 			}
 		}
 	} // }}}

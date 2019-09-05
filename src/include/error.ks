@@ -361,6 +361,9 @@ export class TypeException extends Exception {
 		throwConstructorWithoutNew(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Class constructor "\(name)" cannot be invoked without 'new'`, node)
 		} // }}}
+		throwExpectedReturnedValue(node) ~ TypeException { // {{{
+			throw new TypeException(`A value is expected to be returned`, node)
+		} // }}}
 		throwImplFieldToSealedType(node) ~ TypeException { // {{{
 			throw new TypeException(`impl can add field to only non-sealed type`, node)
 		} // }}}
@@ -427,8 +430,8 @@ export class TypeException extends Exception {
 		throwUnexpectedReturnedValue(node) ~ TypeException { // {{{
 			throw new TypeException(`No values are expected to be returned`, node)
 		} // }}}
-		throwUnexpectedReturnedType(type, node) ~ TypeException { // {{{
-			throw new TypeException(`Expected returned type \(type.toQuote(true))`, node)
+		throwUnexpectedReturnType(expected, unexpected, node) ~ TypeException { // {{{
+			throw new TypeException(`The return type must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
 		} // }}}
 		throwUnnecessaryTypeChecking(type, node) ~ TypeException { // {{{
 			throw new TypeException(`The variable is always of type \(type.toQuote(true))`, node)

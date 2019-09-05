@@ -1,1 +1,1 @@
-TypeException: Expected returned type "String" (line 2, file "fixtures/compile/function/function.return.tsnn.wrn.block.ks")
+TypeException: The return type must be "String" and not "null" (line 2, file "fixtures/compile/function/function.return.tsnn.wrn.block.ks")

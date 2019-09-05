@@ -1,1 +1,1 @@
-TypeException: Expected returned type "String" (line 2, file "fixtures/compile/class/class.return.default.ks")
+TypeException: The return type must be "String" and not "Number" (line 2, file "fixtures/compile/class/class.return.default.ks")
