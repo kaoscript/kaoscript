@@ -56,6 +56,26 @@
         "PI": {
           "reference": 0,
           "sealed": false
+        },
+        "round": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": {
+            "reference": 0
+          },
+          "throws": [],
+          "sealed": false
         }
       }
     },
@@ -78,7 +98,9 @@
             "parameters": [
               {
                 "name": "precision",
-                "type": "Any",
+                "type": {
+                  "reference": 2
+                },
                 "min": 0,
                 "max": 1,
                 "default": 1

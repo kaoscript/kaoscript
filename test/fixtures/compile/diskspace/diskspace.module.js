@@ -21,8 +21,8 @@ module.exports = function() {
 				let matches;
 				for(let __ks_1 = 0, __ks_2 = __ks_String._im_lines(stdout), __ks_3 = __ks_2.length, line; __ks_1 < __ks_3; ++__ks_1) {
 					line = __ks_2[__ks_1];
-					matches = df_regex.exec(line);
-					if(matches) {
+					let __ks_4;
+					if(Type.isValue(__ks_4 = df_regex.exec(line)) ? (matches = __ks_4, true) : false) {
 						disks.push({
 							device: matches[1].trim(),
 							mount: matches[9],

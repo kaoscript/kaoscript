@@ -8,6 +8,9 @@ class NamedType extends Type {
 	constructor(@name, @type) { // {{{
 		super(type.scope())
 	} // }}}
+	canBeBoolean() => @type.canBeBoolean()
+	canBeNumber(any = true) => @type.canBeNumber(any)
+	canBeString(any = true) => @type.canBeString(any)
 	clone() { // {{{
 		@cloned = true
 
@@ -81,6 +84,7 @@ class NamedType extends Type {
 	isAlien() => @type.isAlien()
 	isAlteration() => @type.isAlteration()
 	isArray() => @type.isArray()
+	isBoolean() => @type.isBoolean()
 	isCloned() => @cloned
 	isClass() => @type.isClass()
 	isEnum() => @type.isEnum()
@@ -96,7 +100,7 @@ class NamedType extends Type {
 		if this == value {
 			return true
 		}
-		else if mode & MatchingMode::Exact {
+		else if mode & MatchingMode::Exact != 0 {
 			NotImplementedException.throw()
 		}
 		else {
@@ -172,12 +176,14 @@ class NamedType extends Type {
 	isNamespace() => @type.isNamespace()
 	isNative() => $natives[@name] == true
 	isNullable() => @type.isNullable()
+	isNumber() => @type.isNumber()
 	isPredefined() => @type.isPredefined()
 	isReferenced() => @type.isReferenced()
 	isRequired() => @type.isRequired()
 	isSealable() => @type.isSealable()
 	isSealed() => @type.isSealed()
 	isSealedAlien() => @type.isSealedAlien()
+	isString() => @type.isString()
 	isUnion() => @type.isUnion()
 	matchClassName(that: Type?) { // {{{
 		if that == null {

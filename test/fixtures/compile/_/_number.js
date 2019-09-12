@@ -1,5 +1,7 @@
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	var __ks_Number = {};
+	var __ks_Math = {};
 	__ks_Number.__ks_func_limit_0 = function(min, max) {
 		if(arguments.length < 2) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
@@ -7,10 +9,16 @@ module.exports = function() {
 		if(min === void 0 || min === null) {
 			throw new TypeError("'min' is not nullable");
 		}
+		else if(!Type.isNumber(min)) {
+			throw new TypeError("'min' is not of type 'Number'");
+		}
 		if(max === void 0 || max === null) {
 			throw new TypeError("'max' is not nullable");
 		}
-		return isNaN(this) ? min : Math.min(max, Math.max(min, this));
+		else if(!Type.isNumber(max)) {
+			throw new TypeError("'max' is not of type 'Number'");
+		}
+		return (isNaN(this) === true) ? min : Math.min(max, Math.max(min, this));
 	};
 	__ks_Number.__ks_func_mod_0 = function(max) {
 		if(arguments.length < 1) {
@@ -19,7 +27,10 @@ module.exports = function() {
 		if(max === void 0 || max === null) {
 			throw new TypeError("'max' is not nullable");
 		}
-		if(isNaN(this)) {
+		else if(!Type.isNumber(max)) {
+			throw new TypeError("'max' is not of type 'Number'");
+		}
+		if(isNaN(this) === true) {
 			return 0;
 		}
 		else {
@@ -36,6 +47,9 @@ module.exports = function() {
 		if(precision === void 0 || precision === null) {
 			precision = 0;
 		}
+		else if(!Type.isNumber(precision)) {
+			throw new TypeError("'precision' is not of type 'Number'");
+		}
 		precision = Math.pow(10, precision).toFixed(0);
 		return Math.round(this * precision) / precision;
 	};
@@ -45,6 +59,9 @@ module.exports = function() {
 	__ks_Number.__ks_func_toInt_0 = function(base) {
 		if(base === void 0 || base === null) {
 			base = 10;
+		}
+		else if(!Type.isNumber(base)) {
+			throw new TypeError("'base' is not of type 'Number'");
 		}
 		return parseInt(this, base);
 	};

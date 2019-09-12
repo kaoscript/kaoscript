@@ -11,7 +11,7 @@ abstract class Expression extends AbstractNode {
 	// if the expression is awaiting to be resolved
 	isAwaiting() => false
 	// if the generated code, to cast the expression has a boolean, requires to be wrapped inside parentheses
-	isBooleanComputed() => this.isComputed()
+	isBooleanComputed() => this.isComputed() || !this.type().isBoolean() || this.type().isNullable()
 	// if the expression contains a call
 	isCallable() => false
 	// if the expression needs to be assign to a temp variable to be reused
@@ -45,8 +45,15 @@ abstract class Expression extends AbstractNode {
 
 		return expression._parent
 	} // }}}
-	toBooleanFragments(fragments, mode = Mode::None) => this.toFragments(fragments, mode)
+	toBooleanFragments(fragments, mode = Mode::None) { // {{{
+		this.toFragments(fragments, mode)
+
+		if !this.type().isBoolean() || this.type().isNullable() {
+			fragments.code(' === true')
+		}
+	} // }}}
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
+	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode::None)
 	toQuote(): String { // {{{
 		throw new NotSupportedException()
 	} // }}}

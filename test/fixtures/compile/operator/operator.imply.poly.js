@@ -12,7 +12,7 @@ module.exports = function() {
 		if(z === void 0 || z === null) {
 			throw new TypeError("'z' is not nullable");
 		}
-		if(!(!x || y) || z) {
+		if(!(!(x === true) || (y === true)) || (z === true)) {
 		}
 	}
 };

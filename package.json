@@ -37,17 +37,17 @@
 		"kaoscript": "./bin/kaoscript"
 	},
 	"dependencies": {
-		"@kaoscript/runtime": "^0.6.1",
+		"@kaoscript/runtime": "github:kaoscript/runtime",
 		"commander": "^2.20.0"
 	},
 	"devDependencies": {
 		"@kaoscript/ast": "github:kaoscript/ast",
 		"@kaoscript/coverage-istanbul": "^0.2.1",
 		"@kaoscript/parser": "github:kaoscript/parser",
-		"@kaoscript/source-generator": "^0.1.0",
+		"@kaoscript/source-generator": "github:kaoscript/source-generator",
 		"@kaoscript/target-commons": "^0.2.0",
 		"@kaoscript/test-import": "^0.2.2",
-		"@kaoscript/util": "^0.1.1",
+		"@kaoscript/util": "github:kaoscript/util",
 		"@zokugun/istanbul.cover": "^0.5.0",
 		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",
 		"@zokugun/istanbul.reporter.minimap": "^0.5.0",

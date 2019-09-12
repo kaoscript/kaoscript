@@ -408,10 +408,17 @@ class RuntimeAttribute extends Attribute {
 	}
 	constructor(@data)
 	configure(options) { // {{{
-		for arg in @data.arguments {
+		for const arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
 				if arg.name.name == 'package' {
 					options.runtime.helper.package = options.runtime.type.package = arg.value.value
+				}
+				else if arg.name.name == 'prefix' {
+					const prefix = arg.value.value
+
+					options.runtime.helper.alias = prefix + options.runtime.helper.alias
+					options.runtime.operator.alias = prefix + options.runtime.operator.alias
+					options.runtime.type.alias = prefix + options.runtime.type.alias
 				}
 			}
 			else if arg.kind == NodeKind::AttributeExpression {
@@ -422,6 +429,17 @@ class RuntimeAttribute extends Attribute {
 								'alias' => options.runtime.helper.alias = arg.value.value
 								'member' => options.runtime.helper.member = arg.value.value
 								'package' => options.runtime.helper.package = arg.value.value
+							}
+						}
+					}
+				}
+				else if arg.name.name == 'operator' {
+					for let arg in arg.arguments {
+						if arg.kind == NodeKind::AttributeOperation {
+							switch arg.name.name {
+								'alias' => options.runtime.operator.alias = arg.value.value
+								'member' => options.runtime.operator.member = arg.value.value
+								'package' => options.runtime.operator.package = arg.value.value
 							}
 						}
 					}

@@ -100,7 +100,7 @@ class ForInStatement extends Statement {
 			this.checkForRenamedVariables(@to, variables)
 		}
 
-		if @data.by {
+		if @data.by? {
 			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 
@@ -525,7 +525,7 @@ class ForInStatement extends Statement {
 		ctrl.code('; ')
 
 		if @isDesc || @fromDesc {
-			if @data.by {
+			if @data.by? {
 				if @data.by.kind == NodeKind::NumericExpression {
 					if Math.abs(@data.by.value) == 1 {
 						ctrl.code('--').compile(@indexName ?? @index)
@@ -543,7 +543,7 @@ class ForInStatement extends Statement {
 			}
 		}
 		else {
-			if @data.by {
+			if @data.by? {
 				if @data.by.kind == NodeKind::NumericExpression {
 					if Math.abs(@data.by.value) == 1 {
 						ctrl.code('++').compile(@indexName ?? @index)

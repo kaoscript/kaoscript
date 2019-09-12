@@ -10,7 +10,7 @@ module.exports = function() {
 			throw new TypeError("'x' is not nullable");
 		}
 		if(Type.isArray(x)) {
-			if(qux[x = __ks_Array._im_last(x)]) {
+			if(qux[x = __ks_Array._im_last(x)] === true) {
 				console.log(x.last());
 			}
 			else {

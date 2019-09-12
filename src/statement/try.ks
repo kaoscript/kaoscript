@@ -426,7 +426,7 @@ class TryStatement extends Statement {
 			let ifs = fragments.newControl()
 
 			for clause, i in @data.catchClauses {
-				ifs.step().code('else ') if i
+				ifs.step().code('else ') if i != 0
 
 				ifs
 					.code('if(', $runtime.type(this), '.is(', error, ', ')

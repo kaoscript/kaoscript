@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	class Formatter {
 		constructor() {
@@ -18,7 +19,7 @@ module.exports = function() {
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
-			return value.charAt(0).toLowerCase() + value.substr(1).replace(/[-_\s]+(.)/g, function(__ks_0, l) {
+			return Operator.addOrConcat(value.charAt(0).toLowerCase(), value.substr(1).replace(/[-_\s]+(.)/g, function(__ks_0, l) {
 				if(arguments.length < 2) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
@@ -26,7 +27,7 @@ module.exports = function() {
 					throw new TypeError("'l' is not nullable");
 				}
 				return l.toUpperCase();
-			});
+			}));
 		}
 		camelize() {
 			if(arguments.length === 1) {

@@ -362,12 +362,7 @@ class Importer extends Statement {
 					}
 				}
 
-				if	pkg.main &&
-						(
-							this.loadFile(path.join(x, pkg.main), moduleName) ||
-							this.loadDirectory(path.join(x, pkg.main), moduleName)
-						)
-				{
+				if pkg.main is String && (this.loadFile(path.join(x, pkg.main), moduleName) || this.loadDirectory(path.join(x, pkg.main), moduleName)) {
 					return true
 				}
 			}
@@ -508,7 +503,7 @@ class Importer extends Statement {
 		}
 		else {
 			let name, type
-			for specifier in @data.specifiers {
+			for const specifier in @data.specifiers {
 				if specifier.kind == NodeKind::ImportExclusionSpecifier {
 					const exclusions = [exclusion.name for exclusion in specifier.exclusions]
 
@@ -539,7 +534,7 @@ class Importer extends Statement {
 						}
 						NodeKind::VariableDeclarator => {
 							name = specifier.imported.name.name
-							type = specifier.imported.type ? Type.fromAST(specifier.imported.type, this) : null
+							type = specifier.imported.type? ? Type.fromAST(specifier.imported.type, this) : null
 						}
 						=> {
 							console.info(specifier.imported)

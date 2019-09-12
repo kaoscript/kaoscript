@@ -13,7 +13,7 @@ module.exports = function() {
 			throw new TypeError("'c' is not nullable");
 		}
 		var x;
-		if(a) {
+		if(a === true) {
 			x = {
 				b: b,
 				c: c

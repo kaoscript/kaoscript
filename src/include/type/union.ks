@@ -75,6 +75,33 @@ class UnionType extends Type {
 			}
 		}
 	} // }}}
+	canBeBoolean() { // {{{
+		for const type in @types {
+			if type.canBeBoolean() {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	canBeNumber(any = true) { // {{{
+		for const type in @types {
+			if type.canBeNumber(any) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	canBeString(any = true) { // {{{
+		for const type in @types {
+			if type.canBeString(any) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
@@ -187,24 +214,13 @@ class UnionType extends Type {
 	isUnion() => true
 	length() => @types.length
 	matchContentOf(that: Type) { // {{{
-		if @explicit {
-			for const type in @types {
-				if !type.matchContentOf(that) {
-					return false
-				}
+		for const type in @types {
+			if !type.matchContentOf(that) {
+				return false
 			}
-
-			return true
 		}
-		else {
-			for const type in @types {
-				if type.matchContentOf(that) {
-					return true
-				}
-			}
 
-			return false
-		}
+		return true
 	} // }}}
 	reduce(type: Type) { // {{{
 		const types = [t for const t in @types when !t.matchContentOf(type)]
@@ -236,7 +252,7 @@ class UnionType extends Type {
 		fragments.code('(')
 
 		for type, i in @types {
-			if i {
+			if i != 0 {
 				fragments.code(' || ')
 			}
 

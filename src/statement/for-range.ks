@@ -42,21 +42,21 @@ class ForRangeStatement extends Statement {
 		@to = $compile.expression(@data.to, this, @scope)
 		@to.analyse()
 
-		if @data.by {
+		if @data.by? {
 			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 		}
 
-		if @data.until {
+		if @data.until? {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
-		else if @data.while {
+		else if @data.while? {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
-		if @data.when {
+		if @data.when? {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
@@ -140,16 +140,16 @@ class ForRangeStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if @data.until {
+		if @until? {
 			ctrl.code('!(').compile(@until).code(') && ')
 		}
-		else if @data.while {
+		else if @while? {
 			ctrl.compile(@while).code(' && ')
 		}
 
 		ctrl.compile(@value).code(' <= ').compile(@boundName ?? @to).code('; ')
 
-		if @data.by {
+		if @data.by? {
 			if @data.by.kind == NodeKind::NumericExpression {
 				if @data.by.value == 1 {
 					ctrl.code('++').compile(@value)
@@ -168,7 +168,7 @@ class ForRangeStatement extends Statement {
 
 		ctrl.code(')').step()
 
-		if @data.when {
+		if @when? {
 			ctrl
 				.newControl()
 				.code('if(')

@@ -26,9 +26,9 @@ module.exports = function() {
 				else if(!Type.is(that, Color)) {
 					throw new TypeError("'that' is not of type 'Color'");
 				}
-				if(that._foo) {
+				if(that._foo === true) {
 				}
-				else if(that._bar) {
+				else if(that._bar === true) {
 				}
 			}
 		}

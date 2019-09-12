@@ -374,7 +374,12 @@ export class TypeException extends Exception {
 			throw new TypeException(`Invalid type "\(name)"`, node)
 		} // }}}
 		throwInvalidAssignement(name, declaredType, valueType, node) ~ TypeException { // {{{
-			throw new TypeException(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
+			if valueType.isNull() {
+				throw new TypeException(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
+			}
+			else {
+				throw new TypeException(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
+			}
 		} // }}}
 		throwInvalidBinding(expected, node) ~ TypeException { // {{{
 			throw new TypeException(`The binding is expected to be of type "\(expected)"`, node)
@@ -387,6 +392,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwInvalidForOfExpression(node) ~ TypeException { // {{{
 			throw new TypeException(`"for..of" must be used with an object`, node)
+		} // }}}
+		throwInvalidOperand(expression, operator, node) ~ TypeException { // {{{
+			throw new TypeException(`The \(operator) member \(expression.toQuote(true)) is expected to be of type "\($operatorTypes[operator].join('", "'))" or "Any" and not of type \(expression.type().toQuote(true))`, node)
 		} // }}}
 		throwInvalidSpread(node) ~ TypeException { // {{{
 			throw new TypeException(`Spread operator require an array`, node)
@@ -414,6 +422,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwNotNullableExistential(expression, node) ~ TypeException { // {{{
 			throw new TypeException(`The existentiality test of \(expression.toQuote(true)) is always positive`, node)
+		} // }}}
+		throwNotNullableOperand(expression, operator, node) ~ TypeException { // {{{
+			throw new TypeException(`The \(operator) member \(expression.toQuote(true)) can't be nullable`, node)
 		} // }}}
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)

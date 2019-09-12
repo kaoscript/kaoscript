@@ -39,7 +39,7 @@ module.exports = function() {
 			else if(!Type.is(x, Foobar)) {
 				throw new TypeError("'x' is not of type 'Foobar'");
 			}
-			if(!Type.is(x, Quxbaz) || !this.isNamed() || !x.isNamed()) {
+			if(!Type.is(x, Quxbaz) || !(this.isNamed() === true) || !(x.isNamed() === true)) {
 				return false;
 			}
 			const name = x.name();

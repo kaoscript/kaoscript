@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	let AnimalFlags = {
 		None: 0,
@@ -15,11 +16,11 @@ module.exports = function() {
 		if(animal === void 0 || animal === null) {
 			throw new TypeError("'animal' is not nullable");
 		}
-		let animalFlags = animal.flags;
-		if(animalFlags & AnimalFlags.HasClaws) {
+		const animalFlags = animal.flags;
+		if((animalFlags & AnimalFlags.HasClaws) !== 0) {
 			console.log("animal has claws");
 		}
-		if(animalFlags & AnimalFlags.CanFly) {
+		if((animalFlags & AnimalFlags.CanFly) !== 0) {
 			console.log("animal can fly");
 		}
 		if(animalFlags === AnimalFlags.None) {
@@ -30,10 +31,10 @@ module.exports = function() {
 		flags: AnimalFlags.None
 	};
 	printAnimalAbilities(animal);
-	animal.flags |= AnimalFlags.HasClaws;
+	animal.flags = Operator.bitwiseOr(animal.flags, AnimalFlags.HasClaws);
 	printAnimalAbilities(animal);
-	animal.flags &= ~AnimalFlags.HasClaws;
+	animal.flags = Operator.bitwiseAnd(animal.flags, ~AnimalFlags.HasClaws);
 	printAnimalAbilities(animal);
-	animal.flags |= AnimalFlags.HasClaws | AnimalFlags.CanFly;
+	animal.flags = Operator.bitwiseOr(animal.flags, AnimalFlags.HasClaws, AnimalFlags.CanFly);
 	printAnimalAbilities(animal);
 };

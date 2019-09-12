@@ -317,17 +317,17 @@ class ClassType extends Type {
 	} // }}}
 	condense() { // {{{
 		for const methods of this._abstractMethods {
-			for method in methods {
+			for const method in methods {
 				method.unflagAlteration()
 			}
 		}
 		for const methods of this._classMethods {
-			for method in methods {
+			for const method in methods {
 				method.unflagAlteration()
 			}
 		}
 		for const methods of this._instanceMethods {
-			for method in methods {
+			for const method in methods {
 				method.unflagAlteration()
 			}
 		}
@@ -815,6 +815,22 @@ class ClassType extends Type {
 
 		if @extending {
 			return @extends.type().hasAbstractMethod(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
+	hasAbstractMethod(name: String, arguments: Array) { // {{{
+		if @abstractMethods[name] is Array {
+			for method in @abstractMethods[name] {
+				if method.matchArguments(arguments) {
+					return true
+				}
+			}
+		}
+
+		if @extending {
+			return @extends.type().hasAbstractMethod(name, arguments)
 		}
 		else {
 			return false

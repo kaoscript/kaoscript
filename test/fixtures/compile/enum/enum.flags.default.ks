@@ -7,22 +7,22 @@ enum AnimalFlags {
 	CanFly
 	EatsFish
 	Endangered
-	
+
 	EndangeredFlyingClawedFishEating = HasClaws | CanFly | EatsFish | Endangered
 	Predator = CanFly | HasClaws
 }
 
 func printAnimalAbilities(animal) {
-	let animalFlags = animal.flags
-	
-	if animalFlags & AnimalFlags::HasClaws {
+	const animalFlags: Number = animal.flags
+
+	if animalFlags & AnimalFlags::HasClaws != 0 {
 		console.log('animal has claws')
 	}
-	
-	if animalFlags & AnimalFlags::CanFly {
+
+	if animalFlags & AnimalFlags::CanFly != 0 {
 		console.log('animal can fly')
 	}
-	
+
 	if animalFlags == AnimalFlags::None {
 		console.log('nothing')
 	}

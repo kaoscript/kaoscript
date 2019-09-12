@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foo {
 		constructor() {
@@ -37,7 +37,7 @@ module.exports = function() {
 			if(x === void 0 || x === null) {
 				return __ks_cb(new TypeError("'x' is not nullable"));
 			}
-			return __ks_cb(null, x + 42);
+			return __ks_cb(null, Operator.addOrConcat(x, 42));
 		}
 		foo() {
 			if(arguments.length === 1) {

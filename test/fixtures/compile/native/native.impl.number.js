@@ -1,3 +1,4 @@
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	var __ks_Number = {};
 	__ks_Number.__ks_func_mod_0 = function(max) {
@@ -7,7 +8,10 @@ module.exports = function() {
 		if(max === void 0 || max === null) {
 			throw new TypeError("'max' is not nullable");
 		}
-		if(isNaN(this)) {
+		else if(!Type.isNumber(max)) {
+			throw new TypeError("'max' is not of type 'Number'");
+		}
+		if(isNaN(this) === true) {
 			return 0;
 		}
 		else {

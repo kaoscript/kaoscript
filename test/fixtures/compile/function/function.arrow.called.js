@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	let four = (function(a) {
 		if(arguments.length < 1) {
@@ -6,6 +7,6 @@ module.exports = function() {
 		if(a === void 0 || a === null) {
 			throw new TypeError("'a' is not nullable");
 		}
-		return a / 10;
+		return Operator.division(a, 10);
 	})(42);
 };

@@ -548,7 +548,7 @@ class CallExpression extends Expression {
 				else {
 					const arguments = [argument.type() for const argument in @arguments]
 
-					if value.getAbstractMethod(@property, arguments) {
+					if value.hasAbstractMethod(@property, arguments) {
 						this.addCallee(new DefaultCallee(@data, @object, this))
 					}
 					else if reference.isExhaustive(this) {
@@ -616,7 +616,7 @@ class CallExpression extends Expression {
 
 			this.toCallFragments(fragments, mode)
 
-			fragments.code(', ') if @arguments.length
+			fragments.code(', ') if @arguments.length != 0
 		}
 		else {
 			if @reusable {
@@ -648,11 +648,15 @@ class CallExpression extends Expression {
 		if mode == Mode::Async {
 			this.toCallFragments(fragments, mode)
 
-			fragments.code(', ') if @arguments.length
+			fragments.code(', ') if @arguments.length != 0
 		}
 		else {
 			if @reusable {
 				fragments.code(@reuseName)
+
+				if !@type.isBoolean() || @type.isNullable() {
+					fragments.code(' === true')
+				}
 			}
 			else if this.isNullable() && !@tested {
 				fragments.wrapNullable(this).code(' ? ')
@@ -661,12 +665,20 @@ class CallExpression extends Expression {
 
 				this.toFragments(fragments, mode)
 
+				if !@type.isBoolean() || @type.isNullable() {
+					fragments.code(' === true')
+				}
+
 				fragments.code(' : false')
 			}
 			else {
 				this.toCallFragments(fragments, mode)
 
 				fragments.code(')')
+
+				if !@type.isBoolean() || @type.isNullable() {
+					fragments.code(' === true')
+				}
 			}
 		}
 	} // }}}
@@ -690,6 +702,23 @@ class CallExpression extends Expression {
 		else {
 			throw new NotImplementedException(this)
 		}
+	} // }}}
+	toQuote() { // {{{
+		let fragments = ''
+
+		if @object != null {
+			fragments += @object.toQuote()
+		}
+		else if @data.callee.kind == NodeKind::Identifier {
+			fragments += @data.callee.name
+		}
+		else {
+			NotImplementedException.throw(this)
+		}
+
+		fragments += '(...)'
+
+		return fragments
 	} // }}}
 	toNullableFragments(fragments) { // {{{
 		if !@tested {
@@ -870,7 +899,7 @@ class DefaultCallee extends Callee {
 					fragments.wrap(@expression, mode).code('(')
 
 					for argument, index in node._arguments {
-						fragments.code($comma) if index
+						fragments.code($comma) if index != 0
 
 						fragments.compile(argument, mode)
 					}

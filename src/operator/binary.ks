@@ -80,23 +80,157 @@ class BinaryOperatorExpression extends Expression {
 	} // }}}
 }
 
-class BinaryOperatorAddition extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('+', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type(): Type { // {{{
-		if @left.type().isNumber() || @left.type().isString() {
-			return @left.type()
+abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression {
+	private {
+		_isNative: Boolean		= false
+		_type: Type
+	}
+	prepare() { // {{{
+		super()
+
+		if @left.type().isNumber() && @right.type().isNumber() {
+			@isNative = true
+		}
+		else if @left.type().canBeNumber() {
+			unless @right.type().canBeNumber() {
+				TypeException.throwInvalidOperand(@right, this.operator(), this)
+			}
 		}
 		else {
-			return new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')], false)
+			TypeException.throwInvalidOperand(@left, this.operator(), this)
+		}
+
+		if @left.type().isNullable() || @right.type().isNullable() {
+			@type = @scope.reference('Number').setNullable(true)
+
+			@isNative = false
+		}
+		else {
+			@type = @scope.reference('Number')
 		}
 	} // }}}
+	isComputed() => @isNative
+	abstract operator(): Operator
+	abstract runtime(): String
+	abstract symbol(): String
+	toNativeFragments(fragments) { // {{{
+		fragments.wrap(@left).code($space).code(this.symbol(), @data.operator).code($space).wrap(@right)
+	} // }}}
+	toOperandFragments(fragments, operator, type) { // {{{
+		if operator == this.operator() && type == OperandType::Number {
+			fragments.compile(@left).code($comma).compile(@right)
+		}
+		else {
+			this.toOperatorFragments(fragments)
+		}
+	} // }}}
+	toOperatorFragments(fragments) { // {{{
+		if @isNative {
+			this.toNativeFragments(fragments)
+		}
+		else {
+			fragments
+				.code($runtime.operator(this), `.\(this.runtime())(`)
+				.compile(@left)
+				.code($comma)
+				.compile(@right)
+				.code(')')
+		}
+	} // }}}
+	toQuote() => `\(@left.toQuote()) \(this.symbol()) \(@right.toQuote())`
+	type() => @type
+}
+
+class BinaryOperatorAddition extends BinaryOperatorExpression {
+	private {
+		_isNative: Boolean		= false
+		_isNumber: Boolean		= false
+		_isString: Boolean		= false
+		_type: Type
+	}
+	prepare() { // {{{
+		super()
+
+		if @left.type().isString() || @right.type().isString() {
+			@isString = true
+			@isNative = true
+		}
+		else if @left.type().isNumber() && @right.type().isNumber() {
+			@isNumber = true
+			@isNative = true
+		}
+		else if (@left.type().canBeString(false) && !@left.type().canBeNumber(false)) || (@right.type().canBeString(false) && !@right.type().canBeNumber(false)) {
+			@isString = true
+		}
+		else if @left.type().isAny() || @right.type().isAny() {
+		}
+		else if @left.type().canBeNumber() {
+			if !@left.type().canBeString(false) {
+				if @right.type().canBeNumber() {
+					if !@right.type().canBeString(false) {
+						@isNumber = true
+					}
+				}
+				else {
+					TypeException.throwInvalidOperand(@right, Operator::Addition, this)
+				}
+			}
+		}
+		else {
+			TypeException.throwInvalidOperand(@left, Operator::Addition, this)
+		}
+
+		const nullable = @left.type().isNullable() || @right.type().isNullable()
+		if nullable {
+			@isNative = false
+		}
+
+		if @isNumber {
+			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+		}
+		else if @isString {
+			@type = @scope.reference('String')
+		}
+		else {
+			const numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+
+			@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+		}
+	} // }}}
+	isComputed() => @isNative
+	toOperandFragments(fragments, operator, type) { // {{{
+		if operator == Operator::Addition && ((@isNumber && type == OperandType::Number) || (@isString && type == OperandType::String)) {
+			fragments.compile(@left).code($comma).compile(@right)
+		}
+		else {
+			this.toOperatorFragments(fragments)
+		}
+	} // }}}
+	toOperatorFragments(fragments) { // {{{
+		if @isNative {
+			fragments
+				.wrap(@left)
+				.code($space)
+				.code('+', @data.operator)
+				.code($space)
+				.wrap(@right)
+		}
+		else {
+			if @isNumber {
+				fragments.code($runtime.operator(this), '.addition(')
+			}
+			else if @isString {
+				fragments.code($runtime.helper(this), '.concatString(')
+			}
+			else {
+				fragments.code($runtime.operator(this), '.addOrConcat(')
+			}
+
+			fragments.compile(@left).code($comma).compile(@right).code(')')
+		}
+	} // }}}
+	toQuote() => `\(@left.toQuote()) + \(@right.toQuote())`
+	type() => @type
 }
 
 class BinaryOperatorAnd extends BinaryOperatorExpression {
@@ -106,11 +240,19 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 	prepare() { // {{{
 		@left.prepare()
 
+		unless @left.type().canBeBoolean() {
+			TypeException.throwInvalidOperand(@left, Operator::And, this)
+		}
+
 		for const data, name of @left.inferTypes() {
 			@scope.updateInferable(name, data, this)
 		}
 
 		@right.prepare()
+
+		unless @right.type().canBeBoolean() {
+			TypeException.throwInvalidOperand(@right, Operator::And, this)
+		}
 
 		this.statement().assignTempVariables(@scope)
 	} // }}}
@@ -148,79 +290,56 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
-class BinaryOperatorBitwiseAnd extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('&', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorBitwiseAnd extends NumericBinaryOperatorExpression {
+	operator() => Operator::BitwiseAnd
+	runtime() => 'bitwiseAnd'
+	symbol() => '&'
 }
 
-class BinaryOperatorBitwiseLeftShift extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('<<', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorBitwiseLeftShift extends NumericBinaryOperatorExpression {
+	operator() => Operator::BitwiseLeftShift
+	runtime() => 'bitwiseLeftShift'
+	symbol() => '<<'
 }
 
-class BinaryOperatorBitwiseOr extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('|', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorBitwiseOr extends NumericBinaryOperatorExpression {
+	operator() => Operator::BitwiseOr
+	runtime() => 'bitwiseOr'
+	symbol() => '|'
 }
 
-class BinaryOperatorBitwiseRightShift extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('>>', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorBitwiseRightShift extends NumericBinaryOperatorExpression {
+	operator() => Operator::BitwiseRightShift
+	runtime() => 'bitwiseRightShift'
+	symbol() => '>>'
 }
 
-class BinaryOperatorBitwiseXor extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('^', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorBitwiseXor extends NumericBinaryOperatorExpression {
+	operator() => Operator::BitwiseXor
+	runtime() => 'bitwiseXor'
+	symbol() => '^'
 }
 
-class BinaryOperatorDivision extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('/', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorDivision extends NumericBinaryOperatorExpression {
+	operator() => Operator::Division
+	runtime() => 'division'
+	symbol() => '/'
 }
 
 class BinaryOperatorImply extends BinaryOperatorExpression {
+	prepare() { // {{{
+		@left.prepare()
+
+		unless @left.type().canBeBoolean() {
+			TypeException.throwInvalidOperand(@left, Operator::Imply, this)
+		}
+
+		@right.prepare()
+
+		unless @right.type().canBeBoolean() {
+			TypeException.throwInvalidOperand(@right, Operator::Imply, this)
+		}
+	} // }}}
 	inferTypes() { // {{{
 		const inferables = {}
 
@@ -249,28 +368,16 @@ class BinaryOperatorImply extends BinaryOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
-class BinaryOperatorModulo extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('%', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorModulo extends NumericBinaryOperatorExpression {
+	operator() => Operator::Modulo
+	runtime() => 'modulo'
+	symbol() => '%'
 }
 
-class BinaryOperatorMultiplication extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space)
-			.code('*', @data.operator)
-			.code($space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorMultiplication extends NumericBinaryOperatorExpression {
+	operator() => Operator::Multiplication
+	runtime() => 'multiplication'
+	symbol() => '*'
 }
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
@@ -326,6 +433,19 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorOr extends BinaryOperatorExpression {
+	prepare() { // {{{
+		@left.prepare()
+
+		unless @left.type().canBeBoolean() {
+			TypeException.throwInvalidOperand(@left, Operator::Or, this)
+		}
+
+		@right.prepare()
+
+		unless @right.type().canBeBoolean() {
+			TypeException.throwInvalidOperand(@right, Operator::Or, this)
+		}
+	} // }}}
 	inferTypes() { // {{{
 		const inferables = {}
 
@@ -407,28 +527,19 @@ class BinaryOperatorOr extends BinaryOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
-class BinaryOperatorQuotient extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.code('Number.parseInt(')
-			.wrap(@left)
-			.code($space)
-			.code('/', @data.operator)
-			.code($space)
-			.wrap(@right)
-			.code(')')
+class BinaryOperatorQuotient extends NumericBinaryOperatorExpression {
+	operator() => Operator::Quotient
+	runtime() => 'quotient'
+	symbol() => '/.'
+	toNativeFragments(fragments) { // {{{
+		fragments.code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
 	} // }}}
-	type() => @scope.reference('Number')
 }
 
-class BinaryOperatorSubtraction extends BinaryOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		fragments
-			.wrap(@left)
-			.code($space, '-', @data.operator, $space)
-			.wrap(@right)
-	} // }}}
-	type() => @scope.reference('Number')
+class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
+	operator() => Operator::Subtraction
+	runtime() => 'subtraction'
+	symbol() => '-'
 }
 
 class BinaryOperatorTypeCasting extends Expression {
@@ -626,6 +737,19 @@ class BinaryOperatorTypeInequality extends Expression {
 }
 
 class BinaryOperatorXor extends BinaryOperatorExpression {
+	prepare() { // {{{
+		@left.prepare()
+
+		unless @left.type().canBeBoolean() {
+			TypeException.throwInvalidOperand(@left, Operator::Xor, this)
+		}
+
+		@right.prepare()
+
+		unless @right.type().canBeBoolean() {
+			TypeException.throwInvalidOperand(@right, Operator::Xor, this)
+		}
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(@left)

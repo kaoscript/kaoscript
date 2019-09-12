@@ -6,6 +6,7 @@ import {
 	'./_/_array.ks'
 	'./_/_float.ks'
 	'./_/_integer.ks'
+	'./_/_math.ks'
 	'./_/_number.ks'
 	'./_/_string.ks'
 }
@@ -182,18 +183,22 @@ func $binder(last: func, components, first: func, ...firstArgs): func { // {{{
 	return last**(...lastArgs)
 } // }}}
 
-let $caster = {
-	alpha(n = null, percentage = false): float { // {{{
+namespace $caster {
+	func alpha(n = null, percentage: bool = false): float { // {{{
 		let i: Number = Float.parse(n)
 
 		return 1 if i == NaN else (percentage ? i / 100 : i).limit(0, 1).round(3)
 	} // }}}
-	ff(n): int { // {{{
+
+	func ff(n): int { // {{{
 		return Float.parse(n).limit(0, 255).round()
 	} // }}}
-	percentage(n): float { // {{{
+
+	func percentage(n): float { // {{{
 		return Float.parse(n).limit(0, 100).round(1)
 	} // }}}
+
+	export *
 }
 
 func $component(component, name: string, space: string): void { // {{{
@@ -211,8 +216,7 @@ func $component(component, name: string, space: string): void { // {{{
 	$components[name].spaces[space] = true
 } // }}}
 
-/* func $convert(that: Color, space: string, result: object = {_alpha: 0}): object ~ Error { // {{{ */
-func $convert(that: Color, space: string, result = {_alpha: 0}): object ~ Error { // {{{
+func $convert(that: Color, space: string, result: object = {_alpha: 0}): object ~ Error { // {{{
 	if ?(s = $spaces[that._space]).converters[space] {
 		let args := [that[component.field] for component, name of s.components]
 
@@ -231,7 +235,7 @@ func $convert(that: Color, space: string, result = {_alpha: 0}): object ~ Error 
 
 func $find(from: string, to: string): void { // {{{
 	for :name of $spaces[from].converters {
-		if $spaces[name].converters[to] {
+		if $spaces[name].converters[to]? {
 			$spaces[from].converters[to] = $binder^^($spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name])
 
 			return
@@ -259,7 +263,7 @@ func $from(that: Color, args: array): Color { // {{{
 	return that
 } // }}}
 
-func $hex(that) { // {{{
+func $hex(that: Color) { // {{{
 	let chars = '0123456789abcdef'
 
 	let r1 = that._red >> 4
@@ -445,9 +449,8 @@ let $parsers = {
 		return false
 	} // }}}
 	gray(that: Color, args: array): bool { // {{{
-		if args.length == 1 {
-			//if args[0] kinda integer {
-			if Type.isNumeric(args[0]) {
+		if args.length >= 1 {
+			if Number.isFinite(Float.parse(args[0])) {
 				that._space = Space::SRGB
 				that._red = that._green = that._blue = $caster.ff(args[0])
 				that._alpha = $caster.alpha(args[1]) if args.length >= 2 else 1
@@ -713,7 +716,7 @@ export class Color {
 					d = component.mod - d
 				}
 
-				this[component.field] = ((this[component.field] + (d * percentage)) % component.mod).round(component.round)
+				this[component.field] = ((this[component.field]:Number + (d * percentage)) % component.mod).round(component.round)
 			}
 			else {
 				this[component.field] = $blend(this[component.field], color[component.field], percentage).limit(component.min, component.max).round(component.round)
@@ -766,7 +769,7 @@ export class Color {
 			let black = this.clone().blend($static.black, 0.5, Space::SRGB, true).contrast(color).ratio
 			let white = this.clone().blend($static.white, 0.5, Space::SRGB, true).contrast(color).ratio
 
-			let max := Math.max(black, white)
+			const max = Math.max(black, white)
 
 			let closest = new Color(
 				((color._red - (this._red * a)) / (1 - a)).limit(0, 255),
@@ -774,7 +777,7 @@ export class Color {
 				((color._blue - (this._blue * a)) / (1 - a)).limit(0, 255)
 			)
 
-			let min := this.clone().blend(closest, 0.5, Space::SRGB, true).contrast(color).ratio
+			const min: Number = this.clone().blend(closest, 0.5, Space::SRGB, true).contrast(color).ratio
 
 			return {
 				ratio: ((min + max) / 2).round(2)
@@ -807,7 +810,7 @@ export class Color {
 
 	#[error(off)]
 	distance(color: Color): float { // {{{
-		that = this.like(Space::SRGB)
+		const that: {_red: float, _green: float, _blue: float} = this.like(Space::SRGB)
 		color = color.like(Space::SRGB)
 
 		return Math.sqrt(3 * (color._red - that._red) * (color._red - that._red) + 4 * (color._green - that._green) * (color._green - that._green) + 2 * (color._blue - that._blue) * (color._blue - that._blue))

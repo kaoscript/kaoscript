@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Greetings {
 		constructor() {
@@ -28,7 +28,7 @@ module.exports = function() {
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
-			return this._message + "\nIt's nice to meet you, " + name + ".";
+			return Helper.concatString(this._message, "\nIt's nice to meet you, ", name, ".");
 		}
 		greet() {
 			if(arguments.length === 1) {

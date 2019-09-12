@@ -4,7 +4,7 @@ export class Color {
 		const methods: Array = []
 
 		let field
-		for component, name of expression.components when !component.family {
+		for component, name of expression.components when !?component.family {
 			field = `_\(name)`
 
 			fields.push(macro private #i(field): Number)

@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Qux = {
 		abc: 0,
@@ -22,6 +22,6 @@ module.exports = function() {
 		if(Type.isValue(z)) {
 			return z;
 		}
-		return x + y;
+		return Operator.addOrConcat(x, y);
 	}
 };

@@ -1,5 +1,5 @@
 require("kaoscript/register");
-var Helper = require("@kaoscript/runtime").Helper;
+var {Helper, Operator} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {Array, __ks_Array} = require("../require/require.alt.roi.default.ks")();
 	const m = __ks_Array._cm_map(Helper.newArrayRange(1, 10, 1, true, true), function(value, index) {
@@ -12,7 +12,7 @@ module.exports = function() {
 		if(index === void 0 || index === null) {
 			throw new TypeError("'index' is not nullable");
 		}
-		return value * index;
+		return Operator.multiplication(value, index);
 	});
 	return {
 		Array: Array,

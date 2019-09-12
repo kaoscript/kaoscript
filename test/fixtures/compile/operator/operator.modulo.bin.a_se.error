@@ -1,0 +1,1 @@
+TypeException: The modulo member "y" is expected to be of type "Number" or "Any" and not of type "String" (line 2, file "fixtures/compile/operator/operator.modulo.bin.a_se.ks")

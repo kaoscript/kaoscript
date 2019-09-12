@@ -1,13 +1,13 @@
-var KSType = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function $clone(value = null) {
 		if(value === null) {
 			return null;
 		}
-		else if(KSType.isArray(value)) {
+		else if(Type.isArray(value)) {
 			return __ks_Array._im_clone(value);
 		}
-		else if(KSType.isObject(value)) {
+		else if(Type.isObject(value)) {
 			return __ks_Object._cm_clone(value);
 		}
 		else {
@@ -28,11 +28,11 @@ module.exports = function() {
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
-			if(KSType.isArray(value)) {
+			if(Type.isArray(value)) {
 				source[key] = __ks_Array._im_clone(value);
 			}
-			else if(KSType.isObject(value)) {
-				if(KSType.isObject(source[key])) {
+			else if(Type.isObject(value)) {
+				if(Type.isObject(source[key])) {
 					$merge.object(source[key], value);
 				}
 				else {
@@ -55,7 +55,7 @@ module.exports = function() {
 				throw new TypeError("'current' is not nullable");
 			}
 			for(const key in current) {
-				if(source[key]) {
+				if(Type.isValue(source[key])) {
 					$merge.merge(source, key, current[key]);
 				}
 				else {
@@ -69,7 +69,7 @@ module.exports = function() {
 	__ks_Array.__ks_func_append_0 = function(...args) {
 		let l, i, j, arg;
 		for(let k = 0, __ks_0 = args.length; k < __ks_0; ++k) {
-			arg = __ks_Array._cm_from(args[k]);
+			arg = Helper.array(args[k]);
 			if((l = arg.length) > 50000) {
 				i = 0;
 				j = 50000;
@@ -105,7 +105,7 @@ module.exports = function() {
 		}
 		for(let index = 0, __ks_0 = this.length, item; index < __ks_0; ++index) {
 			item = this[index];
-			if(fn(item, index, this)) {
+			if(fn(item, index, this) === true) {
 				return true;
 			}
 		}
@@ -118,7 +118,7 @@ module.exports = function() {
 	__ks_Array.__ks_func_clone_0 = function() {
 		let i = this.length;
 		let clone = new Array(i);
-		while(i) {
+		while(i > 0) {
 			clone[--i] = $clone(this[i]);
 		}
 		return clone;
@@ -135,25 +135,14 @@ module.exports = function() {
 		}
 		return this.indexOf(item, from) !== -1;
 	};
-	__ks_Array.__ks_sttc_from_0 = function(item) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(item === void 0 || item === null) {
-			throw new TypeError("'item' is not nullable");
-		}
-		if(KSType.isEnumerable(item) && !KSType.isString(item)) {
-			return KSType.isArray(item) ? item : Array.prototype.slice.call(item);
-		}
-		else {
-			return [item];
-		}
-	};
 	__ks_Array.__ks_func_last_0 = function(index) {
 		if(index === void 0 || index === null) {
 			index = 1;
 		}
-		return this.length ? this[this.length - index] : null;
+		else if(!Type.isNumber(index)) {
+			throw new TypeError("'index' is not of type 'Number'");
+		}
+		return (this.length !== 0) ? this[this.length - index] : null;
 	};
 	__ks_Array.__ks_func_remove_0 = function(...items) {
 		if(items.length === 1) {
@@ -180,12 +169,12 @@ module.exports = function() {
 		let source;
 		let i = 0;
 		let l = args.length;
-		while((i < l) && !((KSType.isValue(args[i]) ? (source = args[i], true) : false) && KSType.isArray(source))) {
+		while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isArray(source))) {
 			++i;
 		}
 		++i;
 		while(i < l) {
-			if(KSType.isArray(args[i])) {
+			if(Type.isArray(args[i])) {
 				for(let __ks_0 = 0, __ks_1 = args[i].length, value; __ks_0 < __ks_1; ++__ks_0) {
 					value = args[i][__ks_0];
 					source.pushUniq(value);
@@ -193,7 +182,7 @@ module.exports = function() {
 			}
 			++i;
 		}
-		return source;
+		return Type.isValue(source) ? source : [];
 	};
 	__ks_Array.__ks_func_pushUniq_0 = function(...args) {
 		if(args.length === 1) {
@@ -267,13 +256,6 @@ module.exports = function() {
 		}
 		throw new SyntaxError("Wrong number of arguments");
 	};
-	__ks_Array._cm_from = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 1) {
-			return __ks_Array.__ks_sttc_from_0.apply(null, args);
-		}
-		throw new SyntaxError("Wrong number of arguments");
-	};
 	__ks_Array._im_last = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length >= 0 && args.length <= 1) {
@@ -307,10 +289,10 @@ module.exports = function() {
 		if(object === void 0 || object === null) {
 			throw new TypeError("'object' is not nullable");
 		}
-		if(KSType.isFunction(object.constructor.clone) && (object.constructor.clone !== this)) {
+		if(Type.isFunction(object.constructor.clone) && (object.constructor.clone !== this)) {
 			return object.constructor.clone(object);
 		}
-		if(KSType.isFunction(object.constructor.prototype.clone)) {
+		if(Type.isFunction(object.constructor.prototype.clone)) {
 			return object.clone();
 		}
 		let clone = {};
@@ -330,23 +312,18 @@ module.exports = function() {
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
 		}
-		for(const key in item) {
-			if(item.hasOwnProperty(key)) {
-				return false;
-			}
-		}
-		return true;
+		return Helper.isEmptyObject(item);
 	};
 	__ks_Object.__ks_sttc_merge_0 = function(...args) {
 		let source;
 		let i = 0;
 		let l = args.length;
-		while((i < l) && !((KSType.isValue(args[i]) ? (source = args[i], true) : false) && KSType.isObject(source))) {
+		while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isObject(source))) {
 			++i;
 		}
 		++i;
 		while(i < l) {
-			if(KSType.isObject(args[i])) {
+			if(Type.isObject(args[i])) {
 				for(const key in args[i]) {
 					const value = args[i][key];
 					$merge.merge(source, key, value);
@@ -354,7 +331,7 @@ module.exports = function() {
 			}
 			++i;
 		}
-		return source;
+		return Type.isValue(source) ? source : {};
 	};
 	__ks_Object._cm_clone = function() {
 		var args = Array.prototype.slice.call(arguments);

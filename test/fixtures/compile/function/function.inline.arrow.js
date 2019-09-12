@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function camelize(value) {
 		if(arguments.length < 1) {
@@ -10,7 +10,7 @@ module.exports = function() {
 		else if(!Type.isString(value)) {
 			throw new TypeError("'value' is not of type 'String'");
 		}
-		return value.charAt(0).toLowerCase() + value.substring(1).replace(/[-_\s]+(.)/g, function(m, l) {
+		return Operator.addOrConcat(value.charAt(0).toLowerCase(), value.substring(1).replace(/[-_\s]+(.)/g, function(m, l) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
@@ -21,6 +21,6 @@ module.exports = function() {
 				throw new TypeError("'l' is not nullable");
 			}
 			return l.toUpperCase();
-		});
+		}));
 	}
 };

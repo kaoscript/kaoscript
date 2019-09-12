@@ -1,33 +1,33 @@
 module.exports = function() {
 	let x, y, z, foo, bar, qux;
-	if(x) {
-		if(foo) {
+	if(x === true) {
+		if(foo === true) {
 		}
-		else if(bar) {
+		else if(bar === true) {
 		}
-		else if(qux) {
+		else if(qux === true) {
 		}
 		else {
 		}
 	}
-	else if(y) {
+	else if(y === true) {
 	}
-	else if(z) {
-		if(foo) {
+	else if(z === true) {
+		if(foo === true) {
 		}
-		else if(bar) {
+		else if(bar === true) {
 		}
-		else if(qux) {
+		else if(qux === true) {
 		}
 		else {
 		}
 	}
 	else {
-		if(foo) {
+		if(foo === true) {
 		}
-		else if(bar) {
+		else if(bar === true) {
 		}
-		else if(qux) {
+		else if(qux === true) {
 		}
 		else {
 		}

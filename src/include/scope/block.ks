@@ -432,11 +432,13 @@ class BlockScope extends Scope {
 		let variable = this.getVariable(name)
 
 		if variable.isDefinitive() {
-			if type.isAny() && !variable.getDeclaredType().isAny() {
+			if type.isNull() && !variable.getDeclaredType().isNullable() {
+				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+			}
+			else if type.isAny() && !variable.getDeclaredType().isAny() {
 				return variable
 			}
-
-			if !type.matchContentOf(variable.getDeclaredType()) {
+			else if !type.matchContentOf(variable.getDeclaredType()) {
 				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
 			}
 		}

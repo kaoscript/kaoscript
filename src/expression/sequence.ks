@@ -1,9 +1,10 @@
 class SequenceExpression extends Expression {
 	private {
-		_expressions
+		_expressions: Array<Expression>		= []
+		_last: Number
+		_type: Type
 	}
 	analyse() { // {{{
-		@expressions = []
 		for expression in @data.expressions {
 			@expressions.push(expression = $compile.expression(expression, this))
 
@@ -14,6 +15,9 @@ class SequenceExpression extends Expression {
 		for expression in @expressions {
 			expression.prepare()
 		}
+
+		@last = @expressions.length - 1
+		@type = @expressions[@last].type()
 	} // }}}
 	translate() { // {{{
 		for expression in @expressions {
@@ -32,10 +36,12 @@ class SequenceExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.code('(')
 
-		for i from 0 til @expressions.length {
-			fragments.code($comma) if i != 0
+		for const expression, index in @expressions {
+			if index != 0 {
+				fragments.code($comma)
+			}
 
-			fragments.compile(@expressions[i])
+			fragments.compile(expression)
 		}
 
 		fragments.code(')')
@@ -43,13 +49,17 @@ class SequenceExpression extends Expression {
 	toBooleanFragments(fragments, mode) { // {{{
 		fragments.code('(')
 
-		for i from 0 til @expressions.length {
-			fragments.code($comma) if i != 0
+		for const expression, index in @expressions til @last {
+			if index != 0 {
+				fragments.code($comma)
+			}
 
-			fragments.compileBoolean(@expressions[i])
+			fragments.compile(expression)
 		}
+
+		fragments.code($comma).compileBoolean(@expressions[@last])
 
 		fragments.code(')')
 	} // }}}
-	type() => @expressions[@expressions.length - 1].type()
+	type() => @type
 }

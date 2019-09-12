@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		if((arguments.length === 2 && Type.isNumber(arguments[1])) || (arguments.length === 3 && Type.isNumber(arguments[2]))) {
@@ -16,7 +16,7 @@ module.exports = function() {
 			else if(!Type.isNumber(z)) {
 				throw new TypeError("'z' is not of type 'Number'");
 			}
-			return x.times(y + z);
+			return x.times(Operator.addOrConcat(y, z));
 		}
 		else if(arguments.length === 2 || arguments.length === 3) {
 			let __ks_i = -1;

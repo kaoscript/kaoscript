@@ -36,7 +36,7 @@ export class Module {
 			}
 		}
 
-		if @compiler._options.output {
+		if @compiler._options.output is String {
 			@output = @compiler._options.output
 
 			if @compiler._options.rewire is Array {
@@ -426,47 +426,85 @@ export class Module {
 			line.done()
 		}
 
-		let helper = $runtime.helper(this)
-		let type = $runtime.type(this)
+		const helper = $runtime.helper(this)
+		const operator = $runtime.operator(this)
+		const type = $runtime.type(this)
 
-		let hasHelper = !@flags.Helper || @imports[helper] == true
-		let hasType = !@flags.Type || @imports[type] == true
+		let hasHelper = @flags.Helper == true && !@imports[helper]
+		let hasOperator = @flags.Operator == true && !@imports[operator]
+		let hasType = @flags.Type == true && !@imports[type]
 
-		if !hasHelper || !hasType {
-			for requirement in @requirements {
+		if hasHelper || hasType {
+			for const requirement in @requirements {
 				if requirement.name() == helper {
-					hasHelper = true
+					hasHelper = false
 				}
 				else if requirement.name() == type {
-					hasType = true
+					hasType = false
 				}
 			}
 		}
 
-		if !hasHelper || !hasType {
-			if hasHelper {
-				mark.line(`var \(type) = require("\(@options.runtime.type.package)").\(@options.runtime.type.member)`)
-			}
-			else if hasType {
-				mark.line(`var \(helper) = require("\(@options.runtime.helper.package)").\(@options.runtime.helper.member)`)
-			}
-			else if @options.runtime.helper.package == @options.runtime.type.package {
-				if @options.format.destructuring == 'es5' {
-					mark
-						.line(`var __ks__ = require("\(@options.runtime.helper.package)")`)
-						.line(`var \(helper) = __ks__.\(@options.runtime.helper.member), \(type) = __ks__.\(@options.runtime.type.member)`)
-				}
-				else {
-					helper = `\(@options.runtime.helper.member): \(helper)` unless helper == @options.runtime.helper.member
-					type = `\(@options.runtime.type.member): \(type)` unless type == @options.runtime.type.member
+		const packages = {}
+		if hasHelper {
+			packages[@options.runtime.helper.package] ??= []
 
-					mark.line(`var {\(helper), \(type)} = require("\(@options.runtime.helper.package)")`)
+			packages[@options.runtime.helper.package].push({
+				name: helper
+				options: @options.runtime.helper
+			})
+		}
+		if hasOperator {
+			packages[@options.runtime.operator.package] ??= []
+
+			packages[@options.runtime.operator.package].push({
+				name: operator
+				options: @options.runtime.operator
+			})
+		}
+		if hasType {
+			packages[@options.runtime.type.package] ??= []
+
+			packages[@options.runtime.type.package].push({
+				name: type
+				options: @options.runtime.type
+			})
+		}
+
+		for const package, name of packages {
+			if package.length == 1 {
+				mark.line(`var \(package[0].name) = require("\(package[0].options.package)").\(package[0].options.member)`)
+			}
+			else if @options.format.destructuring == 'es5' {
+				mark.line(`var __ks__ = require("\(name)")`)
+
+				const line = mark.newLine().code('var ')
+
+				for const item, index in package {
+					line.code(', ') if index != 0
+
+					line.code(`\(item.name) = __ks__.\(item.options.member)`)
 				}
+
+				line.done()
 			}
 			else {
-				mark
-					.line(`var \(helper) = require("\(@options.runtime.helper.package)").\(@options.runtime.helper.member)`)
-					.line(`var \(type) = require("\(@options.runtime.type.package)").\(@options.runtime.type.member)`)
+				const line = mark.newLine().code('var {')
+
+				for const item, index in package {
+					line.code(', ') if index != 0
+
+					if item.name == item.options.member {
+						line.code(item.name)
+					}
+					else {
+						line.code(`\(item.options.member): \(item.name)`)
+					}
+				}
+
+				line.code(`} = require("\(name)")`)
+
+				line.done()
 			}
 		}
 

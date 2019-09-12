@@ -43,6 +43,9 @@ class ReferenceType extends Type {
 
 		@name = $types[name] ?? name
 	} // }}}
+	canBeBoolean() => this.isUnion() ? @type.canBeBoolean() : super()
+	canBeNumber(any = true) => this.isUnion() ? @type.canBeNumber(any) : super(any)
+	canBeString(any = true) => this.isUnion() ? @type.canBeString(any) : super(any)
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
@@ -143,7 +146,7 @@ class ReferenceType extends Type {
 			hash += '<'
 
 			for const parameter, i in @parameters {
-				if i {
+				if i != 0 {
 					hash += ','
 				}
 
@@ -164,6 +167,7 @@ class ReferenceType extends Type {
 	isAny() => @name == 'Any' || @name == 'any'
 	isArray() => @name == 'Array' || @name == 'array' || this.type().isArray()
 	isAsync() => false
+	isBoolean() => @name == 'Boolean' || @name == 'bool' || this.type().isBoolean()
 	isClass() => @name == 'Class' || @name == 'class'
 	isEnum() => @name == 'Enum' || @name == 'enum'
 	isExhaustive() => this.type().isExhaustive()
@@ -208,7 +212,7 @@ class ReferenceType extends Type {
 		if this == value {
 			return true
 		}
-		else if mode & MatchingMode::Exact {
+		else if mode & MatchingMode::Exact != 0 {
 			if value is ReferenceType {
 				if @name != value._name || @nullable != value._nullable || @parameters.length != value._parameters.length {
 					return false
@@ -261,11 +265,11 @@ class ReferenceType extends Type {
 	} // }}}
 	isNative() => $natives[@name] == true
 	isNullable() => @nullable
-	isNumber() => @name == 'Number' || @name == 'number'
+	isNumber() => @name == 'Number' || @name == 'number' || this.type().isNumber()
 	isObject() => @name == 'Object' || @name == 'object'
 	isReference() => true
 	isRequired() => this.type().isRequired()
-	isString() => @name == 'String' || @name == 'string'
+	isString() => @name == 'String' || @name == 'string' || this.type().isString()
 	isVoid() => @name == 'Void' || @name == 'void'
 	isUnion() => this.type().isUnion()
 	matchContentOf(that: Type) { // {{{
@@ -425,7 +429,7 @@ class ReferenceType extends Type {
 			return super.toReference(references, mode)
 		}
 		else if @type.isExplicitlyExported() {
-			if (mode & ExportMode::IgnoreAlteration) && @type.isAlteration() {
+			if mode & ExportMode::IgnoreAlteration != 0 && @type.isAlteration() {
 				return this.export(references, mode, @type:ClassType.toAlterationReference(references, mode))
 			}
 			else {

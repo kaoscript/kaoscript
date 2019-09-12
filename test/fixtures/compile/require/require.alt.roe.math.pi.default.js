@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 function __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
 	var req = [];
 	if(Type.isValue(__ks_0)) {
@@ -22,8 +22,11 @@ module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
 		if(precision === void 0 || precision === null) {
 			precision = 0;
 		}
+		else if(!Type.isNumber(precision)) {
+			throw new TypeError("'precision' is not of type 'Number'");
+		}
 		precision = Math.pow(10, precision).toFixed(0);
-		return Math.round(this * precision) / precision;
+		return Operator.division(Math.round(this * precision), precision);
 	};
 	__ks_Number._im_round = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

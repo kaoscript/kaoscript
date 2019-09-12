@@ -7,6 +7,8 @@
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
+#![runtime(prefix='KS')]
+
 #![error(off)]
 #![rules(ignore-misfit)]
 
@@ -35,12 +37,10 @@ const $extensions = { // {{{
 const $targetRegex = /^(\w+)-v((?:\d+)(?:\.\d+)?(?:\.\d+)?)$/
 
 const $typeofs = { // {{{
-	Any: true
 	Array: true
 	Boolean: true
 	Class: true
 	Function: true
-	NaN: true
 	Number: true
 	Object: true
 	RegExp: true
@@ -111,20 +111,25 @@ const $runtime = {
 
 		return node._options.runtime.helper.alias
 	} // }}}
-	isDefined(name, node) { // {{{
-		if node._options.runtime.helper.alias == name {
+	getVariable(name, node) { // {{{
+		if node._options.runtime.helper.alias == name || (node.isIncluded() && name == 'Helper') {
 			node.module?().flag('Helper')
 
-			return true
+			return node._options.runtime.helper.alias
 		}
-		else if node._options.runtime.type.alias == name {
+		else if node._options.runtime.type.alias == name || (node.isIncluded() && name == 'Type') {
 			node.module?().flag('Type')
 
-			return true
+			return node._options.runtime.type.alias
 		}
 		else {
-			return false
+			return null
 		}
+	} // }}}
+	operator(node) { // {{{
+		node.module?().flag('Operator')
+
+		return node._options.runtime.operator.alias
 	} // }}}
 	scope(node) { // {{{
 		return node._options.format.variables == 'es5' ? 'var ' : 'let '
@@ -173,6 +178,7 @@ abstract class AbstractNode {
 	directory() => @parent.directory()
 	file() => @parent.file()
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
+	isIncluded(): Boolean => this.file() != this.module().file()
 	module() => @parent.module()
 	newScope(scope: Scope, type: ScopeType) { // {{{
 		switch type {
@@ -216,7 +222,6 @@ abstract class AbstractNode {
 }
 
 include {
-	'./include/assignment'
 	'./include/attribute'
 	'./include/fragment'
 	'./include/type'
@@ -226,10 +231,7 @@ include {
 	'./include/statement'
 	'./include/expression'
 	'./include/parameter'
-	'./operator/assignment'
-	'./operator/binary'
-	'./operator/polyadic'
-	'./operator/unary'
+	'./include/operator'
 	'./include/block'
 	'./include/macro'
 	'./include/router'
@@ -591,6 +593,11 @@ export class Compiler {
 					member: 'Helper'
 					package: '@kaoscript/runtime'
 				}
+				operator: {
+					alias: 'Operator'
+					member: 'Operator'
+					package: '@kaoscript/runtime'
+				}
 				type: {
 					alias: 'Type'
 					member: 'Type'
@@ -652,7 +659,7 @@ export class Compiler {
 			source += fragment.code
 		}
 
-		if source.length {
+		if source.length != 0 {
 			return source.substr(0, source.length - 1)
 		}
 		else {
@@ -676,7 +683,7 @@ export class Compiler {
 		fs.writeFile(getHashPath(@file, @options.target), JSON.stringify(@module.toHashes()))
 	} // }}}
 	writeMetadata() { // {{{
-		if !@options.output {
+		if @options.output is not String {
 			throw new Error('Undefined option: output')
 		}
 
@@ -689,7 +696,7 @@ export class Compiler {
 		return this
 	} // }}}
 	writeOutput() { // {{{
-		if !@options.output {
+		if @options.output is not String {
 			throw new Error('Undefined option: output')
 		}
 

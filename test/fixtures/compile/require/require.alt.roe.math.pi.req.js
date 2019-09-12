@@ -16,6 +16,9 @@ module.exports = function(__ks_0, __ks___ks_0, Math, __ks_Math) {
 		if(precision === void 0 || precision === null) {
 			precision = 0;
 		}
+		else if(!Type.isNumber(precision)) {
+			throw new TypeError("'precision' is not of type 'Number'");
+		}
 		precision = Math.pow(10, precision).toFixed(0);
 		return Math.round(this * precision) / precision;
 	};

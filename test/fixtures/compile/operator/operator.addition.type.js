@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	function surround(value, separator) {
 		if(arguments.length < 1) {
@@ -9,6 +10,6 @@ module.exports = function() {
 		if(separator === void 0 || separator === null) {
 			separator = "";
 		}
-		return (separator + value + separator).toString();
+		return Operator.addOrConcat(separator, value, separator).toString();
 	}
 };

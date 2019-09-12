@@ -1204,7 +1204,7 @@ class CallSuperMethodES5Substitude {
 	constructor(@data, @arguments, @method, @class)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
-		fragments.code(`\(@class.type().extends().path()).prototype.\(@method.name()).call(this, [`)
+		fragments.code(`\(@class.type().extends().path()).prototype.\(@method.name()).apply(this, [`)
 
 		for argument, index in @arguments {
 			if index != 0 {

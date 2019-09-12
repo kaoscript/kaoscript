@@ -3,7 +3,7 @@ extern console, isNaN
 extern sealed class Number
 
 impl Number {
-	mod(max): Number {
+	mod(max: Number): Number {
 		if isNaN(this) {
 			return 0
 		}

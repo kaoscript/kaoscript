@@ -24,5 +24,6 @@ class EnumExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@enum).code('.', @data.member.name)
 	} // }}}
+	toQuote() => `\(@enum.toQuote())::\(@data.member.name))`
 	type() => @type
 }

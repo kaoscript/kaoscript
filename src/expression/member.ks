@@ -174,7 +174,6 @@ class MemberExpression extends Expression {
 					.code('[')
 					.compile(@property)
 					.code(']')
-					.code(' : false')
 			}
 			else {
 				fragments
@@ -183,8 +182,13 @@ class MemberExpression extends Expression {
 					.compile(@object)
 					.code($dot)
 					.compile(@property)
-					.code(' : false')
 			}
+
+			if !@type.isBoolean() || @type.isNullable() {
+				fragments.code(' === true')
+			}
+
+			fragments.code(' : false')
 		}
 		else {
 			if @data.computed {
@@ -199,6 +203,10 @@ class MemberExpression extends Expression {
 					.wrap(@object)
 					.code($dot)
 					.compile(@property)
+			}
+
+			if !@type.isBoolean() || @type.isNullable() {
+				fragments.code(' === true')
 			}
 		}
 	} // }}}
@@ -233,20 +241,20 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	toQuote() { // {{{
-		const fragments = [@object.toQuote()]
+		let fragments = @object.toQuote()
 
 		if @data.nullable {
-			fragments.push('?')
+			fragments += '?'
 		}
 
 		if @data.computed {
-			fragments.push('[', @property.toQuote(), ']')
+			fragments += `[\(@property.toQuote())]`
 		}
 		else {
-			fragments.push('.', @property)
+			fragments += `.\(@property)`
 		}
 
-		return fragments.join('')
+		return fragments
 	} // }}}
 	toReusableFragments(fragments) { // {{{
 		const objectCallable = @object.isCallable()

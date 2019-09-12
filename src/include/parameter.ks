@@ -73,14 +73,14 @@ class Parameter extends AbstractNode {
 			else if parameter.hasDefaultValue() {
 				SyntaxException.throwNoDefaultParameter(node)
 			}
-			else if parameter.isNullable() {
+			else if parameter.type().isNullable() {
 				SyntaxException.throwNoNullParameter(node)
 			}
 			else if parameter.isAnonymous() {
 				SyntaxException.throwNotNamedParameter(node)
 			}
 
-			fragments.code($comma) if i
+			fragments.code($comma) if i != 0
 
 			parameter.toParameterFragments(fragments)
 		}
@@ -96,7 +96,7 @@ class Parameter extends AbstractNode {
 				SyntaxException.throwNotNamedParameter(node)
 			}
 
-			fragments.code($comma) if i
+			fragments.code($comma) if i != 0
 
 			if parameter.isRest() {
 				parameter.toParameterFragments(fragments)
@@ -656,8 +656,7 @@ class Parameter extends AbstractNode {
 			type = Type.fromAST(@data.type, this)
 		}
 
-		const definitive = type != null
-		if !definitive {
+		if type == null {
 			type = @anonymous ? AnyType.NullableUnexplicit : Type.Any
 		}
 
@@ -708,7 +707,7 @@ class Parameter extends AbstractNode {
 
 		@type = new ParameterType(@scope, name, type, min, max, default)
 
-		@name.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, definitive)
+		@name.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, true)
 	} // }}}
 	translate() { // {{{
 		@name.translate()
@@ -726,7 +725,6 @@ class Parameter extends AbstractNode {
 	arity() => @arity
 	hasDefaultValue() => @hasDefaultValue
 	isAnonymous() => @anonymous
-	isNullable() => @type.type().isNullable()
 	isRequired() => @defaultValue == null || @explicitlyRequired
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
@@ -876,7 +874,7 @@ class IdentifierParameter extends IdentifierLiteral {
 					.newLine()
 					.code($runtime.scope(this))
 					.compile(this)
-					.code(` = Array.prototype.slice.call(\(context.name), \(context.increment ? '++__ks_i' : '__ks_i'), \(index + 1 == context.length ? '' : '__ks_i = ')__ks_i + \(arity.min + context.increment ? 1 : 0))`)
+					.code(` = Array.prototype.slice.call(\(context.name), \(context.increment ? '++__ks_i' : '__ks_i'), \(index + 1 == context.length ? '' : '__ks_i = ')__ks_i + \(arity.min + (context.increment ? 1 : 0)))`)
 					.done()
 
 				context.increment = true

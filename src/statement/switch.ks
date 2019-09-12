@@ -205,12 +205,12 @@ class SwitchStatement extends Statement {
 
 		let i, binding
 		for clause, clauseIdx in @clauses {
-			if clause.conditions.length {
+			if clause.conditions.length != 0 {
 				if we {
 					SyntaxException.throwAfterDefaultClause(this)
 				}
 
-				if clauseIdx {
+				if clauseIdx != 0 {
 					ctrl.step().code('else if(')
 				}
 				else {
@@ -218,7 +218,7 @@ class SwitchStatement extends Statement {
 				}
 
 				for condition, i in clause.conditions {
-					ctrl.code(' || ') if i
+					ctrl.code(' || ') if i != 0
 
 					condition.toBooleanFragments(ctrl, @name)
 				}
@@ -234,7 +234,7 @@ class SwitchStatement extends Statement {
 				clause.body.toFragments(ctrl, mode)
 			}
 			else if clause.hasTest {
-				if clauseIdx {
+				if clauseIdx != 0 {
 					ctrl.step().code('else if(')
 				}
 				else {
@@ -252,7 +252,7 @@ class SwitchStatement extends Statement {
 				clause.body.toFragments(ctrl, mode)
 			}
 			else {
-				if clauseIdx {
+				if clauseIdx != 0 {
 					ctrl.step().code('else')
 				}
 				else {

@@ -15,11 +15,16 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "exhaustive": false,
+      "exhaustive": false,
       "init": 0,
       "constructors": [],
       "destructors": 0,
-      "instanceVariables": {},
+      "instanceVariables": {
+        "length": {
+          "access": 3,
+          "type": "Number"
+        }
+      },
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {}
@@ -29,8 +34,8 @@
       "class": {
         "reference": 0
       },
+      "exhaustive": false,
       "init": 0,
-	  "exhaustive": false,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {

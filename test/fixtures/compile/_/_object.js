@@ -48,7 +48,7 @@ module.exports = function(Helper, Type) {
 		let results = [];
 		for(let index in object) {
 			let item = object[index];
-			if(condition(item, index)) {
+			if(condition(item, index) === true) {
 				results.push(iterator(item, index));
 			}
 		}

@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	function foobar(x, y) {
 		if(arguments.length < 2) {
@@ -12,6 +13,6 @@ module.exports = function() {
 		if((x === null) || (y === null)) {
 			return null;
 		}
-		return x.foobar() + y.foobar();
+		return Operator.addOrConcat(x.foobar(), y.foobar());
 	}
 };

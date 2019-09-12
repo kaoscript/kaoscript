@@ -4,26 +4,28 @@ class PolyadicOperatorExpression extends Expression {
 		_tested: Boolean	= false
 	}
 	analyse() { // {{{
-		for operand in @data.operands {
-			@operands.push(operand = $compile.expression(operand, this))
+		for const data in @data.operands {
+			operand = $compile.expression(data, this)
 
 			operand.analyse()
+
+			@operands.push(operand)
 		}
 	} // }}}
 	prepare() { // {{{
-		for operand in @operands {
+		for const operand in @operands {
 			operand.prepare()
 		}
 	} // }}}
 	translate() { // {{{
-		for operand in @operands {
+		for const operand in @operands {
 			operand.translate()
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		for i from 0 til @operands.length {
-			@operands[i].acquireReusable(false)
-			@operands[i].releaseReusable()
+		for const operand in @operands {
+			operand.acquireReusable(false)
+			operand.releaseReusable()
 		}
 	} // }}}
 	releaseReusable() { // {{{
@@ -40,7 +42,7 @@ class PolyadicOperatorExpression extends Expression {
 		return false
 	} // }}}
 	isUsingVariable(name) { // {{{
-		for operand in @operands {
+		for const operand in @operands {
 			if operand.isUsingVariable(name) {
 				return true
 			}
@@ -49,7 +51,7 @@ class PolyadicOperatorExpression extends Expression {
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		let test = this.isNullable() && !@tested
+		const test = this.isNullable() && !@tested
 		if test {
 			fragments
 				.compileNullable(this)
@@ -65,7 +67,7 @@ class PolyadicOperatorExpression extends Expression {
 	toNullableFragments(fragments) { // {{{
 		if !@tested {
 			let nf = false
-			for operand in @operands {
+			for const operand in @operands {
 				if operand.isNullable() {
 					if nf {
 						fragments.code(' && ')
@@ -83,31 +85,229 @@ class PolyadicOperatorExpression extends Expression {
 	} // }}}
 }
 
-class PolyadicOperatorAddition extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('+', @data.operator)
-					.code($space)
+abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpression {
+	private {
+		_isNative: Boolean		= false
+		_type: Type
+	}
+	prepare() { // {{{
+		super()
+
+		let nullable = false
+
+		@isNative = true
+
+		for const operand in @operands {
+			if operand.type().isNullable() {
+				nullable = true
+				@isNative = false
+			}
+
+			if operand.type().isNumber() {
+			}
+			else if operand.type().canBeNumber() {
+				@isNative = false
 			}
 			else {
-				nf = true
+				TypeException.throwInvalidOperand(operand, this.operator(), this)
+			}
+		}
+
+		@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+	} // }}}
+	isComputed() => @isNative
+	abstract operator(): Operator
+	abstract runtime(): String
+	abstract symbol(): String
+	toNativeFragments(fragments) { // {{{
+		for const operand, index in @operands {
+			if index != 0 {
+				fragments.code($space).code(this.symbol(), @data.operator).code($space)
 			}
 
 			fragments.wrap(operand)
 		}
 	} // }}}
-	type(): Type { // {{{
-		if @operands[0].type().isNumber() || @operands[0].type().isString() {
-			return @operands[0].type()
+	toOperandFragments(fragments, operator, type) { // {{{
+		if operator == this.operator() && type == OperandType::Number {
+			for const operand, index in @operands {
+				if index != 0 {
+					fragments.code($comma)
+				}
+
+				fragments.compile(operand)
+			}
 		}
 		else {
-			return new UnionType(@scope, [@scope.reference('Number'), @scope.reference('String')], false)
+			this.toOperatorFragments(fragments)
 		}
 	} // }}}
+	toOperatorFragments(fragments) { // {{{
+		if @isNative {
+			this.toNativeFragments(fragments)
+		}
+		else {
+			fragments.code($runtime.operator(this), `.\(this.runtime())(`)
+
+			for const operand, index in @operands {
+				if index != 0 {
+					fragments.code($comma)
+				}
+
+				fragments.compile(operand)
+			}
+
+			fragments.code(')')
+		}
+	} // }}}
+	toQuote() { // {{{
+		let fragments = ''
+
+		for const operand, index in @operands {
+			if index != 0 {
+				fragments += ` \(this.symbol()) `
+			}
+
+			fragments += operand.toQuote()
+		}
+
+		return fragments
+	} // }}}
+	type() => @type
+}
+
+class PolyadicOperatorAddition extends PolyadicOperatorExpression {
+	private {
+		_isNative: Boolean		= false
+		_isNumber: Boolean		= false
+		_isString: Boolean		= false
+		_type: Type
+	}
+	prepare() { // {{{
+		super()
+
+		let nullable = false
+
+		@isNative = true
+
+		for const operand in @operands {
+			if operand.type().isNullable() {
+				nullable = true
+				@isNative = false
+			}
+
+			if operand.type().isString() {
+				@isString = true
+			}
+			else if operand.type().canBeString(false) && !operand.type().canBeNumber(false) {
+				@isString = true
+				@isNative = false
+			}
+		}
+
+		if !@isString {
+			@isNumber = true
+
+			let notNumber = null
+
+			// for const operand in @operands while @isNative || @isNumber {
+			for const operand in @operands {
+				if operand.type().isNumber() {
+				}
+				else if operand.type().isAny() {
+					@isNumber = false
+					@isNative = false
+				}
+				else if operand.type().canBeNumber(false) {
+					@isNative = false
+
+					if operand.type().canBeString(false) {
+						@isNumber = false
+					}
+				}
+				else if notNumber == null {
+					notNumber = operand
+				}
+			}
+
+			if @isNumber && notNumber != null {
+				TypeException.throwInvalidOperand(notNumber, Operator::Addition, this)
+			}
+		}
+
+		if @isNumber {
+			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+		}
+		else if @isString {
+			@type = @scope.reference('String')
+		}
+		else {
+			const numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+
+			@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+		}
+	} // }}}
+	isComputed() => @isNative
+	toOperandFragments(fragments, operator, type) { // {{{
+		if operator == Operator::Addition && ((@isNumber && type == OperandType::Number) || (@isString && type == OperandType::String)) {
+			for const operand, index in @operands {
+				if index != 0 {
+					fragments.code($comma)
+				}
+
+				fragments.compile(operand)
+			}
+		}
+		else {
+			this.toOperatorFragments(fragments)
+		}
+	} // }}}
+	toOperatorFragments(fragments) { // {{{
+		if @isNative {
+			for const operand, index in @operands {
+				if index != 0 {
+					fragments.code($space).code('+', @data.operator).code($space)
+				}
+
+				fragments.wrap(operand)
+			}
+		}
+		else {
+			if @isNumber {
+				fragments.code($runtime.operator(this), '.addition(')
+			}
+			else if @isString {
+				fragments.code($runtime.helper(this), '.concatString(')
+			}
+			else {
+				fragments.code($runtime.operator(this), '.addOrConcat(')
+			}
+
+			for const operand, index in @operands {
+				if index != 0 {
+					fragments.code($comma)
+				}
+
+				fragments.compile(operand)
+			}
+
+			fragments.code(')')
+		}
+	} // }}}
+	toQuote() { // {{{
+		let fragments = ''
+
+		for const operand, index in @operands {
+			if index != 0 {
+				fragments += ' + '
+			}
+
+			fragments += operand.toQuote()
+		}
+
+		return fragments
+	} // }}}
+	type() => @type
 }
 
 class PolyadicOperatorAnd extends PolyadicOperatorExpression {
@@ -179,124 +379,40 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
-class PolyadicOperatorBitwiseAnd extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('&', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorBitwiseAnd extends NumericPolyadicOperatorExpression {
+	operator() => Operator::BitwiseAnd
+	runtime() => 'bitwiseAnd'
+	symbol() => '&'
 }
 
-class PolyadicOperatorBitwiseLeftShift extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('<<', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorBitwiseLeftShift extends NumericPolyadicOperatorExpression {
+	operator() => Operator::BitwiseLeftShift
+	runtime() => 'bitwiseLeftShift'
+	symbol() => '<<'
 }
 
-class PolyadicOperatorBitwiseOr extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('|', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorBitwiseOr extends NumericPolyadicOperatorExpression {
+	operator() => Operator::BitwiseOr
+	runtime() => 'bitwiseOr'
+	symbol() => '|'
 }
 
-class PolyadicOperatorBitwiseRightShift extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('>>', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorBitwiseRightShift extends NumericPolyadicOperatorExpression {
+	operator() => Operator::BitwiseRightShift
+	runtime() => 'bitwiseRightShift'
+	symbol() => '>>'
 }
 
-class PolyadicOperatorBitwiseXor extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('^', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorBitwiseXor extends NumericPolyadicOperatorExpression {
+	operator() => Operator::BitwiseXor
+	runtime() => 'bitwiseXor'
+	symbol() => '^'
 }
 
-class PolyadicOperatorDivision extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('/', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorDivision extends NumericPolyadicOperatorExpression {
+	operator() => Operator::Division
+	runtime() => 'division'
+	symbol() => '/'
 }
 
 class PolyadicOperatorImply extends PolyadicOperatorExpression {
@@ -315,44 +431,16 @@ class PolyadicOperatorImply extends PolyadicOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
-class PolyadicOperatorMultiplication extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('*', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorModulo extends NumericPolyadicOperatorExpression {
+	operator() => Operator::Modulo
+	runtime() => 'modulo'
+	symbol() => '%'
 }
 
-class PolyadicOperatorModulo extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('%', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorMultiplication extends NumericPolyadicOperatorExpression {
+	operator() => Operator::Multiplication
+	runtime() => 'multiplication'
+	symbol() => '*'
 }
 
 class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
@@ -517,8 +605,11 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
-class PolyadicOperatorQuotient extends PolyadicOperatorExpression {
-	toFragments(fragments, mode) { // {{{
+class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
+	operator() => Operator::Quotient
+	runtime() => 'quotient'
+	symbol() => '/.'
+	toNativeFragments(fragments) { // {{{
 		const l = @operands.length - 1
 		fragments.code('Number.parseInt('.repeat(l))
 
@@ -528,27 +619,12 @@ class PolyadicOperatorQuotient extends PolyadicOperatorExpression {
 			fragments.code(' / ').wrap(operand).code(')')
 		}
 	} // }}}
-	type() => @scope.reference('Boolean')
 }
 
-class PolyadicOperatorSubtraction extends PolyadicOperatorExpression {
-	toOperatorFragments(fragments) { // {{{
-		let nf = false
-		for operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('-', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrap(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Number')
+class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
+	operator() => Operator::Subtraction
+	runtime() => 'subtraction'
+	symbol() => '-'
 }
 
 class PolyadicOperatorXor extends PolyadicOperatorExpression {

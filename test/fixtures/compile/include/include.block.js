@@ -49,7 +49,7 @@ module.exports = function() {
 		let results = [];
 		for(let index = 0, __ks_0 = array.length, item; index < __ks_0; ++index) {
 			item = array[index];
-			if(condition(item, index)) {
+			if(condition(item, index) === true) {
 				results.push(iterator(item, index));
 			}
 		}
@@ -59,7 +59,10 @@ module.exports = function() {
 		if(index === void 0 || index === null) {
 			index = 1;
 		}
-		return this.length ? this[this.length - index] : null;
+		else if(!Type.isNumber(index)) {
+			throw new TypeError("'index' is not of type 'Number'");
+		}
+		return (this.length !== 0) ? this[this.length - index] : null;
 	};
 	__ks_Array._cm_map = function() {
 		var args = Array.prototype.slice.call(arguments);
@@ -86,7 +89,7 @@ module.exports = function() {
 		if(this.length === 0) {
 			return [];
 		}
-		else if(emptyLines) {
+		else if(emptyLines === true) {
 			return this.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
 		}
 		else {

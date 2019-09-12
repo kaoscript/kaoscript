@@ -48,7 +48,7 @@ module.exports = function(Array, __ks_Array) {
 		let results = [];
 		for(let index = 0, __ks_0 = array.length, item; index < __ks_0; ++index) {
 			item = array[index];
-			if(condition(item, index)) {
+			if(condition(item, index) === true) {
 				results.push(iterator(item, index));
 			}
 		}

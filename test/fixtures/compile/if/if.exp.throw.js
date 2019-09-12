@@ -6,7 +6,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		if(x) {
+		if(x === true) {
 			throw new Error();
 		}
 	}

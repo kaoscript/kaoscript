@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	var __ks_Number = {};
 	__ks_Number.__ks_func_zeroPad_0 = function(length) {
@@ -27,7 +28,7 @@ module.exports = function() {
 		if(pad === void 0 || pad === null) {
 			throw new TypeError("'pad' is not nullable");
 		}
-		return pad.repeat(length - this.length) + this;
+		return pad.repeat(Operator.subtraction(length, this.length)) + this;
 	};
 	__ks_String._im_lpad = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

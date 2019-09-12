@@ -1,10 +1,12 @@
 extern console
 
-extern sealed class Array
+extern sealed class Array {
+	length: Number
+}
 
 impl Array {
-	last(index = 1) {
-		return this.length ? this[this.length - index] : null
+	last(index: Number = 1) {
+		return this.length != 0 ? this[this.length - index] : null
 	}
 }
 

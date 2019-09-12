@@ -5,6 +5,7 @@ require|extern sealed class Number {
 #[rules(non-exhaustive)]
 extern sealed namespace Math {
 	PI: Number
+	round(...): Number
 }
 
 extern console
@@ -12,7 +13,7 @@ extern console
 console.log(`\(Math.PI.toString())`)
 
 impl Number {
-	round(precision = 0): Number {
+	round(precision: Number = 0): Number {
 		precision = Math.pow(10, precision).toFixed(0)
 		return Math.round(this * precision) / precision
 	}

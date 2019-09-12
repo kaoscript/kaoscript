@@ -1,0 +1,1 @@
+TypeException: The negative member "x" can't be nullable (line 2, file "fixtures/compile/operator/operator.negative.ine.ks")

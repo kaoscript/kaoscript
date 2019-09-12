@@ -1,6 +1,6 @@
 module.exports = function() {
 	function foobar() {
-		if(this.qux) {
+		if(this.qux === true) {
 		}
 	}
 };

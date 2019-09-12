@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo(x, y, __ks_cb) {
 		if(arguments.length < 3) {
@@ -19,7 +19,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			return __ks_cb(new TypeError("'y' is not nullable"));
 		}
-		return __ks_cb(null, x - y);
+		return __ks_cb(null, Operator.subtraction(x, y));
 	}
 	function bar(__ks_cb) {
 		if(arguments.length < 1) {
@@ -45,7 +45,7 @@ module.exports = function() {
 							}
 							else {
 								let e = __ks_1;
-								return __ks_cb(null, d * e);
+								return __ks_cb(null, Operator.multiplication(d, e));
 							}
 						});
 					}

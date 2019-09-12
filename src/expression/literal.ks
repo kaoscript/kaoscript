@@ -44,11 +44,13 @@ class IdentifierLiteral extends Literal {
 				@isVariable = true
 				@line = @scope.line()
 			}
-			else if $runtime.isDefined(@value, @parent) {
-				@realType = @declaredType = Type.Any
-			}
 			else if @scope.hasMacro(@value) {
 				@isMacro = true
+			}
+			// else if const name = $runtime.getVariable(@value, @parent) {
+			else if name ?= $runtime.getVariable(@value, @parent) {
+				@value = name
+				@realType = @declaredType = Type.Any
 			}
 			else {
 				ReferenceException.throwNotDefined(@value, this)
@@ -75,7 +77,6 @@ class IdentifierLiteral extends Literal {
 	isDeclarable() => true
 	isDeclararingVariable(name: String) => @value == name
 	isMacro() => @isMacro
-	// isNullable() => @realType.isNullable()
 	isRedeclared() => @scope.isRedeclaredVariable(@value)
 	isRenamed() => @scope.isRenamedVariable(@value)
 	isInferable() => true

@@ -73,7 +73,7 @@ class ArrayBinding extends Expression {
 		fragments.code('[')
 
 		for i from 0 til @elements.length {
-			fragments.code(', ') if i
+			fragments.code(', ') if i != 0
 
 			@elements[i].toFragments(fragments)
 		}
@@ -368,7 +368,7 @@ class ObjectBinding extends Expression {
 		fragments.code('{')
 
 		for i from 0 til @elements.length {
-			fragments.code(', ') if i
+			fragments.code(', ') if i != 0
 
 			@elements[i].toFragments(fragments)
 		}

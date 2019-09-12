@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 function foo(x, y, __ks_cb) {
 	if(arguments.length < 3) {
 		let __ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2 + 1)");
@@ -18,7 +18,7 @@ function foo(x, y, __ks_cb) {
 	if(y === void 0 || y === null) {
 		return __ks_cb(new TypeError("'y' is not nullable"));
 	}
-	return __ks_cb(null, x - y);
+	return __ks_cb(null, Operator.subtraction(x, y));
 }
 function bar(__ks_cb) {
 	if(arguments.length < 1) {
@@ -39,7 +39,7 @@ function bar(__ks_cb) {
 				try {
 					let d = __ks_0;
 					console.log(d);
-					return __ks_cb(null, d * 3);
+					return __ks_cb(null, Operator.multiplication(d, 3));
 				}
 				catch(__ks_e) {
 					return __ks_1(__ks_e);

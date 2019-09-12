@@ -46,7 +46,7 @@ class ForFromStatement extends Statement {
 			}
 		}
 
-		if @data.til {
+		if @data.til? {
 			@til = $compile.expression(@data.til, this, @scope)
 			@til.analyse()
 
@@ -73,7 +73,7 @@ class ForFromStatement extends Statement {
 			}
 		}
 
-		if @data.by {
+		if @data.by? {
 			@by = $compile.expression(@data.by, this, @scope)
 			@by.analyse()
 
@@ -101,16 +101,16 @@ class ForFromStatement extends Statement {
 		@variable = $compile.expression(@data.variable, this, @bindingScope)
 		@variable.analyse()
 
-		if @data.until {
+		if @data.until? {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
-		else if @data.while {
+		else if @data.while? {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
-		if @data.when {
+		if @data.when? {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}
@@ -220,18 +220,18 @@ class ForFromStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if @data.until {
+		if @until? {
 			ctrl.code('!(').compileBoolean(@until).code(') && ')
 		}
-		else if @data.while {
+		else if @while? {
 			ctrl.compileBoolean(@while).code(' && ')
 		}
 
 		ctrl.compile(@variable)
 
-		let desc = (@data.by && @data.by.kind == NodeKind::NumericExpression && @data.by.value < 0) || (@data.from.kind == NodeKind::NumericExpression && ((@data.to && @data.to.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value) || (@data.til && @data.til.kind == NodeKind::NumericExpression && @data.from.value > @data.til.value)))
+		let desc = (@data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0) || (@data.from.kind == NodeKind::NumericExpression && ((@data.to?.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value) || (@data.til?.kind == NodeKind::NumericExpression && @data.from.value > @data.til.value)))
 
-		if @data.til {
+		if @data.til? {
 			if desc {
 				ctrl.code(' > ')
 			}
@@ -254,7 +254,7 @@ class ForFromStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if @data.by {
+		if @data.by? {
 			if @data.by.kind == NodeKind::NumericExpression {
 				if @data.by.value == 1 {
 					ctrl.code('++').compile(@variable)
@@ -282,7 +282,7 @@ class ForFromStatement extends Statement {
 
 		ctrl.code(')').step()
 
-		if @data.when {
+		if @data.when? {
 			this.toDeclarationFragments(@conditionalTempVariables, ctrl)
 
 			ctrl

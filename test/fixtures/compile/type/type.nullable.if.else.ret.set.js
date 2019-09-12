@@ -14,7 +14,7 @@ module.exports = function() {
 		if(x === void 0) {
 			x = null;
 		}
-		if(test()) {
+		if(test() === true) {
 			return 24;
 		}
 		else {

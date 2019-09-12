@@ -31,8 +31,8 @@ impl Array {
 		}
 	}
 
-	last(index = 1) {
-		return this.length ? this[this.length - index] : null
+	last(index: Number = 1) {
+		return this.length != 0 ? this[this.length - index] : null
 	}
 }
 

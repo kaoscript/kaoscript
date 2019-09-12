@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo(x, y, __ks_cb) {
 		if(arguments.length < 3) {
@@ -35,7 +35,7 @@ module.exports = function() {
 			}
 			else {
 				d = __ks_0;
-				return __ks_cb(null, d * 3);
+				return __ks_cb(null, Operator.multiplication(d, 3));
 			}
 		});
 	}

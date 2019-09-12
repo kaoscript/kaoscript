@@ -1,0 +1,104 @@
+{
+  "aliens": [
+    0,
+    "Math"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Math"
+  ],
+  "references": [
+    {
+      "kind": "namespace",
+      "sealed": true,
+      "exhaustive": true,
+      "properties": {
+        "max": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": "Number",
+          "throws": [],
+          "sealed": false
+        },
+        "min": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": "Number",
+          "throws": [],
+          "sealed": false
+        },
+        "pow": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": "Number",
+          "throws": [],
+          "sealed": false
+        },
+        "random": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Number",
+          "throws": [],
+          "sealed": false
+        },
+        "round": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": "Number",
+          "throws": [],
+          "sealed": false
+        }
+      }
+    }
+  ],
+  "macros": []
+}

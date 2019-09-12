@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	function foobar(x, y) {
 		if(arguments.length < 2) {
@@ -9,7 +10,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		if((x + y) === 0) {
+		if(Operator.addOrConcat(x, y) === 0) {
 			return 42;
 		}
 		return null;
@@ -24,6 +25,6 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		return ((x + y) === 0) ? 42 : 24;
+		return (Operator.addOrConcat(x, y) === 0) ? 42 : 24;
 	}
 };

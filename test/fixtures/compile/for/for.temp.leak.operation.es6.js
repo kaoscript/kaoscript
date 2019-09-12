@@ -13,7 +13,7 @@ module.exports = function() {
 			throw new TypeError("'extending' is not nullable");
 		}
 		let index = 1;
-		if(((index = getIndex()) === -1) && extending) {
+		if(((index = getIndex()) === -1) && (extending === true)) {
 		}
 		for(let __ks_0 = 0, __ks_1 = statements.length, statement; __ks_0 < __ks_1; ++__ks_0) {
 			statement = statements[__ks_0];

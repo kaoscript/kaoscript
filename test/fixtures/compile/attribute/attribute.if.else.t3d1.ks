@@ -1,6 +1,9 @@
 #![target(trident-v8)]
 
-extern sealed class String
+#[rules(non-exhaustive)]
+extern sealed class String {
+	length: Number
+}
 
 #[if(any(trident, jsc-v8))]
 impl String {

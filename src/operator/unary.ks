@@ -17,31 +17,62 @@ class UnaryOperatorExpression extends Expression {
 	isUsingVariable(name) => @argument.isUsingVariable(name)
 }
 
-class UnaryOperatorBitwiseNot extends UnaryOperatorExpression {
-	toFragments(fragments, mode) { // {{{
-		fragments
-			.code('~', @data.operator)
-			.wrap(@argument)
+abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
+	private {
+		_allNumber: Boolean		= false
+	}
+	prepare() { // {{{
+		super()
+
+		if @argument.type().isNumber() {
+			if @argument.type().isNullable() {
+				TypeException.throwNotNullableOperand(@argument, this.operator(), this)
+			}
+
+			@allNumber = true
+		}
+		else if !@argument.type().canBeNumber() {
+			TypeException.throwInvalidOperand(@argument, this.operator(), this)
+		}
 	} // }}}
+	abstract operator(): Operator
+	abstract runtime(): String
+	abstract symbol(): String
+	toFragments(fragments, mode) { // {{{
+		if @allNumber {
+			fragments.code(this.symbol(), @data.operator).wrap(@argument)
+		}
+		else {
+			fragments.code($runtime.operator(this), `.\(this.runtime())(`).compile(@argument).code(')')
+		}
+	} // }}}
+	toQuote() => `\(this.symbol())\(@argument.toQuote())`
 	type() => @scope.reference('Number')
 }
 
-class UnaryOperatorDecrementPostfix extends UnaryOperatorExpression {
-	toFragments(fragments, mode) { // {{{
-		fragments
-			.wrap(@argument)
-			.code('--', @data.operator)
-	} // }}}
-	type() => @scope.reference('Number')
+class UnaryOperatorBitwiseNot extends NumericUnaryOperatorExpression {
+	operator() => Operator::BitwiseNot
+	runtime() => 'bitwiseNot'
+	symbol() => '~'
 }
 
-class UnaryOperatorDecrementPrefix extends UnaryOperatorExpression {
+class UnaryOperatorDecrementPostfix extends NumericUnaryOperatorExpression {
+	operator() => Operator::DecrementPostfix
+	runtime() => 'decrementPostfix'
+	symbol() => '--'
 	toFragments(fragments, mode) { // {{{
-		fragments
-			.code('--', @data.operator)
-			.wrap(@argument)
+		fragments.compile(@argument).code(this.symbol(), @data.operator)
 	} // }}}
-	type() => @scope.reference('Number')
+	toQuote() => `\(@argument.toQuote())\(this.symbol())`
+}
+
+class UnaryOperatorDecrementPrefix extends NumericUnaryOperatorExpression {
+	operator() => Operator::DecrementPrefix
+	runtime() => 'decrementPrefix'
+	symbol() => '--'
+	toFragments(fragments, mode) { // {{{
+		fragments.code(this.symbol(), @data.operator).compile(@argument)
+	} // }}}
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
@@ -96,22 +127,23 @@ class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
 	type() => AnyType.Unexplicit
 }
 
-class UnaryOperatorIncrementPostfix extends UnaryOperatorExpression {
+class UnaryOperatorIncrementPostfix extends NumericUnaryOperatorExpression {
+	operator() => Operator::IncrementPostfix
+	runtime() => 'incrementPostfix'
+	symbol() => '++'
 	toFragments(fragments, mode) { // {{{
-		fragments
-			.wrap(@argument)
-			.code('++', @data.operator)
+		fragments.compile(@argument).code(this.symbol(), @data.operator)
 	} // }}}
-	type() => @scope.reference('Number')
+	toQuote() => `\(@argument.toQuote())\(this.symbol())`
 }
 
-class UnaryOperatorIncrementPrefix extends UnaryOperatorExpression {
+class UnaryOperatorIncrementPrefix extends NumericUnaryOperatorExpression {
+	operator() => Operator::IncrementPrefix
+	runtime() => 'incrementPrefix'
+	symbol() => '++'
 	toFragments(fragments, mode) { // {{{
-		fragments
-			.code('++', @data.operator)
-			.wrap(@argument)
+		fragments.code(this.symbol(), @data.operator).compile(@argument)
 	} // }}}
-	type() => @scope.reference('Number')
 }
 
 class UnaryOperatorNegation extends UnaryOperatorExpression {
@@ -125,13 +157,10 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 	type() => @scope.reference('Boolean')
 }
 
-class UnaryOperatorNegative extends UnaryOperatorExpression {
-	toFragments(fragments, mode) { // {{{
-		fragments
-			.code('-', @data.operator)
-			.wrap(@argument)
-	} // }}}
-	type() => @scope.reference('Number')
+class UnaryOperatorNegative extends NumericUnaryOperatorExpression {
+	operator() => Operator::Negative
+	runtime() => 'negative'
+	symbol() => '-'
 }
 
 class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {

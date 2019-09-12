@@ -1,4 +1,5 @@
-var Type = require("@kaoscript/runtime").Type;
+var __ks__ = require("@kaoscript/runtime");
+var Operator = __ks__.Operator, Type = __ks__.Type;
 module.exports = function() {
 	function foobar(values) {
 		if(arguments.length < 1) {
@@ -29,7 +30,7 @@ module.exports = function() {
 		}
 		for(var i = 0, __ks_0 = values.length, value; i < __ks_0; ++i) {
 			value = values[i];
-			var __ks_x_1 = i * value.max;
+			var __ks_x_1 = Operator.multiplication(i, value.max);
 		}
 	}
 };

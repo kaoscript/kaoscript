@@ -25,14 +25,14 @@ module.exports = function(__ks_0, __ks___ks_0) {
 	};
 	__ks_Array.__ks_func_pushUniq_0 = function(...args) {
 		if(args.length === 1) {
-			if(!__ks_Array._im_contains(this, args[0])) {
+			if(!(__ks_Array._im_contains(this, args[0]) === true)) {
 				this.push(args[0]);
 			}
 		}
 		else {
 			for(let __ks_0 = 0, __ks_1 = args.length, item; __ks_0 < __ks_1; ++__ks_0) {
 				item = args[__ks_0];
-				if(!__ks_Array._im_contains(this, item)) {
+				if(!(__ks_Array._im_contains(this, item) === true)) {
 					this.push(item);
 				}
 			}

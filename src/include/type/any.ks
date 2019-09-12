@@ -49,7 +49,7 @@ class AnyType extends Type {
 	isExportable() => true
 	isInstanceOf(target: Type) => true
 	isMatching(value: Type, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact {
+		if mode & MatchingMode::Exact != 0 {
 			return value.isAny() && @nullable == value.isNullable()
 		}
 		else {
@@ -86,7 +86,7 @@ class AnyType extends Type {
 		fragments.code('Any')
 	} // }}}
 	toMetadata(references, mode) => -1
-	toQuote(): String => `Any`
+	toQuote(): String => @nullable ? `Any?` : `Any`
 	toReference(references, mode) => 'Any'
 	toTestFragments(fragments, node) { // {{{
 		throw new NotSupportedException(node)

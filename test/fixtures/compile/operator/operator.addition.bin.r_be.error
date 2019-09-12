@@ -1,0 +1,1 @@
+TypeException: The addition member "x" is expected to be of type "Number" or "Any" and not of type "Array" (line 2, file "fixtures/compile/operator/operator.addition.bin.r_be.ks")

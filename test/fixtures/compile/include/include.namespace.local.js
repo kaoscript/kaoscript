@@ -9,7 +9,7 @@ module.exports = function() {
 			if(this.length === 0) {
 				return [];
 			}
-			else if(emptyLines) {
+			else if(emptyLines === true) {
 				return this.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
 			}
 			else {

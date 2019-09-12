@@ -1,4 +1,4 @@
-extern t1, t2, t3, h, i
+extern t1: Number, t2: Number, t3: Number, h: Number, i: Number
 
 const foo = t1 + (t2 - t1) * (2 / 3 - t3) * 6
 const bar = h + 1 / 3 * - (i - 1)
@@ -13,7 +13,7 @@ export class Color {
 Color.registerSpace!({
 	name: 'FBQ'
 	formatters: {
-		foo(t1, t2, t3) => t1 + (t2 - t1) * (2 / 3 - t3) * 6
-		bar(h, i) => h + 1 / 3 * - (i - 1)
+		foo(t1: Number, t2: Number, t3: Number) => t1 + (t2 - t1) * (2 / 3 - t3) * 6
+		bar(h: Number, i: Number) => h + 1 / 3 * - (i - 1)
 	}
 })

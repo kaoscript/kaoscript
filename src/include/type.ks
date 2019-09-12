@@ -138,7 +138,7 @@ abstract class Type {
 					if const variable = scope.getVariable(data.name) {
 						return variable.getDeclaredType()
 					}
-					else if $runtime.isDefined(data.name, node) {
+					else if $runtime.getVariable(data.name, node) != null {
 						return Type.Any
 					}
 					else {
@@ -468,6 +468,9 @@ abstract class Type {
 	abstract export(references, mode)
 	abstract toFragments(fragments, node)
 	abstract toTestFragments(fragments, node)
+	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
+	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
+	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()
 	condense(): Type => this
 	discardAlias(): Type => this
 	discardName(): Type => this
@@ -506,6 +509,7 @@ abstract class Type {
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
+	isBoolean() => false
 	isCloned() => false
 	isClass() => false
 	isContainedIn(types) { // {{{

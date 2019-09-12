@@ -9,9 +9,7 @@ async func disks() {
 	let disks = []
 	let matches: Array<String>
 	for line in stdout.lines() {
-		matches = df_regex.exec(line)
-
-		if matches {
+		if matches ?= df_regex.exec(line) {
 			disks.push({
 				device: matches[1].trim()
 				mount: matches[9]

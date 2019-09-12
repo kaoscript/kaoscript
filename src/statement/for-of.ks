@@ -74,16 +74,16 @@ class ForOfStatement extends Statement {
 			@bindingScope.rename(variable)
 		}
 
-		if @data.until {
+		if @data.until? {
 			@until = $compile.expression(@data.until, this, @bodyScope)
 			@until.analyse()
 		}
-		else if @data.while {
+		else if @data.while? {
 			@while = $compile.expression(@data.while, this, @bodyScope)
 			@while.analyse()
 		}
 
-		if @data.when {
+		if @data.when? {
 			@when = $compile.expression(@data.when, this, @bodyScope)
 			@when.analyse()
 		}

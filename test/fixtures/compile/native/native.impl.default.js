@@ -1,7 +1,8 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_lowerFirst_0 = function() {
-		return this.charAt(0).toLowerCase() + this.substring(1);
+		return Operator.addOrConcat(this.charAt(0).toLowerCase(), this.substring(1));
 	};
 	__ks_String._im_lowerFirst = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

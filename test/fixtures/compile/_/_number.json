@@ -3,17 +3,17 @@
     -1,
     "isNaN",
     -1,
-    "Math",
-    -1,
     "parseFloat",
     -1,
     "parseInt",
     0,
-    "Number"
+    "Number",
+    1,
+    "Math"
   ],
   "requirements": [],
   "exports": [
-    1,
+    2,
     "Number"
   ],
   "references": [
@@ -29,8 +29,117 @@
       "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
-      "instanceMethods": {},
+      "instanceMethods": {
+        "toFixed": [
+          {
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
       "classMethods": {}
+    },
+    {
+      "kind": "namespace",
+      "sealed": true,
+      "exhaustive": true,
+      "properties": {
+        "max": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": {
+            "reference": 0
+          },
+          "throws": [],
+          "sealed": false
+        },
+        "min": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": {
+            "reference": 0
+          },
+          "throws": [],
+          "sealed": false
+        },
+        "pow": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": {
+            "reference": 0
+          },
+          "throws": [],
+          "sealed": false
+        },
+        "round": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": {
+            "reference": 0
+          },
+          "throws": [],
+          "sealed": false
+        }
+      }
     },
     {
       "kind": "class",
@@ -51,21 +160,25 @@
             "parameters": [
               {
                 "name": "min",
-                "type": "Any",
+                "type": {
+                  "reference": 2
+                },
                 "min": 1,
                 "max": 1,
                 "default": 0
               },
               {
                 "name": "max",
-                "type": "Any",
+                "type": {
+                  "reference": 2
+                },
                 "min": 1,
                 "max": 1,
                 "default": 0
               }
             ],
             "returns": {
-              "reference": 1
+              "reference": 2
             },
             "sealed": true,
             "throws": []
@@ -80,14 +193,16 @@
             "parameters": [
               {
                 "name": "max",
-                "type": "Any",
+                "type": {
+                  "reference": 2
+                },
                 "min": 1,
                 "max": 1,
                 "default": 0
               }
             ],
             "returns": {
-              "reference": 1
+              "reference": 2
             },
             "sealed": true,
             "throws": []
@@ -102,14 +217,16 @@
             "parameters": [
               {
                 "name": "precision",
-                "type": "Any",
+                "type": {
+                  "reference": 2
+                },
                 "min": 0,
                 "max": 1,
                 "default": 1
               }
             ],
             "returns": {
-              "reference": 1
+              "reference": 2
             },
             "sealed": true,
             "throws": []
@@ -123,7 +240,7 @@
             "max": 0,
             "parameters": [],
             "returns": {
-              "reference": 1
+              "reference": 2
             },
             "sealed": true,
             "throws": []
@@ -138,14 +255,16 @@
             "parameters": [
               {
                 "name": "base",
-                "type": "Any",
+                "type": {
+                  "reference": 2
+                },
                 "min": 0,
                 "max": 1,
                 "default": 1
               }
             ],
             "returns": {
-              "reference": 1
+              "reference": 2
             },
             "sealed": true,
             "throws": []

@@ -1,13 +1,22 @@
-extern isNaN, Math, parseFloat, parseInt
+extern isNaN, parseFloat, parseInt
 
+#[rules(non-exhaustive)]
 extern sealed class Number {
+	toFixed(...): Number
+}
+
+extern sealed namespace Math {
+	max(...): Number
+	min(...): Number
+	pow(...): Number
+	round(...): Number
 }
 
 impl Number {
-	limit(min, max): Number {
+	limit(min: Number, max: Number): Number {
 		return isNaN(this) ? min : Math.min(max, Math.max(min, this))
 	}
-	mod(max): Number {
+	mod(max: Number): Number {
 		if isNaN(this) {
 			return 0
 		}
@@ -21,12 +30,12 @@ impl Number {
 			}
 		}
 	}
-	round(precision = 0): Number {
+	round(precision: Number = 0): Number {
 		precision = Math.pow(10, precision).toFixed(0)
 		return Math.round(this * precision) / precision
 	}
 	toFloat(): Number => parseFloat(this)
-	toInt(base = 10): Number => parseInt(this, base)
+	toInt(base: Number = 10): Number => parseInt(this, base)
 }
 
 export Number

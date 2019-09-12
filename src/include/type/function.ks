@@ -212,14 +212,14 @@ class FunctionType extends Type {
 			return false
 		}
 
-		if mode & MatchingMode::ExactParameter {
+		if mode & MatchingMode::ExactParameter != 0 {
 			for const parameter, index in @parameters {
 				if !parameter.isMatching(value._parameters[index], MatchingMode::Exact) {
 					return false
 				}
 			}
 		}
-		else if mode & MatchingMode::SimilarParameter {
+		else if mode & MatchingMode::SimilarParameter != 0 {
 			for const parameter, index in @parameters {
 				if !parameter.isMatching(value._parameters[index], MatchingMode::Similar) {
 					return false
@@ -228,10 +228,10 @@ class FunctionType extends Type {
 		}
 
 
-		if mode & MatchingMode::ExactReturn {
+		if mode & MatchingMode::ExactReturn != 0 {
 			return @returnType.isMatching(value._returnType, MatchingMode::Exact)
 		}
-		else if mode & MatchingMode::SimilarReturn {
+		else if mode & MatchingMode::SimilarReturn != 0 {
 			if @missingReturn || value._missingReturn {
 				return true
 			}
@@ -243,7 +243,7 @@ class FunctionType extends Type {
 		}
 	} // }}}
 	export(references, mode) { // {{{
-		if mode & ExportMode::OverloadedFunction {
+		if mode & ExportMode::OverloadedFunction != 0 {
 			return {
 				kind: TypeKind::Function
 				async: @async

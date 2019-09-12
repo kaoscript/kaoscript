@@ -19,6 +19,9 @@ class AliasType extends Type {
 	constructor(@scope, @type) { // {{{
 		super(scope)
 	} // }}}
+	canBeBoolean() => @type.canBeBoolean()
+	canBeNumber(any = true) => @type.canBeNumber(any)
+	canBeString(any = true) => @type.canBeString(any)
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
@@ -36,6 +39,9 @@ class AliasType extends Type {
 	getProperty(name: String): Type => @type.getProperty(name)
 	isAlias() => true
 	isArray() => @type.isArray()
+	isBoolean() => @type.isBoolean()
+	isNumber() => @type.isNumber()
+	isString() => @type.isString()
 	isUnion() => @type.isUnion()
 	isExportable() => @type.isExportable()
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)

@@ -9,7 +9,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		if(x !== y) {
+		if((x === true) !== (y === true)) {
 		}
 	}
 };

@@ -1,9 +1,10 @@
 require("kaoscript/register");
-var {Helper, Type} = require("@kaoscript/runtime");
+var {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {Array, __ks_Array} = require("./_/_array.ks")();
 	var Float = require("./_/_float.ks")().Float;
 	var Integer = require("./_/_integer.ks")().Integer;
+	var {Math, __ks_Math} = require("./_/_math.ks")();
 	var {Number, __ks_Number} = require("./_/_number.ks")();
 	var {String, __ks_String} = require("./_/_string.ks")();
 	let $spaces = {};
@@ -210,15 +211,24 @@ module.exports = function() {
 		lastArgs.push(that);
 		return last.call(null, ...lastArgs);
 	}
-	let $caster = {
-		alpha(n = null, percentage) {
-			if(percentage === void 0 || percentage === null) {
+	let $caster = (function() {
+		function alpha() {
+			let __ks_i = -1;
+			let __ks__;
+			let n = arguments.length > 0 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
+			let percentage;
+			if(arguments.length > ++__ks_i && (percentage = arguments[__ks_i]) !== void 0 && percentage !== null) {
+				if(!Type.isBoolean(percentage)) {
+					throw new TypeError("'percentage' is not of type 'Boolean'");
+				}
+			}
+			else {
 				percentage = false;
 			}
 			let i = Float.parse(n);
 			return isNaN(i) ? 1 : __ks_Number._im_round(__ks_Number._im_limit(percentage ? i / 100 : i, 0, 1), 3);
-		},
-		ff(n) {
+		}
+		function ff(n) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
@@ -226,8 +236,8 @@ module.exports = function() {
 				throw new TypeError("'n' is not nullable");
 			}
 			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 255));
-		},
-		percentage(n) {
+		}
+		function percentage(n) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
@@ -236,7 +246,12 @@ module.exports = function() {
 			}
 			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 100), 1);
 		}
-	};
+		return {
+			alpha: alpha,
+			ff: ff,
+			percentage: percentage
+		};
+	})();
 	function $component(component, name, space) {
 		if(arguments.length < 3) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
@@ -289,6 +304,9 @@ module.exports = function() {
 				_alpha: 0
 			};
 		}
+		else if(!Type.isObject(result)) {
+			throw new TypeError("'result' is not of type 'Object'");
+		}
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
 			let args = Helper.mapObject(s.components, function(name, component) {
@@ -320,7 +338,7 @@ module.exports = function() {
 			throw new TypeError("'to' is not of type 'String'");
 		}
 		for(let name in $spaces[from].converters) {
-			if($spaces[name].converters[to]) {
+			if(Type.isValue($spaces[name].converters[to])) {
 				$spaces[from].converters[to] = Helper.vcurry($binder, null, $spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name]);
 				return;
 			}
@@ -347,14 +365,14 @@ module.exports = function() {
 			return that;
 		}
 		else if(Type.isString(args[0]) && Type.isValue($parsers[args[0]])) {
-			if($parsers[args.shift()](that, args)) {
+			if($parsers[args.shift()](that, args) === true) {
 				return that;
 			}
 		}
 		else {
 			for(let name in $parsers) {
 				let parse = $parsers[name];
-				if(parse(that, args)) {
+				if(parse(that, args) === true) {
 					return that;
 				}
 			}
@@ -368,6 +386,9 @@ module.exports = function() {
 		}
 		if(that === void 0 || that === null) {
 			throw new TypeError("'that' is not nullable");
+		}
+		else if(!Type.is(that, Color)) {
+			throw new TypeError("'that' is not of type 'Color'");
 		}
 		let chars = "0123456789abcdef";
 		let r1 = that._red >> 4;
@@ -481,17 +502,17 @@ module.exports = function() {
 					}
 					else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
 						that._space = Space.SRGB;
-						that._red = Integer.parse(match[1] + match[1], 16);
-						that._green = Integer.parse(match[2] + match[2], 16);
-						that._blue = Integer.parse(match[3] + match[3], 16);
-						that._alpha = $caster.alpha(Integer.parse(match[4] + match[4], 16) / 255);
+						that._red = Integer.parse(Operator.addOrConcat(match[1], match[1]), 16);
+						that._green = Integer.parse(Operator.addOrConcat(match[2], match[2]), 16);
+						that._blue = Integer.parse(Operator.addOrConcat(match[3], match[3]), 16);
+						that._alpha = $caster.alpha(Integer.parse(Operator.addOrConcat(match[4], match[4]), 16) / 255);
 						return true;
 					}
 					else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
 						that._space = Space.SRGB;
-						that._red = Integer.parse(match[1] + match[1], 16);
-						that._green = Integer.parse(match[2] + match[2], 16);
-						that._blue = Integer.parse(match[3] + match[3], 16);
+						that._red = Integer.parse(Operator.addOrConcat(match[1], match[1]), 16);
+						that._green = Integer.parse(Operator.addOrConcat(match[2], match[2]), 16);
+						that._blue = Integer.parse(Operator.addOrConcat(match[3], match[3]), 16);
 						that._alpha = 1;
 						return true;
 					}
@@ -521,9 +542,9 @@ module.exports = function() {
 					}
 					else if(Type.isValue(__ks_0 = /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
 						that._space = Space.SRGB;
-						that._red = Integer.parse(match[1] + match[1], 16);
-						that._green = Integer.parse(match[2] + match[2], 16);
-						that._blue = Integer.parse(match[3] + match[3], 16);
+						that._red = Integer.parse(Operator.addOrConcat(match[1], match[1]), 16);
+						that._green = Integer.parse(Operator.addOrConcat(match[2], match[2]), 16);
+						that._blue = Integer.parse(Operator.addOrConcat(match[3], match[3]), 16);
 						that._alpha = $caster.alpha(match[4], match[5]);
 						return true;
 					}
@@ -563,8 +584,8 @@ module.exports = function() {
 			else if(!Type.isArray(args)) {
 				throw new TypeError("'args' is not of type 'Array'");
 			}
-			if(args.length === 1) {
-				if(Type.isNumeric(args[0])) {
+			if(args.length >= 1) {
+				if(Number.isFinite(Float.parse(args[0])) === true) {
 					that._space = Space.SRGB;
 					that._red = that._green = that._blue = $caster.ff(args[0]);
 					that._alpha = (args.length >= 2) ? $caster.alpha(args[1]) : 1;
@@ -715,12 +736,12 @@ module.exports = function() {
 			let components = $spaces[space].components;
 			for(let name in components) {
 				let component = components[name];
-				if(component.loop) {
-					let d = Math.abs(this[component.field] - color[component.field]);
+				if(component.loop === true) {
+					let d = Math.abs(Operator.subtraction(this[component.field], color[component.field]));
 					if(d > component.half) {
-						d = component.mod - d;
+						d = Operator.subtraction(component.mod, d);
 					}
-					this[component.field] = __ks_Number._im_round((this[component.field] + (d * percentage)) % component.mod, component.round);
+					this[component.field] = __ks_Number._im_round(Operator.modulo(this[component.field] + Operator.multiplication(d, percentage), component.mod), component.round);
 				}
 				else {
 					this[component.field] = __ks_Number._im_round(__ks_Number._im_limit($blend(this[component.field], color[component.field], percentage), component.min, component.max), component.round);
@@ -744,7 +765,7 @@ module.exports = function() {
 			else if(!(Type.isString(value) || Type.isNumber(value))) {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
-			if(Type.isString(value) && value.endsWith("%")) {
+			if(Type.isString(value) && (value.endsWith("%") === true)) {
 				return this.alpha(this._alpha * ((100 - __ks_String._im_toFloat(value)) / 100));
 			}
 			else {
@@ -798,9 +819,9 @@ module.exports = function() {
 			else {
 				let black = this.clone().blend($static.black, 0.5, Space.SRGB, true).contrast(color).ratio;
 				let white = this.clone().blend($static.white, 0.5, Space.SRGB, true).contrast(color).ratio;
-				let max = Math.max(black, white);
+				const max = Math.max(black, white);
 				let closest = new Color(__ks_Number._im_limit((color._red - (this._red * a)) / (1 - a), 0, 255), __ks_Number._im_limit((color._green - (this._green * a)) / (1 - a), 0, 255), __ks_Number._im_limit((color._blue - (this._blue * a)) / (1 - a), 0, 255));
-				let min = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio;
+				const min = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio;
 				return {
 					ratio: __ks_Number._im_round((min + max) / 2, 2),
 					error: __ks_Number._im_round((max - min) / 2, 2),
@@ -854,7 +875,7 @@ module.exports = function() {
 			else if(!Type.is(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
-			let that = this.like(Space.SRGB);
+			const that = this.like(Space.SRGB);
 			color = color.like(Space.SRGB);
 			return Math.sqrt((3 * (color._red - that._red) * (color._red - that._red)) + (4 * (color._green - that._green) * (color._green - that._green)) + (2 * (color._blue - that._blue) * (color._blue - that._blue)));
 		}
@@ -1076,13 +1097,13 @@ module.exports = function() {
 		}
 		__ks_func_luminance_0() {
 			let that = this.like(Space.SRGB);
-			let r = that._red / 255;
-			r = (r < 0.03928) ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
-			let g = that._green / 255;
-			g = (g < 0.03928) ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-			let b = that._blue / 255;
-			b = (b < 0.03928) ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
-			return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+			let r = Operator.division(that._red, 255);
+			r = (r < 0.03928) ? Operator.division(r, 12.92) : Math.pow(Operator.division(Operator.addition(r, 0.055), 1.055), 2.4);
+			let g = Operator.division(that._green, 255);
+			g = (g < 0.03928) ? Operator.division(g, 12.92) : Math.pow(Operator.division(Operator.addition(g, 0.055), 1.055), 2.4);
+			let b = Operator.division(that._blue, 255);
+			b = (b < 0.03928) ? Operator.division(b, 12.92) : Math.pow(Operator.division(Operator.addition(b, 0.055), 1.055), 2.4);
+			return Operator.multiplication(0.2126, r) + Operator.multiplication(0.7152, g) + Operator.multiplication(0.0722, b);
 		}
 		luminance() {
 			if(arguments.length === 0) {
@@ -1113,7 +1134,7 @@ module.exports = function() {
 			else if(!(Type.isString(value) || Type.isNumber(value))) {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
-			if(Type.isString(value) && value.endsWith("%")) {
+			if(Type.isString(value) && (value.endsWith("%") === true)) {
 				return this.alpha(this._alpha * ((100 + __ks_String._im_toFloat(value)) / 100));
 			}
 			else {
@@ -1202,7 +1223,7 @@ module.exports = function() {
 			if(Type.isValue(component.parser)) {
 				this[component.field] = component.parser(value);
 			}
-			else if(component.loop) {
+			else if(component.loop === true) {
 				this[component.field] = __ks_Number._im_round(__ks_Number._im_mod(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.mod), component.round);
 			}
 			else {
@@ -1489,9 +1510,9 @@ module.exports = function() {
 						if(!Type.isValue(component.loop) || (component.min !== 0)) {
 							component.loop = false;
 						}
-						else if(component.loop) {
-							component.mod = component.max + 1;
-							component.half = component.mod / 2;
+						else if(component.loop === true) {
+							component.mod = Operator.addOrConcat(component.max, 1);
+							component.half = Operator.division(component.mod, 2);
 						}
 						$component(component, name, space.name);
 					}
