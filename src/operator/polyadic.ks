@@ -210,8 +210,7 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 
 			let notNumber = null
 
-			// for const operand in @operands while @isNative || @isNumber {
-			for const operand in @operands {
+			for const operand in @operands while @isNative || @isNumber {
 				if operand.type().isNumber() {
 				}
 				else if operand.type().isAny() {

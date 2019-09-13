@@ -19,7 +19,7 @@ module.exports = function() {
 			while(index < 0)
 		}
 		if(args.length > 1) {
-			if(index === true) {
+			if(index !== 0) {
 				if(index >= this.length) {
 					for(let i = 0, __ks_0 = args.length; i < __ks_0; ++i) {
 						this.push.apply(this, [].concat(args[i]));
@@ -39,7 +39,7 @@ module.exports = function() {
 			}
 		}
 		else {
-			if(index === true) {
+			if(index !== 0) {
 				if(index >= this.length) {
 					this.push.apply(this, [].concat(args[0]));
 				}

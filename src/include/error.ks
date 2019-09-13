@@ -222,6 +222,9 @@ export class ReferenceException extends Exception {
 		throwNotPassed(name, module, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)
 		} // }}}
+		throwNullExpression(expression, node) ~ TypeException { // {{{
+			throw new ReferenceException(`The expression \(expression.toQuote(true)) is "null"`, node)
+		} // }}}
 	}
 
 }
@@ -386,6 +389,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwInvalidCasting(node) ~ TypeException { // {{{
 			throw new TypeException(`Only variables can be casted`, node)
+		} // }}}
+		throwInvalidCondition(expression, node) ~ TypeException { // {{{
+			throw new TypeException(`The consition \(expression.toQuote(true)) is expected to be of type "Boolean" or "Any" and not of type \(expression.type().toQuote(true))`, node)
 		} // }}}
 		throwInvalidForInExpression(node) ~ TypeException { // {{{
 			throw new TypeException(`"for..in" must be used with an array`, node)

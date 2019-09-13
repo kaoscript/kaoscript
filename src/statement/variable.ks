@@ -2,6 +2,7 @@ class VariableDeclaration extends Statement {
 	private {
 		_autotype: Boolean			= false
 		_await: Boolean				= false
+		_cascade: Boolean				= false
 		_declarators: Array			= []
 		_function					= null
 		_hasInit: Boolean			= false
@@ -30,6 +31,8 @@ class VariableDeclaration extends Statement {
 	} // }}}
 	constructor(@data, @parent, @scope, @initScope) { // {{{
 		this(data, parent, scope)
+
+		@cascade = parent is IfStatement && parent.isCascade()
 	} // }}}
 	analyse() { // {{{
 		@immutable = !@data.rebindable
@@ -148,6 +151,10 @@ class VariableDeclaration extends Statement {
 	} // }}}
 	defineVariables(declarator) { // {{{
 		let alreadyDeclared
+
+		if @cascade {
+			@parent.addAssignments(declarator.listAssignments([]))
+		}
 
 		for const name in declarator.listAssignments([]) {
 			if @scope.hasDefinedVariable(name) {
@@ -279,6 +286,14 @@ class VariableDeclaration extends Statement {
 			line.code(' = null')
 
 			line.done()
+		}
+	} // }}}
+	toInlineFragments(fragments, mode) { // {{{
+		if @init.isAwaiting() {
+			NotImplementedException.throw(this)
+		}
+		else {
+			@declarators[0].toAssignmentFragments(fragments, @init)
 		}
 	} // }}}
 	walk(fn) { // {{{

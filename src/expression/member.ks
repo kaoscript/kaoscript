@@ -27,13 +27,21 @@ class MemberExpression extends Expression {
 		if @prepareObject {
 			@object.prepare()
 
+			const type = @object.type()
+
+			// if type.isNull() {
+			// 	unless @data.nullable || @object.isNullable() {
+			// 		ReferenceException.throwNullExpression(@object, this)
+			// 	}
+			// }
+
 			if @data.computed {
 				@property = $compile.expression(@data.property, this)
 
 				@property.analyse()
 				@property.prepare()
 
-				if @object.type().isArray() {
+				if type.isArray() {
 					@type = @object.type().parameter()
 				}
 
@@ -56,8 +64,6 @@ class MemberExpression extends Expression {
 			}
 			else {
 				@property = @data.property.name
-
-				const type = @object.type()
 
 				if const property = type.getProperty(@property) {
 					@type = property.discardVariable()

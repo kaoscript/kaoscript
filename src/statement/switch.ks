@@ -108,7 +108,9 @@ class SwitchStatement extends Statement {
 			@name = @scope.acquireTempName(false)
 		}
 
-		for const clause in @clauses {
+		const inferables = {}
+
+		for const clause, index in @clauses {
 			for condition in clause.conditions {
 				condition.prepare()
 			}
@@ -120,6 +122,33 @@ class SwitchStatement extends Statement {
 			clause.filter.prepare()
 
 			clause.body.prepare()
+
+			if index == 0 {
+				for const data, name of clause.body.scope().listUpdatedInferables() {
+					inferables[name] = {
+						count: 1
+						union: false
+						data
+					}
+				}
+			}
+			else {
+				for const data, name of clause.body.scope().listUpdatedInferables() when inferables[name]? {
+					if inferables[name].union {
+						inferables[name].data.type.addType(data.type)
+					}
+					else if !data.type.equals(inferables[name].data.type) {
+						inferables[name].data.type = Type.union(@scope, inferables[name].data.type, data.type)
+						inferables[name].union = inferables[name].data.type.isUnion()
+					}
+
+					inferables[name].count++
+				}
+			}
+		}
+
+		for const inferable, name of inferables when inferable.count == @clauses.length {
+			@scope.updateInferable(name, inferable.data, this)
 		}
 
 		if @value != null {

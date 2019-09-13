@@ -145,16 +145,28 @@ class ForFromStatement extends Statement {
 		if @until? {
 			@until.prepare()
 
+			unless @until.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@until, this)
+			}
+
 			this.assignTempVariables(@bodyScope)
 		}
 		else if @while? {
 			@while.prepare()
+
+			unless @while.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@while, this)
+			}
 
 			this.assignTempVariables(@bodyScope)
 		}
 
 		if @when? {
 			@when.prepare()
+
+			unless @when.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@when, this)
+			}
 
 			@bodyScope.commitTempVariables(@conditionalTempVariables)
 		}
@@ -224,7 +236,7 @@ class ForFromStatement extends Statement {
 			ctrl.code('!(').compileBoolean(@until).code(') && ')
 		}
 		else if @while? {
-			ctrl.compileBoolean(@while).code(' && ')
+			ctrl.wrapBoolean(@while).code(' && ')
 		}
 
 		ctrl.compile(@variable)

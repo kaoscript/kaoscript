@@ -1,6 +1,8 @@
+extern func foobar
+
 let x
 
-if x = 5 {
+if x = foobar() {
 }
 else {
 }

@@ -16,6 +16,10 @@ class UnlessStatement extends Statement {
 	prepare() { // {{{
 		@condition.prepare()
 
+		unless @condition.type().canBeBoolean() {
+			TypeException.throwInvalidCondition(@condition, this)
+		}
+
 		this.assignTempVariables(@scope)
 
 		@whenFalseExpression.prepare()

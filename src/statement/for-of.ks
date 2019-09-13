@@ -127,16 +127,28 @@ class ForOfStatement extends Statement {
 		if @until? {
 			@until.prepare()
 
+			unless @until.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@until, this)
+			}
+
 			@bodyScope.commitTempVariables(@loopTempVariables)
 		}
 		else if @while? {
 			@while.prepare()
+
+			unless @while.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@while, this)
+			}
 
 			@bodyScope.commitTempVariables(@loopTempVariables)
 		}
 
 		if @when? {
 			@when.prepare()
+
+			unless @when.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@when, this)
+			}
 
 			@bodyScope.commitTempVariables(@conditionalTempVariables)
 		}

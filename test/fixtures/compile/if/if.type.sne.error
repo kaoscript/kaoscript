@@ -1,0 +1,1 @@
+TypeException: The consition "x" is expected to be of type "Boolean" or "Any" and not of type "String?" (line 2, file "fixtures/compile/if/if.type.sne.ks")

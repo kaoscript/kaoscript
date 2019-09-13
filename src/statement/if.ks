@@ -1,6 +1,7 @@
 class IfStatement extends Statement {
 	private {
 		_bindingScope: Scope
+		_cascade: Boolean				= false
 		_condition
 		_declared: Boolean				= false
 		_variable
@@ -44,6 +45,7 @@ class IfStatement extends Statement {
 
 			if @data.whenFalse.kind == NodeKind::IfStatement {
 				@whenFalseExpression = $compile.statement(@data.whenFalse, this, @whenFalseScope)
+				@whenFalseExpression.setCascade(true)
 				@whenFalseExpression.analyse()
 			}
 			else {
@@ -62,6 +64,10 @@ class IfStatement extends Statement {
 		}
 		else {
 			@condition.prepare()
+
+			unless @condition.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@condition, this)
+			}
 
 			for const data, name of @condition.inferTypes() {
 				@whenTrueScope.updateInferable(name, data, this)
@@ -174,6 +180,7 @@ class IfStatement extends Statement {
 		@whenTrueExpression.checkReturnType(type)
 		@whenFalseExpression?.checkReturnType(type)
 	} // }}}
+	isCascade() => @cascade
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isUsingVariable(name) { // {{{
 		if @declared {
@@ -193,6 +200,7 @@ class IfStatement extends Statement {
 
 		return @whenFalseExpression != null && @whenFalseExpression.isUsingVariable(name)
 	} // }}}
+	setCascade(@cascade)
 	toStatementFragments(fragments, mode) { // {{{
 		if @declared {
 			fragments.compile(@variable)
@@ -215,18 +223,38 @@ class IfStatement extends Statement {
 		fragments.code('if(')
 
 		if @declared {
-			let first = true
+			if @cascade {
+				let first = true
 
-			@variable.walk(name => {
-				if first {
-					first = false
-				}
-				else {
-					fragments.code(' && ')
-				}
+				@variable.walk(name => {
+					if first {
+						fragments.code($runtime.type(this) + '.isValue((')
 
-				fragments.code($runtime.type(this) + '.isValue(', name, ')')
-			})
+						@variable.toInlineFragments(fragments, mode)
+
+						fragments.code('))')
+
+						first = false
+					}
+					else {
+						fragments.code(' && ' + $runtime.type(this) + '.isValue(', name, ')')
+					}
+				})
+			}
+			else {
+				let first = true
+
+				@variable.walk(name => {
+					if first {
+						first = false
+					}
+					else {
+						fragments.code(' && ')
+					}
+
+					fragments.code($runtime.type(this) + '.isValue(', name, ')')
+				})
+			}
 		}
 		else {
 			fragments.compileBoolean(@condition)

@@ -79,12 +79,26 @@ class ForRangeStatement extends Statement {
 
 		if @until? {
 			@until.prepare()
+
+			unless @until.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@until, this)
+			}
 		}
 		else if @while? {
 			@while.prepare()
+
+			unless @while.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@while, this)
+			}
 		}
 
-		@when.prepare() if @when?
+		if @when? {
+			@when.prepare()
+
+			unless @when.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@when, this)
+			}
+		}
 
 		@body.prepare()
 
@@ -141,10 +155,10 @@ class ForRangeStatement extends Statement {
 		ctrl.code('; ')
 
 		if @until? {
-			ctrl.code('!(').compile(@until).code(') && ')
+			ctrl.code('!(').compileBoolean(@until).code(') && ')
 		}
 		else if @while? {
-			ctrl.compile(@while).code(' && ')
+			ctrl.wrapBoolean(@while).code(' && ')
 		}
 
 		ctrl.compile(@value).code(' <= ').compile(@boundName ?? @to).code('; ')

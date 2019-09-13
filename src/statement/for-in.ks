@@ -189,6 +189,10 @@ class ForInStatement extends Statement {
 		if @until? {
 			@until.prepare()
 
+			unless @until.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@until, this)
+			}
+
 			if @useBreak {
 				@bodyScope.commitTempVariables(@loopTempVariables)
 			}
@@ -198,6 +202,10 @@ class ForInStatement extends Statement {
 		}
 		else if @while? {
 			@while.prepare()
+
+			unless @while.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@while, this)
+			}
 
 			if @useBreak {
 				@bodyScope.commitTempVariables(@loopTempVariables)
@@ -209,6 +217,10 @@ class ForInStatement extends Statement {
 
 		if @when? {
 			@when.prepare()
+
+			unless @when.type().canBeBoolean() {
+				TypeException.throwInvalidCondition(@when, this)
+			}
 
 			@when.acquireReusable(false)
 			@when.releaseReusable()
@@ -518,7 +530,7 @@ class ForInStatement extends Statement {
 				ctrl.code(' && !(').compileBoolean(@until).code(')')
 			}
 			else if @while? {
-				ctrl.code(' && ').compileBoolean(@while)
+				ctrl.code(' && ').wrapBoolean(@while)
 			}
 		}
 

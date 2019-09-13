@@ -1,5 +1,6 @@
 func foobar() => 42
 
-let x, y
+let x
+let y = {}
 
 x = y.x = foobar()

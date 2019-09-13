@@ -47,8 +47,7 @@ class IdentifierLiteral extends Literal {
 			else if @scope.hasMacro(@value) {
 				@isMacro = true
 			}
-			// else if const name = $runtime.getVariable(@value, @parent) {
-			else if name ?= $runtime.getVariable(@value, @parent) {
+			else if const name = $runtime.getVariable(@value, @parent) {
 				@value = name
 				@realType = @declaredType = Type.Any
 			}

@@ -308,6 +308,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	toBooleanFragments(fragments, mode) { // {{{
 		fragments.compile(@left).code($equals).wrap(@right)
 	} // }}}
+	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
 	type() => @left.type()
 }
 

@@ -227,15 +227,35 @@ class EqualityOperator extends ComparisonOperator {
 		const inferables = {}
 
 		if @left is IdentifierLiteral && @left.value() == 'null' && @right.isInferable() {
-			inferables[@right.path()] = {
-				isVariable: @right is IdentifierLiteral
-				type: @right.type().setNullable(false)
+			if @right.type().isNull() {
+				if @right is IdentifierLiteral {
+					inferables[@right.path()] = {
+						isVariable: true
+						type: @right.getDeclaredType().setNullable(false)
+					}
+				}
+			}
+			else {
+				inferables[@right.path()] = {
+					isVariable: @right is IdentifierLiteral
+					type: @right.type().setNullable(false)
+				}
 			}
 		}
 		else if @right is IdentifierLiteral && @right.value() == 'null' && @left.isInferable() {
-			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
-				type: @left.type().setNullable(false)
+			if @left.type().isNull() {
+				if @left is IdentifierLiteral {
+					inferables[@left.path()] = {
+						isVariable: true
+						type: @left.getDeclaredType().setNullable(false)
+					}
+				}
+			}
+			else {
+				inferables[@left.path()] = {
+					isVariable: @left is IdentifierLiteral
+					type: @left.type().setNullable(false)
+				}
 			}
 		}
 
