@@ -6,9 +6,10 @@ class ForRangeStatement extends Statement {
 		_boundName
 		_by
 		_byName
-		_defineVariable: Boolean		= false
+		_declaration: Boolean		= false
+		_defineVariable: Boolean	= false
 		_from
-		_immutable: Boolean		= false
+		_immutable: Boolean			= false
 		_til
 		_to
 		_until
@@ -21,10 +22,17 @@ class ForRangeStatement extends Statement {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		@immutable = @data.declaration && !@data.rebindable
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind::Immutable {
+				@immutable = true
+			}
+		}
 
 		const variable = @scope.getVariable(@data.value.name)
-		if @data.declaration || variable == null {
+		if @declaration || variable == null {
 			@valueVariable = @bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), this)
 
 			@defineVariable = true

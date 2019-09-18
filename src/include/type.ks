@@ -219,12 +219,20 @@ abstract class Type {
 						return type
 					}
 					else if data.typeName? {
+						let nullable = false
+
+						for const modifier in data.modifiers {
+							if modifier.kind == ModifierKind::Nullable {
+								nullable = true
+							}
+						}
+
 						if data.typeName.kind == NodeKind::Identifier {
 							const name = Type.renameNative(data.typeName.name)
 
 							if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
 								if data.typeParameters? {
-									const type = new ReferenceType(scope, name, data.nullable)
+									const type = new ReferenceType(scope, name, nullable)
 
 									for parameter in data.typeParameters {
 										type._parameters.push(Type.fromAST(parameter, scope, defined, node))
@@ -233,7 +241,7 @@ abstract class Type {
 									return type
 								}
 								else {
-									return scope.reference(name, data.nullable)
+									return scope.reference(name, nullable)
 								}
 							}
 							else {
@@ -243,7 +251,7 @@ abstract class Type {
 						else if data.typeName.kind == NodeKind::MemberExpression && !data.typeName.computed {
 							const namespace = Type.fromAST(data.typeName.object, scope, defined, node)
 
-							const type = new ReferenceType(namespace.scope(), data.typeName.property.name, data.nullable)
+							const type = new ReferenceType(namespace.scope(), data.typeName.property.name, nullable)
 
 							if data.typeParameters? {
 								for parameter in data.typeParameters {

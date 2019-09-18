@@ -94,7 +94,7 @@ class CallExpression extends Expression {
 			}
 		}
 
-		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.computed {
+		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Computed) {
 			@object = $compile.expression(@data.callee.object, this)
 			@object.analyse()
 		}
@@ -466,8 +466,10 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), name)
 			}
 			is ReferenceType => {
-				if value.isNullable() && !@data.callee.nullable && !this._options.rules.ignoreMisfit {
-					TypeException.throwNullableCaller(@property, this)
+				if value.isNullable() && !this._options.rules.ignoreMisfit {
+					unless @data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Nullable) {
+						TypeException.throwNullableCaller(@property, this)
+					}
 				}
 
 				this.makeMemberCalleeFromReference(value)
@@ -743,13 +745,25 @@ class CallExpression extends Expression {
 }
 
 abstract class Callee {
-	abstract isNullable(): Boolean
-	abstract isNullableComputed(): Boolean
+	private {
+		_data
+		_nullable: Boolean			= false
+		_nullableProperty: Boolean	= false
+	}
+	constructor(@data) {
+		for const modifier in data.modifiers {
+			if modifier.kind == ModifierKind::Nullable {
+				@nullable = true
+			}
+		}
+	}
+	acquireReusable(acquire)
+	isNullable() => @nullable || @nullableProperty
+	isNullableComputed() => @nullable && @nullableProperty
+	releaseReusable()
 	abstract toFragments(fragments, mode, node)
 	abstract translate()
 	abstract type(): Type
-	acquireReusable(acquire)
-	releaseReusable()
 	validate(type: FunctionType, node) { // {{{
 		for throw in type.throws() {
 			Exception.validateReportedError(throw.discardReference(), node)
@@ -759,16 +773,13 @@ abstract class Callee {
 
 class DefaultCallee extends Callee {
 	private {
-		_data
 		_expression
 		_flatten: Boolean
-		_nullable: Boolean
-		_nullableComputed: Boolean
 		_scope: ScopeKind
 		_type: Type
 	}
 	constructor(@data, object = null, node) { // {{{
-		super()
+		super(data)
 
 		if object == null {
 			@expression = $compile.expression(data.callee, node)
@@ -781,8 +792,7 @@ class DefaultCallee extends Callee {
 		@expression.prepare()
 
 		@flatten = node._flatten
-		@nullable = data.nullable || @expression.isNullable()
-		@nullableComputed = data.nullable && @expression.isNullable()
+		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
 		const type = @expression.type()
@@ -800,7 +810,7 @@ class DefaultCallee extends Callee {
 		}
 	} // }}}
 	constructor(@data, object = null, type: Type, node) { // {{{
-		super()
+		super(data)
 
 		if object == null {
 			@expression = $compile.expression(data.callee, node)
@@ -813,8 +823,7 @@ class DefaultCallee extends Callee {
 		@expression.prepare()
 
 		@flatten = node._flatten
-		@nullable = data.nullable || @expression.isNullable()
-		@nullableComputed = data.nullable && @expression.isNullable()
+		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
 		if type.isClass() {
@@ -830,15 +839,14 @@ class DefaultCallee extends Callee {
 		}
 	} // }}}
 	constructor(@data, object, methods, @type, node) { // {{{
-		super()
+		super(data)
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
 		@expression.analyse()
 		@expression.prepare()
 
 		@flatten = node._flatten
-		@nullable = data.nullable || @expression.isNullable()
-		@nullableComputed = data.nullable && @expression.isNullable()
+		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
 		for method in methods {
@@ -850,10 +858,8 @@ class DefaultCallee extends Callee {
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		@expression.acquireReusable(@data.nullable || (@flatten && @scope == ScopeKind::This))
+		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind::This))
 	} // }}}
-	isNullable() => @nullable
-	isNullableComputed() => @nullableComputed
 	releaseReusable() { // {{{
 		@expression.releaseReusable()
 	} // }}}
@@ -970,7 +976,7 @@ class DefaultCallee extends Callee {
 		}
 	} // }}}
 	toNullableFragments(fragments, node) { // {{{
-		if @data.nullable {
+		if @nullable {
 			if @expression.isNullable() {
 				fragments
 					.compileNullable(@expression)
@@ -1001,29 +1007,24 @@ class DefaultCallee extends Callee {
 
 class SealedFunctionCallee extends Callee {
 	private {
-		_nullable: Boolean
-		_nullableComputed: Boolean
 		_object
 		_property: String
 		_type: Type
 		_variable: NamedType<NamespaceType>
 	}
-	constructor(data, @variable, function, @type, node) { // {{{
-		super()
+	constructor(@data, @variable, function, @type, node) { // {{{
+		super(data)
 
 		@object = node._object
 		@property = node._property
 
-		nullable = data.nullable || node._object.isNullable()
-		nullableComputed = data.nullable && node._object.isNullable()
+		@nullableProperty = node._object.isNullable()
 
 		this.validate(function, node)
 	} // }}}
 	translate() { // {{{
 		@object.translate()
 	} // }}}
-	isNullable() => @nullable
-	isNullableComputed() => @nullableComputed
 	toFragments(fragments, mode, node) { // {{{
 		if node._flatten {
 			switch node._data.scope.kind {
@@ -1070,21 +1071,18 @@ class SealedMethodCallee extends Callee {
 	private {
 		_instance: Boolean
 		_node
-		_nullable: Boolean
-		_nullableComputed: Boolean
 		_object
 		_property: String
 		_type: Type
 		_variable: NamedType<ClassType>
 	}
-	constructor(data, @variable, @instance, methods = [], @type = Type.Any, @node) { // {{{
-		super()
+	constructor(@data, @variable, @instance, methods = [], @type = Type.Any, @node) { // {{{
+		super(data)
 
 		@object = node._object
 		@property = node._property
 
-		@nullable = data.nullable || data.callee.nullable
-		@nullableComputed = data.nullable && data.callee.nullable
+		@nullableProperty = data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Nullable)
 
 		for method in methods {
 			this.validate(method, node)
@@ -1093,8 +1091,6 @@ class SealedMethodCallee extends Callee {
 	translate() { // {{{
 		@object.translate()
 	} // }}}
-	isNullable() => @nullable
-	isNullableComputed() => @nullableComputed
 	toFragments(fragments, mode, node) { // {{{
 		if node._flatten {
 			switch node._data.scope.kind {
@@ -1164,26 +1160,20 @@ class SealedMethodCallee extends Callee {
 class SubstituteCallee extends Callee {
 	private {
 		_substitute
-		_nullable: Boolean
-		_nullableComputed: Boolean
 		_type: Type
 	}
-	constructor(data, @substitute, node) { // {{{
-		super()
+	constructor(@data, @substitute, node) { // {{{
+		super(data)
 
-		@nullable = data.nullable || substitute.isNullable()
-		@nullableComputed = data.nullable && substitute.isNullable()
+		@nullableProperty = substitute.isNullable()
 
 		@type = @substitute.type()
 	} // }}}
-	constructor(data, @substitute, @type, node) { // {{{
-		super()
+	constructor(@data, @substitute, @type, node) { // {{{
+		super(data)
 
-		@nullable = data.nullable || substitute.isNullable()
-		@nullableComputed = data.nullable && substitute.isNullable()
+		@nullableProperty = substitute.isNullable()
 	} // }}}
-	isNullable() => @nullable
-	isNullableComputed() => @nullableComputed
 	toFragments(fragments, mode, node) { // {{{
 		@substitute.toFragments(fragments, mode)
 	} // }}}

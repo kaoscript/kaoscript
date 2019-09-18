@@ -1694,6 +1694,8 @@ class ClassConstructorDeclaration extends Statement {
 			if extendedType.hasConstructors() || extendedType.isSealed() {
 				@block.addStatement({
 					kind: NodeKind::CallExpression
+					attributes: []
+					modifiers: []
 					scope: {
 						kind: ScopeKind::This
 					}
@@ -1704,8 +1706,6 @@ class ClassConstructorDeclaration extends Statement {
 						end: @data.start
 					}
 					arguments: []
-					nullable: false
-					attributes: []
 					start: @data.start
 					end: @data.start
 				})

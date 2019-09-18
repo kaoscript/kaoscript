@@ -6,6 +6,7 @@ class ForOfStatement extends Statement {
 		_bodyScope: Scope
 		_body
 		_conditionalTempVariables: Array	= []
+		_declaration: Boolean				= false
 		_defineKey: Boolean					= false
 		_defineValue: Boolean				= false
 		_expression
@@ -23,12 +24,19 @@ class ForOfStatement extends Statement {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		@immutable = @data.declaration && !@data.rebindable
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind::Immutable {
+				@immutable = true
+			}
+		}
 
 		if @data.key? {
 			const keyVariable = @scope.getVariable(@data.key.name)
 
-			if @data.declaration || keyVariable == null {
+			if @declaration || keyVariable == null {
 				@bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), this)
 
 				@defineKey = true
@@ -52,7 +60,7 @@ class ForOfStatement extends Statement {
 			for const name in @value.listAssignments([]) {
 				const variable = @bindingScope.getVariable(name)
 
-				if @data.declaration || variable == null {
+				if @declaration || variable == null {
 					@defineValue = true
 
 					@bindingScope.define(name, @immutable, Type.Any, this)
@@ -240,7 +248,7 @@ class ForOfStatement extends Statement {
 		let ctrl = fragments.newControl().code('for(')
 
 		if @key != null {
-			if @data.declaration || @defineKey {
+			if @declaration || @defineKey {
 				if @options.format.variables == 'es5' {
 					ctrl.code('var ')
 				}
@@ -263,7 +271,7 @@ class ForOfStatement extends Statement {
 		if @value != null {
 			let line = ctrl.newLine()
 
-			if @data.declaration || @defineValue {
+			if @declaration || @defineValue {
 				if @options.format.variables == 'es5' {
 					line.code('var ')
 				}

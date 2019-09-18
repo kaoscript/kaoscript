@@ -8,10 +8,12 @@ class ForInStatement extends Statement {
 		_by
 		_byName: String
 		_conditionalTempVariables: Array	= []
+		_declaration: Boolean				= false
 		_declared: Boolean					= false
 		_declaredVariables: Array			= []
 		_declareIndex: Boolean				= false
 		_declareValue: Boolean				= false
+		_descending: Boolean				= false
 		_expression
 		_expressionName: String
 		_from
@@ -19,7 +21,6 @@ class ForInStatement extends Statement {
 		_immutable: Boolean					= false
 		_index								= null
 		_indexName: String
-		_isDesc: Boolean					= false
 		_loopTempVariables: Array			= []
 		_until
 		_useBreak: Boolean					= false
@@ -33,12 +34,22 @@ class ForInStatement extends Statement {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		@immutable = @data.declaration && !@data.rebindable
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind::Immutable {
+				@immutable = true
+			}
+			else if modifier.kind == ModifierKind::Descending {
+				@descending = true
+			}
+		}
 
 		if @data.index? {
 			const variable = @bindingScope.getVariable(@data.index.name)
 
-			if @data.declaration || variable == null {
+			if @declaration || variable == null {
 				@bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), this)
 
 				@declareIndex = true
@@ -62,7 +73,7 @@ class ForInStatement extends Statement {
 			for const name in @value.listAssignments([]) {
 				const variable = @scope.getVariable(name)
 
-				if @data.declaration || variable == null {
+				if @declaration || variable == null {
 					@declareValue = true
 
 					@declaredVariables.push(@bindingScope.define(name, @immutable, Type.Any, this))
@@ -132,11 +143,10 @@ class ForInStatement extends Statement {
 		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
 
-		@isDesc = @data.desc == true
 		@fromDesc = @data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0
 
-		if @isDesc && @fromDesc {
-			@isDesc = @fromDesc = false
+		if @descending && @fromDesc {
+			@descending = @fromDesc = false
 		}
 	} // }}}
 	prepare() { // {{{
@@ -151,7 +161,7 @@ class ForInStatement extends Statement {
 			@value.type(type.parameter(), @bindingScope, this)
 		}
 
-		if !?@index && !(@data.index? && !@data.declaration && @scope.hasVariable(@data.index.name)) {
+		if !?@index && !(@data.index? && !@declaration && @scope.hasVariable(@data.index.name)) {
 			@indexName = @bindingScope.acquireTempName(false)
 		}
 
@@ -314,7 +324,7 @@ class ForInStatement extends Statement {
 		||	@body.isUsingVariable(name)
 	// }}}
 	toBoundFragments(fragments) { // {{{
-		if @isDesc {
+		if @descending {
 			if @from? {
 				if @from is NumberLiteral && @from.value() < 0 {
 					fragments
@@ -392,7 +402,7 @@ class ForInStatement extends Statement {
 		}
 	} // }}}
 	toFromFragments(fragments) { // {{{
-		if @isDesc {
+		if @descending {
 			if @til? {
 				if @til is NumberLiteral && @til.value() < 0 {
 					fragments
@@ -472,7 +482,7 @@ class ForInStatement extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl
 
-		if @index != null && !@data.declaration && !@declareIndex {
+		if @index != null && !@declaration && !@declareIndex {
 			const line = fragments
 				.newLine()
 				.compile(@index)
@@ -514,7 +524,7 @@ class ForInStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if @isDesc || @fromDesc {
+		if @descending || @fromDesc {
 			ctrl
 				.compile(@indexName ?? @index)
 				.code(' >= ' + @boundName)
@@ -536,7 +546,7 @@ class ForInStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if @isDesc || @fromDesc {
+		if @descending || @fromDesc {
 			if @data.by? {
 				if @data.by.kind == NodeKind::NumericExpression {
 					if Math.abs(@data.by.value) == 1 {

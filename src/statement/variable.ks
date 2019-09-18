@@ -35,9 +35,16 @@ class VariableDeclaration extends Statement {
 		@cascade = parent is IfStatement && parent.isCascade()
 	} // }}}
 	analyse() { // {{{
-		@immutable = !@data.rebindable
-		@rebindable = !@immutable
-		@autotype = @immutable || @data.autotype
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Immutable {
+				@immutable = true
+				@rebindable = false
+				@autotype = true
+			}
+			else if modifier.kind == ModifierKind::AutoTyping {
+				@autotype = true
+			}
+		}
 
 		@initScope ??= @scope
 

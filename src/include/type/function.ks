@@ -48,7 +48,7 @@ class FunctionType extends Type {
 
 			type.updateArguments()
 
-			if data.sealed == true {
+			if data.sealed {
 				type.flagSealed()
 			}
 

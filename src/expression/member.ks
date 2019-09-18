@@ -1,7 +1,9 @@
 class MemberExpression extends Expression {
 	private {
 		_callee
+		_computed: Boolean		= false
 		_inferable: Boolean		= false
+		_nullable: Boolean		= false
 		_object
 		_path: String
 		_prepareObject: Boolean	= true
@@ -18,6 +20,15 @@ class MemberExpression extends Expression {
 		@prepareObject = false
 	} // }}}
 	analyse() { // {{{
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Computed {
+				@computed = true
+			}
+			else if modifier.kind == ModifierKind::Nullable {
+				@nullable = true
+			}
+		}
+
 		if @prepareObject {
 			@object = $compile.expression(@data.object, this)
 			@object.analyse()
@@ -30,12 +41,12 @@ class MemberExpression extends Expression {
 			const type = @object.type()
 
 			// if type.isNull() {
-			// 	unless @data.nullable || @object.isNullable() {
+			// 	unless @nullable || @object.isNullable() {
 			// 		ReferenceException.throwNullExpression(@object, this)
 			// 	}
 			// }
 
-			if @data.computed {
+			if @computed {
 				@property = $compile.expression(@data.property, this)
 
 				@property.analyse()
@@ -83,7 +94,7 @@ class MemberExpression extends Expression {
 				}
 			}
 		}
-		else if @data.computed {
+		else if @computed {
 			@property = $compile.expression(@data.property, this)
 			@property.analyse()
 			@property.prepare()
@@ -92,35 +103,35 @@ class MemberExpression extends Expression {
 			@property = @data.property.name
 		}
 
-		// if @data.nullable && !@object.isNullable() {
+		// if @nullable && !@object.isNullable() {
 		// 	TypeException.throwNotNullableExistential(@object, this)
 		// }
 	} // }}}
 	translate() { // {{{
 		@object.translate()
 
-		if @data.computed {
+		if @computed {
 			@property.translate()
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
 		if @object.isCallable() {
-			@object.acquireReusable(@data.nullable || acquire)
+			@object.acquireReusable(@nullable || acquire)
 		}
 
-		if @data.computed && @property is not String && @property.isCallable() {
-			@property.acquireReusable(@data.nullable || acquire)
+		if @computed && @property is not String && @property.isCallable() {
+			@property.acquireReusable(@nullable || acquire)
 		}
 	} // }}}
 	caller() => @object
 	isAssignable() => true
-	isCallable() => @object.isCallable() || (@data.computed && @property.isCallable())
+	isCallable() => @object.isCallable() || (@computed && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
 	isInferable() => @inferable
 	isLooseComposite() => this.isCallable() || this.isNullable()
 	isMacro() => false
-	isNullable() => @data.nullable || @object.isNullable() || (@data.computed && @property.isNullable())
-	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@data.nullable ? 1 : 0) + (@data.computed && @property.isNullable() ? 1 : 0) > 1
+	isNullable() => @nullable || @object.isNullable() || (@computed && @property.isNullable())
+	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@nullable ? 1 : 0) + (@computed && @property.isNullable() ? 1 : 0) > 1
 	isUsingVariable(name) => @object.isUsingVariable(name)
 	listAssignments(array) => array
 	path() => @path
@@ -129,7 +140,7 @@ class MemberExpression extends Expression {
 			@object.releaseReusable()
 		}
 
-		if @data.computed && @property is not String && @property.isCallable() {
+		if @computed && @property is not String && @property.isCallable() {
 			@property.releaseReusable()
 		}
 	} // }}}
@@ -138,7 +149,7 @@ class MemberExpression extends Expression {
 		if this.isNullable() && !@tested {
 			fragments.wrapNullable(this).code(' ? ').compile(@object)
 
-			if @data.computed {
+			if @computed {
 				fragments.code('[').compile(@property).code('] : null')
 			}
 			else {
@@ -158,7 +169,7 @@ class MemberExpression extends Expression {
 				fragments.compile(@object)
 			}
 
-			if @data.computed {
+			if @computed {
 				fragments.code('[').compile(@property).code(']')
 			}
 			else {
@@ -172,7 +183,7 @@ class MemberExpression extends Expression {
 	} // }}}
 	toBooleanFragments(fragments, mode) { // {{{
 		if this.isNullable() && !@tested {
-			if @data.computed {
+			if @computed {
 				fragments
 					.compileNullable(this)
 					.code(' ? ')
@@ -197,7 +208,7 @@ class MemberExpression extends Expression {
 			fragments.code(' : false')
 		}
 		else {
-			if @data.computed {
+			if @computed {
 				fragments
 					.wrap(@object)
 					.code('[')
@@ -228,7 +239,7 @@ class MemberExpression extends Expression {
 				conditional = true
 			}
 
-			if @data.nullable {
+			if @nullable {
 				fragments.code(' && ') if conditional
 
 				fragments
@@ -239,7 +250,7 @@ class MemberExpression extends Expression {
 				conditional = true
 			}
 
-			if @data.computed && @property.isNullable() {
+			if @computed && @property.isNullable() {
 				fragments.code(' && ') if conditional
 
 				fragments.compileNullable(@property)
@@ -249,11 +260,11 @@ class MemberExpression extends Expression {
 	toQuote() { // {{{
 		let fragments = @object.toQuote()
 
-		if @data.nullable {
+		if @nullable {
 			fragments += '?'
 		}
 
-		if @data.computed {
+		if @computed {
 			fragments += `[\(@property.toQuote())]`
 		}
 		else {
@@ -276,7 +287,7 @@ class MemberExpression extends Expression {
 			fragments.wrap(@object)
 		}
 
-		if @data.computed {
+		if @computed {
 			if @property.isCallable() {
 				fragments
 					.code('[')

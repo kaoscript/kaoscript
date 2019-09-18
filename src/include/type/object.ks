@@ -6,7 +6,7 @@ class ObjectType extends Type {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new ObjectType(scope)
 
-			if data.sealed == true {
+			if data.sealed {
 				type.flagSealed()
 			}
 

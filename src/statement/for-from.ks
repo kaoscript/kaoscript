@@ -7,6 +7,7 @@ class ForFromStatement extends Statement {
 		_by
 		_byName: String
 		_conditionalTempVariables: Array	= []
+		_declaration: Boolean				= false
 		_declared: Boolean					= false
 		_from
 		_immutable: Boolean					= false
@@ -22,8 +23,16 @@ class ForFromStatement extends Statement {
 		let rename = false
 		const variable = @scope.getVariable(@data.variable.name)
 
-		@declared = @data.declaration || variable == null
-		@immutable = @data.declaration && !@data.rebindable
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Declarative {
+				@declaration = true
+			}
+			else if modifier.kind == ModifierKind::Immutable {
+				@immutable = true
+			}
+		}
+
+		@declared = @declaration || variable == null
 
 		if @declared {
 			@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)

@@ -172,7 +172,7 @@ abstract class DependencyStatement extends Statement {
 					type = new ClassType(scope)
 				}
 
-				if declaration.sealed {
+				if declaration.modifiers.some(modifier => modifier.kind == ModifierKind::Sealed) {
 					if type is ReferenceType && type.isClass() {
 						type = new ClassType(scope)
 					}

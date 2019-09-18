@@ -27,7 +27,7 @@ class NamespaceType extends Type {
 				})
 			}
 			else {
-				if data.sealed == true {
+				if data.sealed {
 					type.flagSealed()
 				}
 
