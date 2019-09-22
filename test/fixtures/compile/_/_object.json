@@ -44,6 +44,7 @@
       "classMethods": {
         "map": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 2,
@@ -71,6 +72,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 3,

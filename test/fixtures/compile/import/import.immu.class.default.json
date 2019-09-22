@@ -46,6 +46,7 @@
       "instanceMethods": {
         "space": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -56,6 +57,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -78,6 +80,7 @@
         ],
         "luma": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -88,6 +91,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,

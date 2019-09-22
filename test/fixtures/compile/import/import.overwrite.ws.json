@@ -1,0 +1,50 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Date"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "setDate": [
+          {
+            "id": 1,
+            "access": 3,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "sealed": true,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

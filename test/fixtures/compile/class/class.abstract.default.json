@@ -79,6 +79,7 @@
       "abstractMethods": {
         "greet": [
           {
+            "id": -1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -114,6 +115,7 @@
       "instanceMethods": {
         "greet": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,

@@ -308,6 +308,9 @@ export class SyntaxException extends Exception {
 		throwNoRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't be a rest parameter`, node)
 		} // }}}
+		throwNoSuitableOverwrite(class, name, type, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`"\(class.toQuote()).\(name)\(type.toQuote())" can't be match to any suitable method to overwrite`, node)
+		} // }}}
 		throwNoSuperCall(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Call "super()" is missing`, node)
 		} // }}}
@@ -325,6 +328,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwNotOverloadableFunction(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Variable "\(name)" is not an overloadable function`, node)
+		} // }}}
+		throwNotSealedOverwrite(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`A method can be overwritten only in a sealed class`, node)
 		} // }}}
 		throwReservedClassMethod(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Class method "\(name)" is reserved`, node)

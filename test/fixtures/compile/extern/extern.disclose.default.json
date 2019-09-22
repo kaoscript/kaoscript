@@ -36,6 +36,7 @@
       "instanceMethods": {
         "split": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -63,6 +64,7 @@
         ],
         "replace": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -84,6 +86,7 @@
         ],
         "trim": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

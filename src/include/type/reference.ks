@@ -241,6 +241,15 @@ class ReferenceType extends Type {
 			else if value.isObject() && this.type().isClass() {
 				return @type.type().matchInstanceWith(value, [])
 			}
+			else if value is UnionType {
+				for const type in value.types() {
+					if this.isMatching(type, mode) {
+						return true
+					}
+				}
+
+				return false
+			}
 			else {
 				return value.isAny()
 			}

@@ -43,6 +43,7 @@
       "instanceMethods": {
         "toSource": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -57,6 +58,7 @@
       "classMethods": {
         "vcurry": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,

@@ -102,6 +102,7 @@
       "instanceMethods": {
         "charAt": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -123,6 +124,7 @@
         ],
         "match": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -146,6 +148,7 @@
         ],
         "replace": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -167,6 +170,7 @@
         ],
         "slice": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -188,6 +192,7 @@
         ],
         "split": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -207,6 +212,7 @@
         ],
         "toLowerCase": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -221,6 +227,7 @@
         ],
         "trim": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -248,6 +255,7 @@
       "instanceMethods": {
         "lines": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -268,6 +276,7 @@
         ],
         "lower": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -282,6 +291,7 @@
         ],
         "toFloat": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -294,6 +304,7 @@
         ],
         "toInt": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

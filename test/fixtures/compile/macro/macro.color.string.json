@@ -34,6 +34,7 @@
       "instanceMethods": {
         "getField": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -54,6 +55,7 @@
         ],
         "setField": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 2,
@@ -81,6 +83,7 @@
         ],
         "red": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -91,6 +94,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -111,6 +115,7 @@
         ],
         "green": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -121,6 +126,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -141,6 +147,7 @@
         ],
         "blue": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -151,6 +158,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -173,6 +181,7 @@
       "classMethods": {
         "registerSpace": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,

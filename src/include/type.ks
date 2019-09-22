@@ -58,6 +58,11 @@ enum MatchingMode {
 	Similar
 	SimilarParameter
 	SimilarReturn
+
+	MissingParameter
+	MissingReturn
+
+	ShiftableParameter
 }
 
 #[flags]

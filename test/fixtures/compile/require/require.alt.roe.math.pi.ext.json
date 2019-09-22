@@ -34,6 +34,7 @@
       "instanceMethods": {
         "toString": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -90,6 +91,7 @@
       "instanceMethods": {
         "round": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

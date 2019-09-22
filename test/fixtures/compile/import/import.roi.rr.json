@@ -30,6 +30,7 @@
       "instanceMethods": {
         "concat": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -51,6 +52,7 @@
         ],
         "indexOf": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -70,6 +72,7 @@
         ],
         "push": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -89,6 +92,7 @@
         ],
         "shift": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -101,6 +105,7 @@
         ],
         "splice": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -122,6 +127,7 @@
         ],
         "unshift": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -141,6 +147,7 @@
         ],
         "last": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -161,6 +168,7 @@
         ],
         "contains": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -188,6 +196,7 @@
         ],
         "pushUniq": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -210,6 +219,7 @@
       "classMethods": {
         "map": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 2,
@@ -237,6 +247,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 3,
@@ -285,6 +296,7 @@
       "instanceMethods": {
         "foo": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

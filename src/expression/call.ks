@@ -153,19 +153,17 @@ class CallExpression extends Expression {
 					}
 				}
 
-				if type is FunctionType {
+				if const substitute = variable.replaceCall?(@data, @arguments) {
+					this.addCallee(new SubstituteCallee(@data, substitute, this))
+				}
+				else if type is FunctionType {
 					this.makeCallee(type, variable.name())
 				}
 				else if type is OverloadedFunctionType {
 					this.makeCallee(type, variable.name())
 				}
 				else {
-					if substitute ?= variable.replaceCall?(@data, @arguments) {
-						this.addCallee(new SubstituteCallee(@data, substitute, this))
-					}
-					else {
-						this.addCallee(new DefaultCallee(@data, this))
-					}
+					this.addCallee(new DefaultCallee(@data, this))
 				}
 			}
 			else {

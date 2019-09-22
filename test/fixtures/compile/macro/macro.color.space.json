@@ -74,6 +74,7 @@
       "instanceMethods": {
         "alpha": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -86,6 +87,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -111,6 +113,7 @@
         ],
         "blend": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 2,
@@ -162,6 +165,7 @@
         ],
         "clearer": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -187,6 +191,7 @@
         ],
         "clone": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -201,6 +206,7 @@
         ],
         "contrast": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -225,6 +231,7 @@
         ],
         "copy": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -249,6 +256,7 @@
         ],
         "distance": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -273,6 +281,7 @@
         ],
         "equals": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -295,6 +304,7 @@
         ],
         "format": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -315,6 +325,7 @@
         ],
         "from": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -337,6 +348,7 @@
         ],
         "getField": [
           {
+            "id": 0,
             "access": 1,
             "async": false,
             "min": 1,
@@ -357,6 +369,7 @@
         ],
         "gradient": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 2,
@@ -396,6 +409,7 @@
         ],
         "greyscale": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -418,6 +432,7 @@
         ],
         "hex": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -430,6 +445,7 @@
         ],
         "isBlack": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -442,6 +458,7 @@
         ],
         "isTransparent": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -454,6 +471,7 @@
         ],
         "isWhite": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -466,6 +484,7 @@
         ],
         "like": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -488,6 +507,7 @@
         ],
         "luminance": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -500,6 +520,7 @@
         ],
         "negative": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -514,6 +535,7 @@
         ],
         "opaquer": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -539,6 +561,7 @@
         ],
         "readable": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -570,6 +593,7 @@
         ],
         "scheme": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -606,6 +630,7 @@
         ],
         "setField": [
           {
+            "id": 0,
             "access": 1,
             "async": false,
             "min": 2,
@@ -638,6 +663,7 @@
         ],
         "shade": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -662,6 +688,7 @@
         ],
         "space": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -674,6 +701,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -698,6 +726,7 @@
         ],
         "tint": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -722,6 +751,7 @@
         ],
         "tone": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -746,6 +776,7 @@
         ],
         "red": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -756,6 +787,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -776,6 +808,7 @@
         ],
         "green": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -786,6 +819,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -806,6 +840,7 @@
         ],
         "blue": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -816,6 +851,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -836,6 +872,7 @@
         ],
         "rouge": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -846,6 +883,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -866,6 +904,7 @@
         ],
         "vert": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -876,6 +915,7 @@
             "throws": []
           },
           {
+            "id": 1,
             "access": 3,
             "async": false,
             "min": 1,
@@ -898,6 +938,7 @@
       "classMethods": {
         "from": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -923,6 +964,7 @@
         ],
         "greyscale": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -948,6 +990,7 @@
         ],
         "hex": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -971,6 +1014,7 @@
         ],
         "negative": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -996,6 +1040,7 @@
         ],
         "registerFormatter": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 2,
@@ -1023,6 +1068,7 @@
         ],
         "registerParser": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 2,
@@ -1050,6 +1096,7 @@
         ],
         "registerSpace": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,

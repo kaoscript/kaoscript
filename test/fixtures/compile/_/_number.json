@@ -32,6 +32,7 @@
       "instanceMethods": {
         "toFixed": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -153,6 +154,7 @@
       "instanceMethods": {
         "limit": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 2,
@@ -186,6 +188,7 @@
         ],
         "mod": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -210,6 +213,7 @@
         ],
         "round": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -234,6 +238,7 @@
         ],
         "toFloat": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -248,6 +253,7 @@
         ],
         "toInt": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

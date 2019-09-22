@@ -204,6 +204,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_internalName: String
 		_name: String
 		_override: Boolean				= false
+		_overwrite: Boolean				= false
 		_parameters: Array<Parameter>
 		_this: Variable
 		_type: Type
@@ -227,12 +228,15 @@ class ImplementClassMethodDeclaration extends Statement {
 			throw new NotImplementedException(this)
 		}
 		else {
-			for i from 0 til @data.modifiers.length {
-				if @data.modifiers[i].kind == ModifierKind::Static {
-					@instance = false
-				}
-				else if @data.modifiers[i].kind == ModifierKind::Override {
+			for const modifier in @data.modifiers {
+				if modifier.kind == ModifierKind::Override {
 					@override = true
+				}
+				else if modifier.kind == ModifierKind::Overwrite {
+					@overwrite = true
+				}
+				else if modifier.kind == ModifierKind::Static {
+					@instance = false
 				}
 			}
 		}
@@ -264,31 +268,77 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 
 		if @instance {
-			if const index = @class.matchInstanceMethod(@name, @type) {
-				if @override {
-					@internalName = `__ks_func_\(@name)_\(index)`
+			if @override {
+				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::ShiftableParameter)
+
+				if methods.length == 0 {
+					@override = false
+					@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
 				}
 				else {
-					SyntaxException.throwDuplicateMethod(@name, this)
+					@internalName = `__ks_func_\(@name)_\(methods[0].id())`
 				}
 			}
+			else if @overwrite {
+				unless @class.isSealed() {
+					SyntaxException.throwNotSealedOverwrite(this)
+				}
+
+				// const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameter | MatchingMode::ShiftableParameter)
+				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::ShiftableParameter)
+				// console.log(methods)
+				if methods.length == 0 {
+					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
+				}
+
+				@class.overwriteInstanceMethod(@name, @type, methods)
+
+				@internalName = `__ks_func_\(@name)_\(@type.id())`
+
+				const type = Type.union(@scope, ...methods)
+				const variable = @scope.define('precursor', true, type, this)
+
+				variable.replaceCall = (data, arguments) => new CallOverwrittenMethodSubstitude(data, arguments, @name, type)
+			}
 			else {
-				@override = false
-				@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
+				if @class.hasMatchingInstanceMethod(@name, @type, MatchingMode::ExactParameter) {
+					SyntaxException.throwDuplicateMethod(@name, this)
+				}
+				else {
+					@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
+				}
 			}
 		}
 		else {
-			if const index = @class.matchClassMethod(@name, @type) {
-				if @override {
-					@internalName = `__ks_sttc_\(@name)_\(index)`
+			if @override {
+				NotImplementedException.throw(this)
+			}
+			else if @overwrite {
+				unless @class.isSealed() {
+					NotImplementedException.throw(this)
 				}
-				else {
-					SyntaxException.throwDuplicateMethod(@name, this)
+
+				const methods = @class.listMatchingClassMethods(@name, @type, MatchingMode::ShiftableParameter)
+				if methods.length == 0 {
+					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
+
+				@class.overwriteClassMethod(@name, @type, methods)
+
+				@internalName = `__ks_sttc_\(@name)_\(@type.id())`
+
+				const type = Type.union(@scope, ...methods)
+				const variable = @scope.define('precursor', true, type, this)
+
+				variable.replaceCall = (data, arguments) => new CallOverwrittenMethodSubstitude(data, arguments, @name, type)
 			}
 			else {
-				@override = false
-				@internalName = `__ks_sttc_\(@name)_\(@class.addClassMethod(@name, @type))`
+				if @class.hasMatchingClassMethod(@name, @type, MatchingMode::ExactParameter) {
+					SyntaxException.throwDuplicateMethod(@name, this)
+				}
+				else {
+					@internalName = `__ks_sttc_\(@name)_\(@class.addClassMethod(@name, @type))`
+				}
 			}
 		}
 	} // }}}
@@ -370,21 +420,21 @@ class ImplementClassMethodDeclaration extends Statement {
 						return block
 					}
 					(fragments) => fragments.done()
-					(fragments, method, index) => {
+					(fragments, method) => {
 						if method.max() == 0 {
 							if method.isSealed() {
-								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(index).apply(that)`)
+								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(method.id()).apply(that)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(index).apply(that)`)
+								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(method.id()).apply(that)`)
 							}
 						}
 						else {
 							if method.isSealed() {
-								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(index).apply(that, args)`)
+								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(method.id()).apply(that, args)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(index).apply(that, args)`)
+								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(method.id()).apply(that, args)`)
 							}
 						}
 					}
@@ -413,21 +463,21 @@ class ImplementClassMethodDeclaration extends Statement {
 						return block
 					}
 					(fragments) => fragments.done()
-					(fragments, method, index) => {
+					(fragments, method) => {
 						if method.max() == 0 {
 							if method.isSealed() {
-								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(index)()`)
+								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(method.id())()`)
 							}
 							else {
-								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(index)()`)
+								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(method.id())()`)
 							}
 						}
 						else {
 							if method.isSealed() {
-								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(method.id()).apply(null, args)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(index).apply(null, args)`)
+								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(method.id()).apply(null, args)`)
 							}
 						}
 					}
@@ -573,6 +623,29 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		block.done()
 
 		line.done()
+	} // }}}
+	type() => @type
+}
+
+class CallOverwrittenMethodSubstitude {
+	private {
+		_arguments
+		_data
+		_name: String
+		_type: Type
+	}
+	constructor(@data, @arguments, @name, @type)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`this.\(@name)(`)
+
+		for const argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
+			}
+
+			fragments.compile(argument)
+		}
 	} // }}}
 	type() => @type
 }

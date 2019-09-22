@@ -12,6 +12,7 @@ class ClassType extends Type {
 		_alterationReference: ClassType
 		_classAssessments: Object		= {}
 		_classMethods: Object			= {}
+		_classMethodNextId: Object		= {}
 		_classVariables: Object			= {}
 		_constructors: Array			= []
 		_destructors: Number			= 0
@@ -27,6 +28,7 @@ class ClassType extends Type {
 		_init: Number					= 0
 		_instanceAssessments: Object	= {}
 		_instanceMethods: Object		= {}
+		_instanceMethodNextId: Object	= {}
 		_instanceVariables: Object		= {}
 		_predefined: Boolean			= false
 		_seal: Object
@@ -199,9 +201,20 @@ class ClassType extends Type {
 	addClassMethod(name: String, type: ClassMethodType): Number? { // {{{
 		if @classMethods[name] is not Array {
 			@classMethods[name] = []
+			@classMethodNextId[name] = 0
 		}
 
-		const index = @classMethods[name].length
+		let id = type.id()
+		if id == -1 {
+			id = @classMethodNextId[name]++
+
+			type.id(id)
+		}
+		else {
+			if id >= @classMethodNextId[name] {
+				@classMethodNextId[name] = id + 1
+			}
+		}
 
 		@classMethods[name].push(type)
 
@@ -213,7 +226,7 @@ class ClassType extends Type {
 			@seal.classMethods[name] = true
 		}
 
-		return index
+		return id
 	} // }}}
 	addClassVariable(name: String, type: ClassVariableType) { // {{{
 		@classVariables[name] = type
@@ -231,9 +244,20 @@ class ClassType extends Type {
 	addInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
 		if @instanceMethods[name] is not Array {
 			@instanceMethods[name] = []
+			@instanceMethodNextId[name] = 0
 		}
 
-		const index = @instanceMethods[name].length
+		let id = type.id()
+		if id == -1 {
+			id = @instanceMethodNextId[name]++
+
+			type.id(id)
+		}
+		else {
+			if id >= @instanceMethodNextId[name] {
+				@instanceMethodNextId[name] = id + 1
+			}
+		}
 
 		@instanceMethods[name].push(type)
 
@@ -245,7 +269,7 @@ class ClassType extends Type {
 			@seal.instanceMethods[name] = true
 		}
 
-		return index
+		return id
 	} // }}}
 	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
 		@instanceVariables[name] = type
@@ -359,9 +383,11 @@ class ClassType extends Type {
 		}
 		for const methods, name of src._classMethods {
 			@classMethods[name] = [].concat(methods)
+			@classMethodNextId[name] = [].concat(src._classMethodNextId[name])
 		}
 		for const methods, name of src._instanceMethods {
 			@instanceMethods[name] = [].concat(methods)
+			@instanceMethodNextId[name] = [].concat(src._instanceMethodNextId[name])
 		}
 
 		for const variable, name of src._classVariables {
@@ -384,20 +410,56 @@ class ClassType extends Type {
 		return this
 	} // }}}
 	dedupClassMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if this.matchClassMethod(name, type) == null {
-			return this.addClassMethod(name, type)
+		if const id = type.id() {
+			if @classMethods[name] is Array {
+				for const method in @classMethods[name] {
+					if method.id() == id {
+						return id
+					}
+				}
+			}
 		}
-		else {
-			return null
+
+		if const overwrite = type.overwrite() {
+			const methods = @classMethods[name]
+
+			for const id in overwrite {
+				for const i from methods.length - 1 to 0 by -1 when methods[i].id() == id {
+					methods.splice(i, 1)
+					break
+				}
+			}
+
+			type.overwrite(null)
 		}
+
+		return this.addClassMethod(name, type)
 	} // }}}
 	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if this.matchInstanceMethod(name, type) == null {
-			return this.addInstanceMethod(name, type)
+		if const id = type.id() {
+			if @instanceMethods[name] is Array {
+				for const method in @instanceMethods[name] {
+					if method.id() == id {
+						return id
+					}
+				}
+			}
 		}
-		else {
-			return null
+
+		if const overwrite = type.overwrite() {
+			const methods = @instanceMethods[name]
+
+			for const id in overwrite {
+				for const i from methods.length - 1 to 0 by -1 when methods[i].id() == id {
+					methods.splice(i, 1)
+					break
+				}
+			}
+
+			type.overwrite(null)
 		}
+
+		return this.addInstanceMethod(name, type)
 	} // }}}
 	destructors() => @destructors
 	equals(b?): Boolean { // {{{
@@ -1045,6 +1107,27 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
+	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { // {{{
+		const results: Array = []
+
+		if @instanceMethods[name] is Array {
+			for const method in @instanceMethods[name] {
+				if method.isMatching(type, mode) {
+					results.push(method)
+				}
+			}
+		}
+
+		if @abstract && @abstractMethods[name] is Array {
+			for const method in @abstractMethods[name] {
+				if method.isMatching(type, mode) {
+					results.push(method)
+				}
+			}
+		}
+
+		return results
+	} // }}}
 	listMissingAbstractMethods() { // {{{
 		unless @extending {
 			return []
@@ -1088,38 +1171,6 @@ class ClassType extends Type {
 			}
 
 			return false
-		}
-	} // }}}
-	matchClassMethod(name: String, type: ClassMethodType) { // {{{
-		if @classMethods[name] is Array {
-			for const method, index in @classMethods[name] {
-				if method.equals(type) {
-					return index
-				}
-			}
-		}
-
-		if @extending {
-			return @extends.type().matchClassMethod(name, type)
-		}
-		else {
-			return null
-		}
-	} // }}}
-	matchInstanceMethod(name: String, type: ClassMethodType) { // {{{
-		if @instanceMethods[name] is Array {
-			for const method, index in @instanceMethods[name] {
-				if method.equals(type) {
-					return index
-				}
-			}
-		}
-
-		if @extending {
-			return @extends.type().matchInstanceMethod(name, type)
-		}
-		else {
-			return null
 		}
 	} // }}}
 	matchInstanceWith(object: ObjectType, matchables) { // {{{
@@ -1209,6 +1260,13 @@ class ClassType extends Type {
 		else {
 			return [this.toMetadata(references, mode), name]
 		}
+	} // }}}
+	overwriteInstanceMethod(name, type, methods) { // {{{
+		@instanceMethods[name]:Array.remove(...methods)
+
+		type.overwrite([method.id() for const method in methods])
+
+		return this.addInstanceMethod(name, type)
 	} // }}}
 	parameter() => AnyType.NullableUnexplicit
 	setAlterationReference(@alterationReference) { // {{{
@@ -1328,7 +1386,9 @@ class ClassVariableType extends Type {
 class ClassMethodType extends FunctionType {
 	private {
 		_access: Accessibility	= Accessibility::Public
-		_alteration: Boolean		= false
+		_alteration: Boolean	= false
+		_id: Number				= -1
+		_overwrite: Array?		 = null
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
@@ -1339,6 +1399,7 @@ class ClassMethodType extends FunctionType {
 		fromMetadata(data, metadata, references, alterations, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { // {{{
 			const type = new ClassMethodType(scope)
 
+			type._id = data.id
 			type._access = data.access
 			type._async = data.async
 			type._min = data.min
@@ -1350,27 +1411,42 @@ class ClassMethodType extends FunctionType {
 
 			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
+			if data.overwrite? {
+				type._overwrite = data.overwrite
+			}
+
 			type.updateArguments()
 
 			return type
 		} // }}}
 	}
 	access(@access) => this
-	export(references, mode) => { // {{{
-		access: @access
-		async: @async
-		min: @min
-		max: @max
-		parameters: [parameter.export(references, mode) for parameter in @parameters]
-		returns: @returnType.toReference(references, mode)
-		sealed: @sealed
-		throws: [throw.toReference(references, mode) for throw in @throws]
+	export(references, mode) { // {{{
+		const export = {
+			id: @id
+			access: @access
+			async: @async
+			min: @min
+			max: @max
+			parameters: [parameter.export(references, mode) for parameter in @parameters]
+			returns: @returnType.toReference(references, mode)
+			sealed: @sealed
+			throws: [throw.toReference(references, mode) for throw in @throws]
+		}
+
+		if @overwrite != null {
+			export.overwrite = @overwrite
+		}
+
+		return export
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
 
 		return this
 	} // }}}
+	id() => @id
+	id(@id)
 	isAlteration() => @alteration
 	isMatched(methods: Array<ClassMethodType>, matchables): Boolean { // {{{
 		for method in methods {
@@ -1383,6 +1459,8 @@ class ClassMethodType extends FunctionType {
 	} // }}}
 	isMethod() => true
 	isSealable() => true
+	overwrite() => @overwrite
+	overwrite(@overwrite)
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Async {

@@ -24,6 +24,7 @@
       "instanceMethods": {
         "replace": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -58,6 +59,7 @@
       "instanceMethods": {
         "capitalizeWords": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -72,6 +74,7 @@
         ],
         "classify": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

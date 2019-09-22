@@ -25,6 +25,7 @@
       "instanceMethods": {
         "toString": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

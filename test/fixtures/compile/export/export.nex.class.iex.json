@@ -26,6 +26,7 @@
       "instanceMethods": {
         "foobar": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

@@ -40,6 +40,7 @@
       "instanceMethods": {
         "midnight": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -56,6 +57,7 @@
       "classMethods": {
         "today": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

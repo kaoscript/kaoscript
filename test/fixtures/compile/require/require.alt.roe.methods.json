@@ -28,6 +28,7 @@
       "instanceMethods": {
         "indexOf": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -47,6 +48,7 @@
         ],
         "push": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -66,6 +68,7 @@
         ],
         "slice": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -100,6 +103,7 @@
       "instanceMethods": {
         "contains": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 1,
@@ -127,6 +131,7 @@
         ],
         "pushUniq": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,

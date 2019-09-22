@@ -90,6 +90,7 @@
       "instanceMethods": {
         "lines": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -110,6 +111,7 @@
         ],
         "lower": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -124,6 +126,7 @@
         ],
         "toFloat": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
@@ -136,6 +139,7 @@
         ],
         "toInt": [
           {
+            "id": 0,
             "access": 3,
             "async": false,
             "min": 0,
