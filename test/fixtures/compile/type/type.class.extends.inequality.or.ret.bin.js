@@ -36,10 +36,10 @@ module.exports = function() {
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.is(x, Foobar)) {
+			else if(!Type.isInstance(x, Foobar)) {
 				throw new TypeError("'x' is not of type 'Foobar'");
 			}
-			if(!Type.is(x, Quxbaz) || !(x.isNamed() === true)) {
+			if(!Type.isInstance(x, Quxbaz) || !(x.isNamed() === true)) {
 				return false;
 			}
 			const name = x.name();

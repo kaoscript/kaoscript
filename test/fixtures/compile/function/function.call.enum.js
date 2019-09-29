@@ -1,10 +1,10 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Foobar = {
+	let Foobar = Helper.enum(Number, {
 		X: 0,
 		Y: 1,
 		Z: 2
-	};
+	});
 	function toString(foo) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
@@ -12,7 +12,7 @@ module.exports = function() {
 		if(foo === void 0 || foo === null) {
 			throw new TypeError("'foo' is not nullable");
 		}
-		else if(!Type.is(foo, Foobar)) {
+		else if(!Type.isEnumMember(foo, Foobar)) {
 			throw new TypeError("'foo' is not of type 'Foobar'");
 		}
 		return "xyz";

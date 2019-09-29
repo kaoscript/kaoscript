@@ -5,6 +5,7 @@ require|extern sealed class Number {
 #[rules(non-exhaustive)]
 require|extern sealed namespace Math {
 	PI: Number
+	round(...): Number
 }
 
 extern console

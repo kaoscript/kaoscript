@@ -383,11 +383,11 @@ class ClassType extends Type {
 		}
 		for const methods, name of src._classMethods {
 			@classMethods[name] = [].concat(methods)
-			@classMethodNextId[name] = [].concat(src._classMethodNextId[name])
+			@classMethodNextId[name] = src._classMethodNextId[name]
 		}
 		for const methods, name of src._instanceMethods {
 			@instanceMethods[name] = [].concat(methods)
-			@instanceMethodNextId[name] = [].concat(src._instanceMethodNextId[name])
+			@instanceMethodNextId[name] = src._instanceMethodNextId[name]
 		}
 
 		for const variable, name of src._classVariables {
@@ -1449,7 +1449,7 @@ class ClassMethodType extends FunctionType {
 	id(@id)
 	isAlteration() => @alteration
 	isMatched(methods: Array<ClassMethodType>, matchables): Boolean { // {{{
-		for method in methods {
+		for const method in methods {
 			if method.matchSignatureOf(this, matchables) {
 				return true
 			}

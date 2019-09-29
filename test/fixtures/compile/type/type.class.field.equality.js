@@ -45,7 +45,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_qux_0() {
-			if(Type.is(this._foo, Quxbaz)) {
+			if(Type.isInstance(this._foo, Quxbaz)) {
 				this._foo.quxbaz();
 			}
 		}

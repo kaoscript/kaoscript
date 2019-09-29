@@ -1,9 +1,9 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Space = {
+	let Space = Helper.enum(String, {
 		RGB: "rgb",
 		SRGB: "srgb"
-	};
+	});
 	class Color {
 		constructor() {
 			this.__ks_init();
@@ -70,7 +70,7 @@ module.exports = function() {
 			if(that === void 0 || that === null) {
 				throw new TypeError("'that' is not nullable");
 			}
-			else if(!Type.is(that, Color)) {
+			else if(!Type.isInstance(that, Color)) {
 				throw new TypeError("'that' is not of type 'Color'");
 			}
 			return $hex(that);
@@ -82,7 +82,7 @@ module.exports = function() {
 			if(that === void 0 || that === null) {
 				throw new TypeError("'that' is not nullable");
 			}
-			else if(!Type.is(that, Color)) {
+			else if(!Type.isInstance(that, Color)) {
 				throw new TypeError("'that' is not of type 'Color'");
 			}
 			if(that._alpha === 1) {

@@ -22,7 +22,7 @@ module.exports = function() {
 			if(bar === void 0 || bar === null) {
 				throw new TypeError("'bar' is not nullable");
 			}
-			else if(!Type.is(bar, Bar)) {
+			else if(!Type.isInstance(bar, Bar)) {
 				throw new TypeError("'bar' is not of type 'Bar'");
 			}
 			this._bar = bar;
@@ -60,7 +60,7 @@ module.exports = function() {
 			if(foo === void 0 || foo === null) {
 				throw new TypeError("'foo' is not nullable");
 			}
-			else if(!Type.is(foo, Foo)) {
+			else if(!Type.isInstance(foo, Foo)) {
 				throw new TypeError("'foo' is not of type 'Foo'");
 			}
 			this._foo = foo;

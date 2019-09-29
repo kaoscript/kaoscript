@@ -1,8 +1,8 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Token = {
+	let Token = Helper.enum(Number, {
 		INVALID: 0
-	};
+	});
 	class Scanner {
 		constructor() {
 			this.__ks_init();

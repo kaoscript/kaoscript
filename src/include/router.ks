@@ -580,7 +580,7 @@ namespace Router {
 			NotSupportedException.throw()
 		}
 		else if parameters[index + 1] is Number {
-			index = parameters[index + 1] - 1
+			index = parameters[index + 1]:Number - 1
 		}
 
 		const tree = []

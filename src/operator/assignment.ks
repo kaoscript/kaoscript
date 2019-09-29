@@ -75,42 +75,55 @@ class AssignmentOperatorExpression extends Expression {
 
 abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExpression {
 	private {
+		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
 	}
 	prepare() { // {{{
 		super()
 
-		if @left.type().isNumber() && @right.type().isNumber() {
-			@isNative = true
+		if this.isEnumAppliable() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+			@isEnum = true
+
+			@type = @left.type()
 		}
-		else if @left.type().canBeNumber() {
-			unless @right.type().canBeNumber() {
-				TypeException.throwInvalidOperand(@right, this.operator(), this)
+		else {
+			if @left.type().isNumber() && @right.type().isNumber() {
+				@isNative = true
+			}
+			else if @left.type().canBeNumber() {
+				unless @right.type().canBeNumber() {
+					TypeException.throwInvalidOperand(@right, this.operator(), this)
+				}
+			}
+			else {
+				TypeException.throwInvalidOperand(@left, this.operator(), this)
+			}
+
+			if @left.type().isNullable() || @right.type().isNullable() {
+				@type = @scope.reference('Number').setNullable(true)
+
+				@isNative = false
+			}
+			else {
+				@type = @scope.reference('Number')
+			}
+
+			if @left is IdentifierLiteral {
+				@left.type(@type, @scope, this)
 			}
 		}
-		else {
-			TypeException.throwInvalidOperand(@left, this.operator(), this)
-		}
-
-		if @left.type().isNullable() || @right.type().isNullable() {
-			@type = @scope.reference('Number').setNullable(true)
-
-			@isNative = false
-		}
-		else {
-			@type = @scope.reference('Number')
-		}
-
-		if @left is IdentifierLiteral {
-			@left.type(@type, @scope, this)
-		}
 	} // }}}
+	getBinarySymbol() => ''
+	isEnumAppliable() => false
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
 	toFragments(fragments, mode) { // {{{
-		if @isNative {
+		if @isEnum {
+			fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code($space, this.getBinarySymbol(), $space).compile(@right).code(')')
+		}
+		else if @isNative {
 			this.toNativeFragments(fragments)
 		}
 		else {
@@ -228,6 +241,8 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorBitwiseAnd extends NumericAssignmentOperatorExpression {
+	getBinarySymbol() => '&'
+	isEnumAppliable() => true
 	operator() => Operator::BitwiseAnd
 	runtime() => 'bitwiseAnd'
 	symbol() => '&='
@@ -240,6 +255,8 @@ class AssignmentOperatorBitwiseLeftShift extends NumericAssignmentOperatorExpres
 }
 
 class AssignmentOperatorBitwiseOr extends NumericAssignmentOperatorExpression {
+	getBinarySymbol() => '|'
+	isEnumAppliable() => true
 	operator() => Operator::BitwiseOr
 	runtime() => 'bitwiseOr'
 	symbol() => '|='

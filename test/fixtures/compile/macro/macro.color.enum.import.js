@@ -59,8 +59,8 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
-	Space.HSB = "hsb";
-	Space.HSL = "hsl";
+	Space.HSB = Space("hsb");
+	Space.HSL = Space("hsl");
 	Color.registerSpace({
 		name: Space.HSL,
 		"components": {

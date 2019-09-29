@@ -4,6 +4,7 @@ extern sealed class Number {
 
 extern sealed namespace Math {
 	PI: Number
+	round(...): Number
 }
 
 extern console

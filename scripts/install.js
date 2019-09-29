@@ -17,7 +17,7 @@ function getPackage(source) {
 program
 	.command('dependency')
 	.action(function() {
-		if(metadata._requested && metadata._requested.registry === 'git') {
+		if(!metadata._requested || metadata._requested.registry === 'git') {
 			console.log('github:kaoscript/' + getPackage('github'))
 		}
 		else {

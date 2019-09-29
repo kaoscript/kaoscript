@@ -1,5 +1,6 @@
 #![target(ecma-v5)]
 
+import '../_/_number.ks'
 import '../_/_string.ks'
 
 impl String {

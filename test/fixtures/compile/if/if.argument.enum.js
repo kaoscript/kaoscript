@@ -1,10 +1,10 @@
-var {Operator, Type} = require("@kaoscript/runtime");
+var {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Qux = {
+	let Qux = Helper.enum(Number, {
 		abc: 0,
 		def: 1,
 		ghi: 2
-	};
+	});
 	function foobar(x, y, filter) {
 		if(arguments.length < 3) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");

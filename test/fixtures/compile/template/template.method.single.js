@@ -7,7 +7,7 @@ module.exports = function() {
 		if(date === void 0 || date === null) {
 			throw new TypeError("'date' is not nullable");
 		}
-		else if(!Type.is(date, Date)) {
+		else if(!Type.isInstance(date, Date)) {
 			throw new TypeError("'date' is not of type 'Date'");
 		}
 		return ("" + date.getFullYear()).substring(-2);

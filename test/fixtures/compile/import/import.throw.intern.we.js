@@ -6,7 +6,7 @@ module.exports = function() {
 		foo();
 	}
 	catch(__ks_0) {
-		if(Type.is(__ks_0, MyError)) {
+		if(Type.isInstance(__ks_0, MyError)) {
 			let error = __ks_0;
 			console.error(error);
 		}

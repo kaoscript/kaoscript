@@ -1,6 +1,7 @@
 require("kaoscript/register");
-var {Operator, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
+	var {Number, __ks_Number} = require("../_/_number.ks")();
 	var {String, __ks_String} = require("../_/_string.ks")();
 	__ks_String.__ks_func_endsWith_0 = function(value) {
 		if(arguments.length < 1) {
@@ -41,7 +42,7 @@ module.exports = function() {
 			return current * ((100 - __ks_String._im_toFloat(value)) / 100);
 		}
 		else {
-			return Operator.subtraction(current, Type.isString(value) ? __ks_String._im_toFloat(value) : value.toFloat());
+			return current - (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value));
 		}
 	}
 };

@@ -54,7 +54,7 @@ class ThisExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		if @calling {
-			if @type ?= @class.type().getInstanceMethod(@name, [argument.type() for argument in @parent.arguments()]) {
+			if @type ?= @class.type().getInstanceMethod(@name, @parent.arguments()) {
 				@fragment = `this.\(@name)`
 			}
 			else if @type ?= @class.type().getInstanceVariable(@name) {

@@ -30,3 +30,19 @@ func printAnimalAbilities(abilities: AnimalFlags) {
 		console.log('nothing')
 	}
 }
+
+let abilities := AnimalFlags::None
+
+printAnimalAbilities(abilities)
+
+abilities |= AnimalFlags::HasClaws
+
+printAnimalAbilities(abilities)
+
+abilities &= ~AnimalFlags::HasClaws
+printAnimalAbilities(abilities)
+
+abilities |= AnimalFlags::HasClaws | AnimalFlags::CanFly
+printAnimalAbilities(abilities)
+
+printAnimalAbilities(AnimalFlags::HasClaws | AnimalFlags::CanFly)

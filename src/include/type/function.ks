@@ -406,7 +406,7 @@ class FunctionType extends Type {
 			return false
 		}
 	} // }}}
-	matchArguments(arguments: Array<Type>) { // {{{
+	matchArguments(arguments: Array) { // {{{
 		// console.log(@parameters)
 		// console.log(arguments)
 		if arguments.length == 0 {
@@ -618,8 +618,9 @@ class FunctionType extends Type {
 		else if value is OverloadedFunctionType {
 			throw new NotImplementedException()
 		}
-
-		return false
+		else {
+			return false
+		}
 	} // }}}
 	max() => @max
 	min() => @min

@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let NS = (function() {
+	let NS = Helper.namespace(function() {
 		var __ks_String = {};
 		__ks_String.__ks_func_lines_0 = function(emptyLines) {
 			if(emptyLines === void 0 || emptyLines === null) {
@@ -61,5 +61,5 @@ module.exports = function() {
 			String: String,
 			__ks_String: __ks_String
 		};
-	})();
+	});
 };

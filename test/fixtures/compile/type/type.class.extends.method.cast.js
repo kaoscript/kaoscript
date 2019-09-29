@@ -39,7 +39,7 @@ module.exports = function() {
 			if(foobar === void 0 || foobar === null) {
 				throw new TypeError("'foobar' is not nullable");
 			}
-			else if(!Type.is(foobar, ClassA)) {
+			else if(!Type.isInstance(foobar, ClassA)) {
 				throw new TypeError("'foobar' is not of type 'ClassA'");
 			}
 			this._foobar = foobar;

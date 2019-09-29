@@ -1,4 +1,7 @@
 abstract class Expression extends AbstractNode {
+	private {
+		_castingEnum: Boolean	= false
+	}
 	acquireReusable(acquire)
 	// if the expression can throw an expception
 	hasExceptions() => true
@@ -36,6 +39,7 @@ abstract class Expression extends AbstractNode {
 	isSplitAssignment() => false
 	releaseReusable()
 	setAssignment(type: AssignmentType)
+	setCastingEnum(@castingEnum)
 	statement(data) { // {{{
 		let expression = this
 
@@ -44,6 +48,13 @@ abstract class Expression extends AbstractNode {
 		}
 
 		return expression._parent
+	} // }}}
+	toArgumentFragments(fragments, mode = Mode::None) { // {{{
+		this.toFragments(fragments, mode)
+
+		if @castingEnum {
+			fragments.code('.value')
+		}
 	} // }}}
 	toBooleanFragments(fragments, mode = Mode::None) { // {{{
 		this.toFragments(fragments, mode)
@@ -66,6 +77,15 @@ abstract class Expression extends AbstractNode {
 		}
 	} // }}}
 	toReusableFragments(fragments) => this.toFragments(fragments, Mode::None)
+	toStringFragments(fragments) { // {{{
+		const type = this.type()
+		if type.isReference() && type.type().isEnum() {
+			fragments.compile(this).code('.value')
+		}
+		else {
+			fragments.wrap(this)
+		}
+	} // }}}
 }
 
 include {

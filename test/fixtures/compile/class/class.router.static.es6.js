@@ -28,13 +28,13 @@ module.exports = function() {
 			if(domain === void 0 || domain === null) {
 				throw new TypeError("'domain' is not nullable");
 			}
-			else if(!Type.is(domain, Domain)) {
+			else if(!Type.isInstance(domain, Domain)) {
 				throw new TypeError("'domain' is not of type 'Domain'");
 			}
 			if(node === void 0 || node === null) {
 				throw new TypeError("'node' is not nullable");
 			}
-			else if(!Type.is(node, AbstractNode)) {
+			else if(!Type.isInstance(node, AbstractNode)) {
 				throw new TypeError("'node' is not of type 'AbstractNode'");
 			}
 			return Type.import(null, data, references, domain, node);
@@ -61,7 +61,7 @@ module.exports = function() {
 			if(node === void 0 || node === null) {
 				throw new TypeError("'node' is not nullable");
 			}
-			else if(!Type.is(node, AbstractNode)) {
+			else if(!Type.isInstance(node, AbstractNode)) {
 				throw new TypeError("'node' is not of type 'AbstractNode'");
 			}
 			return Type.import(name, data, references, node.scope().domain(), node);
@@ -85,20 +85,20 @@ module.exports = function() {
 			if(domain === void 0 || domain === null) {
 				throw new TypeError("'domain' is not nullable");
 			}
-			else if(!Type.is(domain, Domain)) {
+			else if(!Type.isInstance(domain, Domain)) {
 				throw new TypeError("'domain' is not of type 'Domain'");
 			}
 			if(node === void 0 || node === null) {
 				throw new TypeError("'node' is not nullable");
 			}
-			else if(!Type.is(node, AbstractNode)) {
+			else if(!Type.isInstance(node, AbstractNode)) {
 				throw new TypeError("'node' is not of type 'AbstractNode'");
 			}
 			return new FoobarType();
 		}
 		static import() {
 			if(arguments.length === 4) {
-				if(Type.is(arguments[2], Domain)) {
+				if(Type.isInstance(arguments[2], Domain)) {
 					return Type.__ks_sttc_import_0.apply(this, arguments);
 				}
 				else {

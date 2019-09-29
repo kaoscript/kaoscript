@@ -47,7 +47,7 @@ module.exports = function() {
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
-			else if(!Type.is(color, Color)) {
+			else if(!Type.isInstance(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
 			this._name = name;
@@ -77,7 +77,7 @@ module.exports = function() {
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
-			else if(!Type.is(color, Color)) {
+			else if(!Type.isInstance(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
 			this._color = color;

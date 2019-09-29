@@ -15,7 +15,7 @@ class EnumExpression extends Expression {
 			ReferenceException.throwNotDefinedEnumElement(@data.member.name, named.name(), this)
 		}
 
-		@type = named.type().type()
+		@type = named.reference(@scope)
 	} // }}}
 	translate() { // {{{
 		@enum.translate()
@@ -24,6 +24,6 @@ class EnumExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@enum).code('.', @data.member.name)
 	} // }}}
-	toQuote() => `\(@enum.toQuote())::\(@data.member.name))`
+	toQuote() => `\(@enum.toQuote())::\(@data.member.name)`
 	type() => @type
 }

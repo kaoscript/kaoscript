@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let qux = (function() {
+	let qux = Helper.namespace(function() {
 		class Foobar {
 			constructor() {
 				this.__ks_init();
@@ -29,6 +29,6 @@ module.exports = function() {
 		return {
 			Foobar: Foobar
 		};
-	})();
+	});
 	const x = new qux.Foobar();
 };

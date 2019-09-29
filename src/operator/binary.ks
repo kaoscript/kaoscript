@@ -82,31 +82,47 @@ class BinaryOperatorExpression extends Expression {
 
 abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression {
 	private {
+		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
 	}
 	prepare() { // {{{
 		super()
 
-		if @left.type().isNumber() && @right.type().isNumber() {
-			@isNative = true
+		if @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+			@isEnum = true
+
+			@type = @left.type()
 		}
-		else if @left.type().canBeNumber() {
-			unless @right.type().canBeNumber() {
-				TypeException.throwInvalidOperand(@right, this.operator(), this)
+		else {
+			if @left.type().isNumber() && @right.type().isNumber() {
+				@isNative = true
+			}
+			else if @left.type().canBeNumber() {
+				unless @right.type().canBeNumber() {
+					TypeException.throwInvalidOperand(@right, this.operator(), this)
+				}
+			}
+			else {
+				TypeException.throwInvalidOperand(@left, this.operator(), this)
+			}
+
+			if @left.type().isNullable() || @right.type().isNullable() {
+				@type = @scope.reference('Number').setNullable(true)
+
+				@isNative = false
+			}
+			else {
+				@type = @scope.reference('Number')
 			}
 		}
-		else {
-			TypeException.throwInvalidOperand(@left, this.operator(), this)
-		}
+	} // }}}
+	translate() { // {{{
+		super()
 
-		if @left.type().isNullable() || @right.type().isNullable() {
-			@type = @scope.reference('Number').setNullable(true)
-
-			@isNative = false
-		}
-		else {
-			@type = @scope.reference('Number')
+		if @isEnum && (@parent.type().isBoolean() || (@parent.type().isEnum() && @left.type().name() == @parent.type().name())) {
+			@isEnum = false
+			@isNative = true
 		}
 	} // }}}
 	isComputed() => @isNative
@@ -125,7 +141,14 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 		}
 	} // }}}
 	toOperatorFragments(fragments) { // {{{
-		if @isNative {
+		if @isEnum {
+			fragments.code(@type.name(), '(')
+
+			this.toNativeFragments(fragments)
+
+			fragments.code(')')
+		}
+		else if @isNative {
 			this.toNativeFragments(fragments)
 		}
 		else {
@@ -593,15 +616,32 @@ class BinaryOperatorTypeEquality extends Expression {
 			if const variable = @scope.getVariable(@data.right.typeName.name) {
 				const type = variable.getRealType()
 
-				unless type.isClass() {
-					TypeException.throwNotClass(variable.name(), this)
-				}
-
 				if @left.type().isNull() {
 					TypeException.throwNullTypeChecking(type, this)
 				}
-				else if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
-					TypeException.throwInvalidTypeChecking(@left.type(), type, this)
+
+				if type is NamedType && type.name() == 'Namespace' {
+					if !@left.type().isAny() && !@left.type().isNamespace() {
+						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
+					}
+				}
+				else if type is NamedType && type.name() == 'Enum' {
+					if !@left.type().isAny() && !@left.type().isEnum() {
+						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
+					}
+				}
+				else if type.isEnum() {
+					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
+						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
+					}
+				}
+				else if type.isClass() {
+					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
+						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
+					}
+				}
+				else {
+					TypeException.throwNotClass(variable.name(), this)
 				}
 
 				@trueType = type.reference()
@@ -672,15 +712,32 @@ class BinaryOperatorTypeInequality extends Expression {
 			if variable ?= @scope.getVariable(@data.right.typeName.name) {
 				type = variable.getRealType()
 
-				unless type.isClass() {
-					TypeException.throwNotClass(variable.name(), this)
-				}
-
 				if @left.type().isNull() {
 					TypeException.throwNullTypeChecking(type, this)
 				}
-				else if !@left.type().isAny() && (!type.matchContentOf(@left.type()) || type.matchClassName(@left.type())) {
-					TypeException.throwUnnecessaryTypeChecking(type, this)
+
+				if type is NamedType && type.name() == 'Namespace' {
+					if !@left.type().isAny() && !@left.type().isNamespace() {
+						TypeException.throwUnnecessaryTypeChecking(type, this)
+					}
+				}
+				else if type is NamedType && type.name() == 'Enum' {
+					if !@left.type().isAny() && !@left.type().isEnum() {
+						TypeException.throwUnnecessaryTypeChecking(type, this)
+					}
+				}
+				else if type.isEnum() {
+					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
+						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
+					}
+				}
+				else if type.isClass() {
+					if !@left.type().isAny() && (!type.matchContentOf(@left.type()) || type.matchClassName(@left.type())) {
+						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
+					}
+				}
+				else {
+					TypeException.throwNotClass(variable.name(), this)
 				}
 
 				@falseType = type.reference()

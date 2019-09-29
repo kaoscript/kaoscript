@@ -19,7 +19,7 @@ class CallExpression extends Expression {
 	static {
 		toFlattenArgumentsFragments(fragments, arguments, prefill = null) { // {{{
 			if arguments.length == 1 && prefill == null && arguments[0].argument().type().isArray() {
-				fragments.compile(arguments[0].argument())
+				arguments[0].argument().toArgumentFragments(fragments)
 			}
 			else {
 				if prefill == null {
@@ -31,7 +31,7 @@ class CallExpression extends Expression {
 
 				let opened = false
 
-				for argument, index in arguments {
+				for const argument, index in arguments {
 					if argument is UnaryOperatorSpread {
 						if opened {
 							fragments.code('], ')
@@ -42,7 +42,7 @@ class CallExpression extends Expression {
 							fragments.code($comma)
 						}
 
-						fragments.compile(argument.argument())
+						argument.argument().toArgumentFragments(fragments)
 					}
 					else {
 						if index != 0 {
@@ -55,7 +55,7 @@ class CallExpression extends Expression {
 							opened = true
 						}
 
-						fragments.compile(argument)
+						argument.toArgumentFragments(fragments)
 					}
 				}
 
@@ -322,10 +322,8 @@ class CallExpression extends Expression {
 	makeCallee(type, name) { // {{{
 		switch type {
 			is FunctionType => {
-				const arguments = [argument.type() for argument in @arguments]
-
-				if type.isExhaustive(this) && !type.matchArguments(arguments) {
-					ReferenceException.throwNoMatchingFunction(name, arguments, this)
+				if type.isExhaustive(this) && !type.matchArguments(@arguments) {
+					ReferenceException.throwNoMatchingFunction(name, @arguments, this)
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, type, this))
@@ -338,7 +336,7 @@ class CallExpression extends Expression {
 
 				if matches.length == 0 {
 					if type.isExhaustive(this) {
-						ReferenceException.throwNoMatchingFunction(name, arguments, this)
+						ReferenceException.throwNoMatchingFunction(name, @arguments, this)
 					}
 					else {
 						this.addCallee(new DefaultCallee(@data, @object, this))
@@ -804,7 +802,7 @@ class DefaultCallee extends Callee {
 			@type = type.returnType()
 		}
 		else {
-			@type = Type.Any
+			@type = AnyType.NullableUnexplicit
 		}
 	} // }}}
 	constructor(@data, object = null, type: Type, node) { // {{{
@@ -833,7 +831,7 @@ class DefaultCallee extends Callee {
 			@type = type.returnType()
 		}
 		else {
-			@type = Type.Any
+			@type = AnyType.NullableUnexplicit
 		}
 	} // }}}
 	constructor(@data, object, methods, @type, node) { // {{{
@@ -888,24 +886,28 @@ class DefaultCallee extends Callee {
 				ScopeKind::Argument => {
 					fragments.wrap(@expression, mode).code('.call(').compile(node._callScope, mode)
 
-					for argument in node._arguments {
-						fragments.code($comma).compile(argument, mode)
+					for const argument in node._arguments {
+						fragments.code($comma)
+
+						argument.toArgumentFragments(fragments, mode)
 					}
 				}
 				ScopeKind::Null => {
 					fragments.wrap(@expression, mode).code('.call(null')
 
-					for argument in node._arguments {
-						fragments.code($comma).compile(argument, mode)
+					for const argument in node._arguments {
+						fragments.code($comma)
+
+						argument.toArgumentFragments(fragments, mode)
 					}
 				}
 				ScopeKind::This => {
 					fragments.wrap(@expression, mode).code('(')
 
-					for argument, index in node._arguments {
+					for const argument, index in node._arguments {
 						fragments.code($comma) if index != 0
 
-						fragments.compile(argument, mode)
+						argument.toArgumentFragments(fragments, mode)
 					}
 				}
 			}
@@ -969,7 +971,9 @@ class DefaultCallee extends Callee {
 			}
 
 			for argument in arguments {
-				fragments.code($comma).compile(argument)
+				fragments.code($comma)
+
+				argument.toArgumentFragments(fragments, mode)
 			}
 		}
 	} // }}}
@@ -1048,12 +1052,12 @@ class SealedFunctionCallee extends Callee {
 				ScopeKind::This => {
 					fragments.code(`\(@variable.getSealedName()).\(@property)(`)
 
-					for i from 0 til node._arguments.length {
-						if i != 0 {
+					for const argument, index in node._arguments {
+						if index != 0 {
 							fragments.code($comma)
 						}
 
-						fragments.compile(node._arguments[i])
+						argument.toArgumentFragments(fragments, mode)
 					}
 				}
 			}
@@ -1074,7 +1078,7 @@ class SealedMethodCallee extends Callee {
 		_type: Type
 		_variable: NamedType<ClassType>
 	}
-	constructor(@data, @variable, @instance, methods = [], @type = Type.Any, @node) { // {{{
+	constructor(@data, @variable, @instance, methods = [], @type = AnyType.NullableUnexplicit, @node) { // {{{
 		super(data)
 
 		@object = node._object
@@ -1126,17 +1130,21 @@ class SealedMethodCallee extends Callee {
 							.code(`\(@variable.getSealedPath())._im_\(@property)(`)
 							.compile(@object)
 
-						for i from 0 til node._arguments.length {
-							fragments.code($comma).compile(node._arguments[i])
+						for const argument in node._arguments {
+							fragments.code($comma)
+
+							argument.toArgumentFragments(fragments, mode)
 						}
 					}
 					else {
 						fragments.code(`\(@variable.getSealedPath())._cm_\(@property)(`)
 
-						for i from 0 til node._arguments.length {
-							fragments.code($comma) if i != 0
+						for const argument, index in node._arguments {
+							if index != 0 {
+								fragments.code($comma)
+							}
 
-							fragments.compile(node._arguments[i])
+							argument.toArgumentFragments(fragments, mode)
 						}
 					}
 				}

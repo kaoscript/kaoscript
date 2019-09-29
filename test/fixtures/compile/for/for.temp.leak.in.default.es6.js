@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	function init(data, builder) {
 		if(arguments.length < 2) {
@@ -18,7 +19,7 @@ module.exports = function() {
 		let source = "";
 		for(let __ks_0 = 0, __ks_1 = builder.toArray(), __ks_2 = __ks_1.length, fragment; __ks_0 < __ks_2; ++__ks_0) {
 			fragment = __ks_1[__ks_0];
-			source += fragment.code;
+			source = Helper.concatString(source, fragment.code);
 		}
 		return source;
 	}

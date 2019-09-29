@@ -23,7 +23,7 @@ module.exports = function() {
 				if(that === void 0 || that === null) {
 					throw new TypeError("'that' is not nullable");
 				}
-				else if(!Type.is(that, Color)) {
+				else if(!Type.isInstance(that, Color)) {
 					throw new TypeError("'that' is not of type 'Color'");
 				}
 				if(that._foo === true) {

@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let NS = (function() {
+	let NS = Helper.namespace(function() {
 		function foo() {
 		}
 		function bar() {
@@ -51,7 +51,7 @@ module.exports = function() {
 			qux: qux,
 			Foobar: Foobar
 		};
-	})();
+	});
 	return {
 		NS: NS
 	};

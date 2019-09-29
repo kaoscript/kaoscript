@@ -28,7 +28,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.is(x, Quxbaz)) {
+		else if(!Type.isInstance(x, Quxbaz)) {
 			throw new TypeError("'x' is not of type 'Quxbaz'");
 		}
 	}
@@ -39,10 +39,10 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.is(x, Foobar)) {
+		else if(!Type.isInstance(x, Foobar)) {
 			throw new TypeError("'x' is not of type 'Foobar'");
 		}
-		if(!Type.is(x, Quxbaz)) {
+		if(!Type.isInstance(x, Quxbaz)) {
 			x = new Quxbaz();
 		}
 		quxbaz(x);

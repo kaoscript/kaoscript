@@ -87,7 +87,7 @@ class NamespaceDeclaration extends Statement {
 		line.done()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		const line = fragments.newLine().code($runtime.scope(this), @name, ' = (function()')
+		const line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
 		const block = line.newBlock()
 
 		for statement in @statements {
@@ -97,7 +97,7 @@ class NamespaceDeclaration extends Statement {
 		this.toExportFragements(block)
 
 		block.done()
-		line.code(')()').done()
+		line.code(')').done()
 	} // }}}
 	type() => @type
 }

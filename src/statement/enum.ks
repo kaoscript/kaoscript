@@ -53,7 +53,7 @@ class EnumDeclaration extends Statement {
 			EnumTypeKind::Flags => {
 				for data in @data.members {
 					if data.value? {
-						if data.value.kind == NodeKind::BinaryExpression && data.value.operator.kind == BinaryOperatorKind::BitwiseOr {
+						if data.value.kind == NodeKind::BinaryExpression && (data.value.operator.kind == BinaryOperatorKind::BitwiseOr || data.value.operator.kind == BinaryOperatorKind::Addition) {
 							@composites.push({
 								name: data.name.name
 								components: [data.value.left, data.value.right]
@@ -61,7 +61,7 @@ class EnumDeclaration extends Statement {
 
 							@enum.addElement(data.name.name)
 						}
-						else if data.value.kind == NodeKind::PolyadicExpression && data.value.operator.kind == BinaryOperatorKind::BitwiseOr {
+						else if data.value.kind == NodeKind::PolyadicExpression && (data.value.operator.kind == BinaryOperatorKind::BitwiseOr || data.value.operator.kind == BinaryOperatorKind::Addition) {
 							@composites.push({
 								name: data.name.name
 								components: data.value.operands
@@ -157,37 +157,42 @@ class EnumDeclaration extends Statement {
 	name() => @name
 	toStatementFragments(fragments, mode) { // {{{
 		if @new {
-			const line = fragments.newLine().code($runtime.scope(this), @name, $equals)
+			const line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.enum(')
+
+			if @type.isString() {
+				line.code('String, ')
+			}
+			else {
+				line.code('Number, ')
+			}
+
 			const object = line.newObject()
 
-			for member in @values {
+			for const member in @values {
 				object.line(member.name, ': ', member.value)
 			}
 
 			object.done()
-			line.done()
+
+			line.code(')').done()
 		}
 		else {
-			for member in @values {
-				fragments.line(@name, '.', member.name, ' = ', member.value)
+			for const member in @values {
+				fragments.line(@name, '.', member.name, $equals, @name, '(', member.value, ')')
 			}
 		}
 
 		if @composites.length > 0 {
-			let line
+			for const member in @composites {
+				const line = fragments.newLine().code(@name, '.', member.name, ' = ', @name, '(')
 
-			for member in @composites {
-				line = fragments
-					.newLine()
-					.code(@name, '.', member.name, ' = ')
-
-				for value, i in member.components {
+				for const value, i in member.components {
 					line.code(' | ') if i > 0
 
 					line.code(@name, '.', value.name)
 				}
 
-				line.done()
+				line.code(')').done()
 			}
 		}
 	} // }}}

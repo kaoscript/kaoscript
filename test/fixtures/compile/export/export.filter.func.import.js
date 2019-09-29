@@ -20,7 +20,7 @@ module.exports = function() {
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.is(x, Shape)) {
+			else if(!Type.isInstance(x, Shape)) {
 				throw new TypeError("'x' is not of type 'Shape'");
 			}
 			return x;

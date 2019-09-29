@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Float = (function() {
+	let Float = Helper.namespace(function() {
 		function toFloat(value) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
@@ -29,7 +29,7 @@ module.exports = function() {
 			toFloat: toFloat,
 			toString: toString
 		};
-	})();
+	});
 	return {
 		Float: Float
 	};

@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function corge() {
 		return 42;
@@ -30,14 +30,14 @@ module.exports = function() {
 	function waldo() {
 		return "miss White";
 	}
-	let foobar = (function() {
+	let foobar = Helper.namespace(function() {
 		return {
 			corge: corge,
 			grault: grault,
 			garply: garply,
 			waldo: waldo
 		};
-	})();
+	});
 	return {
 		foobar: foobar
 	};

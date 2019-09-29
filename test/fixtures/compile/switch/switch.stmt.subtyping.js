@@ -1,14 +1,14 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	let view;
-	if(Type.is(view, UIImageView)) {
+	if(Type.isInstance(view, UIImageView)) {
 		console.log("It's an image view");
 	}
-	else if(Type.is(view, UILabel)) {
+	else if(Type.isInstance(view, UILabel)) {
 		let label = view;
 		console.log("It's a label");
 	}
-	else if(Type.is(view, UITableView)) {
+	else if(Type.isInstance(view, UITableView)) {
 		let tblv = view;
 		let sectionCount = tblv.numberOfSections();
 		console.log("It's a table view with " + sectionCount + " sections");

@@ -1,11 +1,12 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
-	let NS = (function() {
+	let NS = Helper.namespace(function() {
 		function foo() {
 		}
 		return {
 			foo: foo
 		};
-	})();
+	});
 	return {
 		nsFoo: NS.foo
 	};

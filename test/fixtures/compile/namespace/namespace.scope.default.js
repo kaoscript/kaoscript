@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Float = (function() {
+	let Float = Helper.namespace(function() {
 		const PI = 3.14;
 		function toFloat(value) {
 			if(arguments.length < 1) {
@@ -31,7 +31,7 @@ module.exports = function() {
 			toFloat: toFloat,
 			toString: toString
 		};
-	})();
+	});
 	console.log(Float.PI);
 	console.log(Float.toFloat("3.14"));
 	console.log(Float.toString(3.14));

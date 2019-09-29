@@ -28,7 +28,7 @@ module.exports = function() {
 		if(d === void 0 || d === null) {
 			throw new TypeError("'d' is not nullable");
 		}
-		else if(!Type.is(d, Date)) {
+		else if(!Type.isInstance(d, Date)) {
 			throw new TypeError("'d' is not of type 'Date'");
 		}
 	}

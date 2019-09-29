@@ -108,7 +108,7 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	flagExported(explicitly: Boolean) { // {{{
-		if !this.isAny() && !this.isEnum() && !this.isVoid() {
+		if !this.isAny() && !this.isVoid() {
 			this.type().flagExported(explicitly).flagReferenced()
 		}
 
@@ -164,17 +164,17 @@ class ReferenceType extends Type {
 	} // }}}
 	hasParameters() => @parameters.length != 0
 	isAlien() => this.type().isAlien()
-	isAny() => @name == 'Any' || @name == 'any'
-	isArray() => @name == 'Array' || @name == 'array' || this.type().isArray()
+	isAny() => @name == 'Any' || this.type().isAny()
+	isArray() => @name == 'Array' || this.type().isArray()
 	isAsync() => false
-	isBoolean() => @name == 'Boolean' || @name == 'bool' || this.type().isBoolean()
-	isClass() => @name == 'Class' || @name == 'class'
-	isEnum() => @name == 'Enum' || @name == 'enum'
+	isBoolean() => @name == 'Boolean' || this.type().isBoolean()
+	isClass() => @name == 'Class'
+	isEnum() => @name == 'Enum' || this.type().isEnum()
 	isExhaustive() => this.type().isExhaustive()
 	isExplicitlyExported() => this.type().isExplicitlyExported()
-	isExportable() => this.isEnum() || this.type().isExportable()
+	isExportable() => this.type().isExportable()
 	isExported() => this.type().isExported()
-	isFunction() => @name == 'Function' || @name == 'function'
+	isFunction() => @name == 'Function' || this.type().isFunction()
 	isHybrid() => this.type().isHybrid()
 	isInstanceOf(target: AnyType) => true
 	isInstanceOf(target: ReferenceType) { // {{{
@@ -273,13 +273,14 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	isNative() => $natives[@name] == true
+	isNamespace() => @name == 'Namespace' || this.type().isNamespace()
 	isNullable() => @nullable
-	isNumber() => @name == 'Number' || @name == 'number' || this.type().isNumber()
-	isObject() => @name == 'Object' || @name == 'object'
+	isNumber() => @name == 'Number' || this.type().isNumber()
+	isObject() => @name == 'Object' || this.type().isObject()
 	isReference() => true
 	isRequired() => this.type().isRequired()
-	isString() => @name == 'String' || @name == 'string' || this.type().isString()
-	isVoid() => @name == 'Void' || @name == 'void'
+	isString() => @name == 'String' || this.type().isString()
+	isVoid() => @name == 'Void' || this.type().isVoid()
 	isUnion() => this.type().isUnion()
 	matchContentOf(that: Type) { // {{{
 		if this == that {
@@ -290,9 +291,6 @@ class ReferenceType extends Type {
 		}
 		else if that.isAny() {
 			return true
-		}
-		else if this.isEnum() {
-			return that.isEnum()
 		}
 		else if this.isFunction() {
 			return that.isFunction()
@@ -327,11 +325,11 @@ class ReferenceType extends Type {
 	} // }}}
 	matchSignatureOf(value, matchables) { // {{{
 		if value is ReferenceType {
-			if this.isEnum() {
-				return value.discardReference() is EnumType
+			if value.name() == 'Enum' {
+				return this.type().isEnum()
 			}
-			else if value.isEnum() {
-				return this.discardReference() is EnumType
+			else if value.name() == 'Namespace' {
+				return this.type().isNamespace()
 			}
 			else {
 				return this.discardReference():Type.matchSignatureOf(value.discardReference():Type, matchables)
@@ -363,20 +361,51 @@ class ReferenceType extends Type {
 	reassign(@name, @scope) => this
 	resolveType() { // {{{
 		if !?@type || @type.isCloned() {
-			if this.isAny() {
+			if @name == 'Any' {
 				@type = Type.Any
 				@predefined = true
 			}
-			else if this.isEnum() {
-				@predefined = true
-			}
-			else if this.isVoid() {
+			else if @name == 'Void' {
 				@type = Type.Void
 				@predefined = true
 			}
-			else if @variable ?= @scope.getVariable(@name, -1) {
-				@type = @variable.getRealType()
-				@predefined = @type.isPredefined()
+			else {
+				const names = @name.split('.')
+
+				if names.length == 1 {
+					if @variable ?= @scope.getVariable(@name, -1) {
+						@type = @variable.getRealType()
+						@predefined = @variable.isPredefined() || @type.isPredefined()
+
+						if @type is AliasType {
+							@type = @type.type()
+						}
+						if @type is ReferenceType {
+							@type = @type.type()
+						}
+					}
+					else {
+						console.info(this)
+						throw new NotImplementedException()
+					}
+				}
+				else {
+					let type = @scope.getVariable(names[0], -1)?.getRealType()
+					if !?type {
+						console.info(this)
+						throw new NotImplementedException()
+					}
+
+					for const name in names from 1 {
+						if type !?= type.getProperty(name) {
+							console.info(this)
+							throw new NotImplementedException()
+						}
+					}
+
+					@type = type
+					@predefined = type.isPredefined()
+				}
 
 				if @type is AliasType {
 					@type = @type.type()
@@ -384,10 +413,6 @@ class ReferenceType extends Type {
 				if @type is ReferenceType {
 					@type = @type.type()
 				}
-			}
-			else {
-				console.info(this)
-				throw new NotImplementedException()
 			}
 		}
 	} // }}}
@@ -463,7 +488,16 @@ class ReferenceType extends Type {
 				fragments.code(`\(tof)(`).compile(node)
 			}
 			else {
-				fragments.code(`\($runtime.type(node)).is(`).compile(node).code(`, `)
+				fragments.code(`\($runtime.type(node)).`)
+
+				if @type.isClass() {
+					fragments.code(`isInstance`)
+				}
+				else {
+					fragments.code(`isEnumMember`)
+				}
+
+				fragments.code(`(`).compile(node).code(`, `)
 
 				if @type is NamedType {
 					fragments.code(@type.path())

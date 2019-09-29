@@ -193,12 +193,17 @@ abstract class ComparisonOperator {
 
 class EqualityOperator extends ComparisonOperator {
 	private {
+		_enumLeft: Boolean		= false
+		_enumRight: Boolean		= false
 		_infinity: Boolean		= false
 		_nanLeft: Boolean		= false
 		_nanRight: Boolean		= false
 	}
 	prepare() { // {{{
-		if @left is IdentifierLiteral {
+		if @left.type().isEnum() && @left is not NumericBinaryOperatorExpression {
+			@enumLeft = true
+		}
+		else if @left is IdentifierLiteral {
 			if @left.value() == 'NaN' {
 				@nanLeft = true
 			}
@@ -210,7 +215,10 @@ class EqualityOperator extends ComparisonOperator {
 			@infinity = @left.argument().value() == 'Infinity'
 		}
 
-		if @right is IdentifierLiteral {
+		if @right.type().isEnum() && @right is not NumericBinaryOperatorExpression {
+			@enumRight = true
+		}
+		else if @right is IdentifierLiteral {
 			if @right.value() == 'NaN' {
 				@nanRight = true
 			}
@@ -220,6 +228,10 @@ class EqualityOperator extends ComparisonOperator {
 		}
 		else if @right is UnaryOperatorNegative && @right.argument() is IdentifierLiteral {
 			@infinity = @right.argument().value() == 'Infinity'
+		}
+
+		if @enumLeft && @enumRight {
+			@enumLeft = @enumRight = false
 		}
 	} // }}}
 	isComputed() => !@nanLeft && !@nanRight
@@ -261,6 +273,38 @@ class EqualityOperator extends ComparisonOperator {
 
 		return inferables
 	} // }}}
+	toLeftFragments(fragments, leftReusable, reuseName?) { // {{{
+		let suffix = null
+		let wrap = true
+
+		if @enumLeft {
+			suffix = '.value'
+		}
+		else if @enumRight && @left.type().isAny() && !@left.type().isNull() {
+			if @left.type().isNullable() {
+				fragments.code($runtime.helper(@left), '.valueOf(')
+				wrap = false
+				suffix = ')'
+			}
+			else {
+				suffix = '.valueOf()'
+			}
+		}
+
+		if leftReusable && reuseName != null  {
+			fragments.code(reuseName)
+		}
+		else if wrap {
+			fragments.wrap(@left)
+		}
+		else {
+			fragments.compile(@left)
+		}
+
+		if suffix != null {
+			fragments.code(suffix)
+		}
+	} // }}}
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {
@@ -279,12 +323,7 @@ class EqualityOperator extends ComparisonOperator {
 			}
 		}
 		else {
-			if leftReusable && reuseName != null  {
-				fragments.code(reuseName)
-			}
-			else {
-				fragments.wrap(@left)
-			}
+			this.toLeftFragments(fragments, leftReusable, reuseName)
 
 			if @infinity {
 				fragments.code(' == ')
@@ -293,12 +332,39 @@ class EqualityOperator extends ComparisonOperator {
 				fragments.code(' === ')
 			}
 
-			if rightReusable && reuseName != null  {
-				fragments.code('(', reuseName, $equals).compile(@right).code(')')
+			this.toRightFragments(fragments, rightReusable, reuseName)
+		}
+	} // }}}
+	toRightFragments(fragments, rightReusable, reuseName?) { // {{{
+		let suffix = null
+		let wrap = true
+
+		if @enumRight {
+			suffix = '.value'
+		}
+		else if @enumLeft && @right.type().isAny() && !@right.type().isNull() {
+			if @right.type().isNullable() {
+				fragments.code($runtime.helper(@right), '.valueOf(')
+				wrap = false
+				suffix = ')'
 			}
 			else {
-				fragments.wrap(@right)
+				suffix = '.valueOf()'
 			}
+		}
+
+		if rightReusable && reuseName != null  {
+			fragments.code('(', reuseName, $equals).compile(@right).code(')')
+		}
+		else if wrap {
+			fragments.wrap(@right)
+		}
+		else {
+			fragments.compile(@right)
+		}
+
+		if suffix != null {
+			fragments.code(suffix)
 		}
 	} // }}}
 }
@@ -324,12 +390,7 @@ class InequalityOperator extends EqualityOperator {
 			}
 		}
 		else {
-			if leftReusable && reuseName != null  {
-				fragments.code(reuseName)
-			}
-			else {
-				fragments.wrap(@left)
-			}
+			this.toLeftFragments(fragments, leftReusable, reuseName)
 
 			if @infinity {
 				fragments.code(' != ')
@@ -338,12 +399,7 @@ class InequalityOperator extends EqualityOperator {
 				fragments.code(' !== ')
 			}
 
-			if rightReusable && reuseName != null  {
-				fragments.code('(', reuseName, $equals).compile(@right).code(')')
-			}
-			else {
-				fragments.wrap(@right)
-			}
+			this.toRightFragments(fragments, rightReusable, reuseName)
 		}
 	} // }}}
 }

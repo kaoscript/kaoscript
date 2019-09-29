@@ -1,10 +1,10 @@
 var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
-	var Space = {
+	var Space = Helper.enum(String, {
 		RGB: "rgb",
 		SRGB: "srgb",
 		YUV: "yuv"
-	};
+	});
 	var Color = Helper.class({
 		$name: "Color",
 		$static: {

@@ -1,7 +1,8 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	var __ks_Function = {};
 	__ks_Function.__ks_func_foo_0 = function() {
-		return "foo" + this();
+		return Helper.concatString("foo", this());
 	};
 	__ks_Function._im_foo = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

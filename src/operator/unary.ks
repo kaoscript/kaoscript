@@ -19,27 +19,41 @@ class UnaryOperatorExpression extends Expression {
 
 abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	private {
-		_allNumber: Boolean		= false
+		_isEnum: Boolean		= false
+		_isNative: Boolean		= false
+		_type: Type
 	}
 	prepare() { // {{{
 		super()
 
-		if @argument.type().isNumber() {
-			if @argument.type().isNullable() {
-				TypeException.throwNotNullableOperand(@argument, this.operator(), this)
+		if @argument.type().isEnum() {
+			@isEnum = true
+
+			@type = @argument.type()
+		}
+		else {
+			if @argument.type().isNumber() {
+				if @argument.type().isNullable() {
+					TypeException.throwNotNullableOperand(@argument, this.operator(), this)
+				}
+
+				@isNative = true
+			}
+			else if !@argument.type().canBeNumber() {
+				TypeException.throwInvalidOperand(@argument, this.operator(), this)
 			}
 
-			@allNumber = true
-		}
-		else if !@argument.type().canBeNumber() {
-			TypeException.throwInvalidOperand(@argument, this.operator(), this)
+			@type = @scope.reference('Number')
 		}
 	} // }}}
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
 	toFragments(fragments, mode) { // {{{
-		if @allNumber {
+		if @isEnum {
+			fragments.code(this.symbol(), @data.operator).wrap(@argument)
+		}
+		else if @isNative {
 			fragments.code(this.symbol(), @data.operator).wrap(@argument)
 		}
 		else {
@@ -47,7 +61,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 		}
 	} // }}}
 	toQuote() => `\(this.symbol())\(@argument.toQuote())`
-	type() => @scope.reference('Number')
+	type() => @type
 }
 
 class UnaryOperatorBitwiseNot extends NumericUnaryOperatorExpression {

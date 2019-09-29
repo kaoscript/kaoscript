@@ -66,7 +66,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		else if(!(Type.is(y, Foo) || Type.is(y, Bar))) {
+		else if(!(Type.isInstance(y, Foo) || Type.isInstance(y, Bar))) {
 			throw new TypeError("'y' is not of type 'Foo' or 'Bar'");
 		}
 		const z = y.y(x);

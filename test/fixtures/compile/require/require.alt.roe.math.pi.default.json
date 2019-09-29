@@ -59,6 +59,26 @@
         "PI": {
           "reference": 0,
           "sealed": false
+        },
+        "round": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": {
+            "reference": 0
+          },
+          "throws": [],
+          "sealed": false
         }
       }
     },

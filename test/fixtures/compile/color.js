@@ -211,7 +211,7 @@ module.exports = function() {
 		lastArgs.push(that);
 		return last.call(null, ...lastArgs);
 	}
-	let $caster = (function() {
+	let $caster = Helper.namespace(function() {
 		function alpha() {
 			let __ks_i = -1;
 			let __ks__;
@@ -251,7 +251,7 @@ module.exports = function() {
 			ff: ff,
 			percentage: percentage
 		};
-	})();
+	});
 	function $component(component, name, space) {
 		if(arguments.length < 3) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
@@ -290,7 +290,7 @@ module.exports = function() {
 		if(that === void 0 || that === null) {
 			throw new TypeError("'that' is not nullable");
 		}
-		else if(!Type.is(that, Color)) {
+		else if(!Type.isInstance(that, Color)) {
 			throw new TypeError("'that' is not of type 'Color'");
 		}
 		if(space === void 0 || space === null) {
@@ -351,7 +351,7 @@ module.exports = function() {
 		if(that === void 0 || that === null) {
 			throw new TypeError("'that' is not nullable");
 		}
-		else if(!Type.is(that, Color)) {
+		else if(!Type.isInstance(that, Color)) {
 			throw new TypeError("'that' is not of type 'Color'");
 		}
 		if(args === void 0 || args === null) {
@@ -387,7 +387,7 @@ module.exports = function() {
 		if(that === void 0 || that === null) {
 			throw new TypeError("'that' is not nullable");
 		}
-		else if(!Type.is(that, Color)) {
+		else if(!Type.isInstance(that, Color)) {
 			throw new TypeError("'that' is not of type 'Color'");
 		}
 		let chars = "0123456789abcdef";
@@ -421,7 +421,7 @@ module.exports = function() {
 			if(that === void 0 || that === null) {
 				throw new TypeError("'that' is not nullable");
 			}
-			else if(!Type.is(that, Color)) {
+			else if(!Type.isInstance(that, Color)) {
 				throw new TypeError("'that' is not of type 'Color'");
 			}
 			if(args === void 0 || args === null) {
@@ -481,7 +481,7 @@ module.exports = function() {
 						return true;
 					}
 					if(Type.isValue($names[color])) {
-						color = "#" + $names[color];
+						color = Helper.concatString("#", $names[color]);
 					}
 					let match, __ks_0;
 					if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
@@ -575,7 +575,7 @@ module.exports = function() {
 			if(that === void 0 || that === null) {
 				throw new TypeError("'that' is not nullable");
 			}
-			else if(!Type.is(that, Color)) {
+			else if(!Type.isInstance(that, Color)) {
 				throw new TypeError("'that' is not of type 'Color'");
 			}
 			if(args === void 0 || args === null) {
@@ -627,10 +627,10 @@ module.exports = function() {
 			components: {}
 		};
 	}
-	let Space = {
+	let Space = Helper.enum(String, {
 		RGB: "rgb",
 		SRGB: "srgb"
-	};
+	});
 	class Color {
 		constructor() {
 			this.__ks_init();
@@ -685,7 +685,7 @@ module.exports = function() {
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
-			else if(!Type.is(color, Color)) {
+			else if(!Type.isInstance(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
 			if(percentage === void 0 || percentage === null) {
@@ -697,7 +697,7 @@ module.exports = function() {
 			let __ks_i = 1;
 			let space;
 			if(arguments.length > ++__ks_i && (space = arguments[__ks_i]) !== void 0 && space !== null) {
-				if(!Type.is(space, Space)) {
+				if(!Type.isEnumMember(space, Space)) {
 					if(arguments.length - __ks_i < 2) {
 						space = Space.SRGB;
 						--__ks_i;
@@ -741,7 +741,7 @@ module.exports = function() {
 					if(d > component.half) {
 						d = Operator.subtraction(component.mod, d);
 					}
-					this[component.field] = __ks_Number._im_round(Operator.modulo(this[component.field] + Operator.multiplication(d, percentage), component.mod), component.round);
+					this[component.field] = __ks_Number._im_round(Operator.modulo(this[component.field] + (d * percentage), component.mod), component.round);
 				}
 				else {
 					this[component.field] = __ks_Number._im_round(__ks_Number._im_limit($blend(this[component.field], color[component.field], percentage), component.min, component.max), component.round);
@@ -794,7 +794,7 @@ module.exports = function() {
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
-			else if(!Type.is(color, Color)) {
+			else if(!Type.isInstance(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
 			let a = this._alpha;
@@ -843,7 +843,7 @@ module.exports = function() {
 			if(target === void 0 || target === null) {
 				throw new TypeError("'target' is not nullable");
 			}
-			else if(!Type.is(target, Color)) {
+			else if(!Type.isInstance(target, Color)) {
 				throw new TypeError("'target' is not of type 'Color'");
 			}
 			let s1 = this._space;
@@ -872,7 +872,7 @@ module.exports = function() {
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
-			else if(!Type.is(color, Color)) {
+			else if(!Type.isInstance(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
 			const that = this.like(Space.SRGB);
@@ -892,7 +892,7 @@ module.exports = function() {
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
-			else if(!Type.is(color, Color)) {
+			else if(!Type.isInstance(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
 			return this.hex() === color.hex();
@@ -961,7 +961,7 @@ module.exports = function() {
 			if(endColor === void 0 || endColor === null) {
 				throw new TypeError("'endColor' is not nullable");
 			}
-			else if(!Type.is(endColor, Color)) {
+			else if(!Type.isInstance(endColor, Color)) {
 				throw new TypeError("'endColor' is not of type 'Color'");
 			}
 			if(length === void 0 || length === null) {
@@ -1082,7 +1082,7 @@ module.exports = function() {
 				throw new TypeError("'space' is not of type 'String'");
 			}
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
-			if((this._space === space) || Type.isValue($spaces[this._space][space])) {
+			if((this._space.value === space) || Type.isValue($spaces[this._space][space])) {
 				return this;
 			}
 			else {
@@ -1154,7 +1154,7 @@ module.exports = function() {
 			if(color === void 0 || color === null) {
 				throw new TypeError("'color' is not nullable");
 			}
-			else if(!Type.is(color, Color)) {
+			else if(!Type.isInstance(color, Color)) {
 				throw new TypeError("'color' is not of type 'Color'");
 			}
 			if(tripleA === void 0 || tripleA === null) {
@@ -1280,7 +1280,7 @@ module.exports = function() {
 					throw new Error("The component '" + space + "' has a conflict between the spaces '" + $components[space].families.join("', '") + "'");
 				}
 			}
-			if((this._space !== space) && !Type.isValue($spaces[this._space][space])) {
+			if((this._space.value !== space) && !Type.isValue($spaces[this._space][space])) {
 				$convert(this, space, this);
 			}
 			return this;
@@ -1537,7 +1537,7 @@ module.exports = function() {
 				if(that === void 0 || that === null) {
 					throw new TypeError("'that' is not nullable");
 				}
-				else if(!Type.is(that, Color)) {
+				else if(!Type.isInstance(that, Color)) {
 					throw new TypeError("'that' is not of type 'Color'");
 				}
 				return $hex(that);
@@ -1549,7 +1549,7 @@ module.exports = function() {
 				if(that === void 0 || that === null) {
 					throw new TypeError("'that' is not nullable");
 				}
-				else if(!Type.is(that, Color)) {
+				else if(!Type.isInstance(that, Color)) {
 					throw new TypeError("'that' is not of type 'Color'");
 				}
 				if(that._alpha === 1) {

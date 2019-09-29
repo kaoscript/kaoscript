@@ -1,3 +1,4 @@
+import '../_/_number.ks'
 import '../_/_string.ks'
 
 impl String {

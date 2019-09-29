@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let NS = (function() {
+	let NS = Helper.namespace(function() {
 		function foo() {
 		}
 		function bar() {
@@ -51,7 +51,7 @@ module.exports = function() {
 			qux: qux,
 			Foobar: Foobar
 		};
-	})();
+	});
 	const $available = [];
 	function acquire() {
 		if($available.length === 0) {
@@ -68,7 +68,7 @@ module.exports = function() {
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
 		}
-		else if(!Type.is(item, NS.Foobar)) {
+		else if(!Type.isInstance(item, NS.Foobar)) {
 			throw new TypeError("'item' is not of type 'Foobar'");
 		}
 		$available.push(item);

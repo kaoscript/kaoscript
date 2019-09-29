@@ -7,8 +7,10 @@ impl Number {
 }
 
 extern sealed class String {
+	length: Number
+	repeat(...): String
 }
 
 impl String {
-	lpad(length, pad): String => pad.repeat(length - this.length) + this
+	lpad(length, pad: String): String => pad.repeat(length - this.length) + this
 }

@@ -193,6 +193,7 @@ class NamespaceType extends Type {
 	isNamespace() => true
 	isSealable() => true
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
+	matchContentOf(that: Type) => that is ReferenceType && that.isNamespace()
 	matchSignatureOf(that, matchables) { // {{{
 		if that is NamespaceType {
 			for const property, name of that._properties {

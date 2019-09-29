@@ -1,8 +1,8 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Space = {
+	let Space = Helper.enum(String, {
 		RGB: "rgb"
-	};
+	});
 	class Color {
 		constructor() {
 			this.__ks_init();
@@ -32,7 +32,7 @@ module.exports = function() {
 			if(space === void 0 || space === null) {
 				throw new TypeError("'space' is not nullable");
 			}
-			else if(!Type.is(space, Space)) {
+			else if(!Type.isEnumMember(space, Space)) {
 				throw new TypeError("'space' is not of type 'Space'");
 			}
 			this._space = space;

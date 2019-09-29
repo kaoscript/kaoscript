@@ -176,7 +176,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The constructor of class "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
 			}
 		} // }}}
 		throwNoMatchingFunction(name, arguments, node) ~ ReferenceException { // {{{
@@ -184,7 +184,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
 			}
 		} // }}}
 		throwNoMatchingMethod(method, class, arguments, node) ~ ReferenceException { // {{{
@@ -397,7 +397,7 @@ export class TypeException extends Exception {
 			throw new TypeException(`Only variables can be casted`, node)
 		} // }}}
 		throwInvalidCondition(expression, node) ~ TypeException { // {{{
-			throw new TypeException(`The consition \(expression.toQuote(true)) is expected to be of type "Boolean" or "Any" and not of type \(expression.type().toQuote(true))`, node)
+			throw new TypeException(`The condition \(expression.toQuote(true)) is expected to be of type "Boolean" or "Any" and not of type \(expression.type().toQuote(true))`, node)
 		} // }}}
 		throwInvalidForInExpression(node) ~ TypeException { // {{{
 			throw new TypeException(`"for..in" must be used with an array`, node)

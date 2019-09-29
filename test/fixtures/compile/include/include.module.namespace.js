@@ -1,5 +1,6 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
-	let ns = (function() {
+	let ns = Helper.namespace(function() {
 		function foo() {
 		}
 		const bar = 42;
@@ -29,7 +30,7 @@ module.exports = function() {
 			bar: bar,
 			Qux: Qux
 		};
-	})();
+	});
 	const foo = ns.bar;
 	console.log(ns.foo());
 };

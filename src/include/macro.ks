@@ -189,13 +189,13 @@ func $transformExpression(macro, node, data, writer) { // {{{
 
 class MacroDeclaration extends AbstractNode {
 	private {
-		_executeCount				= 0
+		_executeCount							= 0
 		_fn: Function
 		_line: Number
-		_marks:	Array				= []
+		_marks:	Array							= []
 		_name: String
-		_parameters: Object			= {}
-		_referenceIndex: Number		= -1
+		_parameters: Object						= {}
+		_referenceIndex: Number					= -1
 		_type: MacroType
 	}
 	constructor(@data, @parent, :Scope?, @name = data.name.name) { // {{{

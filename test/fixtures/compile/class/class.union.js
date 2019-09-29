@@ -56,14 +56,14 @@ module.exports = function() {
 			if(person === void 0 || person === null) {
 				throw new TypeError("'person' is not nullable");
 			}
-			else if(!Type.is(person, Person)) {
+			else if(!Type.isInstance(person, Person)) {
 				throw new TypeError("'person' is not of type 'Person'");
 			}
 			this.greet(person.name());
 		}
 		greet() {
 			if(arguments.length === 1) {
-				if(Type.is(arguments[0], Person)) {
+				if(Type.isInstance(arguments[0], Person)) {
 					return Greetings.prototype.__ks_func_greet_1.apply(this, arguments);
 				}
 				else {

@@ -47,6 +47,14 @@ class TemplateExpression extends Expression {
 				}
 			}
 		}
+		else if @elements.length == 1 {
+			if @types[0] {
+				@elements[0].toStringFragments(fragments)
+			}
+			else {
+				fragments.code('"" + ').wrap(@elements[0])
+			}
+		}
 		else {
 			for const element, index in @elements {
 				if index == 0 {

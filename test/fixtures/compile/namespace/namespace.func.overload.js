@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Util = (function() {
+	let Util = Helper.namespace(function() {
 		function reverse() {
 			if(arguments.length === 1 && Type.isString(arguments[0])) {
 				let __ks_i = -1;
@@ -31,7 +31,7 @@ module.exports = function() {
 		return {
 			reverse: reverse
 		};
-	})();
+	});
 	const foo = Util.reverse("hello");
 	console.log(foo);
 	return {

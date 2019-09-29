@@ -22,15 +22,14 @@ const $switch = {
 
 class SwitchStatement extends Statement {
 	private {
-		_clauses	= []
-		_name
-		_value		= null
+		_castingEnum: Boolean	= false
+		_clauses				= []
+		_name: String?			= null
+		_value					= null
+		_valueType: Type
 	}
 	analyse() { // {{{
-		if @data.expression.kind == NodeKind::Identifier {
-			@name = @data.expression.name
-		}
-		else {
+		if @data.expression.kind != NodeKind::Identifier {
 			@value = $compile.expression(@data.expression, this)
 			@value.analyse()
 		}
@@ -102,20 +101,36 @@ class SwitchStatement extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		if @value != null {
+		if @value == null {
+			@valueType = @scope.getVariable(@data.expression.name).getRealType()
+		}
+		else {
 			@value.prepare()
 
 			@name = @scope.acquireTempName(false)
+			@valueType = @value.type()
 		}
 
+		const enumValue = @valueType.isEnum()
+
 		const inferables = {}
+		let enumConditions = 0
+		let maxConditions = 0
 
 		for const clause, index in @clauses {
-			for condition in clause.conditions {
+			let nf = true
+
+			for const condition in clause.conditions {
 				condition.prepare()
+
+				if condition.isEnum() {
+					++enumConditions
+				}
+
+				++maxConditions
 			}
 
-			for binding in clause.bindings {
+			for const binding in clause.bindings {
 				binding.prepare()
 			}
 
@@ -147,12 +162,36 @@ class SwitchStatement extends Statement {
 			}
 		}
 
+		if enumConditions != 0 || enumValue {
+			if enumValue && enumConditions == maxConditions {
+				// do nothing
+			}
+			else {
+				for const clause in @clauses {
+					for const condition in clause.conditions {
+						condition.setCastingEnum(true)
+					}
+				}
+
+				if enumValue || @valueType.isAny() {
+					@castingEnum = true
+
+					if @name == null {
+						@name = @scope.acquireTempName(false)
+					}
+				}
+			}
+		}
+
 		for const inferable, name of inferables when inferable.count == @clauses.length {
 			@scope.updateInferable(name, inferable.data, this)
 		}
 
-		if @value != null {
+		if @name != null {
 			@scope.releaseTempName(@name)
+		}
+		else {
+			@name = @data.expression.name
 		}
 	} // }}}
 	translate() { // {{{
@@ -213,11 +252,30 @@ class SwitchStatement extends Statement {
 		}
 
 		if @value != null {
-			fragments
-				.newLine()
-				.code($runtime.scope(this), @name, ' = ')
-				.compile(@value)
-				.done()
+			const line = fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value)
+
+			if @castingEnum {
+				if @valueType.isEnum() {
+					line.code('.value')
+				}
+				else if @valueType.isAny() {
+					line.code('.valueOf()')
+				}
+			}
+
+			line.done()
+		}
+		else if @castingEnum {
+			const line = fragments.newLine().code($runtime.scope(this), @name, ' = ', @data.expression.name)
+
+			if @valueType.isEnum() {
+				line.code('.value')
+			}
+			else if @valueType.isAny() {
+				line.code('.valueOf()')
+			}
+
+			line.done()
 		}
 
 		let condition
@@ -392,6 +450,7 @@ class SwitchConditionArray extends AbstractNode {
 			value.translate()
 		}
 	} // }}}
+	isEnum() => false
 	toBooleanFragments(fragments, name) { // {{{
 		this.module().flag('Type')
 
@@ -504,6 +563,7 @@ class SwitchConditionRange extends AbstractNode {
 		@left.translate()
 		@right.translate()
 	} // }}}
+	isEnum() => false
 	toBooleanFragments(fragments, name) { // {{{
 		fragments
 			.code(name, @from ? ' >= ' : '>')
@@ -525,6 +585,7 @@ class SwitchConditionType extends AbstractNode {
 		@type = Type.fromAST(@data.type, this)
 	} // }}}
 	translate()
+	isEnum() => false
 	toBooleanFragments(fragments, name) { // {{{
 		@type.toTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
 	} // }}}
@@ -533,7 +594,9 @@ class SwitchConditionType extends AbstractNode {
 
 class SwitchConditionValue extends AbstractNode {
 	private {
+		_castingEnum: Boolean	= false
 		_value
+		_type: Type
 	}
 	analyse() { // {{{
 		@value = $compile.expression(@data, this)
@@ -541,14 +604,25 @@ class SwitchConditionValue extends AbstractNode {
 	} // }}}
 	prepare() { // {{{
 		@value.prepare()
+
+		@type = @value.type()
 	} // }}}
 	translate() { // {{{
 		@value.translate()
 	} // }}}
+	isEnum() => @type.isEnum()
+	setCastingEnum(@castingEnum)
 	toBooleanFragments(fragments, name) { // {{{
-		fragments
-			.code(name, ' === ')
-			.compile(@value)
+		fragments.code(name, ' === ').compile(@value)
+
+		if @castingEnum {
+			if @type.isEnum() {
+				fragments.code('.value')
+			}
+			else if @type.isAny() {
+				fragments.code('.valueOf()')
+			}
+		}
 	} // }}}
 	toStatementFragments(fragments) { // {{{
 	} // }}}

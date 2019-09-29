@@ -1,9 +1,9 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Parser = (function() {
-		let Token = {
+	let Parser = Helper.namespace(function() {
+		let Token = Helper.enum(Number, {
 			INVALID: 0
-		};
+		});
 		class Scanner {
 			constructor() {
 				this.__ks_init();
@@ -49,7 +49,7 @@ module.exports = function() {
 			}
 		}
 		return {};
-	})();
+	});
 	return {
 		Parser: Parser
 	};

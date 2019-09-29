@@ -36,10 +36,8 @@ class CreateExpression extends Expression {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
 			else {
-				const arguments = [argument.type() for argument in @arguments]
-
-				if !type.type().matchArguments(arguments) {
-					ReferenceException.throwNoMatchingConstructor(type.name(), arguments, this)
+				if !type.type().matchArguments(@arguments) {
+					ReferenceException.throwNoMatchingConstructor(type.name(), @arguments, this)
 				}
 			}
 

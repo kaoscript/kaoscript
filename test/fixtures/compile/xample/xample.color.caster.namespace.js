@@ -1,10 +1,10 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var Float = require("../_/_float.ks")().Float;
 	var {Math, __ks_Math} = require("../_/_math.ks")();
 	var {Number, __ks_Number} = require("../_/_number.ks")();
-	let $caster = (function() {
+	let $caster = Helper.namespace(function() {
 		function percentage(n) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
@@ -17,7 +17,7 @@ module.exports = function() {
 		return {
 			percentage: percentage
 		};
-	})();
+	});
 	function srgb(that, color) {
 		if(arguments.length < 2) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");

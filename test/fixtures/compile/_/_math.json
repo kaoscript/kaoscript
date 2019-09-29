@@ -14,6 +14,24 @@
       "sealed": true,
       "exhaustive": true,
       "properties": {
+        "abs": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": "Infinity",
+          "parameters": [
+            {
+              "type": "Any",
+              "min": 0,
+              "max": "Infinity",
+              "default": 0
+            }
+          ],
+          "returns": "Number",
+          "throws": [],
+          "sealed": false
+        },
         "max": {
           "kind": "function",
           "async": false,

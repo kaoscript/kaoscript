@@ -4,7 +4,7 @@ module.exports = function() {
 		console.log("foobar");
 	}
 	catch(__ks_0) {
-		if(Type.is(__ks_0, RangeError)) {
+		if(Type.isInstance(__ks_0, RangeError)) {
 			let error = __ks_0;
 			console.log("RangeError", error);
 		}

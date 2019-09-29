@@ -13,7 +13,7 @@ class EnumType extends Type {
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const type = new EnumType(scope, data.type)
+			const type = new EnumType(scope, EnumTypeKind.from(data.type))
 
 			type._exhaustive = data.exhaustive
 			type._elements = data.elements
@@ -22,7 +22,7 @@ class EnumType extends Type {
 			return type
 		} // }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const type = new EnumType(scope, data.type)
+			const type = new EnumType(scope, EnumTypeKind.from(data.type))
 
 			type._exhaustive = data.exhaustive
 			type._elements = data.elements
@@ -66,6 +66,15 @@ class EnumType extends Type {
 
 		return false
 	} // }}}
+	getProperty(name: String) { // {{{
+		if name == 'value' {
+			return @type
+		}
+		else {
+			return null
+		}
+	} // }}}
+	hasProperty(name: String) => name == 'value'
 	index() => @index
 	index(@index)
 	isEnum() => true
@@ -81,8 +90,9 @@ class EnumType extends Type {
 		else if value is ReferenceType && value.name() == 'Enum' {
 			return true
 		}
-
-		return false
+		else {
+			return false
+		}
 	} // }}}
 	step() => ++@index
 	toFragments(fragments, node) { // {{{
@@ -91,5 +101,4 @@ class EnumType extends Type {
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	type() => @type
 }

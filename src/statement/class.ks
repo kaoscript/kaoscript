@@ -390,43 +390,48 @@ class ClassDeclaration extends Statement {
 		}
 	} // }}}
 	addReference(type, node) { // {{{
-		if !type.isAny() {
-			if type is ReferenceType {
-				const name = type.name()
+		if type is AnyType {
+			// do nothing
+		}
+		else if type is ReferenceType {
+			const name = type.name()
 
-				if !?@references[name] {
-					if $typeofs[name] == true {
-						@references[name] = {
-							status: TypeStatus::Native
-							type: type
-						}
+			if name == 'Any' {
+				// do nothing
+			}
+			else if !?@references[name] {
+				if $typeofs[name] == true {
+					@references[name] = {
+						status: TypeStatus::Native
+						type: type
 					}
-					else if variable ?= @scope.getVariable(name) {
-						@references[name] = {
-							status: TypeStatus::Referenced
-							type: type
-							variable: variable
-						}
+				}
+				else if variable ?= @scope.getVariable(name) {
+					@references[name] = {
+						status: TypeStatus::Referenced
+						type: type
+						variable: variable
 					}
-					else {
-						@references[name] = {
-							status: TypeStatus::Unreferenced
-							type: type
-						}
+				}
+				else {
+					@references[name] = {
+						status: TypeStatus::Unreferenced
+						type: type
 					}
 				}
 			}
-			else if type is UnionType {
-				for let type in type.types() {
-					this.addReference(type, node)
-				}
+		}
+		else if type is UnionType {
+			for let type in type.types() {
+				this.addReference(type, node)
 			}
-			else if type is ClassVariableType {
-				this.addReference(type.type(), node)
-			}
-			else {
-				throw new NotImplementedException(this)
-			}
+		}
+		else if type is ClassVariableType {
+			this.addReference(type.type(), node)
+		}
+		else {
+			console.log(type)
+			throw new NotImplementedException(this)
 		}
 	} // }}}
 	export(recipient) { // {{{
@@ -1475,7 +1480,7 @@ class ClassMethodDeclaration extends Statement {
 
 			if @parent.isExtending() {
 				const extends = @parent.extends().type()
-				if const method = extends.getInstanceMethod(@name, arguments) ?? extends.getAbstractMethod(@name, @type) {
+				if const method = extends.getInstanceMethod(@name, @parameters) ?? extends.getAbstractMethod(@name, @type) {
 					if @data.type? {
 						if !@type.returnType().isInstanceOf(method.returnType()) {
 							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)

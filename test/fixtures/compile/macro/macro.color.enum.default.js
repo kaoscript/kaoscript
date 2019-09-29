@@ -1,8 +1,9 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
-	let Space = {
+	let Space = Helper.enum(String, {
 		RGB: "rgb",
 		SRGB: "srgb"
-	};
+	});
 	class Color {
 		constructor() {
 			this.__ks_init();

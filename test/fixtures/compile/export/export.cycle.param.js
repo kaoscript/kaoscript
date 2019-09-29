@@ -19,7 +19,7 @@ module.exports = function() {
 			if(b === void 0 || b === null) {
 				throw new TypeError("'b' is not nullable");
 			}
-			else if(!Type.is(b, Foo)) {
+			else if(!Type.isInstance(b, Foo)) {
 				throw new TypeError("'b' is not of type 'Foo'");
 			}
 		}

@@ -1,11 +1,11 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let CardSuit = {
+	let CardSuit = Helper.enum(String, {
 		Clubs: "clubs",
 		Diamonds: "diamonds",
 		Hearts: "hearts",
 		Spades: "spades"
-	};
+	});
 	function foobar(x) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
@@ -17,7 +17,7 @@ module.exports = function() {
 			throw new TypeError("'x' is not of type 'String'");
 		}
 	}
-	foobar(CardSuit.Hearts);
+	foobar(CardSuit.Hearts.value);
 	function quxbaz(x, y) {
 		if(arguments.length < 2) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
@@ -25,13 +25,13 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.is(x, CardSuit)) {
+		else if(!Type.isEnumMember(x, CardSuit)) {
 			throw new TypeError("'x' is not of type 'CardSuit'");
 		}
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		else if(!Type.is(y, CardSuit)) {
+		else if(!Type.isEnumMember(y, CardSuit)) {
 			throw new TypeError("'y' is not of type 'CardSuit'");
 		}
 		return x + y;

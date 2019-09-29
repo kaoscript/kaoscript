@@ -40,7 +40,9 @@ const $typeofs = { // {{{
 	Array: true
 	Boolean: true
 	Class: true
+	Enum: true
 	Function: true
+	Namespace: true
 	Number: true
 	Object: true
 	RegExp: true
@@ -242,15 +244,11 @@ const $compile = {
 	expression(data, parent, scope = parent.scope()) { // {{{
 		let expression
 
-		let clazz = $expressions[data.kind]
-		if clazz? {
+		if const clazz = $expressions[data.kind] {
 			expression = clazz is Class ? new clazz(data, parent, scope) : clazz(data, parent, scope)
 		}
 		else if data.kind == NodeKind::BinaryExpression {
-			if clazz ?= $binaryOperators[data.operator.kind] {
-				expression = new clazz(data, parent, scope)
-			}
-			else if data.operator.kind == BinaryOperatorKind::Assignment {
+			if data.operator.kind == BinaryOperatorKind::Assignment {
 				if clazz = $assignmentOperators[data.operator.assignment] {
 					expression = new clazz(data, parent, scope)
 				}
@@ -258,12 +256,15 @@ const $compile = {
 					throw new NotSupportedException(`Unexpected assignment operator \(data.operator.assignment)`, parent)
 				}
 			}
+			else if const clazz = $binaryOperators[data.operator.kind] {
+				expression = new clazz(data, parent, scope)
+			}
 			else {
 				throw new NotSupportedException(`Unexpected binary operator \(data.operator.kind)`, parent)
 			}
 		}
 		else if data.kind == NodeKind::PolyadicExpression {
-			if clazz ?= $polyadicOperators[data.operator.kind] {
+			if const clazz = $polyadicOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
 			else {
@@ -271,7 +272,7 @@ const $compile = {
 			}
 		}
 		else if data.kind == NodeKind::UnaryExpression {
-			if clazz ?= $unaryOperators[data.operator.kind] {
+			if const clazz = $unaryOperators[data.operator.kind] {
 				expression = new clazz(data, parent, scope)
 			}
 			else {

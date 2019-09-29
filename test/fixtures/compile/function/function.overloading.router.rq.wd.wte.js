@@ -1,4 +1,4 @@
-var {Operator, Type} = require("@kaoscript/runtime");
+var {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		if((arguments.length === 2 && Type.isNumber(arguments[1])) || (arguments.length === 3 && Type.isNumber(arguments[2]))) {
@@ -33,7 +33,7 @@ module.exports = function() {
 			else if(!Type.isString(z)) {
 				throw new TypeError("'z' is not of type 'String'");
 			}
-			return x.times(y) + z;
+			return Helper.concatString(x.times(y), z);
 		}
 		else {
 			throw new SyntaxError("Wrong number of arguments");

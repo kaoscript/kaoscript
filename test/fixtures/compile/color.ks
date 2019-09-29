@@ -710,7 +710,7 @@ export class Color {
 
 		for component, name of components {
 			if component.loop {
-				d = Math.abs(this[component.field] - color[component.field])
+				let d = Math.abs(this[component.field] - color[component.field])
 
 				if d > component.half {
 					d = component.mod - d

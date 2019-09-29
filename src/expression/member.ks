@@ -9,7 +9,7 @@ class MemberExpression extends Expression {
 		_prepareObject: Boolean	= true
 		_property
 		_tested: Boolean		= false
-		_type: Type				= Type.Any
+		_type: Type				= AnyType.NullableUnexplicit
 	}
 	constructor(@data, @parent, @scope) { // {{{
 		super(data, parent, scope)

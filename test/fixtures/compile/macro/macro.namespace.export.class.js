@@ -1,5 +1,6 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
-	let NS = (function() {
+	let NS = Helper.namespace(function() {
 		class Foobar {
 			constructor() {
 				this.__ks_init();
@@ -19,7 +20,7 @@ module.exports = function() {
 		return {
 			Foobar: Foobar
 		};
-	})();
+	});
 	function foo() {
 		return "42";
 	}
