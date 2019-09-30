@@ -89,7 +89,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	prepare() { // {{{
 		super()
 
-		if @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+		if this.isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
 			@isEnum = true
 
 			@type = @left.type()
@@ -120,11 +120,12 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	translate() { // {{{
 		super()
 
-		if @isEnum && (@parent.type().isBoolean() || (@parent.type().isEnum() && @left.type().name() == @parent.type().name())) {
+		if @isEnum && (@parent.type().isBoolean() || (@parent.type().isEnum() && @type.name() == @parent.type().name())) {
 			@isEnum = false
 			@isNative = true
 		}
 	} // }}}
+	isAcceptingEnum() => false
 	isComputed() => @isNative
 	abstract operator(): Operator
 	abstract runtime(): String
@@ -314,6 +315,7 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 }
 
 class BinaryOperatorBitwiseAnd extends NumericBinaryOperatorExpression {
+	isAcceptingEnum() => true
 	operator() => Operator::BitwiseAnd
 	runtime() => 'bitwiseAnd'
 	symbol() => '&'
@@ -326,6 +328,7 @@ class BinaryOperatorBitwiseLeftShift extends NumericBinaryOperatorExpression {
 }
 
 class BinaryOperatorBitwiseOr extends NumericBinaryOperatorExpression {
+	isAcceptingEnum() => true
 	operator() => Operator::BitwiseOr
 	runtime() => 'bitwiseOr'
 	symbol() => '|'

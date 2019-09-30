@@ -46,3 +46,5 @@ abilities |= AnimalFlags::HasClaws | AnimalFlags::CanFly
 printAnimalAbilities(abilities)
 
 printAnimalAbilities(AnimalFlags::HasClaws | AnimalFlags::CanFly)
+
+printAnimalAbilities(AnimalFlags::HasClaws | AnimalFlags::CanFly | AnimalFlags::Endangered)

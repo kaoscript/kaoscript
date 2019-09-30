@@ -50,4 +50,5 @@ module.exports = function() {
 	abilities = AnimalFlags(abilities | AnimalFlags.HasClaws | AnimalFlags.CanFly);
 	printAnimalAbilities(abilities);
 	printAnimalAbilities(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly));
+	printAnimalAbilities(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered));
 };

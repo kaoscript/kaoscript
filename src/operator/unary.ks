@@ -26,7 +26,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 	prepare() { // {{{
 		super()
 
-		if @argument.type().isEnum() {
+		if this.isAcceptingEnum() && @argument.type().isEnum() {
 			@isEnum = true
 
 			@type = @argument.type()
@@ -46,6 +46,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 			@type = @scope.reference('Number')
 		}
 	} // }}}
+	isAcceptingEnum() => false
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
@@ -65,6 +66,7 @@ abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorBitwiseNot extends NumericUnaryOperatorExpression {
+	isAcceptingEnum() => true
 	operator() => Operator::BitwiseNot
 	runtime() => 'bitwiseNot'
 	symbol() => '~'

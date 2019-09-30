@@ -614,6 +614,7 @@ class FunctionType extends Type {
 		}
 		else if value is FunctionType {
 			return (@missingParameters || this.matchParametersOf(value._parameters, matchables)) && (@missingReturn || @returnType.matchSignatureOf(value._returnType, matchables))
+			// return this.isMatching(value, MatchingMode::MissingParameter | MatchingMode::SimilarParameter | MatchingMode::ShiftableParameter | MatchingMode::MissingReturn | MatchingMode::SimilarReturn)
 		}
 		else if value is OverloadedFunctionType {
 			throw new NotImplementedException()

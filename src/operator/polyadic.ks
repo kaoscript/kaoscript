@@ -87,34 +87,64 @@ class PolyadicOperatorExpression extends Expression {
 
 abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpression {
 	private {
+		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
 	}
 	prepare() { // {{{
 		super()
 
-		let nullable = false
+		if this.isAcceptingEnum() && @operands[0].type().isEnum() {
+			const name = @operands[0].type().name()
 
-		@isNative = true
+			@isEnum = true
 
-		for const operand in @operands {
-			if operand.type().isNullable() {
-				nullable = true
-				@isNative = false
+			for const operand in @operands from 1 {
+				if !operand.type().isEnum() || operand.type().name() != name {
+					@isEnum = false
+
+					break
+				}
 			}
 
-			if operand.type().isNumber() {
-			}
-			else if operand.type().canBeNumber() {
-				@isNative = false
-			}
-			else {
-				TypeException.throwInvalidOperand(operand, this.operator(), this)
+			if @isEnum {
+				@type = @operands[0].type()
 			}
 		}
 
-		@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+		if !@isEnum {
+			let nullable = false
+
+			@isNative = true
+
+			for const operand in @operands {
+				if operand.type().isNullable() {
+					nullable = true
+					@isNative = false
+				}
+
+				if operand.type().isNumber() {
+				}
+				else if operand.type().canBeNumber() {
+					@isNative = false
+				}
+				else {
+					TypeException.throwInvalidOperand(operand, this.operator(), this)
+				}
+			}
+
+			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+		}
 	} // }}}
+	translate() { // {{{
+		super()
+
+		if @isEnum && (@parent.type().isBoolean() || (@parent.type().isEnum() && @type.name() == @parent.type().name())) {
+			@isEnum = false
+			@isNative = true
+		}
+	} // }}}
+	isAcceptingEnum() => false
 	isComputed() => @isNative
 	abstract operator(): Operator
 	abstract runtime(): String
@@ -143,7 +173,14 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 	} // }}}
 	toOperatorFragments(fragments) { // {{{
-		if @isNative {
+		if @isEnum {
+			fragments.code(@type.name(), '(')
+
+			this.toNativeFragments(fragments)
+
+			fragments.code(')')
+		}
+		else if @isNative {
 			this.toNativeFragments(fragments)
 		}
 		else {
@@ -379,6 +416,7 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorBitwiseAnd extends NumericPolyadicOperatorExpression {
+	isAcceptingEnum() => true
 	operator() => Operator::BitwiseAnd
 	runtime() => 'bitwiseAnd'
 	symbol() => '&'
@@ -391,6 +429,7 @@ class PolyadicOperatorBitwiseLeftShift extends NumericPolyadicOperatorExpression
 }
 
 class PolyadicOperatorBitwiseOr extends NumericPolyadicOperatorExpression {
+	isAcceptingEnum() => true
 	operator() => Operator::BitwiseOr
 	runtime() => 'bitwiseOr'
 	symbol() => '|'

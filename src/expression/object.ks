@@ -75,6 +75,14 @@ class ObjectExpression extends Expression {
 		}
 	} // }}}
 	isComputed() => true
+	isMatchingType(type: Type) { // {{{
+		if @properties.length == 0 {
+			return type.isAny() || type.isObject()
+		}
+		else {
+			return @type.matchContentOf(type)
+		}
+	} // }}}
 	isUsingVariable(name) { // {{{
 		for const property in @properties {
 			if property.isUsingVariable(name) {

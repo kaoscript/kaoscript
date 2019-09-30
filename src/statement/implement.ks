@@ -284,9 +284,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					SyntaxException.throwNotSealedOverwrite(this)
 				}
 
-				// const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameter | MatchingMode::ShiftableParameter)
-				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::ShiftableParameter)
-				// console.log(methods)
+				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameter | MatchingMode::ShiftableParameter)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}

@@ -82,7 +82,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 	prepare() { // {{{
 		super()
 
-		if this.isEnumAppliable() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+		if this.isAcceptingEnum() && @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
 			@isEnum = true
 
 			@type = @left.type()
@@ -115,7 +115,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 		}
 	} // }}}
 	getBinarySymbol() => ''
-	isEnumAppliable() => false
+	isAcceptingEnum() => false
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
@@ -242,7 +242,7 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 
 class AssignmentOperatorBitwiseAnd extends NumericAssignmentOperatorExpression {
 	getBinarySymbol() => '&'
-	isEnumAppliable() => true
+	isAcceptingEnum() => true
 	operator() => Operator::BitwiseAnd
 	runtime() => 'bitwiseAnd'
 	symbol() => '&='
@@ -256,7 +256,7 @@ class AssignmentOperatorBitwiseLeftShift extends NumericAssignmentOperatorExpres
 
 class AssignmentOperatorBitwiseOr extends NumericAssignmentOperatorExpression {
 	getBinarySymbol() => '|'
-	isEnumAppliable() => true
+	isAcceptingEnum() => true
 	operator() => Operator::BitwiseOr
 	runtime() => 'bitwiseOr'
 	symbol() => '|='
