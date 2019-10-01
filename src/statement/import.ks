@@ -154,7 +154,7 @@ class Importer extends Statement {
 
 					const type = @worker.getType(name)
 
-					if def.type != null && !type.matchSignatureOf(def.type, matchables) {
+					if def.type != null && !type.isMatching(def.type, MatchingMode::Signature) {
 						TypeException.throwNotCompatibleDefinition(def.local, name, @data.source.value, this)
 					}
 
@@ -164,7 +164,7 @@ class Importer extends Statement {
 					else if !variable.isPredefined() && @argumentValues[def.local] is not Number {
 						ReferenceException.throwNotPassed(def.local, @data.source.value, this)
 					}
-					else if type.matchSignatureOf(variable.getDeclaredType(), matchables) {
+					else if type.isMatching(variable.getDeclaredType(), MatchingMode::Signature) {
 						const alien = variable.getDeclaredType().isAlien()
 
 						variable.setDeclaredType(def.type ?? type)
@@ -1007,7 +1007,7 @@ class ImportWorker {
 			for i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
-				if (argument ?= arguments[name]) && !argument.required && !reqReferences[@metadata.requirements[i]].isAny() && !argument.type.matchSignatureOf(reqReferences[@metadata.requirements[i]], matchables) {
+				if (argument ?= arguments[name]) && !argument.required && !reqReferences[@metadata.requirements[i]].isAny() && !argument.type.isMatching(reqReferences[@metadata.requirements[i]], MatchingMode::Signature) {
 					TypeException.throwNotCompatibleArgument(argument.name, name, @node.data().source.value, @node)
 				}
 			}

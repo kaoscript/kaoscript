@@ -47,9 +47,6 @@ class EnumType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?) { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	export(references, mode) => { // {{{
 		kind: TypeKind::Enum
 		exhaustive: this.isExhaustive()
@@ -78,22 +75,19 @@ class EnumType extends Type {
 	index() => @index
 	index(@index)
 	isEnum() => true
+	isMatching(value: EnumType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
+	isMatching(value: ReferenceType, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Similar != 0 {
+			return value.name() == 'Enum'
+		}
+
+		return false
+	} // }}}
 	isMergeable(type) => type.isEnum()
 	isNumber() => @type.isNumber()
 	isString() => @type.isString()
 	kind() => @kind
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
-	matchSignatureOf(value: Type, matchables): Boolean { // {{{
-		if value is EnumType {
-			return true
-		}
-		else if value is ReferenceType && value.name() == 'Enum' {
-			return true
-		}
-		else {
-			return false
-		}
-	} // }}}
 	step() => ++@index
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()

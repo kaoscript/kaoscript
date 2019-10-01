@@ -53,16 +53,22 @@ enum MatchingMode {
 	Default
 
 	Exact
-	ExactParameter
+	ExactParameters
 	ExactReturn
 	Similar
-	SimilarParameter
+	SimilarParameters
 	SimilarReturn
 
-	MissingParameter
+	MissingParameters
 	MissingReturn
 
-	ShiftableParameter
+	MissingType
+	MissingParameterType
+
+	ShiftableParameters
+	RequireAllParameters
+
+	Signature = Similar | MissingParameters | ShiftableParameters | MissingParameterType | RequireAllParameters | MissingReturn
 }
 
 #[flags]
@@ -477,7 +483,6 @@ abstract class Type {
 	}
 	constructor(@scope)
 	abstract clone(): Type
-	abstract equals(b?): Boolean
 	abstract export(references, mode)
 	abstract toFragments(fragments, node)
 	abstract toTestFragments(fragments, node)
@@ -489,6 +494,7 @@ abstract class Type {
 	discardName(): Type => this
 	discardReference(): Type? => this
 	discardVariable() => this
+	equals(value?): Boolean => value? && this.isMatching(value, MatchingMode::Exact)
 	flagAlien() { // {{{
 		@alien = true
 
@@ -551,6 +557,7 @@ abstract class Type {
 	isFlexible() => false
 	isFunction() => false
 	isHybrid() => false
+	isMatching(value, mode: MatchingMode) => false
 	isMergeable(type) => false
 	isMethod() => false
 	isMorePreciseThan(that: Type): Boolean => false
@@ -572,7 +579,6 @@ abstract class Type {
 	isUnion() => false
 	isVoid() => false
 	matchContentOf(that: Type?): Boolean => this.equals(that)
-	matchSignatureOf(that: Type, matchables): Boolean => false
 	reduce(type: Type) => this
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex

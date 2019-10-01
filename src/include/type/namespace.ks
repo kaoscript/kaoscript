@@ -121,9 +121,6 @@ class NamespaceType extends Type {
 
 		return this
 	} // }}}
-	equals(b?) { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	export(references, mode) { // {{{
 		if @alterationReference? {
 			const export = {
@@ -190,23 +187,19 @@ class NamespaceType extends Type {
 	} // }}}
 	isExtendable() => true
 	isFlexible() => @sealed
+	isMatching(value: NamespaceType, mode: MatchingMode) { // {{{
+		for const property, name of value._properties {
+			if !@properties[name]?.isMatching(property, mode) {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
 	isNamespace() => true
 	isSealable() => true
 	isSealedProperty(name: String) => @sealed && @sealProperties[name] == true
 	matchContentOf(that: Type) => that is ReferenceType && that.isNamespace()
-	matchSignatureOf(that, matchables) { // {{{
-		if that is NamespaceType {
-			for const property, name of that._properties {
-				if !@properties[name]?.matchSignatureOf(property, matchables) {
-					return false
-				}
-			}
-
-			return true
-		}
-
-		return false
-	} // }}}
 	setAlterationReference(@alterationReference) { // {{{
 		@alteration = true
 	} // }}}
@@ -236,14 +229,6 @@ class NamespacePropertyType extends Type {
 	} // }}}
 	clone() { // {{{
 		throw new NotSupportedException()
-	} // }}}
-	equals(b?) { // {{{
-		if b is NamespacePropertyType {
-			return @type.equals(b.type())
-		}
-		else {
-			return false
-		}
 	} // }}}
 	export(references, mode) { // {{{
 		let export
@@ -286,14 +271,15 @@ class NamespacePropertyType extends Type {
 		return this
 	} // }}}
 	isAlteration() => @alteration
-	isSealed() => @type.isSealed()
-	matchSignatureOf(b: Type, matchables): Boolean { // {{{
-		if b is NamespacePropertyType {
+	isMatching(value: NamespacePropertyType, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Exact != 0 {
+			return @type.isMatching(value.type(), MatchingMode::Exact)
+		}
+		else {
 			return true
 		}
-
-		return false
 	} // }}}
+	isSealed() => @type.isSealed()
 	toExportOrIndex(references, mode) { // {{{
 		if @type.isSealable() {
 			return @type.toExportOrIndex(references, mode)

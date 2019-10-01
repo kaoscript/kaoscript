@@ -5,12 +5,13 @@ class NullType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?): Boolean => b is NullType
 	export(references, mode)
 	getProperty(name) => Type.Any
 	isInstanceOf(target: Type) => true
 	isMorePreciseThan(type: Type) => type.isAny() || type.isNullable()
 	isAny() => true
+	isMatching(value: NullType, mode: MatchingMode) => true
+	isMatching(value: Type, mode: MatchingMode) => false
 	isNull() => true
 	isNullable() => true
 	matchContentOf(type: Type) => type.isAny() || type.isNullable()

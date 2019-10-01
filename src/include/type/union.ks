@@ -105,23 +105,6 @@ class UnionType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?): Boolean { // {{{
-		if !?b || b is not UnionType || @types.length != b._types.length {
-			return false
-		}
-
-		let match = 0
-		for aType in @types {
-			for bType in b._types {
-				if aType.equals(bType) {
-					match++
-					break
-				}
-			}
-		}
-
-		return match == @types.length
-	} // }}}
 	export(references, mode) => [type.toReference(references, mode) for type in @types]
 	flagExported(explicitly: Boolean) { // {{{
 		if @exported {

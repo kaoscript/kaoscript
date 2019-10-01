@@ -8,9 +8,6 @@ class ArrayType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?) { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Array
@@ -26,11 +23,8 @@ class ArrayType extends Type {
 	} // }}}
 	getElement(index: Number): Type => index >= @elements.length ? Type.Any : @elements[index]
 	isArray() => true
-	isNullable() => false
-	isSealable() => true
-	length() => @elements.length
-	matchSignatureOf(value, matchables) { // {{{
-		if value is not ArrayType || this.length() != value.length() {
+	isMatching(value: ArrayType, mode: MatchingMode) { // {{{
+		if this.length() != value.length() {
 			return false
 		}
 
@@ -39,13 +33,16 @@ class ArrayType extends Type {
 		}
 
 		for const element, index in value._elements {
-			unless @elements[index].matchSignatureOf(element, matchables) {
+			unless @elements[index].isMatching(element, mode) {
 				return false
 			}
 		}
 
 		return true
 	} // }}}
+	isNullable() => false
+	isSealable() => true
+	length() => @elements.length
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}

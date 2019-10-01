@@ -462,9 +462,6 @@ class ClassType extends Type {
 		return this.addInstanceMethod(name, type)
 	} // }}}
 	destructors() => @destructors
-	equals(b?): Boolean { // {{{
-		return this == b
-	} // }}}
 	export(references, mode) { // {{{
 		const exhaustive = this.isExhaustive()
 
@@ -659,7 +656,7 @@ class ClassType extends Type {
 		let method, index
 		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
-				if method.isMatched(@instanceMethods[name], matchables) {
+				if method.isMatched(@instanceMethods[name], MatchingMode::Signature) {
 					methods.splice(index, 1)
 				}
 			}
@@ -702,7 +699,7 @@ class ClassType extends Type {
 	getAbstractMethod(name: String, type: Type) { // {{{
 		if @abstractMethods[name] is Array {
 			for method in @abstractMethods[name] {
-				if type.matchSignatureOf(method, []) {
+				if type.isMatching(method, MatchingMode::Signature) {
 					return method
 				}
 			}
@@ -1090,6 +1087,57 @@ class ClassType extends Type {
 			return false
 		}
 	} // }}}
+	isMatching(value: ClassType, mode: MatchingMode) { // {{{
+		if this == value {
+			return true
+		}
+		if mode & MatchingMode::Exact != 0 {
+			return false
+		}
+
+		for const variable, name of value._instanceVariables {
+			if !@instanceVariables[name]?.isMatching(variable, mode) {
+				return false
+			}
+		}
+
+		for const variable, name of value._classVariables {
+			if !@classVariables[name]?.isMatching(variable, mode) {
+				return false
+			}
+		}
+
+		for const methods, name of value._instanceMethods {
+			if @instanceMethods[name] is not Array {
+				return false
+			}
+
+			for method in methods {
+				if !method.isMatched(@instanceMethods[name], MatchingMode::Signature) {
+					return false
+				}
+			}
+		}
+
+		for const methods, name of value._classMethods {
+			if @classMethods[name] is not Array {
+				return false
+			}
+
+			for method in methods {
+				if !method.isMatched(@classMethods[name], MatchingMode::Signature) {
+					return false
+				}
+			}
+		}
+
+		return true
+	} // }}}
+	isMatching(value: NamedType, mode: MatchingMode) { // {{{
+		return this.isMatching(value.type(), mode)
+	} // }}}
+	// ↓↓↓ to remove, should use super method
+	isMatching(value, mode: MatchingMode) => false
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true
@@ -1142,7 +1190,7 @@ class ClassType extends Type {
 		let method, index
 		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
-				if method.isMatched(@instanceMethods[name], matchables) {
+				if method.isMatched(@instanceMethods[name], MatchingMode::Signature) {
 					methods.splice(index, 1)
 				}
 			}
@@ -1175,13 +1223,13 @@ class ClassType extends Type {
 	} // }}}
 	matchInstanceWith(object: ObjectType, matchables) { // {{{
 		for const property, name of object._properties {
-			if @instanceVariables[name]?.matchSignatureOf(property, matchables) {
+			if @instanceVariables[name]?.isMatching(property, MatchingMode::Signature) {
 			}
 			else if @instanceMethods[name] is Array {
 				let nf = true
 
 				for method in @instanceMethods[name] while nf {
-					if method.matchSignatureOf(property, matchables) {
+					if method.isMatching(property, MatchingMode::Signature) {
 						nf = false
 					}
 				}
@@ -1197,62 +1245,6 @@ class ClassType extends Type {
 
 		return true
 	} // }}}
-	matchSignatureOf(that, matchables) => false
-	matchSignatureOf(that: ClassType, matchables) { // {{{
-		for i from 0 til matchables.length by 3 {
-			if matchables[i] == this && matchables[i + 1] == that {
-				return matchables[i + 2]
-			}
-		}
-
-		const index = matchables.length
-		matchables.push(this, that, true)
-
-		for const variable, name of that._instanceVariables {
-			if !@instanceVariables[name]?.matchSignatureOf(variable, matchables) {
-				matchables[index + 2] = false
-				return false
-			}
-		}
-
-		for const variable, name of that._classVariables {
-			if !@classVariables[name]?.matchSignatureOf(variable, matchables) {
-				matchables[index + 2] = false
-				return false
-			}
-		}
-
-		for const methods, name of that._instanceMethods {
-			if @instanceMethods[name] is not Array {
-				matchables[index + 2] = false
-				return false
-			}
-
-			for method in methods {
-				if !method.isMatched(@instanceMethods[name], matchables) {
-					matchables[index + 2] = false
-					return false
-				}
-			}
-		}
-
-		for const methods, name of that._classMethods {
-			if @classMethods[name] is not Array {
-				matchables[index + 2] = false
-				return false
-			}
-
-			for method in methods {
-				if !method.isMatched(@classMethods[name], matchables) {
-					matchables[index + 2] = false
-					return false
-				}
-			}
-		}
-
-		return true
-	} // }}}
-	matchSignatureOf(that: NamedType, matchables) => this.matchSignatureOf(that.type(), matchables)
 	metaReference(references, name, mode) { // {{{
 		if @predefined {
 			return name
@@ -1348,14 +1340,6 @@ class ClassVariableType extends Type {
 		throw new NotSupportedException()
 	} // }}}
 	discardVariable() => @type
-	equals(b?) { // {{{
-		if b is ClassVariableType {
-			return @type.equals(b.type())
-		}
-		else {
-			return false
-		}
-	} // }}}
 	access(@access) => this
 	export(references, mode) => { // {{{
 		access: @access
@@ -1367,12 +1351,13 @@ class ClassVariableType extends Type {
 		return this
 	} // }}}
 	isAlteration() => @alteration
-	matchSignatureOf(b: Type, matchables): Boolean { // {{{
-		if b is ClassVariableType {
+	isMatching(value: ClassVariableType, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Exact != 0 {
+			return @type.isMatching(value.type(), MatchingMode::Exact)
+		}
+		else {
 			return true
 		}
-
-		return false
 	} // }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
@@ -1448,9 +1433,9 @@ class ClassMethodType extends FunctionType {
 	id() => @id
 	id(@id)
 	isAlteration() => @alteration
-	isMatched(methods: Array<ClassMethodType>, matchables): Boolean { // {{{
+	isMatched(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { // {{{
 		for const method in methods {
-			if method.matchSignatureOf(this, matchables) {
+			if method.isMatching(this, mode) {
 				return true
 			}
 		}

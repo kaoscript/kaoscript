@@ -72,7 +72,7 @@ class ModuleScope extends Scope {
 			let notAdded = true
 
 			for const m, index in @macros[name] while notAdded {
-				if m.type().matchSignatureOf(type, []) {
+				if m.type().isMatching(type, MatchingMode::Signature) {
 					@macros[name].splice(index, 0, macro)
 
 					notAdded = false

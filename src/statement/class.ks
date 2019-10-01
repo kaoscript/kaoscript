@@ -272,7 +272,7 @@ class ClassDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @class.hasMatchingClassMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @class.hasMatchingClassMethod(name, method.type(), MatchingMode::ExactParameters) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -296,7 +296,7 @@ class ClassDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameters) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -314,7 +314,7 @@ class ClassDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameter) {
+				if @class.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameters) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -325,7 +325,7 @@ class ClassDeclaration extends Statement {
 		for method in @constructors {
 			method.prepare()
 
-			if @class.hasMatchingConstructor(method.type(), MatchingMode::ExactParameter) {
+			if @class.hasMatchingConstructor(method.type(), MatchingMode::ExactParameters) {
 				SyntaxException.throwIdenticalConstructor(method)
 			}
 

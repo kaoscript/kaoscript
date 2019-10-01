@@ -71,21 +71,6 @@ class ReferenceType extends Type {
 			return null
 		}
 	} // }}}
-	equals(b?): Boolean { // {{{
-		if b == null {
-			return false
-		}
-		else if b is not ReferenceType {
-			return b.equals(this)
-		}
-		else if @name != b._name || @nullable != b._nullable || @parameters.length != b._parameters.length {
-			return false
-		}
-
-		// TODO: test @parameters
-
-		return true
-	} // }}}
 	export(references, mode, name = @name) { // {{{
 		if @nullable || @parameters.length != 0 {
 			const export = {
@@ -228,11 +213,11 @@ class ReferenceType extends Type {
 		}
 		else {
 			if value is ReferenceType {
-				if this.isEnum() {
-					return value.discardReference() is EnumType
+				if value.name() == 'Enum' {
+					return this.type().isEnum()
 				}
-				else if value.isEnum() {
-					return this.discardReference() is EnumType
+				else if value.name() == 'Namespace' {
+					return this.type().isNamespace()
 				}
 				else {
 					return this.discardReference():Type.isMatching(value.discardReference():Type, mode)
@@ -321,28 +306,6 @@ class ReferenceType extends Type {
 			else {
 				return a.matchContentOf(b)
 			}
-		}
-	} // }}}
-	matchSignatureOf(value, matchables) { // {{{
-		if value is ReferenceType {
-			if value.name() == 'Enum' {
-				return this.type().isEnum()
-			}
-			else if value.name() == 'Namespace' {
-				return this.type().isNamespace()
-			}
-			else {
-				return this.discardReference():Type.matchSignatureOf(value.discardReference():Type, matchables)
-			}
-		}
-		else if value.isObject() && this.type().isClass() {
-			return @type.type().matchInstanceWith(value, matchables)
-		}
-		else if value is AnyType {
-			return this.discardReference():Type.matchSignatureOf(value, matchables)
-		}
-		else {
-			return false
 		}
 	} // }}}
 	name(): String => @name

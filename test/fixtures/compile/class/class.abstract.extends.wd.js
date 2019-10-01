@@ -81,4 +81,5 @@ module.exports = function() {
 	}
 	const greetings = new Greetings("John");
 	console.log(greetings.greet());
+	console.log(greetings.greet("John"));
 };

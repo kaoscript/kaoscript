@@ -23,9 +23,12 @@ class Greetings extends AbstractGreetings {
 		super()
 	}
 
-	greet(name = @name) => `\(@message) My name is \(name).`
+	greet(name = @name, message = @message) => `\(message) My name is \(name).`
 }
 
 const greetings = new Greetings('John')
 
 console.log(`\(greetings.greet())`)
+console.log(`\(greetings.greet('John'))`)
+console.log(`\(greetings.greet('John', 'Hi!'))`)
+console.log(`\(greetings.greet(null, 'Hi!'))`)

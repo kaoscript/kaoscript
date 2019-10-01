@@ -51,4 +51,33 @@ module.exports = function() {
 	printAnimalAbilities(abilities);
 	printAnimalAbilities(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly));
 	printAnimalAbilities(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered));
+	function quxbaz(x) {
+		if(arguments.length < 1) {
+			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		}
+		if(x === void 0 || x === null) {
+			throw new TypeError("'x' is not nullable");
+		}
+		let abex;
+		if(x === true) {
+			abex = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
+		}
+		else {
+			abex = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly);
+		}
+		let abey;
+		if(x === true) {
+			abey = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
+		}
+		else {
+			abey = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly);
+		}
+		let abez;
+		if(x === true) {
+			abez = AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered;
+		}
+		else {
+			abez = AnimalFlags.HasClaws | AnimalFlags.CanFly;
+		}
+	}
 };

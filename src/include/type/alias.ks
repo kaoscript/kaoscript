@@ -27,9 +27,6 @@ class AliasType extends Type {
 	} // }}}
 	discardAlias() => @type.discardAlias()
 	discardReference() => @type.discardAlias()
-	equals(b?): Boolean { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	export(references, mode) { // {{{
 		return {
 			kind: TypeKind::Alias
@@ -40,6 +37,9 @@ class AliasType extends Type {
 	isAlias() => true
 	isArray() => @type.isArray()
 	isBoolean() => @type.isBoolean()
+	isMatching(value: AliasType, mode: MatchingMode) { // {{{
+		return this == value
+	} // }}}
 	isNumber() => @type.isNumber()
 	isString() => @type.isString()
 	isUnion() => @type.isUnion()

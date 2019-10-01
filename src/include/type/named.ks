@@ -26,7 +26,6 @@ class NamedType extends Type {
 	discardAlias() => @type.discardAlias()
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
-	equals(b?) => @type.equals(b)
 	export(references, mode) { // {{{
 		if @type is ClassType && (@type.isPredefined() || !(@type.isExported() || @type.isAlien())) {
 			return @name
@@ -96,12 +95,25 @@ class NamedType extends Type {
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
 	isHybrid() => @type.isHybrid()
+	isInheriting(superclass: NamedType) { // {{{
+		let that = this
+
+		while that.type().isExtending() {
+			that = that.type().extends()
+
+			if that.name() == superclass {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	isMatching(value: Type, mode: MatchingMode) { // {{{
 		if this == value {
 			return true
 		}
 		else if mode & MatchingMode::Exact != 0 {
-			NotImplementedException.throw()
+			return false
 		}
 		else {
 			if value.isAny() {
@@ -109,7 +121,12 @@ class NamedType extends Type {
 			}
 			else if value is NamedType {
 				if @type is ClassType && value.type() is ClassType {
-					return this.matchInheritanceOf(value)
+					if @type.isPredefined() && value.isPredefined() {
+						return @name == value.name()
+					}
+					else {
+						return this.isInheriting(value) || @type.isMatching(value.type(), mode)
+					}
 				}
 				else if value.type() is EnumType {
 					if @type is EnumType {
@@ -118,6 +135,9 @@ class NamedType extends Type {
 					else {
 						return this.isMatching(value.type().type(), mode)
 					}
+				}
+				else if value.type() is ClassType && value.name() == 'Enum' {
+					return this.isEnum()
 				}
 				else if value.isAlias() {
 					if this.isAlias() {
@@ -250,14 +270,14 @@ class NamedType extends Type {
 			return @type.matchContentOf(that)
 		}
 	} // }}}
-	matchInheritanceOf(base: Type) { // {{{
+	matchInheritanceOf(base: Type, strict = false) { // {{{
 		if base is not NamedType || !this.isClass() || !base.isClass() {
 			return false
 		}
 
 		const basename = base.name()
 
-		if @name == basename {
+		if !strict && @name == basename {
 			return true
 		}
 
@@ -272,7 +292,6 @@ class NamedType extends Type {
 
 		return false
 	} // }}}
-	matchSignatureOf(that, matchables) => @type.matchSignatureOf(that.discardName(), matchables)
 	metaReference(references, mode) { // {{{
 		if @type is ClassType {
 			return @type.metaReference(references, @name, mode)

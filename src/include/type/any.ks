@@ -18,17 +18,6 @@ class AnyType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?): Boolean { // {{{
-		if b is AnyType {
-			return @nullable == b.isNullable()
-		}
-		else if b is ReferenceType {
-			return b.isAny() && @nullable == b.isNullable()
-		}
-		else {
-			return false
-		}
-	} // }}}
 	export(references, mode) => 'Any'
 	flagAlien() { // {{{
 		if @alien == true {
@@ -50,16 +39,18 @@ class AnyType extends Type {
 	isInstanceOf(target: Type) => true
 	isMatching(value: Type, mode: MatchingMode) { // {{{
 		if mode & MatchingMode::Exact != 0 {
-			return value.isAny() && @nullable == value.isNullable()
+			return value.isAny() && !value.isNull() && @nullable == value.isNullable()
+		}
+		else if mode & MatchingMode::MissingType != 0 && !@explicit {
+			return @nullable || !value.isNullable()
 		}
 		else {
-			return value.isAny()
+			return value.isAny() && (@nullable || !value.isNullable())
 		}
 	} // }}}
 	isMorePreciseThan(type: Type) => type.isAny() && @nullable != type.isNullable()
 	isNullable() => @nullable
 	matchContentOf(b) => !@explicit || (b.isAny() && (@nullable -> !b.isNullable()))
-	matchSignatureOf(b, matchables) => (@nullable || !b.isNullable()) && (!@explicit || b.isAny())
 	parameter() => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
 	reference() => this
 	setNullable(nullable: Boolean): Type { // {{{

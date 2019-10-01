@@ -120,9 +120,25 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 	translate() { // {{{
 		super()
 
-		if @isEnum && (@parent.type().isBoolean() || (@parent.type().isEnum() && @type.name() == @parent.type().name())) {
-			@isEnum = false
-			@isNative = true
+		if @isEnum {
+			const type = @parent.type()
+
+			if @parent is AssignmentOperatorEquality {
+				if type.isEnum() {
+					if @type.name() != type.name() {
+						@isEnum = false
+						@isNative = true
+					}
+				}
+				else if type.isNumber() {
+					@isEnum = false
+					@isNative = true
+				}
+			}
+			else if type.isBoolean() || (type.isEnum() && @type.name() == type.name()) {
+				@isEnum = false
+				@isNative = true
+			}
 		}
 	} // }}}
 	isAcceptingEnum() => false

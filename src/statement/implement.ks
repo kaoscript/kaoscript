@@ -269,7 +269,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @override {
-				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::ShiftableParameter)
+				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::ShiftableParameters)
 
 				if methods.length == 0 {
 					@override = false
@@ -284,7 +284,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					SyntaxException.throwNotSealedOverwrite(this)
 				}
 
-				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameter | MatchingMode::ShiftableParameter)
+				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameters | MatchingMode::ShiftableParameters)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
@@ -299,7 +299,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				variable.replaceCall = (data, arguments) => new CallOverwrittenMethodSubstitude(data, arguments, @name, type)
 			}
 			else {
-				if @class.hasMatchingInstanceMethod(@name, @type, MatchingMode::ExactParameter) {
+				if @class.hasMatchingInstanceMethod(@name, @type, MatchingMode::ExactParameters) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {
@@ -316,7 +316,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					NotImplementedException.throw(this)
 				}
 
-				const methods = @class.listMatchingClassMethods(@name, @type, MatchingMode::ShiftableParameter)
+				const methods = @class.listMatchingClassMethods(@name, @type, MatchingMode::ShiftableParameters)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
@@ -331,7 +331,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				variable.replaceCall = (data, arguments) => new CallOverwrittenMethodSubstitude(data, arguments, @name, type)
 			}
 			else {
-				if @class.hasMatchingClassMethod(@name, @type, MatchingMode::ExactParameter) {
+				if @class.hasMatchingClassMethod(@name, @type, MatchingMode::ExactParameters) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {

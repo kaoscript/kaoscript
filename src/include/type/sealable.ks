@@ -19,14 +19,6 @@ class SealableType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?) { // {{{
-		if b is SealableType {
-			return @type.equals(b.type())
-		}
-		else {
-			return false
-		}
-	} // }}}
 	export(references, mode) => { // {{{
 		kind: TypeKind::Sealable
 		sealed: this.isSealed()
@@ -42,16 +34,17 @@ class SealableType extends Type {
 
 		return this
 	} // }}}
-	isSealable() => true
-	isSealed() => @sealed || @type.isSealed()
-	matchSignatureOf(that, matchables) { // {{{
-		if that is SealableType {
-			return @type.matchSignatureOf(that.type(), matchables)
+	isMatching(value: SealableType, mode: MatchingMode) => @type.isMatching(value.type(), mode)
+	isMatching(value: Type, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Similar != 0 {
+			return @type.isMatching(value, mode)
 		}
 		else {
-			return @type.matchSignatureOf(that, matchables)
+			return false
 		}
 	} // }}}
+	isSealable() => true
+	isSealed() => @sealed || @type.isSealed()
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)

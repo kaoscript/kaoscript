@@ -179,30 +179,6 @@ class FunctionType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?): Boolean { // {{{
-		if b is ReferenceType {
-			return b.name() == 'Function' && @min == 0 && @max == Infinity
-		}
-		else if b is not FunctionType {
-			return false
-		}
-
-		if @async != b._async || @hasRest != b._hasRest || @max != b._max || @min != b._min || @restIndex != b._restIndex || @parameters.length != b._parameters.length {
-			return false
-		}
-
-		for parameter, index in @parameters {
-			if !parameter.equals(b._parameters[index]) {
-				return false
-			}
-		}
-
-		if @missingReturn || b._missingReturn {
-			return true
-		}
-
-		return @returnType.equals(b._returnType)
-	} // }}}
 	export(references, mode) { // {{{
 		if mode & ExportMode::OverloadedFunction != 0 {
 			return {
@@ -266,34 +242,66 @@ class FunctionType extends Type {
 		return true
 	} // }}}
 	isFunction() => true
-	isMatching(value: FunctionType, mode: MatchingMode) { // {{{
-		if @async != value._async || @hasRest != value._hasRest {
+	isMatching(value: ReferenceType, mode: MatchingMode) { // {{{
+		if value.name() != 'Function' {
 			return false
 		}
 
-		if mode & MatchingMode::MissingParameter != 0 && (@missingParameters || value._missingParameters) {
+		if mode & MatchingMode::Exact != 0 || mode & MatchingMode::ExactParameters != 0 {
+			return @min == 0 && @max == Infinity
+		}
+		else {
+			return true
+		}
+	} // }}}
+	isMatching(value: FunctionType, mode: MatchingMode) { // {{{
+		if @async != value._async {
+			return false
+		}
+
+		if mode & MatchingMode::Exact != 0 {
+			mode |= MatchingMode::ExactParameters | MatchingMode::ExactReturn
+		}
+		else if mode & MatchingMode::Similar != 0 {
+			mode |= MatchingMode::SimilarParameters | MatchingMode::SimilarReturn
+		}
+
+		if mode & MatchingMode::MissingParameters != 0 && @missingParameters {
 			// do nothing
 		}
-		else if mode & MatchingMode::ShiftableParameter != 0 {
-			const parameterMode = mode & MatchingMode::ExactParameter != 0 ? MatchingMode::Exact : MatchingMode::Similar
+		else if mode & MatchingMode::ShiftableParameters != 0 {
+			let parameterMode: MatchingMode
+			if mode & MatchingMode::ExactParameters != 0 {
+				parameterMode = MatchingMode::Exact
+			}
+			else if mode & MatchingMode::MissingParameterType != 0 {
+				parameterMode = MatchingMode::Similar | MatchingMode::MissingType
+			}
+			else {
+				parameterMode = MatchingMode::Similar
+			}
+
+			if mode & MatchingMode::RequireAllParameters != 0 {
+				parameterMode |= MatchingMode::RequireAllParameters
+			}
 
 			if !this.isParametersMatching(value._parameters, parameterMode) {
 				return false
 			}
 		}
 		else {
-			if @max != value._max || @min != value._min || @restIndex != value._restIndex || @parameters.length != value._parameters.length {
+			if @hasRest != value._hasRest || @max != value._max || @min != value._min || @restIndex != value._restIndex || @parameters.length != value._parameters.length {
 				return false
 			}
 
-			if mode & MatchingMode::ExactParameter != 0 {
+			if mode & MatchingMode::ExactParameters != 0 {
 				for const parameter, index in @parameters {
 					if !parameter.isMatching(value._parameters[index], MatchingMode::Exact) {
 						return false
 					}
 				}
 			}
-			else if mode & MatchingMode::SimilarParameter != 0 {
+			else if mode & MatchingMode::SimilarParameters != 0 {
 				for const parameter, index in @parameters {
 					if !parameter.isMatching(value._parameters[index], MatchingMode::Similar) {
 						return false
@@ -302,7 +310,7 @@ class FunctionType extends Type {
 			}
 		}
 
-		if mode & MatchingMode::MissingReturn != 0 && (@missingReturn || value._missingReturn) {
+		if mode & MatchingMode::MissingReturn != 0 && @missingReturn {
 			return true
 		}
 		else if mode & MatchingMode::ExactReturn != 0 {
@@ -315,6 +323,8 @@ class FunctionType extends Type {
 			return true
 		}
 	} // }}}
+	// ↓↓↓ to remove, should use super method
+	isMatching(value, mode: MatchingMode) => false
 	isMorePreciseThan(type: Type) { // {{{
 		if type.isAny() {
 			return true
@@ -325,9 +335,15 @@ class FunctionType extends Type {
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
 	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => this.isParametersMatching(0, -1, arguments, 0, -1, mode)
 	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { // {{{
+		// console.log(pIndex, pStep, aIndex, aStep)
 		if pStep == -1 {
 			if pIndex >= @parameters.length {
-				return FunctionType.isOptional(arguments, aIndex, aStep)
+				if mode & MatchingMode::RequireAllParameters == 0 {
+					return FunctionType.isOptional(arguments, aIndex, aStep)
+				}
+				else {
+					return aIndex >= arguments.length || (aIndex + 1 == arguments.length && aStep > arguments[aIndex].max())
+				}
 			}
 
 			const parameter = @parameters[pIndex]
@@ -359,7 +375,7 @@ class FunctionType extends Type {
 		}
 		else if aStep == -1 {
 			if aIndex >= arguments.length {
-				return false
+				return FunctionType.isOptional(@parameters, pIndex, pStep)
 			}
 
 			const argument = arguments[aIndex]
@@ -525,104 +541,6 @@ class FunctionType extends Type {
 
 		return false
 	} // }}}
-	matchParametersOf(arguments: Array, matchables): Boolean => this.matchParametersOf(0, -1, arguments, 0, -1, matchables)
-	matchParametersOf(pIndex, pStep, arguments, aIndex, aStep, matchables) { // {{{
-		if aStep == -1 {
-			if aIndex >= arguments.length {
-				return FunctionType.isOptional(@parameters, pIndex, pStep)
-			}
-
-			const argument = arguments[aIndex]
-
-			if argument.max() == Infinity {
-				return this.matchParametersOf(pIndex, pStep, arguments, aIndex, 1, matchables)
-			}
-
-			for const i from 1 to argument.min() {
-				if !this.matchParametersOf(pIndex, pStep, arguments, aIndex, i, matchables) {
-					return false
-				}
-			}
-
-			if argument.min() == argument.max() {
-				return true
-			}
-
-			for const i from argument.min() + 1 to argument.max() {
-				if this.matchParametersOf(pIndex, pStep, arguments, aIndex, i, matchables) {
-					return true
-				}
-			}
-
-			return false
-		}
-		else if aStep > arguments[aIndex].max() {
-			return this.matchParametersOf(pIndex, pStep, arguments, aIndex + 1, -1, matchables)
-		}
-		else if pStep == -1 {
-			if pIndex >= @parameters.length {
-				return false
-			}
-
-			const parameter = @parameters[pIndex]
-
-			if parameter.max() == Infinity {
-				return this.matchParametersOf(pIndex, 1, arguments, aIndex, aStep, matchables)
-			}
-
-			for const i from 1 to parameter.min() {
-				if !this.matchParametersOf(pIndex, i, arguments, aIndex, aStep, matchables) {
-					return false
-				}
-			}
-
-			if parameter.min() == parameter.max() {
-				return true
-			}
-
-			for const i from parameter.min() + 1 to parameter.max() {
-				if this.matchParametersOf(pIndex, i, arguments, aIndex, aStep, matchables) {
-					return true
-				}
-			}
-
-			return false
-		}
-		else if pStep > @parameters[pIndex].max() {
-			return this.matchParametersOf(pIndex + 1, -1, arguments, aIndex, aStep, matchables)
-		}
-		else if @parameters[pIndex].matchSignatureOf(arguments[aIndex], matchables) {
-			if arguments[aIndex].max() == Infinity {
-				if @parameters[pIndex].max() == Infinity {
-					return true
-				}
-				else {
-					return this.matchParametersOf(pIndex, pStep + 1, arguments, aIndex, aStep, matchables)
-				}
-			}
-			else {
-				return this.matchParametersOf(pIndex, pStep + 1, arguments, aIndex, aStep + 1, matchables)
-			}
-		}
-		else {
-			return false
-		}
-	} // }}}
-	matchSignatureOf(value: Type, matchables): Boolean { // {{{
-		if value is ReferenceType {
-			return value.isFunction()
-		}
-		else if value is FunctionType {
-			return (@missingParameters || this.matchParametersOf(value._parameters, matchables)) && (@missingReturn || @returnType.matchSignatureOf(value._returnType, matchables))
-			// return this.isMatching(value, MatchingMode::MissingParameter | MatchingMode::SimilarParameter | MatchingMode::ShiftableParameter | MatchingMode::MissingReturn | MatchingMode::SimilarReturn)
-		}
-		else if value is OverloadedFunctionType {
-			throw new NotImplementedException()
-		}
-		else {
-			return false
-		}
-	} // }}}
 	max() => @max
 	min() => @min
 	parameter(index) => @parameters[index]
@@ -636,7 +554,7 @@ class FunctionType extends Type {
 	} // }}}
 	pushTo(methods) { // {{{
 		for const method in methods {
-			if this.isMatching(method, MatchingMode::SimilarParameter) {
+			if this.isMatching(method, MatchingMode::SimilarParameters) {
 				return
 			}
 		}
@@ -793,9 +711,6 @@ class OverloadedFunctionType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?) { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	export(references, mode) { // {{{
 		const functions = []
 
@@ -839,6 +754,55 @@ class OverloadedFunctionType extends Type {
 		return false
 	} // }}}
 	isFunction() => true
+	isMatching(value: ReferenceType, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Exact != 0 {
+			return false
+		}
+
+		return value.isFunction()
+	} // }}}
+	isMatching(value: FunctionType, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Exact != 0 {
+			return false
+		}
+
+		for fn in @functions {
+			if fn.isMatching(value, mode) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	isMatching(value: OverloadedFunctionType, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Exact != 0 {
+			return false
+		}
+
+		let nf
+		for fb in value.functions() {
+			nf = true
+
+			for fn in @functions while nf {
+				if fn.isMatching(fb, mode) {
+					nf = false
+				}
+			}
+
+			if nf {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
+	isMatching(value: NamedType, mode: MatchingMode) { // {{{
+		if mode & MatchingMode::Exact != 0 {
+			return false
+		}
+
+		return this.isMatching(value.type(), mode)
+	} // }}}
 	isMergeable(type) => type is OverloadedFunctionType && @async == type.isAsync()
 	isMorePreciseThan(type: Type) { // {{{
 		if type.isAny() {
@@ -848,41 +812,6 @@ class OverloadedFunctionType extends Type {
 		return false
 	} // }}}
 	length() => @functions.length
-	matchSignatureOf(value: Type, matchables) { // {{{
-		if value is ReferenceType {
-			return value.isFunction()
-		}
-		else if value is FunctionType {
-			for fn in @functions {
-				if fn.matchSignatureOf(value, matchables) {
-					return true
-				}
-			}
-		}
-		else if value is OverloadedFunctionType {
-			let nf
-			for fb in value.functions() {
-				nf = true
-
-				for fn in @functions while nf {
-					if fn.matchSignatureOf(fb, matchables) {
-						nf = false
-					}
-				}
-
-				if nf {
-					return false
-				}
-			}
-
-			return true
-		}
-		else if value is NamedType {
-			return this.matchSignatureOf(value.type(), matchables)
-		}
-
-		return false
-	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}

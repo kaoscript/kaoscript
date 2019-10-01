@@ -5,8 +5,8 @@ class VoidType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?): Boolean => b is VoidType
 	export(references, mode) => 'Void'
+	isMatching(value: VoidType, mode: MatchingMode) => true
 	isVoid() => true
 	toFragments(fragments, node) { // {{{
 		fragments.code('Void')

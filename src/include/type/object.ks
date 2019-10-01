@@ -30,9 +30,6 @@ class ObjectType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?) { // {{{
-		throw new NotImplementedException()
-	} // }}}
 	export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Object
@@ -51,12 +48,9 @@ class ObjectType extends Type {
 		return export
 	} // }}}
 	getProperty(name: String): Type => @properties[name] ?? Type.Any
-	isNullable() => false
-	isObject() => true
-	isSealable() => true
-	matchSignatureOf(value, matchables) { // {{{
-		if value is not ObjectType {
-			return false
+	isMatching(value: ObjectType, mode: MatchingMode) { // {{{
+		if this == value {
+			return true
 		}
 
 		if this.isSealed() != value.isSealed() {
@@ -68,7 +62,7 @@ class ObjectType extends Type {
 			nf = true
 
 			for const prop of @properties while nf {
-				if prop.matchSignatureOf(property, matchables) {
+				if prop.isMatching(property, mode) {
 					nf = false
 				}
 			}
@@ -80,6 +74,10 @@ class ObjectType extends Type {
 
 		return true
 	} // }}}
+	isMatching(value: Type, mode: MatchingMode) => false
+	isNullable() => false
+	isObject() => true
+	isSealable() => true
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}

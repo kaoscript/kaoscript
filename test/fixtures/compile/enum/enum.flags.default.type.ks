@@ -48,3 +48,29 @@ printAnimalAbilities(abilities)
 printAnimalAbilities(AnimalFlags::HasClaws | AnimalFlags::CanFly)
 
 printAnimalAbilities(AnimalFlags::HasClaws | AnimalFlags::CanFly | AnimalFlags::Endangered)
+
+func quxbaz(x) {
+	let abex
+	if x {
+		abex = AnimalFlags::HasClaws | AnimalFlags::CanFly | AnimalFlags::Endangered
+	}
+	else {
+		abex = AnimalFlags::HasClaws | AnimalFlags::CanFly
+	}
+
+	let abey: AnimalFlags
+	if x {
+		abey = AnimalFlags::HasClaws | AnimalFlags::CanFly | AnimalFlags::Endangered
+	}
+	else {
+		abey = AnimalFlags::HasClaws | AnimalFlags::CanFly
+	}
+
+	let abez: Number
+	if x {
+		abez = AnimalFlags::HasClaws | AnimalFlags::CanFly | AnimalFlags::Endangered
+	}
+	else {
+		abez = AnimalFlags::HasClaws | AnimalFlags::CanFly
+	}
+}

@@ -24,23 +24,6 @@ class FusionType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	equals(b?): Boolean { // {{{
-		if !?b || b is not FusionType || @types.length != b._types.length {
-			return false
-		}
-
-		let match = 0
-		for aType in @types {
-			for bType in b._types {
-				if aType.equals(bType) {
-					match++
-					break
-				}
-			}
-		}
-
-		return match == @types.length
-	} // }}}
 	export(references, mode) { // {{{
 		return {
 			kind: TypeKind::Fusion
@@ -58,6 +41,23 @@ class FusionType extends Type {
 	} // }}}
 	isArray() => @array
 	isExportable() => true
+	isMatching(value: FusionType, mode: MatchingMode) { // {{{
+		if @types.length != value._types.length {
+			return false
+		}
+
+		let match = 0
+		for aType in @types {
+			for bType in value._types {
+				if aType.isMatching(bType, mode) {
+					match++
+					break
+				}
+			}
+		}
+
+		return match == @types.length
+	} // }}}
 	isNullable() => @nullable
 	parameter() { // {{{
 		for const type in @types when type.isArray() {

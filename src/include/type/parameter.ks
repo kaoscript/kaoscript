@@ -18,14 +18,7 @@ class ParameterType extends Type {
 		super(scope)
 	} // }}}
 	clone() => new ParameterType(@scope, @name, @type, @min, @max, @default)
-	equals(b?): Boolean { // {{{
-		if b is not ParameterType {
-			return false
-		}
-
-		return @min == b.min() && @max == b.max() && @type.equals(b.type())
-	} // }}}
-	isMatching(value: ParameterType, mode: MatchingMode) => @min == value.min() && @max == value.max() && @type.isMatching(value.type(), mode)
+	isMatching(value: ParameterType, mode: MatchingMode) => @type.isMatching(value.type(), mode)
 	export(references, mode) { // {{{
 		const export = {}
 
@@ -64,7 +57,6 @@ class ParameterType extends Type {
 	} // }}}
 	matchArgument(value: Parameter) => this.matchArgument(value.type())
 	matchArgument(value: Type) => value.matchContentOf(@type) || (value.isNullable() && @default != 0)
-	matchSignatureOf(type: ParameterType, matchables) => @type.matchSignatureOf(type.type(), matchables)
 	max() => @max
 	min() => @min
 	name() => @name
