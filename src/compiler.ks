@@ -1,6 +1,6 @@
 /**
  * compiler.ks
- * Version 0.9.2
+ * Version 0.9.3
  * September 14th, 2016
  *
  * Copyright (c) 2016 Baptiste Augrain
