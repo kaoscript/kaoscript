@@ -38,15 +38,15 @@
 	},
 	"dependencies": {
 		"@kaoscript/runtime": "^0.6.1",
-		"commander": "^2.20.0"
+		"commander": "^2.20.1"
 	},
 	"devDependencies": {
 		"@kaoscript/ast": "^0.8.0",
-		"@kaoscript/coverage-istanbul": "^0.2.0",
+		"@kaoscript/coverage-istanbul": "^0.2.1",
 		"@kaoscript/parser": "^0.7.0",
 		"@kaoscript/source-generator": "^0.1.0",
 		"@kaoscript/target-commons": "^0.2.0",
-		"@kaoscript/test-import": "^0.2.1",
+		"@kaoscript/test-import": "^0.2.2",
 		"@kaoscript/util": "^0.1.1",
 		"@zokugun/istanbul.cover": "^0.5.0",
 		"@zokugun/istanbul.cover.cmd.mocha": "^0.4.0",
@@ -56,11 +56,11 @@
 		"istanbul": "^0.4.5",
 		"klaw-sync": "^6.0.0",
 		"mocha": "^5.2.0",
-		"rimraf": "^2.6.3"
+		"rimraf": "^2.7.1"
 	},
 	"scripts": {
 		"postinstall": "npm install --no-save `node ./scripts/install.js dependency` && node ./scripts/install.js binary",
-		"prepublish": "rm -f ./lib/compiler.js",
+		"prepublishOnly": "rm -f ./lib/compiler.js",
 		"push-coverage": "npm run test-coverage && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
 		"test": "mocha --colors --check-leaks --reporter spec --require ./register.js",
 		"test-coverage": "node node_modules/@zokugun/istanbul.cover/src/cli.js"
