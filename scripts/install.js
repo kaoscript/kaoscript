@@ -17,11 +17,14 @@ function getPackage(source) {
 program
 	.command('dependency')
 	.action(function() {
-		if(!metadata._requested || metadata._requested.registry === 'git') {
-			console.log('github:kaoscript/' + getPackage('github'))
+		if(metadata._requested && metadata._requested.registry === 'git') {
+			console.log('github:kaoscript/' + getPackage('github'));
+		}
+		else if(metadata._resolved) {
+			console.log('@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.'));
 		}
 		else {
-			console.log('@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.'))
+			console.log('github:kaoscript/' + getPackage('github'));
 		}
 	});
 
