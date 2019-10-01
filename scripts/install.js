@@ -17,11 +17,11 @@ function getPackage(source) {
 program
 	.command('dependency')
 	.action(function() {
-		if(metadata._requested && metadata._requested.registry) {
-			console.log('@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.'))
+		if(!metadata._requested || metadata._requested.registry === 'git') {
+			console.log('github:kaoscript/' + getPackage('github'))
 		}
 		else {
-			console.log('github:kaoscript/' + getPackage('github'))
+			console.log('@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.'))
 		}
 	});
 
