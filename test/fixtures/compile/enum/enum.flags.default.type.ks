@@ -74,3 +74,6 @@ func quxbaz(x) {
 		abez = AnimalFlags::HasClaws | AnimalFlags::CanFly
 	}
 }
+
+const abyx = AnimalFlags::HasClaws | AnimalFlags::CanFly
+const abyy = AnimalFlags::HasClaws | AnimalFlags::CanFly | AnimalFlags::Endangered

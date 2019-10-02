@@ -303,6 +303,7 @@ class VariableDeclaration extends Statement {
 			@declarators[0].toAssignmentFragments(fragments, @init)
 		}
 	} // }}}
+	type() => @declarators[0].variable().getRealType()
 	walk(fn) { // {{{
 		for declarator in @declarators {
 			declarator.walk(fn)
@@ -442,6 +443,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 			.code($equals)
 			.compile(value)
 	} // }}}
+	variable() => @variable
 	walk(fn) { // {{{
 		fn(@variable.getSecureName(), @variable.getRealType())
 	} // }}}

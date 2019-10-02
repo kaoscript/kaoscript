@@ -323,8 +323,6 @@ class FunctionType extends Type {
 			return true
 		}
 	} // }}}
-	// ↓↓↓ to remove, should use super method
-	isMatching(value, mode: MatchingMode) => false
 	isMorePreciseThan(type: Type) { // {{{
 		if type.isAny() {
 			return true

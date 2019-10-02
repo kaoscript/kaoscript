@@ -142,7 +142,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		if @isEnum {
 			const type = @parent.type()
 
-			if @parent is AssignmentOperatorEquality {
+			if @parent is AssignmentOperatorEquality || @parent is VariableDeclaration {
 				if type.isEnum() {
 					if @type.name() != type.name() {
 						@isEnum = false

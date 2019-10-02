@@ -80,4 +80,6 @@ module.exports = function() {
 			abez = AnimalFlags.HasClaws | AnimalFlags.CanFly;
 		}
 	}
+	const abyx = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly);
+	const abyy = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
 };

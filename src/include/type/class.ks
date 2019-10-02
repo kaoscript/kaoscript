@@ -1136,8 +1136,6 @@ class ClassType extends Type {
 	isMatching(value: NamedType, mode: MatchingMode) { // {{{
 		return this.isMatching(value.type(), mode)
 	} // }}}
-	// ↓↓↓ to remove, should use super method
-	isMatching(value, mode: MatchingMode) => false
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true
@@ -1443,6 +1441,17 @@ class ClassMethodType extends FunctionType {
 		return false
 	} // }}}
 	isMethod() => true
+	isOverflowing(methods: Array<ClassMethodType>) { // {{{
+		const mode = MatchingMode::SimilarParameters | MatchingMode::MissingParameters | MatchingMode::ShiftableParameters | MatchingMode::RequireAllParameters
+
+		for const method in methods {
+			if this.isMatching(method, mode) {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
 	isSealable() => true
 	overwrite() => @overwrite
 	overwrite(@overwrite)

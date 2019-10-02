@@ -509,7 +509,20 @@ class ClassDeclaration extends Statement {
 					m.push(method.type())
 				}
 
-				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+				let overflow = false
+
+				if @extending {
+					if const methods = @extendsType.type().listClassMethods(name) {
+						for const method in methods {
+							if method.isOverflowing(m) {
+								overflow = true
+								break
+							}
+						}
+					}
+				}
+
+				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 			}
 
 			ctrl.done()
@@ -582,7 +595,20 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+			let overflow = false
+
+			if @extending {
+				if const methods = @extendsType.type().listInstanceMethods(name) {
+					for const method in methods {
+						if method.isOverflowing(m) {
+							overflow = true
+							break
+						}
+					}
+				}
+			}
+
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 		}
 
 		clazz.done()
@@ -667,13 +693,26 @@ class ClassDeclaration extends Statement {
 		for const methods, name of @instanceMethods {
 			m.clear()
 
-			for method in methods {
+			for const method in methods {
 				method.toFragments(clazz, Mode::None)
 
 				m.push(method.type())
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+			let overflow = false
+
+			if @extending {
+				if const methods = @extendsType.type().listInstanceMethods(name) {
+					for const method in methods {
+						if method.isOverflowing(m) {
+							overflow = true
+							break
+						}
+					}
+				}
+			}
+
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -687,7 +726,20 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+			let overflow = false
+
+			if @extending {
+				if const methods = @extendsType.type().listClassMethods(name) {
+					for const method in methods {
+						if method.isOverflowing(m) {
+							overflow = true
+							break
+						}
+					}
+				}
+			}
+
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -817,7 +869,20 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+			let overflow = false
+
+			if @extending {
+				if const methods = @extendsType.type().listInstanceMethods(name) {
+					for const method in methods {
+						if method.isOverflowing(m) {
+							overflow = true
+							break
+						}
+					}
+				}
+			}
+
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -831,7 +896,20 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+			let overflow = false
+
+			if @extending {
+				if const methods = @extendsType.type().listClassMethods(name) {
+					for const method in methods {
+						if method.isOverflowing(m) {
+							overflow = true
+							break
+						}
+					}
+				}
+			}
+
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -875,7 +953,20 @@ class ClassDeclaration extends Statement {
 					m.push(method.type())
 				}
 
-				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+				let overflow = false
+
+				if @extending {
+					if const methods = @extendsType.type().listClassMethods(name) {
+						for const method in methods {
+							if method.isOverflowing(m) {
+								overflow = true
+								break
+							}
+						}
+					}
+				}
+
+				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 			}
 
 			ctrl.done()
@@ -929,7 +1020,20 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+			let overflow = false
+
+			if @extending {
+				if const methods = @extendsType.type().listInstanceMethods(name) {
+					for const method in methods {
+						if method.isOverflowing(m) {
+							overflow = true
+							break
+						}
+					}
+				}
+			}
+
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 		}
 
 		clazz.done()
@@ -1007,7 +1111,20 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+			let overflow = false
+
+			if @extending {
+				if const methods = @extendsType.type().listInstanceMethods(name) {
+					for const method in methods {
+						if method.isOverflowing(m) {
+							overflow = true
+							break
+						}
+					}
+				}
+			}
+
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -1021,7 +1138,20 @@ class ClassDeclaration extends Statement {
 				m.push(method.type())
 			}
 
-			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+			let overflow = false
+
+			if @extending {
+				if const methods = @extendsType.type().listClassMethods(name) {
+					for const method in methods {
+						if method.isOverflowing(m) {
+							overflow = true
+							break
+						}
+					}
+				}
+			}
+
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -1293,8 +1423,8 @@ class ClassMethodDeclaration extends Statement {
 		_returnNull: Boolean			= false
 		_type: Type
 	}
-	static toClassSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
-		const assessment = Router.assess(methods, false)
+	static toClassSwitchFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
+		const assessment = Router.assess(methods, false, overflow)
 
 		if variable.type().isExtending() {
 			return Router.toFragments(
@@ -1342,8 +1472,8 @@ class ClassMethodDeclaration extends Statement {
 			)
 		}
 	} // }}}
-	static toInstanceSwitchFragments(node, fragments, variable, methods, name, header, footer) { // {{{
-		const assessment = Router.assess(methods, false)
+	static toInstanceSwitchFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
+		const assessment = Router.assess(methods, false, overflow)
 
 		if variable.type().isExtending() {
 			return Router.toFragments(

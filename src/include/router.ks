@@ -1,5 +1,5 @@
 namespace Router {
-	export func assess(methods, flattenable) { // {{{
+	export func assess(methods, flattenable, overflow = false) { // {{{
 		if methods.length == 0 {
 			return {
 				async: false
@@ -97,7 +97,7 @@ namespace Router {
 
 			const assessment = {
 				async
-				methods: assessBounded(methods, groups, min, max)
+				methods: assessBounded(methods, groups, min, max, overflow)
 			}
 
 			if infinities.length == 1 {
@@ -121,7 +121,7 @@ namespace Router {
 		}
 	} // }}}
 
-	func assessBounded(methods, groups, min, max) { // {{{
+	func assessBounded(methods, groups, min, max, overflow) { // {{{
 		for const i from min to max {
 			if const group = groups[i] {
 				for const j from i + 1 to max while (gg ?= groups[j]) && gg.methods.length == 1 == group.methods.length && Array.same(gg.methods, group.methods) {
@@ -209,7 +209,7 @@ namespace Router {
 					}
 				}
 
-				checkMethods(methods, parameters, min, max, 0, sortedIndexes, assessment, [])
+				checkMethods(methods, parameters, min, max, overflow, 0, sortedIndexes, assessment, [])
 			}
 		}
 
@@ -364,7 +364,7 @@ namespace Router {
 		}
 	} // }}}
 
-	func checkMethods(methods, parameters, min, max, sortedIndex, sortedIndexes, assessment, filters) { // {{{
+	func checkMethods(methods, parameters, min, max, overflow, sortedIndex, sortedIndexes, assessment, filters) { // {{{
 		const index = sortedIndexes[sortedIndex]
 
 		if !?parameters[index + 1] {
@@ -415,7 +415,7 @@ namespace Router {
 		}
 
 		if tree.length == 0 {
-			checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters)
+			checkMethods(methods, parameters, min, max, overflow, sortedIndex + 1, sortedIndexes, assessment, filters)
 		}
 		else if tree.length == 1 {
 			item = tree[0]
@@ -457,7 +457,7 @@ namespace Router {
 				}
 			}
 			else {
-				checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters)
+				checkMethods(methods, parameters, min, max, overflow, sortedIndex + 1, sortedIndexes, assessment, filters)
 			}
 		}
 		else {
@@ -526,28 +526,44 @@ namespace Router {
 			for const item, i in tree {
 				if i + 1 == tree.length {
 					if item.methods.length == 1 {
-						assessment.push({
-							method: item.methods[0]
-							index: item.methods[0].index()
-							min
-							max
-							filters
-							argFilters: [
-								{
-									min
-									max
-									filters: [
-										{
-											index
-											type: item.type[0]
-										}
-									]
-								}
-							]
-						})
+						if overflow {
+							filters.push({
+								index
+								type: item.type[0]
+							})
+
+							assessment.push({
+								method: item.methods[0]
+								index: item.methods[0].index()
+								min
+								max
+								filters
+							})
+						}
+						else {
+							assessment.push({
+								method: item.methods[0]
+								index: item.methods[0].index()
+								min
+								max
+								filters
+								argFilters: [
+									{
+										min
+										max
+										filters: [
+											{
+												index
+												type: item.type[0]
+											}
+										]
+									}
+								]
+							})
+						}
 					}
 					else {
-						checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters)
+						checkMethods(methods, parameters, min, max, overflow, sortedIndex + 1, sortedIndexes, assessment, filters)
 					}
 				}
 				else {
@@ -568,7 +584,7 @@ namespace Router {
 						})
 					}
 					else {
-						checkMethods(methods, parameters, min, max, sortedIndex + 1, sortedIndexes, assessment, filters)
+						checkMethods(methods, parameters, min, max, overflow, sortedIndex + 1, sortedIndexes, assessment, filters)
 					}
 				}
 			}

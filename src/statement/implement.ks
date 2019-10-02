@@ -441,7 +441,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				).done()
 			}
 			else {
-				ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @variable, @class.listInstanceMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
+				ClassMethodDeclaration.toInstanceSwitchFragments(this, fragments.newLine(), @variable, @class.listInstanceMethods(@name), false, @name, (node, fragments) => fragments.code(`\(@variable.name()).prototype.\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 			}
 		}
 		else {
@@ -484,7 +484,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				).done()
 			}
 			else {
-				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @variable, @class.listClassMethods(@name), @name, (node, fragments) => fragments.code(`\(@variable.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
+				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @variable, @class.listClassMethods(@name), false, @name, (node, fragments) => fragments.code(`\(@variable.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 			}
 		}
 	} // }}}
