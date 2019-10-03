@@ -782,6 +782,11 @@ class Parameter extends AbstractNode {
 		}
 	} // }}}
 	type(): ParameterType => @type
+	type(@type) { // {{{
+		const t = @type.type()
+
+		@name.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
+	} // }}}
 }
 
 class AliasStatement extends Statement {

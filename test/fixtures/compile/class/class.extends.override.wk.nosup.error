@@ -1,0 +1,1 @@
+SyntaxException: "Rectangle.draw()" can't be matched to any suitable method to override (line 8, file "fixtures/compile/class/class.extends.override.wk.nosup.ks")

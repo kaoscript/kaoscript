@@ -1419,6 +1419,7 @@ class ClassMethodDeclaration extends Statement {
 		_instance: Boolean				= true
 		_internalName: String
 		_name: String
+		_override: Boolean				= false
 		_parameters: Array<Parameter>
 		_returnNull: Boolean			= false
 		_type: Type
@@ -1530,6 +1531,9 @@ class ClassMethodDeclaration extends Statement {
 			if modifier.kind == ModifierKind::Abstract {
 				@abstract = true
 			}
+			else if modifier.kind == ModifierKind::Override {
+				@override = true
+			}
 			else if modifier.kind == ModifierKind::Static {
 				@instance = false
 			}
@@ -1600,24 +1604,47 @@ class ClassMethodDeclaration extends Statement {
 		if !@analysed {
 			@parent.updateMethodScope(this)
 
-			for parameter in @parameters {
+			for const parameter in @parameters {
 				parameter.prepare()
 			}
 
-			const arguments = [parameter.type() for const parameter in @parameters]
+			if @override {
+				unless @parent.isExtending() {
+					SyntaxException.throwNoSuitableOverride(@parent.type(), @name, @parameters, this)
+				}
 
-			@type = new ClassMethodType(arguments, @data, this)
+				const superclass = @parent.extends().type()
 
-			if @parent.isExtending() {
-				const extends = @parent.extends().type()
-				if const method = extends.getInstanceMethod(@name, @parameters) ?? extends.getAbstractMethod(@name, @type) {
-					if @data.type? {
-						if !@type.returnType().isInstanceOf(method.returnType()) {
-							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
-						}
+				if const method = superclass.getInstanceMethod(@name, @parameters) {
+					@type = method.type()
+
+					const parameters = @type.parameters()
+
+					for const parameter, index in @parameters {
+						parameter.type(parameters[index])
 					}
-					else {
-						@type.returnType(method.returnType())
+				}
+				else {
+					SyntaxException.throwNoSuitableOverride(@parent.extends(), @name, @parameters, this)
+				}
+			}
+			else {
+				const arguments = [parameter.type() for const parameter in @parameters]
+
+				@type = new ClassMethodType(arguments, @data, this)
+
+				if @parent.isExtending() {
+					const superclass = @parent.extends().type()
+
+					if const method = superclass.getInstanceMethod(@name, @parameters) ?? superclass.getAbstractMethod(@name, @type) {
+						if @data.type? {
+							if !@type.returnType().isInstanceOf(method.returnType()) {
+								SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
+							}
+						}
+						else {
+							@type.returnType(method.returnType())
+						}
 					}
 				}
 			}
@@ -1654,6 +1681,7 @@ class ClassMethodDeclaration extends Statement {
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
 	isInstanceMethod() => @instance
+	/* isOverride() => @override */
 	length() => @parameters.length
 	name() => @name
 	parameters() => @parameters

@@ -308,8 +308,11 @@ export class SyntaxException extends Exception {
 		throwNoRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't be a rest parameter`, node)
 		} // }}}
+		throwNoSuitableOverride(class, name, parameters, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`"\(class.toQuote()).\(name)\(FunctionType.toQuote(parameters))" can't be matched to any suitable method to override`, node)
+		} // }}}
 		throwNoSuitableOverwrite(class, name, type, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`"\(class.toQuote()).\(name)\(type.toQuote())" can't be match to any suitable method to overwrite`, node)
+			throw new SyntaxException(`"\(class.toQuote()).\(name)\(type.toQuote())" can't be matched to any suitable method to overwrite`, node)
 		} // }}}
 		throwNoSuperCall(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Call "super()" is missing`, node)

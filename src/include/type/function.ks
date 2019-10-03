@@ -98,6 +98,24 @@ class FunctionType extends Type {
 
 			return true
 		} // }}}
+		toQuote(parameters) { // {{{
+			let fragments = ''
+
+			fragments += '('
+
+			for const parameter, index in parameters {
+				if index != 0 {
+					fragments += ', '
+				}
+
+				fragments += parameter.toQuote()
+			}
+
+			fragments += ')'
+
+
+			return fragments
+		} // }}}
 	}
 	constructor(@scope) { // {{{
 		super(scope)
@@ -566,25 +584,25 @@ class FunctionType extends Type {
 		fragments.code('Function')
 	} // }}}
 	toQuote() { // {{{
-		const fragments = []
+		let fragments = ''
 
-		fragments.push('(')
+		fragments += '('
 
 		for const parameter, index in @parameters {
 			if index != 0 {
-				fragments.push(', ')
+				fragments += ', '
 			}
 
-			fragments.push(parameter.toQuote())
+			fragments += parameter.toQuote()
 		}
 
-		fragments.push(')')
+		fragments += ')'
 
 		if !@returnType.isAny() || !@returnType.isNullable() {
-			fragments.push(': ', @returnType.toQuote())
+			fragments += ': ' + @returnType.toQuote()
 		}
 
-		return fragments.join('')
+		return fragments
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		fragments
