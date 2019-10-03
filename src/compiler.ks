@@ -380,6 +380,7 @@ const $expressions = {
 	`\(NodeKind::SequenceExpression)`			: SequenceExpression
 	`\(NodeKind::TemplateExpression)`			: TemplateExpression
 	`\(NodeKind::ThisExpression)`				: ThisExpression
+	`\(NodeKind::TryExpression)`				: TryExpression
 	`\(NodeKind::UnlessExpression)`				: UnlessExpression
 }
 

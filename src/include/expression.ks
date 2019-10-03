@@ -108,8 +108,9 @@ include {
 	'../expression/omitted'
 	'../expression/regex'
 	'../expression/sequence'
-	'../expression/this'
 	'../expression/template'
+	'../expression/this'
+	'../expression/try'
 	'../expression/unless'
 
 	'../expression/misc'

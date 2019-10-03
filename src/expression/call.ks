@@ -462,7 +462,7 @@ class CallExpression extends Expression {
 				this.makeMemberCallee(value.type(), name)
 			}
 			is ReferenceType => {
-				if value.isNullable() && !this._options.rules.ignoreMisfit {
+				if value.isNullable() && !@options.rules.ignoreMisfit {
 					unless @data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Nullable) {
 						TypeException.throwNullableCaller(@property, this)
 					}
@@ -618,7 +618,7 @@ class CallExpression extends Expression {
 		}
 		else {
 			if @reusable {
-				fragments.code(this._reuseName)
+				fragments.code(@reuseName)
 			}
 			else if this.isNullable() && !@tested {
 				fragments.wrapNullable(this).code(' ? ')
