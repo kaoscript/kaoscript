@@ -1,7 +1,6 @@
 class DictionaryType extends Type {
 	private {
-		// _properties: Dictionary			= {}
-		_properties			= {}
+		_properties: Dictionary			= {}
 	}
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{

@@ -168,6 +168,21 @@ class IfStatement extends Statement {
 		@whenTrueExpression.translate()
 		@whenFalseExpression?.translate()
 	} // }}}
+	addAssignments(variables) { // {{{
+		if @cascade {
+			@parent.addAssignments(variables)
+		}
+		else if @declared {
+			for const variable in variables {
+				if !@variable.isDeclararingVariable(variable) {
+					@assignments.pushUniq(variable)
+				}
+			}
+		}
+		else {
+			@assignments.pushUniq(...variables)
+		}
+	} // }}}
 	assignments() { // {{{
 		if @whenFalseExpression is IfStatement {
 			return [].concat(@assignments, @whenFalseExpression.assignments())
