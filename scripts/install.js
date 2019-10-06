@@ -17,7 +17,7 @@ function getPackage(source) {
 program
 	.command('dependency')
 	.action(function() {
-		if(metadata._requested && metadata._requested.version === 'git') {
+		if(metadata._requested && metadata._requested.type === 'git') {
 			console.log('github:kaoscript/' + getPackage('github'));
 		}
 		else if(metadata._resolved) {
