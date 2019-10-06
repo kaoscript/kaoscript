@@ -1,3 +1,4 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	for(var x = 0; x < 10; ++x) {
 		console.log(x);
@@ -10,11 +11,13 @@ module.exports = function() {
 		hero = heroes[index];
 		console.log("The hero at index %d is %s", index, hero);
 	}
-	var likes = {
-		leto: "spice",
-		paul: "chani",
-		duncan: "murbella"
-	};
+	var likes = (() => {
+		var d = new Dictionary();
+		d.leto = "spice";
+		d.paul = "chani";
+		d.duncan = "murbella";
+		return d;
+	})();
 	for(var key in likes) {
 		var value = likes[key];
 		console.log(key + " likes " + value);

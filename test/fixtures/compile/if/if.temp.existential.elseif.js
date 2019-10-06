@@ -7,8 +7,8 @@ module.exports = function() {
 		if(color === void 0 || color === null) {
 			throw new TypeError("'color' is not nullable");
 		}
-		else if(!(Type.isObject(color) || Type.isString(color))) {
-			throw new TypeError("'color' is not of type 'Object' or 'String'");
+		else if(!(Type.isDictionary(color) || Type.isString(color))) {
+			throw new TypeError("'color' is not of type 'Dictionary' or 'String'");
 		}
 		if(Type.isString(color)) {
 			let match, __ks_0;

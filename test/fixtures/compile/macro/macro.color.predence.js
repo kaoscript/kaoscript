@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const foo = t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
 	const bar = h + ((1 / 3) * -(i - 1));
@@ -29,10 +29,12 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
-	Color.registerSpace({
-		"name": "FBQ",
-		"formatters": {
-			foo(t1, t2, t3) {
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d["name"] = "FBQ";
+		d["formatters"] = (() => {
+			const d = new Dictionary();
+			d.foo = function(t1, t2, t3) {
 				if(arguments.length < 3) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 				}
@@ -55,8 +57,8 @@ module.exports = function() {
 					throw new TypeError("'t3' is not of type 'Number'");
 				}
 				return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
-			},
-			bar(h, i) {
+			};
+			d.bar = function(h, i) {
 				if(arguments.length < 2) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
@@ -73,9 +75,11 @@ module.exports = function() {
 					throw new TypeError("'i' is not of type 'Number'");
 				}
 				return h + ((1 / 3) * -(i - 1));
-			}
-		}
-	});
+			};
+			return d;
+		})();
+		return d;
+	})());
 	return {
 		Color: Color
 	};

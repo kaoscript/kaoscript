@@ -22,8 +22,8 @@ module.exports = function() {
 			if(references === void 0 || references === null) {
 				throw new TypeError("'references' is not nullable");
 			}
-			else if(!Type.isObject(references)) {
-				throw new TypeError("'references' is not of type 'Object'");
+			else if(!Type.isDictionary(references)) {
+				throw new TypeError("'references' is not of type 'Dictionary'");
 			}
 			if(domain === void 0 || domain === null) {
 				throw new TypeError("'domain' is not nullable");
@@ -55,8 +55,8 @@ module.exports = function() {
 			if(references === void 0 || references === null) {
 				throw new TypeError("'references' is not nullable");
 			}
-			else if(!Type.isObject(references)) {
-				throw new TypeError("'references' is not of type 'Object'");
+			else if(!Type.isDictionary(references)) {
+				throw new TypeError("'references' is not of type 'Dictionary'");
 			}
 			if(node === void 0 || node === null) {
 				throw new TypeError("'node' is not nullable");

@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	function foobar(x) {
 		if(arguments.length < 1) {
@@ -6,9 +7,9 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		if(x == Infinity) {
+		if(Operator.eq(x, Infinity)) {
 		}
-		else if(x == -Infinity) {
+		else if(Operator.eq(x, -Infinity)) {
 		}
 	}
 };

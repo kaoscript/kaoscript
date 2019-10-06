@@ -1,5 +1,5 @@
 require("kaoscript/register");
-var {Helper, Operator, Type} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {Array, __ks_Array} = require("./_/_array.ks")();
 	var Float = require("./_/_float.ks")().Float;
@@ -7,160 +7,162 @@ module.exports = function() {
 	var {Math, __ks_Math} = require("./_/_math.ks")();
 	var {Number, __ks_Number} = require("./_/_number.ks")();
 	var {String, __ks_String} = require("./_/_string.ks")();
-	let $spaces = {};
-	let $aliases = {};
-	let $components = {};
-	let $formatters = {};
-	const $names = {
-		"aliceblue": "f0f8ff",
-		"antiquewhite": "faebd7",
-		"aqua": "0ff",
-		"aquamarine": "7fffd4",
-		"azure": "f0ffff",
-		"beige": "f5f5dc",
-		"bisque": "ffe4c4",
-		"black": "000",
-		"blanchedalmond": "ffebcd",
-		"blue": "00f",
-		"blueviolet": "8a2be2",
-		"brown": "a52a2a",
-		"burlywood": "deb887",
-		"burntsienna": "ea7e5d",
-		"cadetblue": "5f9ea0",
-		"chartreuse": "7fff00",
-		"chocolate": "d2691e",
-		"coral": "ff7f50",
-		"cornflowerblue": "6495ed",
-		"cornsilk": "fff8dc",
-		"crimson": "dc143c",
-		"cyan": "0ff",
-		"darkblue": "00008b",
-		"darkcyan": "008b8b",
-		"darkgoldenrod": "b8860b",
-		"darkgray": "a9a9a9",
-		"darkgreen": "006400",
-		"darkgrey": "a9a9a9",
-		"darkkhaki": "bdb76b",
-		"darkmagenta": "8b008b",
-		"darkolivegreen": "556b2f",
-		"darkorange": "ff8c00",
-		"darkorchid": "9932cc",
-		"darkred": "8b0000",
-		"darksalmon": "e9967a",
-		"darkseagreen": "8fbc8f",
-		"darkslateblue": "483d8b",
-		"darkslategray": "2f4f4f",
-		"darkslategrey": "2f4f4f",
-		"darkturquoise": "00ced1",
-		"darkviolet": "9400d3",
-		"deeppink": "ff1493",
-		"deepskyblue": "00bfff",
-		"dimgray": "696969",
-		"dimgrey": "696969",
-		"dodgerblue": "1e90ff",
-		"firebrick": "b22222",
-		"floralwhite": "fffaf0",
-		"forestgreen": "228b22",
-		"fuchsia": "f0f",
-		"gainsboro": "dcdcdc",
-		"ghostwhite": "f8f8ff",
-		"gold": "ffd700",
-		"goldenrod": "daa520",
-		"gray": "808080",
-		"green": "008000",
-		"greenyellow": "adff2f",
-		"grey": "808080",
-		"honeydew": "f0fff0",
-		"hotpink": "ff69b4",
-		"indianred": "cd5c5c",
-		"indigo": "4b0082",
-		"ivory": "fffff0",
-		"khaki": "f0e68c",
-		"lavender": "e6e6fa",
-		"lavenderblush": "fff0f5",
-		"lawngreen": "7cfc00",
-		"lemonchiffon": "fffacd",
-		"lightblue": "add8e6",
-		"lightcoral": "f08080",
-		"lightcyan": "e0ffff",
-		"lightgoldenrodyellow": "fafad2",
-		"lightgray": "d3d3d3",
-		"lightgreen": "90ee90",
-		"lightgrey": "d3d3d3",
-		"lightpink": "ffb6c1",
-		"lightsalmon": "ffa07a",
-		"lightseagreen": "20b2aa",
-		"lightskyblue": "87cefa",
-		"lightslategray": "789",
-		"lightslategrey": "789",
-		"lightsteelblue": "b0c4de",
-		"lightyellow": "ffffe0",
-		"lime": "0f0",
-		"limegreen": "32cd32",
-		"linen": "faf0e6",
-		"magenta": "f0f",
-		"maroon": "800000",
-		"mediumaquamarine": "66cdaa",
-		"mediumblue": "0000cd",
-		"mediumorchid": "ba55d3",
-		"mediumpurple": "9370db",
-		"mediumseagreen": "3cb371",
-		"mediumslateblue": "7b68ee",
-		"mediumspringgreen": "00fa9a",
-		"mediumturquoise": "48d1cc",
-		"mediumvioletred": "c71585",
-		"midnightblue": "191970",
-		"mintcream": "f5fffa",
-		"mistyrose": "ffe4e1",
-		"moccasin": "ffe4b5",
-		"navajowhite": "ffdead",
-		"navy": "000080",
-		"oldlace": "fdf5e6",
-		"olive": "808000",
-		"olivedrab": "6b8e23",
-		"orange": "ffa500",
-		"orangered": "ff4500",
-		"orchid": "da70d6",
-		"palegoldenrod": "eee8aa",
-		"palegreen": "98fb98",
-		"paleturquoise": "afeeee",
-		"palevioletred": "db7093",
-		"papayawhip": "ffefd5",
-		"peachpuff": "ffdab9",
-		"peru": "cd853f",
-		"pink": "ffc0cb",
-		"plum": "dda0dd",
-		"powderblue": "b0e0e6",
-		"purple": "800080",
-		"red": "f00",
-		"rosybrown": "bc8f8f",
-		"royalblue": "4169e1",
-		"saddlebrown": "8b4513",
-		"salmon": "fa8072",
-		"sandybrown": "f4a460",
-		"seagreen": "2e8b57",
-		"seashell": "fff5ee",
-		"sienna": "a0522d",
-		"silver": "c0c0c0",
-		"skyblue": "87ceeb",
-		"slateblue": "6a5acd",
-		"slategray": "708090",
-		"slategrey": "708090",
-		"snow": "fffafa",
-		"springgreen": "00ff7f",
-		"steelblue": "4682b4",
-		"tan": "d2b48c",
-		"teal": "008080",
-		"thistle": "d8bfd8",
-		"tomato": "ff6347",
-		"turquoise": "40e0d0",
-		"violet": "ee82ee",
-		"wheat": "f5deb3",
-		"white": "fff",
-		"whitesmoke": "f5f5f5",
-		"yellow": "ff0",
-		"yellowgreen": "9acd32"
-	};
+	let $spaces = new Dictionary();
+	let $aliases = new Dictionary();
+	let $components = new Dictionary();
+	let $formatters = new Dictionary();
+	const $names = (() => {
+		const d = new Dictionary();
+		d["aliceblue"] = "f0f8ff";
+		d["antiquewhite"] = "faebd7";
+		d["aqua"] = "0ff";
+		d["aquamarine"] = "7fffd4";
+		d["azure"] = "f0ffff";
+		d["beige"] = "f5f5dc";
+		d["bisque"] = "ffe4c4";
+		d["black"] = "000";
+		d["blanchedalmond"] = "ffebcd";
+		d["blue"] = "00f";
+		d["blueviolet"] = "8a2be2";
+		d["brown"] = "a52a2a";
+		d["burlywood"] = "deb887";
+		d["burntsienna"] = "ea7e5d";
+		d["cadetblue"] = "5f9ea0";
+		d["chartreuse"] = "7fff00";
+		d["chocolate"] = "d2691e";
+		d["coral"] = "ff7f50";
+		d["cornflowerblue"] = "6495ed";
+		d["cornsilk"] = "fff8dc";
+		d["crimson"] = "dc143c";
+		d["cyan"] = "0ff";
+		d["darkblue"] = "00008b";
+		d["darkcyan"] = "008b8b";
+		d["darkgoldenrod"] = "b8860b";
+		d["darkgray"] = "a9a9a9";
+		d["darkgreen"] = "006400";
+		d["darkgrey"] = "a9a9a9";
+		d["darkkhaki"] = "bdb76b";
+		d["darkmagenta"] = "8b008b";
+		d["darkolivegreen"] = "556b2f";
+		d["darkorange"] = "ff8c00";
+		d["darkorchid"] = "9932cc";
+		d["darkred"] = "8b0000";
+		d["darksalmon"] = "e9967a";
+		d["darkseagreen"] = "8fbc8f";
+		d["darkslateblue"] = "483d8b";
+		d["darkslategray"] = "2f4f4f";
+		d["darkslategrey"] = "2f4f4f";
+		d["darkturquoise"] = "00ced1";
+		d["darkviolet"] = "9400d3";
+		d["deeppink"] = "ff1493";
+		d["deepskyblue"] = "00bfff";
+		d["dimgray"] = "696969";
+		d["dimgrey"] = "696969";
+		d["dodgerblue"] = "1e90ff";
+		d["firebrick"] = "b22222";
+		d["floralwhite"] = "fffaf0";
+		d["forestgreen"] = "228b22";
+		d["fuchsia"] = "f0f";
+		d["gainsboro"] = "dcdcdc";
+		d["ghostwhite"] = "f8f8ff";
+		d["gold"] = "ffd700";
+		d["goldenrod"] = "daa520";
+		d["gray"] = "808080";
+		d["green"] = "008000";
+		d["greenyellow"] = "adff2f";
+		d["grey"] = "808080";
+		d["honeydew"] = "f0fff0";
+		d["hotpink"] = "ff69b4";
+		d["indianred"] = "cd5c5c";
+		d["indigo"] = "4b0082";
+		d["ivory"] = "fffff0";
+		d["khaki"] = "f0e68c";
+		d["lavender"] = "e6e6fa";
+		d["lavenderblush"] = "fff0f5";
+		d["lawngreen"] = "7cfc00";
+		d["lemonchiffon"] = "fffacd";
+		d["lightblue"] = "add8e6";
+		d["lightcoral"] = "f08080";
+		d["lightcyan"] = "e0ffff";
+		d["lightgoldenrodyellow"] = "fafad2";
+		d["lightgray"] = "d3d3d3";
+		d["lightgreen"] = "90ee90";
+		d["lightgrey"] = "d3d3d3";
+		d["lightpink"] = "ffb6c1";
+		d["lightsalmon"] = "ffa07a";
+		d["lightseagreen"] = "20b2aa";
+		d["lightskyblue"] = "87cefa";
+		d["lightslategray"] = "789";
+		d["lightslategrey"] = "789";
+		d["lightsteelblue"] = "b0c4de";
+		d["lightyellow"] = "ffffe0";
+		d["lime"] = "0f0";
+		d["limegreen"] = "32cd32";
+		d["linen"] = "faf0e6";
+		d["magenta"] = "f0f";
+		d["maroon"] = "800000";
+		d["mediumaquamarine"] = "66cdaa";
+		d["mediumblue"] = "0000cd";
+		d["mediumorchid"] = "ba55d3";
+		d["mediumpurple"] = "9370db";
+		d["mediumseagreen"] = "3cb371";
+		d["mediumslateblue"] = "7b68ee";
+		d["mediumspringgreen"] = "00fa9a";
+		d["mediumturquoise"] = "48d1cc";
+		d["mediumvioletred"] = "c71585";
+		d["midnightblue"] = "191970";
+		d["mintcream"] = "f5fffa";
+		d["mistyrose"] = "ffe4e1";
+		d["moccasin"] = "ffe4b5";
+		d["navajowhite"] = "ffdead";
+		d["navy"] = "000080";
+		d["oldlace"] = "fdf5e6";
+		d["olive"] = "808000";
+		d["olivedrab"] = "6b8e23";
+		d["orange"] = "ffa500";
+		d["orangered"] = "ff4500";
+		d["orchid"] = "da70d6";
+		d["palegoldenrod"] = "eee8aa";
+		d["palegreen"] = "98fb98";
+		d["paleturquoise"] = "afeeee";
+		d["palevioletred"] = "db7093";
+		d["papayawhip"] = "ffefd5";
+		d["peachpuff"] = "ffdab9";
+		d["peru"] = "cd853f";
+		d["pink"] = "ffc0cb";
+		d["plum"] = "dda0dd";
+		d["powderblue"] = "b0e0e6";
+		d["purple"] = "800080";
+		d["red"] = "f00";
+		d["rosybrown"] = "bc8f8f";
+		d["royalblue"] = "4169e1";
+		d["saddlebrown"] = "8b4513";
+		d["salmon"] = "fa8072";
+		d["sandybrown"] = "f4a460";
+		d["seagreen"] = "2e8b57";
+		d["seashell"] = "fff5ee";
+		d["sienna"] = "a0522d";
+		d["silver"] = "c0c0c0";
+		d["skyblue"] = "87ceeb";
+		d["slateblue"] = "6a5acd";
+		d["slategray"] = "708090";
+		d["slategrey"] = "708090";
+		d["snow"] = "fffafa";
+		d["springgreen"] = "00ff7f";
+		d["steelblue"] = "4682b4";
+		d["tan"] = "d2b48c";
+		d["teal"] = "008080";
+		d["thistle"] = "d8bfd8";
+		d["tomato"] = "ff6347";
+		d["turquoise"] = "40e0d0";
+		d["violet"] = "ee82ee";
+		d["wheat"] = "f5deb3";
+		d["white"] = "fff";
+		d["whitesmoke"] = "f5f5f5";
+		d["yellow"] = "ff0";
+		d["yellowgreen"] = "9acd32";
+		return d;
+	})();
 	function $blend(x, y, percentage) {
 		if(arguments.length < 3) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
@@ -205,7 +207,7 @@ module.exports = function() {
 			throw new TypeError("'first' is not of type 'Function'");
 		}
 		let that = first.call(null, ...firstArgs);
-		let lastArgs = Helper.mapObject(components, function(name, component) {
+		let lastArgs = Helper.mapDictionary(components, function(name, component) {
 			return that[component.field];
 		});
 		lastArgs.push(that);
@@ -226,7 +228,7 @@ module.exports = function() {
 				percentage = false;
 			}
 			let i = Float.parse(n);
-			return isNaN(i) ? 1 : __ks_Number._im_round(__ks_Number._im_limit(percentage ? i / 100 : i, 0, 1), 3);
+			return Number.isNaN(i) ? 1 : __ks_Number._im_round(__ks_Number._im_limit(percentage ? i / 100 : i, 0, 1), 3);
 		}
 		function ff(n) {
 			if(arguments.length < 1) {
@@ -274,11 +276,13 @@ module.exports = function() {
 		component.field = "_" + name;
 		$spaces[space].components[name] = component;
 		if(!Type.isValue($components[name])) {
-			$components[name] = {
-				field: component.field,
-				spaces: {},
-				families: []
-			};
+			$components[name] = (() => {
+				const d = new Dictionary();
+				d.field = component.field;
+				d.spaces = new Dictionary();
+				d.families = [];
+				return d;
+			})();
 		}
 		$components[name].families.push(space);
 		$components[name].spaces[space] = true;
@@ -300,16 +304,18 @@ module.exports = function() {
 			throw new TypeError("'space' is not of type 'String'");
 		}
 		if(result === void 0 || result === null) {
-			result = {
-				_alpha: 0
-			};
+			result = (() => {
+				const d = new Dictionary();
+				d._alpha = 0;
+				return d;
+			})();
 		}
-		else if(!Type.isObject(result)) {
-			throw new TypeError("'result' is not of type 'Object'");
+		else if(!Type.isDictionary(result)) {
+			throw new TypeError("'result' is not of type 'Dictionary'");
 		}
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
-			let args = Helper.mapObject(s.components, function(name, component) {
+			let args = Helper.mapDictionary(s.components, function(name, component) {
 				return that[component.field];
 			});
 			args.push(result);
@@ -413,8 +419,9 @@ module.exports = function() {
 			return "#" + chars.charAt(r1) + chars.charAt(r2) + chars.charAt(g1) + chars.charAt(g2) + chars.charAt(b1) + chars.charAt(b2) + chars.charAt(a1) + chars.charAt(a2);
 		}
 	}
-	let $parsers = {
-		srgb(that, args) {
+	let $parsers = (() => {
+		const d = new Dictionary();
+		d.srgb = function(that, args) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
@@ -447,7 +454,7 @@ module.exports = function() {
 					that._blue = $caster.ff(args[0][2]);
 					return true;
 				}
-				else if(Type.isObject(args[0])) {
+				else if(Type.isDictionary(args[0])) {
 					if(Type.isValue(args[0].r) && Type.isValue(args[0].g) && Type.isValue(args[0].b)) {
 						that._space = Space.SRGB;
 						that._alpha = $caster.alpha(args[0].a);
@@ -567,8 +574,8 @@ module.exports = function() {
 				return true;
 			}
 			return false;
-		},
-		gray(that, args) {
+		};
+		d.gray = function(that, args) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
@@ -609,8 +616,9 @@ module.exports = function() {
 				}
 			}
 			return false;
-		}
-	};
+		};
+		return d;
+	})();
 	function $space(name) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
@@ -621,11 +629,13 @@ module.exports = function() {
 		else if(!Type.isString(name)) {
 			throw new TypeError("'name' is not of type 'String'");
 		}
-		$spaces[name] = Type.isValue($spaces[name]) ? $spaces[name] : {
-			alias: {},
-			converters: {},
-			components: {}
-		};
+		$spaces[name] = Type.isValue($spaces[name]) ? $spaces[name] : (() => {
+			const d = new Dictionary();
+			d.alias = new Dictionary();
+			d.converters = new Dictionary();
+			d.components = new Dictionary();
+			return d;
+		})();
 	}
 	let Space = Helper.enum(String, {
 		RGB: "rgb",
@@ -738,7 +748,7 @@ module.exports = function() {
 				let component = components[name];
 				if(component.loop === true) {
 					let d = Math.abs(Operator.subtraction(this[component.field], color[component.field]));
-					if(d > component.half) {
+					if(Operator.gt(d, component.half)) {
 						d = Operator.subtraction(component.mod, d);
 					}
 					this[component.field] = __ks_Number._im_round(Operator.modulo(this[component.field] + (d * percentage), component.mod), component.round);
@@ -809,12 +819,14 @@ module.exports = function() {
 					ratio = 1 / ratio;
 				}
 				ratio = __ks_Number._im_round(ratio, 2);
-				return {
-					ratio,
-					error: 0,
-					min: ratio,
-					max: ratio
-				};
+				return (() => {
+					const d = new Dictionary();
+					d.ratio = ratio;
+					d.error = 0;
+					d.min = ratio;
+					d.max = ratio;
+					return d;
+				})();
 			}
 			else {
 				let black = this.clone().blend($static.black, 0.5, Space.SRGB, true).contrast(color).ratio;
@@ -822,12 +834,14 @@ module.exports = function() {
 				const max = Math.max(black, white);
 				let closest = new Color(__ks_Number._im_limit((color._red - (this._red * a)) / (1 - a), 0, 255), __ks_Number._im_limit((color._green - (this._green * a)) / (1 - a), 0, 255), __ks_Number._im_limit((color._blue - (this._blue * a)) / (1 - a), 0, 255));
 				const min = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio;
-				return {
-					ratio: __ks_Number._im_round((min + max) / 2, 2),
-					error: __ks_Number._im_round((max - min) / 2, 2),
-					min,
-					max
-				};
+				return (() => {
+					const d = new Dictionary();
+					d.ratio = __ks_Number._im_round((min + max) / 2, 2);
+					d.error = __ks_Number._im_round((max - min) / 2, 2);
+					d.min = min;
+					d.max = max;
+					return d;
+				})();
 			}
 		}
 		contrast() {
@@ -941,7 +955,7 @@ module.exports = function() {
 			if(Type.isValue(component.spaces[this._space])) {
 				return this[component.field];
 			}
-			else if(component.families.length > 1) {
+			else if(Operator.gt(component.families.length, 1)) {
 				throw new Error("The component '" + name + "' has a conflict between the spaces '" + component.families.join("', '") + "'");
 			}
 			else {
@@ -1098,11 +1112,11 @@ module.exports = function() {
 		__ks_func_luminance_0() {
 			let that = this.like(Space.SRGB);
 			let r = Operator.division(that._red, 255);
-			r = (r < 0.03928) ? Operator.division(r, 12.92) : Math.pow(Operator.division(Operator.addition(r, 0.055), 1.055), 2.4);
+			r = Operator.lt(r, 0.03928) ? Operator.division(r, 12.92) : Math.pow(Operator.division(Operator.addition(r, 0.055), 1.055), 2.4);
 			let g = Operator.division(that._green, 255);
-			g = (g < 0.03928) ? Operator.division(g, 12.92) : Math.pow(Operator.division(Operator.addition(g, 0.055), 1.055), 2.4);
+			g = Operator.lt(g, 0.03928) ? Operator.division(g, 12.92) : Math.pow(Operator.division(Operator.addition(g, 0.055), 1.055), 2.4);
 			let b = Operator.division(that._blue, 255);
-			b = (b < 0.03928) ? Operator.division(b, 12.92) : Math.pow(Operator.division(Operator.addition(b, 0.055), 1.055), 2.4);
+			b = Operator.lt(b, 0.03928) ? Operator.division(b, 12.92) : Math.pow(Operator.division(Operator.addition(b, 0.055), 1.055), 2.4);
 			return Operator.multiplication(0.2126, r) + Operator.multiplication(0.7152, g) + Operator.multiplication(0.0722, b);
 		}
 		luminance() {
@@ -1164,10 +1178,10 @@ module.exports = function() {
 				throw new TypeError("'tripleA' is not of type 'Boolean'");
 			}
 			if(tripleA) {
-				return this.contrast(color).ratio >= 7;
+				return Operator.gte(this.contrast(color).ratio, 7);
 			}
 			else {
-				return this.contrast(color).ratio >= 4.5;
+				return Operator.gte(this.contrast(color).ratio, 4.5);
 			}
 		}
 		readable() {
@@ -1213,7 +1227,7 @@ module.exports = function() {
 			if(Type.isValue(component.spaces[this._space])) {
 				component = $spaces[this._space].components[name];
 			}
-			else if(component.families.length > 1) {
+			else if(Operator.gt(component.families.length, 1)) {
 				throw new Error("The component '" + name + "' has a conflict between the spaces '" + component.families.join("', '") + "'");
 			}
 			else {
@@ -1381,9 +1395,11 @@ module.exports = function() {
 			else if(!Type.isFunction(formatter)) {
 				throw new TypeError("'formatter' is not of type 'Function'");
 			}
-			$formatters[format] = {
-				formatter
-			};
+			$formatters[format] = (() => {
+				const d = new Dictionary();
+				d.formatter = formatter;
+				return d;
+			})();
 		}
 		static registerFormatter() {
 			if(arguments.length === 2) {
@@ -1422,27 +1438,31 @@ module.exports = function() {
 			if(space === void 0 || space === null) {
 				throw new TypeError("'space' is not nullable");
 			}
-			else if(!Type.isObject(space)) {
-				throw new TypeError("'space' is not of type 'Object'");
+			else if(!Type.isDictionary(space)) {
+				throw new TypeError("'space' is not of type 'Dictionary'");
 			}
-			let spaces = Object.keys($spaces);
+			let spaces = Dictionary.keys($spaces);
 			$space(space.name);
 			if(Type.isValue(space.parser)) {
 				$parsers[space.name] = space.parser;
 			}
 			if(Type.isValue(space.formatter)) {
-				$formatters[space.name] = {
-					space: space.name,
-					formatter: space.formatter
-				};
+				$formatters[space.name] = (() => {
+					const d = new Dictionary();
+					d.space = space.name;
+					d.formatter = space.formatter;
+					return d;
+				})();
 			}
 			else if(Type.isValue(space.formatters)) {
 				for(let name in space.formatters) {
 					let formatter = space.formatters[name];
-					$formatters[name] = {
-						space: space.name,
-						formatter
-					};
+					$formatters[name] = (() => {
+						const d = new Dictionary();
+						d.space = space.name;
+						d.formatter = formatter;
+						return d;
+					})();
 				}
 			}
 			if(Type.isValue(space.alias)) {
@@ -1526,11 +1546,13 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
-	Color.registerSpace({
-		name: Space.SRGB,
-		"alias": [Space.RGB],
-		"formatters": {
-			hex(that) {
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d.name = Space.SRGB;
+		d["alias"] = [Space.RGB];
+		d["formatters"] = (() => {
+			const d = new Dictionary();
+			d.hex = function(that) {
 				if(arguments.length < 1) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
@@ -1541,8 +1563,8 @@ module.exports = function() {
 					throw new TypeError("'that' is not of type 'Color'");
 				}
 				return $hex(that);
-			},
-			srgb(that) {
+			};
+			d.srgb = function(that) {
 				if(arguments.length < 1) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
@@ -1558,20 +1580,30 @@ module.exports = function() {
 				else {
 					return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
 				}
-			}
-		},
-		"components": {
-			"red": {
-				"max": 255
-			},
-			"green": {
-				"max": 255
-			},
-			"blue": {
-				"max": 255
-			}
-		}
-	});
+			};
+			return d;
+		})();
+		d["components"] = (() => {
+			const d = new Dictionary();
+			d["red"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			d["green"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			d["blue"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			return d;
+		})();
+		return d;
+	})());
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.getField("red");
 	};
@@ -1635,11 +1667,13 @@ module.exports = function() {
 		}
 		throw new SyntaxError("Wrong number of arguments");
 	};
-	let $static = {
-		black: Color.from("#000"),
-		gray: Color.from("#808080"),
-		white: Color.from("#fff")
-	};
+	let $static = (() => {
+		const d = new Dictionary();
+		d.black = Color.from("#000");
+		d.gray = Color.from("#808080");
+		d.white = Color.from("#fff");
+		return d;
+	})();
 	return {
 		Space: Space,
 		Color: Color

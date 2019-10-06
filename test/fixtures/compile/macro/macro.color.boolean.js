@@ -1,3 +1,4 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	class Color {
 		constructor() {
@@ -57,28 +58,40 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
-	Color.registerSpace({
-		"name": "srgb",
-		"alias": ["rgb"],
-		"components": {
-			"red": {
-				"max": 255,
-				"field": "_red"
-			},
-			"green": {
-				"max": 255,
-				"field": "_green"
-			},
-			"blue": {
-				"max": 255,
-				"field": "_blue"
-			},
-			"alpha": {
-				"mutator": true,
-				"field": "_alpha"
-			}
-		}
-	});
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d["name"] = "srgb";
+		d["alias"] = ["rgb"];
+		d["components"] = (() => {
+			const d = new Dictionary();
+			d["red"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_red";
+				return d;
+			})();
+			d["green"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_green";
+				return d;
+			})();
+			d["blue"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_blue";
+				return d;
+			})();
+			d["alpha"] = (() => {
+				const d = new Dictionary();
+				d["mutator"] = true;
+				d["field"] = "_alpha";
+				return d;
+			})();
+			return d;
+		})();
+		return d;
+	})());
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.getField("red");
 	};

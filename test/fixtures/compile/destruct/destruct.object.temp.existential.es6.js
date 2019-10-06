@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function parse(line, rules) {
 		if(arguments.length < 2) {
@@ -11,10 +11,12 @@ module.exports = function() {
 			throw new TypeError("'rules' is not nullable");
 		}
 		const tokens = [];
-		return {
-			tokens,
-			rules
-		};
+		return (() => {
+			const d = new Dictionary();
+			d.tokens = tokens;
+			d.rules = rules;
+			return d;
+		})();
 	}
 	function foobar(lines) {
 		if(arguments.length < 1) {

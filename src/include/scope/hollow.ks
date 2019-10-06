@@ -123,6 +123,15 @@ class HollowScope extends Scope {
 	parent() => @parent
 	reference(...args) => @parent.reference(...args)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
+	rename(name, newName) { // {{{
+		if newName != name {
+			const variable = this.getVariable(name).clone()
+
+			variable.renameAs(newName)
+
+			@variables[name] = [@parent.line(), variable]
+		}
+	} // }}}
 	replaceVariable(name: String, type: Type, node): Variable { // {{{
 		let variable = this.getVariable(name)
 

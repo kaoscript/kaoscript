@@ -9,12 +9,12 @@ enum Foobar {
 
 func foobar(x: Foobar) => 'enum'
 func foobar(x: Number) => 'number'
-func foobar(x: Object) => 'object'
+func foobar(x: Dictionary) => 'dictionary'
 
 expect(foobar(Foobar::foo)).to.equal('enum')
 expect(foobar(Foobar::foo | Foobar::bar)).to.equal('enum')
 expect(foobar(0)).to.equal('number')
-expect(foobar({})).to.equal('object')
+expect(foobar({})).to.equal('dictionary')
 
 func testIf(x: Foobar, y: Number, z) {
 	const results = []

@@ -1,9 +1,12 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	function foo() {
-		return {
-			x: 1,
-			y: 2
-		};
+		return (() => {
+			const d = new Dictionary();
+			d.x = 1;
+			d.y = 2;
+			return d;
+		})();
 	}
 	const {x, y} = foo();
 	console.log(x, y);

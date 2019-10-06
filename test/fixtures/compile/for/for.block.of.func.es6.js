@@ -1,10 +1,13 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	function likes() {
-		return {
-			leto: "spice",
-			paul: "chani",
-			duncan: "murbella"
-		};
+		return (() => {
+			const d = new Dictionary();
+			d.leto = "spice";
+			d.paul = "chani";
+			d.duncan = "murbella";
+			return d;
+		})();
 	}
 	{
 		let __ks_0 = likes();

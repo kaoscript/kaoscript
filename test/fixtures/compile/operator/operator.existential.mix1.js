@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	if(Type.isValue(foo) ? foo.length > 10 : false) {
+	if(Type.isValue(foo) ? Operator.gt(foo.length, 10) : false) {
 		console.log(foo);
 	}
 };

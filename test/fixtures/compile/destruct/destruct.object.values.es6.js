@@ -1,22 +1,30 @@
-var Helper = require("@kaoscript/runtime").Helper;
+var {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let __ks_0;
-	let foo = Helper.default((__ks_0 = {
-		foo: 2,
-		qux: 9
-	}).foo, 3), bar = Helper.default(__ks_0.bar, 6), qux = __ks_0.qux;
+	let foo = Helper.default((__ks_0 = (() => {
+		const d = new Dictionary();
+		d.foo = 2;
+		d.qux = 9;
+		return d;
+	})()).foo, 3), bar = Helper.default(__ks_0.bar, 6), qux = __ks_0.qux;
 	console.log(foo, bar, qux);
-	foo = Helper.default((__ks_0 = {
-		foo: null
-	}).foo, 3), bar = __ks_0.bar, qux = Helper.default(__ks_0.qux, 7);
+	foo = Helper.default((__ks_0 = (() => {
+		const d = new Dictionary();
+		d.foo = null;
+		return d;
+	})()).foo, 3), bar = __ks_0.bar, qux = Helper.default(__ks_0.qux, 7);
 	console.log(foo, bar, qux);
-	foo = Helper.default(({
-		bar: 2
-	}).foo, 5);
+	foo = Helper.default(((() => {
+		const d = new Dictionary();
+		d.bar = 2;
+		return d;
+	})()).foo, 5);
 	console.log(foo, bar, qux);
-	({foo, bar, qux} = {
-		foo: 2,
-		qux: 9
-	});
+	({foo, bar, qux} = (() => {
+		const d = new Dictionary();
+		d.foo = 2;
+		d.qux = 9;
+		return d;
+	})());
 	console.log(foo, bar, qux);
 };

@@ -5,7 +5,7 @@ enum Space<String> {
 }
 
 class Color {
-	macro registerSpace(@expression: Object) {
+	macro registerSpace(@expression: Dictionary) {
 		if expression.components? {
 			const fields: Array = []
 			const methods: Array = []

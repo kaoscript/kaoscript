@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_replaceAll_0 = function(find, replacement) {
@@ -17,7 +17,7 @@ module.exports = function() {
 		if(find.length === 0) {
 			return this.valueOf();
 		}
-		if(find.length <= 3) {
+		if(Operator.lte(find.length, 3)) {
 			return this.split(find).join(replacement);
 		}
 		else {

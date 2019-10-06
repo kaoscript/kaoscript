@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo(x) {
 		if(arguments.length < 1) {
@@ -22,8 +22,10 @@ module.exports = function() {
 		}
 	}
 	function bar() {
-		return {
-			z: 42
-		};
+		return (() => {
+			const d = new Dictionary();
+			d.z = 42;
+			return d;
+		})();
 	}
 };

@@ -828,7 +828,7 @@ namespace Router {
 			}
 		}
 		else {
-			if map.types[type.hashCode()] is Object {
+			if map.types[type.hashCode()] is Dictionary {
 				map.types[type.hashCode()].methods.push(method)
 			}
 			else {

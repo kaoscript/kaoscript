@@ -1497,7 +1497,7 @@ class ObjectBindingParameter extends ObjectBinding {
 				element.setDeclaredType(type, definitive)
 			}
 		}
-		else if type.isObject() {
+		else if type.isDictionary() {
 			if type.isReference() {
 				const elementType = type.parameter()
 

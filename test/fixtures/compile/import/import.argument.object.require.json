@@ -11,7 +11,7 @@
   "exports": [],
   "references": [
     {
-      "kind": "object",
+      "kind": "dictionary",
       "properties": {
         "waldo": {
           "kind": "function",

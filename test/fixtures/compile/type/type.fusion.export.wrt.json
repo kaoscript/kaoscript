@@ -46,7 +46,7 @@
       }
     },
     {
-      "kind": "object",
+      "kind": "dictionary",
       "properties": {
         "index": "Number",
         "input": "String"

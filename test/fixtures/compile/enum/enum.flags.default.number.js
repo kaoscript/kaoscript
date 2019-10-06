@@ -1,4 +1,4 @@
-var {Helper, Operator} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Operator} = require("@kaoscript/runtime");
 module.exports = function() {
 	let AnimalFlags = Helper.enum(Number, {
 		None: 0,
@@ -27,9 +27,11 @@ module.exports = function() {
 			console.log("nothing");
 		}
 	}
-	let animal = {
-		flags: AnimalFlags.None
-	};
+	let animal = (() => {
+		const d = new Dictionary();
+		d.flags = AnimalFlags.None;
+		return d;
+	})();
 	printAnimalAbilities(animal);
 	animal.flags = Operator.bitwiseOr(animal.flags, AnimalFlags.HasClaws);
 	printAnimalAbilities(animal);

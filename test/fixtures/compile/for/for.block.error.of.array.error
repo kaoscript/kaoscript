@@ -1,1 +1,1 @@
-TypeException: "for..of" must be used with an object (line 5, file "fixtures/compile/for/for.block.error.of.array.ks")
+TypeException: "for..of" must be used with a dictionary (line 5, file "fixtures/compile/for/for.block.error.of.array.ks")

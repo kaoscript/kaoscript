@@ -20,7 +20,7 @@ class AnonymousFunctionExpression extends Expression {
 			parameter.analyse()
 		}
 
-		@isObjectMember = @parent.parent() is ObjectExpression
+		@isObjectMember = @parent.parent() is DictionaryExpression
 	} // }}}
 	prepare() { // {{{
 		for parameter in @parameters {
@@ -49,39 +49,10 @@ class AnonymousFunctionExpression extends Expression {
 	isUsingVariable(name) => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
-		let surround
-
-		if @options.format.functions == 'es5' {
-			if @isObjectMember && !@parent.parent().hasComputedProperties() {
-				surround = {
-					beforeParameters: ': function('
-					afterParameters: ')'
-					footer: ''
-				}
-			}
-			else {
-				surround = {
-					beforeParameters: 'function('
-					afterParameters: ')'
-					footer: ''
-				}
-			}
-		}
-		else {
-			if @isObjectMember {
-				surround = {
-					beforeParameters: '('
-					afterParameters: ')'
-					footer: ''
-				}
-			}
-			else {
-				surround = {
-					beforeParameters: 'function('
-					afterParameters: ')'
-					footer: ''
-				}
-			}
+		const surround = {
+			beforeParameters: 'function('
+			afterParameters: ')'
+			footer: ''
 		}
 
 		fragments.code(surround.beforeParameters)

@@ -1,7 +1,8 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	let x = 0;
 	console.log(x);
-	let o = {};
+	let o = new Dictionary();
 	o.x = 30;
 	if(true) {
 		let x = 42;

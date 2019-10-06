@@ -7,6 +7,6 @@ module.exports = function() {
 			percentage = false;
 		}
 		let i = Float.parse(n);
-		return isNaN(i) ? 1 : __ks_Number._im_round(__ks_Number._im_limit((percentage === true) ? i / 100 : i, 0, 1), 3);
+		return Number.isNaN(i) ? 1 : __ks_Number._im_round(__ks_Number._im_limit((percentage === true) ? i / 100 : i, 0, 1), 3);
 	}
 };

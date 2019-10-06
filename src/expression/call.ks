@@ -420,6 +420,22 @@ class CallExpression extends Expression {
 					this.addCallee(new DefaultCallee(@data, @object, this))
 				}
 			}
+			is DictionaryType => {
+				if const property = value.getProperty(@property) {
+					if property is FunctionType {
+						this.makeCallee(property, @property)
+					}
+					else if property is OverloadedFunctionType {
+						this.makeCallee(property, @property)
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, @object, property, this))
+					}
+				}
+				else {
+					this.addCallee(new DefaultCallee(@data, @object, this))
+				}
+			}
 			is FunctionType => {
 				this.makeMemberCalleeFromReference(@scope.reference('Function'))
 			}
@@ -437,22 +453,6 @@ class CallExpression extends Expression {
 				}
 				else if value.isExhaustive(this) {
 					ReferenceException.throwNotDefinedProperty(@property, this)
-				}
-				else {
-					this.addCallee(new DefaultCallee(@data, @object, this))
-				}
-			}
-			is ObjectType => {
-				if const property = value.getProperty(@property) {
-					if property is FunctionType {
-						this.makeCallee(property, @property)
-					}
-					else if property is OverloadedFunctionType {
-						this.makeCallee(property, @property)
-					}
-					else {
-						this.addCallee(new DefaultCallee(@data, @object, property, this))
-					}
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, this))
@@ -606,7 +606,7 @@ class CallExpression extends Expression {
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if mode == Mode::Async {
-			for argument in @arguments {
+			for const argument in @arguments {
 				if argument.isAwaiting() {
 					return argument.toFragments(fragments, mode)
 				}
@@ -630,7 +630,7 @@ class CallExpression extends Expression {
 				fragments.code(' : null')
 			}
 			else {
-				for argument in @arguments {
+				for const argument in @arguments {
 					if argument.isAwaiting() {
 						return argument.toFragments(fragments, mode)
 					}

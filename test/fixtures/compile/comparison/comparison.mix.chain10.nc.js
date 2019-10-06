@@ -1,3 +1,4 @@
+var Operator = require("@kaoscript/runtime").Operator;
 module.exports = function() {
 	function foobar(a, b, c, d, e, f, g, h, i, j) {
 		if(arguments.length < 10) {
@@ -33,7 +34,7 @@ module.exports = function() {
 		if(j === void 0 || j === null) {
 			throw new TypeError("'j' is not nullable");
 		}
-		if(a < b && b <= c && c < d && d === e && e > f && f >= g && g === h && h < i && i !== j) {
+		if(Operator.lt(a, b) && Operator.lte(b, c) && Operator.lt(c, d) && d === e && Operator.gt(e, f) && Operator.gte(f, g) && g === h && Operator.lt(h, i) && i !== j) {
 		}
 	}
 	foobar(1, 2, 2, 3, 3, 2, 1, 1, 3, 5);

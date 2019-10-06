@@ -1,10 +1,10 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let somePoint = [1, 1];
 	let __ks_0 = ([x, y]) => (x === 0) && (y === 0);
 	let __ks_1 = ([x, y]) => y === 0;
 	let __ks_2 = ([x, y]) => x === 0;
-	let __ks_3 = ([x, y]) => (-2 <= x && x <= 2) && (-2 <= y && y <= 2);
+	let __ks_3 = ([x, y]) => (Operator.lte(-2, x) && Operator.lte(x, 2)) && (Operator.lte(-2, y) && Operator.lte(y, 2));
 	if(Type.isArray(somePoint) && somePoint.length === 2 && __ks_0(somePoint)) {
 		let [x, y] = somePoint;
 		console.log("(0, 0) is at the origin");

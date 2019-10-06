@@ -1,7 +1,7 @@
 import '../export/export.enum.space'
 
 class Color {
-	macro registerSpace(@expression: Object) {
+	macro registerSpace(@expression: Dictionary) {
 		if expression.components? {
 			const fields: Array = []
 			const methods: Array = []

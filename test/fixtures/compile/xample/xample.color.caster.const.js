@@ -1,11 +1,12 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var Float = require("../_/_float.ks")().Float;
 	var {Math, __ks_Math} = require("../_/_math.ks")();
 	var {Number, __ks_Number} = require("../_/_number.ks")();
-	const $caster = {
-		percentage(n) {
+	const $caster = (() => {
+		const d = new Dictionary();
+		d.percentage = function(n) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
@@ -13,8 +14,9 @@ module.exports = function() {
 				throw new TypeError("'n' is not nullable");
 			}
 			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 100), 1);
-		}
-	};
+		};
+		return d;
+	})();
 	function srgb(that, color) {
 		if(arguments.length < 2) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");

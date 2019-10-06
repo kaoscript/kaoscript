@@ -1,3 +1,4 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	class Matcher {
 		constructor() {
@@ -5,11 +6,13 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_init_1() {
-			this._likes = {
-				leto: "spice",
-				paul: "chani",
-				duncan: "murbella"
-			};
+			this._likes = (() => {
+				const d = new Dictionary();
+				d.leto = "spice";
+				d.paul = "chani";
+				d.duncan = "murbella";
+				return d;
+			})();
 		}
 		__ks_init() {
 			Matcher.prototype.__ks_init_1.call(this);

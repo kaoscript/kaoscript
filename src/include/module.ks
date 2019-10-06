@@ -80,7 +80,7 @@ export class Module {
 			@includePaths[path] = modulePath
 		}
 
-		if @includeModules[modulePath] is Object {
+		if @includeModules[modulePath] is Dictionary {
 			@includeModules[modulePath].paths:Array.pushUniq(path)
 			@includeModules[modulePath].versions:Array.pushUniq(moduleVersion)
 		}
@@ -225,7 +225,7 @@ export class Module {
 		return hashes
 	} // }}}
 	listIncludeVersions(path, modulePath) { // {{{
-		if @includeModules[modulePath] is Object {
+		if @includeModules[modulePath] is Dictionary {
 			return @includeModules[modulePath].versions
 		}
 		else if @includePaths[path] == true {
@@ -408,7 +408,9 @@ export class Module {
 					type = export.type
 
 					if !type.isAlias() {
-						object.newLine().code(`\(name): `).compile(export.variable).done()
+						if !type.isVirtual() {
+							object.newLine().code(`\(name): `).compile(export.variable).done()
+						}
 
 						if type is not ReferenceType {
 							if type.isSealed() && type.isExtendable() {
@@ -426,17 +428,22 @@ export class Module {
 			line.done()
 		}
 
+		const dictionary = $runtime.dictionary(this)
 		const helper = $runtime.helper(this)
 		const operator = $runtime.operator(this)
 		const type = $runtime.type(this)
 
+		let hasDictionary = @flags.Dictionary == true && !@imports[dictionary]
 		let hasHelper = @flags.Helper == true && !@imports[helper]
 		let hasOperator = @flags.Operator == true && !@imports[operator]
 		let hasType = @flags.Type == true && !@imports[type]
 
-		if hasHelper || hasType {
+		if hasDictionary || hasHelper || hasType {
 			for const requirement in @requirements {
-				if requirement.name() == helper {
+				if requirement.name() == dictionary {
+					hasDictionary = false
+				}
+				else if requirement.name() == helper {
 					hasHelper = false
 				}
 				else if requirement.name() == type {
@@ -446,6 +453,14 @@ export class Module {
 		}
 
 		const packages = {}
+		if hasDictionary {
+			packages[@options.runtime.dictionary.package] ??= []
+
+			packages[@options.runtime.dictionary.package].push({
+				name: dictionary
+				options: @options.runtime.dictionary
+			})
+		}
 		if hasHelper {
 			packages[@options.runtime.helper.package] ??= []
 

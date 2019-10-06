@@ -1,5 +1,5 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {String, __ks_String} = require("../_/_string.ks")();
 	var exec = require("child_process").exec;
@@ -23,13 +23,15 @@ module.exports = function() {
 					line = __ks_2[__ks_1];
 					let __ks_4;
 					if(Type.isValue(__ks_4 = df_regex.exec(line)) ? (matches = __ks_4, true) : false) {
-						disks.push({
-							device: matches[1].trim(),
-							mount: matches[9],
-							total: __ks_String._im_toInt(matches[2]) * 1024,
-							used: __ks_String._im_toInt(matches[3]) * 1024,
-							available: __ks_String._im_toInt(matches[4]) * 1024
-						});
+						disks.push((() => {
+							const d = new Dictionary();
+							d.device = matches[1].trim();
+							d.mount = matches[9];
+							d.total = __ks_String._im_toInt(matches[2]) * 1024;
+							d.used = __ks_String._im_toInt(matches[3]) * 1024;
+							d.available = __ks_String._im_toInt(matches[4]) * 1024;
+							return d;
+						})());
 					}
 				}
 				return __ks_cb(null, disks);

@@ -22,6 +22,10 @@ class BinaryOperatorExpression extends Expression {
 		@left.translate()
 		@right.translate()
 	} // }}}
+	acquireReusable(acquire) { // {{{
+		@left.acquireReusable(false)
+		@right.acquireReusable(false)
+	} // }}}
 	hasExceptions() => false
 	isAwait() => @await
 	isAwaiting() => @left.isAwaiting() || @right.isAwaiting()
@@ -29,10 +33,6 @@ class BinaryOperatorExpression extends Expression {
 	isNullable() => @left.isNullable() || @right.isNullable()
 	isNullableComputed() => (@left.isNullable() && @right.isNullable()) || @left.isNullableComputed() || @right.isNullableComputed()
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
-	acquireReusable(acquire) { // {{{
-		@left.acquireReusable(false)
-		@right.acquireReusable(false)
-	} // }}}
 	releaseReusable() { // {{{
 		@left.releaseReusable()
 		@right.releaseReusable()

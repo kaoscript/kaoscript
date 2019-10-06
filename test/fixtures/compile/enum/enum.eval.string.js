@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let CardSuit = Helper.enum(String, {
 		Clubs: "clubs",
@@ -12,12 +12,16 @@ module.exports = function(expect) {
 	expect(Type.typeOf(x)).to.equal("enum-member");
 	expect(">>> " + x).to.equal(">>> clubs");
 	expect(x.value).to.equal("clubs");
-	expect(JSON.stringify({
-		id: x
-	})).to.equal("{\"id\":\"clubs\"}");
-	expect(JSON.stringify({
-		id: x.value
-	})).to.equal("{\"id\":\"clubs\"}");
+	expect(JSON.stringify((() => {
+		const d = new Dictionary();
+		d.id = x;
+		return d;
+	})())).to.equal("{\"id\":\"clubs\"}");
+	expect(JSON.stringify((() => {
+		const d = new Dictionary();
+		d.id = x.value;
+		return d;
+	})())).to.equal("{\"id\":\"clubs\"}");
 	function foobar() {
 		if(arguments.length === 1 && Type.isEnum(arguments[0])) {
 			let __ks_i = -1;
@@ -52,16 +56,16 @@ module.exports = function(expect) {
 			}
 			return "number";
 		}
-		else if(arguments.length === 1 && Type.isObject(arguments[0])) {
+		else if(arguments.length === 1 && Type.isDictionary(arguments[0])) {
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.isObject(x)) {
-				throw new TypeError("'x' is not of type 'Object'");
+			else if(!Type.isDictionary(x)) {
+				throw new TypeError("'x' is not of type 'Dictionary'");
 			}
-			return "object";
+			return "dictionary";
 		}
 		else if(arguments.length === 1 && Type.isString(arguments[0])) {
 			let __ks_i = -1;
@@ -90,7 +94,7 @@ module.exports = function(expect) {
 	expect(foobar(CardSuit.Clubs)).to.equal("enum-member");
 	expect(foobar(CardSuit.Clubs.value)).to.equal("string");
 	expect(foobar(0)).to.equal("number");
-	expect(foobar({})).to.equal("object");
+	expect(foobar(new Dictionary())).to.equal("dictionary");
 	expect(foobar("foo")).to.equal("string");
 	function testIf(x, y, z) {
 		if(arguments.length < 3) {

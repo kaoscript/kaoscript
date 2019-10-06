@@ -10,13 +10,13 @@
   ],
   "references": [
     {
-      "kind": "object",
+      "kind": "dictionary",
       "sealed": true,
       "properties": {
         "innerHeight": "Number",
         "innerWidth": "Number",
         "console": {
-          "kind": "object",
+          "kind": "dictionary",
           "properties": {
             "log": {
               "kind": "function",

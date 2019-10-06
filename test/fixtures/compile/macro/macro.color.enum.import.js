@@ -1,4 +1,5 @@
 require("kaoscript/register");
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	var Space = require("../export/export.enum.space.ks")().Space;
 	class Color {
@@ -61,24 +62,34 @@ module.exports = function() {
 	}
 	Space.HSB = Space("hsb");
 	Space.HSL = Space("hsl");
-	Color.registerSpace({
-		name: Space.HSL,
-		"components": {
-			"hue": {
-				family: Space.HSB,
-				"field": "_hue"
-			},
-			"saturation": {
-				family: Space.HSB,
-				"field": "_saturation"
-			},
-			"lightness": {
-				"max": 100,
-				"round": 1,
-				"field": "_lightness"
-			}
-		}
-	});
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d.name = Space.HSL;
+		d["components"] = (() => {
+			const d = new Dictionary();
+			d["hue"] = (() => {
+				const d = new Dictionary();
+				d.family = Space.HSB;
+				d["field"] = "_hue";
+				return d;
+			})();
+			d["saturation"] = (() => {
+				const d = new Dictionary();
+				d.family = Space.HSB;
+				d["field"] = "_saturation";
+				return d;
+			})();
+			d["lightness"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 100;
+				d["round"] = 1;
+				d["field"] = "_lightness";
+				return d;
+			})();
+			return d;
+		})();
+		return d;
+	})());
 	Color.prototype.__ks_func_hue_0 = function() {
 		return this.getField("hue");
 	};

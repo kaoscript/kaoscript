@@ -241,13 +241,6 @@ class ForFromStatement extends Statement {
 
 		ctrl.code('; ')
 
-		if @until? {
-			ctrl.code('!(').compileBoolean(@until).code(') && ')
-		}
-		else if @while? {
-			ctrl.wrapBoolean(@while).code(' && ')
-		}
-
 		ctrl.compile(@variable)
 
 		let desc = (@data.by?.kind == NodeKind::NumericExpression && @data.by.value < 0) || (@data.from.kind == NodeKind::NumericExpression && ((@data.to?.kind == NodeKind::NumericExpression && @data.from.value > @data.to.value) || (@data.til?.kind == NodeKind::NumericExpression && @data.from.value > @data.til.value)))
@@ -271,6 +264,13 @@ class ForFromStatement extends Statement {
 			}
 
 			ctrl.compile(@boundName ?? @to)
+		}
+
+		if @until? {
+			ctrl.code(' && !(').compileBoolean(@until).code(')')
+		}
+		else if @while? {
+			ctrl.code(' && ').wrapBoolean(@while)
 		}
 
 		ctrl.code('; ')

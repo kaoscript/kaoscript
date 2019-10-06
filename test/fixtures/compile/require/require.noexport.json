@@ -26,7 +26,7 @@
       "classMethods": {}
     },
     {
-      "kind": "object",
+      "kind": "dictionary",
       "properties": {
         "log": {
           "kind": "function",

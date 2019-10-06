@@ -1,5 +1,5 @@
 extern console
 
-func foobar({x, y}: Object<String>) {
+func foobar({x, y}: Dictionary<String>) {
 	console.log(`\(x).\(y)`)
 }

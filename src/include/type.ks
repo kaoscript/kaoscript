@@ -9,15 +9,16 @@ const $natives = { // {{{
 	class: true
 	Date: true
 	date: true
+	Dictionary: true
+	dict: true
 	Enum: true
 	enum: true
 	Error: true
 	Function: true
 	func: true
+	Namespace: true
 	Number: true
 	number: true
-	Object: true
-	object: true
 	RegExp: true
 	regex: true
 	String: true
@@ -32,13 +33,18 @@ const $types = { // {{{
 	bool: 'Boolean'
 	class: 'Class'
 	date: 'Date'
+	dict: 'Dictionary'
 	enum: 'Enum'
 	func: 'Function'
 	number: 'Number'
-	object: 'Object'
 	string: 'String'
 	void: 'Void'
 } // }}}
+
+const $virtuals = {
+	Enum: true
+	Namespace: true
+}
 
 #[flags]
 enum ExportMode {
@@ -82,11 +88,11 @@ enum TypeKind<String> {
 	Alias
 	Array
 	Class
+	Dictionary
 	Enum
 	Function
 	Fusion
 	Namespace
-	Object
 	OverloadedFunction
 	Reference
 	Sealable
@@ -221,7 +227,7 @@ abstract class Type {
 						return type
 					}
 					else if data.properties? {
-						const type = new ObjectType(scope)
+						const type = new DictionaryType(scope)
 
 						for property in data.properties {
 							type.addProperty(property.name.name, Type.fromAST(property.type, scope, defined, node))
@@ -432,6 +438,9 @@ abstract class Type {
 					TypeKind::Class => {
 						return ClassType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind::Dictionary => {
+						return DictionaryType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
 					TypeKind::Enum => {
 						return EnumType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
@@ -440,9 +449,6 @@ abstract class Type {
 					}
 					TypeKind::Namespace => {
 						return NamespaceType.import(index, data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Object => {
-						return ObjectType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::OverloadedFunction => {
 						return OverloadedFunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
@@ -540,6 +546,7 @@ abstract class Type {
 
 		return false
 	} // }}}
+	isDictionary() => false
 	isEnum() => false
 	isExhaustive() { // {{{
 		if @exhaustive == null {
@@ -567,7 +574,6 @@ abstract class Type {
 	isNumber() => false
 	isNull() => false
 	isNullable() => false
-	isObject() => false
 	isPredefined() => false
 	isReference() => false
 	isReferenced() => @referenced
@@ -577,6 +583,7 @@ abstract class Type {
 	isSealedAlien() => @alien && @sealed
 	isString() => false
 	isUnion() => false
+	isVirtual() => false
 	isVoid() => false
 	matchContentOf(that: Type?): Boolean => this.equals(that)
 	reduce(type: Type) => this
@@ -647,7 +654,7 @@ include {
 	'./type/enum'
 	'./type/namespace'
 	'./type/null'
-	'./type/object'
+	'./type/dictionary'
 	'./type/parameter'
 	'./type/fusion'
 	'./type/union'

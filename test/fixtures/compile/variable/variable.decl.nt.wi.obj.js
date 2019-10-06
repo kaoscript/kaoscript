@@ -1,3 +1,4 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
-	let $foo = {};
+	let $foo = new Dictionary();
 };

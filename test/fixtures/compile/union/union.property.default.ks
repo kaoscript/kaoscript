@@ -1,3 +1,3 @@
-func foo(x, y: Object | String) {
+func foo(x, y: Dictionary | String) {
 	let z = y.y
 }

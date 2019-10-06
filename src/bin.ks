@@ -7,7 +7,7 @@
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-extern console, global, Object, process, require
+extern console, global, process, require
 
 import {
 	'../package.json'	=> metadata

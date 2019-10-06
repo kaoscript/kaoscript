@@ -7,13 +7,13 @@ enum Accessibility {
 class ClassType extends Type {
 	private {
 		_abstract: Boolean				= false
-		_abstractMethods: Object		= {}
+		_abstractMethods: Dictionary		= {}
 		_alteration: Boolean			= false
 		_alterationReference: ClassType
-		_classAssessments: Object		= {}
-		_classMethods: Object			= {}
-		_classMethodNextId: Object		= {}
-		_classVariables: Object			= {}
+		_classAssessments: Dictionary		= {}
+		_classMethods: Dictionary			= {}
+		_classMethodNextId: Dictionary		= {}
+		_classVariables: Dictionary			= {}
 		_constructors: Array			= []
 		_destructors: Number			= 0
 		_exhaustiveness					= {
@@ -26,12 +26,12 @@ class ClassType extends Type {
 		_extends: NamedType<ClassType>?	= null
 		_hybrid: Boolean				= false
 		_init: Number					= 0
-		_instanceAssessments: Object	= {}
-		_instanceMethods: Object		= {}
-		_instanceMethodNextId: Object	= {}
-		_instanceVariables: Object		= {}
+		_instanceAssessments: Dictionary	= {}
+		_instanceMethods: Dictionary		= {}
+		_instanceMethodNextId: Dictionary	= {}
+		_instanceVariables: Dictionary		= {}
 		_predefined: Boolean			= false
-		_seal: Object
+		_seal: Dictionary
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
@@ -400,7 +400,7 @@ class ClassType extends Type {
 		@constructors.concat(src._constructors)
 
 		if src._sealed {
-			@seal = Object.clone(src._seal)
+			@seal = Dictionary.clone(src._seal)
 		}
 
 		if src.isRequired() || src.isAlien() {
@@ -560,12 +560,12 @@ class ClassType extends Type {
 				notEmpty = true
 			}
 
-			if !Object.isEmpty(@exhaustiveness.classMethods) {
+			if !Dictionary.isEmpty(@exhaustiveness.classMethods) {
 				exhaustiveness.classMethods = @exhaustiveness.classMethods
 				notEmpty = true
 			}
 
-			if !Object.isEmpty(@exhaustiveness.instanceMethods) {
+			if !Dictionary.isEmpty(@exhaustiveness.instanceMethods) {
 				exhaustiveness.instanceMethods = @exhaustiveness.instanceMethods
 				notEmpty = true
 			}
@@ -722,7 +722,7 @@ class ClassType extends Type {
 			}
 		}
 
-		if @classAssessments[name] is not Object {
+		if @classAssessments[name] is not Dictionary {
 			const methods = [...@classMethods[name]]
 
 			let that = this
@@ -775,7 +775,7 @@ class ClassType extends Type {
 			}
 		}
 
-		if @instanceAssessments[name] is not Object {
+		if @instanceAssessments[name] is not Dictionary {
 			const methods = [...@instanceMethods[name]]
 
 			let that = this
@@ -1219,7 +1219,7 @@ class ClassType extends Type {
 			return false
 		}
 	} // }}}
-	matchInstanceWith(object: ObjectType, matchables) { // {{{
+	matchInstanceWith(object: DictionaryType, matchables) { // {{{
 		for const property, name of object._properties {
 			if @instanceVariables[name]?.isMatching(property, MatchingMode::Signature) {
 			}

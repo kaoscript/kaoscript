@@ -1,20 +1,31 @@
 require("kaoscript/register");
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	var {Space, Color} = require("../color.ks")();
-	Color.registerSpace({
-		"name": "rvb",
-		"components": {
-			"rouge": {
-				"max": 255
-			},
-			"vert": {
-				"max": 255
-			},
-			"blue": {
-				"max": 255
-			}
-		}
-	});
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d["name"] = "rvb";
+		d["components"] = (() => {
+			const d = new Dictionary();
+			d["rouge"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			d["vert"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			d["blue"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			return d;
+		})();
+		return d;
+	})());
 	Color.prototype.__ks_func_rouge_0 = function() {
 		return this.getField("rouge");
 	};
@@ -69,11 +80,14 @@ module.exports = function() {
 		}
 		throw new SyntaxError("Wrong number of arguments");
 	};
-	Color.registerSpace({
-		"name": "cmy",
-		"converters": {
-			"from": {
-				srgb(red, green, blue, that) {
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d["name"] = "cmy";
+		d["converters"] = (() => {
+			const d = new Dictionary();
+			d["from"] = (() => {
+				const d = new Dictionary();
+				d.srgb = function(red, green, blue, that) {
 					if(arguments.length < 4) {
 						throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 4)");
 					}
@@ -92,10 +106,12 @@ module.exports = function() {
 					that._cyan = blue;
 					that._magenta = red;
 					that._yellow = green;
-				}
-			},
-			"to": {
-				srgb(cyan, magenta, yellow, that) {
+				};
+				return d;
+			})();
+			d["to"] = (() => {
+				const d = new Dictionary();
+				d.srgb = function(cyan, magenta, yellow, that) {
 					if(arguments.length < 4) {
 						throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 4)");
 					}
@@ -114,21 +130,32 @@ module.exports = function() {
 					that._red = magenta;
 					that._green = yellow;
 					that._blue = cyan;
-				}
-			}
-		},
-		"components": {
-			"cyan": {
-				"max": 255
-			},
-			"magenta": {
-				"max": 255
-			},
-			"yellow": {
-				"max": 255
-			}
-		}
-	});
+				};
+				return d;
+			})();
+			return d;
+		})();
+		d["components"] = (() => {
+			const d = new Dictionary();
+			d["cyan"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			d["magenta"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			d["yellow"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				return d;
+			})();
+			return d;
+		})();
+		return d;
+	})());
 	Color.prototype.__ks_func_cyan_0 = function() {
 		return this.getField("cyan");
 	};

@@ -205,6 +205,7 @@ class NamedType extends Type {
 	isSealedAlien() => @type.isSealedAlien()
 	isString() => @type.isString()
 	isUnion() => @type.isUnion()
+	isVirtual() => @type.isClass() && $virtuals[@name]
 	matchClassName(that: Type?) { // {{{
 		if that == null {
 			return false
@@ -335,7 +336,7 @@ class NamedType extends Type {
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
 	type() => @type
 	walk(fn) { // {{{
-		if @type is ObjectType || @type is NamespaceType {
+		if @type is DictionaryType || @type is NamespaceType {
 			@type.walk(fn)
 		}
 		else {
@@ -356,7 +357,7 @@ class NamedContainerType extends NamedType {
 			property = property.duplicate().container(this)
 		}
 
-		@type:ObjectType.addProperty(name, property)
+		@type:DictionaryType.addProperty(name, property)
 
 		@properties[name] = property
 	} // }}}

@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const o = {};
+	const o = new Dictionary();
 	function foo(key) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

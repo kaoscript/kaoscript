@@ -154,6 +154,7 @@ class ReferenceType extends Type {
 	isAsync() => false
 	isBoolean() => @name == 'Boolean' || this.type().isBoolean()
 	isClass() => @name == 'Class'
+	isDictionary() => @name == 'Dictionary' || this.type().isDictionary()
 	isEnum() => @name == 'Enum' || this.type().isEnum()
 	isExhaustive() => this.type().isExhaustive()
 	isExplicitlyExported() => this.type().isExplicitlyExported()
@@ -223,7 +224,7 @@ class ReferenceType extends Type {
 					return this.discardReference():Type.isMatching(value.discardReference():Type, mode)
 				}
 			}
-			else if value.isObject() && this.type().isClass() {
+			else if value.isDictionary() && this.type().isClass() {
 				return @type.type().matchInstanceWith(value, [])
 			}
 			else if value is UnionType {
@@ -261,7 +262,6 @@ class ReferenceType extends Type {
 	isNamespace() => @name == 'Namespace' || this.type().isNamespace()
 	isNullable() => @nullable
 	isNumber() => @name == 'Number' || this.type().isNumber()
-	isObject() => @name == 'Object' || this.type().isObject()
 	isReference() => true
 	isRequired() => this.type().isRequired()
 	isString() => @name == 'String' || this.type().isString()

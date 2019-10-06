@@ -120,7 +120,7 @@ class ArrayRange extends Expression {
 			@by.translate()
 		}
 	} // }}}
-	isUsingVariable(name) => @from.isUsingVariable(name) || @to.isUsingVariable(name) || @to?.isUsingVariable(name)
+	isUsingVariable(name) => @from.isUsingVariable(name) || @to.isUsingVariable(name) || @by?.isUsingVariable(name)
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 

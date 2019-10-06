@@ -53,15 +53,17 @@ class ThisExpression extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
+		const name = @scope.getVariable('this').getSecureName()
+
 		if @calling {
 			if @type ?= @class.type().getInstanceMethod(@name, @parent.arguments()) {
-				@fragment = `this.\(@name)`
+				@fragment = `\(name).\(@name)`
 			}
 			else if @type ?= @class.type().getInstanceVariable(@name) {
-				@fragment = `this.\(@name)`
+				@fragment = `\(name).\(@name)`
 			}
 			else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
-				@fragment = `this._\(@name)`
+				@fragment = `\(name)._\(@name)`
 			}
 			else {
 				ReferenceException.throwNotDefinedField(@name, this)
@@ -69,11 +71,11 @@ class ThisExpression extends Expression {
 		}
 		else {
 			if variable ?= @class.type().getInstanceVariable(@name) {
-				@fragment = `this.\(@name)`
+				@fragment = `\(name).\(@name)`
 				@type = @scope.getChunkType(@fragment) ?? variable.type()
 			}
 			else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
-				@fragment = `this._\(@name)`
+				@fragment = `\(name)._\(@name)`
 				@type = @scope.getChunkType(@fragment) ?? variable.type()
 			}
 			else if @type ?= @class.type().getPropertyGetter(@name) {
@@ -81,7 +83,7 @@ class ThisExpression extends Expression {
 					ReferenceException.throwLoopingAlias(@name, this)
 				}
 
-				@fragment = `this.\(@name)()`
+				@fragment = `\(name).\(@name)()`
 				@composite = true
 			}
 			else {

@@ -344,7 +344,7 @@ class ClassDeclaration extends Statement {
 			@class.addClassVariable(name, variable.type())
 		}
 
-		if @extending && !@abstract && !Object.isEmpty(notImplemented = @class.listMissingAbstractMethods()) {
+		if @extending && !@abstract && !Dictionary.isEmpty(notImplemented = @class.listMissingAbstractMethods()) {
 			SyntaxException.throwMissingAbstractMethods(@name, notImplemented, this)
 		}
 
@@ -491,7 +491,7 @@ class ClassDeclaration extends Statement {
 		const m = []
 
 		let ctrl
-		if @destructor? || !Object.isEmpty(@classMethods) {
+		if @destructor? || !Dictionary.isEmpty(@classMethods) {
 			ctrl = clazz.newLine().code('$static: ').newObject()
 
 			if @destructor? {
@@ -935,7 +935,7 @@ class ClassDeclaration extends Statement {
 		const m = []
 
 		let ctrl
-		if @destructor? || !Object.isEmpty(@classMethods) {
+		if @destructor? || !Dictionary.isEmpty(@classMethods) {
 			ctrl = clazz.newLine().code('$static: ').newObject()
 
 			if @destructor? {
@@ -1681,7 +1681,6 @@ class ClassMethodDeclaration extends Statement {
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
 	isInstanceMethod() => @instance
-	/* isOverride() => @override */
 	length() => @parameters.length
 	name() => @name
 	parameters() => @parameters

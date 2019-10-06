@@ -1,4 +1,4 @@
-var Helper = require("@kaoscript/runtime").Helper;
+var {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Space = Helper.enum(String, {
 		RGB: "rgb",
@@ -63,31 +63,45 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
-	Color.registerSpace({
-		name: Space.SRGB,
-		"alias": [Space.RGB],
-		"parsers": {
-			"from": {
-				[Space.YUV]() {
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d.name = Space.SRGB;
+		d["alias"] = [Space.RGB];
+		d["parsers"] = (() => {
+			const d = new Dictionary();
+			d["from"] = (() => {
+				const d = new Dictionary();
+				d[Space.YUV] = function() {
 					return "RGB -> UYV";
-				}
-			}
-		},
-		"components": {
-			"red": {
-				"max": 255,
-				"field": "_red"
-			},
-			"green": {
-				"max": 255,
-				"field": "_green"
-			},
-			"blue": {
-				"max": 255,
-				"field": "_blue"
-			}
-		}
-	});
+				};
+				return d;
+			})();
+			return d;
+		})();
+		d["components"] = (() => {
+			const d = new Dictionary();
+			d["red"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_red";
+				return d;
+			})();
+			d["green"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_green";
+				return d;
+			})();
+			d["blue"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_blue";
+				return d;
+			})();
+			return d;
+		})();
+		return d;
+	})());
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.getField("red");
 	};

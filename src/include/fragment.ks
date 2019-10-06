@@ -55,7 +55,7 @@ class FragmentBuilder extends Writer {
 	line(...args) { // {{{
 		let line = this.newLine(@indent)
 
-		if args.length == 1 && args[0] is Object {
+		if args.length == 1 && args[0] is Dictionary {
 			line.compile(args[0])
 		}
 		else {
@@ -70,7 +70,7 @@ class FragmentBuilder extends Writer {
 
 class BlockBuilder extends BlockWriter {
 	compile(node, mode = Mode::None) { // {{{
-		if node is Object {
+		if node is Dictionary {
 			node.toFragments(this, mode)
 		}
 		else {
@@ -82,7 +82,7 @@ class BlockBuilder extends BlockWriter {
 	line(...args) { // {{{
 		let line = @writer.newLine(@indent + 1)
 
-		if args.length == 1 && args[0] is Object {
+		if args.length == 1 && args[0] is Dictionary {
 			line.compile(args[0])
 		}
 		else {
@@ -136,11 +136,11 @@ class ExpressionBuilder extends ExpressionWriter {
 			if arg is Array {
 				this.code(...arg)
 			}
-			else if arg is Object {
+			else if arg is Dictionary {
 				@writer.push(arg)
 			}
 			else {
-				if i + 1 < args.length && (data = args[i + 1]) is Object && data.kind? {
+				if i + 1 < args.length && (data = args[i + 1]) is Dictionary && data.kind? {
 					if data.start? {
 						@writer.push(@writer.newFragment(arg, data.start, data.end))
 					}
@@ -159,7 +159,7 @@ class ExpressionBuilder extends ExpressionWriter {
 		return this
 	} // }}}
 	compile(node, mode = Mode::None) { // {{{
-		if node is Object {
+		if node is Dictionary {
 			node.toFragments(this, mode)
 		}
 		else {
@@ -169,7 +169,7 @@ class ExpressionBuilder extends ExpressionWriter {
 		return this
 	} // }}}
 	compileBoolean(node, mode = Mode::None) { // {{{
-		if node is Object {
+		if node is Dictionary {
 			node.toBooleanFragments(this, mode)
 		}
 		else {
@@ -179,7 +179,7 @@ class ExpressionBuilder extends ExpressionWriter {
 		return this
 	} // }}}
 	compileNullable(node) { // {{{
-		if node is Object {
+		if node is Dictionary {
 			node.toNullableFragments(this)
 		}
 		else {
@@ -189,7 +189,7 @@ class ExpressionBuilder extends ExpressionWriter {
 		return this
 	} // }}}
 	compileReusable(node) { // {{{
-		if node is Object {
+		if node is Dictionary {
 			node.toReusableFragments(this)
 		}
 		else {

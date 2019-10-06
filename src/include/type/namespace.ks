@@ -2,8 +2,8 @@ class NamespaceType extends Type {
 	private {
 		_alteration: Boolean				= false
 		_alterationReference: NamespaceType
-		_properties: Object					= {}
-		_sealProperties: Object				= {}
+		_properties: Dictionary					= {}
+		_sealProperties: Dictionary				= {}
 	}
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{

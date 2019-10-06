@@ -360,8 +360,8 @@ class VariableBindingDeclarator extends AbstractNode {
 				}
 			}
 			else if @binding is ObjectBinding {
-				if !type.isObject() {
-					TypeException.throwInvalidBinding('Object', this)
+				if !type.isDictionary() {
+					TypeException.throwInvalidBinding('Dictionary', this)
 				}
 			}
 		}

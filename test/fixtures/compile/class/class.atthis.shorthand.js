@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -28,9 +28,11 @@ module.exports = function() {
 			}
 		}
 		__ks_func_export_0() {
-			return {
-				x: this._x
-			};
+			return (() => {
+				const d = new Dictionary();
+				x: this._x;
+				return d;
+			})();
 		}
 		export() {
 			if(arguments.length === 0) {

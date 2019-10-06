@@ -7,8 +7,8 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isObject(x) || Type.isString(x))) {
-			throw new TypeError("'x' is not of type 'Object' or 'String'");
+		else if(!(Type.isDictionary(x) || Type.isString(x))) {
+			throw new TypeError("'x' is not of type 'Dictionary' or 'String'");
 		}
 	}
 	function bar(x) {
@@ -18,8 +18,8 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isObject(x) || Type.isString(x))) {
-			throw new TypeError("'x' is not of type 'Object' or 'String'");
+		else if(!(Type.isDictionary(x) || Type.isString(x))) {
+			throw new TypeError("'x' is not of type 'Dictionary' or 'String'");
 		}
 		foo(x);
 	}

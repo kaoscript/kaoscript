@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Color {
 		constructor() {
@@ -13,10 +13,12 @@ module.exports = function() {
 			}
 		}
 	}
-	Color.registerSpace({
-		"name": "FBQ",
-		"formatters": {
-			srgb(that) {
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d["name"] = "FBQ";
+		d["formatters"] = (() => {
+			const d = new Dictionary();
+			d.srgb = function(that) {
 				if(arguments.length < 1) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 				}
@@ -30,9 +32,11 @@ module.exports = function() {
 				}
 				else if(that._bar === true) {
 				}
-			}
-		}
-	});
+			};
+			return d;
+		})();
+		return d;
+	})());
 	return {
 		Color: Color
 	};

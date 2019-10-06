@@ -18,7 +18,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		if($ksType.isObject(x)) {
+		if($ksType.isDictionary(x)) {
 			return $ksType.isEmptyObject(x);
 		}
 		else {

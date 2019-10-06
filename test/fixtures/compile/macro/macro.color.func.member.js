@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Space = Helper.enum(String, {
 		RGB: "rgb",
@@ -62,8 +62,9 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
-	const $util = {
-		formatToHex(that) {
+	const $util = (() => {
+		const d = new Dictionary();
+		d.formatToHex = function(that) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
@@ -74,8 +75,8 @@ module.exports = function() {
 				throw new TypeError("'that' is not of type 'Color'");
 			}
 			return $hex(that);
-		},
-		formatToSRGB(that) {
+		};
+		d.formatToSRGB = function(that) {
 			if(arguments.length < 1) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 			}
@@ -91,30 +92,43 @@ module.exports = function() {
 			else {
 				return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
 			}
-		}
-	};
-	Color.registerSpace({
-		name: Space.SRGB,
-		"alias": [Space.RGB],
-		"formatters": {
-			hex: $util.formatToHex,
-			srgb: $util.formatToSRGB
-		},
-		"components": {
-			"red": {
-				"max": 255,
-				"field": "_red"
-			},
-			"green": {
-				"max": 255,
-				"field": "_green"
-			},
-			"blue": {
-				"max": 255,
-				"field": "_blue"
-			}
-		}
-	});
+		};
+		return d;
+	})();
+	Color.registerSpace((() => {
+		const d = new Dictionary();
+		d.name = Space.SRGB;
+		d["alias"] = [Space.RGB];
+		d["formatters"] = (() => {
+			const d = new Dictionary();
+			d.hex = $util.formatToHex;
+			d.srgb = $util.formatToSRGB;
+			return d;
+		})();
+		d["components"] = (() => {
+			const d = new Dictionary();
+			d["red"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_red";
+				return d;
+			})();
+			d["green"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_green";
+				return d;
+			})();
+			d["blue"] = (() => {
+				const d = new Dictionary();
+				d["max"] = 255;
+				d["field"] = "_blue";
+				return d;
+			})();
+			return d;
+		})();
+		return d;
+	})());
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.getField("red");
 	};

@@ -1,6 +1,6 @@
 extern console
 
-func parse(color: Object | String) {
+func parse(color: Dictionary | String) {
 	if color is String {
 		if match ?= /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color) {
 			console.log(match)

@@ -761,10 +761,15 @@ class Importer extends Statement {
 							nf = true
 						}
 
-						line.code(`\(alias) = \(variable).\(name)`)
+						if alias == name && $virtuals[name] {
+							line.code(`__ks_\(alias) = \(variable).__ks_\(name)`)
+						}
+						else {
+							line.code(`\(alias) = \(variable).\(name)`)
 
-						if @sealedVariables[name] == true {
-							line.code(`, __ks_\(alias) = \(variable).__ks_\(name)`)
+							if @sealedVariables[name] == true {
+								line.code(`, __ks_\(alias) = \(variable).__ks_\(name)`)
+							}
 						}
 					}
 
@@ -783,10 +788,15 @@ class Importer extends Statement {
 						}
 
 						if alias == name {
-							line.code(name)
+							if $virtuals[name] {
+								line.code(`__ks_\(name)`)
+							}
+							else {
+								line.code(name)
 
-							if @sealedVariables[name] == true {
-								line.code(`, __ks_\(name)`)
+								if @sealedVariables[name] == true {
+									line.code(`, __ks_\(name)`)
+								}
 							}
 						}
 						else {

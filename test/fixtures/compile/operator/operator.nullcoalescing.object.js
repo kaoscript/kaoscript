@@ -1,6 +1,8 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let foobar = Type.isValue(x.y) ? x.y : {
-		x: 42
-	};
+	let foobar = Type.isValue(x.y) ? x.y : (() => {
+		const d = new Dictionary();
+		d.x = 42;
+		return d;
+	})();
 };

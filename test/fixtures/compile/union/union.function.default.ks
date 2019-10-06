@@ -1,7 +1,7 @@
-func foo(x: Object | String) {
+func foo(x: Dictionary | String) {
 
 }
 
-func bar(x: Object | String) {
+func bar(x: Dictionary | String) {
 	foo(x)
 }

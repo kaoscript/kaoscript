@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function corge() {
 		return 42;
@@ -30,12 +30,14 @@ module.exports = function() {
 	function waldo() {
 		return "miss White";
 	}
-	const foobar = {
-		corge,
-		grault,
-		garply,
-		waldo
-	};
+	const foobar = (() => {
+		const d = new Dictionary();
+		d.corge = corge;
+		d.grault = grault;
+		d.garply = garply;
+		d.waldo = waldo;
+		return d;
+	})();
 	return {
 		foobar: foobar
 	};

@@ -160,16 +160,16 @@ class ForRangeStatement extends Statement {
 			ctrl.code($comma, @byName, $equals).compile(@by)
 		}
 
-		ctrl.code('; ')
+		ctrl.code('; ').compile(@value).code(' <= ').compile(@boundName ?? @to)
 
 		if @until? {
-			ctrl.code('!(').compileBoolean(@until).code(') && ')
+			ctrl.code(' && !(').compileBoolean(@until).code(')')
 		}
 		else if @while? {
-			ctrl.wrapBoolean(@while).code(' && ')
+			ctrl.code(' && ').wrapBoolean(@while)
 		}
 
-		ctrl.compile(@value).code(' <= ').compile(@boundName ?? @to).code('; ')
+		ctrl.code('; ')
 
 		if @data.by? {
 			if @data.by.kind == NodeKind::NumericExpression {

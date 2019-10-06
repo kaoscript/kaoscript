@@ -1,3 +1,4 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	function foobar() {
 		this.foobar = true;
@@ -6,5 +7,5 @@ module.exports = function() {
 			return this;
 		}).bind(this);
 	}
-	console.log(foobar.call({})());
+	console.log(foobar.call(new Dictionary())());
 };

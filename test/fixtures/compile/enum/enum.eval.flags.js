@@ -1,4 +1,4 @@
-var {Helper, Operator, Type} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let Foobar = Helper.enum(Number, {
 		foo: 1,
@@ -34,10 +34,10 @@ module.exports = function(expect) {
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.isObject(x)) {
-				throw new TypeError("'x' is not of type 'Object'");
+			else if(!Type.isDictionary(x)) {
+				throw new TypeError("'x' is not of type 'Dictionary'");
 			}
-			return "object";
+			return "dictionary";
 		}
 		else {
 			throw new SyntaxError("Wrong number of arguments");
@@ -46,7 +46,7 @@ module.exports = function(expect) {
 	expect(foobar(Foobar.foo)).to.equal("enum");
 	expect(foobar(Foobar(Foobar.foo | Foobar.bar))).to.equal("enum");
 	expect(foobar(0)).to.equal("number");
-	expect(foobar({})).to.equal("object");
+	expect(foobar(new Dictionary())).to.equal("dictionary");
 	function testIf(x, y, z) {
 		if(arguments.length < 3) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");

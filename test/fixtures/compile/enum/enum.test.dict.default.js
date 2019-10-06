@@ -1,4 +1,4 @@
-var Helper = require("@kaoscript/runtime").Helper;
+var {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Color = Helper.enum(Number, {
 		Red: 0,
@@ -11,7 +11,7 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_init_1() {
-			this._colors = {};
+			this._colors = new Dictionary();
 		}
 		__ks_init() {
 			Foobar.prototype.__ks_init_1.call(this);

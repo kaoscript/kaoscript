@@ -40,11 +40,11 @@ const $typeofs = { // {{{
 	Array: true
 	Boolean: true
 	Class: true
+	Dictionary: true
 	Enum: true
 	Function: true
 	Namespace: true
 	Number: true
-	Object: true
 	RegExp: true
 	String: true
 } // }}}
@@ -108,13 +108,23 @@ const $ast = {
 }
 
 const $runtime = {
+	dictionary(node) { // {{{
+		node.module?().flag('Dictionary')
+
+		return node._options.runtime.dictionary.alias
+	} // }}}
 	helper(node) { // {{{
 		node.module?().flag('Helper')
 
 		return node._options.runtime.helper.alias
 	} // }}}
 	getVariable(name, node) { // {{{
-		if node._options.runtime.helper.alias == name || (node.isIncluded() && name == 'Helper') {
+		if node._options.runtime.dictionary.alias == name || (node.isIncluded() && name == 'Dictionary') {
+			node.module?().flag('Dictionary')
+
+			return node._options.runtime.dictionary.alias
+		}
+		else if node._options.runtime.helper.alias == name || (node.isIncluded() && name == 'Helper') {
 			node.module?().flag('Helper')
 
 			return node._options.runtime.helper.alias
@@ -374,7 +384,7 @@ const $expressions = {
 	`\(NodeKind::MemberExpression)`				: MemberExpression
 	`\(NodeKind::NumericExpression)`			: NumberLiteral
 	`\(NodeKind::ObjectBinding)`				: ObjectBinding
-	`\(NodeKind::ObjectExpression)`				: ObjectExpression
+	`\(NodeKind::ObjectExpression)`				: DictionaryExpression
 	`\(NodeKind::OmittedExpression)`			: OmittedExpression
 	`\(NodeKind::RegularExpression)`			: RegularExpression
 	`\(NodeKind::SequenceExpression)`			: SequenceExpression
@@ -465,7 +475,7 @@ func $expandOptions(options) { // {{{
 
 	if engine is Function {
 		if const opts = engine(options.target.version.split('.').map(v => parseInt(v)), $targets) {
-			return Object.defaults(options, opts)
+			return Dictionary.defaults(options, opts)
 		}
 		else {
 			throw new Error(`Undefined target's version '\(options.target.version)'`)
@@ -476,7 +486,7 @@ func $expandOptions(options) { // {{{
 			throw new Error(`Undefined target's version '\(options.target.version)'`)
 		}
 
-		return Object.defaults(options, engine[options.target.version])
+		return Dictionary.defaults(options, engine[options.target.version])
 	}
 } // }}}
 
@@ -488,7 +498,6 @@ const $targets = {
 				destructuring: 'es5'
 				functions: 'es5'
 				parameters: 'es5'
-				properties: 'es5'
 				spreads: 'es5'
 				variables: 'es5'
 			}
@@ -499,7 +508,6 @@ const $targets = {
 				destructuring: 'es6'
 				functions: 'es6'
 				parameters: 'es6'
-				properties: 'es6'
 				spreads: 'es6'
 				variables: 'es6'
 			}
@@ -527,7 +535,7 @@ export class Compiler {
 		registerTarget(target: String, fn: Function) { // {{{
 			$targets[target] = fn
 		} // }}}
-		registerTarget(target: String, options: Object) { // {{{
+		registerTarget(target: String, options: Dictionary) { // {{{
 			if target !?= $targetRegex.exec(target) {
 				throw new Error(`Invalid target syntax: \(target)`)
 			}
@@ -572,7 +580,7 @@ export class Compiler {
 		} // }}}
 	}
 	constructor(@file, options = null, @hashes = {}) { // {{{
-		@options = Object.merge({
+		@options = Dictionary.merge({
 			target: 'ecma-v6'
 			register: true
 			header: true
@@ -590,6 +598,11 @@ export class Compiler {
 				noUndefined: false
 			}
 			runtime: {
+				dictionary: {
+					alias: 'Dictionary'
+					member: 'Dictionary'
+					package: '@kaoscript/runtime'
+				}
 				helper: {
 					alias: 'Helper'
 					member: 'Helper'
@@ -618,7 +631,7 @@ export class Compiler {
 				version: target[2]
 			}
 		}
-		else if @options.target is not Object || !$targetRegex.test(`\(@options.target.name)-v\(@options.target.version)`) {
+		else if @options.target is not Dictionary || !$targetRegex.test(`\(@options.target.name)-v\(@options.target.version)`) {
 			throw new Error(`Undefined target`)
 		}
 
@@ -640,7 +653,7 @@ export class Compiler {
 		return this
 	} // }}}
 	createServant(file) { // {{{
-		return new Compiler(file, Object.defaults(@options, {
+		return new Compiler(file, Dictionary.defaults(@options, {
 			register: false
 		}), @hashes)
 	} // }}}

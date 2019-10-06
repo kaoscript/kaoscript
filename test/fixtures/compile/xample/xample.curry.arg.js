@@ -1,8 +1,10 @@
-var {Helper, Operator} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Operator} = require("@kaoscript/runtime");
 module.exports = function() {
-	let o = {
-		name: "White"
-	};
+	let o = (() => {
+		const d = new Dictionary();
+		d.name = "White";
+		return d;
+	})();
 	function fff(prefix) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

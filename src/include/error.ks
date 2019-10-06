@@ -406,7 +406,7 @@ export class TypeException extends Exception {
 			throw new TypeException(`"for..in" must be used with an array`, node)
 		} // }}}
 		throwInvalidForOfExpression(node) ~ TypeException { // {{{
-			throw new TypeException(`"for..of" must be used with an object`, node)
+			throw new TypeException(`"for..of" must be used with a dictionary`, node)
 		} // }}}
 		throwInvalidOperand(expression, operator, node) ~ TypeException { // {{{
 			throw new TypeException(`The \(operator) member \(expression.toQuote(true)) is expected to be of type "\($operatorTypes[operator].join('", "'))" or "Any" and not of type \(expression.type().toQuote(true))`, node)

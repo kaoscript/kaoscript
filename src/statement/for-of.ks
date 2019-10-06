@@ -103,7 +103,7 @@ class ForOfStatement extends Statement {
 		@expression.prepare()
 
 		const type = @expression.type()
-		if !(type.isAny() || type.isObject()) {
+		if !(type.isAny() || type.isDictionary()) {
 			TypeException.throwInvalidForOfExpression(this)
 		}
 

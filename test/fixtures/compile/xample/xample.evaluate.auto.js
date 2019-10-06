@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_evaluate_0 = function() {
@@ -20,7 +20,7 @@ module.exports = function() {
 		else if(!Type.isString(value)) {
 			throw new TypeError("'value' is not of type 'String'");
 		}
-		return (this.length >= value.length) && (this.slice(0, value.length) === value);
+		return Operator.gte(this.length, value.length) && (this.slice(0, value.length) === value);
 	};
 	__ks_String._im_evaluate = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

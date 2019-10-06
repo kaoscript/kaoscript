@@ -66,12 +66,12 @@ class ComparisonExpression extends Expression {
 	} // }}}
 	private getOperator(data, operand1, operand2) { // {{{
 		switch data.kind {
-			BinaryOperatorKind::Equality => return new EqualityOperator(operand1, operand2)
-			BinaryOperatorKind::GreaterThan => return new GreaterThanOperator(operand1, operand2)
-			BinaryOperatorKind::GreaterThanOrEqual => return new GreaterThanOrEqualOperator(operand1, operand2)
-			BinaryOperatorKind::Inequality => return new InequalityOperator(operand1, operand2)
-			BinaryOperatorKind::LessThan => return new LessThanOperator(operand1, operand2)
-			BinaryOperatorKind::LessThanOrEqual => return new LessThanOrEqualOperator(operand1, operand2)
+			BinaryOperatorKind::Equality => return new EqualityOperator(this, operand1, operand2)
+			BinaryOperatorKind::GreaterThan => return new GreaterThanOperator(this, operand1, operand2)
+			BinaryOperatorKind::GreaterThanOrEqual => return new GreaterThanOrEqualOperator(this, operand1, operand2)
+			BinaryOperatorKind::Inequality => return new InequalityOperator(this, operand1, operand2)
+			BinaryOperatorKind::LessThan => return new LessThanOperator(this, operand1, operand2)
+			BinaryOperatorKind::LessThanOrEqual => return new LessThanOrEqualOperator(this, operand1, operand2)
 		}
 	} // }}}
 	hasExceptions() => false
@@ -182,9 +182,10 @@ class ComparisonExpression extends Expression {
 abstract class ComparisonOperator {
 	private {
 		_left
+		_node
 		_right
 	}
-	constructor(@left, @right)
+	constructor(@node, @left, @right)
 	prepare()
 	inferTypes() => {}
 	inferContraryTypes() => {}
@@ -308,29 +309,27 @@ class EqualityOperator extends ComparisonOperator {
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {
-				fragments.code('isNaN(').code(reuseName, $equals).compile(@right).code(')')
+				fragments.code('Number.isNaN(').code(reuseName, $equals).compile(@right).code(')')
 			}
 			else {
-				fragments.code('isNaN(').compile(@right).code(')')
+				fragments.code('Number.isNaN(').compile(@right).code(')')
 			}
 		}
 		else if @nanRight {
 			if leftReusable && reuseName != null  {
-				fragments.code('isNaN(', reuseName, ')')
+				fragments.code('Number.isNaN(', reuseName, ')')
 			}
 			else {
-				fragments.code('isNaN(').compile(@left).code(')')
+				fragments.code('Number.isNaN(').compile(@left).code(')')
 			}
+		}
+		else if @infinity {
+			fragments.code($runtime.operator(@node), '.eq(').compile(@left).code(', ').compile(@right).code(')')
 		}
 		else {
 			this.toLeftFragments(fragments, leftReusable, reuseName)
 
-			if @infinity {
-				fragments.code(' == ')
-			}
-			else {
-				fragments.code(' === ')
-			}
+			fragments.code(' === ')
 
 			this.toRightFragments(fragments, rightReusable, reuseName)
 		}
@@ -375,43 +374,60 @@ class InequalityOperator extends EqualityOperator {
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {
-				fragments.code('!isNaN(').code(reuseName, $equals).compile(@right).code(')')
+				fragments.code('!Number.isNaN(').code(reuseName, $equals).compile(@right).code(')')
 			}
 			else {
-				fragments.code('!isNaN(').compile(@right).code(')')
+				fragments.code('!Number.isNaN(').compile(@right).code(')')
 			}
 		}
 		else if @nanRight {
 			if leftReusable && reuseName != null  {
-				fragments.code('!isNaN(', reuseName, ')')
+				fragments.code('!Number.isNaN(', reuseName, ')')
 			}
 			else {
-				fragments.code('!isNaN(').compile(@left).code(')')
+				fragments.code('!Number.isNaN(').compile(@left).code(')')
 			}
+		}
+		else if @infinity {
+			fragments.code($runtime.operator(@node), '.neq(').compile(@left).code(', ').compile(@right).code(')')
 		}
 		else {
 			this.toLeftFragments(fragments, leftReusable, reuseName)
 
-			if @infinity {
-				fragments.code(' != ')
-			}
-			else {
-				fragments.code(' !== ')
-			}
+			fragments.code(' !== ')
 
 			this.toRightFragments(fragments, rightReusable, reuseName)
 		}
 	} // }}}
 }
 
-class DirtyComparisonOperator extends ComparisonOperator {
+abstract class NumericComparisonOperator extends ComparisonOperator {
 	private {
-		_operator: String
+		_isNative: Boolean		= false
 	}
-	constructor(@left, @right, @operator) { // {{{
-		super(left, right)
+	prepare() { // {{{
+		super()
+
+		if @left.type().isNumber() && @right.type().isNumber() {
+			@isNative = true
+		}
+		else if @left.type().canBeNumber() {
+			unless @right.type().canBeNumber() {
+				TypeException.throwInvalidOperand(@right, this.operator(), this)
+			}
+		}
+		else {
+			TypeException.throwInvalidOperand(@left, this.operator(), this)
+		}
+
+		if @left.type().isNullable() || @right.type().isNullable() {
+			@isNative = false
+		}
 	} // }}}
-	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
+	isComputed() => @isNative
+	abstract runtime(): String
+	abstract symbol(): String
+	toNativeFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if leftReusable && reuseName != null  {
 			fragments.code(reuseName)
 		}
@@ -419,7 +435,7 @@ class DirtyComparisonOperator extends ComparisonOperator {
 			fragments.wrap(@left)
 		}
 
-		fragments.code(' ', @operator, ' ')
+		fragments.code($space, this.symbol(), $space)
 
 		if rightReusable && reuseName != null  {
 			fragments.code('(', reuseName, $equals).compile(@right).code(')')
@@ -428,28 +444,50 @@ class DirtyComparisonOperator extends ComparisonOperator {
 			fragments.wrap(@right)
 		}
 	} // }}}
-}
+	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
+		if @isNative {
+			this.toNativeFragments(fragments, reuseName, leftReusable, rightReusable)
+		}
+		else {
+			fragments.code($runtime.operator(@node), `.\(this.runtime())(`)
 
-class GreaterThanOperator extends DirtyComparisonOperator {
-	constructor(@left, @right) { // {{{
-		super(left, right, '>')
+			if leftReusable && reuseName != null  {
+				fragments.code(reuseName)
+			}
+			else {
+				fragments.wrap(@left)
+			}
+
+			fragments.code($comma)
+
+			if rightReusable && reuseName != null  {
+				fragments.code(reuseName, $equals).compile(@right)
+			}
+			else {
+				fragments.wrap(@right)
+			}
+
+			fragments.code(')')
+		}
 	} // }}}
 }
 
-class GreaterThanOrEqualOperator extends DirtyComparisonOperator {
-	constructor(@left, @right) { // {{{
-		super(left, right, '>=')
-	} // }}}
+class GreaterThanOperator extends NumericComparisonOperator {
+	runtime() => 'gt'
+	symbol() => '>'
 }
 
-class LessThanOperator extends DirtyComparisonOperator {
-	constructor(@left, @right) { // {{{
-		super(left, right, '<')
-	} // }}}
+class GreaterThanOrEqualOperator extends NumericComparisonOperator {
+	runtime() => 'gte'
+	symbol() => '>='
 }
 
-class LessThanOrEqualOperator extends DirtyComparisonOperator {
-	constructor(@left, @right) { // {{{
-		super(left, right, '<=')
-	} // }}}
+class LessThanOperator extends NumericComparisonOperator {
+	runtime() => 'lt'
+	symbol() => '<'
+}
+
+class LessThanOrEqualOperator extends NumericComparisonOperator {
+	runtime() => 'lte'
+	symbol() => '<='
 }

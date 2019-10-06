@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function $clone(value = null) {
 		if(value === null) {
@@ -7,15 +7,16 @@ module.exports = function() {
 		else if(Type.isArray(value)) {
 			return __ks_Array._im_clone(value);
 		}
-		else if(Type.isObject(value)) {
-			return __ks_Object._cm_clone(value);
+		else if(Type.isDictionary(value)) {
+			return __ks_Dictionary._cm_clone(value);
 		}
 		else {
 			return value;
 		}
 	}
-	const $merge = {
-		merge(source, key, value) {
+	const $merge = (() => {
+		const d = new Dictionary();
+		d.merge = function(source, key, value) {
 			if(arguments.length < 3) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
 			}
@@ -31,8 +32,8 @@ module.exports = function() {
 			if(Type.isArray(value)) {
 				source[key] = __ks_Array._im_clone(value);
 			}
-			else if(Type.isObject(value)) {
-				if(Type.isObject(source[key])) {
+			else if(Type.isDictionary(value)) {
+				if(Type.isDictionary(source[key])) {
 					$merge.object(source[key], value);
 				}
 				else {
@@ -43,8 +44,8 @@ module.exports = function() {
 				source[key] = value;
 			}
 			return source;
-		},
-		object(source, current) {
+		};
+		d.object = function(source, current) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 			}
@@ -62,10 +63,11 @@ module.exports = function() {
 					source[key] = current[key];
 				}
 			}
-		}
-	};
+		};
+		return d;
+	})();
 	var __ks_Array = {};
-	var __ks_Object = {};
+	var __ks_Dictionary = {};
 	__ks_Array.__ks_func_append_0 = function(...args) {
 		let l, i, j, arg;
 		for(let k = 0, __ks_0 = args.length; k < __ks_0; ++k) {
@@ -282,48 +284,45 @@ module.exports = function() {
 		}
 		throw new SyntaxError("Wrong number of arguments");
 	};
-	__ks_Object.__ks_sttc_clone_0 = function(object) {
+	__ks_Dictionary.__ks_sttc_clone_0 = function(dict) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
-		if(object === void 0 || object === null) {
-			throw new TypeError("'object' is not nullable");
+		if(dict === void 0 || dict === null) {
+			throw new TypeError("'dict' is not nullable");
 		}
-		if(Type.isFunction(object.constructor.clone) && (object.constructor.clone !== this)) {
-			return object.constructor.clone(object);
+		if(Type.isFunction(dict.clone)) {
+			return dict.clone();
 		}
-		if(Type.isFunction(object.constructor.prototype.clone)) {
-			return object.clone();
-		}
-		let clone = {};
-		for(const key in object) {
-			const value = object[key];
+		let clone = new Dictionary();
+		for(const key in dict) {
+			const value = dict[key];
 			clone[key] = $clone(value);
 		}
 		return clone;
 	};
-	__ks_Object.__ks_sttc_defaults_0 = function(...args) {
-		return __ks_Object._cm_merge({}, ...args);
+	__ks_Dictionary.__ks_sttc_defaults_0 = function(...args) {
+		return __ks_Dictionary._cm_merge(new Dictionary(), ...args);
 	};
-	__ks_Object.__ks_sttc_isEmpty_0 = function(item) {
+	__ks_Dictionary.__ks_sttc_isEmpty_0 = function(item) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
 		}
-		return Helper.isEmptyObject(item);
+		return Helper.isEmptyDictionary(item);
 	};
-	__ks_Object.__ks_sttc_merge_0 = function(...args) {
+	__ks_Dictionary.__ks_sttc_merge_0 = function(...args) {
 		let source;
 		let i = 0;
 		let l = args.length;
-		while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isObject(source))) {
+		while((i < l) && !((Type.isValue(args[i]) ? (source = args[i], true) : false) && Type.isDictionary(source))) {
 			++i;
 		}
 		++i;
 		while(i < l) {
-			if(Type.isObject(args[i])) {
+			if(Type.isDictionary(args[i])) {
 				for(const key in args[i]) {
 					const value = args[i][key];
 					$merge.merge(source, key, value);
@@ -331,28 +330,28 @@ module.exports = function() {
 			}
 			++i;
 		}
-		return Type.isValue(source) ? source : {};
+		return Type.isValue(source) ? source : new Dictionary();
 	};
-	__ks_Object._cm_clone = function() {
+	__ks_Dictionary._cm_clone = function() {
 		var args = Array.prototype.slice.call(arguments);
 		if(args.length === 1) {
-			return __ks_Object.__ks_sttc_clone_0.apply(null, args);
+			return __ks_Dictionary.__ks_sttc_clone_0.apply(null, args);
 		}
 		throw new SyntaxError("Wrong number of arguments");
 	};
-	__ks_Object._cm_defaults = function() {
+	__ks_Dictionary._cm_defaults = function() {
 		var args = Array.prototype.slice.call(arguments);
-		return __ks_Object.__ks_sttc_defaults_0.apply(null, args);
+		return __ks_Dictionary.__ks_sttc_defaults_0.apply(null, args);
 	};
-	__ks_Object._cm_isEmpty = function() {
+	__ks_Dictionary._cm_isEmpty = function() {
 		var args = Array.prototype.slice.call(arguments);
 		if(args.length === 1) {
-			return __ks_Object.__ks_sttc_isEmpty_0.apply(null, args);
+			return __ks_Dictionary.__ks_sttc_isEmpty_0.apply(null, args);
 		}
 		throw new SyntaxError("Wrong number of arguments");
 	};
-	__ks_Object._cm_merge = function() {
+	__ks_Dictionary._cm_merge = function() {
 		var args = Array.prototype.slice.call(arguments);
-		return __ks_Object.__ks_sttc_merge_0.apply(null, args);
+		return __ks_Dictionary.__ks_sttc_merge_0.apply(null, args);
 	};
 };

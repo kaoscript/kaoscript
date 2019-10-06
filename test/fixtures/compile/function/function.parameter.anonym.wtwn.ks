@@ -1,5 +1,5 @@
 extern console
 
-func foo(data, :Object?, name: String = data.name) {
+func foo(data, :Dictionary?, name: String = data.name) {
 	console.log(name)
 }

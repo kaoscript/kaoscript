@@ -308,7 +308,7 @@ class ArrayComprehensionForOf extends Expression {
 		let surround = $function.surround(this)
 
 		fragments
-			.code($runtime.helper(this), '.mapObject(')
+			.code($runtime.helper(this), '.mapDictionary(')
 			.compile(@expression)
 			.code(', ')
 

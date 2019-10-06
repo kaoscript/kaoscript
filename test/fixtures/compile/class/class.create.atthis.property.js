@@ -1,3 +1,4 @@
+var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -18,9 +19,11 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_init_1() {
-			this._options = {
-				class: Foobar
-			};
+			this._options = (() => {
+				const d = new Dictionary();
+				d.class = Foobar;
+				return d;
+			})();
 		}
 		__ks_init() {
 			Quxbaz.prototype.__ks_init_1.call(this);

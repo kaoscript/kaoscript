@@ -194,7 +194,7 @@ class MacroDeclaration extends AbstractNode {
 		_line: Number
 		_marks:	Array							= []
 		_name: String
-		_parameters: Object						= {}
+		_parameters: Dictionary						= {}
 		_referenceIndex: Number					= -1
 		_type: MacroType
 	}
@@ -465,6 +465,9 @@ class MacroParameterType extends ParameterType {
 			'Array' => {
 				return value.kind == NodeKind::ArrayExpression
 			}
+			'Dictionary' => {
+				return value.kind == NodeKind::ObjectExpression
+			}
 			'Expression' => {
 				return	value.kind == NodeKind::UnaryExpression ||
 						value.kind == NodeKind::BinaryExpression ||
@@ -476,9 +479,6 @@ class MacroParameterType extends ParameterType {
 			}
 			'Number' => {
 				return value.kind == NodeKind::NumericExpression
-			}
-			'Object' => {
-				return value.kind == NodeKind::ObjectExpression
 			}
 			'String' => {
 				return value.kind == NodeKind::Literal

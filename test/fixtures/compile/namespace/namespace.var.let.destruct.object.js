@@ -1,10 +1,12 @@
-var Helper = require("@kaoscript/runtime").Helper;
+var {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	function min() {
-		return {
-			gender: "female",
-			age: 24
-		};
+		return (() => {
+			const d = new Dictionary();
+			d.gender = "female";
+			d.age = 24;
+			return d;
+		})();
 	}
 	let foo = Helper.namespace(function() {
 		let {gender, age} = min();

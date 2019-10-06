@@ -1,8 +1,8 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var {String, __ks_String} = require("../_/_string.ks")();
-	const $formatters = {};
+	const $formatters = new Dictionary();
 	function format(format) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
