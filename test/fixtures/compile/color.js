@@ -993,8 +993,8 @@ module.exports = function() {
 				let green = endColor._green - this._green;
 				let blue = endColor._blue - this._blue;
 				for(let i = 1; i < length; ++i) {
-					let offset = i / length;
-					let color = this.clone();
+					const offset = i / length;
+					const color = this.clone();
 					color._red += Math.round(red * offset);
 					color._green += Math.round(green * offset);
 					color._blue += Math.round(blue * offset);
@@ -1112,12 +1112,12 @@ module.exports = function() {
 		__ks_func_luminance_0() {
 			let that = this.like(Space.SRGB);
 			let r = Operator.division(that._red, 255);
-			r = Operator.lt(r, 0.03928) ? Operator.division(r, 12.92) : Math.pow(Operator.division(Operator.addition(r, 0.055), 1.055), 2.4);
+			r = (r < 0.03928) ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
 			let g = Operator.division(that._green, 255);
-			g = Operator.lt(g, 0.03928) ? Operator.division(g, 12.92) : Math.pow(Operator.division(Operator.addition(g, 0.055), 1.055), 2.4);
+			g = (g < 0.03928) ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
 			let b = Operator.division(that._blue, 255);
-			b = Operator.lt(b, 0.03928) ? Operator.division(b, 12.92) : Math.pow(Operator.division(Operator.addition(b, 0.055), 1.055), 2.4);
-			return Operator.multiplication(0.2126, r) + Operator.multiplication(0.7152, g) + Operator.multiplication(0.0722, b);
+			b = (b < 0.03928) ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+			return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
 		}
 		luminance() {
 			if(arguments.length === 0) {

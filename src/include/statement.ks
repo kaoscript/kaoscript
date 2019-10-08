@@ -49,6 +49,7 @@ abstract class Statement extends AbstractNode {
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	includePath() => @parent.includePath()
 	isAwait() => false
+	isCascade() => false
 	isExit() => false
 	isExportable() => false
 	isUsingVariable(name) => false

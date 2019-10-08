@@ -864,10 +864,10 @@ export class Color {
 			let green = endColor._green - this._green
 			let blue = endColor._blue - this._blue
 
-			for i from 1 til length {
-				offset = i / length
+			for const i from 1 til length {
+				const offset = i / length
 
-				color = this.clone()
+				const color = this.clone()
 				color._red += Math.round(red * offset)
 				color._green += Math.round(green * offset)
 				color._blue += Math.round(blue * offset)

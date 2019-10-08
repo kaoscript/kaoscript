@@ -33,7 +33,7 @@ class ForRangeStatement extends Statement {
 
 		const variable = @scope.getVariable(@data.value.name)
 		if @declaration || variable == null {
-			@valueVariable = @bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), this)
+			@valueVariable = @bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 			@defineVariable = true
 		}

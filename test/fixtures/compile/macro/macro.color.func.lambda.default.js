@@ -1,4 +1,4 @@
-var {Dictionary, Helper} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Space = Helper.enum(String, {
 		RGB: "rgb",
@@ -9,7 +9,11 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		}
+		__ks_init_1() {
+			this._alpha = 0;
+		}
 		__ks_init() {
+			Color.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
@@ -75,6 +79,9 @@ module.exports = function() {
 				if(that === void 0 || that === null) {
 					throw new TypeError("'that' is not nullable");
 				}
+				else if(!Type.isInstance(that, Color)) {
+					throw new TypeError("'that' is not of type 'Color'");
+				}
 				return $hex(that);
 			};
 			d.srgb = function(that) {
@@ -83,6 +90,9 @@ module.exports = function() {
 				}
 				if(that === void 0 || that === null) {
 					throw new TypeError("'that' is not nullable");
+				}
+				else if(!Type.isInstance(that, Color)) {
+					throw new TypeError("'that' is not of type 'Color'");
 				}
 				if(that._alpha === 1) {
 					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";

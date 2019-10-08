@@ -39,14 +39,20 @@ class Variable {
 		} // }}}
 	}
 	constructor()
-	constructor(@name, @immutable, @predefined, declaredType = null) { // {{{
+	constructor(@name, @immutable, @predefined, declaredType: Type = null, initialized: Boolean = false) { // {{{
 		if declaredType == null {
 			@declaredType = Type.toNamedType(@name, Type.Any)
-			@realType = Type.Null
+
+			if initialized {
+				@realType = @declaredType
+			}
 		}
 		else {
 			@declaredType = Type.toNamedType(@name, declaredType)
-			@realType = @declaredType
+
+			if @predefined || initialized || !declaredType.isReference() {
+				@realType = @declaredType
+			}
 		}
 
 		@definitive = @immutable
@@ -89,7 +95,9 @@ class Variable {
 	setDeclaredType(@declaredType) { // {{{
 		@declaredType = Type.toNamedType(@name, declaredType)
 
-		@realType = @declaredType
+		if @realType != Type.Null || !@declaredType.isReference() {
+			@realType = @declaredType
+		}
 
 		return this
 	} // }}}

@@ -97,7 +97,7 @@ class ForFromStatement extends Statement {
 		}
 
 		if @declared {
-			@variableVariable = @bindingScope.define(@data.variable.name, @immutable, @bindingScope.reference('Number'), this)
+			@variableVariable = @bindingScope.define(@data.variable.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 			if rename {
 				@bindingScope.rename(@data.variable.name)

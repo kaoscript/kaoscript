@@ -95,12 +95,12 @@ class BlockScope extends Scope {
 			return null
 		}
 	} // }}}
-	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable { // {{{
+	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { // {{{
 		if this.hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		const variable = new Variable(name, immutable, false, type)
+		const variable = new Variable(name, immutable, false, type, initialized)
 
 		this.defineVariable(variable, node)
 
@@ -436,6 +436,10 @@ class BlockScope extends Scope {
 				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
 			}
 			else if type.isAny() && !variable.getDeclaredType().isAny() {
+				if variable.getRealType().isNull() {
+					variable.setRealType(variable.getDeclaredType())
+				}
+
 				return variable
 			}
 			else if !type.matchContentOf(variable.getDeclaredType()) {

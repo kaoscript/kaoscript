@@ -1,0 +1,1 @@
+require|extern sealed class Dictionary

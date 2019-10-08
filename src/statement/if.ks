@@ -16,6 +16,7 @@ class IfStatement extends Statement {
 			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
 
 			@variable = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope)
+			@variable.analyse()
 
 			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 		}
@@ -24,12 +25,6 @@ class IfStatement extends Statement {
 			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
 			@condition = $compile.expression(@data.condition, this, @bindingScope)
-		}
-
-		if @declared {
-			@variable.analyse()
-		}
-		else {
 			@condition.analyse()
 		}
 

@@ -241,7 +241,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 
-		@this = @scope.define('this', true, @classRef, this)
+		@this = @scope.define('this', true, @classRef, true, this)
 
 		@parameters = []
 		for parameter in @data.parameters {

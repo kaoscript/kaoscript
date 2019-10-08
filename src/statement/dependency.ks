@@ -109,7 +109,7 @@ abstract class DependencyStatement extends Statement {
 					type = this.scope().reference('Function')
 				}
 
-				const variable = scope.define(declaration.name.name, true, type, this)
+				const variable = scope.define(declaration.name.name, true, type, true, this)
 
 				if kind != DependencyKind::Extern {
 					type.flagRequired()
@@ -194,7 +194,7 @@ abstract class DependencyStatement extends Statement {
 					type = @scope.reference(type)
 				}
 
-				const variable = scope.define(declaration.name.name, true, type, this)
+				const variable = scope.define(declaration.name.name, true, type, true, this)
 
 				if kind != DependencyKind::Extern {
 					type.flagRequired()
@@ -544,15 +544,19 @@ class RequireOrImportDeclarator extends Importer {
 abstract class Requirement {
 	private {
 		_name: String
+		_node: AbstractNode
 		_type: Type
 	}
-	constructor(@name, @type)
-	constructor(variable: Variable) { // {{{
-		@name = variable.name()
-		@type = variable.getDeclaredType()
+	constructor(@name, @type, @node) { // {{{
+		if @name == 'Dictionary' {
+			node.module().flag('Dictionary')
+		}
 	} // }}}
-	constructor(data, kind: DependencyKind, node) { // {{{
-		this(node.define(data, kind))
+	constructor(variable: Variable, @node) { // {{{
+		this(variable.name(), variable.getDeclaredType(), node)
+	} // }}}
+	constructor(data, kind: DependencyKind, @node) { // {{{
+		this(node.define(data, kind), node)
 	} // }}}
 	isAlien() => false
 	isFlexible() => @type.isFlexible()
@@ -570,10 +574,10 @@ abstract class Requirement {
 }
 
 class StaticRequirement extends Requirement {
-	constructor(@name, @type) { // {{{
-		super(name, type)
+	constructor(@name, @type, @node) { // {{{
+		super(name, type, node)
 	} // }}}
-	constructor(data, node) { // {{{
+	constructor(data, @node) { // {{{
 		super(data, DependencyKind::Require, node)
 	} // }}}
 	isRequired() => true
@@ -588,8 +592,8 @@ class StaticRequirement extends Requirement {
 }
 
 class ImportingRequirement extends StaticRequirement {
-	constructor(@name, @type) { // {{{
-		super(name, type)
+	constructor(@name, @type, node) { // {{{
+		super(name, type, node)
 	} // }}}
 	isRequired() => false
 }
@@ -597,10 +601,9 @@ class ImportingRequirement extends StaticRequirement {
 abstract class DynamicRequirement extends Requirement {
 	private {
 		_parameter: String
-		_node: AbstractNode
 	}
 	constructor(variable: Variable, @node) { // {{{
-		super(variable)
+		super(variable, node)
 
 		@parameter = @node.module().scope().acquireTempName(false)
 	} // }}}

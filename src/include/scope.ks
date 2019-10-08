@@ -76,7 +76,7 @@ abstract class Scope {
 	}
 	abstract acquireTempName(declare: Boolean = true): String
 	private abstract declareVariable(name: String): String?
-	abstract define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable
+	abstract define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable
 	abstract defineVariable(variable: Variable, node: AbstractNode)
 	abstract getDefinedVariable(name: String): Variable?
 	abstract getRenamedIndex(name: String): Number

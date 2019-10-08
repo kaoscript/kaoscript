@@ -40,10 +40,8 @@ class MemberExpression extends Expression {
 
 			const type = @object.type()
 
-			// if type.isNull() {
-			// 	unless @nullable || @object.isNullable() {
-			// 		ReferenceException.throwNullExpression(@object, this)
-			// 	}
+			// if type.isNull() && !@nullable {
+			// 	ReferenceException.throwNullExpression(@object, this)
 			// }
 
 			if @computed {
@@ -94,16 +92,22 @@ class MemberExpression extends Expression {
 				}
 			}
 		}
-		else if @computed {
-			@property = $compile.expression(@data.property, this)
-			@property.analyse()
-			@property.prepare()
-		}
 		else {
-			@property = @data.property.name
+			// if @object.type().isNull() && !@nullable {
+			// 	ReferenceException.throwNullExpression(@object, this)
+			// }
+
+			if @computed {
+				@property = $compile.expression(@data.property, this)
+				@property.analyse()
+				@property.prepare()
+			}
+			else {
+				@property = @data.property.name
+			}
 		}
 
-		// if @nullable && !@object.isNullable() {
+		// if @nullable && !@object.type().isNullable() {
 		// 	TypeException.throwNotNullableExistential(@object, this)
 		// }
 	} // }}}

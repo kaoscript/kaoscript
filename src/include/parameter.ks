@@ -866,7 +866,7 @@ class IdentifierParameter extends IdentifierLiteral {
 	setDeclaredType(type, definitive) { // {{{
 		const variable = @scope.getVariable(@value)
 
-		variable.setDeclaredType(type).setDefinitive(definitive)
+		variable.setDeclaredType(type).setRealType(type).setDefinitive(definitive)
 
 		@declaredType = @realType = type
 	} // }}}

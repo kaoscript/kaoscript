@@ -31,7 +31,7 @@ class AnyType extends Type {
 		return type
 	} // }}}
 	flagRequired() => this
-	getProperty(name) => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+	getProperty(name) => AnyType.Unexplicit
 	hashCode() => 'Any'
 	isAny() => true
 	isExplicit() => @explicit

@@ -142,14 +142,14 @@ class ClassDeclaration extends Statement {
 
 		@variable = @scope.define(@name, true, @type, this)
 
-		let thisVariable = @constructorScope.define('this', true, @scope.reference(@name), this)
+		let thisVariable = @constructorScope.define('this', true, @scope.reference(@name), true, this)
 
 		thisVariable.replaceCall = (data, arguments) => new CallThisConstructorSubstitude(data, arguments, @type)
 
-		@destructorScope.define('this', true, @scope.reference(@name), this)
+		@destructorScope.define('this', true, @scope.reference(@name), true, this)
 		@destructorScope.rename('this', 'that')
 
-		@instanceVariableScope.define('this', true, @scope.reference(@name), this)
+		@instanceVariableScope.define('this', true, @scope.reference(@name), true, this)
 
 		if @data.extends? {
 			@extending = true
@@ -241,7 +241,9 @@ class ClassDeclaration extends Statement {
 
 			@hybrid = @class.isHybrid()
 
-			const superVariable = @constructorScope.define('super', true, @scope.reference(@extendsName), this)
+			const superType = @scope.reference(@extendsName)
+
+			const superVariable = @constructorScope.define('super', true, superType, true, this)
 
 			if @hybrid && !@es5 {
 				const thisVariable = @constructorScope.getVariable('this')
@@ -259,7 +261,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			@instanceVariableScope.define('super', true, @scope.reference(@extendsName), this)
+			@instanceVariableScope.define('super', true, superType, true, this)
 		}
 
 		for const methods, name of @classMethods {
@@ -457,12 +459,12 @@ class ClassDeclaration extends Statement {
 	newInstanceMethodScope(method: ClassMethodDeclaration) { // {{{
 		const scope = this.newScope(@scope, ScopeType::Function)
 
-		scope.define('this', true, @scope.reference(@name), this)
+		scope.define('this', true, @scope.reference(@name), true, this)
 
 		if @extending {
 			scope.flagExtending()
 
-			scope.define('super', true, null, this)
+			scope.define('super', true, @scope.reference(@extendsName), true, this)
 		}
 
 		return scope

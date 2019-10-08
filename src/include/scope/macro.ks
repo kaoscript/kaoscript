@@ -54,12 +54,12 @@ class MacroScope extends Scope {
 			return null
 		}
 	} // }}}
-	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable { // {{{
+	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { // {{{
 		if @variables[name] is Variable {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		const variable = new Variable(name, immutable, false, type)
+		const variable = new Variable(name, immutable, false, type, initialized)
 
 		this.defineVariable(variable, node)
 

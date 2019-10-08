@@ -338,7 +338,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		@right.releaseReusable()
 
 		if @left is IdentifierLiteral {
-			@left.type(@right.type(), @scope, this)
+			@left.type(@right.type().setNullable(false), @scope, this)
 		}
 	} // }}}
 	inferTypes() { // {{{
@@ -347,7 +347,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
-				type: @left.type().setNullable(false)
+				type: @right.type().setNullable(false)
 			}
 		}
 

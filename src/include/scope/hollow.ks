@@ -9,12 +9,12 @@ class HollowScope extends Scope {
 	acquireUnusedTempName() => @parent.acquireUnusedTempName()
 	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
 	private declareVariable(name: String): String? => @parent.declareVariable(name)
-	define(name: String, immutable: Boolean, type: Type = null, node: AbstractNode): Variable { // {{{
+	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { // {{{
 		if this.hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)
 		}
 
-		const variable = new Variable(name, immutable, false, type)
+		const variable = new Variable(name, immutable, false, type, initialized)
 
 		this.defineVariable(variable, node)
 

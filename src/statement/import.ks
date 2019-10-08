@@ -128,7 +128,7 @@ class Importer extends Statement {
 			@worker.prepare(arguments)
 
 			for const argument in @arguments when argument.required {
-				module.addRequirement(new ImportingRequirement(argument.name, argument.type))
+				module.addRequirement(new ImportingRequirement(argument.name, argument.type, this))
 			}
 
 			const matchables = []
@@ -279,7 +279,7 @@ class Importer extends Statement {
 		const newVariable = (variable !?= @scope.getVariable(local)) || variable.isPredefined()
 
 		if newVariable {
-			@scope.define(local, true, null, this)
+			@scope.define(local, true, null, true, this)
 		}
 		else if @parent.includePath() != null {
 			return
@@ -319,7 +319,7 @@ class Importer extends Statement {
 			}
 		}
 		else {
-			@scope.define(local, true, type, this)
+			@scope.define(local, true, type, true, this)
 		}
 
 		this.module().import(local)

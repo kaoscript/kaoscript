@@ -21,7 +21,7 @@ class ArrayComprehensionForFrom extends Expression {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		@bindingScope.define(@data.loop.variable.name, false, @scope.reference('Number'), this)
+		@bindingScope.define(@data.loop.variable.name, false, @scope.reference('Number'), true, this)
 
 		@variable = $compile.expression(@data.loop.variable, this, @bindingScope)
 		@variable.analyse()
@@ -136,7 +136,7 @@ class ArrayComprehensionForIn extends Expression {
 		@expression.analyse()
 
 		if @data.loop.value? {
-			@valueVariable = @bindingScope.define(@data.loop.value.name, false, Type.Any, this)
+			@valueVariable = @bindingScope.define(@data.loop.value.name, false, AnyType.NullableUnexplicit, true, this)
 
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.analyse()
@@ -146,7 +146,7 @@ class ArrayComprehensionForIn extends Expression {
 		}
 
 		if @data.loop.index? {
-			@indexVariable = @bindingScope.define(@data.loop.index.name, false, @bindingScope.reference('Number'), this)
+			@indexVariable = @bindingScope.define(@data.loop.index.name, false, @bindingScope.reference('Number'), true, this)
 
 			@index = $compile.expression(@data.loop.index, this, @bindingScope)
 			@index.analyse()
@@ -261,7 +261,7 @@ class ArrayComprehensionForOf extends Expression {
 		@expression.analyse()
 
 		if @data.loop.key? {
-			@bindingScope.define(@data.loop.key.name, false, @bindingScope.reference('String'), this)
+			@bindingScope.define(@data.loop.key.name, false, @bindingScope.reference('String'), true, this)
 
 			@key = $compile.expression(@data.loop.key, this, @bindingScope)
 			@key.analyse()
@@ -271,7 +271,7 @@ class ArrayComprehensionForOf extends Expression {
 		}
 
 		if @data.loop.value? {
-			@bindingScope.define(@data.loop.value.name, false, Type.Any, this)
+			@bindingScope.define(@data.loop.value.name, false, AnyType.NullableUnexplicit, true, this)
 
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.analyse()
@@ -363,7 +363,7 @@ class ArrayComprehensionForRange extends Expression {
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
 		@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 
-		@bindingScope.define(@data.loop.value.name, false, @scope.reference('Number'), this)
+		@bindingScope.define(@data.loop.value.name, false, @scope.reference('Number'), true, this)
 
 		@value = $compile.expression(@data.loop.value, this, @bindingScope)
 		@value.analyse()

@@ -32,7 +32,7 @@ class VariableDeclaration extends Statement {
 	constructor(@data, @parent, @scope, @initScope) { // {{{
 		this(data, parent, scope)
 
-		@cascade = parent is IfStatement && parent.isCascade()
+		@cascade = parent.isCascade()
 	} // }}}
 	analyse() { // {{{
 		for const modifier in @data.modifiers {
@@ -137,9 +137,7 @@ class VariableDeclaration extends Statement {
 		}
 
 		if @hasInit {
-			if !@autotype {
-				declarator.setRealType(type)
-			}
+			declarator.setRealType(type)
 
 			@init.acquireReusable(declarator.isSplitAssignment())
 			@init.releaseReusable()
@@ -159,9 +157,7 @@ class VariableDeclaration extends Statement {
 	defineVariables(declarator) { // {{{
 		let alreadyDeclared
 
-		if @cascade {
-			@parent.addAssignments(declarator.listAssignments([]))
-		}
+		const assignments = []
 
 		for const name in declarator.listAssignments([]) {
 			if @scope.hasDefinedVariable(name) {
@@ -176,9 +172,16 @@ class VariableDeclaration extends Statement {
 				alreadyDeclared = !variable.isRenamed()
 			}
 
-			if alreadyDeclared && @toDeclareAll {
+			if alreadyDeclared {
 				@toDeclareAll = false
 			}
+			else {
+				assignments.push(variable.getSecureName())
+			}
+		}
+
+		if @cascade {
+			@parent.addAssignments(assignments)
 		}
 	} // }}}
 	export(recipient) { // {{{

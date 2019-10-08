@@ -392,7 +392,7 @@ class SwitchBindingArray extends AbstractNode {
 
 class SwitchBindingType extends AbstractNode {
 	analyse() { // {{{
-		@scope.define(@data.name.name, false, this)
+		@scope.define(@data.name.name, false, Type.fromAST(@data.type, this), true, this)
 	} // }}}
 	prepare()
 	translate()

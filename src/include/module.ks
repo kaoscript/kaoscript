@@ -438,12 +438,9 @@ export class Module {
 		let hasOperator = @flags.Operator == true && !@imports[operator]
 		let hasType = @flags.Type == true && !@imports[type]
 
-		if hasDictionary || hasHelper || hasType {
+		if hasHelper || hasType {
 			for const requirement in @requirements {
-				if requirement.name() == dictionary {
-					hasDictionary = false
-				}
-				else if requirement.name() == helper {
+				if requirement.name() == helper {
 					hasHelper = false
 				}
 				else if requirement.name() == type {

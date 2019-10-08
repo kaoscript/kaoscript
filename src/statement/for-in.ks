@@ -50,7 +50,7 @@ class ForInStatement extends Statement {
 			const variable = @bindingScope.getVariable(@data.index.name)
 
 			if @declaration || variable == null {
-				@bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), this)
+				@bindingScope.define(@data.index.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 				@declareIndex = true
 			}
@@ -76,7 +76,7 @@ class ForInStatement extends Statement {
 				if @declaration || variable == null {
 					@declareValue = true
 
-					@declaredVariables.push(@bindingScope.define(name, @immutable, Type.Any, this))
+					@declaredVariables.push(@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this))
 				}
 				else if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, this)

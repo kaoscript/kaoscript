@@ -114,10 +114,10 @@ abstract class Type {
 		fromAST(data?, node: AbstractNode): Type => Type.fromAST(data, node.scope(), true, node)
 		fromAST(data?, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
 			if !?data {
-				return Type.Any
+				return AnyType.NullableUnexplicit
 			}
 			else if data is Type {
-				return data:Type
+				return data
 			}
 
 			data = data as Any

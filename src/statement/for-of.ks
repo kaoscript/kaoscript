@@ -37,7 +37,7 @@ class ForOfStatement extends Statement {
 			const keyVariable = @scope.getVariable(@data.key.name)
 
 			if @declaration || keyVariable == null {
-				@bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), this)
+				@bindingScope.define(@data.key.name, @immutable, @bindingScope.reference('String'), true, this)
 
 				@defineKey = true
 			}
@@ -63,7 +63,7 @@ class ForOfStatement extends Statement {
 				if @declaration || variable == null {
 					@defineValue = true
 
-					@bindingScope.define(name, @immutable, Type.Any, this)
+					@bindingScope.define(name, @immutable, AnyType.NullableUnexplicit, true, this)
 				}
 				else if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, this)
