@@ -292,19 +292,50 @@ class Parameter extends AbstractNode {
 				node.module().flag('Type')
 
 				if asyncHeader {
-					if signature.min() == 0 {
-						fragments
-							.newControl()
-							.code(`if(arguments.length < 1)`)
-							.step()
-							.line(`throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 0 + 1)")`)
-							.step()
-							.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
-							.step()
-							.line(`throw new TypeError("'callback' must be a function")`)
-							.done()
+					if !node._options.rules.noParamAssert {
+						if signature.min() == 0 {
+							fragments
+								.newControl()
+								.code(`if(arguments.length < 1)`)
+								.step()
+								.line(`throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 0 + 1)")`)
+								.step()
+								.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
+								.step()
+								.line(`throw new TypeError("'callback' must be a function")`)
+								.done()
+						}
+						else {
+							let ctrl = fragments
+								.newControl()
+								.code(`if(arguments.length < \(signature.min() + 1))`)
+								.step()
+								.line(`\($runtime.scope(node))__ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
+
+							ctrl
+								.newControl()
+								.code(`if(arguments.length > 0 && \($runtime.type(node)).isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+								.step()
+								.line(`return __ks_cb(__ks_error)`)
+								.step()
+								.code(`else`)
+								.step()
+								.line(`throw __ks_error`)
+								.done()
+
+							ctrl
+								.step()
+								.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
+								.step()
+								.line(`throw new TypeError("'callback' must be a function")`)
+								.done()
+						}
 					}
-					else {
+				}
+				else {
+					fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
+
+					if !node._options.rules.noParamAssert {
 						let ctrl = fragments
 							.newControl()
 							.code(`if(arguments.length < \(signature.min() + 1))`)
@@ -313,7 +344,7 @@ class Parameter extends AbstractNode {
 
 						ctrl
 							.newControl()
-							.code(`if(arguments.length > 0 && \($runtime.type(node)).isFunction((__ks_cb = arguments[arguments.length - 1])))`)
+							.code(`if(\($runtime.type(node)).isFunction(__ks_cb))`)
 							.step()
 							.line(`return __ks_cb(__ks_error)`)
 							.step()
@@ -327,39 +358,12 @@ class Parameter extends AbstractNode {
 							.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
 							.step()
 							.line(`throw new TypeError("'callback' must be a function")`)
-							.done()
+
+						ctrl.done()
 					}
 				}
-				else {
-					fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
-
-					let ctrl = fragments
-						.newControl()
-						.code(`if(arguments.length < \(signature.min() + 1))`)
-						.step()
-						.line(`\($runtime.scope(node))__ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for \(signature.min()) + 1)")`)
-
-					ctrl
-						.newControl()
-						.code(`if(\($runtime.type(node)).isFunction(__ks_cb))`)
-						.step()
-						.line(`return __ks_cb(__ks_error)`)
-						.step()
-						.code(`else`)
-						.step()
-						.line(`throw __ks_error`)
-						.done()
-
-					ctrl
-						.step()
-						.code(`else if(!\($runtime.type(node)).isFunction(__ks_cb))`)
-						.step()
-						.line(`throw new TypeError("'callback' must be a function")`)
-
-					ctrl.done()
-				}
 			}
-			else {
+			else if !node._options.rules.noParamAssert {
 				fragments
 					.newControl()
 					.code(`if(\(name).length < \(signature.min()))`)
@@ -1387,17 +1391,17 @@ class IdentifierParameter extends IdentifierLiteral {
 			}
 		}
 		else {
-			ctrl = fragments.newControl()
-
 			if @declaredType.isNullable() {
-				ctrl.code('if(').compile(this).code(' === void 0').code(')')
+				ctrl = fragments
+					.newControl()
+					.code('if(').compile(this).code(' === void 0').code(')')
 					.step()
-					.newLine()
-					.compile(this).code(' = null')
-					.done()
+
+				ctrl.newLine().compile(this).code(' = null').done()
 			}
-			else {
-				ctrl
+			else if !@options.rules.noParamAssert {
+				ctrl = fragments
+					.newControl()
 					.code('if(').compile(this).code(' === void 0').code(' || ').compile(this).code(' === null').code(')')
 					.step()
 
@@ -1408,7 +1412,7 @@ class IdentifierParameter extends IdentifierLiteral {
 			}
 		}
 
-		if !@declaredType.isAny() {
+		if !@declaredType.isAny() && !@options.rules.noParamAssert && !@options.rules.noParamTypeAssert {
 			if ctrl? {
 				ctrl.step().code('else ')
 			}
@@ -1571,7 +1575,7 @@ class AnonymousParameter extends AbstractNode {
 		}
 	} // }}}
 	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
-		if !@type.isAny() {
+		if !@type.isAny() && !@options.rules.noParamAssert && !@options.rules.noParamTypeAssert {
 			let ctrl = fragments
 				.newControl()
 				.code('if(')

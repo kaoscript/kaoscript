@@ -594,8 +594,10 @@ export class Compiler {
 			}
 			format: {}
 			rules: {
-				ignoreMisfit: false
+				noParamAssert: false
+				noParamTypeAssert: false
 				noUndefined: false
+				ignoreMisfit: false
 			}
 			runtime: {
 				dictionary: {
