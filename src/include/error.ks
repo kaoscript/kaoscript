@@ -376,6 +376,9 @@ export class TypeException extends Exception {
 		throwExpectedReturnedValue(node) ~ TypeException { // {{{
 			throw new TypeException(`A value is expected to be returned`, node)
 		} // }}}
+		throwExpectedThrownError(node) ~ TypeException { // {{{
+			throw new TypeException(`An error is expected to be thrown`, node)
+		} // }}}
 		throwImplFieldToSealedType(node) ~ TypeException { // {{{
 			throw new TypeException(`impl can add field to only non-sealed type`, node)
 		} // }}}
@@ -452,6 +455,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwRequireClass(node) ~ TypeException { // {{{
 			throw new TypeException(`An instance is required`, node)
+		} // }}}
+		throwUnexpectedInoperative(operand, node) ~ TypeException { // {{{
+			throw new TypeException(`The operand \(operand.toQuote(true)) can't be of type \(operand.type().toQuote(true))`, node)
 		} // }}}
 		throwUnexpectedReturnedValue(node) ~ TypeException { // {{{
 			throw new TypeException(`No values are expected to be returned`, node)

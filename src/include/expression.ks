@@ -23,6 +23,8 @@ abstract class Expression extends AbstractNode {
 	isComputed() => false
 	// if the expression can be an assignment and be transformed as a declaration
 	isDeclarable() => false
+	// if the expression is always exiting
+	isExit() => false
 	// if the expression can be ignored (like a variable casting)
 	isIgnorable() => false
 	// if the associated type can be updated (it's a chunck or a variable)

@@ -1,0 +1,1 @@
+TypeException: The operand "quxbaz()" can't be of type "Void" (line 2, file "fixtures/compile/function/function.void.decl.ks")

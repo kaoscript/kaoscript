@@ -242,10 +242,15 @@ class FunctionType extends Type {
 	index(@index) => this
 	isAsync() => @async
 	isCatchingError(error): Boolean { // {{{
-		for type in @throws {
-			if error.matchInheritanceOf(type) {
-				return true
+		if @throws.length != 0 {
+			for type in @throws {
+				if error.matchInheritanceOf(type) {
+					return true
+				}
 			}
+		}
+		else if @returnType.isNever() {
+			return true
 		}
 
 		return false

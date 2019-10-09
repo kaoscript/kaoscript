@@ -60,7 +60,10 @@ class ReturnStatement extends Statement {
 		}
 	} // }}}
 	checkReturnType(type: Type) { // {{{
-		if @value == null {
+		if type.isNever() {
+			TypeException.throwUnexpectedReturnedValue(this)
+		}
+		else if @value == null {
 			if !type.isVoid() {
 				TypeException.throwExpectedReturnedValue(this)
 			}

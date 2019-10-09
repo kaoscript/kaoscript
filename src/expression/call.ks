@@ -102,6 +102,10 @@ class CallExpression extends Expression {
 	prepare() { // {{{
 		for const argument in @arguments {
 			argument.prepare()
+
+			if argument.type().isInoperative() {
+				TypeException.throwUnexpectedInoperative(argument, this)
+			}
 		}
 
 		if @options.format.spreads == 'es5' {
@@ -299,6 +303,7 @@ class CallExpression extends Expression {
 	isCallable() => !@reusable
 	isComposite() => !@reusable
 	isComputed() => (@nullable || @callees.length > 1) && !@tested
+	isExit() => @type.isNever()
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	isUsingVariable(name) { // {{{
@@ -714,7 +719,7 @@ class CallExpression extends Expression {
 			NotImplementedException.throw(this)
 		}
 
-		fragments += '(...)'
+		fragments += '()'
 
 		return fragments
 	} // }}}

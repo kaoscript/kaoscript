@@ -74,12 +74,20 @@ class Block extends AbstractNode {
 			}
 		}
 
-		if !@exit && @type != null && !@type.isAny() && !@type.isVoid() {
-			if @statements.length == 0 {
-				TypeException.throwExpectedReturnedValue(this)
+		if !@exit && @type != null && !@type.isVoid() {
+			if @type.isNever() {
+				TypeException.throwExpectedThrownError(this)
+			}
+			else if @type.isAny() && !@type.isExplicit() {
+				// do nothing
 			}
 			else {
-				@statements[@statements.length - 1].checkReturnType(@type)
+				if @statements.length == 0 {
+					TypeException.throwExpectedReturnedValue(this)
+				}
+				else {
+					@statements[@statements.length - 1].checkReturnType(@type)
+				}
 			}
 		}
 	} // }}}

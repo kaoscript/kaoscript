@@ -260,6 +260,7 @@ class ReferenceType extends Type {
 	} // }}}
 	isNative() => $natives[@name] == true
 	isNamespace() => @name == 'Namespace' || this.type().isNamespace()
+	isNever() => @name == 'Never' || this.type().isNever()
 	isNullable() => @nullable
 	isNumber() => @name == 'Number' || this.type().isNumber()
 	isReference() => true
@@ -326,6 +327,10 @@ class ReferenceType extends Type {
 		if !?@type || @type.isCloned() {
 			if @name == 'Any' {
 				@type = Type.Any
+				@predefined = true
+			}
+			else if @name == 'Never' {
+				@type = Type.Never
 				@predefined = true
 			}
 			else if @name == 'Void' {

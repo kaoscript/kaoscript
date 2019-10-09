@@ -1,0 +1,43 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "FoobarError",
+    1,
+    "foobar"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": true,
+      "sealed": false,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "extends": "Error"
+    },
+    {
+      "kind": "function",
+      "async": false,
+      "exhaustive": true,
+      "min": 0,
+      "max": 0,
+      "parameters": [],
+      "returns": "Never",
+      "throws": [
+        {
+          "reference": 0
+        }
+      ]
+    }
+  ],
+  "macros": []
+}

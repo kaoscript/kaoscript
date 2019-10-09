@@ -16,7 +16,16 @@ class BinaryOperatorExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
+
+		if @left.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@left, this)
+		}
+
 		@right.prepare()
+
+		if @right.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@right, this)
+		}
 	} // }}}
 	translate() { // {{{
 		@left.translate()
@@ -280,6 +289,10 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 	prepare() { // {{{
 		@left.prepare()
 
+		if @left.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@left, this)
+		}
+
 		unless @left.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@left, Operator::And, this)
 		}
@@ -289,6 +302,10 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 		}
 
 		@right.prepare()
+
+		if @right.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@right, this)
+		}
 
 		unless @right.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@right, Operator::And, this)
@@ -370,13 +387,11 @@ class BinaryOperatorDivision extends NumericBinaryOperatorExpression {
 
 class BinaryOperatorImply extends BinaryOperatorExpression {
 	prepare() { // {{{
-		@left.prepare()
+		super()
 
 		unless @left.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@left, Operator::Imply, this)
 		}
-
-		@right.prepare()
 
 		unless @right.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@right, Operator::Imply, this)
@@ -427,7 +442,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 		_type: Type
 	}
 	prepare() { // {{{
-		super.prepare()
+		super()
 
 		@left.acquireReusable(true)
 		@left.releaseReusable()
@@ -476,13 +491,11 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 
 class BinaryOperatorOr extends BinaryOperatorExpression {
 	prepare() { // {{{
-		@left.prepare()
+		super()
 
 		unless @left.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@left, Operator::Or, this)
 		}
-
-		@right.prepare()
 
 		unless @right.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@right, Operator::Or, this)
@@ -600,6 +613,10 @@ class BinaryOperatorTypeCasting extends Expression {
 
 		const type = @left.type()
 
+		if type.isInoperative() {
+			TypeException.throwUnexpectedInoperative(@left, this)
+		}
+
 		if !(type is ReferenceType || type is UnionType || type.isAny()) {
 			TypeException.throwInvalidCasting(this)
 		}
@@ -630,6 +647,10 @@ class BinaryOperatorTypeEquality extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
+
+		if @left.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@left, this)
+		}
 
 		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
 			if const variable = @scope.getVariable(@data.right.typeName.name) {
@@ -727,6 +748,10 @@ class BinaryOperatorTypeInequality extends Expression {
 	prepare() { // {{{
 		@left.prepare()
 
+		if @left.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@left, this)
+		}
+
 		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
 			if variable ?= @scope.getVariable(@data.right.typeName.name) {
 				type = variable.getRealType()
@@ -814,13 +839,11 @@ class BinaryOperatorTypeInequality extends Expression {
 
 class BinaryOperatorXor extends BinaryOperatorExpression {
 	prepare() { // {{{
-		@left.prepare()
+		super()
 
 		unless @left.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@left, Operator::Xor, this)
 		}
-
-		@right.prepare()
 
 		unless @right.type().canBeBoolean() {
 			TypeException.throwInvalidOperand(@right, Operator::Xor, this)

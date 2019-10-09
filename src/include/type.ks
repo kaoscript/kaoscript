@@ -16,6 +16,8 @@ const $natives = { // {{{
 	Error: true
 	Function: true
 	func: true
+	Never: true
+	never: true
 	Namespace: true
 	Number: true
 	number: true
@@ -36,6 +38,7 @@ const $types = { // {{{
 	dict: 'Dictionary'
 	enum: 'Enum'
 	func: 'Function'
+	never: 'Never'
 	number: 'Number'
 	string: 'String'
 	void: 'Void'
@@ -564,6 +567,7 @@ abstract class Type {
 	isFlexible() => false
 	isFunction() => false
 	isHybrid() => false
+	isInoperative() => this.isNever() || this.isVoid()
 	isMatching(value, mode: MatchingMode) => false
 	isMergeable(type) => false
 	isMethod() => false
@@ -571,6 +575,7 @@ abstract class Type {
 	isNamed() => false
 	isNamespace() => false
 	isNative() => false
+	isNever() => false
 	isNumber() => false
 	isNull() => false
 	isNullable() => false
@@ -653,6 +658,7 @@ include {
 	'./type/class'
 	'./type/enum'
 	'./type/namespace'
+	'./type/never'
 	'./type/null'
 	'./type/dictionary'
 	'./type/parameter'
@@ -662,5 +668,6 @@ include {
 }
 
 Type.Any = AnyType.Unexplicit
+Type.Never = new NeverType()
 Type.Null = new NullType()
 Type.Void = new VoidType()

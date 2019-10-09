@@ -34,6 +34,10 @@ class ComparisonExpression extends Expression {
 	prepare() { // {{{
 		for const operand in @operands {
 			operand.prepare()
+
+			if operand.type().isInoperative() {
+				TypeException.throwUnexpectedInoperative(operand, this)
+			}
 		}
 
 		for const operator in @operators {

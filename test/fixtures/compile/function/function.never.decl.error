@@ -1,0 +1,1 @@
+TypeException: The operand "quxbaz()" can't be of type "Never" (line 2, file "fixtures/compile/function/function.never.decl.ks")

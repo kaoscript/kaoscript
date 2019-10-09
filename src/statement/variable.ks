@@ -113,6 +113,10 @@ class VariableDeclaration extends Statement {
 
 			type = @init.type()
 
+			if type.isInoperative() {
+				TypeException.throwUnexpectedInoperative(@init, this)
+			}
+
 			if @parent is IfStatement {
 				type = type.setNullable(false)
 			}

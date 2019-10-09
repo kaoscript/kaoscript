@@ -35,7 +35,10 @@ let $keywords = { // {{{
 	interface: true
 	long: true
 	native: true
+	never: true
 	new: true
+	override: true
+	overwrite: true
 	package: true
 	private: true
 	protected: true

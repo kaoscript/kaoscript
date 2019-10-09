@@ -15,6 +15,10 @@ class PolyadicOperatorExpression extends Expression {
 	prepare() { // {{{
 		for const operand in @operands {
 			operand.prepare()
+
+			if operand.type().isInoperative() {
+				TypeException.throwUnexpectedInoperative(operand, this)
+			}
 		}
 	} // }}}
 	translate() { // {{{
@@ -367,6 +371,10 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 		for operand in @operands {
 			operand.prepare()
 
+			if operand.type().isInoperative() {
+				TypeException.throwUnexpectedInoperative(operand, this)
+			}
+
 			for const data, name of operand.inferTypes() when !data.type.isAny() {
 				@scope.updateInferable(name, data, this)
 			}
@@ -516,6 +524,10 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 		let operandType, type, ne
 		for operand, index in @operands {
 			operand.prepare()
+
+			if operand.type().isInoperative() {
+				TypeException.throwUnexpectedInoperative(operand, this)
+			}
 
 			if index < last {
 				operand.acquireReusable(true)

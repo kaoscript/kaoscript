@@ -8,6 +8,10 @@ class UnaryOperatorExpression extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@argument.prepare()
+
+		if @argument.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@argument, this)
+		}
 	} // }}}
 	translate() { // {{{
 		@argument.translate()
@@ -184,7 +188,7 @@ class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 		_type: Type
 	}
 	prepare() { // {{{
-		@argument.prepare()
+		super()
 
 		@type = @argument.type().setNullable(false)
 	} // }}}
@@ -196,7 +200,7 @@ class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 
 class UnaryOperatorSpread extends UnaryOperatorExpression {
 	prepare() { // {{{
-		@argument.prepare()
+		super()
 
 		const type = @argument.type()
 

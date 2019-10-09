@@ -42,6 +42,10 @@ class AssignmentOperatorExpression extends Expression {
 		}
 
 		@right.prepare()
+
+		if @right.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@right, this)
+		}
 	} // }}}
 	translate() { // {{{
 		@left.translate()
@@ -285,7 +289,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		_ignorable: Boolean		= false
 	}
 	prepare() { // {{{
-		super.prepare()
+		super()
 
 		if @left is IdentifierLiteral {
 			@left.type(@right.type(), @scope, this)
@@ -331,8 +335,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 	prepare() { // {{{
-		@left.prepare()
-		@right.prepare()
+		super()
 
 		@right.acquireReusable(true)
 		@right.releaseReusable()
@@ -428,11 +431,14 @@ class AssignmentOperatorMultiplication extends NumericAssignmentOperatorExpressi
 
 class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 	prepare() { // {{{
-		@left.prepare()
-		@right.prepare()
+		super()
 
 		@right.acquireReusable(true)
 		@right.releaseReusable()
+
+		if @left is IdentifierLiteral {
+			@left.type(@right.type().setNullable(false), @scope, this)
+		}
 	} // }}}
 	isDeclararing() => true
 	toFragments(fragments, mode) { // {{{

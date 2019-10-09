@@ -24,6 +24,10 @@ class TryExpression extends Expression {
 	prepare() { // {{{
 		@argument.prepare()
 
+		if @unwrap && @argument.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@argument, this)
+		}
+
 		if @defaultValue != null {
 			@defaultValue.prepare()
 		}
