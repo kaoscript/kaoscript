@@ -37,8 +37,8 @@ class InlineBlockScope extends BlockScope {
 
 		return null
 	} // }}}
-	private declareVariable(name: String) { // {{{
-		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Array) {
+	private declareVariable(name: String, scope: Scope) { // {{{
+		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && @parent.hasDefinedVariable(name)) {
 			const newName = this.getNewName(name)
 
 			if @variables[name] is not Array {
@@ -53,6 +53,18 @@ class InlineBlockScope extends BlockScope {
 			return null
 		}
 	} // }}}
+	getNewName(name: String): String { // {{{
+		let index = this.getRenamedIndex(name)
+		let newName = '__ks_' + name + '_' + (++index)
+
+		while this.hasRenamedVariable(newName) {
+			newName = '__ks_' + name + '_' + (++index)
+		}
+
+		@renamedIndexes[name] = index
+
+		return newName
+	} // }}}
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
 	getTempIndex() { // {{{
 		if @tempIndex == -1 {
@@ -60,6 +72,19 @@ class InlineBlockScope extends BlockScope {
 		}
 
 		return @tempIndex
+	} // }}}
+	hasRenamedVariable(name: String): Boolean { // {{{
+		let parent = this
+		do {
+			if parent.hasDeclaredVariable(name) {
+				return true
+			}
+
+			parent = parent.parent()
+		}
+		while parent.isInline()
+
+		return parent.hasDeclaredVariable(name)
 	} // }}}
 	isInline() => true
 	listUpdatedInferables() => @upatedInferables
@@ -89,7 +114,7 @@ class InlineBlockScope extends BlockScope {
 			@renamedIndexes[name] = parent.getRenamedIndex(name)
 		}
 
-		const newName = this.declareVariable(name)
+		const newName = this.declareVariable(name, this)
 
 		@renamedVariables[name] = newName
 		@declarations[newName] = true
@@ -127,7 +152,7 @@ class InlineBlockScope extends BlockScope {
 }
 
 class LaxInlineBlockScope extends InlineBlockScope {
-	private declareVariable(name: String) { // {{{
+	private declareVariable(name: String, scope: Scope) { // {{{
 		if $keywords[name] == true || this.hasRenamedVariable(name) {
 			const newName = this.getNewName(name)
 
@@ -142,31 +167,6 @@ class LaxInlineBlockScope extends InlineBlockScope {
 
 			return null
 		}
-	} // }}}
-	getNewName(name: String): String { // {{{
-		let index = this.getRenamedIndex(name)
-		let newName = '__ks_' + name + '_' + (++index)
-
-		while this.hasRenamedVariable(newName) {
-			newName = '__ks_' + name + '_' + (++index)
-		}
-
-		@renamedIndexes[name] = index
-
-		return newName
-	} // }}}
-	hasRenamedVariable(name: String): Boolean { // {{{
-		let parent = this
-		do {
-			if parent.hasDeclaredVariable(name) {
-				return true
-			}
-
-			parent = parent.parent()
-		}
-		while parent.isInline()
-
-		return parent.hasDeclaredVariable(name)
 	} // }}}
 	isBleeding() => true
 }

@@ -5,7 +5,7 @@ class FunctionScope extends BlockScope {
 	flagExtending() { // {{{
 		@extending = true
 	} // }}}
-	protected declareVariable(name: String) { // {{{
+	protected declareVariable(name: String, scope: Scope) { // {{{
 		if name == 'this' || (@extending && name == 'super') {
 			@declarations[name] = true
 

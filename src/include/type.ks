@@ -340,9 +340,6 @@ abstract class Type {
 
 					return type
 				}
-				/* else {
-					return UnionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-				} */
 			}
 			else if data.kind? {
 				switch data.kind {
@@ -410,9 +407,6 @@ abstract class Type {
 						return references[data[0]].name(data[1])
 					}
 				}
-				/* else {
-					return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
-				} */
 			}
 			else if data.reference? {
 				if references[data.reference]? {

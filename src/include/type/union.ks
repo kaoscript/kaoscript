@@ -126,7 +126,6 @@ class UnionType extends Type {
 
 		return that
 	} // }}}
-	/* export(references, mode) => [type.toReference(references, mode) for type in @types] */
 	export(references, mode) { // {{{
 		if @explicitNullity {
 			return {

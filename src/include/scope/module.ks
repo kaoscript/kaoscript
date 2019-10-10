@@ -100,7 +100,7 @@ class ModuleScope extends Scope {
 
 		@tempDeclarations.clear()
 	} // }}}
-	private declareVariable(name: String) { // {{{
+	private declareVariable(name: String, scope: Scope) { // {{{
 		if $keywords[name] == true || (@declarations[name] == true && @variables[name] is Array) {
 			const newName = this.getNewName(name)
 
@@ -140,7 +140,7 @@ class ModuleScope extends Scope {
 			variables.push(@line, variable)
 		}
 		else {
-			if const newName = this.declareVariable(name) {
+			if const newName = this.declareVariable(name, this) {
 				@renamedVariables[name] = newName
 
 				variable.renameAs(newName)

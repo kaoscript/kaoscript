@@ -79,7 +79,7 @@ class BlockScope extends Scope {
 
 		@tempDeclarations.clear()
 	} // }}}
-	protected declareVariable(name: String) { // {{{
+	protected declareVariable(name: String, scope: Scope) { // {{{
 		if $keywords[name] == true || @declarations[name] == true {
 			const newName = this.getNewName(name)
 
@@ -119,7 +119,7 @@ class BlockScope extends Scope {
 			variables.push(@line, variable)
 		}
 		else {
-			if const newName = this.declareVariable(name) {
+			if const newName = this.declareVariable(name, this) {
 				@renamedVariables[name] = newName
 
 				variable.renameAs(newName)

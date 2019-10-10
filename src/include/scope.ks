@@ -78,7 +78,7 @@ abstract class Scope {
 		isTempName(name: String): Boolean => name.length > 5 && name.substr(0, 5) == '__ks_'
 	}
 	abstract acquireTempName(declare: Boolean = true): String
-	private abstract declareVariable(name: String): String?
+	private abstract declareVariable(name: String, scope: Scope): String?
 	abstract define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable
 	abstract defineVariable(variable: Variable, node: AbstractNode)
 	abstract getDefinedVariable(name: String): Variable?
