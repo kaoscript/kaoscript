@@ -102,5 +102,6 @@ class ThisExpression extends Expression {
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@fragment)
 	} // }}}
+	toQuote() => `@\(@name)`
 	type() => @type
 }

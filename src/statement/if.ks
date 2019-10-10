@@ -53,9 +53,9 @@ class IfStatement extends Statement {
 		if @declared {
 			@variable.prepare()
 
-			// if const variable = @variable.getIdentifierVariable() {
-			// 	variable.setRealType(variable.getRealType().setNullable(false))
-			// }
+			if const variable = @variable.getIdentifierVariable() {
+				variable.setRealType(variable.getRealType().setNullable(false))
+			}
 		}
 		else {
 			@condition.prepare()

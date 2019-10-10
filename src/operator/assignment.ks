@@ -440,6 +440,22 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			@left.type(@right.type().setNullable(false), @scope, this)
 		}
 	} // }}}
+	inferContraryTypes(isExit) { // {{{
+		if !isExit {
+			return {}
+		}
+
+		const inferables = {}
+
+		if @left.isInferable() {
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type: @right.type().setNullable(false)
+			}
+		}
+
+		return inferables
+	} // }}}
 	isDeclararing() => true
 	toFragments(fragments, mode) { // {{{
 		if @right.isNullable() {

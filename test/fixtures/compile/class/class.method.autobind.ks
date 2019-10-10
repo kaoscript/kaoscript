@@ -9,10 +9,6 @@ class Foobar {
 
 const f = new Foobar()
 
-if ?f.x {
-	console.log(f.x)
-}
-
 let x = f.x
 
 console.log(x())

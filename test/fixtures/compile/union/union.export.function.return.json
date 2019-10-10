@@ -13,10 +13,13 @@
       "min": 0,
       "max": 0,
       "parameters": [],
-      "returns": [
-        "String",
-        "Number"
-      ],
+      "returns": {
+        "kind": "union",
+        "types": [
+          "String",
+          "Number"
+        ]
+      },
       "throws": []
     }
   ],

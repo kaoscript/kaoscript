@@ -19,3 +19,5 @@ func foobar(x: Foobar | String = null) {
 func quxbaz(x: Foobar) {
 
 }
+
+export Foobar, foobar, quxbaz

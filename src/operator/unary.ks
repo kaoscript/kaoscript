@@ -115,9 +115,9 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 	prepare() { // {{{
 		@argument.prepare()
 
-		// if !@argument.isNullable() {
-		// 	TypeException.throwNotNullableExistential(@argument, this)
-		// }
+		if !@argument.type().isNullable() && !@options.rules.ignoreMisfit {
+			TypeException.throwNotNullableExistential(@argument, this)
+		}
 
 		@type = @argument.type().setNullable(false)
 	} // }}}

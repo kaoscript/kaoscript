@@ -1,19 +1,32 @@
 class UnionType extends Type {
 	private {
-		_any: Boolean			= false
+		_any: Boolean				= false
 		_explicit: Boolean
-		_nullable: Boolean		= false
+		_explicitNullity: Boolean	= false
+		_nullable: Boolean			= false
 		_types: Array<Type>
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			return new UnionType(scope, [Type.fromMetadata(type, metadata, references, alterations, queue, scope, node) for type in data])
+			const type = new UnionType(scope, [Type.fromMetadata(item, metadata, references, alterations, queue, scope, node) for const item in data.types])
+
+			if data.nullable? {
+				type._nullable = data.nullable
+				type._explicitNullity = true
+			}
+
+			return type
 		} // }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new UnionType(scope)
 
+			if data.nullable? {
+				type._nullable = data.nullable
+				type._explicitNullity = true
+			}
+
 			queue.push(() => {
-				for item in data {
+				for const item in data.types {
 					type.addType(Type.fromMetadata(item, metadata, references, alterations, queue, scope, node))
 				}
 			})
@@ -103,9 +116,32 @@ class UnionType extends Type {
 		return false
 	} // }}}
 	clone() { // {{{
-		throw new NotSupportedException()
+		const that = new UnionType(@scope)
+
+		that._any = @any
+		that._explicit = @explicit
+		that._explicitNullity = @explicitNullity
+		that._nullable = @nullable
+		that._types = [...@types]
+
+		return that
 	} // }}}
-	export(references, mode) => [type.toReference(references, mode) for type in @types]
+	/* export(references, mode) => [type.toReference(references, mode) for type in @types] */
+	export(references, mode) { // {{{
+		if @explicitNullity {
+			return {
+				kind: TypeKind::Union
+				nullable: @nullable
+				types: [type.toReference(references, mode) for type in @types]
+			}
+		}
+		else {
+			return {
+				kind: TypeKind::Union
+				types: [type.toReference(references, mode) for type in @types]
+			}
+		}
+	} // }}}
 	flagExported(explicitly: Boolean) { // {{{
 		if @exported {
 			return this
@@ -213,6 +249,19 @@ class UnionType extends Type {
 		}
 		else {
 			return Type.union(@scope, ...types)
+		}
+	} // }}}
+	setNullable(nullable: Boolean) { // {{{
+		if @nullable == nullable {
+			return this
+		}
+		else {
+			const that = this.clone()
+
+			that._nullable = nullable
+			that._explicitNullity = true
+
+			return that
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{

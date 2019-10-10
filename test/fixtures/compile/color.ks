@@ -944,13 +944,15 @@ export class Color {
 
 	#[error(off)]
 	luminance(): Number { // {{{
-		let that = this.like(Space::SRGB)
+		const that = this.like(Space::SRGB)
 
-		let r = that._red / 255
+		let r: float = that._red:float / 255
 		r = r / 12.92 if r < 0.03928 else Math.pow((r + 0.055) / 1.055, 2.4)
-		let g = that._green / 255
+
+		let g: float = that._green:float / 255
 		g = g / 12.92 if g < 0.03928 else Math.pow((g + 0.055) / 1.055, 2.4)
-		let b = that._blue / 255
+
+		let b: float = that._blue:float / 255
 		b = b / 12.92 if b < 0.03928 else Math.pow((b + 0.055) / 1.055, 2.4)
 
 		return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)

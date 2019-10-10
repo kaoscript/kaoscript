@@ -95,10 +95,13 @@
             "parameters": [
               {
                 "name": "value",
-                "type": [
-                  "String",
-                  "Number"
-                ],
+                "type": {
+                  "kind": "union",
+                  "types": [
+                    "String",
+                    "Number"
+                  ]
+                },
                 "min": 1,
                 "max": 1,
                 "default": 0
@@ -173,10 +176,13 @@
             "parameters": [
               {
                 "name": "value",
-                "type": [
-                  "String",
-                  "Number"
-                ],
+                "type": {
+                  "kind": "union",
+                  "types": [
+                    "String",
+                    "Number"
+                  ]
+                },
                 "min": 1,
                 "max": 1,
                 "default": 0
@@ -543,10 +549,13 @@
             "parameters": [
               {
                 "name": "value",
-                "type": [
-                  "String",
-                  "Number"
-                ],
+                "type": {
+                  "kind": "union",
+                  "types": [
+                    "String",
+                    "Number"
+                  ]
+                },
                 "min": 1,
                 "max": 1,
                 "default": 0
@@ -645,10 +654,13 @@
               },
               {
                 "name": "value",
-                "type": [
-                  "Number",
-                  "String"
-                ],
+                "type": {
+                  "kind": "union",
+                  "types": [
+                    "Number",
+                    "String"
+                  ]
+                },
                 "min": 1,
                 "max": 1,
                 "default": 0
@@ -952,12 +964,15 @@
                 "default": 0
               }
             ],
-            "returns": [
-              {
-                "reference": 0
-              },
-              "Boolean"
-            ],
+            "returns": {
+              "kind": "union",
+              "types": [
+                {
+                  "reference": 0
+                },
+                "Boolean"
+              ]
+            },
             "sealed": false,
             "throws": []
           }
@@ -978,12 +993,15 @@
                 "default": 0
               }
             ],
-            "returns": [
-              {
-                "reference": 0
-              },
-              "Boolean"
-            ],
+            "returns": {
+              "kind": "union",
+              "types": [
+                {
+                  "reference": 0
+                },
+                "Boolean"
+              ]
+            },
             "sealed": false,
             "throws": []
           }
@@ -1004,10 +1022,13 @@
                 "default": 0
               }
             ],
-            "returns": [
-              "String",
-              "Boolean"
-            ],
+            "returns": {
+              "kind": "union",
+              "types": [
+                "String",
+                "Boolean"
+              ]
+            },
             "sealed": false,
             "throws": []
           }
@@ -1028,12 +1049,15 @@
                 "default": 0
               }
             ],
-            "returns": [
-              {
-                "reference": 0
-              },
-              "Boolean"
-            ],
+            "returns": {
+              "kind": "union",
+              "types": [
+                {
+                  "reference": 0
+                },
+                "Boolean"
+              ]
+            },
             "sealed": false,
             "throws": []
           }

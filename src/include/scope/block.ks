@@ -400,6 +400,20 @@ class BlockScope extends Scope {
 			@parent.removeVariable(name)
 		}
 	} // }}}
+	rename(name) { // {{{
+		return if @renamedVariables[name] is String
+
+		let index = this.getRenamedIndex(name)
+
+		let newName = '__ks_' + name + '_' + (++index)
+
+		@renamedIndexes[name] = index
+		@renamedVariables[name] = newName
+
+		const variable = this.getVariable(name)
+
+		variable.renameAs(newName)
+	} // }}}
 	rename(name, newName) { // {{{
 		if newName != name {
 			@renamedVariables[name] = newName

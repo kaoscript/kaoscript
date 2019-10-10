@@ -1110,12 +1110,12 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 		__ks_func_luminance_0() {
-			let that = this.like(Space.SRGB);
-			let r = Operator.division(that._red, 255);
+			const that = this.like(Space.SRGB);
+			let r = that._red / 255;
 			r = (r < 0.03928) ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
-			let g = Operator.division(that._green, 255);
+			let g = that._green / 255;
 			g = (g < 0.03928) ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
-			let b = Operator.division(that._blue, 255);
+			let b = that._blue / 255;
 			b = (b < 0.03928) ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
 			return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
 		}

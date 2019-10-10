@@ -108,7 +108,7 @@ class ReferenceType extends Type {
 	} // }}}
 	getProperty(name: String): Type { // {{{
 		if this.isAny() {
-			return Type.Any
+			return AnyType.NullableUnexplicit
 		}
 
 		let type := this.type()

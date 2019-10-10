@@ -113,8 +113,20 @@ class ForOfStatement extends Statement {
 			@bleeding = @bindingScope.isBleeding()
 		}
 
+		const parameterType = type.parameter()
+
 		if @defineValue {
-			@value.type(type.parameter(), @bindingScope, this)
+			@value.type(parameterType, @bindingScope, this)
+		}
+		else if @value != null {
+			if @value is IdentifierLiteral {
+				@bindingScope.replaceVariable(@value.name(), parameterType, this)
+			}
+			else {
+				for const name in @value.listAssignments([]) {
+					@bindingScope.replaceVariable(name, parameterType.getProperty(name), this)
+				}
+			}
 		}
 
 		if @key? {

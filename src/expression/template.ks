@@ -37,7 +37,10 @@ class TemplateExpression extends Expression {
 	} // }}}
 	isComputed() => @elements.length > 1 || !@types[0]
 	toFragments(fragments, mode) { // {{{
-		if @computing {
+		if @elements.length == 0 {
+			fragments.code('""')
+		}
+		else if @computing {
 			for const element, index in @elements {
 				if index == 0 {
 					fragments.wrap(element)

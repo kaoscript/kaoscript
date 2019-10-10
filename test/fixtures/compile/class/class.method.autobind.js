@@ -1,4 +1,3 @@
-var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -27,9 +26,6 @@ module.exports = function() {
 		}
 	}
 	const f = new Foobar();
-	if(Type.isValue(f.x)) {
-		console.log(f.x.bind(f));
-	}
 	let x = f.x.bind(f);
 	console.log(x());
 	console.log(f.x());

@@ -31,7 +31,7 @@ class AnyType extends Type {
 		return type
 	} // }}}
 	flagRequired() => this
-	getProperty(name) => AnyType.Unexplicit
+	getProperty(name) => AnyType.NullableUnexplicit
 	hashCode() => 'Any'
 	isAny() => true
 	isExplicit() => @explicit
@@ -51,7 +51,7 @@ class AnyType extends Type {
 	isMorePreciseThan(type: Type) => type.isAny() && @nullable != type.isNullable()
 	isNullable() => @nullable
 	matchContentOf(b) => !@explicit || (b.isAny() && (@nullable -> !b.isNullable()))
-	parameter() => @nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+	parameter() => AnyType.NullableUnexplicit
 	reference() => this
 	setNullable(nullable: Boolean): Type { // {{{
 		let type

@@ -1,6 +1,6 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	if(Type.isValue(foo) ? (foo.bar + "world") === "hello world" : false) {
+	if(Type.isValue(foo) ? Helper.concatString(foo.bar, "world") === "hello world" : false) {
 		console.log(foo);
 	}
 };

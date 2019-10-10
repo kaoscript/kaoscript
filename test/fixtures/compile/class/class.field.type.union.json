@@ -19,10 +19,13 @@
       "instanceVariables": {
         "_x": {
           "access": 1,
-          "type": [
-            "Array",
-            "String"
-          ]
+          "type": {
+            "kind": "union",
+            "types": [
+              "Array",
+              "String"
+            ]
+          }
         }
       },
       "classVariables": {},

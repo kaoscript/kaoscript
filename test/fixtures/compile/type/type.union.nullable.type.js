@@ -31,11 +31,8 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
-	function foobar(x) {
-		if(x === void 0 || x === null) {
-			x = null;
-		}
-		else if(!(Type.isInstance(x, Foobar) || Type.isString(x))) {
+	function foobar(x = null) {
+		if(x !== null && !(Type.isInstance(x, Foobar) || Type.isString(x))) {
 			throw new TypeError("'x' is not of type 'Foobar' or 'String'");
 		}
 		if(!Type.isValue(x)) {
@@ -57,4 +54,9 @@ module.exports = function() {
 			throw new TypeError("'x' is not of type 'Foobar'");
 		}
 	}
+	return {
+		Foobar: Foobar,
+		foobar: foobar,
+		quxbaz: quxbaz
+	};
 };

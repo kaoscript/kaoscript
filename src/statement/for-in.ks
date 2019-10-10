@@ -157,8 +157,20 @@ class ForInStatement extends Statement {
 			TypeException.throwInvalidForInExpression(this)
 		}
 
+		const parameterType = type.parameter()
+
 		if @declareValue {
-			@value.type(type.parameter(), @bindingScope, this)
+			@value.type(parameterType, @bindingScope, this)
+		}
+		else if @value != null {
+			if @value is IdentifierLiteral {
+				@bindingScope.replaceVariable(@value.name(), parameterType, this)
+			}
+			else {
+				for const name in @value.listAssignments([]) {
+					@bindingScope.replaceVariable(name, parameterType.getProperty(name), this)
+				}
+			}
 		}
 
 		if !?@index && !(@data.index? && !@declaration && @scope.hasVariable(@data.index.name)) {

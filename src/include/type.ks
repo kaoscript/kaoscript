@@ -99,6 +99,7 @@ enum TypeKind<String> {
 	OverloadedFunction
 	Reference
 	Sealable
+	Union
 }
 
 abstract class Type {
@@ -339,9 +340,9 @@ abstract class Type {
 
 					return type
 				}
-				else {
+				/* else {
 					return UnionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-				}
+				} */
 			}
 			else if data.kind? {
 				switch data.kind {
@@ -365,6 +366,9 @@ abstract class Type {
 					}
 					TypeKind::Sealable => {
 						return SealableType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind::Union => {
+						return UnionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 				}
 			}
@@ -406,9 +410,9 @@ abstract class Type {
 						return references[data[0]].name(data[1])
 					}
 				}
-				else {
+				/* else {
 					return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
-				}
+				} */
 			}
 			else if data.reference? {
 				if references[data.reference]? {
@@ -455,6 +459,9 @@ abstract class Type {
 					}
 					TypeKind::OverloadedFunction => {
 						return OverloadedFunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind::Union => {
+						return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 				}
 			}

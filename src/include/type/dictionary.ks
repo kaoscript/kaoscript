@@ -47,7 +47,7 @@ class DictionaryType extends Type {
 
 		return export
 	} // }}}
-	getProperty(name: String): Type => @properties[name] ?? Type.Any
+	getProperty(name: String): Type => @properties[name] ?? AnyType.NullableUnexplicit
 	isMatching(value: DictionaryType, mode: MatchingMode) { // {{{
 		if this == value {
 			return true
