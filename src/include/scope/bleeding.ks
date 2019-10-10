@@ -10,7 +10,7 @@ class BleedingScope extends Scope {
 	acquireTempName(declare: Boolean = true): String => @parent.acquireTempName(declare)
 	acquireUnusedTempName() => @parent.acquireUnusedTempName()
 	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
-	private declareVariable(name: String, scope: Scope) => @parent.declareVariable(name, this)
+	private declareVariable(name: String, scope: Scope) => @parent.declareVariable(name, scope)
 	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { // {{{
 		if this.hasDefinedVariable(name) {
 			SyntaxException.throwAlreadyDeclared(name, node)

@@ -38,7 +38,7 @@ class InlineBlockScope extends BlockScope {
 		return null
 	} // }}}
 	private declareVariable(name: String, scope: Scope) { // {{{
-		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && @parent.hasDefinedVariable(name)) {
+		if $keywords[name] == true || (@declarations[name] && @variables[name] is Array) || (scope.isBleeding() && this.hasBleedingVariable(name)) {
 			const newName = this.getNewName(name)
 
 			if @variables[name] is not Array {
@@ -73,6 +73,7 @@ class InlineBlockScope extends BlockScope {
 
 		return @tempIndex
 	} // }}}
+	hasBleedingVariable(name: String) => super(name) || @parent.hasBleedingVariable(name)
 	hasRenamedVariable(name: String): Boolean { // {{{
 		let parent = this
 		do {

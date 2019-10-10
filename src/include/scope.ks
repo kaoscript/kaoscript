@@ -84,10 +84,11 @@ abstract class Scope {
 	abstract getDefinedVariable(name: String): Variable?
 	abstract getRenamedIndex(name: String): Number
 	abstract getVariable(name: String, line: Number = -1): Variable
+	hasBleedingVariable(name: String): Boolean => this.hasDefinedVariable(name)
 	abstract hasDeclaredVariable(name: String): Boolean
 	abstract hasDefinedVariable(name: String): Boolean
-	abstract hasVariable(name: String, line: Number = -1): Boolean
 	hasMacro(name: String): Boolean => false
+	abstract hasVariable(name: String, line: Number = -1): Boolean
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
 	isPredefinedVariable(name: String): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
