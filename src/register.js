@@ -12,7 +12,10 @@ var fs = require('./fs.js');
 var path = require('path');
 
 var Compiler = _.Compiler;
-var target = 'v8-v' + process.versions.v8.split('.').slice(0, 2).join('.');
+var target = {
+	name: 'v8',
+	version: process.versions.v8.split('.').slice(0, 2).join('.')
+};
 
 var loadFile = function(module, filename) { // {{{
 	var source = fs.readFile(filename);

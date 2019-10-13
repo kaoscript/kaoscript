@@ -448,8 +448,8 @@ class ReferenceType extends Type {
 	toTestFragments(fragments, node) { // {{{
 		this.resolveType()
 
-		if @variable.getRealType().isAlias() {
-			@variable.getRealType().toTestFragments(fragments, node)
+		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
+			@type.toTestFragments(fragments, node)
 		}
 		else {
 			if tof ?= $runtime.typeof(@name, node) {

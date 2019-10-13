@@ -21,6 +21,9 @@ const $natives = { // {{{
 	Namespace: true
 	Number: true
 	number: true
+	Primitive: true
+	Object: true
+	object: true
 	RegExp: true
 	regex: true
 	String: true
@@ -40,6 +43,7 @@ const $types = { // {{{
 	func: 'Function'
 	never: 'Never'
 	number: 'Number'
+	object: 'Object'
 	string: 'String'
 	void: 'Void'
 } // }}}
@@ -47,6 +51,8 @@ const $types = { // {{{
 const $virtuals = {
 	Enum: true
 	Namespace: true
+	Primitive: true
+	Object: true
 }
 
 #[flags]
@@ -93,6 +99,7 @@ enum TypeKind<String> {
 	Class
 	Dictionary
 	Enum
+	Exclusion
 	Function
 	Fusion
 	Namespace
@@ -140,6 +147,9 @@ abstract class Type {
 					}
 
 					return new NamedType(data.name.name, type)
+				}
+				NodeKind::ExclusionType => {
+					return new ExclusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
 				}
 				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
 					if data.parameters? {
@@ -552,6 +562,7 @@ abstract class Type {
 	} // }}}
 	isDictionary() => false
 	isEnum() => false
+	isExclusion() => false
 	isExhaustive() { // {{{
 		if @exhaustive == null {
 			return !@alien && !@required
@@ -580,7 +591,9 @@ abstract class Type {
 	isNumber() => false
 	isNull() => false
 	isNullable() => false
+	isObject() => false
 	isPredefined() => false
+	isPrimitive() => false
 	isReference() => false
 	isReferenced() => @referenced
 	isRequired() => @required
@@ -663,6 +676,7 @@ include {
 	'./type/null'
 	'./type/dictionary'
 	'./type/parameter'
+	'./type/exclusion'
 	'./type/fusion'
 	'./type/union'
 	'./type/void'

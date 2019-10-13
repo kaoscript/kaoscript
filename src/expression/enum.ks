@@ -11,7 +11,10 @@ class EnumExpression extends Expression {
 		@enum.prepare()
 
 		const named = @enum.type()
-		if !named.type().hasElement(@data.member.name) {
+		if !named.type().isEnum() {
+			TypeException.throwNotEnum(@data.enum.name, this)
+		}
+		else if !named.type().hasElement(@data.member.name) {
 			ReferenceException.throwNotDefinedEnumElement(@data.member.name, named.name(), this)
 		}
 

@@ -435,6 +435,9 @@ export class TypeException extends Exception {
 		throwNotCompatibleDefinition(varname, argname, modname, node) ~ ReferenceException { // {{{
 			throw new TypeException(`The definition for "\(varname)" and the variable "\(argname)" of the module "\(modname)" aren't compatible`, node)
 		} // }}}
+		throwNotEnum(name, node) ~ TypeException { // {{{
+			throw new TypeException(`Identifier "\(name)" is not an enum`, node)
+		} // }}}
 		throwNotNamespace(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a namespace`, node)
 		} // }}}

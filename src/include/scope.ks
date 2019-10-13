@@ -34,6 +34,7 @@ let $keywords = { // {{{
 	int: true
 	interface: true
 	long: true
+	namespace: true
 	native: true
 	never: true
 	new: true

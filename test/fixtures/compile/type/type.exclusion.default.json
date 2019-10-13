@@ -1,0 +1,22 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Instance"
+  ],
+  "references": [
+    {
+      "kind": "alias",
+      "of": {
+        "kind": "exclusion",
+        "types": [
+          "Any",
+          "Primitive",
+          "Array"
+        ]
+      }
+    }
+  ],
+  "macros": []
+}

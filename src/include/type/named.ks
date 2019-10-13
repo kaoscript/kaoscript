@@ -267,6 +267,9 @@ class NamedType extends Type {
 		else if that is ReferenceType {
 			return @name == that.name() || this.matchContentOf(that.discardReference())
 		}
+		else if that is ExclusionType {
+			return that.isMatchedBy(this)
+		}
 		else {
 			return @type.matchContentOf(that)
 		}

@@ -3,7 +3,7 @@
     0,
     "Array",
     1,
-    "Object",
+    "Dictionary",
     2,
     "String"
   ],
@@ -12,7 +12,7 @@
     "Array",
     false,
     1,
-    "Object",
+    "Dictionary",
     false,
     2,
     "String",
@@ -22,7 +22,7 @@
     0,
     "Array",
     1,
-    "Object",
+    "Dictionary",
     2,
     "String"
   ],

@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Dictionary, Type} = require("@kaoscript/runtime");
 function __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1, __ks_2, __ks___ks_2) {
 	var req = [];
 	if(Type.isValue(Array)) {
@@ -7,8 +7,8 @@ function __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1, __ks_2, __ks___k
 	else {
 		req.push(__ks_0, __ks___ks_0);
 	}
-	if(Type.isValue(Object)) {
-		req.push(Object, typeof __ks_Object === "undefined" ? {} : __ks_Object);
+	if(Type.isValue(Dictionary)) {
+		req.push(Dictionary, typeof __ks_Dictionary === "undefined" ? {} : __ks_Dictionary);
 	}
 	else {
 		req.push(__ks_1, __ks___ks_1);
@@ -22,12 +22,12 @@ function __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1, __ks_2, __ks___k
 	return req;
 }
 module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1, __ks_2, __ks___ks_2) {
-	var [Array, __ks_Array, Object, __ks_Object, String, __ks_String] = __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1, __ks_2, __ks___ks_2);
+	var [Array, __ks_Array, Dictionary, __ks_Dictionary, String, __ks_String] = __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1, __ks_2, __ks___ks_2);
 	return {
 		Array: Array,
 		__ks_Array: __ks_Array,
-		Object: Object,
-		__ks_Object: __ks_Object,
+		Dictionary: Dictionary,
+		__ks_Dictionary: __ks_Dictionary,
 		String: String,
 		__ks_String: __ks_String
 	};

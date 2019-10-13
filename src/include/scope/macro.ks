@@ -29,6 +29,8 @@ class MacroScope extends Scope {
 		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
 		@predefined.__Math = new Variable('Math', true, true, this.reference('Dictionary'))
 		@predefined.__NaN = new Variable('NaN', true, true, this.reference('Number'))
+		@predefined.__Object = new Variable('Object', true, true, new ExclusionType(this, [AnyType.Explicit, this.reference('Array'), this.reference('Boolean'), this.reference('Dictionary'), this.reference('Enum'), this.reference('Function'), this.reference('Namespace'), this.reference('Number'), this.reference('String')]))
+		@predefined.__Primitive = new Variable('Primitive', true, true, new UnionType(this, [this.reference('Boolean'), this.reference('Number'), this.reference('String')]))
 
 		// macro types
 		@predefined.__Expression = Variable.createPredefinedClass('Expression', this)
