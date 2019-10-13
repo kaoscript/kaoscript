@@ -87,6 +87,7 @@ class NamedType extends Type {
 	isCloned() => @cloned
 	isClass() => @type.isClass()
 	isEnum() => @type.isEnum()
+	isExclusion() => @type.isExclusion()
 	isExhaustive() => @type.isExhaustive()
 	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
 	isExplicitlyExported() => @type.isExplicitlyExported()
@@ -264,11 +265,11 @@ class NamedType extends Type {
 
 			return false
 		}
-		else if that is ReferenceType {
-			return @name == that.name() || this.matchContentOf(that.discardReference())
-		}
 		else if that is ExclusionType {
 			return that.isMatchedBy(this)
+		}
+		else if that is ReferenceType {
+			return @name == that.name() || this.matchContentOf(that.discardReference())
 		}
 		else {
 			return @type.matchContentOf(that)
@@ -336,7 +337,14 @@ class NamedType extends Type {
 			return @type.toReference(references, mode)
 		}
 	} // }}}
-	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
+	toTestFragments(fragments, node) { // {{{
+		if const tof = $runtime.typeof(@name, node) {
+			fragments.code(`\(tof)(`).compile(node).code(')')
+		}
+		else {
+			@type.toTestFragments(fragments, node)
+		}
+	} // }}}
 	type() => @type
 	walk(fn) { // {{{
 		if @type is DictionaryType || @type is NamespaceType {

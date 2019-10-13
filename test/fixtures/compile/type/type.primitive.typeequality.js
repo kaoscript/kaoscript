@@ -7,14 +7,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.isPrimitive(x)) {
-			throw new TypeError("'x' is not of type 'Primitive'");
+		if(Type.isPrimitive(x)) {
 		}
 	}
-	foobar(42);
-	foobar(true);
-	foobar("quxbaz");
-	return {
-		foobar: foobar
-	};
 };

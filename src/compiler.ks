@@ -45,6 +45,8 @@ const $typeofs = { // {{{
 	Function: true
 	Namespace: true
 	Number: true
+	Object: true
+	Primitive: true
 	RegExp: true
 	String: true
 } // }}}

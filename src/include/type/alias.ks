@@ -37,6 +37,7 @@ class AliasType extends Type {
 	isAlias() => true
 	isArray() => @type.isArray()
 	isBoolean() => @type.isBoolean()
+	isExclusion() => @type.isExclusion()
 	isMatching(value: AliasType, mode: MatchingMode) { // {{{
 		return this == value
 	} // }}}
@@ -51,7 +52,5 @@ class AliasType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
-		@type.toTestFragments(fragments, node)
-	} // }}}
+	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
 }

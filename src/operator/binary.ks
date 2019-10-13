@@ -670,12 +670,7 @@ class BinaryOperatorTypeEquality extends Expression {
 						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
 					}
 				}
-				else if type.isEnum() {
-					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
-						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
-					}
-				}
-				else if type.isClass() {
+				else if type.isClass() || type.isEnum() || type.isUnion() || type.isExclusion() {
 					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
 						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
 					}
@@ -770,7 +765,7 @@ class BinaryOperatorTypeInequality extends Expression {
 						TypeException.throwUnnecessaryTypeChecking(type, this)
 					}
 				}
-				else if type.isEnum() {
+				else if type.isEnum() || type.isUnion() || type.isExclusion() {
 					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
 						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
 					}
