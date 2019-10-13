@@ -7,7 +7,7 @@
  * Licensed under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  **/
-extern console, global, process, require
+extern console, global, process, require, Object
 
 import {
 	'../package.json'	=> metadata
@@ -64,10 +64,8 @@ else if program.args.length == 0 {
 const file = path.join(process.cwd(), program.args[0])
 
 const options = {
+	header: program.header
 	register: program.register
-	config: {
-		header: program.header
-	}
 }
 
 if program.rewire? {
@@ -128,7 +126,8 @@ else {
 
 	_module.filename = file
 
-	for r in Object.getOwnPropertyNames(require) {
+	#[rules(ignore-misfit)]
+	for const r in Object.getOwnPropertyNames(require) {
 		if r != 'paths' && r != 'arguments' && r != 'caller' {
 			_require[r] = require[r]
 		}

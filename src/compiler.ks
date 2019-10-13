@@ -631,11 +631,11 @@ export class Compiler {
 			}
 
 			@options.target = {
-				name: target[1],
+				name: target[1]
 				version: target[2]
 			}
 		}
-		else if @options.target is not Dictionary || !$targetRegex.test(`\(@options.target.name)-v\(@options.target.version)`) {
+		else if !(@options.target is Dictionary || @options.target is Object) || !$targetRegex.test(`\(@options.target.name)-v\(@options.target.version)`) {
 			throw new Error(`Undefined target`)
 		}
 

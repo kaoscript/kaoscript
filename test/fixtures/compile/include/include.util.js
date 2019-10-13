@@ -32,8 +32,8 @@ module.exports = function() {
 			if(Type.isArray(value)) {
 				source[key] = __ks_Array._im_clone(value);
 			}
-			else if(Type.isDictionary(value)) {
-				if(Type.isDictionary(source[key])) {
+			else if(!Type.isPrimitive(value)) {
+				if(Type.isDictionary(source[key]) || Type.isObject(source[key])) {
 					$merge.object(source[key], value);
 				}
 				else {
@@ -322,7 +322,7 @@ module.exports = function() {
 		}
 		++i;
 		while(i < l) {
-			if(Type.isDictionary(args[i])) {
+			if(Type.isDictionary(args[i]) || Type.isObject(args[i])) {
 				for(const key in args[i]) {
 					const value = args[i][key];
 					$merge.merge(source, key, value);
