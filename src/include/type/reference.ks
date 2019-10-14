@@ -263,6 +263,7 @@ class ReferenceType extends Type {
 	isNever() => @name == 'Never' || this.type().isNever()
 	isNullable() => @nullable
 	isNumber() => @name == 'Number' || this.type().isNumber()
+	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String'))
 	isReference() => true
 	isRequired() => this.type().isRequired()
 	isString() => @name == 'String' || this.type().isString()

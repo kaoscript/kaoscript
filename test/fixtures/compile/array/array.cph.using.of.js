@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	function foobar(values) {
 		if(arguments.length < 1) {
@@ -6,9 +6,6 @@ module.exports = function() {
 		}
 		if(values === void 0 || values === null) {
 			throw new TypeError("'values' is not nullable");
-		}
-		else if(!Type.isArray(values)) {
-			throw new TypeError("'values' is not of type 'Array'");
 		}
 		for(let __ks_0 = 0, __ks_1 = Helper.mapDictionary(values, function(__ks_0, value) {
 			return value.values();

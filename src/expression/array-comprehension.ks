@@ -165,6 +165,11 @@ class ArrayComprehensionForIn extends Expression {
 	prepare() { // {{{
 		@expression.prepare()
 
+		const type = @expression.type()
+		if !(type.isAny() || type.isArray()) {
+			TypeException.throwInvalidForInExpression(this)
+		}
+
 		if @value? {
 			@valueVariable.setRealType(@expression.type().parameter())
 
@@ -289,6 +294,12 @@ class ArrayComprehensionForOf extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@expression.prepare()
+
+		const type = @expression.type()
+		if !(type.isAny() || type.isDictionary() || type.isObject()) {
+			TypeException.throwInvalidForOfExpression(this)
+		}
+
 		@key.prepare() if @key?
 		@value.prepare() if @value?
 		@body.prepare()
