@@ -151,37 +151,30 @@ class FunctionDeclaration extends Statement {
 		_oldVariableName: String
 		_variable: FunctionVariable
 	}
-	constructor(@data, @parent, @scope) { // {{{
-		super(data, parent, scope, ScopeType::Function)
-	} // }}}
 	analyse() { // {{{
-		@scope.define('this', true, Type.Any, this)
-
 		@name = @data.name.name
 
-		const scope = @parent.scope()
-
-		if @variable ?= scope.getDefinedVariable(@name) {
+		if @variable ?= @scope.getDefinedVariable(@name) {
 			if @variable is FunctionVariable {
 				const declarator = new FunctionDeclarator(@variable, @data, this)
 
 				declarator.analyse()
 			}
 			else {
-				scope.addStash(@name, variable => {
+				@scope.addStash(@name, variable => {
 					const type = variable.getRealType()
 
 					if type.isFunction() {
 						@main = true
 						@extended = true
 
-						@variable = new FunctionVariable(scope, @name, true)
+						@variable = new FunctionVariable(@scope!?, @name, true)
 
 						@variable.getRealType().addFunction(type)
 
-						scope.replaceVariable(@name, @variable)
+						@scope.replaceVariable(@name, @variable)
 
-						@oldVariableName = scope.getNewName(@name)
+						@oldVariableName = @scope.getNewName(@name)
 					}
 					else {
 						SyntaxException.throwNotOverloadableFunction(@name, this)
@@ -200,9 +193,9 @@ class FunctionDeclaration extends Statement {
 		else {
 			@main = true
 
-			@variable = new FunctionVariable(scope, @name, false)
+			@variable = new FunctionVariable(@scope!?, @name, false)
 
-			scope.defineVariable(@variable, this)
+			@scope.defineVariable(@variable, this)
 
 			const declarator = new FunctionDeclarator(@variable, @data, this)
 
@@ -210,7 +203,7 @@ class FunctionDeclaration extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		if @main || @parent.scope().processStash(@name) {
+		if @main || @scope.processStash(@name) {
 			@variable.prepare()
 		}
 	} // }}}
@@ -329,17 +322,22 @@ class FunctionDeclarator extends AbstractNode {
 		_awaiting: Boolean				= false
 		_block: Block
 		_exit: Boolean					= false
+		_line: Number
 		_parameters: Array<Parameter>	= []
 		_returnNull: Boolean			= false
 		_variable: FunctionVariable
 		_type: FunctionType
 	}
 	constructor(@variable, @data, @parent) { // {{{
-		super(data, parent)
+		super(data, parent, parent.scope(), ScopeType::Function)
 
 		variable.addDeclarator(this)
 	} // }}}
 	analyse() { // {{{
+		@line = @scope.line()
+
+		@scope.define('this', true, Type.Any, this)
+
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
 
@@ -347,7 +345,7 @@ class FunctionDeclarator extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		@scope.line(@data.start.line)
+		@scope.line(@line - @scope.module().getLineOffset())
 
 		for parameter in @parameters {
 			parameter.prepare()
