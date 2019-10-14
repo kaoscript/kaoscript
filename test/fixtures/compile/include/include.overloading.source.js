@@ -10,5 +10,6 @@ module.exports = function() {
 		else if(!Type.isArray(x)) {
 			throw new TypeError("'x' is not of type 'Array'");
 		}
+		return x;
 	}
 };

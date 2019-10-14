@@ -322,7 +322,7 @@ class FunctionDeclarator extends AbstractNode {
 		_awaiting: Boolean				= false
 		_block: Block
 		_exit: Boolean					= false
-		_line: Number
+		_offset: Number
 		_parameters: Array<Parameter>	= []
 		_returnNull: Boolean			= false
 		_variable: FunctionVariable
@@ -334,7 +334,7 @@ class FunctionDeclarator extends AbstractNode {
 		variable.addDeclarator(this)
 	} // }}}
 	analyse() { // {{{
-		@line = @scope.line()
+		@offset = @scope.module().getLineOffset()
 
 		@scope.define('this', true, Type.Any, this)
 
@@ -345,7 +345,9 @@ class FunctionDeclarator extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		@scope.line(@line - @scope.module().getLineOffset())
+		@scope.module().setLineOffset(@offset)
+
+		@scope.line(@data.start.line)
 
 		for parameter in @parameters {
 			parameter.prepare()
@@ -354,6 +356,8 @@ class FunctionDeclarator extends AbstractNode {
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
 	} // }}}
 	translate() { // {{{
+		@scope.module().setLineOffset(@offset)
+
 		@scope.line(@data.start.line)
 
 		for parameter in @parameters {

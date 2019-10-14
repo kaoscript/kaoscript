@@ -10,6 +10,7 @@ module.exports = function() {
 			else if(!Type.isArray(x)) {
 				throw new TypeError("'x' is not of type 'Array'");
 			}
+			return x;
 		}
 		else if(arguments.length === 1) {
 			let __ks_i = -1;
@@ -17,6 +18,7 @@ module.exports = function() {
 			if(x === void 0) {
 				x = null;
 			}
+			return x;
 		}
 		else {
 			throw new SyntaxError("Wrong number of arguments");
