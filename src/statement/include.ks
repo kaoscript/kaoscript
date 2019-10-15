@@ -180,6 +180,7 @@ class IncludeDeclaration extends Statement {
 
 		@declarators.push(declarator)
 	} // }}}
+	registerMacro(name, macro) => @parent.registerMacro(name, macro)
 	toFragments(fragments, mode) { // {{{
 		for const declarator in @declarators {
 			declarator.toFragments(fragments, mode)
@@ -272,6 +273,7 @@ class IncludeDeclarator extends Statement {
 	file() => @file
 	includePath() => @includePath
 	recipient() => this.module()
+	registerMacro(name, macro) => @parent.registerMacro(name, macro)
 	toFragments(fragments, mode) { // {{{
 		for const statement in @statements {
 			statement.toFragments(fragments, mode)

@@ -68,6 +68,12 @@ class IfStatement extends Statement {
 				@whenTrueScope.updateInferable(name, data, this)
 			}
 
+			if @whenFalseExpression != null {
+				for const data, name of @condition.inferContraryTypes(true) {
+					@whenFalseScope.updateInferable(name, data, this)
+				}
+			}
+
 			@condition.acquireReusable(false)
 			@condition.releaseReusable()
 		}
