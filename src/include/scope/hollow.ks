@@ -75,6 +75,7 @@ class HollowScope extends Scope {
 
 		return null
 	} // }}}
+	getMacro(data, parent) => @parent.getMacro(data, parent)
 	getRenamedIndex(name: String): Number => @parent.getRenamedIndex(name)
 	getTempIndex() => @parent.getTempIndex()
 	getVariable(name): Variable => this.getVariable(name, @parent.line())
@@ -106,6 +107,7 @@ class HollowScope extends Scope {
 	hasBleedingVariable(name: String) => @parent.hasBleedingVariable(name)
 	hasDefinedVariable(name: String): Boolean => @parent.hasDefinedVariable(name)
 	hasDeclaredVariable(name: String): Boolean => @parent.hasDeclaredVariable(name)
+	hasMacro(name) => @parent.hasMacro(name)
 	hasVariable(name: String): Boolean => @parent.hasVariable(name)
 	hasVariable(name: String, line: Number) => @parent.hasVariable(name, line)
 	isBleeding() => true

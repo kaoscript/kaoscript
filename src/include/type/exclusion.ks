@@ -62,6 +62,7 @@ class ExclusionType extends Type {
 	} // }}}
 	isMatching(value: Type, mode: MatchingMode) { // {{{
 		console.log(value)
+		NotImplementedException.throw()
 	} // }}}
 	isMatchedBy(value: NamedType) { // {{{
 		if !value.matchContentOf(@types[0]) {
