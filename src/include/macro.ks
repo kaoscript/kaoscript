@@ -29,7 +29,7 @@ class MacroMarker {
 	constructor(@index)
 }
 
-func $reificate(macro, node, data, ast, reification) { // {{{
+func $reificate(macro, node, data, ast, reification = null, separator = null) { // {{{
 	if ast {
 		return Generator.generate(data, {
 			transformers: {
@@ -39,14 +39,13 @@ func $reificate(macro, node, data, ast, reification) { // {{{
 	}
 	else {
 		switch reification {
-			ReificationKind::Block => {
-				let src = ''
-
-				for element in data {
-					src += element + '\n'
+			ReificationKind::Argument => {
+				if data is Array {
+					return data.join(', ')
 				}
-
-				return src
+				else {
+					return data
+				}
 			}
 			ReificationKind::Expression => {
 				const context = {
@@ -57,7 +56,23 @@ func $reificate(macro, node, data, ast, reification) { // {{{
 
 				return context.data
 			}
-			ReificationKind::Identifier => {
+			ReificationKind::Join => {
+				if data is Array {
+					return data.join(separator)
+				}
+				else {
+					return data
+				}
+			}
+			ReificationKind::Statement => {
+				if data is Array {
+					return data.join('\n') + '\n'
+				}
+				else {
+					return data
+				}
+			}
+			ReificationKind::Write => {
 				return data
 			}
 		}
@@ -236,7 +251,7 @@ class MacroDeclaration extends AbstractNode {
 
 		for const kind, name of @parameters {
 			if kind == MacroVariableKind::AutoEvaluated {
-				block.line(`\(name) = __ks_evaluate(__ks_reificate(\(name), true, 3))`)
+				block.line(`\(name) = __ks_evaluate(__ks_reificate(\(name), true, \(ReificationKind::Expression.value)))`)
 			}
 		}
 
@@ -330,10 +345,15 @@ class MacroDeclaration extends AbstractNode {
 
 				switch element.kind {
 					MacroElementKind::Expression => {
-						fragments
-							.code('__ks_reificate(')
-							.expression(element.expression)
-							.code(`, \(element.expression.kind == NodeKind::Identifier && @parameters[element.expression.name] == MacroVariableKind::AST), \(element.reification.kind))`)
+						if element.expression.kind == NodeKind::Identifier && @parameters[element.expression.name] == MacroVariableKind::AST {
+							fragments.code('__ks_reificate(').expression(element.expression).code(`, true)`)
+						}
+						else if element.reification.kind == ReificationKind::Join {
+							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind), `).expression(element.separator).code(')')
+						}
+						else {
+							fragments.code('__ks_reificate(').expression(element.expression).code(`, false, \(element.reification.kind))`)
+						}
 					}
 					MacroElementKind::Literal => {
 						fragments.code($quote(element.value.replace(/\\/g, '\\\\')))

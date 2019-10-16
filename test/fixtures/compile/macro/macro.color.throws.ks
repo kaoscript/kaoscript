@@ -8,11 +8,11 @@ export class Color {
 			for component, name of expression.components {
 				field = `_\(name)`
 
-				fields.push(macro private #i(field): Number)
+				fields.push(macro private #w(field): Number)
 
 				methods.push(macro {
-					#i(name)() ~ Error => this.getField(#(name))
-					#i(name)(value) ~ Error => this.setField(#(name), value)
+					#w(name)() ~ Error => this.getField(#(name))
+					#w(name)(value) ~ Error => this.setField(#(name), value)
 				})
 
 				expression.components[name].field = field
@@ -22,8 +22,8 @@ export class Color {
 				Color.registerSpace(#(expression))
 
 				impl Color {
-					#b(fields)
-					#b(methods)
+					#s(fields)
+					#s(methods)
 				}
 			}
 		}

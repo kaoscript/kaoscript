@@ -512,11 +512,11 @@ export class Color {
 			for const component, name of space.components {
 				field = `_\(name)`
 
-				fields.push(macro private #i(field): Number)
+				fields.push(macro private #w(field): Number)
 
 				methods.push(macro {
-					override #i(name)() => this.getField(#(name))
-					override #i(name)(value) => this.setField(#(name), value)
+					override #w(name)() => this.getField(#(name))
+					override #w(name)(value) => this.setField(#(name), value)
 				})
 			}
 
@@ -524,8 +524,8 @@ export class Color {
 				Color.registerSpace(#(space))
 
 				impl Color {
-					#b(fields)
-					#b(methods)
+					#s(fields)
+					#s(methods)
 				}
 			}
 		}

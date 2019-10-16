@@ -131,43 +131,48 @@ class CallExpression extends Expression {
 			this.makeMemberCallee(@object.type())
 		}
 		else {
-			if @data.callee.kind == NodeKind::Identifier && (variable ?= @scope.getVariable(@data.callee.name)) {
-				const type = variable.getRealType()
+			if @data.callee.kind == NodeKind::Identifier {
+				if const variable = @scope.getVariable(@data.callee.name) {
+					const type = variable.getRealType()
 
-				if type.isFunction() {
-					if type.isAsync() {
-						if @parent is VariableDeclaration {
-							if !@parent.isAwait() {
+					if type.isFunction() {
+						if type.isAsync() {
+							if @parent is VariableDeclaration {
+								if !@parent.isAwait() {
+									TypeException.throwNotSyncFunction(@data.callee.name, this)
+								}
+							}
+							else if @parent is not AwaitExpression {
 								TypeException.throwNotSyncFunction(@data.callee.name, this)
 							}
 						}
-						else if @parent is not AwaitExpression {
-							TypeException.throwNotSyncFunction(@data.callee.name, this)
-						}
-					}
-					else {
-						if @parent is VariableDeclaration {
-							if @parent.isAwait() {
+						else {
+							if @parent is VariableDeclaration {
+								if @parent.isAwait() {
+									TypeException.throwNotAsyncFunction(@data.callee.name, this)
+								}
+							}
+							else if @parent is AwaitExpression {
 								TypeException.throwNotAsyncFunction(@data.callee.name, this)
 							}
 						}
-						else if @parent is AwaitExpression {
-							TypeException.throwNotAsyncFunction(@data.callee.name, this)
-						}
+					}
+
+					if const substitute = variable.replaceCall?(@data, @arguments) {
+						this.addCallee(new SubstituteCallee(@data, substitute, this))
+					}
+					else if type is FunctionType {
+						this.makeCallee(type, variable.name())
+					}
+					else if type is OverloadedFunctionType {
+						this.makeCallee(type, variable.name())
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, this))
 					}
 				}
-
-				if const substitute = variable.replaceCall?(@data, @arguments) {
-					this.addCallee(new SubstituteCallee(@data, substitute, this))
-				}
-				else if type is FunctionType {
-					this.makeCallee(type, variable.name())
-				}
-				else if type is OverloadedFunctionType {
-					this.makeCallee(type, variable.name())
-				}
 				else {
-					this.addCallee(new DefaultCallee(@data, this))
+					SyntaxException.throwUndefinedFunction(@data.callee.name, this)
 				}
 			}
 			else {
