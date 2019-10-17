@@ -423,8 +423,8 @@ class ClassType extends Type {
 		if const overwrite = type.overwrite() {
 			const methods = @classMethods[name]
 
-			for const id in overwrite {
-				for const i from methods.length - 1 to 0 by -1 when methods[i].id() == id {
+			for const data in overwrite {
+				for const i from methods.length - 1 to 0 by -1 when methods[i].id() == data.id {
 					methods.splice(i, 1)
 					break
 				}
@@ -449,8 +449,8 @@ class ClassType extends Type {
 		if const overwrite = type.overwrite() {
 			const methods = @instanceMethods[name]
 
-			for const id in overwrite {
-				for const i from methods.length - 1 to 0 by -1 when methods[i].id() == id {
+			for const data in overwrite {
+				for const i from methods.length - 1 to 0 by -1 when methods[i].id() == data.id {
 					methods.splice(i, 1)
 					break
 				}
@@ -1254,7 +1254,7 @@ class ClassType extends Type {
 	overwriteInstanceMethod(name, type, methods) { // {{{
 		@instanceMethods[name]:Array.remove(...methods)
 
-		type.overwrite([method.id() for const method in methods])
+		type.overwrite([{id: method.id(), export: !method.isAlteration()} for const method in methods])
 
 		return this.addInstanceMethod(name, type)
 	} // }}}
@@ -1395,7 +1395,7 @@ class ClassMethodType extends FunctionType {
 			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
 			if data.overwrite? {
-				type._overwrite = data.overwrite
+				type._overwrite = [{id: id, export: true} for id in data.overwrite]
 			}
 
 			type.updateArguments()
@@ -1418,7 +1418,11 @@ class ClassMethodType extends FunctionType {
 		}
 
 		if @overwrite != null {
-			export.overwrite = @overwrite
+			const overwrite = [data.id for const data in @overwrite when data.export]
+
+			if overwrite.length != 0 {
+				export.overwrite = overwrite
+			}
 		}
 
 		return export

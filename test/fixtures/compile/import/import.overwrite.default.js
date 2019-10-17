@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	var {Date, __ks_Date} = require("../implement/implement.overwrite.ws.pi.ks")();
+	var {Date, __ks_Date} = require("../implement/implement.overwrite.pi.ks")();
 	function foobar(d) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

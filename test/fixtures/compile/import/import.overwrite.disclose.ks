@@ -1,4 +1,4 @@
-import '../implement/implement.overwrite.ws.pi'
+import '../implement/implement.overwrite.disclose'
 
 func foobar(d: Date) {
 

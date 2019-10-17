@@ -1,0 +1,1 @@
+SyntaxException: A method can be overwritten only in a sealed class (line 6, file "fixtures/compile/implement/implement.overwrite.notsealed.ks")
