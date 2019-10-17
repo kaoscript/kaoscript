@@ -1,1 +1,1 @@
-TypeException: The modulo member "z" is expected to be of type "Number" or "Any" and not of type "String" (line 2, file "fixtures/compile/operator/operator.modulo.poly.a_a_se.ks")
+TypeException: The expression "z" of type "String" is expected to be of type "Number" or "Any" in a modulo operation (line 2, file "fixtures/compile/operator/operator.modulo.poly.a_a_se.ks")

@@ -12,8 +12,8 @@ enum OperandType {
 }
 
 enum Operator<String> {
-	Addition
-	And
+	Addition			= 'additive'
+	And					= 'and'
 	BitwiseAnd			= 'bitwise-and'
 	BitwiseLeftShift	= 'bitwise-left-shift'
 	BitwiseNot			= 'bitwise-not'
@@ -22,17 +22,21 @@ enum Operator<String> {
 	BitwiseXor			= 'bitwise-xor'
 	DecrementPostfix	= 'postfix-decrement'
 	DecrementPrefix		= 'prefix-decrement'
-	Division
-	Imply
+	Division			= 'divisive'
+	GreaterThan			= 'greater-than'
+	GreaterThanOrEqual	= 'greater-than-or-equal'
+	Imply				= 'imply'
 	IncrementPostfix	= 'postfix-increment'
 	IncrementPrefix		= 'prefix-increment'
-	Modulo
-	Multiplication
-	Negative
-	Or
-	Quotient
-	Subtraction
-	Xor
+	LessThan			= 'less-than'
+	LessThanOrEqual		= 'less-than-or-equal'
+	Modulo				= 'modulo'
+	Multiplication		= 'multiplicative'
+	Negative			= 'negative'
+	Or					= 'or'
+	Quotient			= 'quotient'
+	Subtraction			= 'subtractive'
+	Xor					= 'xor'
 }
 
 const $operatorTypes = {

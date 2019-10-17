@@ -1,1 +1,1 @@
-TypeException: The modulo member "x" is expected to be of type "Number" or "Any" and not of type "String" (line 2, file "fixtures/compile/operator/operator.modulo.bin.s_se.ks")
+TypeException: The expression "x" of type "String" is expected to be of type "Number" or "Any" in a modulo operation (line 2, file "fixtures/compile/operator/operator.modulo.bin.s_se.ks")

@@ -1,1 +1,1 @@
-TypeException: The addition member "y" is expected to be of type "Number" or "Any" and not of type "Boolean" (line 2, file "fixtures/compile/operator/operator.addition.assign.i_be.ks")
+TypeException: The expression "y" of type "Boolean" is expected to be of type "Number" or "Any" in a additive operation (line 2, file "fixtures/compile/operator/operator.addition.assign.i_be.ks")

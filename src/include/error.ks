@@ -415,7 +415,7 @@ export class TypeException extends Exception {
 			throw new TypeException(`"for..of" must be used with a dictionary`, node)
 		} // }}}
 		throwInvalidOperand(expression, operator, node) ~ TypeException { // {{{
-			throw new TypeException(`The \(operator) member \(expression.toQuote(true)) is expected to be of type "\($operatorTypes[operator].join('", "'))" or "Any" and not of type \(expression.type().toQuote(true))`, node)
+			throw new TypeException(`The expression \(expression.toQuote(true)) of type \(expression.type().toQuote(true)) is expected to be of type "\($operatorTypes[operator].join('", "'))" or "Any" in a \(operator) operation`, node)
 		} // }}}
 		throwInvalidSpread(node) ~ TypeException { // {{{
 			throw new TypeException(`Spread operator require an array`, node)
@@ -448,7 +448,7 @@ export class TypeException extends Exception {
 			throw new TypeException(`The existentiality test of \(expression.toQuote(true)) is always positive`, node)
 		} // }}}
 		throwNotNullableOperand(expression, operator, node) ~ TypeException { // {{{
-			throw new TypeException(`The \(operator) member \(expression.toQuote(true)) can't be nullable`, node)
+			throw new TypeException(`The operand \(expression.toQuote(true)) can't be nullable in a \(operator) operation`, node)
 		} // }}}
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)

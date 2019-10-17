@@ -477,21 +477,25 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 }
 
 class GreaterThanOperator extends NumericComparisonOperator {
+	operator() => Operator::GreaterThan
 	runtime() => 'gt'
 	symbol() => '>'
 }
 
 class GreaterThanOrEqualOperator extends NumericComparisonOperator {
+	operator() => Operator::GreaterThanOrEqual
 	runtime() => 'gte'
 	symbol() => '>='
 }
 
 class LessThanOperator extends NumericComparisonOperator {
+	operator() => Operator::LessThan
 	runtime() => 'lt'
 	symbol() => '<'
 }
 
 class LessThanOrEqualOperator extends NumericComparisonOperator {
+	operator() => Operator::LessThanOrEqual
 	runtime() => 'lte'
 	symbol() => '<='
 }
