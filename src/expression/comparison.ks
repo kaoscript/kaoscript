@@ -417,11 +417,11 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 		}
 		else if @left.type().canBeNumber() {
 			unless @right.type().canBeNumber() {
-				TypeException.throwInvalidOperand(@right, this.operator(), this)
+				TypeException.throwInvalidOperand(@right, this.operator(), @node)
 			}
 		}
 		else {
-			TypeException.throwInvalidOperand(@left, this.operator(), this)
+			TypeException.throwInvalidOperand(@left, this.operator(), @node)
 		}
 
 		if @left.type().isNullable() || @right.type().isNullable() {
