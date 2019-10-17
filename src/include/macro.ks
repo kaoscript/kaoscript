@@ -229,7 +229,7 @@ class MacroDeclaration extends AbstractNode {
 		const line = builder.newLine().code('func(__ks_evaluate, __ks_reificate')
 
 		let auto
-		for data in @data.parameters {
+		for const data in @data.parameters {
 			line.code(', ', data.name.name)
 
 			if data.defaultValue? {
@@ -238,7 +238,7 @@ class MacroDeclaration extends AbstractNode {
 
 			auto = false
 
-			for modifier in data.modifiers until auto {
+			for const modifier in data.modifiers until auto {
 				if modifier.kind == ModifierKind::AutoEvaluate {
 					auto = true
 				}
@@ -257,7 +257,7 @@ class MacroDeclaration extends AbstractNode {
 
 		block.line('let __ks_src = ""')
 
-		for statement in $ast.block(@data.body).statements {
+		for const statement in $ast.block(@data.body).statements {
 			block.statement(statement)
 		}
 
@@ -356,7 +356,12 @@ class MacroDeclaration extends AbstractNode {
 						}
 					}
 					MacroElementKind::Literal => {
-						fragments.code($quote(element.value.replace(/\\/g, '\\\\')))
+						if element.value[0] == '\\' {
+							fragments.code($quote(element.value.substr(1).replace(/\\/g, '\\\\')))
+						}
+						else {
+							fragments.code($quote(element.value.replace(/\\/g, '\\\\')))
+						}
 					}
 					MacroElementKind::NewLine => {
 						fragments.code('"\\n"')
