@@ -32,6 +32,7 @@ enum Operator<String> {
 	LessThanOrEqual		= 'less-than-or-equal'
 	Modulo				= 'modulo'
 	Multiplication		= 'multiplicative'
+	Negation			= 'negation'
 	Negative			= 'negative'
 	Or					= 'or'
 	Quotient			= 'quotient'
@@ -60,6 +61,7 @@ const $operatorTypes = {
 	[Operator::LessThanOrEqual]: ['Number']
 	[Operator::Modulo]: ['Number']
 	[Operator::Multiplication]: ['Number']
+	[Operator::Negation]: ['Boolean']
 	[Operator::Negative]: ['Number']
 	[Operator::Or]: ['Boolean']
 	[Operator::Quotient]: ['Number']
