@@ -20,7 +20,7 @@ program
 		if(metadata._requested && (metadata._requested.type === 'git' || metadata._requested.type === 'hosted')) {
 			console.log('github:kaoscript/' + getPackage('github'));
 		}
-		else if(metadata._resolved) {
+		else if(metadata._resolved && metadata._resolved.substr(0, 4) !== 'git:') {
 			console.log('@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.'));
 		}
 		else {
