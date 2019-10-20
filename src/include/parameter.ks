@@ -610,19 +610,29 @@ class Parameter extends AbstractNode {
 				}
 				else {
 					if data.async {
-						fragments.line(`return __ks_cb(new TypeError("anonymous argument is not of type \(data.type.toQuote(false))"))`)
+						fragments.line(`return __ks_cb(new TypeError("Anonymous argument is not of type \(data.type.toQuote(false))"))`)
 					}
 					else {
-						fragments.line(`throw new TypeError("anonymous argument is not of type \(data.type.toQuote(false))")`)
+						fragments.line(`throw new TypeError("Anonymous argument is not of type \(data.type.toQuote(false))")`)
 					}
 				}
 			}
 			ParameterWrongDoing::NotNullable => {
-				if data.async {
-					fragments.line(`return __ks_cb(new TypeError("'\(data.name)' is not nullable"))`)
+				if data.destructuring {
+					if data.async {
+						fragments.line(`return __ks_cb(new TypeError("Destructuring value is not nullable"))`)
+					}
+					else {
+						fragments.line(`throw new TypeError("Destructuring value is not nullable")`)
+					}
 				}
 				else {
-					fragments.line(`throw new TypeError("'\(data.name)' is not nullable")`)
+					if data.async {
+						fragments.line(`return __ks_cb(new TypeError("'\(data.name)' is not nullable"))`)
+					}
+					else {
+						fragments.line(`throw new TypeError("'\(data.name)' is not nullable")`)
+					}
 				}
 			}
 		}
@@ -693,7 +703,7 @@ class Parameter extends AbstractNode {
 			}
 
 			if !(@explicitlyRequired && type.isNullable()) {
-				@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && type.isNullable() || @name is not IdentifierLiteral
+				@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && (type.isNullable() || @name is not IdentifierLiteral)
 
 				@defaultValue = $compile.expression(@data.defaultValue, @parent)
 				@defaultValue.analyse()
@@ -748,15 +758,16 @@ class Parameter extends AbstractNode {
 	toParameterFragments(fragments) { // {{{
 		fragments.code('...') if @rest
 
-		fragments.compile(@name)
+		@name.toParameterFragments(fragments)
 
 		if @maybeHeadedDefaultValue {
-			if @hasDefaultValue {
+			fragments.code($equals).compile(@defaultValue)
+			/* if @hasDefaultValue {
 				fragments.code($equals).compile(@defaultValue)
 			}
 			else {
 				fragments.code(' = null')
-			}
+			} */
 		}
 
 		@header = true
@@ -1367,6 +1378,9 @@ class IdentifierParameter extends IdentifierLiteral {
 			type: @declaredType.parameter()
 		})
 	} // }}}
+	toParameterFragments(fragments) { // {{{
+		fragments.compile(this)
+	} // }}}
 	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
 		let ctrl = null
 
@@ -1448,6 +1462,16 @@ class IdentifierParameter extends IdentifierLiteral {
 }
 
 class ArrayBindingParameter extends ArrayBinding {
+	private {
+		_tempName: String
+	}
+	analyse() { // {{{
+		super()
+
+		if @flatten {
+			@tempName = new Literal(@scope.acquireTempName(false), this)
+		}
+	} // }}}
 	addAliasParameter(data, name, setter) => @parent.addAliasParameter(data, name, setter)
 	newElement(data) => new ArrayBindingParameterElement(data, this, @scope)
 	setDeclaredType(type, definitive: Boolean = false) { // {{{
@@ -1474,7 +1498,52 @@ class ArrayBindingParameter extends ArrayBinding {
 			TypeException.throwInvalidBinding('Array', this)
 		}
 	} // }}}
-	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async)
+	toParameterFragments(fragments) { // {{{
+		if @flatten {
+			fragments.compile(@tempName)
+		}
+		else {
+			fragments.compile(this)
+		}
+	} // }}}
+	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
+		if @flatten {
+			const ctrl = fragments
+				.newControl()
+				.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
+				.step()
+
+			if defaultValue != null {
+				ctrl
+					.newLine()
+					.compile(@tempName)
+					.code($equals)
+					.compile(defaultValue)
+					.done()
+			}
+			else {
+				wrongdoer(ctrl, ParameterWrongDoing::NotNullable, {
+					destructuring: true
+					async: async
+					name: @tempName.value()
+				})
+			}
+
+			ctrl.done()
+
+			const line = fragments.newLine().code($runtime.scope(this))
+
+			@elements[0].toFlatFragments(line, @tempName)
+
+			for const element in @elements from 1 {
+				line.code(', ')
+
+				element.toFlatFragments(line, @tempName)
+			}
+
+			line.done()
+		}
+	} // }}}
 }
 
 class ArrayBindingParameterElement extends ArrayBindingElement {
@@ -1493,6 +1562,16 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 }
 
 class ObjectBindingParameter extends ObjectBinding {
+	private {
+		_tempName: String
+	}
+	analyse() { // {{{
+		super()
+
+		if @flatten {
+			@tempName = new Literal(@scope.acquireTempName(false), this)
+		}
+	} // }}}
 	addAliasParameter(data, name, setter) => @parent.addAliasParameter(data, name, setter)
 	newElement(data) => new ObjectBindingParameterElement(data, this, @scope)
 	setDeclaredType(type, definitive: Boolean = false) { // {{{
@@ -1519,7 +1598,52 @@ class ObjectBindingParameter extends ObjectBinding {
 			TypeException.throwInvalidBinding('Object', this)
 		}
 	} // }}}
-	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async)
+	toParameterFragments(fragments) { // {{{
+		if @flatten {
+			fragments.compile(@tempName)
+		}
+		else {
+			fragments.compile(this)
+		}
+	} // }}}
+	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
+		if @flatten {
+			const ctrl = fragments
+				.newControl()
+				.code('if(').compile(@tempName).code(' === void 0').code(' || ').compile(@tempName).code(' === null').code(')')
+				.step()
+
+			if defaultValue != null {
+				ctrl
+					.newLine()
+					.compile(@tempName)
+					.code($equals)
+					.compile(defaultValue)
+					.done()
+			}
+			else {
+				wrongdoer(ctrl, ParameterWrongDoing::NotNullable, {
+					destructuring: true
+					async: async
+					name: @tempName.value()
+				})
+			}
+
+			ctrl.done()
+
+			const line = fragments.newLine().code($runtime.scope(this))
+
+			@elements[0].toFlatFragments(line, @tempName)
+
+			for const element in @elements from 1 {
+				line.code(', ')
+
+				element.toFlatFragments(line, @tempName)
+			}
+
+			line.done()
+		}
+	} // }}}
 }
 
 class ObjectBindingParameterElement extends ObjectBindingElement {
@@ -1573,6 +1697,9 @@ class AnonymousParameter extends AbstractNode {
 
 			--context.required
 		}
+	} // }}}
+	toParameterFragments(fragments) { // {{{
+		fragments.compile(this)
 	} // }}}
 	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
 		if !@type.isAny() && !@options.rules.noParamAssert && !@options.rules.noParamTypeAssert {

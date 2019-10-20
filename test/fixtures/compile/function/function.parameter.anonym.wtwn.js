@@ -8,7 +8,7 @@ module.exports = function() {
 			throw new TypeError("'data' is not nullable");
 		}
 		if(__ks_0 !== null && !Type.isDictionary(__ks_0)) {
-			throw new TypeError("anonymous argument is not of type 'Dictionary?'");
+			throw new TypeError("Anonymous argument is not of type 'Dictionary?'");
 		}
 		if(name === void 0 || name === null) {
 			name = data.name;
