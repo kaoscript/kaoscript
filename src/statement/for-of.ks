@@ -44,9 +44,6 @@ class ForOfStatement extends Statement {
 			else if keyVariable.isImmutable() {
 				ReferenceException.throwImmutable(@data.key.name, this)
 			}
-			else {
-				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
-			}
 
 			@key = $compile.expression(@data.key, this, @bindingScope)
 			@key.analyse()
@@ -113,23 +110,36 @@ class ForOfStatement extends Statement {
 			@bleeding = @bindingScope.isBleeding()
 		}
 
-		const parameterType = type.parameter()
+		if @value != null {
+			const parameterType = type.parameter()
 
-		if @defineValue {
-			@value.type(parameterType, @bindingScope, this)
-		}
-		else if @value != null {
-			if @value is IdentifierLiteral {
-				@bindingScope.replaceVariable(@value.name(), parameterType, this)
+			const valueType = Type.fromAST(@data.type, this)
+			unless parameterType.matchContentOf(valueType) {
+				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
+			}
+
+			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+
+			if @defineValue {
+				@value.type(realType, @bindingScope, this)
 			}
 			else {
-				for const name in @value.listAssignments([]) {
-					@bindingScope.replaceVariable(name, parameterType.getProperty(name), this)
+				if @value is IdentifierLiteral {
+					@bindingScope.replaceVariable(@value.name(), realType, this)
+				}
+				else {
+					for const name in @value.listAssignments([]) {
+						@bindingScope.replaceVariable(name, realType.getProperty(name), this)
+					}
 				}
 			}
 		}
 
-		if @key? {
+		if @key != null {
+			unless @defineKey {
+				@bindingScope.replaceVariable(@data.key.name, @bindingScope.reference('String'), this)
+			}
+
 			@key.prepare()
 		}
 		else {

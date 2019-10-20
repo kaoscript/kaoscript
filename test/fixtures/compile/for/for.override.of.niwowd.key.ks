@@ -6,6 +6,6 @@ let value = {
 	duncan: 'murbella'
 }
 
-for let :value of value {
+for let _, value of value {
 	console.log(value)
 }

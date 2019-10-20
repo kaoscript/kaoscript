@@ -8,6 +8,6 @@ let likes = {
 	duncan: 'murbella'
 }
 
-for let :value of likes {
+for let _, value of likes {
 	console.log(value)
 }

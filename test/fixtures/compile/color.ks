@@ -234,7 +234,7 @@ func $convert(that: Color, space: string, result: dict = {_alpha: 0}): dict ~ Er
 } // }}}
 
 func $find(from: string, to: string): void { // {{{
-	for :name of $spaces[from].converters {
+	for const _, name of $spaces[from].converters {
 		if $spaces[name].converters[to]? {
 			$spaces[from].converters[to] = $binder^^($spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name])
 

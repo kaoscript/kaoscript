@@ -384,7 +384,7 @@ class Importer extends Statement {
 			return this.loadKSFile(x + $extensions.source, moduleName)
 		}
 		else {
-			for const :ext of require.extensions {
+			for const _, ext of require.extensions {
 				if fs.isFile(x + ext) {
 					return this.loadNodeFile(x, moduleName)
 				}
@@ -1001,7 +1001,7 @@ class ImportWorker {
 			const reqReferences = []
 			const alterations = {}
 
-			for i from 0 til @metadata.requirements.length by 3 {
+			for const i from 0 til @metadata.requirements.length by 3 {
 				index = @metadata.requirements[i]
 				type = Type.import(index, @metadata, reqReferences, alterations, queue, @scope, @node)
 
@@ -1014,7 +1014,7 @@ class ImportWorker {
 
 			const matchables = []
 
-			for i from 0 til @metadata.requirements.length by 3 {
+			for const i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
 				if (argument ?= arguments[name]) && !argument.required && !reqReferences[@metadata.requirements[i]].isAny() && !argument.type.isMatching(reqReferences[@metadata.requirements[i]], MatchingMode::Signature) {
@@ -1022,7 +1022,7 @@ class ImportWorker {
 				}
 			}
 
-			for i from 0 til @metadata.requirements.length by 3 {
+			for const i from 0 til @metadata.requirements.length by 3 {
 				if argument ?= arguments[@metadata.requirements[i + 1]] {
 					if argument.required {
 						argument.type = reqReferences[@metadata.requirements[i]]
@@ -1035,7 +1035,7 @@ class ImportWorker {
 
 		const alterations = {}
 
-		for i from 0 til @metadata.aliens.length by 2 {
+		for const i from 0 til @metadata.aliens.length by 2 {
 			index = @metadata.aliens[i]
 			name = @metadata.aliens[i + 1]
 
@@ -1049,7 +1049,7 @@ class ImportWorker {
 			type = references[index] = Type.toNamedType(name, type)
 		}
 
-		for i from 0 til @metadata.requirements.length by 3 {
+		for const i from 0 til @metadata.requirements.length by 3 {
 			index = @metadata.requirements[i]
 			name = @metadata.requirements[i + 1]
 
@@ -1063,7 +1063,7 @@ class ImportWorker {
 			references[index] = Type.toNamedType(name, type)
 		}
 
-		for i from 0 til @metadata.exports.length by 2 {
+		for const i from 0 til @metadata.exports.length by 2 {
 			index = @metadata.exports[i]
 			name = @metadata.exports[i + 1]
 
@@ -1079,7 +1079,7 @@ class ImportWorker {
 			@scope.addVariable(name, new Variable(name, false, false, type), @node)
 		}
 
-		for i from 0 til @metadata.aliens.length by 2 {
+		for const i from 0 til @metadata.aliens.length by 2 {
 			index = @metadata.aliens[i]
 			name = @metadata.aliens[i + 1]
 
@@ -1088,7 +1088,7 @@ class ImportWorker {
 			}
 		}
 
-		for :index in @metadata.references {
+		for const _, index in @metadata.references {
 			if !?references[index] {
 				let type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
 

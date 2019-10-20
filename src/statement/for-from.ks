@@ -15,7 +15,6 @@ class ForFromStatement extends Statement {
 		_to
 		_until
 		_variable
-		_variableVariable: Variable
 		_when
 		_while
 	}
@@ -97,7 +96,7 @@ class ForFromStatement extends Statement {
 		}
 
 		if @declared {
-			@variableVariable = @bindingScope.define(@data.variable.name, @immutable, @bindingScope.reference('Number'), true, this)
+			@bindingScope.define(@data.variable.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 			if rename {
 				@bindingScope.rename(@data.variable.name)
@@ -128,6 +127,10 @@ class ForFromStatement extends Statement {
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
+		unless @declared {
+			@bindingScope.replaceVariable(@data.variable.name, @bindingScope.reference('Number'), this)
+		}
+
 		@variable.prepare()
 
 		@from.prepare()

@@ -97,7 +97,7 @@ class IfStatement extends Statement {
 					const conditionInferables = @condition.inferContraryTypes(false)
 					const trueInferables = @whenTrueScope.listUpdatedInferables()
 
-					for const :name of trueInferables when conditionInferables[name]? {
+					for const _, name of trueInferables when conditionInferables[name]? {
 						const trueType = trueInferables[name].type
 						const conditionType = conditionInferables[name].type
 
@@ -141,7 +141,7 @@ class IfStatement extends Statement {
 				const trueInferables = @whenTrueScope.listUpdatedInferables()
 				const falseInferables = @whenFalseScope.listUpdatedInferables()
 
-				for const :name of trueInferables when falseInferables[name]? {
+				for const _, name of trueInferables when falseInferables[name]? {
 					const trueType = trueInferables[name].type
 					const falseType = falseInferables[name].type
 

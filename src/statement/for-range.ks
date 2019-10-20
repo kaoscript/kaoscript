@@ -14,7 +14,6 @@ class ForRangeStatement extends Statement {
 		_to
 		_until
 		_value
-		_valueVariable: Variable
 		_when
 		_while
 	}
@@ -33,7 +32,7 @@ class ForRangeStatement extends Statement {
 
 		const variable = @scope.getVariable(@data.value.name)
 		if @declaration || variable == null {
-			@valueVariable = @bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), true, this)
+			@bindingScope.define(@data.value.name, @immutable, @bindingScope.reference('Number'), true, this)
 
 			@defineVariable = true
 		}
@@ -73,6 +72,10 @@ class ForRangeStatement extends Statement {
 		@body.analyse()
 	} // }}}
 	prepare() { // {{{
+		unless @defineVariable {
+			@bindingScope.replaceVariable(@data.value.name, @bindingScope.reference('Number'), this)
+		}
+
 		@value.prepare()
 		@from.prepare()
 		@to.prepare()

@@ -343,7 +343,7 @@ module.exports = function() {
 		else if(!Type.isString(to)) {
 			throw new TypeError("'to' is not of type 'String'");
 		}
-		for(let name in $spaces[from].converters) {
+		for(const name in $spaces[from].converters) {
 			if(Type.isValue($spaces[name].converters[to])) {
 				$spaces[from].converters[to] = Helper.vcurry($binder, null, $spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name]);
 				return;

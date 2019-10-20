@@ -330,7 +330,7 @@ class BinaryOperatorAnd extends BinaryOperatorExpression {
 
 		const rightTypes = @right.inferContraryTypes(false)
 
-		for const :name of @left.inferContraryTypes(false) when rightTypes[name]? {
+		for const _, name of @left.inferContraryTypes(false) when rightTypes[name]? {
 			inferables[name] = rightTypes[name]
 		}
 

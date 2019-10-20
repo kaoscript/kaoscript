@@ -171,7 +171,16 @@ class ArrayComprehensionForIn extends Expression {
 		}
 
 		if @value? {
-			@valueVariable.setRealType(@expression.type().parameter())
+			const parameterType = type.parameter()
+
+			const valueType = Type.fromAST(@data.type, this)
+			unless parameterType.matchContentOf(valueType) {
+				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
+			}
+
+			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+
+			@valueVariable.setRealType(realType)
 
 			@value.prepare()
 		}
@@ -256,7 +265,8 @@ class ArrayComprehensionForOf extends Expression {
 		_key
 		_keyName
 		_value
-		_when			= null
+		_valueVariable: Variable
+		_when						= null
 	}
 	analyse() { // {{{
 		@bindingScope = this.newScope(@scope, ScopeType::InlineBlock)
@@ -276,7 +286,7 @@ class ArrayComprehensionForOf extends Expression {
 		}
 
 		if @data.loop.value? {
-			@bindingScope.define(@data.loop.value.name, false, AnyType.NullableUnexplicit, true, this)
+			@valueVariable = @bindingScope.define(@data.loop.value.name, false, AnyType.NullableUnexplicit, true, this)
 
 			@value = $compile.expression(@data.loop.value, this, @bindingScope)
 			@value.analyse()
@@ -300,10 +310,30 @@ class ArrayComprehensionForOf extends Expression {
 			TypeException.throwInvalidForOfExpression(this)
 		}
 
-		@key.prepare() if @key?
-		@value.prepare() if @value?
+		if @value? {
+			const parameterType = type.parameter()
+
+			const valueType = Type.fromAST(@data.type, this)
+			unless parameterType.matchContentOf(valueType) {
+				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
+			}
+
+			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+
+			@valueVariable.setRealType(realType)
+
+			@value.prepare()
+		}
+
+		if @key? {
+			@key.prepare()
+		}
+
 		@body.prepare()
-		@when.prepare() if @when?
+
+		if @when? {
+			@when.prepare()
+		}
 	} // }}}
 	translate() { // {{{
 		@expression.translate()

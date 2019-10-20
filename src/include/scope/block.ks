@@ -20,7 +20,7 @@ class BlockScope extends Scope {
 		@module = @parent.module()
 	} // }}}
 	acquireTempName(declare: Boolean = true): String { // {{{
-		for const :name of @tempNames when @tempNames[name] {
+		for const _, name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
 			return name
@@ -37,7 +37,7 @@ class BlockScope extends Scope {
 		return name
 	} // }}}
 	acquireUnusedTempName(): String? { // {{{
-		for const :name of @tempNames when @tempNames[name] {
+		for const _, name of @tempNames when @tempNames[name] {
 			@tempNames[name] = false
 
 			return name

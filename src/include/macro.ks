@@ -213,7 +213,7 @@ class MacroDeclaration extends AbstractNode {
 		_referenceIndex: Number					= -1
 		_type: MacroType
 	}
-	constructor(@data, @parent, :Scope?, @name = data.name.name) { // {{{
+	constructor(@data, @parent, _: Scope?, @name = data.name.name) { // {{{
 		super(data, parent, new MacroScope())
 
 		@type = MacroType.fromAST(data, this)

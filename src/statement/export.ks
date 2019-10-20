@@ -174,7 +174,7 @@ class ExportWildcardSpecifier extends AbstractNode {
 	export(recipient) { // {{{
 		@expression.prepare()
 
-		@expression.type().walk((name,) => {
+		@expression.type().walk((name, _) => {
 			recipient.export(name, new ExportProperty(@expression, name))
 		})
 	} // }}}

@@ -4,7 +4,7 @@ const hero = 'you'
 
 let heroes = ['leto', 'duncan', 'goku']
 
-for let :hero in heroes {
+for let _, hero in heroes {
 	console.log(hero)
 }
 

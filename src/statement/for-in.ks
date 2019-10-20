@@ -57,9 +57,6 @@ class ForInStatement extends Statement {
 			else if variable.isImmutable() {
 				ReferenceException.throwImmutable(@data.index.name, this)
 			}
-			else {
-				@bindingScope.replaceVariable(@data.index.name, @bindingScope.reference('Number'), this)
-			}
 
 			@index = $compile.expression(@data.index, this, @bindingScope)
 			@index.analyse()
@@ -157,23 +154,39 @@ class ForInStatement extends Statement {
 			TypeException.throwInvalidForInExpression(this)
 		}
 
-		const parameterType = type.parameter()
+		if @value != null {
+			const parameterType = type.parameter()
 
-		if @declareValue {
-			@value.type(parameterType, @bindingScope, this)
-		}
-		else if @value != null {
-			if @value is IdentifierLiteral {
-				@bindingScope.replaceVariable(@value.name(), parameterType, this)
+			const valueType = Type.fromAST(@data.type, this)
+			unless parameterType.matchContentOf(valueType) {
+				TypeException.throwInvalidAssignement(@value, valueType, parameterType, this)
 			}
-			else {
-				for const name in @value.listAssignments([]) {
-					@bindingScope.replaceVariable(name, parameterType.getProperty(name), this)
+
+			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
+
+			if @declareValue {
+				@value.type(realType, @bindingScope, this)
+			}
+			else  {
+				if @value is IdentifierLiteral {
+					@bindingScope.replaceVariable(@value.name(), realType, this)
+				}
+				else {
+					for const name in @value.listAssignments([]) {
+						@bindingScope.replaceVariable(name, realType.getProperty(name), this)
+					}
 				}
 			}
 		}
 
-		if !?@index && !(@data.index? && !@declaration && @scope.hasVariable(@data.index.name)) {
+		if @index != null {
+			unless @declareIndex {
+				@bindingScope.replaceVariable(@data.index.name, @bindingScope.reference('Number'), this)
+			}
+
+			@index.prepare()
+		}
+		else {
 			@indexName = @bindingScope.acquireTempName(false)
 		}
 

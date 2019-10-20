@@ -2,7 +2,7 @@ extern console
 
 let hero = ['leto', 'duncan', 'goku']
 
-for let :hero in hero {
+for let _, hero in hero {
 	console.log(hero)
 }
 

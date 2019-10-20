@@ -391,12 +391,20 @@ export class TypeException extends Exception {
 		throwInvalid(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Invalid type "\(name)"`, node)
 		} // }}}
-		throwInvalidAssignement(name, declaredType, valueType, node) ~ TypeException { // {{{
+		throwInvalidAssignement(name: String, declaredType: Type, valueType: Type, node) ~ TypeException { // {{{
 			if valueType.isNull() {
 				throw new TypeException(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
 			}
 			else {
 				throw new TypeException(`The variable "\(name)" of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
+			}
+		} // }}}
+		throwInvalidAssignement(name: AbstractNode, declaredType: Type, valueType: Type, node) ~ TypeException { // {{{
+			if valueType.isNull() {
+				throw new TypeException(`The variable \(name.toQuote(true)) of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
+			}
+			else {
+				throw new TypeException(`The variable \(name.toQuote(true)) of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
 			}
 		} // }}}
 		throwInvalidBinding(expected, node) ~ TypeException { // {{{
