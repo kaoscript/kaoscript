@@ -762,12 +762,6 @@ class Parameter extends AbstractNode {
 
 		if @maybeHeadedDefaultValue {
 			fragments.code($equals).compile(@defaultValue)
-			/* if @hasDefaultValue {
-				fragments.code($equals).compile(@defaultValue)
-			}
-			else {
-				fragments.code(' = null')
-			} */
 		}
 
 		@header = true

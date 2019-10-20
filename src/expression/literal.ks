@@ -68,6 +68,10 @@ class IdentifierLiteral extends Literal {
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 
+			if @scope.hasDeclaredVariable(@value) && !@scope.hasDefinedVariable(@value, @line) {
+				@scope.renameNext(@value, @line)
+			}
+
 			@declaredType = variable.getDeclaredType()
 			@realType = variable.getRealType()
 		}

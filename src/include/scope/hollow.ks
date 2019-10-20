@@ -105,7 +105,8 @@ class HollowScope extends Scope {
 		return @parent.getVariable(name, -1)
 	} // }}}
 	hasBleedingVariable(name: String) => @parent.hasBleedingVariable(name)
-	hasDefinedVariable(name: String): Boolean => @parent.hasDefinedVariable(name)
+	hasDefinedVariable(name: String): Boolean => @parent.hasDefinedVariable(name, @line)
+	hasDefinedVariable(name: String, line: Number): Boolean => @parent.hasDefinedVariable(name, line)
 	hasDeclaredVariable(name: String): Boolean => @parent.hasDeclaredVariable(name)
 	hasMacro(name) => @parent.hasMacro(name)
 	hasVariable(name: String): Boolean => @parent.hasVariable(name)

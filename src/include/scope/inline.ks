@@ -126,6 +126,25 @@ class InlineBlockScope extends BlockScope {
 
 		return newName
 	} // }}}
+	renameNext(name, line) { // {{{
+		return if @renamedVariables[name] is String
+
+		const newName = this.declareVariable(name, this)
+
+		@renamedVariables[name] = newName
+		@declarations[newName] = true
+
+		const variables: Array = @variables[name]
+
+		let i = 0
+		while i < variables.length && variables[i] < line {
+			i += 2
+		}
+
+		const variable: Variable = variables[i + 1]
+
+		variable.renameAs(newName)
+	} // }}}
 	replaceVariable(name: String, variable: Variable): Variable { // {{{
 		variable = super.replaceVariable(name, variable)
 

@@ -90,10 +90,6 @@ class VariableDeclaration extends Statement {
 
 			declarator.analyse()
 
-			if @hasInit {
-				declarator.checkNames(@init)
-			}
-
 			@declarators.push(declarator)
 		}
 
@@ -341,13 +337,6 @@ class VariableBindingDeclarator extends AbstractNode {
 	translate() { // {{{
 		@binding.translate()
 	} // }}}
-	checkNames(init) { // {{{
-		@binding.walk(name => {
-			if init.isUsingVariable(name) {
-				@scope.rename(name)
-			}
-		})
-	} // }}}
 	export(recipient) { // {{{
 		@binding.export(recipient)
 	} // }}}
@@ -408,11 +397,6 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	translate() { // {{{
 		@identifier.translate()
-	} // }}}
-	checkNames(init) { // {{{
-		if init.isUsingVariable(@name) {
-			@scope.rename(@name)
-		}
 	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)

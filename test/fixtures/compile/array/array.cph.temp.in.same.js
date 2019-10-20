@@ -7,9 +7,9 @@ module.exports = function() {
 		if(values === void 0 || values === null) {
 			throw new TypeError("'values' is not nullable");
 		}
-		const __ks_value_1 = Helper.mapArray(values, function(value) {
+		const value = Helper.mapArray(values, function(value) {
 			return value;
 		});
-		return __ks_value_1;
+		return value;
 	}
 };
