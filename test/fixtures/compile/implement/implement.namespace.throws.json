@@ -1,0 +1,42 @@
+{
+  "aliens": [
+    0,
+    "NS"
+  ],
+  "requirements": [],
+  "exports": [
+    1,
+    "NS"
+  ],
+  "references": [
+    {
+      "kind": "namespace",
+      "sealed": false,
+      "exhaustive": false,
+      "properties": {}
+    },
+    {
+      "kind": "namespace",
+      "exhaustive": false,
+      "namespace": {
+        "reference": 0
+      },
+      "properties": {
+        "foobar": {
+          "kind": "function",
+          "async": false,
+          "exhaustive": true,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "returns": "Any",
+          "throws": [
+            "Error"
+          ],
+          "sealed": false
+        }
+      }
+    }
+  ],
+  "macros": []
+}

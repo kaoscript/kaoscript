@@ -598,6 +598,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@block.translate()
 	} // }}}
 	getSharedName() => null
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
