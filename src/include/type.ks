@@ -341,11 +341,19 @@ abstract class Type {
 				return data == 'Any' ? Type.Any : scope.reference(data)
 			}
 			else if data is Array {
-				if data[0] is Number {
-					let type = references[data[0]]
+				const index = data[0]
+
+				if index is Number {
+					let type = references[index]
+
+					if !?type {
+						type = Type.fromMetadata(index, metadata, references, alterations, queue, scope, node)
+					}
 
 					if type is not NamedType {
 						type = new NamedType(data[1], type)
+
+						references[index] = type
 					}
 
 					return type

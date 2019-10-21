@@ -1,0 +1,125 @@
+{
+  "aliens": [
+    0,
+    "Foobar",
+    1,
+    "Error"
+  ],
+  "requirements": [
+    0,
+    "Foobar",
+    false,
+    1,
+    "Error",
+    false
+  ],
+  "exports": [
+    0,
+    "Foobar",
+    2,
+    "Error",
+    3,
+    "FooError"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "class": {
+        "reference": 1
+      },
+      "exhaustive": true,
+      "init": 0,
+      "instanceVariables": {
+        "message": {
+          "access": 3,
+          "type": "String"
+        },
+        "name": {
+          "access": 3,
+          "type": "String"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "toString": [
+          {
+            "id": 0,
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": true,
+      "sealed": false,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "toString": [
+          {
+            "id": 0,
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {},
+      "extends": [
+        2,
+        "Error"
+      ]
+    }
+  ],
+  "macros": []
+}

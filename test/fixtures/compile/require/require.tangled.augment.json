@@ -1,0 +1,115 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "foobar": [
+          {
+            "id": 0,
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any",
+            "sealed": true,
+            "throws": [
+              {
+                "reference": 1
+              }
+            ]
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": true,
+      "sealed": false,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "toString": [
+          {
+            "id": 0,
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {},
+      "extends": [
+        2,
+        "Error"
+      ]
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "message": {
+          "access": 3,
+          "type": "String"
+        },
+        "name": {
+          "access": 3,
+          "type": "String"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "toString": [
+          {
+            "id": 0,
+            "access": 3,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}
