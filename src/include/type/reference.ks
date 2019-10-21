@@ -1,3 +1,18 @@
+const $weightTOFs = { // {{{
+	Array: 1
+	Boolean: 2
+	Class: 12
+	Dictionary: 10
+	Enum: 4
+	Function: 3
+	Namespace: 8
+	Number: 5
+	Object: 11
+	Primitive: 7
+	RegExp: 9
+	String: 6
+} // }}}
+
 class ReferenceType extends Type {
 	private {
 		_name: String
@@ -48,6 +63,39 @@ class ReferenceType extends Type {
 	canBeString(any = true) => this.isUnion() ? @type.canBeString(any) : super(any)
 	clone() { // {{{
 		throw new NotSupportedException()
+	} // }}}
+	compareTo(value: Type) { // {{{
+		if this.matchContentOf(value) {
+			return -1
+		}
+		else if value.matchContentOf(this) {
+			return 1
+		}
+		else if this.isTypeOf() {
+			if value.isTypeOf() {
+				return $weightTOFs[@name] - $weightTOFs[value.name()]
+			}
+			else if value.discardReference().isClass() {
+				return -1
+			}
+			else {
+				return 1
+			}
+		}
+		else if this.type().isClass() {
+			if value.isTypeOf() {
+				return 1
+			}
+			else if value.discardReference().isClass() {
+				return Helper.compareString(@type.name(), value.discardReference().name())
+			}
+			else {
+				return 1
+			}
+		}
+		else {
+			return -1
+		}
 	} // }}}
 	discardAlias() { // {{{
 		if @name == 'Any' {
@@ -267,8 +315,9 @@ class ReferenceType extends Type {
 	isReference() => true
 	isRequired() => this.type().isRequired()
 	isString() => @name == 'String' || this.type().isString()
-	isVoid() => @name == 'Void' || this.type().isVoid()
+	isTypeOf(): Boolean => $typeofs[@name]
 	isUnion() => this.type().isUnion()
+	isVoid() => @name == 'Void' || this.type().isVoid()
 	matchContentOf(that: Type) { // {{{
 		if this == that {
 			return true

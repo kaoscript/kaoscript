@@ -601,6 +601,7 @@ abstract class Type {
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
 	isString() => false
+	isTypeOf() => false
 	isUnion() => false
 	isVirtual() => false
 	isVoid() => false

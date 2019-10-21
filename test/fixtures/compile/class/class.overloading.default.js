@@ -222,19 +222,19 @@ module.exports = function() {
 				return Greetings.prototype.__ks_func_garply_0.apply(this, arguments);
 			}
 			else if(arguments.length === 2) {
-				if(Type.isString(arguments[1])) {
-					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
+				if(Type.isArray(arguments[1])) {
+					return Greetings.prototype.__ks_func_garply_2.apply(this, arguments);
 				}
 				else {
-					return Greetings.prototype.__ks_func_garply_2.apply(this, arguments);
+					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
 				}
 			}
 			else if(arguments.length === 3) {
-				if(Type.isNumber(arguments[2])) {
-					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
+				if(Type.isArray(arguments[2])) {
+					return Greetings.prototype.__ks_func_garply_2.apply(this, arguments);
 				}
 				else {
-					return Greetings.prototype.__ks_func_garply_2.apply(this, arguments);
+					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
 				}
 			}
 			throw new SyntaxError("Wrong number of arguments");

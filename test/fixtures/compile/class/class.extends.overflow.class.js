@@ -61,11 +61,11 @@ module.exports = function() {
 		}
 		static message() {
 			if(arguments.length === 1) {
-				if(Type.isString(arguments[0])) {
-					return Quxbaz.__ks_sttc_message_0.apply(this, arguments);
-				}
-				else if(Type.isNumber(arguments[0])) {
+				if(Type.isNumber(arguments[0])) {
 					return Quxbaz.__ks_sttc_message_1.apply(this, arguments);
+				}
+				else if(Type.isString(arguments[0])) {
+					return Quxbaz.__ks_sttc_message_0.apply(this, arguments);
 				}
 			}
 			return Foobar.message.apply(null, arguments);

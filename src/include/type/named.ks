@@ -205,6 +205,7 @@ class NamedType extends Type {
 	isSealed() => @type.isSealed()
 	isSealedAlien() => @type.isSealedAlien()
 	isString() => @type.isString()
+	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
 	isVirtual() => @type.isClass() && $virtuals[@name]
 	matchClassName(that: Type?) { // {{{

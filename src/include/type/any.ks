@@ -18,6 +18,22 @@ class AnyType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
+	compareTo(value: Type) { // {{{
+		if value.isAny() {
+			if @nullable == value.isNullable() {
+				return 0
+			}
+			else if @nullable {
+				return 1
+			}
+			else {
+				return -1
+			}
+		}
+		else {
+			return 1
+		}
+	} // }}}
 	export(references, mode) => 'Any'
 	flagAlien() { // {{{
 		if @alien == true {
@@ -80,6 +96,11 @@ class AnyType extends Type {
 	toQuote(): String => @nullable ? `Any?` : `Any`
 	toReference(references, mode) => 'Any'
 	toTestFragments(fragments, node) { // {{{
-		throw new NotSupportedException(node)
+		if @nullable {
+			fragments.code('true')
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).isValue(`).compile(node).code(`)`)
+		}
 	} // }}}
 }

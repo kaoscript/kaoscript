@@ -70,11 +70,11 @@ module.exports = function() {
 		}
 		message() {
 			if(arguments.length === 1) {
-				if(Type.isString(arguments[0])) {
-					return Quxbaz.prototype.__ks_func_message_0.apply(this, arguments);
-				}
-				else if(Type.isNumber(arguments[0])) {
+				if(Type.isNumber(arguments[0])) {
 					return Quxbaz.prototype.__ks_func_message_1.apply(this, arguments);
+				}
+				else if(Type.isString(arguments[0])) {
+					return Quxbaz.prototype.__ks_func_message_0.apply(this, arguments);
 				}
 				else {
 					return Quxbaz.prototype.__ks_func_message_2.apply(this, arguments);

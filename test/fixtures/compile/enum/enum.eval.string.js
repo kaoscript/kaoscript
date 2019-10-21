@@ -23,18 +23,7 @@ module.exports = function(expect) {
 		return d;
 	})())).to.equal("{\"id\":\"clubs\"}");
 	function foobar() {
-		if(arguments.length === 1 && Type.isEnum(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isEnum(x)) {
-				throw new TypeError("'x' is not of type 'Enum'");
-			}
-			return "enum";
-		}
-		else if(arguments.length === 1 && Type.isEnumMember(arguments[0], CardSuit)) {
+		if(arguments.length === 1 && Type.isEnumMember(arguments[0], CardSuit)) {
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];
 			if(x === void 0 || x === null) {
@@ -44,6 +33,17 @@ module.exports = function(expect) {
 				throw new TypeError("'x' is not of type 'CardSuit'");
 			}
 			return "enum-member";
+		}
+		else if(arguments.length === 1 && Type.isEnum(arguments[0])) {
+			let __ks_i = -1;
+			let x = arguments[++__ks_i];
+			if(x === void 0 || x === null) {
+				throw new TypeError("'x' is not nullable");
+			}
+			else if(!Type.isEnum(x)) {
+				throw new TypeError("'x' is not of type 'Enum'");
+			}
+			return "enum";
 		}
 		else if(arguments.length === 1 && Type.isNumber(arguments[0])) {
 			let __ks_i = -1;
@@ -56,17 +56,6 @@ module.exports = function(expect) {
 			}
 			return "number";
 		}
-		else if(arguments.length === 1 && Type.isDictionary(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isDictionary(x)) {
-				throw new TypeError("'x' is not of type 'Dictionary'");
-			}
-			return "dictionary";
-		}
 		else if(arguments.length === 1 && Type.isString(arguments[0])) {
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];
@@ -77,6 +66,17 @@ module.exports = function(expect) {
 				throw new TypeError("'x' is not of type 'String'");
 			}
 			return "string";
+		}
+		else if(arguments.length === 1 && Type.isDictionary(arguments[0])) {
+			let __ks_i = -1;
+			let x = arguments[++__ks_i];
+			if(x === void 0 || x === null) {
+				throw new TypeError("'x' is not nullable");
+			}
+			else if(!Type.isDictionary(x)) {
+				throw new TypeError("'x' is not of type 'Dictionary'");
+			}
+			return "dictionary";
 		}
 		else if(arguments.length === 1) {
 			let __ks_i = -1;

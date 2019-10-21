@@ -38,11 +38,11 @@ module.exports = function() {
 		}
 		static foobar() {
 			if(arguments.length === 1) {
-				if(Type.isString(arguments[0])) {
-					return Foobar.__ks_sttc_foobar_0.apply(this, arguments);
+				if(Type.isNumber(arguments[0])) {
+					return Foobar.__ks_sttc_foobar_1.apply(this, arguments);
 				}
 				else {
-					return Foobar.__ks_sttc_foobar_1.apply(this, arguments);
+					return Foobar.__ks_sttc_foobar_0.apply(this, arguments);
 				}
 			}
 			throw new SyntaxError("Wrong number of arguments");

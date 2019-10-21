@@ -383,13 +383,6 @@ namespace Router {
 
 			tree.push(item)
 
-			if type.type.isAny() {
-				item.weight = 0
-			}
-			else {
-				item.weight = 1_00
-			}
-
 			for const i in type.methods {
 				const method = methods[i]
 
@@ -480,7 +473,6 @@ namespace Router {
 					for const type in usage.types {
 						item.type.push(type.type)
 						item.usage += type.usage
-						item.weight += type.weight
 
 						tree.remove(type)
 					}
@@ -489,39 +481,7 @@ namespace Router {
 				}
 			}
 
-			tree.sort(func(a, b) {
-				if a.weight == 0 && b.weight != 0 {
-					return 1
-				}
-				else if b.weight == 0 {
-					return -1
-				}
-				else if a.type.length == b.type.length {
-					if a.type.length == 1 && b.type.length == 1 {
-						const ac = a.type[0].type()
-						const bc = b.type[0].type()
-
-						if ac.isClass() && bc.isClass() {
-							if ac.matchInheritanceOf(bc) {
-								return -1
-							}
-							else if bc.matchInheritanceOf(ac) {
-								return 1
-							}
-						}
-					}
-
-					if a.usage == b.usage {
-						return b.weight - a.weight
-					}
-					else {
-						return b.usage - a.usage
-					}
-				}
-				else {
-					return a.type.length - b.type.length
-				}
-			})
+			tree.sort((a, b) => compareTypes(a.type, b.type))
 
 			for const item, i in tree {
 				if i + 1 == tree.length {
@@ -744,6 +704,48 @@ namespace Router {
 					}
 				}
 			}
+		}
+	} // }}}
+
+	// func compareTypes(aType: Type, bType: Type) => compareTypes([aType], [bType])
+	// func compareTypes(aType: Type, bTypes: Array<Type>) => compareTypes([aType], bTypes)
+	// func compareTypes(aTypes: Array<Type>, bType: Type) => compareTypes(aTypes, [bType])
+	// func compareTypes(aTypes: Array<Type>, bTypes: Array<Type>) { // {{{
+	func compareTypes(aTypes, bTypes) { // {{{
+		if aTypes is not Array {
+			aTypes = [aTypes]
+		}
+		if bTypes is not Array {
+			bTypes = [bTypes]
+		}
+
+		if aTypes.length == 1 && bTypes.length == 1 {
+			return aTypes[0].compareTo(bTypes[0])
+		}
+		else {
+			let aGreater: Number = 0
+
+			for const aType in aTypes {
+				let bGreater: Number = 0
+
+				for const bType in bTypes {
+					if aType.isMorePreciseThan(bType) {
+						return -1
+					}
+					else if bType.isMorePreciseThan(aType) {
+						return 1
+					}
+					else if bType.compareTo(aType) > 0 {
+						++bGreater
+					}
+				}
+
+				if bGreater == bTypes.length {
+					++aGreater
+				}
+			}
+
+			return aTypes.length - bTypes.length
 		}
 	} // }}}
 

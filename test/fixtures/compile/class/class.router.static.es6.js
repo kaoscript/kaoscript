@@ -98,11 +98,11 @@ module.exports = function() {
 		}
 		static import() {
 			if(arguments.length === 4) {
-				if(Type.isInstance(arguments[2], Domain)) {
-					return Type.__ks_sttc_import_0.apply(this, arguments);
+				if(Type.isDictionary(arguments[2])) {
+					return Type.__ks_sttc_import_1.apply(this, arguments);
 				}
 				else {
-					return Type.__ks_sttc_import_1.apply(this, arguments);
+					return Type.__ks_sttc_import_0.apply(this, arguments);
 				}
 			}
 			else if(arguments.length === 5) {
