@@ -94,7 +94,14 @@ class AnyType extends Type {
 	} // }}}
 	toMetadata(references, mode) => -1
 	toQuote(): String => @nullable ? `Any?` : `Any`
-	toReference(references, mode) => 'Any'
+	toReference(references, mode) { // {{{
+		if @explicit {
+			return @nullable ? `Any?` : `Any`
+		}
+		else {
+			return 'Any'
+		}
+	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		if @nullable {
 			fragments.code('true')

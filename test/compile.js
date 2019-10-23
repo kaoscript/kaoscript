@@ -7,7 +7,7 @@ var path = require('path');
 
 require('@kaoscript/target-commons')(Compiler)
 
-function replacer(key, value){
+function replacer(key, value) {
 	if(value === undefined) {
 		// return 'undefined'
 		throw new Error('the value of "' + key + '" is not nullable');

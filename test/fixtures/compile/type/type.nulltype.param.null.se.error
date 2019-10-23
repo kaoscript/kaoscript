@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (String) (line 5, file "fixtures/compile/type/type.nulltype.param.null.se.ks")

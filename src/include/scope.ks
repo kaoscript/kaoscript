@@ -21,6 +21,7 @@ let $keywords = { // {{{
 	enum: true
 	export: true
 	extends: true
+	false: true
 	finally: true
 	float: true
 	for: true
@@ -38,6 +39,7 @@ let $keywords = { // {{{
 	native: true
 	never: true
 	new: true
+	null: true
 	override: true
 	overwrite: true
 	package: true
@@ -55,6 +57,7 @@ let $keywords = { // {{{
 	throw: true
 	throws: true
 	transient: true
+	true: true
 	try: true
 	typeof: true
 	var: true

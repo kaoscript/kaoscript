@@ -42,11 +42,13 @@ class AliasType extends Type {
 		return this == value
 	} // }}}
 	isNumber() => @type.isNumber()
+	isReducible() => true
 	isString() => @type.isString()
 	isUnion() => @type.isUnion()
 	isExportable() => @type.isExportable()
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
 	parameter() => @type.parameter()
+	reduce(type: Type) => @type.reduce(type)
 	type() => @type
 	type(@type) => this
 	toFragments(fragments, node) { // {{{

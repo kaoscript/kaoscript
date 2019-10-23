@@ -4,7 +4,7 @@ class UnionType extends Type {
 		_explicit: Boolean
 		_explicitNullity: Boolean	= false
 		_nullable: Boolean			= false
-		_types: Array<Type>
+		_types: Array<Type>			= []
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
@@ -34,12 +34,28 @@ class UnionType extends Type {
 			return type
 		} // }}}
 	}
-	constructor(@scope, @types = [], @explicit = true) { // {{{
+	constructor(@scope, types: Array = [], @explicit = true) { // {{{
 		super(scope)
 
-		for const type in @types until @nullable {
-			if type.isNullable() {
+		for const type in types {
+			if type.isNull() && (type.isReference() || type.isExplicit()) {
 				@nullable = true
+				@explicitNullity = true
+			}
+			else if type.isAny() {
+				@types = [type]
+
+				@any = true
+				@nullable = type.isNullable()
+
+				break
+			}
+			else {
+				@types.push(type)
+
+				if type.isNullable() {
+					@nullable = true
+				}
 			}
 		}
 	} // }}}
@@ -50,6 +66,9 @@ class UnionType extends Type {
 
 				@nullable = true
 			}
+		}
+		else if type.isNull() {
+			@nullable = true
 		}
 		else if type.isAny() {
 			@types = [type]
@@ -229,6 +248,7 @@ class UnionType extends Type {
 		return false
 	} // }}}
 	isNullable() => @nullable
+	isReducible() => true
 	isUnion() => true
 	length() => @types.length
 	matchContentOf(that: Type) { // {{{

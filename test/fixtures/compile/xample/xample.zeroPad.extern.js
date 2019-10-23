@@ -1,4 +1,4 @@
-var {Operator, Type} = require("@kaoscript/runtime");
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	var __ks_Number = {};
 	__ks_Number.__ks_func_zeroPad_0 = function(length) {
@@ -25,13 +25,16 @@ module.exports = function() {
 		if(length === void 0 || length === null) {
 			throw new TypeError("'length' is not nullable");
 		}
+		else if(!Type.isNumber(length)) {
+			throw new TypeError("'length' is not of type 'Number'");
+		}
 		if(pad === void 0 || pad === null) {
 			throw new TypeError("'pad' is not nullable");
 		}
 		else if(!Type.isString(pad)) {
 			throw new TypeError("'pad' is not of type 'String'");
 		}
-		return pad.repeat(Operator.subtraction(length, this.length)) + this;
+		return pad.repeat(length - this.length) + this;
 	};
 	__ks_String._im_lpad = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);

@@ -1,0 +1,1 @@
+TypeException: The variable "x" can't be of type "Null" (line 1, file "fixtures/compile/type/type.nulltype.var.default.ks")

@@ -57,6 +57,10 @@ class ReferenceType extends Type {
 		super(scope)
 
 		@name = $types[name] ?? name
+
+		if @name == 'Null' {
+			@nullable = true
+		}
 	} // }}}
 	canBeBoolean() => this.isUnion() ? @type.canBeBoolean() : super()
 	canBeNumber(any = true) => this.isUnion() ? @type.canBeNumber(any) : super(any)
@@ -197,7 +201,7 @@ class ReferenceType extends Type {
 	} // }}}
 	hasParameters() => @parameters.length != 0
 	isAlien() => this.type().isAlien()
-	isAny() => @name == 'Any' || this.type().isAny()
+	isAny() => @name == 'Any'
 	isArray() => @name == 'Array' || this.type().isArray()
 	isAsync() => false
 	isBoolean() => @name == 'Boolean' || this.type().isBoolean()
@@ -309,10 +313,12 @@ class ReferenceType extends Type {
 	isNative() => $natives[@name] == true
 	isNamespace() => @name == 'Namespace' || this.type().isNamespace()
 	isNever() => @name == 'Never' || this.type().isNever()
+	isNull() => @name == 'Null'
 	isNullable() => @nullable
 	isNumber() => @name == 'Number' || this.type().isNumber()
 	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String'))
 	isReference() => true
+	isReducible() => true
 	isRequired() => this.type().isRequired()
 	isString() => @name == 'String' || this.type().isString()
 	isTypeOf(): Boolean => $typeofs[@name]
@@ -373,6 +379,7 @@ class ReferenceType extends Type {
 	} // }}}
 	parameters() => @parameters
 	reassign(@name, @scope) => this
+	reduce(type: Type) => this.type().reduce(type)
 	resolveType() { // {{{
 		if !?@type || @type.isCloned() {
 			if @name == 'Any' {
@@ -381,6 +388,10 @@ class ReferenceType extends Type {
 			}
 			else if @name == 'Never' {
 				@type = Type.Never
+				@predefined = true
+			}
+			else if @name == 'Null' {
+				@type = Type.Null
 				@predefined = true
 			}
 			else if @name == 'Void' {

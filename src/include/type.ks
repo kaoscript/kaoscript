@@ -19,6 +19,8 @@ const $natives = { // {{{
 	Never: true
 	never: true
 	Namespace: true
+	Null: true
+	null: true
 	Number: true
 	number: true
 	Primitive: true
@@ -338,7 +340,18 @@ abstract class Type {
 				}
 			}
 			else if data is String {
-				return data == 'Any' ? Type.Any : scope.reference(data)
+				if data == 'Any' {
+					return AnyType.Unexplicit
+				}
+				else if data == 'Any?' {
+					return AnyType.NullableExplicit
+				}
+				else if data == 'Null' {
+					return Type.Null
+				}
+				else {
+					return scope.reference(data)
+				}
 			}
 			else if data is Array {
 				const index = data[0]
@@ -602,6 +615,7 @@ abstract class Type {
 	isObject() => false
 	isPredefined() => false
 	isPrimitive() => false
+	isReducible() => false
 	isReference() => false
 	isReferenced() => @referenced
 	isRequired() => @required
@@ -693,5 +707,5 @@ include {
 
 Type.Any = AnyType.Unexplicit
 Type.Never = new NeverType()
-Type.Null = new NullType()
+Type.Null = NullType.Unexplicit
 Type.Void = new VoidType()

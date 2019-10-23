@@ -12,5 +12,5 @@ extern sealed class String {
 }
 
 impl String {
-	lpad(length, pad: String): String => pad.repeat(length - this.length) + this
+	lpad(length: Number, pad: String): String => pad.repeat(length - this.length) + this
 }

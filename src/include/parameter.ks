@@ -673,6 +673,9 @@ class Parameter extends AbstractNode {
 		if type == null {
 			type = @anonymous ? AnyType.NullableUnexplicit : Type.Any
 		}
+		else if type.isNull() {
+			type = NullType.Explicit
+		}
 
 		let min: Number = 1
 		let max: Number = 1
@@ -1430,13 +1433,18 @@ class IdentifierParameter extends IdentifierLiteral {
 
 			ctrl.code('if(')
 
-			if @declaredType.isNullable() {
-				ctrl.compile(this).code(' !== null && ')
+			if @declaredType.isNull() {
+				ctrl.compile(this).code(' !== null')
 			}
+			else {
+				if @declaredType.isNullable() {
+					ctrl.compile(this).code(' !== null && ')
+				}
 
-			ctrl.code('!')
+				ctrl.code('!')
 
-			@declaredType.toTestFragments(ctrl, this)
+				@declaredType.toTestFragments(ctrl, this)
+			}
 
 			ctrl
 				.code(')')

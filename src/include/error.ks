@@ -467,6 +467,9 @@ export class TypeException extends Exception {
 		throwNullTypeChecking(type, node) ~ TypeException { // {{{
 			throw new TypeException(`The variable is "null" and can't be checked against the type \(type.toQuote(true))`, node)
 		} // }}}
+		throwNullTypeVariable(name, node) ~ TypeException { // {{{
+			throw new TypeException(`The variable "\(name)" can't be of type "Null"`, node)
+		} // }}}
 		throwRequireClass(node) ~ TypeException { // {{{
 			throw new TypeException(`An instance is required`, node)
 		} // }}}

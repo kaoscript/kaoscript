@@ -118,7 +118,13 @@ class VariableDeclaration extends Statement {
 			}
 
 			if @autotype {
-				declarator.setDeclaredType(type)
+				if type.isNull() {
+					declarator.setDeclaredType(AnyType.NullableExplicit)
+				}
+				else {
+					declarator.setDeclaredType(type)
+				}
+
 				declarator.flagDefinitive()
 			}
 			else {
@@ -390,7 +396,13 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	prepare() { // {{{
 		if @data.type? {
-			@variable.setDeclaredType(Type.fromAST(@data.type, this)).flagDefinitive()
+			const type = Type.fromAST(@data.type, this)
+
+			if type.isNull() {
+				TypeException.throwNullTypeVariable(@name, this)
+			}
+
+			@variable.setDeclaredType(type).flagDefinitive()
 		}
 
 		@identifier.prepare()

@@ -199,6 +199,7 @@ class NamedType extends Type {
 	isNullable() => @type.isNullable()
 	isNumber() => @type.isNumber()
 	isPredefined() => @type.isPredefined()
+	isReducible() => true
 	isReferenced() => @type.isReferenced()
 	isRequired() => @type.isRequired()
 	isSealable() => @type.isSealable()
@@ -315,6 +316,14 @@ class NamedType extends Type {
 		}
 		else {
 			return @name
+		}
+	} // }}}
+	reduce(type: Type) { // {{{
+		if @type.isReducible() {
+			return @type.reduce(type)
+		}
+		else {
+			return this
 		}
 	} // }}}
 	referenceIndex() => @type.referenceIndex()

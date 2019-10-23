@@ -117,6 +117,7 @@ class ArrowFunctionExpression extends Expression {
 		@exit = @block.isExit()
 	} // }}}
 	isComputed() => true
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	isUsingVariable(name) { // {{{
 		for parameter in @parameters {
