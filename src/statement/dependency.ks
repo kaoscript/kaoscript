@@ -470,56 +470,29 @@ class RequireOrImportDeclarator extends Importer {
 
 			const ctrl = fragments.newControl().code(`if(`)
 
-			const aliases = {}
-
 			for const requirement, index in @requirements {
 				if index != 0 {
 					ctrl.code(' || ')
 				}
 
 				ctrl.code(`!\(requirement.tempName())_valuable`)
-
-				aliases[requirement.name()] = requirement.tempName()
 			}
 
 			ctrl.code(')').step()
 
-			this.toImportFragments(ctrl, aliases)
+			this.toImportFragments(ctrl, false)
 
-			if @options.format.destructuring == 'es5' {
-				for const requirement in @requirements {
-					if requirement.isFlexible() {
-						const control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
+			for const requirement in @requirements {
+				if requirement.isFlexible() {
+					const control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
 
-						control.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
+					control.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
+					control.line(`__ks_\(requirement.name()) = __ks__.__ks_\(requirement.name())`)
 
-						if requirement.isFlexible() {
-							control.line(`__ks_\(requirement.name()) = __ks__.__ks_\(requirement.name())`)
-						}
-
-						control.done()
-					}
-					else {
-						ctrl.line(`\(requirement.name()) = \(requirement.tempName())_valuable ? \(requirement.name()) : __ks__.\(requirement.name())`)
-					}
+					control.done()
 				}
-			}
-			else {
-				for const requirement in @requirements {
-					if requirement.isFlexible() {
-						const control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
-
-						control.line(`\(requirement.name()) = \(requirement.tempName())`)
-
-						if requirement.isFlexible() {
-							control.line(`__ks_\(requirement.name()) = __ks_\(requirement.tempName())`)
-						}
-
-						control.done()
-					}
-					else {
-						ctrl.line(`\(requirement.name()) = \(requirement.tempName())_valuable ? \(requirement.name()) : \(requirement.tempName())`)
-					}
+				else {
+					ctrl.line(`\(requirement.name()) = \(requirement.tempName())_valuable ? \(requirement.name()) : __ks__.\(requirement.name())`)
 				}
 			}
 

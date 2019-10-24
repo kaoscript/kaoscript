@@ -5,9 +5,9 @@ module.exports = function(Template, template) {
 	var __ks_0_valuable = Type.isValue(Template);
 	var __ks_1_valuable = Type.isValue(template);
 	if(!__ks_0_valuable || !__ks_1_valuable) {
-		var {__ks_0, __ks_1} = require("./import.sealed.function.source.ks")();
-		Template = __ks_0_valuable ? Template : __ks_0;
-		template = __ks_1_valuable ? template : __ks_1;
+		var __ks__ = require("./import.sealed.function.source.ks")();
+		Template = __ks_0_valuable ? Template : __ks__.Template;
+		template = __ks_1_valuable ? template : __ks__.template;
 	}
 	function foo() {
 		return 42;

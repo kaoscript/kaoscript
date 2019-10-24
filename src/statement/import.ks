@@ -728,15 +728,15 @@ class Importer extends Statement {
 	registerMacro(name, macro) { // {{{
 		@parent.registerMacro(name, macro)
 	} // }}}
-	toImportFragments(fragments, aliases = null) { // {{{
+	toImportFragments(fragments, destructuring = true) { // {{{
 		if @isKSFile {
-			this.toKSFileFragments(fragments, aliases)
+			this.toKSFileFragments(fragments, destructuring)
 		}
 		else {
 			this.toNodeFileFragments(fragments)
 		}
 	} // }}}
-	toKSFileFragments(fragments, aliases: Dictionary?) { // {{{
+	toKSFileFragments(fragments, destructuring) { // {{{
 		if @count == 0 {
 			if @alias != null {
 				const line = fragments
@@ -781,7 +781,7 @@ class Importer extends Statement {
 				line.code(`.\(name)`).done()
 			}
 			else {
-				if @options.format.destructuring == 'es5' {
+				if !destructuring || @options.format.destructuring == 'es5' {
 					let variable
 
 					if @reusable {
@@ -799,7 +799,7 @@ class Importer extends Statement {
 						variable = '__ks__'
 					}
 
-					if !?aliases {
+					if destructuring {
 						let line = fragments.newLine().code('var ')
 
 						let nf = false
@@ -827,8 +827,6 @@ class Importer extends Statement {
 					}
 				}
 				else {
-					aliases ??= {}
-
 					let line = fragments.newLine().code('var {')
 
 					let nf = false
@@ -845,19 +843,10 @@ class Importer extends Statement {
 								line.code(`__ks_\(name)`)
 							}
 							else {
-								if const ralias = aliases[name] {
-									line.code(ralias)
+								line.code(name)
 
-									if @sealedVariables[name] == true {
-										line.code(`, __ks_\(ralias)`)
-									}
-								}
-								else {
-									line.code(name)
-
-									if @sealedVariables[name] == true {
-										line.code(`, __ks_\(name)`)
-									}
+								if @sealedVariables[name] == true {
+									line.code(`, __ks_\(name)`)
 								}
 							}
 						}
