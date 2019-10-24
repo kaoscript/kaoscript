@@ -54,7 +54,6 @@ const $virtuals = {
 	Enum: true
 	Namespace: true
 	Primitive: true
-	Object: true
 }
 
 #[flags]

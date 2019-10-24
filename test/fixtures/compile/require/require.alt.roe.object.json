@@ -1,0 +1,33 @@
+{
+  "aliens": [
+    0,
+    "Object"
+  ],
+  "requirements": [
+    0,
+    "Object",
+    false
+  ],
+  "exports": [
+    0,
+    "Object"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}
