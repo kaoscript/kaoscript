@@ -1,4 +1,4 @@
-require|import '../require/require.alt.roi.default'
+require|import '../require/require.alt.roi.default.es6'
 
 impl Array {
 	foo() => 42

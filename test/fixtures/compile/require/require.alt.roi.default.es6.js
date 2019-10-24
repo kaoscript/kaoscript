@@ -1,19 +1,10 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
-function __ks_require(__ks_0, __ks___ks_0) {
-	var req = [];
-	if(Type.isValue(__ks_0)) {
-		req.push(__ks_0, __ks___ks_0);
-	}
-	else {
-		var {Array, __ks_Array} = require("../_/_array.ks")();
-		req.push(Array, __ks_Array);
-	}
-	return req;
-}
-module.exports = function(__ks_0, __ks___ks_0) {
-	var [Array, __ks_Array] = __ks_require(__ks_0, __ks___ks_0);
+module.exports = function(Array, __ks_Array) {
 	const PI = 3.14;
+	if(!Type.isValue(Array)) {
+		var {Array, __ks_Array} = require("../_/_array.ks")();
+	}
 	__ks_Array.__ks_func_contains_0 = function(item, from) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

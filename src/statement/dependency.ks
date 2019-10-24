@@ -410,6 +410,9 @@ class RequireOrImportDeclaration extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
+		for const declarator in @declarators {
+			declarator.toStatementFragments(fragments, mode)
+		}
 	} // }}}
 }
 
@@ -437,107 +440,91 @@ class RequireOrImportDeclarator extends Importer {
 			}
 		}
 
+		if @requirements.length > 0 {
+			for const requirement in @requirements {
+				requirement.acquireTempName()
+			}
+		}
+
 		if @alias != null {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
 	metadata() => @metadata
-	toAltFragments(fragments) { // {{{
-		return if this._printed
+	toStatementFragments(fragments, mode) { // {{{
+		if @requirements.length == 1 {
+			const requirement = @requirements[0]
 
-		if this._requirements.length == 1 {
-			const requirement = this._requirements[0]
+			const ctrl = fragments.newControl()
 
-			const ctrl = fragments.newControl().code(`if(\($runtime.type(this)).isValue(\(requirement.parameter())))`).step()
+			ctrl.code('if(!', $runtime.type(this), '.isValue(', requirement.name(), '))').step()
 
-			if requirement.isFlexible() {
-				ctrl
-					.line(`req.push(\(requirement.parameter()), __ks_\(requirement.parameter()))`)
-					.step()
-					.code('else')
-					.step()
+			this.toImportFragments(ctrl)
 
-				this.toImportFragments(ctrl)
-
-				ctrl.line(`req.push(\(requirement.name()), __ks_\(requirement.name()))`)
-
-				ctrl.done()
-			}
-			else {
-				ctrl
-					.line(`req.push(\(requirement.parameter()))`)
-					.step()
-					.code('else')
-					.step()
-
-				this.toImportFragments(ctrl)
-
-				ctrl.line(`req.push(\(requirement.name()))`)
-
-				ctrl.done()
-			}
+			ctrl.done()
 		}
 		else {
-			for const requirement in this._requirements {
-				fragments.line(`var \(requirement.parameter())_valuable = \($runtime.type(this)).isValue(\(requirement.parameter()))`)
+			for const requirement in @requirements {
+				fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.name()))`)
 			}
 
 			const ctrl = fragments.newControl().code(`if(`)
 
-			for const requirement, index in this._requirements {
+			const aliases = {}
+
+			for const requirement, index in @requirements {
 				if index != 0 {
 					ctrl.code(' || ')
 				}
 
-				ctrl.code(`!\(requirement.parameter())_valuable`)
+				ctrl.code(`!\(requirement.tempName())_valuable`)
+
+				aliases[requirement.name()] = requirement.tempName()
 			}
 
 			ctrl.code(')').step()
 
-			this.toImportFragments(ctrl)
+			this.toImportFragments(ctrl, aliases)
 
-			for const requirement in this._requirements {
-				if requirement.isFlexible() {
-					const control = ctrl.newControl().code(`if(\(requirement.parameter())_valuable)`).step()
+			if @options.format.destructuring == 'es5' {
+				for const requirement in @requirements {
+					if requirement.isFlexible() {
+						const control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
 
-					control.line(`req.push(\(requirement.parameter()), __ks_\(requirement.parameter()))`).step()
+						control.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
 
-					control.code('else').step()
+						if requirement.isFlexible() {
+							control.line(`__ks_\(requirement.name()) = __ks__.__ks_\(requirement.name())`)
+						}
 
-					control.line(`req.push(\(requirement.name()), \(requirement.type().getSealedName()))`)
-
-					control.done()
-				}
-				else {
-					ctrl.line(`req.push(\(requirement.parameter())_valuable ? \(requirement.parameter()) : \(requirement.name()))`)
-				}
-			}
-
-			ctrl.step().code('else').step()
-
-			const line = ctrl.newLine().code('req.push(')
-
-			for const requirement, index in this._requirements {
-				if index != 0 {
-					line.code($comma)
-				}
-
-				if requirement.isFlexible() {
-					line.code(`\(requirement.parameter()), __ks_\(requirement.parameter())`)
-				}
-				else {
-					line.code(requirement.parameter())
+						control.done()
+					}
+					else {
+						ctrl.line(`\(requirement.name()) = \(requirement.tempName())_valuable ? \(requirement.name()) : __ks__.\(requirement.name())`)
+					}
 				}
 			}
+			else {
+				for const requirement in @requirements {
+					if requirement.isFlexible() {
+						const control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
 
-			line.code(')').done()
+						control.line(`\(requirement.name()) = \(requirement.tempName())`)
+
+						if requirement.isFlexible() {
+							control.line(`__ks_\(requirement.name()) = __ks_\(requirement.tempName())`)
+						}
+
+						control.done()
+					}
+					else {
+						ctrl.line(`\(requirement.name()) = \(requirement.tempName())_valuable ? \(requirement.name()) : \(requirement.tempName())`)
+					}
+				}
+			}
 
 			ctrl.done()
 		}
-
-		this._printed = true
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
 	} // }}}
 }
 
@@ -579,6 +566,9 @@ class StaticRequirement extends Requirement {
 	} // }}}
 	constructor(data, @node) { // {{{
 		super(data, DependencyKind::Require, node)
+	} // }}}
+	constructor(variable: Variable, @node) { // {{{
+		super(variable, node)
 	} // }}}
 	isRequired() => true
 	parameter() => @name
@@ -697,14 +687,19 @@ class ROEDynamicRequirement extends DynamicRequirement {
 	} // }}}
 }
 
-class ROIDynamicRequirement extends DynamicRequirement {
+class ROIDynamicRequirement extends StaticRequirement {
 	private {
 		_importer
+		_tempName: String
 	}
 	constructor(variable: Variable, importer) { // {{{
 		super(variable, @importer = importer)
 
 		variable.getDeclaredType().condense()
 	} // }}}
-	toAltFragments(fragments) => @importer.toAltFragments(fragments)
+	acquireTempName() { // {{{
+		@tempName = @node.module().scope().acquireTempName(false)
+	} // }}}
+	isRequired() => false
+	tempName() => @tempName
 }

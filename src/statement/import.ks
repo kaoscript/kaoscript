@@ -240,7 +240,7 @@ class Importer extends Statement {
 			}
 		}
 
-		if data.required {
+		if argument.required {
 			if (variable ?= @scope.getVariable(data.value.name)) && !variable.getDeclaredType().isPredefined()  {
 				ReferenceException.throwDefined(data.value.name, this)
 			}
@@ -435,16 +435,72 @@ class Importer extends Statement {
 		@isKSFile = true
 		@moduleName = moduleName
 
+		let autofill = false
+
+		for const modifer in @data.modifiers {
+			if modifer.kind == ModifierKind::Autofill {
+				autofill = true
+			}
+		}
+
 		@worker = new ImportWorker(@metadata, this)
 
 		if @data.arguments?.length != 0 {
-			for argument in @data.arguments {
+			for const argument in @data.arguments {
 				this.addArgument(argument)
 			}
 
+			if autofill {
+				for const i from 0 til @metadata.requirements.length by 3 {
+					const name = @metadata.requirements[i + 1]
+
+					if !?@argumentNames[name] {
+						if @scope.hasVariable(name) {
+							this.addArgument({
+								modifiers: []
+								value: {
+									kind: NodeKind::Identifier
+									name: name
+								}
+							})
+						}
+						else if @metadata.requirements[i + 2] {
+							SyntaxException.throwMissingRequirement(name, this)
+						}
+					}
+				}
+			}
+		}
+		else if autofill {
+			for const i from 0 til @metadata.requirements.length by 3 {
+				const name = @metadata.requirements[i + 1]
+
+				if @scope.hasVariable(name) {
+					this.addArgument({
+						modifiers: []
+						value: {
+							kind: NodeKind::Identifier
+							name: name
+						}
+					})
+				}
+				else if @metadata.requirements[i + 2] {
+					SyntaxException.throwMissingRequirement(name, this)
+				}
+			}
+		}
+		else {
+			for const i from 1 til @metadata.requirements.length by 3 {
+				if @metadata.requirements[i + 1] {
+					SyntaxException.throwMissingRequirement(@metadata.requirements[i], this)
+				}
+			}
+		}
+
+		if @arguments.length != 0 {
 			const requirements = []
 
-			for i from 0 til @metadata.requirements.length by 3 {
+			for const i from 0 til @metadata.requirements.length by 3 {
 				const name = @metadata.requirements[i + 1]
 
 				if @argumentNames[name] is Number {
@@ -475,16 +531,9 @@ class Importer extends Statement {
 
 			@arguments.sort((a, b) => a.index - b.index)
 		}
-		else {
-			for i from 1 til @metadata.requirements.length by 3 {
-				if @metadata.requirements[i + 1] {
-					SyntaxException.throwMissingRequirement(@metadata.requirements[i], this)
-				}
-			}
-		}
 
 		const macros = {}
-		for i from 0 til @metadata.macros.length by 2 {
+		for const i from 0 til @metadata.macros.length by 2 {
 			macros[@metadata.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for data in @metadata.macros[i + 1]]
 		}
 
@@ -679,15 +728,15 @@ class Importer extends Statement {
 	registerMacro(name, macro) { // {{{
 		@parent.registerMacro(name, macro)
 	} // }}}
-	toImportFragments(fragments) { // {{{
+	toImportFragments(fragments, aliases = null) { // {{{
 		if @isKSFile {
-			this.toKSFileFragments(fragments)
+			this.toKSFileFragments(fragments, aliases)
 		}
 		else {
 			this.toNodeFileFragments(fragments)
 		}
 	} // }}}
-	toKSFileFragments(fragments) { // {{{
+	toKSFileFragments(fragments, aliases: Dictionary?) { // {{{
 		if @count == 0 {
 			if @alias != null {
 				const line = fragments
@@ -750,32 +799,36 @@ class Importer extends Statement {
 						variable = '__ks__'
 					}
 
-					let line = fragments.newLine().code('var ')
+					if !?aliases {
+						let line = fragments.newLine().code('var ')
 
-					let nf = false
-					for const alias, name of @variables {
-						if nf {
-							line.code(', ')
-						}
-						else {
-							nf = true
-						}
+						let nf = false
+						for const alias, name of @variables {
+							if nf {
+								line.code(', ')
+							}
+							else {
+								nf = true
+							}
 
-						if alias == name && $virtuals[name] {
-							line.code(`__ks_\(alias) = \(variable).__ks_\(name)`)
-						}
-						else {
-							line.code(`\(alias) = \(variable).\(name)`)
+							if alias == name && $virtuals[name] {
+								line.code(`__ks_\(alias) = \(variable).__ks_\(name)`)
+							}
+							else {
+								line.code(`\(alias) = \(variable).\(name)`)
 
-							if @sealedVariables[name] == true {
-								line.code(`, __ks_\(alias) = \(variable).__ks_\(name)`)
+								if @sealedVariables[name] == true {
+									line.code(`, __ks_\(alias) = \(variable).__ks_\(name)`)
+								}
 							}
 						}
-					}
 
-					line.done()
+						line.done()
+					}
 				}
 				else {
+					aliases ??= {}
+
 					let line = fragments.newLine().code('var {')
 
 					let nf = false
@@ -792,10 +845,19 @@ class Importer extends Statement {
 								line.code(`__ks_\(name)`)
 							}
 							else {
-								line.code(name)
+								if const ralias = aliases[name] {
+									line.code(ralias)
 
-								if @sealedVariables[name] == true {
-									line.code(`, __ks_\(name)`)
+									if @sealedVariables[name] == true {
+										line.code(`, __ks_\(ralias)`)
+									}
+								}
+								else {
+									line.code(name)
+
+									if @sealedVariables[name] == true {
+										line.code(`, __ks_\(name)`)
+									}
 								}
 							}
 						}

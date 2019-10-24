@@ -1,19 +1,10 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
-function __ks_require(__ks_0) {
-	var req = [];
-	if(Type.isValue(__ks_0)) {
-		req.push(__ks_0);
-	}
-	else {
-		var template = require("./import.sealed.function.source.ks")().template;
-		req.push(template);
-	}
-	return req;
-}
-module.exports = function(__ks_0) {
-	var [template] = __ks_require(__ks_0);
+module.exports = function(template) {
 	var {Function, __ks_Function} = require("../_/_function.ks")();
+	if(!Type.isValue(template)) {
+		var template = require("./import.sealed.function.source.ks")().template;
+	}
 	function foo() {
 		return 42;
 	}

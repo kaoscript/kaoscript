@@ -532,7 +532,7 @@ export class Module {
 				macros: []
 			}
 
-			for requirement in @requirements {
+			for const requirement in @requirements {
 				@metadata.requirements.push(
 					requirement.type().toMetadata(@metadata.references, ExportMode::IgnoreAlteration)
 					requirement.name()

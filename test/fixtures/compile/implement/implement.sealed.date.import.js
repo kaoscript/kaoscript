@@ -1,18 +1,9 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
-function __ks_require(__ks_0, __ks___ks_0) {
-	var req = [];
-	if(Type.isValue(__ks_0)) {
-		req.push(__ks_0, __ks___ks_0);
-	}
-	else {
+module.exports = function(Date, __ks_Date) {
+	if(!Type.isValue(Date)) {
 		var {Date, __ks_Date} = require("../_/_date.ks")();
-		req.push(Date, __ks_Date);
 	}
-	return req;
-}
-module.exports = function(__ks_0, __ks___ks_0) {
-	var [Date, __ks_Date] = __ks_require(__ks_0, __ks___ks_0);
 	__ks_Date.__ks_sttc_today_0 = function() {
 		return __ks_Date._im_midnight(new Date());
 	};

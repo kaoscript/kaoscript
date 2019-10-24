@@ -387,6 +387,11 @@ class ModuleScope extends Scope {
 			return false
 		}
 	} // }}}
+	reassignReference(oldName, newName, newScope) { // {{{
+		if @references[oldName]? {
+			@references[oldName].reassign(newName, newScope)
+		}
+	} // }}}
 	reference(value, nullable: Boolean = false, parameters: Array = []) { // {{{
 		switch value {
 			is AnyType => return this.resolveReference('Any', nullable, parameters)

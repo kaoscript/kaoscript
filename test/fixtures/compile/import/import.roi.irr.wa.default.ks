@@ -1,4 +1,4 @@
-import '../require/require.alt.roi.default'
+import '../require/require.alt.roi.default.es6'
 
 import './import.roi.rr'(Array)
 
