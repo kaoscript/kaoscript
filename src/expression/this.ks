@@ -1,5 +1,6 @@
 class ThisExpression extends Expression {
 	private {
+		_assignment: AssignmentType	= AssignmentType::Neither
 		_calling: Boolean			= false
 		_class: ClassType
 		_composite: Boolean			= false
@@ -63,7 +64,12 @@ class ThisExpression extends Expression {
 				@fragment = `\(name).\(@name)`
 			}
 			else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
-				@fragment = `\(name)._\(@name)`
+				if @type.isInitiatable() && @assignment == AssignmentType::Neither {
+					@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+				}
+				else {
+					@fragment = `\(name)._\(@name)`
+				}
 			}
 			else {
 				ReferenceException.throwNotDefinedField(@name, this)
@@ -72,10 +78,17 @@ class ThisExpression extends Expression {
 		else {
 			if variable ?= @class.type().getInstanceVariable(@name) {
 				@fragment = `\(name).\(@name)`
+
 				@type = @scope.getChunkType(@fragment) ?? variable.type()
 			}
 			else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
-				@fragment = `\(name)._\(@name)`
+				if variable.isInitiatable() && @assignment == AssignmentType::Neither {
+					@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+				}
+				else {
+					@fragment = `\(name)._\(@name)`
+				}
+
 				@type = @scope.getChunkType(@fragment) ?? variable.type()
 			}
 			else if @type ?= @class.type().getPropertyGetter(@name) {
@@ -98,7 +111,7 @@ class ThisExpression extends Expression {
 	isUsingVariable(name) => name == 'this'
 	listAssignments(array) => array
 	path() => @fragment
-	setAssignment(assignment)
+	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@fragment)
 	} // }}}

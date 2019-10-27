@@ -1,0 +1,116 @@
+{
+  "aliens": [
+    -1,
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Shape",
+    1,
+    "Rectangle"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": true,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [
+        {
+          "access": 4,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "name": "color",
+              "type": "String",
+              "min": 1,
+              "max": 1,
+              "default": 0
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "destructors": 0,
+      "instanceVariables": {
+        "_color": {
+          "access": 2,
+          "type": "String"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "abstractMethods": {
+        "draw": [
+          {
+            "id": 0,
+            "access": 4,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      }
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [
+        {
+          "access": 4,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "name": "color",
+              "type": "String",
+              "min": 1,
+              "max": 1,
+              "default": 0
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "draw": [
+          {
+            "id": 0,
+            "access": 4,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "sealed": false,
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {},
+      "extends": [
+        0,
+        "Shape"
+      ]
+    }
+  ],
+  "macros": []
+}

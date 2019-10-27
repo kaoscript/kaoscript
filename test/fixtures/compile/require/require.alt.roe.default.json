@@ -41,7 +41,7 @@
         "contains": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 1,
             "max": 2,
@@ -69,7 +69,7 @@
         "copy": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -84,7 +84,7 @@
         "pushUniq": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",

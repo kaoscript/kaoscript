@@ -25,7 +25,7 @@
       "destructors": 0,
       "instanceVariables": {
         "length": {
-          "access": 3,
+          "access": 4,
           "type": "Number"
         }
       },
@@ -34,7 +34,7 @@
         "charAt": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -56,7 +56,7 @@
         "match": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -80,7 +80,7 @@
         "replace": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -102,7 +102,7 @@
         "slice": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -124,7 +124,7 @@
         "split": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -144,7 +144,7 @@
         "toLowerCase": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -159,7 +159,7 @@
         "trim": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -187,7 +187,7 @@
         "lines": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 1,
@@ -208,7 +208,7 @@
         "lower": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -223,7 +223,7 @@
         "toFloat": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -236,7 +236,7 @@
         "toInt": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 1,

@@ -16,7 +16,7 @@
       "init": 0,
       "constructors": [
         {
-          "access": 3,
+          "access": 4,
           "min": 0,
           "max": "Infinity",
           "parameters": [
@@ -34,7 +34,7 @@
       "destructors": 0,
       "instanceVariables": {
         "_messages": {
-          "access": 1,
+          "access": 2,
           "type": "Any"
         }
       },

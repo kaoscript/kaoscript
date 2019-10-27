@@ -61,11 +61,11 @@
       "init": 0,
       "instanceVariables": {
         "message": {
-          "access": 3,
+          "access": 4,
           "type": "String"
         },
         "name": {
-          "access": 3,
+          "access": 4,
           "type": "String"
         }
       },
@@ -74,7 +74,7 @@
         "toString": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -103,7 +103,7 @@
         "toString": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,

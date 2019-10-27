@@ -43,7 +43,7 @@
         "toString": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -71,7 +71,7 @@
         "toFloat": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -86,7 +86,7 @@
         "toInt": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 1,

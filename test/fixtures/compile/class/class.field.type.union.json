@@ -18,7 +18,7 @@
       "destructors": 0,
       "instanceVariables": {
         "_x": {
-          "access": 1,
+          "access": 2,
           "type": {
             "kind": "union",
             "types": [

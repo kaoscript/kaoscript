@@ -1626,6 +1626,15 @@ class ClassMethodDeclaration extends Statement {
 						parameter.type(parameters[index])
 					}
 				}
+				else if const method = superclass.getAbstractMethod(@name, @parameters) {
+					@type = method.type()
+
+					const parameters = @type.parameters()
+
+					for const parameter, index in @parameters {
+						parameter.type(parameters[index])
+					}
+				}
 				else {
 					SyntaxException.throwNoSuitableOverride(@parent.extends(), @name, @parameters, this)
 				}

@@ -1,0 +1,1 @@
+SyntaxException: Binary file can't use "require" statement (line 3, file "fixtures/compile/require/require.bin.default.ks")

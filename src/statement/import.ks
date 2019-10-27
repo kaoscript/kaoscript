@@ -733,7 +733,7 @@ class Importer extends Statement {
 			this.toKSFileFragments(fragments, destructuring)
 		}
 		else {
-			this.toNodeFileFragments(fragments)
+			this.toNodeFileFragments(fragments, destructuring)
 		}
 	} // }}}
 	toKSFileFragments(fragments, destructuring) { // {{{
@@ -868,7 +868,7 @@ class Importer extends Statement {
 			}
 		}
 	} // }}}
-	toNodeFileFragments(fragments) { // {{{
+	toNodeFileFragments(fragments, destructuring) { // {{{
 		if @count == 0 {
 			if @alias != null {
 				const line = fragments
@@ -907,7 +907,7 @@ class Importer extends Statement {
 				line.code(`.\(name)`).done()
 			}
 			else if @count > 0 {
-				if @options.format.destructuring == 'es5' {
+				if !destructuring || @options.format.destructuring == 'es5' {
 					let line = fragments
 						.newLine()
 						.code(`var __ks__ = `)
@@ -916,21 +916,23 @@ class Importer extends Statement {
 
 					line.done()
 
-					line = fragments.newLine().code('var ')
+					if destructuring {
+						line = fragments.newLine().code('var ')
 
-					let nf = false
-					for const alias, name of @variables {
-						if nf {
-							line.code(', ')
-						}
-						else {
-							nf = true
+						let nf = false
+						for const alias, name of @variables {
+							if nf {
+								line.code(', ')
+							}
+							else {
+								nf = true
+							}
+
+							line.code(`\(alias) = __ks__.\(name)`)
 						}
 
-						line.code(`\(alias) = __ks__.\(name)`)
+						line.done()
 					}
-
-					line.done()
 				}
 				else {
 					let line = fragments.newLine().code('var {')

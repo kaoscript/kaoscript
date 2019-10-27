@@ -16,7 +16,7 @@
       "init": 0,
       "constructors": [
         {
-          "access": 3,
+          "access": 4,
           "min": 0,
           "max": 0,
           "parameters": [],
@@ -43,7 +43,7 @@
       "init": 0,
       "constructors": [
         {
-          "access": 3,
+          "access": 4,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -65,7 +65,7 @@
       "destructors": 0,
       "instanceVariables": {
         "_foo": {
-          "access": 1,
+          "access": 2,
           "type": {
             "kind": "reference",
             "name": 2,
@@ -78,7 +78,7 @@
         "foo": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -111,7 +111,7 @@
         "toString": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,

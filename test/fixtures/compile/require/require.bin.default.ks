@@ -1,0 +1,5 @@
+#![bin]
+
+require class Foobar {
+
+}

@@ -97,6 +97,7 @@ class ImplementClassFieldDeclaration extends Statement {
 		_hasDefaultValue: Boolean	= false
 		_init: Number				= 0
 		_instance: Boolean			= true
+		_internalName: String
 		_name: String
 		_type: ClassVariableType
 		_variable: NamedType<ClassType>
@@ -105,22 +106,37 @@ class ImplementClassFieldDeclaration extends Statement {
 		super(data, parent)
 
 		@class = @variable.type()
-
-		if @class.isSealed() {
-			TypeException.throwImplFieldToSealedType(this)
-		}
-
 		@classRef = @scope.reference(@variable)
-	} // }}}
-	analyse() { // {{{
-		for i from 0 til @data.modifiers.length while @instance {
-			if @data.modifiers[i].kind == ModifierKind::Static {
-				@instance = false
+
+		@name = @internalName = data.name.name
+
+		let private = false
+		let alias = false
+
+		for const modifier in data.modifiers {
+			switch modifier.kind {
+				ModifierKind::Private => {
+					private = true
+				}
+				ModifierKind::Static => {
+					@instance = false
+				}
+				ModifierKind::ThisAlias => {
+					alias = true
+				}
 			}
 		}
 
-		@name = @data.name.name
-
+		if private {
+			if alias {
+				@internalName = `_\(@name)`
+			}
+			else if @name[0] == '_' {
+				@name = @name.substr(1)
+			}
+		}
+	} // }}}
+	analyse() { // {{{
 		if @data.defaultValue? {
 			@hasDefaultValue = true
 
@@ -133,18 +149,28 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		@type.flagAlteration()
 
+		if @class.isSealed() {
+			@type.flagSealed()
+
+			if @hasDefaultValue {
+				@type.flagInitiatable()
+			}
+		}
+
 		if @instance {
-			@class.addInstanceVariable(@name, @type)
+			@class.addInstanceVariable(@internalName, @type)
 		}
 		else {
-			@class.addClassVariable(@name, @type)
+			@class.addClassVariable(@internalName, @type)
 		}
 
 		if @hasDefaultValue {
 			if @instance {
 				@init = @class.init() + 1
 
-				@class.init(@init)
+				if !@class.isSealed() {
+					@class.init(@init)
+				}
 			}
 
 			@defaultValue.prepare()
@@ -158,36 +184,121 @@ class ImplementClassFieldDeclaration extends Statement {
 	getSharedName() => @hasDefaultValue && @instance ? '__ks_init' : null
 	toFragments(fragments, mode) { // {{{
 		if @hasDefaultValue {
-			if @instance {
-				const line = fragments.newLine()
+			if @class.isSealed() {
+				if @instance {
+					let line, block, ctrl
 
-				line.code(`\(@variable.name()).prototype.__ks_init_\(@init) = function()`)
+					// init()
+					line = fragments.newLine()
 
-				const block = line.newBlock()
+					line.code(`\(@variable.getSealedName()).__ks_init_\(@init) = function(that)`)
 
-				block.newLine().code(`this.\(@name) = `).compile(@defaultValue).done()
+					block = line.newBlock()
 
-				block.done()
-				line.done()
+					block.newLine().code(`that.\(@internalName) = `).compile(@defaultValue).done()
+
+					block.done()
+					line.done()
+
+					// get()
+					line = fragments.newLine()
+
+					line.code(`\(@variable.getSealedName()).__ks_get_\(@name) = function(that)`)
+
+					block = line.newBlock()
+
+					ctrl = block.newControl()
+					ctrl.code(`if(!that[\($runtime.initFlag(this))])`).step()
+					ctrl.line(`\(@variable.getSealedName()).__ks_init(that)`)
+					ctrl.done()
+
+					block.line(`return that.\(@internalName)`)
+
+					block.done()
+					line.done()
+
+					// set()
+					line = fragments.newLine()
+
+					line.code(`\(@variable.getSealedName()).__ks_set_\(@name) = function(that, value)`)
+
+					block = line.newBlock()
+
+					ctrl = block.newControl()
+					ctrl.code(`if(!that[\($runtime.initFlag(this))])`).step()
+					ctrl.line(`\(@variable.getSealedName()).__ks_init(that)`)
+					ctrl.done()
+
+					block.line(`that.\(@internalName) = value`)
+
+					block.done()
+					line.done()
+				}
+				else {
+					fragments.newLine().code(`\(@variable.getSealedName()).\(@internalName) = `).compile(@defaultValue).done()
+				}
 			}
 			else {
-				fragments.newLine().code(`\(@variable.name()).\(@name) = `).compile(@defaultValue).done()
+				if @instance {
+					const line = fragments.newLine()
+
+					line.code(`\(@variable.name()).prototype.__ks_init_\(@init) = function()`)
+
+					const block = line.newBlock()
+
+					block.newLine().code(`this.\(@internalName) = `).compile(@defaultValue).done()
+
+					block.done()
+					line.done()
+				}
+				else {
+					fragments.newLine().code(`\(@variable.name()).\(@internalName) = `).compile(@defaultValue).done()
+				}
 			}
 		}
 	} // }}}
 	toSharedFragments(fragments) { // {{{
-		const line = fragments.newLine()
+		if @class.isSealed() {
+			const line = fragments.newLine()
 
-		line.code(`\(@variable.name()).prototype.__ks_init = function()`)
+			line.code(`\(@variable.getSealedName()).__ks_init = function(that)`)
 
-		const block = line.newBlock()
+			const block = line.newBlock()
 
-		for let i from 1 to @init {
-			block.line(`\(@variable.name()).prototype.__ks_init_\(i).call(this)`)
+			/* const ctrl = block.newControl()
+
+			ctrl.code(`if(!that[\($runtime.initFlag(this))])`).step()
+
+			for let i from 1 to @init {
+				ctrl.line(`\(@variable.getSealedName()).__ks_init_\(i)(that)`)
+			}
+
+			ctrl.line(`that[\($runtime.initFlag(this))] = true`)
+
+			ctrl.done() */
+			for let i from 1 to @init {
+				block.line(`\(@variable.getSealedName()).__ks_init_\(i)(that)`)
+			}
+
+			block.line(`that[\($runtime.initFlag(this))] = true`)
+
+			block.done()
+			line.done()
 		}
+		else {
+			const line = fragments.newLine()
 
-		block.done()
-		line.done()
+			line.code(`\(@variable.name()).prototype.__ks_init = function()`)
+
+			const block = line.newBlock()
+
+			for let i from 1 to @init {
+				block.line(`\(@variable.name()).prototype.__ks_init_\(i).call(this)`)
+			}
+
+			block.done()
+			line.done()
+		}
 	} // }}}
 	type() => @type
 }
@@ -358,7 +469,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			@aliases.push(statement)
 		}
 	} // }}}
-	class() => @class
+	class() => @variable
 	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_cm_\(@name)`
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance

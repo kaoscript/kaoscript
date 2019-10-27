@@ -1,15 +1,20 @@
 class MemberExpression extends Expression {
 	private {
+		_assignment: AssignmentType	= AssignmentType::Neither
 		_callee
-		_computed: Boolean		= false
-		_inferable: Boolean		= false
-		_nullable: Boolean		= false
+		_computed: Boolean			= false
+		_inferable: Boolean			= false
+		_nullable: Boolean			= false
 		_object
 		_path: String
-		_prepareObject: Boolean	= true
+		_prepareObject: Boolean		= true
 		_property
-		_tested: Boolean		= false
-		_type: Type				= AnyType.NullableUnexplicit
+		_sealed: Boolean			= false
+		_tested: Boolean			= false
+		_type: Type					= AnyType.NullableUnexplicit
+		/* _useGetter: Boolean			= false */
+		_usingGetter: Boolean			= false
+		_usingSetter: Boolean			= false
 	}
 	constructor(@data, @parent, @scope) { // {{{
 		super(data, parent, scope)
@@ -75,6 +80,17 @@ class MemberExpression extends Expression {
 				@property = @data.property.name
 
 				if const property = type.getProperty(@property) {
+					const type = type.discardReference()
+					if type.isClass() && property is ClassVariableType && property.isSealed() {
+						/* if property.isSealed() && @assignment == AssignmentType::Neither {
+							@useGetter = true
+							@sealed = property.isSealed()
+						} */
+						@sealed = true
+						@usingGetter = property.isInitiatable()
+						@usingSetter = property.isInitiatable()
+					}
+
 					@type = property.discardVariable()
 				}
 				else {
@@ -136,6 +152,7 @@ class MemberExpression extends Expression {
 	isMacro() => false
 	isNullable() => @nullable || @object.isNullable() || (@computed && @property.isNullable())
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@nullable ? 1 : 0) + (@computed && @property.isNullable() ? 1 : 0) > 1
+	isUsingSetter() => @usingSetter
 	isUsingVariable(name) => @object.isUsingVariable(name)
 	listAssignments(array) => array
 	path() => @path
@@ -148,7 +165,7 @@ class MemberExpression extends Expression {
 			@property.releaseReusable()
 		}
 	} // }}}
-	setAssignment(assignment)
+	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
 		if this.isNullable() && !@tested {
 			fragments.wrapNullable(this).code(' ? ').compile(@object)
@@ -163,25 +180,47 @@ class MemberExpression extends Expression {
 		else {
 			const type = @object.type()
 
-			if @object.isComputed() || @object._data.kind == NodeKind::NumericExpression {
-				fragments.code('(').compile(@object).code(')')
-			}
-			else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(@property) {
-				fragments.code(type.getSealedName())
+			/* if @useGetter {
+				if @sealed {
+					const name = @property[0] == '_' ? @property.substr(1) : @property
+
+					fragments.code(`\(type.type().getSealedName()).__ks_get_\(name)(`).compile(@object).code(')')
+				}
+				else {
+					NotImplementedException.throw(this)
+				}
+			} */
+			if @usingGetter {
+				if @sealed {
+					const name = @property[0] == '_' ? @property.substr(1) : @property
+
+					fragments.code(`\(type.type().getSealedName()).__ks_get_\(name)(`).compile(@object).code(')')
+				}
+				else {
+					NotImplementedException.throw(this)
+				}
 			}
 			else {
-				fragments.compile(@object)
-			}
+				if @object.isComputed() || @object._data.kind == NodeKind::NumericExpression {
+					fragments.code('(').compile(@object).code(')')
+				}
+				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(@property) {
+					fragments.code(type.getSealedName())
+				}
+				else {
+					fragments.compile(@object)
+				}
 
-			if @computed {
-				fragments.code('[').compile(@property).code(']')
-			}
-			else {
-				fragments.code($dot).compile(@property)
-			}
+				if @computed {
+					fragments.code('[').compile(@property).code(']')
+				}
+				else {
+					fragments.code($dot).compile(@property)
+				}
 
-			if @prepareObject && @type.isMethod() && @parent is not UnaryOperatorExpression{
-				fragments.code('.bind(').compile(@object).code(')')
+				if @prepareObject && @type.isMethod() && @parent is not UnaryOperatorExpression{
+					fragments.code('.bind(').compile(@object).code(')')
+				}
 			}
 		}
 	} // }}}
@@ -311,6 +350,16 @@ class MemberExpression extends Expression {
 
 		if objectCallable {
 			fragments.code(')')
+		}
+	} // }}}
+	toSetterFragments(fragments, value) { // {{{
+		if @sealed {
+			const name = @property[0] == '_' ? @property.substr(1) : @property
+
+			fragments.code(`\(@object.type().type().getSealedName()).__ks_set_\(name)(`).compile(@object).code($comma).compile(value).code(')')
+		}
+		else {
+			NotImplementedException.throw(this)
 		}
 	} // }}}
 	type() => @type

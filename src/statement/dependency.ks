@@ -280,6 +280,10 @@ class RequireDeclaration extends DependencyStatement {
 	analyse() { // {{{
 		const module = this.module()
 
+		if module.isBinary() {
+			SyntaxException.throwNotBinary('require', this)
+		}
+
 		let variable
 		for declaration in @data.declarations {
 			if variable ?= @scope.getVariable(declaration.name.name) {
@@ -334,6 +338,10 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 	analyse() { // {{{
 		const module = this.module()
 
+		if module.isBinary() {
+			SyntaxException.throwNotBinary('extern|require', this)
+		}
+
 		module.flag('Type')
 
 		if @parent.includePath() != null {
@@ -362,6 +370,10 @@ class ExternOrRequireDeclaration extends DependencyStatement {
 class RequireOrExternDeclaration extends DependencyStatement {
 	analyse() { // {{{
 		const module = this.module()
+
+		if module.isBinary() {
+			SyntaxException.throwNotBinary('require|extern', this)
+		}
 
 		module.flag('Type')
 
@@ -393,6 +405,10 @@ class RequireOrImportDeclaration extends Statement {
 		_declarators = []
 	}
 	analyse() { // {{{
+		if this.module().isBinary() {
+			SyntaxException.throwNotBinary('require|import', this)
+		}
+
 		for let declarator in @data.declarations {
 			@declarators.push(declarator = new RequireOrImportDeclarator(declarator, this))
 

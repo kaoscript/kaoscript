@@ -29,7 +29,7 @@
         "indexOf": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -49,7 +49,7 @@
         "push": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -69,7 +69,7 @@
         "slice": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -104,7 +104,7 @@
         "contains": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 1,
             "max": 2,
@@ -132,7 +132,7 @@
         "pushUniq": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": "Infinity",

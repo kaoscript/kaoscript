@@ -1,5 +1,6 @@
 enum Accessibility {
-	Private = 1
+	Internal = 1
+	Private
 	Protected
 	Public
 }
@@ -488,14 +489,14 @@ class ClassType extends Type {
 			}
 
 			for const methods, name of @instanceMethods {
-				const exportedMethods = [method.export(references, mode) for method in methods when method.isAlteration()]
+				const exportedMethods = [method.export(references, mode) for method in methods when method.isAlteration() && method.isExportable()]
 				if exportedMethods.length > 0 {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
 			for const methods, name of @classMethods {
-				const exportedMethods = [method.export(references, mode) for method in methods when method.isAlteration()]
+				const exportedMethods = [method.export(references, mode) for method in methods when method.isAlteration() && method.isExportable()]
 				if exportedMethods.length > 0 {
 					export.classMethods[name] = exportedMethods
 				}
@@ -535,14 +536,14 @@ class ClassType extends Type {
 			}
 
 			for const methods, name of @classMethods {
-				export.classMethods[name] = [method.export(references, mode) for method in methods]
+				export.classMethods[name] = [method.export(references, mode) for method in methods when method.isExportable()]
 			}
 
 			if @abstract {
 				export.abstractMethods = {}
 
 				for const methods, name of @abstractMethods {
-					export.abstractMethods[name] = [method.export(references, mode) for method in methods]
+					export.abstractMethods[name] = [method.export(references, mode) for method in methods when method.isExportable()]
 				}
 			}
 
@@ -1295,6 +1296,7 @@ class ClassVariableType extends Type {
 	private {
 		_access: Accessibility	= Accessibility::Public
 		_alteration: Boolean	= false
+		_initiatable: Boolean	= false
 		_type: Type
 	}
 	static {
@@ -1327,6 +1329,7 @@ class ClassVariableType extends Type {
 			const type = new ClassVariableType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node))
 
 			type._access = data.access
+			type._initiatable = data.initiatable
 
 			return type
 		} // }}}
@@ -1339,16 +1342,34 @@ class ClassVariableType extends Type {
 	} // }}}
 	discardVariable() => @type
 	access(@access) => this
-	export(references, mode) => { // {{{
-		access: @access
-		type: @type.toReference(references, mode)
+	export(references, mode) { // {{{
+		const data = {
+			access: @access
+			type: @type.toReference(references, mode)
+		}
+
+		if @sealed {
+			data.sealed = true
+
+			if @initiatable {
+				data.initiatable = true
+			}
+		}
+
+		return data
 	} // }}}
 	flagAlteration() { // {{{
 		@alteration = true
 
 		return this
 	} // }}}
+	flagInitiatable() { // {{{
+		@initiatable = true
+
+		return this
+	} // }}}
 	isAlteration() => @alteration
+	isInitiatable() => @initiatable
 	isMatching(value: ClassVariableType, mode: MatchingMode) { // {{{
 		if mode & MatchingMode::Exact != 0 {
 			return @type.isMatching(value.type(), MatchingMode::Exact)
@@ -1357,6 +1378,8 @@ class ClassVariableType extends Type {
 			return true
 		}
 	} // }}}
+	isUsingGetter() => @sealed && @initiatable
+	isUsingSetter() => @sealed && @initiatable
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
@@ -1435,6 +1458,13 @@ class ClassMethodType extends FunctionType {
 	id() => @id
 	id(@id)
 	isAlteration() => @alteration
+	isExportable() { // {{{
+		if !super() {
+			return false
+		}
+
+		return @access != Accessibility::Internal
+	} // }}}
 	isMatched(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { // {{{
 		for const method in methods {
 			if method.isMatching(this, mode) {
@@ -1463,6 +1493,9 @@ class ClassMethodType extends FunctionType {
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Async {
 				this.async()
+			}
+			else if modifier.kind == ModifierKind::Internal {
+				@access = Accessibility::Internal
 			}
 			else if modifier.kind == ModifierKind::Private {
 				@access = Accessibility::Private

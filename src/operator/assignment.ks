@@ -314,6 +314,9 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		if @right.isAwaiting() {
 			return @right.toFragments(fragments, mode)
 		}
+		else if @left.isUsingSetter() {
+			@left.toSetterFragments(fragments, @right)
+		}
 		else {
 			fragments.compile(@left).code($equals).compile(@right)
 		}

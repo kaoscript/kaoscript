@@ -115,11 +115,6 @@ const $runtime = {
 
 		return node._options.runtime.dictionary.alias
 	} // }}}
-	helper(node) { // {{{
-		node.module?().flag('Helper')
-
-		return node._options.runtime.helper.alias
-	} // }}}
 	getVariable(name, node) { // {{{
 		if node._options.runtime.dictionary.alias == name || (node.isIncluded() && name == 'Dictionary') {
 			node.module?().flag('Dictionary')
@@ -139,6 +134,16 @@ const $runtime = {
 		else {
 			return null
 		}
+	} // }}}
+	helper(node) { // {{{
+		node.module?().flag('Helper')
+
+		return node._options.runtime.helper.alias
+	} // }}}
+	initFlag(node) { // {{{
+		node.module?().flag('initFlag')
+
+		return node._options.runtime.initFlag.alias
 	} // }}}
 	operator(node) { // {{{
 		node.module?().flag('Operator')
@@ -610,6 +615,11 @@ export class Compiler {
 				helper: {
 					alias: 'Helper'
 					member: 'Helper'
+					package: '@kaoscript/runtime'
+				}
+				initFlag: {
+					alias: 'initFlag'
+					member: 'initFlag'
 					package: '@kaoscript/runtime'
 				}
 				operator: {

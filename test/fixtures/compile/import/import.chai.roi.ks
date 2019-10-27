@@ -1,0 +1,1 @@
+require|import 'chai' for assert, Assertion, config, expect, should, Should, use

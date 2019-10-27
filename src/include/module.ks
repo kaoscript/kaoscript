@@ -430,11 +430,13 @@ export class Module {
 
 		const dictionary = $runtime.dictionary(this)
 		const helper = $runtime.helper(this)
+		const initFlag = $runtime.initFlag(this)
 		const operator = $runtime.operator(this)
 		const type = $runtime.type(this)
 
 		let hasDictionary = @flags.Dictionary == true && !@imports[dictionary]
 		let hasHelper = @flags.Helper == true && !@imports[helper]
+		let hasInitFlag = @flags.initFlag == true
 		let hasOperator = @flags.Operator == true && !@imports[operator]
 		let hasType = @flags.Type == true && !@imports[type]
 
@@ -464,6 +466,14 @@ export class Module {
 			packages[@options.runtime.helper.package].push({
 				name: helper
 				options: @options.runtime.helper
+			})
+		}
+		if hasInitFlag {
+			packages[@options.runtime.initFlag.package] ??= []
+
+			packages[@options.runtime.initFlag.package].push({
+				name: initFlag
+				options: @options.runtime.initFlag
 			})
 		}
 		if hasOperator {

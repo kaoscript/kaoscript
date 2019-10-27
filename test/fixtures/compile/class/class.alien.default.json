@@ -38,7 +38,7 @@
       "init": 1,
       "constructors": [
         {
-          "access": 3,
+          "access": 4,
           "min": 2,
           "max": 2,
           "parameters": [
@@ -63,7 +63,7 @@
       "destructors": 0,
       "instanceVariables": {
         "_z": {
-          "access": 1,
+          "access": 2,
           "type": "Number"
         }
       },
@@ -85,7 +85,7 @@
       "init": 1,
       "constructors": [
         {
-          "access": 3,
+          "access": 4,
           "min": 2,
           "max": 2,
           "parameters": [
@@ -110,7 +110,7 @@
       "destructors": 0,
       "instanceVariables": {
         "_w": {
-          "access": 1,
+          "access": 2,
           "type": "Number"
         }
       },

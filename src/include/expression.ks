@@ -37,6 +37,8 @@ abstract class Expression extends AbstractNode {
 	isNullable() => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
 	isNullableComputed() => this.isComputed()
+	// if the expression needs to use a setter function to assign a value
+	isUsingSetter() => false
 	// if the expression generates multiple assignments
 	isSplitAssignment() => false
 	releaseReusable()

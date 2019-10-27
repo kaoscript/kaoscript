@@ -804,9 +804,11 @@ class Parameter extends AbstractNode {
 class AliasStatement extends Statement {
 	private {
 		_name: String
+		_namedClass: ClassType
 		_identifier: IdentifierParameter
 		_parameter: Parameter
-		_setter: Boolean
+		_sealed: Boolean					= false
+		_setter: Boolean					= false
 		_type: Type
 		_variableName: String
 	}
@@ -817,7 +819,9 @@ class AliasStatement extends Statement {
 
 		parameter.parent().addAliasStatement(this)
 
-		const class = parameter.parent().parent().type().discardAlias()
+		@namedClass = parameter.parent().parent().type()
+
+		const class = @namedClass.type()
 
 		if setter {
 			if @type !?= class.getPropertySetter(@name) {
@@ -829,7 +833,13 @@ class AliasStatement extends Statement {
 				@variableName = @name
 			}
 			else if @type ?= class.getInstanceVariable(`_\(@name)`) {
-				@variableName = `_\(@name)`
+				if @type.isSealed() && @type.isInitiatable() {
+					@sealed = true
+					@setter = true
+				}
+				else {
+					@variableName = `_\(@name)`
+				}
 			}
 			else if @type ?= class.getPropertySetter(@name) {
 				@setter = true
@@ -845,7 +855,12 @@ class AliasStatement extends Statement {
 	name() => @name
 	toStatementFragments(fragments, mode) { // {{{
 		if @setter {
-			fragments.newLine().code(`this.\(@name)(`).compile(@identifier).code(')').done()
+			if @sealed {
+				fragments.newLine().code(`\(@namedClass.getSealedName()).__ks_set_\(@name)(this, `).compile(@identifier).code(')').done()
+			}
+			else {
+				fragments.newLine().code(`this.\(@name)(`).compile(@identifier).code(')').done()
+			}
 		}
 		else {
 			fragments.newLine().code(`this.\(@variableName) = `).compile(@identifier).done()

@@ -21,7 +21,7 @@
       "destructors": 0,
       "instanceVariables": {
         "length": {
-          "access": 3,
+          "access": 4,
           "type": "Number"
         }
       },
@@ -42,7 +42,7 @@
         "last": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 1,
@@ -65,7 +65,7 @@
         "map": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 2,
             "max": 2,
@@ -93,7 +93,7 @@
           },
           {
             "id": 1,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 3,
             "max": 3,

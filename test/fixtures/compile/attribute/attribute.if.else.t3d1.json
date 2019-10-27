@@ -21,7 +21,7 @@
       "destructors": 0,
       "instanceVariables": {
         "length": {
-          "access": 3,
+          "access": 4,
           "type": "Number"
         }
       },
@@ -42,7 +42,7 @@
         "endsWith": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 1,
             "max": 1,

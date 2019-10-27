@@ -40,7 +40,7 @@
         "space": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -53,7 +53,7 @@
           },
           {
             "id": 1,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 1,
             "max": 1,
@@ -87,7 +87,7 @@
       "init": 0,
       "instanceVariables": {
         "_luma": {
-          "access": 1,
+          "access": 2,
           "type": "Number"
         }
       },
@@ -96,7 +96,7 @@
         "luma": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -107,7 +107,7 @@
           },
           {
             "id": 1,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 1,
             "max": 1,

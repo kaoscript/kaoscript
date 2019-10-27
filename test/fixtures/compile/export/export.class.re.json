@@ -18,7 +18,7 @@
       "destructors": 0,
       "instanceVariables": {
         "_name": {
-          "access": 1,
+          "access": 2,
           "type": "String"
         }
       },
@@ -40,7 +40,7 @@
       "init": 1,
       "constructors": [
         {
-          "access": 3,
+          "access": 4,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -58,11 +58,11 @@
       "destructors": 0,
       "instanceVariables": {
         "_color": {
-          "access": 1,
+          "access": 2,
           "type": "String"
         },
         "_side": {
-          "access": 1,
+          "access": 2,
           "type": "Any"
         }
       },

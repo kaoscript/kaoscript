@@ -20,19 +20,19 @@
       "destructors": 0,
       "instanceVariables": {
         "_blue": {
-          "access": 1,
+          "access": 2,
           "type": "Number"
         },
         "_green": {
-          "access": 1,
+          "access": 2,
           "type": "Number"
         },
         "_red": {
-          "access": 1,
+          "access": 2,
           "type": "Number"
         },
         "_space": {
-          "access": 1,
+          "access": 2,
           "type": {
             "reference": 1
           }
@@ -43,7 +43,7 @@
         "space": [
           {
             "id": 0,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 0,
             "max": 0,
@@ -54,7 +54,7 @@
           },
           {
             "id": 1,
-            "access": 3,
+            "access": 4,
             "async": false,
             "min": 1,
             "max": 1,
