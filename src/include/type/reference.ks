@@ -1,13 +1,13 @@
 const $weightTOFs = { // {{{
 	Array: 1
 	Boolean: 2
-	Class: 12
+	Class: 11
 	Dictionary: 10
 	Enum: 4
 	Function: 3
 	Namespace: 8
 	Number: 5
-	Object: 11
+	Object: 12
 	Primitive: 7
 	RegExp: 9
 	String: 6
