@@ -69,6 +69,8 @@ class WhileStatement extends Statement {
 		@body.checkReturnType(type)
 	} // }}}
 	isCascade() => @declared
+	isJumpable() => true
+	isLoop() => true
 	isUsingVariable(name) { // {{{
 		if @declared {
 			if @variable.isUsingVariable(name) {

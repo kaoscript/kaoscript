@@ -37,6 +37,7 @@ class UnlessStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@whenFalseExpression.checkReturnType(type)
 	} // }}}
+	isJumpable() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenFalseExpression.isUsingVariable()
 	toStatementFragments(fragments, mode) { // {{{
 		fragments

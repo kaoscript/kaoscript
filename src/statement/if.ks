@@ -198,6 +198,7 @@ class IfStatement extends Statement {
 	} // }}}
 	isCascade() => @cascade
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
+	isJumpable() => true
 	isUsingVariable(name) { // {{{
 		if @declared {
 			if @variable.isUsingVariable(name) {

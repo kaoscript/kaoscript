@@ -28,6 +28,8 @@ class DoUntilStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isJumpable() => true
+	isLoop() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
 	toStatementFragments(fragments, mode) { // {{{
 		fragments

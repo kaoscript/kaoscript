@@ -380,6 +380,7 @@ class FunctionDeclarator extends AbstractNode {
 	isExit() => @exit
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
+	isJumpable() => false
 	parameters() => @parameters
 	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
 		fragments.code('(__ks_e')

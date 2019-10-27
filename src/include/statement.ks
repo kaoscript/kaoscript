@@ -52,6 +52,8 @@ abstract class Statement extends AbstractNode {
 	isCascade() => false
 	isExit() => false
 	isExportable() => false
+	isJumpable() => false
+	isLoop() => false
 	isUsingVariable(name) => false
 	line() => @line
 	setAttributeData(key: AttributeData, data) { // {{{
@@ -94,6 +96,7 @@ include {
 	'../statement/enum'
 	'../statement/export'
 	'../statement/expression'
+	'../statement/fallthrough'
 	'../statement/for-from'
 	'../statement/for-in'
 	'../statement/for-of'

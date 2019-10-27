@@ -22,10 +22,12 @@ const $switch = {
 
 class SwitchStatement extends Statement {
 	private {
-		_castingEnum: Boolean	= false
-		_clauses				= []
-		_name: String?			= null
-		_value					= null
+		_castingEnum: Boolean		= false
+		_clauses					= []
+		_name: String?				= null
+		_nextClauseIndex: Number
+		_usingFallthrough: Boolean	= false
+		_value						= null
 		_valueType: Type
 	}
 	analyse() { // {{{
@@ -138,6 +140,10 @@ class SwitchStatement extends Statement {
 
 			clause.body.prepare()
 
+			if @usingFallthrough {
+				clause.name = @scope.acquireTempName(false)
+			}
+
 			if index == 0 {
 				for const data, name of clause.body.scope().listUpdatedInferables() {
 					inferables[name] = {
@@ -233,6 +239,12 @@ class SwitchStatement extends Statement {
 			clause.body.checkReturnType(type)
 		}
 	} // }}}
+	flagUsingFallthrough() { // {{{
+		@usingFallthrough = true
+
+		return this
+	} // }}}
+	isJumpable() => true
 	isUsingVariable(name) { // {{{
 		if @value.isUsingVariable(name) {
 			return true
@@ -245,6 +257,11 @@ class SwitchStatement extends Statement {
 		}
 
 		return false
+	} // }}}
+	toFallthroughFragments(fragments) { // {{{
+		if @nextClauseIndex < @clauses.length {
+			fragments.line(`\(@clauses[@nextClauseIndex].name)()`)
+		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @clauses.length == 0 {
@@ -278,20 +295,34 @@ class SwitchStatement extends Statement {
 			line.done()
 		}
 
-		let condition
-		for clause in @clauses {
-			for condition in clause.conditions {
+		for const clause, clauseIdx in @clauses {
+			for const condition in clause.conditions {
 				condition.toStatementFragments(fragments)
 			}
 
 			clause.filter.toStatementFragments(fragments)
+
+			if @usingFallthrough {
+				const line = fragments.newLine().code(`\($runtime.scope(this))\(clause.name) = () =>`)
+				const block = line.newBlock()
+
+				@nextClauseIndex = clauseIdx + 1
+
+				for binding in clause.bindings {
+					binding.toFragments(block)
+				}
+
+				clause.body.toFragments(block, mode)
+
+				block.done()
+				line.done()
+			}
 		}
 
 		let ctrl = fragments.newControl()
 		let we = false
 
-		let i, binding
-		for clause, clauseIdx in @clauses {
+		for const clause, clauseIdx in @clauses {
 			if clause.conditions.length != 0 {
 				if we {
 					SyntaxException.throwAfterDefaultClause(this)
@@ -304,7 +335,7 @@ class SwitchStatement extends Statement {
 					ctrl.code('if(')
 				}
 
-				for condition, i in clause.conditions {
+				for const condition, i in clause.conditions {
 					ctrl.code(' || ') if i != 0
 
 					condition.toBooleanFragments(ctrl, @name)
@@ -314,11 +345,16 @@ class SwitchStatement extends Statement {
 
 				ctrl.code(')').step()
 
-				for binding in clause.bindings {
-					binding.toFragments(ctrl)
+				if @usingFallthrough {
+					ctrl.line(`\(clause.name)()`)
 				}
+				else {
+					for const binding in clause.bindings {
+						binding.toFragments(ctrl)
+					}
 
-				clause.body.toFragments(ctrl, mode)
+					clause.body.toFragments(ctrl, mode)
+				}
 			}
 			else if clause.hasTest {
 				if clauseIdx != 0 {
@@ -332,11 +368,16 @@ class SwitchStatement extends Statement {
 
 				ctrl.code(')').step()
 
-				for binding in clause.bindings {
-					binding.toFragments(ctrl)
+				if @usingFallthrough {
+					ctrl.line(`\(clause.name)()`)
 				}
+				else {
+					for const binding in clause.bindings {
+						binding.toFragments(ctrl)
+					}
 
-				clause.body.toFragments(ctrl, mode)
+					clause.body.toFragments(ctrl, mode)
+				}
 			}
 			else {
 				if clauseIdx != 0 {
@@ -350,11 +391,16 @@ class SwitchStatement extends Statement {
 
 				ctrl.step()
 
-				for binding in clause.bindings {
-					binding.toFragments(ctrl)
+				if @usingFallthrough {
+					ctrl.line(`\(clause.name)()`)
 				}
+				else {
+					for const binding in clause.bindings {
+						binding.toFragments(ctrl)
+					}
 
-				clause.body.toFragments(ctrl, mode)
+					clause.body.toFragments(ctrl, mode)
+				}
 			}
 		}
 

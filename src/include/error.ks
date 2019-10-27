@@ -261,6 +261,9 @@ export class SyntaxException extends Exception {
 		throwIdenticalMethod(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The method "\(name)" is identical with another method "\(name)"`, node)
 		} // }}}
+		throwIllegalStatement(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The statement "\(name)" is illegal`, node)
+		} // }}}
 		throwInvalidAwait(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)
 		} // }}}

@@ -414,6 +414,7 @@ const $statements = {
 	`\(NodeKind::ExportDeclaration)`			: ExportDeclaration
 	`\(NodeKind::ExternDeclaration)`			: ExternDeclaration
 	`\(NodeKind::ExternOrRequireDeclaration)`	: ExternOrRequireDeclaration
+	`\(NodeKind::FallthroughStatement)`			: FallthroughStatement
 	`\(NodeKind::ForFromStatement)`				: ForFromStatement
 	`\(NodeKind::ForInStatement)`				: ForInStatement
 	`\(NodeKind::ForOfStatement)`				: ForOfStatement

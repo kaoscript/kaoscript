@@ -230,6 +230,8 @@ class ForOfStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isJumpable() => true
+	isLoop() => true
 	isUsingVariable(name) => // {{{
 			@expression.isUsingVariable(name)
 		||	@until?.isUsingVariable(name)

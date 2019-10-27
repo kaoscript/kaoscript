@@ -137,6 +137,8 @@ class ForRangeStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isJumpable() => true
+	isLoop() => true
 	isUsingVariable(name) => // {{{
 			@from.isUsingVariable(name)
 		||	@to.isUsingVariable(name)

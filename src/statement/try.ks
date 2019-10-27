@@ -148,6 +148,7 @@ class TryStatement extends Statement {
 		}
 	} // }}}
 	isExit() => @exit
+	isJumpable() => true
 	isUsingVariable(name) { // {{{
 		if @block.isUsingVariable(name) {
 			return true

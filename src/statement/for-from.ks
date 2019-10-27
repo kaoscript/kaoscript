@@ -215,6 +215,8 @@ class ForFromStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isJumpable() => true
+	isLoop() => true
 	isUsingVariable(name) => // {{{
 			@from.isUsingVariable(name)
 		||	@til?.isUsingVariable(name)

@@ -109,6 +109,8 @@ class Block extends AbstractNode {
 	isAwait() => @awaiting
 	isEmpty() => @empty
 	isExit() => @exit
+	isJumpable() => @parent.isJumpable()
+	isLoop() => @parent.isLoop()
 	isUsingVariable(name) { // {{{
 		for statement in @statements {
 			if statement.isUsingVariable(name) {
