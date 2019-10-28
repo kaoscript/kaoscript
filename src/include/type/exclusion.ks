@@ -67,12 +67,12 @@ class ExclusionType extends Type {
 	} // }}}
 	length() => @types.length
 	matchContentOf(value: Type?) { // {{{
-		if !value.matchContentOf(@types[0]) {
+		if !@types[0].matchContentOf(value) {
 			return false
 		}
 
 		for const type in @types from 1 {
-			if value.matchContentOf(type) {
+			if type.matchContentOf(value) {
 				return false
 			}
 		}
@@ -110,4 +110,5 @@ class ExclusionType extends Type {
 
 		fragments.code(')')
 	} // }}}
+	types() => @types
 }

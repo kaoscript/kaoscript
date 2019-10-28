@@ -236,7 +236,7 @@ class NamedType extends Type {
 		}
 		else if that is NamedType {
 			if that.name() == 'Object' && that.type() is ClassType {
-				return @scope.module().getPredefined('Object')!?.matchContentOf(this)
+				return this.matchContentOf(@scope.module().getPredefined('Object'))
 			}
 			else if @type is ClassType && that.type() is ClassType {
 				return this.matchInheritanceOf(that)
@@ -274,7 +274,19 @@ class NamedType extends Type {
 			return false
 		}
 		else if that is ExclusionType {
-			return that.matchContentOf(this)
+			const types = that.types()
+
+			if !this.matchContentOf(types[0]) {
+				return false
+			}
+
+			for const type in types from 1 {
+				if this.matchContentOf(type) {
+					return false
+				}
+			}
+
+			return true
 		}
 		else if that is ReferenceType {
 			return @name == that.name() || this.matchContentOf(that.discardReference())
