@@ -265,17 +265,6 @@ class ImplementClassFieldDeclaration extends Statement {
 
 			const block = line.newBlock()
 
-			/* const ctrl = block.newControl()
-
-			ctrl.code(`if(!that[\($runtime.initFlag(this))])`).step()
-
-			for let i from 1 to @init {
-				ctrl.line(`\(@variable.getSealedName()).__ks_init_\(i)(that)`)
-			}
-
-			ctrl.line(`that[\($runtime.initFlag(this))] = true`)
-
-			ctrl.done() */
 			for let i from 1 to @init {
 				block.line(`\(@variable.getSealedName()).__ks_init_\(i)(that)`)
 			}

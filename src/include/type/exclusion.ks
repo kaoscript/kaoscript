@@ -50,6 +50,7 @@ class ExclusionType extends Type {
 
 		return this
 	} // }}}
+	getMainType() => @types[0]
 	isExclusion() => true
 	isExportable() { // {{{
 		for type in @types {
@@ -64,7 +65,8 @@ class ExclusionType extends Type {
 		console.log(value)
 		NotImplementedException.throw()
 	} // }}}
-	isMatchedBy(value: NamedType) { // {{{
+	length() => @types.length
+	matchContentOf(value: Type?) { // {{{
 		if !value.matchContentOf(@types[0]) {
 			return false
 		}
@@ -77,7 +79,6 @@ class ExclusionType extends Type {
 
 		return true
 	} // }}}
-	length() => @types.length
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}

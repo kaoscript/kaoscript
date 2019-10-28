@@ -377,7 +377,7 @@ class CallExpression extends Expression {
 
 		switch value {
 			is AliasType => {
-				throw new NotImplementedException(this)
+				this.makeMemberCallee(value.type(), name)
 			}
 			is ClassVariableType => {
 				this.makeMemberCalleeFromReference(value.type())
@@ -445,6 +445,9 @@ class CallExpression extends Expression {
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, this))
 				}
+			}
+			is ExclusionType => {
+				this.makeMemberCallee(value.getMainType())
 			}
 			is FunctionType => {
 				this.makeMemberCalleeFromReference(@scope.reference('Function'))

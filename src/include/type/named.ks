@@ -231,8 +231,14 @@ class NamedType extends Type {
 		else if that.isAny() {
 			return true
 		}
+		else if @name == 'Object' && @type is ClassType {
+			return @scope.module().getPredefined('Object')!?.matchContentOf(that)
+		}
 		else if that is NamedType {
-			if @type is ClassType && that.type() is ClassType {
+			if that.name() == 'Object' && that.type() is ClassType {
+				return @scope.module().getPredefined('Object')!?.matchContentOf(this)
+			}
+			else if @type is ClassType && that.type() is ClassType {
 				return this.matchInheritanceOf(that)
 			}
 			else if that.type() is EnumType {
@@ -252,7 +258,7 @@ class NamedType extends Type {
 				}
 			}
 			else {
-				return @type.matchContentOf(that.type())
+				return @type.matchContentOf(that)
 			}
 		}
 		else if this.isAlias() {
@@ -268,7 +274,7 @@ class NamedType extends Type {
 			return false
 		}
 		else if that is ExclusionType {
-			return that.isMatchedBy(this)
+			return that.matchContentOf(this)
 		}
 		else if that is ReferenceType {
 			return @name == that.name() || this.matchContentOf(that.discardReference())

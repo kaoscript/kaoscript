@@ -237,6 +237,14 @@ class ModuleScope extends Scope {
 
 		return newName
 	} // }}}
+	getPredefined(name: String): Type? { // {{{
+		if @predefined[`__\(name)`]? {
+			return @predefined[`__\(name)`].getDeclaredType()
+		}
+		else {
+			return null
+		}
+	} // }}}
 	getRawLine() => @line - @lineOffset
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 	getTempIndex() => @tempIndex

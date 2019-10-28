@@ -12,7 +12,6 @@ class MemberExpression extends Expression {
 		_sealed: Boolean			= false
 		_tested: Boolean			= false
 		_type: Type					= AnyType.NullableUnexplicit
-		/* _useGetter: Boolean			= false */
 		_usingGetter: Boolean			= false
 		_usingSetter: Boolean			= false
 	}
@@ -82,10 +81,6 @@ class MemberExpression extends Expression {
 				if const property = type.getProperty(@property) {
 					const type = type.discardReference()
 					if type.isClass() && property is ClassVariableType && property.isSealed() {
-						/* if property.isSealed() && @assignment == AssignmentType::Neither {
-							@useGetter = true
-							@sealed = property.isSealed()
-						} */
 						@sealed = true
 						@usingGetter = property.isInitiatable()
 						@usingSetter = property.isInitiatable()
@@ -180,16 +175,6 @@ class MemberExpression extends Expression {
 		else {
 			const type = @object.type()
 
-			/* if @useGetter {
-				if @sealed {
-					const name = @property[0] == '_' ? @property.substr(1) : @property
-
-					fragments.code(`\(type.type().getSealedName()).__ks_get_\(name)(`).compile(@object).code(')')
-				}
-				else {
-					NotImplementedException.throw(this)
-				}
-			} */
 			if @usingGetter {
 				if @sealed {
 					const name = @property[0] == '_' ? @property.substr(1) : @property
