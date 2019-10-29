@@ -31,6 +31,7 @@
       },
       "exhaustive": true,
       "init": 0,
+      "constructors": [],
       "instanceVariables": {
         "length": {
           "access": 4,
@@ -43,6 +44,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -63,7 +65,6 @@
                 }
               ]
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -71,6 +72,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -85,7 +87,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -93,6 +94,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -100,7 +102,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ]

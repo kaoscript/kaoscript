@@ -23,6 +23,7 @@
           {
             "id": 1,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 1,
             "max": 1,
@@ -38,7 +39,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": true,
             "throws": []
           }
         ]

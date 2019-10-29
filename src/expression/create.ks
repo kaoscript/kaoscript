@@ -3,6 +3,7 @@ class CreateExpression extends Expression {
 		_arguments: Array		= []
 		_class: Expression
 		_flatten: Boolean		= false
+		_sealed: Boolean		= false
 		_type: Type				= Type.Any
 	}
 	analyse() { // {{{
@@ -35,10 +36,14 @@ class CreateExpression extends Expression {
 			if type.type().isAbstract() {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
-			else {
+			else if !@options.rules.nonExhaustive {
 				if !type.type().matchArguments(@arguments) {
 					ReferenceException.throwNoMatchingConstructor(type.name(), @arguments, this)
 				}
+			}
+
+			if type.type().hasSealedConstructors() {
+				@sealed = true
 			}
 
 			@type = @scope.reference(type)
@@ -69,7 +74,18 @@ class CreateExpression extends Expression {
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @flatten {
+		if @sealed {
+			fragments.code(`\(@type.type().getSealedName()).new(`)
+
+			for const argument, i in @arguments {
+				fragments.code($comma) if i != 0
+
+				fragments.compile(argument)
+			}
+
+			fragments.code(')')
+		}
+		else if @flatten {
 			this.module().flag('Helper')
 
 			fragments.code(`\($runtime.helper(this)).create(`).compile(@class)
@@ -81,10 +97,10 @@ class CreateExpression extends Expression {
 		else {
 			fragments.code('new ').compile(@class).code('(')
 
-			for i from 0 til @arguments.length {
+			for const argument, i in @arguments {
 				fragments.code($comma) if i != 0
 
-				fragments.compile(@arguments[i])
+				fragments.compile(argument)
 			}
 
 			fragments.code(')')

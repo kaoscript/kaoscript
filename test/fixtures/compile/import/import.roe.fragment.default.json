@@ -25,6 +25,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -32,7 +33,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ]
@@ -63,6 +63,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -77,7 +78,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -85,6 +85,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -101,7 +102,6 @@
               "name": "Array",
               "nullable": true
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -109,6 +109,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -123,7 +124,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -131,6 +131,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -145,7 +146,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -153,6 +153,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -165,7 +166,6 @@
               }
             ],
             "returns": "Array",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -173,6 +173,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -180,7 +181,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -188,6 +188,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -195,7 +196,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -203,6 +203,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 0,
             "max": 1,
@@ -216,7 +217,6 @@
               }
             ],
             "returns": "Array",
-            "sealed": true,
             "throws": []
           }
         ],
@@ -224,6 +224,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 0,
             "max": 0,
@@ -231,7 +232,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": true,
             "throws": []
           }
         ],
@@ -239,6 +239,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 0,
             "max": 0,
@@ -246,7 +247,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": true,
             "throws": []
           }
         ],
@@ -254,6 +254,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 0,
             "max": 1,
@@ -269,7 +270,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": true,
             "throws": []
           }
         ]

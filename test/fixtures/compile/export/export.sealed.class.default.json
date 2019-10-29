@@ -44,7 +44,9 @@
       "init": 1,
       "constructors": [
         {
+          "id": 0,
           "access": 4,
+          "sealed": false,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -72,6 +74,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 1,
             "max": 1,
@@ -85,7 +88,6 @@
               }
             ],
             "returns": "String",
-            "sealed": true,
             "throws": []
           }
         ]

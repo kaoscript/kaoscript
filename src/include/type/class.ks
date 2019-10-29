@@ -7,32 +7,35 @@ enum Accessibility {
 
 class ClassType extends Type {
 	private {
-		_abstract: Boolean				= false
+		_abstract: Boolean					= false
 		_abstractMethods: Dictionary		= {}
-		_alteration: Boolean			= false
+		_alteration: Boolean				= false
 		_alterationReference: ClassType
 		_classAssessments: Dictionary		= {}
 		_classMethods: Dictionary			= {}
-		_classMethodNextId: Dictionary		= {}
 		_classVariables: Dictionary			= {}
-		_constructors: Array			= []
-		_destructors: Number			= 0
-		_exhaustiveness					= {
+		_constructors: Array				= []
+		_destructors: Number				= 0
+		_exhaustiveness						= {
 			constructor: null
 			classMethods: {}
 			instanceMethods: {}
 		}
-		_explicitlyExported: Boolean	= false
-		_extending: Boolean				= false
-		_extends: NamedType<ClassType>?	= null
-		_hybrid: Boolean				= false
-		_init: Number					= 0
+		_explicitlyExported: Boolean		= false
+		_extending: Boolean					= false
+		_extends: NamedType<ClassType>?		= null
+		_hybrid: Boolean					= false
+		_init: Number						= 0
 		_instanceAssessments: Dictionary	= {}
 		_instanceMethods: Dictionary		= {}
-		_instanceMethodNextId: Dictionary	= {}
 		_instanceVariables: Dictionary		= {}
-		_predefined: Boolean			= false
+		_predefined: Boolean				= false
 		_seal: Dictionary
+		_sequences	 						= {
+			constructor: 0
+			classMethods: {}
+			instanceMethods: {}
+		}
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
@@ -202,18 +205,18 @@ class ClassType extends Type {
 	addClassMethod(name: String, type: ClassMethodType): Number? { // {{{
 		if @classMethods[name] is not Array {
 			@classMethods[name] = []
-			@classMethodNextId[name] = 0
+			@sequences.classMethods[name] = 0
 		}
 
-		let id = type.id()
+		let id = type.identifier()
 		if id == -1 {
-			id = @classMethodNextId[name]++
+			id = @sequences.classMethods[name]++
 
-			type.id(id)
+			type.identifier(id)
 		}
 		else {
-			if id >= @classMethodNextId[name] {
-				@classMethodNextId[name] = id + 1
+			if id >= @sequences.classMethods[name] {
+				@sequences.classMethods[name] = id + 1
 			}
 		}
 
@@ -237,7 +240,29 @@ class ClassType extends Type {
 		}
 	} // }}}
 	addConstructor(type: ClassConstructorType) { // {{{
+		let id = type.identifier()
+		if id == -1 {
+			id = @sequences.constructor++
+
+			type.identifier(id)
+		}
+		else {
+			if id >= @sequences.constructor {
+				@sequences.constructor = id + 1
+			}
+		}
+
 		@constructors.push(type)
+
+		if @alteration {
+			type.flagAlteration()
+		}
+
+		if type.isSealed() {
+			@seal.constructors = true
+		}
+
+		return id
 	} // }}}
 	addDestructor() { // {{{
 		@destructors++
@@ -245,18 +270,18 @@ class ClassType extends Type {
 	addInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
 		if @instanceMethods[name] is not Array {
 			@instanceMethods[name] = []
-			@instanceMethodNextId[name] = 0
+			@sequences.instanceMethods[name] = 0
 		}
 
-		let id = type.id()
+		let id = type.identifier()
 		if id == -1 {
-			id = @instanceMethodNextId[name]++
+			id = @sequences.instanceMethods[name]++
 
-			type.id(id)
+			type.identifier(id)
 		}
 		else {
-			if id >= @instanceMethodNextId[name] {
-				@instanceMethodNextId[name] = id + 1
+			if id >= @sequences.instanceMethods[name] {
+				@sequences.instanceMethods[name] = id + 1
 			}
 		}
 
@@ -300,7 +325,13 @@ class ClassType extends Type {
 			}
 			NodeKind::MethodDeclaration => {
 				if this.isConstructor(data.name.name) {
-					throw new NotImplementedException(node)
+					const type = ClassConstructorType.fromAST(data, node)
+
+					if options.rules.nonExhaustive {
+						@exhaustiveness.constructor = false
+					}
+
+					this.addConstructor(type)
 				}
 				else if this.isDestructor(data.name.name) {
 					throw new NotImplementedException(node)
@@ -384,11 +415,9 @@ class ClassType extends Type {
 		}
 		for const methods, name of src._classMethods {
 			@classMethods[name] = [].concat(methods)
-			@classMethodNextId[name] = src._classMethodNextId[name]
 		}
 		for const methods, name of src._instanceMethods {
 			@instanceMethods[name] = [].concat(methods)
-			@instanceMethodNextId[name] = src._instanceMethodNextId[name]
 		}
 
 		for const variable, name of src._classVariables {
@@ -404,6 +433,8 @@ class ClassType extends Type {
 			@seal = Dictionary.clone(src._seal)
 		}
 
+		@sequences = Dictionary.clone(src._sequences)
+
 		if src.isRequired() || src.isAlien() {
 			this.setAlterationReference(src)
 		}
@@ -411,10 +442,10 @@ class ClassType extends Type {
 		return this
 	} // }}}
 	dedupClassMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if const id = type.id() {
+		if const id = type.identifier() {
 			if @classMethods[name] is Array {
 				for const method in @classMethods[name] {
-					if method.id() == id {
+					if method.identifier() == id {
 						return id
 					}
 				}
@@ -425,7 +456,7 @@ class ClassType extends Type {
 			const methods = @classMethods[name]
 
 			for const data in overwrite {
-				for const i from methods.length - 1 to 0 by -1 when methods[i].id() == data.id {
+				for const i from methods.length - 1 to 0 by -1 when methods[i].identifier() == data.id {
 					methods.splice(i, 1)
 					break
 				}
@@ -437,10 +468,10 @@ class ClassType extends Type {
 		return this.addClassMethod(name, type)
 	} // }}}
 	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if const id = type.id() {
+		if const id = type.identifier() {
 			if @instanceMethods[name] is Array {
 				for const method in @instanceMethods[name] {
-					if method.id() == id {
+					if method.identifier() == id {
 						return id
 					}
 				}
@@ -451,7 +482,7 @@ class ClassType extends Type {
 			const methods = @instanceMethods[name]
 
 			for const data in overwrite {
-				for const i from methods.length - 1 to 0 by -1 when methods[i].id() == data.id {
+				for const i from methods.length - 1 to 0 by -1 when methods[i].identifier() == data.id {
 					methods.splice(i, 1)
 					break
 				}
@@ -474,6 +505,7 @@ class ClassType extends Type {
 				class: @alterationReference.toAlterationReference(references, mode)
 				exhaustive
 				init: @init
+				constructors: [constructor.export(references, mode) for const constructor in @constructors when constructor.isAlteration() && constructor.isExportable()]
 				instanceVariables: {}
 				classVariables: {}
 				instanceMethods: {}
@@ -489,14 +521,14 @@ class ClassType extends Type {
 			}
 
 			for const methods, name of @instanceMethods {
-				const exportedMethods = [method.export(references, mode) for method in methods when method.isAlteration() && method.isExportable()]
+				const exportedMethods = [method.export(references, mode) for const method in methods when method.isAlteration() && method.isExportable()]
 				if exportedMethods.length > 0 {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
 			for const methods, name of @classMethods {
-				const exportedMethods = [method.export(references, mode) for method in methods when method.isAlteration() && method.isExportable()]
+				const exportedMethods = [method.export(references, mode) for const method in methods when method.isAlteration() && method.isExportable()]
 				if exportedMethods.length > 0 {
 					export.classMethods[name] = exportedMethods
 				}
@@ -511,7 +543,7 @@ class ClassType extends Type {
 				sealed: @sealed
 				exhaustive
 				init: @init
-				constructors: [constructor.export(references, mode) for constructor in @constructors]
+				constructors: [constructor.export(references, mode) for const constructor in @constructors]
 				destructors: @destructors
 				instanceVariables: {}
 				classVariables: {}
@@ -536,14 +568,14 @@ class ClassType extends Type {
 			}
 
 			for const methods, name of @classMethods {
-				export.classMethods[name] = [method.export(references, mode) for method in methods when method.isExportable()]
+				export.classMethods[name] = [method.export(references, mode) for const method in methods when method.isExportable()]
 			}
 
 			if @abstract {
 				export.abstractMethods = {}
 
 				for const methods, name of @abstractMethods {
-					export.abstractMethods[name] = [method.export(references, mode) for method in methods when method.isExportable()]
+					export.abstractMethods[name] = [method.export(references, mode) for const method in methods when method.isExportable()]
 				}
 			}
 
@@ -987,6 +1019,7 @@ class ClassType extends Type {
 
 		return false
 	} // }}}
+	hasSealedConstructors(): Boolean => @seal?.constructors
 	init() => @init
 	init(@init) => this
 	isAbstract() => @abstract
@@ -1147,12 +1180,24 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
+	listConstructors() => @constructors
 	listInstanceMethods(name: String) { // {{{
 		if @instanceMethods[name] is Array {
 			return @instanceMethods[name]
 		}
 
 		return null
+	} // }}}
+	listMatchingConstructors(type: FunctionType, mode: MatchingMode) { // {{{
+		const results: Array = []
+
+		for const constructor in @constructors {
+			if constructor.isMatching(type, mode) {
+				results.push(constructor)
+			}
+		}
+
+		return results
 	} // }}}
 	listMatchingInstanceMethods(name, type: FunctionType, mode: MatchingMode) { // {{{
 		const results: Array = []
@@ -1252,10 +1297,17 @@ class ClassType extends Type {
 			return [this.toMetadata(references, mode), name]
 		}
 	} // }}}
+	overwriteConstructor(type, methods) { // {{{
+		@constructors.remove(...methods)
+
+		type.overwrite([{id: method.identifier(), export: !method.isAlteration()} for const method in methods])
+
+		return this.addConstructor(type)
+	} // }}}
 	overwriteInstanceMethod(name, type, methods) { // {{{
 		@instanceMethods[name]:Array.remove(...methods)
 
-		type.overwrite([{id: method.id(), export: !method.isAlteration()} for const method in methods])
+		type.overwrite([{id: method.identifier(), export: !method.isAlteration()} for const method in methods])
 
 		return this.addInstanceMethod(name, type)
 	} // }}}
@@ -1314,7 +1366,10 @@ class ClassVariableType extends Type {
 
 			if data.modifiers? {
 				for modifier in data.modifiers {
-					if modifier.kind == ModifierKind::Private {
+					if modifier.kind == ModifierKind::Internal {
+						type.access(Accessibility::Internal)
+					}
+					else if modifier.kind == ModifierKind::Private {
 						type.access(Accessibility::Private)
 					}
 					else if modifier.kind == ModifierKind::Protected {
@@ -1393,8 +1448,8 @@ class ClassMethodType extends FunctionType {
 	private {
 		_access: Accessibility	= Accessibility::Public
 		_alteration: Boolean	= false
-		_id: Number				= -1
-		_overwrite: Array?		 = null
+		_identifier: Number		= -1
+		_overwrite: Array?		= null
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
@@ -1405,12 +1460,12 @@ class ClassMethodType extends FunctionType {
 		fromMetadata(data, metadata, references, alterations, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { // {{{
 			const type = new ClassMethodType(scope)
 
-			type._id = data.id
+			type._identifier = data.id
 			type._access = data.access
+			type._sealed = data.sealed
 			type._async = data.async
 			type._min = data.min
 			type._max = data.max
-			type._sealed = data.sealed
 			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
 
 			type._returnType = Type.fromMetadata(data.returns, metadata, references, alterations, queue, scope, node)
@@ -1429,14 +1484,14 @@ class ClassMethodType extends FunctionType {
 	access(@access) => this
 	export(references, mode) { // {{{
 		const export = {
-			id: @id
+			id: @identifier
 			access: @access
+			sealed: @sealed
 			async: @async
 			min: @min
 			max: @max
 			parameters: [parameter.export(references, mode) for parameter in @parameters]
 			returns: @returnType.toReference(references, mode)
-			sealed: @sealed
 			throws: [throw.toReference(references, mode) for throw in @throws]
 		}
 
@@ -1455,8 +1510,8 @@ class ClassMethodType extends FunctionType {
 
 		return this
 	} // }}}
-	id() => @id
-	id(@id)
+	identifier() => @identifier
+	identifier(@identifier)
 	isAlteration() => @alteration
 	isExportable() { // {{{
 		if !super() {
@@ -1531,29 +1586,81 @@ class ClassMethodSetType extends OverloadedFunctionType {
 class ClassConstructorType extends FunctionType {
 	private {
 		_access: Accessibility	= Accessibility::Public
+		_alteration: Boolean	= false
+		_dependent: Boolean		= false
+		_identifier: Number		= -1
+		_overwrite: Array?		= null
 	}
-	static fromMetadata(data, metadata, references, alterations, queue, scope: Scope, node: AbstractNode): ClassConstructorType { // {{{
-		const type = new ClassConstructorType(scope)
+	static {
+		fromAST(data, node: AbstractNode): ClassConstructorType { // {{{
+			const scope = node.scope()
 
-		type._access = data.access
-		type._min = data.min
-		type._max = data.max
+			return new ClassConstructorType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters]!!, data, node)
+		} // }}}
+		fromMetadata(data, metadata, references, alterations, queue, scope: Scope, node: AbstractNode): ClassConstructorType { // {{{
+			const type = new ClassConstructorType(scope)
 
-		type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
-		type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
+			type._identifier = data.id
+			type._access = data.access
+			type._sealed = data.sealed
+			type._min = data.min
+			type._max = data.max
 
-		type.updateArguments()
+			if data.dependent {
+				type._dependent = true
+			}
 
-		return type
-	} // }}}
+			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
+			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
+
+			type.updateArguments()
+
+			return type
+		} // }}}
+	}
 	access(@access) => this
-	export(references, mode) => { // {{{
-		access: @access
-		min: @min
-		max: @max
-		parameters: [parameter.export(references, mode) for parameter in @parameters]
-		throws: [throw.toReference(references, mode) for throw in @throws]
+	export(references, mode) { // {{{
+		const export = {
+			id: @identifier
+			access: @access
+			sealed: @sealed
+			min: @min
+			max: @max
+			parameters: [parameter.export(references, mode) for parameter in @parameters]
+			throws: [throw.toReference(references, mode) for throw in @throws]
+		}
+
+		if @dependent {
+			export.dependent = true
+		}
+
+		if @overwrite != null {
+			const overwrite = [data.id for const data in @overwrite when data.export]
+
+			if overwrite.length != 0 {
+				export.overwrite = overwrite
+			}
+		}
+
+		return export
 	} // }}}
+	flagAlteration() { // {{{
+		@alteration = true
+
+		return this
+	} // }}}
+	flagDependent() { // {{{
+		@dependent = true
+
+		return this
+	} // }}}
+	identifier() => @identifier
+	identifier(@identifier)
+	isAlteration() => @alteration
+	isDependent() => @dependent
+	isOverwritten() => @overwrite != null
+	overwrite() => @overwrite
+	overwrite(@overwrite)
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Async {

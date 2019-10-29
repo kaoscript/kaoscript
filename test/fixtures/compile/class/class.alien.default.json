@@ -38,7 +38,9 @@
       "init": 1,
       "constructors": [
         {
+          "id": 0,
           "access": 4,
+          "sealed": false,
           "min": 2,
           "max": 2,
           "parameters": [
@@ -85,7 +87,9 @@
       "init": 1,
       "constructors": [
         {
+          "id": 0,
           "access": 4,
+          "sealed": false,
           "min": 2,
           "max": 2,
           "parameters": [

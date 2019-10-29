@@ -35,6 +35,7 @@
       },
       "exhaustive": false,
       "init": 0,
+      "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -42,6 +43,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 1,
             "max": 2,
@@ -62,7 +64,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": true,
             "throws": []
           }
         ],
@@ -70,6 +71,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -83,7 +85,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": true,
             "throws": []
           }
         ]

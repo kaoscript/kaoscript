@@ -30,6 +30,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -42,7 +43,6 @@
               }
             ],
             "returns": "Number",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -50,6 +50,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -62,7 +63,6 @@
               }
             ],
             "returns": "Number",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -70,6 +70,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -84,7 +85,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ]
@@ -98,6 +98,7 @@
       },
       "exhaustive": false,
       "init": 0,
+      "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -105,6 +106,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 1,
             "max": 2,
@@ -125,7 +127,6 @@
               }
             ],
             "returns": "Boolean",
-            "sealed": true,
             "throws": []
           }
         ],
@@ -133,6 +134,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -148,7 +150,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": true,
             "throws": []
           }
         ]

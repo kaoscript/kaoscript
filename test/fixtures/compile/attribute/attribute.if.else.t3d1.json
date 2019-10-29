@@ -36,6 +36,7 @@
       },
       "exhaustive": false,
       "init": 0,
+	  "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {

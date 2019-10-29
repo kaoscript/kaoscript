@@ -1,0 +1,1 @@
+ReferenceException: The constructor of class "Date" can't be matched to given arguments (Number, Number, Number) (line 8, file "fixtures/compile/extern/extern.disclose.cons.cb.ks")

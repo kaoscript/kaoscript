@@ -41,6 +41,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -48,12 +49,12 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -71,7 +72,6 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           }
         ]
@@ -85,6 +85,7 @@
       },
       "exhaustive": true,
       "init": 0,
+      "constructors": [],
       "instanceVariables": {
         "_luma": {
           "access": 2,
@@ -97,17 +98,18 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Number",
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -121,7 +123,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ]

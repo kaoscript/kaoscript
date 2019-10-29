@@ -16,7 +16,9 @@
       "init": 1,
       "constructors": [
         {
+          "id": 0,
           "access": 4,
+          "sealed": false,
           "min": 0,
           "max": "Infinity",
           "parameters": [
@@ -76,6 +78,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -83,12 +86,12 @@
             "returns": {
               "reference": 2
             },
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -110,7 +113,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -118,6 +120,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 2,
             "max": 4,
@@ -160,7 +163,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": [
               "Error"
             ]
@@ -170,6 +172,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -191,7 +194,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -199,6 +201,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -206,7 +209,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -214,6 +216,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -229,7 +232,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": [
               "Error"
             ]
@@ -239,6 +241,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -256,7 +259,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -264,6 +266,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -281,7 +284,6 @@
             "returns": {
               "reference": 3
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -289,6 +291,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -304,7 +307,6 @@
               }
             ],
             "returns": "Boolean",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -312,6 +314,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 1,
@@ -325,7 +328,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -333,6 +335,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -348,7 +351,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -356,6 +358,7 @@
           {
             "id": 0,
             "access": 2,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -369,7 +372,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -377,6 +379,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 2,
             "max": 2,
@@ -409,7 +412,6 @@
                 }
               ]
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -417,6 +419,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 1,
@@ -432,7 +435,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -440,12 +442,12 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -453,12 +455,12 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Boolean",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -466,12 +468,12 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Boolean",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -479,12 +481,12 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Boolean",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -492,6 +494,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -505,7 +508,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": [
               "Error"
             ]
@@ -515,12 +517,12 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Number",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -528,6 +530,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -535,7 +538,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -543,6 +545,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -564,7 +567,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -572,6 +574,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 2,
@@ -594,7 +597,6 @@
               }
             ],
             "returns": "Boolean",
-            "sealed": false,
             "throws": [
               "Error"
             ]
@@ -604,6 +606,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -633,7 +636,6 @@
                 }
               ]
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -641,6 +643,7 @@
           {
             "id": 0,
             "access": 2,
+            "sealed": false,
             "async": false,
             "min": 2,
             "max": 2,
@@ -669,7 +672,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -677,6 +679,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -694,7 +697,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -702,6 +704,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
@@ -709,12 +712,12 @@
             "returns": {
               "reference": 1
             },
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -730,7 +733,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": [
               "Error"
             ]
@@ -740,6 +742,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -757,7 +760,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -765,6 +767,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -782,7 +785,6 @@
             "returns": {
               "reference": 0
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -790,17 +792,18 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -814,7 +817,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -822,17 +824,18 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -846,7 +849,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -854,17 +856,18 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -878,7 +881,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -886,17 +888,18 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -910,7 +913,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -918,17 +920,18 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           },
           {
             "id": 1,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -942,7 +945,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ]
@@ -952,6 +954,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -973,7 +976,6 @@
                 "Boolean"
               ]
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -981,6 +983,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -1002,7 +1005,6 @@
                 "Boolean"
               ]
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -1010,6 +1012,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -1029,7 +1032,6 @@
                 "Boolean"
               ]
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -1037,6 +1039,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": "Infinity",
@@ -1058,7 +1061,6 @@
                 "Boolean"
               ]
             },
-            "sealed": false,
             "throws": []
           }
         ],
@@ -1066,6 +1068,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 2,
             "max": 2,
@@ -1086,7 +1089,6 @@
               }
             ],
             "returns": "Void",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -1094,6 +1096,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 2,
             "max": 2,
@@ -1114,7 +1117,6 @@
               }
             ],
             "returns": "Void",
-            "sealed": false,
             "throws": []
           }
         ],
@@ -1122,6 +1124,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 1,
             "max": 1,
@@ -1135,7 +1138,6 @@
               }
             ],
             "returns": "Any",
-            "sealed": false,
             "throws": []
           }
         ]

@@ -22,16 +22,26 @@ class ImplementDeclaration extends Statement {
 		const type = @type.type()
 
 		if type is ClassType {
-			for property in @data.properties {
-				switch property.kind {
+			for const data in @data.properties {
+				let property: Statement
+
+				switch data.kind {
 					NodeKind::FieldDeclaration => {
-						property = new ImplementClassFieldDeclaration(property, this, @type)
+						property = new ImplementClassFieldDeclaration(data, this, @type)
 					}
 					NodeKind::MethodDeclaration => {
-						property = new ImplementClassMethodDeclaration(property, this, @type)
+						if type.isConstructor(data.name.name) {
+							property = new ImplementClassConstructorDeclaration(data, this, @type)
+						}
+						else if type.isDestructor(data.name.name) {
+							NotImplementedException.throw(this)
+						}
+						else {
+							property = new ImplementClassMethodDeclaration(data, this, @type)
+						}
 					}
 					=> {
-						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
+						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
 					}
 				}
 
@@ -41,16 +51,18 @@ class ImplementDeclaration extends Statement {
 			}
 		}
 		else if type is NamespaceType {
-			for property in @data.properties {
-				switch property.kind {
+			for data in @data.properties {
+				let property: Statement
+
+				switch data.kind {
 					NodeKind::FieldDeclaration => {
-						property = new ImplementNamespaceVariableDeclaration(property, this, @type)
+						property = new ImplementNamespaceVariableDeclaration(data, this, @type)
 					}
 					NodeKind::MethodDeclaration => {
-						property = new ImplementNamespaceFunctionDeclaration(property, this, @type)
+						property = new ImplementNamespaceFunctionDeclaration(data, this, @type)
 					}
 					=> {
-						throw new NotSupportedException(`Unexpected kind \(property.kind)`, this)
+						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
 					}
 				}
 
@@ -63,11 +75,10 @@ class ImplementDeclaration extends Statement {
 			TypeException.throwImplInvalidType(this)
 		}
 
-		let name
-		for property in @properties {
+		for const property in @properties {
 			property.prepare()
 
-			if name ?= property.getSharedName() {
+			if const name = property.getSharedName() {
 				@sharingProperties[name] = property
 			}
 		}
@@ -298,8 +309,6 @@ class ImplementClassMethodDeclaration extends Statement {
 		_block: Block
 		_class: ClassType
 		_classRef: ReferenceType
-		_isContructor: Boolean			= false
-		_isDestructor: Boolean			= false
 		_instance: Boolean				= true
 		_internalName: String
 		_name: String
@@ -307,7 +316,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_overwrite: Boolean				= false
 		_parameters: Array<Parameter>
 		_this: Variable
-		_type: Type
+		_type: ClassMethodType
 		_variable: NamedType<ClassType>
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -321,23 +330,15 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		@name = @data.name.name
 
-		if @isContructor = (@data.name.kind == NodeKind::Identifier && @class.isConstructor(@name)) {
-			throw new NotImplementedException(this)
-		}
-		else if @isDestructor = (@data.name.kind == NodeKind::Identifier && @class.isDestructor(@name)) {
-			throw new NotImplementedException(this)
-		}
-		else {
-			for const modifier in @data.modifiers {
-				if modifier.kind == ModifierKind::Override {
-					@override = true
-				}
-				else if modifier.kind == ModifierKind::Overwrite {
-					@overwrite = true
-				}
-				else if modifier.kind == ModifierKind::Static {
-					@instance = false
-				}
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Override {
+				@override = true
+			}
+			else if modifier.kind == ModifierKind::Overwrite {
+				@overwrite = true
+			}
+			else if modifier.kind == ModifierKind::Static {
+				@instance = false
 			}
 		}
 
@@ -376,7 +377,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
 				}
 				else {
-					@internalName = `__ks_func_\(@name)_\(methods[0].id())`
+					@internalName = `__ks_func_\(@name)_\(methods[0].identifier())`
 				}
 			}
 			else if @overwrite {
@@ -391,7 +392,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 				@class.overwriteInstanceMethod(@name, @type, methods)
 
-				@internalName = `__ks_func_\(@name)_\(@type.id())`
+				@internalName = `__ks_func_\(@name)_\(@type.identifier())`
 
 				const type = Type.union(@scope, ...methods)
 				const variable = @scope.define('precursor', true, type, this)
@@ -423,7 +424,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 				@class.overwriteClassMethod(@name, @type, methods)
 
-				@internalName = `__ks_sttc_\(@name)_\(@type.id())`
+				@internalName = `__ks_sttc_\(@name)_\(@type.identifier())`
 
 				const type = Type.union(@scope, ...methods)
 				const variable = @scope.define('precursor', true, type, this)
@@ -464,40 +465,6 @@ class ImplementClassMethodDeclaration extends Statement {
 	isInstance() => @instance
 	isInstanceMethod() => @instance
 	parameters() => @parameters
-	toStatementFragments(fragments, mode) { // {{{
-		if @isContructor {
-			throw new NotImplementedException(this)
-		}
-		else if @isDestructor {
-			throw new NotImplementedException(this)
-		}
-		else {
-			const line = fragments.newLine()
-
-			if @class.isSealed() {
-				line.code(`\(@variable.getSealedName()).\(@internalName) = function(`)
-			}
-			else {
-				if @instance {
-					line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
-				}
-				else {
-					line.code(`\(@variable.name()).\(@internalName) = function(`)
-				}
-			}
-
-			const block = Parameter.toFragments(this, line, ParameterMode::Default, func(node) {
-				line.code(')')
-
-				return line.newBlock()
-			})
-
-			block.compile(@block)
-
-			block.done()
-			line.done()
-		}
-	} // }}}
 	toSharedFragments(fragments) { // {{{
 		return if @override
 
@@ -521,18 +488,18 @@ class ImplementClassMethodDeclaration extends Statement {
 					(fragments, method) => {
 						if method.max() == 0 {
 							if method.isSealed() {
-								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(method.id()).apply(that)`)
+								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(method.identifier()).apply(that)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(method.id()).apply(that)`)
+								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(method.identifier()).apply(that)`)
 							}
 						}
 						else {
 							if method.isSealed() {
-								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(method.id()).apply(that, args)`)
+								fragments.line(`return \(@variable.getSealedName()).__ks_func_\(@name)_\(method.identifier()).apply(that, args)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(method.id()).apply(that, args)`)
+								fragments.line(`return \(@variable.name()).prototype.__ks_func_\(@name)_\(method.identifier()).apply(that, args)`)
 							}
 						}
 					}
@@ -564,18 +531,18 @@ class ImplementClassMethodDeclaration extends Statement {
 					(fragments, method) => {
 						if method.max() == 0 {
 							if method.isSealed() {
-								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(method.id())()`)
+								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(method.identifier())()`)
 							}
 							else {
-								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(method.id())()`)
+								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(method.identifier())()`)
 							}
 						}
 						else {
 							if method.isSealed() {
-								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(method.id()).apply(null, args)`)
+								fragments.line(`return \(@variable.getSealedName()).__ks_sttc_\(@name)_\(method.identifier()).apply(null, args)`)
 							}
 							else {
-								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(method.id()).apply(null, args)`)
+								fragments.line(`return \(@variable.name()).__ks_sttc_\(@name)_\(method.identifier()).apply(null, args)`)
 							}
 						}
 					}
@@ -587,6 +554,263 @@ class ImplementClassMethodDeclaration extends Statement {
 				ClassMethodDeclaration.toClassSwitchFragments(this, fragments.newLine(), @variable, @class.listClassMethods(@name), false, @name, (node, fragments) => fragments.code(`\(@variable.name()).\(@name) = function()`).newBlock(), (fragments) => fragments.done()).done()
 			}
 		}
+	} // }}}
+	toStatementFragments(fragments, mode) { // {{{
+		const line = fragments.newLine()
+
+		if @class.isSealed() {
+			line.code(`\(@variable.getSealedName()).\(@internalName) = function(`)
+		}
+		else {
+			if @instance {
+				line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
+			}
+			else {
+				line.code(`\(@variable.name()).\(@internalName) = function(`)
+			}
+		}
+
+		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(node) {
+			line.code(')')
+
+			return line.newBlock()
+		})
+
+		block.compile(@block)
+
+		block.done()
+		line.done()
+	} // }}}
+	type() => @type
+}
+
+class ImplementClassConstructorDeclaration extends Statement {
+	private {
+		_block: Block
+		_class: ClassType
+		_classRef: ReferenceType
+		_dependent: Boolean				= false
+		_internalName: String
+		_overwrite: Boolean				= false
+		_parameters: Array<Parameter>
+		_this: Variable
+		_type: ClassConstructorType
+		_variable: NamedType<ClassType>
+	}
+	constructor(data, parent, @variable) { // {{{
+		super(data, parent, parent.scope(), ScopeType::Function)
+
+		@class = @variable.type()
+		@classRef = @scope.reference(@variable)
+
+		if @class.isHybrid() {
+			NotSupportedException.throw(this)
+		}
+	} // }}}
+	analyse() { // {{{
+		@scope.line(@data.start.line)
+
+		for const modifier in @data.modifiers {
+			if modifier.kind == ModifierKind::Overwrite {
+				@overwrite = true
+			}
+		}
+
+		@this = @scope.define('this', true, @classRef, true, this)
+
+		const body = $ast.body(@data)
+
+		if @class.isSealed() && this.getConstructorIndex($ast.block(body).statements) != -1 {
+			@scope.rename('this', 'that')
+
+			@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable)
+
+			@dependent = true
+		}
+		else if @overwrite {
+			@scope.rename('this', 'that')
+
+			@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable)
+		}
+		else {
+			@this.replaceCall = (data, arguments) => new CallThisConstructorSubstitude(data, arguments, @variable)
+		}
+
+		@parameters = []
+		for parameter in @data.parameters {
+			@parameters.push(parameter = new Parameter(parameter, this))
+
+			parameter.analyse()
+		}
+
+		@block = $compile.block(body, this)
+	} // }}}
+	prepare() { // {{{
+		@scope.line(@data.start.line)
+
+		for const parameter in @parameters {
+			parameter.prepare()
+		}
+
+		@type = new ClassConstructorType([parameter.type() for const parameter in @parameters], @data, this)
+
+		@type.flagAlteration()
+
+		if @class.isSealed() {
+			@type.flagSealed()
+		}
+
+		if @dependent {
+			@type.flagDependent()
+		}
+
+		if @overwrite {
+			unless @class.isSealed() {
+				SyntaxException.throwNotSealedOverwrite(this)
+			}
+
+			const methods = @class.listMatchingConstructors(@type, MatchingMode::SimilarParameters | MatchingMode::ShiftableParameters)
+			if methods.length == 0 {
+				SyntaxException.throwNoSuitableOverwrite(@classRef, 'constructor', @type, this)
+			}
+
+			@class.overwriteConstructor(@type, methods)
+
+			@internalName = `__ks_cons_\(@type.identifier())`
+
+			const variable = @scope.define('precursor', true, @classRef, this)
+
+			variable.replaceCall = (data, arguments) => new CallOverwrittenConstructorSubstitude(data, arguments, @variable)
+		}
+		else {
+			if @class.hasMatchingConstructor(@type, MatchingMode::ExactParameters) {
+				SyntaxException.throwDuplicateConstructor(this)
+			}
+			else {
+				@internalName = `__ks_cons_\(@class.addConstructor(@type))`
+			}
+		}
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+
+		@block.analyse()
+		@block.prepare()
+		@block.translate()
+	} // }}}
+	class() => @variable
+	getSharedName() => '__ks_cons'
+	isExtending() => @class.isExtending()
+	private getConstructorIndex(body: Array) { // {{{
+		for const statement, index in body {
+			if statement.kind == NodeKind::CallExpression {
+				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super') {
+					return index
+				}
+			}
+			else if statement.kind == NodeKind::IfStatement {
+				if statement.whenFalse? && this.getConstructorIndex(statement.whenTrue.statements) != -1 && this.getConstructorIndex(statement.whenFalse.statements) != -1 {
+					return index
+				}
+			}
+		}
+
+		return -1
+	} // }}}
+	parameters() => @parameters
+	toSharedFragments(fragments) { // {{{
+		if @class.isSealed() {
+			const assessment = Router.assess([constructor for const constructor in @class.listConstructors() when constructor.isSealed()], false)
+
+			const es5 = @options.format.spreads == 'es5'
+			let min = Number.MAX_VALUE
+
+			Router.toFragments(
+				assessment
+				fragments.newLine()
+				'arguments'
+				false
+				(node, fragments) => fragments.code(`\(@variable.getSealedName()).new = function()`).newBlock()
+				(fragments) => fragments.done()
+				(fragments, method, index) => {
+					if method.isDependent() || method.isOverwritten() {
+						if es5 {
+							fragments.line(`return \(@variable.getSealedName()).__ks_cons_\(method.identifier()).apply(null, arguments)`)
+						}
+						else {
+							fragments.line(`return \(@variable.getSealedName()).__ks_cons_\(method.identifier())(...arguments)`)
+						}
+					}
+					else {
+						fragments.line(`return \(@variable.getSealedName()).__ks_cons_\(method.identifier()).apply(new \(@variable.name())(), arguments)`)
+					}
+
+					if method.min() < min {
+						min = method.min()
+					}
+				}
+				(block, ctrl) => {
+					ctrl.step()
+
+					if min > 0 {
+						ctrl
+							.code('else if(arguments.length === 0)')
+							.step()
+							.line(`return new \(@variable.name())()`)
+							.step()
+					}
+
+					ctrl.code(`else`).step()
+
+					if es5 {
+						ctrl.line(`return new (Function.prototype.bind.apply(\(@variable.name()), arguments))`)
+					}
+					else {
+						ctrl.line(`return new \(@variable.name())(...arguments)`)
+					}
+
+					ctrl.done()
+				}
+				this
+			).done()
+		}
+		else {
+			ClassConstructorDeclaration.toRouterFragments(
+				this
+				fragments.newControl()
+				@classRef
+				@class.listConstructors()
+				(node, fragments) => fragments.code(`\(@variable.name()).prototype.__ks_cons = function(args)`).step()
+				(fragments) => fragments.done()
+			)
+		}
+	} // }}}
+	toStatementFragments(fragments, mode) { // {{{
+		const line = fragments.newLine()
+
+		if @class.isSealed() {
+			line.code(`\(@variable.getSealedName()).\(@internalName) = function(`)
+		}
+		else {
+			line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
+		}
+
+		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(node) {
+			line.code(')')
+
+			return line.newBlock()
+		})
+
+		block.compile(@block)
+
+		if @class.isSealed() {
+			block.newLine().code(`return `).compile(@this).done()
+		}
+
+		block.done()
+		line.done()
 	} // }}}
 	type() => @type
 }
@@ -747,4 +971,48 @@ class CallOverwrittenMethodSubstitude {
 		}
 	} // }}}
 	type() => @type
+}
+
+class CallSealedConstructorSubstitude {
+	private {
+		_arguments
+		_class: NamedType<ClassType>
+		_data
+	}
+	constructor(@data, @arguments, @class)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`var that = \(@class.getSealedName()).new(`)
+
+		for const argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
+			}
+
+			fragments.compile(argument)
+		}
+	} // }}}
+	type() => Type.Void
+}
+
+class CallOverwrittenConstructorSubstitude {
+	private {
+		_arguments
+		_class: NamedType<ClassType>
+		_data
+	}
+	constructor(@data, @arguments, @class)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		fragments.code(`var that = new \(@class.name())(`)
+
+		for const argument, index in @arguments {
+			if index != 0 {
+				fragments.code($comma)
+			}
+
+			fragments.compile(argument)
+		}
+	} // }}}
+	type() => Type.Void
 }

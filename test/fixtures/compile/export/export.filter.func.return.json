@@ -43,12 +43,12 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "sealed": false,
             "throws": []
           }
         ]

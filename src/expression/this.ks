@@ -46,6 +46,10 @@ class ThisExpression extends Expression {
 				@class = parent.class()
 				break
 			}
+			else if parent is ImplementClassConstructorDeclaration {
+				@class = parent.class()
+				break
+			}
 		}
 		while parent ?= parent.parent()
 

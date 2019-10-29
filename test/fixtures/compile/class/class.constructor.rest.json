@@ -16,7 +16,9 @@
       "init": 0,
       "constructors": [
         {
+          "id": 0,
           "access": 4,
+          "sealed": false,
           "min": 0,
           "max": "Infinity",
           "parameters": [

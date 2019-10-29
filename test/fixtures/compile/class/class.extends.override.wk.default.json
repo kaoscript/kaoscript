@@ -21,7 +21,9 @@
       "init": 0,
       "constructors": [
         {
+          "id": 0,
           "access": 4,
+          "sealed": false,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -49,12 +51,12 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "sealed": false,
             "throws": []
           }
         ]
@@ -71,7 +73,9 @@
       "init": 0,
       "constructors": [
         {
+          "id": 0,
           "access": 4,
+          "sealed": false,
           "min": 1,
           "max": 1,
           "parameters": [
@@ -94,12 +98,12 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": false,
             "async": false,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "sealed": false,
             "throws": []
           }
         ]
