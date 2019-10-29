@@ -123,6 +123,10 @@ class ClassType extends Type {
 
 					type.copyFrom(source.type())
 
+					for method in data.constructors {
+						type.addConstructor(ClassConstructorType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+					}
+
 					for const vtype, name of data.instanceVariables {
 						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
 					}
@@ -1069,6 +1073,15 @@ class ClassType extends Type {
 			return super.isExhaustive()
 		}
 	} // }}}
+	isExhaustiveConstructor() { // {{{
+		if @exhaustiveness.constructor == false {
+			return false
+		}
+		else {
+			return true
+		}
+	} // }}}
+	isExhaustiveConstructor(node) => this.isExhaustive(node) && this.isExhaustiveConstructor()
 	isExhaustiveClassMethod(name) { // {{{
 		if @exhaustiveness.classMethods[name] == false {
 			return false
@@ -1080,13 +1093,7 @@ class ClassType extends Type {
 			return true
 		}
 	} // }}}
-	isExhaustiveClassMethod(name, node) { // {{{
-		if !this.isExhaustive(node) {
-			return false
-		}
-
-		return this.isExhaustiveClassMethod(name)
-	} // }}}
+	isExhaustiveClassMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveClassMethod(name)
 	isExhaustiveInstanceMethod(name) { // {{{
 		if @exhaustiveness.instanceMethods[name] == false {
 			return false
@@ -1098,13 +1105,7 @@ class ClassType extends Type {
 			return true
 		}
 	} // }}}
-	isExhaustiveInstanceMethod(name, node) { // {{{
-		if !this.isExhaustive(node) {
-			return false
-		}
-
-		return this.isExhaustiveInstanceMethod(name)
-	} // }}}
+	isExhaustiveInstanceMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveInstanceMethod(name)
 	isExplicitlyExported() => @explicitlyExported
 	isExtendable() => true
 	isExtending() => @extending

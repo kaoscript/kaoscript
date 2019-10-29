@@ -36,7 +36,7 @@ class CreateExpression extends Expression {
 			if type.type().isAbstract() {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
-			else if !@options.rules.nonExhaustive {
+			else if type.type().isExhaustiveConstructor(this) {
 				if !type.type().matchArguments(@arguments) {
 					ReferenceException.throwNoMatchingConstructor(type.name(), @arguments, this)
 				}
