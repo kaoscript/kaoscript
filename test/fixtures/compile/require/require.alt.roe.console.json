@@ -1,15 +1,15 @@
 {
   "aliens": [
-    -1,
+    "Any?",
     "console"
   ],
   "requirements": [
-    -1,
+    "Any?",
     "console",
     false
   ],
   "exports": [
-    -1,
+    "Any?",
     "console"
   ],
   "references": [],

@@ -17,7 +17,7 @@ class FallthroughStatement extends Statement {
 			}
 		}
 
-		@switch = parent
+		@switch = parent!!
 
 		@switch.flagUsingFallthrough()
 	} // }}}

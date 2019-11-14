@@ -161,6 +161,8 @@ namespace Router {
 				})
 			}
 			else {
+				group.methods.sort((a, b) => a.max() - b.max())
+
 				const parameters = {}
 				if group.n is Array {
 					for const n in group.n {
@@ -175,15 +177,19 @@ namespace Router {
 					}
 				}
 
-				const length = group.methods.length
+				const length = methods.length
 
 				for const parameter, name of parameters {
 					for const type, name of parameter.types {
 						if type.methods.length == length {
 							parameter.weight -= type.weight
 
-							delete parameter[name]
+							delete parameter.types[name]
 						}
+					}
+
+					if parameter.weight == 0 {
+						delete parameters[name]
 					}
 				}
 
@@ -315,7 +321,11 @@ namespace Router {
 
 		const parameter = parameters[pIndex]
 
-		const type = parameter.type()
+		let type = parameter.type()
+
+		if parameter.hasDefaultValue() {
+			type = type.setNullable(true)
+		}
 
 		for const i from 1 to parameter.min() {
 			line.filters.push({
@@ -860,7 +870,25 @@ namespace Router {
 	export func matchArguments(assessment, arguments) { // {{{
 		const matches = []
 
+		let spreadIndex: Number = -1
+
+		for const argument, index in arguments {
+			if argument.isSpread() {
+				spreadIndex = index
+
+				break
+			}
+		}
+
 		const length = arguments.length
+
+		if spreadIndex != -1 {
+			for const method in assessment.methods when length <= method.max {
+				matches.push(method.method)
+			}
+
+			return matches
+		}
 
 		for const method in assessment.methods when method.min <= length <= method.max {
 			if method.filters.length == 0 && !?method.argFilters {

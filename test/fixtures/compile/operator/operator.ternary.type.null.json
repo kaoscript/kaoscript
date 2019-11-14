@@ -6,11 +6,7 @@
     "foo"
   ],
   "references": [
-    {
-      "kind": "reference",
-      "name": "Array",
-      "nullable": true
-    }
+    "Array?"
   ],
   "macros": []
 }

@@ -1,6 +1,6 @@
 {
   "aliens": [
-    -1,
+    "Any?",
     "console",
     0,
     "Number",
@@ -9,7 +9,7 @@
   ],
   "requirements": [],
   "exports": [
-    -1,
+    "Any?",
     "console",
     0,
     "Number",

@@ -76,7 +76,7 @@
               },
               {
                 "name": "bind",
-                "type": "Any",
+                "type": "Any?",
                 "min": 0,
                 "max": 1,
                 "default": 1
@@ -89,7 +89,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ]

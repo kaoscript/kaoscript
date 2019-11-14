@@ -230,7 +230,7 @@ class SwitchStatement extends Statement {
 				ReferenceException.throwNotDefined(name, this)
 			}
 			else {
-				scope.define(name, false, null, this)
+				scope.define(name, false, AnyType.NullableUnexplicit, true, this)
 			}
 		}
 	} // }}}

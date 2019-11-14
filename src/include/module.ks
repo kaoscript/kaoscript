@@ -603,6 +603,20 @@ class ModuleBlock extends AbstractNode {
 
 			statement.export(recipient)
 		}
+
+		let type: Type
+		for const data, name of @module._exports {
+			if data.variable is Variable {
+				type = data.variable.getRealType()
+			}
+			else {
+				type = data.variable.type()
+			}
+
+			if type.isNull() && !data.type.isNullable() {
+				TypeException.throwUnexpectedExportType(name, data.type, type, this)
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		for const statement in @statements {

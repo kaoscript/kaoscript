@@ -80,6 +80,10 @@ class UnionType extends Type {
 			for const type in type.discardAlias().types() {
 				this.addType(type)
 			}
+
+			if !@nullable && type.isNullable() {
+				@nullable = true
+			}
 		}
 		else {
 			let notMatched = true
@@ -229,6 +233,10 @@ class UnionType extends Type {
 		return match == @types.length
 	} // }}}
 	isMorePreciseThan(that: Type) { // {{{
+		if that.isAny() {
+			return true
+		}
+
 		if that is ReferenceType {
 			if !@nullable && that.isNullable() {
 				return true

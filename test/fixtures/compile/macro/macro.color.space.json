@@ -154,7 +154,7 @@
               },
               {
                 "name": "alpha",
-                "type": "Boolean",
+                "type": "Boolean?",
                 "min": 0,
                 "max": 1,
                 "default": 1
@@ -231,7 +231,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": [
               "Error"
             ]
@@ -321,13 +321,13 @@
             "parameters": [
               {
                 "name": "format",
-                "type": "String",
+                "type": "String?",
                 "min": 0,
                 "max": 1,
                 "default": 1
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ],
@@ -371,7 +371,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ],
@@ -426,7 +426,7 @@
             "parameters": [
               {
                 "name": "model",
-                "type": "String",
+                "type": "String?",
                 "min": 0,
                 "max": 1,
                 "default": 1
@@ -507,7 +507,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": [
               "Error"
             ]
@@ -590,7 +590,7 @@
               },
               {
                 "name": "tripleA",
-                "type": "Boolean",
+                "type": "Boolean?",
                 "min": 0,
                 "max": 1,
                 "default": 1
@@ -797,7 +797,7 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           },
           {
@@ -816,7 +816,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ],
@@ -829,7 +829,7 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           },
           {
@@ -848,7 +848,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ],
@@ -861,7 +861,7 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           },
           {
@@ -880,7 +880,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ],
@@ -893,7 +893,7 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           },
           {
@@ -912,7 +912,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ],
@@ -925,7 +925,7 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           },
           {
@@ -944,7 +944,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ]
@@ -1137,7 +1137,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ]

@@ -1,6 +1,7 @@
 class AssignmentOperatorExpression extends Expression {
 	private {
 		_await: Boolean				= false
+		_bindingScope: Scope
 		_left						= null
 		_right						= null
 	}
@@ -13,7 +14,9 @@ class AssignmentOperatorExpression extends Expression {
 
 		@left.analyse()
 
-		@right = $compile.expression(@data.right, this)
+		@bindingScope = this.newScope(@scope, ScopeType::Hollow)
+
+		@right = $compile.expression(@data.right, this, @bindingScope)
 
 		@right.setAssignment(AssignmentType::Expression)
 
@@ -67,6 +70,7 @@ class AssignmentOperatorExpression extends Expression {
 	isComputed() => true
 	isDeclararing() => false
 	isDeclararingVariable(name: String) => this.isDeclararing() && @left.isDeclararingVariable(name)
+	isExpectingType() => @left.isExpectingType()
 	isNullable() => @right.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	listAssignments(array) => @left.listAssignments(@right.listAssignments(array))
@@ -287,15 +291,27 @@ class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	private {
 		_ignorable: Boolean		= false
+		_type: Type
 	}
 	prepare() { // {{{
 		super()
 
-		if @left is IdentifierLiteral {
-			@left.type(@right.type(), @scope, this)
+		if @left is IdentifierLiteral && (@right is IdentifierLiteral || @right is BinaryOperatorTypeCasting) {
+			@ignorable = @left.name() == @right.name()
+		}
 
-			if @right is IdentifierLiteral || @right is BinaryOperatorTypeCasting {
-				@ignorable = @left.name() == @right.name()
+		@type = @left.getDeclaredType()
+
+		if this.isInDestructor() {
+			@type = NullType.Explicit
+		}
+		else {
+			unless @right.type().matchContentOf(@type) {
+				TypeException.throwInvalidAssignement(@left.path(), @type, @right.type(), this)
+			}
+
+			if @left.isInferable() && @right.type().isMorePreciseThan(@type) {
+				@type = @right.type()
 			}
 		}
 	} // }}}
@@ -303,10 +319,37 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		@right.acquireReusable(@left.isSplitAssignment())
 	} // }}}
 	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
+	inferTypes(inferables) { // {{{
+		if @left.isInferable() {
+			inferables[@left.path()] = {
+				isVariable: @left is IdentifierLiteral
+				type: @type
+			}
+		}
+
+		return inferables
+	} // }}}
 	isAssignable() => @left.isAssignable()
 	isDeclarable() => @left.isDeclarable()
 	isDeclararing() => true
 	isIgnorable() => @ignorable
+	private isInDestructor() { // {{{
+		if @parent is not ExpressionStatement {
+			return false
+		}
+
+		let parent = @parent
+
+		while parent? {
+			parent = parent.parent()
+
+			if parent is ClassDestructorDeclaration {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	releaseReusable() { // {{{
 		@right.releaseReusable()
 	} // }}}
@@ -333,7 +376,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		fragments.compile(@left).code($equals).wrap(@right)
 	} // }}}
 	toQuote() => `\(@left.toQuote()) = \(@right.toQuote())`
-	type() => @left.type()
+	type() => @type
 }
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
@@ -347,9 +390,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 			@left.type(@right.type().setNullable(false), @scope, this)
 		}
 	} // }}}
-	inferTypes() { // {{{
-		const inferables = {}
-
+	inferWhenTrueTypes(inferables) { // {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
@@ -443,13 +484,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 			@left.type(@right.type().setNullable(false), @scope, this)
 		}
 	} // }}}
-	inferContraryTypes(isExit) { // {{{
-		if !isExit {
-			return {}
-		}
-
-		const inferables = {}
-
+	inferWhenFalseTypes(inferables) { // {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral

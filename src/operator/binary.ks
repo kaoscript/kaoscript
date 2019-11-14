@@ -282,69 +282,16 @@ class BinaryOperatorAddition extends BinaryOperatorExpression {
 	type() => @type
 }
 
-class BinaryOperatorAnd extends BinaryOperatorExpression {
-	constructor(@data, @parent, @scope) { // {{{
-		super(data, parent, scope, ScopeType::Operation)
+class BinaryOperatorAnd extends PolyadicOperatorAnd {
+	analyse() { // {{{
+		for const data in [@data.left, @data.right] {
+			operand = $compile.expression(data, this)
+
+			operand.analyse()
+
+			@operands.push(operand)
+		}
 	} // }}}
-	prepare() { // {{{
-		@left.prepare()
-
-		if @left.type().isInoperative() {
-			TypeException.throwUnexpectedInoperative(@left, this)
-		}
-
-		unless @left.type().canBeBoolean() {
-			TypeException.throwInvalidOperand(@left, Operator::And, this)
-		}
-
-		for const data, name of @left.inferTypes() {
-			@scope.updateInferable(name, data, this)
-		}
-
-		@right.prepare()
-
-		if @right.type().isInoperative() {
-			TypeException.throwUnexpectedInoperative(@right, this)
-		}
-
-		unless @right.type().canBeBoolean() {
-			TypeException.throwInvalidOperand(@right, Operator::And, this)
-		}
-
-		this.statement().assignTempVariables(@scope)
-	} // }}}
-	inferTypes() { // {{{
-		const inferables = {}
-
-		for const data, name of @left.inferTypes() {
-			inferables[name] = data
-		}
-		for const data, name of @right.inferTypes() {
-			inferables[name] = data
-		}
-
-		return inferables
-	} // }}}
-	inferContraryTypes(isExit) { // {{{
-		const inferables = {}
-
-		const rightTypes = @right.inferContraryTypes(false)
-
-		for const _, name of @left.inferContraryTypes(false) when rightTypes[name]? {
-			inferables[name] = rightTypes[name]
-		}
-
-		return inferables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
-		fragments
-			.wrapBoolean(@left)
-			.code($space)
-			.code('&&', @data.operator)
-			.code($space)
-			.wrapBoolean(@right)
-	} // }}}
-	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorBitwiseAnd extends NumericBinaryOperatorExpression {
@@ -397,14 +344,12 @@ class BinaryOperatorImply extends BinaryOperatorExpression {
 			TypeException.throwInvalidOperand(@right, Operator::Imply, this)
 		}
 	} // }}}
-	inferTypes() { // {{{
-		const inferables = {}
-
-		const right = @right.inferTypes()
+	inferTypes(inferables) { // {{{
+		const right = @right.inferTypes({})
 
 		let rtype
-		for const data, name of @left.inferTypes() {
-			if (rtype ?= right[name].type) && !data.type.isAny() && !rtype.isAny() {
+		for const data, name of @left.inferTypes({}) {
+			if (rtype ?= right[name]?.type) && !data.type.isAny() && !rtype.isAny() {
 				inferables[name] = data
 
 				if !data.type.equals(rtype) {
@@ -453,7 +398,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 			@type = leftType
 		}
 		else {
-			@type = new UnionType(@scope, [leftType, @right.type()])
+			@type = Type.union(@scope, leftType, @right.type())
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
@@ -489,97 +434,16 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	type() => @type
 }
 
-class BinaryOperatorOr extends BinaryOperatorExpression {
-	prepare() { // {{{
-		super()
+class BinaryOperatorOr extends PolyadicOperatorOr {
+	analyse() { // {{{
+		for const data in [@data.left, @data.right] {
+			operand = $compile.expression(data, this)
 
-		unless @left.type().canBeBoolean() {
-			TypeException.throwInvalidOperand(@left, Operator::Or, this)
-		}
+			operand.analyse()
 
-		unless @right.type().canBeBoolean() {
-			TypeException.throwInvalidOperand(@right, Operator::Or, this)
+			@operands.push(operand)
 		}
 	} // }}}
-	inferTypes() { // {{{
-		const inferables = {}
-
-		const right = @right.inferTypes()
-
-		for const data, name of @left.inferTypes() {
-			if right[name]? {
-				const rtype = right[name].type
-
-				if !data.type.isAny() && !rtype.isAny() {
-					inferables[name] = data
-
-					if !data.type.equals(rtype) {
-						inferables[name].type = Type.union(@scope, data.type, rtype)
-					}
-				}
-			}
-			else {
-				inferables[name] = data
-			}
-		}
-
-		return inferables
-	} // }}}
-	inferContraryTypes(isExit) { // {{{
-		if isExit {
-			const inferables = @left.inferContraryTypes(false)
-
-			for const data, name of @right.inferContraryTypes(false) {
-				if inferables[name]? {
-					const itype = inferables[name].type
-
-					if !data.type.isAny() && !itype.isAny() {
-						inferables[name] = {
-							isVariable: data.isVariable
-							type: data.type.reduce(itype)
-						}
-					}
-				}
-				else {
-					inferables[name] = data
-				}
-			}
-
-			return inferables
-		}
-		else {
-			const inferables = {}
-
-			const right = @right.inferTypes()
-
-			for const data, name of @left.inferContraryTypes(false) {
-				if right[name]? {
-					const rtype = right[name].type
-
-					if !data.type.isAny() && !rtype.isAny() {
-						inferables[name] = {
-							isVariable: data.isVariable
-							type: data.type.reduce(rtype)
-						}
-					}
-				}
-				else {
-					inferables[name] = data
-				}
-			}
-
-			return inferables
-		}
-	} // }}}
-	toFragments(fragments, mode) { // {{{
-		fragments
-			.wrapBoolean(@left)
-			.code($space)
-			.code('||', @data.operator)
-			.code($space)
-			.wrapBoolean(@right)
-	} // }}}
-	type() => @scope.reference('Boolean')
 }
 
 class BinaryOperatorQuotient extends NumericBinaryOperatorExpression {
@@ -697,9 +561,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		@left.translate()
 	} // }}}
 	hasExceptions() => false
-	inferTypes() { // {{{
-		const inferables = {}
-
+	inferWhenTrueTypes(inferables) { // {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
@@ -709,9 +571,7 @@ class BinaryOperatorTypeEquality extends Expression {
 
 		return inferables
 	} // }}}
-	inferContraryTypes(isExit) { // {{{
-		const inferables = {}
-
+	inferWhenFalseTypes(inferables) { // {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
@@ -800,9 +660,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)
-	inferTypes() { // {{{
-		const inferables = {}
-
+	inferWhenTrueTypes(inferables) { // {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
@@ -812,9 +670,7 @@ class BinaryOperatorTypeInequality extends Expression {
 
 		return inferables
 	} // }}}
-	inferContraryTypes(isExit) { // {{{
-		const inferables = {}
-
+	inferWhenFalseTypes(inferables) { // {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral

@@ -28,7 +28,7 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": [
               {
                 "reference": 0

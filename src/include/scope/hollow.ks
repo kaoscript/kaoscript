@@ -8,6 +8,7 @@ class HollowScope extends Scope {
 	acquireTempName(declare: Boolean = true): String => @parent.acquireTempName(declare)
 	acquireUnusedTempName() => @parent.acquireUnusedTempName()
 	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
+	block() => @parent.block()
 	private declareVariable(name: String, scope: Scope): String? => @parent.declareVariable(name, scope)
 	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { // {{{
 		if this.hasDefinedVariable(name) {
@@ -52,7 +53,7 @@ class HollowScope extends Scope {
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
-			let variable: Variable = null
+			let variable: Variable? = null
 
 			if @parent.isAtLastLine() {
 				variable = variables.last()
@@ -76,6 +77,7 @@ class HollowScope extends Scope {
 		return null
 	} // }}}
 	getMacro(data, parent) => @parent.getMacro(data, parent)
+	getRawLine() => @parent.getRawLine()
 	getRenamedIndex(name: String): Number => @parent.getRenamedIndex(name)
 	getTempIndex() => @parent.getTempIndex()
 	getVariable(name): Variable => this.getVariable(name, @parent.line())
@@ -83,7 +85,7 @@ class HollowScope extends Scope {
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			const currentLine = @parent.line()
-			let variable: Variable = null
+			let variable: Variable? = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
@@ -102,7 +104,7 @@ class HollowScope extends Scope {
 			}
 		}
 
-		return @parent.getVariable(name, -1)
+		return @parent.getVariable(name, line)
 	} // }}}
 	hasBleedingVariable(name: String) => @parent.hasBleedingVariable(name)
 	hasDefinedVariable(name: String): Boolean => @parent.hasDefinedVariable(name, @line)
@@ -123,9 +125,12 @@ class HollowScope extends Scope {
 	} // }}}
 	isRenamedVariable(name: String): Boolean => @parent.isRenamedVariable(name)
 	line() => @parent.line()
+	line(line: Number) => @parent.line(line)
 	module() => @parent.module()
 	parent() => @parent
-	reference(...args) => @parent.reference(...args)
+	// reference(...args) => @parent.reference(...args)
+	// override reference(value, nullable?, parameters?) => @parent.reference(value, nullable, parameters)
+	reference(value, nullable: Boolean = false, parameters: Array = []) => @parent.reference(value, nullable, parameters)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name, newName) { // {{{
 		if newName != name {
@@ -136,6 +141,7 @@ class HollowScope extends Scope {
 			@variables[name] = [@parent.line(), variable]
 		}
 	} // }}}
+	renameNext(name, line) => @parent.renameNext(name, line)
 	replaceVariable(name: String, type: Type, node): Variable { // {{{
 		let variable = this.getVariable(name)
 
@@ -144,6 +150,14 @@ class HollowScope extends Scope {
 				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
 			}
 			else if type.isAny() && !variable.getDeclaredType().isAny() {
+				if variable.getRealType().isNull() {
+					variable.setRealType(variable.getDeclaredType())
+				}
+
+				if type.isNullable() {
+					variable.setRealType(variable.getRealType().setNullable(true))
+				}
+
 				return variable
 			}
 			else if !type.matchContentOf(variable.getDeclaredType()) {
@@ -164,14 +178,14 @@ class HollowScope extends Scope {
 
 		return variable
 	} // }}}
-	resolveReference(...args) => @parent.resolveReference(...args)
+	resolveReference(name, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(name, nullable, parameters)
 	updateInferable(name, data, node) { // {{{
 		if data.isVariable {
 			this.replaceVariable(name, data.type, node)
 		}
 		else {
 			if @chunkTypes[name] is Array {
-				@chunkTypes.push(@line, data.type)
+				@chunkTypes[name].push(@line, data.type)
 			}
 			else {
 				@chunkTypes[name] = [@line, data.type]

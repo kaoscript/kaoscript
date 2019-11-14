@@ -1,6 +1,6 @@
 {
   "aliens": [
-    -1,
+    "Any?",
     "console",
     0,
     "NS"
@@ -34,7 +34,7 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ]

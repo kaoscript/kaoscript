@@ -42,11 +42,11 @@ module.exports = function() {
 				Greetings.prototype.__ks_cons_0.apply(this);
 			}
 			else if(args.length === 1) {
-				if(Type.isArray(args[0], String)) {
-					Greetings.prototype.__ks_cons_2.apply(this, args);
+				if(Type.isString(args[0])) {
+					Greetings.prototype.__ks_cons_1.apply(this, args);
 				}
 				else {
-					Greetings.prototype.__ks_cons_1.apply(this, args);
+					Greetings.prototype.__ks_cons_2.apply(this, args);
 				}
 			}
 			else {

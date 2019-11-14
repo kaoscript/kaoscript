@@ -83,6 +83,16 @@ class IdentifierLiteral extends Literal {
 	isAssignable() => true
 	isDeclarable() => true
 	isDeclararingVariable(name: String) => @value == name
+	isExpectingType() { // {{{
+		if @isVariable {
+			const variable = @scope.getVariable(@value, @line)
+
+			return variable.isDefinitive()
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isMacro() => @isMacro
 	isRedeclared() => @scope.isRedeclaredVariable(@value)
 	isRenamed() => @scope.isRenamedVariable(@value)

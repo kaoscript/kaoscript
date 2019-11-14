@@ -98,6 +98,7 @@ class ModuleScope extends Scope {
 			@stashes[name] = [fn]
 		}
 	} // }}}
+	block() => this
 	commitTempVariables(variables: Array) { // {{{
 		variables.pushUniq(...@tempDeclarations)
 
@@ -177,7 +178,7 @@ class ModuleScope extends Scope {
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
-			let variable: Variable = null
+			let variable: Variable? = null
 
 			if @lastLine {
 				variable = variables.last()
@@ -450,7 +451,7 @@ class ModuleScope extends Scope {
 		return variable
 	} // }}}
 	replaceVariable(name: String, type: Type, node): Variable { // {{{
-		let variable: Variable = this.getVariable(name)
+		let variable: Variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
 			if type.isNull() && !variable.getDeclaredType().isNullable() {
@@ -459,6 +460,10 @@ class ModuleScope extends Scope {
 			else if type.isAny() && !variable.getDeclaredType().isAny() {
 				if variable.getRealType().isNull() {
 					variable.setRealType(variable.getDeclaredType())
+				}
+
+				if type.isNullable() {
+					variable.setRealType(variable.getRealType().setNullable(true))
 				}
 
 				return variable

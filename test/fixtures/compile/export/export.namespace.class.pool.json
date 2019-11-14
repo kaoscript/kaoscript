@@ -22,7 +22,7 @@
           "min": 0,
           "max": 0,
           "parameters": [],
-          "returns": "Any",
+          "returns": "Any?",
           "throws": [],
           "sealed": false
         },
@@ -33,7 +33,7 @@
           "min": 0,
           "max": 0,
           "parameters": [],
-          "returns": "Any",
+          "returns": "Any?",
           "throws": [],
           "sealed": false
         },
@@ -44,7 +44,7 @@
           "min": 0,
           "max": 0,
           "parameters": [],
-          "returns": "Any",
+          "returns": "Any?",
           "throws": [],
           "sealed": false
         },
@@ -78,7 +78,7 @@
             "min": 0,
             "max": 0,
             "parameters": [],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           },
           {
@@ -97,7 +97,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ]
@@ -133,7 +133,7 @@
           "default": 0
         }
       ],
-      "returns": "Any",
+      "returns": "Any?",
       "throws": []
     }
   ],

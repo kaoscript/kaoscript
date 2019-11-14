@@ -1,6 +1,6 @@
 {
   "aliens": [
-    -1,
+    "Any?",
     "console",
     0,
     "Math"
@@ -28,7 +28,7 @@
           "max": "Infinity",
           "parameters": [
             {
-              "type": "Any",
+              "type": "Any?",
               "min": 0,
               "max": "Infinity",
               "default": 0

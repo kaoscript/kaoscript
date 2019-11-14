@@ -1,6 +1,6 @@
 {
   "aliens": [
-    -1,
+    "Any?",
     "console"
   ],
   "requirements": [],
@@ -11,7 +11,7 @@
     "grault",
     2,
     "x",
-    -1,
+    "Any?",
     "y"
   ],
   "references": [
@@ -30,7 +30,7 @@
           "default": 0
         }
       ],
-      "returns": "Any",
+      "returns": "Any?",
       "throws": []
     },
     {
@@ -48,7 +48,7 @@
           "default": 0
         }
       ],
-      "returns": "Any",
+      "returns": "Any?",
       "throws": []
     },
     "String"

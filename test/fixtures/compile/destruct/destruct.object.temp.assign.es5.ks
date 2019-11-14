@@ -1,6 +1,6 @@
 #![target(ecma-v5)]
 
-func parse(line, rules) {
+func parse(line, rules?) {
 	const tokens = []
 
 	return {

@@ -9,6 +9,7 @@ class BleedingScope extends Scope {
 	constructor(@parent)
 	acquireTempName(declare: Boolean = true): String => @parent.acquireTempName(declare)
 	acquireUnusedTempName() => @parent.acquireUnusedTempName()
+	block() => @parent.block()
 	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
 	private declareVariable(name: String, scope: Scope) => @parent.declareVariable(name, scope)
 	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { // {{{
@@ -64,6 +65,7 @@ class BleedingScope extends Scope {
 
 		return null
 	} // }}}
+	getRawLine() => @parent.getRawLine()
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
 	getTempIndex() => @parent.getTempIndex()
 	getVariable(name): Variable => this.getVariable(name, @parent.line())
@@ -71,7 +73,7 @@ class BleedingScope extends Scope {
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			const currentLine = @parent.line()
-			let variable: Variable = null
+			let variable: Variable? = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
@@ -90,7 +92,7 @@ class BleedingScope extends Scope {
 			}
 		}
 
-		return @parent.getVariable(name, -1)
+		return @parent.getVariable(name, line)
 	} // }}}
 	hasDeclaredVariable(name: String) => @variables[name] is Array || @parent.hasDeclaredVariable(name)
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @parent.line())
@@ -137,9 +139,10 @@ class BleedingScope extends Scope {
 		}
 	} // }}}
 	line() => @parent.line()
+	line(line: Number) => @parent.line(line)
 	module() => @parent.module()
 	parent() => @parent
-	reference(...args) => @parent.reference(...args)
+	reference(value, nullable: Boolean = false, parameters: Array = []) => @parent.reference(value, nullable, parameters)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name) { // {{{
 		return if @renamedVariables[name] is String
@@ -155,5 +158,5 @@ class BleedingScope extends Scope {
 
 		variable.renameAs(newName)
 	} // }}}
-	resolveReference(...args) => @parent.resolveReference(...args)
+	resolveReference(name, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(name, nullable, parameters)
 }

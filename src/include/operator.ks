@@ -71,7 +71,7 @@ const $operatorTypes = {
 
 include {
 	'../operator/assignment'
-	'../operator/binary'
 	'../operator/polyadic'
+	'../operator/binary'
 	'../operator/unary'
 }

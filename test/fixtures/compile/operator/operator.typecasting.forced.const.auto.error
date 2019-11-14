@@ -1,0 +1,1 @@
+SyntaxException: The forced type casting "!!" can't determine the expected type (line 4, file "fixtures/compile/operator/operator.typecasting.forced.const.auto.ks")

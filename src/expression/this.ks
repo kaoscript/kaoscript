@@ -109,8 +109,21 @@ class ThisExpression extends Expression {
 		}
 	} // }}}
 	translate()
+	getDeclaredType() { // {{{
+		if !@calling {
+			if variable ?= @class.type().getInstanceVariable(@name) {
+				return variable.type()
+			}
+			else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
+				return variable.type()
+			}
+		}
+
+		return @type
+	} // }}}
 	isAssignable() => !@calling && !@composite
 	isComposite() => @composite
+	isExpectingType() => true
 	isInferable() => !@calling && !@composite
 	isUsingVariable(name) => name == 'this'
 	listAssignments(array) => array

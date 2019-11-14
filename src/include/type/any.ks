@@ -34,7 +34,7 @@ class AnyType extends Type {
 			return 1
 		}
 	} // }}}
-	export(references, mode) => 'Any'
+	export(references, mode) => this.toReference(references, mode)
 	flagAlien() { // {{{
 		if @alien == true {
 			return this
@@ -48,7 +48,7 @@ class AnyType extends Type {
 	} // }}}
 	flagRequired() => this
 	getProperty(name) => AnyType.NullableUnexplicit
-	hashCode() => 'Any'
+	hashCode() => @nullable ? `Any?` : `Any`
 	isAny() => true
 	isExplicit() => @explicit
 	isExportable() => true
@@ -66,7 +66,7 @@ class AnyType extends Type {
 	} // }}}
 	isMorePreciseThan(type: Type) => type.isAny() && @nullable != type.isNullable()
 	isNullable() => @nullable
-	matchContentOf(b) => !@explicit || (b.isAny() && (@nullable -> !b.isNullable()))
+	matchContentOf(b) => !@explicit || (b.isAny() && (@nullable -> b.isNullable()))
 	parameter() => AnyType.NullableUnexplicit
 	reference() => this
 	setNullable(nullable: Boolean): Type { // {{{
@@ -90,16 +90,16 @@ class AnyType extends Type {
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
-		fragments.code('Any')
+		fragments.code(@nullable ? `Any?` : `Any`)
 	} // }}}
-	toMetadata(references, mode) => -1
+	toMetadata(references, mode) => this.toReference(references, mode)
 	toQuote(): String => @nullable ? `Any?` : `Any`
 	toReference(references, mode) { // {{{
 		if @explicit {
-			return @nullable ? `Any?` : `Any`
+			return @nullable ? `Any!?` : `Any!`
 		}
 		else {
-			return 'Any'
+			return @nullable ? `Any?` : `Any`
 		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{

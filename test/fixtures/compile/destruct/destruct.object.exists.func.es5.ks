@@ -1,7 +1,7 @@
 #![format(destructuring='es5')]
 
 extern console: {
-	log(...args)
+	log(...)
 }
 
 func foo() => { bar: 'hello', baz: 3 }

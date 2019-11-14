@@ -1,5 +1,5 @@
 extern console: {
-	log(...args)
+	log(...)
 }
 
 let foo = { bar: 'hello', baz: 3 }

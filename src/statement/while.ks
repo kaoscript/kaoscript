@@ -41,7 +41,7 @@ class WhileStatement extends Statement {
 				TypeException.throwInvalidCondition(@condition, this)
 			}
 
-			for const data, name of @condition.inferTypes() {
+			for const data, name of @condition.inferWhenTrueTypes({}) {
 				@bodyScope.updateInferable(name, data, this)
 			}
 

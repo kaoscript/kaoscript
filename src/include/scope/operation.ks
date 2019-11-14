@@ -1,4 +1,5 @@
 class OperationScope extends InlineBlockScope {
+	block() => @parent.block()
 	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable => @parent.define(name, immutable, type, initialized, node)
 	replaceVariable(name: String, type: Type, node): Variable { // {{{
 		let variable = this.getVariable(name)
@@ -10,6 +11,10 @@ class OperationScope extends InlineBlockScope {
 			else if type.isAny() && !variable.getDeclaredType().isAny() {
 				if variable.getRealType().isNull() {
 					variable.setRealType(variable.getDeclaredType())
+				}
+
+				if type.isNullable() {
+					variable.setRealType(variable.getRealType().setNullable(true))
 				}
 
 				return variable

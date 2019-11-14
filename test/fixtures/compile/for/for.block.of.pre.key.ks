@@ -1,5 +1,5 @@
 extern console: {
-	log(...args)
+	log(...)
 }
 
 likes = {

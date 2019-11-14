@@ -1,3 +1,5 @@
+const $importTypeModifiers = /^(\w+)(!)?(\?)?$/
+
 const $natives = { // {{{
 	Any: true
 	any: true
@@ -154,10 +156,10 @@ abstract class Type {
 				}
 				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
 					if data.parameters? {
-						return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters]!!, data, node)
+						return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
 					}
 					else {
-						return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)] as Array<ParameterType>, data, node)
+						return new FunctionType([new ParameterType(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node)
 					}
 				}
 				NodeKind::FunctionExpression, NodeKind::MethodDeclaration => {
@@ -191,7 +193,7 @@ abstract class Type {
 					return scope.reference('Number')
 				}
 				NodeKind::Parameter => {
-					let type = Type.fromAST(data.type, scope, defined, node)
+					let type = ?data.type ? Type.fromAST(data.type, scope, defined, node) : AnyType.Unexplicit
 
 					let default: Number = 0
 					let min: Number = 1
@@ -262,7 +264,10 @@ abstract class Type {
 						if data.typeName.kind == NodeKind::Identifier {
 							const name = Type.renameNative(data.typeName.name)
 
-							if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
+							if name == 'Any' {
+								return nullable ? AnyType.NullableExplicit : AnyType.Explicit
+							}
+							else if !defined || Type.isNative(name) || scope.hasVariable(name, -1) {
 								if data.typeParameters? {
 									const type = new ReferenceType(scope, name, nullable)
 
@@ -339,14 +344,24 @@ abstract class Type {
 				}
 			}
 			else if data is String {
-				if data == 'Any' {
-					return AnyType.Unexplicit
-				}
-				else if data == 'Any?' {
-					return AnyType.NullableExplicit
-				}
-				else if data == 'Null' {
+				if data == 'Null' {
 					return Type.Null
+				}
+
+				if const match = $importTypeModifiers.exec(data) {
+					const nullable = match[3]?
+
+					if match[1] == 'Any' {
+						if match[2]? {
+							return nullable ? AnyType.NullableExplicit : AnyType.Explicit
+						}
+						else {
+							return nullable ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+						}
+					}
+					else {
+						return scope.reference(match[1], nullable)
+					}
 				}
 				else {
 					return scope.reference(data)
@@ -533,7 +548,8 @@ abstract class Type {
 	discardAlias(): Type => this
 	discardName(): Type => this
 	discardReference(): Type? => this
-	discardVariable() => this
+	discardSpread(): Type => this
+	discardVariable(): Type => this
 	equals(value?): Boolean => value? && this.isMatching(value, MatchingMode::Exact)
 	flagAlien() { // {{{
 		@alien = true
@@ -621,6 +637,7 @@ abstract class Type {
 	isSealable() => false
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
+	isSpread() => false
 	isString() => false
 	isTypeOf() => false
 	isUnion() => false

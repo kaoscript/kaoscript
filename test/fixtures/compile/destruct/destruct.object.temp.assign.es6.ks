@@ -1,4 +1,4 @@
-func parse(line, rules) {
+func parse(line, rules?) {
 	const tokens = []
 
 	return {

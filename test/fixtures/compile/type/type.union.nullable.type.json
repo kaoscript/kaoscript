@@ -73,7 +73,7 @@
           "default": 1
         }
       ],
-      "returns": "Any",
+      "returns": "Any?",
       "throws": []
     },
     {
@@ -93,7 +93,7 @@
           "default": 0
         }
       ],
-      "returns": "Any",
+      "returns": "Any?",
       "throws": []
     }
   ],

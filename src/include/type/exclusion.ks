@@ -62,7 +62,7 @@ class ExclusionType extends Type {
 		return true
 	} // }}}
 	isMatching(value: Type, mode: MatchingMode) { // {{{
-		console.log(value)
+		console.error(value)
 		NotImplementedException.throw()
 	} // }}}
 	length() => @types.length

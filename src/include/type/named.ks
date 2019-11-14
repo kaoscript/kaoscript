@@ -291,6 +291,9 @@ class NamedType extends Type {
 		else if that is ReferenceType {
 			return @name == that.name() || this.matchContentOf(that.discardReference())
 		}
+		else if that is DictionaryType {
+			return @name == 'Dictionary'
+		}
 		else {
 			return @type.matchContentOf(that)
 		}
@@ -418,4 +421,45 @@ class NamedContainerType extends NamedType {
 		}
 	} // }}}
 	hasProperty(name: String): Boolean => @type.hasProperty(name)
+	matchContentOf(that: Type?) { // {{{
+		if that == null {
+			return false
+		}
+		else if that.isAny() {
+			return true
+		}
+		else if that is NamedContainerType {
+			return @name == that.name()
+		}
+		else if that is UnionType {
+			for const type in that.types() {
+				if this.matchContentOf(type) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else if that is ExclusionType {
+			const types = that.types()
+
+			if !this.matchContentOf(types[0]) {
+				return false
+			}
+
+			for const type in types from 1 {
+				if this.matchContentOf(type) {
+					return false
+				}
+			}
+
+			return true
+		}
+		else if that is ReferenceType {
+			return @name == that.name() || this.matchContentOf(that.discardReference())
+		}
+		else {
+			return @type.matchContentOf(that)
+		}
+	} // }}}
 }

@@ -32,11 +32,7 @@
             "kind": "reference",
             "name": "Array",
             "parameters": [
-              {
-                "kind": "reference",
-                "name": "String",
-                "nullable": true
-              }
+              "String?"
             ]
           },
           {

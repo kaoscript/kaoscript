@@ -64,12 +64,12 @@ class IfStatement extends Statement {
 				TypeException.throwInvalidCondition(@condition, this)
 			}
 
-			for const data, name of @condition.inferTypes() {
+			for const data, name of @condition.inferWhenTrueTypes({}) {
 				@whenTrueScope.updateInferable(name, data, this)
 			}
 
 			if @whenFalseExpression != null {
-				for const data, name of @condition.inferContraryTypes(true) {
+				for const data, name of @condition.inferWhenFalseTypes({}) {
 					@whenFalseScope.updateInferable(name, data, this)
 				}
 			}
@@ -89,17 +89,17 @@ class IfStatement extends Statement {
 
 			if !@declared {
 				if @whenTrueExpression.isExit() {
-					for const data, name of @condition.inferContraryTypes(true) {
+					for const data, name of @condition.inferWhenFalseTypes({}) {
 						@scope.updateInferable(name, data, this)
 					}
 				}
 				else {
-					const conditionInferables = @condition.inferContraryTypes(false)
+					const conditionInferables = @condition.inferWhenFalseTypes({})
 					const trueInferables = @whenTrueScope.listUpdatedInferables()
 
 					for const _, name of trueInferables when conditionInferables[name]? {
-						const trueType = trueInferables[name].type
 						const conditionType = conditionInferables[name].type
+						const trueType = trueInferables[name].type
 
 						if trueType.equals(conditionType) {
 							@scope.updateInferable(name, trueInferables[name], this)
@@ -116,7 +116,7 @@ class IfStatement extends Statement {
 		}
 		else {
 			if !@declared {
-				for const data, name of @condition.inferContraryTypes(false) {
+				for const data, name of @condition.inferWhenFalseTypes({}) {
 					@whenFalseScope.updateInferable(name, data, this)
 				}
 			}

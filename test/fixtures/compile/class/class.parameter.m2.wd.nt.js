@@ -1,3 +1,4 @@
+var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	class Foo {
 		constructor() {
@@ -39,7 +40,12 @@ module.exports = function() {
 				Foo.prototype.__ks_cons_0.apply(this, args);
 			}
 			else if(args.length === 2) {
-				Foo.prototype.__ks_cons_0.apply(this, args);
+				if(Type.isValue(args[0])) {
+					Foo.prototype.__ks_cons_1.apply(this, args);
+				}
+				else {
+					Foo.prototype.__ks_cons_0.apply(this, args);
+				}
 			}
 			else if(args.length === 3) {
 				Foo.prototype.__ks_cons_1.apply(this, args);

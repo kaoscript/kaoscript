@@ -25,7 +25,7 @@ class UnlessStatement extends Statement {
 		@whenFalseExpression.prepare()
 
 		if @whenFalseExpression.isExit() {
-			for const data, name of @condition.inferTypes() {
+			for const data, name of @condition.inferWhenTrueTypes({}) {
 				@scope.updateInferable(name, data, this)
 			}
 		}

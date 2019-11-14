@@ -432,7 +432,7 @@ class ClassDeclaration extends Statement {
 			this.addReference(type.type(), node)
 		}
 		else {
-			console.log(type)
+			console.error(type)
 			throw new NotImplementedException(this)
 		}
 	} // }}}

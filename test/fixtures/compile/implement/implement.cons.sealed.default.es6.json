@@ -2,7 +2,7 @@
   "aliens": [
     0,
     "Date",
-    -1,
+    "Any?",
     "console"
   ],
   "requirements": [],

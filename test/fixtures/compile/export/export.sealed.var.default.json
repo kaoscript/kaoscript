@@ -12,7 +12,7 @@
     {
       "kind": "sealable",
       "sealed": true,
-      "type": "Any"
+      "type": "Any?"
     }
   ],
   "macros": []

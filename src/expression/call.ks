@@ -279,18 +279,20 @@ class CallExpression extends Expression {
 		}
 	} // }}}
 	arguments() => @arguments
-	inferTypes() { // {{{
-		if @object == null {
-			return {}
+	inferTypes(inferables) { // {{{
+		if @object != null {
+			@object.inferTypes(inferables)
+
+			if @nullable && @object.isInferable() {
+				inferables[@object.path()] = {
+					isVariable: @object is IdentifierLiteral
+					type: @object.type().setNullable(false)
+				}
+			}
 		}
 
-		const inferables = @object.inferTypes()
-
-		if @nullable && @object.isInferable() {
-			inferables[@object.path()] = {
-				isVariable: @object is IdentifierLiteral
-				type: @object.type().setNullable(false)
-			}
+		for const argument in @arguments {
+			argument.inferTypes(inferables)
 		}
 
 		return inferables
@@ -309,6 +311,7 @@ class CallExpression extends Expression {
 	isComposite() => !@reusable
 	isComputed() => (@nullable || @callees.length > 1) && !@tested
 	isExit() => @type.isNever()
+	isExpectingType() => true
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	isUsingVariable(name) { // {{{
@@ -457,6 +460,12 @@ class CallExpression extends Expression {
 			}
 			is NamespaceType => {
 				if const property = value.getProperty(@property) {
+					if property is FunctionType || property is OverloadedFunctionType {
+						if property.isExhaustive(this) && !property.matchArguments(@arguments) {
+							ReferenceException.throwNoMatchingFunctionInNamespace(@property, name, @arguments, this)
+						}
+					}
+
 					if property is SealableType {
 						this.makeNamespaceCallee(property.type(), property.isSealed(), name)
 					}
@@ -759,13 +768,13 @@ abstract class Callee {
 		_nullable: Boolean			= false
 		_nullableProperty: Boolean	= false
 	}
-	constructor(@data) {
+	constructor(@data) { // {{{
 		for const modifier in data.modifiers {
 			if modifier.kind == ModifierKind::Nullable {
 				@nullable = true
 			}
 		}
-	}
+	} // }}}
 	acquireReusable(acquire)
 	isNullable() => @nullable || @nullableProperty
 	isNullableComputed() => @nullable && @nullableProperty

@@ -874,7 +874,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		_block: Block
 		_namespace: NamespaceType
 		_namespaceRef: ReferenceType
-		_parameters: Array
+		_parameters: Array						 = []
 		_type: FunctionType
 		_variable: NamedType<NamespaceType>
 	}
@@ -885,15 +885,16 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@namespaceRef = @scope.reference(@variable)
 	} // }}}
 	analyse() { // {{{
-		@parameters = []
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+		for const data in @data.parameters {
+			const parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 	} // }}}
 	prepare() { // {{{
-		for parameter in @parameters {
+		for const parameter in @parameters {
 			parameter.prepare()
 		}
 
@@ -910,7 +911,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@type = property.type()
 	} // }}}
 	translate() { // {{{
-		for parameter in @parameters {
+		for const parameter in @parameters {
 			parameter.translate()
 		}
 

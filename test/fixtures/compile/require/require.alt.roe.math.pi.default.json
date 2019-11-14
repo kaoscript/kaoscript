@@ -4,7 +4,7 @@
     "Number",
     1,
     "Math",
-    -1,
+    "Any?",
     "console"
   ],
   "requirements": [
@@ -68,7 +68,7 @@
           "max": "Infinity",
           "parameters": [
             {
-              "type": "Any",
+              "type": "Any?",
               "min": 0,
               "max": "Infinity",
               "default": 0
@@ -105,7 +105,9 @@
               {
                 "name": "precision",
                 "type": {
-                  "reference": 2
+                  "kind": "reference",
+                  "name": 2,
+                  "nullable": true
                 },
                 "min": 0,
                 "max": 1,

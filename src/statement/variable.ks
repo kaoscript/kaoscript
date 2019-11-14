@@ -2,7 +2,7 @@ class VariableDeclaration extends Statement {
 	private {
 		_autotype: Boolean			= false
 		_await: Boolean				= false
-		_cascade: Boolean				= false
+		_cascade: Boolean			= false
 		_declarators: Array			= []
 		_function					= null
 		_hasInit: Boolean			= false
@@ -39,17 +39,20 @@ class VariableDeclaration extends Statement {
 			if modifier.kind == ModifierKind::Immutable {
 				@immutable = true
 				@rebindable = false
-				@autotype = true
 			}
 			else if modifier.kind == ModifierKind::AutoTyping {
 				@autotype = true
 			}
 		}
 
-		@initScope ??= @scope
-
 		if @data.init? {
 			@hasInit = true
+
+			if @immutable {
+				@rebindable = ?@initScope
+			}
+
+			@initScope ??= this.newScope(@scope, ScopeType::Hollow)
 
 			const line = @initScope.getRawLine()
 
@@ -59,10 +62,6 @@ class VariableDeclaration extends Statement {
 			@init.analyse()
 
 			@initScope.line(line)
-
-			if @immutable {
-				@rebindable = @scope != @initScope
-			}
 
 			@await = @init.isAwait()
 
@@ -98,6 +97,7 @@ class VariableDeclaration extends Statement {
 				this.reference(@declarators[0].name())
 			}
 		}
+
 	} // }}}
 	prepare() { // {{{
 		const declarator = @declarators[0]
@@ -224,6 +224,7 @@ class VariableDeclaration extends Statement {
 
 		return false
 	} // }}}
+	isExpectingType() => @declarators[0].isStronglyTyped()
 	isImmutable() => @immutable
 	isUsingVariable(name) => @hasInit && @init.isUsingVariable(name)
 	toAwaitStatementFragments(fragments, statements) { // {{{
@@ -353,6 +354,7 @@ class VariableBindingDeclarator extends AbstractNode {
 	} // }}}
 	isRedeclared() => @binding.isRedeclared()
 	isSplitAssignment() => @binding.isSplitAssignment()
+	isStronglyTyped() => true
 	setDeclaredType(type: Type) => this.setRealType(type)
 	setRealType(type: Type) { // {{{
 		if !type.isAny() {
@@ -381,12 +383,13 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	private {
 		_identifier: IdentifierLiteral
 		_name: String
+		_type: Type?						= null
 		_variable: Variable
 	}
 	analyse() { // {{{
 		@name = @data.name.name
 
-		@identifier = new IdentifierLiteral(@data.name, this)
+		@identifier = new IdentifierLiteral(@data.name, this, @scope)
 		@identifier.setAssignment(AssignmentType::Declaration)
 		@identifier.analyse()
 
@@ -396,13 +399,23 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	prepare() { // {{{
 		if @data.type? {
-			const type = Type.fromAST(@data.type, this)
+			@type = Type.fromAST(@data.type, this)
 
-			if type.isNull() {
+			if @type.isNull() {
 				TypeException.throwNullTypeVariable(@name, this)
 			}
 
-			@variable.setDeclaredType(type).flagDefinitive()
+			@variable.setDeclaredType(@type).flagDefinitive()
+		}
+		else {
+			if @parent.isImmutable() {
+				@type = @variable.getRealType()
+			}
+			else {
+				@type = AnyType.NullableUnexplicit
+			}
+
+			@variable.setDeclaredType(@type).flagDefinitive()
 		}
 
 		@identifier.prepare()
@@ -434,9 +447,22 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	isDeclararingVariable(name: String) => @name == name
 	isRedeclared() => @scope.isRedeclaredVariable(@name)
 	isSplitAssignment() => false
+	isStronglyTyped() => @data.type?
 	name() => @name
-	setDeclaredType(type: Type) => @variable.setDeclaredType(type)
-	setRealType(type: Type) => @variable.setRealType(type)
+	setDeclaredType(type: Type) { // {{{
+		if @type == null {
+			@variable.setDeclaredType(type)
+		}
+	} // }}}
+	setRealType(type: Type) { // {{{
+		if @type != null {
+			if !type.matchContentOf(@type) {
+				TypeException.throwInvalidAssignement(@name, @type, type, this)
+			}
+		}
+
+		@variable.setRealType(type)
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@identifier)
 	} // }}}

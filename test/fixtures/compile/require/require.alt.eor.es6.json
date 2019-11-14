@@ -57,13 +57,13 @@
               },
               {
                 "name": "from",
-                "type": "Any",
+                "type": "Any?",
                 "min": 0,
                 "max": 1,
                 "default": 1
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ],
@@ -84,7 +84,7 @@
                 "default": 0
               }
             ],
-            "returns": "Any",
+            "returns": "Any?",
             "throws": []
           }
         ]

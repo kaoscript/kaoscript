@@ -1,12 +1,17 @@
 abstract class Expression extends AbstractNode {
 	private {
-		_castingEnum: Boolean	= false
+		_castingEnum: Boolean		= false
 	}
 	acquireReusable(acquire)
+	getDeclaredType() => this.type()
 	// if the expression can throw an expception
 	hasExceptions() => true
-	inferTypes() => {}
-	inferContraryTypes(isExit) => {}
+	// types after of the expression block
+	inferTypes(inferables) => inferables
+	// types if the condition is true
+	inferWhenTrueTypes(inferables) => this.inferTypes(inferables)
+	// types if the condition is false
+	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
 	// if the expression can be an assignment
 	isAssignable() => false
 	// if the expression is an `await` expression
@@ -25,6 +30,8 @@ abstract class Expression extends AbstractNode {
 	isDeclarable() => false
 	// if the expression is always exiting
 	isExit() => false
+	// if the expression can be an assignment and the variable has a defined type
+	isExpectingType() => false
 	// if the expression can be ignored (like a variable casting)
 	isIgnorable() => false
 	// if the associated type can be updated (it's a chunck or a variable)
@@ -90,6 +97,7 @@ abstract class Expression extends AbstractNode {
 			fragments.wrap(this)
 		}
 	} // }}}
+	type() => AnyType.NullableUnexplicit
 }
 
 include {

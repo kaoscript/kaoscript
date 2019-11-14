@@ -39,6 +39,7 @@ class MacroScope extends Scope {
 	acquireTempName(declare: Boolean = true) { // {{{
 		throw new NotSupportedException()
 	} // }}}
+	block() => this
 	private declareVariable(name: String, scope: Scope) { // {{{
 		if $keywords[name] == true || @renamedIndexes[name] is Number {
 			let index = @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0

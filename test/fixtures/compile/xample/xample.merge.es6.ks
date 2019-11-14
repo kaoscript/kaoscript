@@ -2,25 +2,27 @@ extern sealed class Array
 
 impl Array {
 	static merge(...args) {
-		let source: Array
-
 		let i = 0
 		let l = args.length
-		while i < l && !((source ?= args[i]) && source is Array) {
+		while i < l && args[i] is not Array {
 			++i
 		}
-		++i
 
-		while i < l {
-			if args[i] is Array {
-				for value in args[i] {
-					source.pushUniq(value)
+		if i < l {
+			const source: Array = args[i]
+
+			while ++i < l {
+				if args[i] is Array {
+					for value in args[i] {
+						source.pushUniq(value)
+					}
 				}
 			}
 
-			++i
+			return source
 		}
-
-		return source
+		else {
+			return []
+		}
 	}
 }

@@ -1,7 +1,7 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function foobar() {
-		return [42];
+		return 42;
 	}
 	function quxbaz(x) {
 		if(arguments.length < 1) {
@@ -10,8 +10,8 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.isArray(x, Number)) {
-			throw new TypeError("'x' is not of type 'Array<Number>'");
+		else if(!Type.isNumber(x)) {
+			throw new TypeError("'x' is not of type 'Number'");
 		}
 	}
 	quxbaz(foobar());

@@ -710,10 +710,10 @@ export class Color {
 
 		for component, name of components {
 			if component.loop {
-				let d = Math.abs(this[component.field] - color[component.field])
+				let d: Number = Math.abs(this[component.field] - color[component.field])
 
 				if d > component.half {
-					d = component.mod - d
+					d = component.mod:Number - d
 				}
 
 				this[component.field] = ((this[component.field]:Number + (d * percentage)) % component.mod).round(component.round)

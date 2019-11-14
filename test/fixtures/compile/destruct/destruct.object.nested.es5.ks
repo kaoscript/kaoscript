@@ -1,7 +1,7 @@
 #![target(ecma-v5)]
 
 extern console: {
-	log(...args)
+	log(...)
 }
 
 let foo = { bar: { n1: 'hello', n2: 'world' } }

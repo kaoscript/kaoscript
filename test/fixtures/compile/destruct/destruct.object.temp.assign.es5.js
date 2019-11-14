@@ -7,8 +7,8 @@ module.exports = function() {
 		if(line === void 0 || line === null) {
 			throw new TypeError("'line' is not nullable");
 		}
-		if(rules === void 0 || rules === null) {
-			throw new TypeError("'rules' is not nullable");
+		if(rules === void 0) {
+			rules = null;
 		}
 		var tokens = [];
 		return (function() {

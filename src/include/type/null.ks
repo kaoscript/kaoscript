@@ -21,12 +21,11 @@ class NullType extends Type {
 	isExportable() => true
 	isInstanceOf(target: Type) => true
 	isMorePreciseThan(type: Type) => type.isAny() || type.isNullable()
-	isAny() => !@explicit
 	isMatching(value: NullType, mode: MatchingMode) => true
 	isMatching(value: Type, mode: MatchingMode) => false
 	isNull() => true
 	isNullable() => true
-	matchContentOf(type: Type) => type.isAny() || type.isNullable()
+	matchContentOf(type: Type) => type.isNullable()
 	toFragments(fragments, node)
 	toQuote() => 'Null'
 	toReference(references, mode) => 'Null'

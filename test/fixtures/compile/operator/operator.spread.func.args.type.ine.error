@@ -1,0 +1,1 @@
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Array<Number?>) (line 2, file "fixtures/compile/operator/operator.spread.func.args.type.ine.ks")

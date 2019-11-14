@@ -75,7 +75,7 @@
               },
               {
                 "name": "flag",
-                "type": "Boolean",
+                "type": "Boolean?",
                 "min": 0,
                 "max": 1,
                 "default": 1

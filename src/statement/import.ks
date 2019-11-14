@@ -406,6 +406,10 @@ class Importer extends Statement {
 
 		let name, alias, variable, hashes
 
+		if module.compiler().isInHierarchy(x) {
+			SyntaxException.throwLoopingImport(@data.source.value, this)
+		}
+
 		if ?metadataPath && fs.isFile(metadataPath) && (@metadata ?= this.readMetadata(metadataPath)) {
 		}
 		else {

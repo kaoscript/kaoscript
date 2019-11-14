@@ -12,8 +12,8 @@ class MemberExpression extends Expression {
 		_sealed: Boolean			= false
 		_tested: Boolean			= false
 		_type: Type					= AnyType.NullableUnexplicit
-		_usingGetter: Boolean			= false
-		_usingSetter: Boolean			= false
+		_usingGetter: Boolean		= false
+		_usingSetter: Boolean		= false
 	}
 	constructor(@data, @parent, @scope) { // {{{
 		super(data, parent, scope)
@@ -139,6 +139,15 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	caller() => @object
+	inferTypes(inferables) { // {{{
+		@object.inferTypes(inferables)
+
+		if @computed {
+			@property.inferTypes(inferables)
+		}
+
+		return inferables
+	} // }}}
 	isAssignable() => true
 	isCallable() => @object.isCallable() || (@computed && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested

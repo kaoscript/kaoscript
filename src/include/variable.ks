@@ -2,7 +2,7 @@ class Variable {
 	private {
 		// true: can be altered by `impl` declaration
 		_altereable: Boolean	= false
-		_declaredType: Type		= Type.Any
+		_declaredType: Type		= AnyType.NullableUnexplicit
 		// true: the type can't be changed
 		_definitive: Boolean	= false
 		// true: the value can be set only once
@@ -95,7 +95,7 @@ class Variable {
 	setDeclaredType(@declaredType) { // {{{
 		@declaredType = Type.toNamedType(@name, declaredType)
 
-		if @realType != Type.Null || !@declaredType.isReference() {
+		if @realType != Type.Null {
 			@realType = @declaredType
 		}
 

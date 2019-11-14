@@ -26,13 +26,13 @@
               "max": "Infinity",
               "parameters": [
                 {
-                  "type": "Any",
+                  "type": "Any?",
                   "min": 0,
                   "max": "Infinity",
                   "default": 0
                 }
               ],
-              "returns": "Any",
+              "returns": "Any?",
               "throws": []
             }
           }
@@ -59,7 +59,7 @@
               "default": 0
             }
           ],
-          "returns": "Any",
+          "returns": "Any?",
           "throws": []
         }
       }

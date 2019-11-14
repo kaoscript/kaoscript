@@ -74,6 +74,7 @@ class BlockScope extends Scope {
 			@stashes[name] = [fn]
 		}
 	} // }}}
+	block() => this
 	commitTempVariables(variables: Array) { // {{{
 		variables.pushUniq(...@tempDeclarations)
 
@@ -225,7 +226,7 @@ class BlockScope extends Scope {
 	getVariable(name, line: Number): Variable { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
-			let variable: Variable = null
+			let variable: Variable? = null
 
 			if line == -1 || line > @line {
 				variable = variables.last()
@@ -452,6 +453,10 @@ class BlockScope extends Scope {
 			else if type.isAny() && !variable.getDeclaredType().isAny() {
 				if variable.getRealType().isNull() {
 					variable.setRealType(variable.getDeclaredType())
+				}
+
+				if type.isNullable() {
+					variable.setRealType(variable.getRealType().setNullable(true))
 				}
 
 				return variable

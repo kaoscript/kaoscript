@@ -79,20 +79,28 @@ class ComparisonExpression extends Expression {
 		}
 	} // }}}
 	hasExceptions() => false
-	inferTypes() { // {{{
+	inferTypes(inferables) { // {{{
 		if @operators.length == 1 {
-			return @operators[0].inferTypes()
+			return @operators[0].inferTypes(inferables)
 		}
 		else {
-			return {}
+			return inferables
 		}
 	} // }}}
-	inferContraryTypes(isExit) { // {{{
+	inferWhenFalseTypes(inferables) { // {{{
 		if @operators.length == 1 {
-			return @operators[0].inferContraryTypes()
+			return @operators[0].inferWhenFalseTypes(inferables)
 		}
 		else {
-			return {}
+			return inferables
+		}
+	} // }}}
+	inferWhenTrueTypes(inferables) { // {{{
+		if @operators.length == 1 {
+			return @operators[0].inferWhenTrueTypes(inferables)
+		}
+		else {
+			return inferables
 		}
 	} // }}}
 	isComputed() => @computed
@@ -191,8 +199,9 @@ abstract class ComparisonOperator {
 	}
 	constructor(@node, @left, @right)
 	prepare()
-	inferTypes() => {}
-	inferContraryTypes() => {}
+	inferTypes(inferables) => @right.inferTypes(@left.inferTypes(inferables))
+	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
+	inferWhenTrueTypes(inferables) => this.inferTypes(inferables)
 	isComputed() => true
 }
 
@@ -240,10 +249,23 @@ class EqualityOperator extends ComparisonOperator {
 		}
 	} // }}}
 	isComputed() => !@nanLeft && !@nanRight
-	inferContraryTypes() { // {{{
-		const inferables = {}
+	inferTypes(inferables) { // {{{
+		if @left is IdentifierLiteral && @left.value() == 'null' {
+			inferables = @right.inferTypes(inferables)
+		}
+		else if @right is IdentifierLiteral && @right.value() == 'null' {
+			inferables = @left.inferTypes(inferables)
+		}
+		else {
+			inferables = @right.inferTypes(@left.inferTypes(inferables))
+		}
 
+		return inferables
+	} // }}}
+	inferWhenFalseTypes(inferables) { // {{{
 		if @left is IdentifierLiteral && @left.value() == 'null' && @right.isInferable() {
+			inferables = @right.inferTypes(inferables)
+
 			if @right.type().isNull() {
 				if @right is IdentifierLiteral {
 					inferables[@right.path()] = {
@@ -260,6 +282,8 @@ class EqualityOperator extends ComparisonOperator {
 			}
 		}
 		else if @right is IdentifierLiteral && @right.value() == 'null' && @left.isInferable() {
+			inferables = @left.inferTypes(inferables)
+
 			if @left.type().isNull() {
 				if @left is IdentifierLiteral {
 					inferables[@left.path()] = {
@@ -274,6 +298,9 @@ class EqualityOperator extends ComparisonOperator {
 					type: @left.type().setNullable(false)
 				}
 			}
+		}
+		else {
+			inferables = @right.inferTypes(@left.inferTypes(inferables))
 		}
 
 		return inferables
@@ -373,8 +400,8 @@ class EqualityOperator extends ComparisonOperator {
 }
 
 class InequalityOperator extends EqualityOperator {
-	inferTypes() => super.inferContraryTypes()
-	inferContraryTypes() => super.inferTypes()
+	inferWhenFalseTypes(inferables) => super.inferWhenTrueTypes(inferables)
+	inferWhenTrueTypes(inferables) => super.inferWhenFalseTypes(inferables)
 	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {

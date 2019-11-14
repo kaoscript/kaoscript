@@ -1,6 +1,6 @@
 {
   "aliens": [
-    -1,
+    "Any?",
     "console"
   ],
   "requirements": [],
@@ -34,7 +34,7 @@
               "default": 0
             }
           ],
-          "returns": "Any",
+          "returns": "Any?",
           "throws": []
         },
         {
@@ -58,7 +58,7 @@
               "default": 0
             }
           ],
-          "returns": "Any",
+          "returns": "Any?",
           "throws": []
         },
         {
@@ -82,7 +82,7 @@
               "default": 0
             }
           ],
-          "returns": "Any",
+          "returns": "Any?",
           "throws": []
         }
       ]

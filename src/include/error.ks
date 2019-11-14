@@ -187,6 +187,14 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
 			}
 		} // }}}
+		throwNoMatchingFunctionInNamespace(name, namespace, arguments, node) ~ ReferenceException { // {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
+			}
+		} // }}}
 		throwNoMatchingMethod(method, class, arguments, node) ~ ReferenceException { // {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
@@ -278,6 +286,12 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwInvalidSyncMethods(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
+		} // }}}
+		throwInvalidForcedTypeCasting(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The forced type casting "!!" can't determine the expected type`, node)
+		} // }}}
+		throwLoopingImport(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The import "\(name)" is looping`, node)
 		} // }}}
 		throwMismatchedInclude(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Inclusions of "\(name)" should have the same version`, node)
@@ -475,6 +489,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwRequireClass(node) ~ TypeException { // {{{
 			throw new TypeException(`An instance is required`, node)
+		} // }}}
+		throwUnexpectedExportType(name, expected, unexpected, node) ~ TypeException { // {{{
+			throw new TypeException(`The type of export "\(name)" must be \(expected.toQuote(true)) and not \(unexpected.toQuote(true))`, node)
 		} // }}}
 		throwUnexpectedInoperative(operand, node) ~ TypeException { // {{{
 			throw new TypeException(`The operand \(operand.toQuote(true)) can't be of type \(operand.type().toQuote(true))`, node)

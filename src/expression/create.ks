@@ -30,7 +30,7 @@ class CreateExpression extends Expression {
 		}
 
 		if type !?= @class.type() {
-			ReferenceException.throwNotDefined(@class.type().name(), this)
+			ReferenceException.throwNotDefined(@class.toQuote(), this)
 		}
 		else if type.isNamed() && type.type() is ClassType {
 			if type.type().isAbstract() {
@@ -49,7 +49,7 @@ class CreateExpression extends Expression {
 			@type = @scope.reference(type)
 		}
 		else if !type.isAny() && !type.isClass() {
-			TypeException.throwNotClass(type.name(), this)
+			TypeException.throwNotClass(type.toQuote(), this)
 		}
 	} // }}}
 	translate() { // {{{

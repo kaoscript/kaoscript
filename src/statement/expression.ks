@@ -12,6 +12,10 @@ class ExpressionStatement extends Statement {
 	prepare() { // {{{
 		@expression.prepare()
 
+		for const data, name of @expression.inferTypes({}) {
+			@scope.updateInferable(name, data, this)
+		}
+
 		@ignorable = @expression.isIgnorable()
 
 		if !@ignorable {

@@ -1,13 +1,13 @@
 {
   "aliens": [
-    -1,
+    "Any?",
     "console",
     0,
     "Math"
   ],
   "requirements": [],
   "exports": [
-    -1,
+    "Any?",
     "console",
     1,
     "Math"
@@ -30,7 +30,7 @@
           "max": "Infinity",
           "parameters": [
             {
-              "type": "Any",
+              "type": "Any?",
               "min": 0,
               "max": "Infinity",
               "default": 0
@@ -65,18 +65,14 @@
             },
             {
               "name": "y",
-              "type": {
-                "kind": "reference",
-                "name": "Any",
-                "nullable": true
-              },
+              "type": "Any!?",
               "min": 1,
               "max": 1,
               "default": 0
             },
             {
               "name": "z",
-              "type": "Any",
+              "type": "Any?",
               "min": 0,
               "max": 1,
               "default": 1

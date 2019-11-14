@@ -37,7 +37,7 @@
       "instanceVariables": {
         "_messages": {
           "access": 2,
-          "type": "Any"
+          "type": "Any?"
         }
       },
       "classVariables": {},

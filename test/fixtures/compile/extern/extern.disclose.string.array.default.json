@@ -64,7 +64,7 @@
             "max": "Infinity",
             "parameters": [
               {
-                "type": "Any",
+                "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
                 "default": 0
@@ -92,7 +92,7 @@
             "max": "Infinity",
             "parameters": [
               {
-                "type": "Any",
+                "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
                 "default": 0

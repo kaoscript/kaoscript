@@ -20,7 +20,7 @@ class FunctionType extends Type {
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
 			if data.parameters? {
-				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters]!!, data, node)
+				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
 			}
 			else {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
@@ -449,55 +449,88 @@ class FunctionType extends Type {
 		if arguments.length == 0 {
 			return @min == 0
 		}
-		else {
-			if !(@min <= arguments.length <= @max) {
-				return false
-			}
+		if arguments.length > @max {
+			return false
+		}
 
-			if arguments.length == 0 {
-				return true
-			}
-			else if @parameters.length == 1 {
-				const parameter = @parameters[0]
+		let spreadIndex: Number = -1
 
-				for argument in arguments {
+		for const argument, index in arguments {
+			if argument is UnaryOperatorSpread {
+				spreadIndex = index
+
+				break
+			}
+		}
+
+		if spreadIndex != -1 {
+			if arguments.length == 1 {
+				const argument = arguments[0].type().parameter()
+
+				for const parameter in @parameters {
+					if !parameter.matchArgument(argument) {
+						return false
+					}
+				}
+			}
+			else {
+				let argIndex = 0
+				let parIndex = 0
+
+				for argIndex from 0 til spreadIndex {
+					if parIndex + 1 > @parameters.length {
+						return false
+					}
+					if !@parameters[parIndex].matchArgument(arguments[argIndex]) {
+						return false
+					}
+
+					++parIndex
+				}
+
+				const argument = arguments[spreadIndex].type().parameter()
+
+				for const parameter in @parameters from parIndex {
 					if !parameter.matchArgument(argument) {
 						return false
 					}
 				}
 
-				return true
 			}
-			else if @hasRest {
-				let a = 0
-				let b = arguments.length - 1
 
-				for const parameter in @parameters from @parameters.length - 1 til @restIndex by -1 {
-					for const j from 0 til parameter.min() {
-						if !parameter.matchArgument(arguments[b]) {
-							return false
-						}
+			return true
+		}
 
-						--b
-					}
+		if arguments.length < @min {
+			return false
+		}
+
+		if @parameters.length == 1 {
+			const parameter = @parameters[0]
+
+			for const argument in arguments {
+				if !parameter.matchArgument(argument) {
+					return false
 				}
+			}
 
-				for const parameter in @parameters from 0 til @restIndex {
-					for const j from 0 til parameter.min() {
-						if !parameter.matchArgument(arguments[a]) {
-							return false
-						}
+			return true
+		}
+		else if @hasRest {
+			let a = 0
+			let b = arguments.length - 1
 
-						++a
+			for const parameter in @parameters from @parameters.length - 1 til @restIndex by -1 {
+				for const j from 0 til parameter.min() {
+					if !parameter.matchArgument(arguments[b]) {
+						return false
 					}
 
-					for const j from parameter.min() til parameter.max() while a < b && parameter.matchArgument(arguments[a]) {
-						++a
-					}
+					--b
 				}
+			}
 
-				const parameter = @parameters[@restIndex]
-
+			for const parameter in @parameters from 0 til @restIndex {
 				for const j from 0 til parameter.min() {
 					if !parameter.matchArgument(arguments[a]) {
 						return false
@@ -506,45 +539,59 @@ class FunctionType extends Type {
 					++a
 				}
 
-				return true
+				for const j from parameter.min() til parameter.max() while a < b && parameter.matchArgument(arguments[a]) {
+					++a
+				}
 			}
-			else if arguments.length == @max {
-				let a = 0
 
-				let p
-				for parameter in @parameters {
-					for p from 0 til parameter.max() {
-						if !parameter.matchArgument(arguments[a]) {
-							return false
-						}
+			const parameter = @parameters[@restIndex]
 
-						++a
-					}
+			for const j from 0 til parameter.min() {
+				if !parameter.matchArgument(arguments[a]) {
+					return false
 				}
 
-				return true
+				++a
 			}
-			else {
-				let a = 0
-				let optional = arguments.length - @min
 
-				for const parameter in @parameters {
-					for i from 0 til parameter.min() {
-						if !parameter.matchArgument(arguments[a]) {
-							return false
-						}
+			return true
+		}
+		else if arguments.length == @max {
+			let a = 0
 
-						++a
+			let p
+			for parameter in @parameters {
+				for p from 0 til parameter.max() {
+					if !parameter.matchArgument(arguments[a]) {
+						return false
 					}
 
-					for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
-						++a
-						--optional
+					++a
+				}
+			}
+
+			return true
+		}
+		else {
+			let a = 0
+			let optional = arguments.length - @min
+
+			for const parameter in @parameters {
+				for i from 0 til parameter.min() {
+					if !parameter.matchArgument(arguments[a]) {
+						return false
 					}
+
+					++a
 				}
 
-				return optional == 0
+				for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
+					++a
+					--optional
+				}
 			}
+
+			return optional == 0
 		}
 	} // }}}
 	matchContentOf(type: Type) { // {{{
@@ -833,6 +880,15 @@ class OverloadedFunctionType extends Type {
 		return false
 	} // }}}
 	length() => @functions.length
+	matchArguments(arguments: Array) { // {{{
+		for const fn in @functions {
+			if fn.matchArguments(arguments) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}

@@ -41,7 +41,7 @@
         },
         "_side": {
           "access": 2,
-          "type": "Any"
+          "type": "Any?"
         }
       },
       "classVariables": {},

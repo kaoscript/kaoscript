@@ -26,10 +26,10 @@ class ArrayExpression extends Expression {
 			value.prepare()
 
 			if index == 0 {
-				type = value.type()
+				type = value.type().discardSpread()
 			}
 			else if type != null {
-				if !type.equals(value.type()) {
+				if !type.equals(value.type().discardSpread()) {
 					type = null
 				}
 			}

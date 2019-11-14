@@ -1,9 +1,9 @@
-func foobar(): Array {
-	return [42]
+func foobar(): Number | String {
+	return 42
 }
 
-func quxbaz(x: Array<Number>) {
+func quxbaz(x: Number) {
 }
 
-quxbaz(foobar() as Array<Number>)
+quxbaz(foobar() as Number)
 quxbaz(foobar()!!)

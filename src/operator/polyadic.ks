@@ -375,43 +375,50 @@ class PolyadicOperatorAnd extends PolyadicOperatorExpression {
 				TypeException.throwUnexpectedInoperative(operand, this)
 			}
 
-			for const data, name of operand.inferTypes() when !data.type.isAny() {
+			unless operand.type().canBeBoolean() {
+				TypeException.throwInvalidOperand(operand, Operator::And, this)
+			}
+
+			for const data, name of operand.inferWhenTrueTypes({}) {
 				@scope.updateInferable(name, data, this)
 			}
 		}
 	} // }}}
-	inferTypes() { // {{{
-		const inferables = {}
-
-		for const operand in @operands {
-			for const data, name of operand.inferTypes() {
+	inferTypes(inferables) { // {{{
+		for const data, name of @operands[0].inferTypes({}) {
+			if inferables[name]? {
+				if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
+					inferables[name] = data
+				}
+				else {
+					inferables[name] = {
+						isVariable: data.isVariable
+						type: Type.union(@scope, inferables[name].type, data.type)
+					}
+				}
+			}
+			else {
 				inferables[name] = data
 			}
 		}
 
 		return inferables
 	} // }}}
-	inferContraryTypes(isExit) { // {{{
-		const inferables = {}
-
-		const last = @operands.length - 1
-
-		const operandTypes = [null]
-		for const operand in @operands til last {
-			operandTypes.push(operand.inferContraryTypes(false))
-		}
-
-		for const operand in @operands[last] {
-			for const data, name of operand.inferContraryTypes(false) {
-				let nf = false
-
-				for const index from 0 til @operands.length until nf {
-					if !?operandTypes[index][name] {
-						nf = true
+	inferWhenTrueTypes(inferables) { // {{{
+		for const operand in @operands {
+			for const data, name of operand.inferWhenTrueTypes({}) {
+				if inferables[name]? {
+					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
+						inferables[name] = data
+					}
+					else {
+						inferables[name] = {
+							isVariable: data.isVariable
+							type: Type.union(@scope, inferables[name].type, data.type)
+						}
 					}
 				}
-
-				if !nf {
+				else {
 					inferables[name] = data
 				}
 			}
@@ -597,44 +604,77 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 }
 
 class PolyadicOperatorOr extends PolyadicOperatorExpression {
-	inferTypes() { // {{{
-		const inferables = {}
+	prepare() { // {{{
+		const lastIndex = @operands.length - 1
 
-		for const data, name of @operands[0].inferTypes() {
-			if !data.type.isAny() {
-				for const operand in @operands from 1 {
-					const types = operand.inferTypes()
+		for const operand, index in @operands {
+			operand.prepare()
 
-					if types[name]? && !types[name].type.isAny() {
-						data.type = Type.union(@scope, data.type, types[name].type)
-					}
-					else {
-						break
+			if operand.type().isInoperative() {
+				TypeException.throwUnexpectedInoperative(operand, this)
+			}
+
+			unless operand.type().canBeBoolean() {
+				TypeException.throwInvalidOperand(operand, Operator::And, this)
+			}
+
+			if index < lastIndex {
+				for const data, name of operand.inferWhenFalseTypes({}) {
+					@scope.updateInferable(name, data, this)
+				}
+			}
+		}
+	} // }}}
+	inferTypes(inferables) { // {{{
+		for const data, name of @operands[0].inferTypes({}) {
+			if inferables[name]? {
+				if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
+					inferables[name] = data
+				}
+				else {
+					inferables[name] = {
+						isVariable: data.isVariable
+						type: Type.union(@scope, inferables[name].type, data.type)
 					}
 				}
-
+			}
+			else {
 				inferables[name] = data
+			}
+		}
+
+		for const operand in @operands from 1 {
+			for const data, name of operand.inferTypes({}) {
+				if inferables[name]? {
+					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
+						inferables[name] = data
+					}
+					else {
+						inferables[name] = {
+							isVariable: data.isVariable
+							type: Type.union(@scope, inferables[name].type, data.type)
+						}
+					}
+				}
 			}
 		}
 
 		return inferables
 	} // }}}
-	inferContraryTypes(isExit) { // {{{
-		const inferables = {}
-
+	inferWhenFalseTypes(inferables) { // {{{
 		const operandTypes = [null]
 		for const operand in @operands from 1 {
-			operandTypes.push(operand.inferTypes())
+			operandTypes.push(operand.inferWhenTrueTypes({}))
 		}
 
-		for const data, name of @operands[0].inferContraryTypes(false) {
-			if !data.type.isAny() {
+		for const operand in @operands {
+			for const data, name of operand.inferWhenFalseTypes({}) {
 				let type = data.type
 
 				for const index from 1 til @operands.length {
 					const types = operandTypes[index]
 
-					if types[name]? && !types[name].type.isAny() {
+					if types[name]? {
 						type = type.reduce(types[name].type)
 					}
 					else {
@@ -645,6 +685,42 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 				inferables[name] = {
 					isVariable: data.isVariable
 					type
+				}
+			}
+		}
+
+		return inferables
+	} // }}}
+	inferWhenTrueTypes(inferables) { // {{{
+		for const data, name of @operands[0].inferWhenTrueTypes({}) {
+			if inferables[name]? {
+				if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
+					inferables[name] = data
+				}
+				else {
+					inferables[name] = {
+						isVariable: data.isVariable
+						type: Type.union(@scope, inferables[name].type, data.type)
+					}
+				}
+			}
+			else {
+				inferables[name] = data
+			}
+		}
+
+		for const operand in @operands from 1 {
+			for const data, name of operand.inferWhenTrueTypes({}) {
+				if inferables[name]? {
+					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
+						inferables[name] = data
+					}
+					else {
+						inferables[name] = {
+							isVariable: data.isVariable
+							type: Type.union(@scope, inferables[name].type, data.type)
+						}
+					}
 				}
 			}
 		}

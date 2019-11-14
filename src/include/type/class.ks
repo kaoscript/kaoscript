@@ -10,7 +10,7 @@ class ClassType extends Type {
 		_abstract: Boolean					= false
 		_abstractMethods: Dictionary		= {}
 		_alteration: Boolean				= false
-		_alterationReference: ClassType
+		_alterationReference: ClassType?
 		_classAssessments: Dictionary		= {}
 		_classMethods: Dictionary			= {}
 		_classVariables: Dictionary			= {}
@@ -1024,7 +1024,7 @@ class ClassType extends Type {
 		return false
 	} // }}}
 	hasSealedConstructors(): Boolean => @seal?.constructors
-	init() => @init
+	init(): Number => @init
 	init(@init) => this
 	isAbstract() => @abstract
 	isAlteration() => @alteration
@@ -1362,7 +1362,7 @@ class ClassVariableType extends Type {
 				type = new ClassVariableType(scope, Type.fromAST(data.type, node))
 			}
 			else {
-				type = new ClassVariableType(scope, Type.Any)
+				type = new ClassVariableType(scope, AnyType.NullableUnexplicit)
 			}
 
 			if data.modifiers? {
@@ -1456,7 +1456,7 @@ class ClassMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
 			const scope = node.scope()
 
-			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters]!!, data, node)
+			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
 		} // }}}
 		fromMetadata(data, metadata, references, alterations, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { // {{{
 			const type = new ClassMethodType(scope)
@@ -1596,7 +1596,7 @@ class ClassConstructorType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassConstructorType { // {{{
 			const scope = node.scope()
 
-			return new ClassConstructorType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters]!!, data, node)
+			return new ClassConstructorType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
 		} // }}}
 		fromMetadata(data, metadata, references, alterations, queue, scope: Scope, node: AbstractNode): ClassConstructorType { // {{{
 			const type = new ClassConstructorType(scope)

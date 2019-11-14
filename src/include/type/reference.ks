@@ -16,9 +16,10 @@ const $weightTOFs = { // {{{
 class ReferenceType extends Type {
 	private {
 		_name: String
-		_nullable: Boolean = false
+		_nullable: Boolean					= false
 		_parameters: Array<ReferenceType>
-		_predefined: Boolean = false
+		_predefined: Boolean				= false
+		_spread: Boolean					= false
 		_type: Type
 		_variable: Variable
 	}
@@ -123,7 +124,41 @@ class ReferenceType extends Type {
 			return null
 		}
 	} // }}}
-	export(references, mode, name = @name) { // {{{
+	discardSpread() { // {{{
+		if @spread {
+			if @parameters?.length > 0 {
+				return @parameters[0]
+			}
+			else {
+				return AnyType.NullableUnexplicit
+			}
+		}
+		else {
+			return this
+		}
+	} // }}}
+	export(references, mode) { // {{{
+		if @parameters.length == 0 {
+			return @nullable ? `\(@name)?` : @name
+		}
+		else {
+			const export = {
+				kind: TypeKind::Reference
+				name: @name
+			}
+
+			if @nullable {
+				export.nullable = @nullable
+			}
+
+			if @parameters.length != 0 {
+				export.parameters = [parameter.toReference(references, mode) for parameter in @parameters]
+			}
+
+			return export
+		}
+	} // }}}
+	export(references, mode, name) { // {{{
 		if @nullable || @parameters.length != 0 {
 			const export = {
 				kind: TypeKind::Reference
@@ -155,6 +190,13 @@ class ReferenceType extends Type {
 		const type = new ReferenceType(@scope, @name, @nullable, @parameters)
 
 		type._sealed = true
+
+		return type
+	} // }}}
+	flagSpread(): ReferenceType { // {{{
+		const type = new ReferenceType(@scope, @name, @nullable, @parameters)
+
+		type._spread = true
 
 		return type
 	} // }}}
@@ -294,18 +336,20 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	isMorePreciseThan(that: Type) { // {{{
+		// console.log(this)
+		// console.log(that)
 		if that.isAny() {
 			return !this.isAny() || (that.isNullable() && !@nullable)
 		}
 		else if this.isAny() {
 			return false
 		}
-		else if that.isNullable() && !@nullable {
-			return true
+		else if that is ReferenceType && that.name() == @name {
+			return that.isNullable() && !@nullable
 		}
 		else {
-			const a: Type = this.discardReference()
-			const b: Type = that.discardReference()
+			const a: Type = this.discardReference()!?
+			const b: Type = that.discardReference()!?
 
 			return a.isMorePreciseThan(b)
 		}
@@ -320,6 +364,7 @@ class ReferenceType extends Type {
 	isReference() => true
 	isReducible() => true
 	isRequired() => this.type().isRequired()
+	isSpread() => @spread
 	isString() => @name == 'String' || this.type().isString()
 	isTypeOf(): Boolean => $typeofs[@name]
 	isUnion() => this.type().isUnion()
@@ -338,14 +383,18 @@ class ReferenceType extends Type {
 			return that.isFunction()
 		}
 		else {
-			const a: Type = this.discardReference()
-			const b: Type = that.discardReference()
+			const a: Type = this.discardReference()!?
+			const b: Type = that.discardReference()!?
 
 			if a is ReferenceType || b is ReferenceType {
 				return false
 			}
 
 			if that is ReferenceType && that.hasParameters() {
+				if @parameters.length == 0 {
+					return true
+				}
+
 				const parameters = that.parameters()
 
 				if @parameters.length != parameters.length || !a.matchContentOf(b) {
@@ -379,7 +428,14 @@ class ReferenceType extends Type {
 	} // }}}
 	parameters() => @parameters
 	reassign(@name, @scope) => this
-	reduce(type: Type) => this.type().reduce(type)
+	reduce(type: Type) { // {{{
+		if this == type {
+			return this
+		}
+		else {
+			return @scope.reference(this.type().reduce(type))
+		}
+	} // }}}
 	resolveType() { // {{{
 		if !?@type || @type.isCloned() {
 			if @name == 'Any' {

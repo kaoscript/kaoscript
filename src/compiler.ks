@@ -304,7 +304,7 @@ const $compile = {
 	} // }}}
 	statement(data, parent, scope = parent.scope()) { // {{{
 		if Attribute.conditional(data, parent) {
-			let clazz = $statements[data.kind] ?? $statements.default
+			const clazz = $statements[data.kind] ?? $statements.default
 
 			return new clazz(data, parent, scope)
 		}
@@ -535,9 +535,10 @@ export class Compiler {
 	private {
 		_file: String
 		_fragments
-		_hashes
-		_module
-		_options
+		_hashes: Dictionary
+		_hierarchy: Array
+		_module: Module
+		_options: Dictionary
 	}
 	static {
 		registerTarget(target: String, fn: Function) { // {{{
@@ -587,7 +588,7 @@ export class Compiler {
 			}
 		} // }}}
 	}
-	constructor(@file, options = null, @hashes = {}) { // {{{
+	constructor(@file, options = null, @hashes = {}, @hierarchy = [@file]) { // {{{
 		@options = Dictionary.merge({
 			target: 'ecma-v6'
 			register: true
@@ -670,8 +671,9 @@ export class Compiler {
 	createServant(file) { // {{{
 		return new Compiler(file, Dictionary.defaults(@options, {
 			register: false
-		}), @hashes)
+		}), @hashes, [...@hierarchy, file])
 	} // }}}
+	isInHierarchy(file) => @hierarchy.contains(file)
 	readFile() => fs.readFile(@file)
 	sha256(file, data = null) { // {{{
 		return @hashes[file] ?? (@hashes[file] = fs.sha256(data ?? fs.readFile(file)))

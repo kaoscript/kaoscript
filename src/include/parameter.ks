@@ -660,7 +660,7 @@ class Parameter extends AbstractNode {
 	prepare() { // {{{
 		@name.prepare()
 
-		let type: Type = null
+		let type: Type? = null
 
 		if @data.modifiers.length != 0 {
 			type = @name.applyModifiers(@data.modifiers, this)
@@ -1480,7 +1480,7 @@ class IdentifierParameter extends IdentifierLiteral {
 
 class ArrayBindingParameter extends ArrayBinding {
 	private {
-		_tempName: String
+		_tempName: Literal
 	}
 	analyse() { // {{{
 		super()
@@ -1580,7 +1580,7 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 
 class ObjectBindingParameter extends ObjectBinding {
 	private {
-		_tempName: String
+		_tempName: Literal
 	}
 	analyse() { // {{{
 		super()

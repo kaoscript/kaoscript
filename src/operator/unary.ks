@@ -99,8 +99,8 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 	private {
 		_type: Type
 	}
-	inferTypes() { // {{{
-		const inferables = @argument.inferTypes()
+	inferTypes(inferables) { // {{{
+		@argument.inferTypes(inferables)
 
 		if @argument.isInferable() {
 			inferables[@argument.path()] = {
@@ -141,10 +141,20 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorForcedTypeCasting extends UnaryOperatorExpression {
+	private {
+		_type: Type		= AnyType.Unexplicit
+	}
+	prepare() { // {{{
+		super()
+
+		if !@parent.isExpectingType() {
+			SyntaxException.throwInvalidForcedTypeCasting(this)
+		}
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@argument)
 	} // }}}
-	type() => AnyType.Unexplicit
+	type() => @type
 }
 
 class UnaryOperatorIncrementPostfix extends NumericUnaryOperatorExpression {
@@ -179,8 +189,8 @@ class UnaryOperatorNegation extends UnaryOperatorExpression {
 			TypeException.throwInvalidOperand(@argument, Operator::Negation, this)
 		}
 	} // }}}
-	inferTypes() => @argument.inferContraryTypes(false)
-	inferContraryTypes(isExit) => @argument.inferTypes()
+	inferWhenFalseTypes(inferables) => @argument.inferWhenTrueTypes(inferables)
+	inferWhenTrueTypes(inferables) => @argument.inferWhenFalseTypes(inferables)
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.code('!', @data.operator)
@@ -211,15 +221,25 @@ class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorSpread extends UnaryOperatorExpression {
+	private {
+		_type: Type
+	}
 	prepare() { // {{{
 		super()
 
 		const type = @argument.type()
 
-		unless type.isArray() || type.isAny() {
+		if type.isArray() {
+			@type = type.flagSpread()
+		}
+		else if type.isAny() {
+			@type = @scope.reference('Array').flagSpread()
+		}
+		else {
 			TypeException.throwInvalidSpread(this)
 		}
 	} // }}}
+	isExpectingType() => true
 	toFragments(fragments, mode) { // {{{
 		if @options.format.spreads == 'es5' {
 			throw new NotSupportedException(this)
@@ -229,5 +249,5 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			.code('...', @data.operator)
 			.wrap(@argument)
 	} // }}}
-	type() => @scope.reference('Array')
+	type() => @type
 }

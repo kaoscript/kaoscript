@@ -749,7 +749,7 @@ module.exports = function() {
 				if(component.loop === true) {
 					let d = Math.abs(Operator.subtraction(this[component.field], color[component.field]));
 					if(Operator.gt(d, component.half)) {
-						d = Operator.subtraction(component.mod, d);
+						d = component.mod - d;
 					}
 					this[component.field] = __ks_Number._im_round(Operator.modulo(this[component.field] + (d * percentage), component.mod), component.round);
 				}
