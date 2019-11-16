@@ -1,11 +1,12 @@
 // natives
 class MacroScope extends Scope {
 	private {
-		_predefined			= {}
-		_references			= {}
-		_renamedIndexes 	= {}
-		_renamedVariables	= {}
-		_variables			= {}
+		_matchingTypes: Dictionary<Array>	= {}
+		_predefined							= {}
+		_references							= {}
+		_renamedIndexes					 	= {}
+		_renamedVariables					= {}
+		_variables							= {}
 	}
 	constructor() { // {{{
 		super()
@@ -106,6 +107,30 @@ class MacroScope extends Scope {
 	hasDeclaredVariable(name: String) => @variables[name] is Variable
 	hasDefinedVariable(name: String) => @variables[name] is Variable
 	hasVariable(name: String, line = -1) => @variables[name] is Variable
+	isMatchingType(a: Type, b: Type, mode: MatchingMode) { // {{{
+		const hash = a.toQuote()
+
+		if const matches = @matchingTypes[hash] {
+			for const type, i in matches by 2 {
+				if type == b {
+					return matches[i + 1]
+				}
+			}
+		}
+		else {
+			@matchingTypes[hash] = []
+		}
+
+		@matchingTypes[hash].push(b, false)
+
+		const index = @matchingTypes[hash].length
+
+		const match = a.isMatching(b, mode)
+
+		@matchingTypes[hash][index - 1] = match
+
+		return match
+	} // }}}
 	reference(value, nullable: Boolean = false, parameters: Array = []) { // {{{
 		switch value {
 			is AnyType => return this.resolveReference('Any', nullable, parameters)

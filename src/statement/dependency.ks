@@ -475,6 +475,7 @@ class RequireOrImportDeclarator extends Importer {
 			throw new NotImplementedException(this)
 		}
 	} // }}}
+	flagForcefullyRebinded()
 	metadata() => @metadata
 	toStatementFragments(fragments, mode) { // {{{
 		if @requirements.length == 0 {

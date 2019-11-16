@@ -315,7 +315,7 @@ class ReferenceType extends Type {
 					return this.type().isNamespace()
 				}
 				else {
-					return this.discardReference():Type.isMatching(value.discardReference():Type, mode)
+					return @scope.isMatchingType(this.discardReference()!?, value.discardReference()!?, mode)
 				}
 			}
 			else if value.isDictionary() && this.type().isClass() {

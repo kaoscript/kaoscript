@@ -1,21 +1,22 @@
 // predefined
 class ModuleScope extends Scope {
 	private {
-		_chunkTypes					= {}
-		_declarations				= {}
-		_lastLine: Boolean			= false
-		_line: Number				= 0
-		_lineOffset: Number			= 0
-		_macros						= {}
-		_predefined					= {}
-		_references					= {}
-		_renamedIndexes 			= {}
-		_renamedVariables			= {}
-		_stashes					= {}
-		_tempDeclarations: Array	= []
-		_tempIndex 					= -1
-		_tempNames					= {}
-		_variables					= {}
+		_chunkTypes							= {}
+		_declarations						= {}
+		_lastLine: Boolean					= false
+		_line: Number						= 0
+		_lineOffset: Number					= 0
+		_macros								= {}
+		_matchingTypes: Dictionary<Array>	= {}
+		_predefined							= {}
+		_references							= {}
+		_renamedIndexes 					= {}
+		_renamedVariables					= {}
+		_stashes							= {}
+		_tempDeclarations: Array			= []
+		_tempIndex		 					= -1
+		_tempNames							= {}
+		_variables							= {}
 	}
 	constructor() { // {{{
 		super()
@@ -310,13 +311,13 @@ class ModuleScope extends Scope {
 
 		return false
 	} // }}}
-	hasDefinedVariableBefore(name: String, line: Number) {
+	hasDefinedVariableBefore(name: String, line: Number) { // {{{
 		if @variables[name] is Array {
 			return @variables[name][0] < line
 		}
 
 		return false
-	}
+	} // }}}
 	hasMacro(name) => @macros[name] is Array
 	hasVariable(name: String) => this.hasVariable(name, @line)
 	hasVariable(name: String, line: Number) { // {{{
@@ -341,6 +342,30 @@ class ModuleScope extends Scope {
 		return @predefined[`__\(name)`] is Variable
 	} // }}}
 	isAtLastLine() => @lastLine
+	isMatchingType(a: Type, b: Type, mode: MatchingMode) { // {{{
+		const hash = a.toQuote()
+
+		if const matches = @matchingTypes[hash] {
+			for const type, i in matches by 2 {
+				if type == b {
+					return matches[i + 1]
+				}
+			}
+		}
+		else {
+			@matchingTypes[hash] = []
+		}
+
+		@matchingTypes[hash].push(b, false)
+
+		const index = @matchingTypes[hash].length
+
+		const match = a.isMatching(b, mode)
+
+		@matchingTypes[hash][index - 1] = match
+
+		return match
+	} // }}}
 	isRedeclaredVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			return @variables[name].length != 2
