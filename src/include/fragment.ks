@@ -250,4 +250,8 @@ class LineBuilder extends ExpressionBuilder {
 			@undone = false
 		}
 	} // }}}
+	newControl(indent = @indent, initiator = true, terminator = true) { // {{{
+		return @writer.newControl(indent, initiator, terminator)
+	} // }}}
+	newLine() => this
 }

@@ -127,6 +127,10 @@ class ModuleScope extends Scope {
 
 		const variable = new Variable(name, immutable, false, type, initialized)
 
+		if node is Statement {
+			variable.declaration(node)
+		}
+
 		this.defineVariable(variable, node)
 
 		return variable
@@ -306,6 +310,13 @@ class ModuleScope extends Scope {
 
 		return false
 	} // }}}
+	hasDefinedVariableBefore(name: String, line: Number) {
+		if @variables[name] is Array {
+			return @variables[name][0] < line
+		}
+
+		return false
+	}
 	hasMacro(name) => @macros[name] is Array
 	hasVariable(name: String) => this.hasVariable(name, @line)
 	hasVariable(name: String, line: Number) { // {{{

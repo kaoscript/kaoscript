@@ -420,7 +420,7 @@ class ReferenceType extends Type {
 			return this.type().parameter()
 		}
 		else if index >= @parameters.length {
-			return Type.Any
+			return AnyType.NullableUnexplicit
 		}
 		else {
 			return @parameters[index]

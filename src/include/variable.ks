@@ -1,16 +1,17 @@
 class Variable {
 	private {
 		// true: can be altered by `impl` declaration
-		_altereable: Boolean	= false
-		_declaredType: Type		= AnyType.NullableUnexplicit
+		_altereable: Boolean		= false
+		_declaration: Statement?	= null
+		_declaredType: Type			= AnyType.NullableUnexplicit
 		// true: the type can't be changed
-		_definitive: Boolean	= false
+		_definitive: Boolean		= false
 		// true: the value can be set only once
-		_immutable: Boolean		= true
+		_immutable: Boolean			= true
 		_name: String
-		_new: Boolean			= true
-		_predefined: Boolean	= false
-		_realType: Type			= Type.Null
+		_new: Boolean				= true
+		_predefined: Boolean		= false
+		_realType: Type				= Type.Null
 		_secureName: String
 	}
 	static {
@@ -71,6 +72,8 @@ class Variable {
 
 		return clone
 	} // }}}
+	declaration() => @declaration
+	declaration(@declaration) => this
 	flagDefinitive() { // {{{
 		@definitive = true
 

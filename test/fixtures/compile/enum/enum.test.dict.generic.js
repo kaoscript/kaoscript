@@ -28,7 +28,7 @@ module.exports = function() {
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
-			return Helper.valueOf(this._colors[name]) === Color.Red.value;
+			return this._colors[name] === Color.Red;
 		}
 		isRed() {
 			if(arguments.length === 1) {

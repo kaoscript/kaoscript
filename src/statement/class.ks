@@ -12,28 +12,29 @@ enum TypeStatus { // {{{
 
 class ClassDeclaration extends Statement {
 	private {
-		_abstract: Boolean 			= false
-		_abstractMethods			= {}
+		_abstract: Boolean 					= false
+		_abstractMethods					= {}
 		_class: ClassType
-		_classMethods				= {}
-		_classVariables				= {}
-		_constructors				= []
+		_classMethods						= {}
+		_classVariables						= {}
+		_constructors						= []
 		_constructorScope
-		_destructor					= null
+		_destructor							= null
 		_destructorScope
-		_es5: Boolean				= false
-		_extending: Boolean			= false
-		_extendingAlien: Boolean	= false
+		_es5: Boolean						= false
+		_extending: Boolean					= false
+		_extendingAlien: Boolean			= false
 		_extendsName: String
 		_extendsType: NamedType<ClassType>
-		_hybrid: Boolean			= false
-		_instanceMethods			= {}
-		_instanceVariables			= {}
+		_forcefullyRebinded: Boolean		= false
+		_hybrid: Boolean					= false
+		_instanceMethods					= {}
+		_instanceVariables					= {}
 		_instanceVariableScope
-		_macros						= {}
+		_macros								= {}
 		_name: String
-		_references					= {}
-		_sealed: Boolean 			= false
+		_references							= {}
+		_sealed: Boolean 					= false
 		_type: NamedType<ClassType>
 		_variable: Variable
 	}
@@ -443,6 +444,9 @@ class ClassDeclaration extends Statement {
 		@parent.exportMacro(`\(@name).\(name)`, macro)
 	} // }}}
 	extends() => @extendsType
+	flagForcefullyRebinded() { // {{{
+		@forcefullyRebinded = true
+	} // }}}
 	hasConstructors() => @constructors.length != 0
 	hasInits() { // {{{
 		for const field of @instanceVariables {
@@ -617,8 +621,16 @@ class ClassDeclaration extends Statement {
 		line.code(')').done()
 	} // }}}
 	toContinousES6Fragments(fragments) { // {{{
-		const clazz = fragments
-			.newControl()
+		let root = fragments
+		let breakable = true
+
+		if @forcefullyRebinded {
+			root = fragments.newLine().code(`var \(@name) = `)
+			breakable = false
+		}
+
+		const clazz = root
+			.newControl(null, breakable, breakable)
 			.code('class ', @name)
 
 		if @extending {
@@ -747,6 +759,10 @@ class ClassDeclaration extends Statement {
 		}
 
 		clazz.done()
+
+		if @forcefullyRebinded {
+			root.done()
+		}
 	} // }}}
 	toHybridES6Fragments(fragments) { // {{{
 		const clazz = fragments

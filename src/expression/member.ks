@@ -54,8 +54,8 @@ class MemberExpression extends Expression {
 				@property.analyse()
 				@property.prepare()
 
-				if type.isArray() {
-					@type = @object.type().parameter()
+				if type.isArray() || type.isDictionary() {
+					@type = type.parameter()
 				}
 
 				if @object.isInferable() {
@@ -77,6 +77,10 @@ class MemberExpression extends Expression {
 			}
 			else {
 				@property = @data.property.name
+
+				if type.isDictionary() {
+					@type = type.parameter()
+				}
 
 				if const property = type.getProperty(@property) {
 					const type = type.discardReference()

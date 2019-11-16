@@ -78,6 +78,7 @@ class DictionaryType extends Type {
 	isNullable() => false
 	isDictionary() => true
 	isSealable() => true
+	parameter() => AnyType.NullableUnexplicit
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}

@@ -444,11 +444,20 @@ class RequireOrImportDeclarator extends Importer {
 
 		if @count != 0 {
 			if @parent.includePath() == null {
-				for const alias of @variables {
-					const requirement = new ROIDynamicRequirement(@scope.getVariable(alias), this)
+				const line = this.line()
 
-					@requirements.push(requirement)
-					module.addRequirement(requirement)
+				for const alias of @variables {
+					const variable = @scope.getVariable(alias)
+
+					if @scope.hasDefinedVariableBefore(alias, line) {
+						variable.declaration().flagForcefullyRebinded()
+					}
+					else {
+						const requirement = new ROIDynamicRequirement(@scope.getVariable(alias), this)
+
+						@requirements.push(requirement)
+						module.addRequirement(requirement)
+					}
 				}
 			}
 			else {
@@ -468,7 +477,10 @@ class RequireOrImportDeclarator extends Importer {
 	} // }}}
 	metadata() => @metadata
 	toStatementFragments(fragments, mode) { // {{{
-		if @requirements.length == 1 {
+		if @requirements.length == 0 {
+			this.toImportFragments(fragments)
+		}
+		else if @requirements.length == 1 {
 			const requirement = @requirements[0]
 
 			const ctrl = fragments.newControl()
