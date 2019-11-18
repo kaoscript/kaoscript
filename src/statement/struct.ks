@@ -75,6 +75,20 @@ class StructDeclaration extends Statement {
 		line.code(']').done()
 	} // }}}
 	toObjectFragments(fragments, mode) { // {{{
+		if @fields.length == 0 {
+			fragments.line(`return new \($runtime.dictionary(this))`)
+		}
+		else {
+			let varname = '_'
+
+			fragments.line($const(this), varname, ' = new ', $runtime.dictionary(this), '()')
+
+			for const field in @fields {
+				fragments.newLine().code(varname, '.').compile(field.parameter().name()).code($equals).compile(field.parameter().name()).done()
+			}
+
+			fragments.line(`return \(varname)`)
+		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const line = fragments.newLine().code(`var \(@name) = \($runtime.helper(this)).struct(`)

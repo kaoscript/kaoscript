@@ -113,6 +113,7 @@ enum TypeKind<String> {
 	OverloadedFunction
 	Reference
 	Sealable
+	Struct
 	Union
 }
 
@@ -503,6 +504,9 @@ abstract class Type {
 					TypeKind::OverloadedFunction => {
 						return OverloadedFunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind::Struct => {
+						return StructType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
 					TypeKind::Union => {
 						return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
@@ -516,7 +520,7 @@ abstract class Type {
 		isNative(name: String) => $natives[name] == true
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
 		toNamedType(name: String, type: Type): Type { // {{{
-			if type is AliasType || type is ClassType || type is EnumType {
+			if type is AliasType || type is ClassType || type is EnumType || type is StructType {
 				return new NamedType(name, type)
 			}
 			else if type is NamespaceType {

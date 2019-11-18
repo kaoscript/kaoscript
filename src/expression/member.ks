@@ -89,7 +89,8 @@ class MemberExpression extends Expression {
 				}
 			}
 			else {
-				const isArrayStruct = type.isStruct() && type.isArray()
+				const isStruct = type.isStruct()
+				const isArrayStruct = isStruct && type.isArray()
 
 				@property = @data.property.name
 
@@ -118,6 +119,19 @@ class MemberExpression extends Expression {
 					if @object.isInferable() {
 						@inferable = true
 						@path = `\(@object.path())[\(@property)]`
+					}
+				}
+				else if isStruct {
+					if const property = type.getProperty(@property) {
+						@type = property.type()
+					}
+					else if type.isExhaustive(this) {
+						ReferenceException.throwNotDefinedProperty(@property, this)
+					}
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
 					}
 				}
 				else {

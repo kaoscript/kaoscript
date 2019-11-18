@@ -1,0 +1,19 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Point"
+  ],
+  "references": [
+    {
+      "kind": "struct",
+      "variety": "object",
+      "fields": {
+        "x": "Number",
+        "y": "Number"
+      }
+    }
+  ],
+  "macros": []
+}

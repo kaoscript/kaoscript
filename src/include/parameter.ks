@@ -769,6 +769,7 @@ class Parameter extends AbstractNode {
 
 		@header = true
 	} // }}}
+	toQuote() => @type.toQuote()
 	toValidationFragments(fragments, wrongdoer) { // {{{
 		if @rest {
 			if @hasDefaultValue {
