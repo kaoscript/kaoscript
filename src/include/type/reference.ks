@@ -310,18 +310,6 @@ class ReferenceType extends Type {
 		}
 		else {
 			if value is ReferenceType {
-				/* if value.name() == 'Enum' {
-					return this.type().isEnum()
-				}
-				else if value.name() == 'Namespace' {
-					return this.type().isNamespace()
-				}
-				else if value.name() == 'Struct' {
-					return this.type().isStruct()
-				} */
-				/* if $virtuals[value.name()] {
-					return this.type()[`is\(value.name())`]()
-				} */
 				if $virtuals[value.name()] {
 					return this.type().canBeVirtual(value.name())
 				}

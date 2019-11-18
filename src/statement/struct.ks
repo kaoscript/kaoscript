@@ -101,19 +101,12 @@ class StructDeclaration extends Statement {
 class StructFunction extends AbstractNode {
 	private {
 		_parameters: Array<Parameter>
-		/* _struct: StructDeclaration */
 		_type: FunctionType
 	}
 	constructor(@parent) { // {{{
 		super(parent._data, parent)
 
-		/* @parameters = [field.parameter() for const field in parent._fields] */
-
 		@type = new FunctionType(@scope)
-
-		/* for const parameter in @parameters {
-			@type.addParameter(parameter.type())
-		} */
 	} // }}}
 	analyse() { // {{{
 		@parameters = [field.parameter() for const field in @parent._fields]
@@ -130,8 +123,6 @@ class StructFunction extends AbstractNode {
 
 class StructFieldDeclaration extends AbstractNode {
 	private {
-		/* _defaultValue						= null */
-		_hasDefaultValue: Boolean			= false
 		_hasName: Boolean					= false
 		_index: Number
 		_name: String
@@ -149,13 +140,6 @@ class StructFieldDeclaration extends AbstractNode {
 		@parameter = new StructFieldParameter(this, parent._function)
 	} // }}}
 	analyse() { // {{{
-		/* if @data.defaultValue? {
-			@hasDefaultValue = true
-
-			@defaultValue = $compile.expression(@data.defaultValue, this)
-			@defaultValue.analyse()
-		} */
-
 		@parameter.analyse()
 	} // }}}
 	prepare() { // {{{
@@ -164,19 +148,8 @@ class StructFieldDeclaration extends AbstractNode {
 		@parameter.prepare()
 	} // }}}
 	translate() { // {{{
-		/* if @hasDefaultValue {
-			@defaultValue.prepare()
-
-			if !@defaultValue.isMatchingType(@type.type()) {
-				/* TypeException.throwInvalidAssignement(@name, @type, @defaultValue.type(), this) */
-			}
-
-			@defaultValue.translate()
-		} */
-
 		@parameter.translate()
 	} // }}}
-	hasDefaultValue() => @hasDefaultValue
 	hasName() => @hasName
 	index() => @index
 	name() => @name
@@ -198,7 +171,6 @@ class StructFieldParameter extends Parameter {
 			@name = new IdentifierParameter(@data.name, this, @scope)
 		}
 		else {
-			/* @name = new IdentifierParameter({name: `_\(@field.index())`}, this, @scope) */
 			@name = new IdentifierParameter({name: @scope.acquireTempName(false)}, this, @scope)
 		}
 

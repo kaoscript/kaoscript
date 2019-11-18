@@ -22,7 +22,6 @@ class ArrayStructType extends StructType {
 		@fields.push(field)
 	} // }}}
 	override isArray() => true
-	/* getProperty(name: String) => @fields[name]?.type() */
 	getProperty(name: Number | String) => @fields[name]
 	isMatching(value: ArrayStructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
@@ -32,7 +31,6 @@ class ArrayStructType extends StructType {
 
 		return false
 	} // }}}
-	/* parameter(index: Number | String) => @fields[index]?.type() */
 }
 
 class NamedArrayStructType extends StructType {

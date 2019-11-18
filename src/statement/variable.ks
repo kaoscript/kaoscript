@@ -206,7 +206,6 @@ class VariableDeclaration extends Statement {
 			return null
 		}
 	} // }}}
-	/* getRealType() => @type */
 	init() => @init
 	isAwait() => @await
 	isDeclararingVariable(name: String) { // {{{
@@ -316,7 +315,6 @@ class VariableDeclaration extends Statement {
 			@declarators[0].toAssignmentFragments(fragments, @init)
 		}
 	} // }}}
-	/* type() => @declarators[0].variable().getRealType() */
 	type() => @type
 	walk(fn) { // {{{
 		for declarator in @declarators {
@@ -345,9 +343,6 @@ class VariableBindingDeclarator extends AbstractNode {
 	} // }}}
 	prepare() { // {{{
 		if @data.type? {
-			/* @type = Type.fromAST(@data.type, this)
-
-			@binding.type(@type) */
 			this.setDeclaredType(Type.fromAST(@data.type, this))
 		}
 		else if @parent.isImmutable() {
@@ -370,8 +365,7 @@ class VariableBindingDeclarator extends AbstractNode {
 	isRedeclared() => @binding.isRedeclared()
 	isSplitAssignment() => @binding.isSplitAssignment()
 	isStronglyTyped() => true
-	/* setDeclaredType(type: Type) => this.setRealType(type) */
-	setDeclaredType(@type) {
+	setDeclaredType(@type) { // {{{
 		if !@type.isAny() {
 			if @binding is ArrayBinding {
 				unless @type.isArray() {
@@ -386,7 +380,7 @@ class VariableBindingDeclarator extends AbstractNode {
 
 			@binding.type(@type)
 		}
-	}
+	} // }}}
 	setRealType(type: Type) { // {{{
 		if !type.isAny() {
 			if @binding is ArrayBinding {

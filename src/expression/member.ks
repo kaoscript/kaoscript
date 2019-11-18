@@ -58,7 +58,6 @@ class MemberExpression extends Expression {
 				if type.isStruct() {
 					if type.isArray() {
 						if @property is NumberLiteral {
-							/* @type = type.discard().parameter(@property.value()) */
 							if const property = type.discard().getProperty(@property.value()) {
 								@type = property.type()
 							}
@@ -146,21 +145,6 @@ class MemberExpression extends Expression {
 						@path = `\(@object.path()).\(@property)`
 					}
 				}
-
-				/* if @computed {
-					if @object.isInferable() {
-						@inferable = true
-						@path = `\(@object.path())[\(@property)]`
-					}
-
-					@property = $compile.expression(@data.property, this)
-				}
-				else {
-					if @object.isInferable() {
-						@inferable = true
-						@path = `\(@object.path()).\(@property)`
-					}
-				} */
 			}
 		}
 		else {

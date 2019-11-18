@@ -210,7 +210,6 @@ class NamedType extends Type {
 	isStruct() => @type.isStruct()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
-	/* isVirtual() => @type.isClass() && $virtuals[@name] */
 	isVirtual() => $virtuals[@name]
 	matchClassName(that: Type?) { // {{{
 		if that == null {

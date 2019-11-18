@@ -524,26 +524,6 @@ class BinaryOperatorTypeEquality extends Expression {
 					TypeException.throwNullTypeChecking(type, this)
 				}
 
-				/* if type is NamedType && type.name() == 'Namespace' {
-					if !@left.type().isAny() && !@left.type().isNamespace() {
-						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
-					}
-				}
-				else if type is NamedType && type.name() == 'Enum' {
-					if !@left.type().isAny() && !@left.type().isEnum() {
-						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
-					}
-				}
-				else if type is NamedType && type.name() == 'Struct' {
-					if !@left.type().isAny() && !@left.type().isStruct() {
-						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
-					}
-				} */
-				/* if type is NamedType && $virtuals[type.name()] {
-					if !@left.type().isAny() && !@left.type()[`is\(type.name())`]() {
-						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
-					}
-				} */
 				if type.isVirtual() {
 					if !@left.type().isAny() && !@left.type().canBeVirtual(type.name()) {
 						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
@@ -630,29 +610,9 @@ class BinaryOperatorTypeInequality extends Expression {
 					TypeException.throwNullTypeChecking(type, this)
 				}
 
-				/* if type is NamedType && type.name() == 'Namespace' {
-					if !@left.type().isAny() && !@left.type().isNamespace() {
-						TypeException.throwUnnecessaryTypeChecking(type, this)
-					}
-				}
-				else if type is NamedType && type.name() == 'Enum' {
-					if !@left.type().isAny() && !@left.type().isEnum() {
-						TypeException.throwUnnecessaryTypeChecking(type, this)
-					}
-				}
-				else if type is NamedType && type.name() == 'Struct' {
-					if !@left.type().isAny() && !@left.type().isStruct() {
-						TypeException.throwUnnecessaryTypeChecking(type, this)
-					}
-				} */
-				/* if type is NamedType && $virtuals[type.name()] {
-					if !@left.type().isAny() && !@left.type()[`is\(type.name())`]() {
-						TypeException.throwUnnecessaryTypeChecking(type, this)
-					}
-				} */
-				if type.isVirtual {
+				if type.isVirtual() {
 					if !@left.type().isAny() && !@left.type().canBeVirtual(type.name()) {
-						TypeException.throwUnnecessaryTypeChecking(type, this)
+						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
 					}
 				}
 				else if type.isEnum() || type.isStruct() || type.isUnion() || type.isExclusion() {
