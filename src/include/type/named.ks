@@ -23,6 +23,7 @@ class NamedType extends Type {
 	} // }}}
 	container() => @container
 	container(@container) => this
+	discard() => @type.discard()
 	discardAlias() => @type.discardAlias()
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
@@ -206,9 +207,11 @@ class NamedType extends Type {
 	isSealed() => @type.isSealed()
 	isSealedAlien() => @type.isSealedAlien()
 	isString() => @type.isString()
+	isStruct() => @type.isStruct()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
-	isVirtual() => @type.isClass() && $virtuals[@name]
+	/* isVirtual() => @type.isClass() && $virtuals[@name] */
+	isVirtual() => $virtuals[@name]
 	matchClassName(that: Type?) { // {{{
 		if that == null {
 			return false

@@ -10,6 +10,7 @@ class MemberExpression extends Expression {
 		_prepareObject: Boolean		= true
 		_property
 		_sealed: Boolean			= false
+		_stringProperty: Boolean	= false
 		_tested: Boolean			= false
 		_type: Type					= AnyType.NullableUnexplicit
 		_usingGetter: Boolean		= false
@@ -54,7 +55,20 @@ class MemberExpression extends Expression {
 				@property.analyse()
 				@property.prepare()
 
-				if type.isArray() || type.isDictionary() {
+				if type.isStruct() {
+					if type.isArray() {
+						if @property is NumberLiteral {
+							/* @type = type.discard().parameter(@property.value()) */
+							if const property = type.discard().getProperty(@property.value()) {
+								@type = property.type()
+							}
+							else if type.isExhaustive(this) {
+								ReferenceException.throwNotDefinedProperty(@property.value(), this)
+							}
+						}
+					}
+				}
+				else if type.isArray() || type.isDictionary() {
 					@type = type.parameter()
 				}
 
@@ -76,39 +90,83 @@ class MemberExpression extends Expression {
 				}
 			}
 			else {
+				const isArrayStruct = type.isStruct() && type.isArray()
+
 				@property = @data.property.name
+
+				if 48 <= @property.charCodeAt(0) <= 57 {
+					unless isArrayStruct {
+						SyntaxException.throwInvalidIdentifier(@property, this)
+					}
+				}
 
 				if type.isDictionary() {
 					@type = type.parameter()
 				}
 
-				if const property = type.getProperty(@property) {
-					const type = type.discardReference()
-					if type.isClass() && property is ClassVariableType && property.isSealed() {
-						@sealed = true
-						@usingGetter = property.isInitiatable()
-						@usingSetter = property.isInitiatable()
-					}
+				if isArrayStruct {
+					@computed = true
+					@stringProperty = true
 
-					@type = property.discardVariable()
-				}
-				else {
-					if type.isEnum() {
-						SyntaxException.throwInvalidEnumAccess(this)
+					if const property = type.getProperty(@property) {
+						@property = `\(property.index())`
+						@type = property.type()
 					}
 					else if type.isExhaustive(this) {
 						ReferenceException.throwNotDefinedProperty(@property, this)
 					}
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path())[\(@property)]`
+					}
+				}
+				else {
+					if const property = type.getProperty(@property) {
+						const type = type.discardReference()
+						if type.isClass() && property is ClassVariableType && property.isSealed() {
+							@sealed = true
+							@usingGetter = property.isInitiatable()
+							@usingSetter = property.isInitiatable()
+						}
+
+						@type = property.discardVariable()
+					}
+					else {
+						if type.isEnum() {
+							SyntaxException.throwInvalidEnumAccess(this)
+						}
+						else if type.isExhaustive(this) {
+							ReferenceException.throwNotDefinedProperty(@property, this)
+						}
+					}
+
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
 				}
 
-				if @object.isInferable() {
-					@inferable = true
-					@path = `\(@object.path()).\(@property)`
+				/* if @computed {
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path())[\(@property)]`
+					}
+
+					@property = $compile.expression(@data.property, this)
 				}
+				else {
+					if @object.isInferable() {
+						@inferable = true
+						@path = `\(@object.path()).\(@property)`
+					}
+				} */
 			}
 		}
 		else {
-			if @object.type().isNull() && !@nullable && !@options.rules.ignoreMisfit {
+			const type = @object.type()
+
+			if type.isNull() && !@nullable && !@options.rules.ignoreMisfit {
 				ReferenceException.throwNullExpression(@object, this)
 			}
 
@@ -119,6 +177,12 @@ class MemberExpression extends Expression {
 			}
 			else {
 				@property = @data.property.name
+
+				if 48 <= @property.charCodeAt(0) <= 57 {
+					unless type.isStruct() && type.isArray() {
+						SyntaxException.throwInvalidIdentifier(@property, this)
+					}
+				}
 			}
 		}
 
@@ -129,7 +193,7 @@ class MemberExpression extends Expression {
 	translate() { // {{{
 		@object.translate()
 
-		if @computed {
+		if @computed && !@stringProperty {
 			@property.translate()
 		}
 	} // }}}
@@ -138,7 +202,7 @@ class MemberExpression extends Expression {
 			@object.acquireReusable(@nullable || acquire)
 		}
 
-		if @computed && @property is not String && @property.isCallable() {
+		if @computed && !@stringProperty && @property.isCallable() {
 			@property.acquireReusable(@nullable || acquire)
 		}
 	} // }}}
@@ -146,20 +210,20 @@ class MemberExpression extends Expression {
 	inferTypes(inferables) { // {{{
 		@object.inferTypes(inferables)
 
-		if @computed {
+		if @computed && !@stringProperty {
 			@property.inferTypes(inferables)
 		}
 
 		return inferables
 	} // }}}
 	isAssignable() => true
-	isCallable() => @object.isCallable() || (@computed && @property.isCallable())
+	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
 	isInferable() => @inferable
 	isLooseComposite() => this.isCallable() || this.isNullable()
 	isMacro() => false
-	isNullable() => @nullable || @object.isNullable() || (@computed && @property.isNullable())
-	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@nullable ? 1 : 0) + (@computed && @property.isNullable() ? 1 : 0) > 1
+	isNullable() => @nullable || @object.isNullable() || (@computed && !@stringProperty && @property.isNullable())
+	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@nullable ? 1 : 0) + (@computed && !@stringProperty && @property.isNullable() ? 1 : 0) > 1
 	isUsingSetter() => @usingSetter
 	isUsingVariable(name) => @object.isUsingVariable(name)
 	listAssignments(array) => array
@@ -169,7 +233,7 @@ class MemberExpression extends Expression {
 			@object.releaseReusable()
 		}
 
-		if @computed && @property is not String && @property.isCallable() {
+		if @computed && !@stringProperty && @property.isCallable() {
 			@property.releaseReusable()
 		}
 	} // }}}
@@ -291,7 +355,7 @@ class MemberExpression extends Expression {
 				conditional = true
 			}
 
-			if @computed && @property.isNullable() {
+			if @computed && !@stringProperty && @property.isNullable() {
 				fragments.code(' && ') if conditional
 
 				fragments.compileNullable(@property)
@@ -306,7 +370,12 @@ class MemberExpression extends Expression {
 		}
 
 		if @computed {
-			fragments += `[\(@property.toQuote())]`
+			if @stringProperty {
+				fragments += `[\(@property)]`
+			}
+			else {
+				fragments += `[\(@property.toQuote())]`
+			}
 		}
 		else {
 			fragments += `.\(@property)`
@@ -329,7 +398,7 @@ class MemberExpression extends Expression {
 		}
 
 		if @computed {
-			if @property.isCallable() {
+			if !@stringProperty && @property.isCallable() {
 				fragments
 					.code('[')
 					.compileReusable(@property)

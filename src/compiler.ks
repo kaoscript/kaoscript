@@ -49,6 +49,7 @@ const $typeofs = { // {{{
 	Primitive: true
 	RegExp: true
 	String: true
+	Struct: true
 } // }}}
 
 const $ast = {
@@ -250,6 +251,7 @@ include {
 	'./include/statement'
 	'./include/expression'
 	'./include/parameter'
+	'./statement/struct'
 	'./include/operator'
 	'./include/block'
 	'./include/macro'
@@ -431,6 +433,7 @@ const $statements = {
 	`\(NodeKind::RequireOrExternDeclaration)`	: RequireOrExternDeclaration
 	`\(NodeKind::RequireOrImportDeclaration)`	: RequireOrImportDeclaration
 	`\(NodeKind::ReturnStatement)`				: ReturnStatement
+	`\(NodeKind::StructDeclaration)`			: StructDeclaration
 	`\(NodeKind::SwitchStatement)`				: SwitchStatement
 	`\(NodeKind::ThrowStatement)`				: ThrowStatement
 	`\(NodeKind::TryStatement)`					: TryStatement

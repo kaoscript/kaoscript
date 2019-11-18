@@ -32,6 +32,8 @@ const $natives = { // {{{
 	regex: true
 	String: true
 	string: true
+	Struct: true
+	struct: true
 	Void: true
 	void: true
 } // }}}
@@ -49,6 +51,7 @@ const $types = { // {{{
 	number: 'Number'
 	object: 'Object'
 	string: 'String'
+	struct: 'Struct'
 	void: 'Void'
 } // }}}
 
@@ -56,6 +59,7 @@ const $virtuals = {
 	Enum: true
 	Namespace: true
 	Primitive: true
+	Struct: true
 }
 
 #[flags]
@@ -544,7 +548,21 @@ abstract class Type {
 	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
 	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
 	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()
+	canBeVirtual(name: String) { // {{{
+		if this.isAny() {
+			return true
+		}
+
+		switch name {
+			'Enum'		=> return this.isEnum()
+			'Namespace'	=> return this.isNamespace()
+			'Struct'	=> return this.isStruct()
+		}
+
+		return false
+	} // }}}
 	condense(): Type => this
+	discard(): Type? => this
 	discardAlias(): Type => this
 	discardName(): Type => this
 	discardReference(): Type? => this
@@ -639,6 +657,7 @@ abstract class Type {
 	isSealedAlien() => @alien && @sealed
 	isSpread() => false
 	isString() => false
+	isStruct() => false
 	isTypeOf() => false
 	isUnion() => false
 	isVirtual() => false
@@ -715,6 +734,7 @@ include {
 	'./type/null'
 	'./type/dictionary'
 	'./type/parameter'
+	'./type/struct'
 	'./type/exclusion'
 	'./type/fusion'
 	'./type/union'

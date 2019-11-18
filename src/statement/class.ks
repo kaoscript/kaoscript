@@ -166,7 +166,7 @@ class ClassDeclaration extends Statement {
 			@extendsName = `\(member.name)` + name
 		}
 
-		for modifier in @data.modifiers {
+		for const modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
 				@abstract = true
 
@@ -180,7 +180,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		let declaration
-		for data in @data.members {
+		for const data in @data.members {
 			switch data.kind {
 				NodeKind::CommentBlock => {
 				}

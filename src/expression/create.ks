@@ -1,14 +1,15 @@
 class CreateExpression extends Expression {
 	private {
 		_arguments: Array		= []
-		_class: Expression
+		_factory: Expression
 		_flatten: Boolean		= false
 		_sealed: Boolean		= false
+		_struct: Boolean		= false
 		_type: Type				= Type.Any
 	}
 	analyse() { // {{{
-		@class = $compile.expression(@data.class, this)
-		@class.analyse()
+		@factory = $compile.expression(@data.class, this)
+		@factory.analyse()
 
 		const es5 = @options.format.spreads == 'es5'
 
@@ -23,14 +24,14 @@ class CreateExpression extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
-		@class.prepare()
+		@factory.prepare()
 
 		for argument in @arguments {
 			argument.prepare()
 		}
 
-		if type !?= @class.type() {
-			ReferenceException.throwNotDefined(@class.toQuote(), this)
+		if type !?= @factory.type() {
+			ReferenceException.throwNotDefined(@factory.toQuote(), this)
 		}
 		else if type.isNamed() && type.type() is ClassType {
 			if type.type().isAbstract() {
@@ -48,12 +49,17 @@ class CreateExpression extends Expression {
 
 			@type = @scope.reference(type)
 		}
-		else if !type.isAny() && !type.isClass() {
+		else if type.isNamed() && type.type() is StructType {
+			@type = @scope.reference(type)
+
+			@struct = true
+		}
+		else if !(type.isAny() || type.isClass() || type.isStruct()) {
 			TypeException.throwNotClass(type.toQuote(), this)
 		}
 	} // }}}
 	translate() { // {{{
-		@class.translate()
+		@factory.translate()
 
 		for argument in @arguments {
 			argument.translate()
@@ -61,7 +67,7 @@ class CreateExpression extends Expression {
 	} // }}}
 	isComputed() => true
 	isUsingVariable(name) { // {{{
-		if @class.isUsingVariable(name) {
+		if @factory.isUsingVariable(name) {
 			return true
 		}
 
@@ -74,7 +80,18 @@ class CreateExpression extends Expression {
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @sealed {
+		if @struct {
+			fragments.compile(@factory).code('(')
+
+			for const argument, i in @arguments {
+				fragments.code($comma) if i != 0
+
+				fragments.compile(argument)
+			}
+
+			fragments.code(')')
+		}
+		else if @sealed {
 			fragments.code(`\(@type.type().getSealedName()).new(`)
 
 			for const argument, i in @arguments {
@@ -88,14 +105,14 @@ class CreateExpression extends Expression {
 		else if @flatten {
 			this.module().flag('Helper')
 
-			fragments.code(`\($runtime.helper(this)).create(`).compile(@class)
+			fragments.code(`\($runtime.helper(this)).create(`).compile(@factory)
 
 			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
 
 			fragments.code(')')
 		}
 		else {
-			fragments.code('new ').compile(@class).code('(')
+			fragments.code('new ').compile(@factory).code('(')
 
 			for const argument, i in @arguments {
 				fragments.code($comma) if i != 0

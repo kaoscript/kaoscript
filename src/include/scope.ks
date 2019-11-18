@@ -50,6 +50,7 @@ let $keywords = { // {{{
 	sealed: true
 	short: true
 	static: true
+	struct: true
 	super: true
 	switch: true
 	synchronized: true

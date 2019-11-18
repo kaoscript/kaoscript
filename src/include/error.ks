@@ -284,6 +284,9 @@ export class SyntaxException extends Exception {
 		throwInvalidImportAliasArgument(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Aliases arguments can't be used with classic JavaScript module`, node)
 		} // }}}
+		throwInvalidIdentifier(value, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`"\(value)" is an invalid identifier`, node)
+		} // }}}
 		throwInvalidSyncMethods(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
 		} // }}}

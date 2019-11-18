@@ -21,7 +21,7 @@ class ArrayType extends Type {
 
 		return export
 	} // }}}
-	getElement(index: Number): Type => index >= @elements.length ? Type.Any : @elements[index]
+	getElement(index: Number): Type => index >= @elements.length ? AnyType.NullableUnexplicit : @elements[index]
 	isArray() => true
 	isMatching(value: ArrayType, mode: MatchingMode) { // {{{
 		if this.length() != value.length() {

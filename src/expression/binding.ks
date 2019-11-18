@@ -4,6 +4,7 @@ class ArrayBinding extends Expression {
 		_elements						= []
 		_flatten: Boolean				= false
 		_immutable: Boolean				= false
+		_type: Type?					= null
 	}
 	analyse() { // {{{
 		@flatten = @options.format.destructuring == 'es5'
@@ -21,12 +22,39 @@ class ArrayBinding extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
-		for element in @elements {
-			element.prepare()
+		if @type == null {
+			for const element in @elements {
+				element.prepare()
+			}
+		}
+		else if @type is ArrayType {
+			for const element, index in @elements {
+				element.type(@type.getElement(index))
+
+				element.prepare()
+			}
+		}
+		else if @type.isStruct() {
+			const type = @type.discard()
+
+			for const element, index in @elements {
+				element.type(type.getProperty(index).type())
+
+				element.prepare()
+			}
+		}
+		else {
+			const type = @type.parameter()
+
+			for const element in @elements {
+				element.type(type)
+
+				element.prepare()
+			}
 		}
 	} // }}}
 	translate() { // {{{
-		for element in @elements {
+		for const element in @elements {
 			element.translate()
 		}
 	} // }}}
@@ -111,6 +139,7 @@ class ArrayBinding extends Expression {
 			}
 		}
 	} // }}}
+	type(@type) => this
 	type(type: Type, scope: Scope, node)
 	walk(fn) { // {{{
 		for element in @elements {
@@ -123,12 +152,13 @@ class ArrayBindingElement extends Expression {
 	private {
 		_assignment: AssignmentType		= AssignmentType::Neither
 		_defaultValue					= null
+		_hasDefaultValue: Boolean		= false
 		_index							= -1
 		_name							= null
 		_named: Boolean					= false
 		_rest: Boolean					= false
 		_thisAlias: Boolean				= false
-		_type: Type						= Type.Any
+		_type: Type						= AnyType.NullableUnexplicit
 	}
 	analyse() { // {{{
 		if @data.name? {
@@ -139,6 +169,8 @@ class ArrayBindingElement extends Expression {
 			@named = true
 
 			if @data.defaultValue? {
+				@hasDefaultValue = true
+
 				@defaultValue = $compile.expression(@data.defaultValue, this)
 				@defaultValue.analyse()
 			}
@@ -154,14 +186,32 @@ class ArrayBindingElement extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
+		if @data.type? {
+			@type = Type.fromAST(@data.type, this)
+		}
+
 		if @named {
 			@name.prepare()
 
-			@defaultValue?.prepare()
-		}
+			if @hasDefaultValue {
+				@defaultValue.prepare()
+			}
 
-		if @data.type? {
-			@type = Type.fromAST(@data.type, this)
+			if @name is IdentifierLiteral {
+				const variable = @name.variable()
+
+				variable.setDeclaredType(@type)
+
+				if @assignment == AssignmentType::Declaration {
+					variable.setRealType(@type)
+				}
+				else if @hasDefaultValue {
+					variable.setRealType(@defaultValue.type())
+				}
+			}
+			else {
+				@name.type(@type)
+			}
 		}
 
 		this.statement().assignTempVariables(@scope)
@@ -170,7 +220,9 @@ class ArrayBindingElement extends Expression {
 		if @named {
 			@name.translate()
 
-			@defaultValue?.translate()
+			if @hasDefaultValue {
+				@defaultValue.translate()
+			}
 		}
 	} // }}}
 	compileVariable(data) => $compile.expression(data, this)
@@ -224,6 +276,7 @@ class ArrayBindingElement extends Expression {
 		}
 	} // }}}
 	type() => @type
+	type(@type) => this
 	walk(fn) { // {{{
 		if @named {
 			@name.walk(fn)
@@ -297,6 +350,7 @@ class ObjectBinding extends Expression {
 		_elements						= []
 		_flatten: Boolean				= false
 		_immutable: Boolean				= false
+		_type: Type?					= null
 	}
 	analyse() { // {{{
 		@flatten = @options.format.destructuring == 'es5'
@@ -316,8 +370,26 @@ class ObjectBinding extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
-		for const element in @elements {
-			element.prepare()
+		if @type == null {
+			for const element in @elements {
+				element.prepare()
+			}
+		}
+		else if @type is DictionaryType {
+			for const element in @elements {
+				element.type(@type.getProperty(element.name()))
+
+				element.prepare()
+			}
+		}
+		else {
+			const type = @type.parameter()
+
+			for const element in @elements {
+				element.type(type)
+
+				element.prepare()
+			}
 		}
 	} // }}}
 	translate() { // {{{
@@ -410,6 +482,7 @@ class ObjectBinding extends Expression {
 			}
 		}
 	} // }}}
+	type(@type) => this
 	type(type: Type, scope: Scope, node)
 	walk(fn) { // {{{
 		for element in @elements {
@@ -428,6 +501,7 @@ class ObjectBindingElement extends Expression {
 		_name
 		_rest: Boolean					= false
 		_thisAlias: Boolean				= false
+		_type: Type						= AnyType.NullableUnexplicit
 	}
 	analyse() { // {{{
 		for const modifier in @data.modifiers {
@@ -469,10 +543,30 @@ class ObjectBindingElement extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
+		if @data.type? {
+			@type = Type.fromAST(@data.type, this)
+		}
+
 		@alias.prepare()
 
 		if @hasDefaultValue {
 			@defaultValue.prepare()
+		}
+
+		if @alias is IdentifierLiteral {
+			const variable = @alias.variable()
+
+			variable.setDeclaredType(@type)
+
+			if @assignment == AssignmentType::Declaration {
+				variable.setRealType(@type)
+			}
+			else if @hasDefaultValue {
+				variable.setRealType(@defaultValue.type())
+			}
+		}
+		else {
+			@alias.type(@type)
 		}
 
 		this.statement().assignTempVariables(@scope)
@@ -552,6 +646,7 @@ class ObjectBindingElement extends Expression {
 				.compile(@name)
 		}
 	} // }}}
+	type(@type) => this
 	walk(fn) { // {{{
 		@alias.walk(fn)
 	} // }}}

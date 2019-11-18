@@ -7,10 +7,11 @@ const $weightTOFs = { // {{{
 	Function: 3
 	Namespace: 8
 	Number: 5
-	Object: 11
+	Object: 12
 	Primitive: 7
 	RegExp: 9
 	String: 6
+	Struct: 11
 } // }}}
 
 class ReferenceType extends Type {
@@ -102,6 +103,7 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} // }}}
+	discard() => this.discardReference()?.discard()
 	discardAlias() { // {{{
 		if @name == 'Any' {
 			return Type.Any
@@ -308,11 +310,20 @@ class ReferenceType extends Type {
 		}
 		else {
 			if value is ReferenceType {
-				if value.name() == 'Enum' {
+				/* if value.name() == 'Enum' {
 					return this.type().isEnum()
 				}
 				else if value.name() == 'Namespace' {
 					return this.type().isNamespace()
+				}
+				else if value.name() == 'Struct' {
+					return this.type().isStruct()
+				} */
+				/* if $virtuals[value.name()] {
+					return this.type()[`is\(value.name())`]()
+				} */
+				if $virtuals[value.name()] {
+					return this.type().canBeVirtual(value.name())
 				}
 				else {
 					return @scope.isMatchingType(this.discardReference()!?, value.discardReference()!?, mode)
@@ -360,12 +371,13 @@ class ReferenceType extends Type {
 	isNull() => @name == 'Null'
 	isNullable() => @nullable
 	isNumber() => @name == 'Number' || this.type().isNumber()
-	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String'))
+	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String' || @name == 'Struct'))
 	isReference() => true
 	isReducible() => true
 	isRequired() => this.type().isRequired()
 	isSpread() => @spread
 	isString() => @name == 'String' || this.type().isString()
+	isStruct() => @name == 'Struct' || this.type().isStruct()
 	isTypeOf(): Boolean => $typeofs[@name]
 	isUnion() => this.type().isUnion()
 	isVoid() => @name == 'Void' || this.type().isVoid()
@@ -578,8 +590,11 @@ class ReferenceType extends Type {
 				if @type.isClass() {
 					fragments.code(`isInstance`)
 				}
-				else {
+				else if @type.isEnum() {
 					fragments.code(`isEnumMember`)
+				}
+				else if @type.isStruct() {
+					fragments.code(`isStructInstance`)
 				}
 
 				fragments.code(`(`).compile(node).code(`, `)

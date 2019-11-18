@@ -25,6 +25,7 @@ class AliasType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
+	discard() => @type.discard()
 	discardAlias() => @type.discardAlias()
 	discardReference() => @type.discardAlias()
 	export(references, mode) { // {{{

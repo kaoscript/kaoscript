@@ -138,6 +138,15 @@ class UnionType extends Type {
 
 		return false
 	} // }}}
+	canBeVirtual(name: String) { // {{{
+		for const type in @types {
+			if type.canBeVirtual(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	clone() { // {{{
 		const that = new UnionType(@scope)
 

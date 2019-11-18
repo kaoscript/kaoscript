@@ -13,6 +13,7 @@ class VariableDeclaration extends Statement {
 		_redeclared: Boolean		= false
 		_toDeclareAll: Boolean		= true
 		_try
+		_type: Type					= Type.Null
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
@@ -102,33 +103,31 @@ class VariableDeclaration extends Statement {
 	prepare() { // {{{
 		const declarator = @declarators[0]
 
-		let type = null
-
 		if @hasInit {
 			@init.prepare()
 
-			type = @init.type()
+			@type = @init.type()
 
-			if type.isInoperative() {
+			if @type.isInoperative() {
 				TypeException.throwUnexpectedInoperative(@init, this)
 			}
 
 			if @parent is IfStatement {
-				type = type.setNullable(false)
+				@type = @type.setNullable(false)
 			}
 
 			if @autotype {
-				if type.isNull() {
+				if @type.isNull() {
 					declarator.setDeclaredType(AnyType.NullableExplicit)
 				}
 				else {
-					declarator.setDeclaredType(type)
+					declarator.setDeclaredType(@type)
 				}
 
 				declarator.flagDefinitive()
 			}
 			else {
-				declarator.setRealType(type)
+				declarator.setRealType(@type)
 			}
 
 			this.assignTempVariables(@initScope)
@@ -143,12 +142,15 @@ class VariableDeclaration extends Statement {
 		}
 
 		if @hasInit {
-			declarator.setRealType(type)
+			declarator.setRealType(@type)
 
 			@init.acquireReusable(declarator.isSplitAssignment())
 			@init.releaseReusable()
 
 			this.statement().assignTempVariables(@scope)
+		}
+		else {
+			@type = @declarators[0].variable().getRealType()
 		}
 	} // }}}
 	translate() { // {{{
@@ -204,6 +206,7 @@ class VariableDeclaration extends Statement {
 			return null
 		}
 	} // }}}
+	/* getRealType() => @type */
 	init() => @init
 	isAwait() => @await
 	isDeclararingVariable(name: String) { // {{{
@@ -313,7 +316,8 @@ class VariableDeclaration extends Statement {
 			@declarators[0].toAssignmentFragments(fragments, @init)
 		}
 	} // }}}
-	type() => @declarators[0].variable().getRealType()
+	/* type() => @declarators[0].variable().getRealType() */
+	type() => @type
 	walk(fn) { // {{{
 		for declarator in @declarators {
 			declarator.walk(fn)
@@ -324,6 +328,7 @@ class VariableDeclaration extends Statement {
 class VariableBindingDeclarator extends AbstractNode {
 	private {
 		_binding
+		_type: Type?						= null
 	}
 	analyse() { // {{{
 		@binding = $compile.expression(@data.name, this)
@@ -339,6 +344,16 @@ class VariableBindingDeclarator extends AbstractNode {
 		@parent.defineVariables(@binding)
 	} // }}}
 	prepare() { // {{{
+		if @data.type? {
+			/* @type = Type.fromAST(@data.type, this)
+
+			@binding.type(@type) */
+			this.setDeclaredType(Type.fromAST(@data.type, this))
+		}
+		else if @parent.isImmutable() {
+			this.setDeclaredType(@parent.type())
+		}
+
 		@binding.prepare()
 	} // }}}
 	translate() { // {{{
@@ -355,16 +370,32 @@ class VariableBindingDeclarator extends AbstractNode {
 	isRedeclared() => @binding.isRedeclared()
 	isSplitAssignment() => @binding.isSplitAssignment()
 	isStronglyTyped() => true
-	setDeclaredType(type: Type) => this.setRealType(type)
-	setRealType(type: Type) { // {{{
-		if !type.isAny() {
+	/* setDeclaredType(type: Type) => this.setRealType(type) */
+	setDeclaredType(@type) {
+		if !@type.isAny() {
 			if @binding is ArrayBinding {
-				if !type.isArray() {
+				unless @type.isArray() {
 					TypeException.throwInvalidBinding('Array', this)
 				}
 			}
-			else if @binding is ObjectBinding {
-				if !type.isDictionary() {
+			else {
+				unless @type.isDictionary() {
+					TypeException.throwInvalidBinding('Dictionary', this)
+				}
+			}
+
+			@binding.type(@type)
+		}
+	}
+	setRealType(type: Type) { // {{{
+		if !type.isAny() {
+			if @binding is ArrayBinding {
+				unless type.isArray() {
+					TypeException.throwInvalidBinding('Array', this)
+				}
+			}
+			else {
+				unless type.isDictionary() {
 					TypeException.throwInvalidBinding('Dictionary', this)
 				}
 			}
