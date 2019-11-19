@@ -87,6 +87,7 @@ class NamedType extends Type {
 	isBoolean() => @type.isBoolean()
 	isCloned() => @cloned
 	isClass() => @type.isClass()
+	isDictionary() => @type.isDictionary()
 	isEnum() => @type.isEnum()
 	isExclusion() => @type.isExclusion()
 	isExhaustive() => @type.isExhaustive()

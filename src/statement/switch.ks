@@ -119,6 +119,8 @@ class SwitchStatement extends Statement {
 		let enumConditions = 0
 		let maxConditions = 0
 
+		let maxInferables = @clauses.length
+
 		for const clause, index in @clauses {
 			let nf = true
 
@@ -144,7 +146,10 @@ class SwitchStatement extends Statement {
 				clause.name = @scope.acquireTempName(false)
 			}
 
-			if index == 0 {
+			if clause.body.isExit() {
+				--maxInferables
+			}
+			else if index == 0 {
 				for const data, name of clause.body.scope().listUpdatedInferables() {
 					inferables[name] = {
 						count: 1
@@ -189,7 +194,7 @@ class SwitchStatement extends Statement {
 			}
 		}
 
-		for const inferable, name of inferables when inferable.count == @clauses.length {
+		for const inferable, name of inferables when inferable.count == maxInferables {
 			@scope.updateInferable(name, inferable.data, this)
 		}
 

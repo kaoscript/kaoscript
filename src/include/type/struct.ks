@@ -205,7 +205,7 @@ class ObjectStructType extends StructType {
 						result.push(nameds[name])
 					}
 					else if field.isRequired() {
-						NotSupportedException.throw(node)
+						ReferenceException.throwNotDefinedField(name, node)
 					}
 					else {
 						result.push(new Literal('null', node))

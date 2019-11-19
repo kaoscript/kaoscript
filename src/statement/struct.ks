@@ -35,7 +35,7 @@ class StructDeclaration extends Statement {
 
 		@variable = @scope.define(@name, true, @type, this)
 
-		@function = new StructFunction(this)
+		@function = new StructFunction(@data, this, new BlockScope(@scope))
 
 		for const data, index in @data.fields {
 			const field = new StructFieldDeclaration(index, data, this)
@@ -117,8 +117,8 @@ class StructFunction extends AbstractNode {
 		_parameters: Array<Parameter>
 		_type: FunctionType
 	}
-	constructor(@parent) { // {{{
-		super(parent._data, parent)
+	constructor(@data, @parent, @scope) { // {{{
+		super(data, parent, scope)
 
 		@type = new FunctionType(@scope)
 	} // }}}

@@ -382,6 +382,15 @@ class ObjectBinding extends Expression {
 				element.prepare()
 			}
 		}
+		else if @type.isStruct() {
+			const type = @type.discard()
+
+			for const element in @elements {
+				element.type(type.getProperty(element.name()).type())
+
+				element.prepare()
+			}
+		}
 		else {
 			const type = @type.parameter()
 

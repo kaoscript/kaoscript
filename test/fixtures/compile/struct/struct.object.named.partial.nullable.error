@@ -1,0 +1,1 @@
+ReferenceException: Field "x" is not defined (line 8, file "fixtures/compile/struct/struct.object.named.partial.nullable.ks")
