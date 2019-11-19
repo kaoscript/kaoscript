@@ -7,6 +7,7 @@ class CallExpression extends Expression {
 		_defaultCallee: DefaultCallee
 		_flatten: Boolean				= false
 		_hasDefaultCallee: Boolean		= false
+		_named: Boolean					= false
 		_nullable: Boolean				= false
 		_nullableComputed: Boolean		= false
 		_object							= null
@@ -68,30 +69,25 @@ class CallExpression extends Expression {
 		} // }}}
 	}
 	analyse() { // {{{
-		if @data.arguments.length == 1 {
-			@arguments.push(argument = $compile.expression(@data.arguments[0], this))
+		const es5 = @data.arguments.length != 1 && @options.format.spreads == 'es5'
+
+		for const data in @data.arguments {
+			const argument = $compile.expression(data, this)
 
 			argument.analyse()
 
-			if argument.isAwait() {
+			if es5 && argument is UnaryOperatorSpread {
+				@flatten = true
+			}
+			else if argument.isAwait() {
 				@await = true
 			}
-		}
-		else {
-			const es5 = @options.format.spreads == 'es5'
 
-			for argument in @data.arguments {
-				@arguments.push(argument = $compile.expression(argument, this))
-
-				argument.analyse()
-
-				if es5 && argument is UnaryOperatorSpread {
-					@flatten = true
-				}
-				else if argument.isAwait() {
-					@await = true
-				}
+			if argument is NamedArgument {
+				@named = true
 			}
+
+			@arguments.push(argument)
 		}
 
 		if @data.callee.kind == NodeKind::MemberExpression && !@data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Computed) {
@@ -124,6 +120,10 @@ class CallExpression extends Expression {
 		}
 
 		if @object != null {
+			if @named {
+				NotImplementedException.throw(this)
+			}
+
 			@object.prepare()
 
 			@property = @data.callee.property.name
@@ -173,12 +173,25 @@ class CallExpression extends Expression {
 					else {
 						this.addCallee(new DefaultCallee(@data, null, null, this))
 					}
+
+					if @named {
+						if type.isStruct() {
+							@arguments = type.discard().sortArguments(@arguments)
+						}
+						else {
+							NotImplementedException.throw(this)
+						}
+					}
 				}
 				else {
 					SyntaxException.throwUndefinedFunction(@data.callee.name, this)
 				}
 			}
 			else {
+				if @named {
+					NotImplementedException.throw(this)
+				}
+
 				this.addCallee(new DefaultCallee(@data, null, null, this))
 			}
 		}
@@ -799,37 +812,6 @@ class DefaultCallee extends Callee {
 		_scope: ScopeKind
 		_type: Type
 	}
-	/* constructor(@data, object = null, node) { // {{{
-		super(data)
-
-		if object == null {
-			@expression = $compile.expression(data.callee, node)
-		}
-		else {
-			@expression = new MemberExpression(data.callee, node, node.scope(), object)
-		}
-
-		@expression.analyse()
-		@expression.prepare()
-
-		@flatten = node._flatten
-		@nullableProperty = @expression.isNullable()
-		@scope = data.scope.kind
-
-		const type = @expression.type()
-
-		if type.isClass() {
-			TypeException.throwConstructorWithoutNew(type.name(), node)
-		}
-		else if type is FunctionType {
-			this.validate(type, node)
-
-			@type = type.returnType()
-		}
-		else {
-			@type = AnyType.NullableUnexplicit
-		}
-	} // }}} */
 	constructor(@data, object! = null, type!: Type = null, node) { // {{{
 		super(data)
 
@@ -1215,4 +1197,28 @@ class SubstituteCallee extends Callee {
 	} // }}}
 	translate()
 	type() => @type
+}
+
+class NamedArgument extends Expression {
+	private {
+		_name: String
+		_value: Expression
+	}
+	analyse() { // {{{
+		@name = @data.name.name
+
+		@value = $compile.expression(@data.value, this)
+		@value.analyse()
+	} // }}}
+	prepare() { // {{{
+		@value.prepare()
+	} // }}}
+	translate() { // {{{
+		@value.translate()
+	} // }}}
+	isAwait() => @value.isAwait()
+	name() => @name
+	toFragments(fragments, mode) { // {{{
+		@value.toFragments(fragments, mode)
+	} // }}}
 }

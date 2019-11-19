@@ -391,6 +391,7 @@ const $expressions = {
 	`\(NodeKind::LambdaExpression)`				: ArrowFunctionExpression
 	`\(NodeKind::Literal)`						: StringLiteral
 	`\(NodeKind::MemberExpression)`				: MemberExpression
+	`\(NodeKind::NamedArgument)`				: NamedArgument
 	`\(NodeKind::NumericExpression)`			: NumberLiteral
 	`\(NodeKind::ObjectBinding)`				: ObjectBinding
 	`\(NodeKind::ObjectExpression)`				: DictionaryExpression

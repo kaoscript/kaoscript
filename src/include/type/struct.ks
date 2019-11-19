@@ -79,6 +79,7 @@ class ArrayStructType extends StructType {
 
 		return false
 	} // }}}
+	sortArguments(arguments) => arguments
 }
 
 class NamedArrayStructType extends StructType {
@@ -128,10 +129,14 @@ class NamedArrayStructType extends StructType {
 
 		return false
 	} // }}}
+	sortArguments(arguments: Array) { // {{{
+		NotImplementedException.throw()
+	} // }}}
 }
 
 class ObjectStructType extends StructType {
 	private {
+		_count: Number								= 0
 		_fields: Dictionary<StructFieldType>		= {}
 	}
 	static {
@@ -153,6 +158,7 @@ class ObjectStructType extends StructType {
 	}
 	addField(field: StructFieldType) { // {{{
 		@fields[field.name()] = field
+		++@count
 	} // }}}
 	override export(references, mode) { // {{{
 		const export = {
@@ -176,6 +182,32 @@ class ObjectStructType extends StructType {
 		}
 
 		return false
+	} // }}}
+	sortArguments(arguments: Array) { // {{{
+		const result = []
+
+		const nameds = {}
+		let count = 0
+		for const argument in arguments when argument is NamedArgument {
+			nameds[argument.name()] = argument
+			++count
+		}
+
+		if count == arguments.length {
+			if count == @count {
+				for const field, name of @fields {
+					result.push(nameds[name])
+				}
+			}
+			else {
+				NotImplementedException.throw()
+			}
+		}
+		else {
+			NotImplementedException.throw()
+		}
+
+		return result
 	} // }}}
 }
 
