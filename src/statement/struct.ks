@@ -157,9 +157,9 @@ class StructFieldDeclaration extends AbstractNode {
 		@parameter.analyse()
 	} // }}}
 	prepare() { // {{{
-		@type = StructFieldType.fromAST(@data, @index, this)
-
 		@parameter.prepare()
+
+		@type = new StructFieldType(@scope, @data.name?.name, @index, Type.fromAST(@data.type, this), @parameter.isRequired())
 	} // }}}
 	translate() { // {{{
 		@parameter.translate()

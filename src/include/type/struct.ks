@@ -64,7 +64,7 @@ class ArrayStructType extends StructType {
 		}
 
 		for const field in @fields {
-			export.fields.push(field.type().export(references, mode))
+			export.fields.push(field.export(references, mode))
 		}
 
 		return export
@@ -114,7 +114,7 @@ class NamedArrayStructType extends StructType {
 		}
 
 		for const field of @fields {
-			export.fields[field.name()] = field.type().export(references, mode)
+			export.fields[field.name()] = field.export(references, mode)
 		}
 
 		return export
@@ -168,7 +168,7 @@ class ObjectStructType extends StructType {
 		}
 
 		for const field of @fields {
-			export.fields[field.name()] = field.type().export(references, mode)
+			export.fields[field.name()] = field.export(references, mode)
 		}
 
 		return export
@@ -183,7 +183,7 @@ class ObjectStructType extends StructType {
 
 		return false
 	} // }}}
-	sortArguments(arguments: Array) { // {{{
+	sortArguments(arguments: Array, node) { // {{{
 		const result = []
 
 		const nameds = {}
@@ -200,11 +200,21 @@ class ObjectStructType extends StructType {
 				}
 			}
 			else {
-				NotImplementedException.throw()
+				for const field, name of @fields {
+					if nameds[name]? {
+						result.push(nameds[name])
+					}
+					else if field.isRequired() {
+						NotSupportedException.throw(node)
+					}
+					else {
+						result.push(new Literal('null', node))
+					}
+				}
 			}
 		}
 		else {
-			NotImplementedException.throw()
+			NotImplementedException.throw(node)
 		}
 
 		return result
@@ -218,28 +228,21 @@ class StructFieldType extends Type {
 		_type: Type
 	}
 	static {
-		fromAST(data, index: Number, node: AbstractNode) { // {{{
-			const scope = node.scope()
+		fromMetadata(index, name?, data, metadata, references, alterations, queue, scope, node) { // {{{
+			const fieldType = Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node)
 
-			const name = data.name?.name
-			const type = Type.fromAST(data.type, node)
-
-			return new StructFieldType(scope, name, index, type)
-		} // }}}
-		fromMetadata(index, name?, type, metadata, references, alterations, queue, scope, node) { // {{{
-			const fieldType = Type.fromMetadata(type, metadata, references, alterations, queue, scope, node)
-
-			return new StructFieldType(scope, name, index, fieldType)
+			return new StructFieldType(scope, name, index, fieldType, data.required)
 		} // }}}
 	}
-	constructor(@scope, @name, @index, @type) { // {{{
+	constructor(@scope, @name, @index, @type, @required) { // {{{
 		super(scope)
 	} // }}}
 	override clone() { // {{{
 		NotImplementedException.throw()
 	} // }}}
-	override export(references, mode) { // {{{
-		NotImplementedException.throw()
+	override export(references, mode) => { // {{{
+		required: @required
+		type: @type.export(references, mode)
 	} // }}}
 	index() => @index
 	name() => @name

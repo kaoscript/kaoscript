@@ -13,8 +13,14 @@
       "kind": "struct",
       "variety": "namedarray",
       "fields": {
-        "x": "String",
-        "y": "Number"
+        "x": {
+          "required": false,
+          "type": "String"
+        },
+        "y": {
+          "required": false,
+          "type": "Number"
+        }
       }
     }
   ],

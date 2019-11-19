@@ -176,7 +176,7 @@ class CallExpression extends Expression {
 
 					if @named {
 						if type.isStruct() {
-							@arguments = type.discard().sortArguments(@arguments)
+							@arguments = type.discard().sortArguments(@arguments, this)
 						}
 						else {
 							NotImplementedException.throw(this)

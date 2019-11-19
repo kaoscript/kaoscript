@@ -13,8 +13,14 @@
       "kind": "struct",
       "variety": "object",
       "fields": {
-        "x": "Number",
-        "y": "Number"
+        "x": {
+          "required": true,
+          "type": "Number"
+        },
+        "y": {
+          "required": true,
+          "type": "Number"
+        }
       }
     }
   ],

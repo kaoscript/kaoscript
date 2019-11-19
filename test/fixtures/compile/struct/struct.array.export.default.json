@@ -10,8 +10,14 @@
       "kind": "struct",
       "variety": "array",
       "fields": [
-        "String",
-        "Number"
+        {
+          "required": true,
+          "type": "String"
+        },
+        {
+          "required": true,
+          "type": "Number"
+        }
       ]
     }
   ],
