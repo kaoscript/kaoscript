@@ -167,8 +167,11 @@ class CallExpression extends Expression {
 					else if type is OverloadedFunctionType {
 						this.makeCallee(type, variable.name())
 					}
+					else if type.isStruct() {
+						this.addCallee(new DefaultCallee(@data, null, type, this))
+					}
 					else {
-						this.addCallee(new DefaultCallee(@data, this))
+						this.addCallee(new DefaultCallee(@data, null, null, this))
 					}
 				}
 				else {
@@ -176,7 +179,7 @@ class CallExpression extends Expression {
 				}
 			}
 			else {
-				this.addCallee(new DefaultCallee(@data, this))
+				this.addCallee(new DefaultCallee(@data, null, null, this))
 			}
 		}
 
@@ -352,11 +355,11 @@ class CallExpression extends Expression {
 						ReferenceException.throwNoMatchingFunction(name, @arguments, this)
 					}
 					else {
-						this.addCallee(new DefaultCallee(@data, @object, this))
+						this.addCallee(new DefaultCallee(@data, @object, null, this))
 					}
 				}
 				else if matches.length == 1 {
-					this.addCallee(new DefaultCallee(@data, matches[0], this))
+					this.addCallee(new DefaultCallee(@data, null, matches[0], this))
 				}
 				else {
 					const union = new UnionType(this.scope())
@@ -369,7 +372,7 @@ class CallExpression extends Expression {
 				}
 			}
 			=> {
-				this.addCallee(new DefaultCallee(@data, @object, this))
+				this.addCallee(new DefaultCallee(@data, @object, null, this))
 			}
 		}
 	} // }}}
@@ -414,7 +417,7 @@ class CallExpression extends Expression {
 							this.addCallee(new SealedMethodCallee(@data, name, false, this))
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, this))
+							this.addCallee(new DefaultCallee(@data, @object, null, this))
 						}
 					}
 					else {
@@ -430,7 +433,7 @@ class CallExpression extends Expression {
 					ReferenceException.throwNotFoundMethod(@property, name:NamedType.name(), this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, this))
+					this.addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is DictionaryType => {
@@ -446,7 +449,7 @@ class CallExpression extends Expression {
 					}
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, this))
+					this.addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is ExclusionType => {
@@ -477,7 +480,7 @@ class CallExpression extends Expression {
 					ReferenceException.throwNotDefinedProperty(@property, this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, this))
+					this.addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is ParameterType => {
@@ -501,7 +504,7 @@ class CallExpression extends Expression {
 				}
 			}
 			=> {
-				this.addCallee(new DefaultCallee(@data, @object, this))
+				this.addCallee(new DefaultCallee(@data, @object, null, this))
 			}
 		}
 	} // }}}
@@ -541,7 +544,7 @@ class CallExpression extends Expression {
 							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, this))
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, this))
+							this.addCallee(new DefaultCallee(@data, @object, null, this))
 						}
 					}
 					else {
@@ -569,13 +572,13 @@ class CallExpression extends Expression {
 					const arguments = [argument.type() for const argument in @arguments]
 
 					if value.hasAbstractMethod(@property, arguments) {
-						this.addCallee(new DefaultCallee(@data, @object, this))
+						this.addCallee(new DefaultCallee(@data, @object, null, this))
 					}
 					else if reference.isExhaustive(this) {
 						ReferenceException.throwNotFoundMethod(@property, reference.name(), this)
 					}
 					else {
-						this.addCallee(new DefaultCallee(@data, @object, this))
+						this.addCallee(new DefaultCallee(@data, @object, null, this))
 					}
 				}
 			}
@@ -597,7 +600,7 @@ class CallExpression extends Expression {
 				}
 			}
 			=> {
-				this.addCallee(new DefaultCallee(@data, @object, this))
+				this.addCallee(new DefaultCallee(@data, @object, null, this))
 			}
 		}
 	} // }}}
@@ -796,7 +799,7 @@ class DefaultCallee extends Callee {
 		_scope: ScopeKind
 		_type: Type
 	}
-	constructor(@data, object = null, node) { // {{{
+	/* constructor(@data, object = null, node) { // {{{
 		super(data)
 
 		if object == null {
@@ -826,8 +829,8 @@ class DefaultCallee extends Callee {
 		else {
 			@type = AnyType.NullableUnexplicit
 		}
-	} // }}}
-	constructor(@data, object = null, type: Type, node) { // {{{
+	} // }}} */
+	constructor(@data, object! = null, type!: Type = null, node) { // {{{
 		super(data)
 
 		if object == null {
@@ -844,6 +847,8 @@ class DefaultCallee extends Callee {
 		@nullableProperty = @expression.isNullable()
 		@scope = data.scope.kind
 
+		type ??= @expression.type()
+
 		if type.isClass() {
 			TypeException.throwConstructorWithoutNew(type.name(), node)
 		}
@@ -851,6 +856,9 @@ class DefaultCallee extends Callee {
 			this.validate(type, node)
 
 			@type = type.returnType()
+		}
+		else if type.isStruct() {
+			@type = node.scope().reference(type)
 		}
 		else {
 			@type = AnyType.NullableUnexplicit

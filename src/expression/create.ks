@@ -4,7 +4,6 @@ class CreateExpression extends Expression {
 		_factory: Expression
 		_flatten: Boolean		= false
 		_sealed: Boolean		= false
-		_struct: Boolean		= false
 		_type: Type				= Type.Any
 	}
 	analyse() { // {{{
@@ -49,12 +48,7 @@ class CreateExpression extends Expression {
 
 			@type = @scope.reference(type)
 		}
-		else if type.isNamed() && type.type() is StructType {
-			@type = @scope.reference(type)
-
-			@struct = true
-		}
-		else if !(type.isAny() || type.isClass() || type.isStruct()) {
+		else if !(type.isAny() || type.isClass()) {
 			TypeException.throwNotClass(type.toQuote(), this)
 		}
 	} // }}}
@@ -80,18 +74,7 @@ class CreateExpression extends Expression {
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @struct {
-			fragments.compile(@factory).code('(')
-
-			for const argument, i in @arguments {
-				fragments.code($comma) if i != 0
-
-				fragments.compile(argument)
-			}
-
-			fragments.code(')')
-		}
-		else if @sealed {
+		if @sealed {
 			fragments.code(`\(@type.type().getSealedName()).new(`)
 
 			for const argument, i in @arguments {

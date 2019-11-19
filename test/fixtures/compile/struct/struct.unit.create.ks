@@ -1,3 +1,3 @@
 struct Unit
 
-const unit = new Unit
+const unit = Unit()

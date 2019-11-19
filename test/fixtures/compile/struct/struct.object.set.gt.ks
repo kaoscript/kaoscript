@@ -5,7 +5,7 @@ struct Point {
     y: Number
 }
 
-const point = new Point(0.3, 0.4)
+const point = Point(0.3, 0.4)
 
 console.log(point.x + 1, point.x + point.y)
 

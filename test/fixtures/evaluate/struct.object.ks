@@ -8,7 +8,7 @@ struct Point {
 expect(Point is Struct).to.equal(true)
 expect(Type.typeOf(Point)).to.equal('struct')
 
-const point = new Point(0.3, 0.4)
+const point = Point(0.3, 0.4)
 
 expect(point is Point).to.equal(true)
 expect(Type.typeOf(point)).to.equal('struct-instance')

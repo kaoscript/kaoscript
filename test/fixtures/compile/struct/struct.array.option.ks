@@ -3,12 +3,12 @@ struct Pair(
 	Number	= 0
 )
 
-const pair = new Pair()
+const pair = Pair()
 
-const pair2 = new Pair(null, 3.14)
+const pair2 = Pair(null, 3.14)
 
-const pair3 = new Pair('foobar')
+const pair3 = Pair('foobar')
 
-const pair4 = new Pair('foobar', null)
+const pair4 = Pair('foobar', null)
 
-const pair5 = new Pair(null, null)
+const pair5 = Pair(null, null)

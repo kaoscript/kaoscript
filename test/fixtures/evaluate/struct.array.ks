@@ -5,7 +5,7 @@ struct Pair(String, Number)
 expect(Pair is Struct).to.equal(true)
 expect(Type.typeOf(Pair)).to.equal('struct')
 
-const pair = new Pair('x', 0.1)
+const pair = Pair('x', 0.1)
 
 expect(pair is Pair).to.equal(true)
 expect(Type.typeOf(pair)).to.equal('struct-instance')
