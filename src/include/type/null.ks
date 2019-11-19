@@ -26,6 +26,14 @@ class NullType extends Type {
 	isNull() => true
 	isNullable() => true
 	matchContentOf(type: Type) => type.isNullable()
+	setNullable(nullable: Boolean) { // {{{
+		if nullable {
+			return this
+		}
+		else {
+			return AnyType.Explicit
+		}
+	} // }}}
 	toFragments(fragments, node)
 	toQuote() => 'Null'
 	toReference(references, mode) => 'Null'
