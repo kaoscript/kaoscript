@@ -5,7 +5,7 @@ module.exports = function() {
 		let __ks_0;
 		if(arguments.length > ++__ks_i && (__ks_0 = arguments[__ks_i]) !== void 0 && __ks_0 !== null) {
 			if(!Type.isString(__ks_0)) {
-				if(arguments.length - __ks_i < 0) {
+				if(arguments.length - __ks_i < 2) {
 					__ks_0 = "";
 					--__ks_i;
 				}

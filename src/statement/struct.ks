@@ -84,7 +84,7 @@ class StructDeclaration extends Statement {
 			fragments.line($const(this), varname, ' = new ', $runtime.dictionary(this), '()')
 
 			for const field in @fields {
-				fragments.newLine().code(varname, '.').compile(field.parameter().name()).code($equals).compile(field.parameter().name()).done()
+				fragments.newLine().code(varname, '.').compile(field.name()).code($equals).compile(field.parameter().name()).done()
 			}
 
 			fragments.line(`return \(varname)`)

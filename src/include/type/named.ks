@@ -252,6 +252,14 @@ class NamedType extends Type {
 					return this.matchContentOf(that.type().type())
 				}
 			}
+			else if that.type() is StructType {
+				if @type is StructType {
+					return @name == that.name()
+				}
+				else {
+					return @type.matchContentOf(that.type())
+				}
+			}
 			else if that.isAlias() {
 				if this.isAlias() {
 					return @name == that.name() || this.discardAlias().matchContentOf(that.discardAlias())

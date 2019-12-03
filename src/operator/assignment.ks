@@ -18,8 +18,6 @@ class AssignmentOperatorExpression extends Expression {
 
 		@right = $compile.expression(@data.right, this, @bindingScope)
 
-		@right.setAssignment(AssignmentType::Expression)
-
 		@right.analyse()
 
 		@await = @right.isAwait()

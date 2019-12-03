@@ -1,0 +1,1 @@
+ReferenceException: "x" is not defined (line 1, file "fixtures/compile/operator/operator.assign.addition.undef.left.ks")

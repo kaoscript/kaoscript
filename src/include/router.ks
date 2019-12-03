@@ -1,776 +1,1634 @@
 namespace Router {
-	export func assess(methods, flattenable, overflow = false) { // {{{
-		if methods.length == 0 {
-			return {
-				async: false
-				methods: []
-			}
+	#![rules(dont-ignore-misfit, dont-assert-parameter)]
+
+	struct Assessement {
+		async: Boolean			= false
+		flattenable: Boolean	= false
+		routes: Array<Route>	= []
+	}
+
+	struct Route {
+		function: FunctionType
+		index: Number
+		min: Number
+		max: Number
+		filters: Array<Filter>					= []
+		matchingFilters: Array<RouteFilter>		= []
+		rest: Filter?							= null
+		done: Boolean							= false
+	}
+
+	struct Filter {
+		index: Number
+		type: Type
+	}
+
+	struct RouteFilter {
+		min: Number
+		max: Number
+		filters: Array<Filter>	= []
+		rest: Filter?			= null
+	}
+
+	struct Group {
+		n: Number
+		functions: Array<FunctionType>		= []
+	}
+
+	namespace Bounded { // {{{
+		/* struct BoundedGroup extends Group {
+			isNode: Boolean			= false
+			rows: Dictionary<Row>	= {}
+			rowCount: Number		= 0
+		} */
+
+		struct UniqueRow {
+			index: Number
+			type: Type
+			function: FunctionType
+			rows: Array<String>
 		}
-		else if methods.length == 1 {
-			const method = methods[0]
 
-			method.index(0)
+		struct Row {
+			function: FunctionType
+			types: Array<Type>
+		}
 
-			const argFilters = []
+		struct Tree {
+			columns: Dictionary			= {}
+			indexes: Dictionary<Array>	= {}
+			order: Array<String>		= []
+		}
 
-			if method.absoluteMax() == Infinity {
-				const rest = method.restIndex()
-				const min = method.absoluteMin()
+		func addMatchingFilter(matchingFilters: Array<RouteFilter>, min: Number, max: Number, filter: Filter): Void { // {{{
+			for const arg in matchingFilters {
+				if arg.min == min && arg.max == max {
+					arg.filters.push(filter)
 
-				if rest < min {
-					buildArgFilter(method, argFilters, min, Infinity)
+					return
+				}
+			}
+
+			matchingFilters.push({
+				min: min
+				max: max
+				filters: [filter]
+			})
+		} // }}}
+
+		func buildFilters(filters: Array<Filter>, matchingFilters: Array<RouteFilter>, node, index: Number, max: Number, routes: Array<Route>): Void { // {{{
+			if node.isFilter {
+				if !(node.type.isAny() && node.type.isNullable()) {
+					filters = [...filters]
+
+					filters.push(Filter(
+						index: index - 1
+						type: node.type
+					))
+				}
+			}
+			else {
+				matchingFilters = [...matchingFilters]
+
+				addMatchingFilter(matchingFilters, max, max, Filter(
+					index: index - 1
+					type: node.type
+				))
+			}
+
+			if index == max {
+				routes.push(Route(
+					function: node.function
+					index: node.function.index()
+					min: max
+					max: max
+					filters
+					matchingFilters
+				))
+			}
+			else {
+				const next = index + 1
+
+				for const name in node.order {
+					buildFilters(filters, matchingFilters, node.columns[name], next, max, routes)
+				}
+			}
+		} // }}}
+
+		func buildRoutes(group, routes: Array<Route>, overflow): Void { // {{{
+			let rowCount: Number = group.rowCount
+			let rows: Dictionary<Row> = {...group.rows}
+
+			while rowCount > 1 && !usingSameFunction(rows) {
+				const uniques: Array<UniqueRow> = []
+
+				for const index from 0 til group.n {
+					resolveUniqueRows(index, rowCount, rows, uniques)
+				}
+
+				if uniques.length == 0 {
+					break
+				}
+
+				if uniques.length > 1 {
+					uniques.sort((a, b) => a.type.compareTo(b.type))
+				}
+
+				const uniq = uniques[0]
+
+				routes.push(Route(
+					function: uniq.function
+					index: uniq.function.index()
+					min: group.n
+					max: group.n
+					filters: [
+						Filter(
+							index: uniq.index
+							type: uniq.type
+						)
+					]
+				))
+
+				for const key in uniq.rows {
+					delete rows[key]
+				}
+
+				rowCount -= uniq.rows.length
+			}
+
+			const keys: Array = Dictionary.keys(rows)
+
+			if keys.length == 1 || usingSameFunction(rows) {
+				const row = rows[keys[0]]
+
+				const filters = []
+				for const type, index in row.types {
+					if !(type.isAny() && type.isNullable()) {
+						filters.push(Filter(
+							index
+							type
+						))
+					}
+				}
+
+				if overflow {
+					routes.push(Route(
+						function: row.function
+						index: row.function.index()
+						min: group.n
+						max: group.n
+						filters
+					))
 				}
 				else {
-					for const n from min til rest {
-						buildArgFilter(method, argFilters, n, n)
+					const matchingFilters = []
+
+					if filters.length != 0 {
+						matchingFilters.push(RouteFilter(
+							min: group.n
+							max: group.n
+							filters
+						))
 					}
 
-					buildArgFilter(method, argFilters, min, Infinity)
+					routes.push(Route(
+						function: row.function
+						index: row.function.index()
+						min: group.n
+						max: group.n
+						matchingFilters
+					))
+				}
+			}
+			else if keys.length > 0 {
+				const tree = createTree(keys, rows, group.n)
+
+				if group.n > 1 {
+					for const node of tree.columns {
+						buildNode(node, 1, group.n, tree.indexes)
+					}
+				}
+
+				tree.order = sortNodes(tree.columns)
+
+				filterOutCommonTypes(keys, tree, rows, group.n)
+
+				filterOutNodes(tree, false)
+
+				for const name in tree.order {
+					buildFilters([], [], tree.columns[name], 1, group.n, routes)
+				}
+
+				if !overflow {
+					const route: Route = routes.last()
+
+					for const filter in route.filters {
+						addMatchingFilter(route.matchingFilters, route.min, route.max, filter)
+					}
+
+					route.filters.clear()
+				}
+			}
+		} // }}}
+
+		func buildNode(node, index: Number, max: Number, indexes: Dictionary<Array>): Void { // {{{
+			const usages = {}
+			for const row in node.rows {
+				const index = row.function.index()
+
+				usages[index] = (usages[index] ?? 0) + 1
+			}
+
+			const next = index + 1
+
+			if next == max {
+				for const row in node.rows {
+					const type = row.types[index]
+					const hash = type.hashCode()
+
+					if ?node.columns[hash] {
+						NotSupportedException.throw()
+					}
+
+					node.columns[hash] = {
+						index: next
+						type
+						function: row.function
+						isNode: false
+						weight: 1 / usages[row.function.index()]
+						isFilter: null
+					}
+
+					indexes[index].push(node.columns[hash])
+				}
+
+				node.order = sortNodes(node.columns)
+			}
+			else {
+				for const row in node.rows {
+					const type = row.types[index]
+					const hash = type.hashCode()
+
+					if !?node.columns[hash] {
+						node.columns[hash] = {
+							index: next
+							type
+							rows: [row]
+							columns: {}
+							isNode: true
+							weight: 1 / usages[row.function.index()]
+							isFilter: null
+						}
+
+						indexes[index].push(node.columns[hash])
+					}
+					else {
+						node.columns[hash].rows.push(row)
+						node.columns[hash].weight += 1 / usages[row.function.index()]
+					}
+				}
+
+				for const child of node.columns {
+					buildNode(child, next, max, indexes)
+				}
+
+				node.order = sortNodes(node.columns)
+			}
+		} // }}}
+
+		func compareTypes(aType: Type, bType: Type): Number => compareTypes([aType], [bType])
+		func compareTypes(aType: Type, bTypes: Array<Type>): Number => compareTypes([aType], bTypes)
+		func compareTypes(aTypes: Array<Type>, bType: Type): Number => compareTypes(aTypes, [bType])
+		func compareTypes(aTypes: Array<Type>, bTypes: Array<Type>): Number { // {{{
+			if aTypes.length == 1 && bTypes.length == 1 {
+				return aTypes[0].compareTo(bTypes[0])
+			}
+			else {
+				let aGreater: Number = 0
+
+				for const aType in aTypes {
+					let bGreater: Number = 0
+
+					for const bType in bTypes {
+						if aType.isMorePreciseThan(bType) {
+							return -1
+						}
+						else if bType.isMorePreciseThan(aType) {
+							return 1
+						}
+						else if bType.compareTo(aType) > 0 {
+							++bGreater
+						}
+					}
+
+					if bGreater == bTypes.length {
+						++aGreater
+					}
+				}
+
+				return aTypes.length - bTypes.length
+			}
+		} // }}}
+
+		func createTree(keys: Array<String>, rows: Dictionary<Row>, length: Number): Tree { // {{{
+			const tree = Tree()
+			for const i from 0 til length {
+				tree.indexes[i] = []
+			}
+
+			const usages = {}
+			for const key in keys {
+				const index = rows[key].function.index()
+
+				usages[index] = (usages[index] ?? 0) + 1
+			}
+
+			if length == 1 {
+				for const key in keys {
+					const row = rows[key]
+					const type = row.types[0]
+					const hash = type.hashCode()
+
+					if ?tree.columns[hash] {
+						NotSupportedException.throw()
+					}
+
+					tree.columns[hash] = {
+						index: 1
+						type
+						function: row.function
+						isNode: false
+						weight: 1 / usages[row.function.index()]
+						isFilter: null
+					}
+
+					tree.indexes['0'].push(tree.columns[hash])
 				}
 			}
 			else {
-				for const n from method.absoluteMin() to method.absoluteMax() {
-					buildArgFilter(method, argFilters, n, n)
+				for const key in keys {
+					const row = rows[key]
+					const type = row.types[0]
+					const hash = type.hashCode()
+
+					if !?tree.columns[hash] {
+						tree.columns[hash] = {
+							index: 1
+							type
+							rows: [row]
+							columns: {}
+							isNode: true
+							weight: 1 / usages[row.function.index()]
+							isFilter: null
+						}
+
+						tree.indexes['0'].push(tree.columns[hash])
+					}
+					else {
+						tree.columns[hash].rows.push(row)
+						tree.columns[hash].weight += 1 / usages[row.function.index()]
+					}
 				}
 			}
 
-			return {
-				async: method.isAsync()
-				methods: [{
-					method
-					index: 0
-					min: method.absoluteMin()
-					max: method.absoluteMax()
-					filters: []
-					argFilters
-				}]
+			return tree
+		} // }}}
+
+		func expandGroup(group): Void { // {{{
+			group.rows = {}
+			group.rowCount = 0
+
+			for const function in group.functions {
+				expandFunction(group, function, function.parameters(), group.n, function.min(), 0, 0, '', [])
 			}
-		}
+		} // }}}
 
-		const groups = {}
-		const infinities = []
-		let min = Infinity
-		let max = 0
+		func expandFunction(group, function: FunctionType, parameters: Array<ParameterType>, target: Number, count: Number, pIndex: Number, pCount: Number, key: String, types: Array<Type>): Void { // {{{
+			if pIndex == parameters.length {
+				if const match = group.rows[key] {
+					if function.max() == match.function.max() {
+						NotImplementedException.throw()
+					}
+					else if function.max() < match.function.max() {
+						group.rows[key] = Row(
+							function
+							types
+						)
+					}
+				}
+				else {
+					group.rows[key] = Row(
+						function
+						types
+					)
 
-		for const method, index in methods {
-			method.index(index)
-
-			if method.absoluteMax() == Infinity {
-				infinities.push(method)
+					group.rowCount++
+				}
 			}
 			else {
-				for const n from method.absoluteMin() to method.absoluteMax() {
+				const parameter = parameters[pIndex]
+
+				if pCount < parameter.min() {
+					expandParameter(group, function, parameters, target, count, pIndex, pCount + 1, key, types, parameter.type())
+				}
+				else if parameter.max() == Infinity {
+					if count < target {
+						expandParameter(group, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, parameter.type())
+					}
+					else {
+						expandFunction(group, function, parameters, target, count, pIndex + 1, 0, key, types)
+					}
+				}
+				else {
+					if count < target && pCount < parameter.max() {
+						expandParameter(group, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, parameter.type())
+					}
+					else {
+						expandFunction(group, function, parameters, target, count, pIndex + 1, 0, key, types)
+					}
+				}
+			}
+		} // }}}
+
+		func expandParameter(group, function: FunctionType, parameters: Array<ParameterType>, target: Number, count: Number, pIndex: Number, pCount: Number, key: String, types: Array<Type>, type: Type): Void { // {{{
+			if type is UnionType {
+				for const value in type.types() {
+					expandParameter(group, function, parameters, target, count, pIndex, pCount, key, types, value)
+				}
+			}
+			else {
+				const key = `\(key);\(type.hashCode())`
+
+				const types = [...types]
+
+				types.push(type)
+
+				expandFunction(group, function, parameters, target, count, pIndex, pCount, key, types)
+			}
+		} // }}}
+
+		func filterOutCommonTypes(keys: Array<String>, tree: Tree, rows: Dictionary<Row>, length: Number): Void { // {{{
+			for const index from 0 til length {
+				if const hash = findCommonType(index, keys, rows) {
+					for const type in tree.indexes[index] {
+						type.isFilter = false
+					}
+				}
+			}
+		} // }}}
+
+		func filterOutNodes(node, forceFilter: Boolean): Boolean { // {{{
+			let n = 0
+			while n < node.order.length {
+				const name = node.order[n]
+				const child = node.columns[name]
+
+				if child.isFilter != null {
+					// do nothing
+				}
+				else if n == 0 {
+					if n + 1 == node.order.length {
+						child.isFilter = forceFilter
+
+						if child.type.isAny() {
+							child.isFilter = false
+						}
+					}
+					else {
+						child.isFilter = true
+					}
+
+					if child.isNode {
+						for const name in node.order from n + 1 {
+							const type = node.columns[name].type
+
+							if type.isAny() || type.matchContentOf(child.type) {
+								forceFilter = true
+
+								break
+							}
+						}
+					}
+				}
+				else if n + 1 == node.order.length {
+					child.isFilter = forceFilter
+
+					if child.type.isAny() {
+						child.isFilter = false
+					}
+				}
+				else {
+					child.isFilter = true
+
+					if child.isNode {
+						for const name in node.order from n + 1 {
+							const type = node.columns[name].type
+
+							if type.isAny() {
+								break
+							}
+							else if type.matchContentOf(child.type) {
+								child.isFilter = false
+								forceFilter = true
+
+								break
+							}
+						}
+					}
+					else {
+						const types = [child.type]
+						const names = [name]
+
+						for const key in node.order from n + 1 {
+							if node.columns[key].isNode || node.columns[key].function != child.function {
+								break
+							}
+							else {
+								types.push(node.columns[key].type)
+								names.push(key)
+
+								child.weight += node.columns[key].weight
+							}
+						}
+
+						if names.length > 1 {
+							child.isFilter = forceFilter
+
+							child.type = Type.union(child.type.scope(), ...types)
+
+							const name = child.type.hashCode()
+
+							node.order.splice(n, names.length, name)
+
+							for const key in names {
+								delete node.columns[key]
+							}
+
+							node.columns[name] = child
+						}
+					}
+				}
+
+				if child.isNode {
+					filterOutNodes(child, forceFilter)
+				}
+
+				++n
+			}
+		} // }}}
+
+		func findCommonType(index: Number, keys: Array<String>, rows: Dictionary<Row>): String? { // {{{
+			let hash = null
+
+			for const key in keys {
+				const type = rows[key].types[index]
+
+				if hash == null {
+					hash = type.hashCode()
+				}
+				else if hash != type.hashCode() {
+					return null
+				}
+			}
+
+			return hash
+		} // }}}
+
+		func regroupRoutes(routes: Array<Route>): Array<Route> { // {{{
+			let min = routes[0].min
+
+			let index = 0
+			while index < routes.length {
+				const route = routes[index]
+
+				if route.min > min {
+					min = route.min
+				}
+
+				const matches = []
+				let next = route.min + 1
+
+				for const rt in routes from index + 1 when rt.min >= next {
+					if rt.function == route.function && sameFilters(route.filters, rt.filters) {
+						matches.push(rt)
+
+						next = rt.min + 1
+					}
+					else {
+						break
+					}
+				}
+
+				if matches.length != 0 {
+					route.max = matches.last().max
+
+					routes.remove(...matches)
+				}
+
+				++index
+			}
+
+			return routes
+		} // }}}
+
+		func resolveUniqueRows(index: Number, rowCount: Number, rows: Dictionary<Row>, uniques: Array<UniqueRow>): Void { // {{{
+			const items = {}
+			const usages = {}
+			const methods = {}
+
+			for const row, key of rows {
+				const type = row.types[index]
+
+				if type.isAny() {
+					return
+				}
+
+				const hash = type.hashCode()
+				const methodIndex = row.function.index()
+
+				if const item = items[hash] {
+					if const methods = item[methodIndex] {
+						methods.push(key)
+					}
+					else {
+						item.indexes.push(methodIndex)
+						item[methodIndex] = [key]
+					}
+				}
+				else {
+					items[hash] = {
+						indexes: [methodIndex]
+						[methodIndex]: [key]
+					}
+				}
+
+				usages[methodIndex] = (usages[methodIndex] ?? 0) + 1
+				methods[methodIndex] = row.function
+			}
+
+			const uniqs = []
+			for const item of items when item.indexes.length == 1 {
+				const methodIndex = item.indexes[0]
+
+				if usages[methodIndex] == item[methodIndex].length {
+					uniqs.push(UniqueRow(
+						index
+						type: rows[item[methodIndex][0]].types[index]
+						function: methods[methodIndex]
+						rows: item[methodIndex]
+					))
+				}
+			}
+
+			if uniqs.length == 0 {
+				return
+			}
+			else if uniqs.length > 1 {
+				uniqs.sort((a, b) => a.type.compareTo(b.type))
+			}
+
+			uniques.push(uniqs[0])
+		} // }}}
+
+		func sameFilters(a: Array<Filter>, b: Array<Filter>): Boolean { // {{{
+			if a.length != b.length {
+				return false
+			}
+			else if a.length == 0 {
+				return true
+			}
+
+			for const filter, index in a {
+				if !sameFilter(filter, b[index]) {
+					return false
+				}
+			}
+
+			return true
+		} // }}}
+
+		func sameFilter(a: Filter, b: Filter): Boolean { // {{{
+			return a.index == b.index && a.type == b.type
+		} // }}}
+
+		func sortNodes(nodes: Dictionary): Array<String> { // {{{
+			const sorted = []
+
+			const weights = []
+			const weighted = {}
+			for const node of nodes {
+				if const list = weighted[node.weight] {
+					list.push(node.type)
+				}
+				else {
+					weighted[node.weight] = [node.type]
+
+					weights.push(node.weight)
+				}
+			}
+
+			weights.sort((a, b) => a < b)
+
+			for const weight in weights {
+				const list: Array = weighted[weight]
+
+				if list.length == 1 {
+					sorted.push(list[0].hashCode())
+				}
+				else {
+					list.sort(compareTypes)
+
+					for const type in list {
+						sorted.push(type.hashCode())
+					}
+				}
+			}
+
+			return sorted
+		} // }}}
+
+		func usingSameFunction(rows: Dictionary<Row>): Boolean { // {{{
+			let function = null
+
+			for const row of rows {
+				if function == null {
+					function = row.function
+				}
+				else if function != row.function {
+					return false
+				}
+			}
+
+			return true
+		} // }}}
+
+		export func resolveRoutes(functions: Array<FunctionType>, groups: Dictionary, min: Number, max: Number, overflow: Boolean): Array<Route> { // {{{
+			const routes: Array<Route> = []
+
+			for const group of groups {
+				expandGroup(group)
+
+				if group.n == 0 {
+					const function = group.rows[''].function
+
+					routes.push(Route(
+						function
+						index: function.index()
+						min: 0
+						max: 0
+					))
+				}
+				else {
+					group.isNode = true
+
+					buildRoutes(group, routes, overflow)
+				}
+			}
+
+			return regroupRoutes(routes)
+		} // }}}
+	} // }}}
+
+	namespace Fragment { // {{{
+		func toFlatTestFragments(route: Route, ctrl: ControlBuilder, wrap: Boolean, argName: String, node: AbstractNode) { // {{{
+			wrap = wrap && route.filters.length != 0
+
+			if wrap {
+				ctrl.code('(')
+			}
+
+			if route.min == route.max {
+				ctrl.code(`\(argName).length === \(route.min)`)
+			}
+			else if route.max == Infinity {
+				ctrl.code(`\(argName).length >= \(route.min)`)
+			}
+			else if route.min + 1 == route.max {
+				ctrl.code(`\(argName).length === \(route.min) || \(argName).length === \(route.max)`)
+			}
+			else {
+				ctrl.code(`\(argName).length >= \(route.min) && \(argName).length <= \(route.max)`)
+			}
+
+			route.filters.sort((a, b) => a.index > b.index)
+
+			for const filter in route.filters {
+				ctrl.code(' && ')
+
+				if filter.index >= 0 {
+					filter.type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
+				}
+				else {
+					filter.type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
+				}
+			}
+
+			route.done = true
+
+			if wrap {
+				ctrl.code(')')
+			}
+		} // }}}
+
+		func toTestTreeFragments(route: Route, ctrl: ControlBuilder, argName: String, call: Function, node: AbstractNode): Boolean { // {{{
+			if route.filters.length == 0 {
+				unless ctrl.isFirstStep() {
+					ctrl.step().code('else').step()
+				}
+			}
+			else {
+				unless ctrl.isFirstStep() {
+					ctrl.step().code('else ')
+				}
+
+				ctrl.code(`if(`)
+
+				for const filter, index in route.filters {
+					if index != 0 {
+						ctrl.code(' && ')
+					}
+
+					if filter.index >= 0 {
+						filter.type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
+					}
+					else {
+						filter.type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
+					}
+				}
+
+				ctrl.code(`)`).step()
+			}
+
+			call(ctrl, route.function, route.index)
+
+			return true
+		} // }}}
+
+		export func sortTreeMin(routes: Array<Route>, max: Number) { // {{{
+			if max == Infinity {
+				const tree = {
+					keys: []
+				}
+
+				for const route in routes {
+					if tree[route.min]? {
+						tree[route.min].push(route)
+					}
+					else {
+						tree[route.min] = [route]
+
+						tree.keys.push(route.min)
+					}
+				}
+
+				if tree.keys.length == 1 && tree.keys[0] == 0 {
+					return tree['0']
+				}
+				else {
+					return tree
+				}
+			}
+			else {
+				const tree = {
+					equal: []
+					midway: {
+						keys: []
+					}
+				}
+
+				for const route in routes {
+					if route.min == max {
+						tree.equal.push(route)
+					}
+					else {
+						if tree.midway[route.min]? {
+							tree.midway[route.min].push(route)
+						}
+						else {
+							tree.midway[route.min] = [route]
+
+							tree.midway.keys.push(route.min)
+						}
+					}
+				}
+
+				if tree.equal.length == 1 && tree.midway.keys.length == 0 {
+					return tree.equal
+				}
+				else {
+					return tree
+				}
+			}
+		} // }}}
+
+		export func toEqLengthFragments(routes: Array<Route>, ctrl: ControlBuilder, argName: String, call: Function, node: AbstractNode): Boolean { // {{{
+			const route = routes[0]
+
+			if route.max == Infinity && route.min == 0 {
+				unless ctrl.isFirstStep() {
+					ctrl.step().code('else').step()
+				}
+			}
+			else {
+				unless ctrl.isFirstStep() {
+					ctrl.step().code('else ')
+				}
+
+				ctrl.code(`if(`)
+
+				if route.min == route.max {
+					ctrl.code(`\(argName).length === \(route.min)`)
+				}
+				else if route.max == Infinity {
+					ctrl.code(`\(argName).length >= \(route.min)`)
+				}
+				else if route.min + 1 == route.max {
+					ctrl.code(`\(argName).length === \(route.min) || \(argName).length === \(route.max)`)
+				}
+				else {
+					ctrl.code(`\(argName).length >= \(route.min) && \(argName).length <= \(route.max)`)
+				}
+
+				ctrl.code(`)`).step()
+			}
+
+			if routes.length == 1 && route.filters.length == 0 {
+				call(ctrl, route.function, route.index)
+
+				return !(route.max == Infinity && route.min == 0)
+			}
+			else {
+				const ctrl2 = ctrl.newControl()
+
+				let ne = false
+
+				for const route in routes {
+					ne = toTestTreeFragments(route, ctrl2, argName, call, node)
+				}
+
+				ctrl2.done()
+
+				return ne
+			}
+		} // }}}
+
+		export func toFlatFragments(assessment: Assessement, route: Route, ctrl: ControlBuilder, argName: String, call: Function, node: AbstractNode): Boolean { // {{{
+			const matchs = [r for const r in assessment.routes when r.done != true && r.index == route.index]
+
+			if matchs.length == 1 && matchs[0].min == 0 && matchs[0].max == Infinity && matchs[0].filters.length == 0 {
+				unless ctrl.isFirstStep() {
+					ctrl.step().code('else').step()
+				}
+
+				call(ctrl, route.function, route.index)
+
+				return false
+			}
+			else {
+				unless ctrl.isFirstStep() {
+					ctrl.step().code('else ')
+				}
+
+				ctrl.code(`if(`)
+
+				if matchs.length == 1 {
+					toFlatTestFragments(matchs[0], ctrl, false, argName, node)
+				}
+				else {
+					let nf = false
+
+					for const match in matchs {
+						if nf {
+							ctrl.code(' || ')
+						}
+						else {
+							nf = true
+						}
+
+						toFlatTestFragments(match, ctrl, true, argName, node)
+					}
+				}
+
+				ctrl.code(`)`).step()
+
+				call(ctrl, route.function, route.index)
+
+				return true
+			}
+		} // }}}
+
+		export func toMixLengthFragments(tree, ctrl: ControlBuilder, argName: String, call: Function, node: AbstractNode) { // {{{
+			let ne = false
+
+			if tree.equal.length != 0 {
+				ne = toEqLengthFragments(tree.equal, ctrl, argName, call, node)
+			}
+
+			if tree.midway.keys.length == 1 {
+				ne = toEqLengthFragments(tree.midway[tree.midway.keys[0]], ctrl, argName, call, node)
+			}
+			else if tree.midway.keys.length > 1 {
+				throw new NotImplementedException(node)
+			}
+
+			return ne
+		} // }}}
+
+		export func toTestCallFragments(route: Route, ctrl, argName: String, call: Function, node: AbstractNode): Void { // {{{
+			if route.filters.length == 0 {
+				call(ctrl, route.function, route.index)
+			}
+			else {
+				const ctrl2 = ctrl.newControl()
+
+				ctrl2.code(`if(`)
+
+				for const filter, index in route.filters {
+					if index != 0 {
+						ctrl2.code(' && ')
+					}
+
+					if filter.index >= 0 {
+						filter.type.toTestFragments(ctrl2, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
+					}
+					else {
+						filter.type.toTestFragments(ctrl2, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
+					}
+				}
+
+				ctrl2.code(`)`).step()
+
+				call(ctrl2, route.function, route.index)
+
+				ctrl2.done()
+			}
+		} // }}}
+	} // }}}
+
+	namespace Individual { // {{{
+		func buildFilters(function: FunctionType, routes: Array<Route>, min: Number, max: Number): Void { // {{{
+			const route = Route(
+				function
+				index: function.index()
+				min
+				max
+			)
+
+			buildFilters(function, function.parameters(), 0, routes, route, 0, function.min(), min)
+		} // }}}
+
+		func buildFilters(function: FunctionType, parameters: Array<ParameterType>, pIndex: Number, routes: Array<Route>, route: Route, index: Number, count: Number, limit: Number): Void { // {{{
+			if pIndex == parameters.length {
+				if count == limit {
+					routes.push(route)
+				}
+
+				return
+			}
+
+			const parameter = parameters[pIndex]
+
+			let type = parameter.type()
+
+			if parameter.hasDefaultValue() {
+				type = type.setNullable(true)
+			}
+
+			for const i from 1 to parameter.min() {
+				route.filters.push(Filter(
+					index
+					type
+				))
+
+				++index
+			}
+
+			if parameter.max() == Infinity {
+				route.rest = Filter(
+					index
+					type
+				)
+
+				index = count - limit
+
+				buildFilters(function, parameters, pIndex + 1, routes, route, index, count, limit)
+			}
+			else if count < limit && parameter.max() > parameter.min() {
+				buildFilters(function, parameters, pIndex + 1, routes, Route(
+					function
+					index: function.index()
+					min: route.min
+					max: route.max
+					filters: [...route.filters]
+				), index, count, limit)
+
+				for const i from parameter.min() + 1 to parameter.max() while count < limit {
+					route.filters.push(Filter(
+						index
+						type
+					))
+
+					++index
+					++count
+
+					buildFilters(function, parameters, pIndex + 1, routes, Route(
+						function
+						index: function.index()
+						min: route.min
+						max: route.max
+						filters: [...route.filters]
+					), index, count, limit)
+				}
+			}
+			else {
+				buildFilters(function, parameters, pIndex + 1, routes, route, index, count, limit)
+			}
+		} // }}}
+
+		func buildMatchingFilters(function: FunctionType, routes: Array<RouteFilter>, min: Number, max: Number): Void { // {{{
+			const route = RouteFilter(
+				min
+				max
+			)
+
+			buildMatchingFilters(function.parameters(), 0, routes, route, 0, function.min(), min)
+		} // }}}
+
+		func buildMatchingFilters(parameters: Array<ParameterType>, pIndex: Number, routes: Array<RouteFilter>, route: RouteFilter, index: Number, count: Number, limit: Number): Void { // {{{
+			if pIndex == parameters.length {
+				if count == limit {
+					routes.push(route)
+				}
+
+				return
+			}
+
+			const parameter = parameters[pIndex]
+
+			let type = parameter.type()
+
+			if parameter.hasDefaultValue() {
+				type = type.setNullable(true)
+			}
+
+			for const i from 1 to parameter.min() {
+				route.filters.push(Filter(
+					index
+					type
+				))
+
+				++index
+			}
+
+			if parameter.max() == Infinity {
+				route.rest = Filter(
+					index
+					type
+				)
+
+				index = count - limit
+
+				buildMatchingFilters(parameters, pIndex + 1, routes, route, index, count, limit)
+			}
+			else if count < limit && parameter.max() > parameter.min() {
+				buildMatchingFilters(parameters, pIndex + 1, routes, RouteFilter(
+					min: route.min
+					max: route.max
+					filters: [...route.filters]
+				), index, count, limit)
+
+				for const i from parameter.min() + 1 to parameter.max() while count < limit {
+					route.filters.push(Filter(
+						index
+						type
+					))
+
+					++index
+					++count
+
+					buildMatchingFilters(parameters, pIndex + 1, routes, RouteFilter(
+						min: route.min
+						max: route.max
+						filters: [...route.filters]
+					), index, count, limit)
+				}
+			}
+			else {
+				buildMatchingFilters(parameters, pIndex + 1, routes, route, index, count, limit)
+			}
+		} // }}}
+
+		export func assess(function: FunctionType, flattenable: Boolean, overflow: Boolean = false): Assessement { // {{{
+			function.index(0)
+
+			if overflow {
+				const routes = []
+
+				if function.absoluteMax() == Infinity {
+					const rest = function.restIndex()
+					const min = function.absoluteMin()
+
+					if rest < min {
+						buildFilters(function, routes, min, Infinity)
+					}
+					else {
+						for const n from min til rest {
+							buildFilters(function, routes, n, n)
+						}
+
+						buildFilters(function, routes, min, Infinity)
+					}
+				}
+				else {
+					for const n from function.absoluteMin() to function.absoluteMax() {
+						buildFilters(function, routes, n, n)
+					}
+				}
+
+				return Assessement(
+					async: function.isAsync()
+					flattenable: flattenable && isFlattenable(routes)
+					routes
+				)
+			}
+			else {
+				const matchingFilters = []
+
+				if function.absoluteMax() == Infinity {
+					const rest = function.restIndex()
+					const min = function.absoluteMin()
+
+					if rest < min {
+						buildMatchingFilters(function, matchingFilters, min, Infinity)
+					}
+					else {
+						for const n from min til rest {
+							buildMatchingFilters(function, matchingFilters, n, n)
+						}
+
+						buildMatchingFilters(function, matchingFilters, min, Infinity)
+					}
+				}
+				else {
+					for const n from function.absoluteMin() to function.absoluteMax() {
+						buildMatchingFilters(function, matchingFilters, n, n)
+					}
+				}
+
+				return Assessement(
+					async: function.isAsync()
+					flattenable
+					routes: [
+						Route(
+							function
+							index: 0
+							min: function.absoluteMin()
+							max: function.absoluteMax()
+							matchingFilters
+						)
+					]
+				)
+			}
+		} // }}}
+	} // }}}
+
+	namespace Unbounded { // {{{
+		func checkFunctions(functions: Array<FunctionType>, parameters: Dictionary, min: Number, index: Number, routes: Array<Route>, filters: Array): Void { // {{{
+			if !?parameters[index + 1] {
+				NotSupportedException.throw()
+			}
+			else if parameters[index + 1] is Number {
+				index = parameters[index + 1]:Number - 1
+			}
+
+			const tree = []
+			const usages = []
+
+			let type, nf, item, usage, i, function
+			for const type of parameters[index + 1].types {
+				tree.push(item = {
+					type: type.type
+					functions: [functions[i] for i in type.functions]
+					usage: type.functions.length
+				})
+
+				if type.type.isAny() {
+					item.weight = 0
+				}
+				else {
+					item.weight = 1_000
+				}
+
+				for i in type.functions {
+					function = functions[i]
+
+					nf = true
+					for usage in usages while nf {
+						if usage.function == function {
+							nf = false
+						}
+					}
+
+					if nf {
+						usages.push(usage = {
+							function,
+							types: [item]
+						})
+					}
+					else {
+						usage!?.types.push(item)
+					}
+				}
+			}
+
+			if tree.length == 0 {
+				checkFunctions(functions, parameters, min, index + 1, routes, filters)
+			}
+			else if tree.length == 1 {
+				item = tree[0]
+
+				if item.functions.length == 1 {
+					routes.push(Route(
+						function: item.functions[0]
+						index: item.functions[0].index()
+						min
+						max: Infinity
+						filters
+					))
+				}
+				else {
+					checkFunctions(functions, parameters, min, index + 1, routes, filters)
+				}
+			}
+			else {
+				for const usage in usages {
+					let count = usage.types.length
+
+					for const type in usage.types while count >= 0 {
+						count -= type.usage
+					}
+
+					if count == 0 {
+						let item = {
+							type: [],
+							path: [],
+							functions: [usage.function]
+							usage: 0
+							weight: 0
+						}
+
+						for type in usage.types {
+							item.type.push(type.type)
+							item.usage += type.usage
+							item.weight += type.weight
+
+							tree.remove(type)
+						}
+
+						tree.push(item)
+					}
+				}
+
+				tree.sort(func(a, b) {
+					if a.weight == 0 && b.weight != 0 {
+						return 1
+					}
+					else if b.weight == 0 {
+						return -1
+					}
+					else if a.type.length == b.type.length {
+						if a.usage == b.usage {
+							return b.weight - a.weight
+						}
+						else {
+							return b.usage - a.usage
+						}
+					}
+					else {
+						return a.type.length - b.type.length
+					}
+				})
+
+				for const item, i in tree {
+					if item.type[0].isAny() {
+						if item.functions.length == 1 {
+							routes.push(Route(
+								function: item.functions[0]
+								index: item.functions[0].index()
+								min
+								max: Infinity
+								filters
+							))
+						}
+						else {
+							checkFunctions(functions, parameters, min, index + 1, routes, filters)
+						}
+					}
+					else {
+						const filters = filters.slice()
+
+						filters.push({
+							index
+							type: item.type[0]
+						})
+
+						if item.functions.length == 1 {
+							routes.push(Route(
+								function: item.functions[0]
+								index: item.functions[0].index()
+								min
+								max: Infinity
+								filters
+							))
+						}
+						else {
+							checkFunctions(functions, parameters, min, index + 1, routes, filters)
+						}
+					}
+				}
+			}
+		} // }}}
+
+		func mapFunction(function: FunctionType, target: Number, map: Dictionary): Void { // {{{
+			let index = 1
+			let count = function.min()
+			let item
+			let fi = false
+
+			for const parameter, p in function.parameters() {
+				for const i from 1 to parameter.min() {
+					if item !?= map[index] {
+						item = map[index] = {
+							index: index
+							types: {}
+							weight: 0
+						}
+					}
+
+					mapParameter(parameter.type(), function.index(), item, target)
+
+					++index
+				}
+
+				if parameter.max() == Infinity {
+					if !fi {
+						fi = true
+
+						const oldIndex = index
+
+						index -= function.min() + 1
+						map[oldIndex] = index
+					}
+					else {
+						NotImplementedException.throw()
+					}
+				}
+				else {
+					for const i from parameter.min() + 1 to parameter.max() while count < target {
+						if item !?= map[index] {
+							item = map[index] = {
+								index: index
+								types: {}
+								weight: 0
+							}
+						}
+
+						mapParameter(parameter.type(), function.index(), item, target)
+
+						++index
+						++count
+					}
+				}
+			}
+		} // }}}
+
+		func mapParameter(type: Type, function: Number, map: Dictionary, target: Number): Void { // {{{
+			if type is UnionType {
+				for value in type.types() {
+					mapParameter(value, function, map, target)
+				}
+			}
+			else {
+				if map.types[type.hashCode()] is Dictionary {
+					map.types[type.hashCode()].functions.push(function)
+				}
+				else {
+					let weight = 0
+					if type.isAny() {
+						weight = 1
+					}
+					else {
+						weight = 1_00
+
+						if map.index == target {
+							weight += 1_00_00
+						}
+					}
+
+					map.types[type.hashCode()] = {
+						type: type
+						functions: [function]
+						weight
+					}
+
+					map.weight += weight
+				}
+			}
+		} // }}}
+
+		export func resolveRoutes(functions: Array<FunctionType>, infinities: Array<FunctionType>, async: Boolean): Array<Route> { // {{{
+			const groups = {}
+
+			let min = Infinity
+			let max = 0
+
+			for const function in functions {
+				let functionMin = 0
+				let functionMax = 0
+
+				for const parameter in function.parameters() {
+					if parameter.min() != 0 && parameter.max() != Infinity {
+						functionMin += parameter.min()
+						functionMax += parameter.max()
+					}
+				}
+
+				for const n from functionMin to functionMax {
 					if groups[n]? {
-						groups[n].methods.push(method)
+						groups[n].functions.push(function)
 					}
 					else {
 						groups[n] = {
-							n: n
-							methods: [method]
+							n
+							functions: [function]
 						}
 					}
 				}
 
-				min = Math.min(min, method.absoluteMin())
-				max = Math.max(max, method.absoluteMax())
-			}
-		}
-
-		const async = methods[0].isAsync()
-
-		if min == Infinity {
-			const assessment = {
-				async
-				methods: assessUnbounded(methods, infinities, async)
+				min = Math.min(min, functionMin)
+				max = Math.max(max, functionMax)
 			}
 
-			assessment.flattenable = flattenable && isFlattenable(assessment.methods)
+			for const i from min to max {
+				if const group = groups[i] {
+					for const j from i + 1 to max while (gg ?= groups[j]) && Array.same(gg.functions, group.functions) {
+						if group.n is Array {
+							group.n.push(j)
+						}
+						else {
+							group.n = [i, j]
+						}
 
-			return assessment
-		}
-		else {
-			// for const method in infinities {
-			// 	for const group of groups when method.absoluteMin() <= group.n {
-			// 		group.methods.push(method)
-			// 	}
-			// }
-
-			const assessment = {
-				async
-				methods: assessBounded(methods, groups, min, max, overflow)
-			}
-
-			if infinities.length == 1 {
-				const method = infinities[0]
-
-				assessment.methods.push({
-					method
-					index: method.index()
-					min: 0
-					max: Infinity
-					filters: []
-				})
-			}
-			else if infinities.length > 1 {
-				throw new NotImplementedException()
-			}
-
-			assessment.flattenable = flattenable && isFlattenable(assessment.methods)
-
-			return assessment
-		}
-	} // }}}
-
-	func assessBounded(methods, groups, min, max, overflow) { // {{{
-		for const i from min to max {
-			if const group = groups[i] {
-				for const j from i + 1 to max while (gg ?= groups[j]) && gg.methods.length == 1 == group.methods.length && Array.same(gg.methods, group.methods) {
-					if group.n is Array {
-						group.n.push(j)
+						delete groups[j]
 					}
-					else {
-						group.n = [i, j]
-					}
-
-					delete groups[j]
 				}
 			}
-		}
 
-		const assessment = []
+			const assessment = []
 
-		for const group, k of groups {
-			let min, max
-
-			if group.n is Array {
-				min = group.n[0]
-				max = group.n[group.n.length - 1]
-			}
-			else {
-				min = max = group.n
-			}
-
-
-			if group.methods.length == 1 {
-				assessment.push({
-					method: group.methods[0]
-					index: group.methods[0].index()
-					min
-					max
-					filters: []
-				})
-			}
-			else {
-				group.methods.sort((a, b) => a.max() - b.max())
-
+			for const group, k of groups {
 				const parameters = {}
-				if group.n is Array {
-					for const n in group.n {
-						for const method in group.methods {
-							mapMethod(method, n, parameters)
-						}
-					}
+
+				for const function in group.functions {
+					mapFunction(function, group.n, parameters)
 				}
-				else {
-					for const method in group.methods {
-						mapMethod(method, group.n, parameters)
-					}
-				}
-
-				const length = methods.length
-
-				for const parameter, name of parameters {
-					for const type, name of parameter.types {
-						if type.methods.length == length {
-							parameter.weight -= type.weight
-
-							delete parameter.types[name]
-						}
-					}
-
-					if parameter.weight == 0 {
-						delete parameters[name]
-					}
-				}
-
-				const sortedParameters = [value for const value of parameters].sort((a, b) => b.weight - a.weight)
-				const sortedIndexes = [value.index - 1 for const value in sortedParameters]
 
 				let indexes = []
-				for const parameter in sortedParameters {
+				for const parameter in [value for const value of parameters].sort((a, b) => b.weight - a.weight) {
 					for const type, hash of parameter.types {
-						type.methods:Array.remove(...indexes)
+						type.functions:Array.remove(...indexes)
 
-						if type.methods.length == 0 {
+						if type.functions.length == 0 {
 							delete parameter.types[hash]
-
-							parameter.weight -= type.weight
 						}
 					}
 
-					for const type, hash of parameter.types {
-						if type.methods.length == 1 {
-							indexes:Array.pushUniq(type.methods[0])
-						}
-					}
-				}
-
-				checkMethods(methods, parameters, min, max, overflow, 0, sortedIndexes, assessment, [])
-			}
-		}
-
-		return assessment
-	} // }}}
-
-	func assessUnbounded(methods, infinities, async) { // {{{
-		let groups = {}
-		let min = Infinity
-		let max = 0
-
-		for const method in methods {
-			let methodMin = 0
-			let methodMax = 0
-
-			for const parameter in method.parameters() {
-				if parameter.min() != 0 && parameter.max() != Infinity {
-					methodMin += parameter.min()
-					methodMax += parameter.max()
-				}
-			}
-
-			for const n from methodMin to methodMax {
-				if groups[n]? {
-					groups[n].methods.push(method)
-				}
-				else {
-					groups[n] = {
-						n: n
-						methods: [method]
-					}
-				}
-			}
-
-			min = Math.min(min, methodMin)
-			max = Math.max(max, methodMax)
-		}
-
-		for const i from min to max {
-			if const group = groups[i] {
-				for const j from i + 1 to max while (gg ?= groups[j]) && Array.same(gg.methods, group.methods) {
-					if group.n is Array {
-						group.n.push(j)
-					}
-					else {
-						group.n = [i, j]
-					}
-
-					delete groups[j]
-				}
-			}
-		}
-
-		const assessment = []
-
-		for const group, k of groups {
-			const parameters = {}
-			for method in group.methods {
-				mapMethod(method, group.n, parameters)
-			}
-
-			let indexes = []
-			for const parameter in [value for const value of parameters].sort((a, b) => b.weight - a.weight) {
-				for const type, hash of parameter.types {
-					type.methods:Array.remove(...indexes)
-
-					if type.methods.length == 0 {
-						delete parameter.types[hash]
-					}
-				}
-
-				for const type of parameter.types {
-					if type.methods.length == 1 {
-						indexes:Array.pushUniq(type.methods[0])
-					}
-				}
-			}
-
-			checkInfinityMethods(methods, parameters, group.n, 0, assessment, [])
-		}
-
-		return assessment
-	} // }}}
-
-	func buildArgFilter(method, lines, min, max) { // {{{
-		const line = {
-			min
-			max
-			filters: []
-		}
-
-		buildArgFilter(method.parameters(), 0, lines, line, 0, method.min(), min)
-	} // }}}
-
-	func buildArgFilter(parameters, pIndex, lines, line, index, count, limit) { // {{{
-		if pIndex == parameters.length {
-			if count == limit {
-				lines.push(line)
-			}
-
-			return
-		}
-
-		const parameter = parameters[pIndex]
-
-		let type = parameter.type()
-
-		if parameter.hasDefaultValue() {
-			type = type.setNullable(true)
-		}
-
-		for const i from 1 to parameter.min() {
-			line.filters.push({
-				index
-				type
-			})
-
-			++index
-		}
-
-		if parameter.max() == Infinity {
-			line.rest = {
-				index
-				type
-			}
-
-			index = count - limit
-
-			buildArgFilter(parameters, pIndex + 1, lines, line, index, count, limit)
-		}
-		else if count < limit && parameter.max() > parameter.min() {
-			buildArgFilter(parameters, pIndex + 1, lines, {
-				min: line.min
-				max: line.max
-				filters: [...line.filters]
-			}, index, count, limit)
-
-			for const i from parameter.min() + 1 to parameter.max() while count < limit {
-				line.filters.push({
-					index
-					type
-				})
-
-				++index
-				++count
-
-				buildArgFilter(parameters, pIndex + 1, lines, {
-					min: line.min
-					max: line.max
-					filters: [...line.filters]
-				}, index, count, limit)
-			}
-		}
-		else {
-			buildArgFilter(parameters, pIndex + 1, lines, line, index, count, limit)
-		}
-	} // }}}
-
-	func checkMethods(methods, parameters, min, max, overflow, sortedIndex, sortedIndexes, assessment, filters) { // {{{
-		const index = sortedIndexes[sortedIndex]
-
-		if !?parameters[index + 1] {
-			NotSupportedException.throw()
-		}
-
-		const tree = []
-		const usages = []
-
-		for const type of parameters[index + 1].types {
-			const item = {
-				type: type.type
-				methods: [methods[i] for const i in type.methods]
-				usage: type.methods.length
-			}
-
-			tree.push(item)
-
-			for const i in type.methods {
-				const method = methods[i]
-
-				let nf = true
-
-				let usage
-				for usage in usages while nf {
-					if usage.method == method {
-						nf = false
-					}
-				}
-
-				if nf {
-					usages.push({
-						method: method,
-						types: [item]
-					})
-				}
-				else {
-					usage.types.push(item)
-				}
-			}
-		}
-
-		if tree.length == 0 {
-			checkMethods(methods, parameters, min, max, overflow, sortedIndex + 1, sortedIndexes, assessment, filters)
-		}
-		else if tree.length == 1 {
-			item = tree[0]
-
-			if item.methods.length == 1 {
-				assessment.push({
-					method: item.methods[0]
-					index: item.methods[0].index()
-					min
-					max
-					filters
-				})
-			}
-			else if item.methods.length == 2 && sortedIndex + 1 == max {
-				let maxed = null
-
-				for const method in item.methods {
-					if method.max() == max {
-						if maxed == null {
-							maxed = method
-						}
-						else {
-							NotSupportedException.throw()
+					for const type of parameter.types {
+						if type.functions.length == 1 {
+							indexes:Array.pushUniq(type.functions[0])
 						}
 					}
 				}
 
-				if maxed != null {
-					assessment.push({
-						method: maxed
-						index: maxed.index()
-						min
-						max
-						filters
-					})
-				}
-				else {
-					NotSupportedException.throw()
-				}
-			}
-			else {
-				checkMethods(methods, parameters, min, max, overflow, sortedIndex + 1, sortedIndexes, assessment, filters)
-			}
-		}
-		else {
-			for const usage in usages {
-				let count = usage.types.length
-
-				for const type in usage.types while count >= 0 {
-					count -= type.usage
-				}
-
-				if count == 0 {
-					const item = {
-						type: [],
-						path: [],
-						methods: [usage.method]
-						usage: 0
-						weight: 0
-					}
-
-					for const type in usage.types {
-						item.type.push(type.type)
-						item.usage += type.usage
-
-						tree.remove(type)
-					}
-
-					tree.push(item)
-				}
+				checkFunctions(functions, parameters, group.n, 0, assessment, [])
 			}
 
-			tree.sort((a, b) => compareTypes(a.type, b.type))
-
-			for const item, i in tree {
-				if i + 1 == tree.length {
-					if item.methods.length == 1 {
-						if overflow {
-							filters.push({
-								index
-								type: item.type[0]
-							})
-
-							assessment.push({
-								method: item.methods[0]
-								index: item.methods[0].index()
-								min
-								max
-								filters
-							})
-						}
-						else {
-							assessment.push({
-								method: item.methods[0]
-								index: item.methods[0].index()
-								min
-								max
-								filters
-								argFilters: [
-									{
-										min
-										max
-										filters: [
-											{
-												index
-												type: item.type[0]
-											}
-										]
-									}
-								]
-							})
-						}
-					}
-					else {
-						checkMethods(methods, parameters, min, max, overflow, sortedIndex + 1, sortedIndexes, assessment, filters)
-					}
-				}
-				else {
-					const filters = filters.slice()
-
-					filters.push({
-						index
-						type: item.type[0]
-					})
-
-					if item.methods.length == 1 {
-						assessment.push({
-							method: item.methods[0]
-							index: item.methods[0].index()
-							min
-							max
-							filters
-						})
-					}
-					else {
-						checkMethods(methods, parameters, min, max, overflow, sortedIndex + 1, sortedIndexes, assessment, filters)
-					}
-				}
-			}
-		}
+			return assessment
+		} // }}}
 	} // }}}
 
-	func checkInfinityMethods(methods, parameters, min, index, assessment, filters) { // {{{
-		if !?parameters[index + 1] {
-			NotSupportedException.throw()
-		}
-		else if parameters[index + 1] is Number {
-			index = parameters[index + 1]:Number - 1
-		}
-
-		const tree = []
-		const usages = []
-
-		let type, nf, item, usage, i
-		for const type of parameters[index + 1].types {
-			tree.push(item = {
-				type: type.type
-				methods: [methods[i] for i in type.methods]
-				usage: type.methods.length
-			})
-
-			if type.type.isAny() {
-				item.weight = 0
-			}
-			else {
-				item.weight = 1_000
-			}
-
-			for i in type.methods {
-				method = methods[i]
-
-				nf = true
-				for usage in usages while nf {
-					if usage.method == method {
-						nf = false
-					}
-				}
-
-				if nf {
-					usages.push(usage = {
-						method: method,
-						types: [item]
-					})
-				}
-				else {
-					usage.types.push(item)
-				}
-			}
-		}
-
-		if tree.length == 0 {
-			checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters)
-		}
-		else if tree.length == 1 {
-			item = tree[0]
-
-			if item.methods.length == 1 {
-				assessment.push({
-					method: item.methods[0]
-					index: item.methods[0].index()
-					min
-					max: Infinity
-					filters
-				})
-			}
-			else {
-				checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters)
-			}
-		}
-		else {
-			for const usage in usages {
-				let count = usage.types.length
-
-				for const type in usage.types while count >= 0 {
-					count -= type.usage
-				}
-
-				if count == 0 {
-					let item = {
-						type: [],
-						path: [],
-						methods: [usage.method]
-						usage: 0
-						weight: 0
-					}
-
-					for type in usage.types {
-						item.type.push(type.type)
-						item.usage += type.usage
-						item.weight += type.weight
-
-						tree.remove(type)
-					}
-
-					tree.push(item)
-				}
-			}
-
-			tree.sort(func(a, b) {
-				if a.weight == 0 && b.weight != 0 {
-					return 1
-				}
-				else if b.weight == 0 {
-					return -1
-				}
-				else if a.type.length == b.type.length {
-					if a.usage == b.usage {
-						return b.weight - a.weight
-					}
-					else {
-						return b.usage - a.usage
-					}
-				}
-				else {
-					return a.type.length - b.type.length
-				}
-			})
-
-			for const item, i in tree {
-				if item.type[0].isAny() {
-					if item.methods.length == 1 {
-						assessment.push({
-							method: item.methods[0]
-							index: item.methods[0].index()
-							min
-							max: Infinity
-							filters
-						})
-					}
-					else {
-						checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters)
-					}
-				}
-				else {
-					const filters = filters.slice()
-
-					filters.push({
-						index
-						type: item.type[0]
-					})
-
-					if item.methods.length == 1 {
-						assessment.push({
-							method: item.methods[0]
-							index: item.methods[0].index()
-							min
-							max: Infinity
-							filters
-						})
-					}
-					else {
-						checkInfinityMethods(methods, parameters, min, index + 1, assessment, filters)
-					}
-				}
-			}
-		}
-	} // }}}
-
-	// func compareTypes(aType: Type, bType: Type) => compareTypes([aType], [bType])
-	// func compareTypes(aType: Type, bTypes: Array<Type>) => compareTypes([aType], bTypes)
-	// func compareTypes(aTypes: Array<Type>, bType: Type) => compareTypes(aTypes, [bType])
-	// func compareTypes(aTypes: Array<Type>, bTypes: Array<Type>) { // {{{
-	func compareTypes(aTypes, bTypes) { // {{{
-		if aTypes is not Array {
-			aTypes = [aTypes]
-		}
-		if bTypes is not Array {
-			bTypes = [bTypes]
-		}
-
-		if aTypes.length == 1 && bTypes.length == 1 {
-			return aTypes[0].compareTo(bTypes[0])
-		}
-		else {
-			let aGreater: Number = 0
-
-			for const aType in aTypes {
-				let bGreater: Number = 0
-
-				for const bType in bTypes {
-					if aType.isMorePreciseThan(bType) {
-						return -1
-					}
-					else if bType.isMorePreciseThan(aType) {
-						return 1
-					}
-					else if bType.compareTo(aType) > 0 {
-						++bGreater
-					}
-				}
-
-				if bGreater == bTypes.length {
-					++aGreater
-				}
-			}
-
-			return aTypes.length - bTypes.length
-		}
-	} // }}}
-
-	func isFlattenable(methods) { // {{{
-		if methods.length <= 1 {
+	func isFlattenable(routes: Array<Route>): Boolean { // {{{
+		if routes.length <= 1 {
 			return true
 		}
 
 		const done = {}
 		let min = 0
 
-		for const method in methods when done[method.index] != true {
-			done[method.index] = true
+		for const route in routes when done[route.index] != true {
+			done[route.index] = true
 
-			for const m in methods when m.index == method.index {
+			for const m in routes when m.index == route.index {
 				if m.filters.length == 0 {
 					min = m.min
 				}
@@ -783,507 +1641,268 @@ namespace Router {
 		return true
 	} // }}}
 
-	func mapMethod(method, target, map) { // {{{
-		let index = 1
-		let count = method.min()
-		let item
-		let fi = false
+	export {
+		#![rules(assert-parameter)]
 
-		for const parameter, p in method.parameters() {
-			for const i from 1 to parameter.min() {
-				if item !?= map[index] {
-					item = map[index] = {
-						index: index
-						types: {}
-						weight: 0
-					}
-				}
-
-				mapParameter(parameter.type(), method.index(), item, target)
-
-				++index
+		func assess(functions: Array<FunctionType>, flattenable: Boolean, overflow: Boolean = false): Assessement { // {{{
+			if functions.length == 0 {
+				return Assessement()
+			}
+			else if functions.length == 1 {
+				return Individual.assess(functions[0], flattenable, overflow)
 			}
 
-			if parameter.max() == Infinity {
-				if !fi {
-					fi = true
+			const groups: Dictionary<Group> = {}
+			const infinities: Array<FunctionType> = []
+			let min = Infinity
+			let max = 0
 
-					const oldIndex = index
+			for const function, index in functions {
+				function.index(index)
 
-					index -= method.min() + 1
-					map[oldIndex] = index
+				if function.absoluteMax() == Infinity {
+					infinities.push(function)
 				}
-			}
-			else {
-				for const i from parameter.min() + 1 to parameter.max() while count < target {
-					if item !?= map[index] {
-						item = map[index] = {
-							index: index
-							types: {}
-							weight: 0
+				else {
+					for const n from function.absoluteMin() to function.absoluteMax() {
+						if groups[n]? {
+							groups[n].functions.push(function)
+						}
+						else {
+							groups[n] = Group(
+								n
+								functions: [function]
+							)
 						}
 					}
 
-					mapParameter(parameter.type(), method.index(), item, target)
-
-					++index
-					++count
+					min = Math.min(min, function.absoluteMin())
+					max = Math.max(max, function.absoluteMax())
 				}
 			}
-		}
-	} // }}}
 
-	func mapParameter(type, method, map, target) { // {{{
-		if type is UnionType {
-			for value in type.types() {
-				mapParameter(value, method, map, target)
-			}
-		}
-		else {
-			if map.types[type.hashCode()] is Dictionary {
-				map.types[type.hashCode()].methods.push(method)
+			const async = functions[0].isAsync()
+
+			if min == Infinity {
+				const assessment = Assessement(
+					async
+					routes: Unbounded.resolveRoutes(functions, infinities, async)
+				)
+
+				assessment.flattenable = flattenable && isFlattenable(assessment.routes)
+
+				return assessment
 			}
 			else {
-				let weight = 0
-				if type.isAny() {
-					weight = 1
-				}
-				else {
-					weight = 1_00
-
-					if map.index == target {
-						weight += 1_00_00
+				for const function in infinities {
+					for const group of groups when function.absoluteMin() <= group.n {
+						group.functions.push(function)
 					}
 				}
 
-				map.types[type.hashCode()] = {
-					type: type
-					methods: [method]
-					weight
+				const assessment = Assessement(
+					async
+					routes: Bounded.resolveRoutes(functions, groups, min, max, overflow)
+				)
+
+				if infinities.length == 1 {
+					const function = infinities[0]
+
+					for const map, index in assessment.routes desc {
+						if map.function == function && map.filters.length == 0 {
+							assessment.routes.splice(index, 1)
+						}
+					}
+
+					assessment.routes.push(Route(
+						function
+						index: function.index()
+						min: 0
+						max: Infinity
+					))
+				}
+				else if infinities.length > 1 {
+					throw new NotImplementedException()
 				}
 
-				map.weight += weight
+				assessment.flattenable = flattenable && isFlattenable(assessment.routes)
+
+				return assessment
 			}
-		}
-	} // }}}
+		} // }}}
 
-	export func matchArguments(assessment, arguments) { // {{{
-		const matches = []
+		func matchArguments(assessment: Assessement, arguments: Array<Type>): Array<FunctionType> { // {{{
+			const matches: Array<FunctionType> = []
 
-		let spreadIndex: Number = -1
+			let spreadIndex: Number = -1
 
-		for const argument, index in arguments {
-			if argument.isSpread() {
-				spreadIndex = index
+			for const argument, index in arguments {
+				if argument.isSpread() {
+					spreadIndex = index
 
-				break
+					break
+				}
 			}
-		}
 
-		const length = arguments.length
+			const length = arguments.length
 
-		if spreadIndex != -1 {
-			for const method in assessment.methods when length <= method.max {
-				matches.push(method.method)
+			if spreadIndex != -1 {
+				for const route in assessment.routes when length <= route.max {
+					matches.push(route.function)
+				}
+
+				return matches
+			}
+
+			for const route in assessment.routes when route.min <= length <= route.max {
+				if route.filters.length == 0 && route.matchingFilters.length == 0 {
+					matches.push(route.function)
+				}
+				else {
+					let matched = true
+					let perfect = true
+
+					for const filter in route.filters while matched {
+						if arguments[filter.index].isAny() {
+							perfect = false
+						}
+						else if !arguments[filter.index].matchContentOf(filter.type) {
+							matched = false
+						}
+					}
+
+					if route.matchingFilters.length != 0 {
+						let notFound = true
+
+						for const line in route.matchingFilters while notFound when line.min <= length <= line.max {
+							let isMatched = true
+							let isPerfect = perfect
+
+							for const filter in line.filters while isMatched {
+								if arguments[filter.index].isAny() {
+									isPerfect = false
+								}
+								else if !arguments[filter.index].matchContentOf(filter.type) {
+									isMatched = false
+								}
+							}
+
+							if isMatched {
+								notFound = false
+								perfect = isPerfect
+							}
+						}
+
+						if notFound {
+							matched = false
+						}
+					}
+
+					if matched {
+						if perfect {
+							return [route.function]
+						}
+						else {
+							matches.push(route.function)
+						}
+					}
+				}
 			}
 
 			return matches
-		}
+		} // }}}
 
-		for const method in assessment.methods when method.min <= length <= method.max {
-			if method.filters.length == 0 && !?method.argFilters {
-				matches.push(method.method)
+		func toFragments(assessment: Assessement, fragments, argName: String, returns: Boolean, header: Function, footer: Function, call: Function, wrongdoer: Function, node: AbstractNode) { // {{{
+			const block = header(node, fragments)
+
+			if assessment.routes.length == 0 {
+				wrongdoer(block, null, argName, assessment.async, returns)
 			}
-			else {
-				let matched = true
-				let perfect = true
-
-				for const filter in method.filters while matched {
-					if arguments[filter.index].isAny() {
-						perfect = false
-					}
-					else if !arguments[filter.index].matchContentOf(filter.type) {
-						matched = false
-					}
-				}
-
-				if method.argFilters? {
-					let notFound = true
-
-					for const line in method.argFilters while notFound when line.min <= length <= line.max {
-						let isMatched = true
-						let isPerfect = perfect
-
-						for const filter in line.filters while isMatched {
-							if arguments[filter.index].isAny() {
-								isPerfect = false
-							}
-							else if !arguments[filter.index].matchContentOf(filter.type) {
-								isMatched = false
-							}
-						}
-
-						if isMatched {
-							notFound = false
-							perfect = isPerfect
-						}
-					}
-
-					if notFound {
-						matched = false
-					}
-				}
-
-				if matched {
-					if perfect {
-						return [method.method]
-					}
-					else {
-						matches.push(method.method)
-					}
-				}
-			}
-		}
-
-		return matches
-	} // }}}
-
-	func sortTreeMin(methods, max) { // {{{
-		if max == Infinity {
-			const tree = {
-				keys: []
-			}
-
-			for const method in methods {
-				if tree[method.min]? {
-					tree[method.min].push(method)
-				}
-				else {
-					tree[method.min] = [method]
-
-					tree.keys.push(method.min)
-				}
-			}
-
-			if tree.keys.length == 1 && tree.keys[0] == 0 {
-				return tree['0']
-			}
-			else {
-				return tree
-			}
-		}
-		else {
-			const tree = {
-				equal: []
-				midway: {
-					keys: []
-				}
-			}
-
-			for const method in methods {
-				if method.min == max {
-					tree.equal.push(method)
-				}
-				else {
-					if tree.midway[method.min]? {
-						tree.midway[method.min].push(method)
-					}
-					else {
-						tree.midway[method.min] = [method]
-
-						tree.midway.keys.push(method.min)
-					}
-				}
-			}
-
-			if tree.equal.length == 1 && tree.midway.keys.length == 0 {
-				return tree.equal
-			}
-			else {
-				return tree
-			}
-		}
-	} // }}}
-
-	export func toFragments(assessment, fragments, argName, returns, header, footer, call, wrongdoer, node) { // {{{
-		const block = header(node, fragments)
-
-		if assessment.methods.length == 0 {
-			wrongdoer(block, null, argName, assessment.async, returns)
-		}
-		else if assessment.methods.length == 1 {
-			const method = assessment.methods[0].method
-			const min = method.absoluteMin()
-			const max = method.absoluteMax()
-
-			if min == 0 && max >= Infinity {
-				call(block, method, 0)
-			}
-			else if min == max {
+			else if assessment.flattenable {
 				const ctrl = block.newControl()
 
-				ctrl.code(`if(\(argName).length === \(min))`).step()
+				let ne = false
 
-				call(ctrl, method, 0)
+				for const route in assessment.routes when route.done != true {
+					ne = Fragment.toFlatFragments(assessment, route, ctrl, argName, call, node)
+				}
 
-				wrongdoer(block, ctrl, argName, assessment.async, returns)
-			}
-			else if max < Infinity {
-				const ctrl = block.newControl()
-
-				ctrl.code(`if(\(argName).length >= \(min) && \(argName).length <= \(max))`).step()
-
-				call(ctrl, method, 0)
-
-				wrongdoer(block, ctrl, argName, assessment.async, returns)
-			}
-			else {
-				call(block, method, 0)
-			}
-		}
-		else if assessment.flattenable {
-			const ctrl = block.newControl()
-
-			let ne = false
-
-			for const method in assessment.methods when method.done != true {
-				ne = toFlatFragments(assessment, method, ctrl, argName, call, node)
-			}
-
-			if ne {
-				wrongdoer(block, ctrl, argName, assessment.async, returns)
-			}
-			else {
-				ctrl.done()
-			}
-		}
-		else {
-			const tree = {}
-			for const method in assessment.methods {
-				if tree[method.max]? {
-					tree[method.max].push(method)
+				if ne {
+					wrongdoer(block, ctrl, argName, assessment.async, returns)
 				}
 				else {
-					tree[method.max] = [method]
+					ctrl.done()
 				}
 			}
+			else if assessment.routes.length == 1 {
+				const route = assessment.routes[0]
+				const min = route.function.absoluteMin()
+				const max = route.function.absoluteMax()
 
-			for const methods, max of tree {
-				tree[max] = sortTreeMin(methods, methods[0].max)
-			}
+				if min == 0 && max >= Infinity {
+					call(block, route.function, route.index)
+				}
+				else if min == max {
+					const ctrl = block.newControl()
 
-			const ctrl = block.newControl()
+					ctrl.code(`if(\(argName).length === \(min))`).step()
 
-			let ne = false
+					Fragment.toTestCallFragments(route, ctrl, argName, call, node)
 
-			for const item of tree {
-				if item is Array {
-					ne = toEqLengthFragments(item, ctrl, argName, call, node)
+					wrongdoer(block, ctrl, argName, assessment.async, returns)
+				}
+				else if max < Infinity {
+					const ctrl = block.newControl()
+
+					ctrl.code(`if(\(argName).length >= \(min) && \(argName).length <= \(max))`).step()
+
+					Fragment.toTestCallFragments(route, ctrl, argName, call, node)
+
+					wrongdoer(block, ctrl, argName, assessment.async, returns)
 				}
 				else {
-					ne = toMixLengthFragments(item, ctrl, argName, call, node)
+					Fragment.toTestCallFragments(route, block, argName, call, node)
 				}
 			}
-
-			if ne {
-				wrongdoer(block, ctrl, argName, assessment.async, returns)
-			}
 			else {
-				ctrl.done()
-			}
-		}
-
-		footer(block)
-
-		return fragments
-	} // }}}
-
-	func toEqLengthFragments(methods, ctrl, argName, call, node) { // {{{
-		const method = methods[0]
-
-		if method.max == Infinity && method.min == 0 {
-			unless ctrl.isFirstStep() {
-				ctrl.step().code('else').step()
-			}
-		}
-		else {
-			unless ctrl.isFirstStep() {
-				ctrl.step().code('else ')
-			}
-
-			ctrl.code(`if(`)
-
-			if method.min == method.max {
-				ctrl.code(`\(argName).length === \(method.min)`)
-			}
-			else if method.max == Infinity {
-				ctrl.code(`\(argName).length >= \(method.min)`)
-			}
-			else if method.min + 1 == method.max {
-				ctrl.code(`\(argName).length === \(method.min) || \(argName).length === \(method.max)`)
-			}
-			else {
-				ctrl.code(`\(argName).length >= \(method.min) && \(argName).length <= \(method.max)`)
-			}
-
-			ctrl.code(`)`).step()
-		}
-
-		if methods.length == 1 {
-			call(ctrl, method.method, method.index)
-
-			return !(method.max == Infinity && method.min == 0)
-		}
-		else {
-			const ctrl2 = ctrl.newControl()
-
-			let ne = false
-
-			for const method in methods {
-				ne = toTreeTestFragments(method, ctrl2, argName, call, node)
-			}
-
-			ctrl2.done()
-
-			return ne
-		}
-	} // }}}
-
-	func toFlatFragments(assessment, method, ctrl, argName, call, node) { // {{{
-		const matchs = [m for const m in assessment.methods when m.done != true && m.index == method.index]
-
-		if matchs.length == 1 && matchs[0].min == 0 && matchs[0].max == Infinity && matchs[0].filters.length == 0 {
-			unless ctrl.isFirstStep() {
-				ctrl.step().code('else').step()
-			}
-
-			call(ctrl, method.method, method.index)
-
-			return false
-		}
-		else {
-			unless ctrl.isFirstStep() {
-				ctrl.step().code('else ')
-			}
-
-			ctrl.code(`if(`)
-
-			if matchs.length == 1 {
-				toFlatTestFragments(matchs[0], ctrl, false, argName, node)
-			}
-			else {
-				let nf = false
-
-				for const match in matchs {
-					if nf {
-						ctrl.code(' || ')
+				const tree = {}
+				for const route in assessment.routes {
+					if tree[route.max]? {
+						tree[route.max].push(route)
 					}
 					else {
-						nf = true
+						tree[route.max] = [route]
 					}
-
-					toFlatTestFragments(match, ctrl, true, argName, node)
 				}
-			}
 
-			ctrl.code(`)`).step()
+				for const routes, max of tree {
+					tree[max] = Fragment.sortTreeMin(routes!!, routes[0].max)
+				}
 
-			call(ctrl, method.method, method.index)
+				const ctrl = block.newControl()
 
-			return true
-		}
-	} // }}}
+				let ne = false
 
-	func toFlatTestFragments(match, ctrl, wrap, argName, node) { // {{{
-		wrap = wrap && match.filters.length != 0
+				for const item of tree {
+					if item is Array {
+						ne = Fragment.toEqLengthFragments(item, ctrl, argName, call, node)
+					}
+					else {
+						ne = Fragment.toMixLengthFragments(item, ctrl, argName, call, node)
+					}
+				}
 
-		if wrap {
-			ctrl.code('(')
-		}
-
-		if match.min == match.max {
-			ctrl.code(`\(argName).length === \(match.min)`)
-		}
-		else if match.max == Infinity {
-			ctrl.code(`\(argName).length >= \(match.min)`)
-		}
-		else if match.min + 1 == match.max {
-			ctrl.code(`\(argName).length === \(match.min) || \(argName).length === \(match.max)`)
-		}
-		else {
-			ctrl.code(`\(argName).length >= \(match.min) && \(argName).length <= \(match.max)`)
-		}
-
-		if match.filters.length == 1{
-			ctrl.code(' && ')
-
-			const index = match.filters[0].index
-			if index >= 0 {
-				match.filters[0].type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(index)]`))
-			}
-			else {
-				match.filters[0].type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-index - 1)]`))
-			}
-		}
-		else if match.filters.length > 1 {
-			throw new NotImplementedException(node)
-		}
-
-		match.done = true
-
-		if wrap {
-			ctrl.code(')')
-		}
-	} // }}}
-
-	func toMixLengthFragments(tree, ctrl, argName, call, node) { // {{{
-		let ne = false
-
-		if tree.equal.length != 0 {
-			ne = toEqLengthFragments(tree.equal, ctrl, argName, call, node)
-		}
-
-		if tree.midway.keys.length == 1 {
-			ne = toEqLengthFragments(tree.midway[tree.midway.keys[0]], ctrl, argName, call, node)
-		}
-		else if tree.midway.keys.length > 1 {
-			throw new NotImplementedException(node)
-		}
-
-		return ne
-	} // }}}
-
-	func toTreeTestFragments(method, ctrl, argName, call, node) { // {{{
-		if method.filters.length == 0 {
-			unless ctrl.isFirstStep() {
-				ctrl.step().code('else').step()
-			}
-		}
-		else {
-			unless ctrl.isFirstStep() {
-				ctrl.step().code('else ')
-			}
-
-			ctrl.code(`if(`)
-
-			if method.filters.length == 1 {
-				const index = method.filters[0].index
-				if index >= 0 {
-					method.filters[0].type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(index)]`))
+				if ne {
+					wrongdoer(block, ctrl, argName, assessment.async, returns)
 				}
 				else {
-					method.filters[0].type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-index - 1)]`))
+					ctrl.done()
 				}
 			}
-			else if method.filters.length > 1 {
-				throw new NotImplementedException(node)
-			}
 
-			ctrl.code(`)`).step()
-		}
+			footer(block)
 
-		call(ctrl, method.method, method.index)
-
-		return true
-	} // }}}
+			return fragments
+		} // }}}
+	}
 }

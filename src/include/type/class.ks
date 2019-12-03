@@ -309,7 +309,7 @@ class ClassType extends Type {
 		}
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
-		const options = Attribute.configure(data, null, AttributeTarget::Property)
+		const options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
 
 		switch data.kind {
 			NodeKind::FieldDeclaration => {

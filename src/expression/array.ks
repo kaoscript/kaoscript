@@ -66,7 +66,12 @@ class ArrayExpression extends Expression {
 	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @flatten {
-			CallExpression.toFlattenArgumentsFragments(fragments, @values)
+			if @values.length == 1 {
+				fragments.code('[].concat(').compile(@values[0].argument()).code(')')
+			}
+			else {
+				CallExpression.toFlattenArgumentsFragments(fragments, @values)
+			}
 		}
 		else {
 			fragments.code('[')

@@ -8,13 +8,13 @@ abstract class Statement extends AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
 
-		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, super.file())
 		@line = data.start.line
 	} // }}}
 	constructor(@data, @parent, scope: Scope, kind: ScopeType) { // {{{
 		super(data, parent, scope, kind)
 
-		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, super.file())
 		@line = data.start.line
 	} // }}}
 	addAssignments(variables) { // {{{

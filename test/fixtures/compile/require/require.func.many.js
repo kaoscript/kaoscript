@@ -6,7 +6,7 @@ module.exports = function(reverse) {
 	var {String, __ks_String} = require("../_/_string.ks")();
 	const __ks_reverse_1 = reverse;
 	function reverse() {
-		if(arguments.length === 1) {
+		if(arguments.length === 1 && Type.isNumber(arguments[0])) {
 			let __ks_i = -1;
 			let value = arguments[++__ks_i];
 			if(value === void 0 || value === null) {

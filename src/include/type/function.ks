@@ -192,6 +192,30 @@ class FunctionType extends Type {
 
 		@min += min
 	} // }}}
+	addParameter(type: ParameterType) { // {{{
+		@parameters.push(type)
+
+		if @hasRest {
+			@max += type.max()
+
+			@minAfter += type.min()
+			@maxAfter += type.max()
+		}
+		else if type.max() == Infinity {
+			@max = Infinity
+
+			@restIndex = @parameters.length - 1
+			@hasRest = true
+		}
+		else {
+			@max += type.max()
+
+			@minBefore += type.min()
+			@maxBefore += type.max()
+		}
+
+		@min += type.min()
+	} // }}}
 	async() { // {{{
 		@async = true
 	} // }}}

@@ -46,11 +46,11 @@ module.exports = function() {
 				Foo.prototype.__ks_cons_0.apply(this, args);
 			}
 			else if(args.length === 2) {
-				if(Type.isString(args[1])) {
-					Foo.prototype.__ks_cons_0.apply(this, args);
+				if(Type.isString(args[0])) {
+					Foo.prototype.__ks_cons_1.apply(this, args);
 				}
 				else {
-					Foo.prototype.__ks_cons_1.apply(this, args);
+					Foo.prototype.__ks_cons_0.apply(this, args);
 				}
 			}
 			else if(args.length === 3) {

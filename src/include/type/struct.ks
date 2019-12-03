@@ -184,40 +184,116 @@ class ObjectStructType extends StructType {
 		return false
 	} // }}}
 	sortArguments(arguments: Array, node) { // {{{
-		const result = []
+		const order = []
 
 		const nameds = {}
-		let count = 0
-		for const argument in arguments when argument is NamedArgument {
-			nameds[argument.name()] = argument
-			++count
+		let namedCount = 0
+
+		const shorthands = {}
+		const leftovers = []
+
+		for const argument in arguments {
+			if argument is NamedArgument {
+				const name = argument.name()
+
+				if !?@fields[name] {
+					SyntaxException.throwUnrecognizedStructField(name, node)
+				}
+
+				nameds[name] = argument
+
+				++namedCount
+			}
+			else if argument is IdentifierLiteral {
+				const name = argument.name()
+
+				if !?@fields[name] {
+					SyntaxException.throwUnrecognizedStructField(name, node)
+				}
+
+				shorthands[name] = argument
+			}
+			else {
+				leftovers.push(argument)
+			}
 		}
 
-		if count == arguments.length {
-			if count == @count {
+		if namedCount == arguments.length {
+			if namedCount == @count {
 				for const field, name of @fields {
-					result.push(nameds[name])
+					order.push(nameds[name])
 				}
 			}
 			else {
 				for const field, name of @fields {
 					if nameds[name]? {
-						result.push(nameds[name])
+						order.push(nameds[name])
 					}
 					else if field.isRequired() {
-						ReferenceException.throwNotDefinedField(name, node)
+						SyntaxException.throwMissingStructField(name, node)
 					}
 					else {
-						result.push(new Literal('null', node))
+						order.push(new Literal('null', node))
 					}
 				}
 			}
 		}
 		else {
-			NotImplementedException.throw(node)
+			const fields = []
+			let required = 0
+			let optional = 0
+
+			for const field, name of @fields {
+				if nameds[name]? {
+					order.push(nameds[name])
+				}
+				else if shorthands[name]? {
+					order.push(shorthands[name])
+				}
+				else {
+					const index = order.length
+
+					order.push(null)
+					fields.push([index, field])
+
+					if field.isRequired() {
+						++required
+					}
+					else {
+						++optional
+					}
+				}
+			}
+
+			if leftovers.length < required {
+				SyntaxException.throwNotEnoughStructFields(node)
+			}
+			else if leftovers.length > required + optional {
+				SyntaxException.throwTooMuchStructFields(node)
+			}
+
+			let countdown = leftovers.length - required
+			let leftover = 0
+
+			for const [index, field] in fields {
+				if field.isRequired() {
+					order[index] = leftovers[leftover]
+
+					++leftover
+				}
+				else if countdown > 0 {
+					order[index] = leftovers[leftover]
+
+					++leftover
+					--countdown
+				}
+				else {
+					order[index] = new Literal('null', node)
+				}
+			}
 		}
 
-		return result
+		return order
 	} // }}}
 }
 

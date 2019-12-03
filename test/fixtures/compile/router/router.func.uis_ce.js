@@ -23,6 +23,7 @@ module.exports = function() {
 			else if(!Type.isInstance(x, Master)) {
 				throw new TypeError("'x' is not of type 'Master'");
 			}
+			return 2;
 		}
 		else if(arguments.length === 1) {
 			let __ks_i = -1;
@@ -33,6 +34,7 @@ module.exports = function() {
 			else if(!(Type.isNumber(x) || Type.isString(x))) {
 				throw new TypeError("'x' is not of type 'Number' or 'String'");
 			}
+			return 1;
 		}
 		else {
 			throw new SyntaxError("Wrong number of arguments");

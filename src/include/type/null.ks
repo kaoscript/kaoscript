@@ -31,7 +31,7 @@ class NullType extends Type {
 			return this
 		}
 		else {
-			return AnyType.Explicit
+			return AnyType.Unexplicit
 		}
 	} // }}}
 	toFragments(fragments, node)

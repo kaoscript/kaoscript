@@ -256,6 +256,8 @@ class ClassDeclaration extends Statement {
 			else {
 				if @es5 {
 					superVariable.replaceCall = (data, arguments) => new CallSuperConstructorES5Substitude(data, arguments, @type)
+
+					superVariable.replaceMemberCall= (property, arguments, node) => new MemberSuperMethodES5Substitude(property, arguments, @type, node)
 				}
 				else {
 					superVariable.replaceCall = (data, arguments) => new CallSuperConstructorSubstitude(data, arguments, @type)
@@ -720,6 +722,7 @@ class ClassDeclaration extends Statement {
 					for const method in methods {
 						if method.isOverflowing(m) {
 							overflow = true
+
 							break
 						}
 					}

@@ -222,7 +222,7 @@ class FunctionDeclaration extends Statement {
 		if @extended {
 			fragments.line($const(this), @oldVariableName, $equals, @name)
 
-			const assessment = Router.assess([declarator.type() for const declarator in @variable._declarators], true)
+			const assessment = Router.assess([declarator.type() for const declarator in @variable._declarators], true, true)
 
 			Router.toFragments(
 				assessment

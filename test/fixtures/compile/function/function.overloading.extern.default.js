@@ -2,7 +2,7 @@ var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	const __ks_reverse_1 = reverse;
 	function reverse() {
-		if(arguments.length === 1) {
+		if(arguments.length === 1 && Type.isString(arguments[0])) {
 			let __ks_i = -1;
 			let value = arguments[++__ks_i];
 			if(value === void 0 || value === null) {

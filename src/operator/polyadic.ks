@@ -540,7 +540,13 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 				operand.acquireReusable(true)
 				operand.releaseReusable()
 
-				operandType = operand.type().setNullable(false)
+				operandType = operand.type()
+				if operandType.isNull() {
+					operandType = operand.getDeclaredType().setNullable(false)
+				}
+				else {
+					operandType = operandType.setNullable(false)
+				}
 			}
 			else {
 				operandType = operand.type()
@@ -563,7 +569,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 			@type = types[0]
 		}
 		else {
-			@type = new UnionType(@scope, types)
+			@type = Type.union(@scope, ...types)
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{

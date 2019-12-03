@@ -1,4 +1,4 @@
-#![rules(no-param-assert)]
+#![rules(dont-assert-parameter-type)]
 
 func foobar(x: Number) {
 

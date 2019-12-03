@@ -13,10 +13,5 @@ class Disturb {
 
 func foobar(x: SubClassA) {
 }
-func foobar(x: Master) {
-}
-
-func quxbaz(x: SubClassA) {
-}
-func quxbaz(x: Master | Disturb) {
+func foobar(x: Master | Disturb) {
 }

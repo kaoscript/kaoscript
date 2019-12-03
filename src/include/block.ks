@@ -9,7 +9,7 @@ class Block extends AbstractNode {
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
 		super(data, parent, scope)
 
-		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement)
+		@options = Attribute.configure(data, parent._options, AttributeTarget::Statement, this.file())
 
 		if !?@data.statements {
 			@data.statements = []

@@ -3,7 +3,7 @@ module.exports = function() {
 	function foobar() {
 		let x = null;
 		let y = null;
-		quxbaz(Type.isValue(y) ? y : Type.isValue(y) ? y : 42);
+		quxbaz(Type.isValue(x) ? x : Type.isValue(y) ? y : 42);
 	}
 	function quxbaz(x) {
 		if(arguments.length < 1) {

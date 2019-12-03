@@ -234,7 +234,6 @@ export class ReferenceException extends Exception {
 			throw new ReferenceException(`The expression \(expression.toQuote(true)) is "null"`, node)
 		} // }}}
 	}
-
 }
 
 export class SyntaxException extends Exception {
@@ -278,6 +277,9 @@ export class SyntaxException extends Exception {
 		throwInvalidEnumAccess(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Accessing an enum can only be done with "::"`, node)
 		} // }}}
+		throwInvalidForcedTypeCasting(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The forced type casting "!!" can't determine the expected type`, node)
+		} // }}}
 		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
 		} // }}}
@@ -290,8 +292,8 @@ export class SyntaxException extends Exception {
 		throwInvalidSyncMethods(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" can be neither sync nor async`, node)
 		} // }}}
-		throwInvalidForcedTypeCasting(node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`The forced type casting "!!" can't determine the expected type`, node)
+		throwInvalidRule(name, fileName, lineNumber) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The rule "\(name)" is invalid`, fileName, lineNumber)
 		} // }}}
 		throwLoopingImport(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The import "\(name)" is looping`, node)
@@ -312,6 +314,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwMissingRequirement(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`import is missing the argument "\(name)"`, node)
+		} // }}}
+		throwMissingStructField(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The field "\(name)" is missing to create the struct`, node)
 		} // }}}
 		throwMixedOverloadedFunction(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Overloaded functions can't mix sync/async`, node)
@@ -346,6 +351,9 @@ export class SyntaxException extends Exception {
 		throwNotCompatibleConstructor(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parent's constructor of class "\(name)" can't be called`, node)
 		} // }}}
+		throwNotEnoughStructFields(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`There is not enough fields to create the struct`, node)
+		} // }}}
 		throwNotNamedParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter must be named`, node)
 		} // }}}
@@ -364,6 +372,9 @@ export class SyntaxException extends Exception {
 		throwTooMuchAttributesForIfAttribute() ~ SyntaxException { // {{{
 			throw new SyntaxException(`Expected 1 argument for 'if' attribute`)
 		} // }}}
+		throwTooMuchStructFields(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`There is too much fields to create the struct`, node)
+		} // }}}
 		throwTooMuchRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Rest parameter has already been declared`, node)
 		} // }}}
@@ -378,6 +389,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwUnnamedWildcardImport(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Wilcard import can't be named`, node)
+		} // }}}
+		throwUnrecognizedStructField(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The argument "\(name)" isn't recognized to create the struct`, node)
 		} // }}}
 		throwUnreportedError(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`An error is unreported, it must be caught or declared to be thrown`, node)

@@ -221,7 +221,7 @@ class DictionaryLiteralMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
 
 		if @data.name.kind == NodeKind::Identifier	{
 			@name = new Literal(@data.name, this, @scope:Scope, @data.name.name)
@@ -289,7 +289,7 @@ class DictionaryComputedMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
 
 		if @data.name.kind == NodeKind::ComputedPropertyName {
 			@name = $compile.expression(@data.name.expression, this)
@@ -379,7 +379,7 @@ class DictionarySpreadMember extends Expression {
 		_value
 	}
 	analyse() { // {{{
-		@options = Attribute.configure(@data, @options, AttributeTarget::Property)
+		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
 
 		@value = $compile.expression(@data.argument, this)
 		@value.analyse()

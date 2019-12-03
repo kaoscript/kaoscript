@@ -17,6 +17,17 @@ enum AttributeTarget {
 const $attributes = {}
 const $semverRegex = /^(\w+)(?:-v((?:\d+)(?:\.\d+)?(?:\.\d+)?))?$/
 
+const $rules = {
+	'no-undefined':					['noUndefined', true]
+	'non-exhaustive':				['nonExhaustive', true]
+	'ignore-misfit':				['ignoreMisfit', true]
+	'dont-ignore-misfit':			['ignoreMisfit', false]
+	'assert-parameter':				['noParamAssert', false]
+	'dont-assert-parameter':		['noParamAssert', true]
+	'assert-parameter-type':		['noParamTypeAssert', false]
+	'dont-assert-parameter-type':	['noParamTypeAssert', true]
+}
+
 class Attribute {
 	static {
 		conditional(data, node) { // {{{
@@ -30,7 +41,7 @@ class Attribute {
 
 			return true
 		} // }}}
-		configure(data, options!?, mode, force = false) { // {{{
+		configure(data, options!?, mode, fileName, force = false) { // {{{
 			const clone = !force && options != null && AttributeTarget::Global & mode == 0
 
 			if options == null {
@@ -61,7 +72,7 @@ class Attribute {
 							options = attribute.clone(options, cloned)
 						}
 
-						options = attribute.configure(options)
+						options = attribute.configure(options, fileName, attr.start.line)
 					}
 				}
 			}
@@ -130,7 +141,7 @@ class ErrorAttribute extends Attribute {
 
 		return options
 	} // }}}
-	configure(options) { // {{{
+	configure(options, fileName, lineNumber) { // {{{
 		for arg in @data.arguments {
 			switch arg.kind {
 				NodeKind::AttributeExpression => {
@@ -174,7 +185,7 @@ class FormatAttribute extends Attribute {
 
 		return options
 	} // }}}
-	configure(options) { // {{{
+	configure(options, fileName, lineNumber) { // {{{
 		for arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
 				options.format[arg.name.name] = arg.value.value
@@ -358,7 +369,7 @@ class ParseAttribute extends Attribute {
 
 		return options
 	} // }}}
-	configure(options) { // {{{
+	configure(options, fileName, lineNumber) { // {{{
 		for arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
 				options.parse[arg.name.name] = arg.value.value
@@ -386,12 +397,17 @@ class RulesAttribute extends Attribute {
 
 		return options
 	} // }}}
-	configure(options) { // {{{
+	configure(options, fileName, lineNumber) { // {{{
 		for const argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {
-				const name = argument.name.toLowerCase().replace(/[-_\s]+(.)/g, (m, l) => l.toUpperCase())
+				const name = argument.name.toLowerCase()
 
-				options.rules[name] = true
+				if const data = $rules[name] {
+					options.rules[data[0]] = data[1]
+				}
+				else {
+					SyntaxException.throwInvalidRule(name, fileName, lineNumber)
+				}
 			}
 		}
 
@@ -407,7 +423,7 @@ class RuntimeAttribute extends Attribute {
 		target() => AttributeTarget::Global
 	}
 	constructor(@data)
-	configure(options) { // {{{
+	configure(options, fileName, lineNumber) { // {{{
 		for const arg in @data.arguments {
 			if arg.kind == NodeKind::AttributeOperation {
 				if arg.name.name == 'package' {
@@ -489,7 +505,7 @@ class TargetAttribute extends Attribute {
 
 		return options
 	} // }}}
-	configure(options) { // {{{
+	configure(options, fileName, lineNumber) { // {{{
 		for argument in @data.arguments {
 			if argument.kind == NodeKind::Identifier {
 				if match !?= $targetRegex.exec(argument.name) {

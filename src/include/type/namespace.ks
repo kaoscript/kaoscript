@@ -67,7 +67,7 @@ class NamespaceType extends Type {
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
 		const type = Type.fromAST(data, node)
-		const options = Attribute.configure(data, null, AttributeTarget::Property)
+		const options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
 
 		if options.rules.nonExhaustive {
 			type.setExhaustive(false)

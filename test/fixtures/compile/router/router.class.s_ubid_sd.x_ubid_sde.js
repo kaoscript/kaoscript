@@ -85,23 +85,7 @@ module.exports = function() {
 			}
 		}
 		foobar() {
-			if(arguments.length === 1) {
-				if(Type.isString(arguments[0])) {
-					return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
-				}
-				else {
-					return Foobar.prototype.__ks_func_foobar_1.apply(this, arguments);
-				}
-			}
-			else if(arguments.length === 2) {
-				if(Type.isString(arguments[0])) {
-					return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
-				}
-				else {
-					return Foobar.prototype.__ks_func_foobar_1.apply(this, arguments);
-				}
-			}
-			else if(arguments.length === 3) {
+			if(arguments.length >= 1 && arguments.length <= 3) {
 				if(Type.isString(arguments[0])) {
 					return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
 				}

@@ -218,7 +218,7 @@ class IncludeDeclarator extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		Attribute.configure(@data, this.module()._options, AttributeTarget::Global)
+		Attribute.configure(@data, this.module()._options, AttributeTarget::Global, this.file())
 
 		const offset = @scope.getLineOffset()
 

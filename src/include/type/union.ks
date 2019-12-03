@@ -205,6 +205,11 @@ class UnionType extends Type {
 			return Type.union(@scope, ...types)
 		}
 	} // }}}
+	hashCode(): String { // {{{
+		const elements = [type.hashCode() for type in @types]
+
+		return elements.join('|')
+	} // }}}
 	isExplicit() => @explicit
 	isExportable() { // {{{
 		for type in @types {

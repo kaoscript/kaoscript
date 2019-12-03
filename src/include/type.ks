@@ -565,6 +565,7 @@ abstract class Type {
 
 		return false
 	} // }}}
+	compareTo(type: Type) => false
 	condense(): Type => this
 	discard(): Type? => this
 	discardAlias(): Type => this
@@ -599,6 +600,7 @@ abstract class Type {
 		return this
 	} // }}}
 	getProperty(name: String) => null
+	hashCode(): String => ''
 	hasProperty(name: String): Boolean => false
 	isAlias() => false
 	isAlien() => @alien
