@@ -210,7 +210,7 @@ class ReferenceType extends Type {
 			return AnyType.NullableUnexplicit
 		}
 
-		let type := this.type()
+		let type: Type = this.type()
 
 		if type is NamedType {
 			type = type.type()

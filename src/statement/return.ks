@@ -80,6 +80,7 @@ class ReturnStatement extends Statement {
 	hasExceptions() => @exceptions
 	isAwait() => @await
 	isExit() => true
+	isExpectingType() => true
 	isUsingVariable(name) => @value != null && @value.isUsingVariable(name)
 	reference() => @temp
 	releaseReusable() { // {{{

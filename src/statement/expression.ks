@@ -49,7 +49,7 @@ class ExpressionStatement extends Statement {
 			else {
 				assignments.push(name)
 
-				@scope.define(name, false, this)
+				@scope.define(name, false, AnyType.NullableUnexplicit, this)
 			}
 		}
 

@@ -1,0 +1,3 @@
+func foobar() {
+	a = null
+}
