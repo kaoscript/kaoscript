@@ -620,7 +620,13 @@ namespace Router {
 				}
 
 				if matches.length != 0 {
-					route.max = matches.last().max
+					const max = matches.last().max
+
+					route.max = max
+
+					for const filter in route.matchingFilters {
+						filter.max = max
+					}
 
 					routes.remove(...matches)
 				}
