@@ -8,6 +8,95 @@ class IncludeDeclaration extends Statement {
 		let directory = this.directory()
 
 		let x
+		for const data in @data.declarations {
+			const file = data.file
+
+			if $localFileRegex.test(file) {
+				x = fs.resolve(directory, file)
+
+				if fs.isFile(x) || fs.isFile(x += $extensions.source) {
+					if this.canLoadLocalFile(x) {
+						this.loadLocalFile(data, x)
+					}
+				}
+				else {
+					IOException.throwNotFoundFile(file, directory, this)
+				}
+			}
+			else {
+				let modulePath = file
+				let moduleVersion = ''
+
+				let nf = true
+				for const dir in $nodeModulesPaths(directory) while nf {
+					x = fs.resolve(dir, file)
+
+					if fs.isFile(x) {
+						nf = false
+					}
+					else if fs.isFile(x + $extensions.source) {
+						x += $extensions.source
+						modulePath += $extensions.source
+
+						nf = false
+					}
+					else {
+						let pkgfile = path.join(x, 'package.json')
+
+						if fs.isFile(pkgfile) {
+							if const pkg = try JSON.parse(fs.readFile(pkgfile)) {
+								if pkg.kaoscript? && fs.isFile(path.join(x, pkg.kaoscript.main)) {
+									x = path.join(x, pkg.kaoscript.main)
+									modulePath = path.join(modulePath, pkg.kaoscript.main)
+
+									nf = false
+								}
+								else if pkg.main? {
+									if fs.isFile(path.join(x, pkg.main)) {
+										x = path.join(x, pkg.main)
+										modulePath = path.join(modulePath, pkg.main)
+
+										nf = false
+									}
+									else if fs.isFile(path.join(x, pkg.main + $extensions.source)) {
+										x = path.join(x, pkg.main + $extensions.source)
+										modulePath = path.join(modulePath, pkg.main + $extensions.source)
+
+										nf = false
+									}
+									else if fs.isFile(path.join(x, pkg.main, 'index' + $extensions.source)) {
+										x = path.join(x, pkg.main, 'index' + $extensions.source)
+										modulePath = path.join(modulePath, pkg.main, 'index' + $extensions.source)
+
+										nf = false
+									}
+								}
+
+								if !nf {
+									moduleVersion = pkg.version
+								}
+							}
+						}
+
+						if nf && fs.isFile(path.join(x, 'index' + $extensions.source)) {
+							x = path.join(x, 'index' + $extensions.source)
+							modulePath = path.join(modulePath, 'index' + $extensions.source)
+
+							nf = false
+						}
+					}
+				}
+
+				if nf {
+					IOException.throwNotFoundModule(file, directory, this)
+				}
+
+				if this.canLoadModuleFile(x, file, modulePath, moduleVersion) {
+					this.loadModuleFile(data, x, file, modulePath, moduleVersion)
+				}
+			}
+		}
+		/* let x
 		for file in @data.files {
 			if $localFileRegex.test(file) {
 				x = fs.resolve(directory, file)
@@ -98,7 +187,7 @@ class IncludeDeclaration extends Statement {
 					this.loadModuleFile(x, file, modulePath, moduleVersion)
 				}
 			}
-		}
+		} */
 	} // }}}
 	prepare() { // {{{
 		for const declarator in @declarators {
@@ -130,7 +219,7 @@ class IncludeDeclaration extends Statement {
 		}
 	} // }}}
 	isExportable() => true
-	loadLocalFile(path) { // {{{
+	loadLocalFile(declaration, path) { // {{{
 		const module = this.module()
 
 		let data = fs.readFile(path)
@@ -149,13 +238,13 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 
-		const declarator = new IncludeDeclarator(data, path, this)
+		const declarator = new IncludeDeclarator(declaration, data, path, this)
 
 		declarator.analyse()
 
 		@declarators.push(declarator)
 	} // }}}
-	loadModuleFile(path, moduleName, modulePath, moduleVersion) { // {{{
+	loadModuleFile(declaration, path, moduleName, modulePath, moduleVersion) { // {{{
 		const module = this.module()
 
 		let data = fs.readFile(path)
@@ -174,7 +263,7 @@ class IncludeDeclaration extends Statement {
 			throw error
 		}
 
-		const declarator = new IncludeDeclarator(data, path, moduleName, this)
+		const declarator = new IncludeDeclarator(declaration, data, path, moduleName, this)
 
 		declarator.analyse()
 
@@ -202,8 +291,10 @@ class IncludeDeclarator extends Statement {
 		_offsetStart: Number	= 0
 		_statements				= []
 	}
-	constructor(@data, @file, moduleName: String = null, @parent) { // {{{
+	constructor(declaration, @data, @file, moduleName: String = null, @parent) { // {{{
 		super(data, parent)
+
+		@options = Attribute.configure(declaration, @options, AttributeTarget::Global, super.file(), true)
 
 		@directory = path.dirname(file)
 
@@ -218,7 +309,7 @@ class IncludeDeclarator extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		Attribute.configure(@data, this.module()._options, AttributeTarget::Global, this.file())
+		Attribute.configure(@data, @parent.parent()._options, AttributeTarget::Global, this.file())
 
 		const offset = @scope.getLineOffset()
 

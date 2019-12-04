@@ -1,0 +1,1 @@
+SyntaxException: The function "foobar" can't be found (line 1, file "fixtures/compile/include/include.attribute.byfile.slave.ks")
