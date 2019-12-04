@@ -131,7 +131,7 @@ namespace Router {
 				}
 
 				if uniques.length > 1 {
-					uniques.sort((a, b) => a.type.compareTo(b.type))
+					uniques.sort(sortUniques)
 				}
 
 				const uniq = uniques[0]
@@ -751,6 +751,17 @@ namespace Router {
 			}
 
 			return sorted
+		} // }}}
+
+		func sortUniques(a: UniqueRow, b: UniqueRow): Number { // {{{
+			const r = a.type.compareTo(b.type)
+
+			if r == 0 {
+				return a.index - b.index
+			}
+			else {
+				return r
+			}
 		} // }}}
 
 		func usingSameFunction(rows: Dictionary<Row>): Boolean { // {{{

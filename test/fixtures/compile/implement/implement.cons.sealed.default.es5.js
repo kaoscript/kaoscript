@@ -56,7 +56,7 @@ module.exports = function() {
 			return new Date();
 		}
 		else {
-			return new (Function.prototype.bind.apply(Date, arguments));
+			return new (Function.bind.apply(Date, [null].concat(Array.prototype.slice.call(arguments))));
 		}
 	};
 	var d1 = __ks_Date.new();

@@ -765,7 +765,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 					ctrl.code(`else`).step()
 
 					if es5 {
-						ctrl.line(`return new (Function.prototype.bind.apply(\(@variable.name()), arguments))`)
+						ctrl.line(`return new (Function.bind.apply(\(@variable.name()), [null].concat(Array.prototype.slice.call(arguments))))`)
 					}
 					else {
 						ctrl.line(`return new \(@variable.name())(...arguments)`)

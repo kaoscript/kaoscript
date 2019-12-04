@@ -71,7 +71,10 @@ class ReferenceType extends Type {
 		throw new NotSupportedException()
 	} // }}}
 	compareTo(value: Type) { // {{{
-		if this.matchContentOf(value) {
+		if this == value {
+			return 0
+		}
+		else if this.matchContentOf(value) {
 			return -1
 		}
 		else if value.matchContentOf(this) {
