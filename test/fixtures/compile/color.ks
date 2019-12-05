@@ -177,7 +177,8 @@ func $blend(x: float, y: float, percentage: float): float { // {{{
 func $binder(last: func, components, first: func, ...firstArgs): func { // {{{
 	let that = first**(...firstArgs)
 
-	let lastArgs := [that[component.field] for component, name of components]
+	let lastArgs = [that[component.field] for component, name of components]
+
 	lastArgs.push(that)
 
 	return last**(...lastArgs)
@@ -218,7 +219,7 @@ func $component(component, name: string, space: string): void { // {{{
 
 func $convert(that: Color, space: string, result: dict = {_alpha: 0}): dict ~ Error { // {{{
 	if ?(s = $spaces[that._space]).converters[space] {
-		let args := [that[component.field] for component, name of s.components]
+		let args = [that[component.field] for component, name of s.components]
 
 		args.push(result)
 
@@ -748,10 +749,10 @@ export class Color {
 				color = color.clone().blend(this, 0.5, Space::SRGB, true)
 			}
 
-			let l1 := this.luminance() + 0.05
-			let l2 := color.luminance() + 0.05
+			let l1 = this.luminance() + 0.05
+			let l2 = color.luminance() + 0.05
 
-			let ratio := l1 / l2
+			let ratio = l1 / l2
 			if l2 > l1 {
 				ratio = 1 / ratio
 			}

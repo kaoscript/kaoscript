@@ -1,6 +1,6 @@
 #![target(ecma-v5)]
 
-let x := 'y'
+let x = 'y'
 
 let foo = {
 	bar: {

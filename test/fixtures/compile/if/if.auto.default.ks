@@ -2,6 +2,6 @@ extern console
 
 func foobar(): String => 'foobar'
 
-if let x := foobar() {
+if auto x = foobar() {
 	console.log(`\(x)`)
 }

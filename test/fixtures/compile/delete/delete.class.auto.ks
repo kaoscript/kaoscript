@@ -3,6 +3,6 @@ class Foo {
 	}
 }
 
-let foo := new Foo()
+auto foo = new Foo()
 
 delete foo

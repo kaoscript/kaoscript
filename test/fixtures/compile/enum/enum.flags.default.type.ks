@@ -31,7 +31,7 @@ func printAnimalAbilities(abilities: AnimalFlags) {
 	}
 }
 
-let abilities := AnimalFlags::None
+auto abilities = AnimalFlags::None
 
 printAnimalAbilities(abilities)
 

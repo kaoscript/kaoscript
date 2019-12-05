@@ -4,6 +4,6 @@ extern sealed class Object {
 	static keys(...): Array<String>
 }
 
-let item := {}
+auto item = {}
 
 Object.keys(item).last()

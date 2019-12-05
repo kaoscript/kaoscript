@@ -1,3 +1,3 @@
-let x := null
+auto x = null
 
 x = 42
