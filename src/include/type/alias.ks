@@ -38,13 +38,18 @@ class AliasType extends Type {
 	isAlias() => true
 	isArray() => @type.isArray()
 	isBoolean() => @type.isBoolean()
+	isDictionary() => @type.isDictionary()
 	isExclusion() => @type.isExclusion()
+	isFunction() => @type.isFunction()
 	isMatching(value: AliasType, mode: MatchingMode) { // {{{
 		return this == value
 	} // }}}
+	isNamespace() => @type.isNamespace()
 	isNumber() => @type.isNumber()
+	isObject() => @type.isObject()
 	isReducible() => true
 	isString() => @type.isString()
+	isStruct() => @type.isStruct()
 	isUnion() => @type.isUnion()
 	isExportable() => @type.isExportable()
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)

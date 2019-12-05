@@ -462,7 +462,7 @@ class CallExpression extends Expression {
 					}
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, null, this))
+					this.makeMemberCalleeFromReference(@scope.reference('Dictionary'))
 				}
 			}
 			is ExclusionType => {

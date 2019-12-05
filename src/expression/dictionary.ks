@@ -59,11 +59,15 @@ class DictionaryExpression extends Expression {
 		@empty = @properties.length == 0
 	} // }}}
 	prepare() { // {{{
+		@type = new DictionaryType(@scope)
+
 		for const property in @properties {
 			property.prepare()
-		}
 
-		@type = @scope.reference('Dictionary')
+			if property is DictionaryLiteralMember {
+				@type.addProperty(property.name(), property.type())
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		for property in @properties {
@@ -260,6 +264,7 @@ class DictionaryLiteralMember extends Expression {
 	} // }}}
 	acquireReusable(acquire) => @value.acquireReusable(acquire)
 	isUsingVariable(name) => @value.isUsingVariable(name)
+	name() => @name.value()
 	releaseReusable() => @value.releaseReusable()
 	toFragments(fragments, mode) { // {{{
 		if @parent.isSpread() {
@@ -280,6 +285,7 @@ class DictionaryLiteralMember extends Expression {
 			fragments.code(@parent.varname(), '.').compile(@name).code($equals).compile(@value)
 		}
 	} // }}}
+	type() => @value.type()
 	value() => @value
 }
 

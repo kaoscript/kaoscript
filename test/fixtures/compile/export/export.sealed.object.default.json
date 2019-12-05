@@ -25,7 +25,10 @@
       "classMethods": {}
     },
     {
-      "reference": 0
+      "kind": "dictionary",
+      "properties": {
+        "qux": "Number"
+      }
     }
   ],
   "macros": []

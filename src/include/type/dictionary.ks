@@ -47,7 +47,7 @@ class DictionaryType extends Type {
 
 		return export
 	} // }}}
-	getProperty(name: String): Type => @properties[name] ?? AnyType.NullableUnexplicit
+	getProperty(name: String): Type? => @properties[name]
 	isMatching(value: DictionaryType, mode: MatchingMode) { // {{{
 		if this == value {
 			return true
@@ -75,12 +75,57 @@ class DictionaryType extends Type {
 		return true
 	} // }}}
 	isMatching(value: Type, mode: MatchingMode) => false
+	isMorePreciseThan(type: Type) { // {{{
+		if type.isAny() {
+			return true
+		}
+
+		return false
+	} // }}}
 	isNullable() => false
 	isDictionary() => true
+	isExhaustive() => false
 	isSealable() => true
+	matchContentOf(type: Type) { // {{{
+		if type.isAny() || type.isDictionary() {
+			return true
+		}
+
+		if type is UnionType {
+			for const type in type.types() {
+				if this.matchContentOf(type) {
+					return true
+				}
+			}
+		}
+
+		return false
+	} // }}}
 	parameter() => AnyType.NullableUnexplicit
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
+	} // }}}
+	toQuote() { // {{{
+		auto str = '{'
+
+		let first = true
+		for const property, name of @properties {
+			if first {
+				first = false
+			}
+			else {
+				str += ', '
+			}
+
+			str += `\(name): \(property.toQuote())`
+		}
+
+		if first {
+			return 'Dictionary'
+		}
+		else {
+			return str + '}'
+		}
 	} // }}}
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
