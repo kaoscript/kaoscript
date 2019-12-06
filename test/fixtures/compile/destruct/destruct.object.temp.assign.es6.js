@@ -25,7 +25,7 @@ module.exports = function() {
 		if(lines === void 0 || lines === null) {
 			throw new TypeError("'lines' is not nullable");
 		}
-		let tokens, rules;
+		let tokens = null, rules = null;
 		for(let __ks_0 = 0, __ks_1 = lines.length, line; __ks_0 < __ks_1; ++__ks_0) {
 			line = lines[__ks_0];
 			({tokens, rules} = parse(line, rules));

@@ -28,7 +28,7 @@ module.exports = function() {
 		else if(!Type.isFunction(__ks_cb)) {
 			throw new TypeError("'callback' must be a function");
 		}
-		let d, e;
+		let d = null, e = null;
 		let __ks_2 = () => {
 			return __ks_cb(null, Operator.multiplication(d, e));
 		};

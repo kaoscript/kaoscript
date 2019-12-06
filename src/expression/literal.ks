@@ -72,6 +72,10 @@ class IdentifierLiteral extends Literal {
 				@scope.renameNext(@value, @line)
 			}
 
+			if @assignment == AssignmentType::Neither && variable.isLateInit() && variable.isImmutable() && !variable.isInitialized() {
+				SyntaxException.throwNotInitializedVariable(@value, this)
+			}
+
 			@declaredType = variable.getDeclaredType()
 			@realType = variable.getRealType()
 		}

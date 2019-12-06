@@ -69,6 +69,7 @@ class AssignmentOperatorExpression extends Expression {
 	isDeclararing() => false
 	isDeclararingVariable(name: String) => this.isDeclararing() && @left.isDeclararingVariable(name)
 	isExpectingType() => @left.isExpectingType()
+	isImmutable(variable) => variable.isImmutable()
 	isNullable() => @right.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
 	listAssignments(array) => @left.listAssignments(@right.listAssignments(array))
@@ -294,8 +295,18 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	prepare() { // {{{
 		super()
 
-		if @left is IdentifierLiteral && (@right is IdentifierLiteral || @right is BinaryOperatorTypeCasting) {
-			@ignorable = @left.name() == @right.name()
+		if @left is IdentifierLiteral {
+			if @right is IdentifierLiteral || @right is BinaryOperatorTypeCasting {
+				@ignorable = @left.name() == @right.name()
+			}
+
+			if !@ignorable {
+				const variable = @left.variable()
+
+				if variable.isLateInit() {
+					@parent.initializeVariable(variable, @right.type())
+				}
+			}
 		}
 
 		@type = @left.getDeclaredType()

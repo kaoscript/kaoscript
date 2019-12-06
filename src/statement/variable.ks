@@ -9,6 +9,7 @@ class VariableDeclaration extends Statement {
 		_immutable: Boolean			= false
 		_init
 		_initScope: Scope
+		_lateInit: Boolean			= false
 		_rebindable: Boolean		= true
 		_redeclared: Boolean		= false
 		_toDeclareAll: Boolean		= true
@@ -37,12 +38,15 @@ class VariableDeclaration extends Statement {
 	} // }}}
 	analyse() { // {{{
 		for const modifier in @data.modifiers {
-			if modifier.kind == ModifierKind::Immutable {
+			if modifier.kind == ModifierKind::AutoTyping {
+				@autotype = true
+			}
+			else if modifier.kind == ModifierKind::Immutable {
 				@immutable = true
 				@rebindable = false
 			}
-			else if modifier.kind == ModifierKind::AutoTyping {
-				@autotype = true
+			else if modifier.kind == ModifierKind::LateInit {
+				@lateInit = true
 			}
 		}
 
@@ -207,6 +211,7 @@ class VariableDeclaration extends Statement {
 		}
 	} // }}}
 	init() => @init
+	isAutoTyping() => @autotype
 	isAwait() => @await
 	isDeclararingVariable(name: String) { // {{{
 		for declarator in @declarators {
@@ -228,6 +233,7 @@ class VariableDeclaration extends Statement {
 	} // }}}
 	isExpectingType() => @declarators[0].isStronglyTyped()
 	isImmutable() => @immutable
+	isLateInit() => @lateInit
 	isUsingVariable(name) => @hasInit && @init.isUsingVariable(name)
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
@@ -272,37 +278,23 @@ class VariableDeclaration extends Statement {
 				line.done()
 			}
 		}
-		else if @toDeclareAll {
-			let line = fragments.newLine()
-
-			if @options.format.variables == 'es5' {
-				line.code('var ')
-			}
-			else if @rebindable || @redeclared {
-				line.code('let ')
-			}
-			else {
-				line.code('const ')
-			}
-
-			for declarator, index in @declarators {
-				line.code($comma) if index != 0
-
-				line.compile(declarator)
-			}
-
-			line.done()
-		}
 		else {
 			let line = fragments.newLine()
 
+			if @toDeclareAll {
+				if @options.format.variables == 'es5' {
+					line.code('var ')
+				}
+				else {
+					line.code('let ')
+				}
+			}
+
 			for declarator, index in @declarators {
 				line.code($comma) if index != 0
 
-				line.compile(declarator)
+				line.compile(declarator).code(' = null')
 			}
-
-			line.code(' = null')
 
 			line.done()
 		}
@@ -421,6 +413,10 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		@parent.defineVariables(@identifier)
 
 		@variable = @identifier.variable()
+
+		if @parent.isLateInit() && (@parent.isImmutable() || @parent.isAutoTyping()) {
+			@variable.flagLateInit()
+		}
 	} // }}}
 	prepare() { // {{{
 		if @data.type? {
@@ -432,7 +428,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 			@variable.setDeclaredType(@type).flagDefinitive()
 		}
-		else {
+		else if !@variable.isLateInit() {
 			if @parent.isImmutable() {
 				@type = @variable.getRealType()
 			}

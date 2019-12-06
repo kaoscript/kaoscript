@@ -304,6 +304,7 @@ const $compile = {
 
 		return expression
 	} // }}}
+	function(data, parent, scope = parent.scope()) => new FunctionBlock($ast.block(data), parent, scope)
 	statement(data, parent, scope = parent.scope()) { // {{{
 		if Attribute.conditional(data, parent) {
 			const clazz = $statements[data.kind] ?? $statements.default

@@ -7,7 +7,7 @@ module.exports = function() {
 		d.duncan = "murbella";
 		return d;
 	})();
-	let key, value;
+	let key = null, value = null;
 	for(key in likes) {
 		value = likes[key];
 	}

@@ -354,6 +354,12 @@ export class SyntaxException extends Exception {
 		throwNotEnoughStructFields(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`There is not enough fields to create the struct`, node)
 		} // }}}
+		throwNotFullyInitializedVariable(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" is only partially initialized`, node)
+		} // }}}
+		throwNotInitializedVariable(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" isn't initialized`, node)
+		} // }}}
 		throwNotNamedParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter must be named`, node)
 		} // }}}

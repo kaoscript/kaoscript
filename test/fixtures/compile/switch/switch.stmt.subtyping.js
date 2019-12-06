@@ -1,6 +1,6 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	let view;
+	let view = null;
 	if(Type.isInstance(view, UIImageView)) {
 		console.log("It's an image view");
 	}

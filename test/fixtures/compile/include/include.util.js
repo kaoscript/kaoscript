@@ -69,7 +69,7 @@ module.exports = function() {
 	var __ks_Array = {};
 	var __ks_Dictionary = {};
 	__ks_Array.__ks_func_append_0 = function(...args) {
-		let l, i, j, arg;
+		let l = null, i = null, j = null, arg = null;
 		for(let k = 0, __ks_0 = args.length; k < __ks_0; ++k) {
 			arg = Helper.array(args[k]);
 			if((l = arg.length) > 50000) {

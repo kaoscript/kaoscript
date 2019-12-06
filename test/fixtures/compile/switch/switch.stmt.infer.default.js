@@ -10,7 +10,7 @@ module.exports = function() {
 		if(z === void 0 || z === null) {
 			throw new TypeError("'z' is not nullable");
 		}
-		let x;
+		let x = null;
 		if(y === z) {
 			x = 42;
 		}

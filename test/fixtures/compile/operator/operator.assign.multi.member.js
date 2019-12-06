@@ -3,7 +3,7 @@ module.exports = function() {
 	function foobar() {
 		return 42;
 	}
-	let x;
+	let x = null;
 	let y = new Dictionary();
 	x = y.x = foobar();
 };

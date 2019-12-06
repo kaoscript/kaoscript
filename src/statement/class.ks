@@ -1619,7 +1619,7 @@ class ClassMethodDeclaration extends Statement {
 			@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
 		}
 
-		@block = $compile.block($ast.body(@data), this)
+		@block = $compile.function($ast.body(@data), this)
 	} // }}}
 	prepare() { // {{{
 		if !@analysed {
@@ -1832,7 +1832,7 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.analyse()
 		}
 
-		@block = $compile.block($ast.body(@data), this)
+		@block = $compile.function($ast.body(@data), this)
 	} // }}}
 	prepare() { // {{{
 		for parameter in @parameters {
@@ -2086,7 +2086,7 @@ class ClassDestructorDeclaration extends Statement {
 		@type = new ClassDestructorType(@data, this)
 	} // }}}
 	translate() { // {{{
-		@block = $compile.block($ast.body(@data), this)
+		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
 		@block.prepare()
 		@block.translate()

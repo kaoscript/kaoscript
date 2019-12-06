@@ -8,8 +8,10 @@ class Variable {
 		_definitive: Boolean		= false
 		// true: the value can be set only once
 		_immutable: Boolean			= true
+		_initialized: Boolean		= false
 		_name: String
 		_new: Boolean				= true
+		_lateInit: Boolean			= false
 		_predefined: Boolean		= false
 		_realType: Type				= Type.Null
 		_secureName: String
@@ -69,6 +71,8 @@ class Variable {
 		clone._declaredType = @declaredType
 		clone._realType = @realType
 		clone._definitive = @definitive
+		clone._initialized = @initialized
+		clone._lateInit = @lateInit
 
 		return clone
 	} // }}}
@@ -79,11 +83,17 @@ class Variable {
 
 		return this
 	} // }}}
+	flagLateInit() { // {{{
+		@lateInit = true
+		@initialized = false
+	} // }}}
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
 	getSecureName() => @secureName
 	isDefinitive() => @definitive
 	isImmutable() => @immutable
+	isInitialized() => @initialized
+	isLateInit() => @lateInit
 	isPredefined() => @predefined
 	isRenamed() => @name != @secureName
 	name() => @name
@@ -96,6 +106,8 @@ class Variable {
 	} // }}}
 	renameAs(@secureName)
 	setDeclaredType(@declaredType) { // {{{
+		@initialized = true
+
 		@declaredType = Type.toNamedType(@name, declaredType)
 
 		if @realType != Type.Null {

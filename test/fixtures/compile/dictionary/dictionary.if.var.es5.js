@@ -13,7 +13,7 @@ module.exports = function() {
 		if(c === void 0 || c === null) {
 			throw new TypeError("'c' is not nullable");
 		}
-		var x;
+		var x = null;
 		if(a === true) {
 			x = (function() {
 				var d = new Dictionary();

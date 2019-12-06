@@ -9,7 +9,7 @@ module.exports = function() {
 			throw new TypeError("'name' is not nullable");
 		}
 		let result = [];
-		let value;
+		let value = null;
 		for(let __ks_0 = 0, __ks_1 = this.length, item; __ks_0 < __ks_1; ++__ks_0) {
 			item = this[__ks_0];
 			if(Type.isValue(item) && Type.isValue(item[name]) ? (value = item[name], true) : false) {

@@ -28,7 +28,7 @@ module.exports = function() {
 		else if(!Type.isFunction(__ks_cb)) {
 			throw new TypeError("'callback' must be a function");
 		}
-		let d;
+		let d = null;
 		let __ks_1 = () => {
 			return __ks_cb(null, d);
 		};

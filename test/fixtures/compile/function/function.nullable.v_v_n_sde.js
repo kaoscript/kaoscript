@@ -30,7 +30,7 @@ module.exports = function() {
 		if(metadatas === void 0 || metadatas === null) {
 			throw new TypeError("'metadatas' is not nullable");
 		}
-		let name;
+		let name = null;
 		for(name in metadatas) {
 			let data = metadatas[name];
 			foobar(data.x, data.y, null, name);

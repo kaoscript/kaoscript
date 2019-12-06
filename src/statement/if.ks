@@ -4,6 +4,7 @@ class IfStatement extends Statement {
 		_cascade: Boolean				= false
 		_condition
 		_declared: Boolean				= false
+		_lateInitVariables				= {}
 		_variable
 		_whenFalseExpression			= null
 		_whenFalseScope: Scope?			= null
@@ -157,6 +158,24 @@ class IfStatement extends Statement {
 				}
 			}
 		}
+
+		for const map, name of @lateInitVariables {
+			let type
+
+			if map.true.initializable {
+				if map.false.initializable {
+					type = Type.union(@scope, map.true.type, map.false.type)
+				}
+				else {
+					type = map.true.type.setNullable(true)
+				}
+			}
+			else {
+				type = map.false.type.setNullable(true)
+			}
+
+			map.variable.setDeclaredType(type).flagDefinitive()
+		}
 	} // }}}
 	translate() { // {{{
 		if @declared {
@@ -184,6 +203,27 @@ class IfStatement extends Statement {
 			@assignments.pushUniq(...variables)
 		}
 	} // }}}
+	addInitializableVariable(variable, node) { // {{{
+		const name = variable.name()
+		const whenTrue = node == @whenTrueExpression
+
+		if const map = @lateInitVariables[name] {
+			map[whenTrue].initializable = true
+		}
+		else {
+			@lateInitVariables[name] = {
+				variable
+				[whenTrue]: {
+					initializable: true
+					type: null
+				}
+				[!whenTrue]: {
+					initializable: false
+					type: null
+				}
+			}
+		}
+	} // }}}
 	assignments() { // {{{
 		if @whenFalseExpression is IfStatement {
 			return [].concat(@assignments, @whenFalseExpression.assignments())
@@ -195,6 +235,39 @@ class IfStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@whenTrueExpression.checkReturnType(type)
 		@whenFalseExpression?.checkReturnType(type)
+	} // }}}
+	initializeVariable(variable, type, expression, node) { // {{{
+		const name = variable.name()
+
+		if variable.isInitialized() {
+			if variable.isImmutable() {
+				ReferenceException.throwImmutable(name, node)
+			}
+		}
+		else if const map = @lateInitVariables[name] {
+			const whenTrue = node == @whenTrueExpression
+
+			if map[whenTrue].type != null {
+				if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, node)
+				}
+				else if !type.matchContentOf(map[whenTrue].type) {
+					TypeException.throwInvalidAssignement(name, map[whenTrue].type, type, expression)
+				}
+			}
+			else {
+				map[whenTrue].type = type
+			}
+
+			const clone = variable.clone()
+
+			clone.setDeclaredType(type).flagDefinitive()
+
+			node.scope().replaceVariable(name, clone)
+		}
+		else {
+			ReferenceException.throwImmutable(name, expression)
+		}
 	} // }}}
 	isCascade() => @cascade
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()

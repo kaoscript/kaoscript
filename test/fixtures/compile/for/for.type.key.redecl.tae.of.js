@@ -6,7 +6,7 @@ module.exports = function() {
 		if(values === void 0 || values === null) {
 			throw new TypeError("'values' is not nullable");
 		}
-		let key;
+		let key = null;
 		for(key in values) {
 			console.log(key);
 		}

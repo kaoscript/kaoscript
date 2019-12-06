@@ -20,6 +20,7 @@ abstract class Statement extends AbstractNode {
 	addAssignments(variables) { // {{{
 		@assignments.pushUniq(...variables)
 	} // }}}
+	addInitializableVariable(variable, node) => @parent.addInitializableVariable(variable, this)
 	afterward(node) { // {{{
 		@afterwards.push(node)
 	} // }}}
@@ -48,6 +49,7 @@ abstract class Statement extends AbstractNode {
 	export(recipient)
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	includePath() => @parent.includePath()
+	initializeVariable(variable, type, expression, node) => @parent.initializeVariable(variable, type, expression, this)
 	isAwait() => false
 	isCascade() => false
 	isExit() => false

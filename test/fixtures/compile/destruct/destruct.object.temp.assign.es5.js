@@ -25,7 +25,7 @@ module.exports = function() {
 		if(lines === void 0 || lines === null) {
 			throw new TypeError("'lines' is not nullable");
 		}
-		var tokens, rules;
+		var tokens = null, rules = null;
 		for(var __ks_0 = 0, __ks_1 = lines.length, line; __ks_0 < __ks_1; ++__ks_0) {
 			line = lines[__ks_0];
 			var __ks_2;

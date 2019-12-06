@@ -570,6 +570,7 @@ export class Module {
 class ModuleBlock extends AbstractNode {
 	private {
 		_attributeDatas			= {}
+		_initializableVariables	= {}
 		_module
 		_statements: Array		= []
 	}
@@ -595,6 +596,10 @@ class ModuleBlock extends AbstractNode {
 			@scope.line(statement.line())
 
 			statement.prepare()
+		}
+
+		for const flag, name of @initializableVariables when flag {
+			NotImplementedException.throw(this)
 		}
 
 		const recipient = this.recipient()
@@ -625,12 +630,32 @@ class ModuleBlock extends AbstractNode {
 			statement.translate()
 		}
 	} // }}}
+	addInitializableVariable(variable, node) { // {{{
+		@initializableVariables[variable.name()] = true
+	} // }}}
 	directory() => @module.directory()
 	exportMacro(name, macro) { // {{{
 		@module.exportMacro(name, macro.toMetadata())
 	} // }}}
 	file() => @module.file()
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
+	initializeVariable(variable, type, expression, node) { // {{{
+		const name = variable.name()
+
+		if variable.isInitialized() {
+			if variable.isImmutable() {
+				ReferenceException.throwImmutable(name, expression)
+			}
+		}
+		else if @initializableVariables[name] {
+			variable.setDeclaredType(type).flagDefinitive()
+
+			delete @initializableVariables[name]
+		}
+		else {
+			ReferenceException.throwImmutable(name, expression)
+		}
+	} // }}}
 	isConsumedError(error): Boolean => @module.isBinary()
 	includePath() => null
 	module() => @module

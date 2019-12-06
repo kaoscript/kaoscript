@@ -212,9 +212,11 @@ class FunctionDeclaration extends Statement {
 			@variable.translate()
 		}
 	} // }}}
+	addInitializableVariable(variable, node)
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
 	} // }}}
+	initializeVariable(variable, type, expression, node)
 	name() => @name
 	toStatementFragments(fragments, mode) { // {{{
 		return unless @main
@@ -366,7 +368,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
 
-		@block = $compile.block($ast.body(@data), this)
+		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
 
 		@block.type(@type.returnType()).prepare()

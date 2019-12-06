@@ -1,4 +1,4 @@
 module.exports = function() {
-	let x, y;
+	let x = null, y = null;
 	var Type = require("@kaoscript/runtime")(x, y).Type;
 };

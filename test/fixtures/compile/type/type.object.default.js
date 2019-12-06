@@ -1,5 +1,5 @@
 module.exports = function() {
-	let x;
+	let x = null;
 	x = new Date();
 	class Foobar {
 		constructor() {

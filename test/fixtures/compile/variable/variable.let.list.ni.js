@@ -1,3 +1,3 @@
 module.exports = function() {
-	let a, b, c;
+	let a = null, b = null, c = null;
 };

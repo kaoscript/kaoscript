@@ -11,7 +11,7 @@ module.exports = function() {
 		else if(!Type.isArray(lines, String)) {
 			throw new TypeError("'lines' is not of type 'Array<String>'");
 		}
-		let line;
+		let line = null;
 		for(let i = 0, __ks_0 = lines.length; i < __ks_0; ++i) {
 			if((line = lines[i].trim()).length !== 0) {
 				if(line.startsWith("foobar")) {

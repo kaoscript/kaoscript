@@ -10,7 +10,7 @@ module.exports = function() {
 		else if(!Type.isBoolean(x)) {
 			throw new TypeError("'x' is not of type 'Boolean'");
 		}
-		let y;
+		let y = null;
 		if(x) {
 			y = "42 * x";
 		}

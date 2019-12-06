@@ -58,21 +58,21 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		let abex;
+		let abex = null;
 		if(x === true) {
 			abex = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
 		}
 		else {
 			abex = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly);
 		}
-		let abey;
+		let abey = null;
 		if(x === true) {
 			abey = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
 		}
 		else {
 			abey = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly);
 		}
-		let abez;
+		let abez = null;
 		if(x === true) {
 			abez = AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered;
 		}

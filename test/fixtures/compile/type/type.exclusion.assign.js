@@ -12,7 +12,7 @@ module.exports = function() {
 			}
 		}
 	}
-	let x;
+	let x = null;
 	x = new Foobar();
 	x = new Date();
 };

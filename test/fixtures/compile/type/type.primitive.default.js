@@ -1,5 +1,5 @@
 module.exports = function() {
-	let x;
+	let x = null;
 	x = 42;
 	x = true;
 	x = "foobar";

@@ -18,7 +18,7 @@ module.exports = function() {
 			else {
 				let stdout = __ks_0;
 				let disks = [];
-				let matches;
+				let matches = null;
 				for(let __ks_1 = 0, __ks_2 = __ks_String._im_lines(stdout), __ks_3 = __ks_2.length, line; __ks_1 < __ks_3; ++__ks_1) {
 					line = __ks_2[__ks_1];
 					let __ks_4;

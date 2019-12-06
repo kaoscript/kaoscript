@@ -1,6 +1,6 @@
 module.exports = function() {
 	function foobar() {
-		let x, y;
+		let x = null, y = null;
 		if(quxbaz(x = "foobar") && quxbaz(y = x) && quxbaz(x = 42)) {
 			console.log("" + x);
 			console.log(y);

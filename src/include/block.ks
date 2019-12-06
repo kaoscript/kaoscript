@@ -17,6 +17,11 @@ class Block extends AbstractNode {
 
 		@empty = @data.statements.length == 0
 	} // }}}
+	addInitializableVariable(variable, node) { // {{{
+		if !@scope.hasDeclaredVariable(variable.name()) {
+			@parent.addInitializableVariable(variable, this)
+		}
+	} // }}}
 	analyse() { // {{{
 		for statement in @data.statements {
 			@scope.line(statement.start.line)
@@ -106,6 +111,11 @@ class Block extends AbstractNode {
 			statement.checkReturnType(type)
 		}
 	} // }}}
+	initializeVariable(variable, type, expression, node) { // {{{
+		if !@scope.hasDeclaredVariable(variable.name()) {
+			@parent.initializeVariable(variable, type, expression, this)
+		}
+	} // }}}
 	isAwait() => @awaiting
 	isEmpty() => @empty
 	isExit() => @exit
@@ -148,4 +158,33 @@ class Block extends AbstractNode {
 		}
 	} // }}}
 	type(@type) => this
+}
+
+class FunctionBlock extends Block {
+	private {
+		_initializableVariables		= {}
+	}
+	addInitializableVariable(variable, node) { // {{{
+		@initializableVariables[variable.name()] = true
+	} // }}}
+	initializeVariable(variable, type, expression, node) { // {{{
+		const name = variable.name()
+
+		if variable.isInitialized() {
+			if variable.isImmutable() {
+				ReferenceException.throwImmutable(name, expression)
+			}
+			else if !type.matchContentOf(variable.getDeclaredType()) {
+				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, expression)
+			}
+		}
+		else if @initializableVariables[name] {
+			variable.setDeclaredType(type).flagDefinitive()
+
+			delete @initializableVariables[name]
+		}
+		else {
+			ReferenceException.throwImmutable(name, expression)
+		}
+	}
 }

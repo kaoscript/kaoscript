@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (Null) (line 12, file "fixtures/compile/variable/variable.lateinit.let.if.ts.se.ks")

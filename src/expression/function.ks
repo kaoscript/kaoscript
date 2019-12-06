@@ -34,7 +34,7 @@ class AnonymousFunctionExpression extends Expression {
 			parameter.translate()
 		}
 
-		@block = $compile.block($ast.body(@data), this)
+		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
 
 		@awaiting = @block.isAwait()
@@ -88,7 +88,7 @@ class ArrowFunctionExpression extends Expression {
 		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
-		@block = $compile.block($ast.body(@data), this)
+		@block = $compile.function($ast.body(@data), this)
 
 		@parameters = []
 		for parameter in @data.parameters {

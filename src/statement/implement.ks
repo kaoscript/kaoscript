@@ -1,5 +1,6 @@
 class ImplementDeclaration extends Statement {
 	private {
+		_newSealedClass	= false
 		_properties			= []
 		_sharingProperties	= {}
 		_type: NamedType
@@ -8,6 +9,14 @@ class ImplementDeclaration extends Statement {
 	analyse() { // {{{
 		if @variable !?= @scope.getVariable(@data.variable.name) {
 			ReferenceException.throwNotDefined(@data.variable.name, this)
+		}
+
+		if @variable.isPredefined() {
+			const type = @variable.getDeclaredType().clone().condense()
+
+			@variable = @scope.define(@variable.name(), true, type, this)
+
+			@newSealedClass = type.isSealed() && type.isExtendable()
 		}
 	} // }}}
 	prepare() { // {{{
@@ -89,6 +98,10 @@ class ImplementDeclaration extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
+		if @newSealedClass {
+			fragments.line(`var \(@type.getSealedName()) = {}`)
+		}
+
 		for property in @properties {
 			property.toFragments(fragments, Mode::None)
 		}
@@ -351,7 +364,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			parameter.analyse()
 		}
 
-		@block = $compile.block($ast.body(@data), this)
+		@block = $compile.function($ast.body(@data), this)
 	} // }}}
 	prepare() { // {{{
 		@scope.line(@data.start.line)
@@ -643,7 +656,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			parameter.analyse()
 		}
 
-		@block = $compile.block(body, this)
+		@block = $compile.function(body, this)
 	} // }}}
 	prepare() { // {{{
 		@scope.line(@data.start.line)
@@ -915,7 +928,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		@block = $compile.block($ast.body(@data), this)
+		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
 
 		@block.type(@type.returnType()).prepare()

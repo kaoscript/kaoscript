@@ -3,7 +3,7 @@ module.exports = function() {
 	var {Number, __ks_Number} = require("../_/_number.ks")();
 	var {String, __ks_String} = require("../_/_string.ks")();
 	function foobar() {
-		let x, y;
+		let x = null, y = null;
 		if(quxbaz("foobar") || quxbaz(x = "quxbaz")) {
 			console.log(x.toInt());
 			console.log(y.toInt());

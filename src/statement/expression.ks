@@ -37,7 +37,10 @@ class ExpressionStatement extends Statement {
 
 		for const name in variables {
 			if const variable = scope.getVariable(name) {
-				if variable.isImmutable() {
+				if variable.isLateInit() {
+					@parent.addInitializableVariable(variable, this)
+				}
+				else if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, this)
 				}
 
@@ -68,6 +71,7 @@ class ExpressionStatement extends Statement {
 		}
 	} // }}}
 	hasExceptions() => @expression.hasExceptions()
+	initializeVariable(variable, type) => @parent.initializeVariable(variable, type, this, this)
 	isAwait() => @expression.isAwait()
 	isExit() => @expression.isExit()
 	isJumpable() => true

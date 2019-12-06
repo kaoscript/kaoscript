@@ -6,7 +6,7 @@ module.exports = function() {
 		if(heroes === void 0 || heroes === null) {
 			throw new TypeError("'heroes' is not nullable");
 		}
-		let hero;
+		let hero = null;
 		for(let __ks_0 in heroes) {
 			hero = heroes[__ks_0];
 			console.log(hero.name);
