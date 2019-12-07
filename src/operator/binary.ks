@@ -42,6 +42,12 @@ class BinaryOperatorExpression extends Expression {
 	isNullable() => @left.isNullable() || @right.isNullable()
 	isNullableComputed() => (@left.isNullable() && @right.isNullable()) || @left.isNullableComputed() || @right.isNullableComputed()
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
+	listAssignments(array) { // {{{
+		@left.listAssignments(array)
+		@right.listAssignments(array)
+
+		return array
+	} // }}}
 	releaseReusable() { // {{{
 		@left.releaseReusable()
 		@right.releaseReusable()
@@ -492,6 +498,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	isComputed() => false
 	isNullable() => @left.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name)
+	listAssignments(array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@left)
@@ -579,6 +586,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)
+	listAssignments(array) => @left.listAssignments(array)
 	toFragments(fragments, mode) { // {{{
 		@trueType.toTestFragments(fragments, @left)
 	} // }}}
@@ -670,6 +678,7 @@ class BinaryOperatorTypeInequality extends Expression {
 
 		return inferables
 	} // }}}
+	listAssignments(array) => @left.listAssignments(array)
 	toFragments(fragments, mode) { // {{{
 		fragments.code('!')
 

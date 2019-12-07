@@ -14,6 +14,7 @@ class Literal extends Expression {
 	hasExceptions() => false
 	isComposite() => false
 	isUsingVariable(name) => false
+	listAssignments(array) => array
 	toFragments(fragments, mode) { // {{{
 		if @data {
 			fragments.code(@value, @data)

@@ -136,6 +136,13 @@ class ComparisonExpression extends Expression {
 
 		return false
 	} // }}}
+	listAssignments(array) { // {{{
+		for const operand in @operands {
+			operand.listAssignments(array)
+		}
+
+		return array
+	} // }}}
 	releaseReusable() { // {{{
 		if @composite {
 			@scope.releaseTempName(@reuseName)

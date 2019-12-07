@@ -19,6 +19,7 @@ class UnaryOperatorExpression extends Expression {
 	argument() => @argument
 	hasExceptions() => false
 	isUsingVariable(name) => @argument.isUsingVariable(name)
+	listAssignments(array) => @argument.listAssignments(array)
 }
 
 abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {

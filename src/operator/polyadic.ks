@@ -54,6 +54,13 @@ class PolyadicOperatorExpression extends Expression {
 
 		return false
 	} // }}}
+	listAssignments(array) { // {{{
+		for const operand in @operands {
+			operand.listAssignments(array)
+		}
+
+		return array
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		const test = this.isNullable() && !@tested
 		if test {

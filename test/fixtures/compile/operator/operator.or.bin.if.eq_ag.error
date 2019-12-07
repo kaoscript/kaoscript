@@ -1,0 +1,1 @@
+ReferenceException: Invalid left-hand side in assignment (line 2, file "fixtures/compile/operator/operator.or.bin.if.eq_ag.ks")
