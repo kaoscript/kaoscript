@@ -807,6 +807,7 @@ class AliasStatement extends Statement {
 		_name: String
 		_namedClass: ClassType
 		_identifier: IdentifierParameter
+		_instance: Boolean					= true
 		_parameter: Parameter
 		_sealed: Boolean					= false
 		_setter: Boolean					= false
@@ -845,6 +846,14 @@ class AliasStatement extends Statement {
 			else if @type ?= class.getPropertySetter(@name) {
 				@setter = true
 			}
+			else if @type ?= class.getClassVariable(@name) {
+				@variableName = @name
+				@instance = false
+			}
+			else if @type ?= class.getClassVariable(`_\(@name)`) {
+				@instance = false
+				@variableName = `_\(@name)`
+			}
 			else {
 				ReferenceException.throwNotDefinedMember(@name, @parameter)
 			}
@@ -863,8 +872,11 @@ class AliasStatement extends Statement {
 				fragments.newLine().code(`this.\(@name)(`).compile(@identifier).code(')').done()
 			}
 		}
-		else {
+		else if @instance {
 			fragments.newLine().code(`this.\(@variableName) = `).compile(@identifier).done()
+		}
+		else {
+			fragments.newLine().code(`\(@namedClass.name()).\(@variableName) = `).compile(@identifier).done()
 		}
 	} // }}}
 	type() => @type

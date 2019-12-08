@@ -1,0 +1,69 @@
+{
+  "aliens": [
+    "Any?",
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "exhaustive": true,
+      "init": 1,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "_value": {
+          "access": 2,
+          "type": "String"
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "value": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": false,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "throws": []
+          },
+          {
+            "id": 1,
+            "access": 4,
+            "sealed": false,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "String",
+                "min": 1,
+                "max": 1,
+                "default": 0
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

@@ -125,7 +125,10 @@ class FunctionType extends Type {
 		super(node.scope())
 
 		if data.type? {
-			@returnType = Type.fromAST(data.type, node)
+			if data.type.kind != NodeKind::ReturnTypeReference {
+				@returnType = Type.fromAST(data.type, node)
+			}
+
 			@missingReturn = false
 		}
 
@@ -656,6 +659,7 @@ class FunctionType extends Type {
 	} // }}}
 	restIndex() => @restIndex
 	returnType() => @returnType
+	returnType(@returnType) => this
 	throws() => @throws
 	toFragments(fragments, node) { // {{{
 		fragments.code('Function')

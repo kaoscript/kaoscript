@@ -321,6 +321,7 @@ class FunctionDeclaration extends Statement {
 
 class FunctionDeclarator extends AbstractNode {
 	private {
+		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
 		_exit: Boolean					= false
@@ -356,6 +357,17 @@ class FunctionDeclarator extends AbstractNode {
 		}
 
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+
+		@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
+
+		@block = $compile.function($ast.body(@data), this)
+		@block.analyse()
+
+		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
+
+		if @autoTyping {
+			@type.returnType(@block.getUnpreparedType())
+		}
 	} // }}}
 	translate() { // {{{
 		@scope.module().setLineOffset(@offset)
@@ -366,12 +378,14 @@ class FunctionDeclarator extends AbstractNode {
 			parameter.translate()
 		}
 
-		@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
+		if @autoTyping {
+			@block.prepare()
 
-		@block = $compile.function($ast.body(@data), this)
-		@block.analyse()
-
-		@block.type(@type.returnType()).prepare()
+			@type.returnType(@block.type())
+		}
+		else {
+			@block.type(@type.returnType()).prepare()
+		}
 
 		@block.translate()
 

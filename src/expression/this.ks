@@ -2,12 +2,13 @@ class ThisExpression extends Expression {
 	private {
 		_assignment: AssignmentType	= AssignmentType::Neither
 		_calling: Boolean			= false
-		_class: ClassType
+		_class: NamedType
 		_composite: Boolean			= false
 		_fragment: String
+		_instance: Boolean			= true
 		_name: String
 		_namesake: Boolean			= false
-		_type: Type
+		_type: Type?				= null
 	}
 	analyse() { // {{{
 		@name = @data.name.name
@@ -19,10 +20,7 @@ class ThisExpression extends Expression {
 				@calling = true
 			}
 			else if parent is ClassMethodDeclaration ||	parent is ClassVariableDeclaration {
-				if !parent.isInstance() {
-					SyntaxException.throwUnexpectedAlias(@name, this)
-				}
-
+				@instance = parent.isInstance()
 
 				@class = parent.parent().type()
 
@@ -58,66 +56,102 @@ class ThisExpression extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
-		const name = @scope.getVariable('this').getSecureName()
+		return unless @type == null
 
-		if @calling {
-			if @type ?= @class.type().getInstanceMethod(@name, @parent.arguments()) {
-				@fragment = `\(name).\(@name)`
-			}
-			else if @type ?= @class.type().getInstanceVariable(@name) {
-				@fragment = `\(name).\(@name)`
-			}
-			else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
-				if @type.isInitiatable() && @assignment == AssignmentType::Neither {
-					@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+		if @instance {
+			const name = @scope.getVariable('this').getSecureName()
+
+			if @calling {
+				if @type ?= @class.type().getInstantiableMethod(@name, @parent.arguments()) {
+					@fragment = `\(name).\(@name)`
+				}
+				else if @type ?= @class.type().getInstanceVariable(@name) {
+					@fragment = `\(name).\(@name)`
+				}
+				else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
+					if @type.isInitiatable() && @assignment == AssignmentType::Neither {
+						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+					}
+					else {
+						@fragment = `\(name)._\(@name)`
+					}
 				}
 				else {
-					@fragment = `\(name)._\(@name)`
+					ReferenceException.throwUndefinedInstanceField(@name, this)
 				}
 			}
 			else {
-				ReferenceException.throwNotDefinedField(@name, this)
+				if variable ?= @class.type().getInstanceVariable(@name) {
+					@fragment = `\(name).\(@name)`
+
+					@type = @scope.getChunkType(@fragment) ?? variable.type()
+				}
+				else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
+					if variable.isInitiatable() && @assignment == AssignmentType::Neither {
+						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+					}
+					else {
+						@fragment = `\(name)._\(@name)`
+					}
+
+					@type = @scope.getChunkType(@fragment) ?? variable.type()
+				}
+				else if @type ?= @class.type().getPropertyGetter(@name) {
+					if @namesake {
+						ReferenceException.throwLoopingAlias(@name, this)
+					}
+
+					@fragment = `\(name).\(@name)()`
+					@composite = true
+				}
+				else {
+					ReferenceException.throwUndefinedInstanceField(@name, this)
+				}
 			}
 		}
 		else {
-			if variable ?= @class.type().getInstanceVariable(@name) {
-				@fragment = `\(name).\(@name)`
+			const name = @class.name()
 
-				@type = @scope.getChunkType(@fragment) ?? variable.type()
-			}
-			else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
-				if variable.isInitiatable() && @assignment == AssignmentType::Neither {
-					@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
-				}
-				else {
-					@fragment = `\(name)._\(@name)`
-				}
-
-				@type = @scope.getChunkType(@fragment) ?? variable.type()
-			}
-			else if @type ?= @class.type().getPropertyGetter(@name) {
-				if @namesake {
-					ReferenceException.throwLoopingAlias(@name, this)
-				}
-
-				@fragment = `\(name).\(@name)()`
-				@composite = true
+			if @calling {
+				NotImplementedException.throw(this)
 			}
 			else {
-				ReferenceException.throwNotDefinedField(@name, this)
+				if variable ?= @class.type().getClassVariable(@name) {
+					@fragment = `\(name).\(@name)`
+
+					@type = @scope.getChunkType(@fragment) ?? variable.type()
+				}
+				else if variable ?= @class.type().getClassVariable(`_\(@name)`) {
+					@fragment = `\(name)._\(@name)`
+
+					@type = @scope.getChunkType(@fragment) ?? variable.type()
+				}
+				else {
+					ReferenceException.throwUndefinedClassField(@name, this)
+				}
 			}
 		}
 	} // }}}
 	translate()
 	getDeclaredType() { // {{{
 		if !@calling {
-			if variable ?= @class.type().getInstanceVariable(@name) {
-				return variable.type()
+			if @instance {
+				if variable ?= @class.type().getInstanceVariable(@name) {
+					return variable.type()
+				}
+				else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
+					return variable.type()
+				}
 			}
-			else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
-				return variable.type()
+			else {
+				NotImplementedException.throw(this)
 			}
 		}
+
+		return @type
+	} // }}}
+	getUnpreparedType() { // {{{
+		this.prepare()
 
 		return @type
 	} // }}}
@@ -125,7 +159,7 @@ class ThisExpression extends Expression {
 	isComposite() => @composite
 	isExpectingType() => true
 	isInferable() => !@calling && !@composite
-	isUsingVariable(name) => name == 'this'
+	isUsingVariable(name) => @instance && name == 'this'
 	listAssignments(array) => array
 	path() => @fragment
 	setAssignment(@assignment)

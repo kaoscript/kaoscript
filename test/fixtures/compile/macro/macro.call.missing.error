@@ -1,1 +1,1 @@
-SyntaxException: The function "times_five" can't be found (line 3, file "fixtures/compile/macro/macro.call.missing.ks")
+ReferenceException: The function "times_five" can't be found (line 3, file "fixtures/compile/macro/macro.call.missing.ks")

@@ -267,6 +267,12 @@ class ClassDeclaration extends Statement {
 			@instanceVariableScope.define('super', true, superType, true, this)
 		}
 
+		for const variable, name of @classVariables {
+			variable.prepare()
+
+			@class.addClassVariable(name, variable.type())
+		}
+
 		for const methods, name of @classMethods {
 			const async = @extendsType?.type().isAsyncClassMethod(name) ?? methods[0].type().isAsync()
 
@@ -341,12 +347,6 @@ class ClassDeclaration extends Statement {
 			@destructor.prepare()
 
 			@class.addDestructor()
-		}
-
-		for const variable, name of @classVariables {
-			variable.prepare()
-
-			@class.addClassVariable(name, variable.type())
 		}
 
 		if @extending && !@abstract && !Dictionary.isEmpty(notImplemented = @class.listMissingAbstractMethods()) {
@@ -1434,8 +1434,9 @@ class ClassMethodDeclaration extends Statement {
 		_abstract: Boolean				= false
 		_aliases: Array					= []
 		_analysed: Boolean				= false
+		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
-		_block: Block
+		_block: FunctionBlock
 		_exit: Boolean					= false
 		_instance: Boolean				= true
 		_internalName: String
@@ -1622,80 +1623,114 @@ class ClassMethodDeclaration extends Statement {
 		@block = $compile.function($ast.body(@data), this)
 	} // }}}
 	prepare() { // {{{
-		if !@analysed {
-			@parent.updateMethodScope(this)
+		return if @analysed
 
-			for const parameter in @parameters {
-				parameter.prepare()
+		@parent.updateMethodScope(this)
+
+		for const parameter in @parameters {
+			parameter.prepare()
+		}
+
+		if @override {
+			unless @parent.isExtending() {
+				SyntaxException.throwNoSuitableOverride(@parent.type(), @name, @parameters, this)
 			}
 
-			if @override {
-				unless @parent.isExtending() {
-					SyntaxException.throwNoSuitableOverride(@parent.type(), @name, @parameters, this)
-				}
+			const superclass = @parent.extends().type()
 
-				const superclass = @parent.extends().type()
+			if const method = superclass.getInstantiableMethod(@name, @parameters) {
+				@type = method.type()
 
-				if const method = superclass.getInstanceMethod(@name, @parameters) {
-					@type = method.type()
+				const parameters = @type.parameters()
 
-					const parameters = @type.parameters()
-
-					for const parameter, index in @parameters {
-						parameter.type(parameters[index])
-					}
-				}
-				else if const method = superclass.getAbstractMethod(@name, @parameters) {
-					@type = method.type()
-
-					const parameters = @type.parameters()
-
-					for const parameter, index in @parameters {
-						parameter.type(parameters[index])
-					}
-				}
-				else {
-					SyntaxException.throwNoSuitableOverride(@parent.extends(), @name, @parameters, this)
+				for const parameter, index in @parameters {
+					parameter.type(parameters[index])
 				}
 			}
 			else {
-				const arguments = [parameter.type() for const parameter in @parameters]
+				SyntaxException.throwNoSuitableOverride(@parent.extends(), @name, @parameters, this)
+			}
+		}
+		else {
+			const arguments = [parameter.type() for const parameter in @parameters]
 
-				@type = new ClassMethodType(arguments, @data, this)
+			@type = new ClassMethodType(arguments, @data, this)
 
-				if @parent.isExtending() {
-					const superclass = @parent.extends().type()
+			if @parent.isExtending() {
+				const superclass = @parent.extends().type()
 
-					if const method = superclass.getInstanceMethod(@name, @parameters) ?? superclass.getAbstractMethod(@name, @type) {
-						if @data.type? {
-							if !@type.returnType().isInstanceOf(method.returnType()) {
-								SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
-							}
+				if const method = superclass.getInstantiableMethod(@name, @parameters) {
+					if @data.type? {
+						if !@type.returnType().isInstanceOf(method.returnType()) {
+							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
 						}
-						else {
-							@type.returnType(method.returnType())
-						}
+					}
+					else {
+						@type.returnType(method.returnType())
 					}
 				}
 			}
-
-			@analysed = true
-		}
-	} // }}}
-	translate() { // {{{
-		for parameter in @parameters {
-			parameter.translate()
 		}
 
 		@block.analyse(@aliases)
 
 		@block.analyse()
 
-		if !@abstract {
-			@block.type(@type.returnType())
+		if @data.type?.kind == NodeKind::ReturnTypeReference {
+			switch @data.type.value.kind {
+				NodeKind::Identifier => {
+					if @data.type.value.name == 'auto' {
+						if !@override {
+							@type.returnType(@block.getUnpreparedType())
+
+							@autoTyping = true
+						}
+					}
+					else {
+						if !@override {
+							@type.returnType(@parent.type().reference(@scope))
+						}
+
+						const return = $compile.expression(@data.type.value, this)
+
+						return.analyse()
+
+						@block.addReturn(return)
+					}
+				}
+				NodeKind::ThisExpression => {
+					const return = $compile.expression(@data.type.value, this)
+
+					return.analyse()
+
+					if !@override {
+						@type.returnType(return.getUnpreparedType())
+					}
+
+					@block.addReturn(return)
+				}
+			}
 		}
 
-		@block.prepare()
+		@analysed = true
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+
+		if @autoTyping {
+			@block.prepare()
+
+			@type.returnType(@block.type())
+		}
+		else {
+			if !@abstract {
+				@block.type(@type.returnType())
+			}
+
+			@block.prepare()
+		}
 
 		@block.translate()
 

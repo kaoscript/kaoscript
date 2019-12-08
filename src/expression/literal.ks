@@ -85,6 +85,14 @@ class IdentifierLiteral extends Literal {
 		recipient.export(@value, this)
 	} // }}}
 	getDeclaredType() => @declaredType
+	getUnpreparedType() { // {{{
+		if @isVariable {
+			return @scope.getVariable(@value, @line).getRealType()
+		}
+		else {
+			return @realType
+		}
+	} // }}}
 	isAssignable() => true
 	isDeclarable() => true
 	isDeclararingVariable(name: String) => @value == name
@@ -140,6 +148,7 @@ class NumberLiteral extends Literal {
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, data.value)
 	} // }}}
+	getUnpreparedType() => this.type()
 	isUsingVariable(name) => false
 	type() => @scope.reference('Number')
 }
@@ -148,5 +157,6 @@ class StringLiteral extends Literal {
 	constructor(data, parent, scope = parent.scope()) { // {{{
 		super(data, parent, scope, $quote(data.value))
 	} // }}}
+	getUnpreparedType() => this.type()
 	type() => @scope.reference('String')
 }

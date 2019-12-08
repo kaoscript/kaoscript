@@ -319,6 +319,7 @@ class ImplementClassFieldDeclaration extends Statement {
 class ImplementClassMethodDeclaration extends Statement {
 	private {
 		_aliases: Array					= []
+		_autoTyping: Boolean			= false
 		_block: Block
 		_class: ClassType
 		_classRef: ReferenceType
@@ -453,17 +454,60 @@ class ImplementClassMethodDeclaration extends Statement {
 				}
 			}
 		}
+
+		@block.analyse(@aliases)
+
+		@block.analyse()
+
+		if @data.type?.kind == NodeKind::ReturnTypeReference {
+			switch @data.type.value.kind {
+				NodeKind::Identifier => {
+					if @data.type.value.name == 'auto' {
+						if !@override {
+							@type.returnType(@block.getUnpreparedType())
+
+							@autoTyping = true
+						}
+					}
+					else {
+						if !@override {
+							@type.returnType(@parent.type().reference(@scope))
+						}
+
+						const return = $compile.expression(@data.type.value, this)
+
+						return.analyse()
+
+						@block.addReturn(return)
+					}
+				}
+				NodeKind::ThisExpression => {
+					const return = $compile.expression(@data.type.value, this)
+
+					return.analyse()
+
+					if !@override {
+						@type.returnType(return.getUnpreparedType())
+					}
+
+					@block.addReturn(return)
+				}
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
 
-		@block.analyse(@aliases)
+		if @autoTyping {
+			@block.prepare()
 
-		@block.analyse()
-
-		@block.type(@type.returnType()).prepare()
+			@type.returnType(@block.type())
+		}
+		else {
+			@block.type(@type.returnType()).prepare()
+		}
 
 		@block.translate()
 	} // }}}
@@ -884,6 +928,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 
 class ImplementNamespaceFunctionDeclaration extends Statement {
 	private {
+		_autoTyping: Boolean					= false
 		_block: Block
 		_namespace: NamespaceType
 		_namespaceRef: ReferenceType
@@ -922,16 +967,29 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@namespace.addProperty(@data.name.name, property)
 
 		@type = property.type()
+
+		@block = $compile.function($ast.body(@data), this)
+		@block.analyse()
+
+		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
+
+		if @autoTyping {
+			@type.returnType(@block.getUnpreparedType())
+		}
 	} // }}}
 	translate() { // {{{
 		for const parameter in @parameters {
 			parameter.translate()
 		}
 
-		@block = $compile.function($ast.body(@data), this)
-		@block.analyse()
+		if @autoTyping {
+			@block.prepare()
 
-		@block.type(@type.returnType()).prepare()
+			@type.returnType(@block.type())
+		}
+		else {
+			@block.type(@type.returnType()).prepare()
+		}
 
 		@block.translate()
 	} // }}}

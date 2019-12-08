@@ -19,6 +19,9 @@ class ReturnStatement extends Statement {
 			@function = parent
 		}
 	} // }}}
+	constructor(@value, @parent) { // {{{
+		super(value.data(), parent, parent.scope())
+	} // }}}
 	analyse() { // {{{
 		if @data.value? {
 			@value = $compile.expression(@data.value, this)
@@ -78,6 +81,7 @@ class ReturnStatement extends Statement {
 		}
 	} // }}}
 	hasExceptions() => @exceptions
+	getUnpreparedType() => @value.getUnpreparedType()
 	isAwait() => @await
 	isExit() => true
 	isExpectingType() => true

@@ -184,7 +184,7 @@ class CallExpression extends Expression {
 					}
 				}
 				else {
-					SyntaxException.throwUndefinedFunction(@data.callee.name, this)
+					ReferenceException.throwUndefinedFunction(@data.callee.name, this)
 				}
 			}
 			else {
@@ -531,10 +531,10 @@ class CallExpression extends Expression {
 				this.makeMemberCalleeFromReference(value.type())
 			}
 			is ClassType => {
-				if value.hasInstanceMethod(@property) {
+				if value.hasInstantiableMethod(@property) {
 					const arguments = [argument.type() for const argument in @arguments]
 
-					const assessment = value.getInstanceAssessment(@property)
+					const assessment = value.getInstantiableAssessment(@property)
 
 					const methods = Router.matchArguments(assessment, arguments)
 
@@ -581,18 +581,11 @@ class CallExpression extends Expression {
 				{
 					this.addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
 				}
+				else if reference.isExhaustive(this) {
+					ReferenceException.throwNotFoundMethod(@property, reference.name(), this)
+				}
 				else {
-					const arguments = [argument.type() for const argument in @arguments]
-
-					if value.hasAbstractMethod(@property, arguments) {
-						this.addCallee(new DefaultCallee(@data, @object, null, this))
-					}
-					else if reference.isExhaustive(this) {
-						ReferenceException.throwNotFoundMethod(@property, reference.name(), this)
-					}
-					else {
-						this.addCallee(new DefaultCallee(@data, @object, null, this))
-					}
+					this.addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is FunctionType => {

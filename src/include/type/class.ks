@@ -193,18 +193,28 @@ class ClassType extends Type {
 		} // }}}
 	}
 	addAbstractMethod(name: String, type: ClassMethodType): Number { // {{{
-		let index: Number = 0
+		@sequences.instanceMethods[name] ??= 0
+
+		let id = type.identifier()
+		if id == -1 {
+			id = @sequences.instanceMethods[name]++
+
+			type.identifier(id)
+		}
+		else {
+			if id >= @sequences.instanceMethods[name] {
+				@sequences.instanceMethods[name] = id + 1
+			}
+		}
 
 		if @abstractMethods[name] is Array {
-			index = @abstractMethods[name].length
-
 			@abstractMethods[name].push(type)
 		}
 		else {
 			@abstractMethods[name] = [type]
 		}
 
-		return index
+		return id
 	} // }}}
 	addClassMethod(name: String, type: ClassMethodType): Number? { // {{{
 		if @classMethods[name] is not Array {
@@ -272,10 +282,7 @@ class ClassType extends Type {
 		@destructors++
 	} // }}}
 	addInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if @instanceMethods[name] is not Array {
-			@instanceMethods[name] = []
-			@sequences.instanceMethods[name] = 0
-		}
+		@sequences.instanceMethods[name] ??= 0
 
 		let id = type.identifier()
 		if id == -1 {
@@ -289,7 +296,12 @@ class ClassType extends Type {
 			}
 		}
 
-		@instanceMethods[name].push(type)
+		if @instanceMethods[name] is Array {
+			@instanceMethods[name].push(type)
+		}
+		else {
+			@instanceMethods[name] = [type]
+		}
 
 		if @alteration {
 			type.flagAlteration()
@@ -672,6 +684,9 @@ class ClassType extends Type {
 		if type.isAlien() || type.isHybrid() {
 			@hybrid = true
 		}
+
+		@sequences.classMethods = Dictionary.clone(type._sequences.classMethods)
+		@sequences.instanceMethods = Dictionary.clone(type._sequences.instanceMethods)
 	} // }}}
 	filterAbstractMethods(abstractMethods) { // {{{
 		if @extending {
@@ -786,6 +801,13 @@ class ClassType extends Type {
 			return @classVariables[name] ?? Type.Any
 		}
 	} // }}}
+	getClassVariable(name: String) { // {{{
+		if const variable = @classVariables[name] {
+			return variable
+		}
+
+		return null
+	} // }}}
 	getHierarchy(name) { // {{{
 		if @extending {
 			let class = this.extends()
@@ -802,46 +824,26 @@ class ClassType extends Type {
 			return [name]
 		}
 	} // }}}
-	getInstanceAssessment(name: String) { // {{{
-		if @instanceMethods[name] is not Array {
-			if @extending {
-				return @extends.type().getInstanceAssessment(name)
-			}
-			else {
-				return null
-			}
-		}
-
-		if @instanceAssessments[name] is not Dictionary {
-			const methods = [...@instanceMethods[name]]
-
-			let that = this
-			while that.isExtending() {
-				that = that.extends().type()
-
-				if const m = that.listInstanceMethods(name) {
-					for const method in m {
-						method.pushTo(methods)
-					}
-				}
-			}
-
-			@instanceAssessments[name] = Router.assess(methods, false)
-		}
-
-		return @instanceAssessments[name]
-	} // }}}
-	getInstanceMethod(name: String, arguments: Array) { // {{{
-		if @instanceMethods[name] is Array {
-			for method in @instanceMethods[name] {
+	getInstantiableMethod(name: String, arguments: Array) { // {{{
+		if const methods = @instanceMethods[name] {
+			for method in methods {
 				if method.matchArguments(arguments) {
 					return method
 				}
 			}
 		}
+		if @abstract {
+			if const methods = @abstractMethods[name] {
+				for method in methods {
+					if method.matchArguments(arguments) {
+						return method
+					}
+				}
+			}
+		}
 
 		if @extending {
-			return @extends.type().getInstanceMethod(name, arguments)
+			return @extends.type().getInstantiableMethod(name, arguments)
 		}
 		else {
 			return null
@@ -874,6 +876,28 @@ class ClassType extends Type {
 		}
 
 		return null
+	} // }}}
+	getInstantiableAssessment(name: String) { // {{{
+		if const assessment = @instanceAssessments[name] {
+			return assessment
+		}
+
+		const methods = this.listInstantiableMethods(name)
+
+		let that = this
+		while that.isExtending() {
+			that = that.extends().type()
+
+			for const method in that.listInstantiableMethods(name) {
+				method.pushTo(methods)
+			}
+		}
+
+		const assessment = Router.assess(methods, false)
+
+		@instanceAssessments[name] = assessment
+
+		return assessment
 	} // }}}
 	getProperty(name: String) => this.getClassProperty(name)
 	getPropertyGetter(name: String) { // {{{
@@ -977,6 +1001,20 @@ class ClassType extends Type {
 
 		if @extending {
 			return @extends.type().hasInstanceVariable(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
+	hasInstantiableMethod(name) { // {{{
+		if @instanceMethods[name] is Array {
+			return true
+		}
+		else if @abstract && @abstractMethods[name] is Array {
+			return true
+		}
+		else if @extending {
+			return @extends.type().hasInstantiableMethod(name)
 		}
 		else {
 			return false
@@ -1188,6 +1226,21 @@ class ClassType extends Type {
 		}
 
 		return null
+	} // }}}
+	listInstantiableMethods(name: String) { // {{{
+		const methods = []
+
+		if const functions = @instanceMethods[name] {
+			methods.push(...functions)
+		}
+
+		if @abstract {
+			if const functions = @abstractMethods[name] {
+				methods.push(...functions)
+			}
+		}
+
+		return methods
 	} // }}}
 	listMatchingConstructors(type: FunctionType, mode: MatchingMode) { // {{{
 		const results: Array = []

@@ -23,7 +23,7 @@ class Greetings extends AbstractGreetings {
 		super()
 	}
 
-	greet(name, message = @message) => `\(message) My name is \(name).`
+	greet(name, message = @message): String => `\(message) My name is \(name).`
 }
 
 const greetings = new Greetings('John')

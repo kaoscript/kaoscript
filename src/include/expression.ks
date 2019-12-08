@@ -4,6 +4,7 @@ abstract class Expression extends AbstractNode {
 	}
 	acquireReusable(acquire)
 	getDeclaredType() => this.type()
+	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
 	hasExceptions() => true
 	// types after of the expression block

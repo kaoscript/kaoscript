@@ -206,9 +206,6 @@ export class ReferenceException extends Exception {
 		throwNotDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
 		} // }}}
-		throwNotDefinedField(name, node) ~ ReferenceException { // {{{
-			throw new ReferenceException(`Field "\(name)" is not defined`, node)
-		} // }}}
 		throwNotDefinedEnumElement(element, enum, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Element "\(element)" is not defined in enum "\(enum)"`, node)
 		} // }}}
@@ -232,6 +229,15 @@ export class ReferenceException extends Exception {
 		} // }}}
 		throwNullExpression(expression, node) ~ TypeException { // {{{
 			throw new ReferenceException(`The expression \(expression.toQuote(true)) is "null"`, node)
+		} // }}}
+		throwUndefinedClassField(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The class field "\(name)" isn't defined`, node)
+		} // }}}
+		throwUndefinedInstanceField(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The instance field "\(name)" isn't defined`, node)
+		} // }}}
+		throwUndefinedFunction(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The function "\(name)" can't be found`, node)
 		} // }}}
 	}
 }
@@ -386,9 +392,6 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwUnexpectedAlias(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Alias "@\(name)" is expected in an instance method/variable`, node)
-		} // }}}
-		throwUndefinedFunction(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`The function "\(name)" can't be found`, node)
 		} // }}}
 		throwUnmatchedMacro(name, node, data) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The macro "\(name)" can't be matched`, node, data)

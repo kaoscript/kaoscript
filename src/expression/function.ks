@@ -1,5 +1,6 @@
 class AnonymousFunctionExpression extends Expression {
 	private {
+		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
 		_exit: Boolean					= false
@@ -28,20 +29,34 @@ class AnonymousFunctionExpression extends Expression {
 		}
 
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+
+		@block = $compile.function($ast.body(@data), this)
+		@block.analyse()
+
+		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
+
+		if @autoTyping {
+			@type.returnType(@block.getUnpreparedType())
+		}
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
 
-		@block = $compile.function($ast.body(@data), this)
-		@block.analyse()
+		if @autoTyping {
+			@block.prepare()
 
-		@awaiting = @block.isAwait()
-
-		@block.prepare()
+			@type.returnType(@block.type())
+		}
+		else {
+			@block.type(@type.returnType()).prepare()
+		}
 
 		@block.translate()
+
+		@awaiting = @block.isAwait()
+		@exit = @block.isExit()
 	} // }}}
 	isComputed() => true
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
@@ -78,6 +93,7 @@ class AnonymousFunctionExpression extends Expression {
 
 class ArrowFunctionExpression extends Expression {
 	private {
+		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
 		_exit: Boolean					= false
@@ -103,14 +119,29 @@ class ArrowFunctionExpression extends Expression {
 		}
 
 		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+
+		@block.analyse()
+
+		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
+
+		if @autoTyping {
+			@type.returnType(@block.getUnpreparedType())
+		}
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
 			parameter.translate()
 		}
 
-		@block.analyse()
-		@block.prepare()
+		if @autoTyping {
+			@block.prepare()
+
+			@type.returnType(@block.type())
+		}
+		else {
+			@block.type(@type.returnType()).prepare()
+		}
+
 		@block.translate()
 
 		@awaiting = @block.isAwait()

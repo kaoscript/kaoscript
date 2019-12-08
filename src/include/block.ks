@@ -86,13 +86,11 @@ class Block extends AbstractNode {
 			else if @type.isAny() && !@type.isExplicit() {
 				// do nothing
 			}
+			else if @statements.length == 0 {
+				TypeException.throwExpectedReturnedValue(this)
+			}
 			else {
-				if @statements.length == 0 {
-					TypeException.throwExpectedReturnedValue(this)
-				}
-				else {
-					@statements[@statements.length - 1].checkReturnType(@type)
-				}
+				@statements[@statements.length - 1].checkReturnType(@type)
 			}
 		}
 	} // }}}
@@ -109,6 +107,22 @@ class Block extends AbstractNode {
 	checkReturnType(type: Type) { // {{{
 		for const statement in @statements {
 			statement.checkReturnType(type)
+		}
+	} // }}}
+	getUnpreparedType() { // {{{
+		const types = []
+
+		for const statement in @statements {
+			if statement.isExit() {
+				types.push(statement.getUnpreparedType())
+			}
+		}
+
+		if types.length == 0 {
+			return Type.Never
+		}
+		else {
+			return Type.union(@scope, ...types)
 		}
 	} // }}}
 	initializeVariable(variable, type, expression, node) { // {{{
@@ -157,6 +171,26 @@ class Block extends AbstractNode {
 			statement.toFragments(fragments, Mode::None)
 		}
 	} // }}}
+	type() { // {{{
+		if @type == null {
+			if @exit {
+				const types = []
+
+				for const statement in @statements {
+					if statement.isExit() {
+						types.push(statement.type())
+					}
+				}
+
+				@type = Type.union(@scope, ...types)
+			}
+			else {
+				@type = Type.Never
+			}
+		}
+
+		return @type
+	} // }}}
 	type(@type) => this
 }
 
@@ -166,6 +200,11 @@ class FunctionBlock extends Block {
 	}
 	addInitializableVariable(variable, node) { // {{{
 		@initializableVariables[variable.name()] = true
+	} // }}}
+	addReturn(value: Expression) { // {{{
+		if !@exit || !@statements.last().isExit() {
+			@statements.push(new ReturnStatement(value, this))
+		}
 	} // }}}
 	initializeVariable(variable, type, expression, node) { // {{{
 		const name = variable.name()
@@ -186,5 +225,5 @@ class FunctionBlock extends Block {
 		else {
 			ReferenceException.throwImmutable(name, expression)
 		}
-	}
+	} // }}}
 }
