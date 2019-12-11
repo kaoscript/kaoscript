@@ -36,12 +36,6 @@ namespace Router {
 	}
 
 	namespace Bounded { // {{{
-		/* struct BoundedGroup extends Group {
-			isNode: Boolean			= false
-			rows: Dictionary<Row>	= {}
-			rowCount: Number		= 0
-		} */
-
 		struct UniqueRow {
 			index: Number
 			type: Type
@@ -55,9 +49,27 @@ namespace Router {
 		}
 
 		struct Tree {
-			columns: Dictionary			= {}
-			indexes: Dictionary<Array>	= {}
-			order: Array<String>		= []
+			columns: Dictionary<TreeNode>	= {}
+			indexes: Dictionary<Array>		= {}
+			order: Array<String>			= []
+		}
+
+		struct TreeNode {
+			index: Number
+			type: Type
+			isNode: Boolean
+			weight: Number
+			isFilter: Boolean?		= null
+			order: Array<String>	= []
+		}
+
+		struct TreeLeaf extends TreeNode {
+			function: FunctionType
+		}
+
+		struct TreeBranch extends TreeNode {
+			rows: Array<Row>
+			columns: Dictionary<TreeNode>	= {}
 		}
 
 		func addMatchingFilter(matchingFilters: Array<RouteFilter>, min: Number, max: Number, filter: Filter): Void { // {{{
@@ -69,11 +81,11 @@ namespace Router {
 				}
 			}
 
-			matchingFilters.push({
+			matchingFilters.push(RouteFilter(
 				min: min
 				max: max
 				filters: [filter]
-			})
+			))
 		} // }}}
 
 		func buildFilters(filters: Array<Filter>, matchingFilters: Array<RouteFilter>, node, index: Number, max: Number, routes: Array<Route>): Void { // {{{
@@ -205,7 +217,9 @@ namespace Router {
 
 				if group.n > 1 {
 					for const node of tree.columns {
-						buildNode(node, 1, group.n, tree.indexes)
+						if node is TreeBranch {
+							buildNode(node, 1, group.n, tree.indexes)
+						}
 					}
 				}
 
@@ -231,8 +245,8 @@ namespace Router {
 			}
 		} // }}}
 
-		func buildNode(node, index: Number, max: Number, indexes: Dictionary<Array>): Void { // {{{
-			const usages = {}
+		func buildNode(node: TreeBranch, index: Number, max: Number, indexes: Dictionary<Array>): Void { // {{{
+			const usages: Dictionary<Number> = {}
 			for const row in node.rows {
 				const index = row.function.index()
 
@@ -250,14 +264,13 @@ namespace Router {
 						NotSupportedException.throw()
 					}
 
-					node.columns[hash] = {
+					node.columns[hash] = TreeLeaf(
 						index: next
 						type
 						function: row.function
 						isNode: false
 						weight: 1 / usages[row.function.index()]
-						isFilter: null
-					}
+					)
 
 					indexes[index].push(node.columns[hash])
 				}
@@ -270,26 +283,27 @@ namespace Router {
 					const hash = type.hashCode()
 
 					if !?node.columns[hash] {
-						node.columns[hash] = {
+						node.columns[hash] = TreeBranch(
 							index: next
 							type
 							rows: [row]
 							columns: {}
 							isNode: true
 							weight: 1 / usages[row.function.index()]
-							isFilter: null
-						}
+						)
 
 						indexes[index].push(node.columns[hash])
 					}
 					else {
-						node.columns[hash].rows.push(row)
-						node.columns[hash].weight += 1 / usages[row.function.index()]
+						const branch: TreeBranch = node.columns[hash]!!
+
+						branch.rows.push(row)
+						branch.weight += 1 / usages[row.function.index()]
 					}
 				}
 
 				for const child of node.columns {
-					buildNode(child, next, max, indexes)
+					buildNode(child!!, next, max, indexes)
 				}
 
 				node.order = sortNodes(node.columns)
@@ -336,7 +350,7 @@ namespace Router {
 				tree.indexes[i] = []
 			}
 
-			const usages = {}
+			const usages: Dictionary<Number> = {}
 			for const key in keys {
 				const index = rows[key].function.index()
 
@@ -353,14 +367,13 @@ namespace Router {
 						NotSupportedException.throw()
 					}
 
-					tree.columns[hash] = {
+					tree.columns[hash] = TreeLeaf(
 						index: 1
 						type
 						function: row.function
 						isNode: false
 						weight: 1 / usages[row.function.index()]
-						isFilter: null
-					}
+					)
 
 					tree.indexes['0'].push(tree.columns[hash])
 				}
@@ -372,7 +385,7 @@ namespace Router {
 					const hash = type.hashCode()
 
 					if !?tree.columns[hash] {
-						tree.columns[hash] = {
+						tree.columns[hash] = TreeBranch(
 							index: 1
 							type
 							rows: [row]
@@ -380,13 +393,15 @@ namespace Router {
 							isNode: true
 							weight: 1 / usages[row.function.index()]
 							isFilter: null
-						}
+						)
 
 						tree.indexes['0'].push(tree.columns[hash])
 					}
 					else {
-						tree.columns[hash].rows.push(row)
-						tree.columns[hash].weight += 1 / usages[row.function.index()]
+						const branch: TreeBranch = tree.columns[hash]!!
+
+						branch.rows.push(row)
+						branch.weight += 1 / usages[row.function.index()]
 					}
 				}
 			}

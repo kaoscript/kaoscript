@@ -257,6 +257,10 @@ class ForInStatement extends Statement {
 				TypeException.throwInvalidCondition(@when, this)
 			}
 
+			for const data, name of @when.inferWhenTrueTypes({}) {
+				@bodyScope.updateInferable(name, data, this)
+			}
+
 			@when.acquireReusable(false)
 			@when.releaseReusable()
 
