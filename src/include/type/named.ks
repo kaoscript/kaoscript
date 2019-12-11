@@ -24,7 +24,7 @@ class NamedType extends Type {
 	container() => @container
 	container(@container) => this
 	discard() => @type.discard()
-	discardAlias() => @type.discardAlias()
+	discardAlias() => this.isAlias() ? @type.discardAlias() : this
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
 	export(references, mode) { // {{{
@@ -84,6 +84,71 @@ class NamedType extends Type {
 	isAlien() => @type.isAlien()
 	isAlteration() => @type.isAlteration()
 	isArray() => @type.isArray()
+	isAssignableToVariable(value, downcast) { // {{{
+		if this == value {
+			return true
+		}
+		else if value.isAny() {
+			if this.isNullable() {
+				return value.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+		else if this.isAlias() {
+			return this.discardAlias().isAssignableToVariable(value, downcast)
+		}
+		else if value is NamedType {
+			if value.isAlias() {
+				if this.isAlias() {
+					return @name == value.name() || this.discardAlias().isAssignableToVariable(value.discardAlias(), downcast)
+				}
+				else {
+					return this.isAssignableToVariable(value.discardAlias(), downcast)
+				}
+			}
+			else if @type.isClass() && value.isClass() {
+				return @name == 'Class' || this.isInheriting(value) || (downcast && value.isInheriting(this))
+			}
+			else if @type.isStruct() && value.isStruct() {
+				return @name == 'Struct' || this.isInheriting(value) || (downcast && value.isInheriting(this))
+			}
+			else {
+				return false
+			}
+		}
+		else if value is ReferenceType {
+			return this.isAssignableToVariable(value.type(), downcast)
+		}
+		else if value is UnionType {
+			for const type in value.types() {
+				if this.isAssignableToVariable(type, downcast) {
+					return true
+				}
+			}
+
+			return false
+		}
+		else if value is ExclusionType {
+			const types = value.types()
+
+			if !this.isAssignableToVariable(types[0], downcast) {
+				return false
+			}
+
+			for const type in types from 1 {
+				if this.isAssignableToVariable(type, downcast) {
+					return false
+				}
+			}
+
+			return true
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isBoolean() => @type.isBoolean()
 	isCloned() => @cloned
 	isClass() => @type.isClass()
@@ -99,12 +164,13 @@ class NamedType extends Type {
 	isFlexible() => @type.isFlexible()
 	isHybrid() => @type.isHybrid()
 	isInheriting(superclass: NamedType) { // {{{
+		let name = superclass.name()
 		let that = this
 
 		while that.type().isExtending() {
 			that = that.type().extends()
 
-			if that.name() == superclass {
+			if that.name() == name {
 				return true
 			}
 		}
@@ -254,7 +320,7 @@ class NamedType extends Type {
 			}
 			else if that.type() is StructType {
 				if @type is StructType {
-					return @name == that.name()
+					return this.matchInheritanceOf(that)
 				}
 				else {
 					return @type.matchContentOf(that.type())
@@ -309,14 +375,10 @@ class NamedType extends Type {
 			return @type.matchContentOf(that)
 		}
 	} // }}}
-	matchInheritanceOf(base: Type, strict = false) { // {{{
-		if base is not NamedType || !this.isClass() || !base.isClass() {
-			return false
-		}
-
+	matchInheritanceOf(base: Type) { // {{{
 		const basename = base.name()
 
-		if !strict && @name == basename {
+		if @name == basename {
 			return true
 		}
 
@@ -332,7 +394,7 @@ class NamedType extends Type {
 		return false
 	} // }}}
 	metaReference(references, mode) { // {{{
-		if @type is ClassType {
+		if @type is ClassType || @type is StructType {
 			return @type.metaReference(references, @name, mode)
 		}
 		else {

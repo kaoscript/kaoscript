@@ -157,8 +157,8 @@ class InlineBlockScope extends BlockScope {
 
 		return variable
 	} // }}}
-	replaceVariable(name: String, type: Type, node): Variable { // {{{
-		const variable = super.replaceVariable(name, type, node)
+	replaceVariable(name: String, type: Type, downcast: Boolean = false, node: AbstractNode): Variable { // {{{
+		const variable = super.replaceVariable(name, type, downcast, node)
 
 		if @declarations[name] != true {
 			@upatedInferables[name] = {

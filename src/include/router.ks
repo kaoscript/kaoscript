@@ -609,7 +609,7 @@ namespace Router {
 				let next = route.min + 1
 
 				for const rt in routes from index + 1 when rt.min >= next {
-					if rt.function == route.function && sameFilters(route.filters, rt.filters) {
+					if rt.function == route.function && sameFilters(route.filters, rt.filters) && rt.matchingFilters.length >= route.matchingFilters.length {
 						matches.push(rt)
 
 						next = rt.min + 1
@@ -620,12 +620,14 @@ namespace Router {
 				}
 
 				if matches.length != 0 {
-					const max = matches.last().max
+					for const match in matches {
+						if match.max > route.max {
+							route.max = match.max
+						}
 
-					route.max = max
-
-					for const filter in route.matchingFilters {
-						filter.max = max
+						if match.matchingFilters.length != 0 {
+							route.matchingFilters.push(...match.matchingFilters)
+						}
 					}
 
 					routes.remove(...matches)

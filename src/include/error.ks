@@ -501,6 +501,9 @@ export class TypeException extends Exception {
 		throwNotNullableOperand(expression, operator, node) ~ TypeException { // {{{
 			throw new TypeException(`The operand \(expression.toQuote(true)) can't be nullable in a \(operator) operation`, node)
 		} // }}}
+		throwNotStruct(name, node) ~ TypeException { // {{{
+			throw new TypeException(`Identifier "\(name)" is not a struct`, node)
+		} // }}}
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)
 		} // }}}

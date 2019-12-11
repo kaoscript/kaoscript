@@ -1,6 +1,9 @@
 class StructDeclaration extends Statement {
 	private {
 		_array: Boolean							= false
+		_extending: Boolean						= false
+		_extendsName: String
+		_extendsType: NamedType<StructType>
 		_fields: Array<StructFieldDeclaration>	= []
 		_function: StructFunction
 		_name: String
@@ -31,14 +34,28 @@ class StructDeclaration extends Statement {
 			@struct = new ObjectStructType(@scope)
 		}
 
+		if @data.extends? {
+			@extending = true
+
+			let name = ''
+			let member = @data.extends
+			while member.kind == NodeKind::MemberExpression {
+				name = `.\(member.property.name)\(name)`
+
+				member = member.object
+			}
+
+			@extendsName = `\(member.name)\(name)`
+		}
+
 		@type = new NamedType(@name, @struct)
 
 		@variable = @scope.define(@name, true, @type, this)
 
 		@function = new StructFunction(@data, this, new BlockScope(@scope))
 
-		for const data, index in @data.fields {
-			const field = new StructFieldDeclaration(index, data, this)
+		for const data in @data.fields {
+			const field = new StructFieldDeclaration(data, this)
 
 			field.analyse()
 
@@ -48,40 +65,97 @@ class StructDeclaration extends Statement {
 		@function.analyse()
 	} // }}}
 	override prepare() { // {{{
-		for const field in @fields {
-			field.prepare()
+		if @extending {
+			if @extendsType !?= Type.fromAST(@data.extends, this) {
+				ReferenceException.throwNotDefined(@extendsName, this)
+			}
+			else if @extendsType.discardName() is not StructType {
+				TypeException.throwNotStruct(@extendsName, this)
+			}
 
-			@struct.addField(field.type())
+			@struct.extends(@extendsType)
 		}
 
 		@function.prepare()
+
+		for const field in @fields {
+			@struct.addField(field.type())
+		}
 	} // }}}
 	override translate() { // {{{
 		for const field in @fields {
 			field.translate()
 		}
 	} // }}}
+	fields() => @fields
+	isExtending() => @extending
 	toArrayFragments(fragments, mode) { // {{{
-		const line = fragments.newLine().code('return [')
+		if @extending {
+			let varname = '_'
 
-		for const field, i in @fields {
-			if i != 0 {
-				line.code($comma)
+			const line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_builder(')
+
+			let nf = false
+			for const field in @extendsType.type().listAllFields() {
+				if nf {
+					line.code($comma)
+				}
+				else {
+					nf = true
+				}
+
+				line.code(`__ks_\(field.index())`)
 			}
 
-			line.compile(field.parameter().name())
-		}
+			line.code(')').done()
 
-		line.code(']').done()
+			for const field in @fields {
+				fragments.line(varname, '.push(__ks_', field.index(), ')')
+			}
+
+			fragments.line(`return \(varname)`)
+		}
+		else {
+			const line = fragments.newLine().code('return [')
+
+			for const field, i in @fields {
+				if i != 0 {
+					line.code($comma)
+				}
+
+				line.compile(field.parameter().name())
+			}
+
+			line.code(']').done()
+		}
 	} // }}}
 	toObjectFragments(fragments, mode) { // {{{
-		if @fields.length == 0 {
+		if !@extending && @fields.length == 0 {
 			fragments.line(`return new \($runtime.dictionary(this))`)
 		}
 		else {
 			let varname = '_'
 
-			fragments.line($const(this), varname, ' = new ', $runtime.dictionary(this), '()')
+			if @extending {
+				const line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_builder(')
+
+				let nf = false
+				for const name in @extendsType.type().listAllFieldNames() {
+					if nf {
+						line.code($comma)
+					}
+					else {
+						nf = true
+					}
+
+					line.code(name)
+				}
+
+				line.code(')').done()
+			}
+			else {
+				fragments.line($const(this), varname, ' = new ', $runtime.dictionary(this), '()')
+			}
 
 			for const field in @fields {
 				fragments.newLine().code(varname, '.').compile(field.name()).code($equals).compile(field.parameter().name()).done()
@@ -108,13 +182,17 @@ class StructDeclaration extends Statement {
 
 		ctrl.done()
 
+		if @extending {
+			line.code($comma, @extendsName)
+		}
+
 		line.code(')').done()
 	} // }}}
 }
 
 class StructFunction extends AbstractNode {
 	private {
-		_parameters: Array<Parameter>
+		_parameters: Array<Parameter>	= []
 		_type: FunctionType
 	}
 	constructor(@data, @parent, @scope) { // {{{
@@ -122,11 +200,37 @@ class StructFunction extends AbstractNode {
 
 		@type = new FunctionType(@scope)
 	} // }}}
-	analyse() { // {{{
-		@parameters = [field.parameter() for const field in @parent._fields]
-	} // }}}
+	analyse()
 	prepare() { // {{{
-		for const parameter in @parameters {
+		let index = -1
+
+		if @parent.isExtending() {
+			for const type in @parent._extendsType.type().listAllFields() {
+				const field = new StructFieldDeclaration(type, @parent)
+				field.analyse()
+				field.prepare()
+
+				const parameter = field.parameter()
+
+				@parameters.push(parameter)
+
+				@type.addParameter(parameter.type())
+
+				if field.index() > index {
+					index = field.index()
+				}
+			}
+		}
+
+		for const field in @parent.fields() {
+			field.index(++index)
+
+			field.prepare()
+
+			const parameter = field.parameter()
+
+			@parameters.push(parameter)
+
 			@type.addParameter(parameter.type())
 		}
 	} // }}}
@@ -143,7 +247,7 @@ class StructFieldDeclaration extends AbstractNode {
 		_parameter: StructFieldParameter
 		_type: StructFieldType
 	}
-	constructor(@index, data, parent) { // {{{
+	constructor(data, parent) { // {{{
 		super(data, parent)
 
 		if data.name? {
@@ -153,19 +257,33 @@ class StructFieldDeclaration extends AbstractNode {
 
 		@parameter = new StructFieldParameter(this, parent._function)
 	} // }}}
-	analyse() { // {{{
-		@parameter.analyse()
+	constructor(@type, parent) { // {{{
+		super({}, parent)
+
+		if @name ?= @type.name() {
+			@hasName = true
+		}
+
+		@index = @type.index()
+
+		@parameter = new StructFieldParameter(this, parent._function)
+		@parameter.unflagValidation()
 	} // }}}
+	analyse()
 	prepare() { // {{{
+		@parameter.analyse()
 		@parameter.prepare()
 
-		@type = new StructFieldType(@scope, @data.name?.name, @index, Type.fromAST(@data.type, this), @parameter.isRequired())
+		if !?@type {
+			@type = new StructFieldType(@scope, @data.name?.name, @index, Type.fromAST(@data.type, this), @parameter.isRequired())
+		}
 	} // }}}
 	translate() { // {{{
 		@parameter.translate()
 	} // }}}
 	hasName() => @hasName
 	index() => @index
+	index(@index) => this
 	name() => @name
 	parameter() => @parameter
 	type() => @type
@@ -174,6 +292,7 @@ class StructFieldDeclaration extends AbstractNode {
 class StructFieldParameter extends Parameter {
 	private {
 		_field: StructFieldDeclaration
+		_validation: Boolean			 = true
 	}
 	constructor(@field, parent) { // {{{
 		super(field._data, parent)
@@ -182,10 +301,10 @@ class StructFieldParameter extends Parameter {
 	} // }}}
 	analyse() { // {{{
 		if @field.hasName() {
-			@name = new IdentifierParameter(@data.name, this, @scope)
+			@name = new IdentifierParameter({name: @field.name()}, this, @scope)
 		}
 		else {
-			@name = new IdentifierParameter({name: @scope.acquireTempName(false)}, this, @scope)
+			@name = new IdentifierParameter({name: `__ks_\(@field.index())`}, this, @scope)
 		}
 
 		@name.setAssignment(AssignmentType::Parameter)
@@ -196,4 +315,12 @@ class StructFieldParameter extends Parameter {
 		}
 	} // }}}
 	name() => @name
+	toValidationFragments(fragments, wrongdoer) { // {{{
+		if @validation {
+			super(fragments, wrongdoer)
+		}
+	} // }}}
+	unflagValidation() { // {{{
+		@validation = false
+	} // }}}
 }

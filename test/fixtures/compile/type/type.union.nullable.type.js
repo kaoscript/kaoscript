@@ -33,7 +33,7 @@ module.exports = function() {
 	}
 	function foobar(x = null) {
 		if(x !== null && !(Type.isInstance(x, Foobar) || Type.isString(x))) {
-			throw new TypeError("'x' is not of type 'Foobar' or 'String'");
+			throw new TypeError("'x' is not of type 'Foobar', 'String' or 'Null'");
 		}
 		if(!Type.isValue(x)) {
 			x = Foobar.get("foobar");

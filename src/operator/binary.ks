@@ -537,7 +537,7 @@ class BinaryOperatorTypeEquality extends Expression {
 					}
 				}
 				else if type.isClass() || type.isEnum() || type.isStruct() || type.isUnion() || type.isExclusion() {
-					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
+					unless type.isAssignableToVariable(@left.type(), true) {
 						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
 					}
 				}

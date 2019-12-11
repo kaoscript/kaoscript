@@ -48,6 +48,26 @@ class DictionaryType extends Type {
 		return export
 	} // }}}
 	getProperty(name: String): Type? => @properties[name]
+	isAssignableToVariable(value, downcast) {
+		if value.isAny() || value.isDictionary() {
+			if this.isNullable() {
+				return value.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+		else if value is UnionType {
+			for const type in value.types() {
+				if this.isAssignableToVariable(type, downcast) {
+					return true
+				}
+			}
+		}
+		else {
+			return false
+		}
+	}
 	isMatching(value: DictionaryType, mode: MatchingMode) { // {{{
 		if this == value {
 			return true

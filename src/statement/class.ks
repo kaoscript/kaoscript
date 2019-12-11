@@ -23,7 +23,6 @@ class ClassDeclaration extends Statement {
 		_destructorScope
 		_es5: Boolean						= false
 		_extending: Boolean					= false
-		_extendingAlien: Boolean			= false
 		_extendsName: String
 		_extendsType: NamedType<ClassType>
 		_forcefullyRebinded: Boolean		= false
@@ -158,12 +157,12 @@ class ClassDeclaration extends Statement {
 			let name = ''
 			let member = @data.extends
 			while member.kind == NodeKind::MemberExpression {
-				name = `.\(member.property.name)` + name
+				name = `.\(member.property.name)\(name)`
 
 				member = member.object
 			}
 
-			@extendsName = `\(member.name)` + name
+			@extendsName = `\(member.name)\(name)`
 		}
 
 		for const modifier in @data.modifiers {

@@ -210,6 +210,25 @@ class UnionType extends Type {
 
 		return elements.join('|')
 	} // }}}
+	isAssignableToVariable(value, downcast) { // {{{
+		if value.isAny() {
+			if this.isNullable() {
+				return value.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+		else {
+			for const type in @types {
+				if !type.isAssignableToVariable(value, downcast) {
+					return false
+				}
+			}
+
+			return true
+		}
+	} // }}}
 	isExplicit() => @explicit
 	isExportable() { // {{{
 		for type in @types {
@@ -296,13 +315,24 @@ class UnionType extends Type {
 		if @nullable == nullable {
 			return this
 		}
-		else {
+		else if nullable {
 			const that = this.clone()
 
-			that._nullable = nullable
+			that._nullable = true
 			that._explicitNullity = true
 
 			return that
+		}
+		else if @explicitNullity {
+			const that = this.clone()
+
+			that._nullable = false
+			that._explicitNullity = false
+
+			return that
+		}
+		else {
+			NotImplementedException.throw()
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
@@ -311,7 +341,14 @@ class UnionType extends Type {
 	toQuote() => [type.toQuote() for const type in @types].join('|')
 	toQuote(double: Boolean): String { // {{{
 		const elements = [type.toQuote() for type in @types]
-		const last = elements.pop()
+
+		lateinit const last
+		if @explicitNullity {
+			last = 'Null'
+		}
+		else {
+			last = elements.pop()
+		}
 
 		if double {
 			return `"\(elements.join(`", "`))" or "\(last)"`

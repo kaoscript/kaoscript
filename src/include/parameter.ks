@@ -671,7 +671,7 @@ class Parameter extends AbstractNode {
 		}
 
 		if type == null {
-			type = @anonymous ? AnyType.NullableUnexplicit : Type.Any
+			type = @anonymous ? AnyType.NullableUnexplicit : AnyType.Unexplicit
 		}
 		else if type.isNull() {
 			type = NullType.Explicit

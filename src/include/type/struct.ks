@@ -5,6 +5,7 @@ enum StructVarietyKind<String> {
 }
 
 abstract class StructType extends Type {
+
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			switch data.variety {
@@ -20,10 +21,57 @@ abstract class StructType extends Type {
 			}
 		} // }}}
 	}
+	private {
+		_count: Number							= 0
+		_extending: Boolean						= false
+		_extends: NamedType<StructType>?		= null
+		_fields: Dictionary<StructFieldType>	= {}
+	}
+	addField(field: StructFieldType) { // {{{
+		@fields[field.name()] = field
+		++@count
+	} // }}}
 	override clone() { // {{{
 		NotImplementedException.throw()
 	} // }}}
+	count(): Number { // {{{
+		if @extending {
+			return @count + @extends.type().count():Number
+		}
+		else {
+			return @count
+		}
+	} // }}}
+	extends() => @extends
+	extends(@extends) { // {{{
+		@extending = true
+	} // }}}
+	getProperty(name: String) { // {{{
+		if const field = @fields[name] {
+			return field
+		}
+
+		if @extending {
+			return @extends.type().getProperty(name)
+		}
+		else {
+			return null
+		}
+	} // }}}
+	isExtending() => @extending
 	override isStruct() => true
+	listAllFields(list = []) { // {{{
+		if @extending {
+			@extends.type().listAllFields(list)
+		}
+
+		for const field of @fields {
+			list.push(field)
+		}
+
+		return list
+	} // }}}
+	metaReference(references, name, mode) => [this.toMetadata(references, mode), name]
 	override toFragments(fragments, node) { // {{{
 		NotImplementedException.throw()
 	} // }}}
@@ -33,15 +81,16 @@ abstract class StructType extends Type {
 }
 
 class ArrayStructType extends StructType {
-	private {
-		_fields: Array<StructFieldType>		= []
-	}
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new ArrayStructType(scope)
 
 			queue.push(() => {
-				let index = 0
+				if data.extends? {
+					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+				}
+
+				let index = value.count()
 
 				for const type in data.fields {
 					value.addField(StructFieldType.fromMetadata(index, null, type, metadata, references, alterations, queue, scope, node))
@@ -54,7 +103,8 @@ class ArrayStructType extends StructType {
 		} // }}}
 	}
 	addField(field: StructFieldType) { // {{{
-		@fields.push(field)
+		@fields[field.index()] = field
+		++@count
 	} // }}}
 	override export(references, mode) { // {{{
 		const export = {
@@ -63,14 +113,18 @@ class ArrayStructType extends StructType {
 			fields: []
 		}
 
-		for const field in @fields {
+		for const field of @fields {
 			export.fields.push(field.export(references, mode))
+		}
+
+		if @extending {
+			export.extends = @extends.metaReference(references, mode)
 		}
 
 		return export
 	} // }}}
 	override isArray() => true
-	getProperty(name: Number | String) => @fields[name]
+	getProperty(name: Number) => this.getProperty(`\(name)`)
 	isMatching(value: ArrayStructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
 		if value.name() == 'Struct' {
@@ -83,15 +137,16 @@ class ArrayStructType extends StructType {
 }
 
 class NamedArrayStructType extends StructType {
-	private {
-		_fields: Dictionary<StructFieldType>		= {}
-	}
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new NamedArrayStructType(scope)
 
 			queue.push(() => {
-				let index = 0
+				if data.extends? {
+					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+				}
+
+				let index = value.count()
 
 				for const type, name of data.fields {
 					value.addField(StructFieldType.fromMetadata(index, name, type, metadata, references, alterations, queue, scope, node))
@@ -103,9 +158,6 @@ class NamedArrayStructType extends StructType {
 			return value
 		} // }}}
 	}
-	addField(field: StructFieldType) { // {{{
-		@fields[field.name()] = field
-	} // }}}
 	override export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Struct
@@ -117,10 +169,13 @@ class NamedArrayStructType extends StructType {
 			export.fields[field.name()] = field.export(references, mode)
 		}
 
+		if @extending {
+			export.extends = @extends.metaReference(references, mode)
+		}
+
 		return export
 	} // }}}
 	override isArray() => true
-	getProperty(name: String) => @fields[name]
 	isMatching(value: ArrayStructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
 		if value.name() == 'Struct' {
@@ -135,10 +190,6 @@ class NamedArrayStructType extends StructType {
 }
 
 class ObjectStructType extends StructType {
-	private {
-		_count: Number								= 0
-		_fields: Dictionary<StructFieldType>		= {}
-	}
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new ObjectStructType(scope)
@@ -151,15 +202,15 @@ class ObjectStructType extends StructType {
 
 					++index
 				}
+
+				if data.extends? {
+					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+				}
 			})
 
 			return value
 		} // }}}
 	}
-	addField(field: StructFieldType) { // {{{
-		@fields[field.name()] = field
-		++@count
-	} // }}}
 	override export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Struct
@@ -171,10 +222,24 @@ class ObjectStructType extends StructType {
 			export.fields[field.name()] = field.export(references, mode)
 		}
 
+		if @extending {
+			export.extends = @extends.metaReference(references, mode)
+		}
+
 		return export
 	} // }}}
+	getAllFieldsMap(list = {}) { // {{{
+		if @extending {
+			@extends.type().getAllFieldsMap(list)
+		}
+
+		for const field, name of @fields {
+			list[name] = field
+		}
+
+		return list
+	} // }}}
 	override isDictionary() => true
-	getProperty(name: String) => @fields[name]
 	isMatching(value: ObjectStructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
 		if value.name() == 'Struct' {
@@ -183,8 +248,22 @@ class ObjectStructType extends StructType {
 
 		return false
 	} // }}}
+	listAllFieldNames(list = []) { // {{{
+		if @extending {
+			@extends.type().listAllFieldNames(list)
+		}
+
+		for const _, name of @fields {
+			list.push(name)
+		}
+
+		return list
+	} // }}}
 	sortArguments(arguments: Array, node) { // {{{
 		const order = []
+
+		const fields = this.getAllFieldsMap()
+		const count = this.count()
 
 		const nameds = {}
 		let namedCount = 0
@@ -196,7 +275,7 @@ class ObjectStructType extends StructType {
 			if argument is NamedArgument {
 				const name = argument.name()
 
-				if !?@fields[name] {
+				if !?fields[name] {
 					SyntaxException.throwUnrecognizedStructField(name, node)
 				}
 
@@ -207,7 +286,7 @@ class ObjectStructType extends StructType {
 			else if argument is IdentifierLiteral {
 				const name = argument.name()
 
-				if !?@fields[name] {
+				if !?fields[name] {
 					SyntaxException.throwUnrecognizedStructField(name, node)
 				}
 
@@ -219,13 +298,13 @@ class ObjectStructType extends StructType {
 		}
 
 		if namedCount == arguments.length {
-			if namedCount == @count {
-				for const field, name of @fields {
+			if namedCount == count {
+				for const field, name of fields {
 					order.push(nameds[name])
 				}
 			}
 			else {
-				for const field, name of @fields {
+				for const field, name of fields {
 					if nameds[name]? {
 						order.push(nameds[name])
 					}
@@ -239,11 +318,11 @@ class ObjectStructType extends StructType {
 			}
 		}
 		else {
-			const fields = []
+			const groups = []
 			let required = 0
 			let optional = 0
 
-			for const field, name of @fields {
+			for const field, name of fields {
 				if nameds[name]? {
 					order.push(nameds[name])
 				}
@@ -254,7 +333,7 @@ class ObjectStructType extends StructType {
 					const index = order.length
 
 					order.push(null)
-					fields.push([index, field])
+					groups.push([index, field])
 
 					if field.isRequired() {
 						++required
@@ -275,7 +354,7 @@ class ObjectStructType extends StructType {
 			let countdown = leftovers.length - required
 			let leftover = 0
 
-			for const [index, field] in fields {
+			for const [index, field] in groups {
 				if field.isRequired() {
 					order[index] = leftovers[leftover]
 

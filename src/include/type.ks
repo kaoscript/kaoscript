@@ -608,6 +608,7 @@ abstract class Type {
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
+	isAssignableToVariable(type: Type, downcast: Boolean): Boolean => this == type
 	isBoolean() => false
 	isCloned() => false
 	isClass() => false

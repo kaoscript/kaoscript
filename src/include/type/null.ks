@@ -17,6 +17,7 @@ class NullType extends Type {
 	} // }}}
 	export(references, mode)
 	getProperty(name) => Type.Any
+	isAssignableToVariable(value, downcast) => value.isNullable()
 	isExplicit() => @explicit
 	isExportable() => true
 	isInstanceOf(target: Type) => true

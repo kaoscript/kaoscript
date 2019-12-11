@@ -487,25 +487,11 @@ class ModuleScope extends Scope {
 
 		return variable
 	} // }}}
-	replaceVariable(name: String, type: Type, node): Variable { // {{{
+	replaceVariable(name: String, type: Type, downcast: Boolean = false, node: AbstractNode): Variable { // {{{
 		let variable: Variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
-			if type.isNull() && !variable.getDeclaredType().isNullable() {
-				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
-			}
-			else if type.isAny() && !variable.getDeclaredType().isAny() {
-				if variable.getRealType().isNull() {
-					variable.setRealType(variable.getDeclaredType())
-				}
-
-				if type.isNullable() {
-					variable.setRealType(variable.getRealType().setNullable(true))
-				}
-
-				return variable
-			}
-			else if !type.matchContentOf(variable.getDeclaredType()) {
+			if !type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
 				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
 			}
 		}
@@ -535,7 +521,7 @@ class ModuleScope extends Scope {
 	setLineOffset(@lineOffset)
 	updateInferable(name, data, node) { // {{{
 		if data.isVariable {
-			this.replaceVariable(name, data.type, node)
+			this.replaceVariable(name, data.type, true, node)
 		}
 		else {
 			if @chunkTypes[name] is Array {

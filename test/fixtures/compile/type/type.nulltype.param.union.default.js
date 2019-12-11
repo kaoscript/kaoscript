@@ -8,7 +8,7 @@ module.exports = function() {
 			x = null;
 		}
 		else if(x !== null && !(Type.isNumber(x) || Type.isString(x))) {
-			throw new TypeError("'x' is not of type 'Number' or 'String'");
+			throw new TypeError("'x' is not of type 'Number', 'String' or 'Null'");
 		}
 	}
 	foobar(42);

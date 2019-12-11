@@ -250,6 +250,39 @@ class ReferenceType extends Type {
 	isAlien() => this.type().isAlien()
 	isAny() => @name == 'Any'
 	isArray() => @name == 'Array' || this.type().isArray()
+	isAssignableToVariable(value, downcast) { // {{{
+		if this == value {
+			return true
+		}
+		else if value.isAny() {
+			if this.isNullable() {
+				return value.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+		else if value is ReferenceType && @name == value.name() {
+			if @nullable {
+				return value.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+		else if value is UnionType {
+			return this.type().isAssignableToVariable(value, downcast)
+		}
+		else if @name == 'Class' {
+			return value.isClass()
+		}
+		else if @name == 'Struct' {
+			return value.isStruct()
+		}
+		else {
+			return this.type().isAssignableToVariable(value, downcast)
+		}
+	} // }}}
 	isAsync() => false
 	isBoolean() => @name == 'Boolean' || this.type().isBoolean()
 	isClass() => @name == 'Class'
@@ -356,11 +389,11 @@ class ReferenceType extends Type {
 			return a.isMorePreciseThan(b)
 		}
 	} // }}}
-	isNative() => $natives[@name] == true
 	isNamespace() => @name == 'Namespace' || this.type().isNamespace()
+	isNative() => $natives[@name] == true
 	isNever() => @name == 'Never' || this.type().isNever()
 	isNull() => @name == 'Null'
-	isNullable() => @nullable
+	isNullable() => @nullable || @name == 'Null'
 	isNumber() => @name == 'Number' || this.type().isNumber()
 	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String' || @name == 'Struct'))
 	isReference() => true

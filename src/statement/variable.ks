@@ -477,7 +477,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	setRealType(type: Type) { // {{{
 		if @type != null {
-			if !type.matchContentOf(@type) {
+			if !type.isAssignableToVariable(@type, false) {
 				TypeException.throwInvalidAssignement(@name, @type, type, this)
 			}
 		}
