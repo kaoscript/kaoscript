@@ -12,7 +12,7 @@ module.exports = function() {
 		if(x === void 0) {
 			x = null;
 		}
-		else if(x !== null && !Type.isEnumMember(x, Color)) {
+		else if(x !== null && !Type.isEnumInstance(x, Color)) {
 			throw new TypeError("'x' is not of type 'Color?'");
 		}
 		if(x.value === null) {

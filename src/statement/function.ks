@@ -221,8 +221,10 @@ class FunctionDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		return unless @main
 
+		const name = @variable.getSecureName()
+
 		if @extended {
-			fragments.line($const(this), @oldVariableName, $equals, @name)
+			fragments.line($const(this), @oldVariableName, $equals, name)
 
 			const assessment = Router.assess([declarator.type() for const declarator in @variable._declarators], true, true)
 
@@ -231,7 +233,7 @@ class FunctionDeclaration extends Statement {
 				fragments.newLine()
 				'arguments'
 				false
-				(node, fragments) => fragments.code(`function \(@name)()`).newBlock()
+				(node, fragments) => fragments.code(`function \(name)()`).newBlock()
 				(fragments) => fragments.done()
 				(fragments, method, index) => {
 					const declarator = @variable.getDeclarator(index)
@@ -259,7 +261,7 @@ class FunctionDeclaration extends Statement {
 			).done()
 		}
 		else if @variable.length() == 1 {
-			@variable.getDeclarator(0).toStatementFragments(fragments, @name, mode)
+			@variable.getDeclarator(0).toStatementFragments(fragments, name, mode)
 		}
 		else {
 			const assessment = this.type().assessment()
@@ -270,7 +272,7 @@ class FunctionDeclaration extends Statement {
 					fragments.newLine()
 					'arguments'
 					false
-					(node, fragments) => fragments.code(`function \(@name)()`).newBlock()
+					(node, fragments) => fragments.code(`function \(name)()`).newBlock()
 					(fragments) => fragments.done()
 					(fragments, method, index) => {
 						const declarator = @variable.getDeclarator(index)
@@ -291,7 +293,7 @@ class FunctionDeclaration extends Statement {
 					fragments.newLine()
 					'arguments'
 					false
-					(node, fragments) => fragments.code(`function \(@name)()`).newBlock()
+					(node, fragments) => fragments.code(`function \(name)()`).newBlock()
 					(fragments) => fragments.done()
 					(fragments, method, index) => {
 						const name = @variable.getDeclaratorName(index)

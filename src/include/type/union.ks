@@ -210,10 +210,10 @@ class UnionType extends Type {
 
 		return elements.join('|')
 	} // }}}
-	isAssignableToVariable(value, downcast) { // {{{
+	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
 		if value.isAny() {
 			if this.isNullable() {
-				return value.isNullable()
+				return nullcast || value.isNullable()
 			}
 			else {
 				return true
@@ -221,7 +221,7 @@ class UnionType extends Type {
 		}
 		else {
 			for const type in @types {
-				if !type.isAssignableToVariable(value, downcast) {
+				if !type.isAssignableToVariable(value, anycast, nullcast, downcast) {
 					return false
 				}
 			}
@@ -333,6 +333,11 @@ class UnionType extends Type {
 		}
 		else {
 			NotImplementedException.throw()
+		}
+	} // }}}
+	toCastFragments(fragments) { // {{{
+		for const type in @types {
+			type.toCastFragments(fragments)
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{

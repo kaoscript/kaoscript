@@ -32,7 +32,7 @@ module.exports = function() {
 			if(space === void 0 || space === null) {
 				throw new TypeError("'space' is not nullable");
 			}
-			else if(!Type.isEnumMember(space, Space)) {
+			else if(!Type.isEnumInstance(space, Space)) {
 				throw new TypeError("'space' is not of type 'Space'");
 			}
 			this._space = space;

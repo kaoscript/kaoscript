@@ -250,13 +250,13 @@ class ReferenceType extends Type {
 	isAlien() => this.type().isAlien()
 	isAny() => @name == 'Any'
 	isArray() => @name == 'Array' || this.type().isArray()
-	isAssignableToVariable(value, downcast) { // {{{
+	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
 		if this == value {
 			return true
 		}
 		else if value.isAny() {
 			if this.isNullable() {
-				return value.isNullable()
+				return nullcast || value.isNullable()
 			}
 			else {
 				return true
@@ -264,14 +264,14 @@ class ReferenceType extends Type {
 		}
 		else if value is ReferenceType && @name == value.name() {
 			if @nullable {
-				return value.isNullable()
+				return nullcast || value.isNullable()
 			}
 			else {
 				return true
 			}
 		}
 		else if value is UnionType {
-			return this.type().isAssignableToVariable(value, downcast)
+			return this.type().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
 		else if @name == 'Class' {
 			return value.isClass()
@@ -280,7 +280,7 @@ class ReferenceType extends Type {
 			return value.isStruct()
 		}
 		else {
-			return this.type().isAssignableToVariable(value, downcast)
+			return this.type().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
 	} // }}}
 	isAsync() => false
@@ -545,6 +545,27 @@ class ReferenceType extends Type {
 			return @scope.reference(@name, nullable, [...@parameters])
 		}
 	} // }}}
+	toCastFragments(fragments) { // {{{
+		if this.isTypeOf() {
+			fragments.code($comma, 'null', $comma, $quote(@name))
+		}
+		else {
+			this.resolveType()
+
+			if @type.isClass() {
+				fragments.code($comma, @name, $comma, '"Class"')
+			}
+			else if @type.isEnum() {
+				fragments.code($comma, @name, $comma, '"Enum"')
+			}
+			else if @type.isStruct() {
+				fragments.code($comma, @name, $comma, '"Struct"')
+			}
+			else {
+				@type.toCastFragments(fragments)
+			}
+		}
+	} // }}}
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}
@@ -585,7 +606,7 @@ class ReferenceType extends Type {
 		}
 		else if @type.isExplicitlyExported() {
 			if mode & ExportMode::IgnoreAlteration != 0 && @type.isAlteration() {
-				return this.export(references, mode, @type:ClassType.toAlterationReference(references, mode))
+				return this.export(references, mode, @type.toAlterationReference(references, mode))
 			}
 			else {
 				return this.export(references, mode, @type.toReference(references, mode))
@@ -612,10 +633,10 @@ class ReferenceType extends Type {
 				fragments.code(`\($runtime.type(node)).`)
 
 				if @type.isClass() {
-					fragments.code(`isInstance`)
+					fragments.code(`isClassInstance`)
 				}
 				else if @type.isEnum() {
-					fragments.code(`isEnumMember`)
+					fragments.code(`isEnumInstance`)
 				}
 				else if @type.isStruct() {
 					fragments.code(`isStructInstance`)

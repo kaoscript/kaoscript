@@ -8,7 +8,7 @@ module.exports = function() {
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");
 		}
-		else if(!Type.isInstance(value, Date)) {
+		else if(!Type.isClassInstance(value, Date)) {
 			throw new TypeError("'value' is not of type 'Date'");
 		}
 		return this.getTime() === value.getTime();
@@ -34,7 +34,7 @@ module.exports = function() {
 	__ks_Date._im_equals = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
 		if(args.length === 1) {
-			if(Type.isInstance(args[0], Date)) {
+			if(Type.isClassInstance(args[0], Date)) {
 				return __ks_Date.__ks_func_equals_0.apply(that, args);
 			}
 			else if(Type.isValue(args[0])) {

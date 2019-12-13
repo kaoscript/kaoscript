@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class ClassA {
 		constructor() {
@@ -39,7 +39,7 @@ module.exports = function() {
 			if(foobar === void 0 || foobar === null) {
 				throw new TypeError("'foobar' is not nullable");
 			}
-			else if(!Type.isInstance(foobar, ClassA)) {
+			else if(!Type.isClassInstance(foobar, ClassA)) {
 				throw new TypeError("'foobar' is not of type 'ClassA'");
 			}
 			this._foobar = foobar;
@@ -63,7 +63,7 @@ module.exports = function() {
 			ClassA.prototype.__ks_cons.call(this, args);
 		}
 		__ks_func_quxbaz_0() {
-			this._foobar = this._foobar.foobar();
+			this._foobar = Helper.cast(this._foobar, "ClassX", false, ClassX, "Class").foobar();
 		}
 		quxbaz() {
 			if(arguments.length === 0) {

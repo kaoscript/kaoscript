@@ -480,6 +480,9 @@ export class TypeException extends Exception {
 		throwNotAsyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not asynchronous`, node)
 		} // }}}
+		throwNotCastableTo(valueType: Type, castingType: Type, node) ~ TypeException { // {{{
+			throw new TypeException(`The type \(valueType.toQuote(true)) can't be casted as a \(castingType.toQuote(true))`, node)
+		} // }}}
 		throwNotClass(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a class`, node)
 		} // }}}

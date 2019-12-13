@@ -1,5 +1,5 @@
 class Foobar {
-	message(x): String => x.toString():String
+	message(x): String => x.toString():!String
 }
 
 class Quxbaz extends Foobar {

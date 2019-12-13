@@ -1,13 +1,13 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function foobar() {
-		if(arguments.length === 1 && Type.isInstance(arguments[0], Date)) {
+		if(arguments.length === 1 && Type.isClassInstance(arguments[0], Date)) {
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.isInstance(x, Date)) {
+			else if(!Type.isClassInstance(x, Date)) {
 				throw new TypeError("'x' is not of type 'Date'");
 			}
 		}

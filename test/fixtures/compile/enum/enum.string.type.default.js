@@ -25,13 +25,13 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.isEnumMember(x, CardSuit)) {
+		else if(!Type.isEnumInstance(x, CardSuit)) {
 			throw new TypeError("'x' is not of type 'CardSuit'");
 		}
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		else if(!Type.isEnumMember(y, CardSuit)) {
+		else if(!Type.isEnumInstance(y, CardSuit)) {
 			throw new TypeError("'y' is not of type 'CardSuit'");
 		}
 		return x + y;

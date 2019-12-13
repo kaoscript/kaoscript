@@ -268,13 +268,13 @@ class FunctionType extends Type {
 	getProperty(name: String) => Type.Any
 	index() => @index
 	index(@index) => this
-	isAssignableToVariable(value, downcast) {
+	isAssignableToVariable(value, anycast, nullcast, downcast) {
 		if value.isAny() || value.isFunction() {
 			return true
 		}
 		else if value is UnionType {
 			for const type in value.types() {
-				if this.isAssignableToVariable(type, downcast) {
+				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
 					return true
 				}
 			}

@@ -6,13 +6,13 @@ module.exports = function(expect) {
 		qux: 4
 	});
 	function foobar() {
-		if(arguments.length === 1 && Type.isEnumMember(arguments[0], Foobar)) {
+		if(arguments.length === 1 && Type.isEnumInstance(arguments[0], Foobar)) {
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.isEnumMember(x, Foobar)) {
+			else if(!Type.isEnumInstance(x, Foobar)) {
 				throw new TypeError("'x' is not of type 'Foobar'");
 			}
 			return "enum";
@@ -54,7 +54,7 @@ module.exports = function(expect) {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.isEnumMember(x, Foobar)) {
+		else if(!Type.isEnumInstance(x, Foobar)) {
 			throw new TypeError("'x' is not of type 'Foobar'");
 		}
 		if(y === void 0 || y === null) {

@@ -24,8 +24,8 @@ module.exports = function() {
 		}
 	}
 	const x = new Quxbaz();
-	if(Type.isInstance(x, Quxbaz)) {
+	if(Type.isClassInstance(x, Quxbaz)) {
 	}
-	if(Type.isInstance(x, Foobar)) {
+	if(Type.isClassInstance(x, Foobar)) {
 	}
 };

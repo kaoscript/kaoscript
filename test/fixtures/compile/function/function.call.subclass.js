@@ -110,7 +110,7 @@ module.exports = function() {
 		if(point === void 0 || point === null) {
 			throw new TypeError("'point' is not nullable");
 		}
-		else if(!Type.isInstance(point, Point2D)) {
+		else if(!Type.isClassInstance(point, Point2D)) {
 			throw new TypeError("'point' is not of type 'Point2D'");
 		}
 		return point.x();

@@ -54,7 +54,7 @@ module.exports = function() {
 			if(shape === void 0 || shape === null) {
 				throw new TypeError("'shape' is not nullable");
 			}
-			else if(!Type.isInstance(shape, Shape)) {
+			else if(!Type.isClassInstance(shape, Shape)) {
 				throw new TypeError("'shape' is not of type 'Shape'");
 			}
 			this._color = shape.color();

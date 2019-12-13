@@ -8,7 +8,7 @@ module.exports = function(expect) {
 	});
 	expect(Type.isEnum(CardSuit)).to.equal(true);
 	const x = CardSuit.Clubs;
-	expect(Type.isEnumMember(x, CardSuit)).to.equal(true);
+	expect(Type.isEnumInstance(x, CardSuit)).to.equal(true);
 	expect(Type.typeOf(x)).to.equal("enum-member");
 	expect(">>> " + x).to.equal(">>> clubs");
 	expect(x.value).to.equal("clubs");
@@ -23,13 +23,13 @@ module.exports = function(expect) {
 		return d;
 	})())).to.equal("{\"id\":\"clubs\"}");
 	function foobar() {
-		if(arguments.length === 1 && Type.isEnumMember(arguments[0], CardSuit)) {
+		if(arguments.length === 1 && Type.isEnumInstance(arguments[0], CardSuit)) {
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.isEnumMember(x, CardSuit)) {
+			else if(!Type.isEnumInstance(x, CardSuit)) {
 				throw new TypeError("'x' is not of type 'CardSuit'");
 			}
 			return "enum-member";
@@ -103,7 +103,7 @@ module.exports = function(expect) {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.isEnumMember(x, CardSuit)) {
+		else if(!Type.isEnumInstance(x, CardSuit)) {
 			throw new TypeError("'x' is not of type 'CardSuit'");
 		}
 		if(y === void 0 || y === null) {
@@ -148,7 +148,7 @@ module.exports = function(expect) {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.isEnumMember(x, CardSuit)) {
+		else if(!Type.isEnumInstance(x, CardSuit)) {
 			throw new TypeError("'x' is not of type 'CardSuit'");
 		}
 		if(y === void 0 || y === null) {

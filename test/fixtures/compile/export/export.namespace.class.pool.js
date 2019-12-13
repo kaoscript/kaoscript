@@ -68,7 +68,7 @@ module.exports = function() {
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
 		}
-		else if(!Type.isInstance(item, NS.Foobar)) {
+		else if(!Type.isClassInstance(item, NS.Foobar)) {
 			throw new TypeError("'item' is not of type 'Foobar'");
 		}
 		$available.push(item);

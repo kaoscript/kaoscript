@@ -12,7 +12,7 @@ module.exports = function() {
 		if(foo === void 0 || foo === null) {
 			throw new TypeError("'foo' is not nullable");
 		}
-		else if(!Type.isEnumMember(foo, Foobar)) {
+		else if(!Type.isEnumInstance(foo, Foobar)) {
 			throw new TypeError("'foo' is not of type 'Foobar'");
 		}
 		return "xyz";

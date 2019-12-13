@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return 42;
@@ -14,6 +14,6 @@ module.exports = function() {
 			throw new TypeError("'x' is not of type 'Number'");
 		}
 	}
-	quxbaz(foobar());
+	quxbaz(Helper.notNull(foobar()));
 	quxbaz(foobar());
 };

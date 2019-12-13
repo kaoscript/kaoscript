@@ -36,7 +36,7 @@ module.exports = function() {
 			if(foo === void 0) {
 				foo = null;
 			}
-			else if(foo !== null && !Type.isInstance(foo, Foo)) {
+			else if(foo !== null && !Type.isClassInstance(foo, Foo)) {
 				throw new TypeError("'foo' is not of type 'Foo?'");
 			}
 			this._foo = foo;

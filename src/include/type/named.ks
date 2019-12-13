@@ -84,28 +84,28 @@ class NamedType extends Type {
 	isAlien() => @type.isAlien()
 	isAlteration() => @type.isAlteration()
 	isArray() => @type.isArray()
-	isAssignableToVariable(value, downcast) { // {{{
+	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
 		if this == value {
 			return true
 		}
 		else if value.isAny() {
 			if this.isNullable() {
-				return value.isNullable()
+				return nullcast || value.isNullable()
 			}
 			else {
 				return true
 			}
 		}
 		else if this.isAlias() {
-			return this.discardAlias().isAssignableToVariable(value, downcast)
+			return this.discardAlias().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
 		else if value is NamedType {
 			if value.isAlias() {
 				if this.isAlias() {
-					return @name == value.name() || this.discardAlias().isAssignableToVariable(value.discardAlias(), downcast)
+					return @name == value.name() || this.discardAlias().isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
 				}
 				else {
-					return this.isAssignableToVariable(value.discardAlias(), downcast)
+					return this.isAssignableToVariable(value.discardAlias(), anycast, nullcast, downcast)
 				}
 			}
 			else if @type.isClass() && value.isClass() {
@@ -119,11 +119,11 @@ class NamedType extends Type {
 			}
 		}
 		else if value is ReferenceType {
-			return this.isAssignableToVariable(value.type(), downcast)
+			return this.isAssignableToVariable(value.type(), anycast, nullcast, downcast)
 		}
 		else if value is UnionType {
 			for const type in value.types() {
-				if this.isAssignableToVariable(type, downcast) {
+				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
 					return true
 				}
 			}
@@ -133,12 +133,12 @@ class NamedType extends Type {
 		else if value is ExclusionType {
 			const types = value.types()
 
-			if !this.isAssignableToVariable(types[0], downcast) {
+			if !this.isAssignableToVariable(types[0], anycast, nullcast, downcast) {
 				return false
 			}
 
 			for const type in types from 1 {
-				if this.isAssignableToVariable(type, downcast) {
+				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
 					return false
 				}
 			}
@@ -429,6 +429,9 @@ class NamedType extends Type {
 			throw new NotSupportedException()
 		}
 	} // }}}
+	toCastFragments(fragments) { // {{{
+		@type.toCastFragments(fragments)
+	} // }}}
 	toExportOrIndex(references, mode) => @type.toExportOrIndex(references, mode)
 	toFragments(fragments, node)
 	toMetadata(references, mode) => @type.toMetadata(references, mode)
@@ -472,7 +475,7 @@ class NamedContainerType extends NamedType {
 			property = property.duplicate().container(this)
 		}
 
-		@type:DictionaryType.addProperty(name, property)
+		@type.addProperty(name, property)
 
 		@properties[name] = property
 	} // }}}

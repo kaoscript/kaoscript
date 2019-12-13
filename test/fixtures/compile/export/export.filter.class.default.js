@@ -36,7 +36,7 @@ module.exports = function() {
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.isInstance(x, Qux)) {
+			else if(!Type.isClassInstance(x, Qux)) {
 				throw new TypeError("'x' is not of type 'Qux'");
 			}
 		}

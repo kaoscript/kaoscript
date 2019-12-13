@@ -1,0 +1,1 @@
+TypeException: The type "String" can't be casted as a "Number" (line 2, file "fixtures/compile/operator/operator.typecasting.mismatch.ks")

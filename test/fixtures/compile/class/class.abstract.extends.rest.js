@@ -75,7 +75,7 @@ module.exports = function() {
 			if(greeting === void 0 || greeting === null) {
 				throw new TypeError("'greeting' is not nullable");
 			}
-			else if(!Type.isInstance(greeting, AbstractGreetings)) {
+			else if(!Type.isClassInstance(greeting, AbstractGreetings)) {
 				throw new TypeError("'greeting' is not of type 'AbstractGreetings'");
 			}
 			AbstractGreetings.prototype.__ks_cons.call(this, []);

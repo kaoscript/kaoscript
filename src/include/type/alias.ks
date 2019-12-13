@@ -60,5 +60,8 @@ class AliasType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
+	toCastFragments(fragments) { // {{{
+		@type.toCastFragments(fragments)
+	} // }}}
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
 }

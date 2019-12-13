@@ -28,7 +28,7 @@ module.exports = function() {
 		if(abilities === void 0 || abilities === null) {
 			throw new TypeError("'abilities' is not nullable");
 		}
-		else if(!Type.isEnumMember(abilities, AnimalFlags)) {
+		else if(!Type.isEnumInstance(abilities, AnimalFlags)) {
 			throw new TypeError("'abilities' is not of type 'AnimalFlags'");
 		}
 		if((abilities & AnimalFlags.HasClaws) !== 0) {

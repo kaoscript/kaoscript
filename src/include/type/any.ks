@@ -50,13 +50,13 @@ class AnyType extends Type {
 	getProperty(name) => AnyType.NullableUnexplicit
 	hashCode() => @nullable ? `Any?` : `Any`
 	isAny() => true
-	isAssignableToVariable(value, downcast) { // {{{
-		if !@explicit {
+	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
+		if anycast && !@explicit {
 			return true
 		}
 		else if value.isAny() {
 			if @nullable {
-				return value.isNullable()
+				return nullcast || value.isNullable()
 			}
 			else {
 				return true

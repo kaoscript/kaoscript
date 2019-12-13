@@ -714,10 +714,10 @@ export class Color {
 				let d: Number = Math.abs(this[component.field] - color[component.field])
 
 				if d > component.half {
-					d = component.mod:Number - d
+					d = component.mod:!Number - d
 				}
 
-				this[component.field] = ((this[component.field]:Number + (d * percentage)) % component.mod).round(component.round)
+				this[component.field] = ((this[component.field]:!Number + (d * percentage)) % component.mod).round(component.round)
 			}
 			else {
 				this[component.field] = $blend(this[component.field], color[component.field], percentage).limit(component.min, component.max).round(component.round)
@@ -947,13 +947,13 @@ export class Color {
 	luminance(): Number { // {{{
 		const that = this.like(Space::SRGB)
 
-		let r: float = that._red:float / 255
+		let r: float = that._red:!float / 255
 		r = r / 12.92 if r < 0.03928 else Math.pow((r + 0.055) / 1.055, 2.4)
 
-		let g: float = that._green:float / 255
+		let g: float = that._green:!float / 255
 		g = g / 12.92 if g < 0.03928 else Math.pow((g + 0.055) / 1.055, 2.4)
 
-		let b: float = that._blue:float / 255
+		let b: float = that._blue:!float / 255
 		b = b / 12.92 if b < 0.03928 else Math.pow((b + 0.055) / 1.055, 2.4)
 
 		return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)

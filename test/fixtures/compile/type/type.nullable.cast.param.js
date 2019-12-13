@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	function foobar(x) {
 		if(arguments.length < 1) {
@@ -14,6 +15,6 @@ module.exports = function() {
 		if(x === void 0) {
 			x = null;
 		}
-		foobar(x);
+		foobar(Helper.notNull(x));
 	}
 };

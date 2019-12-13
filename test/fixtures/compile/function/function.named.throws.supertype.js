@@ -12,7 +12,7 @@ module.exports = function() {
 		foo(42);
 	}
 	catch(__ks_0) {
-		if(Type.isInstance(__ks_0, Error)) {
+		if(Type.isClassInstance(__ks_0, Error)) {
 		}
 	}
 };

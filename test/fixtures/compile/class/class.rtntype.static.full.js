@@ -51,7 +51,7 @@ module.exports = function() {
 			if(instance === void 0 || instance === null) {
 				throw new TypeError("'instance' is not nullable");
 			}
-			else if(!Type.isInstance(instance, Foobar)) {
+			else if(!Type.isClassInstance(instance, Foobar)) {
 				throw new TypeError("'instance' is not of type 'Foobar'");
 			}
 			Foobar._instance = instance;

@@ -14,31 +14,31 @@ module.exports = function() {
 		}
 	}
 	function foobar() {
-		if(arguments.length === 2 && Type.isInstance(arguments[0], Quxbaz) && Type.isInstance(arguments[1], Quxbaz)) {
+		if(arguments.length === 2 && Type.isClassInstance(arguments[0], Quxbaz) && Type.isClassInstance(arguments[1], Quxbaz)) {
 			let __ks_i = -1;
 			let aType = arguments[++__ks_i];
 			if(aType === void 0 || aType === null) {
 				throw new TypeError("'aType' is not nullable");
 			}
-			else if(!Type.isInstance(aType, Quxbaz)) {
+			else if(!Type.isClassInstance(aType, Quxbaz)) {
 				throw new TypeError("'aType' is not of type 'Quxbaz'");
 			}
 			let bType = arguments[++__ks_i];
 			if(bType === void 0 || bType === null) {
 				throw new TypeError("'bType' is not nullable");
 			}
-			else if(!Type.isInstance(bType, Quxbaz)) {
+			else if(!Type.isClassInstance(bType, Quxbaz)) {
 				throw new TypeError("'bType' is not of type 'Quxbaz'");
 			}
 			return foobar([aType], [bType]);
 		}
-		else if(arguments.length === 2 && Type.isInstance(arguments[0], Quxbaz)) {
+		else if(arguments.length === 2 && Type.isClassInstance(arguments[0], Quxbaz)) {
 			let __ks_i = -1;
 			let aType = arguments[++__ks_i];
 			if(aType === void 0 || aType === null) {
 				throw new TypeError("'aType' is not nullable");
 			}
-			else if(!Type.isInstance(aType, Quxbaz)) {
+			else if(!Type.isClassInstance(aType, Quxbaz)) {
 				throw new TypeError("'aType' is not of type 'Quxbaz'");
 			}
 			let bTypes = arguments[++__ks_i];
@@ -50,7 +50,7 @@ module.exports = function() {
 			}
 			return foobar([aType], bTypes);
 		}
-		else if(arguments.length === 2 && Type.isInstance(arguments[1], Quxbaz)) {
+		else if(arguments.length === 2 && Type.isClassInstance(arguments[1], Quxbaz)) {
 			let __ks_i = -1;
 			let aTypes = arguments[++__ks_i];
 			if(aTypes === void 0 || aTypes === null) {
@@ -63,7 +63,7 @@ module.exports = function() {
 			if(bType === void 0 || bType === null) {
 				throw new TypeError("'bType' is not nullable");
 			}
-			else if(!Type.isInstance(bType, Quxbaz)) {
+			else if(!Type.isClassInstance(bType, Quxbaz)) {
 				throw new TypeError("'bType' is not of type 'Quxbaz'");
 			}
 			return foobar(aTypes, [bType]);

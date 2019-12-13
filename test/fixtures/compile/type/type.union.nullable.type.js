@@ -32,7 +32,7 @@ module.exports = function() {
 		}
 	}
 	function foobar(x = null) {
-		if(x !== null && !(Type.isInstance(x, Foobar) || Type.isString(x))) {
+		if(x !== null && !(Type.isClassInstance(x, Foobar) || Type.isString(x))) {
 			throw new TypeError("'x' is not of type 'Foobar', 'String' or 'Null'");
 		}
 		if(!Type.isValue(x)) {
@@ -50,7 +50,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.isInstance(x, Foobar)) {
+		else if(!Type.isClassInstance(x, Foobar)) {
 			throw new TypeError("'x' is not of type 'Foobar'");
 		}
 	}

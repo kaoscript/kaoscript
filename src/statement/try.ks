@@ -430,7 +430,7 @@ class TryStatement extends Statement {
 				ifs.step().code('else ') if i != 0
 
 				ifs
-					.code('if(', $runtime.type(this), '.isInstance(', error, ', ')
+					.code('if(', $runtime.type(this), '.isClassInstance(', error, ', ')
 					.compile(@catchClauses[i].type)
 					.code('))')
 					.step()

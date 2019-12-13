@@ -30,13 +30,13 @@ module.exports = function() {
 		}
 	}
 	function foobar() {
-		if(arguments.length === 1 && Type.isInstance(arguments[0], SubClassA)) {
+		if(arguments.length === 1 && Type.isClassInstance(arguments[0], SubClassA)) {
 			let __ks_i = -1;
 			let x = arguments[++__ks_i];
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.isInstance(x, SubClassA)) {
+			else if(!Type.isClassInstance(x, SubClassA)) {
 				throw new TypeError("'x' is not of type 'SubClassA'");
 			}
 		}
@@ -46,7 +46,7 @@ module.exports = function() {
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!Type.isInstance(x, Master)) {
+			else if(!Type.isClassInstance(x, Master)) {
 				throw new TypeError("'x' is not of type 'Master'");
 			}
 		}

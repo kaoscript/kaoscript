@@ -469,7 +469,9 @@ class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 
 class BinaryOperatorTypeCasting extends Expression {
 	private {
+		_forced: Boolean	= false
 		_left
+		_nullable: Boolean	= false
 		_type: Type
 	}
 	analyse() { // {{{
@@ -477,6 +479,17 @@ class BinaryOperatorTypeCasting extends Expression {
 		@left.analyse()
 
 		@type = Type.fromAST(@data.right, this)
+
+		for const modifier in @data.operator.modifiers {
+			if modifier.kind == ModifierKind::Forced {
+				@forced = true
+			}
+			else if modifier.kind == ModifierKind::Nullable {
+				@nullable = true
+
+				@type = @type.setNullable(true)
+			}
+		}
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
@@ -501,7 +514,22 @@ class BinaryOperatorTypeCasting extends Expression {
 	listAssignments(array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
 	toFragments(fragments, mode) { // {{{
-		fragments.compile(@left)
+		if @forced || @left.type().isAssignableToVariable(@type, false, false, false) {
+			fragments.compile(@left)
+		}
+		else if !@nullable && @left.type().isAssignableToVariable(@type, false, true, false) {
+			fragments.code($runtime.helper(this), '.notNull(').compile(@left).code(')')
+		}
+		else if @type.isAssignableToVariable(@left.type(), true, @nullable, true) {
+			fragments.code($runtime.helper(this), '.cast(').compile(@left).code($comma, $quote(@type.name()), $comma, @nullable)
+
+			@type.toCastFragments(fragments)
+
+			fragments.code(')')
+		}
+		else {
+			TypeException.throwNotCastableTo(@left.type(), @type, this)
+		}
 	} // }}}
 	type() => @type
 }
