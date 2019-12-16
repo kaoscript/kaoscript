@@ -151,6 +151,34 @@ class FunctionDeclaration extends Statement {
 		_oldVariableName: String
 		_variable: FunctionVariable
 	}
+	static toFlatWrongDoingFragments(block, ctrl?, argName, async, returns) { // {{{
+		if ctrl == null {
+			if async {
+				throw new NotImplementedException()
+			}
+			else {
+				block
+					.newControl()
+					.code(`if(\(argName).length !== 0)`)
+					.step()
+					.line('throw new SyntaxError("Wrong number of arguments")')
+					.done()
+			}
+		}
+		else {
+			if async {
+				ctrl.step().code('else').step().line(`return __ks_cb(new SyntaxError("Wrong number of arguments"))`).done()
+			}
+			else if returns {
+				ctrl.done()
+
+				block.line('throw new SyntaxError("Wrong number of arguments")')
+			}
+			else {
+				ctrl.step().code('else').step().line('throw new SyntaxError("Wrong number of arguments")').done()
+			}
+		}
+	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
 
@@ -218,6 +246,27 @@ class FunctionDeclaration extends Statement {
 	} // }}}
 	initializeVariable(variable, type, expression, node)
 	name() => @name
+	toFlatFooterFragments(fragments) { // {{{
+		fragments.done()
+	} // }}}
+	toFlatHeaderFragments(fragments) { // {{{
+		const block = fragments.code(`function \(@variable.getSecureName())()`).newBlock()
+
+		if @variable.isAsync() {
+			block.line('var __ks_cb = arguments[arguments.length - 1]')
+
+			block
+				.newControl()
+				.code('if(!Type.isFunction(__ks_cb))')
+				.step()
+				.line(`throw new SyntaxError("Callback can't be found")`)
+				.done()
+
+			block.line('var __ks_arguments = Array.prototype.slice.call(arguments, 0, arguments.length - 1)')
+		}
+
+		return block
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		return unless @main
 
@@ -267,13 +316,15 @@ class FunctionDeclaration extends Statement {
 			const assessment = this.type().assessment()
 
 			if assessment.flattenable {
+				const argName = @variable.isAsync() ? '__ks_arguments' : 'arguments'
+
 				Router.toFragments(
 					assessment
 					fragments.newLine()
-					'arguments'
+					argName
 					false
-					(node, fragments) => fragments.code(`function \(name)()`).newBlock()
-					(fragments) => fragments.done()
+					(node, fragments) => this.toFlatHeaderFragments(fragments)
+					(fragments) => this.toFlatFooterFragments(fragments)
 					(fragments, method, index) => {
 						const declarator = @variable.getDeclarator(index)
 
@@ -281,7 +332,7 @@ class FunctionDeclaration extends Statement {
 
 						return declarator.isExit()
 					}
-					ClassDeclaration.toWrongDoingFragments
+					FunctionDeclaration.toFlatWrongDoingFragments
 					this
 				).done()
 			}
@@ -440,7 +491,9 @@ class FunctionDeclarator extends AbstractNode {
 		fragments.code(')').done()
 	} // }}}
 	toRouterFragments(fragments, wrongdoer) { // {{{
-		Parameter.toFragments(this, fragments, ParameterMode::OverloadedFunction, (fragments) => fragments, wrongdoer)
+		const mode = @type.isAsync() ? ParameterMode::AsyncFunction : ParameterMode::OverloadedFunction
+
+		Parameter.toFragments(this, fragments, mode, (fragments) => fragments, wrongdoer)
 
 		fragments.compile(@block, Mode::None)
 
@@ -544,6 +597,7 @@ class FunctionVariable extends Variable {
 	} // }}}
 	getDeclarator(index: Number) => @declarators[index]
 	getDeclaratorName(index) => `__ks_\(@name)_\(index)`
+	isAsync() => @declaredType.isAsync()
 	length() => @declarators.length
 	toStatementFragments(fragments, mode) { // {{{
 		for const declarator, index in @declarators {

@@ -429,7 +429,7 @@ class BlockScope extends Scope {
 			const variables: Array = @variables[name]
 
 			let i = 0
-			while variables[i + 2] <= @line {
+			while i + 2 < variables.length && variables[i + 2] <= @line {
 				i += 2
 			}
 

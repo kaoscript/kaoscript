@@ -1,5 +1,6 @@
 enum ParameterMode {
 	ArrowFunction
+	AsyncFunction
 	Default
 	HybridConstructor
 	OverloadedFunction

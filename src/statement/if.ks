@@ -174,7 +174,7 @@ class IfStatement extends Statement {
 				type = map.false.type.setNullable(true)
 			}
 
-			map.variable.setDeclaredType(type).flagDefinitive()
+			@parent.initializeVariable(map.variable, type, this, this)
 		}
 	} // }}}
 	translate() { // {{{
@@ -223,6 +223,8 @@ class IfStatement extends Statement {
 				}
 			}
 		}
+
+		@parent.addInitializableVariable(variable, node)
 	} // }}}
 	assignments() { // {{{
 		if @whenFalseExpression is IfStatement {
@@ -241,7 +243,7 @@ class IfStatement extends Statement {
 
 		if variable.isInitialized() {
 			if variable.isImmutable() {
-				ReferenceException.throwImmutable(name, node)
+				ReferenceException.throwImmutable(name, expression)
 			}
 		}
 		else if const map = @lateInitVariables[name] {
@@ -249,7 +251,7 @@ class IfStatement extends Statement {
 
 			if map[whenTrue].type != null {
 				if variable.isImmutable() {
-					ReferenceException.throwImmutable(name, node)
+					ReferenceException.throwImmutable(name, expression)
 				}
 				else if !type.matchContentOf(map[whenTrue].type) {
 					TypeException.throwInvalidAssignement(name, map[whenTrue].type, type, expression)

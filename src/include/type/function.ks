@@ -108,7 +108,6 @@ class FunctionType extends Type {
 					fragments += ', '
 				}
 
-				console.log(parameter)
 				fragments += parameter.toQuote()
 			}
 

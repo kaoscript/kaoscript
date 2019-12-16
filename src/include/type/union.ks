@@ -191,7 +191,11 @@ class UnionType extends Type {
 		const types = []
 
 		for const type in @types {
-			const property = type.getProperty(name) ?? Type.Any
+			let property = type.getProperty(name) ?? Type.Any
+
+			if property is StructFieldType {
+				property = property.discardVariable()
+			}
 
 			if !types.some(t => property.matchContentOf(t)) {
 				types.push(property)
@@ -209,6 +213,15 @@ class UnionType extends Type {
 		const elements = [type.hashCode() for type in @types]
 
 		return elements.join('|')
+	} // }}}
+	isArray() { // {{{
+		for const type in @types {
+			if !type.isArray() {
+				return false
+			}
+		}
+
+		return true
 	} // }}}
 	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
 		if value.isAny() {
@@ -228,6 +241,15 @@ class UnionType extends Type {
 
 			return true
 		}
+	} // }}}
+	isDictionary() { // {{{
+		for const type in @types {
+			if !type.isDictionary() {
+				return false
+			}
+		}
+
+		return true
 	} // }}}
 	isExplicit() => @explicit
 	isExportable() { // {{{
@@ -300,6 +322,11 @@ class UnionType extends Type {
 		}
 
 		return true
+	} // }}}
+	parameter() { // {{{
+		const types = [type.parameter() for const type in @types]
+
+		return Type.union(@scope, ...types)
 	} // }}}
 	reduce(type: Type) { // {{{
 		const types = [t for const t in @types when !t.matchContentOf(type)]

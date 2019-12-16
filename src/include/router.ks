@@ -88,7 +88,7 @@ namespace Router {
 			))
 		} // }}}
 
-		func buildFilters(filters: Array<Filter>, matchingFilters: Array<RouteFilter>, node, index: Number, max: Number, routes: Array<Route>): Void { // {{{
+		func buildFilters(filters: Array<Filter>, matchingFilters: Array<RouteFilter>, node: TreeNode, index: Number, max: Number, routes: Array<Route>): Void { // {{{
 			if node.isFilter {
 				if !(node.type.isAny() && node.type.isNullable()) {
 					filters = [...filters]
@@ -109,9 +109,11 @@ namespace Router {
 			}
 
 			if index == max {
+				const leaf = node as TreeLeaf
+
 				routes.push(Route(
-					function: node.function
-					index: node.function.index()
+					function: leaf.function
+					index: leaf.function.index()
 					min: max
 					max: max
 					filters
@@ -122,125 +124,33 @@ namespace Router {
 				const next = index + 1
 
 				for const name in node.order {
-					buildFilters(filters, matchingFilters, node.columns[name], next, max, routes)
+					buildFilters(filters, matchingFilters, node:TreeBranch.columns[name], next, max, routes)
 				}
 			}
 		} // }}}
 
-		func buildRoutes(group, routes: Array<Route>, overflow): Void { // {{{
-			let rowCount: Number = group.rowCount
-			let rows: Dictionary<Row> = {...group.rows}
+		func buildMatchingFiltersFromNode(filters: Array<Filter>, node: TreeNode, excludedIndex: Number, route: Route) { // {{{
+			if node.index != excludedIndex {
+				if !(node.type.isAny() && node.type.isNullable()) {
+					filters = [...filters]
 
-			while rowCount > 1 && !usingSameFunction(rows) {
-				const uniques: Array<UniqueRow> = []
-
-				for const index from 0 til group.n {
-					resolveUniqueRows(index, rowCount, rows, uniques)
+					filters.push(Filter(
+						index: node.index - 1
+						type: node.type
+					))
 				}
+			}
 
-				if uniques.length == 0 {
-					break
-				}
-
-				if uniques.length > 1 {
-					uniques.sort(sortUniques)
-				}
-
-				const uniq = uniques[0]
-
-				routes.push(Route(
-					function: uniq.function
-					index: uniq.function.index()
-					min: group.n
-					max: group.n
-					filters: [
-						Filter(
-							index: uniq.index
-							type: uniq.type
-						)
-					]
+			if node is TreeLeaf {
+				route.matchingFilters.push(RouteFilter(
+					min: route.min
+					max: route.max
+					filters
 				))
-
-				for const key in uniq.rows {
-					delete rows[key]
-				}
-
-				rowCount -= uniq.rows.length
 			}
-
-			const keys: Array = Dictionary.keys(rows)
-
-			if keys.length == 1 || usingSameFunction(rows) {
-				const row = rows[keys[0]]
-
-				const filters = []
-				for const type, index in row.types {
-					if !(type.isAny() && type.isNullable()) {
-						filters.push(Filter(
-							index
-							type
-						))
-					}
-				}
-
-				if overflow {
-					routes.push(Route(
-						function: row.function
-						index: row.function.index()
-						min: group.n
-						max: group.n
-						filters
-					))
-				}
-				else {
-					const matchingFilters = []
-
-					if filters.length != 0 {
-						matchingFilters.push(RouteFilter(
-							min: group.n
-							max: group.n
-							filters
-						))
-					}
-
-					routes.push(Route(
-						function: row.function
-						index: row.function.index()
-						min: group.n
-						max: group.n
-						matchingFilters
-					))
-				}
-			}
-			else if keys.length > 0 {
-				const tree = createTree(keys, rows, group.n)
-
-				if group.n > 1 {
-					for const node of tree.columns {
-						if node is TreeBranch {
-							buildNode(node, 1, group.n, tree.indexes)
-						}
-					}
-				}
-
-				tree.order = sortNodes(tree.columns)
-
-				filterOutCommonTypes(keys, tree, rows, group.n)
-
-				filterOutNodes(tree, false)
-
-				for const name in tree.order {
-					buildFilters([], [], tree.columns[name], 1, group.n, routes)
-				}
-
-				if !overflow {
-					const route: Route = routes.last()
-
-					for const filter in route.filters {
-						addMatchingFilter(route.matchingFilters, route.min, route.max, filter)
-					}
-
-					route.filters.clear()
+			else {
+				for const node of node:TreeBranch.columns {
+					buildMatchingFiltersFromNode(filters, node, excludedIndex, route)
 				}
 			}
 		} // }}}
@@ -307,6 +217,162 @@ namespace Router {
 				}
 
 				node.order = sortNodes(node.columns)
+			}
+		} // }}}
+
+		func buildRoutes(group, routes: Array<Route>, overflow): Void { // {{{
+			let rowCount: Number = group.rowCount
+			let rows: Dictionary<Row> = {...group.rows}
+
+			while rowCount > 1 && !usingSameFunction(rows) {
+				const uniques: Array<UniqueRow> = []
+
+				for const index from 0 til group.n {
+					resolveUniqueRows(index, rowCount, rows, uniques)
+				}
+
+				if uniques.length == 0 {
+					break
+				}
+
+				if uniques.length > 1 {
+					uniques.sort(sortUniques)
+				}
+
+				const uniq = uniques[0]
+
+				const route = Route(
+					function: uniq.function
+					index: uniq.function.index()
+					min: group.n
+					max: group.n
+					filters: [
+						Filter(
+							index: uniq.index
+							type: uniq.type
+						)
+					]
+				)
+
+				if !overflow && uniq.index + 1 < group.n {
+					const tree = createTree(uniq.rows, rows, group.n)
+
+					for const node of tree.columns {
+						if node is TreeBranch {
+							buildNode(node, 1, group.n, tree.indexes)
+						}
+					}
+
+					tree.order = sortNodes(tree.columns)
+
+					filterOutNodes(tree, false)
+
+					for const node of tree.columns {
+						buildMatchingFiltersFromNode([], node:!TreeBranch, uniq.index + 1, route)
+					}
+				}
+
+				for const key in uniq.rows {
+					delete rows[key]
+				}
+
+				routes.push(route)
+
+				rowCount -= uniq.rows.length
+			}
+
+			const keys: Array = Dictionary.keys(rows)
+
+			if keys.length == 1 {
+				const row = rows[keys[0]]
+
+				const filters = []
+				for const type, index in row.types {
+					if !(type.isAny() && type.isNullable()) {
+						filters.push(Filter(
+							index
+							type
+						))
+					}
+				}
+
+				if overflow {
+					routes.push(Route(
+						function: row.function
+						index: row.function.index()
+						min: group.n
+						max: group.n
+						filters
+					))
+				}
+				else {
+					const matchingFilters = []
+
+					if filters.length != 0 {
+						matchingFilters.push(RouteFilter(
+							min: group.n
+							max: group.n
+							filters
+						))
+					}
+
+					routes.push(Route(
+						function: row.function
+						index: row.function.index()
+						min: group.n
+						max: group.n
+						matchingFilters
+					))
+				}
+			}
+			else if keys.length > 0 {
+				const tree = createTree(keys, rows, group.n)
+
+				if group.n > 1 {
+					for const node of tree.columns {
+						if node is TreeBranch {
+							buildNode(node, 1, group.n, tree.indexes)
+						}
+					}
+				}
+
+				tree.order = sortNodes(tree.columns)
+
+				filterOutCommonTypes(keys, tree, rows, group.n)
+
+				filterOutNodes(tree, false)
+
+				if usingSameFunction(rows) {
+					const row = rows[keys[0]]
+
+					const route = Route(
+						function: row.function
+						index: row.function.index()
+						min: group.n
+						max: group.n
+					)
+
+					for const node of tree.columns {
+						buildMatchingFiltersFromNode([], node:!TreeBranch, -1, route)
+					}
+
+					routes.push(route)
+				}
+				else {
+					for const name in tree.order {
+						buildFilters([], [], tree.columns[name], 1, group.n, routes)
+					}
+
+					if !overflow {
+						const route: Route = routes.last()
+
+						for const filter in route.filters {
+							addMatchingFilter(route.matchingFilters, route.min, route.max, filter)
+						}
+
+						route.filters.clear()
+					}
+				}
 			}
 		} // }}}
 
@@ -420,8 +486,14 @@ namespace Router {
 
 		func expandFunction(group, function: FunctionType, parameters: Array<ParameterType>, target: Number, count: Number, pIndex: Number, pCount: Number, key: String, types: Array<Type>): Void { // {{{
 			if pIndex == parameters.length {
-				if const match = group.rows[key] {
-					if function.max() == match.function.max() {
+				if types.length != target {
+					// do nothing
+				}
+				else if const match = group.rows[key] {
+					if function == match.function {
+						// do nothing
+					}
+					else if function.max() == match.function.max() {
 						NotImplementedException.throw()
 					}
 					else if function.max() < match.function.max() {
@@ -444,11 +516,15 @@ namespace Router {
 				const parameter = parameters[pIndex]
 
 				if pCount < parameter.min() {
-					expandParameter(group, function, parameters, target, count, pIndex, pCount + 1, key, types, parameter.type())
+					const type = parameter.type()
+
+					expandParameter(group, function, parameters, target, count, pIndex, pCount + 1, key, types, type)
 				}
 				else if parameter.max() == Infinity {
 					if count < target {
-						expandParameter(group, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, parameter.type())
+						const type = parameter.type()
+
+						expandParameter(group, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, type)
 					}
 					else {
 						expandFunction(group, function, parameters, target, count, pIndex + 1, 0, key, types)
@@ -456,11 +532,17 @@ namespace Router {
 				}
 				else {
 					if count < target && pCount < parameter.max() {
-						expandParameter(group, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, parameter.type())
+						const type = parameter.type()
+
+						expandParameter(group, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, type)
 					}
 					else {
 						expandFunction(group, function, parameters, target, count, pIndex + 1, 0, key, types)
 					}
+				}
+
+				if pCount == 0 && parameter.hasDefaultValue() {
+					expandFunction(group, function, parameters, target, count, pIndex + 1, 0, key, [...types])
 				}
 			}
 		} // }}}
@@ -522,6 +604,38 @@ namespace Router {
 
 								break
 							}
+						}
+					}
+					else {
+						const types = [child.type]
+						const names = [name]
+
+						for const key in node.order from n + 1 {
+							if node.columns[key].isNode || node.columns[key].function != child.function {
+								break
+							}
+							else {
+								types.push(node.columns[key].type)
+								names.push(key)
+
+								child.weight += node.columns[key].weight
+							}
+						}
+
+						if names.length > 1 {
+							child.isFilter = forceFilter
+
+							child.type = Type.union(child.type.scope(), ...types)
+
+							const name = child.type.hashCode()
+
+							node.order.splice(n, names.length, name)
+
+							for const key in names {
+								delete node.columns[key]
+							}
+
+							node.columns[name] = child
 						}
 					}
 				}
@@ -955,7 +1069,7 @@ namespace Router {
 			}
 		} // }}}
 
-		export func toEqLengthFragments(routes: Array<Route>, ctrl: ControlBuilder, argName: String, call: Function, node: AbstractNode): Boolean { // {{{
+		export func toEqLengthFragments(routes: Array<Route>, ctrl: ControlBuilder, argName: String, delta: Number, call: Function, node: AbstractNode): Boolean { // {{{
 			const route = routes[0]
 
 			if route.max == Infinity && route.min == 0 {
@@ -971,16 +1085,16 @@ namespace Router {
 				ctrl.code(`if(`)
 
 				if route.min == route.max {
-					ctrl.code(`\(argName).length === \(route.min)`)
+					ctrl.code(`\(argName).length === \(route.min + delta)`)
 				}
 				else if route.max == Infinity {
-					ctrl.code(`\(argName).length >= \(route.min)`)
+					ctrl.code(`\(argName).length >= \(route.min + delta)`)
 				}
 				else if route.min + 1 == route.max {
-					ctrl.code(`\(argName).length === \(route.min) || \(argName).length === \(route.max)`)
+					ctrl.code(`\(argName).length === \(route.min + delta) || \(argName).length === \(route.max + delta)`)
 				}
 				else {
-					ctrl.code(`\(argName).length >= \(route.min) && \(argName).length <= \(route.max)`)
+					ctrl.code(`\(argName).length >= \(route.min + delta) && \(argName).length <= \(route.max + delta)`)
 				}
 
 				ctrl.code(`)`).step()
@@ -1051,15 +1165,15 @@ namespace Router {
 			}
 		} // }}}
 
-		export func toMixLengthFragments(tree, ctrl: ControlBuilder, argName: String, call: Function, node: AbstractNode) { // {{{
+		export func toMixLengthFragments(tree, ctrl: ControlBuilder, argName: String, delta: Number, call: Function, node: AbstractNode) { // {{{
 			let ne = false
 
 			if tree.equal.length != 0 {
-				ne = toEqLengthFragments(tree.equal, ctrl, argName, call, node)
+				ne = toEqLengthFragments(tree.equal, ctrl, argName, delta, call, node)
 			}
 
 			if tree.midway.keys.length == 1 {
-				ne = toEqLengthFragments(tree.midway[tree.midway.keys[0]], ctrl, argName, call, node)
+				ne = toEqLengthFragments(tree.midway[tree.midway.keys[0]], ctrl, argName, delta, call, node)
 			}
 			else if tree.midway.keys.length > 1 {
 				throw new NotImplementedException(node)
@@ -1694,11 +1808,11 @@ namespace Router {
 			for const function, index in functions {
 				function.index(index)
 
-				if function.absoluteMax() == Infinity {
+				if function.max() == Infinity {
 					infinities.push(function)
 				}
 				else {
-					for const n from function.absoluteMin() to function.absoluteMax() {
+					for const n from function.min() to function.max() {
 						if groups[n]? {
 							groups[n].functions.push(function)
 						}
@@ -1710,8 +1824,8 @@ namespace Router {
 						}
 					}
 
-					min = Math.min(min, function.absoluteMin())
-					max = Math.max(max, function.absoluteMax())
+					min = Math.min(min, function.min())
+					max = Math.max(max, function.max())
 				}
 			}
 
@@ -1870,8 +1984,9 @@ namespace Router {
 			}
 			else if assessment.routes.length == 1 {
 				const route = assessment.routes[0]
-				const min = route.function.absoluteMin()
-				const max = route.function.absoluteMax()
+				const delta = assessment.async ? 1 : 0
+				const min = route.function.min()
+				const max = route.function.max()
 
 				if min == 0 && max >= Infinity {
 					call(block, route.function, route.index)
@@ -1879,7 +1994,7 @@ namespace Router {
 				else if min == max {
 					const ctrl = block.newControl()
 
-					ctrl.code(`if(\(argName).length === \(min))`).step()
+					ctrl.code(`if(\(argName).length === \(min + delta))`).step()
 
 					Fragment.toTestCallFragments(route, ctrl, argName, call, node)
 
@@ -1888,7 +2003,7 @@ namespace Router {
 				else if max < Infinity {
 					const ctrl = block.newControl()
 
-					ctrl.code(`if(\(argName).length >= \(min) && \(argName).length <= \(max))`).step()
+					ctrl.code(`if(\(argName).length >= \(min + delta) && \(argName).length <= \(max + delta))`).step()
 
 					Fragment.toTestCallFragments(route, ctrl, argName, call, node)
 
@@ -1899,6 +2014,8 @@ namespace Router {
 				}
 			}
 			else {
+				const delta = assessment.async ? 1 : 0
+
 				const tree = {}
 				for const route in assessment.routes {
 					if tree[route.max]? {
@@ -1919,10 +2036,10 @@ namespace Router {
 
 				for const item of tree {
 					if item is Array {
-						ne = Fragment.toEqLengthFragments(item, ctrl, argName, call, node)
+						ne = Fragment.toEqLengthFragments(item, ctrl, argName, delta, call, node)
 					}
 					else {
-						ne = Fragment.toMixLengthFragments(item, ctrl, argName, call, node)
+						ne = Fragment.toMixLengthFragments(item, ctrl, argName, delta, call, node)
 					}
 				}
 

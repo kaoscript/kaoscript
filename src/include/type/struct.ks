@@ -395,6 +395,7 @@ class StructFieldType extends Type {
 	override clone() { // {{{
 		NotImplementedException.throw()
 	} // }}}
+	discardVariable() => @type
 	override export(references, mode) => { // {{{
 		required: @required
 		type: @type.export(references, mode)
