@@ -755,6 +755,13 @@ namespace Router {
 						}
 
 						if match.matchingFilters.length != 0 {
+							if route.matchingFilters.length == 0 {
+								route.matchingFilters.push(RouteFilter(
+									min: route.min
+									max: route.min
+								))
+							}
+
 							route.matchingFilters.push(...match.matchingFilters)
 						}
 					}
