@@ -20,6 +20,10 @@ class IfExpression extends Expression {
 	prepare() { // {{{
 		@condition.prepare()
 
+		for const data, name of @condition.inferTypes({}) {
+			@scope.updateInferable(name, data, this)
+		}
+
 		@whenTrue.prepare()
 
 		if @whenFalse? {

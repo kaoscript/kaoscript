@@ -5,7 +5,7 @@ module.exports = function(Array, __ks_Array, Object, __ks_Object, clone) {
 	var __ks_1_valuable = Type.isValue(Object);
 	var __ks_2_valuable = Type.isValue(clone);
 	if(!__ks_0_valuable || !__ks_1_valuable || !__ks_2_valuable) {
-		var __ks__ = require("./require.alt.roi.loop.genesis.ks")();
+		var __ks__ = require("./require.alt.roi.loop1.genesis.ks")();
 		if(!__ks_0_valuable) {
 			Array = __ks__.Array;
 			__ks_Array = __ks__.__ks_Array;
