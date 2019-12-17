@@ -123,8 +123,8 @@ class ClassType extends Type {
 
 					type.copyFrom(source.type())
 
-					for method in data.constructors {
-						type.addConstructor(ClassConstructorType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+					for const constructor in data.constructors {
+						type.addConstructor(ClassConstructorType.fromMetadata(constructor, metadata, references, alterations, queue, scope, node))
 					}
 
 					for const vtype, name of data.instanceVariables {
@@ -443,7 +443,7 @@ class ClassType extends Type {
 			@instanceVariables[name] = variable
 		}
 
-		@constructors.concat(src._constructors)
+		@constructors.push(...src._constructors)
 
 		if src._sealed {
 			@seal = Dictionary.clone(src._seal)

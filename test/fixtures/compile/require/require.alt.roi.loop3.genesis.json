@@ -1,0 +1,60 @@
+{
+  "aliens": [
+    0,
+    "Date"
+  ],
+  "requirements": [
+    0,
+    "Date",
+    false
+  ],
+  "exports": [
+    1,
+    "Date"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "class": {
+        "reference": 0
+      },
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "fromGenesis": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": true,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

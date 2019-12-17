@@ -1,0 +1,155 @@
+{
+  "aliens": [],
+  "requirements": [
+    0,
+    "Date",
+    false
+  ],
+  "exports": [
+    1,
+    "Date"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "fromGenesis": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": true,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "class": {
+        "reference": 0
+      },
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [
+        {
+          "id": 1,
+          "access": 4,
+          "sealed": true,
+          "min": 2,
+          "max": 7,
+          "parameters": [
+            {
+              "name": "year",
+              "type": {
+                "reference": 2
+              },
+              "min": 1,
+              "max": 1,
+              "default": 0
+            },
+            {
+              "name": "month",
+              "type": {
+                "reference": 2
+              },
+              "min": 1,
+              "max": 1,
+              "default": 0
+            },
+            {
+              "name": "day",
+              "type": {
+                "reference": 2
+              },
+              "min": 0,
+              "max": 1,
+              "default": 1
+            },
+            {
+              "name": "hours",
+              "type": {
+                "reference": 2
+              },
+              "min": 0,
+              "max": 1,
+              "default": 1
+            },
+            {
+              "name": "minutes",
+              "type": {
+                "reference": 2
+              },
+              "min": 0,
+              "max": 1,
+              "default": 1
+            },
+            {
+              "name": "seconds",
+              "type": {
+                "reference": 2
+              },
+              "min": 0,
+              "max": 1,
+              "default": 1
+            },
+            {
+              "name": "milliseconds",
+              "type": {
+                "reference": 2
+              },
+              "min": 0,
+              "max": 1,
+              "default": 1
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "fromAugment": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": true,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    },
+    {
+      "kind": "alias",
+      "of": {
+        "kind": "union",
+        "types": [
+          "Number",
+          "String"
+        ]
+      }
+    }
+  ],
+  "macros": []
+}
