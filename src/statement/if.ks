@@ -5,6 +5,7 @@ class IfStatement extends Statement {
 		_condition
 		_declared: Boolean				= false
 		_lateInitVariables				= {}
+		_hasWhenFalse: Boolean			= false
 		_variable
 		_whenFalseExpression			= null
 		_whenFalseScope: Scope?			= null
@@ -29,12 +30,14 @@ class IfStatement extends Statement {
 			@condition.analyse()
 		}
 
+		@hasWhenFalse = @data.whenFalse?
+
 		@scope.line(@data.whenTrue.start.line)
 
 		@whenTrueExpression = $compile.block(@data.whenTrue, this, @whenTrueScope)
 		@whenTrueExpression.analyse()
 
-		if @data.whenFalse? {
+		if @hasWhenFalse {
 			@whenFalseScope = this.newScope(@scope, ScopeType::InlineBlock)
 
 			@scope.line(@data.whenFalse.start.line)
@@ -129,16 +132,52 @@ class IfStatement extends Statement {
 			@scope.line(@data.end.line)
 
 			if @whenTrueExpression.isExit() {
+				for const map, name of @lateInitVariables {
+					if map.false.initializable {
+						@parent.initializeVariable(map.variable, map.false.type, this, this)
+					}
+					else {
+						SyntaxException.throwMissingAssignmentIfFalse(name, @whenFalseExpression)
+					}
+				}
+
 				for const data, name of @whenFalseScope.listUpdatedInferables() {
 					@scope.updateInferable(name, data, this)
 				}
 			}
 			else if @whenFalseExpression.isExit() {
+				for const map, name of @lateInitVariables {
+					if map.true.initializable {
+						@parent.initializeVariable(map.variable, map.true.type, this, this)
+					}
+					else {
+						SyntaxException.throwMissingAssignmentIfTrue(name, @whenTrueExpression)
+					}
+				}
+
 				for const data, name of @whenTrueScope.listUpdatedInferables() {
 					@scope.updateInferable(name, data, this)
 				}
 			}
 			else {
+				for const map, name of @lateInitVariables {
+					let type
+
+					if map.true.initializable {
+						if map.false.initializable {
+							type = Type.union(@scope, map.true.type, map.false.type)
+						}
+						else {
+							SyntaxException.throwMissingAssignmentIfFalse(name, @whenFalseExpression)
+						}
+					}
+					else {
+						SyntaxException.throwMissingAssignmentIfTrue(name, @whenTrueExpression)
+					}
+
+					@parent.initializeVariable(map.variable, type, this, this)
+				}
+
 				const trueInferables = @whenTrueScope.listUpdatedInferables()
 				const falseInferables = @whenFalseScope.listUpdatedInferables()
 
@@ -157,24 +196,6 @@ class IfStatement extends Statement {
 					}
 				}
 			}
-		}
-
-		for const map, name of @lateInitVariables {
-			let type
-
-			if map.true.initializable {
-				if map.false.initializable {
-					type = Type.union(@scope, map.true.type, map.false.type)
-				}
-				else {
-					type = map.true.type.setNullable(true)
-				}
-			}
-			else {
-				type = map.false.type.setNullable(true)
-			}
-
-			@parent.initializeVariable(map.variable, type, this, this)
 		}
 	} // }}}
 	translate() { // {{{
@@ -207,7 +228,10 @@ class IfStatement extends Statement {
 		const name = variable.name()
 		const whenTrue = node == @whenTrueExpression
 
-		if const map = @lateInitVariables[name] {
+		if !@hasWhenFalse {
+			SyntaxException.throwMissingAssignmentIfNoElse(name, this)
+		}
+		else if const map = @lateInitVariables[name] {
 			map[whenTrue].initializable = true
 		}
 		else {
@@ -263,7 +287,12 @@ class IfStatement extends Statement {
 
 			const clone = variable.clone()
 
-			clone.setDeclaredType(type).flagDefinitive()
+			if clone.isDefinitive() {
+				clone.setRealType(type)
+			}
+			else {
+				clone.setDeclaredType(type, true).flagDefinitive()
+			}
 
 			node.scope().replaceVariable(name, clone)
 		}
@@ -274,6 +303,7 @@ class IfStatement extends Statement {
 	isCascade() => @cascade
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
 	isJumpable() => true
+	isLateInitializable() => true
 	isUsingVariable(name) { // {{{
 		if @declared {
 			if @variable.isUsingVariable(name) {

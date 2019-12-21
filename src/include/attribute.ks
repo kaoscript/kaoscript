@@ -22,10 +22,12 @@ const $rules = {
 	'non-exhaustive':				['nonExhaustive', true]
 	'ignore-misfit':				['ignoreMisfit', true]
 	'dont-ignore-misfit':			['ignoreMisfit', false]
-	'assert-parameter':				['noParamAssert', false]
-	'dont-assert-parameter':		['noParamAssert', true]
-	'assert-parameter-type':		['noParamTypeAssert', false]
-	'dont-assert-parameter-type':	['noParamTypeAssert', true]
+	'assert-parameter':				['assertParameter', true]
+	'dont-assert-parameter':		['assertParameter', false]
+	'assert-parameter-type':		['assertParameterType', true]
+	'dont-assert-parameter-type':	['assertParameterType', false]
+	'assert-new-struct':			['assertNewStruct', true]
+	'dont-assert-new-struct':		['assertNewStruct', false]
 }
 
 class Attribute {

@@ -414,7 +414,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 		@variable = @identifier.variable()
 
-		if @parent.isLateInit() && (@parent.isImmutable() || @parent.isAutoTyping()) {
+		if @parent.isLateInit() {
 			@variable.flagLateInit()
 		}
 	} // }}}
@@ -426,9 +426,9 @@ class VariableIdentifierDeclarator extends AbstractNode {
 				TypeException.throwNullTypeVariable(@name, this)
 			}
 
-			@variable.setDeclaredType(@type).flagDefinitive()
+			@variable.setDeclaredType(@type, @parent.hasInit()).flagDefinitive()
 		}
-		else if !@variable.isLateInit() {
+		else if !@variable.isLateInit() || !(@parent.isImmutable() || @parent.isAutoTyping()) {
 			if @parent.isImmutable() {
 				@type = @variable.getRealType()
 			}
@@ -436,7 +436,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 				@type = AnyType.NullableUnexplicit
 			}
 
-			@variable.setDeclaredType(@type).flagDefinitive()
+			@variable.setDeclaredType(@type, @parent.hasInit()).flagDefinitive()
 		}
 
 		@identifier.prepare()

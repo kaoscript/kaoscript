@@ -293,7 +293,7 @@ class Parameter extends AbstractNode {
 				node.module().flag('Type')
 
 				if asyncHeader {
-					if !node._options.rules.noParamAssert {
+					if node.isAssertingParameter() {
 						if signature.min() == 0 {
 							fragments
 								.newControl()
@@ -336,7 +336,7 @@ class Parameter extends AbstractNode {
 				else {
 					fragments.line(`\($runtime.scope(node))__ks_cb = arguments.length > 0 ? arguments[arguments.length - 1] : null`)
 
-					if !node._options.rules.noParamAssert {
+					if node.isAssertingParameter() {
 						let ctrl = fragments
 							.newControl()
 							.code(`if(arguments.length < \(signature.min() + 1))`)
@@ -364,7 +364,7 @@ class Parameter extends AbstractNode {
 					}
 				}
 			}
-			else if !node._options.rules.noParamAssert {
+			else if node.isAssertingParameter() {
 				fragments
 					.newControl()
 					.code(`if(\(name).length < \(signature.min()))`)
@@ -743,6 +743,8 @@ class Parameter extends AbstractNode {
 	arity() => @arity
 	hasDefaultValue() => @hasDefaultValue
 	isAnonymous() => @anonymous
+	isAssertingParameter() => @parent.isAssertingParameter()
+	isAssertingParameterType() => @parent.isAssertingParameterType()
 	isRequired() => @defaultValue == null || @explicitlyRequired
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
@@ -1439,7 +1441,7 @@ class IdentifierParameter extends IdentifierLiteral {
 
 				ctrl.newLine().compile(this).code(' = null').done()
 			}
-			else if !@options.rules.noParamAssert {
+			else if @parent.isAssertingParameter() {
 				ctrl = fragments
 					.newControl()
 					.code('if(').compile(this).code(' === void 0').code(' || ').compile(this).code(' === null').code(')')
@@ -1452,7 +1454,7 @@ class IdentifierParameter extends IdentifierLiteral {
 			}
 		}
 
-		if !@declaredType.isAny() && !@options.rules.noParamAssert && !@options.rules.noParamTypeAssert {
+		if !@declaredType.isAny() && @parent.isAssertingParameterType() {
 			if ctrl? {
 				ctrl.step().code('else ')
 			}
@@ -1733,7 +1735,7 @@ class AnonymousParameter extends AbstractNode {
 		fragments.compile(this)
 	} // }}}
 	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
-		if !@type.isAny() && !@options.rules.noParamAssert && !@options.rules.noParamTypeAssert {
+		if !@type.isAny() && @parent.isAssertingParameterType() {
 			let ctrl = fragments
 				.newControl()
 				.code('if(')

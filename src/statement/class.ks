@@ -1742,6 +1742,8 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	isAbstract() => @abstract
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
 	isInstanceMethod() => @instance
@@ -1982,6 +1984,8 @@ class ClassConstructorDeclaration extends Statement {
 
 		return false
 	} // }}}
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => true
 	parameters() => @parameters
@@ -2134,6 +2138,8 @@ class ClassDestructorDeclaration extends Statement {
 
 		return false
 	} // }}}
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isInstance() => false
 	isInstanceMethod() => true
 	parameters() => @parameters

@@ -457,7 +457,7 @@ class BinaryOperatorQuotient extends NumericBinaryOperatorExpression {
 	runtime() => 'quotient'
 	symbol() => '/.'
 	toNativeFragments(fragments) { // {{{
-		fragments.code('Number.parseInt(').compile(@left).code(' / ').compile(@right).code(')')
+		fragments.code('Number.parseInt(').wrap(@left).code(' / ').wrap(@right).code(')')
 	} // }}}
 }
 

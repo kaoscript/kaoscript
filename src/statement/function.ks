@@ -445,6 +445,8 @@ class FunctionDeclarator extends AbstractNode {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isAwait() => @awaiting
 	isExit() => @exit
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
@@ -537,6 +539,8 @@ class FunctionVariable extends Variable {
 	}
 	constructor(scope: Scope, @name, @extended) { // {{{
 		super(name, true, false, new OverloadedFunctionType(scope))
+
+		@initialized = true
 	} // }}}
 	prepare() { // {{{
 		if @extended {
@@ -560,7 +564,10 @@ class FunctionVariable extends Variable {
 		else if @declarators.length == 1 {
 			@declarators[0].prepare()
 
-			this.setDeclaredType(@declarators[0].type())
+			const type = @declarators[0].type()
+
+			@declaredType = Type.toNamedType(@name, type)
+			@realType = @declaredType
 		}
 		else {
 			let declarator = @declarators[0]

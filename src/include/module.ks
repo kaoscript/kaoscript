@@ -599,7 +599,9 @@ class ModuleBlock extends AbstractNode {
 		}
 
 		for const flag, name of @initializableVariables when flag {
-			NotImplementedException.throw(this)
+			if !@scope.getVariable(name).isInitialized() {
+				SyntaxException.throwNotInitializedVariable(name, this)
+			}
 		}
 
 		const recipient = this.recipient()
@@ -648,7 +650,12 @@ class ModuleBlock extends AbstractNode {
 			}
 		}
 		else if @initializableVariables[name] {
-			variable.setDeclaredType(type).flagDefinitive()
+			if variable.isDefinitive() {
+				variable.setRealType(type)
+			}
+			else {
+				variable.setDeclaredType(type, true).flagDefinitive()
+			}
 
 			delete @initializableVariables[name]
 		}

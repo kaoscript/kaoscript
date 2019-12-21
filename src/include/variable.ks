@@ -86,6 +86,9 @@ class Variable {
 	flagLateInit() { // {{{
 		@lateInit = true
 		@initialized = false
+		@definitive = false
+
+		return this
 	} // }}}
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
@@ -105,12 +108,12 @@ class Variable {
 		}
 	} // }}}
 	renameAs(@secureName)
-	setDeclaredType(@declaredType) { // {{{
-		@initialized = true
-
+	setDeclaredType(@declaredType, initialize: Boolean = true) { // {{{
 		@declaredType = Type.toNamedType(@name, declaredType)
 
-		if @realType != Type.Null {
+		if initialize {
+			@initialized = true
+
 			@realType = @declaredType
 		}
 
@@ -118,6 +121,8 @@ class Variable {
 	} // }}}
 	setDefinitive(@definitive) => this
 	setRealType(type: Type) { // {{{
+		@initialized = true
+
 		if type.isMorePreciseThan(@declaredType) {
 			@realType = type
 		}

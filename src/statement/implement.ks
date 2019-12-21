@@ -516,6 +516,8 @@ class ImplementClassMethodDeclaration extends Statement {
 			@aliases.push(statement)
 		}
 	} // }}}
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	class() => @variable
 	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_cm_\(@name)`
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
@@ -759,6 +761,8 @@ class ImplementClassConstructorDeclaration extends Statement {
 	} // }}}
 	class() => @variable
 	getSharedName() => '__ks_cons'
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isExtending() => @class.isExtending()
 	private getConstructorIndex(body: Array) { // {{{
 		for const statement, index in body {
@@ -994,6 +998,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@block.translate()
 	} // }}}
 	getSharedName() => null
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	parameters() => @parameters

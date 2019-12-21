@@ -55,6 +55,7 @@ abstract class Statement extends AbstractNode {
 	isExit() => false
 	isExportable() => false
 	isJumpable() => false
+	isLateInitializable() => false
 	isLoop() => false
 	isUsingVariable(name) => false
 	line() => @line

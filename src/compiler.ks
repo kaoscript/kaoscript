@@ -608,8 +608,9 @@ export class Compiler {
 			}
 			format: {}
 			rules: {
-				noParamAssert: false
-				noParamTypeAssert: false
+				assertNewStruct: true
+				assertParameter: true
+				assertParameterType: true
 				noUndefined: false
 				ignoreMisfit: false
 			}

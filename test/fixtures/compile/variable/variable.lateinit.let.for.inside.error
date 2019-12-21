@@ -1,0 +1,1 @@
+SyntaxException: The lateinit variable "z" can't be initialized by the statement at (line 4, file "fixtures/compile/variable/variable.lateinit.let.for.inside.ks")

@@ -75,6 +75,7 @@ class ExpressionStatement extends Statement {
 	isAwait() => @expression.isAwait()
 	isExit() => @expression.isExit()
 	isJumpable() => true
+	isLateInitializable() => true
 	isUsingVariable(name) => @expression.isUsingVariable(name)
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()

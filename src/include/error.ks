@@ -286,6 +286,9 @@ export class SyntaxException extends Exception {
 		throwInvalidForcedTypeCasting(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The forced type casting "!!" can't determine the expected type`, node)
 		} // }}}
+		throwInvalidLateInitAssignment(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" can't be initialized by the statement at`, node)
+		} // }}}
 		throwInvalidMethodReturn(className, methodName, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Method "\(methodName)" of the class "\(className)" has an invalid return type`, node)
 		} // }}}
@@ -317,6 +320,21 @@ export class SyntaxException extends Exception {
 			}
 
 			throw new SyntaxException(`Class "\(name)" doesn't implement the following abstract method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
+		} // }}}
+		throwMissingAssignmentIfFalse(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized when the condition is false`, node)
+		} // }}}
+		throwMissingAssignmentIfNoElse(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized due to the missing "else" statement`, node)
+		} // }}}
+		throwMissingAssignmentIfTrue(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized when the condition is true`, node)
+		} // }}}
+		throwMissingAssignmentSwitchClause(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized by the clause at`, node)
+		} // }}}
+		throwMissingAssignmentSwitchNoDefault(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized due to the missing default clause`, node)
 		} // }}}
 		throwMissingRequirement(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`import is missing the argument "\(name)"`, node)

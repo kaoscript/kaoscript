@@ -22,12 +22,14 @@ const $switch = {
 
 class SwitchStatement extends Statement {
 	private {
-		_castingEnum: Boolean		= false
-		_clauses					= []
-		_name: String?				= null
+		_castingEnum: Boolean			= false
+		_clauses						= []
+		_hasLateInitVariables: Boolean	= false
+		_lateInitVariables				= {}
+		_name: String?					= null
 		_nextClauseIndex: Number
-		_usingFallthrough: Boolean	= false
-		_value						= null
+		_usingFallthrough: Boolean		= false
+		_value							= null
 		_valueType: Type
 	}
 	analyse() { // {{{
@@ -36,35 +38,39 @@ class SwitchStatement extends Statement {
 			@value.analyse()
 		}
 
-		let clause, condition, name, exp, value
-		for data, index in @data.clauses {
-			clause = {
+		let hasDefaultClause = false
+
+		let condition, binding
+		for const data, index in @data.clauses {
+			const clause = {
 				hasTest: data.filter?
 				bindings: []
 				conditions: []
 				scope: this.newScope(@scope, ScopeType::InlineBlock)
 			}
 
+			@clauses.push(clause)
+
 			clause.scope.index = index
 
-			for condition, conditionIdx in data.conditions {
-				if condition.kind == NodeKind::SwitchConditionArray {
-					condition = new SwitchConditionArray(condition, this, clause.scope)
+			for const ccData in data.conditions {
+				if ccData.kind == NodeKind::SwitchConditionArray {
+					condition = new SwitchConditionArray(ccData, this, clause.scope)
 				}
-				else if condition.kind == NodeKind::SwitchConditionEnum {
+				else if ccData.kind == NodeKind::SwitchConditionEnum {
 					throw new NotImplementedException(this)
 				}
-				else if condition.kind == NodeKind::SwitchConditionObject {
+				else if ccData.kind == NodeKind::SwitchConditionObject {
 					throw new NotImplementedException(this)
 				}
-				else if condition.kind == NodeKind::SwitchConditionRange {
-					condition = new SwitchConditionRange(condition, this, clause.scope)
+				else if ccData.kind == NodeKind::SwitchConditionRange {
+					condition = new SwitchConditionRange(ccData, this, clause.scope)
 				}
-				else if condition.kind == NodeKind::SwitchConditionType {
-					condition = new SwitchConditionType(condition, this, clause.scope)
+				else if ccData.kind == NodeKind::SwitchConditionType {
+					condition = new SwitchConditionType(ccData, this, clause.scope)
 				}
 				else {
-					condition = new SwitchConditionValue(condition, this, clause.scope)
+					condition = new SwitchConditionValue(ccData, this, clause.scope)
 				}
 
 				condition.analyse()
@@ -72,20 +78,24 @@ class SwitchStatement extends Statement {
 				clause.conditions.push(condition)
 			}
 
-			for binding in data.bindings {
-				if binding.kind == NodeKind::ArrayBinding {
-					binding = new SwitchBindingArray(binding, this, clause.scope)
+			if clause.conditions.length == 0 {
+				hasDefaultClause = true
+			}
+
+			for const bbData in data.bindings {
+				if bbData.kind == NodeKind::ArrayBinding {
+					binding = new SwitchBindingArray(bbData, this, clause.scope)
 
 					clause.hasTest = true
 				}
-				else if binding.kind == NodeKind::ObjectBinding {
+				else if bbData.kind == NodeKind::ObjectBinding {
 					throw new NotImplementedException(this)
 				}
-				else if binding.kind == NodeKind::SwitchTypeCasting {
-					binding = new SwitchBindingType(binding, this, clause.scope)
+				else if bbData.kind == NodeKind::SwitchTypeCasting {
+					binding = new SwitchBindingType(bbData, this, clause.scope)
 				}
 				else {
-					binding = new SwitchBindingValue(binding, this, clause.scope)
+					binding = new SwitchBindingValue(bbData, this, clause.scope)
 				}
 
 				binding.analyse()
@@ -98,8 +108,12 @@ class SwitchStatement extends Statement {
 
 			clause.body = $compile.block(data.body, this, clause.scope)
 			clause.body.analyse()
+		}
 
-			@clauses.push(clause)
+		if @hasLateInitVariables && !hasDefaultClause {
+			for const value, name of @lateInitVariables when value.variable.isImmutable() {
+				SyntaxException.throwMissingAssignmentSwitchNoDefault(name, this)
+			}
 		}
 	} // }}}
 	prepare() { // {{{
@@ -171,6 +185,14 @@ class SwitchStatement extends Statement {
 					inferables[name].count++
 				}
 			}
+
+			if !clause.body.isExit() {
+				for const map, name of @lateInitVariables {
+					unless map.clauses[index].initializable {
+						SyntaxException.throwMissingAssignmentSwitchClause(name, clause.body)
+					}
+				}
+			}
 		}
 
 		if enumConditions != 0 || enumValue {
@@ -192,6 +214,13 @@ class SwitchStatement extends Statement {
 					}
 				}
 			}
+		}
+
+		for const map, name of @lateInitVariables {
+			const types = [clause.type for const clause in map.clauses when clause.initializable]
+			const type = Type.union(@scope, ...types)
+
+			@parent.initializeVariable(map.variable, type, this, this)
 		}
 
 		for const inferable, name of inferables when inferable.count == maxInferables {
@@ -224,6 +253,52 @@ class SwitchStatement extends Statement {
 			clause.body.translate()
 		}
 	} // }}}
+	addInitializableVariable(variable, node) { // {{{
+		const name = variable.name()
+
+		let clauseIndex
+		for const clause, index in @clauses {
+			if clause.body == node {
+				clauseIndex = index
+
+				break
+			}
+		}
+
+		if const map = @lateInitVariables[name] {
+			map.clauses[clauseIndex] = {
+				initializable: true
+				type: null
+			}
+		}
+		else {
+			const map = {
+				variable
+				clauses: []
+			}
+
+			for const i from 0 til @data.clauses.length {
+				if i == clauseIndex {
+					map.clauses[i] = {
+						initializable: true
+						type: null
+					}
+				}
+				else {
+					map.clauses[i] = {
+						initializable: false
+						type: null
+					}
+				}
+			}
+
+			@lateInitVariables[name] = map
+		}
+
+		@hasLateInitVariables = true
+
+		@parent.addInitializableVariable(variable, node)
+	} // }}}
 	defineVariables(declarator, scope) { // {{{
 		let alreadyDeclared
 
@@ -249,7 +324,58 @@ class SwitchStatement extends Statement {
 
 		return this
 	} // }}}
+	initializeVariable(variable, type, expression, node) { // {{{
+		const name = variable.name()
+
+		if variable.isInitialized() {
+			if variable.isImmutable() {
+				ReferenceException.throwImmutable(name, expression)
+			}
+		}
+		else if const map = @lateInitVariables[name] {
+			let clause = null
+
+			for const cc, i in @clauses {
+				if cc.body == node {
+					unless ?map.clauses[i] {
+						ReferenceException.throwImmutable(name, expression)
+					}
+
+					clause = map.clauses[i]
+
+					break
+				}
+			}
+
+			if clause.type != null {
+				if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, expression)
+				}
+				else if !type.matchContentOf(clause.type) {
+					TypeException.throwInvalidAssignement(name, clause.type, type, expression)
+				}
+			}
+			else {
+				clause.type = type
+			}
+
+			const clone = variable.clone()
+
+			if clone.isDefinitive() {
+				clone.setRealType(type)
+			}
+			else {
+				clone.setDeclaredType(type, true).flagDefinitive()
+			}
+
+			node.scope().replaceVariable(name, clone)
+		}
+		else {
+			ReferenceException.throwImmutable(name, expression)
+		}
+	} // }}}
 	isJumpable() => true
+	isLateInitializable() => true
 	isUsingVariable(name) { // {{{
 		if @value.isUsingVariable(name) {
 			return true

@@ -127,7 +127,12 @@ class Block extends AbstractNode {
 	} // }}}
 	initializeVariable(variable, type, expression, node) { // {{{
 		if !@scope.hasDeclaredVariable(variable.name()) {
-			@parent.initializeVariable(variable, type, expression, this)
+			if variable.isInitialized() || @parent.isLateInitializable() {
+				@parent.initializeVariable(variable, type, expression, this)
+			}
+			else {
+				SyntaxException.throwInvalidLateInitAssignment(variable.name(), this)
+			}
 		}
 	} // }}}
 	isAwait() => @awaiting
@@ -218,7 +223,12 @@ class FunctionBlock extends Block {
 			}
 		}
 		else if @initializableVariables[name] {
-			variable.setDeclaredType(type).flagDefinitive()
+			if variable.isDefinitive() {
+				variable.setRealType(type)
+			}
+			else {
+				variable.setDeclaredType(type, true).flagDefinitive()
+			}
 
 			delete @initializableVariables[name]
 		}

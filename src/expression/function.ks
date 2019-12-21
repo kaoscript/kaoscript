@@ -58,6 +58,8 @@ class AnonymousFunctionExpression extends Expression {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isComputed() => true
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
@@ -147,6 +149,8 @@ class ArrowFunctionExpression extends Expression {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isComputed() => true
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
