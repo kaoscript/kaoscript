@@ -1,3 +1,3 @@
-import '../require/require.alt.roe.default'(require Array)
+import '../require/require.alt.roe.array'(require Array)
 
 export Array

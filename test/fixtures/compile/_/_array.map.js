@@ -1,5 +1,5 @@
 var Type = require("@kaoscript/runtime").Type;
-module.exports = function(Array, __ks_Array) {
+module.exports = function(__ks_Array) {
 	__ks_Array.__ks_sttc_map_0 = function(array, iterator) {
 		if(arguments.length < 2) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
@@ -65,7 +65,6 @@ module.exports = function(Array, __ks_Array) {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array
 	};
 };

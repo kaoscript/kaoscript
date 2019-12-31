@@ -1,11 +1,11 @@
 extern isNaN, parseFloat, parseInt
 
 #[rules(non-exhaustive)]
-extern sealed class Number {
+extern systemic class Number {
 	toFixed(...): Number
 }
 
-extern sealed namespace Math {
+extern systemic namespace Math {
 	max(...): Number
 	min(...): Number
 	pow(...): Number

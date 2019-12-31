@@ -2,8 +2,8 @@ require("kaoscript/register");
 var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var Float = require("../_/_float.ks")().Float;
-	var {Math, __ks_Math} = require("../_/_math.ks")();
-	var {Number, __ks_Number} = require("../_/_number.ks")();
+	var __ks_Math = require("../_/_math.ks")().__ks_Math;
+	var __ks_Number = require("../_/_number.ks")().__ks_Number;
 	let $caster = Helper.namespace(function() {
 		function percentage(n) {
 			if(arguments.length < 1) {

@@ -1,4 +1,4 @@
-extern sealed class Array {
+extern systemic class Array {
 
 }
 

@@ -66,7 +66,6 @@ module.exports = function() {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Dictionary: Dictionary,
 		__ks_Dictionary: __ks_Dictionary
 	};
 };

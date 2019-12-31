@@ -1,4 +1,4 @@
-extern sealed class SyntaxError
+extern systemic class SyntaxError
 
 impl SyntaxError {
 	foo(): string => 'bar'

@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	var {Function, __ks_Function} = require("../_/_function.ks")();
+	var __ks_Function = require("../_/_function.ks")().__ks_Function;
 	function foobar(x) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

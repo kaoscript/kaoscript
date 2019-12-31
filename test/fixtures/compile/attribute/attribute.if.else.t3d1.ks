@@ -1,7 +1,7 @@
 #![target(trident-v8)]
 
 #[rules(non-exhaustive)]
-extern sealed class String {
+extern systemic class String {
 	length: Number
 }
 

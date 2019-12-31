@@ -1,6 +1,6 @@
 #![target(ecma-v6)]
 
-extern sealed class String
+extern systemic class String
 
 #[if(none(trident, jsc-v8))]
 disclose String {

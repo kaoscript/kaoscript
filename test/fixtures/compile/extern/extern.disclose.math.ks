@@ -1,4 +1,4 @@
-extern sealed namespace Math
+extern systemic namespace Math
 
 disclose Math {
 	PI: Number

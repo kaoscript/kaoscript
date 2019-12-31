@@ -1,4 +1,4 @@
-extern sealed class String {
+extern systemic class String {
 	replace(...): String
 }
 

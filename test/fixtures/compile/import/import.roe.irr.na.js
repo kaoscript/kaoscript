@@ -1,8 +1,7 @@
 require("kaoscript/register");
 module.exports = function() {
-	var {Array, __ks_Array} = require("./import.roe.rr.ks")();
+	var __ks_Array = require("./import.roe.rr.ks")().__ks_Array;
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array
 	};
 };

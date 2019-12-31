@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Number, __ks_Number} = require("../_/_number.ks")();
+	var __ks_Number = require("../_/_number.ks")().__ks_Number;
 	let $caster = (() => {
 		const d = new Dictionary();
 		d.hex = function(n) {

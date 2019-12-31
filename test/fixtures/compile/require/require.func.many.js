@@ -1,9 +1,9 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function(reverse) {
-	var {Array, __ks_Array} = require("../_/_array.ks")();
-	var {Number, __ks_Number} = require("../_/_number.ks")();
-	var {String, __ks_String} = require("../_/_string.ks")();
+	var __ks_Array = require("../_/_array.ks")().__ks_Array;
+	var __ks_Number = require("../_/_number.ks")().__ks_Number;
+	var __ks_String = require("../_/_string.ks")().__ks_String;
 	const __ks_reverse_1 = reverse;
 	function reverse() {
 		if(arguments.length === 1 && Type.isNumber(arguments[0])) {

@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	var {String, __ks_String} = require("../_/_string.ks")();
+	var __ks_String = require("../_/_string.ks")().__ks_String;
 	class Shape {
 		constructor() {
 			this.__ks_init();

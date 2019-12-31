@@ -1,4 +1,4 @@
-require|import '../require/require.alt.roe.default'
+require|import '../require/require.alt.roe.array'
 
 impl Array {
 	foo() => 42

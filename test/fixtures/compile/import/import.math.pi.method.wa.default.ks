@@ -1,8 +1,8 @@
-extern sealed class Number {
+extern systemic class Number {
 	toString(): String
 }
 
-extern sealed namespace Math {
+extern systemic namespace Math {
 	PI: Number
 	round(...): Number
 }

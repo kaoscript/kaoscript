@@ -1,3 +1,3 @@
-extern sealed class Array
+extern systemic class Array
 
-import '../require/require.alt.roe.default.ks'(Array)
+import '../require/require.alt.roe.array.ks'(Array)

@@ -1,5 +1,5 @@
 var {Operator, Type} = require("@kaoscript/runtime");
-module.exports = function(Array, __ks_Array) {
+module.exports = function(__ks_Array) {
 	__ks_Array.__ks_func_last_0 = function(index) {
 		if(index === void 0 || index === null) {
 			index = 1;
@@ -17,7 +17,6 @@ module.exports = function(Array, __ks_Array) {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array
 	};
 };

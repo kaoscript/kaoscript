@@ -1,4 +1,4 @@
-require|extern sealed class String {
+require|extern systemic class String {
 	split(...): Array<String>
 	replace(...): String
 	trim(): String

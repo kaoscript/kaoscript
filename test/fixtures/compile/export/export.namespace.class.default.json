@@ -9,6 +9,7 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "systemic": false,
       "exhaustive": true,
       "properties": {
         "foo": {
@@ -50,6 +51,7 @@
           "alien": false,
           "hybrid": false,
           "sealed": false,
+          "systemic": false,
           "exhaustive": true,
           "init": 0,
           "constructors": [],

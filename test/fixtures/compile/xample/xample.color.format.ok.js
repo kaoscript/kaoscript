@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {String, __ks_String} = require("../_/_string.ks")();
+	var __ks_String = require("../_/_string.ks")().__ks_String;
 	const $formatters = new Dictionary();
 	function format(format) {
 		if(arguments.length < 1) {

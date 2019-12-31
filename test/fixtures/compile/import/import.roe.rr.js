@@ -1,8 +1,8 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
-module.exports = function(Array, __ks_Array) {
-	if(!Type.isValue(Array)) {
-		var {Array, __ks_Array} = require("../require/require.alt.roe.default.ks")();
+module.exports = function(__ks_Array) {
+	if(!Type.isValue(__ks_Array)) {
+		var __ks_Array = require("../require/require.alt.roe.array.ks")().__ks_Array;
 	}
 	__ks_Array.__ks_func_foo_0 = function() {
 		return 42;
@@ -15,7 +15,6 @@ module.exports = function(Array, __ks_Array) {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array
 	};
 };

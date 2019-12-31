@@ -1,16 +1,8 @@
 var Type = require("@kaoscript/runtime").Type;
-function __ks_require(__ks_0, __ks___ks_0) {
-	var req = [];
-	if(Type.isValue(__ks_0)) {
-		req.push(__ks_0, __ks___ks_0);
+module.exports = function(__ks_Array) {
+	if(!Type.isValue(__ks_Array)) {
+		__ks_Array = {};
 	}
-	else {
-		req.push(Array, typeof __ks_Array === "undefined" ? {} : __ks_Array);
-	}
-	return req;
-}
-module.exports = function(__ks_0, __ks___ks_0) {
-	var [Array, __ks_Array] = __ks_require(__ks_0, __ks___ks_0);
 	__ks_Array.__ks_func_contains_0 = function(item, from) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
@@ -51,7 +43,6 @@ module.exports = function(__ks_0, __ks___ks_0) {
 		return __ks_Array.__ks_func_pushUniq_0.apply(that, args);
 	};
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array
 	};
 };

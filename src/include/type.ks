@@ -127,6 +127,7 @@ abstract class Type {
 		_required: Boolean 			= false
 		_scope: Scope?
 		_sealed: Boolean			= false
+		_systemic: Boolean			= false
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
@@ -599,6 +600,11 @@ abstract class Type {
 
 		return this
 	} // }}}
+	flagSystemic() { // {{{
+		@systemic = true
+
+		return this.flagSealed()
+	} // }}}
 	getProperty(name: String) => null
 	hashCode(): String => ''
 	hasProperty(name: String): Boolean => false
@@ -636,6 +642,7 @@ abstract class Type {
 	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
 	isExplicitlyExported() => @exported
 	isExportable() => this.isAlien() || this.isExported() || this.isNative() || this.isRequired()
+	isExportingFragment() => (!this.isVirtual() && !this.isSystemic()) || (this.isSealed() && this.isExtendable())
 	isExported() => @exported
 	isExtendable() => false
 	isFlexible() => false
@@ -666,6 +673,7 @@ abstract class Type {
 	isSpread() => false
 	isString() => false
 	isStruct() => false
+	isSystemic() => @systemic
 	isTypeOf() => false
 	isUnion() => false
 	isVirtual() => false
@@ -677,6 +685,15 @@ abstract class Type {
 	scope() => @scope
 	setExhaustive(@exhaustive) => this
 	setNullable(nullable: Boolean) => this
+	toExportFragment(fragments, name, variable) { // {{{
+		if !this.isVirtual() && !this.isSystemic() {
+			fragments.newLine().code(`\(name): `).compile(variable).done()
+		}
+
+		if this.isSealed() && this.isExtendable() {
+			fragments.line(`__ks_\(name): \(this.getSealedName())`)
+		}
+	} // }}}
 	toExportOrIndex(references, mode) { // {{{
 		if @referenceIndex != -1 {
 			return @referenceIndex

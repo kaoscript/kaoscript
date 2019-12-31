@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
-	var {String, __ks_String} = require("../_/_string.ks")();
+	var __ks_String = require("../_/_string.ks")().__ks_String;
 	function lines(value) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

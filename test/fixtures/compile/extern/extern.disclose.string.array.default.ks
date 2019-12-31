@@ -1,5 +1,5 @@
-extern sealed class Array
-extern sealed class String
+extern systemic class Array
+extern systemic class String
 
 disclose String {
 	split(...): Array<String>

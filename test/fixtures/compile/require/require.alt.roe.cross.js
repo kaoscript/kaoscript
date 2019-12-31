@@ -1,22 +1,11 @@
 var Type = require("@kaoscript/runtime").Type;
-function __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
-	var req = [];
-	if(Type.isValue(__ks_0)) {
-		req.push(__ks_0, __ks___ks_0);
+module.exports = function(__ks_Number, __ks_String) {
+	if(!Type.isValue(__ks_Number)) {
+		__ks_Number = {};
 	}
-	else {
-		req.push(Number, typeof __ks_Number === "undefined" ? {} : __ks_Number);
+	if(!Type.isValue(__ks_String)) {
+		__ks_String = {};
 	}
-	if(Type.isValue(__ks_1)) {
-		req.push(__ks_1, __ks___ks_1);
-	}
-	else {
-		req.push(String, typeof __ks_String === "undefined" ? {} : __ks_String);
-	}
-	return req;
-}
-module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
-	var [Number, __ks_Number, String, __ks_String] = __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1);
 	__ks_String.__ks_func_toFloat_0 = function() {
 		return parseFloat(this);
 	};
@@ -41,9 +30,7 @@ module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Number: Number,
 		__ks_Number: __ks_Number,
-		String: String,
 		__ks_String: __ks_String
 	};
 };

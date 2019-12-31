@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	var {Array, __ks_Array} = require("../_/_array.ks")();
+	var __ks_Array = require("../_/_array.ks")().__ks_Array;
 	__ks_Array.__ks_func_injectAt_0 = function(index, ...args) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

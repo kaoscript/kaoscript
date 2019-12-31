@@ -2,12 +2,12 @@
   "aliens": [],
   "requirements": [
     0,
-    "Array",
+    "Color",
     true
   ],
   "exports": [
     1,
-    "Array"
+    "Color"
   ],
   "references": [
     {
@@ -16,6 +16,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": true,
+	  "systemic": false,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -33,55 +34,46 @@
       "exhaustive": false,
       "init": 0,
       "constructors": [],
-      "instanceVariables": {},
+      "instanceVariables": {
+        "_luma": {
+          "access": 2,
+          "type": "Number",
+          "sealed": true
+        }
+      },
       "classVariables": {},
       "instanceMethods": {
-        "contains": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "item",
-                "type": "Any",
-                "min": 1,
-                "max": 1,
-                "default": 0
-              },
-              {
-                "name": "from",
-                "type": "Any?",
-                "min": 0,
-                "max": 1,
-                "default": 1
-              }
-            ],
-            "returns": "Any?",
-            "throws": []
-          }
-        ],
-        "pushUniq": [
+        "luma": [
           {
             "id": 0,
             "access": 4,
             "sealed": true,
             "async": false,
             "min": 0,
-            "max": "Infinity",
+            "max": 0,
+            "parameters": [],
+            "returns": "Number",
+            "throws": []
+          },
+          {
+            "id": 1,
+            "access": 4,
+            "sealed": true,
+            "async": false,
+            "min": 1,
+            "max": 1,
             "parameters": [
               {
-                "name": "args",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
+                "name": "luma",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
                 "default": 0
               }
             ],
-            "returns": "Any?",
+            "returns": {
+              "reference": 1
+            },
             "throws": []
           }
         ]

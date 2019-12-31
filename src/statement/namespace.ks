@@ -70,17 +70,8 @@ class NamespaceDeclaration extends Statement {
 		const line = fragments.newLine().code('return ')
 		const object = line.newObject()
 
-		let type
 		for const variable, name of @exports {
-			type = variable.getDeclaredType()
-
-			if type is not AliasType {
-				object.newLine().code(`\(name): `).compile(variable).done()
-
-				if type is not ReferenceType && type.isSealed() {
-					object.line(`__ks_\(name): \(type.getSealedName())`)
-				}
-			}
+			variable.getDeclaredType().toExportFragment(object, name, variable)
 		}
 
 		object.done()

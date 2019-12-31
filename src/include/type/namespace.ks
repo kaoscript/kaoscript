@@ -27,7 +27,10 @@ class NamespaceType extends Type {
 				})
 			}
 			else {
-				if data.sealed {
+				if data.systemic {
+					type.flagSystemic()
+				}
+				else if data.sealed {
 					type.flagSealed()
 				}
 
@@ -107,6 +110,7 @@ class NamespaceType extends Type {
 	} // }}}
 	copyFrom(src: NamespaceType) { // {{{
 		@sealed = src._sealed
+		@systemic = src._systemic
 
 		for const property, name of src._properties {
 			@properties[name] = property
@@ -140,6 +144,7 @@ class NamespaceType extends Type {
 			const export = {
 				kind: TypeKind::Namespace
 				sealed: @sealed
+				systemic: @systemic
 				exhaustive: this.isExhaustive()
 				properties: {}
 			}

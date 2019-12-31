@@ -82,7 +82,6 @@ module.exports = function() {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array
 	};
 };

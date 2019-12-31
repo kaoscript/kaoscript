@@ -1,4 +1,4 @@
-extern sealed class Dictionary {
+extern systemic class Dictionary {
 }
 
 impl Dictionary {

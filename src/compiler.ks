@@ -417,6 +417,7 @@ const $statements = {
 	`\(NodeKind::EnumDeclaration)`				: EnumDeclaration
 	`\(NodeKind::ExportDeclaration)`			: ExportDeclaration
 	`\(NodeKind::ExternDeclaration)`			: ExternDeclaration
+	`\(NodeKind::ExternOrImportDeclaration)`	: ExternOrImportDeclaration
 	`\(NodeKind::ExternOrRequireDeclaration)`	: ExternOrRequireDeclaration
 	`\(NodeKind::FallthroughStatement)`			: FallthroughStatement
 	`\(NodeKind::ForFromStatement)`				: ForFromStatement

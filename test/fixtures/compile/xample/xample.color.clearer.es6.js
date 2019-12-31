@@ -1,8 +1,8 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	var {Number, __ks_Number} = require("../_/_number.ks")();
-	var {String, __ks_String} = require("../_/_string.ks")();
+	var __ks_Number = require("../_/_number.ks")().__ks_Number;
+	var __ks_String = require("../_/_string.ks")().__ks_String;
 	__ks_String.__ks_func_endsWith_0 = function(value) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

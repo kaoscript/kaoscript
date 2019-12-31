@@ -1,22 +1,11 @@
 var Type = require("@kaoscript/runtime").Type;
-function __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
-	var req = [];
-	if(Type.isValue(__ks_0)) {
-		req.push(__ks_0, __ks___ks_0);
+module.exports = function(__ks_Array, __ks_Object) {
+	if(!Type.isValue(__ks_Array)) {
+		__ks_Array = {};
 	}
-	else {
-		req.push(Array, typeof __ks_Array === "undefined" ? {} : __ks_Array);
+	if(!Type.isValue(__ks_Object)) {
+		__ks_Object = {};
 	}
-	if(Type.isValue(__ks_1)) {
-		req.push(__ks_1, __ks___ks_1);
-	}
-	else {
-		req.push(Object, typeof __ks_Object === "undefined" ? {} : __ks_Object);
-	}
-	return req;
-}
-module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
-	var [Array, __ks_Array, Object, __ks_Object] = __ks_require(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1);
 	__ks_Array.__ks_sttc_clone_0 = function(value) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
@@ -91,9 +80,7 @@ module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
 		}
 	};
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array,
-		Object: Object,
 		__ks_Object: __ks_Object,
 		clone: clone
 	};

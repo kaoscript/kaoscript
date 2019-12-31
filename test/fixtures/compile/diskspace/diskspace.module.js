@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {String, __ks_String} = require("../_/_string.ks")();
+	var __ks_String = require("../_/_string.ks")().__ks_String;
 	var exec = require("child_process").exec;
 	const df_regex = /([\/[a-z0-9\-\_\s]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+([0-9]+)\s+([0-9]+)\s+([0-9]+%)\s+(\/.*)/i;
 	function disks(__ks_cb) {

@@ -52,11 +52,13 @@ class AliasType extends Type {
 	isStruct() => @type.isStruct()
 	isUnion() => @type.isUnion()
 	isExportable() => @type.isExportable()
+	isExportingFragment() => false
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
 	parameter() => @type.parameter()
 	reduce(type: Type) => @type.reduce(type)
 	type() => @type
 	type(@type) => this
+	toExportFragment(fragments, name, variable)
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}

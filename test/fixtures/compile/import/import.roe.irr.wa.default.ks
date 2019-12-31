@@ -1,4 +1,4 @@
-import '../require/require.alt.roe.default'
+import '../require/require.alt.roe.array'
 
 import './import.roe.rr'(Array)
 

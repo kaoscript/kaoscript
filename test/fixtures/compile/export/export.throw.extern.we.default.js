@@ -4,7 +4,6 @@ module.exports = function() {
 	}
 	return {
 		foo: foo,
-		SyntaxError: SyntaxError,
 		__ks_SyntaxError: __ks_SyntaxError
 	};
 };

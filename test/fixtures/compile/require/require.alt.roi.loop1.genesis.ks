@@ -1,5 +1,5 @@
-require|extern sealed class Array
-require|extern sealed class Object
+require|extern systemic class Array
+require|extern systemic class Object
 
 impl Array {
 	static clone(value: Array): Array => this

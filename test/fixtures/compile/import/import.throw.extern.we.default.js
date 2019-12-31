@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	var {foo, SyntaxError, __ks_SyntaxError} = require("../export/export.throw.extern.we.default.ks")();
+	var {foo, __ks_SyntaxError} = require("../export/export.throw.extern.we.default.ks")();
 	try {
 		foo();
 	}

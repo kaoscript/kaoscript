@@ -138,9 +138,7 @@ module.exports = function() {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array,
-		String: String,
 		__ks_String: __ks_String
 	};
 };

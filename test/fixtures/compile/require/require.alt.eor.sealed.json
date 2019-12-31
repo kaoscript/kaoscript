@@ -1,0 +1,97 @@
+{
+  "aliens": [
+    0,
+    "Array"
+  ],
+  "requirements": [
+    0,
+    "Array",
+    false
+  ],
+  "exports": [
+    1,
+    "Array"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+	  "systemic": false,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "class": {
+        "reference": 0
+      },
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "contains": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": true,
+            "async": false,
+            "min": 1,
+            "max": 2,
+            "parameters": [
+              {
+                "name": "item",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": 0
+              },
+              {
+                "name": "from",
+                "type": "Any?",
+                "min": 0,
+                "max": 1,
+                "default": 1
+              }
+            ],
+            "returns": "Any?",
+            "throws": []
+          }
+        ],
+        "pushUniq": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": true,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "name": "args",
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": 0
+              }
+            ],
+            "returns": "Any?",
+            "throws": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

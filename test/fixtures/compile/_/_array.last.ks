@@ -1,4 +1,4 @@
-require sealed class Array
+require systemic class Array
 
 impl Array {
 	last(index: Number = 1) {

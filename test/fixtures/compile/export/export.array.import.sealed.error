@@ -1,0 +1,1 @@
+TypeException: The variable "Array" and the argument "Array" of the module "../_/_array.map.ks" aren't compatible (line 3, file "fixtures/compile/export/export.array.import.sealed.ks")

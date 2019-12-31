@@ -1,7 +1,7 @@
 require("kaoscript/register");
 module.exports = function() {
-	var {Number, __ks_Number} = require("../_/_number.ks")();
-	var {String, __ks_String} = require("../_/_string.ks")();
+	var __ks_Number = require("../_/_number.ks")().__ks_Number;
+	var __ks_String = require("../_/_string.ks")().__ks_String;
 	function foobar() {
 		let x = null, y = null;
 		if(quxbaz("foobar") || quxbaz(x = "quxbaz")) {

@@ -1,5 +1,5 @@
 #[rules(non-exhaustive)]
-extern sealed class Array {
+extern systemic class Array {
 	length: Number
 }
 

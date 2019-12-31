@@ -1,1 +1,1 @@
-require|extern sealed class Dictionary
+require|extern systemic class Dictionary

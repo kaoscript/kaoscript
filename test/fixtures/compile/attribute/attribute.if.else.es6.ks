@@ -1,7 +1,7 @@
 #![target(ecma-v6)]
 
 #[rules(non-exhaustive)]
-extern sealed class String {
+extern systemic class String {
 	length: Number
 }
 

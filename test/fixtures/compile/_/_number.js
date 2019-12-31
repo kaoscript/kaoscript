@@ -101,7 +101,6 @@ module.exports = function() {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Number: Number,
 		__ks_Number: __ks_Number
 	};
 };

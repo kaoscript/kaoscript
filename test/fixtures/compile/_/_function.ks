@@ -1,4 +1,4 @@
-extern sealed class Function {
+extern systemic class Function {
 }
 
 impl Function {

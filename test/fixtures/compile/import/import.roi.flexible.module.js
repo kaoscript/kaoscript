@@ -6,7 +6,6 @@ module.exports = function() {
 	});
 	return {
 		Foobar: Foobar,
-		Array: Array,
 		__ks_Array: __ks_Array
 	};
 };

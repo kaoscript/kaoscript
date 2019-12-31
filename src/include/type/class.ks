@@ -154,7 +154,10 @@ class ClassType extends Type {
 				type._hybrid = data.hybrid
 				type._init = data.init
 
-				if data.sealed {
+				if data.systemic {
+					type.flagSystemic()
+				}
+				else if data.sealed {
 					type.flagSealed()
 				}
 
@@ -425,6 +428,7 @@ class ClassType extends Type {
 		@hybrid = src._hybrid
 		@init = src._init
 		@sealed = src._sealed
+		@systemic = src._systemic
 
 		for const methods, name of src._abstractMethods {
 			@abstractMethods[name] = [].concat(methods)
@@ -557,6 +561,7 @@ class ClassType extends Type {
 				alien: @alien
 				hybrid: @hybrid
 				sealed: @sealed
+				systemic: @systemic
 				exhaustive
 				init: @init
 				constructors: [constructor.export(references, mode) for const constructor in @constructors]

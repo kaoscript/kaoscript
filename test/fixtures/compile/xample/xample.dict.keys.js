@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Array, __ks_Array} = require("../_/_array.ks")();
+	var __ks_Array = require("../_/_array.ks")().__ks_Array;
 	var __ks_Dictionary = {};
 	function foo(x) {
 		if(arguments.length < 1) {

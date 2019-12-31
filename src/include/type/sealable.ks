@@ -19,10 +19,21 @@ class SealableType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	export(references, mode) => { // {{{
-		kind: TypeKind::Sealable
-		sealed: this.isSealed()
-		type: @type.toReference(references, mode)
+	export(references, mode) { // {{{
+		if @systemic {
+			return {
+				kind: TypeKind::Sealable
+				systemic: true
+				type: @type.toReference(references, mode)
+			}
+		}
+		else {
+			return {
+				kind: TypeKind::Sealable
+				sealed: this.isSealed()
+				type: @type.toReference(references, mode)
+			}
+		}
 	} // }}}
 	flagExported(explicitly: Boolean) { // {{{
 		@type.flagExported(explicitly)

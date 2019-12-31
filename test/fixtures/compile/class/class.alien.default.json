@@ -19,6 +19,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+      "systemic": false,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -34,6 +35,7 @@
       "alien": false,
       "hybrid": true,
       "sealed": false,
+      "systemic": false,
       "exhaustive": false,
       "init": 1,
       "constructors": [
@@ -83,6 +85,7 @@
       "alien": false,
       "hybrid": true,
       "sealed": false,
+      "systemic": false,
       "exhaustive": false,
       "init": 1,
       "constructors": [

@@ -292,6 +292,7 @@ class ReferenceType extends Type {
 	isExplicitlyExported() => this.type().isExplicitlyExported()
 	isExportable() => this.type().isExportable()
 	isExported() => this.type().isExported()
+	isExportingFragment() => !this.isVirtual()
 	isFunction() => @name == 'Function' || this.type().isFunction()
 	isHybrid() => this.type().isHybrid()
 	isInstanceOf(target: AnyType) => true
@@ -566,6 +567,11 @@ class ReferenceType extends Type {
 			}
 		}
 	} // }}}
+	toExportFragment(fragments, name, variable) {
+		if !this.isVirtual() {
+			fragments.newLine().code(`\(name): `).compile(variable).done()
+		}
+	}
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}

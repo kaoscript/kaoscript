@@ -1,6 +1,6 @@
 extern parseFloat, parseInt
 
-extern sealed class String {
+extern systemic class String {
 	length: Number
 	charAt(...): String
 	match(...): Array?

@@ -1,10 +1,10 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
-module.exports = function(Date, __ks_Date) {
-	if(!Type.isValue(Date)) {
-		var {Date, __ks_Date} = require("./require.alt.roi.loop3.genesis.ks")();
+module.exports = function(__ks_Date) {
+	if(!Type.isValue(__ks_Date)) {
+		var __ks_Date = require("./require.alt.roi.loop3.genesis.ks")().__ks_Date;
 	}
-	var {Date, __ks_Date} = require("./require.alt.roi.loop3.augment.ks")(Date, __ks_Date);
+	var __ks_Date = require("./require.alt.roi.loop3.augment.ks")(__ks_Date).__ks_Date;
 	__ks_Date.__ks_func_fromSpecial_0 = function() {
 	};
 	__ks_Date._im_fromSpecial = function(that) {
@@ -16,7 +16,6 @@ module.exports = function(Date, __ks_Date) {
 	};
 	const d = __ks_Date.new(2000, 1, 20, 3, 45, 6, 789);
 	return {
-		Date: Date,
 		__ks_Date: __ks_Date
 	};
 };

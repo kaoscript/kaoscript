@@ -1,4 +1,4 @@
-extern sealed namespace Math {
+extern systemic namespace Math {
 	abs(...): Number
 	max(...): Number
 	min(...): Number

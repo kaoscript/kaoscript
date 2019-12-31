@@ -21,7 +21,6 @@ module.exports = function() {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		String: String,
 		__ks_String: __ks_String
 	};
 };

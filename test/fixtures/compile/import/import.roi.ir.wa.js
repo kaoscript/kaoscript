@@ -1,8 +1,8 @@
 require("kaoscript/register");
 var {Helper, Operator} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Array, __ks_Array} = require("../_/_array.ks")();
-	var {Array, __ks_Array} = require("../require/require.alt.roi.default.es6.ks")(Array, __ks_Array);
+	var __ks_Array = require("../_/_array.ks")().__ks_Array;
+	var __ks_Array = require("../require/require.alt.roi.systemic.es6.ks")(__ks_Array).__ks_Array;
 	const m = __ks_Array._cm_map(Helper.newArrayRange(1, 10, 1, true, true), function(value, index) {
 		if(arguments.length < 2) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
@@ -16,7 +16,6 @@ module.exports = function() {
 		return Operator.multiplication(value, index);
 	});
 	return {
-		Array: Array,
 		__ks_Array: __ks_Array
 	};
 };

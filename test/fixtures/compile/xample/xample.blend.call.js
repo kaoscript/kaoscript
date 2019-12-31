@@ -1,7 +1,7 @@
 require("kaoscript/register");
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	var {Number, __ks_Number} = require("../_/_number.ks")();
+	var __ks_Number = require("../_/_number.ks")().__ks_Number;
 	function blend(x, y, percentage) {
 		if(arguments.length < 3) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");

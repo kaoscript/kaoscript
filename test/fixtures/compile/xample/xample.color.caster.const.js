@@ -2,8 +2,8 @@ require("kaoscript/register");
 var {Dictionary, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var Float = require("../_/_float.ks")().Float;
-	var {Math, __ks_Math} = require("../_/_math.ks")();
-	var {Number, __ks_Number} = require("../_/_number.ks")();
+	var __ks_Math = require("../_/_math.ks")().__ks_Math;
+	var __ks_Number = require("../_/_number.ks")().__ks_Number;
 	const $caster = (() => {
 		const d = new Dictionary();
 		d.percentage = function(n) {

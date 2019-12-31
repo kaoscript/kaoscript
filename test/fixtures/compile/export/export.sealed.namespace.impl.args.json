@@ -16,6 +16,7 @@
     {
       "kind": "namespace",
       "sealed": true,
+      "systemic": false,
       "exhaustive": true,
       "properties": {
         "PI": {

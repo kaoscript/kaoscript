@@ -1,0 +1,19 @@
+{
+  "aliens": [
+    0,
+    "window"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "window"
+  ],
+  "references": [
+    {
+      "kind": "sealable",
+	  "systemic": true,
+      "type": "Any?"
+    }
+  ],
+  "macros": []
+}

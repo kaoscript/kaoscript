@@ -1,0 +1,30 @@
+{
+  "aliens": [
+    0,
+    "Window"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Window"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "systemic": true,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

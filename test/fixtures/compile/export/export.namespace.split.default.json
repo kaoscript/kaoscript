@@ -11,6 +11,7 @@
     {
       "kind": "namespace",
       "sealed": false,
+      "systemic": false,
       "exhaustive": true,
       "properties": {
         "foo": {

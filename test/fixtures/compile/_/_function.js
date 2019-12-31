@@ -30,7 +30,6 @@ module.exports = function() {
 		throw new SyntaxError("Wrong number of arguments");
 	};
 	return {
-		Function: Function,
 		__ks_Function: __ks_Function
 	};
 };

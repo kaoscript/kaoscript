@@ -160,6 +160,7 @@ class NamedType extends Type {
 	isExplicitlyExported() => @type.isExplicitlyExported()
 	isExportable() => @type.isExportable()
 	isExported() => @type.isExported()
+	isExportingFragment() => @type.isExportingFragment()
 	isExtendable() => @type.isExtendable()
 	isFlexible() => @type.isFlexible()
 	isHybrid() => @type.isHybrid()
@@ -190,7 +191,13 @@ class NamedType extends Type {
 			}
 			else if value is NamedType {
 				if @type is ClassType && value.type() is ClassType {
-					if @type.isPredefined() && value.isPredefined() {
+					if value.isSystemic() && !@type.isSystemic() {
+						return false
+					}
+					else if value.isSealed() && !@type.isSealed() {
+						return false
+					}
+					else if @type.isPredefined() && value.isPredefined() {
 						return @name == value.name()
 					}
 					else {
@@ -275,6 +282,7 @@ class NamedType extends Type {
 	isSealedAlien() => @type.isSealedAlien()
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
+	isSystemic() => @type.isSystemic()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
 	isVirtual() => $virtuals[@name]
@@ -431,6 +439,11 @@ class NamedType extends Type {
 	} // }}}
 	toCastFragments(fragments) { // {{{
 		@type.toCastFragments(fragments)
+	} // }}}
+	toExportFragment(fragments, name, variable) { // {{{
+		if @type.isExportingFragment() {
+			super(fragments, name, variable)
+		}
 	} // }}}
 	toExportOrIndex(references, mode) => @type.toExportOrIndex(references, mode)
 	toFragments(fragments, node)

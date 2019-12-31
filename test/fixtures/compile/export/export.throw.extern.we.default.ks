@@ -1,4 +1,4 @@
-extern sealed class SyntaxError
+extern systemic class SyntaxError
 
 func foo() ~ SyntaxError {
 

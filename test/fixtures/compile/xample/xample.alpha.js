@@ -1,7 +1,7 @@
 require("kaoscript/register");
 module.exports = function() {
 	var Float = require("../_/_float.ks")().Float;
-	var {Number, __ks_Number} = require("../_/_number.ks")();
+	var __ks_Number = require("../_/_number.ks")().__ks_Number;
 	function alpha(n = null, percentage) {
 		if(percentage === void 0 || percentage === null) {
 			percentage = false;

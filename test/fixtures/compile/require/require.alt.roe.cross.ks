@@ -1,8 +1,8 @@
-require|extern sealed class Number {
+require|extern systemic class Number {
 	toString(): String
 }
 
-require|extern sealed class String {
+require|extern systemic class String {
 }
 
 extern parseFloat, parseInt

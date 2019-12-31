@@ -6,7 +6,10 @@ class DictionaryType extends Type {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new DictionaryType(scope)
 
-			if data.sealed {
+			if data.systemic {
+				type.flagSystemic()
+			}
+			else if data.sealed {
 				type.flagSealed()
 			}
 
@@ -35,8 +38,11 @@ class DictionaryType extends Type {
 			kind: TypeKind::Dictionary
 		}
 
-		if @sealed {
-			export.sealed = @sealed
+		if @systemic {
+			export.systemic = true
+		}
+		else if @sealed {
+			export.sealed = true
 		}
 
 		export.properties = {}

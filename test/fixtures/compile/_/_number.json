@@ -23,6 +23,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
+	  "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -58,6 +59,7 @@
     {
       "kind": "namespace",
       "sealed": true,
+	  "systemic": true,
       "exhaustive": true,
       "properties": {
         "max": {

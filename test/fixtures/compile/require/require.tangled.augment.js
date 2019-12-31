@@ -1,6 +1,6 @@
 require("kaoscript/register");
 module.exports = function() {
-	var {Foobar, __ks_Foobar, Error, __ks_Error, FooError} = require("./require.tangled.genesis.ks")();
+	var {Foobar, __ks_Foobar, __ks_Error, FooError} = require("./require.tangled.genesis.ks")();
 	__ks_Foobar.__ks_func_foobar_0 = function() {
 	};
 	__ks_Foobar._im_foobar = function(that) {

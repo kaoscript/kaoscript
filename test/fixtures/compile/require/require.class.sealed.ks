@@ -1,24 +1,11 @@
-require sealed class Array
+require sealed class Color
 
-impl Array {
-	contains(item, from = 0) { // {{{
-		return this.indexOf(item, from) != -1
-	} // }}}
-	pushUniq(...args) { // {{{
-		if args.length == 1 {
-			if !this.contains(args[0]) {
-				this.push(args[0])
-			}
-		}
-		else {
-			for item in args {
-				if !this.contains(item) {
-					this.push(item)
-				}
-			}
-		}
-		return this
-	} // }}}
+impl Color {
+	private {
+		@luma: Number
+	}
+	luma(): @luma
+	luma(@luma): this
 }
 
-export Array
+export Color

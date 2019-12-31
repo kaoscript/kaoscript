@@ -1,4 +1,4 @@
-require|extern sealed class Date
+require|extern systemic class Date
 
 impl Date {
 	fromGenesis() {
