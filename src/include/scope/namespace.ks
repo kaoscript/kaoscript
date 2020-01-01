@@ -1,4 +1,7 @@
 class NamespaceScope extends BlockScope {
+	private {
+		_matchingTypes: Dictionary<Array>	= {}
+	}
 	addVariable(name: String, variable: Variable) { // {{{
 		if $keywords[name] == true {
 			const newName = this.getNewName(name)
@@ -16,5 +19,29 @@ class NamespaceScope extends BlockScope {
 		}
 
 		@variables[name] = [@line, variable]
+	} // }}}
+	isMatchingType(a: Type, b: Type, mode: MatchingMode) { // {{{
+		const hash = a.toQuote()
+
+		if const matches = @matchingTypes[hash] {
+			for const type, i in matches by 2 {
+				if type == b {
+					return matches[i + 1]
+				}
+			}
+		}
+		else {
+			@matchingTypes[hash] = []
+		}
+
+		@matchingTypes[hash].push(b, false)
+
+		const index = @matchingTypes[hash].length
+
+		const match = a.isMatching(b, mode)
+
+		@matchingTypes[hash][index - 1] = match
+
+		return match
 	} // }}}
 }

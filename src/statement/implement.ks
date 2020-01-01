@@ -407,7 +407,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				const type = Type.union(@scope, ...methods)
 				const variable = @scope.define('precursor', true, type, this)
 
-				variable.replaceCall = (data, arguments) => new CallOverwrittenMethodSubstitude(data, arguments, @name, type)
+				variable.replaceCall = (data, arguments) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, true)
 			}
 			else {
 				if @class.hasMatchingInstanceMethod(@name, @type, MatchingMode::ExactParameters) {
@@ -439,7 +439,7 @@ class ImplementClassMethodDeclaration extends Statement {
 				const type = Type.union(@scope, ...methods)
 				const variable = @scope.define('precursor', true, type, this)
 
-				variable.replaceCall = (data, arguments) => new CallOverwrittenMethodSubstitude(data, arguments, @name, type)
+				variable.replaceCall = (data, arguments) => new CallOverwrittenMethodSubstitude(data, arguments, @variable, @name, methods, false)
 			}
 			else {
 				if @class.hasMatchingClassMethod(@name, @type, MatchingMode::ExactParameters) {
@@ -1086,21 +1086,56 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 class CallOverwrittenMethodSubstitude {
 	private {
 		_arguments
+		_class: NamedType<ClassType>
 		_data
+		_instance: Boolean
+		_methods: Array<FunctionType>	= []
 		_name: String
 		_type: Type
 	}
-	constructor(@data, @arguments, @name, @type)
+	constructor(@data, @arguments, @class, @name, methods: Array<FunctionType>, @instance) { // {{{
+		const types = []
+
+		for const method in methods {
+			if method.matchArguments(@arguments) {
+				types.push(method.returnType())
+
+				@methods.push(method)
+			}
+		}
+
+		@type = Type.union(@class.scope(), ...types)
+	} // }}}
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
-		fragments.code(`this.\(@name)(`)
+		if @methods.length == 1 && @methods[0].isSealed() {
+			fragments.code(`\(@class.getSealedName()).__ks_\(@instance ? 'func' : 'sttc')_\(@name)_\(@methods[0].identifier())`)
 
-		for const argument, index in @arguments {
-			if index != 0 {
-				fragments.code($comma)
+			if @arguments.length == 0 {
+				fragments.code(`.apply(this`)
 			}
+			else {
+				fragments.code(`.call(this, `)
 
-			fragments.compile(argument)
+				for const argument, index in @arguments {
+					if index != 0 {
+						fragments.code($comma)
+					}
+
+					fragments.compile(argument)
+				}
+			}
+		}
+		else {
+			fragments.code(`this.\(@name)(`)
+
+			for const argument, index in @arguments {
+				if index != 0 {
+					fragments.code($comma)
+				}
+
+				fragments.compile(argument)
+			}
 		}
 	} // }}}
 	type() => @type

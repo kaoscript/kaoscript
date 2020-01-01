@@ -1,0 +1,61 @@
+{
+  "aliens": [
+    0,
+    "Date",
+    1,
+    "Math"
+  ],
+  "requirements": [
+    0,
+    "Date",
+    false,
+    1,
+    "Math",
+    false
+  ],
+  "exports": [
+    0,
+    "Date",
+    2,
+    "Math"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "systemic": true,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "namespace",
+      "sealed": true,
+      "systemic": true,
+      "exhaustive": false,
+      "properties": {}
+    },
+    {
+      "kind": "namespace",
+      "exhaustive": true,
+      "namespace": {
+        "reference": 1
+      },
+      "properties": {
+        "PI": {
+          "type": "Number",
+          "sealed": false
+        }
+      }
+    }
+  ],
+  "macros": []
+}
