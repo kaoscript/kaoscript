@@ -32,9 +32,9 @@ class ClassType extends Type {
 		_predefined: Boolean				= false
 		_seal: Dictionary
 		_sequences	 						= {
-			constructor: 0
-			classMethods: {}
-			instanceMethods: {}
+			constructor:		0
+			classMethods:		{}
+			instanceMethods:	{}
 		}
 	}
 	static {
@@ -255,6 +255,10 @@ class ClassType extends Type {
 		if @alteration {
 			type.flagAlteration()
 		}
+
+		if type.isSealed() {
+			@seal.classVariables[name] = true
+		}
 	} // }}}
 	addConstructor(type: ClassConstructorType) { // {{{
 		let id = type.identifier()
@@ -321,6 +325,10 @@ class ClassType extends Type {
 
 		if @alteration {
 			type.flagAlteration()
+		}
+
+		if type.isSealed() {
+			@seal.instanceVariables[name] = true
 		}
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
@@ -732,7 +740,9 @@ class ClassType extends Type {
 		@seal = {
 			constructors: false
 			instanceMethods: {}
+			classVariables: {}
 			classMethods: {}
+			instanceVariables: {}
 		}
 
 		return this
@@ -1067,8 +1077,9 @@ class ClassType extends Type {
 		return false
 	} // }}}
 	hasSealedConstructors(): Boolean => @seal?.constructors
-	init(): Number => @init
-	init(@init) => this
+	incInitializer() { // {{{
+		return ++@init
+	} // }}}
 	isAbstract() => @abstract
 	isAlteration() => @alteration
 	isAsyncClassMethod(name) { // {{{
@@ -1154,6 +1165,7 @@ class ClassType extends Type {
 	isExtending() => @extending
 	isFlexible() => @sealed
 	isHybrid() => @hybrid
+	isInitializing() => @init != 0
 	isInstanceOf(target: ClassType) { // {{{
 		if this.equals(target) {
 			return true

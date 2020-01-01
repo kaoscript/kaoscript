@@ -119,7 +119,8 @@
               "default": 1
             }
           ],
-          "throws": []
+          "throws": [],
+		  "dependent": true
         }
       ],
       "instanceVariables": {},

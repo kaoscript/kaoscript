@@ -842,9 +842,8 @@ class AliasStatement extends Statement {
 					@sealed = true
 					@setter = true
 				}
-				else {
-					@variableName = `_\(@name)`
-				}
+
+				@variableName = `_\(@name)`
 			}
 			else if @type ?= class.getPropertySetter(@name) {
 				@setter = true
@@ -869,7 +868,12 @@ class AliasStatement extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		if @setter {
 			if @sealed {
-				fragments.newLine().code(`\(@namedClass.getSealedName()).__ks_set_\(@name)(this, `).compile(@identifier).code(')').done()
+				if @parameter.parent().isConstructor() {
+					fragments.newLine().code(`that.\(@variableName) = `).compile(@identifier).done()
+				}
+				else {
+					fragments.newLine().code(`\(@namedClass.getSealedName()).__ks_set_\(@name)(this, `).compile(@identifier).code(')').done()
+				}
 			}
 			else {
 				fragments.newLine().code(`this.\(@name)(`).compile(@identifier).code(')').done()

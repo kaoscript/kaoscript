@@ -36,7 +36,7 @@
         "reference": 1
       },
       "exhaustive": false,
-      "init": 0,
+      "init": 1,
       "constructors": [],
       "instanceVariables": {
         "_culture": {

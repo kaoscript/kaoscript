@@ -222,7 +222,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		if this.hasInits() {
-			@class.init(1)
+			@class.incInitializer()
 		}
 	} // }}}
 	prepare() { // {{{

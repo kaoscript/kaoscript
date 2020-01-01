@@ -243,15 +243,25 @@ class ExpressionBuilder extends ExpressionWriter {
 }
 
 class LineBuilder extends ExpressionBuilder {
+	private {
+		_whenDone: Function?	= null
+	}
 	done() { // {{{
 		if @undone {
 			@writer.push(@writer.lineTerminator)
 
 			@undone = false
+
+			if @whenDone != null {
+				@whenDone()
+
+				@whenDone = null
+			}
 		}
 	} // }}}
 	newControl(indent = @indent, initiator = true, terminator = true) { // {{{
 		return @writer.newControl(indent, initiator, terminator)
 	} // }}}
 	newLine() => this
+	whenDone(@whenDone)
 }

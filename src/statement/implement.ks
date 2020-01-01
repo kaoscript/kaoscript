@@ -190,11 +190,7 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		if @hasDefaultValue {
 			if @instance {
-				@init = @class.init() + 1
-
-				if !@class.isSealed() {
-					@class.init(@init)
-				}
+				@init = @class.incInitializer()
 			}
 
 			@defaultValue.prepare()
@@ -520,6 +516,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	class() => @variable
 	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_cm_\(@name)`
+	isConstructor() => false
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
 	isInstanceMethod() => @instance
@@ -645,6 +642,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 class ImplementClassConstructorDeclaration extends Statement {
 	private {
+		_aliases: Array					= []
 		_block: Block
 		_class: ClassType
 		_classRef: ReferenceType
@@ -682,14 +680,14 @@ class ImplementClassConstructorDeclaration extends Statement {
 		if @class.isSealed() && this.getConstructorIndex($ast.block(body).statements) != -1 {
 			@scope.rename('this', 'that')
 
-			@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable)
+			@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable, this)
 
 			@dependent = true
 		}
 		else if @overwrite {
 			@scope.rename('this', 'that')
 
-			@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable)
+			@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable, this)
 		}
 		else {
 			@this.replaceCall = (data, arguments) => new CallThisConstructorSubstitude(data, arguments, @variable)
@@ -739,7 +737,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 			const variable = @scope.define('precursor', true, @classRef, this)
 
-			variable.replaceCall = (data, arguments) => new CallOverwrittenConstructorSubstitude(data, arguments, @variable)
+			variable.replaceCall = (data, arguments) => new CallOverwrittenConstructorSubstitude(data, arguments, @variable, this)
 		}
 		else {
 			if @class.hasMatchingConstructor(@type, MatchingMode::ExactParameters) {
@@ -755,19 +753,76 @@ class ImplementClassConstructorDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		@block.analyse()
+		let index = 1
+		if @block.isEmpty() {
+			if @class.isExtending() {
+				this.addCallToParentConstructor()
+
+				index = 0
+			}
+		}
+		else if @class.isExtending() && (index = this.getConstructorIndex(@block.statements())) == -1 {
+			SyntaxException.throwNoSuperCall(this)
+		}
+
+		if @aliases.length == 0 {
+			@block.analyse()
+		}
+		else {
+			@block.analyse(0, index)
+
+			@block.analyse(@aliases)
+
+			@block.analyse(index + 1)
+		}
+
 		@block.prepare()
 		@block.translate()
+	} // }}}
+	addAliasStatement(statement: AliasStatement) { // {{{
+		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
+			@aliases.push(statement)
+		}
+	} // }}}
+	private addCallToParentConstructor() { // {{{
+		// only add call if parent has an empty constructor
+		const extendedType = @class.extends().type()
+
+		if extendedType.matchArguments([]) {
+			if extendedType.hasConstructors() || extendedType.isSealed() {
+				@block.addStatement({
+					kind: NodeKind::CallExpression
+					attributes: []
+					modifiers: []
+					scope: {
+						kind: ScopeKind::This
+					}
+					callee: {
+						kind: NodeKind::Identifier
+						name: 'super'
+						start: @data.start
+						end: @data.start
+					}
+					arguments: []
+					start: @data.start
+					end: @data.start
+				})
+			}
+		}
+		else {
+			SyntaxException.throwNoSuperCall(this)
+		}
 	} // }}}
 	class() => @variable
 	getSharedName() => '__ks_cons'
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
+	isConstructor() => true
 	isExtending() => @class.isExtending()
 	private getConstructorIndex(body: Array) { // {{{
 		for const statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
-				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super') {
+				if statement.callee.kind == NodeKind::Identifier && (statement.callee.name == 'this' || statement.callee.name == 'super' || (@overwrite && statement.callee.name == 'precursor')) {
 					return index
 				}
 			}
@@ -1056,8 +1111,9 @@ class CallSealedConstructorSubstitude {
 		_arguments
 		_class: NamedType<ClassType>
 		_data
+		_node
 	}
-	constructor(@data, @arguments, @class)
+	constructor(@data, @arguments, @class, @node)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`var that = \(@class.getSealedName()).new(`)
@@ -1069,6 +1125,10 @@ class CallSealedConstructorSubstitude {
 
 			fragments.compile(argument)
 		}
+
+		if @class.type().isInitializing() {
+			fragments.whenDone($callSealedInitializer^^(fragments, @class, @node))
+		}
 	} // }}}
 	type() => Type.Void
 }
@@ -1078,8 +1138,9 @@ class CallOverwrittenConstructorSubstitude {
 		_arguments
 		_class: NamedType<ClassType>
 		_data
+		_node
 	}
-	constructor(@data, @arguments, @class)
+	constructor(@data, @arguments, @class, @node)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`var that = new \(@class.name())(`)
@@ -1091,6 +1152,17 @@ class CallOverwrittenConstructorSubstitude {
 
 			fragments.compile(argument)
 		}
+
+		if @class.isSealed() && @class.type().isInitializing() {
+			fragments.whenDone($callSealedInitializer^^(fragments, @class, @node))
+		}
 	} // }}}
 	type() => Type.Void
 }
+
+func $callSealedInitializer(fragments, type, node) { // {{{
+	const ctrl = fragments.newControl()
+	ctrl.code(`if(!that[\($runtime.initFlag(node))])`).step()
+	ctrl.line(`\(type.getSealedName()).__ks_init(that)`)
+	ctrl.done()
+} // }}}
