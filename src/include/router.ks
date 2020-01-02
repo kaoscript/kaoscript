@@ -1913,6 +1913,8 @@ namespace Router {
 				return matches
 			}
 
+			let routes = []
+
 			for const route in assessment.routes when route.min <= length <= route.max {
 				if route.filters.length == 0 && route.matchingFilters.length == 0 {
 					matches.push(route.function)
@@ -1920,13 +1922,20 @@ namespace Router {
 				else {
 					let matched = true
 					let perfect = true
+					let union = true
 
-					for const filter in route.filters while matched {
+					for const filter in route.filters {
 						if arguments[filter.index].isAny() {
 							perfect = false
 						}
 						else if !arguments[filter.index].matchContentOf(filter.type) {
 							matched = false
+
+							if !arguments[filter.index].isUnion() {
+								union = false
+
+								break
+							}
 						}
 					}
 
@@ -1937,12 +1946,18 @@ namespace Router {
 							let isMatched = true
 							let isPerfect = perfect
 
-							for const filter in line.filters while isMatched {
+							for const filter in line.filters {
 								if arguments[filter.index].isAny() {
 									isPerfect = false
 								}
 								else if !arguments[filter.index].matchContentOf(filter.type) {
 									isMatched = false
+
+									if !arguments[filter.index].isUnion() {
+										union = false
+
+										break
+									}
 								}
 							}
 
@@ -1965,6 +1980,78 @@ namespace Router {
 							matches.push(route.function)
 						}
 					}
+					else if union {
+						routes.push(route)
+					}
+				}
+			}
+
+			if routes.length != 0 {
+				for const argument, index in arguments when argument.isUnion() {
+					const types = argument.discard():UnionType.types()
+
+					const newRoutes = []
+
+					for const type in types {
+						let typeIsMatched = true
+
+						for const route in routes {
+							let matched = true
+
+							for const filter in route.filters when filter.index == index {
+								if !type.matchContentOf(filter.type) {
+									matched = false
+								}
+							}
+
+							if route.matchingFilters.length != 0 {
+								let notFound = true
+
+								for const line in route.matchingFilters while notFound when line.min <= length <= line.max {
+									let isMatched = true
+
+									for const filter in line.filters when filter.index == index {
+										if !type.matchContentOf(filter.type) {
+											isMatched = false
+										}
+									}
+
+									if isMatched {
+										notFound = false
+									}
+								}
+
+								if notFound {
+									matched = false
+								}
+							}
+
+							if matched {
+								newRoutes.pushUniq(route)
+
+								typeIsMatched = true
+							}
+						}
+
+						if !typeIsMatched {
+							newRoutes.clear()
+
+							break
+						}
+					}
+
+					if newRoutes.length == 0 {
+						routes.clear()
+
+						break
+					}
+					else {
+						routes = newRoutes
+					}
+				}
+
+				for const route in routes {
+					matches.push(route.function)
 				}
 			}
 

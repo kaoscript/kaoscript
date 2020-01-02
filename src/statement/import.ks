@@ -118,9 +118,9 @@ class Importer extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		if @isKSFile {
-			const module = this.module()
+		const module = this.module()
 
+		if @isKSFile {
 			const arguments = {}
 
 			@scope.line(this.line() - 1)
@@ -207,18 +207,29 @@ class Importer extends Statement {
 						else {
 							@count += 1
 						}
+
+						if type.isSystemic() && def.local == 'Dictionary' {
+							module.flag('Dictionary')
+						}
+						else {
+							module.import(def.local)
+						}
 					}
 				}
 			}
 
 			if @count != 0 || @alias != null {
-				this.module().flagRegister()
+				module.flagRegister()
 			}
 		}
 		else {
 			for const argument in @arguments when argument.isApproved {
 				argument.value.prepare()
 				argument.type = argument.value.type()
+			}
+
+			for const import of @imports {
+				module.import(import.local)
 			}
 		}
 
@@ -305,8 +316,6 @@ class Importer extends Statement {
 		else if isAlias {
 			SyntaxException.throwAlreadyDeclared(local, this)
 		}
-
-		this.module().import(local)
 
 		@imports[imported] = {
 			local

@@ -336,7 +336,7 @@ class NamedType extends Type {
 			}
 			else if that.isAlias() {
 				if this.isAlias() {
-					return @name == that.name() || this.discardAlias().matchContentOf(that.discardAlias())
+					return @name == that.name() || @type.discardAlias().matchContentOf(that.discardAlias())
 				}
 				else {
 					return this.matchContentOf(that.discardAlias())
@@ -347,7 +347,7 @@ class NamedType extends Type {
 			}
 		}
 		else if this.isAlias() {
-			return this.discardAlias().matchContentOf(that)
+			return @type.discardAlias().matchContentOf(that)
 		}
 		else if that is UnionType {
 			for const type in that.types() {

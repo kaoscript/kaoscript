@@ -700,7 +700,7 @@ abstract class Requirement {
 		_type: Type
 	}
 	constructor(@name, @type, @node) { // {{{
-		if @name == 'Dictionary' {
+		if @type.isSystemic() && @name == 'Dictionary' {
 			node.module().flag('Dictionary')
 		}
 	} // }}}
