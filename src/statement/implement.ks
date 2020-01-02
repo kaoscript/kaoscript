@@ -838,7 +838,25 @@ class ImplementClassConstructorDeclaration extends Statement {
 	parameters() => @parameters
 	toSharedFragments(fragments) { // {{{
 		if @class.isSealed() {
-			const assessment = Router.assess([constructor for const constructor in @class.listConstructors() when constructor.isSealed()], false)
+			const assessment = Router.assess([constructor for const constructor in @class.listConstructors()], false, false, groups => {
+				for const group of groups {
+					auto sealed = 0
+					auto notsealed = 0
+
+					for const function in group.functions {
+						if function.isSealed() {
+							++sealed
+						}
+						else {
+							++notsealed
+						}
+					}
+
+					if sealed == 0 {
+						group.functions = [group.functions[0]]
+					}
+				}
+			})
 
 			const es5 = @options.format.spreads == 'es5'
 			let min = Number.MAX_VALUE
@@ -851,7 +869,20 @@ class ImplementClassConstructorDeclaration extends Statement {
 				(node, fragments) => fragments.code(`\(@variable.getSealedName()).new = function()`).newBlock()
 				(fragments) => fragments.done()
 				(fragments, method, index) => {
-					if method.isDependent() || method.isOverwritten() {
+					if !method.isSealed() {
+						if method.max() == 0 {
+							fragments.line(`return new \(@variable.name())()`)
+						}
+						else {
+							if es5 {
+								fragments.line(`return new (Function.bind.apply(\(@variable.name()), [null].concat(Array.prototype.slice.call(arguments))))`)
+							}
+							else {
+								fragments.line(`return new \(@variable.name())(...arguments)`)
+							}
+						}
+					}
+					else if method.isDependent() || method.isOverwritten() {
 						if es5 {
 							fragments.line(`return \(@variable.getSealedName()).__ks_cons_\(method.identifier()).apply(null, arguments)`)
 						}
@@ -868,26 +899,36 @@ class ImplementClassConstructorDeclaration extends Statement {
 					}
 				}
 				(block, ctrl) => {
-					ctrl.step()
-
-					if min > 0 {
+					if @class.isExhaustive() {
 						ctrl
-							.code('else if(arguments.length === 0)')
 							.step()
-							.line(`return new \(@variable.name())()`)
+							.code('else')
 							.step()
-					}
-
-					ctrl.code(`else`).step()
-
-					if es5 {
-						ctrl.line(`return new (Function.bind.apply(\(@variable.name()), [null].concat(Array.prototype.slice.call(arguments))))`)
+							.line(`throw new SyntaxError("Wrong number of arguments")`)
+							.done()
 					}
 					else {
-						ctrl.line(`return new \(@variable.name())(...arguments)`)
-					}
+						ctrl.step()
 
-					ctrl.done()
+						if min > 0 {
+							ctrl
+								.code('else if(arguments.length === 0)')
+								.step()
+								.line(`return new \(@variable.name())()`)
+								.step()
+						}
+
+						ctrl.code(`else`).step()
+
+						if es5 {
+							ctrl.line(`return new (Function.bind.apply(\(@variable.name()), [null].concat(Array.prototype.slice.call(arguments))))`)
+						}
+						else {
+							ctrl.line(`return new \(@variable.name())(...arguments)`)
+						}
+
+						ctrl.done()
+					}
 				}
 				this
 			).done()

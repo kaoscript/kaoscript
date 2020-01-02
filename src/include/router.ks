@@ -548,8 +548,8 @@ namespace Router {
 		} // }}}
 
 		func expandParameter(group, function: FunctionType, parameters: Array<ParameterType>, target: Number, count: Number, pIndex: Number, pCount: Number, key: String, types: Array<Type>, type: Type): Void { // {{{
-			if type is UnionType {
-				for const value in type.types() {
+			if type.isUnion() {
+				for const value in type.discard():UnionType.types() {
 					expandParameter(group, function, parameters, target, count, pIndex, pCount, key, types, value)
 				}
 			}
@@ -1799,7 +1799,7 @@ namespace Router {
 	export {
 		#![rules(assert-parameter)]
 
-		func assess(functions: Array<FunctionType>, flattenable: Boolean, overflow: Boolean = false): Assessement { // {{{
+		func assess(functions: Array<FunctionType>, flattenable: Boolean, overflow: Boolean = false, filterGroups: Function = null): Assessement { // {{{
 			if functions.length == 0 {
 				return Assessement()
 			}
@@ -1853,6 +1853,10 @@ namespace Router {
 					for const group of groups when function.absoluteMin() <= group.n {
 						group.functions.push(function)
 					}
+				}
+
+				if filterGroups != null {
+					filterGroups(groups)
 				}
 
 				const assessment = Assessement(

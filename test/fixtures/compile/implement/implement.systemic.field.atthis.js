@@ -52,14 +52,60 @@ module.exports = function() {
 		that[initFlag] = true;
 	};
 	__ks_Date.new = function() {
-		if(arguments.length >= 3 && arguments.length <= 8) {
-			return __ks_Date.__ks_cons_4(...arguments);
-		}
-		else if(arguments.length === 0) {
+		if(arguments.length === 0) {
 			return new Date();
 		}
-		else {
+		else if(arguments.length === 1) {
 			return new Date(...arguments);
+		}
+		else if(arguments.length === 2) {
+			return new Date(...arguments);
+		}
+		else if(arguments.length === 3) {
+			if(Type.isString(arguments[2])) {
+				return __ks_Date.__ks_cons_4(...arguments);
+			}
+			else {
+				return new Date(...arguments);
+			}
+		}
+		else if(arguments.length === 4) {
+			if(Type.isString(arguments[3])) {
+				return __ks_Date.__ks_cons_4(...arguments);
+			}
+			else {
+				return new Date(...arguments);
+			}
+		}
+		else if(arguments.length === 5) {
+			if(Type.isString(arguments[4])) {
+				return __ks_Date.__ks_cons_4(...arguments);
+			}
+			else {
+				return new Date(...arguments);
+			}
+		}
+		else if(arguments.length === 6) {
+			if(Type.isString(arguments[5])) {
+				return __ks_Date.__ks_cons_4(...arguments);
+			}
+			else {
+				return new Date(...arguments);
+			}
+		}
+		else if(arguments.length === 7) {
+			if(Type.isString(arguments[6])) {
+				return __ks_Date.__ks_cons_4(...arguments);
+			}
+			else {
+				return new Date(...arguments);
+			}
+		}
+		else if(arguments.length === 8) {
+			return __ks_Date.__ks_cons_4(...arguments);
+		}
+		else {
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	};
 	const d = __ks_Date.new(2015, 6, 15, 9, 3, 1, 550, "Europe/Paris");

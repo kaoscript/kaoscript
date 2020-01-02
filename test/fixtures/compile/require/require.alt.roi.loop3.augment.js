@@ -60,11 +60,8 @@ module.exports = function(__ks_Date) {
 		if(arguments.length >= 2 && arguments.length <= 7) {
 			return __ks_Date.__ks_cons_1(...arguments);
 		}
-		else if(arguments.length === 0) {
-			return new Date();
-		}
 		else {
-			return new Date(...arguments);
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	};
 	__ks_Date._im_fromAugment = function(that) {

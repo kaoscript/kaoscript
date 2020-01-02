@@ -31,14 +31,17 @@ module.exports = function() {
 		return that;
 	};
 	__ks_Date.new = function() {
-		if(arguments.length >= 2 && arguments.length <= 7) {
-			return __ks_Date.__ks_cons_3(...arguments);
-		}
-		else if(arguments.length === 0) {
+		if(arguments.length === 0) {
 			return new Date();
 		}
-		else {
+		else if(arguments.length === 1) {
 			return new Date(...arguments);
+		}
+		else if(arguments.length >= 2 && arguments.length <= 7) {
+			return __ks_Date.__ks_cons_3(...arguments);
+		}
+		else {
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	};
 	const d1 = __ks_Date.new();

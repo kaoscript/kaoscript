@@ -4,7 +4,7 @@ module.exports = function(__ks_Date, __ks_Math) {
 	var __ks_0_valuable = Type.isValue(__ks_Date);
 	var __ks_1_valuable = Type.isValue(__ks_Math);
 	if(!__ks_0_valuable || !__ks_1_valuable) {
-		var __ks__ = require("./implement.systemic.constructor.clash.typing.ks")();
+		var __ks__ = require("./implement.systemic.cons.clash.typing.ks")();
 		if(!__ks_0_valuable) {
 			__ks_Date = __ks__.__ks_Date;
 		}
@@ -65,14 +65,19 @@ module.exports = function(__ks_Date, __ks_Math) {
 		that[initFlag] = true;
 	};
 	__ks_Date.new = function() {
-		if(arguments.length === 1) {
-			return __ks_Date.__ks_cons_3(...arguments);
-		}
-		else if(arguments.length === 0) {
+		if(arguments.length === 0) {
 			return new Date();
 		}
+		else if(arguments.length === 1) {
+			if(Type.isNumber(arguments[0])) {
+				return new Date(...arguments);
+			}
+			else {
+				return __ks_Date.__ks_cons_3(...arguments);
+			}
+		}
 		else {
-			return new Date(...arguments);
+			throw new SyntaxError("Wrong number of arguments");
 		}
 	};
 	__ks_Date._im_timezone = function(that) {
@@ -84,5 +89,8 @@ module.exports = function(__ks_Date, __ks_Math) {
 			return __ks_Date.__ks_func_timezone_1.apply(that, args);
 		}
 		throw new SyntaxError("Wrong number of arguments");
+	};
+	return {
+		__ks_Date: __ks_Date
 	};
 };

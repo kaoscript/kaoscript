@@ -1,4 +1,4 @@
-require|import './implement.systemic.constructor.clash.typing.ks'
+require|import './implement.systemic.cons.clash.typing.ks'
 
 disclose Date {
 	constructor()
@@ -18,3 +18,5 @@ impl Date {
 	timezone(): @timezone
 	timezone(@timezone): this
 }
+
+export Date

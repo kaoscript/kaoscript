@@ -567,11 +567,11 @@ class ReferenceType extends Type {
 			}
 		}
 	} // }}}
-	toExportFragment(fragments, name, variable) {
+	toExportFragment(fragments, name, variable) { // {{{
 		if !this.isVirtual() {
 			fragments.newLine().code(`\(name): `).compile(variable).done()
 		}
-	}
+	} // }}}
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}

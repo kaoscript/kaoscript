@@ -17,3 +17,5 @@ impl Date {
 }
 
 const d = new Date(2015, 6, 15, 9, 3, 1, 550)
+
+export Date
