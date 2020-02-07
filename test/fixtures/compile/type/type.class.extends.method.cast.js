@@ -23,8 +23,12 @@ module.exports = function() {
 		}
 	}
 	class ClassX extends ClassA {
+		__ks_init_1() {
+			this._foobar = new ClassA();
+		}
 		__ks_init() {
 			ClassA.prototype.__ks_init.call(this);
+			ClassX.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons(args) {
 			ClassA.prototype.__ks_cons.call(this, args);
@@ -56,8 +60,12 @@ module.exports = function() {
 		}
 	}
 	class ClassY extends ClassA {
+		__ks_init_1() {
+			this._foobar = new ClassA();
+		}
 		__ks_init() {
 			ClassA.prototype.__ks_init.call(this);
+			ClassY.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons(args) {
 			ClassA.prototype.__ks_cons.call(this, args);

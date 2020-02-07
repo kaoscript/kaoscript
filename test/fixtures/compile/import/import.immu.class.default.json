@@ -14,7 +14,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
-	  "systemic": false,
+      "systemic": false,
       "exhaustive": false,
       "init": 1,
       "constructors": [],
@@ -22,25 +22,45 @@
       "instanceVariables": {
         "_blue": {
           "access": 2,
-          "type": "Number"
+          "type": "Number",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         },
         "_green": {
           "access": 2,
-          "type": "Number"
+          "type": "Number",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         },
         "_red": {
           "access": 2,
-          "type": "Number"
+          "type": "Number",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         },
         "_space": {
           "access": 2,
           "type": {
             "reference": 1
-          }
+          },
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         },
         "_luma": {
           "access": 2,
-          "type": "Number"
+          "type": "Number",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -55,7 +75,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -76,7 +97,10 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": [
+              "_space"
+            ]
           }
         ],
         "luma": [
@@ -89,7 +113,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -108,7 +133,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

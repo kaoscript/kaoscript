@@ -1,5 +1,5 @@
 class VariableDeclaration extends Statement {
-	private {
+	private lateinit {
 		_autotype: Boolean			= false
 		_await: Boolean				= false
 		_cascade: Boolean			= false
@@ -13,7 +13,7 @@ class VariableDeclaration extends Statement {
 		_rebindable: Boolean		= true
 		_redeclared: Boolean		= false
 		_toDeclareAll: Boolean		= true
-		_try
+		_try						= null
 		_type: Type					= Type.Null
 	}
 	constructor(@data, @parent, @scope = parent.scope()) { // {{{
@@ -235,6 +235,8 @@ class VariableDeclaration extends Statement {
 	isImmutable() => @immutable
 	isLateInit() => @lateInit
 	isUsingVariable(name) => @hasInit && @init.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @hasInit && @init.isUsingInstanceVariable(name)
+	isUsingStaticVariable(class, varname) => @hasInit && @init.isUsingStaticVariable(class, varname)
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 
@@ -397,8 +399,9 @@ class VariableBindingDeclarator extends AbstractNode {
 }
 
 class VariableIdentifierDeclarator extends AbstractNode {
-	private {
+	private lateinit {
 		_identifier: IdentifierLiteral
+		_lateInit: Boolean					= false
 		_name: String
 		_type: Type?						= null
 		_variable: Variable
@@ -413,8 +416,9 @@ class VariableIdentifierDeclarator extends AbstractNode {
 		@parent.defineVariables(@identifier)
 
 		@variable = @identifier.variable()
+		@lateInit = @parent.isLateInit()
 
-		if @parent.isLateInit() {
+		if @lateInit {
 			@variable.flagLateInit()
 		}
 	} // }}}
@@ -428,7 +432,10 @@ class VariableIdentifierDeclarator extends AbstractNode {
 
 			@variable.setDeclaredType(@type, @parent.hasInit()).flagDefinitive()
 		}
-		else if !@variable.isLateInit() || !(@parent.isImmutable() || @parent.isAutoTyping()) {
+		else if @parent.isAutoTyping() {
+			// do nothing
+		}
+		else if !@lateInit || !@parent.isImmutable() {
 			if @parent.isImmutable() {
 				@type = @variable.getRealType()
 			}
@@ -443,6 +450,10 @@ class VariableIdentifierDeclarator extends AbstractNode {
 	} // }}}
 	translate() { // {{{
 		@identifier.translate()
+
+		if @lateInit && !@variable.isInitialized() {
+			SyntaxException.throwNotInitializedVariable(@name, this)
+		}
 	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)

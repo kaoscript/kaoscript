@@ -1,5 +1,5 @@
 class IfVariableDeclarationExpression extends Expression {
-	private {
+	private lateinit {
 		_autotype: Boolean
 		_await: Boolean
 		_declarators: Array			= []

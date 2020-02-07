@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
 	if(Type.isValue(__ks_0)) {
 		Number = __ks_0;
@@ -18,8 +18,8 @@ module.exports = function(__ks_0, __ks___ks_0, __ks_1, __ks___ks_1) {
 	__ks_Math.foo = function() {
 		return Math.PI;
 	};
-	console.log("" + __ks_Math.pi);
-	console.log("" + __ks_Math.foo());
+	console.log(Helper.toString(__ks_Math.pi));
+	console.log(Helper.toString(__ks_Math.foo()));
 	console.log(__ks_Math.pi.toString());
 	console.log(__ks_Math.foo().toString());
 };

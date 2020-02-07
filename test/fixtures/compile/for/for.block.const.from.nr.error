@@ -1,1 +1,1 @@
-SyntaxException: Identifier "x" is immutable (line 10, file "fixtures/compile/for/for.block.const.from.nr.ks")
+ReferenceException: The identifier "x" is immutable (line 10, file "fixtures/compile/for/for.block.const.from.nr.ks")

@@ -6,8 +6,14 @@ module.exports = function() {
 		}
 		__ks_init() {
 		}
+		__ks_cons_0() {
+			this._x = [];
+		}
 		__ks_cons(args) {
-			if(args.length !== 0) {
+			if(args.length === 0) {
+				ClassA.prototype.__ks_cons_0.apply(this);
+			}
+			else {
 				throw new SyntaxError("Wrong number of arguments");
 			}
 		}

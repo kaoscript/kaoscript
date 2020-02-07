@@ -19,7 +19,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
-	  "systemic": false,
+      "systemic": false,
       "exhaustive": true,
       "init": 0,
       "constructors": [],
@@ -37,7 +37,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Function",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "run": [
@@ -58,7 +59,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

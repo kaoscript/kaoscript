@@ -1,5 +1,5 @@
 class ConditionalExpression extends Expression {
-	private {
+	private lateinit {
 		_condition
 		_whenFalse
 		_whenTrue

@@ -1,5 +1,5 @@
 class DictionaryExpression extends Expression {
-	private {
+	private lateinit {
 		_empty: Boolean				= true
 		_properties					= []
 		_reusable: Boolean			= false

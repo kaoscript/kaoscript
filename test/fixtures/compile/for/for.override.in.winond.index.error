@@ -1,1 +1,1 @@
-SyntaxException: Identifier "hero" is immutable (line 7, file "fixtures/compile/for/for.override.in.winond.index.ks")
+ReferenceException: The identifier "hero" is immutable (line 7, file "fixtures/compile/for/for.override.in.winond.index.ks")

@@ -513,7 +513,7 @@ export class Color {
 			for const component, name of space.components {
 				field = `_\(name)`
 
-				fields.push(macro private #w(field): Number)
+				fields.push(macro private #w(field): Number = 0)
 
 				methods.push(macro {
 					override #w(name)() => this.getField(#(name))

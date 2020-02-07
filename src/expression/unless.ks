@@ -1,5 +1,5 @@
 class UnlessExpression extends Expression {
-	private {
+	private lateinit {
 		_condition
 		_type: Type
 		_whenFalse

@@ -762,7 +762,7 @@ class ImportingRequirement extends StaticRequirement {
 }
 
 abstract class DynamicRequirement extends Requirement {
-	private {
+	private lateinit {
 		_parameter: String
 	}
 	isRequired() => false
@@ -851,7 +851,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 }
 
 class ROIDynamicRequirement extends StaticRequirement {
-	private {
+	private lateinit {
 		_importer
 		_tempName: String
 	}

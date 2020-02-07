@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Shape {
 		constructor() {
@@ -34,7 +34,7 @@ module.exports = function() {
 			color = null;
 		}
 		if(Type.isValue(color)) {
-			return "I'm drawing a " + color + " " + this._shape + ".";
+			return Helper.concatString("I'm drawing a ", color, " ", this._shape, ".");
 		}
 		else {
 			return "I'm drawing a " + this._shape + ".";

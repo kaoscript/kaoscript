@@ -37,7 +37,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -67,7 +68,8 @@
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

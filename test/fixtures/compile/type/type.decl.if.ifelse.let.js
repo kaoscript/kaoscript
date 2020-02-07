@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo(x) {
 		if(arguments.length < 1) {
@@ -19,6 +19,6 @@ module.exports = function() {
 			let y = null;
 			y = "24 * x";
 		}
-		return "" + y;
+		return Helper.toString(y);
 	}
 };

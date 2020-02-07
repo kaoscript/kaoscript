@@ -1,5 +1,5 @@
 class CreateExpression extends Expression {
-	private {
+	private lateinit {
 		_arguments: Array		= []
 		_factory: Expression
 		_flatten: Boolean		= false

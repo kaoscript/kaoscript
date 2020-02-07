@@ -1,6 +1,6 @@
 class ClassA {
 	private {
-		_x: Function
+		lateinit _x: Function
 	}
 	foo() {
 		@x()

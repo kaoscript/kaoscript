@@ -38,7 +38,11 @@
       "instanceVariables": {
         "_messages": {
           "access": 2,
-          "type": "Any?"
+          "type": "Any?",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},

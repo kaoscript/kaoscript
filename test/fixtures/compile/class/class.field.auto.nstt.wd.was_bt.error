@@ -1,0 +1,1 @@
+TypeException: The variable "@PI" of type "Number" can't be assigned with a value of type "String" (line 4, file "fixtures/compile/class/class.field.auto.nstt.wd.was_bt.ks")

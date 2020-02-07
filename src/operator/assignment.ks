@@ -1,5 +1,5 @@
 class AssignmentOperatorExpression extends Expression {
-	private {
+	private lateinit {
 		_await: Boolean				= false
 		_bindingScope: Scope
 		_left						= null
@@ -25,22 +25,11 @@ class AssignmentOperatorExpression extends Expression {
 		if this.isDeclararing() {
 			this.defineVariables(@left)
 		}
-		else {
-			if @left is IdentifierLiteral {
-				if const variable = @scope.getVariable(@left.name()) {
-					if variable.isImmutable() {
-						ReferenceException.throwImmutable(@left.name(), this)
-					}
-				}
-			}
-		}
 	} // }}}
 	prepare() { // {{{
 		@left.prepare()
 
-		unless @left.isAssignable() {
-			ReferenceException.throwInvalidAssignment(this)
-		}
+		@left.checkIfAssignable()
 
 		@right.prepare()
 
@@ -72,6 +61,8 @@ class AssignmentOperatorExpression extends Expression {
 	isImmutable(variable) => variable.isImmutable()
 	isNullable() => @right.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name) || @right.isUsingInstanceVariable(name)
+	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
 	listAssignments(array) => @left.listAssignments(@right.listAssignments(array))
 	setAssignment(assignment)
 	toNullableFragments(fragments) { // {{{
@@ -81,7 +72,7 @@ class AssignmentOperatorExpression extends Expression {
 }
 
 abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExpression {
-	private {
+	private lateinit {
 		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
@@ -154,7 +145,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 }
 
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {
-	private {
+	private lateinit {
 		_isNative: Boolean		= false
 		_isNumber: Boolean		= false
 		_isString: Boolean		= false
@@ -288,26 +279,14 @@ class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
 }
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
-	private {
+	private lateinit {
 		_ignorable: Boolean		= false
 		_type: Type
 	}
 	prepare() { // {{{
 		super()
 
-		if @left is IdentifierLiteral {
-			if @right is IdentifierLiteral || @right is BinaryOperatorTypeCasting {
-				@ignorable = @left.name() == @right.name()
-			}
-
-			if !@ignorable {
-				const variable = @left.variable()
-
-				if variable.isLateInit() {
-					@parent.initializeVariable(variable, @right.type())
-				}
-			}
-		}
+		@left.initializeVariables(@right.type(), this)
 
 		@type = @left.getDeclaredType()
 
@@ -316,7 +295,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		}
 		else {
 			unless @right.type().matchContentOf(@type) {
-				TypeException.throwInvalidAssignement(@left.path(), @type, @right.type(), this)
+				TypeException.throwInvalidAssignement(@left, @type, @right.type(), this)
 			}
 
 			if @left.isInferable() && @right.type().isMorePreciseThan(@type) {
@@ -327,6 +306,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	acquireReusable(acquire) { // {{{
 		@right.acquireReusable(@left.isSplitAssignment())
 	} // }}}
+	checkIfAssignable()
 	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
 	inferTypes(inferables) { // {{{
 		if @left.isInferable() {
@@ -338,7 +318,13 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 
 		return inferables
 	} // }}}
-	isAssignable() => @left.isAssignable()
+	initializeVariable(variable: VariableBrief) { // {{{
+		@parent.initializeVariable(variable, this)
+	} // }}}
+	initializeVariable(variable: VariableBrief, expression: Expression) { // {{{
+		@parent.initializeVariable(variable, expression)
+	} // }}}
+	initializeVariables(type: Type, node: Expression)
 	isDeclarable() => @left.isDeclarable()
 	isDeclararing() => true
 	isIgnorable() => @ignorable

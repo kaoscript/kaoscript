@@ -15,7 +15,17 @@
       "systemic": false,
       "exhaustive": true,
       "init": 0,
-      "constructors": [],
+      "constructors": [
+        {
+          "id": 0,
+          "access": 4,
+          "sealed": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "throws": []
+        }
+      ],
       "destructors": 0,
       "instanceVariables": {
         "_x": {
@@ -26,7 +36,11 @@
               "Array",
               "String"
             ]
-          }
+          },
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},

@@ -1,6 +1,6 @@
 class ImplementDeclaration extends Statement {
-	private {
-		_newSealedClass	= false
+	private lateinit {
+		_newSealedClass		= false
 		_properties			= []
 		_sharingProperties	= {}
 		_type: NamedType
@@ -114,16 +114,21 @@ class ImplementDeclaration extends Statement {
 }
 
 class ImplementClassFieldDeclaration extends Statement {
+	private lateinit {
+		_type: ClassVariableType
+	}
 	private {
+		_autoTyping: Boolean				= false
 		_class: ClassType
 		_classRef: ReferenceType
-		_defaultValue				= null
-		_hasDefaultValue: Boolean	= false
-		_init: Number				= 0
-		_instance: Boolean			= true
+		_defaultValue						= null
+		_hasDefaultValue: Boolean			= false
+		_immutable: Boolean					= false
+		_init: Number						= 0
+		_instance: Boolean					= true
 		_internalName: String
+		_lateInit: Boolean					= false
 		_name: String
-		_type: ClassVariableType
 		_variable: NamedType<ClassType>
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -139,6 +144,16 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		for const modifier in data.modifiers {
 			switch modifier.kind {
+				ModifierKind::AutoTyping => {
+					@autoTyping = true
+				}
+				ModifierKind::Immutable => {
+					@immutable = true
+					@autoTyping = true
+				}
+				ModifierKind::LateInit => {
+					@lateInit = true
+				}
 				ModifierKind::Private => {
 					private = true
 				}
@@ -175,10 +190,6 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		if @class.isSealed() {
 			@type.flagSealed()
-
-			if @hasDefaultValue {
-				@type.flagInitiatable()
-			}
 		}
 
 		if @instance {
@@ -194,6 +205,13 @@ class ImplementClassFieldDeclaration extends Statement {
 			}
 
 			@defaultValue.prepare()
+
+			if @autoTyping {
+				@type.type(@defaultValue.type())
+			}
+		}
+		else if !@lateInit && !@type.isNullable() {
+			SyntaxException.throwNotInitializedField(@name, this)
 		}
 	} // }}}
 	translate() { // {{{
@@ -313,20 +331,22 @@ class ImplementClassFieldDeclaration extends Statement {
 }
 
 class ImplementClassMethodDeclaration extends Statement {
-	private {
-		_aliases: Array					= []
-		_autoTyping: Boolean			= false
+	private lateinit {
 		_block: Block
-		_class: ClassType
-		_classRef: ReferenceType
-		_instance: Boolean				= true
 		_internalName: String
 		_name: String
-		_override: Boolean				= false
-		_overwrite: Boolean				= false
 		_parameters: Array<Parameter>
 		_this: Variable
 		_type: ClassMethodType
+	}
+	private {
+		_aliases: Array					= []
+		_autoTyping: Boolean			= false
+		_class: ClassType
+		_classRef: ReferenceType
+		_instance: Boolean				= true
+		_override: Boolean				= false
+		_overwrite: Boolean				= false
 		_variable: NamedType<ClassType>
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -470,11 +490,13 @@ class ImplementClassMethodDeclaration extends Statement {
 							@type.returnType(@parent.type().reference(@scope))
 						}
 
-						const return = $compile.expression(@data.type.value, this)
+						if @instance {
+							const return = $compile.expression(@data.type.value, this)
 
-						return.analyse()
+							return.analyse()
 
-						@block.addReturn(return)
+							@block.addReturn(return)
+						}
 					}
 				}
 				NodeKind::ThisExpression => {
@@ -507,7 +529,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		@block.translate()
 	} // }}}
-	addAliasStatement(statement: AliasStatement) { // {{{
+	addAtThisParameter(statement: AliasStatement) { // {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
@@ -641,17 +663,19 @@ class ImplementClassMethodDeclaration extends Statement {
 }
 
 class ImplementClassConstructorDeclaration extends Statement {
-	private {
-		_aliases: Array					= []
+	private lateinit {
 		_block: Block
-		_class: ClassType
-		_classRef: ReferenceType
-		_dependent: Boolean				= false
 		_internalName: String
-		_overwrite: Boolean				= false
 		_parameters: Array<Parameter>
 		_this: Variable
 		_type: ClassConstructorType
+	}
+	private {
+		_aliases: Array					= []
+		_class: ClassType
+		_classRef: ReferenceType
+		_dependent: Boolean				= false
+		_overwrite: Boolean				= false
 		_variable: NamedType<ClassType>
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -700,7 +724,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			parameter.analyse()
 		}
 
-		@block = $compile.function(body, this)
+		@block = new ConstructorBlock($ast.block(body), this, @scope)
 	} // }}}
 	prepare() { // {{{
 		@scope.line(@data.start.line)
@@ -747,11 +771,6 @@ class ImplementClassConstructorDeclaration extends Statement {
 				@internalName = `__ks_cons_\(@class.addConstructor(@type))`
 			}
 		}
-	} // }}}
-	translate() { // {{{
-		for parameter in @parameters {
-			parameter.translate()
-		}
 
 		let index = 1
 		if @block.isEmpty() {
@@ -776,10 +795,35 @@ class ImplementClassConstructorDeclaration extends Statement {
 			@block.analyse(index + 1)
 		}
 
+		for const statement in @aliases {
+			const name = statement.getVariableName()
+
+			if const variable = @class.getInstanceVariable(name) {
+				if variable.isRequiringInitialization() {
+					@block.initializeVariable(VariableBrief(
+						name
+						type: statement.type()
+						instance: true
+					), statement, this)
+				}
+			}
+		}
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+
 		@block.prepare()
 		@block.translate()
+
+		@class.forEachInstanceVariables((name, variable) => {
+			if variable.isRequiringInitialization() && !variable.isAlien() && !variable.isAlteration() {
+				this.checkVariableInitialization(name)
+			}
+		})
 	} // }}}
-	addAliasStatement(statement: AliasStatement) { // {{{
+	addAtThisParameter(statement: AliasStatement) { // {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
@@ -811,6 +855,14 @@ class ImplementClassConstructorDeclaration extends Statement {
 		}
 		else {
 			SyntaxException.throwNoSuperCall(this)
+		}
+	} // }}}
+	checkVariableInitialization(name) { // {{{
+		if @block.isInitializingInstanceVariable(name) {
+			@type.addInitializingInstanceVariable(name)
+		}
+		else {
+			SyntaxException.throwNotInitializedField(name, this)
 		}
 	} // }}}
 	class() => @variable
@@ -973,10 +1025,12 @@ class ImplementClassConstructorDeclaration extends Statement {
 }
 
 class ImplementNamespaceVariableDeclaration extends Statement {
+	private lateinit {
+		_type: Type
+		_value
+	}
 	private {
 		_namespace: NamespaceType
-		_value
-		_type: Type
 		_variable: NamedType<NamespaceType>
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -1027,13 +1081,15 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 }
 
 class ImplementNamespaceFunctionDeclaration extends Statement {
+	private lateinit {
+		_block: Block
+		_type: FunctionType
+	}
 	private {
 		_autoTyping: Boolean					= false
-		_block: Block
 		_namespace: NamespaceType
 		_namespaceRef: ReferenceType
 		_parameters: Array						 = []
-		_type: FunctionType
 		_variable: NamedType<NamespaceType>
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -1125,11 +1181,13 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 }
 
 class CallOverwrittenMethodSubstitude {
+	private lateinit {
+		_instance: Boolean
+	}
 	private {
 		_arguments
 		_class: NamedType<ClassType>
 		_data
-		_instance: Boolean
 		_methods: Array<FunctionType>	= []
 		_name: String
 		_type: Type

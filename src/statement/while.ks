@@ -1,5 +1,5 @@
 class WhileStatement extends Statement {
-	private {
+	private lateinit {
 		_bindingScope: Scope
 		_body					= null
 		_bodyScope: Scope?		= null

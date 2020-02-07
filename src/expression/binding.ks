@@ -18,6 +18,10 @@ class ArrayBinding extends Expression {
 
 			element.analyse()
 
+			if element.isThisAliasing() && @assignment != AssignmentType::Parameter {
+				@flatten = true
+			}
+
 			@elements.push(element)
 		}
 	} // }}}
@@ -66,6 +70,11 @@ class ArrayBinding extends Expression {
 	flagImmutable() { // {{{
 		@immutable = true
 	} // }}}
+	initializeVariables(type: Type, node: Expression) { // {{{
+		for const element in @elements {
+			element.initializeVariables(type, node)
+		}
+	} // }}}
 	isAssignable() => true
 	isDeclarable() => true
 	isImmutable() => @immutable
@@ -95,6 +104,7 @@ class ArrayBinding extends Expression {
 
 		return array
 	} // }}}
+	name() => null
 	newElement(data) => new ArrayBindingElement(data, this, @scope)
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
@@ -174,14 +184,13 @@ class ArrayBindingElement extends Expression {
 				@defaultValue = $compile.expression(@data.defaultValue, this)
 				@defaultValue.analyse()
 			}
+
+			@thisAlias =  @data.name.kind == NodeKind::ThisExpression
 		}
 
 		for const modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Rest {
 				@rest = true
-			}
-			else if modifier.kind == ModifierKind::ThisAlias {
-				@thisAlias = true
 			}
 		}
 	} // }}}
@@ -228,11 +237,17 @@ class ArrayBindingElement extends Expression {
 	compileVariable(data) => $compile.expression(data, this)
 	export(recipient) => @named ? @name.export(recipient) : null
 	index(@index) => this
+	initializeVariables(type: Type, node: Expression) { // {{{
+		if const name = @name.name() {
+			@name.initializeVariables(type.getProperty(name) ?? AnyType.NullableUnexplicit, node)
+		}
+	} // }}}
 	isImmutable() => @parent.isImmutable()
 	isDeclararingVariable(name: String) => @named ? @name.isDeclararingVariable(name) : false
 	isAnonymous() => !@named
 	isRedeclared() => @named ? @name.isRedeclared() : false
 	isRest() => @rest
+	isThisAliasing() => @thisAlias
 	listAssignments(array) => @named ? @name.listAssignments(array) : array
 	max() => @rest ? Infinity : 1
 	min() => @rest ? 0 : 1
@@ -362,7 +377,7 @@ class ObjectBinding extends Expression {
 
 			element.analyse()
 
-			if element.hasDefaultValue() {
+			if element.hasDefaultValue() || (element.isThisAliasing() && @assignment != AssignmentType::Parameter) {
 				@flatten = true
 			}
 
@@ -414,6 +429,11 @@ class ObjectBinding extends Expression {
 	flagImmutable() { // {{{
 		@immutable = true
 	} // }}}
+	initializeVariables(type: Type, node: Expression) { // {{{
+		for const element in @elements {
+			element.initializeVariables(type, node)
+		}
+	} // }}}
 	isAssignable() => true
 	isDeclarable() => true
 	isImmutable() => @immutable
@@ -443,6 +463,7 @@ class ObjectBinding extends Expression {
 
 		return array
 	} // }}}
+	name() => null
 	newElement(data) => new ObjectBindingElement(data, this, @scope)
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{
@@ -509,6 +530,7 @@ class ObjectBindingElement extends Expression {
 		_hasDefaultValue: Boolean		= false
 		_name
 		_rest: Boolean					= false
+		_sameName: Boolean				= false
 		_thisAlias: Boolean				= false
 		_type: Type						= AnyType.NullableUnexplicit
 	}
@@ -525,11 +547,22 @@ class ObjectBindingElement extends Expression {
 			@name = $compile.expression(@data.name, this)
 
 			@alias = this.compileVariable(@data.alias)
+
+			@thisAlias =  @data.alias.kind == NodeKind::ThisExpression
+		}
+		else if @data.name.kind == NodeKind::ThisExpression {
+			@name = $compile.expression(@data.name.name, this)
+
+			@alias = this.compileVariable(@data.name)
+
+			@thisAlias = true
+			@sameName = true
 		}
 		else {
 			@name = this.compileVariable(@data.name)
 
 			@alias = @name
+			@sameName = true
 		}
 
 		@alias.setAssignment(@assignment)
@@ -545,9 +578,6 @@ class ObjectBindingElement extends Expression {
 		for const modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Rest {
 				@rest = true
-			}
-			else if modifier.kind == ModifierKind::ThisAlias {
-				@thisAlias = true
 			}
 		}
 	} // }}}
@@ -574,7 +604,7 @@ class ObjectBindingElement extends Expression {
 				variable.setRealType(@defaultValue.type())
 			}
 		}
-		else {
+		else if @alias is not ThisExpression {
 			@alias.type(@type)
 		}
 
@@ -590,9 +620,13 @@ class ObjectBindingElement extends Expression {
 	compileVariable(data) => $compile.expression(data, this)
 	export(recipient) => @alias.export(recipient)
 	hasDefaultValue() => @hasDefaultValue
+	initializeVariables(type: Type, node: Expression) { // {{{
+		@alias.initializeVariables(type.getProperty(@name.name()) ?? AnyType.NullableUnexplicit, node)
+	} // }}}
 	isImmutable() => @parent.isImmutable()
 	isDeclararingVariable(name: String) => @alias.isDeclararingVariable(name)
 	isRedeclared() => @alias.isRedeclared()
+	isThisAliasing() => @thisAlias
 	listAssignments(array) => @alias.listAssignments(array)
 	name(): String => @name.value()
 	setAssignment(@assignment)
@@ -604,11 +638,11 @@ class ObjectBindingElement extends Expression {
 		if @computed {
 			fragments.code('[').compile(@name).code(']: ').compile(@alias)
 		}
-		else if @name != @alias {
-			fragments.compile(@name).code(': ').compile(@alias)
+		else if @sameName {
+			fragments.compile(@alias)
 		}
 		else {
-			fragments.compile(@alias)
+			fragments.compile(@name).code(': ').compile(@alias)
 		}
 
 		if @hasDefaultValue {

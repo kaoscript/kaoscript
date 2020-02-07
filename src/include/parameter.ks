@@ -12,8 +12,8 @@ enum ParameterWrongDoing {
 }
 
 class Parameter extends AbstractNode {
-	private {
-		_anonymous: Boolean
+	private lateinit {
+		_anonymous: Boolean					= false
 		_arity								= null
 		_defaultValue						= null
 		_explicitlyRequired: Boolean		= false
@@ -29,6 +29,7 @@ class Parameter extends AbstractNode {
 			NodeKind::ArrayBinding => return new ArrayBindingParameter(data, node)
 			NodeKind::Identifier => return new IdentifierParameter(data, node)
 			NodeKind::ObjectBinding => return new ObjectBindingParameter(data, node)
+			NodeKind::ThisExpression => return new ThisExpressionParameter(data, node)
 		}
 	}
 	static getUntilDifferentTypeIndex(parameters, index) { // {{{
@@ -661,10 +662,10 @@ class Parameter extends AbstractNode {
 	prepare() { // {{{
 		@name.prepare()
 
-		let type: Type? = null
+		let type: Type? = @name.type()
 
-		if @data.modifiers.length != 0 {
-			type = @name.applyModifiers(@data.modifiers, this)
+		if !type?.isExplicit() {
+			type = null
 		}
 
 		if @data.type? && type == null {
@@ -707,7 +708,7 @@ class Parameter extends AbstractNode {
 			}
 
 			if !(@explicitlyRequired && type.isNullable()) {
-				@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && (type.isNullable() || @name is not IdentifierLiteral)
+				@maybeHeadedDefaultValue = @options.format.parameters == 'es6' && (type.isNullable() || @name.isBinding())
 
 				@defaultValue = $compile.expression(@data.defaultValue, @parent)
 				@defaultValue.analyse()
@@ -720,7 +721,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 
-		const name = !@anonymous && @name is IdentifierLiteral ? @name.name() : null
+		const name = @name.name()
 		const default = @hasDefaultValue ? 1 : 0
 
 		@type = new ParameterType(@scope, name, type, min, max, default)
@@ -735,8 +736,8 @@ class Parameter extends AbstractNode {
 			@defaultValue.translate()
 		}
 	} // }}}
-	addAliasParameter(data, name, setter) { // {{{
-		const alias = new AliasStatement(data, name, setter, this)
+	addAliasParameter(expression: ThisExpressionParameter) { // {{{
+		const alias = new AliasStatement(expression, this)
 
 		return @scope.reference(alias.type())
 	} // }}}
@@ -807,109 +808,614 @@ class Parameter extends AbstractNode {
 
 class AliasStatement extends Statement {
 	private {
-		_name: String
-		_namedClass: ClassType
-		_identifier: IdentifierParameter
-		_instance: Boolean					= true
+		_expression: ThisExpressionParameter
 		_parameter: Parameter
-		_sealed: Boolean					= false
-		_setter: Boolean					= false
-		_type: Type
-		_variableName: String
 	}
-	constructor(@data, @identifier, @setter, @parameter) { // {{{
-		super(data, parameter.parent())
+	constructor(@expression, @parameter) { // {{{
+		const parent = parameter.parent()
 
-		@name = @identifier.name()
+		super(expression.data(), parent)
 
-		parameter.parent().addAliasStatement(this)
-
-		@namedClass = parameter.parent().parent().type()
-
-		const class = @namedClass.type()
-
-		if setter {
-			if @type !?= class.getPropertySetter(@name) {
-				ReferenceException.throwNotDefinedMember(@name, @parameter)
-			}
-		}
-		else {
-			if @type ?= class.getInstanceVariable(@name) {
-				@variableName = @name
-			}
-			else if @type ?= class.getInstanceVariable(`_\(@name)`) {
-				if @type.isSealed() && @type.isInitiatable() {
-					@sealed = true
-					@setter = true
-				}
-
-				@variableName = `_\(@name)`
-			}
-			else if @type ?= class.getPropertySetter(@name) {
-				@setter = true
-			}
-			else if @type ?= class.getClassVariable(@name) {
-				@variableName = @name
-				@instance = false
-			}
-			else if @type ?= class.getClassVariable(`_\(@name)`) {
-				@instance = false
-				@variableName = `_\(@name)`
-			}
-			else {
-				ReferenceException.throwNotDefinedMember(@name, @parameter)
-			}
-		}
+		parent.addAtThisParameter(this)
 	} // }}}
 	analyse()
 	prepare()
 	translate()
-	name() => @name
+	getVariableName() => @expression.getVariableName()
+	name() => @expression.name()
+	path() => @expression.path()
 	toStatementFragments(fragments, mode) { // {{{
-		if @setter {
-			if @sealed {
-				if @parameter.parent().isConstructor() {
-					fragments.newLine().code(`that.\(@variableName) = `).compile(@identifier).done()
-				}
-				else {
-					fragments.newLine().code(`\(@namedClass.getSealedName()).__ks_set_\(@name)(this, `).compile(@identifier).code(')').done()
-				}
-			}
-			else {
-				fragments.newLine().code(`this.\(@name)(`).compile(@identifier).code(')').done()
-			}
-		}
-		else if @instance {
-			fragments.newLine().code(`this.\(@variableName) = `).compile(@identifier).done()
+		const variable = @scope.getVariable(@expression.name())
+
+		if @expression.isSealed() && !@parameter.parent().isConstructor() {
+			fragments.newLine().code(`\(@expression.getClass().getSealedName()).__ks_set_\(@expression.name())(this, `).compile(variable).code(')').done()
 		}
 		else {
-			fragments.newLine().code(`\(@namedClass.name()).\(@variableName) = `).compile(@identifier).done()
+			fragments.newLine().code(@expression.fragment(), $equals).compile(variable).done()
 		}
 	} // }}}
-	type() => @type
+	type() => @expression.type()
 }
 
 class IdentifierParameter extends IdentifierLiteral {
-	applyModifiers(modifiers, node) { // {{{
-		let thisAlias = false
-		let setterAlias = false
+	static {
+		toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { // {{{
+			if arity != null {
+				const type = that.getDeclaredType().parameter()
 
-		for const modifier in modifiers {
-			if modifier.kind == ModifierKind::SetterAlias {
-				setterAlias = true
-			}
-			else if modifier.kind == ModifierKind::ThisAlias {
-				thisAlias = true
-			}
-		}
+				if type.isAny() {
+					fragments
+						.newLine()
+						.code($runtime.scope(that))
+						.compile(that)
+						.code(` = Array.prototype.slice.call(\(context.name), \(context.increment ? '++__ks_i' : '__ks_i'), \(index + 1 == context.length ? '' : '__ks_i = ')__ks_i + \(arity.min + (context.increment ? 1 : 0)))`)
+						.done()
 
-		if thisAlias {
-			return node.addAliasParameter(@data, this, setterAlias)
-		}
-		else {
-			return null
-		}
-	} // }}}
+					context.increment = true
+				}
+				else {
+					if !context.temp {
+						fragments.line(`\($runtime.scope(that))__ks__`)
+
+						context.temp = true
+					}
+
+					fragments
+						.newLine()
+						.code($runtime.scope(that))
+						.compile(that)
+						.code(' = []')
+						.done()
+
+					if !context.increment {
+						fragments.line('--__ks_i')
+					}
+
+					const line = fragments.newLine()
+
+					if !context.tempL {
+						line.code($runtime.scope(that))
+
+						context.tempL = true
+					}
+
+					line.code(`__ks_l = __ks_i + \(arity.min + 1)`).done()
+
+					const ctrl = fragments.newControl().code('while(++__ks_i < __ks_l)').step()
+
+					ctrl.line(`__ks__ = \(context.name)[__ks_i]`)
+
+					const ctrl2 = ctrl.newControl()
+
+					if type.isNullable() {
+						ctrl2
+							.code('if(__ks__ === void 0 || __ks__ === null)')
+							.step()
+							.newLine()
+							.compile(that).code('.push(null)').done()
+							.done()
+
+						ctrl2
+							.step()
+							.code('else if(!')
+					}
+					else {
+						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || !')
+					}
+
+					type.toTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'))
+
+					ctrl2
+						.code(')')
+						.step()
+
+					if index + 1 == context.length {
+						wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
+							async: context.async
+							name: that.name()
+							type: type
+						})
+					}
+					else {
+						const ctrl3 = ctrl2
+							.newControl()
+							.code('if(')
+							.compile(that)
+							.code(`.length >= \(arity.min))`)
+							.step()
+
+						ctrl3
+							.line('break')
+							.step()
+							.code('else')
+							.step()
+
+						wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
+							async: context.async
+							name: that.name()
+							type: type
+						})
+
+						ctrl3.done()
+					}
+
+					ctrl2
+						.step()
+						.code('else')
+						.step()
+						.newLine()
+						.compile(that).code('.push(__ks__)')
+						.done()
+
+					ctrl2.done()
+					ctrl.done()
+
+					context.increment = false
+				}
+			}
+			else if defaultValue != null {
+				if context.any {
+					fragments
+						.newLine()
+						.code($runtime.scope(that))
+						.compile(that)
+						.code($equals)
+						.compile(defaultValue)
+						.done()
+				}
+				else {
+					const declaredType = that.getDeclaredType()
+
+					if declaredType.isAny() {
+						if !context.temp {
+							fragments.line(`\($runtime.scope(that))__ks__`)
+
+							context.temp = true
+						}
+
+						let line = fragments
+							.newLine()
+							.code($runtime.scope(that))
+							.compile(that)
+							.code(` = \(context.name).length > ++__ks_i && (__ks__ = \(context.name)[\(context.increment ? '++' : '')__ks_i]) !== void 0`)
+
+						if !declaredType.isNullable() {
+							line.code(' && __ks__ !== null')
+						}
+
+						line
+							.code(' ? __ks__ : ')
+							.compile(defaultValue)
+							.done()
+					}
+					else {
+						if !context.temp {
+							fragments.line(`\($runtime.scope(that))__ks__`)
+
+							context.temp = true
+						}
+
+						let line = fragments
+							.newLine()
+							.code($runtime.scope(that))
+							.compile(that)
+							.code(` = \(context.name).length > ++__ks_i && (__ks__ = \(context.name)[__ks_i\(context.increment ? ' + 1' : '')]) !== void 0 && `)
+
+						if declaredType.isNullable() {
+							line.code('(__ks__ === null || ')
+
+							declaredType.toTestFragments(line, new Literal(false, that, that.scope(), '__ks__'))
+
+							line.code(')')
+						}
+						else {
+							declaredType.toTestFragments(line, new Literal(false, that, that.scope(), '__ks__'))
+						}
+
+						line
+							.code(context.increment ? ' ? (++__ks_i, __ks__) : ' : ' ? __ks__ : ')
+							.compile(defaultValue)
+							.done()
+					}
+
+					context.increment = true
+				}
+			}
+			else {
+				fragments
+					.newLine()
+					.code($runtime.scope(that))
+					.compile(that)
+					.code(` = \(context.name)[`, context.increment ? '++' : '', '__ks_i]')
+					.done()
+
+				that.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async)
+
+				context.increment = true
+			}
+		} // }}}
+		toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async, that) { // {{{
+			if arity != null {
+				context.required -= arity.min
+
+				const type = that.getDeclaredType().parameter()
+
+				if type.isAny() {
+					if context.required > 0 {
+						fragments
+							.newLine()
+							.code($runtime.scope(that))
+							.compile(that)
+							.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, Math.min(\(context.name).length - \(context.required), __ks_i + \(arity.max + 1)))`)
+							.done()
+					}
+					else {
+						fragments
+							.newLine()
+							.code($runtime.scope(that))
+							.compile(that)
+							.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, Math.min(\(context.name).length, __ks_i + \(arity.max + 1)))`)
+							.done()
+					}
+
+					if index + 1 < context.length {
+						fragments
+							.newLine()
+							.code('__ks_i += ')
+							.compile(that)
+							.code('.length')
+							.done()
+					}
+				}
+				else {
+					if !context.temp {
+						fragments.line(`\($runtime.scope(that))__ks__`)
+
+						context.temp = true
+					}
+
+					fragments
+						.newLine()
+						.code($runtime.scope(that))
+						.compile(that)
+						.code(' = []')
+						.done()
+
+					if !context.increment {
+						fragments.line('--__ks_i')
+					}
+
+					const line = fragments.newLine()
+
+					if !context.tempL {
+						line.code($runtime.scope(that))
+
+						context.tempL = true
+					}
+
+
+					if context.required > 0 {
+						line.code(`__ks_l = Math.min(\(context.name).length - \(context.required), __ks_i + \(arity.max + 1))`)
+					}
+					else {
+						line.code(`__ks_l = Math.min(\(context.name).length, __ks_i + \(arity.max + 1))`)
+					}
+
+					line.done()
+
+					const ctrl = fragments.newControl().code('while(++__ks_i < __ks_l)').step()
+
+					ctrl.line(`__ks__ = \(context.name)[__ks_i]`)
+
+					const ctrl2 = ctrl.newControl()
+
+					if type.isNullable() {
+						ctrl2
+							.code('if(__ks__ === void 0 || __ks__ === null)')
+							.step()
+							.newLine()
+							.compile(that).code('.push(null)').done()
+							.done()
+
+						ctrl2
+							.step()
+							.code('else if(!')
+					}
+					else {
+						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || !')
+					}
+
+					type.toTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'))
+
+					ctrl2
+						.code(')')
+						.step()
+
+					if index + 1 == context.length {
+						wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
+							async: context.async
+							name: that.name()
+							type: type
+						})
+					}
+					else {
+						const ctrl3 = ctrl2
+							.newControl()
+							.code('if(')
+							.compile(that)
+							.code(`.length >= \(arity.min))`)
+							.step()
+
+						ctrl3
+							.line('break')
+							.step()
+							.code('else')
+							.step()
+
+						wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
+							async: context.async
+							name: that.name()
+							type: type
+						})
+
+						ctrl3.done()
+					}
+
+					ctrl2
+						.step()
+						.code('else')
+						.step()
+						.newLine()
+						.compile(that).code('.push(__ks__)')
+						.done()
+
+					ctrl2.done()
+					ctrl.done()
+
+					context.increment = false
+				}
+
+				context.optional += arity.max - arity.min
+			}
+			else {
+				if !required && defaultValue != null {
+					const declaredType = that.getDeclaredType()
+
+					if declaredType.isAny() {
+						if !context.temp {
+							fragments.line(`\($runtime.scope(that))__ks__`)
+
+							context.temp = true
+						}
+
+						const line = fragments
+							.newLine()
+							.code($runtime.scope(that))
+							.compile(that)
+							.code(` = \(context.name).length > \(context.optional) && (__ks__ = \(context.name)[++__ks_i]) !== void 0`)
+
+						if !declaredType.isNullable() {
+							line.code(' && __ks__ !== null')
+						}
+
+						line
+							.code(' ? __ks__ : ')
+							.compile(defaultValue)
+							.done()
+					}
+					else {
+						fragments
+							.newLine()
+							.code($runtime.scope(that))
+							.compile(that)
+							.done()
+
+						const fixed = (context.max - context.min) == 1
+
+						const ctrl = fragments.newControl()
+
+						if fixed {
+							ctrl
+								.code(`if(\(context.name).length > \(context.optional) && (`)
+								.compile(that)
+								.code(` = \(context.name)[++__ks_i]) !== void 0`)
+						}
+						else if context.required > 0 {
+							ctrl
+								.code(`if(\(context.name).length > __ks_i + \(context.required + 1) && (`)
+								.compile(that)
+								.code(` = \(context.name)[++__ks_i]) !== void 0`)
+						}
+						else {
+							ctrl
+								.code(`if(\(context.name).length > ++__ks_i && (`)
+								.compile(that)
+								.code(` = \(context.name)[__ks_i]) !== void 0`)
+						}
+
+						if !declaredType.isNullable() {
+							ctrl.code(' && ').compile(that).code(' !== null')
+						}
+
+						ctrl.code(')').step()
+
+						const ctrl2 = ctrl.newControl().code('if(')
+
+						if declaredType.isNullable() {
+							ctrl2.compile(that).code(' !== null && !')
+						}
+						else {
+							ctrl2.code('!')
+						}
+
+						declaredType.toTestFragments(ctrl2, that)
+
+						ctrl2
+							.code(')')
+							.step()
+
+						if fixed || index + 1 == context.length {
+							wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
+								async: context.async
+								name: that.name()
+								type: declaredType
+							})
+						}
+						else if rest {
+							ctrl2
+								.newLine()
+								.compile(that)
+								.code($equals)
+								.compile(defaultValue)
+								.done()
+
+							ctrl2.line('--__ks_i')
+						}
+						else {
+							const ctrl3 = ctrl2
+								.newControl()
+								.code(`if(arguments.length - __ks_i < \(context.max - context.optional + context.required))`)
+								.step()
+
+							ctrl3
+								.newLine()
+								.compile(that)
+								.code($equals)
+								.compile(defaultValue)
+								.done()
+
+							ctrl3
+								.line('--__ks_i')
+								.step()
+								.code('else')
+								.step()
+
+							wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
+								async: context.async
+								name: that.name()
+								type: declaredType
+							})
+
+							ctrl3.done()
+						}
+
+						ctrl2.done()
+
+						ctrl.step().code('else').step()
+
+						ctrl
+							.newLine()
+							.compile(that)
+							.code($equals)
+							.compile(defaultValue)
+							.done()
+
+						ctrl.done()
+					}
+
+					++context.optional
+				}
+				else {
+					fragments
+						.newLine()
+						.code($runtime.scope(that))
+						.compile(that)
+						.code(` = \(context.name)[++__ks_i]`)
+						.done()
+
+					that.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async)
+
+					--context.required
+				}
+			}
+		} // }}}
+		toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async, that) { // {{{
+			const declaredType = that.getDeclaredType()
+
+			let ctrl = null
+
+			if defaultValue != null {
+				if !header {
+					ctrl = fragments
+						.newControl()
+						.code('if(').compile(that).code(' === void 0')
+
+					if !declaredType.isNullable() {
+						ctrl.code(' || ').compile(that).code(' === null')
+					}
+
+					ctrl.code(')').step()
+
+					ctrl
+						.newLine()
+						.compile(that)
+						.code($equals)
+						.compile(defaultValue)
+						.done()
+				}
+			}
+			else {
+				if declaredType.isNullable() {
+					ctrl = fragments
+						.newControl()
+						.code('if(').compile(that).code(' === void 0').code(')')
+						.step()
+
+					ctrl.newLine().compile(that).code(' = null').done()
+				}
+				else if that.parent().isAssertingParameter() {
+					ctrl = fragments
+						.newControl()
+						.code('if(').compile(that).code(' === void 0').code(' || ').compile(that).code(' === null').code(')')
+						.step()
+
+					wrongdoer(ctrl, ParameterWrongDoing::NotNullable, {
+						async: async
+						name: that.name()
+					})
+				}
+			}
+
+			if !declaredType.isAny() && that.parent().isAssertingParameterType() {
+				if ctrl? {
+					ctrl.step().code('else ')
+				}
+				else {
+					ctrl = fragments.newControl()
+				}
+
+				ctrl.code('if(')
+
+				if declaredType.isNull() {
+					ctrl.compile(that).code(' !== null')
+				}
+				else {
+					if declaredType.isNullable() {
+						ctrl.compile(that).code(' !== null && ')
+					}
+
+					ctrl.code('!')
+
+					declaredType.toTestFragments(ctrl, that)
+				}
+
+				ctrl
+					.code(')')
+					.step()
+
+				wrongdoer(ctrl, ParameterWrongDoing::BadType, {
+					async: async
+					name: that.name()
+					type: declaredType
+				})
+			}
+
+			if ctrl != null {
+				ctrl.done()
+			}
+		} // }}}
+	}
+	isBinding() => false
 	setDeclaredType(type, definitive) { // {{{
 		const variable = @scope.getVariable(@value)
 
@@ -918,490 +1424,10 @@ class IdentifierParameter extends IdentifierLiteral {
 		@declaredType = @realType = type
 	} // }}}
 	toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
-		if arity != null {
-			const type = @declaredType.parameter()
-
-			if type.isAny() {
-				fragments
-					.newLine()
-					.code($runtime.scope(this))
-					.compile(this)
-					.code(` = Array.prototype.slice.call(\(context.name), \(context.increment ? '++__ks_i' : '__ks_i'), \(index + 1 == context.length ? '' : '__ks_i = ')__ks_i + \(arity.min + (context.increment ? 1 : 0)))`)
-					.done()
-
-				context.increment = true
-			}
-			else {
-				if !context.temp {
-					fragments.line(`\($runtime.scope(this))__ks__`)
-
-					context.temp = true
-				}
-
-				fragments
-					.newLine()
-					.code($runtime.scope(this))
-					.compile(this)
-					.code(' = []')
-					.done()
-
-				if !context.increment {
-					fragments.line('--__ks_i')
-				}
-
-				const line = fragments.newLine()
-
-				if !context.tempL {
-					line.code($runtime.scope(this))
-
-					context.tempL = true
-				}
-
-				line.code(`__ks_l = __ks_i + \(arity.min + 1)`).done()
-
-				const ctrl = fragments.newControl().code('while(++__ks_i < __ks_l)').step()
-
-				ctrl.line(`__ks__ = \(context.name)[__ks_i]`)
-
-				const ctrl2 = ctrl.newControl()
-
-				if type.isNullable() {
-					ctrl2
-						.code('if(__ks__ === void 0 || __ks__ === null)')
-						.step()
-						.newLine()
-						.compile(this).code('.push(null)').done()
-						.done()
-
-					ctrl2
-						.step()
-						.code('else if(!')
-				}
-				else {
-					ctrl2.code('if(__ks__ === void 0 || __ks__ === null || !')
-				}
-
-				type.toTestFragments(ctrl2, new Literal(false, this, this.scope(), '__ks__'))
-
-				ctrl2
-					.code(')')
-					.step()
-
-				if index + 1 == context.length {
-					wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
-						async: context.async
-						name: @value
-						type: type
-					})
-				}
-				else {
-					const ctrl3 = ctrl2
-						.newControl()
-						.code('if(')
-						.compile(this)
-						.code(`.length >= \(arity.min))`)
-						.step()
-
-					ctrl3
-						.line('break')
-						.step()
-						.code('else')
-						.step()
-
-					wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
-						async: context.async
-						name: @value
-						type: type
-					})
-
-					ctrl3.done()
-				}
-
-				ctrl2
-					.step()
-					.code('else')
-					.step()
-					.newLine()
-					.compile(this).code('.push(__ks__)')
-					.done()
-
-				ctrl2.done()
-				ctrl.done()
-
-				context.increment = false
-			}
-		}
-		else if defaultValue != null {
-			if context.any {
-				fragments
-					.newLine()
-					.code($runtime.scope(this))
-					.compile(this)
-					.code($equals)
-					.compile(defaultValue)
-					.done()
-			}
-			else {
-				if @declaredType.isAny() {
-					if !context.temp {
-						fragments.line(`\($runtime.scope(this))__ks__`)
-
-						context.temp = true
-					}
-
-					let line = fragments
-						.newLine()
-						.code($runtime.scope(this))
-						.compile(this)
-						.code(` = \(context.name).length > ++__ks_i && (__ks__ = \(context.name)[\(context.increment ? '++' : '')__ks_i]) !== void 0`)
-
-					if !@declaredType.isNullable() {
-						line.code(' && __ks__ !== null')
-					}
-
-					line
-						.code(' ? __ks__ : ')
-						.compile(defaultValue)
-						.done()
-				}
-				else {
-					if !context.temp {
-						fragments.line(`\($runtime.scope(this))__ks__`)
-
-						context.temp = true
-					}
-
-					let line = fragments
-						.newLine()
-						.code($runtime.scope(this))
-						.compile(this)
-						.code(` = \(context.name).length > ++__ks_i && (__ks__ = \(context.name)[__ks_i\(context.increment ? ' + 1' : '')]) !== void 0 && `)
-
-					if @declaredType.isNullable() {
-						line.code('(__ks__ === null || ')
-
-						@declaredType.toTestFragments(line, new Literal(false, this, @scope:Scope, '__ks__'))
-
-						line.code(')')
-					}
-					else {
-						@declaredType.toTestFragments(line, new Literal(false, this, @scope:Scope, '__ks__'))
-					}
-
-					line
-						.code(context.increment ? ' ? (++__ks_i, __ks__) : ' : ' ? __ks__ : ')
-						.compile(defaultValue)
-						.done()
-				}
-
-				context.increment = true
-			}
-		}
-		else {
-			fragments
-				.newLine()
-				.code($runtime.scope(this))
-				.compile(this)
-				.code(` = \(context.name)[`, context.increment ? '++' : '', '__ks_i]')
-				.done()
-
-			this.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async)
-
-			context.increment = true
-		}
+		IdentifierParameter.toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
 	} // }}}
 	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
-		if arity != null {
-			context.required -= arity.min
-
-			const type = @declaredType.parameter()
-
-			if type.isAny() {
-				if context.required > 0 {
-					fragments
-						.newLine()
-						.code($runtime.scope(this))
-						.compile(this)
-						.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, Math.min(\(context.name).length - \(context.required), __ks_i + \(arity.max + 1)))`)
-						.done()
-				}
-				else {
-					fragments
-						.newLine()
-						.code($runtime.scope(this))
-						.compile(this)
-						.code(` = Array.prototype.slice.call(\(context.name), __ks_i + 1, Math.min(\(context.name).length, __ks_i + \(arity.max + 1)))`)
-						.done()
-				}
-
-				if index + 1 < context.length {
-					fragments
-						.newLine()
-						.code('__ks_i += ')
-						.compile(this)
-						.code('.length')
-						.done()
-				}
-			}
-			else {
-				if !context.temp {
-					fragments.line(`\($runtime.scope(this))__ks__`)
-
-					context.temp = true
-				}
-
-				fragments
-					.newLine()
-					.code($runtime.scope(this))
-					.compile(this)
-					.code(' = []')
-					.done()
-
-				if !context.increment {
-					fragments.line('--__ks_i')
-				}
-
-				const line = fragments.newLine()
-
-				if !context.tempL {
-					line.code($runtime.scope(this))
-
-					context.tempL = true
-				}
-
-
-				if context.required > 0 {
-					line.code(`__ks_l = Math.min(\(context.name).length - \(context.required), __ks_i + \(arity.max + 1))`)
-				}
-				else {
-					line.code(`__ks_l = Math.min(\(context.name).length, __ks_i + \(arity.max + 1))`)
-				}
-
-				line.done()
-
-				const ctrl = fragments.newControl().code('while(++__ks_i < __ks_l)').step()
-
-				ctrl.line(`__ks__ = \(context.name)[__ks_i]`)
-
-				const ctrl2 = ctrl.newControl()
-
-				if type.isNullable() {
-					ctrl2
-						.code('if(__ks__ === void 0 || __ks__ === null)')
-						.step()
-						.newLine()
-						.compile(this).code('.push(null)').done()
-						.done()
-
-					ctrl2
-						.step()
-						.code('else if(!')
-				}
-				else {
-					ctrl2.code('if(__ks__ === void 0 || __ks__ === null || !')
-				}
-
-				type.toTestFragments(ctrl2, new Literal(false, this, this.scope(), '__ks__'))
-
-				ctrl2
-					.code(')')
-					.step()
-
-				if index + 1 == context.length {
-					wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
-						async: context.async
-						name: @value
-						type: type
-					})
-				}
-				else {
-					const ctrl3 = ctrl2
-						.newControl()
-						.code('if(')
-						.compile(this)
-						.code(`.length >= \(arity.min))`)
-						.step()
-
-					ctrl3
-						.line('break')
-						.step()
-						.code('else')
-						.step()
-
-					wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
-						async: context.async
-						name: @value
-						type: type
-					})
-
-					ctrl3.done()
-				}
-
-				ctrl2
-					.step()
-					.code('else')
-					.step()
-					.newLine()
-					.compile(this).code('.push(__ks__)')
-					.done()
-
-				ctrl2.done()
-				ctrl.done()
-
-				context.increment = false
-			}
-
-			context.optional += arity.max - arity.min
-		}
-		else {
-			if !required && defaultValue != null {
-				if @declaredType.isAny() {
-					if !context.temp {
-						fragments.line(`\($runtime.scope(this))__ks__`)
-
-						context.temp = true
-					}
-
-					const line = fragments
-						.newLine()
-						.code($runtime.scope(this))
-						.compile(this)
-						.code(` = \(context.name).length > \(context.optional) && (__ks__ = \(context.name)[++__ks_i]) !== void 0`)
-
-					if !@declaredType.isNullable() {
-						line.code(' && __ks__ !== null')
-					}
-
-					line
-						.code(' ? __ks__ : ')
-						.compile(defaultValue)
-						.done()
-				}
-				else {
-					fragments
-						.newLine()
-						.code($runtime.scope(this))
-						.compile(this)
-						.done()
-
-					const fixed = (context.max - context.min) == 1
-
-					const ctrl = fragments.newControl()
-
-					if fixed {
-						ctrl
-							.code(`if(\(context.name).length > \(context.optional) && (`)
-							.compile(this)
-							.code(` = \(context.name)[++__ks_i]) !== void 0`)
-					}
-					else if context.required > 0 {
-						ctrl
-							.code(`if(\(context.name).length > __ks_i + \(context.required + 1) && (`)
-							.compile(this)
-							.code(` = \(context.name)[++__ks_i]) !== void 0`)
-					}
-					else {
-						ctrl
-							.code(`if(\(context.name).length > ++__ks_i && (`)
-							.compile(this)
-							.code(` = \(context.name)[__ks_i]) !== void 0`)
-					}
-
-					if !@declaredType.isNullable() {
-						ctrl.code(' && ').compile(this).code(' !== null')
-					}
-
-					ctrl.code(')').step()
-
-					const ctrl2 = ctrl.newControl().code('if(')
-
-					if @declaredType.isNullable() {
-						ctrl2.compile(this).code(' !== null && !')
-					}
-					else {
-						ctrl2.code('!')
-					}
-
-					@declaredType.toTestFragments(ctrl2, this)
-
-					ctrl2
-						.code(')')
-						.step()
-
-					if fixed || index + 1 == context.length {
-						wrongdoer(ctrl2, ParameterWrongDoing::BadType, {
-							async: context.async
-							name: @value
-							type: @declaredType
-						})
-					}
-					else if rest {
-						ctrl2
-							.newLine()
-							.compile(this)
-							.code($equals)
-							.compile(defaultValue)
-							.done()
-
-						ctrl2.line('--__ks_i')
-					}
-					else {
-						const ctrl3 = ctrl2
-							.newControl()
-							.code(`if(arguments.length - __ks_i < \(context.max - context.optional + context.required))`)
-							.step()
-
-						ctrl3
-							.newLine()
-							.compile(this)
-							.code($equals)
-							.compile(defaultValue)
-							.done()
-
-						ctrl3
-							.line('--__ks_i')
-							.step()
-							.code('else')
-							.step()
-
-						wrongdoer(ctrl3, ParameterWrongDoing::BadType, {
-							async: context.async
-							name: @value
-							type: @declaredType
-						})
-
-						ctrl3.done()
-					}
-
-					ctrl2.done()
-
-					ctrl.step().code('else').step()
-
-					ctrl
-						.newLine()
-						.compile(this)
-						.code($equals)
-						.compile(defaultValue)
-						.done()
-
-					ctrl.done()
-				}
-
-				++context.optional
-			}
-			else {
-				fragments
-					.newLine()
-					.code($runtime.scope(this))
-					.compile(this)
-					.code(` = \(context.name)[++__ks_i]`)
-					.done()
-
-				this.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async)
-
-				--context.required
-			}
-		}
+		IdentifierParameter.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
 	} // }}}
 	toErrorFragments(fragments, wrongdoer, async) { // {{{
 		wrongdoer(fragments, ParameterWrongDoing::BadType, {
@@ -1414,92 +1440,12 @@ class IdentifierParameter extends IdentifierLiteral {
 		fragments.compile(this)
 	} // }}}
 	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
-		let ctrl = null
-
-		if defaultValue != null {
-			if !header {
-				ctrl = fragments
-					.newControl()
-					.code('if(').compile(this).code(' === void 0')
-
-				if !@declaredType.isNullable() {
-					ctrl.code(' || ').compile(this).code(' === null')
-				}
-
-				ctrl.code(')').step()
-
-				ctrl
-					.newLine()
-					.compile(this)
-					.code($equals)
-					.compile(defaultValue)
-					.done()
-			}
-		}
-		else {
-			if @declaredType.isNullable() {
-				ctrl = fragments
-					.newControl()
-					.code('if(').compile(this).code(' === void 0').code(')')
-					.step()
-
-				ctrl.newLine().compile(this).code(' = null').done()
-			}
-			else if @parent.isAssertingParameter() {
-				ctrl = fragments
-					.newControl()
-					.code('if(').compile(this).code(' === void 0').code(' || ').compile(this).code(' === null').code(')')
-					.step()
-
-				wrongdoer(ctrl, ParameterWrongDoing::NotNullable, {
-					async: async
-					name: this.name()
-				})
-			}
-		}
-
-		if !@declaredType.isAny() && @parent.isAssertingParameterType() {
-			if ctrl? {
-				ctrl.step().code('else ')
-			}
-			else {
-				ctrl = fragments.newControl()
-			}
-
-			ctrl.code('if(')
-
-			if @declaredType.isNull() {
-				ctrl.compile(this).code(' !== null')
-			}
-			else {
-				if @declaredType.isNullable() {
-					ctrl.compile(this).code(' !== null && ')
-				}
-
-				ctrl.code('!')
-
-				@declaredType.toTestFragments(ctrl, this)
-			}
-
-			ctrl
-				.code(')')
-				.step()
-
-			wrongdoer(ctrl, ParameterWrongDoing::BadType, {
-				async: async
-				name: this.name()
-				type: @declaredType
-			})
-		}
-
-		if ctrl != null {
-			ctrl.done()
-		}
+		IdentifierParameter.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async, this)
 	} // }}}
 }
 
 class ArrayBindingParameter extends ArrayBinding {
-	private {
+	private lateinit {
 		_tempName: Literal
 	}
 	analyse() { // {{{
@@ -1509,7 +1455,8 @@ class ArrayBindingParameter extends ArrayBinding {
 			@tempName = new Literal(@scope.acquireTempName(false), this)
 		}
 	} // }}}
-	addAliasParameter(data, name, setter) => @parent.addAliasParameter(data, name, setter)
+	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
+	isBinding() => true
 	newElement(data) => new ArrayBindingParameterElement(data, this, @scope)
 	setDeclaredType(type, definitive: Boolean = false) { // {{{
 		if type.isAny() {
@@ -1584,14 +1531,7 @@ class ArrayBindingParameter extends ArrayBinding {
 }
 
 class ArrayBindingParameterElement extends ArrayBindingElement {
-	prepare() { // {{{
-		super.prepare()
-
-		if @named && @data.modifiers != 0 {
-			@name.applyModifiers(@data.modifiers, this)
-		}
-	} // }}}
-	addAliasParameter(data, name, setter) => @parent.addAliasParameter(data, name, setter)
+	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	compileVariable(data) => Parameter.compileExpression(data, this)
 	setDeclaredType(type, definitive) { // {{{
 		@name.setDeclaredType(type, definitive)
@@ -1599,7 +1539,7 @@ class ArrayBindingParameterElement extends ArrayBindingElement {
 }
 
 class ObjectBindingParameter extends ObjectBinding {
-	private {
+	private lateinit {
 		_tempName: Literal
 	}
 	analyse() { // {{{
@@ -1609,7 +1549,8 @@ class ObjectBindingParameter extends ObjectBinding {
 			@tempName = new Literal(@scope.acquireTempName(false), this)
 		}
 	} // }}}
-	addAliasParameter(data, name, setter) => @parent.addAliasParameter(data, name, setter)
+	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
+	isBinding() => true
 	newElement(data) => new ObjectBindingParameterElement(data, this, @scope)
 	setDeclaredType(type, definitive: Boolean = false) { // {{{
 		if type.isAny() {
@@ -1684,14 +1625,7 @@ class ObjectBindingParameter extends ObjectBinding {
 }
 
 class ObjectBindingParameterElement extends ObjectBindingElement {
-	prepare() { // {{{
-		super.prepare()
-
-		if @data.modifiers != 0 {
-			@alias.applyModifiers(@data.modifiers, this)
-		}
-	} // }}}
-	addAliasParameter(data, name, setter) => @parent.addAliasParameter(data, name, setter)
+	addAliasParameter(parameter: ThisExpressionParameter) => @parent.addAliasParameter(parameter)
 	compileVariable(data) => Parameter.compileExpression(data, this)
 	setDeclaredType(type, definitive) { // {{{
 		@alias.setDeclaredType(type, definitive)
@@ -1699,7 +1633,7 @@ class ObjectBindingParameterElement extends ObjectBindingElement {
 }
 
 class AnonymousParameter extends AbstractNode {
-	private {
+	private lateinit {
 		_name: String
 		_type: Type
 	}
@@ -1708,7 +1642,7 @@ class AnonymousParameter extends AbstractNode {
 		@name = @scope.acquireTempName(false)
 	} // }}}
 	translate()
-	applyModifiers(modifiers, node) => null
+	name() => null
 	setDeclaredType(@type, definitive)
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@name)
@@ -1764,4 +1698,73 @@ class AnonymousParameter extends AbstractNode {
 			ctrl.done()
 		}
 	} // }}}
+	type() => null
+}
+
+class ThisExpressionParameter extends ThisExpression {
+	override prepare() { // {{{
+		super()
+
+		const method = this.statement()
+
+		if method is ClassMethodDeclaration || method is ImplementClassMethodDeclaration {
+			const class = method.parent()
+
+			lateinit const variable
+
+			if method.isInstance() {
+				variable = class.type().type().getInstanceVariable(@variableName)
+			}
+			else {
+				variable = class.type().type().getClassVariable(@variableName)
+			}
+
+			if variable.isImmutable() {
+				ReferenceException.throwImmutable(this)
+			}
+		}
+		else if method is ClassConstructorDeclaration || method is ImplementClassConstructorDeclaration {
+			const class = method.parent()
+
+			const variable = class.type().type().getInstanceVariable(@variableName)
+
+			if variable.isImmutable() && !variable.isLateInit() {
+				ReferenceException.throwImmutable(this)
+			}
+		}
+
+		@parent.addAliasParameter(this)
+	} // }}}
+	getDeclaredType() => @type
+	isBinding() => false
+	listAssignments(array) { // {{{
+		array.push(@name)
+
+		return array
+	} // }}}
+	setDeclaredType(type, definitive) { // {{{
+		if !type.matchContentOf(@type) {
+			TypeException.throwInvalidAssignement(`@\(@name)`, @type, type, this)
+		}
+
+		const variable = @parent.scope().getVariable(@name)
+
+		variable.setDeclaredType(type).setDefinitive(definitive)
+	} // }}}
+	toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
+		IdentifierParameter.toAfterRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
+	} // }}}
+	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
+		IdentifierParameter.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		fragments.compile(@scope.getVariable(@name))
+	} // }}}
+	toParameterFragments(fragments) { // {{{
+		fragments.compile(@scope.getVariable(@name))
+	} // }}}
+	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
+		IdentifierParameter.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async, this)
+	} // }}}
+	type(type)
 }

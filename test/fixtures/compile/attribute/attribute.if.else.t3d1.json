@@ -15,7 +15,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -23,7 +23,11 @@
       "instanceVariables": {
         "length": {
           "access": 4,
-          "type": "Number"
+          "type": "Number",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -37,7 +41,7 @@
       },
       "exhaustive": false,
       "init": 0,
-	  "constructors": [],
+      "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -45,6 +49,7 @@
           {
             "id": 0,
             "access": 4,
+            "sealed": true,
             "async": false,
             "min": 1,
             "max": 1,
@@ -60,8 +65,8 @@
               }
             ],
             "returns": "Boolean",
-            "sealed": true,
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

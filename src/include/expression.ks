@@ -3,6 +3,11 @@ abstract class Expression extends AbstractNode {
 		_castingEnum: Boolean		= false
 	}
 	acquireReusable(acquire)
+	checkIfAssignable() { // {{{
+		if !this.isAssignable() {
+			ReferenceException.throwInvalidAssignment(this)
+		}
+	} // }}}
 	getDeclaredType() => this.type()
 	getUnpreparedType() => AnyType.NullableUnexplicit
 	// if the expression can throw an expception
@@ -13,6 +18,7 @@ abstract class Expression extends AbstractNode {
 	inferWhenTrueTypes(inferables) => this.inferTypes(inferables)
 	// types if the condition is false
 	inferWhenFalseTypes(inferables) => this.inferTypes(inferables)
+	initializeVariable(variable: VariableBrief, expression: Expression)
 	// if the expression can be an assignment
 	isAssignable() => false
 	// if the expression is an `await` expression
@@ -35,6 +41,10 @@ abstract class Expression extends AbstractNode {
 	isExpectingType() => false
 	// if the expression can be ignored (like a variable casting)
 	isIgnorable() => false
+	// if the expression is a variable and needs to be initialized
+	isInitializable() => false
+	// if the expression is initializing the given instance variable
+	isInitializingInstanceVariable(name: String): Boolean => false
 	// if the associated type can be updated (it's a chunck or a variable)
 	isInferable() => false
 	// if the expression needs to be assign to a temp variable to be reused, expect for simple member expression
@@ -45,8 +55,14 @@ abstract class Expression extends AbstractNode {
 	isNullable() => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
 	isNullableComputed() => this.isComputed()
+	// if the expression is the given instance variable
+	isUsingInstanceVariable(name) => false
 	// if the expression needs to use a setter function to assign a value
 	isUsingSetter() => false
+	// if the expression is the given static variable
+	isUsingStaticVariable(class, varname) => false
+	// if the expression is the given variable
+	isUsingVariable(name) => false
 	// if the expression generates multiple assignments
 	isSplitAssignment() => false
 	releaseReusable()
@@ -99,6 +115,7 @@ abstract class Expression extends AbstractNode {
 		}
 	} // }}}
 	type() => AnyType.NullableUnexplicit
+	variable() => null
 }
 
 include {

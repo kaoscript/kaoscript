@@ -1,5 +1,5 @@
 class ForFromStatement extends Statement {
-	private {
+	private lateinit {
 		_bindingScope
 		_body
 		_bodyScope

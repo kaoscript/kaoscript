@@ -1,14 +1,18 @@
 class ThisExpression extends Expression {
-	private {
+	private lateinit {
 		_assignment: AssignmentType	= AssignmentType::Neither
 		_calling: Boolean			= false
 		_class: NamedType
 		_composite: Boolean			= false
+		_declaration
 		_fragment: String
+		_immutable: Boolean			= false
 		_instance: Boolean			= true
 		_name: String
 		_namesake: Boolean			= false
+		_sealed: Boolean			= false
 		_type: Type?				= null
+		_variableName: String?		= null
 	}
 	analyse() { // {{{
 		@name = @data.name.name
@@ -23,6 +27,7 @@ class ThisExpression extends Expression {
 				@instance = parent.isInstance()
 
 				@class = parent.parent().type()
+				@declaration = parent.parent()
 
 				if parent is ClassMethodDeclaration && parent.parameters().length == 0{
 					if parent.name() == @name {
@@ -34,6 +39,7 @@ class ThisExpression extends Expression {
 			}
 			else if parent is ClassConstructorDeclaration || parent is ClassDestructorDeclaration {
 				@class = parent.parent().type()
+				@declaration = parent.parent()
 				break
 			}
 			else if parent is ImplementClassMethodDeclaration {
@@ -42,10 +48,12 @@ class ThisExpression extends Expression {
 				}
 
 				@class = parent.class()
+				@declaration = parent.parent()
 				break
 			}
 			else if parent is ImplementClassConstructorDeclaration {
 				@class = parent.class()
+				@declaration = parent.parent()
 				break
 			}
 		}
@@ -67,14 +75,20 @@ class ThisExpression extends Expression {
 				}
 				else if @type ?= @class.type().getInstanceVariable(@name) {
 					@fragment = `\(name).\(@name)`
+
+					@variableName = @name
+					@immutable = @type.isImmutable()
 				}
 				else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
-					if @type.isInitiatable() && @assignment == AssignmentType::Neither {
+					if @type.isSealed() && @type.hasDefaultValue() && @assignment == AssignmentType::Neither {
 						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
 					}
 					else {
 						@fragment = `\(name)._\(@name)`
 					}
+
+					@variableName = `_\(@name)`
+					@immutable = @type.isImmutable()
 				}
 				else {
 					ReferenceException.throwUndefinedInstanceField(@name, this)
@@ -85,9 +99,13 @@ class ThisExpression extends Expression {
 					@fragment = `\(name).\(@name)`
 
 					@type = @scope.getChunkType(@fragment) ?? variable.type()
+
+					@variableName = @name
+					@immutable = variable.isImmutable()
+					@sealed = variable.isSealed()
 				}
 				else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
-					if variable.isInitiatable() && @assignment == AssignmentType::Neither {
+					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType::Neither {
 						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
 					}
 					else {
@@ -95,6 +113,10 @@ class ThisExpression extends Expression {
 					}
 
 					@type = @scope.getChunkType(@fragment) ?? variable.type()
+
+					@variableName = `_\(@name)`
+					@immutable = variable.isImmutable()
+					@sealed = variable.isSealed()
 				}
 				else if @type ?= @class.type().getPropertyGetter(@name) {
 					if @namesake {
@@ -120,11 +142,19 @@ class ThisExpression extends Expression {
 					@fragment = `\(name).\(@name)`
 
 					@type = @scope.getChunkType(@fragment) ?? variable.type()
+
+					@variableName = @name
+					@immutable = variable.isImmutable()
+					@sealed = variable.isSealed()
 				}
 				else if variable ?= @class.type().getClassVariable(`_\(@name)`) {
 					@fragment = `\(name)._\(@name)`
 
 					@type = @scope.getChunkType(@fragment) ?? variable.type()
+
+					@variableName = `_\(@name)`
+					@immutable = variable.isImmutable()
+					@sealed = variable.isSealed()
 				}
 				else {
 					ReferenceException.throwUndefinedClassField(@name, this)
@@ -133,6 +163,31 @@ class ThisExpression extends Expression {
 		}
 	} // }}}
 	translate()
+	checkIfAssignable() { // {{{
+		if const variable = this.declaration() {
+			if variable.isImmutable() {
+				if variable.isLateInit() {
+					if variable.isInitialized() {
+						ReferenceException.throwImmutable(this)
+					}
+				}
+				else {
+					ReferenceException.throwImmutable(this)
+				}
+			}
+		}
+	} // }}}
+	declaration() { // {{{
+		if const node = @parent.getFunctionNode() {
+			if node is ClassConstructorDeclaration {
+				return node.parent().getInstanceVariable(@variableName)
+			}
+		}
+
+		return null
+	} // }}}
+	fragment() => @fragment
+	getClass() => @class
 	getDeclaredType() { // {{{
 		if !@calling {
 			if @instance {
@@ -150,17 +205,41 @@ class ThisExpression extends Expression {
 
 		return @type
 	} // }}}
+	getVariableDeclaration(class) { // {{{
+		return class.getInstanceVariable(@variableName)
+	} // }}}
+	getVariableName() => @variableName
 	getUnpreparedType() { // {{{
 		this.prepare()
 
 		return @type
 	} // }}}
+	initializeVariables(type: Type, node: Expression) { // {{{
+		if @variableName != null {
+			node.initializeVariable(VariableBrief(
+				name: @variableName
+				type
+				instance: @instance
+				immutable: @immutable
+			))
+		}
+	} // }}}
 	isAssignable() => !@calling && !@composite
 	isComposite() => @composite
 	isExpectingType() => true
 	isInferable() => !@calling && !@composite
+	isInitializable() => true
+	isSealed() => @sealed
 	isUsingVariable(name) => @instance && name == 'this'
-	listAssignments(array) => array
+	isUsingInstanceVariable(name) => @instance && @variableName == name
+	listAssignments(array) { // {{{
+		if @variableName != null {
+			array.push(@variableName)
+		}
+
+		return array
+	} // }}}
+	name() => @name
 	path() => @fragment
 	setAssignment(@assignment)
 	toFragments(fragments, mode) { // {{{

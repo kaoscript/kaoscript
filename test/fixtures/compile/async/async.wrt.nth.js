@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo(bar, qux, __ks_cb) {
 		if(arguments.length < 3) {
@@ -19,6 +19,6 @@ module.exports = function() {
 		if(qux === void 0 || qux === null) {
 			return __ks_cb(new TypeError("'qux' is not nullable"));
 		}
-		return __ks_cb(null, "" + qux + "-" + bar);
+		return __ks_cb(null, Helper.concatString(qux, "-", bar));
 	}
 };

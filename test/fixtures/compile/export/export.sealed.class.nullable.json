@@ -66,7 +66,11 @@
       "instanceVariables": {
         "_shape": {
           "access": 2,
-          "type": "String"
+          "type": "String",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -89,7 +93,8 @@
               }
             ],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

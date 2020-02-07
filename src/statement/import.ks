@@ -83,7 +83,7 @@ struct ImportedVariable {
 }
 
 class Importer extends Statement {
-	private {
+	private lateinit {
 		_alias: String?								= null
 		_arguments: Array							= []
 		_argumentNames								= {}
@@ -91,7 +91,7 @@ class Importer extends Statement {
 		_count: Number								= 0
 		_hasArguments: Boolean						= true
 		_imports									= {}
-		_isKSFile: Boolean
+		_isKSFile: Boolean							= false
 		_metadata
 		_moduleName: String
 		_reusable: Boolean							= false

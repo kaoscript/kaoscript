@@ -68,7 +68,11 @@
       "instanceVariables": {
         "_z": {
           "access": 2,
-          "type": "Number"
+          "type": "Number",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -118,7 +122,11 @@
       "instanceVariables": {
         "_w": {
           "access": 2,
-          "type": "Number"
+          "type": "Number",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},

@@ -49,15 +49,18 @@ abstract class Statement extends AbstractNode {
 	export(recipient)
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	includePath() => @parent.includePath()
-	initializeVariable(variable, type, expression, node) => @parent.initializeVariable(variable, type, expression, this)
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode)
 	isAwait() => false
 	isCascade() => false
 	isExit() => false
 	isExportable() => false
+	isInitializingInstanceVariable(name) => false
 	isJumpable() => false
 	isLateInitializable() => false
 	isLoop() => false
 	isUsingVariable(name) => false
+	isUsingInstanceVariable(name) => false
+	isUsingStaticVariable(class, varname) => false
 	line() => @line
 	setAttributeData(key: AttributeData, data) { // {{{
 		@attributeDatas[key] = data

@@ -38,7 +38,11 @@
       "instanceVariables": {
         "_color": {
           "access": 2,
-          "type": "String"
+          "type": "String",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -53,7 +57,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -72,7 +77,10 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": [
+              "_color"
+            ]
           }
         ],
         "draw": [
@@ -93,7 +101,8 @@
               }
             ],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

@@ -1,1 +1,1 @@
-SyntaxException: Identifier "line" is immutable (line 4, file "fixtures/compile/destruct/destruct.object.temp.for.in.use.const.ks")
+ReferenceException: The identifier "line" is immutable (line 4, file "fixtures/compile/destruct/destruct.object.temp.for.in.use.const.ks")

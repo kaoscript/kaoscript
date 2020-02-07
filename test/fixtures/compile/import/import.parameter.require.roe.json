@@ -16,7 +16,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -62,7 +62,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "copy": [
@@ -77,7 +78,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "pushUniq": [
@@ -98,7 +100,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

@@ -23,7 +23,11 @@
       "instanceVariables": {
         "_value": {
           "access": 2,
-          "type": "String"
+          "type": "String",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {
@@ -31,7 +35,11 @@
           "access": 2,
           "type": {
             "reference": 0
-          }
+          },
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "instanceMethods": {
@@ -45,7 +53,8 @@
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -66,7 +75,10 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": [
+              "_value"
+            ]
           }
         ]
       },
@@ -83,7 +95,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -104,7 +117,10 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": [
+              "_instance"
+            ]
           }
         ]
       }

@@ -1,5 +1,5 @@
 class UnlessStatement extends Statement {
-	private {
+	private lateinit {
 		_condition
 		_whenFalseExpression
 		_whenFalseScope: Scope

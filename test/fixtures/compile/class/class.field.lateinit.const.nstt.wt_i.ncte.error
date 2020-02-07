@@ -1,0 +1,1 @@
+SyntaxException: The class variable "PI" isn't initialized (line 1, file "fixtures/compile/class/class.field.lateinit.const.nstt.wt_i.ncte.ks")

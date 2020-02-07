@@ -1,5 +1,5 @@
 class EnumExpression extends Expression {
-	private {
+	private lateinit {
 		_enum
 		_type: Type
 	}

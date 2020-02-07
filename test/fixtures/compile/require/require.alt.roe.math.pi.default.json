@@ -28,7 +28,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": true,
       "init": 0,
       "constructors": [],
@@ -46,7 +46,8 @@
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -55,7 +56,7 @@
     {
       "kind": "namespace",
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "properties": {
         "PI": {
@@ -119,7 +120,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

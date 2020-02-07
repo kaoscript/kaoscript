@@ -52,7 +52,8 @@
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -91,7 +92,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       }

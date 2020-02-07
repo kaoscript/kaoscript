@@ -1,4 +1,4 @@
-var {Dictionary, Operator} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Operator} = require("@kaoscript/runtime");
 module.exports = function() {
 	let likes = (() => {
 		const d = new Dictionary();
@@ -12,6 +12,6 @@ module.exports = function() {
 		if(!(Operator.lte(value.length, 5))) {
 			break;
 		}
-		console.log(key + " likes " + value);
+		console.log(Helper.concatString(key, " likes ", value));
 	}
 };

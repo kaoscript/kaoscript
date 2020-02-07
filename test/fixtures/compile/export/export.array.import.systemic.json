@@ -54,7 +54,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -86,7 +87,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -121,7 +123,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       }

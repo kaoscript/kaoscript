@@ -63,7 +63,8 @@
               }
             ],
             "returns": "Boolean",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

@@ -53,13 +53,17 @@
           "sealed": false,
           "systemic": false,
           "exhaustive": true,
-          "init": 0,
+          "init": 1,
           "constructors": [],
           "destructors": 0,
           "instanceVariables": {
             "_name": {
               "access": 2,
-              "type": "String"
+              "type": "String",
+              "default": true,
+              "immutable": false,
+              "lateInit": false,
+              "sealed": false
             }
           },
           "classVariables": {},
@@ -74,7 +78,8 @@
                 "max": 0,
                 "parameters": [],
                 "returns": "String",
-                "throws": []
+                "throws": [],
+                "inits": []
               },
               {
                 "id": 1,
@@ -93,7 +98,10 @@
                   }
                 ],
                 "returns": "Any?",
-                "throws": []
+                "throws": [],
+                "inits": [
+                  "_name"
+                ]
               }
             ]
           },

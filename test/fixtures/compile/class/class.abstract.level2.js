@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	class Foo {
 		constructor() {
@@ -26,7 +27,7 @@ module.exports = function() {
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
-			return "Hello " + name + "!";
+			return Helper.concatString("Hello ", name, "!");
 		}
 		greet() {
 			if(arguments.length === 1) {

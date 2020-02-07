@@ -1,6 +1,6 @@
 class Foobar {
 	private {
-		@values: Array<Number>
+		@values: Array<Number>	= []
 	}
 	clone(): Foobar {
 		const clone = new Foobar()

@@ -271,6 +271,17 @@ class IncludeDeclarator extends Statement {
 	} // }}}
 	file() => @file
 	includePath() => @includePath
+	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { // {{{
+		const line = stmt.line()
+
+		for const statement in @statements while statement.line() < line && statement != stmt {
+			if statement.isUsingStaticVariable(class, varname) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	recipient() => this.module()
 	registerMacro(name, macro) => @parent.registerMacro(name, macro)
 	toFragments(fragments, mode) { // {{{

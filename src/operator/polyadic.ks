@@ -97,7 +97,7 @@ class PolyadicOperatorExpression extends Expression {
 }
 
 abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpression {
-	private {
+	private lateinit {
 		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
@@ -241,7 +241,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 }
 
 class PolyadicOperatorAddition extends PolyadicOperatorExpression {
-	private {
+	private lateinit {
 		_isNative: Boolean		= false
 		_isNumber: Boolean		= false
 		_isString: Boolean		= false
@@ -520,7 +520,7 @@ class PolyadicOperatorMultiplication extends NumericPolyadicOperatorExpression {
 }
 
 class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
-	private {
+	private lateinit {
 		_type: Type
 	}
 	analyse() { // {{{

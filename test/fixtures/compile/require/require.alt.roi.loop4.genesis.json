@@ -26,7 +26,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -42,7 +42,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -63,7 +63,11 @@
       "instanceVariables": {
         "length": {
           "access": 4,
-          "type": "Number"
+          "type": "Number",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -88,7 +92,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "every": [
@@ -116,7 +121,8 @@
               }
             ],
             "returns": "Boolean",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "forEach": [
@@ -144,7 +150,8 @@
               }
             ],
             "returns": "Void",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "indexOf": [
@@ -172,7 +179,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "join": [
@@ -199,7 +207,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "pop": [
@@ -212,7 +221,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Any!",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "push": [
@@ -233,7 +243,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "shift": [
@@ -246,7 +257,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Any!",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "slice": [
@@ -274,7 +286,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "some": [
@@ -302,7 +315,8 @@
               }
             ],
             "returns": "Boolean",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "sort": [
@@ -325,7 +339,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "splice": [
@@ -362,7 +377,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toString": [
@@ -377,7 +393,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "unshift": [
@@ -398,7 +415,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "last": [
@@ -419,7 +437,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -436,7 +455,11 @@
       "instanceVariables": {
         "length": {
           "access": 4,
-          "type": "Number"
+          "type": "Number",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -461,7 +484,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "charCodeAt": [
@@ -482,7 +506,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "concat": [
@@ -513,7 +538,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "fromCharCode": [
@@ -542,7 +568,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "indexOf": [
@@ -572,7 +599,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "lastIndexOf": [
@@ -602,7 +630,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "match": [
@@ -632,7 +661,8 @@
                 }
               ]
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "replace": [
@@ -678,7 +708,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "search": [
@@ -699,7 +730,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "slice": [
@@ -729,7 +761,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "split": [
@@ -774,7 +807,8 @@
                 }
               ]
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "substr": [
@@ -804,7 +838,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "substring": [
@@ -834,7 +869,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toLowerCase": [
@@ -849,7 +885,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toString": [
@@ -864,7 +901,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toUpperCase": [
@@ -879,7 +917,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "trim": [
@@ -894,7 +933,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "valueOf": [
@@ -909,7 +949,8 @@
             "returns": {
               "reference": 3
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "lines": [
@@ -938,7 +979,8 @@
                 }
               ]
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

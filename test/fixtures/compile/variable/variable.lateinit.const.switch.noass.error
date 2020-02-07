@@ -1,1 +1,0 @@
-SyntaxException: The lateinit variable "value" isn't fully initialized by the clause at (line 8, file "fixtures/compile/variable/variable.lateinit.const.switch.noass.ks")

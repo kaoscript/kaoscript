@@ -23,7 +23,7 @@ class UnaryOperatorExpression extends Expression {
 }
 
 abstract class NumericUnaryOperatorExpression extends UnaryOperatorExpression {
-	private {
+	private lateinit {
 		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
@@ -97,7 +97,7 @@ class UnaryOperatorDecrementPrefix extends NumericUnaryOperatorExpression {
 }
 
 class UnaryOperatorExistential extends UnaryOperatorExpression {
-	private {
+	private lateinit {
 		_type: Type
 	}
 	inferTypes(inferables) { // {{{
@@ -207,7 +207,7 @@ class UnaryOperatorNegative extends NumericUnaryOperatorExpression {
 }
 
 class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
-	private {
+	private lateinit {
 		_type: Type
 	}
 	prepare() { // {{{
@@ -222,7 +222,7 @@ class UnaryOperatorNullableTypeCasting extends UnaryOperatorExpression {
 }
 
 class UnaryOperatorSpread extends UnaryOperatorExpression {
-	private {
+	private lateinit {
 		_type: Type
 	}
 	prepare() { // {{{

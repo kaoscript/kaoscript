@@ -1,0 +1,1 @@
+ReferenceException: The identifier "x" is immutable (line 16, file "fixtures/compile/variable/variable.lateinit.func.s_se.ks")

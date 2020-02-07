@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -24,7 +24,7 @@ module.exports = function() {
 				x = null;
 			}
 			let items = Array.prototype.slice.call(arguments, ++__ks_i, arguments.length);
-			return "[" + x + ", " + items + "]";
+			return Helper.concatString("[", x, ", ", items, "]");
 		}
 		foo() {
 			return Foobar.prototype.__ks_func_foo_0.apply(this, arguments);

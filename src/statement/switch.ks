@@ -21,15 +21,17 @@ const $switch = {
 }
 
 class SwitchStatement extends Statement {
-	private {
-		_castingEnum: Boolean			= false
-		_clauses						= []
-		_hasLateInitVariables: Boolean	= false
-		_lateInitVariables				= {}
-		_name: String?					= null
+	private lateinit {
+		_castingEnum: Boolean				= false
+		_clauses							= []
+		_hasDefaultClause: Boolean			= false
+		_hasLateInitVariables: Boolean		= false
+		_initializedVariables: Dictionary	= {}
+		_lateInitVariables					= {}
+		_name: String?						= null
 		_nextClauseIndex: Number
-		_usingFallthrough: Boolean		= false
-		_value							= null
+		_usingFallthrough: Boolean			= false
+		_value								= null
 		_valueType: Type
 	}
 	analyse() { // {{{
@@ -38,7 +40,7 @@ class SwitchStatement extends Statement {
 			@value.analyse()
 		}
 
-		let hasDefaultClause = false
+		@hasDefaultClause = false
 
 		let condition, binding
 		for const data, index in @data.clauses {
@@ -79,7 +81,7 @@ class SwitchStatement extends Statement {
 			}
 
 			if clause.conditions.length == 0 {
-				hasDefaultClause = true
+				@hasDefaultClause = true
 			}
 
 			for const bbData in data.bindings {
@@ -107,10 +109,13 @@ class SwitchStatement extends Statement {
 			clause.filter.analyse()
 
 			clause.body = $compile.block(data.body, this, clause.scope)
+		}
+
+		for const clause in @clauses {
 			clause.body.analyse()
 		}
 
-		if @hasLateInitVariables && !hasDefaultClause {
+		if @hasLateInitVariables && !@hasDefaultClause {
 			for const value, name of @lateInitVariables when value.variable.isImmutable() {
 				SyntaxException.throwMissingAssignmentSwitchNoDefault(name, this)
 			}
@@ -130,14 +135,13 @@ class SwitchStatement extends Statement {
 		const enumValue = @valueType.isEnum()
 
 		const inferables = {}
-		let enumConditions = 0
-		let maxConditions = 0
+		auto enumConditions = 0
+		auto maxConditions = 0
+		auto first = true
 
 		let maxInferables = @clauses.length
 
 		for const clause, index in @clauses {
-			let nf = true
-
 			for const condition in clause.conditions {
 				condition.prepare()
 
@@ -163,7 +167,7 @@ class SwitchStatement extends Statement {
 			if clause.body.isExit() {
 				--maxInferables
 			}
-			else if index == 0 {
+			else if first {
 				for const data, name of clause.body.scope().listUpdatedInferables() {
 					inferables[name] = {
 						count: 1
@@ -171,6 +175,8 @@ class SwitchStatement extends Statement {
 						data
 					}
 				}
+
+				first = false
 			}
 			else {
 				for const data, name of clause.body.scope().listUpdatedInferables() when inferables[name]? {
@@ -183,14 +189,6 @@ class SwitchStatement extends Statement {
 					}
 
 					inferables[name].count++
-				}
-			}
-
-			if !clause.body.isExit() {
-				for const map, name of @lateInitVariables {
-					unless map.clauses[index].initializable {
-						SyntaxException.throwMissingAssignmentSwitchClause(name, clause.body)
-					}
 				}
 			}
 		}
@@ -216,11 +214,43 @@ class SwitchStatement extends Statement {
 			}
 		}
 
-		for const map, name of @lateInitVariables {
-			const types = [clause.type for const clause in map.clauses when clause.initializable]
+		for const data, name of @initializedVariables {
+			const types = []
+			let initializable = true
+
+			for const clause, index in data.clauses {
+				if clause.initializable {
+					types.push(clause.type)
+				}
+				else if !clause.body.isExit() {
+					initializable = false
+
+					break
+				}
+			}
+
+			if initializable {
+				data.variable.type = Type.union(@scope, ...types)
+
+				@parent.initializeVariable(data.variable, this, this)
+			}
+		}
+
+		for const data, name of @lateInitVariables {
+			const types = []
+
+			for const clause, index in data.clauses {
+				if clause.initializable {
+					types.push(clause.type)
+				}
+				else if !@clauses[index].body.isExit() {
+					SyntaxException.throwMissingAssignmentSwitchClause(name, @clauses[index].body)
+				}
+			}
+
 			const type = Type.union(@scope, ...types)
 
-			@parent.initializeVariable(map.variable, type, this, this)
+			@parent.initializeVariable(VariableBrief(name, type), this, this)
 		}
 
 		for const inferable, name of inferables when inferable.count == maxInferables {
@@ -255,6 +285,10 @@ class SwitchStatement extends Statement {
 	} // }}}
 	addInitializableVariable(variable, node) { // {{{
 		const name = variable.name()
+
+		if !@hasDefaultClause {
+			SyntaxException.throwMissingAssignmentSwitchNoDefault(name, this)
+		}
 
 		let clauseIndex
 		for const clause, index in @clauses {
@@ -324,15 +358,10 @@ class SwitchStatement extends Statement {
 
 		return this
 	} // }}}
-	initializeVariable(variable, type, expression, node) { // {{{
-		const name = variable.name()
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+		const {name, type} = variable
 
-		if variable.isInitialized() {
-			if variable.isImmutable() {
-				ReferenceException.throwImmutable(name, expression)
-			}
-		}
-		else if const map = @lateInitVariables[name] {
+		if const map = @lateInitVariables[name] {
 			let clause = null
 
 			for const cc, i in @clauses {
@@ -359,7 +388,7 @@ class SwitchStatement extends Statement {
 				clause.type = type
 			}
 
-			const clone = variable.clone()
+			const clone = node.scope().getVariable(name).clone()
 
 			if clone.isDefinitive() {
 				clone.setRealType(type)
@@ -370,8 +399,61 @@ class SwitchStatement extends Statement {
 
 			node.scope().replaceVariable(name, clone)
 		}
+		else if !@hasDefaultClause {
+			// do nothing
+		}
+		else if const map = @initializedVariables[name] {
+			let clause = null
+
+			for const cc, i in @clauses {
+				if cc.body == node {
+					unless ?map.clauses[i] {
+						ReferenceException.throwImmutable(name, expression)
+					}
+
+					clause = map.clauses[i]
+
+					break
+				}
+			}
+
+			if clause.type != null {
+				if variable.isImmutable() {
+					ReferenceException.throwImmutable(name, expression)
+				}
+				else if !type.matchContentOf(clause.type) {
+					TypeException.throwInvalidAssignement(name, clause.type, type, expression)
+				}
+			}
+			else {
+				clause.type = type
+				clause.initializable = true
+			}
+
+			node.scope().updateInferable(name, variable, expression)
+		}
 		else {
-			ReferenceException.throwImmutable(name, expression)
+			const map = {
+				variable
+				clauses: []
+			}
+
+			for const clause, index in @clauses {
+				if clause.body == node {
+					map.clauses[index] = {
+						initializable: true
+						type
+					}
+				}
+				else {
+					map.clauses[index] = {
+						initializable: false
+						type: null
+					}
+				}
+			}
+
+			@initializedVariables[name] = map
 		}
 	} // }}}
 	isJumpable() => true
@@ -754,7 +836,7 @@ class SwitchConditionRange extends AbstractNode {
 }
 
 class SwitchConditionType extends AbstractNode {
-	private {
+	private lateinit {
 		_type: Type
 	}
 	analyse()
@@ -770,7 +852,7 @@ class SwitchConditionType extends AbstractNode {
 }
 
 class SwitchConditionValue extends AbstractNode {
-	private {
+	private lateinit {
 		_castingEnum: Boolean	= false
 		_value
 		_type: Type

@@ -1,6 +1,6 @@
 class Foobar {
 	private {
-		@value: Foobar
+		lateinit @value: Foobar
 	}
 	value(value) {
 		@value = value!!

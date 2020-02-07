@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -24,15 +25,15 @@ module.exports = function() {
 			if(y === void 0 || y === null) {
 				throw new TypeError("'y' is not nullable");
 			}
-			return "[" + x + ", " + items + ", " + y + "]";
+			return Helper.concatString("[", x, ", ", items, ", ", y, "]");
 		}
 		foo() {
 			return Foobar.prototype.__ks_func_foo_0.apply(this, arguments);
 		}
 	}
 	const x = new Foobar();
-	console.log("" + x.foo());
-	console.log("" + x.foo(1));
+	console.log(Helper.toString(x.foo()));
+	console.log(Helper.toString(x.foo(1)));
 	console.log(x.foo(1, 2));
 	console.log(x.foo(1, 2, 3));
 	console.log(x.foo(1, 2, 3, 4));

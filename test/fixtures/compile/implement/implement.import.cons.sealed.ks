@@ -1,4 +1,4 @@
-import './implement.cons.sealed.default.es6'
+import './implement.cons.wseal.default.es6'
 
 const d1 = new Date()
 const d2 = new Date([2000, 1, 1])

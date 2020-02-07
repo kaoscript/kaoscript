@@ -1,5 +1,5 @@
 class FunctionType extends Type {
-	private {
+	private lateinit {
 		_async: Boolean						= false
 		_hasRest: Boolean					= false
 		_index: Number
@@ -267,7 +267,7 @@ class FunctionType extends Type {
 	getProperty(name: String) => Type.Any
 	index() => @index
 	index(@index) => this
-	isAssignableToVariable(value, anycast, nullcast, downcast) {
+	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
 		if value.isAny() || value.isFunction() {
 			return true
 		}
@@ -281,7 +281,7 @@ class FunctionType extends Type {
 		else {
 			return false
 		}
-	}
+	} // }}}
 	isAsync() => @async
 	isCatchingError(error): Boolean { // {{{
 		if @throws.length != 0 {

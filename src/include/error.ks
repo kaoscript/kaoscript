@@ -162,13 +162,19 @@ export class ReferenceException extends Exception {
 		throwDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" should not be defined`, node)
 		} // }}}
-		throwImmutable(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Identifier "\(name)" is immutable`, node)
+		throwImmutable(name: String, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The identifier "\(name)" is immutable`, node)
 		} // }}}
-		throwInvalidAssignment(node) ~ TypeException { // {{{
+		throwImmutable(node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The expression "\(node.toQuote())" is immutable`, node)
+		} // }}}
+		throwImmutableField(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The class variable "\(name)" is immutable`, node)
+		} // }}}
+		throwInvalidAssignment(node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Invalid left-hand side in assignment`, node)
 		} // }}}
-		throwLoopingAlias(name, node) ~ SyntaxException { // {{{
+		throwLoopingAlias(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Alias "@\(name)" is looping on itself`, node)
 		} // }}}
 		throwNoMatchingConstructor(name, arguments, node) ~ ReferenceException { // {{{
@@ -321,13 +327,13 @@ export class SyntaxException extends Exception {
 
 			throw new SyntaxException(`Class "\(name)" doesn't implement the following abstract method\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
 		} // }}}
-		throwMissingAssignmentIfFalse(name, node) ~ SyntaxException { // {{{
+		throwMissingAssignmentIfFalse(name, node): Never ~ SyntaxException { // {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized when the condition is false`, node)
 		} // }}}
-		throwMissingAssignmentIfNoElse(name, node) ~ SyntaxException { // {{{
+		throwMissingAssignmentIfNoElse(name, node): Never ~ SyntaxException { // {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized due to the missing "else" statement`, node)
 		} // }}}
-		throwMissingAssignmentIfTrue(name, node) ~ SyntaxException { // {{{
+		throwMissingAssignmentIfTrue(name, node): Never ~ SyntaxException { // {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't fully initialized when the condition is true`, node)
 		} // }}}
 		throwMissingAssignmentSwitchClause(name, node) ~ SyntaxException { // {{{
@@ -380,6 +386,9 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwNotFullyInitializedVariable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" is only partially initialized`, node)
+		} // }}}
+		throwNotInitializedField(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The class variable "\(name)" isn't initialized`, node)
 		} // }}}
 		throwNotInitializedVariable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" isn't initialized`, node)
@@ -434,7 +443,7 @@ export class TypeException extends Exception {
 		throwCannotBeInstantiated(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Class "\(name)" is abstract so it can't be instantiated`, node)
 		} // }}}
-		throwConstructorWithoutNew(name, node) ~ TypeException { // {{{
+		throwConstructorWithoutNew(name, node): Never ~ TypeException { // {{{
 			throw new TypeException(`Class constructor "\(name)" cannot be invoked without 'new'`, node)
 		} // }}}
 		throwExpectedReturnedValue(node) ~ TypeException { // {{{

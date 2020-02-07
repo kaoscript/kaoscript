@@ -1,0 +1,92 @@
+{
+  "aliens": [
+    1,
+    "Date"
+  ],
+  "requirements": [
+    0,
+    "expect",
+    true
+  ],
+  "exports": [
+    2,
+    "Date"
+  ],
+  "references": [
+    "Function",
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": true,
+      "hybrid": false,
+      "sealed": true,
+      "systemic": false,
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    },
+    {
+      "kind": "class",
+      "class": {
+        "reference": 1
+      },
+      "exhaustive": false,
+      "init": 0,
+      "constructors": [],
+      "instanceVariables": {
+        "_culture": {
+          "access": 2,
+          "type": "String?",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": true
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "culture": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": true,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "throws": [],
+            "inits": []
+          },
+          {
+            "id": 1,
+            "access": 4,
+            "sealed": true,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "culture",
+                "type": "String?",
+                "min": 1,
+                "max": 1,
+                "default": 0
+              }
+            ],
+            "returns": "Any?",
+            "throws": [],
+            "inits": []
+          }
+        ]
+      },
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

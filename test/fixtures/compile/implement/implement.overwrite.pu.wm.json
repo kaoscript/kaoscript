@@ -41,7 +41,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -60,7 +61,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -104,6 +106,7 @@
               "reference": 1
             },
             "throws": [],
+            "inits": [],
             "overwrite": [
               0,
               1

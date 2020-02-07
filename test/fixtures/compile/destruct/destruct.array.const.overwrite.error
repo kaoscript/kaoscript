@@ -1,1 +1,1 @@
-SyntaxException: Identifier "a" is immutable (line 7, file "fixtures/compile/destruct/destruct.array.const.overwrite.ks")
+ReferenceException: The identifier "a" is immutable (line 7, file "fixtures/compile/destruct/destruct.array.const.overwrite.ks")

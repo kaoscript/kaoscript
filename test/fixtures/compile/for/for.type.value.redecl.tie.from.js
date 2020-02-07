@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	function foobar(values) {
 		if(arguments.length < 1) {
@@ -8,7 +9,7 @@ module.exports = function() {
 		}
 		let value = null;
 		for(value = 0; value < 10; ++value) {
-			console.log("" + value);
+			console.log(Helper.toString(value));
 		}
 	}
 };

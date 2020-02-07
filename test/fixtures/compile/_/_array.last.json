@@ -16,7 +16,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -55,7 +55,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

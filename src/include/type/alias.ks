@@ -1,5 +1,5 @@
 class AliasType extends Type {
-	private {
+	private lateinit {
 		_type: Type
 	}
 	static {

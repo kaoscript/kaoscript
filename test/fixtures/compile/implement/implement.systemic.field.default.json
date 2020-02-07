@@ -209,8 +209,10 @@
         "_timezone": {
           "access": 2,
           "type": "String",
-          "sealed": true,
-          "initiatable": true
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": true
         }
       },
       "classVariables": {},

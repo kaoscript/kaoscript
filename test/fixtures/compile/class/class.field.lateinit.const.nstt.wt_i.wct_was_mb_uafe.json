@@ -1,0 +1,46 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "systemic": false,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [
+        {
+          "id": 0,
+          "access": 4,
+          "sealed": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "throws": []
+        }
+      ],
+      "destructors": 0,
+      "instanceVariables": {
+        "PI": {
+          "access": 4,
+          "type": "Number",
+          "default": false,
+          "immutable": true,
+          "lateInit": true,
+          "sealed": false
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

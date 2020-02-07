@@ -76,7 +76,11 @@
             "kind": "reference",
             "name": 2,
             "nullable": true
-          }
+          },
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -95,7 +99,8 @@
               "name": 2,
               "nullable": true
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -125,7 +130,8 @@
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

@@ -1,1 +1,0 @@
-TypeException: The variable "x" of type "String" can't be assigned with a value of type "Number" (line 16, file "fixtures/compile/variable/variable.lateinit.auto.func.s_ie.ks")

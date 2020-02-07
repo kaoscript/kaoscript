@@ -157,6 +157,7 @@ class NamedType extends Type {
 	isExclusion() => @type.isExclusion()
 	isExhaustive() => @type.isExhaustive()
 	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
+	isExplicit() => true
 	isExplicitlyExported() => @type.isExplicitlyExported()
 	isExportable() => @type.isExportable()
 	isExported() => @type.isExported()

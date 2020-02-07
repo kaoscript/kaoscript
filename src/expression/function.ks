@@ -1,5 +1,5 @@
 class AnonymousFunctionExpression extends Expression {
-	private {
+	private lateinit {
 		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
@@ -58,6 +58,9 @@ class AnonymousFunctionExpression extends Expression {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
+	addInitializableVariable(variable, node)
+	getFunctionNode() => this
+	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isComputed() => true
@@ -94,7 +97,7 @@ class AnonymousFunctionExpression extends Expression {
 }
 
 class ArrowFunctionExpression extends Expression {
-	private {
+	private lateinit {
 		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
@@ -149,6 +152,9 @@ class ArrowFunctionExpression extends Expression {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
+	addInitializableVariable(variable, node)
+	getFunctionNode() => this
+	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isComputed() => true

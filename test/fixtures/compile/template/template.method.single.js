@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar(date) {
 		if(arguments.length < 1) {
@@ -10,6 +10,6 @@ module.exports = function() {
 		else if(!Type.isClassInstance(date, Date)) {
 			throw new TypeError("'date' is not of type 'Date'");
 		}
-		return ("" + date.getFullYear()).substring(-2);
+		return (Helper.toString(date.getFullYear())).substring(-2);
 	}
 };

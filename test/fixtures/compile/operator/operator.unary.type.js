@@ -1,5 +1,5 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let x = "john";
-	console.log("" + Type.isValue(x.toUpperCase));
+	console.log(Helper.toString(Type.isValue(x.toUpperCase)));
 };

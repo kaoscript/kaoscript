@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return "foobar";
@@ -8,5 +8,5 @@ module.exports = function() {
 		console.log(x);
 	}
 	x = null;
-	console.log("" + x);
+	console.log(Helper.toString(x));
 };

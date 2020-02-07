@@ -42,6 +42,8 @@ class BinaryOperatorExpression extends Expression {
 	isNullable() => @left.isNullable() || @right.isNullable()
 	isNullableComputed() => (@left.isNullable() && @right.isNullable()) || @left.isNullableComputed() || @right.isNullableComputed()
 	isUsingVariable(name) => @left.isUsingVariable(name) || @right.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name) || @right.isUsingInstanceVariable(name)
+	isUsingStaticVariable(class, varname) => @left.isUsingStaticVariable(class, varname) || @right.isUsingStaticVariable(class, varname)
 	listAssignments(array) { // {{{
 		@left.listAssignments(array)
 		@right.listAssignments(array)
@@ -96,7 +98,7 @@ class BinaryOperatorExpression extends Expression {
 }
 
 abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression {
-	private {
+	private lateinit {
 		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_type: Type
@@ -197,7 +199,7 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 }
 
 class BinaryOperatorAddition extends BinaryOperatorExpression {
-	private {
+	private lateinit {
 		_isNative: Boolean		= false
 		_isNumber: Boolean		= false
 		_isString: Boolean		= false
@@ -389,7 +391,7 @@ class BinaryOperatorMultiplication extends NumericBinaryOperatorExpression {
 }
 
 class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
-	private {
+	private lateinit {
 		_type: Type
 	}
 	prepare() { // {{{
@@ -468,7 +470,7 @@ class BinaryOperatorSubtraction extends NumericBinaryOperatorExpression {
 }
 
 class BinaryOperatorTypeCasting extends Expression {
-	private {
+	private lateinit {
 		_forced: Boolean	= false
 		_left
 		_nullable: Boolean	= false
@@ -511,6 +513,7 @@ class BinaryOperatorTypeCasting extends Expression {
 	isComputed() => false
 	isNullable() => @left.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
 	listAssignments(array) => @left.listAssignments(array)
 	name() => @left is IdentifierLiteral ? @left.name() : null
 	toFragments(fragments, mode) { // {{{
@@ -535,7 +538,7 @@ class BinaryOperatorTypeCasting extends Expression {
 }
 
 class BinaryOperatorTypeEquality extends Expression {
-	private {
+	private lateinit {
 		_falseType: Type
 		_left
 		_trueType: Type
@@ -614,6 +617,7 @@ class BinaryOperatorTypeEquality extends Expression {
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
 	listAssignments(array) => @left.listAssignments(array)
 	toFragments(fragments, mode) { // {{{
 		@trueType.toTestFragments(fragments, @left)
@@ -622,7 +626,7 @@ class BinaryOperatorTypeEquality extends Expression {
 }
 
 class BinaryOperatorTypeInequality extends Expression {
-	private {
+	private lateinit {
 		_falseType: Type
 		_left
 		_trueType: Type
@@ -686,6 +690,7 @@ class BinaryOperatorTypeInequality extends Expression {
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
 	inferWhenTrueTypes(inferables) { // {{{
 		if @left.isInferable() {
 			inferables[@left.path()] = {

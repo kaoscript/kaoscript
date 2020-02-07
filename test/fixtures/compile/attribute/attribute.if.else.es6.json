@@ -23,7 +23,11 @@
       "instanceVariables": {
         "length": {
           "access": 4,
-          "type": "Number"
+          "type": "Number",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -68,7 +72,8 @@
               }
             ],
             "returns": "Boolean",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

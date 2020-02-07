@@ -1,6 +1,6 @@
 class NamespaceType extends Type {
-	private {
-		_alteration: Boolean				= false
+	private lateinit {
+		_alteration: Boolean					= false
 		_alterationReference: NamespaceType
 		_properties: Dictionary					= {}
 		_sealProperties: Dictionary				= {}
@@ -240,15 +240,15 @@ class NamespacePropertyType extends Type {
 
 		if @type is ReferenceType {
 			export = @type.toReference(references, mode)
-
-			if export is String {
-				export = {
-					type: export
-				}
-			}
 		}
 		else {
 			export = @type.export(references, mode)
+		}
+
+		if export is String {
+			export = {
+				type: export
+			}
 		}
 
 		export.sealed = this.isSealed()

@@ -41,7 +41,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -85,6 +86,7 @@
               "reference": 1
             },
             "throws": [],
+            "inits": [],
             "overwrite": [
               0
             ]

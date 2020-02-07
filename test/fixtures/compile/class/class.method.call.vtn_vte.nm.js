@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -33,7 +33,7 @@ module.exports = function() {
 			else if(!Type.isString(y)) {
 				throw new TypeError("'y' is not of type 'String'");
 			}
-			return "[" + x + ", " + y + "]";
+			return Helper.concatString("[", x, ", ", y, "]");
 		}
 		foo() {
 			if(arguments.length >= 1 && arguments.length <= 2) {

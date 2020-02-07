@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -47,7 +47,7 @@ module.exports = function() {
 			else {
 				z = false;
 			}
-			return "[" + x + ", " + y + ", " + z + "]";
+			return Helper.concatString("[", x, ", ", y, ", ", z, "]");
 		}
 		foo() {
 			if(arguments.length >= 1 && arguments.length <= 3) {

@@ -18,7 +18,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -34,7 +34,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": true,
       "init": 0,
       "constructors": [],
@@ -54,7 +54,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -83,7 +84,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toInt": [
@@ -106,7 +108,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

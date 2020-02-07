@@ -115,17 +115,19 @@ class ArrayComprehensionForFrom extends Expression {
 }
 
 class ArrayComprehensionForIn extends Expression {
+	private lateinit {
+		_indexVariable: Variable
+		_type: Type
+		_valueName: String
+		_valueVariable: Variable
+	}
 	private {
 		_bindingScope
 		_body
 		_bodyScope
 		_expression
 		_index
-		_indexVariable: Variable
-		_type: Type
 		_value
-		_valueName: String
-		_valueVariable: Variable
 		_when						= null
 	}
 	analyse() { // {{{
@@ -257,6 +259,9 @@ class ArrayComprehensionForIn extends Expression {
 }
 
 class ArrayComprehensionForOf extends Expression {
+	private lateinit {
+		_valueVariable: Variable
+	}
 	private {
 		_bindingScope
 		_body
@@ -265,7 +270,6 @@ class ArrayComprehensionForOf extends Expression {
 		_key
 		_keyName
 		_value
-		_valueVariable: Variable
 		_when						= null
 	}
 	analyse() { // {{{

@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo(bar, qux, __ks_cb) {
 		if(arguments.length < 3) {
@@ -23,7 +23,7 @@ module.exports = function() {
 			return __ks_cb(new Error("baaaad!"));
 		}
 		else {
-			return __ks_cb(null, "" + qux + "-" + bar);
+			return __ks_cb(null, Helper.concatString(qux, "-", bar));
 		}
 	}
 };

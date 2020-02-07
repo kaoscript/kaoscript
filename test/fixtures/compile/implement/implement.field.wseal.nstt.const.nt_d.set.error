@@ -1,0 +1,1 @@
+ReferenceException: The expression "@culture" is immutable (line 10, file "fixtures/compile/implement/implement.field.wseal.nstt.const.nt_d.set.ks")

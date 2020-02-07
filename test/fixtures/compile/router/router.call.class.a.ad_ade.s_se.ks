@@ -6,7 +6,7 @@ class Master {
 }
 class Foobar extends Master {
 	private {
-		b: String
+		b: String	= ''
 	}
 	foobar(a = @a, b = @b) {
 		return b

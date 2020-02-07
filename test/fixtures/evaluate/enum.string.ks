@@ -1,5 +1,7 @@
 require expect: func
 
+extern console
+
 enum CardSuit<String> {
 	Clubs
 	Diamonds

@@ -2,7 +2,7 @@ require {
 	enum Space<String> {
 		RGB
 	}
-	
+
 	class Color {
 		space(): Space
 		space(space: Space): Color
@@ -10,10 +10,10 @@ require {
 }
 
 impl Color {
-	private _luma: Number
-	
+	private _luma: Number	 = 0
+
 	luma(): Number => this._luma
-	
+
 	luma(@luma) => this
 }
 

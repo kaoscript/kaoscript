@@ -71,12 +71,33 @@ class ExpressionStatement extends Statement {
 		}
 	} // }}}
 	hasExceptions() => @expression.hasExceptions()
-	initializeVariable(variable, type) => @parent.initializeVariable(variable, type, this, this)
+	initializeVariable(variable: VariableBrief, expression: Expression) { // {{{
+		if variable.instance {
+			if variable.immutable && @parent.isInitializedVariable(`this.\(variable.name)`) {
+				ReferenceException.throwImmutableField(`\(variable.name)`, this)
+			}
+
+			if !@parent.isUsingInstanceVariableBefore(variable.name, this) {
+				@parent.initializeVariable(variable, expression, this)
+			}
+		}
+		else if variable.static {
+			if !@parent.isUsingStaticVariableBefore(variable.class, variable.name, this) {
+				@parent.initializeVariable(variable, expression, this)
+			}
+		}
+		else {
+			@parent.initializeVariable(variable, expression, this)
+		}
+	} // }}}
 	isAwait() => @expression.isAwait()
 	isExit() => @expression.isExit()
+	isInitializingInstanceVariable(name: String): Boolean => @expression.isInitializingInstanceVariable(name)
 	isJumpable() => true
 	isLateInitializable() => true
 	isUsingVariable(name) => @expression.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @expression.isUsingInstanceVariable(name)
+	isUsingStaticVariable(class, varname) => @expression.isUsingStaticVariable(class, varname)
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 

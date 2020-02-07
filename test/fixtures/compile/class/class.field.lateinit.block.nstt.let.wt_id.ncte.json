@@ -1,0 +1,36 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "systemic": false,
+      "exhaustive": true,
+      "init": 1,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {
+        "_x": {
+          "access": 2,
+          "type": "Number",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

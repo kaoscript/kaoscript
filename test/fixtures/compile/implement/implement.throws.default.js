@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Shape {
 		constructor() {
@@ -64,7 +64,7 @@ module.exports = function() {
 		if(canvas === void 0 || canvas === null) {
 			throw new TypeError("'canvas' is not nullable");
 		}
-		return "I'm drawing a " + this.color() + " rectangle.";
+		return Helper.concatString("I'm drawing a ", this.color(), " rectangle.");
 	};
 	Shape.prototype.draw = function() {
 		if(arguments.length === 1) {

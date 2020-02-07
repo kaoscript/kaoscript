@@ -64,13 +64,21 @@
       "instanceVariables": {
         "name": {
           "access": 4,
-          "type": "String"
+          "type": "String",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {
         "bar": {
           "access": 4,
-          "type": "String"
+          "type": "String",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "instanceMethods": {
@@ -92,7 +100,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

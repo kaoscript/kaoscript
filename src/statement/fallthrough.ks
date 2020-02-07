@@ -1,5 +1,5 @@
 class FallthroughStatement extends Statement {
-	private {
+	private lateinit {
 		_switch: SwitchStatement
 	}
 	analyse() { // {{{

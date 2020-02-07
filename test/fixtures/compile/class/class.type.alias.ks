@@ -6,7 +6,7 @@ type float = Number
 
 class Person {
 	private {
-		_height: float
+		_height: float	= 0
 	}
 
 	constructor()

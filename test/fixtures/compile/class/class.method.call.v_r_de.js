@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -19,7 +20,7 @@ module.exports = function() {
 				throw new TypeError("'x' is not nullable");
 			}
 			let y = 42;
-			return "[" + x + ", " + items + ", " + y + "]";
+			return Helper.concatString("[", x, ", ", items, ", ", y, "]");
 		}
 		foo() {
 			return Foobar.prototype.__ks_func_foo_0.apply(this, arguments);

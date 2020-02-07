@@ -4,8 +4,8 @@ class Color {
 
 export class Shape {
 	private {
-		_color: Color
-		_name: String
+		lateinit _color: Color
+		lateinit _name: String
 	}
 	constructor()
 	constructor(@name)

@@ -125,24 +125,55 @@ class Block extends AbstractNode {
 			return Type.union(@scope, ...types)
 		}
 	} // }}}
-	initializeVariable(variable, type, expression, node) { // {{{
-		if !@scope.hasDeclaredVariable(variable.name()) {
-			if variable.isInitialized() || @parent.isLateInitializable() {
-				@parent.initializeVariable(variable, type, expression, this)
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+		if !@scope.hasDeclaredVariable(variable.name) {
+			if variable.lateInit && !@parent.isLateInitializable() {
+				SyntaxException.throwInvalidLateInitAssignment(variable.name, this)
 			}
 			else {
-				SyntaxException.throwInvalidLateInitAssignment(variable.name(), this)
+				@parent.initializeVariable(variable, expression, this)
 			}
 		}
 	} // }}}
 	isAwait() => @awaiting
 	isEmpty() => @empty
 	isExit() => @exit
+	isInitializingInstanceVariable(name) { // {{{
+		for const statement in @statements {
+			if statement.isInitializingInstanceVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	isJumpable() => @parent.isJumpable()
 	isLoop() => @parent.isLoop()
 	isUsingVariable(name) { // {{{
-		for statement in @statements {
+		for const statement in @statements {
 			if statement.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	isUsingInstanceVariableBefore(name: String, stmt: Statement): Boolean { // {{{
+		const line = stmt.line()
+
+		for const statement in @statements while statement.line() < line && statement != stmt {
+			if statement.isUsingInstanceVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { // {{{
+		const line = stmt.line()
+
+		for const statement in @statements while statement.line() < line && statement != stmt {
+			if statement.isUsingStaticVariable(class, varname) {
 				return true
 			}
 		}
@@ -200,40 +231,62 @@ class Block extends AbstractNode {
 }
 
 class FunctionBlock extends Block {
-	private {
-		_initializableVariables		= {}
-	}
-	addInitializableVariable(variable, node) { // {{{
-		@initializableVariables[variable.name()] = true
-	} // }}}
 	addReturn(value: Expression) { // {{{
 		if !@exit || !@statements.last().isExit() {
 			@statements.push(new ReturnStatement(value, this))
 		}
 	} // }}}
-	initializeVariable(variable, type, expression, node) { // {{{
-		const name = variable.name()
+	isInitializedVariable(name: String): Boolean => true
+}
 
-		if variable.isInitialized() {
-			if variable.isImmutable() {
-				ReferenceException.throwImmutable(name, expression)
-			}
-			else if !type.matchContentOf(variable.getDeclaredType()) {
-				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, expression)
-			}
-		}
-		else if @initializableVariables[name] {
-			if variable.isDefinitive() {
-				variable.setRealType(type)
-			}
-			else {
-				variable.setDeclaredType(type, true).flagDefinitive()
-			}
+class ConstructorBlock extends FunctionBlock {
+	private {
+		@initializedVariables: Dictionary<Boolean>		= {}
+	}
+	override initializeVariable(variable, expression, node) { // {{{
+		lateinit const name
 
-			delete @initializableVariables[name]
+		if variable.instance {
+			name = `this.\(variable.name)`
+
+			this.parent().type().addInitializingInstanceVariable(variable.name)
 		}
 		else {
-			ReferenceException.throwImmutable(name, expression)
+			name = variable.name
+		}
+
+		if @initializedVariables[name] {
+			if variable.immutable {
+				ReferenceException.throwImmutable(name, expression)
+			}
+		}
+		else {
+			@initializedVariables[name] = true
+		}
+	} // }}}
+	isInitializedVariable(name: String): Boolean => @initializedVariables[name]
+	isInitializingInstanceVariable(name: String): Boolean { // {{{
+		if @initializedVariables[`this.\(name)`] {
+			return true
+		}
+
+		for const statement in @statements {
+			if statement.isInitializingInstanceVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+}
+
+class MethodBlock extends FunctionBlock {
+	override initializeVariable(variable, expression, node) { // {{{
+		if variable.instance {
+			 this.parent().type().addInitializingInstanceVariable(variable.name)
+		}
+		else {
+			super(variable, expression, node)
 		}
 	} // }}}
 }

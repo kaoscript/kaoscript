@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	function foo() {
 		return "";
@@ -7,7 +8,7 @@ module.exports = function() {
 	x = foo();
 	console.log(x);
 	let y = 42;
-	console.log("" + y);
+	console.log(Helper.toString(y));
 	y = foo();
 	console.log(y);
 	return {

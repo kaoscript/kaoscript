@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -57,7 +57,7 @@ module.exports = function() {
 			else if(!Type.isNumber(x)) {
 				throw new TypeError("'x' is not of type 'Number'");
 			}
-			return "" + x;
+			return Helper.toString(x);
 		}
 		static message() {
 			if(arguments.length === 1) {

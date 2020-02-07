@@ -30,7 +30,7 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
-	  "systemic": false,
+      "systemic": false,
       "exhaustive": true,
       "init": 0,
       "constructors": [],
@@ -50,7 +50,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -73,7 +74,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -85,12 +87,16 @@
         "reference": 1
       },
       "exhaustive": true,
-      "init": 0,
+      "init": 1,
       "constructors": [],
       "instanceVariables": {
         "_luma": {
           "access": 2,
-          "type": "Number"
+          "type": "Number",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -105,7 +111,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -124,7 +131,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
 		constructor() {
@@ -55,8 +55,8 @@ module.exports = function() {
 				throw new TypeError("'a' is not nullable");
 			}
 			console.log(this.foobar("foo"));
-			console.log("" + this.foobar(0));
-			console.log("" + this.foobar(a));
+			console.log(Helper.toString(this.foobar(0)));
+			console.log(Helper.toString(this.foobar(a)));
 		}
 		quxbaz() {
 			if(arguments.length === 1) {

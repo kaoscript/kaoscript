@@ -5,7 +5,7 @@ enum TryState {
 }
 
 class TryStatement extends Statement {
-	private {
+	private lateinit {
 		_await: Boolean				= false
 		_block: Block
 		_catchVarname: String

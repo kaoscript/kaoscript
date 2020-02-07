@@ -32,7 +32,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

@@ -2,7 +2,7 @@ extern console
 
 class Shape {
 	private {
-		_color: String
+		_color: String	 = ''
 	}
 
 	draw(): String {

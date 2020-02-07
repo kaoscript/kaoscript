@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Function = {};
 	let fn = function(prefix, name) {
@@ -20,5 +20,5 @@ module.exports = function() {
 		return prefix + name;
 	};
 	fn = Function.curry(fn, "Hello ");
-	console.log("" + fn("White"));
+	console.log(Helper.toString(fn("White")));
 };

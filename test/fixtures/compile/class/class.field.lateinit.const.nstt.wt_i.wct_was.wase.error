@@ -1,0 +1,1 @@
+ReferenceException: The expression "f.PI" is immutable (line 10, file "fixtures/compile/class/class.field.lateinit.const.nstt.wt_i.wct_was.wase.ks")

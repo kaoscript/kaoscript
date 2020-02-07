@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foo {
 		constructor() {
@@ -51,7 +51,7 @@ module.exports = function() {
 	let x = new Foo();
 	console.log(bar(x));
 	let y = new Bar();
-	console.log("" + bar(y));
+	console.log(Helper.toString(bar(y)));
 	let z = new Bar();
-	console.log("" + bar(z));
+	console.log(Helper.toString(bar(z)));
 };

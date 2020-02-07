@@ -1,16 +1,19 @@
 class IfStatement extends Statement {
-	private {
+	private lateinit {
+		_analyzeStep: Boolean								= true
+		_assignedInstanceVariables							= {}
 		_bindingScope: Scope
-		_cascade: Boolean				= false
+		_cascade: Boolean									= false
 		_condition
-		_declared: Boolean				= false
-		_lateInitVariables				= {}
-		_hasWhenFalse: Boolean			= false
+		_declared: Boolean									= false
+		_initializedVariables: Dictionary					= {}
+		_lateInitVariables									= {}
+		_hasWhenFalse: Boolean								= false
 		_variable
-		_whenFalseExpression			= null
-		_whenFalseScope: Scope?			= null
-		_whenTrueExpression				= null
-		_whenTrueScope: Scope?			= null
+		_whenFalseExpression								= null
+		_whenFalseScope: Scope?								= null
+		_whenTrueExpression									= null
+		_whenTrueScope: Scope?								= null
 	}
 	analyse() { // {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
@@ -132,9 +135,15 @@ class IfStatement extends Statement {
 			@scope.line(@data.end.line)
 
 			if @whenTrueExpression.isExit() {
+				for const data, name of @initializedVariables when data.false.initializable {
+					data.variable.type = data.false.type
+
+					@parent.initializeVariable(data.variable, this, this)
+				}
+
 				for const map, name of @lateInitVariables {
 					if map.false.initializable {
-						@parent.initializeVariable(map.variable, map.false.type, this, this)
+						@parent.initializeVariable(VariableBrief(name, type: map.false.type), this, this)
 					}
 					else {
 						SyntaxException.throwMissingAssignmentIfFalse(name, @whenFalseExpression)
@@ -146,9 +155,15 @@ class IfStatement extends Statement {
 				}
 			}
 			else if @whenFalseExpression.isExit() {
+				for const data, name of @initializedVariables when data.true.initializable {
+					data.variable.type = data.true.type
+
+					@parent.initializeVariable(data.variable, this, this)
+				}
+
 				for const map, name of @lateInitVariables {
 					if map.true.initializable {
-						@parent.initializeVariable(map.variable, map.true.type, this, this)
+						@parent.initializeVariable(VariableBrief(name, type: map.true.type), this, this)
 					}
 					else {
 						SyntaxException.throwMissingAssignmentIfTrue(name, @whenTrueExpression)
@@ -160,8 +175,16 @@ class IfStatement extends Statement {
 				}
 			}
 			else {
+				for const data, name of @initializedVariables {
+					if data.true.initializable && data.false.initializable {
+						data.variable.type = Type.union(@scope, data.true.type, data.false.type)
+
+						@parent.initializeVariable(data.variable, this, this)
+					}
+				}
+
 				for const map, name of @lateInitVariables {
-					let type
+					lateinit const type: Type
 
 					if map.true.initializable {
 						if map.false.initializable {
@@ -175,7 +198,7 @@ class IfStatement extends Statement {
 						SyntaxException.throwMissingAssignmentIfTrue(name, @whenTrueExpression)
 					}
 
-					@parent.initializeVariable(map.variable, type, this, this)
+					@parent.initializeVariable(VariableBrief(name, type), this, this)
 				}
 
 				const trueInferables = @whenTrueScope.listUpdatedInferables()
@@ -262,17 +285,11 @@ class IfStatement extends Statement {
 		@whenTrueExpression.checkReturnType(type)
 		@whenFalseExpression?.checkReturnType(type)
 	} // }}}
-	initializeVariable(variable, type, expression, node) { // {{{
-		const name = variable.name()
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+		const {name, type} = variable
+		const whenTrue = node == @whenTrueExpression
 
-		if variable.isInitialized() {
-			if variable.isImmutable() {
-				ReferenceException.throwImmutable(name, expression)
-			}
-		}
-		else if const map = @lateInitVariables[name] {
-			const whenTrue = node == @whenTrueExpression
-
+		if const map = @lateInitVariables[name] {
 			if map[whenTrue].type != null {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, expression)
@@ -285,7 +302,7 @@ class IfStatement extends Statement {
 				map[whenTrue].type = type
 			}
 
-			const clone = variable.clone()
+			const clone = node.scope().getVariable(name).clone()
 
 			if clone.isDefinitive() {
 				clone.setRealType(type)
@@ -296,12 +313,62 @@ class IfStatement extends Statement {
 
 			node.scope().replaceVariable(name, clone)
 		}
+		else if const map = @initializedVariables[name] {
+			if map[whenTrue].type != null {
+				if variable.immutable {
+					ReferenceException.throwImmutable(name, expression)
+				}
+				else if !variable.type.matchContentOf(map[whenTrue].type) {
+					TypeException.throwInvalidAssignement(name, map[whenTrue].type, variable.type, expression)
+				}
+			}
+			else {
+				map[whenTrue].initializable = true
+				map[whenTrue].type = variable.type
+			}
+
+			node.scope().updateInferable(name, variable, expression)
+		}
 		else {
-			ReferenceException.throwImmutable(name, expression)
+			@initializedVariables[name] = {
+				variable
+				[whenTrue]: {
+					initializable: true
+					type: variable.type
+				}
+				[!whenTrue]: {
+					initializable: false
+					type: null
+				}
+			}
 		}
 	} // }}}
 	isCascade() => @cascade
 	isExit() => @whenFalseExpression? && @whenTrueExpression.isExit() && @whenFalseExpression.isExit()
+	isInitializingInstanceVariable(name) { // {{{
+		if @condition.isInitializingInstanceVariable(name) {
+			return true
+		}
+
+		if @hasWhenFalse {
+			return @whenTrueExpression.isInitializingInstanceVariable(name) && @whenFalseExpression.isInitializingInstanceVariable(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
+	isInitializingStaticVariable(name) { // {{{
+		if @condition.isInitializingStaticVariable(name) {
+			return true
+		}
+
+		if @hasWhenFalse {
+			return @whenTrueExpression.isInitializingStaticVariable(name) && @whenFalseExpression.isInitializingStaticVariable(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isJumpable() => true
 	isLateInitializable() => true
 	isUsingVariable(name) { // {{{

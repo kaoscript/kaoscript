@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_toInt_0 = function(base) {
@@ -15,5 +16,5 @@ module.exports = function() {
 	};
 	let d = 4;
 	let u = 2;
-	console.log(__ks_String._im_toInt("" + d + u));
+	console.log(__ks_String._im_toInt(Helper.concatString(d, u)));
 };

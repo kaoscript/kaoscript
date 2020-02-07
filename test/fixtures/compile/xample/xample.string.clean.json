@@ -19,7 +19,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": true,
       "init": 0,
       "constructors": [],
@@ -52,7 +52,8 @@
                 }
               ]
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "replace": [
@@ -74,7 +75,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "trim": [
@@ -89,7 +91,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -118,7 +121,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

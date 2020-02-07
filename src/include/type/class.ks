@@ -30,7 +30,13 @@ class ClassType extends Type {
 		_instanceMethods: Dictionary		= {}
 		_instanceVariables: Dictionary		= {}
 		_predefined: Boolean				= false
-		_seal: Dictionary
+		_seal								= {
+			constructors: false
+			instanceMethods: {}
+			classVariables: {}
+			classMethods: {}
+			instanceVariables: {}
+		}
 		_sequences	 						= {
 			constructor:		0
 			classMethods:		{}
@@ -273,6 +279,8 @@ class ClassType extends Type {
 			}
 		}
 
+		type.setClass(this)
+
 		@constructors.push(type)
 
 		if @alteration {
@@ -325,6 +333,10 @@ class ClassType extends Type {
 
 		if @alteration {
 			type.flagAlteration()
+		}
+
+		if @alien {
+			type.flagAlien()
 		}
 
 		if type.isSealed() {
@@ -391,6 +403,19 @@ class ClassType extends Type {
 			=> {
 				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
 			}
+		}
+	} // }}}
+	checkVariablesInitializations(node) { // {{{
+		return if @alien
+
+		for const variable, name of @instanceVariables {
+			if variable.isRequiringInitialization() {
+				SyntaxException.throwNotInitializedField(name, node)
+			}
+		}
+
+		if @extending {
+			@extends.type().checkVariablesInitializations(node)
 		}
 	} // }}}
 	clone() { // {{{
@@ -737,15 +762,16 @@ class ClassType extends Type {
 	flagSealed() { // {{{
 		@sealed = true
 
-		@seal = {
-			constructors: false
-			instanceMethods: {}
-			classVariables: {}
-			classMethods: {}
-			instanceVariables: {}
+		return this
+	} // }}}
+	forEachInstanceVariables(fn) { // {{{
+		for const variable, name of @instanceVariables {
+			fn(name, variable)
 		}
 
-		return this
+		if @extending {
+			@extends.type().forEachInstanceVariables(fn)
+		}
 	} // }}}
 	getAbstractMethod(name: String, arguments: Array) { // {{{
 		if @abstractMethods[name] is Array {
@@ -819,6 +845,22 @@ class ClassType extends Type {
 	getClassVariable(name: String) { // {{{
 		if const variable = @classVariables[name] {
 			return variable
+		}
+
+		return null
+	} // }}}
+	getConstructor(arguments: Array) { // {{{
+		if @constructors.length == 0 {
+			if @extending {
+				return @extends.type().getConstructor(arguments)
+			}
+		}
+		else {
+			for method in @constructors {
+				if method.matchArguments(arguments) {
+					return method
+				}
+			}
 		}
 
 		return null
@@ -1419,7 +1461,9 @@ class ClassVariableType extends Type {
 	private {
 		_access: Accessibility	= Accessibility::Public
 		_alteration: Boolean	= false
-		_initiatable: Boolean	= false
+		_default: Boolean		= false
+		_immutable: Boolean		= false
+		_lateInit: Boolean		= false
 		_type: Type
 	}
 	static {
@@ -1436,17 +1480,30 @@ class ClassVariableType extends Type {
 			}
 
 			if data.modifiers? {
-				for modifier in data.modifiers {
-					if modifier.kind == ModifierKind::Internal {
-						type.access(Accessibility::Internal)
-					}
-					else if modifier.kind == ModifierKind::Private {
-						type.access(Accessibility::Private)
-					}
-					else if modifier.kind == ModifierKind::Protected {
-						type.access(Accessibility::Protected)
+				for const modifier in data.modifiers {
+					switch modifier.kind {
+						ModifierKind::Immutable => {
+							type._immutable = true
+						}
+						ModifierKind::Internal => {
+							type.access(Accessibility::Internal)
+						}
+						ModifierKind::LateInit => {
+							type._lateInit = true
+						}
+						ModifierKind::Private => {
+							type.access(Accessibility::Private)
+						}
+						ModifierKind::Protected => {
+							type.access(Accessibility::Protected)
+						}
 					}
 				}
+			}
+
+			if data.defaultValue? {
+				type._default = true
+				type._lateInit = false
 			}
 
 			return type
@@ -1455,7 +1512,9 @@ class ClassVariableType extends Type {
 			const type = new ClassVariableType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node))
 
 			type._access = data.access
-			type._initiatable = data.initiatable
+			type._default = data.default
+			type._immutable = data.immutable
+			type._lateInit = data.lateInit
 
 			return type
 		} // }}}
@@ -1472,14 +1531,10 @@ class ClassVariableType extends Type {
 		const data = {
 			access: @access
 			type: @type.toReference(references, mode)
-		}
-
-		if @sealed {
-			data.sealed = true
-
-			if @initiatable {
-				data.initiatable = true
-			}
+			default: @default
+			immutable: @immutable
+			lateInit: @lateInit
+			sealed: @sealed
 		}
 
 		return data
@@ -1489,13 +1544,10 @@ class ClassVariableType extends Type {
 
 		return this
 	} // }}}
-	flagInitiatable() { // {{{
-		@initiatable = true
-
-		return this
-	} // }}}
+	hasDefaultValue() => @default
 	isAlteration() => @alteration
-	isInitiatable() => @initiatable
+	isImmutable() => @immutable
+	isLateInit() => @lateInit
 	isMatching(value: ClassVariableType, mode: MatchingMode) { // {{{
 		if mode & MatchingMode::Exact != 0 {
 			return @type.isMatching(value.type(), MatchingMode::Exact)
@@ -1504,12 +1556,15 @@ class ClassVariableType extends Type {
 			return true
 		}
 	} // }}}
-	isUsingGetter() => @sealed && @initiatable
-	isUsingSetter() => @sealed && @initiatable
+	isNullable() => @type.isNullable()
+	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @immutable)
+	isUsingGetter() => @sealed && @default
+	isUsingSetter() => @sealed && @default
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
 	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
-	type() => @type
+	type(): @type
+	type(@type): this
 	unflagAlteration() { // {{{
 		@alteration = false
 	} // }}}
@@ -1517,10 +1572,11 @@ class ClassVariableType extends Type {
 
 class ClassMethodType extends FunctionType {
 	private {
-		_access: Accessibility	= Accessibility::Public
-		_alteration: Boolean	= false
-		_identifier: Number		= -1
-		_overwrite: Array?		= null
+		_access: Accessibility					= Accessibility::Public
+		_alteration: Boolean					= false
+		_identifier: Number						= -1
+		_initVariables: Dictionary<Boolean>		= {}
+		_overwrite: Array?						= null
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
@@ -1547,12 +1603,21 @@ class ClassMethodType extends FunctionType {
 				type._overwrite = [{id: id, export: true} for id in data.overwrite]
 			}
 
+			if data.inits? {
+				for const name in data.inits {
+					type._initVariables[name] = true
+				}
+			}
+
 			type.updateArguments()
 
 			return type
 		} // }}}
 	}
 	access(@access) => this
+	addInitializingInstanceVariable(name: String) { // {{{
+		@initVariables[name] = true
+	} // }}}
 	export(references, mode) { // {{{
 		const export = {
 			id: @identifier
@@ -1564,6 +1629,7 @@ class ClassMethodType extends FunctionType {
 			parameters: [parameter.export(references, mode) for parameter in @parameters]
 			returns: @returnType.toReference(references, mode)
 			throws: [throw.toReference(references, mode) for throw in @throws]
+			inits: Dictionary.keys(@initVariables)
 		}
 
 		if @overwrite != null {
@@ -1591,6 +1657,7 @@ class ClassMethodType extends FunctionType {
 
 		return @access != Accessibility::Internal
 	} // }}}
+	isInitializingInstanceVariable(name) => @initVariables[name]
 	isMatched(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { // {{{
 		for const method in methods {
 			if method.isMatching(this, mode) {
@@ -1656,11 +1723,13 @@ class ClassMethodSetType extends OverloadedFunctionType {
 
 class ClassConstructorType extends FunctionType {
 	private {
-		_access: Accessibility	= Accessibility::Public
-		_alteration: Boolean	= false
-		_dependent: Boolean		= false
-		_identifier: Number		= -1
-		_overwrite: Array?		= null
+		_access: Accessibility					= Accessibility::Public
+		_alteration: Boolean					= false
+		_class: ClassType?
+		_dependent: Boolean						= false
+		_identifier: Number						= -1
+		_initVariables: Dictionary<Boolean>		= {}
+		_overwrite: Array?						= null
 	}
 	static {
 		fromAST(data, node: AbstractNode): ClassConstructorType { // {{{
@@ -1684,12 +1753,28 @@ class ClassConstructorType extends FunctionType {
 			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
 			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
+			if data.inits? {
+				for const name in data.inits {
+					type._initVariables[name] = true
+				}
+			}
+
 			type.updateArguments()
 
 			return type
 		} // }}}
 	}
 	access(@access) => this
+	addInitializingInstanceVariable(name: String) { // {{{
+		@initVariables[name] = true
+	} // }}}
+	checkVariablesInitializations(node: AbstractNode, class: ClassType = @class) { // {{{
+		class.forEachInstanceVariables((name, variable) => {
+			if variable.isRequiringInitialization() && !@initVariables[name] {
+				SyntaxException.throwNotInitializedField(name, node)
+			}
+		})
+	} // }}}
 	export(references, mode) { // {{{
 		const export = {
 			id: @identifier
@@ -1699,6 +1784,11 @@ class ClassConstructorType extends FunctionType {
 			max: @max
 			parameters: [parameter.export(references, mode) for parameter in @parameters]
 			throws: [throw.toReference(references, mode) for throw in @throws]
+		}
+
+
+		if @class.isAbstract() {
+			export.inits = Dictionary.keys(@initVariables)
 		}
 
 		if @dependent {
@@ -1729,6 +1819,7 @@ class ClassConstructorType extends FunctionType {
 	identifier(@identifier)
 	isAlteration() => @alteration
 	isDependent() => @dependent
+	isInitializingInstanceVariable(name) => @initVariables[name]
 	isOverwritten() => @overwrite != null
 	overwrite() => @overwrite
 	overwrite(@overwrite)
@@ -1745,6 +1836,7 @@ class ClassConstructorType extends FunctionType {
 			}
 		}
 	} // }}}
+	setClass(@class): this
 }
 
 class ClassDestructorType extends FunctionType {

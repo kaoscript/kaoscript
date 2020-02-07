@@ -1,1 +1,1 @@
-SyntaxException: Identifier "name" is immutable (line 4, file "fixtures/compile/variable/variable.overwrite.func.default.ks")
+ReferenceException: The identifier "name" is immutable (line 4, file "fixtures/compile/variable/variable.overwrite.func.default.ks")

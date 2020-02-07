@@ -26,8 +26,8 @@ module.exports = function() {
 			if(messages === void 0 || messages === null) {
 				throw new TypeError("'messages' is not nullable");
 			}
-			else if(!Type.isArray(messages)) {
-				throw new TypeError("'messages' is not of type 'Array'");
+			else if(!Type.isArray(messages, String)) {
+				throw new TypeError("'messages' is not of type 'Array<String>'");
 			}
 			this._messages = messages;
 		}

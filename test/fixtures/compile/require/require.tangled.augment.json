@@ -34,7 +34,8 @@
               {
                 "reference": 1
               }
-            ]
+            ],
+            "inits": []
           }
         ]
       },
@@ -64,7 +65,8 @@
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -88,11 +90,19 @@
       "instanceVariables": {
         "message": {
           "access": 4,
-          "type": "String"
+          "type": "String",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         },
         "name": {
           "access": 4,
-          "type": "String"
+          "type": "String",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -107,7 +117,8 @@
             "max": 0,
             "parameters": [],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

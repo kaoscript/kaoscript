@@ -1,5 +1,5 @@
 class NamespaceDeclaration extends Statement {
-	private {
+	private lateinit {
 		_exports				= {}
 		_name: String
 		_statements: Array
@@ -44,6 +44,7 @@ class NamespaceDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
+	addInitializableVariable(variable, node)
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
 	} // }}}
@@ -56,6 +57,11 @@ class NamespaceDeclaration extends Statement {
 		@parent.exportMacro(`\(@name).\(name)`, macro)
 	} // }}}
 	includePath() => null
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+		if const var = @scope.getDefinedVariable(variable.name) {
+			var.setDeclaredType(variable.type)
+		}
+	} // }}}
 	name() => @name
 	publishMacro(name, macro) { // {{{
 		@scope.addMacro(name, macro)

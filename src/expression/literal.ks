@@ -13,7 +13,6 @@ class Literal extends Expression {
 	translate()
 	hasExceptions() => false
 	isComposite() => false
-	isUsingVariable(name) => false
 	listAssignments(array) => array
 	toFragments(fragments, mode) { // {{{
 		if @data {
@@ -28,7 +27,7 @@ class Literal extends Expression {
 }
 
 class IdentifierLiteral extends Literal {
-	private {
+	private lateinit {
 		_assignment: AssignmentType		= AssignmentType::Neither
 		_declaredType: Type
 		_isMacro: Boolean				= false
@@ -81,8 +80,27 @@ class IdentifierLiteral extends Literal {
 			@realType = variable.getRealType()
 		}
 	} // }}}
+	checkIfAssignable() { // {{{
+		if @isVariable {
+			if const variable = @scope.getVariable(@value, @line) {
+				if variable.isImmutable() {
+					if variable.isLateInit() {
+						if variable.isInitialized() {
+							ReferenceException.throwImmutable(@value, this)
+						}
+					}
+					else {
+						ReferenceException.throwImmutable(@value, this)
+					}
+				}
+			}
+		}
+	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@value, this)
+	} // }}}
+	getVariableDeclaration(class) { // {{{
+		return class.getInstanceVariable(@value)
 	} // }}}
 	getDeclaredType() => @declaredType
 	getUnpreparedType() { // {{{
@@ -91,6 +109,20 @@ class IdentifierLiteral extends Literal {
 		}
 		else {
 			return @realType
+		}
+	} // }}}
+	initializeVariables(type: Type, node: Expression) { // {{{
+		if @isVariable {
+			const variable = @scope.getVariable(@value, @line)
+
+			if variable.isLateInit() {
+				node.initializeVariable(VariableBrief(
+					name: @value
+					type
+					immutable: true
+					lateInit: true
+				))
+			}
 		}
 	} // }}}
 	isAssignable() => true
@@ -149,7 +181,6 @@ class NumberLiteral extends Literal {
 		super(data, parent, scope, data.value)
 	} // }}}
 	getUnpreparedType() => this.type()
-	isUsingVariable(name) => false
 	type() => @scope.reference('Number')
 }
 

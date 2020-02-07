@@ -525,7 +525,7 @@ class ModuleScope extends Scope {
 		}
 		else {
 			if @chunkTypes[name] is Array {
-				@chunkTypes.push(@line, data.type)
+				@chunkTypes[name].push(@line, data.type)
 			}
 			else {
 				@chunkTypes[name] = [@line, data.type]

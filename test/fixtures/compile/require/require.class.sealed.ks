@@ -2,7 +2,7 @@ require sealed class Color
 
 impl Color {
 	private {
-		@luma: Number
+		@luma: Number	= 0
 	}
 	luma(): @luma
 	luma(@luma): this

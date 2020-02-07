@@ -84,6 +84,9 @@ module.exports = function() {
 		})();
 		return d;
 	})());
+	Color.prototype.__ks_init_1 = function() {
+		this._green = 0;
+	};
 	Color.prototype.__ks_func_green_0 = function() {
 		return this.getField("green");
 	};
@@ -95,6 +98,9 @@ module.exports = function() {
 			throw new TypeError("'value' is not nullable");
 		}
 		return this.setField("green", value);
+	};
+	Color.prototype.__ks_init = function() {
+		Color.prototype.__ks_init_1.call(this);
 	};
 	Color.prototype.green = function() {
 		if(arguments.length === 0) {

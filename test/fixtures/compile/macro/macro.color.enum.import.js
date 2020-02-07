@@ -90,6 +90,15 @@ module.exports = function() {
 		})();
 		return d;
 	})());
+	Color.prototype.__ks_init_1 = function() {
+		this._hue = 0;
+	};
+	Color.prototype.__ks_init_2 = function() {
+		this._saturation = 0;
+	};
+	Color.prototype.__ks_init_3 = function() {
+		this._lightness = 0;
+	};
 	Color.prototype.__ks_func_hue_0 = function() {
 		return this.getField("hue");
 	};
@@ -125,6 +134,11 @@ module.exports = function() {
 			throw new TypeError("'value' is not nullable");
 		}
 		return this.setField("lightness", value);
+	};
+	Color.prototype.__ks_init = function() {
+		Color.prototype.__ks_init_1.call(this);
+		Color.prototype.__ks_init_2.call(this);
+		Color.prototype.__ks_init_3.call(this);
 	};
 	Color.prototype.hue = function() {
 		if(arguments.length === 0) {

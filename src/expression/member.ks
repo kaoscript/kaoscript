@@ -1,5 +1,5 @@
 class MemberExpression extends Expression {
-	private {
+	private lateinit {
 		_assignment: AssignmentType	= AssignmentType::Neither
 		_callee
 		_computed: Boolean			= false
@@ -139,8 +139,8 @@ class MemberExpression extends Expression {
 						const type = type.discardReference()
 						if type.isClass() && property is ClassVariableType && property.isSealed() {
 							@sealed = true
-							@usingGetter = property.isInitiatable()
-							@usingSetter = property.isInitiatable()
+							@usingGetter = property.hasDefaultValue()
+							@usingSetter = property.hasDefaultValue()
 						}
 
 						@type = property.discardVariable()
@@ -205,6 +205,43 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	caller() => @object
+	checkIfAssignable() { // {{{
+		return if @computed
+
+		if const variable = this.declaration() {
+			if variable.isImmutable() {
+				if variable.isLateInit() {
+					if variable.isInitialized() {
+						ReferenceException.throwImmutable(this)
+					}
+				}
+				else {
+					ReferenceException.throwImmutable(this)
+				}
+			}
+		}
+		else if const property = @object.type().getProperty(@property) {
+			if property.isImmutable() {
+				ReferenceException.throwImmutable(this)
+			}
+		}
+	} // }}}
+	declaration() { // {{{
+		return null if @computed
+
+		if const declaration = @object.variable()?.declaration() {
+			if declaration is ClassDeclaration {
+				return declaration.getClassVariable(@property)
+			}
+		}
+		else if const node = @parent.getFunctionNode() {
+			if node is ClassConstructorDeclaration {
+				return node.parent().getInstanceVariable(@property)
+			}
+		}
+
+		return null
+	} // }}}
 	inferTypes(inferables) { // {{{
 		@object.inferTypes(inferables)
 
@@ -214,7 +251,31 @@ class MemberExpression extends Expression {
 
 		return inferables
 	} // }}}
-	isAssignable() => true
+	initializeVariables(type: Type, node: Expression) { // {{{
+		return if @computed
+
+		if @object is IdentifierLiteral {
+			if const property = @object.type().getProperty(@property) {
+				if @object.type().isClass() && !@object.type().isReference() {
+					node.initializeVariable(VariableBrief(
+						name: @property
+						type
+						static: true
+						class: @object.name()
+						immutable: property.isImmutable()
+					))
+				}
+				else if @object.name() == 'this' {
+					node.initializeVariable(VariableBrief(
+						name: @path.substring(5)
+						type
+						instance: true
+						immutable: property.isImmutable()
+					))
+				}
+			}
+		}
+	} // }}}
 	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
 	isInferable() => @inferable
@@ -224,6 +285,8 @@ class MemberExpression extends Expression {
 	isNullableComputed() => (@object.isNullable() ? 1 : 0) + (@nullable ? 1 : 0) + (@computed && !@stringProperty && @property.isNullable() ? 1 : 0) > 1
 	isUsingSetter() => @usingSetter
 	isUsingVariable(name) => @object.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @property == name && @object is IdentifierLiteral && @object.name() == 'this' && @object.type().discard().hasInstanceVariable(@property)
+	isUsingStaticVariable(class, varname) => @property == varname && @object is IdentifierLiteral && @object.name() == class
 	listAssignments(array) => array
 	path() => @path
 	releaseReusable() { // {{{

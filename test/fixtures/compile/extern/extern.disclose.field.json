@@ -15,7 +15,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -36,7 +36,11 @@
       "instanceVariables": {
         "length": {
           "access": 4,
-          "type": "Number"
+          "type": "Number",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -66,7 +70,8 @@
                 }
               ]
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "replace": [
@@ -88,7 +93,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "trim": [
@@ -103,7 +109,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

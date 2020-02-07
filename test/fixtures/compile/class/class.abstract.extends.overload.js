@@ -14,8 +14,12 @@ module.exports = function() {
 		}
 	}
 	class Greetings extends AbstractGreetings {
+		__ks_init_1() {
+			this._message = "";
+		}
 		__ks_init() {
 			AbstractGreetings.prototype.__ks_init.call(this);
+			Greetings.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons(args) {
 			AbstractGreetings.prototype.__ks_cons.call(this, args);

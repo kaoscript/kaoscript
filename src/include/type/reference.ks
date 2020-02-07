@@ -15,14 +15,16 @@ const $weightTOFs = { // {{{
 } // }}}
 
 class ReferenceType extends Type {
+	private lateinit {
+		_type: Type
+		_variable: Variable
+	}
 	private {
 		_name: String
 		_nullable: Boolean					= false
 		_parameters: Array<ReferenceType>
 		_predefined: Boolean				= false
 		_spread: Boolean					= false
-		_type: Type
-		_variable: Variable
 	}
 	static {
 		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
@@ -289,6 +291,7 @@ class ReferenceType extends Type {
 	isDictionary() => @name == 'Dictionary' || this.type().isDictionary()
 	isEnum() => @name == 'Enum' || this.type().isEnum()
 	isExhaustive() => this.type().isExhaustive()
+	isExplicit() => this.type().isExplicit()
 	isExplicitlyExported() => this.type().isExplicitlyExported()
 	isExportable() => this.type().isExportable()
 	isExported() => this.type().isExported()

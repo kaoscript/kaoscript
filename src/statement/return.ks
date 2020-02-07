@@ -82,6 +82,25 @@ class ReturnStatement extends Statement {
 	} // }}}
 	hasExceptions() => @exceptions
 	getUnpreparedType() => @value.getUnpreparedType()
+	initializeVariable(variable: VariableBrief, expression: Expression) { // {{{
+		if variable.instance {
+			if variable.immutable && @parent.isInitializedVariable(`this.\(variable.name)`) {
+				ReferenceException.throwImmutableField(`\(variable.name)`, this)
+			}
+
+			if !@parent.isUsingInstanceVariableBefore(variable.name, this) {
+				@parent.initializeVariable(variable, expression, this)
+			}
+		}
+		else if variable.static {
+			if !@parent.isUsingStaticVariableBefore(variable.class, variable.name, this) {
+				@parent.initializeVariable(variable, expression, this)
+			}
+		}
+		else {
+			@parent.initializeVariable(variable, expression, this)
+		}
+	} // }}}
 	isAwait() => @await
 	isExit() => true
 	isExpectingType() => true

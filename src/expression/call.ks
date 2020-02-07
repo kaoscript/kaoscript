@@ -1,5 +1,5 @@
 class CallExpression extends Expression {
-	private {
+	private lateinit {
 		_arguments: Array				= []
 		_await: Boolean					= false
 		_callees: Array					= []
@@ -237,11 +237,11 @@ class CallExpression extends Expression {
 		// console.log(@type)
 	} // }}}
 	translate() { // {{{
-		for argument in @arguments {
+		for const argument in @arguments {
 			argument.translate()
 		}
 
-		for callee in @callees {
+		for const callee in @callees {
 			callee.translate()
 		}
 
@@ -328,6 +328,21 @@ class CallExpression extends Expression {
 	isComputed() => (@nullable || @callees.length > 1) && !@tested
 	isExit() => @type.isNever()
 	isExpectingType() => true
+	override isInitializingInstanceVariable(name) { // {{{
+		for const argument in @arguments {
+			if argument.isInitializingInstanceVariable(name) {
+				return true
+			}
+		}
+
+		for const callee in @callees {
+			if !callee.isInitializingInstanceVariable(name) {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
 	isUsingVariable(name) { // {{{
@@ -342,6 +357,39 @@ class CallExpression extends Expression {
 
 		for const argument in @arguments {
 			if argument.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	isUsingInstanceVariable(name) { // {{{
+		if @object != null {
+			if @object.isUsingInstanceVariable(name) {
+				return true
+			}
+		}
+		else if @data.callee.kind == NodeKind::Identifier && @data.callee.name == name {
+			return true
+		}
+
+		for const argument in @arguments {
+			if argument.isUsingInstanceVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	isUsingStaticVariable(class, varname) { // {{{
+		if @object != null {
+			if @object.isUsingStaticVariable(class, varname) {
+				return true
+			}
+		}
+
+		for const argument in @arguments {
+			if argument.isUsingStaticVariable(class, varname) {
 				return true
 			}
 		}
@@ -802,6 +850,7 @@ class DefaultCallee extends Callee {
 	private {
 		_expression
 		_flatten: Boolean
+		_methods: Array<FunctionType>?
 		_scope: ScopeKind
 		_type: Type
 	}
@@ -839,7 +888,7 @@ class DefaultCallee extends Callee {
 			@type = AnyType.NullableUnexplicit
 		}
 	} // }}}
-	constructor(@data, object, methods, @type, node) { // {{{
+	constructor(@data, object, @methods, @type, node) { // {{{
 		super(data)
 
 		@expression = new MemberExpression(data.callee, node, node.scope(), object)
@@ -860,6 +909,20 @@ class DefaultCallee extends Callee {
 	} // }}}
 	acquireReusable(acquire) { // {{{
 		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind::This))
+	} // }}}
+	isInitializingInstanceVariable(name: String): Boolean { // {{{
+		if @methods? {
+			for const method in @methods {
+				if !method.isInitializingInstanceVariable(name) {
+					return false
+				}
+			}
+
+			return true
+		}
+		else {
+			return false
+		}
 	} // }}}
 	releaseReusable() { // {{{
 		@expression.releaseReusable()
@@ -1014,12 +1077,13 @@ class DefaultCallee extends Callee {
 
 class SealedFunctionCallee extends Callee {
 	private {
+		_function
 		_object
 		_property: String
 		_type: Type
 		_variable: NamedType<NamespaceType>
 	}
-	constructor(@data, @variable, function, @type, node) { // {{{
+	constructor(@data, @variable, @function, @type, node) { // {{{
 		super(data)
 
 		@object = node._object
@@ -1032,6 +1096,7 @@ class SealedFunctionCallee extends Callee {
 	translate() { // {{{
 		@object.translate()
 	} // }}}
+	isInitializingInstanceVariable(name: String): Boolean => @function.isInitializingInstanceVariable(name)
 	toFragments(fragments, mode, node) { // {{{
 		if node._flatten {
 			switch node._data.scope.kind {
@@ -1077,13 +1142,14 @@ class SealedFunctionCallee extends Callee {
 class SealedMethodCallee extends Callee {
 	private {
 		_instance: Boolean
+		_methods: Array
 		_node
 		_object
 		_property: String
 		_type: Type
 		_variable: NamedType<ClassType>
 	}
-	constructor(@data, @variable, @instance, methods = [], @type = AnyType.NullableUnexplicit, @node) { // {{{
+	constructor(@data, @variable, @instance, @methods = [], @type = AnyType.NullableUnexplicit, @node) { // {{{
 		super(data)
 
 		@object = node._object
@@ -1097,6 +1163,57 @@ class SealedMethodCallee extends Callee {
 	} // }}}
 	translate() { // {{{
 		@object.translate()
+	} // }}}
+	isInitializingInstanceVariable(name: String): Boolean { // {{{
+		if @methods.length == 0 {
+			let class = @variable.type()
+
+			if @instance {
+				while true {
+					if const methods = class.listInstanceMethods(@property) {
+						for const method in methods {
+							if !method.isInitializingInstanceVariable(name) {
+								return false
+							}
+						}
+					}
+
+					if class.isExtending() {
+						class = class.extends().type()
+					}
+					else {
+						break
+					}
+				}
+			}
+			else {
+				while true {
+					if const methods = class.listClassMethods(@property) {
+						for const method in methods {
+							if !method.isInitializingInstanceVariable(name) {
+								return false
+							}
+						}
+					}
+
+					if class.isExtending() {
+						class = class.extends().type()
+					}
+					else {
+						break
+					}
+				}
+			}
+		}
+		else {
+			for const method in @methods {
+				if !method.isInitializingInstanceVariable(name) {
+					return false
+				}
+			}
+		}
+
+		return true
 	} // }}}
 	toFragments(fragments, mode, node) { // {{{
 		if node._flatten {
@@ -1185,6 +1302,7 @@ class SubstituteCallee extends Callee {
 
 		@nullableProperty = substitute.isNullable()
 	} // }}}
+	isInitializingInstanceVariable(name: String): Boolean => @substitute.isInitializingInstanceVariable(name)
 	toFragments(fragments, mode, node) { // {{{
 		@substitute.toFragments(fragments, mode)
 	} // }}}
@@ -1193,7 +1311,7 @@ class SubstituteCallee extends Callee {
 }
 
 class NamedArgument extends Expression {
-	private {
+	private lateinit {
 		_name: String
 		_value: Expression
 	}

@@ -1,4 +1,4 @@
-var {Dictionary, Type} = require("@kaoscript/runtime");
+var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return (() => {
@@ -10,6 +10,6 @@ module.exports = function() {
 	}
 	let {x, y} = foobar();
 	if(Type.isValue(x) && Type.isValue(y)) {
-		console.log("" + x);
+		console.log(Helper.toString(x));
 	}
 };

@@ -7,7 +7,7 @@ enum Space<String> {
 
 export class Color {
 	private {
-		_alpha: Number
+		_alpha: Number	= 1
 	}
 	macro registerSpace(@expression: Dictionary) {
 		if expression.components? {
@@ -18,7 +18,7 @@ export class Color {
 			for component, name of expression.components {
 				field = `_\(name)`
 
-				fields.push(macro private #w(field): Number)
+				fields.push(macro private #w(field): Number = 0)
 
 				methods.push(macro {
 					#w(name)() => this.getField(#(name))

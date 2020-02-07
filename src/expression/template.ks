@@ -2,7 +2,7 @@ class TemplateExpression extends Expression {
 	private {
 		_computing: Boolean		= false
 		_elements: Array		= []
-		_types: Array			= []
+		_isString: Boolean		= true
 	}
 	analyse() { // {{{
 		for const data in @data.elements {
@@ -14,10 +14,16 @@ class TemplateExpression extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
-		for const element in @elements {
+		for const element, index in @elements {
 			element.prepare()
 
-			@types.push(element.type().isString() && !element.type().isNullable())
+			if @isString {
+				const type = element.type()
+
+				if !type.isString() || type.isNullable() {
+					@isString = false
+				}
+			}
 		}
 	} // }}}
 	translate() { // {{{
@@ -35,43 +41,37 @@ class TemplateExpression extends Expression {
 
 		return false
 	} // }}}
-	isComputed() => @elements.length > 1 || !@types[0]
+	isComputed() => @elements.length > 1 || !@isString
 	toFragments(fragments, mode) { // {{{
 		if @elements.length == 0 {
 			fragments.code('""')
 		}
-		else if @computing {
-			for const element, index in @elements {
-				if index == 0 {
-					fragments.wrap(element)
-				}
-				else {
-					fragments.code(' + ').wrap(element)
-				}
-			}
-		}
 		else if @elements.length == 1 {
-			if @types[0] {
+			if @computing {
+				fragments.wrap(@elements[0])
+			}
+			else if @isString {
 				@elements[0].toStringFragments(fragments)
 			}
 			else {
-				fragments.code('"" + ').wrap(@elements[0])
+				fragments.code($runtime.helper(this), '.toString(').compile(@elements[0]).code(')')
+			}
+		}
+		else if @isString {
+			@elements[0].toStringFragments(fragments)
+
+			for const element in @elements from 1 {
+				fragments.code(' + ').wrap(element)
 			}
 		}
 		else {
-			for const element, index in @elements {
-				if index == 0 {
-					if @types[index] {
-						fragments.wrap(element)
-					}
-					else {
-						fragments.code('"" + ').wrap(element)
-					}
-				}
-				else {
-					fragments.code(' + ').wrap(element)
-				}
+			fragments.code($runtime.helper(this), '.concatString(').wrap(@elements[0])
+
+			for const element, index in @elements from 1 {
+				fragments.code(', ').wrap(element)
 			}
+
+			fragments.code(')')
 		}
 	} // }}}
 	type() => @scope.reference('String')

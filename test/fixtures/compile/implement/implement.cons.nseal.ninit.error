@@ -1,0 +1,1 @@
+SyntaxException: The class variable "_x" isn't initialized (line 11, file "fixtures/compile/implement/implement.cons.nseal.ninit.ks")

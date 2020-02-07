@@ -31,8 +31,12 @@ module.exports = function() {
 		}
 	}
 	class Foobar extends Master {
+		__ks_init_1() {
+			this.b = "";
+		}
 		__ks_init() {
 			Master.prototype.__ks_init.call(this);
+			Foobar.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons(args) {
 			Master.prototype.__ks_cons.call(this, args);

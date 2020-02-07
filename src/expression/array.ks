@@ -1,5 +1,5 @@
 class ArrayExpression extends Expression {
-	private {
+	private lateinit {
 		_flatten: Boolean	= false
 		_type: Type
 		_values: Array		= []
@@ -91,7 +91,7 @@ class ArrayExpression extends Expression {
 }
 
 class ArrayRange extends Expression {
-	private {
+	private lateinit {
 		_by				= null
 		_from
 		_to

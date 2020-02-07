@@ -43,7 +43,11 @@
       "instanceVariables": {
         "_color": {
           "access": 2,
-          "type": "String"
+          "type": "String",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -66,7 +70,8 @@
               }
             ],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -122,7 +127,8 @@
               }
             ],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

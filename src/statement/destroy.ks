@@ -1,9 +1,8 @@
 class DestroyStatement extends Statement {
-	private {
+	private lateinit {
 		_expression
 		_identifier: Boolean		= false
 		_type: Type
-		_variable: Variable
 	}
 	analyse() { // {{{
 		if @data.variable.kind == NodeKind::Identifier {

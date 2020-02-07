@@ -7,7 +7,7 @@ export class Color {
 		for component, name of expression.components {
 			field = `_\(name)`
 
-			fields.push(macro private #w(field): Number)
+			fields.push(macro private #w(field): Number = 0)
 
 			methods.push(macro {
 				#w(name)() => this.getField(#(name))

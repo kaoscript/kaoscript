@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo(x, __ks_cb) {
 		if(arguments.length < 2) {
@@ -19,7 +19,7 @@ module.exports = function() {
 		else if(!Type.isNumber(x)) {
 			return __ks_cb(new TypeError("'x' is not of type 'Number'"));
 		}
-		return __ks_cb(null, "" + (x * 3));
+		return __ks_cb(null, Helper.toString(x * 3));
 	}
 	return {
 		foo: foo

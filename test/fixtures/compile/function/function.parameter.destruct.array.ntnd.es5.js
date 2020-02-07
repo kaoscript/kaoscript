@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	function foobar(__ks_0) {
 		if(arguments.length < 1) {
@@ -7,6 +8,6 @@ module.exports = function() {
 			throw new TypeError("Destructuring value is not nullable");
 		}
 		var x = __ks_0[0], y = __ks_0[1];
-		console.log("" + x + "." + y);
+		console.log(Helper.concatString(x, ".", y));
 	}
 };

@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foo() {
 		return "";
@@ -29,9 +29,9 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		console.log("" + x);
+		console.log(Helper.toString(x));
 		x = foo();
-		console.log("" + x);
+		console.log(Helper.toString(x));
 		x = bar();
 		console.log(x);
 	}
@@ -44,7 +44,7 @@ module.exports = function() {
 	let y = "";
 	console.log(y);
 	y = foo();
-	console.log("" + y);
+	console.log(Helper.toString(y));
 	y = bar();
 	console.log(y);
 	return {

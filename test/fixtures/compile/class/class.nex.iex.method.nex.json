@@ -36,7 +36,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

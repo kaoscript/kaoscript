@@ -1,5 +1,5 @@
 class TryExpression extends Expression {
-	private {
+	private lateinit {
 		_argument: Expression
 		_defaultValue: Expression?		= null
 		_reusable: Boolean				= false

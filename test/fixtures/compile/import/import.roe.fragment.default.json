@@ -14,7 +14,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": true,
       "init": 0,
       "constructors": [],
@@ -34,7 +34,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -46,7 +47,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": true,
       "init": 0,
       "constructors": [],
@@ -56,7 +57,11 @@
           "access": 4,
           "type": {
             "reference": 0
-          }
+          },
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -80,7 +85,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "match": [
@@ -100,7 +106,8 @@
               }
             ],
             "returns": "Array?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "replace": [
@@ -122,7 +129,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "slice": [
@@ -144,7 +152,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "split": [
@@ -164,7 +173,8 @@
               }
             ],
             "returns": "Array",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toLowerCase": [
@@ -179,7 +189,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "trim": [
@@ -194,7 +205,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "lines": [
@@ -215,7 +227,8 @@
               }
             ],
             "returns": "Array",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "lower": [
@@ -230,7 +243,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toFloat": [
@@ -245,7 +259,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toInt": [
@@ -268,7 +283,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

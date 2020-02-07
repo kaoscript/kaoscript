@@ -1,3 +1,4 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	var __ks_Math = {};
 	__ks_Math.foo = function(x, y, z) {
@@ -13,7 +14,7 @@ module.exports = function() {
 		if(z === void 0 || z === null) {
 			z = -1;
 		}
-		return "" + x + "." + y + "." + z;
+		return Helper.concatString(x, ".", y, ".", z);
 	};
 	return {
 		console: console,

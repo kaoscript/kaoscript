@@ -1,5 +1,8 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function(Space, Color) {
+	Color.prototype.__ks_init_1 = function() {
+		this._luma = 0;
+	};
 	Color.prototype.__ks_func_luma_0 = function() {
 		return this._luma;
 	};
@@ -15,6 +18,9 @@ module.exports = function(Space, Color) {
 		}
 		this._luma = luma;
 		return this;
+	};
+	Color.prototype.__ks_init = function() {
+		Color.prototype.__ks_init_1.call(this);
 	};
 	Color.prototype.luma = function() {
 		if(arguments.length === 0) {

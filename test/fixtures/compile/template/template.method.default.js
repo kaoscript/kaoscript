@@ -1,5 +1,6 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	let d = "foo";
 	let u = 42;
-	console.log((d + u).toUpperCase());
+	console.log((Helper.concatString(d, u)).toUpperCase());
 };

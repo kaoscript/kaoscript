@@ -1,5 +1,5 @@
 class TypeAliasDeclaration extends Statement {
-	private {
+	private lateinit {
 		_name: String
 		_variable: Variable
 	}

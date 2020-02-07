@@ -13,7 +13,7 @@
     {
       "kind": "namespace",
       "sealed": false,
-	  "systemic": false,
+      "systemic": false,
       "exhaustive": true,
       "properties": {
         "waldo": {

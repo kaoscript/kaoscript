@@ -5,7 +5,11 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		}
+		__ks_init_1() {
+			this._height = 0;
+		}
 		__ks_init() {
+			Person.prototype.__ks_init_1.call(this);
 		}
 		__ks_cons_0() {
 		}

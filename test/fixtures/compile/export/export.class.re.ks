@@ -2,7 +2,7 @@ import '../export/export.class.default.ks'
 
 class ReShape extends Shape {
 	private {
-		_name: String
+		_name: String	= ''
 	}
 }
 

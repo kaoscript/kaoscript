@@ -1,0 +1,1 @@
+ReferenceException: The class variable "PI" is immutable (line 4, file "fixtures/compile/class/class.field.lateinit.const.nstt.wt_i.wmt_was_ale.ks")

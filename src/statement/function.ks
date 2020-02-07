@@ -144,7 +144,7 @@ const $function = {
 }
 
 class FunctionDeclaration extends Statement {
-	private {
+	private lateinit {
 		_extended: Boolean			= false
 		_main: Boolean				= false
 		_name: String
@@ -244,7 +244,7 @@ class FunctionDeclaration extends Statement {
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
 	} // }}}
-	initializeVariable(variable, type, expression, node)
+	initializeVariable(variable, expression, node)
 	name() => @name
 	toFlatFooterFragments(fragments) { // {{{
 		fragments.done()
@@ -373,7 +373,7 @@ class FunctionDeclaration extends Statement {
 }
 
 class FunctionDeclarator extends AbstractNode {
-	private {
+	private lateinit {
 		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
@@ -405,7 +405,7 @@ class FunctionDeclarator extends AbstractNode {
 
 		@scope.line(@data.start.line)
 
-		for parameter in @parameters {
+		for const parameter in @parameters {
 			parameter.prepare()
 		}
 
@@ -445,6 +445,9 @@ class FunctionDeclarator extends AbstractNode {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
+	addInitializableVariable(variable, node)
+	getFunctionNode() => this
+	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isAwait() => @awaiting

@@ -23,7 +23,11 @@
       "instanceVariables": {
         "length": {
           "access": 4,
-          "type": "Number"
+          "type": "Number",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -47,7 +51,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "indexOf": [
@@ -67,7 +72,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "push": [
@@ -87,7 +93,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "shift": [
@@ -100,7 +107,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Any!",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "splice": [
@@ -122,7 +130,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "unshift": [
@@ -142,7 +151,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "last": [
@@ -163,7 +173,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -195,7 +206,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -230,7 +242,8 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       }

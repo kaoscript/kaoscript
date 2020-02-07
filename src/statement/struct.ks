@@ -1,5 +1,5 @@
 class StructDeclaration extends Statement {
-	private {
+	private lateinit {
 		_array: Boolean							= false
 		_extending: Boolean						= false
 		_extendsName: String
@@ -242,12 +242,14 @@ class StructFunction extends AbstractNode {
 }
 
 class StructFieldDeclaration extends AbstractNode {
-	private {
-		_hasName: Boolean					= false
+	private lateinit {
 		_index: Number
 		_name: String
-		_parameter: StructFieldParameter
 		_type: StructFieldType
+	}
+	private {
+		_hasName: Boolean					= false
+		_parameter: StructFieldParameter
 	}
 	constructor(data, parent) { // {{{
 		super(data, parent)

@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class AbstractGreetings {
 		constructor() {
@@ -67,7 +67,7 @@ module.exports = function() {
 			if(name === void 0 || name === null) {
 				name = this._name;
 			}
-			return this._message + " My name is " + name + ".";
+			return Helper.concatString(this._message, " My name is ", name, ".");
 		}
 		greet() {
 			if(arguments.length >= 0 && arguments.length <= 1) {

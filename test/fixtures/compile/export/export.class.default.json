@@ -38,11 +38,19 @@
       "instanceVariables": {
         "_color": {
           "access": 2,
-          "type": "String"
+          "type": "String",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         },
         "_side": {
           "access": 2,
-          "type": "Any?"
+          "type": "Any?",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},

@@ -1,5 +1,5 @@
 class SequenceExpression extends Expression {
-	private {
+	private lateinit {
 		_expressions: Array<Expression>		= []
 		_last: Number
 		_type: Type

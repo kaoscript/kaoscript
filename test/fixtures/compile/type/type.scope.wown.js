@@ -1,4 +1,5 @@
 require("kaoscript/register");
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	const PI = 3.14;
 	var {CarFactory, Car: OldCar} = require("./type.scope.source.ks")();
@@ -26,6 +27,6 @@ module.exports = function() {
 	}
 	const factory = new CarFactory();
 	console.log(factory.makeCar().getType());
-	console.log("" + (new Car()).getType());
+	console.log(Helper.toString((new Car()).getType()));
 	console.log((new OldCar()).getType());
 };

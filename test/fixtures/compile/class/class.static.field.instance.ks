@@ -1,6 +1,6 @@
 class ClassA {
 	private {
-		_x: Number
+		_x: Number	= 0
 	}
 	static {
 		foo() {

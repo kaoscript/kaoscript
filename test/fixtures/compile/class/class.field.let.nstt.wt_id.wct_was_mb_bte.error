@@ -1,0 +1,1 @@
+TypeException: The variable "this._x" of type "Number" can't be assigned with a value of type "String" (line 6, file "fixtures/compile/class/class.field.let.nstt.wt_id.wct_was_mb_bte.ks")

@@ -7,6 +7,7 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_cons_0() {
+			this._bar = "";
 		}
 		__ks_cons(args) {
 			if(args.length === 0) {

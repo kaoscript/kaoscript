@@ -648,6 +648,7 @@ abstract class Type {
 	isFlexible() => false
 	isFunction() => false
 	isHybrid() => false
+	isImmutable() => false
 	isInoperative() => this.isNever() || this.isVoid()
 	isMatching(value, mode: MatchingMode) => false
 	isMergeable(type) => false

@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar(x) {
 		if(arguments.length < 1) {
@@ -10,6 +10,6 @@ module.exports = function() {
 		else if(x !== null && !Type.isString(x)) {
 			throw new TypeError("'x' is not of type 'String?'");
 		}
-		console.log("" + x);
+		console.log(Helper.toString(x));
 	}
 };

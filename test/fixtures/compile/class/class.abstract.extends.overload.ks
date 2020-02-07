@@ -4,7 +4,7 @@ abstract class AbstractGreetings {
 
 class Greetings extends AbstractGreetings {
 	private {
-		@message: String
+		@message: String	= ''
 	}
 	message() => @message
 	message(@message) => this

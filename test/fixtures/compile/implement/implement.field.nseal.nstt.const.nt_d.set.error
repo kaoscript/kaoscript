@@ -1,0 +1,1 @@
+ReferenceException: The expression "@name" is immutable (line 17, file "fixtures/compile/implement/implement.field.nseal.nstt.const.nt_d.set.ks")

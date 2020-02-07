@@ -12,7 +12,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": false,
+      "systemic": false,
       "exhaustive": true,
       "init": 0,
       "constructors": [],
@@ -40,7 +40,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

@@ -11,10 +11,17 @@ enum TypeStatus { // {{{
 } // }}}
 
 class ClassDeclaration extends Statement {
+	private lateinit {
+		_class: ClassType
+		_extendsName: String
+		_extendsType: NamedType<ClassType>
+		_name: String
+		_type: NamedType<ClassType>
+		_variable: Variable
+}
 	private {
 		_abstract: Boolean 					= false
 		_abstractMethods					= {}
-		_class: ClassType
 		_classMethods						= {}
 		_classVariables						= {}
 		_constructors						= []
@@ -23,19 +30,14 @@ class ClassDeclaration extends Statement {
 		_destructorScope
 		_es5: Boolean						= false
 		_extending: Boolean					= false
-		_extendsName: String
-		_extendsType: NamedType<ClassType>
 		_forcefullyRebinded: Boolean		= false
 		_hybrid: Boolean					= false
 		_instanceMethods					= {}
 		_instanceVariables					= {}
 		_instanceVariableScope
 		_macros								= {}
-		_name: String
 		_references							= {}
 		_sealed: Boolean 					= false
-		_type: NamedType<ClassType>
-		_variable: Variable
 	}
 	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
 		if method.max() == 0 && !method.isAsync() {
@@ -317,7 +319,7 @@ class ClassDeclaration extends Statement {
 		for const methods, name of @abstractMethods {
 			const async = @extendsType?.type().isAsyncInstanceMethod(name) ?? methods[0].type().isAsync()
 
-			for method in methods {
+			for const method in methods {
 				method.prepare()
 
 				if async != method.type().isAsync() {
@@ -332,17 +334,26 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		for method in @constructors {
-			method.prepare()
+		if @abstract {
+			for const constructor in @constructors {
+				constructor.prepare()
 
-			if @class.hasMatchingConstructor(method.type(), MatchingMode::ExactParameters) {
-				SyntaxException.throwIdenticalConstructor(method)
+				@class.addConstructor(constructor.type())
 			}
+		}
+		else {
+			for const constructor in @constructors {
+				constructor.prepare()
 
-			@class.addConstructor(method.type())
+				if @class.hasMatchingConstructor(constructor.type(), MatchingMode::ExactParameters) {
+					SyntaxException.throwIdenticalConstructor(constructor)
+				}
+
+				@class.addConstructor(constructor.type())
+			}
 		}
 
-		if @destructor? {
+		if @destructor != null {
 			@destructor.prepare()
 
 			@class.addDestructor()
@@ -353,7 +364,7 @@ class ClassDeclaration extends Statement {
 		}
 
 		for const macros of @macros {
-			for macro in macros {
+			for const macro in macros {
 				macro.export(this)
 			}
 		}
@@ -361,24 +372,61 @@ class ClassDeclaration extends Statement {
 	translate() { // {{{
 		for const variable of @classVariables {
 			variable.translate()
+
+			if variable.isRequiringInitialization() && !variable.isInitialized() {
+				SyntaxException.throwNotInitializedField(variable.name(), variable)
+			}
 		}
 
 		for const variable of @instanceVariables {
 			variable.translate()
 		}
 
-		for method in @constructors {
-			method.translate()
-		}
-
-		if @destructor? {
-			@destructor.translate()
-		}
-
 		for const methods of @instanceMethods {
 			for method in methods {
 				method.translate()
 			}
+		}
+
+		if @constructors.length == 0 {
+			if @extending {
+				let extends = @class.extends()
+
+				while extends? && !extends.type().hasConstructors() {
+					extends = extends.type().extends()
+				}
+
+				if extends? {
+					for const constructor in extends.type().listConstructors() {
+						constructor.checkVariablesInitializations(this, @class)
+					}
+				}
+				else {
+					@class.checkVariablesInitializations(this)
+				}
+			}
+			else if !@abstract {
+				@class.forEachInstanceVariables((name, variable) => {
+					if variable.isRequiringInitialization() {
+						SyntaxException.throwNotInitializedField(name, this)
+					}
+				})
+			}
+		}
+		else {
+			for const constructor in @constructors {
+				constructor.translate()
+
+				@class.forEachInstanceVariables((name, variable) => {
+					if variable.isRequiringInitialization() && !variable.isAlien() && !variable.isAlteration() {
+						constructor.checkVariableInitialization(name)
+					}
+				})
+			}
+		}
+
+		if @destructor? {
+			@destructor.translate()
 		}
 
 		for const methods of @abstractMethods {
@@ -448,6 +496,8 @@ class ClassDeclaration extends Statement {
 	flagForcefullyRebinded() { // {{{
 		@forcefullyRebinded = true
 	} // }}}
+	getClassVariable(name: String) => @classVariables[name]
+	getInstanceVariable(name: String) => @instanceVariables[name]
 	hasConstructors() => @constructors.length != 0
 	hasInits() { // {{{
 		for const field of @instanceVariables {
@@ -458,6 +508,7 @@ class ClassDeclaration extends Statement {
 
 		return false
 	} // }}}
+	isAbstract() => @abstract
 	isExtending() => @extending
 	isHybrid() => @hybrid
 	name() => @name
@@ -1252,6 +1303,14 @@ class CallThisConstructorSubstitude {
 		_data
 	}
 	constructor(@data, @arguments, @class)
+	isInitializingInstanceVariable(name) { // {{{
+		if const constructor = @class.type().getConstructor(@arguments) {
+			return constructor.isInitializingInstanceVariable(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`\(@class.path()).prototype.__ks_cons.call(this, [`)
@@ -1292,6 +1351,14 @@ class CallSuperConstructorSubstitude {
 		_data
 	}
 	constructor(@data, @arguments, @class)
+	isInitializingInstanceVariable(name) { // {{{
+		if const constructor = @class.type().extends().type().getConstructor(@arguments) {
+			return constructor.isInitializingInstanceVariable(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`\(@class.type().extends().path()).prototype.__ks_cons.call(this, [`)
@@ -1357,6 +1424,7 @@ class CallSuperMethodES5Substitude {
 		_method: ClassMethodDeclaration
 	}
 	constructor(@data, @arguments, @method, @class)
+	isInitializingInstanceVariable(name) => @method.type().isInitializingInstanceVariable(name)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`\(@class.type().extends().path()).prototype.\(@method.name()).apply(this, [`)
@@ -1382,6 +1450,7 @@ class CallSuperMethodES6Substitude {
 		_method: ClassMethodDeclaration
 	}
 	constructor(@data, @arguments, @method, @class)
+	isInitializingInstanceVariable(name) => @method.type().isInitializingInstanceVariable(name)
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`super.\(@method.name())(`)
@@ -1429,21 +1498,23 @@ class MemberSuperMethodES5Substitude {
 }
 
 class ClassMethodDeclaration extends Statement {
+	private lateinit {
+		_block: FunctionBlock
+		_internalName: String
+		_parameters: Array<Parameter>
+		_type: Type
+	}
 	private {
 		_abstract: Boolean				= false
 		_aliases: Array					= []
 		_analysed: Boolean				= false
 		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
-		_block: FunctionBlock
 		_exit: Boolean					= false
 		_instance: Boolean				= true
-		_internalName: String
 		_name: String
 		_override: Boolean				= false
-		_parameters: Array<Parameter>
 		_returnNull: Boolean			= false
-		_type: Type
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
 		const assessment = Router.assess(methods, false, overflow)
@@ -1619,7 +1690,7 @@ class ClassMethodDeclaration extends Statement {
 			@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
 		}
 
-		@block = $compile.function($ast.body(@data), this)
+		@block = new MethodBlock($ast.block($ast.body(@data)), this, @scope)
 	} // }}}
 	prepare() { // {{{
 		return if @analysed
@@ -1671,6 +1742,10 @@ class ClassMethodDeclaration extends Statement {
 			}
 		}
 
+		for const alias in @aliases {
+			@type.addInitializingInstanceVariable(alias.getVariableName())
+		}
+
 		@block.analyse(@aliases)
 
 		@block.analyse()
@@ -1690,11 +1765,13 @@ class ClassMethodDeclaration extends Statement {
 							@type.returnType(@parent.type().reference(@scope))
 						}
 
-						const return = $compile.expression(@data.type.value, this)
+						if @instance {
+							const return = $compile.expression(@data.type.value, this)
 
-						return.analyse()
+							return.analyse()
 
-						@block.addReturn(return)
+							@block.addReturn(return)
+						}
 					}
 				}
 				NodeKind::ThisExpression => {
@@ -1736,11 +1813,12 @@ class ClassMethodDeclaration extends Statement {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
-	addAliasStatement(statement: AliasStatement) { // {{{
+	addAtThisParameter(statement: AliasStatement) { // {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
 	} // }}}
+	getFunctionNode() => this
 	isAbstract() => @abstract
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -1797,12 +1875,15 @@ class ClassMethodDeclaration extends Statement {
 }
 
 class ClassConstructorDeclaration extends Statement {
-	private {
-		_aliases: Array					= []
+	private lateinit {
 		_block: Block
-		_internalName: String
 		_parameters: Array<Parameter>
-		_type: Type
+		_type: ClassConstructorType
+	}
+	private {
+		_aliases: Array								= []
+		_abstract: Boolean							= false
+		_internalName: String
 	}
 	static toRouterFragments(node, fragments, variable, methods, header, footer) { // {{{
 		const assessment = Router.assess(methods, false)
@@ -1852,6 +1933,7 @@ class ClassConstructorDeclaration extends Statement {
 	constructor(data, parent) { // {{{
 		super(data, parent, parent.newScope(parent._constructorScope, ScopeType::Block))
 
+		@abstract = parent.isAbstract()
 		@internalName = `__ks_cons_\(parent._constructors.length)`
 
 		parent._constructors.push(this)
@@ -1868,19 +1950,14 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.analyse()
 		}
 
-		@block = $compile.function($ast.body(@data), this)
+		@block = new ConstructorBlock($ast.block($ast.body(@data)), this, @scope)
 	} // }}}
 	prepare() { // {{{
-		for parameter in @parameters {
+		for const parameter in @parameters {
 			parameter.prepare()
 		}
 
-		@type = new ClassConstructorType([parameter.type() for parameter in @parameters], @data, this)
-	} // }}}
-	translate() { // {{{
-		for parameter in @parameters {
-			parameter.translate()
-		}
+		@type = new ClassConstructorType([parameter.type() for const parameter in @parameters], @data, this)
 
 		let index = 1
 		if @block.isEmpty() {
@@ -1905,11 +1982,32 @@ class ClassConstructorDeclaration extends Statement {
 			@block.analyse(index + 1)
 		}
 
+		const class = @parent.type().type()
+
+		for const statement in @aliases {
+			const name = statement.getVariableName()
+
+			if const variable = class.getInstanceVariable(name) {
+				if variable.isRequiringInitialization() {
+					@block.initializeVariable(VariableBrief(
+						name
+						type: statement.type()
+						instance: true
+					), statement, this)
+				}
+			}
+		}
+	} // }}}
+	translate() { // {{{
+		for parameter in @parameters {
+			parameter.translate()
+		}
+
 		@block.prepare()
 
 		@block.translate()
 	} // }}}
-	addAliasStatement(statement: AliasStatement) { // {{{
+	addAtThisParameter(statement: AliasStatement) { // {{{
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), true, @parent._extending) {
 			@aliases.push(statement)
 		}
@@ -1943,6 +2041,14 @@ class ClassConstructorDeclaration extends Statement {
 			SyntaxException.throwNoSuperCall(this)
 		}
 	} // }}}
+	checkVariableInitialization(name) { // {{{
+		if @block.isInitializingInstanceVariable(name) {
+			@type.addInitializingInstanceVariable(name)
+		}
+		else if !@abstract {
+			SyntaxException.throwNotInitializedField(name, this)
+		}
+	} // }}}
 	private getConstructorIndex(body: Array) { // {{{
 		for statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
@@ -1959,6 +2065,7 @@ class ClassConstructorDeclaration extends Statement {
 
 		return -1
 	} // }}}
+	getFunctionNode() => this
 	private getSuperIndex(body: Array) { // {{{
 		for statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
@@ -2072,11 +2179,13 @@ class ClassConstructorDeclaration extends Statement {
 }
 
 class ClassDestructorDeclaration extends Statement {
-	private {
+	private lateinit {
 		_block: Block
-		_internalName: String
 		_parameters: Array
 		_type: Type
+	}
+	private {
+		_internalName: String
 	}
 	static toRouterFragments(node, fragments, variable) { // {{{
 		let ctrl = fragments.newControl()
@@ -2129,6 +2238,7 @@ class ClassDestructorDeclaration extends Statement {
 		@block.prepare()
 		@block.translate()
 	} // }}}
+	getFunctionNode() => this
 	isAbstract() { // {{{
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
@@ -2165,12 +2275,18 @@ class ClassDestructorDeclaration extends Statement {
 }
 
 class ClassVariableDeclaration extends AbstractNode {
-	private {
-		_defaultValue				= null
-		_hasDefaultValue: Boolean	= false
-		_instance: Boolean			= true
-		_name: String
+	private lateinit {
 		_type: ClassVariableType
+	}
+	private {
+		_autoTyping: Boolean				= false
+		_defaultValue						= null
+		_hasDefaultValue: Boolean			= false
+		_immutable: Boolean					= false
+		_instance: Boolean					= true
+		_initialized: Boolean				= true
+		_lateInit: Boolean					= false
+		_name: String
 	}
 	constructor(data, parent) { // {{{
 		super(data, parent)
@@ -2182,6 +2298,16 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		for const modifier in data.modifiers {
 			switch modifier.kind {
+				ModifierKind::AutoTyping => {
+					@autoTyping = true
+				}
+				ModifierKind::Immutable => {
+					@immutable = true
+					@autoTyping = true
+				}
+				ModifierKind::LateInit => {
+					@lateInit = true
+				}
 				ModifierKind::Public => {
 					public = true
 				}
@@ -2211,6 +2337,7 @@ class ClassVariableDeclaration extends AbstractNode {
 	analyse() { // {{{
 		if @data.defaultValue? {
 			@hasDefaultValue = true
+			@lateInit = false
 
 			if !@instance {
 				@defaultValue = $compile.expression(@data.defaultValue, this)
@@ -2219,10 +2346,6 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		@type = ClassVariableType.fromAST(@data, this)
-
-		@parent.addReference(@type, this)
-
 		if @parent.isExtending() {
 			const type = @parent._extendsType.type()
 
@@ -2238,10 +2361,23 @@ class ClassVariableDeclaration extends AbstractNode {
 			}
 		}
 
+		@type = ClassVariableType.fromAST(@data, this)
+
+		@parent.addReference(@type, this)
+
 		if @hasDefaultValue {
 			if @instance {
 				@defaultValue = $compile.expression(@data.defaultValue, this, @parent._instanceVariableScope)
 				@defaultValue.analyse()
+
+				if @autoTyping {
+					@type.type(@defaultValue.type())
+				}
+			}
+		}
+		else {
+			if @type.isRequiringInitialization() {
+				@initialized = false
 			}
 		}
 	} // }}}
@@ -2249,7 +2385,10 @@ class ClassVariableDeclaration extends AbstractNode {
 		if @hasDefaultValue {
 			@defaultValue.prepare()
 
-			if !@defaultValue.isMatchingType(@type.type()) {
+			if @autoTyping {
+				@type.type(@defaultValue.type())
+			}
+			else if !@defaultValue.isMatchingType(@type.type()) {
 				TypeException.throwInvalidAssignement(@name, @type, @defaultValue.type(), this)
 			}
 
@@ -2257,7 +2396,20 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 	} // }}}
 	hasDefaultValue() => @hasDefaultValue
+	initialize(type, node) { // {{{
+		if !@initialized {
+			@initialized = true
+
+			if @autoTyping {
+				@type.type(type)
+			}
+		}
+	} // }}}
+	isImmutable() => @immutable
+	isInitialized() => @initialized
 	isInstance() => @instance
+	isLateInit() => @lateInit
+	isRequiringInitialization() => @type.isRequiringInitialization()
 	name() => @name
 	toFragments(fragments) { // {{{
 		if @hasDefaultValue {

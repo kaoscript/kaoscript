@@ -956,7 +956,7 @@ module.exports = function() {
 				return this[component.field];
 			}
 			else if(Operator.gt(component.families.length, 1)) {
-				throw new Error("The component '" + name + "' has a conflict between the spaces '" + component.families.join("', '") + "'");
+				throw new Error(Helper.concatString("The component '", name, "' has a conflict between the spaces '", component.families.join("', '"), "'"));
 			}
 			else {
 				return this.like(component.families[0])[component.field];
@@ -1228,7 +1228,7 @@ module.exports = function() {
 				component = $spaces[this._space].components[name];
 			}
 			else if(Operator.gt(component.families.length, 1)) {
-				throw new Error("The component '" + name + "' has a conflict between the spaces '" + component.families.join("', '") + "'");
+				throw new Error(Helper.concatString("The component '", name, "' has a conflict between the spaces '", component.families.join("', '"), "'"));
 			}
 			else {
 				this.space(component.families[0]);
@@ -1291,7 +1291,7 @@ module.exports = function() {
 					space = $components[space].families[0];
 				}
 				else {
-					throw new Error("The component '" + space + "' has a conflict between the spaces '" + $components[space].families.join("', '") + "'");
+					throw new Error(Helper.concatString("The component '", space, "' has a conflict between the spaces '", $components[space].families.join("', '"), "'"));
 				}
 			}
 			if((this._space.value !== space) && !Type.isValue($spaces[this._space][space])) {
@@ -1604,6 +1604,15 @@ module.exports = function() {
 		})();
 		return d;
 	})());
+	Color.prototype.__ks_init_2 = function() {
+		this._red = 0;
+	};
+	Color.prototype.__ks_init_3 = function() {
+		this._green = 0;
+	};
+	Color.prototype.__ks_init_4 = function() {
+		this._blue = 0;
+	};
 	Color.prototype.__ks_func_red_0 = function() {
 		return this.getField("red");
 	};
@@ -1639,6 +1648,12 @@ module.exports = function() {
 			throw new TypeError("'value' is not nullable");
 		}
 		return this.setField("blue", value);
+	};
+	Color.prototype.__ks_init = function() {
+		Color.prototype.__ks_init_1.call(this);
+		Color.prototype.__ks_init_2.call(this);
+		Color.prototype.__ks_init_3.call(this);
+		Color.prototype.__ks_init_4.call(this);
 	};
 	Color.prototype.red = function() {
 		if(arguments.length === 0) {

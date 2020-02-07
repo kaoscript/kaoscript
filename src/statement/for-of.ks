@@ -1,5 +1,5 @@
 class ForOfStatement extends Statement {
-	private {
+	private lateinit {
 		_bindingScope: Scope
 		_bindingValue						= null
 		_bleeding: Boolean					= false

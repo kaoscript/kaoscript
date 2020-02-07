@@ -19,7 +19,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": false,
-	  "systemic": false,
+      "systemic": false,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -58,7 +58,8 @@
               }
             ],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

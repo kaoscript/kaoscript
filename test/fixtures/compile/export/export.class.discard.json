@@ -75,11 +75,19 @@
           "access": 2,
           "type": {
             "reference": 1
-          }
+          },
+          "default": false,
+          "immutable": false,
+          "lateInit": true,
+          "sealed": false
         },
         "_name": {
           "access": 2,
-          "type": "String"
+          "type": "String",
+          "default": false,
+          "immutable": false,
+          "lateInit": true,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -94,7 +102,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -115,7 +124,10 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": [
+              "_color"
+            ]
           }
         ],
         "name": [
@@ -128,7 +140,8 @@
             "max": 0,
             "parameters": [],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": []
           },
           {
             "id": 1,
@@ -147,7 +160,10 @@
               }
             ],
             "returns": "Any?",
-            "throws": []
+            "throws": [],
+            "inits": [
+              "_name"
+            ]
           }
         ]
       },

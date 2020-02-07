@@ -1,5 +1,5 @@
 class EnumDeclaration extends Statement {
-	private {
+	private lateinit {
 		_composites: Array			= []
 		_enum: EnumType
 		_name: String

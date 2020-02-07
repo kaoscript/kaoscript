@@ -1,4 +1,5 @@
 require("kaoscript/register");
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	var CarFactory = require("./type.scope.source.ks")().CarFactory;
 	class Car {
@@ -25,5 +26,5 @@ module.exports = function() {
 	}
 	const factory = new CarFactory();
 	console.log(factory.makeCar().getType());
-	console.log("" + (new Car()).getType());
+	console.log(Helper.toString((new Car()).getType()));
 };

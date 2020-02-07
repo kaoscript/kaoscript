@@ -1,12 +1,13 @@
+var Helper = require("@kaoscript/runtime").Helper;
 module.exports = function() {
 	function foobar() {
 		let x = null, y = null;
 		if(quxbaz(x = "foobar") && quxbaz(y = x) && quxbaz(x = 42)) {
-			console.log("" + x);
+			console.log(Helper.toString(x));
 			console.log(y);
 		}
-		console.log("" + x);
-		console.log("" + y);
+		console.log(Helper.toString(x));
+		console.log(Helper.toString(y));
 	}
 	function quxbaz(x) {
 		if(arguments.length < 1) {

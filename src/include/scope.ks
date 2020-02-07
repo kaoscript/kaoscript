@@ -104,6 +104,17 @@ abstract class Scope {
 	abstract resolveReference(name: String, nullable: Boolean, parameters: Array): ReferenceType
 }
 
+struct VariableBrief {
+	name: String
+	type: Type
+	variable: Boolean	= false
+	immutable: Boolean	= false
+	lateInit: Boolean	= false
+	instance: Boolean	= false
+	static: Boolean		= false
+	class: String?		= null
+}
+
 include {
 	'./scope/bleeding'
 	'./scope/block'

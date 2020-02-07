@@ -1,5 +1,5 @@
 class ForInStatement extends Statement {
-	private {
+	private lateinit {
 		_bindingScope: Scope
 		_bindingValue						= null
 		_body

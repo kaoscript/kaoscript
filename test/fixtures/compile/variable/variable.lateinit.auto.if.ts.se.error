@@ -1,1 +1,0 @@
-SyntaxException: The lateinit variable "x" isn't fully initialized due to the missing "else" statement (line 6, file "fixtures/compile/variable/variable.lateinit.auto.if.ts.se.ks")

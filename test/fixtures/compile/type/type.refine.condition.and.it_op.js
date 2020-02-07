@@ -1,5 +1,5 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_String = require("../_/_string.ks")().__ks_String;
 	function foo(x) {
@@ -13,7 +13,7 @@ module.exports = function() {
 			console.log(x);
 		}
 		else {
-			console.log("" + x);
+			console.log(Helper.toString(x));
 		}
 	}
 };

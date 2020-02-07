@@ -1,5 +1,5 @@
 class Variable {
-	private {
+	private lateinit {
 		// true: can be altered by `impl` declaration
 		_altereable: Boolean		= false
 		_declaration: Statement?	= null

@@ -1,12 +1,12 @@
-var Type = require("@kaoscript/runtime").Type;
+var {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
 		return "foobar";
 	}
 	let x = foobar();
 	if(Type.isValue(x)) {
-		console.log("" + x);
+		console.log(Helper.toString(x));
 	}
 	x = null;
-	console.log("" + x);
+	console.log(Helper.toString(x));
 };

@@ -51,7 +51,8 @@
           "min": 0,
           "max": 0,
           "parameters": [],
-          "throws": []
+          "throws": [],
+          "inits": []
         },
         {
           "id": 1,
@@ -68,14 +69,19 @@
               "default": 0
             }
           ],
-          "throws": []
+          "throws": [],
+          "inits": []
         }
       ],
       "destructors": 0,
       "instanceVariables": {
         "_message": {
           "access": 2,
-          "type": "String"
+          "type": "String",
+          "default": true,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
         }
       },
       "classVariables": {},
@@ -100,7 +106,8 @@
               }
             ],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       }
@@ -137,7 +144,8 @@
               }
             ],
             "returns": "String",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

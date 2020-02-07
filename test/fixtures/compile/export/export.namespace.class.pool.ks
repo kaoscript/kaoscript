@@ -8,7 +8,7 @@ export namespace NS {
 
 	export class Foobar {
 		private {
-			_name: String
+			_name: String	= ''
 		}
 		name() => @name
 		name(@name) => this

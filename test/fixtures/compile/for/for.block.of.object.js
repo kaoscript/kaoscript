@@ -1,4 +1,4 @@
-var Dictionary = require("@kaoscript/runtime").Dictionary;
+var {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	const likes = (() => {
 		const d = new Dictionary();
@@ -9,6 +9,6 @@ module.exports = function() {
 	})();
 	for(let key in likes) {
 		let value = likes[key];
-		console.log(key + " likes " + value);
+		console.log(Helper.concatString(key, " likes ", value));
 	}
 };

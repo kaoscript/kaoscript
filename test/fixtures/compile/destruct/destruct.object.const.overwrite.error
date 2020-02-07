@@ -1,1 +1,1 @@
-SyntaxException: Identifier "bar" is immutable (line 7, file "fixtures/compile/destruct/destruct.object.const.overwrite.ks")
+ReferenceException: The identifier "bar" is immutable (line 7, file "fixtures/compile/destruct/destruct.object.const.overwrite.ks")

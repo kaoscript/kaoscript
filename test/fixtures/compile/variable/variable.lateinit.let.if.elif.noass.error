@@ -1,1 +1,0 @@
-SyntaxException: The lateinit variable "z" isn't fully initialized when the condition is true (line 7, file "fixtures/compile/variable/variable.lateinit.let.if.elif.noass.ks")

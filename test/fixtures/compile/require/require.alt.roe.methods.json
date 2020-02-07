@@ -19,7 +19,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -44,7 +44,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "push": [
@@ -64,7 +65,8 @@
               }
             ],
             "returns": "Number",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "slice": [
@@ -86,7 +88,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -128,7 +131,8 @@
               }
             ],
             "returns": "Boolean",
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "pushUniq": [
@@ -151,7 +155,8 @@
             "returns": {
               "reference": 1
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

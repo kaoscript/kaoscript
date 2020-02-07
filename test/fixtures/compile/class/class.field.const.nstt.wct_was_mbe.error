@@ -1,0 +1,1 @@
+ReferenceException: The expression "this.PI" is immutable (line 4, file "fixtures/compile/class/class.field.const.nstt.wct_was_mbe.ks")

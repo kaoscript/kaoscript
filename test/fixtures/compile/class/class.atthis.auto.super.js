@@ -51,8 +51,8 @@ module.exports = function() {
 			else if(!Type.isString(color)) {
 				throw new TypeError("'color' is not of type 'String'");
 			}
-			if(backgroundColor === void 0 || backgroundColor === null) {
-				throw new TypeError("'backgroundColor' is not nullable");
+			if(backgroundColor === void 0) {
+				backgroundColor = null;
 			}
 			Shape.prototype.__ks_cons.call(this, [color]);
 			this._backgroundColor = backgroundColor;

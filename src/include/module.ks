@@ -482,7 +482,6 @@ export class Module {
 class ModuleBlock extends AbstractNode {
 	private {
 		_attributeDatas			= {}
-		_initializableVariables	= {}
 		_module
 		_statements: Array		= []
 	}
@@ -508,12 +507,6 @@ class ModuleBlock extends AbstractNode {
 			@scope.line(statement.line())
 
 			statement.prepare()
-		}
-
-		for const flag, name of @initializableVariables when flag {
-			if !@scope.getVariable(name).isInitialized() {
-				SyntaxException.throwNotInitializedVariable(name, this)
-			}
 		}
 
 		const recipient = this.recipient()
@@ -544,38 +537,35 @@ class ModuleBlock extends AbstractNode {
 			statement.translate()
 		}
 	} // }}}
-	addInitializableVariable(variable, node) { // {{{
-		@initializableVariables[variable.name()] = true
-	} // }}}
+	addInitializableVariable(variable, node)
 	directory() => @module.directory()
 	exportMacro(name, macro) { // {{{
 		@module.exportMacro(name, macro.toMetadata())
 	} // }}}
 	file() => @module.file()
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
-	initializeVariable(variable, type, expression, node) { // {{{
-		const name = variable.name()
+	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
+		if variable.static {
+			const class = @scope.getVariable(variable.class).declaration()
 
-		if variable.isInitialized() {
-			if variable.isImmutable() {
-				ReferenceException.throwImmutable(name, expression)
-			}
+			class.getClassVariable(variable.name).initialize(variable.type, expression)
 		}
-		else if @initializableVariables[name] {
-			if variable.isDefinitive() {
-				variable.setRealType(type)
-			}
-			else {
-				variable.setDeclaredType(type, true).flagDefinitive()
-			}
-
-			delete @initializableVariables[name]
-		}
-		else {
-			ReferenceException.throwImmutable(name, expression)
+		else if const var = @scope.getDefinedVariable(variable.name) {
+			var.setDeclaredType(variable.type)
 		}
 	} // }}}
 	isConsumedError(error): Boolean => @module.isBinary()
+	isUsingStaticVariableBefore(class: String, varname: String, stmt: Statement): Boolean { // {{{
+		const line = stmt.line()
+
+		for const statement in @statements while statement.line() < line && statement != stmt {
+			if statement.isUsingStaticVariable(class, varname) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	includePath() => null
 	module() => @module
 	publishMacro(name, macro) { // {{{

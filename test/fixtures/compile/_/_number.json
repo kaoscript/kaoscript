@@ -23,7 +23,7 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": false,
       "init": 0,
       "constructors": [],
@@ -50,7 +50,8 @@
             "returns": {
               "reference": 0
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },
@@ -59,7 +60,7 @@
     {
       "kind": "namespace",
       "sealed": true,
-	  "systemic": true,
+      "systemic": true,
       "exhaustive": true,
       "properties": {
         "max": {
@@ -186,7 +187,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "mod": [
@@ -211,7 +213,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "round": [
@@ -238,7 +241,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toFloat": [
@@ -253,7 +257,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ],
         "toInt": [
@@ -280,7 +285,8 @@
             "returns": {
               "reference": 2
             },
-            "throws": []
+            "throws": [],
+            "inits": []
           }
         ]
       },

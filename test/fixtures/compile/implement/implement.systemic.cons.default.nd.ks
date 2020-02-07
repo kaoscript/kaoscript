@@ -9,7 +9,7 @@ disclose Date {
 
 impl Date {
 	private {
-		@timezone: String
+		@timezone: String	= 'UTC'
 	}
 	overwrite constructor(year, month, day = 1, hours = 0, minutes = 0, seconds = 0, milliseconds = 0) {
 		precursor(year, month - 1, day, hours, minutes, seconds, milliseconds)

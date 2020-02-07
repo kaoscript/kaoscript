@@ -197,6 +197,7 @@ abstract class AbstractNode {
 	data() => @data
 	directory() => @parent.directory()
 	file() => @parent.file()
+	getFunctionNode() => @parent?.getFunctionNode()
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
 	isIncluded(): Boolean => this.file() != this.module().file()
 	module() => @parent.module()
@@ -538,12 +539,14 @@ const $targets = {
 }
 
 export class Compiler {
+	private lateinit {
+		_module: Module
+	}
 	private {
 		_file: String
 		_fragments
 		_hashes: Dictionary
 		_hierarchy: Array
-		_module: Module
 		_options: Dictionary
 	}
 	static {
