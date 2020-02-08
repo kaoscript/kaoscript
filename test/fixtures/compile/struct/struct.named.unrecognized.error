@@ -1,0 +1,1 @@
+SyntaxException: The argument "x" isn't recognized to create the struct (line 6, file "fixtures/compile/struct/struct.named.unrecognized.ks")

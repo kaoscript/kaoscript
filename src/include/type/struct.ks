@@ -1,24 +1,8 @@
-enum StructVarietyKind<String> {
-	Array
-	NamedArray
-	Object
-}
-
 abstract class StructType extends Type {
 
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			switch data.variety {
-				StructVarietyKind::Array => {
-					return ArrayStructType.import(index, data, metadata, references, alterations, queue, scope, node)
-				}
-				StructVarietyKind::NamedArray => {
-					return NamedArrayStructType.import(index, data, metadata, references, alterations, queue, scope, node)
-				}
-				=> {
-					return ObjectStructType.import(index, data, metadata, references, alterations, queue, scope, node)
-				}
-			}
+			return ObjectStructType.import(index, data, metadata, references, alterations, queue, scope, node)
 		} // }}}
 	}
 	private {
@@ -80,115 +64,6 @@ abstract class StructType extends Type {
 	} // }}}
 }
 
-class ArrayStructType extends StructType {
-	static {
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const value = new ArrayStructType(scope)
-
-			queue.push(() => {
-				if data.extends? {
-					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
-				}
-
-				let index = value.count()
-
-				for const type in data.fields {
-					value.addField(StructFieldType.fromMetadata(index, null, type, metadata, references, alterations, queue, scope, node))
-
-					++index
-				}
-			})
-
-			return value
-		} // }}}
-	}
-	addField(field: StructFieldType) { // {{{
-		@fields[field.index()] = field
-		++@count
-	} // }}}
-	override export(references, mode) { // {{{
-		const export = {
-			kind: TypeKind::Struct
-			variety: StructVarietyKind::Array
-			fields: []
-		}
-
-		for const field of @fields {
-			export.fields.push(field.export(references, mode))
-		}
-
-		if @extending {
-			export.extends = @extends.metaReference(references, mode)
-		}
-
-		return export
-	} // }}}
-	override isArray() => true
-	getProperty(name: Number) => this.getProperty(`\(name)`)
-	isMatching(value: ArrayStructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
-	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
-		if value.name() == 'Struct' {
-			return true
-		}
-
-		return false
-	} // }}}
-	sortArguments(arguments) => arguments
-}
-
-class NamedArrayStructType extends StructType {
-	static {
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const value = new NamedArrayStructType(scope)
-
-			queue.push(() => {
-				if data.extends? {
-					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
-				}
-
-				let index = value.count()
-
-				for const type, name of data.fields {
-					value.addField(StructFieldType.fromMetadata(index, name, type, metadata, references, alterations, queue, scope, node))
-
-					++index
-				}
-			})
-
-			return value
-		} // }}}
-	}
-	override export(references, mode) { // {{{
-		const export = {
-			kind: TypeKind::Struct
-			variety: StructVarietyKind::NamedArray
-			fields: {}
-		}
-
-		for const field of @fields {
-			export.fields[field.name()] = field.export(references, mode)
-		}
-
-		if @extending {
-			export.extends = @extends.metaReference(references, mode)
-		}
-
-		return export
-	} // }}}
-	override isArray() => true
-	isMatching(value: ArrayStructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
-	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
-		if value.name() == 'Struct' {
-			return true
-		}
-
-		return false
-	} // }}}
-	sortArguments(arguments: Array) { // {{{
-		NotImplementedException.throw()
-	} // }}}
-}
-
 class ObjectStructType extends StructType {
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
@@ -214,7 +89,6 @@ class ObjectStructType extends StructType {
 	override export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Struct
-			variety: StructVarietyKind::Object
 			fields: {}
 		}
 

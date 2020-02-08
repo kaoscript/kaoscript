@@ -1,0 +1,28 @@
+{
+  "aliens": [
+    "Any?",
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Pair"
+  ],
+  "references": [
+    {
+      "kind": "tuple",
+      "named": false,
+      "fields": [
+        {
+          "required": true,
+          "type": "String"
+        },
+        {
+          "required": true,
+          "type": "Number"
+        }
+      ]
+    }
+  ],
+  "macros": []
+}

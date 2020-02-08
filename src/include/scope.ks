@@ -60,6 +60,7 @@ let $keywords = { // {{{
 	transient: true
 	true: true
 	try: true
+	tuple: true
 	typeof: true
 	var: true
 	void: true

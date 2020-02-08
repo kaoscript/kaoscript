@@ -1,0 +1,42 @@
+{
+  "aliens": [
+    "Any?",
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Point",
+    1,
+    "Point3D"
+  ],
+  "references": [
+    {
+      "kind": "struct",
+      "fields": {
+        "x": {
+          "required": true,
+          "type": "Number"
+        },
+        "y": {
+          "required": true,
+          "type": "Number"
+        }
+      }
+    },
+    {
+      "kind": "struct",
+      "fields": {
+        "z": {
+          "required": true,
+          "type": "Number"
+        }
+      },
+      "extends": [
+        0,
+        "Point"
+      ]
+    }
+  ],
+  "macros": []
+}

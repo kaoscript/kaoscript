@@ -1,0 +1,1 @@
+SyntaxException: The field "x" is missing to create the struct (line 8, file "fixtures/compile/struct/struct.named.partial.nullable.ks")

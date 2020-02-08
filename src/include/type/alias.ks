@@ -40,6 +40,8 @@ class AliasType extends Type {
 	isBoolean() => @type.isBoolean()
 	isDictionary() => @type.isDictionary()
 	isExclusion() => @type.isExclusion()
+	isExportable() => @type.isExportable()
+	isExportingFragment() => false
 	isFunction() => @type.isFunction()
 	isMatching(value: AliasType, mode: MatchingMode) { // {{{
 		return this == value
@@ -50,9 +52,8 @@ class AliasType extends Type {
 	isReducible() => true
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
+	isTuple() => @type.isTuple()
 	isUnion() => @type.isUnion()
-	isExportable() => @type.isExportable()
-	isExportingFragment() => false
 	matchContentOf(that: Type): Boolean => @type.matchContentOf(that)
 	parameter() => @type.parameter()
 	reduce(type: Type) => @type.reduce(type)

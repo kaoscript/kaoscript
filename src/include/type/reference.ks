@@ -12,6 +12,7 @@ const $weightTOFs = { // {{{
 	RegExp: 9
 	String: 6
 	Struct: 11
+	Tuple: 11
 } // }}}
 
 class ReferenceType extends Type {
@@ -281,6 +282,9 @@ class ReferenceType extends Type {
 		else if @name == 'Struct' {
 			return value.isStruct()
 		}
+		else if @name == 'Tuple' {
+			return value.isTuple()
+		}
 		else {
 			return this.type().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
@@ -399,13 +403,14 @@ class ReferenceType extends Type {
 	isNull() => @name == 'Null'
 	isNullable() => @nullable || @name == 'Null'
 	isNumber() => @name == 'Number' || this.type().isNumber()
-	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String' || @name == 'Struct'))
+	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String' || @name == 'Struct' || @name == 'Tuple'))
 	isReference() => true
 	isReducible() => true
 	isRequired() => this.type().isRequired()
 	isSpread() => @spread
 	isString() => @name == 'String' || this.type().isString()
 	isStruct() => @name == 'Struct' || this.type().isStruct()
+	isTuple() => @name == 'Tuple' || this.type().isTuple()
 	isTypeOf(): Boolean => $typeofs[@name]
 	isUnion() => this.type().isUnion()
 	isVoid() => @name == 'Void' || this.type().isVoid()
@@ -565,6 +570,9 @@ class ReferenceType extends Type {
 			else if @type.isStruct() {
 				fragments.code($comma, @name, $comma, '"Struct"')
 			}
+			else if @type.isTuple() {
+				fragments.code($comma, @name, $comma, '"Tuple"')
+			}
 			else {
 				@type.toCastFragments(fragments)
 			}
@@ -649,6 +657,9 @@ class ReferenceType extends Type {
 				}
 				else if @type.isStruct() {
 					fragments.code(`isStructInstance`)
+				}
+				else if @type.isTuple() {
+					fragments.code(`isTupleInstance`)
 				}
 
 				fragments.code(`(`).compile(node).code(`, `)

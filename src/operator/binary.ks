@@ -567,7 +567,7 @@ class BinaryOperatorTypeEquality extends Expression {
 						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
 					}
 				}
-				else if type.isClass() || type.isEnum() || type.isStruct() || type.isUnion() || type.isExclusion() {
+				else if type.isClass() || type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isExclusion() {
 					unless type.isAssignableToVariable(@left.type(), true) {
 						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
 					}
@@ -655,7 +655,7 @@ class BinaryOperatorTypeInequality extends Expression {
 						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
 					}
 				}
-				else if type.isEnum() || type.isStruct() || type.isUnion() || type.isExclusion() {
+				else if type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isExclusion() {
 					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
 						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
 					}

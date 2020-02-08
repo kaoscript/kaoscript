@@ -34,6 +34,8 @@ const $natives = { // {{{
 	string: true
 	Struct: true
 	struct: true
+	Tuple: true
+	tuple: true
 	Void: true
 	void: true
 } // }}}
@@ -60,6 +62,7 @@ const $virtuals = {
 	Namespace: true
 	Primitive: true
 	Struct: true
+	Tuple: true
 }
 
 #[flags]
@@ -114,6 +117,7 @@ enum TypeKind<String> {
 	Reference
 	Sealable
 	Struct
+	Tuple
 	Union
 }
 
@@ -508,6 +512,9 @@ abstract class Type {
 					TypeKind::Struct => {
 						return StructType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind::Tuple => {
+						return TupleType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
 					TypeKind::Union => {
 						return UnionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
@@ -521,7 +528,7 @@ abstract class Type {
 		isNative(name: String) => $natives[name] == true
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
 		toNamedType(name: String, type: Type): Type { // {{{
-			if type is AliasType || type is ClassType || type is EnumType || type is StructType {
+			if type is AliasType || type is ClassType || type is EnumType || type is StructType || type is TupleType {
 				return new NamedType(name, type)
 			}
 			else if type is NamespaceType {
@@ -562,6 +569,7 @@ abstract class Type {
 			'Enum'		=> return this.isEnum()
 			'Namespace'	=> return this.isNamespace()
 			'Struct'	=> return this.isStruct()
+			'Tuple'		=> return this.isTuple()
 		}
 
 		return false
@@ -675,6 +683,7 @@ abstract class Type {
 	isString() => false
 	isStruct() => false
 	isSystemic() => @systemic
+	isTuple() => false
 	isTypeOf() => false
 	isUnion() => false
 	isVirtual() => false
@@ -761,6 +770,7 @@ include {
 	'./type/dictionary'
 	'./type/parameter'
 	'./type/struct'
+	'./type/tuple'
 	'./type/exclusion'
 	'./type/fusion'
 	'./type/union'

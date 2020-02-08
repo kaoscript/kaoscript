@@ -55,15 +55,13 @@ class MemberExpression extends Expression {
 				@property.analyse()
 				@property.prepare()
 
-				if type.isStruct() {
-					if type.isArray() {
-						if @property is NumberLiteral {
-							if const property = type.discard().getProperty(@property.value()) {
-								@type = property.type()
-							}
-							else if type.isExhaustive(this) {
-								ReferenceException.throwNotDefinedProperty(@property.value(), this)
-							}
+				if type.isTuple() {
+					if @property is NumberLiteral {
+						if const property = type.discard().getProperty(@property.value()) {
+							@type = property.type()
+						}
+						else if type.isExhaustive(this) {
+							ReferenceException.throwNotDefinedProperty(@property.value(), this)
 						}
 					}
 				}
@@ -89,13 +87,12 @@ class MemberExpression extends Expression {
 				}
 			}
 			else {
-				const isStruct = type.isStruct()
-				const isArrayStruct = isStruct && type.isArray()
+				const isTuple = type.isTuple()
 
 				@property = @data.property.name
 
-				if 48 <= @property.charCodeAt(0) <= 57 {
-					unless isArrayStruct {
+				if !isTuple {
+					if 48 <= @property.charCodeAt(0) <= 57 {
 						SyntaxException.throwInvalidIdentifier(@property, this)
 					}
 				}
@@ -104,7 +101,7 @@ class MemberExpression extends Expression {
 					@type = type.parameter()
 				}
 
-				if isArrayStruct {
+				if isTuple {
 					@computed = true
 					@stringProperty = true
 
@@ -121,7 +118,7 @@ class MemberExpression extends Expression {
 						@path = `\(@object.path())[\(@property)]`
 					}
 				}
-				else if isStruct {
+				else if type.isStruct() {
 					if const property = type.getProperty(@property) {
 						@type = property.type()
 					}
@@ -177,7 +174,7 @@ class MemberExpression extends Expression {
 				@property = @data.property.name
 
 				if 48 <= @property.charCodeAt(0) <= 57 {
-					unless type.isStruct() && type.isArray() {
+					unless type.isTuple() {
 						SyntaxException.throwInvalidIdentifier(@property, this)
 					}
 				}

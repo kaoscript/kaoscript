@@ -50,6 +50,7 @@ const $typeofs = { // {{{
 	RegExp: true
 	String: true
 	Struct: true
+	Tuple: true
 } // }}}
 
 const $ast = {
@@ -253,6 +254,7 @@ include {
 	'./include/expression'
 	'./include/parameter'
 	'./statement/struct'
+	'./statement/tuple'
 	'./include/operator'
 	'./include/block'
 	'./include/macro'
@@ -441,6 +443,7 @@ const $statements = {
 	`\(NodeKind::SwitchStatement)`				: SwitchStatement
 	`\(NodeKind::ThrowStatement)`				: ThrowStatement
 	`\(NodeKind::TryStatement)`					: TryStatement
+	`\(NodeKind::TupleDeclaration)`				: TupleDeclaration
 	`\(NodeKind::TypeAliasDeclaration)`			: TypeAliasDeclaration
 	`\(NodeKind::UnlessStatement)`				: UnlessStatement
 	`\(NodeKind::UntilStatement)`				: UntilStatement
@@ -613,6 +616,7 @@ export class Compiler {
 			format: {}
 			rules: {
 				assertNewStruct: true
+				assertNewTuple: true
 				assertParameter: true
 				assertParameterType: true
 				noUndefined: false

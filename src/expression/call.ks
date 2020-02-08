@@ -167,7 +167,7 @@ class CallExpression extends Expression {
 					else if type is OverloadedFunctionType {
 						this.makeCallee(type, variable.name())
 					}
-					else if type.isStruct() {
+					else if type.isStruct() || type.isTuple() {
 						this.addCallee(new DefaultCallee(@data, null, type, this))
 					}
 					else {
@@ -175,7 +175,7 @@ class CallExpression extends Expression {
 					}
 
 					if @named {
-						if type.isStruct() {
+						if type.isStruct() || type.isTuple() {
 							@arguments = type.discard().sortArguments(@arguments, this)
 						}
 						else {
@@ -881,7 +881,7 @@ class DefaultCallee extends Callee {
 
 			@type = type.returnType()
 		}
-		else if type.isStruct() {
+		else if type.isStruct() || type.isTuple() {
 			@type = node.scope().reference(type)
 		}
 		else {

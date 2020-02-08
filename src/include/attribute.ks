@@ -28,6 +28,8 @@ const $rules = {
 	'dont-assert-parameter-type':	['assertParameterType', false]
 	'assert-new-struct':			['assertNewStruct', true]
 	'dont-assert-new-struct':		['assertNewStruct', false]
+	'assert-new-tuple':				['assertNewTuple', true]
+	'dont-assert-new-tuple':		['assertNewTuple', false]
 }
 
 class Attribute {

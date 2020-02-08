@@ -1,1 +1,0 @@
-TypeException: The variable of type "Array" can never be of type "Struct" (line 4, file "fixtures/compile/struct/struct.array.test.struct.is_r.ks")

@@ -1,1 +1,0 @@
-TypeException: The variable of type "Array" can never be of type "Pair" (line 6, file "fixtures/compile/struct/struct.array.test.instance.is_r.ks")

@@ -114,6 +114,9 @@ class NamedType extends Type {
 			else if @type.isStruct() && value.isStruct() {
 				return @name == 'Struct' || this.isInheriting(value) || (downcast && value.isInheriting(this))
 			}
+			else if @type.isTuple() && value.isTuple() {
+				return @name == 'Tuple' || this.isInheriting(value) || (downcast && value.isInheriting(this))
+			}
 			else {
 				return false
 			}
@@ -284,6 +287,7 @@ class NamedType extends Type {
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
 	isSystemic() => @type.isSystemic()
+	isTuple() => @type.isTuple()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
 	isVirtual() => $virtuals[@name]
@@ -329,6 +333,14 @@ class NamedType extends Type {
 			}
 			else if that.type() is StructType {
 				if @type is StructType {
+					return this.matchInheritanceOf(that)
+				}
+				else {
+					return @type.matchContentOf(that.type())
+				}
+			}
+			else if that.type() is TupleType {
+				if @type is TupleType {
 					return this.matchInheritanceOf(that)
 				}
 				else {
@@ -403,7 +415,7 @@ class NamedType extends Type {
 		return false
 	} // }}}
 	metaReference(references, mode) { // {{{
-		if @type is ClassType || @type is StructType {
+		if @type is ClassType || @type is StructType || @type is TupleType {
 			return @type.metaReference(references, @name, mode)
 		}
 		else {

@@ -38,7 +38,7 @@ class ArrayBinding extends Expression {
 				element.prepare()
 			}
 		}
-		else if @type.isStruct() {
+		else if @type.isTuple() {
 			const type = @type.discard()
 
 			for const element, index in @elements {
