@@ -86,27 +86,40 @@ class UnionType extends Type {
 			}
 		}
 		else {
-			let notMatched = true
+			auto notMatched = true
 
-			for const t, i in @types while notMatched {
-				if t.matchContentOf(type) {
-					notMatched = false
+			if type.isNullable() {
+				for const t, i in @types while notMatched {
+					if t.matchContentOf(type) {
+						notMatched = false
 
-					if !t.equals(type) {
-						@types[i] = type
+						if !t.equals(type) {
+							@types[i] = type
 
-						if !@nullable && type.isNullable() {
 							@nullable = true
 						}
 					}
 				}
-			}
 
-			if notMatched {
-				@types.push(type)
+				if notMatched {
+					@types.push(type)
 
-				if !@nullable && type.isNullable() {
 					@nullable = true
+				}
+			}
+			else {
+				for const t, i in @types while notMatched {
+					if type.matchContentOf(t) {
+						notMatched = false
+
+						if !t.equals(type) {
+							@types[i] = type
+						}
+					}
+				}
+
+				if notMatched {
+					@types.push(type)
 				}
 			}
 		}
