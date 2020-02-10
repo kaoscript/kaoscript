@@ -1328,6 +1328,7 @@ class NamedArgument extends Expression {
 		@value.translate()
 	} // }}}
 	isAwait() => @value.isAwait()
+	isUsingVariable(name) => @value.isUsingVariable(name)
 	name() => @name
 	toFragments(fragments, mode) { // {{{
 		@value.toFragments(fragments, mode)

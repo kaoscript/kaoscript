@@ -14,7 +14,7 @@ class StructDeclaration extends Statement {
 	override analyse() { // {{{
 		@name = @data.name.name
 
-		@struct = new ObjectStructType(@scope)
+		@struct = new StructType(@scope)
 
 		if @data.extends? {
 			@extending = true

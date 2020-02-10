@@ -1,8 +1,24 @@
-abstract class StructType extends Type {
+class StructType extends Type {
 
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			return ObjectStructType.import(index, data, metadata, references, alterations, queue, scope, node)
+			const value = new StructType(scope)
+
+			queue.push(() => {
+				let index = 0
+
+				for const type, name of data.fields {
+					value.addField(StructFieldType.fromMetadata(index, name, type, metadata, references, alterations, queue, scope, node))
+
+					++index
+				}
+
+				if data.extends? {
+					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+				}
+			})
+
+			return value
 		} // }}}
 	}
 	private {
@@ -26,66 +42,6 @@ abstract class StructType extends Type {
 			return @count
 		}
 	} // }}}
-	extends() => @extends
-	extends(@extends) { // {{{
-		@extending = true
-	} // }}}
-	getProperty(name: String) { // {{{
-		if const field = @fields[name] {
-			return field
-		}
-
-		if @extending {
-			return @extends.type().getProperty(name)
-		}
-		else {
-			return null
-		}
-	} // }}}
-	isExtending() => @extending
-	override isStruct() => true
-	listAllFields(list = []) { // {{{
-		if @extending {
-			@extends.type().listAllFields(list)
-		}
-
-		for const field of @fields {
-			list.push(field)
-		}
-
-		return list
-	} // }}}
-	metaReference(references, name, mode) => [this.toMetadata(references, mode), name]
-	override toFragments(fragments, node) { // {{{
-		NotImplementedException.throw()
-	} // }}}
-	override toTestFragments(fragments, node) { // {{{
-		NotImplementedException.throw()
-	} // }}}
-}
-
-class ObjectStructType extends StructType {
-	static {
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const value = new ObjectStructType(scope)
-
-			queue.push(() => {
-				let index = 0
-
-				for const type, name of data.fields {
-					value.addField(StructFieldType.fromMetadata(index, name, type, metadata, references, alterations, queue, scope, node))
-
-					++index
-				}
-
-				if data.extends? {
-					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
-				}
-			})
-
-			return value
-		} // }}}
-	}
 	override export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Struct
@@ -102,6 +58,10 @@ class ObjectStructType extends StructType {
 
 		return export
 	} // }}}
+	extends() => @extends
+	extends(@extends) { // {{{
+		@extending = true
+	} // }}}
 	getAllFieldsMap(list = {}) { // {{{
 		if @extending {
 			@extends.type().getAllFieldsMap(list)
@@ -113,14 +73,39 @@ class ObjectStructType extends StructType {
 
 		return list
 	} // }}}
+	getProperty(name: String) { // {{{
+		if const field = @fields[name] {
+			return field
+		}
+
+		if @extending {
+			return @extends.type().getProperty(name)
+		}
+		else {
+			return null
+		}
+	} // }}}
 	override isDictionary() => true
-	isMatching(value: ObjectStructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
+	isExtending() => @extending
+	isMatching(value: StructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
 		if value.name() == 'Struct' {
 			return true
 		}
 
 		return false
+	} // }}}
+	override isStruct() => true
+	listAllFields(list = []) { // {{{
+		if @extending {
+			@extends.type().listAllFields(list)
+		}
+
+		for const field of @fields {
+			list.push(field)
+		}
+
+		return list
 	} // }}}
 	listAllFieldNames(list = []) { // {{{
 		if @extending {
@@ -133,6 +118,7 @@ class ObjectStructType extends StructType {
 
 		return list
 	} // }}}
+	metaReference(references, name, mode) => [this.toMetadata(references, mode), name]
 	sortArguments(arguments: Array, node) { // {{{
 		const order = []
 
@@ -247,6 +233,12 @@ class ObjectStructType extends StructType {
 		}
 
 		return order
+	} // }}}
+	override toFragments(fragments, node) { // {{{
+		NotImplementedException.throw()
+	} // }}}
+	override toTestFragments(fragments, node) { // {{{
+		NotImplementedException.throw()
 	} // }}}
 }
 

@@ -108,6 +108,17 @@ class NamedTupleType extends TupleType {
 
 		return export
 	} // }}}
+	getAllFieldsMap(list = {}) { // {{{
+		if @extending {
+			@extends.type().getAllFieldsMap(list)
+		}
+
+		for const field, name of @fields {
+			list[name] = field
+		}
+
+		return list
+	} // }}}
 	override isArray() => true
 	isMatching(value: TupleType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
@@ -117,8 +128,120 @@ class NamedTupleType extends TupleType {
 
 		return false
 	} // }}}
-	sortArguments(arguments: Array) { // {{{
-		NotImplementedException.throw()
+	sortArguments(arguments: Array, node) { // {{{
+		const order = []
+
+		const fields = this.getAllFieldsMap()
+		const count = this.count()
+
+		const nameds = {}
+		let namedCount = 0
+
+		const shorthands = {}
+		const leftovers = []
+
+		for const argument in arguments {
+			if argument is NamedArgument {
+				const name = argument.name()
+
+				if !?fields[name] {
+					SyntaxException.throwUnrecognizedStructField(name, node)
+				}
+
+				nameds[name] = argument
+
+				++namedCount
+			}
+			else if argument is IdentifierLiteral {
+				const name = argument.name()
+
+				if !?fields[name] {
+					SyntaxException.throwUnrecognizedStructField(name, node)
+				}
+
+				shorthands[name] = argument
+			}
+			else {
+				leftovers.push(argument)
+			}
+		}
+
+		if namedCount == arguments.length {
+			if namedCount == count {
+				for const field, name of fields {
+					order.push(nameds[name])
+				}
+			}
+			else {
+				for const field, name of fields {
+					if nameds[name]? {
+						order.push(nameds[name])
+					}
+					else if field.isRequired() {
+						SyntaxException.throwMissingStructField(name, node)
+					}
+					else {
+						order.push(new Literal('null', node))
+					}
+				}
+			}
+		}
+		else {
+			const groups = []
+			let required = 0
+			let optional = 0
+
+			for const field, name of fields {
+				if nameds[name]? {
+					order.push(nameds[name])
+				}
+				else if shorthands[name]? {
+					order.push(shorthands[name])
+				}
+				else {
+					const index = order.length
+
+					order.push(null)
+					groups.push([index, field])
+
+					if field.isRequired() {
+						++required
+					}
+					else {
+						++optional
+					}
+				}
+			}
+
+			if leftovers.length < required {
+				SyntaxException.throwNotEnoughStructFields(node)
+			}
+			else if leftovers.length > required + optional {
+				SyntaxException.throwTooMuchStructFields(node)
+			}
+
+			let countdown = leftovers.length - required
+			let leftover = 0
+
+			for const [index, field] in groups {
+				if field.isRequired() {
+					order[index] = leftovers[leftover]
+
+					++leftover
+				}
+				else if countdown > 0 {
+					order[index] = leftovers[leftover]
+
+					++leftover
+					--countdown
+				}
+				else {
+					order[index] = new Literal('null', node)
+				}
+			}
+		}
+
+		return order
 	} // }}}
 }
 
