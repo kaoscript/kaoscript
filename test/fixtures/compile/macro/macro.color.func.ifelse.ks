@@ -16,6 +16,8 @@ Color.registerSpace!({
 			else if that._bar {
 
 			}
+
+			return ''
 		}
 	}
 })

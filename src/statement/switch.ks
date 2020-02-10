@@ -463,6 +463,19 @@ class SwitchStatement extends Statement {
 			@initializedVariables[name] = map
 		}
 	} // }}}
+	isExit() { // {{{
+		unless @hasDefaultClause {
+			return false
+		}
+
+		for const clause in @clauses {
+			if !clause.body.isExit() {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
 	isJumpable() => true
 	isLateInitializable() => true
 	isUsingVariable(name) { // {{{

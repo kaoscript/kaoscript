@@ -1,0 +1,1 @@
+TypeException: A value of type "Number" is expected to be returned (line 1, file "fixtures/compile/function/function.exit.nret.while.ks")

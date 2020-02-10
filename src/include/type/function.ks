@@ -278,9 +278,8 @@ class FunctionType extends Type {
 				}
 			}
 		}
-		else {
-			return false
-		}
+
+		return false
 	} // }}}
 	isAsync() => @async
 	isCatchingError(error): Boolean { // {{{

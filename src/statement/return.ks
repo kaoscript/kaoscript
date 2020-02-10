@@ -68,7 +68,7 @@ class ReturnStatement extends Statement {
 		}
 		else if @value == null {
 			if !type.isVoid() {
-				TypeException.throwExpectedReturnedValue(this)
+				TypeException.throwExpectedReturnedValue(type, this)
 			}
 		}
 		else {

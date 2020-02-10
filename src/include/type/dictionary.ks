@@ -54,7 +54,7 @@ class DictionaryType extends Type {
 		return export
 	} // }}}
 	getProperty(name: String): Type? => @properties[name]
-	isAssignableToVariable(value, anycast, nullcast, downcast) {
+	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
 		if value.isAny() || value.isDictionary() {
 			if this.isNullable() {
 				return nullcast || value.isNullable()
@@ -70,10 +70,9 @@ class DictionaryType extends Type {
 				}
 			}
 		}
-		else {
-			return false
-		}
-	}
+
+		return false
+	} // }}}
 	isMatching(value: DictionaryType, mode: MatchingMode) { // {{{
 		if this == value {
 			return true

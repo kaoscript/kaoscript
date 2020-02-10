@@ -122,7 +122,7 @@ export class IOException extends Exception {
 
 export class NotImplementedException extends Exception {
 	static {
-		throw(...arguments) ~ NotImplementedException { // {{{
+		throw(...arguments): Never ~ NotImplementedException { // {{{
 			throw new NotImplementedException(...arguments)
 		} // }}}
 	}
@@ -446,8 +446,8 @@ export class TypeException extends Exception {
 		throwConstructorWithoutNew(name, node): Never ~ TypeException { // {{{
 			throw new TypeException(`Class constructor "\(name)" cannot be invoked without 'new'`, node)
 		} // }}}
-		throwExpectedReturnedValue(node) ~ TypeException { // {{{
-			throw new TypeException(`A value is expected to be returned`, node)
+		throwExpectedReturnedValue(type, node) ~ TypeException { // {{{
+			throw new TypeException(`A value of type \(type.toQuote(true)) is expected to be returned`, node)
 		} // }}}
 		throwExpectedThrownError(node) ~ TypeException { // {{{
 			throw new TypeException(`An error is expected to be thrown`, node)

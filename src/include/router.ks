@@ -574,7 +574,7 @@ namespace Router {
 			}
 		} // }}}
 
-		func filterOutNodes(node, forceFilter: Boolean): Boolean { // {{{
+		func filterOutNodes(node, forceFilter: Boolean): Void { // {{{
 			let n = 0
 			while n < node.order.length {
 				const name = node.order[n]

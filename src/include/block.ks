@@ -86,11 +86,8 @@ class Block extends AbstractNode {
 			else if @type.isAny() && !@type.isExplicit() {
 				// do nothing
 			}
-			else if @statements.length == 0 {
-				TypeException.throwExpectedReturnedValue(this)
-			}
-			else {
-				@statements[@statements.length - 1].checkReturnType(@type)
+			else if @statements.length == 0 || !@statements.last().isExit() {
+				TypeException.throwExpectedReturnedValue(@type, this)
 			}
 		}
 	} // }}}

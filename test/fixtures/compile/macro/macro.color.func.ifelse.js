@@ -32,6 +32,7 @@ module.exports = function() {
 				}
 				else if(that._bar === true) {
 				}
+				return "";
 			};
 			return d;
 		})();
