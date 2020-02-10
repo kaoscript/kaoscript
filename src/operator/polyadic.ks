@@ -619,6 +619,7 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	prepare() { // {{{
 		const lastIndex = @operands.length - 1
+		const originals = {}
 
 		for const operand, index in @operands {
 			operand.prepare()
@@ -633,9 +634,20 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 
 			if index < lastIndex {
 				for const data, name of operand.inferWhenFalseTypes({}) {
+					if data.isVariable && !?originals[name] {
+						originals[name] = {
+							isVariable: true
+							type: @scope.getVariable(name).getRealType()
+						}
+					}
+
 					@scope.updateInferable(name, data, this)
 				}
 			}
+		}
+
+		for const data, name of originals {
+			@scope.updateInferable(name, data, this)
 		}
 	} // }}}
 	inferTypes(inferables) { // {{{
@@ -705,25 +717,26 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 		return inferables
 	} // }}}
 	inferWhenTrueTypes(inferables) { // {{{
+		const typings = {}
+
 		for const data, name of @operands[0].inferWhenTrueTypes({}) {
-			if inferables[name]? {
-				if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
-					inferables[name] = data
-				}
-				else {
-					inferables[name] = {
-						isVariable: data.isVariable
-						type: Type.union(@scope, inferables[name].type, data.type)
-					}
-				}
-			}
-			else {
-				inferables[name] = data
+			inferables[name] = data
+
+			if data.isTyping {
+				typings[name] = true
 			}
 		}
 
-		for const operand in @operands from 1 {
-			for const data, name of operand.inferWhenTrueTypes({}) {
+		for const operand, index in @operands from 1 {
+			const types = operand.inferWhenTrueTypes({})
+
+			for const _, name of typings {
+				if !?types[name] {
+					delete inferables[name]
+				}
+			}
+
+			for const data, name of types {
 				if inferables[name]? {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data

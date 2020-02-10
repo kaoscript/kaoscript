@@ -222,11 +222,11 @@ class BlockScope extends Scope {
 	getRawLine() => @module.getRawLine()
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 	getTempIndex() => @tempIndex
-	getVariable(name): Variable => this.getVariable(name, @line)
-	getVariable(name, line: Number): Variable { // {{{
+	getVariable(name): Variable? => this.getVariable(name, @line)
+	getVariable(name, line: Number): Variable? { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
-			let variable: Variable? = null
+			let variable = null
 
 			if line == -1 || line > @line {
 				variable = variables.last()
@@ -241,7 +241,7 @@ class BlockScope extends Scope {
 				return @parent.getVariable(name, -1)
 			}
 			else if variable != null {
-				return variable
+				return variable!!
 			}
 		}
 
@@ -444,7 +444,7 @@ class BlockScope extends Scope {
 		return variable
 	} // }}}
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, node: AbstractNode): Variable { // {{{
-		let variable = this.getVariable(name)
+		let variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
 			if !type.isAssignableToVariable(variable.getDeclaredType(), downcast) {

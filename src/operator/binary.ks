@@ -598,6 +598,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
+				isTyping: true
 				type: @trueType
 			}
 		}
@@ -695,6 +696,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		if @left.isInferable() {
 			inferables[@left.path()] = {
 				isVariable: @left is IdentifierLiteral
+				isTyping: true
 				type: @trueType
 			}
 		}

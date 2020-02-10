@@ -5,22 +5,17 @@ module.exports = function() {
 		Green: 1,
 		Blue: 2
 	});
-	function foobar(x) {
+	function foobar(color) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
 		}
-		if(x === void 0) {
-			x = null;
+		if(color === void 0) {
+			color = null;
 		}
-		else if(x !== null && !Type.isEnumInstance(x, Color)) {
-			throw new TypeError("'x' is not of type 'Color?'");
+		else if(color !== null && !Type.isEnumInstance(color, Color)) {
+			throw new TypeError("'color' is not of type 'Color?'");
 		}
-		if(x.value === null) {
+		if(color === Color.Red) {
 		}
-		while(quxbaz().value !== null) {
-		}
-	}
-	function quxbaz() {
-		return null;
 	}
 };

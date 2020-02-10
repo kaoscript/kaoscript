@@ -2,7 +2,7 @@ class WhileStatement extends Statement {
 	private lateinit {
 		_bindingScope: Scope
 		_body					= null
-		_bodyScope: Scope?		= null
+		_bodyScope: Scope
 		_condition
 		_declared: Boolean		= false
 		_variable
@@ -54,6 +54,15 @@ class WhileStatement extends Statement {
 		@scope.line(@data.body.start.line)
 
 		@body.prepare()
+
+		for const inferable, name of @bodyScope.listUpdatedInferables() when inferable.isVariable {
+			if const variable = @scope.getVariable(name) {
+				@scope.updateInferable(name, {
+					isVariable: true
+					type: @scope.inferVariableType(variable, inferable.type)
+				}, this)
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		if @declared {

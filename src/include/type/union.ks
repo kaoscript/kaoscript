@@ -405,7 +405,14 @@ class UnionType extends Type {
 	} // }}}
 	type() { // {{{
 		if @types.length == 1 {
-			return @types[0]
+			const type = @types[0]
+
+			if @nullable == type.isNullable() {
+				return type
+			}
+			else {
+				return type.setNullable(@nullable)
+			}
 		}
 		else {
 			return this

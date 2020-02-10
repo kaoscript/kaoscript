@@ -185,7 +185,7 @@ class ModuleScope extends Scope {
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
-			let variable: Variable? = null
+			let variable = null
 
 			if @lastLine {
 				variable = variables.last()

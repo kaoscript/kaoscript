@@ -91,13 +91,29 @@ abstract class Scope {
 	abstract getDefinedVariable(name: String): Variable?
 	getLineOffset(): Number => 0
 	abstract getRenamedIndex(name: String): Number
-	abstract getVariable(name: String, line: Number = -1): Variable
+	abstract getVariable(name: String, line: Number = -1): Variable?
 	hasBleedingVariable(name: String): Boolean => this.hasDefinedVariable(name)
 	abstract hasDeclaredVariable(name: String): Boolean
 	abstract hasDefinedVariable(name: String): Boolean
 	hasMacro(name: String): Boolean => false
 	abstract hasVariable(name: String, line: Number = -1): Boolean
 	line(): Number => 0
+	inferVariableType(variable: Variable, type: Type): Type { // {{{
+		if variable.getRealType().isNull() {
+			return variable.getDeclaredType()
+		}
+		else if type.isNull() {
+			if variable.getRealType().isNullable() {
+				return variable.getRealType()
+			}
+			else {
+				return variable.getDeclaredType()
+			}
+		}
+		else {
+			return Type.union(this, type, variable.getRealType())
+		}
+	} // }}}
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
 	isPredefinedVariable(name: String): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()

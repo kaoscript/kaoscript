@@ -740,7 +740,6 @@ export class Color {
 		return this.copy(new Color())
 	} // }}}
 
-	/* contrast(color: Color): {ratio: float, error: float, min: float, max: float} ~ Error { // {{{ */
 	contrast(color: Color) ~ Error { // {{{
 		let a = this._alpha
 

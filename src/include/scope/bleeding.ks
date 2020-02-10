@@ -68,12 +68,12 @@ class BleedingScope extends Scope {
 	getRawLine() => @parent.getRawLine()
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : @parent.getRenamedIndex(name)
 	getTempIndex() => @parent.getTempIndex()
-	getVariable(name): Variable => this.getVariable(name, @parent.line())
-	getVariable(name, line: Number): Variable { // {{{
+	getVariable(name): Variable? => this.getVariable(name, @parent.line())
+	getVariable(name, line: Number): Variable? { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			const currentLine = @parent.line()
-			let variable: Variable? = null
+			let variable = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
@@ -88,7 +88,7 @@ class BleedingScope extends Scope {
 				return @parent.getVariable(name, -1)
 			}
 			else if variable != null {
-				return variable
+				return variable!!
 			}
 		}
 

@@ -53,7 +53,7 @@ class HollowScope extends Scope {
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
-			let variable: Variable? = null
+			let variable = null
 
 			if @parent.isAtLastLine() {
 				variable = variables.last()
@@ -80,12 +80,12 @@ class HollowScope extends Scope {
 	getRawLine() => @parent.getRawLine()
 	getRenamedIndex(name: String): Number => @parent.getRenamedIndex(name)
 	getTempIndex() => @parent.getTempIndex()
-	getVariable(name): Variable => this.getVariable(name, @parent.line())
-	getVariable(name, line: Number): Variable { // {{{
+	getVariable(name): Variable? => this.getVariable(name, @parent.line())
+	getVariable(name, line: Number): Variable? { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			const currentLine = @parent.line()
-			let variable: Variable? = null
+			let variable = null
 
 			if line == -1 || line > currentLine {
 				variable = variables.last()
@@ -100,7 +100,7 @@ class HollowScope extends Scope {
 				return @parent.getVariable(name, -1)
 			}
 			else if variable != null {
-				return variable
+				return variable!!
 			}
 		}
 
@@ -141,7 +141,7 @@ class HollowScope extends Scope {
 	} // }}}
 	renameNext(name, line) => @parent.renameNext(name, line)
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, node: AbstractNode): Variable { // {{{
-		let variable = this.getVariable(name)
+		let variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
 			if !type.isAssignableToVariable(variable.getDeclaredType(), downcast) {

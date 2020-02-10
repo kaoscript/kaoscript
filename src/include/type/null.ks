@@ -16,7 +16,7 @@ class NullType extends Type {
 		throw new NotSupportedException()
 	} // }}}
 	export(references, mode)
-	getProperty(name) => Type.Any
+	getProperty(name) => AnyType.NullableUnexplicit
 	isAssignableToVariable(value, anycast, nullcast, downcast) => nullcast || value.isNullable()
 	isExplicit() => @explicit
 	isExportable() => true

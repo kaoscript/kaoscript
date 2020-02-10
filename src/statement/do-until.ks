@@ -1,14 +1,17 @@
 class DoUntilStatement extends Statement {
-	private {
+	private lateinit {
 		_body
+		_bodyScope: Scope
 		_condition
 	}
 	analyse() { // {{{
-		@condition = $compile.expression(@data.condition, this)
-		@condition.analyse()
+		@bodyScope = this.newScope(@scope, ScopeType::InlineBlock)
 
-		@body = $compile.block(@data.body, this)
+		@body = $compile.block(@data.body, this, @bodyScope)
 		@body.analyse()
+
+		@condition = $compile.expression(@data.condition, this, @scope)
+		@condition.analyse()
 	} // }}}
 	prepare() { // {{{
 		@condition.prepare()
@@ -20,6 +23,15 @@ class DoUntilStatement extends Statement {
 		this.assignTempVariables(@scope)
 
 		@body.prepare()
+
+		for const inferable, name of @bodyScope.listUpdatedInferables() when inferable.isVariable {
+			if const variable = @scope.getVariable(name) {
+				@scope.updateInferable(name, {
+					isVariable: true
+					type: @scope.inferVariableType(variable, inferable.type)
+				}, this)
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		@condition.translate()

@@ -627,6 +627,7 @@ abstract class Type {
 	isBoolean() => false
 	isCloned() => false
 	isClass() => false
+	isComparableWith(type: Type): Boolean => type.isAssignableToVariable(this, true, false, false)
 	isContainedIn(types) { // {{{
 		for type in types {
 			if this.equals(type) {

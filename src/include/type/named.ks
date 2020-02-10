@@ -155,6 +155,7 @@ class NamedType extends Type {
 	isBoolean() => @type.isBoolean()
 	isCloned() => @cloned
 	isClass() => @type.isClass()
+	override isComparableWith(type) => @type.isComparableWith(type)
 	isDictionary() => @type.isDictionary()
 	isEnum() => @type.isEnum()
 	isExclusion() => @type.isExclusion()

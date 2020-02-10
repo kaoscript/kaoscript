@@ -115,6 +115,15 @@ class ForRangeStatement extends Statement {
 
 		@bindingScope.releaseTempName(@boundName) if @boundName?
 		@bindingScope.releaseTempName(@byName) if @byName?
+
+		for const inferable, name of @bodyScope.listUpdatedInferables() {
+			if const variable = @scope.getVariable(name) {
+				@scope.updateInferable(name, {
+					isVariable: true
+					type: @scope.inferVariableType(variable, inferable.type)
+				}, this)
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		@value.translate()

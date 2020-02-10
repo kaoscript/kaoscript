@@ -104,18 +104,29 @@ class IfStatement extends Statement {
 					const conditionInferables = @condition.inferWhenFalseTypes({})
 					const trueInferables = @whenTrueScope.listUpdatedInferables()
 
-					for const _, name of trueInferables when conditionInferables[name]? {
-						const conditionType = conditionInferables[name].type
-						const trueType = trueInferables[name].type
+					for const inferable, name of trueInferables {
+						const trueType = inferable.type
 
-						if trueType.equals(conditionType) {
-							@scope.updateInferable(name, trueInferables[name], this)
+						if conditionInferables[name]? {
+							const conditionType = conditionInferables[name].type
+
+							if trueType.equals(conditionType) {
+								@scope.updateInferable(name, inferable, this)
+							}
+							else {
+								@scope.updateInferable(name, {
+									isVariable: inferable.isVariable
+									type: Type.union(@scope, trueType, conditionType)
+								}, this)
+							}
 						}
-						else {
-							@scope.updateInferable(name, {
-								isVariable: trueInferables[name].isVariable
-								type: Type.union(@scope, trueType, conditionType)
-							}, this)
+						else if inferable.isVariable {
+							if const variable = @scope.getVariable(name) {
+								@scope.updateInferable(name, {
+									isVariable: true
+									type: @scope.inferVariableType(variable, trueType)
+								}, this)
+							}
 						}
 					}
 				}
@@ -204,17 +215,37 @@ class IfStatement extends Statement {
 				const trueInferables = @whenTrueScope.listUpdatedInferables()
 				const falseInferables = @whenFalseScope.listUpdatedInferables()
 
-				for const _, name of trueInferables when falseInferables[name]? {
-					const trueType = trueInferables[name].type
-					const falseType = falseInferables[name].type
+				for const inferable, name of trueInferables {
+					const trueType = inferable.type
 
-					if trueType.equals(falseType) {
-						@scope.updateInferable(name, trueInferables[name], this)
+					if falseInferables[name]? {
+						const falseType = falseInferables[name].type
+
+						if trueType.equals(falseType) {
+							@scope.updateInferable(name, inferable, this)
+						}
+						else {
+							@scope.updateInferable(name, {
+								isVariable: inferable.isVariable
+								type: Type.union(@scope, trueType, falseType)
+							}, this)
+						}
 					}
-					else {
+					else if inferable.isVariable {
+						if const variable = @scope.getVariable(name) {
+							@scope.updateInferable(name, {
+								isVariable: true
+								type: Type.union(@scope, trueType, variable.getRealType())
+							}, this)
+						}
+					}
+				}
+
+				for const inferable, name of falseInferables when inferable.isVariable && !?trueInferables[name] {
+					if const variable = @scope.getVariable(name) {
 						@scope.updateInferable(name, {
-							isVariable: trueInferables[name].isVariable
-							type: Type.union(@scope, trueType, falseType)
+							isVariable: true
+							type: Type.union(@scope, inferable.type, variable.getRealType())
 						}, this)
 					}
 				}

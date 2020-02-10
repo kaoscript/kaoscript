@@ -2,7 +2,7 @@ class Foobar {
 }
 
 func foobar(x: Foobar | String | Number, y) {
-	if x is not String || x == 0 {
+	if x is not Number || x == 0 {
 		quxbaz(x)
 	}
 }

@@ -483,6 +483,9 @@ export class TypeException extends Exception {
 		throwInvalidCasting(node) ~ TypeException { // {{{
 			throw new TypeException(`Only variables can be casted`, node)
 		} // }}}
+		throwInvalidComparison(left: AbstractNode, right: AbstractNode, node) ~ TypeException { // {{{
+			throw new TypeException(`The expression \(left.toQuote(true)) of type \(left.type().toQuote(true)) can't be compared to a value of type \(right.type().toQuote(true))`, node)
+		} // }}}
 		throwInvalidCondition(expression, node) ~ TypeException { // {{{
 			throw new TypeException(`The condition \(expression.toQuote(true)) is expected to be of type "Boolean" or "Any" and not of type \(expression.type().toQuote(true))`, node)
 		} // }}}

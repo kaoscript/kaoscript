@@ -137,7 +137,6 @@ class SwitchStatement extends Statement {
 		const inferables = {}
 		auto enumConditions = 0
 		auto maxConditions = 0
-		auto first = true
 
 		let maxInferables = @clauses.length
 
@@ -167,28 +166,26 @@ class SwitchStatement extends Statement {
 			if clause.body.isExit() {
 				--maxInferables
 			}
-			else if first {
-				for const data, name of clause.body.scope().listUpdatedInferables() {
-					inferables[name] = {
-						count: 1
-						union: false
-						data
-					}
-				}
-
-				first = false
-			}
 			else {
-				for const data, name of clause.body.scope().listUpdatedInferables() when inferables[name]? {
-					if inferables[name].union {
-						inferables[name].data.type.addType(data.type)
-					}
-					else if !data.type.equals(inferables[name].data.type) {
-						inferables[name].data.type = Type.union(@scope, inferables[name].data.type, data.type)
-						inferables[name].union = inferables[name].data.type.isUnion()
-					}
+				for const data, name of clause.body.scope().listUpdatedInferables() {
+					if inferables[name]? {
+						if inferables[name].union {
+							inferables[name].data.type.addType(data.type)
+						}
+						else if !data.type.equals(inferables[name].data.type) {
+							inferables[name].data.type = Type.union(@scope, inferables[name].data.type, data.type)
+							inferables[name].union = inferables[name].data.type.isUnion()
+						}
 
-					inferables[name].count++
+						inferables[name].count++
+					}
+					else {
+						inferables[name] = {
+							count: 1
+							union: false
+							data
+						}
+					}
 				}
 			}
 		}
@@ -253,8 +250,18 @@ class SwitchStatement extends Statement {
 			@parent.initializeVariable(VariableBrief(name, type), this, this)
 		}
 
-		for const inferable, name of inferables when inferable.count == maxInferables {
-			@scope.updateInferable(name, inferable.data, this)
+		for const inferable, name of inferables {
+			if inferable.count == maxInferables {
+				@scope.updateInferable(name, inferable.data, this)
+			}
+			else if inferable.data.isVariable {
+				if const variable = @scope.getVariable(name) {
+					@scope.updateInferable(name, {
+						isVariable: true
+						type: @scope.inferVariableType(variable, inferable.data.type)
+					}, this)
+				}
+			}
 		}
 
 		if @name != null {

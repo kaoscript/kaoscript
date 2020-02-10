@@ -221,7 +221,10 @@ class EqualityOperator extends ComparisonOperator {
 		_nanRight: Boolean		= false
 	}
 	prepare() { // {{{
-		if @left.type().isEnum() && @left is not NumericBinaryOperatorExpression {
+		const leftType = @left.type()
+		const rightType = @right.type()
+
+		if leftType.isEnum() && @left is not NumericBinaryOperatorExpression {
 			@enumLeft = true
 		}
 		else if @left is IdentifierLiteral {
@@ -236,19 +239,51 @@ class EqualityOperator extends ComparisonOperator {
 			@infinity = @left.argument().value() == 'Infinity'
 		}
 
-		if @right.type().isEnum() && @right is not NumericBinaryOperatorExpression {
-			@enumRight = true
-		}
-		else if @right is IdentifierLiteral {
-			if @right.value() == 'NaN' {
-				@nanRight = true
+		if rightType.isNull() {
+			if !leftType.isNullable() && (variable ?= @right.variable()) && variable.getDeclaredType().isNull() {
+				TypeException.throwInvalidComparison(@left, @right, @node)
 			}
-			else if @right.value() == 'Infinity' {
-				@infinity = true
-			}
+
+			@enumLeft = false
 		}
-		else if @right is UnaryOperatorNegative && @right.argument() is IdentifierLiteral {
-			@infinity = @right.argument().value() == 'Infinity'
+		else {
+			if leftType.isNull() {
+				if !rightType.isNullable() && (variable ?= @left.variable()) && variable.getDeclaredType().isNull() {
+					TypeException.throwInvalidComparison(@left, @right, @node)
+				}
+			}
+			else {
+				if !leftType.isAssignableToVariable(rightType, false) && !rightType.isAssignableToVariable(leftType, false) {
+					if leftType.isEnum() {
+						unless leftType.isComparableWith(rightType) {
+							TypeException.throwInvalidComparison(@left, @right, @node)
+						}
+					}
+					else if rightType.isEnum() {
+						unless rightType.isComparableWith(leftType) {
+							TypeException.throwInvalidComparison(@left, @right, @node)
+						}
+					}
+					else {
+						TypeException.throwInvalidComparison(@left, @right, @node)
+					}
+				}
+
+				if rightType.isEnum() && @right is not NumericBinaryOperatorExpression {
+					@enumRight = true
+				}
+				else if @right is IdentifierLiteral {
+					if @right.value() == 'NaN' {
+						@nanRight = true
+					}
+					else if @right.value() == 'Infinity' {
+						@infinity = true
+					}
+				}
+				else if @right is UnaryOperatorNegative && @right.argument() is IdentifierLiteral {
+					@infinity = @right.argument().value() == 'Infinity'
+				}
+			}
 		}
 
 		if @enumLeft && @enumRight {
@@ -317,7 +352,14 @@ class EqualityOperator extends ComparisonOperator {
 		let wrap = true
 
 		if @enumLeft {
-			suffix = '.value'
+			if @left.type().isNullable() {
+				fragments.code($runtime.helper(@left), '.valueOf(')
+				wrap = false
+				suffix = ')'
+			}
+			else {
+				suffix = '.value'
+			}
 		}
 		else if @enumRight && @left.type().isAny() && !@left.type().isNull() {
 			if @left.type().isNullable() {

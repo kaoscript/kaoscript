@@ -191,6 +191,15 @@ class ForOfStatement extends Statement {
 
 		@bindingScope.releaseTempName(@expressionName) if @expressionName?
 		@bindingScope.releaseTempName(@keyName) if @keyName?
+
+		for const inferable, name of @bodyScope.listUpdatedInferables() {
+			if const variable = @scope.getVariable(name) {
+				@scope.updateInferable(name, {
+					isVariable: true
+					type: @scope.inferVariableType(variable, inferable.type)
+				}, this)
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		@expression.translate()

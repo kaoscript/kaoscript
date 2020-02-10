@@ -80,7 +80,7 @@ func $reificate(macro, node, data, ast, reification = null, separator = null) { 
 } // }}}
 
 func $serialize(macro, data, context) { // {{{
-	if data == null || data is Boolean {
+	if data is Boolean {
 		context.data += JSON.stringify(data)
 	}
 	else if data is Array {

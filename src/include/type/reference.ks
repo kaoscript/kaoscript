@@ -292,6 +292,7 @@ class ReferenceType extends Type {
 	isAsync() => false
 	isBoolean() => @name == 'Boolean' || this.type().isBoolean()
 	isClass() => @name == 'Class'
+	override isComparableWith(type) => this.type().isComparableWith(type)
 	isDictionary() => @name == 'Dictionary' || this.type().isDictionary()
 	isEnum() => @name == 'Enum' || this.type().isEnum()
 	isExhaustive() => this.type().isExhaustive()

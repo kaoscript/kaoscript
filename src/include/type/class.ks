@@ -1722,10 +1722,10 @@ class ClassMethodSetType extends OverloadedFunctionType {
 }
 
 class ClassConstructorType extends FunctionType {
-	private {
+	private lateinit {
 		_access: Accessibility					= Accessibility::Public
 		_alteration: Boolean					= false
-		_class: ClassType?
+		_class: ClassType
 		_dependent: Boolean						= false
 		_identifier: Number						= -1
 		_initVariables: Dictionary<Boolean>		= {}

@@ -74,6 +74,17 @@ class EnumType extends Type {
 	hasProperty(name: String) => name == 'value'
 	index() => @index
 	index(@index)
+	override isComparableWith(type) {
+		if this.isNumber() {
+			return type.canBeNumber()
+		}
+		else if this.isString() {
+			return type.canBeString()
+		}
+		else {
+			return false
+		}
+	}
 	isEnum() => true
 	isMatching(value: EnumType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: ReferenceType, mode: MatchingMode) { // {{{

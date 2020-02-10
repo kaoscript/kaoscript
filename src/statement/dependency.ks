@@ -64,15 +64,15 @@ abstract class DependencyStatement extends Statement {
 				return variable
 			}
 			NodeKind::EnumDeclaration => {
-				let kind = EnumTypeKind::Number
+				let ekind = EnumTypeKind::Number
 
 				if declaration.type? {
 					if Type.fromAST(declaration.type, this).isString() {
-						kind = EnumTypeKind::String
+						ekind = EnumTypeKind::String
 					}
 				}
 
-				let type = new EnumType(scope, kind)
+				let type = new EnumType(scope, ekind)
 				const variable = scope.define(declaration.name.name, true, type, this)
 
 				if kind != DependencyKind::Extern {
