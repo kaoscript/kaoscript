@@ -40,6 +40,7 @@ class DoWhileStatement extends Statement {
 	checkReturnType(type: Type) { // {{{
 		@body.checkReturnType(type)
 	} // }}}
+	isExit() => @body.isExit()
 	isJumpable() => true
 	isLoop() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @body.isUsingVariable()
