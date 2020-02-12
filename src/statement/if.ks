@@ -2,14 +2,15 @@ class IfStatement extends Statement {
 	private lateinit {
 		_analyzeStep: Boolean								= true
 		_assignedInstanceVariables							= {}
+		_bindingDeclaration: Boolean						= false
 		_bindingScope: Scope
 		_cascade: Boolean									= false
-		_condition
+		_condition: Expression
+		_declaration: VariableDeclaration
 		_declared: Boolean									= false
 		_initializedVariables: Dictionary					= {}
 		_lateInitVariables									= {}
 		_hasWhenFalse: Boolean								= false
-		_variable
 		_whenFalseExpression								= null
 		_whenFalseScope: Scope?								= null
 		_whenTrueExpression									= null
@@ -20,8 +21,14 @@ class IfStatement extends Statement {
 			@declared = true
 			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
 
-			@variable = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope)
-			@variable.analyse()
+			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
+
+			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, @cascade || @bindingDeclaration)
+			@declaration.analyse()
+
+			if @bindingDeclaration {
+				@condition = @declaration.init()
+			}
 
 			@whenTrueScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 		}
@@ -58,9 +65,14 @@ class IfStatement extends Statement {
 	} // }}}
 	prepare() { // {{{
 		if @declared {
-			@variable.prepare()
+			@declaration.prepare()
 
-			if const variable = @variable.getIdentifierVariable() {
+			if @bindingDeclaration {
+				@condition.acquireReusable(true)
+				@condition.releaseReusable()
+			}
+
+			if const variable = @declaration.getIdentifierVariable() {
 				variable.setRealType(variable.getRealType().setNullable(false))
 			}
 		}
@@ -254,7 +266,7 @@ class IfStatement extends Statement {
 	} // }}}
 	translate() { // {{{
 		if @declared {
-			@variable.translate()
+			@declaration.translate()
 		}
 		else {
 			@condition.translate()
@@ -267,9 +279,9 @@ class IfStatement extends Statement {
 		if @cascade {
 			@parent.addAssignments(variables)
 		}
-		else if @declared {
+		else if @declared && !@bindingDeclaration {
 			for const variable in variables {
-				if !@variable.isDeclararingVariable(variable) {
+				if !@declaration.isDeclararingVariable(variable) {
 					@assignments.pushUniq(variable)
 				}
 			}
@@ -404,7 +416,7 @@ class IfStatement extends Statement {
 	isLateInitializable() => true
 	isUsingVariable(name) { // {{{
 		if @declared {
-			if @variable.isUsingVariable(name) {
+			if @declaration.isUsingVariable(name) {
 				return true
 			}
 		}
@@ -422,8 +434,8 @@ class IfStatement extends Statement {
 	} // }}}
 	setCascade(@cascade)
 	toStatementFragments(fragments, mode) { // {{{
-		if @declared {
-			fragments.compile(@variable)
+		if @declared && !@bindingDeclaration {
+			fragments.compile(@declaration)
 
 			const ctrl = fragments.newControl()
 
@@ -443,37 +455,51 @@ class IfStatement extends Statement {
 		fragments.code('if(')
 
 		if @declared {
-			if @cascade {
-				let first = true
+			if @bindingDeclaration {
+				fragments
+					.code($runtime.type(this) + '.isValue(')
+					.compileReusable(@condition)
+					.code(')')
 
-				@variable.walk(name => {
-					if first {
-						fragments.code($runtime.type(this) + '.isValue((')
+				fragments.code(' ? (')
 
-						@variable.toInlineFragments(fragments, mode)
+				@declaration.declarator().toAssignmentFragments(fragments, @condition)
 
-						fragments.code('))')
-
-						first = false
-					}
-					else {
-						fragments.code(' && ' + $runtime.type(this) + '.isValue(', name, ')')
-					}
-				})
+				fragments.code(', true) : false')
 			}
 			else {
-				let first = true
+				if @cascade {
+					let first = true
 
-				@variable.walk(name => {
-					if first {
-						first = false
-					}
-					else {
-						fragments.code(' && ')
-					}
+					@declaration.walk(name => {
+						if first {
+							fragments.code($runtime.type(this) + '.isValue((')
 
-					fragments.code($runtime.type(this) + '.isValue(', name, ')')
-				})
+							@declaration.toInlineFragments(fragments, mode)
+
+							fragments.code('))')
+
+							first = false
+						}
+						else {
+							fragments.code(' && ' + $runtime.type(this) + '.isValue(', name, ')')
+						}
+					})
+				}
+				else {
+					let first = true
+
+					@declaration.walk(name => {
+						if first {
+							first = false
+						}
+						else {
+							fragments.code(' && ')
+						}
+
+						fragments.code($runtime.type(this) + '.isValue(', name, ')')
+					})
+				}
 			}
 		}
 		else {

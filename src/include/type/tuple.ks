@@ -15,11 +15,6 @@ abstract class TupleType extends Type {
 		_extends: NamedType<TupleType>?		= null
 		_fields: Dictionary<TupleFieldType>	= {}
 	}
-	addField(field: TupleFieldType) { // {{{
-		@fields[field.name()] = field
-
-		++@count
-	} // }}}
 	override clone() { // {{{
 		NotImplementedException.throw()
 	} // }}}
@@ -119,6 +114,11 @@ class NamedTupleType extends TupleType {
 
 		return list
 	} // }}}
+	addField(field: TupleFieldType) { // {{{
+		@fields[field.name()] = field
+
+		++@count
+	} // }}}
 	override isArray() => true
 	isMatching(value: TupleType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
@@ -127,6 +127,107 @@ class NamedTupleType extends TupleType {
 		}
 
 		return false
+	} // }}}
+	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { // {{{
+		const fields = this.getAllFieldsMap()
+		const count = this.count()
+
+		const nameds = {}
+		let namedCount = 0
+
+		const shorthands = {}
+		const leftovers = []
+
+		for const argument in arguments {
+			if argument is NamedArgument {
+				const name = argument.name()
+
+				if !?fields[name] {
+					SyntaxException.throwUnrecognizedTupleField(name, node)
+				}
+
+				nameds[name] = true
+
+				++namedCount
+			}
+			else if argument is IdentifierLiteral {
+				const name = argument.name()
+
+				if ?fields[name] {
+					shorthands[name] = true
+				}
+				else {
+					leftovers.push(argument)
+				}
+			}
+			else {
+				leftovers.push(argument)
+			}
+		}
+
+		if namedCount == arguments.length {
+			if namedCount != count {
+				if arguments.length == 0 {
+					for const field, name of fields when field.isRequired() {
+						ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
+					}
+				}
+				else {
+					for const field, name of fields when !nameds[name] && field.isRequired() {
+						SyntaxException.throwMissingTupleField(name, node)
+					}
+				}
+			}
+		}
+		else {
+			const groups = []
+
+			let index = 0
+			let required = 0
+			let optional = 0
+
+			for const field, name of fields {
+				if nameds[name] || shorthands[name] {
+					++index
+				}
+				else {
+					groups.push([++index, field])
+
+					if field.isRequired() {
+						++required
+					}
+					else {
+						++optional
+					}
+				}
+			}
+
+			if leftovers.length < required {
+				ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
+			}
+			else if leftovers.length > required + optional {
+				SyntaxException.throwTooMuchTupleFields(node)
+			}
+
+			let countdown = leftovers.length - required
+			let leftover = 0
+
+			for const [index, field] in groups {
+				if field.isRequired() {
+					if !leftovers[leftover].type().matchContentOf(field.type()) {
+						ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
+					}
+
+					++leftover
+				}
+				else if countdown > 0 {
+					++leftover
+					--countdown
+				}
+			}
+		}
+
+		return true
 	} // }}}
 	sortArguments(arguments: Array, node) { // {{{
 		const order = []
@@ -145,7 +246,7 @@ class NamedTupleType extends TupleType {
 				const name = argument.name()
 
 				if !?fields[name] {
-					SyntaxException.throwUnrecognizedStructField(name, node)
+					SyntaxException.throwUnrecognizedTupleField(name, node)
 				}
 
 				nameds[name] = argument
@@ -155,11 +256,9 @@ class NamedTupleType extends TupleType {
 			else if argument is IdentifierLiteral {
 				const name = argument.name()
 
-				if !?fields[name] {
-					SyntaxException.throwUnrecognizedStructField(name, node)
+				if ?fields[name] {
+					shorthands[name] = argument
 				}
-
-				shorthands[name] = argument
 			}
 			else {
 				leftovers.push(argument)
@@ -178,7 +277,7 @@ class NamedTupleType extends TupleType {
 						order.push(nameds[name])
 					}
 					else if field.isRequired() {
-						SyntaxException.throwMissingStructField(name, node)
+						SyntaxException.throwMissingTupleField(name, node)
 					}
 					else {
 						order.push(new Literal('null', node))
@@ -214,10 +313,10 @@ class NamedTupleType extends TupleType {
 			}
 
 			if leftovers.length < required {
-				SyntaxException.throwNotEnoughStructFields(node)
+				SyntaxException.throwNotEnoughTupleFields(node)
 			}
 			else if leftovers.length > required + optional {
-				SyntaxException.throwTooMuchStructFields(node)
+				SyntaxException.throwTooMuchTupleFields(node)
 			}
 
 			let countdown = leftovers.length - required
@@ -298,6 +397,47 @@ class UnnamedTupleType extends TupleType {
 		}
 
 		return false
+	} // }}}
+	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { // {{{
+		const fields = this.listAllFields()
+
+		let required = 0
+		let optional = 0
+
+		for const field of fields {
+			if field.isRequired() {
+				++required
+			}
+			else {
+				++optional
+			}
+		}
+
+		if arguments.length < required {
+			ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
+		}
+		else if arguments.length > required + optional {
+			SyntaxException.throwTooMuchTupleFields(node)
+		}
+
+		let countdown = arguments.length - required
+		let leftover = 0
+
+		for const field of fields {
+			if field.isRequired() {
+				if !arguments[leftover].type().matchContentOf(field.type()) {
+					ReferenceException.throwNoMatchingTuple(tupleName, arguments, node)
+				}
+
+				++leftover
+			}
+			else if countdown > 0 {
+				++leftover
+				--countdown
+			}
+		}
+
+		return true
 	} // }}}
 	sortArguments(arguments) => arguments
 }

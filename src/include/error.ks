@@ -209,6 +209,22 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
 			}
 		} // }}}
+		throwNoMatchingStruct(name, arguments, node) ~ ReferenceException { // {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The struct "\(name)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The struct "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
+			}
+		} // }}}
+		throwNoMatchingTuple(name, arguments, node) ~ ReferenceException { // {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The tuple "\(name)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The tuple "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
+			}
+		} // }}}
 		throwNotDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
 		} // }}}
@@ -348,6 +364,9 @@ export class SyntaxException extends Exception {
 		throwMissingStructField(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The field "\(name)" is missing to create the struct`, node)
 		} // }}}
+		throwMissingTupleField(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The field "\(name)" is missing to create the tuple`, node)
+		} // }}}
 		throwMixedOverloadedFunction(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Overloaded functions can't mix sync/async`, node)
 		} // }}}
@@ -384,6 +403,9 @@ export class SyntaxException extends Exception {
 		throwNotEnoughStructFields(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`There is not enough fields to create the struct`, node)
 		} // }}}
+		throwNotEnoughTupleFields(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`There is not enough fields to create the tuple`, node)
+		} // }}}
 		throwNotFullyInitializedVariable(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The lateinit variable "\(name)" is only partially initialized`, node)
 		} // }}}
@@ -414,6 +436,9 @@ export class SyntaxException extends Exception {
 		throwTooMuchStructFields(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`There is too much fields to create the struct`, node)
 		} // }}}
+		throwTooMuchTupleFields(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`There is too much fields to create the tuple`, node)
+		} // }}}
 		throwTooMuchRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Rest parameter has already been declared`, node)
 		} // }}}
@@ -429,11 +454,17 @@ export class SyntaxException extends Exception {
 		throwUnrecognizedStructField(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The argument "\(name)" isn't recognized to create the struct`, node)
 		} // }}}
+		throwUnrecognizedTupleField(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The argument "\(name)" isn't recognized to create the tuple`, node)
+		} // }}}
 		throwUnreportedError(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`An error is unreported, it must be caught or declared to be thrown`, node)
 		} // }}}
 		throwUnreportedError(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`An error "\(name)" is unreported, it must be caught or declared to be thrown`, node)
+		} // }}}
+		throwUnsupportedDestructuringAssignment(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The current destructuring assignment is unsupported`, node)
 		} // }}}
 	}
 }
@@ -536,6 +567,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwNotStruct(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a struct`, node)
+		} // }}}
+		throwNotTuple(name, node) ~ TypeException { // {{{
+			throw new TypeException(`Identifier "\(name)" is not a tuple`, node)
 		} // }}}
 		throwNotSyncFunction(name, node) ~ TypeException { // {{{
 			throw new TypeException(`The function "\(name)" is not synchronous`, node)

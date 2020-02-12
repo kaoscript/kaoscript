@@ -40,7 +40,9 @@ abstract class Statement extends AbstractNode {
 				ReferenceException.throwNotDefined(name, this)
 			}
 			else {
-				@assignments.push(name)
+				if !scope.hasDeclaredVariable(name) {
+					@assignments.push(name)
+				}
 
 				@scope.define(name, false, this)
 			}

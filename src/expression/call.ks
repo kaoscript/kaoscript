@@ -161,17 +161,8 @@ class CallExpression extends Expression {
 					if const substitute = variable.replaceCall?(@data, @arguments) {
 						this.addCallee(new SubstituteCallee(@data, substitute, this))
 					}
-					else if type is FunctionType {
-						this.makeCallee(type, variable.name())
-					}
-					else if type is OverloadedFunctionType {
-						this.makeCallee(type, variable.name())
-					}
-					else if type.isStruct() || type.isTuple() {
-						this.addCallee(new DefaultCallee(@data, null, type, this))
-					}
 					else {
-						this.addCallee(new DefaultCallee(@data, null, null, this))
+						this.makeCallee(type, variable.name())
 					}
 
 					if @named {
@@ -396,45 +387,48 @@ class CallExpression extends Expression {
 
 		return false
 	} // }}}
-	makeCallee(type, name) { // {{{
-		switch type {
-			is FunctionType => {
-				if type.isExhaustive(this) && !type.matchArguments(@arguments) {
+	makeCallee(type: Type, name: String?) { // {{{
+		if type is FunctionType {
+			if type.isExhaustive(this) && !type.matchArguments(@arguments) {
+				ReferenceException.throwNoMatchingFunction(name, @arguments, this)
+			}
+			else {
+				this.addCallee(new DefaultCallee(@data, @object, type, this))
+			}
+		}
+		else if type is OverloadedFunctionType {
+			const arguments = [argument.type() for argument in @arguments]
+
+			const matches = Router.matchArguments(type.assessment(), arguments)
+
+			if matches.length == 0 {
+				if type.isExhaustive(this) {
 					ReferenceException.throwNoMatchingFunction(name, @arguments, this)
 				}
 				else {
-					this.addCallee(new DefaultCallee(@data, @object, type, this))
+					this.addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
-			is OverloadedFunctionType => {
-				const arguments = [argument.type() for argument in @arguments]
-
-				const matches = Router.matchArguments(type.assessment(), arguments)
-
-				if matches.length == 0 {
-					if type.isExhaustive(this) {
-						ReferenceException.throwNoMatchingFunction(name, @arguments, this)
-					}
-					else {
-						this.addCallee(new DefaultCallee(@data, @object, null, this))
-					}
-				}
-				else if matches.length == 1 {
-					this.addCallee(new DefaultCallee(@data, null, matches[0], this))
-				}
-				else {
-					const union = new UnionType(this.scope())
-
-					for const function in matches {
-						union.addType(function.returnType())
-					}
-
-					this.addCallee(new DefaultCallee(@data, @object, union.type(), this))
-				}
+			else if matches.length == 1 {
+				this.addCallee(new DefaultCallee(@data, @object, matches[0], this))
 			}
-			=> {
-				this.addCallee(new DefaultCallee(@data, @object, null, this))
+			else {
+				const union = new UnionType(this.scope())
+
+				for const function in matches {
+					union.addType(function.returnType())
+				}
+
+				this.addCallee(new DefaultCallee(@data, @object, union.type(), this))
 			}
+		}
+		else if type.isStruct() || type.isTuple() {
+			type.isExhaustive(this) && type.type().matchArguments(name, @arguments, this)
+
+			this.addCallee(new DefaultCallee(@data, @object, type, this))
+		}
+		else {
+			this.addCallee(new DefaultCallee(@data, @object, null, this))
 		}
 	} // }}}
 	makeMemberCallee(value, name: NamedType = null) { // {{{
@@ -499,15 +493,7 @@ class CallExpression extends Expression {
 			}
 			is DictionaryType => {
 				if const property = value.getProperty(@property) {
-					if property is FunctionType {
-						this.makeCallee(property, @property)
-					}
-					else if property is OverloadedFunctionType {
-						this.makeCallee(property, @property)
-					}
-					else {
-						this.addCallee(new DefaultCallee(@data, @object, property, this))
-					}
+					this.makeCallee(property, @property)
 				}
 				else {
 					this.makeMemberCalleeFromReference(@scope.reference('Dictionary'))

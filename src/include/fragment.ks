@@ -111,6 +111,16 @@ class ControlBuilder extends ControlWriter {
 
 		return this
 	} // }}}
+	compileReusable(node) { // {{{
+		if node is not Primitive {
+			node.toReusableFragments(this)
+		}
+		else {
+			@writer.push(@writer.newFragment(node))
+		}
+
+		return this
+	} // }}}
 	wrap(node, mode = null) { // {{{
 		@step.wrap(node, mode)
 

@@ -1,0 +1,1 @@
+ReferenceException: The tuple "Point" can't be matched to given arguments (String, Number) (line 6, file "fixtures/compile/tuple/tuple.create.named.nd_nd.ws_wie.ks")

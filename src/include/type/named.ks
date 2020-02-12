@@ -84,20 +84,9 @@ class NamedType extends Type {
 	isAlien() => @type.isAlien()
 	isAlteration() => @type.isAlteration()
 	isArray() => @type.isArray()
-	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
-		if this == value {
+	override isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
+		if super(value, anycast, nullcast, downcast) {
 			return true
-		}
-		else if value.isAny() {
-			if this.isNullable() {
-				return nullcast || value.isNullable()
-			}
-			else {
-				return true
-			}
-		}
-		else if this.isAlias() {
-			return this.discardAlias().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
 		else if value is NamedType {
 			if value.isAlias() {

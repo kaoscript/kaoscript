@@ -1,19 +1,26 @@
 class WhileStatement extends Statement {
 	private lateinit {
+		_bindingDeclaration: Boolean		= false
 		_bindingScope: Scope
-		_body					= null
+		_body								= null
 		_bodyScope: Scope
-		_condition
-		_declared: Boolean		= false
-		_variable
+		_condition: Expression
+		_declared: Boolean					= false
+		_declaration: VariableDeclaration
 	}
 	analyse() { // {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
 			@declared = true
 			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
 
-			@variable = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope)
-			@variable.analyse()
+			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
+
+			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, true)
+			@declaration.analyse()
+
+			if @bindingDeclaration {
+				@condition = @declaration.init()
+			}
 
 			@bodyScope = this.newScope(@bindingScope, ScopeType::InlineBlock)
 		}
@@ -32,7 +39,16 @@ class WhileStatement extends Statement {
 	} // }}}
 	prepare() { // {{{
 		if @declared {
-			@variable.prepare()
+			@declaration.prepare()
+
+			if @bindingDeclaration {
+				@condition.acquireReusable(true)
+				@condition.releaseReusable()
+			}
+
+			if const variable = @declaration.getIdentifierVariable() {
+				variable.setRealType(variable.getRealType().setNullable(false))
+			}
 		}
 		else {
 			@condition.prepare()
@@ -66,7 +82,7 @@ class WhileStatement extends Statement {
 	} // }}}
 	translate() { // {{{
 		if @declared {
-			@variable.translate()
+			@declaration.translate()
 		}
 		else {
 			@condition.translate()
@@ -82,7 +98,7 @@ class WhileStatement extends Statement {
 	isLoop() => true
 	isUsingVariable(name) { // {{{
 		if @declared {
-			if @variable.isUsingVariable(name) {
+			if @declaration.isUsingVariable(name) {
 				return true
 			}
 		}
@@ -98,22 +114,36 @@ class WhileStatement extends Statement {
 		const ctrl = fragments.newControl().code('while(')
 
 		if @declared {
-			let first = true
+			if @bindingDeclaration {
+				ctrl
+					.code($runtime.type(this) + '.isValue(')
+					.compileReusable(@condition)
+					.code(')')
 
-			@variable.walk(name => {
-				if first {
-					ctrl.code($runtime.type(this) + '.isValue(')
+				ctrl.code(' ? (')
 
-					@variable.toInlineFragments(ctrl, mode)
+				@declaration.declarator().toAssignmentFragments(ctrl, @condition)
 
-					ctrl.code(')')
+				ctrl.code(', true) : false')
+			}
+			else {
+				let first = true
 
-					first = false
-				}
-				else {
-					ctrl.code(' && ' + $runtime.type(this) + '.isValue(', name, ')')
-				}
-			})
+				@declaration.walk(name => {
+					if first {
+						ctrl.code($runtime.type(this) + '.isValue(')
+
+						@declaration.toInlineFragments(ctrl, mode)
+
+						ctrl.code(')')
+
+						first = false
+					}
+					else {
+						ctrl.code(' && ' + $runtime.type(this) + '.isValue(', name, ')')
+					}
+				})
+			}
 		}
 		else {
 			ctrl.compileBoolean(@condition)

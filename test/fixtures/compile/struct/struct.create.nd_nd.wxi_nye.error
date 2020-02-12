@@ -1,0 +1,1 @@
+ReferenceException: The struct "Point" can't be matched to given arguments (Number) (line 6, file "fixtures/compile/struct/struct.create.nd_nd.wxi_nye.ks")

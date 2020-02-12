@@ -623,7 +623,25 @@ abstract class Type {
 	isAnonymous() => false
 	isArray() => false
 	isAssignableToVariable(type: Type, downcast: Boolean): Boolean => this.isAssignableToVariable(type, true, false, downcast)
-	isAssignableToVariable(type: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean): Boolean => this == type
+	isAssignableToVariable(type: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean): Boolean { // {{{
+		if this == type {
+			return true
+		}
+		else if type.isAny() {
+			if this.isNullable() {
+				return nullcast || type.isNullable()
+			}
+			else {
+				return true
+			}
+		}
+		else if this.isAlias() {
+			return this.discardAlias().isAssignableToVariable(type, anycast, nullcast, downcast)
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isBoolean() => false
 	isCloned() => false
 	isClass() => false

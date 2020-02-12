@@ -1,4 +1,3 @@
-// predefined
 class ModuleScope extends Scope {
 	private {
 		_chunkTypes							= {}

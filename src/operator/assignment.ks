@@ -8,6 +8,10 @@ class AssignmentOperatorExpression extends Expression {
 	analyse() { // {{{
 		@left = $compile.expression(@data.left, this)
 
+		if !this.isAssigningBinding() && (@left is ArrayBinding || @left is ObjectBinding) {
+			SyntaxException.throwUnsupportedDestructuringAssignment(this)
+		}
+
 		if this.isDeclararing() {
 			@left.setAssignment(AssignmentType::Expression)
 		}
@@ -52,6 +56,7 @@ class AssignmentOperatorExpression extends Expression {
 
 		expression.parent().defineVariables(left, @scope, expression, leftMost)
 	} // }}}
+	isAssigningBinding() => false
 	isAwait() => @await
 	isAwaiting() => @right.isAwaiting()
 	isComputed() => true
@@ -325,6 +330,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 		@parent.initializeVariable(variable, expression)
 	} // }}}
 	initializeVariables(type: Type, node: Expression)
+	isAssigningBinding() => true
 	isDeclarable() => @left.isDeclarable()
 	isDeclararing() => true
 	isIgnorable() => @ignorable
@@ -395,6 +401,7 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 
 		return inferables
 	} // }}}
+	isAssigningBinding() => true
 	isDeclararing() => true
 	toFragments(fragments, mode) { // {{{
 		if @right.isNullable() {
@@ -489,6 +496,7 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 
 		return inferables
 	} // }}}
+	isAssigningBinding() => true
 	isDeclararing() => true
 	toFragments(fragments, mode) { // {{{
 		if @right.isNullable() {

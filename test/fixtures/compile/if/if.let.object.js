@@ -8,8 +8,8 @@ module.exports = function() {
 			return d;
 		})();
 	}
-	let {x, y} = foobar();
-	if(Type.isValue(x) && Type.isValue(y)) {
+	let x, y, __ks_0;
+	if(Type.isValue(__ks_0 = foobar()) ? ({x, y} = __ks_0, true) : false) {
 		console.log(Helper.toString(x));
 	}
 };

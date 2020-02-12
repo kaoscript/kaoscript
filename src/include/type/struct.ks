@@ -1,5 +1,4 @@
 class StructType extends Type {
-
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new StructType(scope)
@@ -118,6 +117,104 @@ class StructType extends Type {
 
 		return list
 	} // }}}
+	matchArguments(structName: String, arguments: Array, node): Boolean ~ Exception { // {{{
+		const fields = this.getAllFieldsMap()
+		const count = this.count()
+
+		const nameds = {}
+		let namedCount = 0
+
+		const shorthands = {}
+		const leftovers = []
+
+		for const argument in arguments {
+			if argument is NamedArgument {
+				const name = argument.name()
+
+				if !?fields[name] {
+					SyntaxException.throwUnrecognizedStructField(name, node)
+				}
+
+				nameds[name] = true
+
+				++namedCount
+			}
+			else if argument is IdentifierLiteral {
+				const name = argument.name()
+
+				if ?fields[name] {
+					shorthands[name] = true
+				}
+			}
+			else {
+				leftovers.push(argument)
+			}
+		}
+
+		if namedCount == arguments.length {
+			if namedCount != count {
+				if arguments.length == 0 {
+					for const field, name of fields when field.isRequired() {
+						ReferenceException.throwNoMatchingStruct(structName, arguments, node)
+					}
+				}
+				else {
+					for const field, name of fields when !nameds[name] && field.isRequired() {
+						SyntaxException.throwMissingStructField(name, node)
+					}
+				}
+			}
+		}
+		else {
+			const groups = []
+
+			let index = 0
+			let required = 0
+			let optional = 0
+
+			for const field, name of fields {
+				if nameds[name] || shorthands[name] {
+					++index
+				}
+				else {
+					groups.push([++index, field])
+
+					if field.isRequired() {
+						++required
+					}
+					else {
+						++optional
+					}
+				}
+			}
+
+			if leftovers.length < required {
+				ReferenceException.throwNoMatchingStruct(structName, arguments, node)
+			}
+			else if leftovers.length > required + optional {
+				SyntaxException.throwTooMuchStructFields(node)
+			}
+
+			let countdown = leftovers.length - required
+			let leftover = 0
+
+			for const [index, field] in groups {
+				if field.isRequired() {
+					if !leftovers[leftover].type().matchContentOf(field.type()) {
+						ReferenceException.throwNoMatchingStruct(structName, arguments, node)
+					}
+
+					++leftover
+				}
+				else if countdown > 0 {
+					++leftover
+					--countdown
+				}
+			}
+		}
+
+		return true
+	} // }}}
 	metaReference(references, name, mode) => [this.toMetadata(references, mode), name]
 	sortArguments(arguments: Array, node) { // {{{
 		const order = []
@@ -146,11 +243,12 @@ class StructType extends Type {
 			else if argument is IdentifierLiteral {
 				const name = argument.name()
 
-				if !?fields[name] {
-					SyntaxException.throwUnrecognizedStructField(name, node)
+				if ?fields[name] {
+					shorthands[name] = argument
 				}
-
-				shorthands[name] = argument
+				else {
+					leftovers.push(argument)
+				}
 			}
 			else {
 				leftovers.push(argument)

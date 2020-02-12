@@ -31,10 +31,8 @@ class VariableDeclaration extends Statement {
 			@function = parent
 		}
 	} // }}}
-	constructor(@data, @parent, @scope, @initScope) { // {{{
+	constructor(@data, @parent, @scope, @initScope, @cascade) { // {{{
 		this(data, parent, scope)
-
-		@cascade = parent.isCascade()
 	} // }}}
 	analyse() { // {{{
 		for const modifier in @data.modifiers {
@@ -166,6 +164,7 @@ class VariableDeclaration extends Statement {
 			declarator.translate()
 		}
 	} // }}}
+	declarator() => @declarators[0]
 	defineVariables(declarator) { // {{{
 		let alreadyDeclared
 
