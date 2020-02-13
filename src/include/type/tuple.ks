@@ -2,41 +2,49 @@ abstract class TupleType extends Type {
 	static {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			if data.named {
-				return NamedTupleType.import(index, data, metadata, references, alterations, queue, scope, node)
+				return NamedTupleType.import(data, metadata, references, alterations, queue, scope, node)
 			}
 			else {
-				return UnnamedTupleType.import(index, data, metadata, references, alterations, queue, scope, node)
+				return UnnamedTupleType.import(data, metadata, references, alterations, queue, scope, node)
 			}
 		} // }}}
 	}
 	private {
-		_count: Number							= 0
-		_extending: Boolean						= false
-		_extends: NamedType<TupleType>?		= null
-		_fields: Dictionary<TupleFieldType>	= {}
+		@length: Number						= 0
+		@extending: Boolean					= false
+		@extends: NamedType<TupleType>?		= null
+		@extendedLength: Number				= 0
+		@fieldsByIndex: Dictionary<TupleFieldType>	= {}
 	}
+	abstract addField(field: TupleFieldType): Void
 	override clone() { // {{{
 		NotImplementedException.throw()
-	} // }}}
-	count(): Number { // {{{
-		if @extending {
-			return @count + @extends.type().count():Number
-		}
-		else {
-			return @count
-		}
 	} // }}}
 	extends() => @extends
 	extends(@extends) { // {{{
 		@extending = true
+
+		@extendedLength = @extends.type().length()
 	} // }}}
-	getProperty(name: String) { // {{{
-		if const field = @fields[name] {
+	getProperty(index: Number): Type? { // {{{
+		if const field = @fieldsByIndex[index] {
 			return field
 		}
 
 		if @extending {
-			return @extends.type().getProperty(name)
+			return @extends.getProperty(index)
+		}
+		else {
+			return null
+		}
+	} // }}}
+	getProperty(name: String): Type? { // {{{
+		if const field = @fieldsByIndex[name] {
+			return field
+		}
+
+		if @extending {
+			return @extends.getProperty(name)
 		}
 		else {
 			return null
@@ -44,17 +52,7 @@ abstract class TupleType extends Type {
 	} // }}}
 	isExtending() => @extending
 	override isTuple() => true
-	listAllFields(list = []) { // {{{
-		if @extending {
-			@extends.type().listAllFields(list)
-		}
-
-		for const field of @fields {
-			list.push(field)
-		}
-
-		return list
-	} // }}}
+	length(): Number => @extendedLength + @length
 	metaReference(references, name, mode) => [this.toMetadata(references, mode), name]
 	override toFragments(fragments, node) { // {{{
 		NotImplementedException.throw()
@@ -66,7 +64,7 @@ abstract class TupleType extends Type {
 
 class NamedTupleType extends TupleType {
 	static {
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		import(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new NamedTupleType(scope)
 
 			queue.push(() => {
@@ -74,18 +72,23 @@ class NamedTupleType extends TupleType {
 					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 
-				let index = value.count()
-
 				for const type, name of data.fields {
-					value.addField(TupleFieldType.fromMetadata(index, name, type, metadata, references, alterations, queue, scope, node))
-
-					++index
+					value.addField(TupleFieldType.fromMetadata(name, type, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
 			return value
 		} // }}}
 	}
+	private {
+		@fieldsByName: Dictionary<TupleFieldType>	= {}
+	}
+	override addField(field) { // {{{
+		@fieldsByName[field.name()] = field
+		@fieldsByIndex[field.index()] = field
+
+		++@length
+	} // }}}
 	override export(references, mode) { // {{{
 		const export = {
 			kind: TypeKind::Tuple
@@ -93,8 +96,8 @@ class NamedTupleType extends TupleType {
 			fields: {}
 		}
 
-		for const field of @fields {
-			export.fields[field.name()] = field.export(references, mode)
+		for const field, name of @fieldsByName {
+			export.fields[name] = field.export(references, mode)
 		}
 
 		if @extending {
@@ -108,16 +111,26 @@ class NamedTupleType extends TupleType {
 			@extends.type().getAllFieldsMap(list)
 		}
 
-		for const field, name of @fields {
+		for const field, name of @fieldsByName {
 			list[name] = field
 		}
 
 		return list
 	} // }}}
-	addField(field: TupleFieldType) { // {{{
-		@fields[field.name()] = field
+	getProperty(name: String): Type? { // {{{
+		if const field = @fieldsByName[name] {
+			return field
+		}
+		else if const field = @fieldsByIndex[name] {
+			return field
+		}
 
-		++@count
+		if @extending {
+			return @extends.getProperty(name)
+		}
+		else {
+			return null
+		}
 	} // }}}
 	override isArray() => true
 	isMatching(value: TupleType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
@@ -128,9 +141,20 @@ class NamedTupleType extends TupleType {
 
 		return false
 	} // }}}
+	listAllFields(list = []) { // {{{
+		if @extending {
+			@extends.type().listAllFields(list)
+		}
+
+		for const field of @fieldsByName {
+			list.push(field)
+		}
+
+		return list
+	} // }}}
 	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { // {{{
 		const fields = this.getAllFieldsMap()
-		const count = this.count()
+		const count = this.length()
 
 		const nameds = {}
 		let namedCount = 0
@@ -233,7 +257,7 @@ class NamedTupleType extends TupleType {
 		const order = []
 
 		const fields = this.getAllFieldsMap()
-		const count = this.count()
+		const count = this.length()
 
 		const nameds = {}
 		let namedCount = 0
@@ -346,7 +370,7 @@ class NamedTupleType extends TupleType {
 
 class UnnamedTupleType extends TupleType {
 	static {
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		import(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new UnnamedTupleType(scope)
 
 			queue.push(() => {
@@ -354,22 +378,23 @@ class UnnamedTupleType extends TupleType {
 					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 
-				let index = value.count()
-
 				for const type in data.fields {
-					value.addField(TupleFieldType.fromMetadata(index, null, type, metadata, references, alterations, queue, scope, node))
-
-					++index
+					value.addField(TupleFieldType.fromMetadata(null, type, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
 			return value
 		} // }}}
 	}
-	addField(field: TupleFieldType) { // {{{
-		@fields[field.index()] = field
+	private {
+		@fields: Array<TupleFieldType>	= []
+	}
+	addField(field) { // {{{
+		@fieldsByIndex[field.index()] = field
 
-		++@count
+		@fields.push(field)
+
+		++@length
 	} // }}}
 	override export(references, mode) { // {{{
 		const export = {
@@ -378,7 +403,7 @@ class UnnamedTupleType extends TupleType {
 			fields: []
 		}
 
-		for const field of @fields {
+		for const field in @fields {
 			export.fields.push(field.export(references, mode))
 		}
 
@@ -389,7 +414,6 @@ class UnnamedTupleType extends TupleType {
 		return export
 	} // }}}
 	override isArray() => true
-	getProperty(name: Number) => this.getProperty(`\(name)`)
 	isMatching(value: TupleType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
 		if value.name() == 'Tuple' {
@@ -397,6 +421,15 @@ class UnnamedTupleType extends TupleType {
 		}
 
 		return false
+	} // }}}
+	listAllFields(list = []) { // {{{
+		if @extending {
+			@extends.type().listAllFields(list)
+		}
+
+		list.push(...@fields)
+
+		return list
 	} // }}}
 	matchArguments(tupleName: String, arguments: Array, node): Boolean ~ Exception { // {{{
 		const fields = this.listAllFields()
@@ -444,15 +477,15 @@ class UnnamedTupleType extends TupleType {
 
 class TupleFieldType extends Type {
 	private {
-		_index: Number
-		_name: String?
-		_type: Type
+		@index: Number
+		@name: String?
+		@type: Type
 	}
 	static {
-		fromMetadata(index, name?, data, metadata, references, alterations, queue, scope, node) { // {{{
+		fromMetadata(name?, data, metadata, references, alterations, queue, scope, node) { // {{{
 			const fieldType = Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node)
 
-			return new TupleFieldType(scope, name, index, fieldType, data.required)
+			return new TupleFieldType(scope, name, data.index, fieldType, data.required)
 		} // }}}
 	}
 	constructor(@scope, @name, @index, @type, @required) { // {{{
@@ -463,6 +496,7 @@ class TupleFieldType extends Type {
 	} // }}}
 	discardVariable() => @type
 	override export(references, mode) => { // {{{
+		index: @index
 		required: @required
 		type: @type.export(references, mode)
 	} // }}}

@@ -159,6 +159,9 @@ export class ReferenceException extends Exception {
 		throwAlreadyDefinedField(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Field "\(name)" is already defined by its parent class`, node)
 		} // }}}
+		throwBindingExceedArray(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The destructuring variable "\(name)" can't be matched`, node)
+		} // }}}
 		throwDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" should not be defined`, node)
 		} // }}}
@@ -251,6 +254,9 @@ export class ReferenceException extends Exception {
 		} // }}}
 		throwNullExpression(expression, node) ~ TypeException { // {{{
 			throw new ReferenceException(`The expression \(expression.toQuote(true)) is "null"`, node)
+		} // }}}
+		throwUndefinedBindingVariable(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The destructuring variable "\(name)" can't be matched`, node)
 		} // }}}
 		throwUndefinedClassField(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`The class field "\(name)" isn't defined`, node)

@@ -14,10 +14,12 @@
       "named": false,
       "fields": [
         {
+          "index": 0,
           "required": true,
           "type": "String"
         },
         {
+          "index": 1,
           "required": true,
           "type": "Number"
         }

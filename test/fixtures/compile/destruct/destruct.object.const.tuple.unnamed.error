@@ -1,0 +1,1 @@
+TypeException: The binding is expected to be of type "Dictionary" (line 3, file "fixtures/compile/destruct/destruct.object.const.tuple.unnamed.ks")

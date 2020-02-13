@@ -161,7 +161,9 @@ class TupleFunction extends AbstractNode {
 		let index = -1
 
 		if @parent.isExtending() {
-			for const type in @parent._extendsType.type().listAllFields() {
+			const parent = @parent._extendsType.type()
+
+			for const type in parent.listAllFields() {
 				const field = new TupleFieldDeclaration(type, @parent)
 				field.analyse()
 				field.prepare()
@@ -171,11 +173,9 @@ class TupleFunction extends AbstractNode {
 				@parameters.push(parameter)
 
 				@type.addParameter(parameter.type())
-
-				if field.index() > index {
-					index = field.index()
-				}
 			}
+
+			index += parent.length()
 		}
 
 		for const field in @parent.fields() {

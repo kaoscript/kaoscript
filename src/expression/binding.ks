@@ -32,6 +32,10 @@ class ArrayBinding extends Expression {
 			}
 		}
 		else if @type is ArrayType {
+			if @type.length() < @elements.length {
+				ReferenceException.throwBindingExceedArray(@elements.length, @type.length(), this)
+			}
+
 			for const element, index in @elements {
 				element.type(@type.getElement(index))
 
@@ -40,6 +44,10 @@ class ArrayBinding extends Expression {
 		}
 		else if @type.isTuple() {
 			const type = @type.discard()
+
+			if type.length() < @elements.length {
+				ReferenceException.throwBindingExceedArray(@elements.length, type.length(), this)
+			}
 
 			for const element, index in @elements {
 				element.type(type.getProperty(index).type())
@@ -392,7 +400,14 @@ class ObjectBinding extends Expression {
 		}
 		else if @type is DictionaryType {
 			for const element in @elements {
-				element.type(@type.getProperty(element.name()))
+				if element.isRequired() {
+					if const property = @type.getProperty(element.name()) {
+						element.type(property)
+					}
+					else {
+						ReferenceException.throwUndefinedBindingVariable(element.name(), this)
+					}
+				}
 
 				element.prepare()
 			}
@@ -401,7 +416,14 @@ class ObjectBinding extends Expression {
 			const type = @type.discard()
 
 			for const element in @elements {
-				element.type(type.getProperty(element.name()).type())
+				if element.isRequired() {
+					if const property = type.getProperty(element.name()) {
+						element.type(property.type())
+					}
+					else {
+						ReferenceException.throwUndefinedBindingVariable(element.name(), this)
+					}
+				}
 
 				element.prepare()
 			}
@@ -626,6 +648,7 @@ class ObjectBindingElement extends Expression {
 	isImmutable() => @parent.isImmutable()
 	isDeclararingVariable(name: String) => @alias.isDeclararingVariable(name)
 	isRedeclared() => @alias.isRedeclared()
+	isRequired() => !(@computed || @rest || @hasDefaultValue)
 	isThisAliasing() => @thisAlias
 	listAssignments(array) => @alias.listAssignments(array)
 	name(): String => @name.value()
