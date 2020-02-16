@@ -23,7 +23,8 @@
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     },
     {
       "kind": "dictionary",

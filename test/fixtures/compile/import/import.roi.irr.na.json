@@ -308,7 +308,8 @@
             "inits": []
           }
         ]
-      }
+      },
+      "sharedMethods": {}
     }
   ],
   "macros": []

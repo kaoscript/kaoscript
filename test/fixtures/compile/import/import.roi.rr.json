@@ -298,7 +298,8 @@
             "inits": []
           }
         ]
-      }
+      },
+      "sharedMethods": {}
     },
     {
       "kind": "class",
@@ -326,7 +327,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     }
   ],
   "macros": []

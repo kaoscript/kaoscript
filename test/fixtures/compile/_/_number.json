@@ -55,7 +55,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     },
     {
       "kind": "namespace",
@@ -290,7 +291,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     }
   ],
   "macros": []

@@ -658,14 +658,24 @@ class ObjectBindingElement extends Expression {
 			fragments.code('...')
 		}
 
-		if @computed {
-			fragments.code('[').compile(@name).code(']: ').compile(@alias)
-		}
-		else if @sameName {
-			fragments.compile(@alias)
+		if $keywords[this.name()] {
+			if @computed {
+				fragments.code(`[\(this.name())]: `).compile(@alias)
+			}
+			else {
+				fragments.code(`\(this.name()): `).compile(@alias)
+			}
 		}
 		else {
-			fragments.compile(@name).code(': ').compile(@alias)
+			if @computed {
+				fragments.code('[').compile(@name).code(']: ').compile(@alias)
+			}
+			else if @sameName {
+				fragments.compile(@alias)
+			}
+			else {
+				fragments.compile(@name).code(': ').compile(@alias)
+			}
 		}
 
 		if @hasDefaultValue {
@@ -677,11 +687,21 @@ class ObjectBindingElement extends Expression {
 			fragments.code('...')
 		}
 
-		if @computed {
-			fragments.code('[').compile(@name).code(']: ', name)
+		if $keywords[this.name()] {
+			if @computed {
+				fragments.code(`[\(this.name())]: \(name)`)
+			}
+			else {
+				fragments.code(`\(this.name()): \(name)`)
+			}
 		}
 		else {
-			fragments.compile(@name).code(': ', name)
+			if @computed {
+				fragments.code('[').compile(@name).code(']: ', name)
+			}
+			else {
+				fragments.compile(@name).code(': ', name)
+			}
 		}
 
 		if @hasDefaultValue {
@@ -692,24 +712,47 @@ class ObjectBindingElement extends Expression {
 		if @alias is ObjectBinding {
 			@alias.toFlatFragments(fragments, new FlatObjectBindingElement(value, @name, this))
 		}
-		else if @hasDefaultValue {
-			fragments
-				.compile(@alias)
-				.code($equals, $runtime.helper(this), '.default(')
-				.wrap(value)
-				.code('.')
-				.compile(@name)
-				.code($comma)
-				.compile(@defaultValue)
-				.code(')')
+		else if $keywords[this.name()] {
+			if @hasDefaultValue {
+				fragments
+					.compile(@alias)
+					.code($equals, $runtime.helper(this), '.default(')
+					.wrap(value)
+					.code('.')
+					.code(this.name())
+					.code($comma)
+					.compile(@defaultValue)
+					.code(')')
+			}
+			else {
+				fragments
+					.compile(@alias)
+					.code($equals)
+					.wrap(value)
+					.code('.')
+					.code(this.name())
+			}
 		}
 		else {
-			fragments
-				.compile(@alias)
-				.code($equals)
-				.wrap(value)
-				.code('.')
-				.compile(@name)
+			if @hasDefaultValue {
+				fragments
+					.compile(@alias)
+					.code($equals, $runtime.helper(this), '.default(')
+					.wrap(value)
+					.code('.')
+					.compile(@name)
+					.code($comma)
+					.compile(@defaultValue)
+					.code(')')
+			}
+			else {
+				fragments
+					.compile(@alias)
+					.code($equals)
+					.wrap(value)
+					.code('.')
+					.compile(@name)
+			}
 		}
 	} // }}}
 	type(@type) => this

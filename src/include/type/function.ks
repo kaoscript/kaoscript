@@ -17,6 +17,16 @@ class FunctionType extends Type {
 		_throws: Array<Type>				= []
 	}
 	static {
+		clone(source: FunctionType, target: FunctionType): FunctionType { // {{{
+			for const key in ['_async', '_hasRest', '_index', '_max', '_maxBefore', '_maxAfter', '_min', '_minBefore', '_minAfter', '_missingParameters', '_missingReturn', '_restIndex', '_returnType'] {
+				target[key] = source[key]
+			}
+
+			target._parameters = [...source._parameters]
+			target._throws = [...source._throws]
+
+			return target
+		} // }}}
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
 			if data.parameters? {

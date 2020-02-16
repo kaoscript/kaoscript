@@ -596,16 +596,28 @@ class CallExpression extends Expression {
 					}
 					else {
 						if sealed {
-							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, methods, union.type(), this))
-						}
-						else if	@data.callee.object.kind == NodeKind::Identifier &&
+							const type = value.getClassWithInstanceMethod(@property, reference.type())
+
+							if	@data.callee.object.kind == NodeKind::Identifier &&
 								(callee ?= @scope.getVariable(@data.callee.object.name)) &&
 								(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
-						{
-							this.addCallee(new SubstituteCallee(@data, substitute, union.type(), this))
+							{
+								this.addCallee(new SubstituteCallee(@data, substitute, union.type(), this))
+							}
+							else {
+								this.addCallee(new SealedMethodCallee(@data, type, true, methods, union.type(), this))
+							}
 						}
 						else {
-							this.addCallee(new DefaultCallee(@data, @object, methods, union.type(), this))
+							if	@data.callee.object.kind == NodeKind::Identifier &&
+								(callee ?= @scope.getVariable(@data.callee.object.name)) &&
+								(substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
+							{
+								this.addCallee(new SubstituteCallee(@data, substitute, union.type(), this))
+							}
+							else {
+								this.addCallee(new DefaultCallee(@data, @object, methods, union.type(), this))
+							}
 						}
 					}
 				}
@@ -826,7 +838,7 @@ abstract class Callee {
 	abstract translate()
 	abstract type(): Type
 	validate(type: FunctionType, node) { // {{{
-		for throw in type.throws() {
+		for const throw in type.throws() {
 			Exception.validateReportedError(throw.discardReference(), node)
 		}
 	} // }}}
@@ -1143,7 +1155,7 @@ class SealedMethodCallee extends Callee {
 
 		@nullableProperty = data.callee.modifiers.some(modifier => modifier.kind == ModifierKind::Nullable)
 
-		for method in methods {
+		for const method in methods {
 			this.validate(method, node)
 		}
 	} // }}}
@@ -1233,6 +1245,8 @@ class SealedMethodCallee extends Callee {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind::This => {
+					// (substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
+					// @substitute.toFragments(fragments, mode)
 					if @instance {
 						fragments
 							.code(`\(@variable.getSealedPath())._im_\(@property)(`)

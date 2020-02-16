@@ -30,6 +30,7 @@ class ClassType extends Type {
 		_instanceMethods: Dictionary		= {}
 		_instanceVariables: Dictionary		= {}
 		_predefined: Boolean				= false
+		_sharedMethods: Dictionary<Number>	= {}
 		_seal								= {
 			constructors: false
 			instanceMethods: {}
@@ -119,6 +120,10 @@ class ClassType extends Type {
 				if data.exhaustiveness.instanceMethods? {
 					type._exhaustiveness.instanceMethods = data.exhaustiveness.instanceMethods
 				}
+			}
+
+			if data.sharedMethods? {
+				type._sharedMethods = data.sharedMethods
 			}
 
 			if data.class? {
@@ -662,6 +667,10 @@ class ClassType extends Type {
 			}
 		}
 
+		if @sealed {
+			export.sharedMethods = {...@sharedMethods}
+		}
+
 		return export
 	} // }}}
 	flagAbstract() { // {{{
@@ -849,6 +858,13 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
+	getClassWithInstanceMethod(name: String, that: NamedType): NamedType { // {{{
+		if @instanceMethods[name] is Array {
+			return that
+		}
+
+		return @extends.type().getClassWithInstanceMethod(name, @extends)
+	} // }}}
 	getConstructor(arguments: Array) { // {{{
 		if @constructors.length == 0 {
 			if @extending {
@@ -880,6 +896,18 @@ class ClassType extends Type {
 		else {
 			return [name]
 		}
+	} // }}}
+	getHybridMethod(name: String, namedClass: NamedType<ClassType>): NamedType<ClassType>? { // {{{
+		if @sealed {
+			if @seal.instanceMethods[name] {
+				return namedClass
+			}
+		}
+		else if @extending {
+			return @extends.type().getHybridMethod(name, @extends)
+		}
+
+		return null
 	} // }}}
 	getInstantiableMethod(name: String, arguments: Array) { // {{{
 		if const methods = @instanceMethods[name] {
@@ -1121,6 +1149,16 @@ class ClassType extends Type {
 	hasSealedConstructors(): Boolean => @seal?.constructors
 	incInitializer() { // {{{
 		return ++@init
+	} // }}}
+	incSharedMethod(name: String): Number { // {{{
+		if const value = @sharedMethods[name] {
+			@sharedMethods[name] = ++value
+		}
+		else {
+			@sharedMethods[name] = 0
+		}
+
+		return @sharedMethods[name]
 	} // }}}
 	isAbstract() => @abstract
 	isAlteration() => @alteration
@@ -1617,6 +1655,22 @@ class ClassMethodType extends FunctionType {
 	access(@access) => this
 	addInitializingInstanceVariable(name: String) { // {{{
 		@initVariables[name] = true
+	} // }}}
+	clone() { // {{{
+		const clone = new ClassMethodType(@scope)
+
+		FunctionType.clone(this, clone)
+
+		clone._access = @access
+		clone._alteration = @alteration
+		clone._identifier = @identifier
+		clone._initVariables = {...@initVariables}
+
+		if @overwrite != null {
+			clone._overwrite = [...@overwrite]
+		}
+
+		return clone
 	} // }}}
 	export(references, mode) { // {{{
 		const export = {

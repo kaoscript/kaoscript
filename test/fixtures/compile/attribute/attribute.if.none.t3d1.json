@@ -15,15 +15,16 @@
       "alien": true,
       "hybrid": false,
       "sealed": true,
-	  "systemic": true,
-	  "exhaustive": false,
+      "systemic": true,
+      "exhaustive": false,
       "init": 0,
       "constructors": [],
       "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     }
   ],
   "macros": []

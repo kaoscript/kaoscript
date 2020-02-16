@@ -57,7 +57,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     },
     {
       "kind": "class",

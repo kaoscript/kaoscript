@@ -51,7 +51,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     },
     {
       "kind": "namespace",

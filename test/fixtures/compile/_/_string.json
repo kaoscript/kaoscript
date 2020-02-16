@@ -180,7 +180,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     },
     {
       "kind": "class",
@@ -268,7 +269,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     }
   ],
   "macros": []

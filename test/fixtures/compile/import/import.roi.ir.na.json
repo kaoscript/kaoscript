@@ -294,7 +294,8 @@
             "inits": []
           }
         ]
-      }
+      },
+      "sharedMethods": {}
     }
   ],
   "macros": []

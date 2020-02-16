@@ -96,7 +96,8 @@
             "inits": []
           }
         ]
-      }
+      },
+      "sharedMethods": {}
     }
   ],
   "macros": []

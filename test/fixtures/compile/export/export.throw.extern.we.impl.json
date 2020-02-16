@@ -25,7 +25,8 @@
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     },
     {
       "kind": "function",
@@ -67,7 +68,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     }
   ],
   "macros": []

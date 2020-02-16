@@ -870,6 +870,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConstructor() => true
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isExtending() => @class.isExtending()
 	private getConstructorIndex(body: Array) { // {{{
 		for const statement, index in body {

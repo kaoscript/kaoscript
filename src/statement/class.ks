@@ -18,7 +18,7 @@ class ClassDeclaration extends Statement {
 		_name: String
 		_type: NamedType<ClassType>
 		_variable: Variable
-}
+	}
 	private {
 		_abstract: Boolean 					= false
 		_abstractMethods					= {}
@@ -38,6 +38,7 @@ class ClassDeclaration extends Statement {
 		_macros								= {}
 		_references							= {}
 		_sealed: Boolean 					= false
+		_sharedMethods: Dictionary			= {}
 	}
 	static callMethod(node, variable, fnName, argName, retCode, fragments, method, index) { // {{{
 		if method.max() == 0 && !method.isAsync() {
@@ -258,7 +259,7 @@ class ClassDeclaration extends Statement {
 				if @es5 {
 					superVariable.replaceCall = (data, arguments) => new CallSuperConstructorES5Substitude(data, arguments, @type)
 
-					superVariable.replaceMemberCall= (property, arguments, node) => new MemberSuperMethodES5Substitude(property, arguments, @type, node)
+					superVariable.replaceMemberCall = (property, arguments, node) => new MemberSuperMethodES5Substitude(property, arguments, @type, node)
 				}
 				else {
 					superVariable.replaceCall = (data, arguments) => new CallSuperConstructorSubstitude(data, arguments, @type)
@@ -484,6 +485,14 @@ class ClassDeclaration extends Statement {
 		else {
 			console.error(type)
 			throw new NotImplementedException(this)
+		}
+	} // }}}
+	addSharedMethod(name: String, sealedclass: NamedType): Void { // {{{
+		if !?@sharedMethods[name] {
+			@sharedMethods[name] = {
+				class: sealedclass
+				index: sealedclass.type().incSharedMethod(name)
+			}
 		}
 	} // }}}
 	export(recipient) { // {{{
@@ -1275,16 +1284,44 @@ class ClassDeclaration extends Statement {
 		if @sealed {
 			fragments.line(`var \(@type.getSealedName()) = {}`)
 		}
+		else {
+			for const {class, index}, name of @sharedMethods {
+				fragments.line(`\(class.getSealedName())._im_\(index)_\(name) = \(class.getSealedName())._im_\(name)`)
+
+				const line = fragments.newLine()
+				const block = line.code(`\(class.getSealedName())._im_\(name) = function(that)`).newBlock()
+
+				const condition = block.newControl()
+
+				condition.code('if(', $runtime.type(this), '.isClassInstance(that, ', @name, '))').step()
+
+				condition.line(`return that.\(name).apply(that, Array.prototype.slice.call(arguments, 1, arguments.length))`)
+
+				condition.step().code('else').step()
+
+				condition.line(`return \(class.getSealedName())._im_\(index)_\(name).apply(null, arguments)`)
+
+				condition.done()
+
+				block.done()
+				line.done()
+			}
+		}
 	} // }}}
 	type() => @type
 	updateMethodScope(method) { // {{{
 		if @extending {
 			const variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
 
-			if @es5 {
+			if @extendsType.isSealed() {
+				variable.replaceCall = (data, arguments) => new CallSealedSuperMethodSubstitude(data, arguments, method, @type)
+
+				variable.replaceMemberCall = (property, arguments, node) => new MemberSealedSuperMethodSubstitude(property, arguments, @type, node)
+			}
+			else if @es5 {
 				variable.replaceCall = (data, arguments) => new CallSuperMethodES5Substitude(data, arguments, method, @type)
 
-				variable.replaceMemberCall= (property, arguments, node) => new MemberSuperMethodES5Substitude(property, arguments, @type, node)
+				variable.replaceMemberCall = (property, arguments, node) => new MemberSuperMethodES5Substitude(property, arguments, @type, node)
 			}
 			else {
 				variable.replaceCall = (data, arguments) => new CallSuperMethodES6Substitude(data, arguments, method, @type)
@@ -1455,12 +1492,55 @@ class CallSuperMethodES6Substitude {
 	toFragments(fragments, mode) { // {{{
 		fragments.code(`super.\(@method.name())(`)
 
-		for argument, index in @arguments {
+		for const argument, index in @arguments {
 			if index != 0 {
 				fragments.code($comma)
 			}
 
 			fragments.compile(argument)
+		}
+	} // }}}
+	type() => @method.type().returnType()
+}
+
+class CallSealedSuperMethodSubstitude {
+	private {
+		_arguments
+		_class: NamedType<ClassType>
+		_extendsType: NamedType<ClassType>
+		_data
+		_method: ClassMethodDeclaration
+		_property: String
+		_sealed: Boolean					= false
+	}
+	constructor(@data, @arguments, @method, @class) { // {{{
+		@extendsType = @class.type().extends()
+		@property = @method.name()
+
+		if const property = @extendsType.type().getInstanceProperty(@property) {
+			@sealed = property.isSealed()
+		}
+	} // }}}
+	isInitializingInstanceVariable(name) => @method.type().isInitializingInstanceVariable(name)
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		if @sealed {
+			fragments.code(`\(@extendsType.getSealedPath())._im_\(@property)(this`)
+
+			for const argument in @arguments {
+				fragments.code($comma).compile(argument)
+			}
+		}
+		else {
+			fragments.code(`super.\(@property)(`)
+
+			for const argument, index in @arguments {
+				if index != 0 {
+					fragments.code($comma)
+				}
+
+				fragments.compile(argument)
+			}
 		}
 	} // }}}
 	type() => @method.type().returnType()
@@ -1494,6 +1574,44 @@ class MemberSuperMethodES5Substitude {
 		}
 
 		fragments.code(']')
+	} // }}}
+}
+
+class MemberSealedSuperMethodSubstitude {
+	private {
+		_arguments
+		_class: NamedType<ClassType>
+		_extendsType: NamedType<ClassType>
+		_property: String
+		_sealed: Boolean					= false
+	}
+	constructor(@property, @arguments, @class, node) { // {{{
+		@extendsType = @class.type().extends()
+
+		if const property = @extendsType.type().getInstanceProperty(@property) {
+			@sealed = property.isSealed()
+		}
+	} // }}}
+	isNullable() => false
+	toFragments(fragments, mode) { // {{{
+		if @sealed {
+			fragments.code(`\(@extendsType.getSealedPath())._im_\(@property)(this`)
+
+			for const argument in @arguments {
+				fragments.code($comma).compile(argument)
+			}
+		}
+		else {
+			fragments.code(`super.\(@property)(`)
+
+			for const argument, index in @arguments {
+				if index != 0 {
+					fragments.code($comma)
+				}
+
+				fragments.compile(argument)
+			}
+		}
 	} // }}}
 }
 
@@ -1709,7 +1827,12 @@ class ClassMethodDeclaration extends Statement {
 			const superclass = @parent.extends().type()
 
 			if const method = superclass.getInstantiableMethod(@name, @parameters) {
-				@type = method.type()
+				if method.isSealed() {
+					@type = method.clone()
+				}
+				else {
+					@type = method
+				}
 
 				const parameters = @type.parameters()
 
@@ -1719,6 +1842,10 @@ class ClassMethodDeclaration extends Statement {
 			}
 			else {
 				SyntaxException.throwNoSuitableOverride(@parent.extends(), @name, @parameters, this)
+			}
+
+			if const sealedclass = superclass.getHybridMethod(@name, @parent.extends()) {
+				@parent.addSharedMethod(@name, sealedclass)
 			}
 		}
 		else {
@@ -1738,6 +1865,10 @@ class ClassMethodDeclaration extends Statement {
 					else {
 						@type.returnType(method.returnType())
 					}
+				}
+
+				if const sealedclass = superclass.getHybridMethod(@name, @parent.extends()) {
+					@parent.addSharedMethod(@name, sealedclass)
 				}
 			}
 		}
@@ -2014,10 +2145,10 @@ class ClassConstructorDeclaration extends Statement {
 	} // }}}
 	private addCallToParentConstructor() { // {{{
 		// only add call if parent has an empty constructor
-		const extendedType = @parent.extends().type()
+		const extendsType = @parent.extends().type()
 
-		if extendedType.matchArguments([]) {
-			if extendedType.hasConstructors() || extendedType.isSealed() {
+		if extendsType.matchArguments([]) {
+			if extendsType.hasConstructors() || extendsType.isSealed() {
 				@block.addStatement({
 					kind: NodeKind::CallExpression
 					attributes: []

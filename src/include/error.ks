@@ -240,7 +240,7 @@ export class ReferenceException extends Exception {
 		throwNotDefinedMember(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Member "\(name)" is not defined`, node)
 		} // }}}
-		throwNotDefinedProperty(name, node) ~ ReferenceException { // {{{
+		throwNotDefinedProperty(name, node): Never ~ ReferenceException { // {{{
 			throw new ReferenceException(`Property "\(name)" is not defined`, node)
 		} // }}}
 		throwNotExportable(name, node) ~ ReferenceException { // {{{

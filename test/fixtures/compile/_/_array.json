@@ -156,7 +156,8 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sharedMethods": {}
     },
     {
       "kind": "class",
@@ -260,7 +261,8 @@
             "inits": []
           }
         ]
-      }
+      },
+      "sharedMethods": {}
     }
   ],
   "macros": []
