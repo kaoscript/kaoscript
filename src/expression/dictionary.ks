@@ -12,10 +12,6 @@ class DictionaryExpression extends Expression {
 		super(data, parent, scope, ScopeType::Hollow)
 	} // }}}
 	analyse() { // {{{
-		if @options.format.functions == 'es5' && @scope.hasVariable('this') {
-			@scope.rename('this', 'that')
-		}
-
 		const names = {}
 
 		let ref
@@ -54,6 +50,10 @@ class DictionaryExpression extends Expression {
 			}
 
 			@properties.push(property)
+		}
+
+		if @options.format.functions == 'es5' && !@spread && @scope.hasVariable('this') {
+			@scope.rename('this', 'that')
 		}
 
 		@empty = @properties.length == 0
