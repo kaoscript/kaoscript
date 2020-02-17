@@ -2,6 +2,7 @@ var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	var __ks_Date = {};
 	__ks_Date.__ks_func_foobar_0 = function() {
+		return 0;
 	};
 	__ks_Date._im_foobar = function(that) {
 		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
@@ -18,7 +19,7 @@ module.exports = function() {
 		__ks_init() {
 		}
 		__ks_func_foobar_0() {
-			__ks_Date._im_0_foobar(this);
+			return __ks_Date._im_0_foobar(this);
 		}
 		foobar() {
 			if(arguments.length === 0) {
@@ -36,12 +37,4 @@ module.exports = function() {
 			return __ks_Date._im_0_foobar.apply(null, arguments);
 		}
 	};
-	const d = new Date();
-	const f = new FDate();
-	const x = (function() {
-		return new FDate();
-	})();
-	__ks_Date._im_foobar(d);
-	f.foobar();
-	__ks_Date._im_foobar(x);
 };

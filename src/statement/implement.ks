@@ -701,17 +701,14 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		const body = $ast.body(@data)
 
-		if @class.isSealed() && this.getConstructorIndex($ast.block(body).statements) != -1 {
-			@scope.rename('this', 'that')
+		if @class.isSealed() {
+			if this.getConstructorIndex($ast.block(body).statements) != -1 {
+				@scope.rename('this', 'that')
 
-			@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable, this)
+				@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable, this)
 
-			@dependent = true
-		}
-		else if @overwrite {
-			@scope.rename('this', 'that')
-
-			@this.replaceCall = (data, arguments) => new CallSealedConstructorSubstitude(data, arguments, @variable, this)
+				@dependent = true
+			}
 		}
 		else {
 			@this.replaceCall = (data, arguments) => new CallThisConstructorSubstitude(data, arguments, @variable)
@@ -935,7 +932,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 							}
 						}
 					}
-					else if method.isDependent() || method.isOverwritten() {
+					else if method.isDependent() {
 						if es5 {
 							fragments.line(`return \(@variable.getSealedName()).__ks_cons_\(method.identifier()).apply(null, arguments)`)
 						}

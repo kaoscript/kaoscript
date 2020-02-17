@@ -246,27 +246,11 @@ class ClassDeclaration extends Statement {
 
 			const superType = @scope.reference(@extendsName)
 
-			const superVariable = @constructorScope.define('super', true, superType, true, this)
-
-			if @hybrid && !@es5 {
-				const thisVariable = @constructorScope.getVariable('this')
-
-				thisVariable.replaceCall = (data, arguments) => new CallHybridThisConstructorES6Substitude(data, arguments, @type)
-
-				superVariable.replaceCall = (data, arguments) => new CallHybridSuperConstructorES6Substitude(data, arguments, @type)
-			}
-			else {
-				if @es5 {
-					superVariable.replaceCall = (data, arguments) => new CallSuperConstructorES5Substitude(data, arguments, @type)
-
-					superVariable.replaceMemberCall = (property, arguments, node) => new MemberSuperMethodES5Substitude(property, arguments, @type, node)
-				}
-				else {
-					superVariable.replaceCall = (data, arguments) => new CallSuperConstructorSubstitude(data, arguments, @type)
-				}
-			}
+			@constructorScope.define('super', true, superType, true, this)
 
 			@instanceVariableScope.define('super', true, superType, true, this)
+
+			this.updateConstructorScope()
 		}
 
 		for const variable, name of @classVariables {
@@ -1309,6 +1293,31 @@ class ClassDeclaration extends Statement {
 		}
 	} // }}}
 	type() => @type
+	updateConstructorScope() { // {{{
+		const superVariable = @constructorScope.getVariable('super')
+
+		if @hybrid && !@es5 {
+			const thisVariable = @constructorScope.getVariable('this')
+
+			thisVariable.replaceCall = (data, arguments) => new CallHybridThisConstructorES6Substitude(data, arguments, @type)
+
+			superVariable.replaceCall = (data, arguments) => new CallHybridSuperConstructorES6Substitude(data, arguments, @type)
+		}
+		else {
+			if @es5 {
+				superVariable.replaceCall = (data, arguments) => new CallSuperConstructorES5Substitude(data, arguments, @type)
+
+				superVariable.replaceMemberCall = (property, arguments, node) => new MemberSuperMethodES5Substitude(property, arguments, @type, node)
+			}
+			else {
+				superVariable.replaceCall = (data, arguments) => new CallSuperConstructorSubstitude(data, arguments, @type)
+			}
+		}
+
+		if @extendsType.isSealed() {
+			superVariable.replaceMemberCall = (property, arguments, node) => new MemberSealedSuperMethodSubstitude(property, arguments, @type, node)
+		}
+	} // }}}
 	updateMethodScope(method) { // {{{
 		if @extending {
 			const variable = method.scope().getVariable('super').setDeclaredType(@scope.reference(@extendsName))
@@ -1595,7 +1604,12 @@ class MemberSealedSuperMethodSubstitude {
 	isNullable() => false
 	toFragments(fragments, mode) { // {{{
 		if @sealed {
-			fragments.code(`\(@extendsType.getSealedPath())._im_\(@property)(this`)
+			if const index = @extendsType.type().getSharedMethodIndex(@property) {
+				fragments.code(`\(@extendsType.getSealedPath())._im_\(index)_\(@property)(this`)
+			}
+			else {
+				fragments.code(`\(@extendsType.getSealedPath())._im_\(@property)(this`)
+			}
 
 			for const argument in @arguments {
 				fragments.code($comma).compile(argument)

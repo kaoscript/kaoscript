@@ -1013,6 +1013,7 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
+	getSharedMethodIndex(name: String): Number? => @sharedMethods[name]
 	hasAbstractMethod(name) { // {{{
 		if @abstractMethods[name] is Array {
 			return true
