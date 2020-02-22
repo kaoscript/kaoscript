@@ -176,6 +176,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
+	toEnumFragments(fragments)
 	toNativeFragments(fragments) { // {{{
 		for const operand, index in @operands {
 			if index != 0 {
@@ -186,7 +187,10 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		}
 	} // }}}
 	toOperandFragments(fragments, operator, type) { // {{{
-		if operator == this.operator() && type == OperandType::Number {
+		if @isEnum {
+			this.toEnumFragments(fragments)
+		}
+		else if operator == this.operator() && type == OperandType::Number {
 			for const operand, index in @operands {
 				if index != 0 {
 					fragments.code($comma)
@@ -203,7 +207,7 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 		if @isEnum {
 			fragments.code(@type.name(), '(')
 
-			this.toNativeFragments(fragments)
+			this.toEnumFragments(fragments)
 
 			fragments.code(')')
 		}
@@ -242,83 +246,129 @@ abstract class NumericPolyadicOperatorExpression extends PolyadicOperatorExpress
 
 class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	private lateinit {
-		_isNative: Boolean		= false
-		_isNumber: Boolean		= false
-		_isString: Boolean		= false
+		_expectingEnum: Boolean		= true
+		_isEnum: Boolean			= false
+		_isNative: Boolean			= false
+		_isNumber: Boolean			= false
+		_isString: Boolean			= false
 		_type: Type
 	}
 	prepare() { // {{{
 		super()
 
-		let nullable = false
+		if @operands[0].type().isEnum() {
+			const name = @operands[0].type().name()
 
-		@isNative = true
+			@isEnum = true
 
-		for const operand in @operands {
-			if operand.type().isNullable() {
-				nullable = true
-				@isNative = false
+			for const operand in @operands from 1 {
+				if !operand.type().isEnum() || operand.type().name() != name {
+					@isEnum = false
+
+					break
+				}
 			}
 
-			if operand.type().isString() {
-				@isString = true
-			}
-			else if operand.type().canBeString(false) && !operand.type().canBeNumber(false) {
-				@isString = true
-				@isNative = false
+			if @isEnum {
+				if @expectingEnum {
+					@type = @operands[0].type()
+				}
+				else {
+					@type = @operands[0].type().discard().type()
+				}
 			}
 		}
 
-		if !@isString {
-			@isNumber = true
+		if !@isEnum {
+			let nullable = false
 
-			let notNumber = null
+			@isNative = true
 
-			for const operand in @operands while @isNative || @isNumber {
-				if operand.type().isNumber() {
-				}
-				else if operand.type().isAny() {
-					@isNumber = false
+			for const operand in @operands {
+				if operand.type().isNullable() {
+					nullable = true
 					@isNative = false
 				}
-				else if operand.type().canBeNumber(false) {
-					@isNative = false
 
-					if operand.type().canBeString(false) {
+				if operand.type().isString() {
+					@isString = true
+				}
+				else if operand.type().canBeString(false) && !operand.type().canBeNumber(false) {
+					@isString = true
+					@isNative = false
+				}
+			}
+
+			if !@isString {
+				@isNumber = true
+
+				let notNumber = null
+
+				for const operand in @operands while @isNative || @isNumber {
+					if operand.type().isNumber() {
+					}
+					else if operand.type().isAny() {
 						@isNumber = false
+						@isNative = false
+					}
+					else if operand.type().canBeNumber(false) {
+						@isNative = false
+
+						if operand.type().canBeString(false) {
+							@isNumber = false
+						}
+					}
+					else if notNumber == null {
+						notNumber = operand
 					}
 				}
-				else if notNumber == null {
-					notNumber = operand
+
+				if @isNumber && notNumber != null {
+					TypeException.throwInvalidOperand(notNumber, Operator::Addition, this)
 				}
 			}
 
-			if @isNumber && notNumber != null {
-				TypeException.throwInvalidOperand(notNumber, Operator::Addition, this)
+			if @isNumber {
+				@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 			}
-		}
+			else if @isString {
+				@type = @scope.reference('String')
+			}
+			else {
+				const numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 
-		if @isNumber {
-			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
-		}
-		else if @isString {
-			@type = @scope.reference('String')
-		}
-		else {
-			const numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
-
-			@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+			}
 		}
 	} // }}}
 	isComputed() => @isNative
+	override setExpectedType(type) { // {{{
+		if !type.isEnum() && (type.isNumber() || type.isString()) {
+			@expectingEnum = false
+		}
+	} // }}}
 	toOperandFragments(fragments, operator, type) { // {{{
-		if operator == Operator::Addition && ((@isNumber && type == OperandType::Number) || (@isString && type == OperandType::String)) {
-			for const operand, index in @operands {
-				if index != 0 {
-					fragments.code($comma)
-				}
+		if operator == Operator::Addition {
+			if type == OperandType::Enum && (@isEnum || @isNumber) {
+				for const operand, index in @operands {
+					if index != 0 {
+						fragments.code(' | ')
+					}
 
-				fragments.compile(operand)
+					fragments.wrap(operand)
+				}
+			}
+			else if ((@isNumber && type == OperandType::Number) || (@isString && type == OperandType::String)) {
+				for const operand, index in @operands {
+					if index != 0 {
+						fragments.code($comma)
+					}
+
+					fragments.compile(operand)
+				}
+			}
+			else {
+				this.toOperatorFragments(fragments)
 			}
 		}
 		else {
@@ -326,7 +376,40 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 		}
 	} // }}}
 	toOperatorFragments(fragments) { // {{{
-		if @isNative {
+		if @isEnum {
+			lateinit const operator: String
+
+			if @operands[0].type().discard().isFlags() {
+				operator = ' | '
+			}
+			else {
+				operator = ' + '
+			}
+
+			if @expectingEnum {
+				fragments.code(@type.name(), '(')
+
+				for const operand, index in @operands {
+					if index != 0 {
+						fragments.code(operator)
+					}
+
+					fragments.wrap(operand)
+				}
+
+				fragments.code(')')
+			}
+			else {
+				for const operand, index in @operands {
+					if index != 0 {
+						fragments.code(operator)
+					}
+
+					fragments.wrap(operand)
+				}
+			}
+		}
+		else if @isNative {
 			for const operand, index in @operands {
 				if index != 0 {
 					fragments.code($space).code('+', @data.operator).code($space)
@@ -373,91 +456,20 @@ class PolyadicOperatorAddition extends PolyadicOperatorExpression {
 	type() => @type
 }
 
-class PolyadicOperatorAnd extends PolyadicOperatorExpression {
-	prepare() { // {{{
-		for operand in @operands {
-			operand.prepare()
-
-			if operand.type().isInoperative() {
-				TypeException.throwUnexpectedInoperative(operand, this)
-			}
-
-			unless operand.type().canBeBoolean() {
-				TypeException.throwInvalidOperand(operand, Operator::And, this)
-			}
-
-			for const data, name of operand.inferWhenTrueTypes({}) {
-				@scope.updateInferable(name, data, this)
-			}
-		}
-	} // }}}
-	inferTypes(inferables) { // {{{
-		for const data, name of @operands[0].inferTypes({}) {
-			if inferables[name]? {
-				if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
-					inferables[name] = data
-				}
-				else {
-					inferables[name] = {
-						isVariable: data.isVariable
-						type: Type.union(@scope, inferables[name].type, data.type)
-					}
-				}
-			}
-			else {
-				inferables[name] = data
-			}
-		}
-
-		return inferables
-	} // }}}
-	inferWhenTrueTypes(inferables) { // {{{
-		for const operand in @operands {
-			for const data, name of operand.inferWhenTrueTypes({}) {
-				if inferables[name]? {
-					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
-						inferables[name] = data
-					}
-					else {
-						inferables[name] = {
-							isVariable: data.isVariable
-							type: Type.union(@scope, inferables[name].type, data.type)
-						}
-					}
-				}
-				else {
-					inferables[name] = data
-				}
-			}
-		}
-
-		return inferables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
-		let nf = false
-
-		for const operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('&&', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrapBoolean(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Boolean')
-}
-
 class PolyadicOperatorBitwiseAnd extends NumericPolyadicOperatorExpression {
 	isAcceptingEnum() => true
 	operator() => Operator::BitwiseAnd
 	runtime() => 'bitwiseAnd'
 	symbol() => '&'
+	toEnumFragments(fragments) { // {{{
+		for const operand, index in @operands {
+			if index != 0 {
+				fragments.code(' & ')
+			}
+
+			fragments.wrap(operand)
+		}
+	} // }}}
 }
 
 class PolyadicOperatorBitwiseLeftShift extends NumericPolyadicOperatorExpression {
@@ -471,6 +483,15 @@ class PolyadicOperatorBitwiseOr extends NumericPolyadicOperatorExpression {
 	operator() => Operator::BitwiseOr
 	runtime() => 'bitwiseOr'
 	symbol() => '|'
+	toEnumFragments(fragments) { // {{{
+		for const operand, index in @operands {
+			if index != 0 {
+				fragments.code(' & ')
+			}
+
+			fragments.wrap(operand)
+		}
+	} // }}}
 }
 
 class PolyadicOperatorBitwiseRightShift extends NumericPolyadicOperatorExpression {
@@ -489,22 +510,6 @@ class PolyadicOperatorDivision extends NumericPolyadicOperatorExpression {
 	operator() => Operator::Division
 	runtime() => 'division'
 	symbol() => '/'
-}
-
-class PolyadicOperatorImply extends PolyadicOperatorExpression {
-	toFragments(fragments, mode) { // {{{
-		const l = @operands.length - 2
-		fragments.code('!('.repeat(l))
-
-		fragments.code('!').wrapBoolean(@operands[0])
-
-		for const operand in @operands from 1 til -1 {
-			fragments.code(' || ').wrapBoolean(operand).code(')')
-		}
-
-		fragments.code(' || ').wrapBoolean(@operands[@operands.length - 1])
-	} // }}}
-	type() => @scope.reference('Boolean')
 }
 
 class PolyadicOperatorModulo extends NumericPolyadicOperatorExpression {
@@ -616,163 +621,6 @@ class PolyadicOperatorNullCoalescing extends PolyadicOperatorExpression {
 	type() => @type
 }
 
-class PolyadicOperatorOr extends PolyadicOperatorExpression {
-	prepare() { // {{{
-		const lastIndex = @operands.length - 1
-		const originals = {}
-
-		for const operand, index in @operands {
-			operand.prepare()
-
-			if operand.type().isInoperative() {
-				TypeException.throwUnexpectedInoperative(operand, this)
-			}
-
-			unless operand.type().canBeBoolean() {
-				TypeException.throwInvalidOperand(operand, Operator::And, this)
-			}
-
-			if index < lastIndex {
-				for const data, name of operand.inferWhenFalseTypes({}) {
-					if data.isVariable && !?originals[name] {
-						originals[name] = {
-							isVariable: true
-							type: @scope.getVariable(name).getRealType()
-						}
-					}
-
-					@scope.updateInferable(name, data, this)
-				}
-			}
-		}
-
-		for const data, name of originals {
-			@scope.updateInferable(name, data, this)
-		}
-	} // }}}
-	inferTypes(inferables) { // {{{
-		for const data, name of @operands[0].inferTypes({}) {
-			if inferables[name]? {
-				if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
-					inferables[name] = data
-				}
-				else {
-					inferables[name] = {
-						isVariable: data.isVariable
-						type: Type.union(@scope, inferables[name].type, data.type)
-					}
-				}
-			}
-			else {
-				inferables[name] = data
-			}
-		}
-
-		for const operand in @operands from 1 {
-			for const data, name of operand.inferTypes({}) {
-				if inferables[name]? {
-					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
-						inferables[name] = data
-					}
-					else {
-						inferables[name] = {
-							isVariable: data.isVariable
-							type: Type.union(@scope, inferables[name].type, data.type)
-						}
-					}
-				}
-			}
-		}
-
-		return inferables
-	} // }}}
-	inferWhenFalseTypes(inferables) { // {{{
-		const operandTypes = [null]
-		for const operand in @operands from 1 {
-			operandTypes.push(operand.inferWhenTrueTypes({}))
-		}
-
-		for const operand in @operands {
-			for const data, name of operand.inferWhenFalseTypes({}) {
-				let type = data.type
-
-				for const index from 1 til @operands.length {
-					const types = operandTypes[index]
-
-					if types[name]? {
-						type = type.reduce(types[name].type)
-					}
-					else {
-						break
-					}
-				}
-
-				inferables[name] = {
-					isVariable: data.isVariable
-					type
-				}
-			}
-		}
-
-		return inferables
-	} // }}}
-	inferWhenTrueTypes(inferables) { // {{{
-		const typings = {}
-
-		for const data, name of @operands[0].inferWhenTrueTypes({}) {
-			inferables[name] = data
-
-			if data.isTyping {
-				typings[name] = true
-			}
-		}
-
-		for const operand, index in @operands from 1 {
-			const types = operand.inferWhenTrueTypes({})
-
-			for const _, name of typings {
-				if !?types[name] {
-					delete inferables[name]
-				}
-			}
-
-			for const data, name of types {
-				if inferables[name]? {
-					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
-						inferables[name] = data
-					}
-					else {
-						inferables[name] = {
-							isVariable: data.isVariable
-							type: Type.union(@scope, inferables[name].type, data.type)
-						}
-					}
-				}
-			}
-		}
-
-		return inferables
-	} // }}}
-	toFragments(fragments, mode) { // {{{
-		let nf = false
-
-		for const operand in @operands {
-			if nf {
-				fragments
-					.code($space)
-					.code('||', @data.operator)
-					.code($space)
-			}
-			else {
-				nf = true
-			}
-
-			fragments.wrapBoolean(operand)
-		}
-	} // }}}
-	type() => @scope.reference('Boolean')
-}
-
 class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
 	operator() => Operator::Quotient
 	runtime() => 'quotient'
@@ -790,23 +638,42 @@ class PolyadicOperatorQuotient extends NumericPolyadicOperatorExpression {
 }
 
 class PolyadicOperatorSubtraction extends NumericPolyadicOperatorExpression {
+	isAcceptingEnum() => true
 	operator() => Operator::Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-'
-}
+	toOperandFragments(fragments, operator, type) { // {{{
+		if operator == Operator::Subtraction {
+			if type == OperandType::Enum {
+				for const operand, index in @operands {
+					if index != 0 {
+						fragments.code(' & ~')
+					}
 
-class PolyadicOperatorXor extends PolyadicOperatorExpression {
-	toFragments(fragments, mode) { // {{{
-		const l = @operands.length - 2
-		fragments.code('('.repeat(l))
+					fragments.wrap(operand)
+				}
+			}
+			else {
+				for const operand, index in @operands {
+					if index != 0 {
+						fragments.code($comma)
+					}
 
-		fragments.wrapBoolean(@operands[0])
-
-		for const operand in @operands from 1 til -1 {
-			fragments.code(' !== ').wrapBoolean(operand).code(')')
+					fragments.compile(operand)
+				}
+			}
 		}
-
-		fragments.code(' !== ').wrapBoolean(@operands[@operands.length - 1])
+		else {
+			this.toOperatorFragments(fragments)
+		}
 	} // }}}
-	type() => @scope.reference('Boolean')
+	toEnumFragments(fragments) { // {{{
+		for const operand, index in @operands {
+			if index != 0 {
+				fragments.code(' & ~')
+			}
+
+			fragments.wrap(operand)
+		}
+	} // }}}
 }

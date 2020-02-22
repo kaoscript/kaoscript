@@ -1,1 +1,0 @@
-TypeException: The expression "x" of type "Null" can't be compared to a value of type "Boolean" (line 4, file "fixtures/compile/operator/operator.equality.t_n.t_b.ks")

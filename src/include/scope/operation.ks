@@ -1,21 +1,29 @@
 class OperationScope extends InlineBlockScope {
 	block() => @parent.block()
 	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable => @parent.define(name, immutable, type, initialized, node)
-	replaceVariable(name: String, type: Type, downcast: Boolean = false, node: AbstractNode): Variable { // {{{
+	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { // {{{
 		let variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
-			if !type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
+			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
+				// do nothing
+			}
+			else if variable.isInitialized() {
 				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+			}
+			else if type.isNullable() {
+				unless type.setNullable(false).isAssignableToVariable(variable.getDeclaredType(), downcast) {
+					TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+				}
 			}
 		}
 
 		if !type.equals(variable.getRealType()) {
 			if @variables[name] is Array {
-				variable.setRealType(type)
+				variable.setRealType(type, absolute, this)
 			}
 			else {
-				variable = variable.clone().setRealType(type)
+				variable = variable.clone().setRealType(type, absolute, this)
 
 				@variables[name] = [@line, variable]
 			}

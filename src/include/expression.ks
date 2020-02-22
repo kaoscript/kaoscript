@@ -68,6 +68,7 @@ abstract class Expression extends AbstractNode {
 	releaseReusable()
 	setAssignment(type: AssignmentType)
 	setCastingEnum(@castingEnum)
+	setExpectedType(type: Type): Void
 	statement(data) { // {{{
 		let expression = this
 
@@ -125,7 +126,6 @@ include {
 	'../expression/await'
 	'../expression/binding'
 	'../expression/call'
-	'../expression/comparison'
 	'../expression/conditional'
 	'../expression/create'
 	'../expression/curry'

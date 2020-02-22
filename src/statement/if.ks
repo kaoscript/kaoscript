@@ -132,25 +132,14 @@ class IfStatement extends Statement {
 								}, this)
 							}
 						}
-						else if inferable.isVariable {
-							if const variable = @scope.getVariable(name) {
-								@scope.updateInferable(name, {
-									isVariable: true
-									type: @scope.inferVariableType(variable, trueType)
-								}, this)
-							}
+						else if inferable.isVariable && @scope.hasVariable(name) {
+							@scope.replaceVariable(name, trueType, true, false, this)
 						}
 					}
 				}
 			}
 		}
 		else {
-			if !@declared {
-				for const data, name of @condition.inferWhenFalseTypes({}) {
-					@whenFalseScope.updateInferable(name, data, this)
-				}
-			}
-
 			@scope.line(@data.whenFalse.start.line)
 
 			@whenFalseExpression.prepare()
@@ -243,22 +232,14 @@ class IfStatement extends Statement {
 							}, this)
 						}
 					}
-					else if inferable.isVariable {
-						if const variable = @scope.getVariable(name) {
-							@scope.updateInferable(name, {
-								isVariable: true
-								type: Type.union(@scope, trueType, variable.getRealType())
-							}, this)
-						}
+					else if inferable.isVariable && @scope.hasVariable(name) {
+						@scope.replaceVariable(name, inferable.type, true, false, this)
 					}
 				}
 
-				for const inferable, name of falseInferables when inferable.isVariable && !?trueInferables[name] {
-					if const variable = @scope.getVariable(name) {
-						@scope.updateInferable(name, {
-							isVariable: true
-							type: Type.union(@scope, inferable.type, variable.getRealType())
-						}, this)
+				for const inferable, name of falseInferables when !?trueInferables[name] {
+					if inferable.isVariable && @scope.hasVariable(name) {
+						@scope.replaceVariable(name, inferable.type, true, false, this)
 					}
 				}
 			}

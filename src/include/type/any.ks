@@ -70,10 +70,10 @@ class AnyType extends Type {
 	isExportable() => true
 	isInstanceOf(target: Type) => true
 	isMatching(value: Type, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact != 0 {
+		if mode ~~ MatchingMode::Exact {
 			return value.isAny() && !value.isNull() && @nullable == value.isNullable()
 		}
-		else if mode & MatchingMode::MissingType != 0 && !@explicit {
+		else if mode ~~ MatchingMode::MissingType && !@explicit {
 			return @nullable || !value.isNullable()
 		}
 		else {

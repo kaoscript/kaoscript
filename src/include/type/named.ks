@@ -176,7 +176,7 @@ class NamedType extends Type {
 		if this == value {
 			return true
 		}
-		else if mode & MatchingMode::Exact != 0 {
+		else if mode ~~ MatchingMode::Exact {
 			return false
 		}
 		else {

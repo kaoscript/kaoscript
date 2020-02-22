@@ -93,7 +93,7 @@ enum MatchingMode {
 	ShiftableParameters
 	RequireAllParameters
 
-	Signature = Similar | MissingParameters | ShiftableParameters | MissingParameterType | RequireAllParameters | MissingReturn
+	Signature = Similar + MissingParameters + ShiftableParameters + MissingParameterType + RequireAllParameters + MissingReturn
 }
 
 #[flags]
@@ -714,6 +714,14 @@ abstract class Type {
 	scope() => @scope
 	setExhaustive(@exhaustive) => this
 	setNullable(nullable: Boolean) => this
+	setNullable(type: Type): Type { // {{{
+		if !type.isNullable() {
+			return this.setNullable(false)
+		}
+		else {
+			return this
+		}
+	} // }}}
 	toExportFragment(fragments, name, variable) { // {{{
 		if !this.isVirtual() && !this.isSystemic() {
 			fragments.newLine().code(`\(name): `).compile(variable).done()

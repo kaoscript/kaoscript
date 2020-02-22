@@ -1,1 +1,0 @@
-ReferenceException: The function "quxbaz" can't be matched to given arguments (Foobar|String|Number) (line 6, file "fixtures/compile/type/type.union.isnt.or.vte.ks")

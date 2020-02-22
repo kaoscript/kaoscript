@@ -86,7 +86,7 @@ class StructType extends Type {
 	} // }}}
 	override isDictionary() => true
 	isExtending() => @extending
-	isMatching(value: StructType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
+	isMatching(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
 		if value.name() == 'Struct' {
 			return true

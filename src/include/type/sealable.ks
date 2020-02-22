@@ -47,7 +47,7 @@ class SealableType extends Type {
 	} // }}}
 	isMatching(value: SealableType, mode: MatchingMode) => @type.isMatching(value.type(), mode)
 	isMatching(value: Type, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Similar != 0 {
+		if mode ~~ MatchingMode::Similar {
 			return @type.isMatching(value, mode)
 		}
 		else {

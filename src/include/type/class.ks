@@ -1262,7 +1262,7 @@ class ClassType extends Type {
 		if this == value {
 			return true
 		}
-		if mode & MatchingMode::Exact != 0 {
+		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
@@ -1588,7 +1588,7 @@ class ClassVariableType extends Type {
 	isImmutable() => @immutable
 	isLateInit() => @lateInit
 	isMatching(value: ClassVariableType, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact != 0 {
+		if mode ~~ MatchingMode::Exact {
 			return @type.isMatching(value.type(), MatchingMode::Exact)
 		}
 		else {
@@ -1724,7 +1724,7 @@ class ClassMethodType extends FunctionType {
 	} // }}}
 	isMethod() => true
 	isOverflowing(methods: Array<ClassMethodType>) { // {{{
-		const mode = MatchingMode::SimilarParameters | MatchingMode::MissingParameters | MatchingMode::ShiftableParameters | MatchingMode::RequireAllParameters
+		const mode = MatchingMode::SimilarParameters + MatchingMode::MissingParameters + MatchingMode::ShiftableParameters + MatchingMode::RequireAllParameters
 
 		for const method in methods {
 			if this.isMatching(method, mode) {

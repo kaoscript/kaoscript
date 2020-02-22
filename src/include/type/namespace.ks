@@ -277,7 +277,7 @@ class NamespacePropertyType extends Type {
 	} // }}}
 	isAlteration() => @alteration
 	isMatching(value: NamespacePropertyType, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact != 0 {
+		if mode ~~ MatchingMode::Exact {
 			return @type.isMatching(value.type(), MatchingMode::Exact)
 		}
 		else {

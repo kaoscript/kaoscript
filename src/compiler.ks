@@ -348,6 +348,8 @@ const $binaryOperators = {
 	`\(BinaryOperatorKind::BitwiseXor)`			: BinaryOperatorBitwiseXor
 	`\(BinaryOperatorKind::Division)`			: BinaryOperatorDivision
 	`\(BinaryOperatorKind::Imply)`				: BinaryOperatorImply
+	`\(BinaryOperatorKind::Match)`				: BinaryOperatorMatch
+	`\(BinaryOperatorKind::Mismatch)`			: BinaryOperatorMismatch
 	`\(BinaryOperatorKind::Modulo)`				: BinaryOperatorModulo
 	`\(BinaryOperatorKind::Multiplication)`		: BinaryOperatorMultiplication
 	`\(BinaryOperatorKind::NullCoalescing)`		: BinaryOperatorNullCoalescing

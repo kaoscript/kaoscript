@@ -140,21 +140,29 @@ class HollowScope extends Scope {
 		}
 	} // }}}
 	renameNext(name, line) => @parent.renameNext(name, line)
-	replaceVariable(name: String, type: Type, downcast: Boolean = false, node: AbstractNode): Variable { // {{{
+	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { // {{{
 		let variable = this.getVariable(name)!?
 
 		if variable.isDefinitive() {
-			if !type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
+			if type.isAssignableToVariable(variable.getDeclaredType(), downcast) {
+				// do nothing
+			}
+			else if variable.isInitialized() {
 				TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+			}
+			else if type.isNullable() {
+				unless type.setNullable(false).isAssignableToVariable(variable.getDeclaredType(), downcast) {
+					TypeException.throwInvalidAssignement(name, variable.getDeclaredType(), type, node)
+				}
 			}
 		}
 
 		if !type.equals(variable.getRealType()) {
 			if @variables[name] is Array {
-				variable.setRealType(type)
+				variable.setRealType(type, absolute, this)
 			}
 			else {
-				variable = variable.clone().setRealType(type)
+				variable = variable.clone().setRealType(type, absolute, this)
 
 				@variables[name] = [@parent.line(), variable]
 			}
@@ -165,7 +173,7 @@ class HollowScope extends Scope {
 	override resolveReference(name, nullable: Boolean, parameters: Array) => @parent.resolveReference(name, nullable, parameters)
 	updateInferable(name, data, node) { // {{{
 		if data.isVariable {
-			this.replaceVariable(name, data.type, true, node)
+			this.replaceVariable(name, data.type, true, true, node)
 		}
 		else {
 			if @chunkTypes[name] is Array {

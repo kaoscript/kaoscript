@@ -49,8 +49,16 @@ module.exports = function() {
 	printAnimalAbilities(abilities);
 	abilities = AnimalFlags(abilities | AnimalFlags.HasClaws | AnimalFlags.CanFly);
 	printAnimalAbilities(abilities);
+	abilities = AnimalFlags(abilities | AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
+	printAnimalAbilities(abilities);
+	abilities = AnimalFlags(abilities & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly);
+	printAnimalAbilities(abilities);
+	abilities = AnimalFlags(abilities & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly & ~AnimalFlags.Endangered);
+	printAnimalAbilities(abilities);
 	printAnimalAbilities(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly));
 	printAnimalAbilities(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered));
+	printAnimalAbilities(AnimalFlags(AnimalFlags.EndangeredFlyingClawedFishEating & ~AnimalFlags.HasClaws));
+	printAnimalAbilities(AnimalFlags(AnimalFlags.EndangeredFlyingClawedFishEating & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly));
 	function quxbaz(x) {
 		if(arguments.length < 1) {
 			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");

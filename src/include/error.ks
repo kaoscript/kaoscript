@@ -311,6 +311,9 @@ export class SyntaxException extends Exception {
 		throwInvalidEnumAccess(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Accessing an enum can only be done with "::"`, node)
 		} // }}}
+		throwInvalidEnumValue(data, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The enum's value isn't valid`, node, data)
+		} // }}}
 		throwInvalidForcedTypeCasting(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The forced type casting "!!" can't determine the expected type`, node)
 		} // }}}

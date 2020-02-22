@@ -148,7 +148,7 @@ class InlineBlockScope extends BlockScope {
 	replaceVariable(name: String, variable: Variable): Variable { // {{{
 		variable = super.replaceVariable(name, variable)
 
-		if @declarations[name] != true {
+		if !@declarations[name] {
 			@upatedInferables[name] = {
 				isVariable: true
 				type: variable.getRealType()
@@ -157,10 +157,10 @@ class InlineBlockScope extends BlockScope {
 
 		return variable
 	} // }}}
-	replaceVariable(name: String, type: Type, downcast: Boolean = false, node: AbstractNode): Variable { // {{{
-		const variable = super.replaceVariable(name, type, downcast, node)
+	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { // {{{
+		const variable = super.replaceVariable(name, type, downcast, absolute, node)
 
-		if @declarations[name] != true {
+		if !@declarations[name] {
 			@upatedInferables[name] = {
 				isVariable: true
 				type: variable.getRealType()

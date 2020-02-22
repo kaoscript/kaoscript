@@ -86,9 +86,10 @@ class EnumType extends Type {
 		}
 	}
 	isEnum() => true
-	isMatching(value: EnumType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
+	isFlags() => @kind == EnumTypeKind::Flags
+	isMatching(value: EnumType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
 	isMatching(value: ReferenceType, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Similar != 0 {
+		if mode ~~ MatchingMode::Similar {
 			return value.name() == 'Enum'
 		}
 
@@ -106,4 +107,5 @@ class EnumType extends Type {
 	toTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
+	type() => @type
 }

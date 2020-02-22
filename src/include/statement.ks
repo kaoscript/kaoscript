@@ -67,6 +67,7 @@ abstract class Statement extends AbstractNode {
 	setAttributeData(key: AttributeData, data) { // {{{
 		@attributeDatas[key] = data
 	} // }}}
+	setExpectedType(type: Type): Void
 	statement() => this
 	target() => @options.target
 	toDeclarationFragments(variables, fragments) { // {{{

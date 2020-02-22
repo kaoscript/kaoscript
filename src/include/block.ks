@@ -60,20 +60,32 @@ class Block extends AbstractNode {
 		}
 	} // }}}
 	prepare() { // {{{
-		const notAny = @type != null && !@type.isAny()
+		if @type != null && !@type.isAny() {
+			for const statement in @statements {
+				@scope.line(statement.line())
 
-		for const statement in @statements {
-			@scope.line(statement.line())
-
-			statement.prepare()
-
-			if @exit {
-				SyntaxException.throwDeadCode(statement)
-			}
-			else {
-				if notAny {
-					statement.checkReturnType(@type)
+				if @exit {
+					SyntaxException.throwDeadCode(statement)
 				}
+
+				statement.setExpectedType(@type)
+
+				statement.prepare()
+
+				statement.checkReturnType(@type)
+
+				@exit = statement.isExit()
+			}
+		}
+		else {
+			for const statement in @statements {
+				@scope.line(statement.line())
+
+				if @exit {
+					SyntaxException.throwDeadCode(statement)
+				}
+
+				statement.prepare()
 
 				@exit = statement.isExit()
 			}

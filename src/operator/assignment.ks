@@ -35,6 +35,18 @@ class AssignmentOperatorExpression extends Expression {
 
 		@left.checkIfAssignable()
 
+		if const variable = @left.variable() {
+			if variable.isInitialized() {
+				@right.setExpectedType(variable.getRealType())
+			}
+			else {
+				@right.setExpectedType(variable.getDeclaredType())
+			}
+		}
+		else {
+			@right.setExpectedType(@left.type())
+		}
+
 		@right.prepare()
 
 		if @right.type().isInoperative() {
@@ -117,14 +129,13 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			}
 		}
 	} // }}}
-	getBinarySymbol() => ''
 	isAcceptingEnum() => false
 	abstract operator(): Operator
 	abstract runtime(): String
 	abstract symbol(): String
 	toFragments(fragments, mode) { // {{{
 		if @isEnum {
-			fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code($space, this.getBinarySymbol(), $space).compile(@right).code(')')
+			this.toEnumFragments(fragments)
 		}
 		else if @isNative {
 			this.toNativeFragments(fragments)
@@ -142,6 +153,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 			fragments.code(')')
 		}
 	} // }}}
+	toEnumFragments(fragments)
 	toNativeFragments(fragments) { // {{{
 		fragments.compile(@left).code($space).code(this.symbol(), @data.operator).code($space).compile(@right)
 	} // }}}
@@ -151,6 +163,7 @@ abstract class NumericAssignmentOperatorExpression extends AssignmentOperatorExp
 
 class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	private lateinit {
+		_isEnum: Boolean		= false
 		_isNative: Boolean		= false
 		_isNumber: Boolean		= false
 		_isString: Boolean		= false
@@ -159,50 +172,57 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 	prepare() { // {{{
 		super()
 
-		if @left.type().isString() || @right.type().isString() {
-			@isString = true
-			@isNative = true
+		if @left.type().isEnum() && @right.type().isEnum() && @left.type().name() == @right.type().name() {
+			@isEnum = true
+
+			@type = @left.type()
 		}
-		else if @left.type().isNumber() && @right.type().isNumber() {
-			@isNumber = true
-			@isNative = true
-		}
-		else if (@left.type().canBeString(false) && !@left.type().canBeNumber(false)) || (@right.type().canBeString(false) && !@right.type().canBeNumber(false)) {
-			@isString = true
-		}
-		else if @left.type().isAny() || @right.type().isAny() {
-		}
-		else if @left.type().canBeNumber() {
-			if !@left.type().canBeString(false) {
-				if @right.type().canBeNumber() {
-					if !@right.type().canBeString(false) {
-						@isNumber = true
+		else {
+			if @left.type().isString() || @right.type().isString() {
+				@isString = true
+				@isNative = true
+			}
+			else if @left.type().isNumber() && @right.type().isNumber() {
+				@isNumber = true
+				@isNative = true
+			}
+			else if (@left.type().canBeString(false) && !@left.type().canBeNumber(false)) || (@right.type().canBeString(false) && !@right.type().canBeNumber(false)) {
+				@isString = true
+			}
+			else if @left.type().isAny() || @right.type().isAny() {
+			}
+			else if @left.type().canBeNumber() {
+				if !@left.type().canBeString(false) {
+					if @right.type().canBeNumber() {
+						if !@right.type().canBeString(false) {
+							@isNumber = true
+						}
+					}
+					else {
+						TypeException.throwInvalidOperand(@right, Operator::Addition, this)
 					}
 				}
-				else {
-					TypeException.throwInvalidOperand(@right, Operator::Addition, this)
-				}
 			}
-		}
-		else {
-			TypeException.throwInvalidOperand(@left, Operator::Addition, this)
-		}
+			else {
+				TypeException.throwInvalidOperand(@left, Operator::Addition, this)
+			}
 
-		const nullable = @left.type().isNullable() || @right.type().isNullable()
-		if nullable {
-			@isNative = false
-		}
+			const nullable = @left.type().isNullable() || @right.type().isNullable()
+			if nullable {
+				@isNative = false
+			}
 
-		if @isNumber {
-			@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
-		}
-		else if @isString {
-			@type = @scope.reference('String')
-		}
-		else {
-			const numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+			if @isNumber {
+				@type = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
+			}
+			else if @isString {
+				@type = @scope.reference('String')
+			}
+			else {
+				const numberType = nullable ? @scope.reference('Number').setNullable(true) : @scope.reference('Number')
 
-			@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+				@type = new UnionType(@scope, [numberType, @scope.reference('String')], false)
+			}
 		}
 
 		if @left is IdentifierLiteral {
@@ -210,7 +230,14 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @isNative {
+		if @isEnum {
+			fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' | ')
+
+			@right.toOperandFragments(fragments, Operator::Addition, OperandType::Enum)
+
+			fragments.code(')')
+		}
+		else if @isNative {
 			fragments.compile(@left).code(' += ').compile(@right)
 		}
 		else {
@@ -244,11 +271,13 @@ class AssignmentOperatorAddition extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorBitwiseAnd extends NumericAssignmentOperatorExpression {
-	getBinarySymbol() => '&'
 	isAcceptingEnum() => true
 	operator() => Operator::BitwiseAnd
 	runtime() => 'bitwiseAnd'
 	symbol() => '&='
+	toEnumFragments(fragments) { // {{{
+		fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' & ').compile(@right).code(')')
+	} // }}}
 }
 
 class AssignmentOperatorBitwiseLeftShift extends NumericAssignmentOperatorExpression {
@@ -258,11 +287,14 @@ class AssignmentOperatorBitwiseLeftShift extends NumericAssignmentOperatorExpres
 }
 
 class AssignmentOperatorBitwiseOr extends NumericAssignmentOperatorExpression {
-	getBinarySymbol() => '|'
+	getEnumSymbol() => '|'
 	isAcceptingEnum() => true
 	operator() => Operator::BitwiseOr
 	runtime() => 'bitwiseOr'
 	symbol() => '|='
+	toEnumFragments(fragments) { // {{{
+		fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' | ').compile(@right).code(')')
+	} // }}}
 }
 
 class AssignmentOperatorBitwiseRightShift extends NumericAssignmentOperatorExpression {
@@ -617,7 +649,15 @@ class AssignmentOperatorQuotient extends NumericAssignmentOperatorExpression {
 }
 
 class AssignmentOperatorSubtraction extends NumericAssignmentOperatorExpression {
+	isAcceptingEnum() => true
 	operator() => Operator::Subtraction
 	runtime() => 'subtraction'
 	symbol() => '-='
+	toEnumFragments(fragments) { // {{{
+		fragments.compile(@left).code($equals, @type.name(), '(').compile(@left).code(' & ~')
+
+		@right.toOperandFragments(fragments, Operator::Subtraction, OperandType::Enum)
+
+		fragments.code(')')
+	} // }}}
 }

@@ -7,4 +7,4 @@ func foobar(x) ~ Error {
     }
 }
 
-let x = try foobar(true) ~~ 24
+let x = try foobar(true) ~ 24

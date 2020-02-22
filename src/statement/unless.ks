@@ -30,12 +30,27 @@ class UnlessStatement extends Statement {
 			}
 		}
 		else {
-			for const inferable, name of @bodyScope.listUpdatedInferables() when inferable.isVariable {
-				if const variable = @scope.getVariable(name) {
-					@scope.updateInferable(name, {
-						isVariable: true
-						type: @scope.inferVariableType(variable, inferable.type)
-					}, this)
+			const conditionInferables = @condition.inferWhenTrueTypes({})
+			const trueInferables = @bodyScope.listUpdatedInferables()
+
+			for const inferable, name of trueInferables {
+				const trueType = inferable.type
+
+				if conditionInferables[name]? {
+					const conditionType = conditionInferables[name].type
+
+					if trueType.equals(conditionType) {
+						@scope.updateInferable(name, inferable, this)
+					}
+					else {
+						@scope.updateInferable(name, {
+							isVariable: inferable.isVariable
+							type: Type.union(@scope, trueType, conditionType)
+						}, this)
+					}
+				}
+				else if inferable.isVariable {
+					@scope.replaceVariable(name, trueType, true, false, this)
 				}
 			}
 		}

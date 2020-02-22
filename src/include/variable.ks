@@ -132,6 +132,31 @@ class Variable {
 
 		return this
 	} // }}}
+	setRealType(type: Type, absolute: Boolean, scope: Scope) { // {{{
+		if absolute {
+			@initialized = true
+
+			if type.isMorePreciseThan(@declaredType) {
+				@realType = type
+			}
+			else {
+				@realType = @declaredType
+			}
+		}
+		else {
+			if @realType.isNull() {
+				@realType = type.setNullable(true)
+			}
+			else if @realType.isMorePreciseThan(type) {
+				@realType = Type.union(scope, type, @realType)
+			}
+			else {
+				@realType = @declaredType
+			}
+		}
+
+		return this
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.code(@secureName)
 	} // }}}

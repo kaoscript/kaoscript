@@ -78,7 +78,7 @@ class EnumDeclaration extends Statement {
 								@enum.index(data.value.value)
 							}
 							else {
-								throw new NotSupportedException(this)
+								SyntaxException.throwInvalidEnumValue(data.value, this)
 							}
 
 							@values.push({

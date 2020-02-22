@@ -24,12 +24,9 @@ class DoWhileStatement extends Statement {
 
 		@body.prepare()
 
-		for const inferable, name of @bodyScope.listUpdatedInferables() when inferable.isVariable {
-			if const variable = @scope.getVariable(name) {
-				@scope.updateInferable(name, {
-					isVariable: true
-					type: @scope.inferVariableType(variable, inferable.type)
-				}, this)
+		for const inferable, name of @bodyScope.listUpdatedInferables() {
+			if inferable.isVariable && @scope.hasVariable(name) {
+				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
 	} // }}}

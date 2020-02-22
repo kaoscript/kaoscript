@@ -255,12 +255,7 @@ class SwitchStatement extends Statement {
 				@scope.updateInferable(name, inferable.data, this)
 			}
 			else if inferable.data.isVariable {
-				if const variable = @scope.getVariable(name) {
-					@scope.updateInferable(name, {
-						isVariable: true
-						type: @scope.inferVariableType(variable, inferable.data.type)
-					}, this)
-				}
+				@scope.replaceVariable(name, inferable.data.type, true, false, this)
 			}
 		}
 

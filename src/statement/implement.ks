@@ -415,7 +415,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					SyntaxException.throwNotSealedOverwrite(this)
 				}
 
-				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameters | MatchingMode::ShiftableParameters)
+				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::SimilarParameters + MatchingMode::ShiftableParameters)
 				if methods.length == 0 {
 					SyntaxException.throwNoSuitableOverwrite(@classRef, @name, @type, this)
 				}
@@ -747,7 +747,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 				SyntaxException.throwNotSealedOverwrite(this)
 			}
 
-			const methods = @class.listMatchingConstructors(@type, MatchingMode::SimilarParameters | MatchingMode::ShiftableParameters)
+			const methods = @class.listMatchingConstructors(@type, MatchingMode::SimilarParameters + MatchingMode::ShiftableParameters)
 			if methods.length == 0 {
 				SyntaxException.throwNoSuitableOverwrite(@classRef, 'constructor', @type, this)
 			}

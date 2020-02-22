@@ -7,6 +7,7 @@ enum AssignmentType {
 
 enum OperandType {
 	Any
+	Enum
 	Number
 	String
 }
@@ -30,6 +31,8 @@ enum Operator<String> {
 	IncrementPrefix		= 'prefix-increment'
 	LessThan			= 'less-than'
 	LessThanOrEqual		= 'less-than-or-equal'
+	Match				= 'match'
+	Mismatch			= 'mismatch'
 	Modulo				= 'modulo'
 	Multiplication		= 'multiplicative'
 	Negation			= 'negation'
@@ -74,4 +77,6 @@ include {
 	'../operator/polyadic'
 	'../operator/binary'
 	'../operator/unary'
+	'../operator/comparison'
+	'../operator/logical'
 }

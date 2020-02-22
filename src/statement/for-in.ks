@@ -274,11 +274,8 @@ class ForInStatement extends Statement {
 		@bindingScope.releaseTempName(@boundName)
 
 		for const inferable, name of @bodyScope.listUpdatedInferables() {
-			if const variable = @scope.getVariable(name) {
-				@scope.updateInferable(name, {
-					isVariable: true
-					type: @scope.inferVariableType(variable, inferable.type)
-				}, this)
+			if inferable.isVariable && @scope.hasVariable(name) {
+				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
 	} // }}}

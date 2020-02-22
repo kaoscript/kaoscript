@@ -1,0 +1,1 @@
+TypeException: The variable "x" of type "Number" can't be assigned with the value "null" (line 10, file "fixtures/compile/type/type.refine.eq.unless.t_i_n.ps_i.cd_ca_st_n.ks")

@@ -63,21 +63,8 @@ class ReturnStatement extends Statement {
 		}
 	} // }}}
 	checkReturnType(type: Type) { // {{{
-		if type.isNever() {
-			TypeException.throwUnexpectedReturnedValue(this)
-		}
-		else if @value == null {
-			if !type.isVoid() {
-				TypeException.throwExpectedReturnedValue(type, this)
-			}
-		}
-		else {
-			if type.isVoid() {
-				TypeException.throwUnexpectedReturnedValue(this)
-			}
-			else if !@value.isMatchingType(type) {
-				TypeException.throwUnexpectedReturnType(type, @value.type(), this)
-			}
+		if @value != null && !@value.isMatchingType(type) {
+			TypeException.throwUnexpectedReturnType(type, @value.type(), this)
 		}
 	} // }}}
 	hasExceptions() => @exceptions
@@ -109,6 +96,24 @@ class ReturnStatement extends Statement {
 	releaseReusable() { // {{{
 		if @value != null {
 			@value.releaseReusable()
+		}
+	} // }}}
+	override setExpectedType(type) { // {{{
+		if type.isNever() {
+			TypeException.throwUnexpectedReturnedValue(this)
+		}
+		else if type.isVoid() {
+			if @value != null {
+				TypeException.throwUnexpectedReturnedValue(this)
+			}
+		}
+		else {
+			if @value == null {
+				TypeException.throwExpectedReturnedValue(type, this)
+			}
+			else {
+				@value.setExpectedType(type)
+			}
 		}
 	} // }}}
 	toAwaitStatementFragments(fragments, statements) { // {{{

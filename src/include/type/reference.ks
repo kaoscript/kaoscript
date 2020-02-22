@@ -339,7 +339,7 @@ class ReferenceType extends Type {
 		if this == value {
 			return true
 		}
-		else if mode & MatchingMode::Exact != 0 {
+		else if mode ~~ MatchingMode::Exact {
 			if value is ReferenceType {
 				if @name != value._name || @nullable != value._nullable || @parameters.length != value._parameters.length {
 					return false
@@ -623,7 +623,7 @@ class ReferenceType extends Type {
 			return super.toReference(references, mode)
 		}
 		else if @type.isExplicitlyExported() {
-			if mode & ExportMode::IgnoreAlteration != 0 && @type.isAlteration() {
+			if mode ~~ ExportMode::IgnoreAlteration && @type.isAlteration() {
 				return this.export(references, mode, @type.toAlterationReference(references, mode))
 			}
 			else {

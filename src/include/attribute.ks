@@ -46,7 +46,7 @@ class Attribute {
 			return true
 		} // }}}
 		configure(data, options!?, mode, fileName, force = false) { // {{{
-			const clone = !force && options != null && AttributeTarget::Global & mode == 0
+			const clone = !force && options != null && AttributeTarget::Global !~ mode
 
 			if options == null {
 				options = {
@@ -93,7 +93,7 @@ class Attribute {
 				name = data.name
 			}
 
-			if ?name && (clazz ?= $attributes[name]) && clazz.target() & targets > 0 {
+			if ?name && (clazz ?= $attributes[name]) && clazz.target() ~~ targets {
 				return new clazz(data)
 			}
 			else {
@@ -133,7 +133,7 @@ class ErrorAttribute extends Attribute {
 		_data
 	}
 	static {
-		target() => AttributeTarget::Global | AttributeTarget::Property | AttributeTarget::Statement
+		target() => AttributeTarget::Global + AttributeTarget::Property + AttributeTarget::Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { // {{{
@@ -177,7 +177,7 @@ class FormatAttribute extends Attribute {
 		_data
 	}
 	static {
-		target() => AttributeTarget::Global | AttributeTarget::Statement
+		target() => AttributeTarget::Global + AttributeTarget::Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { // {{{
@@ -361,7 +361,7 @@ class ParseAttribute extends Attribute {
 		_data
 	}
 	static {
-		target() => AttributeTarget::Global | AttributeTarget::Statement
+		target() => AttributeTarget::Global + AttributeTarget::Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { // {{{
@@ -389,7 +389,7 @@ class RulesAttribute extends Attribute {
 		_data
 	}
 	static {
-		target() => AttributeTarget::Global | AttributeTarget::Property | AttributeTarget::Statement
+		target() => AttributeTarget::Global + AttributeTarget::Property + AttributeTarget::Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { // {{{
@@ -487,7 +487,7 @@ class TargetAttribute extends Attribute {
 		_data
 	}
 	static {
-		target() => AttributeTarget::Global | AttributeTarget::Statement
+		target() => AttributeTarget::Global + AttributeTarget::Statement
 	}
 	constructor(@data)
 	clone(options, cloned) { // {{{

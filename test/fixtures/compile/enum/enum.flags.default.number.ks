@@ -8,18 +8,18 @@ enum AnimalFlags {
 	EatsFish
 	Endangered
 
-	EndangeredFlyingClawedFishEating = HasClaws | CanFly | EatsFish | Endangered
-	Predator = CanFly | HasClaws
+	EndangeredFlyingClawedFishEating = HasClaws + CanFly + EatsFish + Endangered
+	Predator = CanFly + HasClaws
 }
 
 func printAnimalAbilities(animal) {
 	const animalFlags: Number = animal.flags
 
-	if animalFlags & AnimalFlags::HasClaws != 0 {
+	if animalFlags &&& AnimalFlags::HasClaws != 0 {
 		console.log('animal has claws')
 	}
 
-	if animalFlags & AnimalFlags::CanFly != 0 {
+	if animalFlags &&& AnimalFlags::CanFly != 0 {
 		console.log('animal can fly')
 	}
 
@@ -35,14 +35,14 @@ let animal = {
 printAnimalAbilities(animal)
 // -> nothing
 
-animal.flags |= AnimalFlags::HasClaws
+animal.flags += AnimalFlags::HasClaws
 printAnimalAbilities(animal)
 // -> animal has claws
 
-animal.flags &= ~AnimalFlags::HasClaws
+animal.flags -= AnimalFlags::HasClaws
 printAnimalAbilities(animal)
 // -> nothing
 
-animal.flags |= AnimalFlags::HasClaws | AnimalFlags::CanFly
+animal.flags += AnimalFlags::HasClaws + AnimalFlags::CanFly
 printAnimalAbilities(animal)
 // -> animal has claws, animal can fly

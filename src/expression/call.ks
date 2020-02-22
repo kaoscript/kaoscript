@@ -761,21 +761,21 @@ class CallExpression extends Expression {
 		if @callees.length == 1 {
 			@callees[0].toFragments(fragments, mode, this)
 		}
-		else if @callees.length == 2 {
+		else {
 			this.module().flag('Type')
 
-			@callees[0].toTestFragments(fragments, this)
+			for const callee in @callees til -1 {
+				callee.toTestFragments(fragments, this)
 
-			fragments.code(' ? ')
+				fragments.code(' ? ')
 
-			@callees[0].toFragments(fragments, mode, this)
+				callee.toFragments(fragments, mode, this)
 
-			fragments.code(') : ')
+				fragments.code(') : ')
 
-			@callees[1].toFragments(fragments, mode, this)
-		}
-		else {
-			throw new NotImplementedException(this)
+			}
+
+			@callees.last().toFragments(fragments, mode, this)
 		}
 	} // }}}
 	toQuote() { // {{{
@@ -1245,8 +1245,6 @@ class SealedMethodCallee extends Callee {
 					throw new NotImplementedException(node)
 				}
 				ScopeKind::This => {
-					// (substitute ?= callee.replaceMemberCall?(@property, @arguments, this))
-					// @substitute.toFragments(fragments, mode)
 					if @instance {
 						fragments
 							.code(`\(@variable.getSealedPath())._im_\(@property)(`)

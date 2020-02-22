@@ -1,0 +1,1 @@
+TypeException: The variable is always of type "Number" (line 5, file "fixtures/compile/type/type.union.isnt.log.poly.and.eq_i.in_s.in_ie.ks")

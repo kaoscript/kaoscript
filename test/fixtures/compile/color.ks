@@ -267,16 +267,16 @@ func $from(that: Color, args: array): Color { // {{{
 func $hex(that: Color) { // {{{
 	let chars = '0123456789abcdef'
 
-	let r1 = that._red >> 4
-	let g1 = that._green >> 4
-	let b1 = that._blue >> 4
+	let r1 = that._red >>> 4
+	let g1 = that._green >>> 4
+	let b1 = that._blue >>> 4
 
-	let r2 = that._red & 0xf
-	let g2 = that._green & 0xf
-	let b2 = that._blue & 0xf
+	let r2 = that._red &&& 0xf
+	let g2 = that._green &&& 0xf
+	let b2 = that._blue &&& 0xf
 
 	if that._alpha == 1 {
-		if ((r1 ^ r2) | (g1 ^ g2) | (b1 ^ b2)) == 0 {
+		if ((r1 ^^^ r2) ||| (g1 ^^^ g2) ||| (b1 ^^^ b2)) == 0 {
 			return '#' + chars.charAt(r1) + chars.charAt(g1) + chars.charAt(b1)
 		}
 
@@ -284,10 +284,10 @@ func $hex(that: Color) { // {{{
 	}
 	else {
 		let a = Math.round(that._alpha * 255)
-		let a1 = a >> 4
-		let a2 = a & 0xf
+		let a1 = a >>> 4
+		let a2 = a &&& 0xf
 
-		if ((r1 ^ r2) | (g1 ^ g2) | (b1 ^ b2) | (a1 ^ a2)) == 0 {
+		if ((r1 ^^^ r2) ||| (g1 ^^^ g2) ||| (b1 ^^^ b2) ||| (a1 ^^^ a2)) == 0 {
 			return '#' + chars.charAt(r1) + chars.charAt(g1) + chars.charAt(b1) + chars.charAt(a1)
 		}
 
@@ -300,10 +300,10 @@ let $parsers = {
 		if args.length == 1 {
 			if args[0] is number {
 				that._space = Space::SRGB
-				that._alpha = $caster.alpha(((args[0] >> 24) & 0xff) / 255)
-				that._red = (args[0] >> 16) & 0xff
-				that._green = (args[0] >> 8) & 0xff
-				that._blue = args[0] & 0xff
+				that._alpha = $caster.alpha(((args[0] >>> 24) &&& 0xff) / 255)
+				that._red = (args[0] >>> 16) &&& 0xff
+				that._green = (args[0] >>> 8) &&& 0xff
+				that._blue = args[0] &&& 0xff
 				return true
 			}
 			else if args[0] is array {
@@ -342,12 +342,12 @@ let $parsers = {
 				}
 
 				else if 'rand' == color {
-					let c = Math.random() * 0xffffff|0
+					let c = Math.random() * 0xffffff ||| 0
 					that._space = Space::SRGB
 					that._alpha = 1
-					that._red = ((c >> 16) & 0xff)
-					that._green = ((c >>8) & 0xff)
-					that._blue = ((c) & 0xff)
+					that._red = ((c >>> 16) &&& 0xff)
+					that._green = ((c >>> 8) &&& 0xff)
+					that._blue = (c &&& 0xff)
 					return true
 				}
 
@@ -962,9 +962,9 @@ export class Color {
 	negative(): Color { // {{{
 		this.space(Space::SRGB)
 
-		this._red ^= 0xff
-		this._green ^= 0xff
-		this._blue ^= 0xff
+		this._red ^^= 0xff
+		this._green ^^= 0xff
+		this._blue ^^= 0xff
 
 		return this
 	} // }}}

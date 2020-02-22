@@ -133,7 +133,7 @@ class NamedTupleType extends TupleType {
 		}
 	} // }}}
 	override isArray() => true
-	isMatching(value: TupleType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
+	isMatching(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
 		if value.name() == 'Tuple' {
 			return true
@@ -414,7 +414,7 @@ class UnnamedTupleType extends TupleType {
 		return export
 	} // }}}
 	override isArray() => true
-	isMatching(value: TupleType, mode: MatchingMode) => mode & MatchingMode::Similar != 0
+	isMatching(value: TupleType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
 	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
 		if value.name() == 'Tuple' {
 			return true

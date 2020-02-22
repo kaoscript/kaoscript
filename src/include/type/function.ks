@@ -235,7 +235,7 @@ class FunctionType extends Type {
 		throw new NotSupportedException()
 	} // }}}
 	export(references, mode) { // {{{
-		if mode & ExportMode::OverloadedFunction != 0 {
+		if mode ~~ ExportMode::OverloadedFunction {
 			return {
 				kind: TypeKind::Function
 				async: @async
@@ -321,7 +321,7 @@ class FunctionType extends Type {
 			return false
 		}
 
-		if mode & MatchingMode::Exact != 0 || mode & MatchingMode::ExactParameters != 0 {
+		if mode ~~ MatchingMode::Exact || mode ~~ MatchingMode::ExactParameters {
 			return @min == 0 && @max == Infinity
 		}
 		else {
@@ -333,30 +333,31 @@ class FunctionType extends Type {
 			return false
 		}
 
-		if mode & MatchingMode::Exact != 0 {
-			mode |= MatchingMode::ExactParameters | MatchingMode::ExactReturn
+		if mode ~~ MatchingMode::Exact {
+			mode += MatchingMode::ExactParameters + MatchingMode::ExactReturn
 		}
-		else if mode & MatchingMode::Similar != 0 {
-			mode |= MatchingMode::SimilarParameters | MatchingMode::SimilarReturn
+		else if mode ~~ MatchingMode::Similar {
+			mode += MatchingMode::SimilarParameters + MatchingMode::SimilarReturn
 		}
 
-		if mode & MatchingMode::MissingParameters != 0 && @missingParameters {
+		if mode ~~ MatchingMode::MissingParameters && @missingParameters {
 			// do nothing
 		}
-		else if mode & MatchingMode::ShiftableParameters != 0 {
+		else if mode ~~ MatchingMode::ShiftableParameters {
 			let parameterMode: MatchingMode
-			if mode & MatchingMode::ExactParameters != 0 {
+
+			if mode ~~ MatchingMode::ExactParameters {
 				parameterMode = MatchingMode::Exact
 			}
-			else if mode & MatchingMode::MissingParameterType != 0 {
-				parameterMode = MatchingMode::Similar | MatchingMode::MissingType
+			else if mode ~~ MatchingMode::MissingParameterType {
+				parameterMode = MatchingMode::Similar + MatchingMode::MissingType
 			}
 			else {
 				parameterMode = MatchingMode::Similar
 			}
 
-			if mode & MatchingMode::RequireAllParameters != 0 {
-				parameterMode |= MatchingMode::RequireAllParameters
+			if mode ~~ MatchingMode::RequireAllParameters {
+				parameterMode += MatchingMode::RequireAllParameters
 			}
 
 			if !this.isParametersMatching(value._parameters, parameterMode) {
@@ -368,14 +369,14 @@ class FunctionType extends Type {
 				return false
 			}
 
-			if mode & MatchingMode::ExactParameters != 0 {
+			if mode ~~ MatchingMode::ExactParameters {
 				for const parameter, index in @parameters {
 					if !parameter.isMatching(value._parameters[index], MatchingMode::Exact) {
 						return false
 					}
 				}
 			}
-			else if mode & MatchingMode::SimilarParameters != 0 {
+			else if mode ~~ MatchingMode::SimilarParameters {
 				for const parameter, index in @parameters {
 					if !parameter.isMatching(value._parameters[index], MatchingMode::Similar) {
 						return false
@@ -384,13 +385,13 @@ class FunctionType extends Type {
 			}
 		}
 
-		if mode & MatchingMode::MissingReturn != 0 && @missingReturn {
+		if mode ~~ MatchingMode::MissingReturn && @missingReturn {
 			return true
 		}
-		else if mode & MatchingMode::ExactReturn != 0 {
+		else if mode ~~ MatchingMode::ExactReturn {
 			return @returnType.isMatching(value._returnType, MatchingMode::Exact)
 		}
-		else if mode & MatchingMode::SimilarReturn != 0 {
+		else if mode ~~ MatchingMode::SimilarReturn {
 			return @returnType.isMatching(value._returnType, MatchingMode::Similar)
 		}
 		else {
@@ -410,7 +411,7 @@ class FunctionType extends Type {
 		// console.log(pIndex, pStep, aIndex, aStep)
 		if pStep == -1 {
 			if pIndex >= @parameters.length {
-				if mode & MatchingMode::RequireAllParameters == 0 {
+				if mode !~ MatchingMode::RequireAllParameters {
 					return FunctionType.isOptional(arguments, aIndex, aStep)
 				}
 				else {
@@ -834,7 +835,7 @@ class OverloadedFunctionType extends Type {
 	export(references, mode) { // {{{
 		const functions = []
 
-		const overloadedMode = mode | ExportMode::OverloadedFunction
+		const overloadedMode = mode + ExportMode::OverloadedFunction
 
 		for const reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
@@ -875,14 +876,14 @@ class OverloadedFunctionType extends Type {
 	} // }}}
 	isFunction() => true
 	isMatching(value: ReferenceType, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact != 0 {
+		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
 		return value.isFunction()
 	} // }}}
 	isMatching(value: FunctionType, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact != 0 {
+		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
@@ -895,7 +896,7 @@ class OverloadedFunctionType extends Type {
 		return false
 	} // }}}
 	isMatching(value: OverloadedFunctionType, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact != 0 {
+		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
@@ -917,7 +918,7 @@ class OverloadedFunctionType extends Type {
 		return true
 	} // }}}
 	isMatching(value: NamedType, mode: MatchingMode) { // {{{
-		if mode & MatchingMode::Exact != 0 {
+		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
