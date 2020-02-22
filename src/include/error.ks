@@ -152,6 +152,9 @@ export class NotSupportedException extends Exception {
 	constructor(message = 'Not Supported', node: AbstractNode) { // {{{
 		super(message, node)
 	} // }}}
+	constructor(message = 'Not Supported', node: AbstractNode, data) { // {{{
+		super(message, node, data)
+	} // }}}
 }
 
 export class ReferenceException extends Exception {
@@ -569,7 +572,7 @@ export class TypeException extends Exception {
 			throw new TypeException(`Identifier "\(name)" is not a namespace`, node)
 		} // }}}
 		throwNotNullableExistential(expression, node) ~ TypeException { // {{{
-			throw new TypeException(`The existentiality test of \(expression.toQuote(true)) is always positive`, node)
+			throw new TypeException(`The existential test of \(expression.toQuote(true)) is always positive`, node)
 		} // }}}
 		throwNotNullableOperand(expression, operator, node) ~ TypeException { // {{{
 			throw new TypeException(`The operand \(expression.toQuote(true)) can't be nullable in a \(operator) operation`, node)

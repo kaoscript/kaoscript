@@ -1,34 +1,52 @@
 class ComparisonExpression extends Expression {
 	private {
-		_await: Boolean		= false
-		_composite: Boolean	= false
-		_computed: Boolean	= true
-		_operands			= []
-		_operators			= []
-		_reuseName: String?	= null
-		_tested: Boolean	= false
+		_await: Boolean				= false
+		_composite: Boolean			= false
+		_computed: Boolean			= true
+		_junction: String			= ' && '
+		_junctive: Boolean			= false
+		_operands					= []
+		_operators					= []
+		_reuseName: String?			= null
+		_tested: Boolean			= false
 	}
 	analyse() { // {{{
 		let operand1, operand2, operator
 
-		operand1 = $compile.expression(@data.values[0], this)
-		operand1.analyse()
+		operand1 = this.addOperand(@data.values[0])
 
-		@operands.push(operand1)
-		@await = @await || operand1.isAwait()
+		if @data.values.length == 3 {
+			const value = @data.values[2]
 
-		for const i from 1 til @data.values.length by 2 {
-			operand2 = $compile.expression(@data.values[i + 1], this)
-			operand2.analyse()
+			if value.kind == NodeKind::JunctionExpression {
+				@junctive = true
 
-			@operands.push(operand2)
-			@await = @await || operand2.isAwait()
+				for const operand in value.operands {
+					this.addOperator(@data.values[1], operand1, this.addOperand(operand))
+				}
 
-			operator = this.getOperator(@data.values[i], operand1, operand2)
+				if value.operator.kind == BinaryOperatorKind::And {
+					@junction = ' && '
+				}
+				else if value.operator.kind == BinaryOperatorKind::Or {
+					@junction = ' || '
+				}
+				else {
+					@junction = 'xor'
+				}
+			}
+			else {
+				this.addOperator(@data.values[1], operand1, this.addOperand(@data.values[2]))
+			}
+		}
+		else {
+			for const i from 1 til @data.values.length by 2 {
+				operand2 = this.addOperand(@data.values[i + 1])
 
-			@operators.push(operator)
+				this.addOperator(@data.values[i], operand1, operand2)
 
-			operand1 = operand2
+				operand1 = operand2
+			}
 		}
 	} // }}}
 	prepare() { // {{{
@@ -54,19 +72,46 @@ class ComparisonExpression extends Expression {
 		}
 	} // }}}
 	acquireReusable(acquire) { // {{{
-		if @operators.length > 1 {
-			for const operand in @operands from 1 til -1 until @composite {
-				@composite = operand.isComposite()
-			}
+		if @junctive {
+			if @operands[0].isComposite() {
+				@composite = true
 
-			if @composite {
 				@reuseName = @scope.acquireTempName()
+			}
+		}
+		else {
+			if @operators.length > 1 {
+				for const operand in @operands from 1 til -1 until @composite {
+					@composite = operand.isComposite()
+				}
+
+				if @composite {
+					@reuseName = @scope.acquireTempName()
+				}
 			}
 		}
 
 		for const operand in @operands {
 			operand.acquireReusable(acquire)
 		}
+	} // }}}
+	private addOperand(data) { // {{{
+		const operand = $compile.expression(data, this)
+
+		operand.analyse()
+
+		@operands.push(operand)
+
+		if operand.isAwait() {
+			@await = true
+		}
+
+		return operand
+	} // }}}
+	private addOperator(data, operand1, operand2) { // {{{
+		const operator = this.getOperator(data, operand1, operand2)
+
+		@operators.push(operator)
 	} // }}}
 	private getOperator(data, operand1, operand2) { // {{{
 		switch data.kind {
@@ -153,23 +198,53 @@ class ComparisonExpression extends Expression {
 		}
 	} // }}}
 	toFragments(fragments, mode) { // {{{
+		if @await {
+			NotSupportedException.throw(this)
+		}
+
 		const test = this.isNullable() && !@tested
 		if test {
 			fragments.wrapNullable(this).code(' ? ')
 		}
 
-		@operators[0].toOperatorFragments(fragments, @reuseName, false, true)
+		if @junctive {
+			if @junction == 'xor' {
+				fragments.code($runtime.operator(this), '.xor(')
 
-		if @operators.length > 1 {
-			for const operator in @operators from 1 til -1 {
-				fragments.code(' && ')
+				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, false, false)
 
-				operator.toOperatorFragments(fragments, @reuseName, true, true)
+				for const operator in @operators from 1 {
+					fragments.code($comma)
+
+					operator.toOperatorFragments(fragments, @reuseName, true, false, false, false)
+				}
+
+				fragments.code(')')
 			}
+			else {
+				@operators[0].toOperatorFragments(fragments, @reuseName, true, true, false, false)
 
-			fragments.code(' && ')
+				for const operator in @operators from 1 {
+					fragments.code(@junction)
 
-			@operators[@operators.length - 1].toOperatorFragments(fragments, @reuseName, true, false)
+					operator.toOperatorFragments(fragments, @reuseName, true, false, false, false)
+				}
+			}
+		}
+		else {
+			@operators[0].toOperatorFragments(fragments, @reuseName, false, false, true, true)
+
+			if @operators.length > 1 {
+				for const operator in @operators from 1 til -1 {
+					fragments.code(@junction)
+
+					operator.toOperatorFragments(fragments, @reuseName, true, false, true, true)
+				}
+
+				fragments.code(@junction)
+
+				@operators[@operators.length - 1].toOperatorFragments(fragments, @reuseName, true, false, false, false)
+			}
 		}
 
 		if test {
@@ -240,7 +315,7 @@ class EqualityOperator extends ComparisonOperator {
 		}
 
 		if rightType.isNull() {
-			unless leftType.isNullable() {
+			unless leftType.isNullable() || @left.isLateInit() || @node._options.rules.ignoreMisfit {
 				TypeException.throwInvalidComparison(@left, @right, @node)
 			}
 
@@ -248,7 +323,7 @@ class EqualityOperator extends ComparisonOperator {
 		}
 		else {
 			if leftType.isNull() {
-				unless rightType.isNullable() {
+				unless rightType.isNullable() || @right.isLateInit() || @node._options.rules.ignoreMisfit {
 					TypeException.throwInvalidComparison(@left, @right, @node)
 				}
 			}
@@ -371,7 +446,7 @@ class EqualityOperator extends ComparisonOperator {
 
 		return inferables
 	} // }}}
-	toLeftFragments(fragments, leftReusable, reuseName?) { // {{{
+	toLeftFragments(fragments, reuseName?, reusable, assignable) { // {{{
 		let suffix = null
 		let wrap = true
 
@@ -396,8 +471,13 @@ class EqualityOperator extends ComparisonOperator {
 			}
 		}
 
-		if leftReusable && reuseName != null  {
-			fragments.code(reuseName)
+		if reusable && reuseName != null {
+			if assignable {
+				fragments.code('(', reuseName, $equals).compile(@left).code(')')
+			}
+			else {
+				fragments.code(reuseName)
+			}
 		}
 		else if wrap {
 			fragments.wrap(@left)
@@ -410,7 +490,7 @@ class EqualityOperator extends ComparisonOperator {
 			fragments.code(suffix)
 		}
 	} // }}}
-	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
+	toOperatorFragments(fragments, reuseName?, leftReusable, leftAssignable, rightReusable, rightAssignable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {
 				fragments.code('Number.isNaN(').code(reuseName, $equals).compile(@right).code(')')
@@ -431,14 +511,14 @@ class EqualityOperator extends ComparisonOperator {
 			fragments.code($runtime.operator(@node), '.eq(').compile(@left).code(', ').compile(@right).code(')')
 		}
 		else {
-			this.toLeftFragments(fragments, leftReusable, reuseName)
+			this.toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
 
 			fragments.code(' === ')
 
-			this.toRightFragments(fragments, rightReusable, reuseName)
+			this.toRightFragments(fragments, reuseName, rightReusable, rightAssignable)
 		}
 	} // }}}
-	toRightFragments(fragments, rightReusable, reuseName?) { // {{{
+	toRightFragments(fragments, reuseName?, reusable, assignable) { // {{{
 		let suffix = null
 		let wrap = true
 
@@ -456,8 +536,13 @@ class EqualityOperator extends ComparisonOperator {
 			}
 		}
 
-		if rightReusable && reuseName != null  {
-			fragments.code('(', reuseName, $equals).compile(@right).code(')')
+		if reusable && reuseName != null {
+			if assignable {
+				fragments.code('(', reuseName, $equals).compile(@right).code(')')
+			}
+			else {
+				fragments.code(reuseName)
+			}
 		}
 		else if wrap {
 			fragments.wrap(@right)
@@ -475,7 +560,7 @@ class EqualityOperator extends ComparisonOperator {
 class InequalityOperator extends EqualityOperator {
 	inferWhenFalseTypes(inferables) => super.inferWhenTrueTypes(inferables)
 	inferWhenTrueTypes(inferables) => super.inferWhenFalseTypes(inferables)
-	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
+	toOperatorFragments(fragments, reuseName?, leftReusable, leftAssignable, rightReusable, rightAssignable) { // {{{
 		if @nanLeft {
 			if rightReusable && reuseName != null  {
 				fragments.code('!Number.isNaN(').code(reuseName, $equals).compile(@right).code(')')
@@ -496,11 +581,11 @@ class InequalityOperator extends EqualityOperator {
 			fragments.code($runtime.operator(@node), '.neq(').compile(@left).code(', ').compile(@right).code(')')
 		}
 		else {
-			this.toLeftFragments(fragments, leftReusable, reuseName)
+			this.toLeftFragments(fragments, reuseName, leftReusable, leftAssignable)
 
 			fragments.code(' !== ')
 
-			this.toRightFragments(fragments, rightReusable, reuseName)
+			this.toRightFragments(fragments, reuseName, rightReusable, rightAssignable)
 		}
 	} // }}}
 }
@@ -548,27 +633,42 @@ abstract class NumericComparisonOperator extends ComparisonOperator {
 			fragments.wrap(@right)
 		}
 	} // }}}
-	toOperatorFragments(fragments, reuseName?, leftReusable, rightReusable) { // {{{
+	toOperatorFragments(fragments, reuseName?, leftReusable, leftAssignable, rightReusable, rightAssignable) { // {{{
 		if @isNative {
 			this.toNativeFragments(fragments, reuseName, leftReusable, rightReusable)
 		}
 		else {
 			fragments.code($runtime.operator(@node), `.\(this.runtime())(`)
 
-			if leftReusable && reuseName != null  {
-				fragments.code(reuseName)
+			if reuseName != null {
+				if leftReusable {
+					if leftAssignable {
+						fragments.code(reuseName, $equals).compile(@left)
+					}
+					else {
+						fragments.code(reuseName)
+					}
+				}
+				else {
+					fragments.compile(@left)
+				}
+
+				fragments.code($comma)
+
+				if rightReusable {
+					if rightAssignable {
+						fragments.code(reuseName, $equals).compile(@right)
+					}
+					else {
+						fragments.code(reuseName)
+					}
+				}
+				else {
+					fragments.compile(@right)
+				}
 			}
 			else {
-				fragments.wrap(@left)
-			}
-
-			fragments.code($comma)
-
-			if rightReusable && reuseName != null  {
-				fragments.code(reuseName, $equals).compile(@right)
-			}
-			else {
-				fragments.wrap(@right)
+				fragments.compile(@left).code($comma).compile(@right)
 			}
 
 			fragments.code(')')

@@ -8,6 +8,7 @@ class ThisExpression extends Expression {
 		_fragment: String
 		_immutable: Boolean			= false
 		_instance: Boolean			= true
+		_lateInit: Boolean			= false
 		_name: String
 		_namesake: Boolean			= false
 		_sealed: Boolean			= false
@@ -78,6 +79,7 @@ class ThisExpression extends Expression {
 
 					@variableName = @name
 					@immutable = @type.isImmutable()
+					@lateInit = !@immutable && @type.isLateInit()
 				}
 				else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
 					if @type.isSealed() && @type.hasDefaultValue() && @assignment == AssignmentType::Neither {
@@ -89,6 +91,7 @@ class ThisExpression extends Expression {
 
 					@variableName = `_\(@name)`
 					@immutable = @type.isImmutable()
+					@lateInit = !@immutable && @type.isLateInit()
 				}
 				else {
 					ReferenceException.throwUndefinedInstanceField(@name, this)
@@ -103,6 +106,7 @@ class ThisExpression extends Expression {
 					@variableName = @name
 					@immutable = variable.isImmutable()
 					@sealed = variable.isSealed()
+					@lateInit = !@immutable && variable.isLateInit()
 				}
 				else if variable ?= @class.type().getInstanceVariable(`_\(@name)`) {
 					if variable.isSealed() && variable.hasDefaultValue() && @assignment == AssignmentType::Neither {
@@ -117,6 +121,7 @@ class ThisExpression extends Expression {
 					@variableName = `_\(@name)`
 					@immutable = variable.isImmutable()
 					@sealed = variable.isSealed()
+					@lateInit = !@immutable && variable.isLateInit()
 				}
 				else if @type ?= @class.type().getPropertyGetter(@name) {
 					if @namesake {
@@ -228,6 +233,7 @@ class ThisExpression extends Expression {
 	isComposite() => @composite
 	isExpectingType() => true
 	isInferable() => !@calling && !@composite
+	isLateInit() => @lateInit
 	isInitializable() => true
 	isSealed() => @sealed
 	isUsingVariable(name) => @instance && name == 'this'

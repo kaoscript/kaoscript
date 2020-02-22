@@ -383,74 +383,225 @@ class BinaryOperatorDivision extends NumericBinaryOperatorExpression {
 	symbol() => '/'
 }
 
-class BinaryOperatorMatch extends BinaryOperatorExpression {
-	private {
-		_isNative: Boolean		= false
+class BinaryOperatorMatch extends Expression {
+	private lateinit {
+		_await: Boolean				= false
+		_composite: Boolean			= false
+		_isNative: Boolean			= true
+		_junction: String
+		_junctive: Boolean			= false
+		_operands					= []
+		_reuseName: String?			= null
+		_subject
+		_tested: Boolean			= false
 	}
-	prepare() { // {{{
-		super()
+	analyse() { // {{{
+		@subject = $compile.expression(@data.left, this)
+		@subject.analyse()
 
-		unless @left.type().canBeNumber() {
-			TypeException.throwInvalidOperand(@left, Operator::Match, this)
-		}
+		if @data.right.kind == NodeKind::JunctionExpression {
+			@junctive = true
 
-		unless @right.type().canBeNumber() {
-			TypeException.throwInvalidOperand(@right, Operator::Match, this)
-		}
+			for const operand in @data.right.operands {
+				this.addOperand(operand)
+			}
 
-		if @left.type().isNumber() && @right.type().isNumber() && !@left.type().isNullable() && !@right.type().isNullable() {
-			@isNative = true
-		}
-	} // }}}
-	toOperatorFragments(fragments) { // {{{
-		if @isNative {
-			fragments.code('(').wrap(@left).code(' & ').wrap(@right).code(') !== 0')
+			if @data.right.operator.kind == BinaryOperatorKind::And {
+				@junction = ' && '
+			}
+			else if @data.right.operator.kind == BinaryOperatorKind::Or {
+				@junction = ' || '
+			}
 		}
 		else {
-			fragments
-				.code($runtime.operator(this), `.bitwiseAnd(`)
-				.compile(@left)
-				.code($comma)
-				.compile(@right)
-				.code(') !== 0')
+			this.addOperand(@data.right)
+		}
+	} // }}}
+	prepare() { // {{{
+		@subject.prepare()
+
+		if @subject.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@subject, this)
+		}
+
+		unless @subject.type().canBeNumber() {
+			TypeException.throwInvalidOperand(@subject, Operator::Match, this)
+		}
+
+		if !@subject.type().isNumber() || @subject.type().isNullable() {
+			@isNative = false
+		}
+
+		for const operand in @operands {
+			operand.prepare()
+
+			if operand.type().isInoperative() {
+				TypeException.throwUnexpectedInoperative(operand, this)
+			}
+
+			unless operand.type().canBeNumber() {
+				TypeException.throwInvalidOperand(operand, Operator::Match, this)
+			}
+		}
+	} // }}}
+	translate() { // {{{
+		@subject.translate()
+
+		for const operand in @operands {
+			operand.translate()
+		}
+	} // }}}
+	acquireReusable(acquire) { // {{{
+		if @junctive && @subject.isComposite() {
+			@composite = true
+
+			@reuseName = @scope.acquireTempName()
+		}
+
+		@subject.acquireReusable(acquire)
+
+		for const operand in @operands {
+			operand.acquireReusable(acquire)
+		}
+	} // }}}
+	private addOperand(data) { // {{{
+		const operand = $compile.expression(data, this)
+
+		operand.analyse()
+
+		@operands.push(operand)
+
+		if operand.isAwait() {
+			@await = true
+		}
+	} // }}}
+	isComputed() => true
+	operator() => '!=='
+	releaseReusable() { // {{{
+		if @composite {
+			@scope.releaseTempName(@reuseName)
+		}
+
+		@subject.releaseReusable()
+
+		for const operand in @operands {
+			operand.releaseReusable()
+		}
+	} // }}}
+	toFragments(fragments, mode) { // {{{
+		if @await {
+			NotSupportedException.throw(this)
+		}
+
+		const test = this.isNullable() && !@tested
+		if test {
+			fragments.wrapNullable(this).code(' ? ')
+		}
+
+		if @junctive {
+			if !?@junction {
+				fragments.code($runtime.operator(this), '.xor(')
+
+				this.toOperatorFragments(fragments, @operands[0], true)
+
+				for const operand in @operands from 1 {
+					fragments.code($comma)
+
+					this.toOperatorFragments(fragments, operand, false)
+				}
+
+				fragments.code(')')
+			}
+			else {
+				this.toOperatorFragments(fragments, @operands[0], true)
+
+				for const operand in @operands from 1 {
+					fragments.code(@junction)
+
+					this.toOperatorFragments(fragments, operand, false)
+				}
+			}
+		}
+		else {
+			this.toOperatorFragments(fragments, @operands[0], false)
+		}
+
+		if test {
+			fragments.code(' : false')
+		}
+	} // }}}
+	toNullableFragments(fragments) { // {{{
+		if !@tested {
+			let nf = false
+
+			if @subject.isNullable() {
+				nf = true
+
+				fragments.compileNullable(@subject)
+			}
+
+			for const operand in @operands {
+				if operand.isNullable() {
+					if nf {
+						fragments.code(' && ')
+					}
+					else {
+						nf = true
+					}
+
+					fragments.compileNullable(operand)
+				}
+			}
+
+			@tested = true
+		}
+	} // }}}
+	toOperatorFragments(fragments, operand, assignable) { // {{{
+		const native = @isNative && operand.type().isNumber() && !operand.type().isNullable()
+		const operator = this.operator()
+
+		if @composite {
+			if assignable {
+				if native {
+					fragments.code(`((\(@reuseName) = `).compile(@subject).code(') & ').wrap(operand).code(`) \(operator) 0`)
+				}
+				else {
+					fragments
+						.code($runtime.operator(this), `.bitwiseAnd(\(@reuseName) = `)
+						.compile(@subject)
+						.code($comma)
+						.compile(operand)
+						.code(`) \(operator) 0`)
+				}
+			}
+			else {
+				if native {
+					fragments.code(`(\(@reuseName) & `).wrap(operand).code(`) \(operator) 0`)
+				}
+				else {
+					fragments.code($runtime.operator(this), `.bitwiseAnd(\(@reuseName), `).compile(operand).code(`) \(operator) 0`)
+				}
+			}
+		}
+		else {
+			if native {
+				fragments.code('(').wrap(@subject).code(' & ').wrap(operand).code(`) \(operator) 0`)
+			}
+			else {
+				fragments
+					.code($runtime.operator(this), `.bitwiseAnd(`)
+					.compile(@subject)
+					.code($comma)
+					.compile(operand)
+					.code(`) \(operator) 0`)
+			}
 		}
 	} // }}}
 	type() => @scope.reference('Boolean')
 }
 
-class BinaryOperatorMismatch extends BinaryOperatorExpression {
-	private {
-		_isNative: Boolean		= false
-	}
-	prepare() { // {{{
-		super()
-
-		unless @left.type().canBeNumber() {
-			TypeException.throwInvalidOperand(@left, Operator::Match, this)
-		}
-
-		unless @right.type().canBeNumber() {
-			TypeException.throwInvalidOperand(@right, Operator::Match, this)
-		}
-
-		if @left.type().isNumber() && @right.type().isNumber() && !@left.type().isNullable() && !@right.type().isNullable() {
-			@isNative = true
-		}
-	} // }}}
-	toOperatorFragments(fragments) { // {{{
-		if @isNative {
-			fragments.code('(').wrap(@left).code(' & ').wrap(@right).code(') === 0')
-		}
-		else {
-			fragments
-				.code($runtime.operator(this), `.bitwiseAnd(`)
-				.compile(@left)
-				.code($comma)
-				.compile(@right)
-				.code(') === 0')
-		}
-	} // }}}
-	type() => @scope.reference('Boolean')
+class BinaryOperatorMismatch extends BinaryOperatorMatch {
+	operator() => '==='
 }
 
 class BinaryOperatorModulo extends NumericBinaryOperatorExpression {

@@ -5,9 +5,6 @@ enum AnimalFlags {
 	CanFly
 	EatsFish
 	Endangered
-
-	EndangeredFlyingClawedFishEating = HasClaws + CanFly + EatsFish + Endangered
-	Predator = CanFly + HasClaws
 }
 
 func foobar(abilities: AnimalFlags) {

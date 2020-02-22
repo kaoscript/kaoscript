@@ -100,6 +100,15 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 	private lateinit {
 		_type: Type
 	}
+	prepare() { // {{{
+		@argument.prepare()
+
+		unless @argument.type().isNullable() || @argument.isLateInit() || @options.rules.ignoreMisfit || @argument is MemberExpression {
+			TypeException.throwNotNullableExistential(@argument, this)
+		}
+
+		@type = @argument.type().setNullable(false)
+	} // }}}
 	inferTypes(inferables) { // {{{
 		@argument.inferTypes(inferables)
 
@@ -113,15 +122,6 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 		return inferables
 	} // }}}
 	isComputed() => @argument.isNullable()
-	prepare() { // {{{
-		@argument.prepare()
-
-		if !(@argument is MemberExpression || @argument.type().isNullable()) && !@options.rules.ignoreMisfit {
-			TypeException.throwNotNullableExistential(@argument, this)
-		}
-
-		@type = @argument.type().setNullable(false)
-	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @argument.isNullable() {
 			fragments

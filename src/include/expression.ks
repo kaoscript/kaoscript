@@ -47,6 +47,8 @@ abstract class Expression extends AbstractNode {
 	isInitializingInstanceVariable(name: String): Boolean => false
 	// if the associated type can be updated (it's a chunck or a variable)
 	isInferable() => false
+	// if the expression is a lateinit field
+	isLateInit() => false
 	// if the expression needs to be assign to a temp variable to be reused, expect for simple member expression
 	isLooseComposite() => this.isComposite()
 	// if the type is matching the given type

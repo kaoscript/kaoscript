@@ -301,6 +301,9 @@ const $compile = {
 				throw new NotSupportedException(`Unexpected unary operator \(data.operator.kind)`, parent)
 			}
 		}
+		else if data.kind == NodeKind::JunctionExpression {
+			throw new NotSupportedException(`Unexpected junction expression`, parent)
+		}
 		else {
 			throw new NotSupportedException(`Unexpected expression/statement \(data.kind)`, parent)
 		}
