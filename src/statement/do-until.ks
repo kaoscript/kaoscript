@@ -14,14 +14,6 @@ class DoUntilStatement extends Statement {
 		@condition.analyse()
 	} // }}}
 	prepare() { // {{{
-		@condition.prepare()
-
-		unless @condition.type().canBeBoolean() {
-			TypeException.throwInvalidCondition(@condition, this)
-		}
-
-		this.assignTempVariables(@scope)
-
 		@body.prepare()
 
 		for const inferable, name of @bodyScope.listUpdatedInferables() {
@@ -29,6 +21,14 @@ class DoUntilStatement extends Statement {
 				@scope.replaceVariable(name, inferable.type, true, false, this)
 			}
 		}
+
+		@condition.prepare()
+
+		unless @condition.type().canBeBoolean() {
+			TypeException.throwInvalidCondition(@condition, this)
+		}
+
+		this.assignTempVariables(@scope)
 	} // }}}
 	translate() { // {{{
 		@condition.translate()
