@@ -237,6 +237,10 @@ class TupleFieldDeclaration extends AbstractNode {
 
 		if !?@type {
 			@type = new TupleFieldType(@scope, @data.name?.name, @index, Type.fromAST(@data.type, this), @parameter.isRequired())
+
+			if @data.defaultValue? && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+				@type.flagNullable()
+			}
 		}
 	} // }}}
 	translate() { // {{{

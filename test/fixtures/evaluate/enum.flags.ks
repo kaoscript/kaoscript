@@ -1,7 +1,6 @@
 require expect: func
 
-#[flags]
-enum Foobar {
+flagged enum Foobar {
 	foo = 1
 	bar
 	qux

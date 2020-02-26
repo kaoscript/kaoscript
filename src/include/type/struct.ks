@@ -364,6 +364,9 @@ class StructFieldType extends Type {
 		required: @required
 		type: @type.export(references, mode)
 	} // }}}
+	flagNullable() { // {{{
+		@type = @type.setNullable(true)
+	} // }}}
 	index() => @index
 	name() => @name
 	override toFragments(fragments, node) { // {{{

@@ -219,7 +219,7 @@ class EnumVariableDeclaration extends AbstractNode {
 								SyntaxException.throwEnumOverflow(@parent.name(), this)
 							}
 
-							let tmp = enum.index(value.value)
+							enum.index(value.value)
 						}
 						else {
 							SyntaxException.throwInvalidEnumValue(value, this)

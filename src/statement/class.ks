@@ -426,51 +426,6 @@ class ClassDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	addReference(type, node) { // {{{
-		if type is AnyType {
-			// do nothing
-		}
-		else if type is ReferenceType {
-			const name = type.name()
-
-			if name == 'Any' {
-				// do nothing
-			}
-			else if !?@references[name] {
-				if $typeofs[name] == true {
-					@references[name] = {
-						status: TypeStatus::Native
-						type: type
-					}
-				}
-				else if variable ?= @scope.getVariable(name) {
-					@references[name] = {
-						status: TypeStatus::Referenced
-						type: type
-						variable: variable
-					}
-				}
-				else {
-					@references[name] = {
-						status: TypeStatus::Unreferenced
-						type: type
-					}
-				}
-			}
-		}
-		else if type is UnionType {
-			for let type in type.types() {
-				this.addReference(type, node)
-			}
-		}
-		else if type is ClassVariableType {
-			this.addReference(type.type(), node)
-		}
-		else {
-			console.error(type)
-			throw new NotImplementedException(this)
-		}
-	} // }}}
 	addSharedMethod(name: String, sealedclass: NamedType): Void { // {{{
 		if !?@sharedMethods[name] {
 			@sharedMethods[name] = {
@@ -1259,12 +1214,6 @@ class ClassDeclaration extends Statement {
 			line.code(')').done()
 		}
 
-		if references ?= this.module().listReferences(@name) {
-			for ref in references {
-				fragments.line(ref)
-			}
-		}
-
 		if @sealed {
 			fragments.line(`var \(@type.getSealedName()) = {}`)
 		}
@@ -1805,10 +1754,6 @@ class ClassMethodDeclaration extends Statement {
 				parent._classMethods[@name] = [this]
 			}
 		}
-
-		for parameter in @data.parameters {
-			@parent.addReference(Type.fromAST(parameter.type, @scope, false, this), this)
-		}
 	} // }}}
 	analyse() { // {{{
 		for parameter in @data.parameters {
@@ -2082,10 +2027,6 @@ class ClassConstructorDeclaration extends Statement {
 		@internalName = `__ks_cons_\(parent._constructors.length)`
 
 		parent._constructors.push(this)
-
-		for parameter in @data.parameters {
-			@parent.addReference(Type.fromAST(parameter.type, @scope, false, this), this)
-		}
 	} // }}}
 	analyse() { // {{{
 		@parameters = []
@@ -2510,16 +2451,17 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		@type = ClassVariableType.fromAST(@data, this)
 
-		@parent.addReference(@type, this)
-
 		if @defaultValue {
 			if @instance {
 				@value = $compile.expression(@data.value, this, @parent._instanceVariableScope)
 				@value.analyse()
+			}
 
-				if @autoTyping {
-					@type.type(@value.type())
-				}
+			if @autoTyping {
+				@type.type(@value.type())
+			}
+			else if @data.value.kind == NodeKind::Identifier && @data.value.name == 'null' {
+				@type.flagNullable()
 			}
 		}
 		else {
@@ -2532,10 +2474,7 @@ class ClassVariableDeclaration extends AbstractNode {
 		if @defaultValue {
 			@value.prepare()
 
-			if @autoTyping {
-				@type.type(@value.type())
-			}
-			else if !@value.isMatchingType(@type.type()) {
+			if !@value.isMatchingType(@type.type()) {
 				TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
 			}
 

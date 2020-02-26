@@ -5,7 +5,7 @@ module.exports = function() {
 			this.__ks_cons(arguments);
 		}
 		__ks_init_1() {
-			this._x = null;
+			this.x = null;
 		}
 		__ks_init() {
 			Foobar.prototype.__ks_init_1.call(this);
@@ -15,16 +15,7 @@ module.exports = function() {
 				throw new SyntaxError("Wrong number of arguments");
 			}
 		}
-		__ks_func_foobar_0() {
-			if(this._x !== null) {
-				this._x = null;
-			}
-		}
-		foobar() {
-			if(arguments.length === 0) {
-				return Foobar.prototype.__ks_func_foobar_0.apply(this);
-			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
 	}
+	const f = new Foobar();
+	f.x = null;
 };

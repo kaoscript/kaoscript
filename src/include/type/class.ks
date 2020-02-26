@@ -1583,6 +1583,9 @@ class ClassVariableType extends Type {
 
 		return this
 	} // }}}
+	flagNullable() { // {{{
+		@type = @type.setNullable(true)
+	} // }}}
 	hasDefaultValue() => @default
 	isAlteration() => @alteration
 	isImmutable() => @immutable

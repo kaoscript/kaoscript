@@ -17,7 +17,6 @@ export class Module {
 		_metadata				= null
 		_options
 		_output
-		_references				= {}
 		_register				= false
 		_requirements			= []
 		_requirementByNames		= {}
@@ -89,16 +88,6 @@ export class Module {
 				versions: [moduleVersion]
 			}
 		}
-	} // }}}
-	addReference(key, code) { // {{{
-		if @references[key] {
-			@references[key].push(code)
-		}
-		else {
-			@references[key] = [code]
-		}
-
-		return this
 	} // }}}
 	addRequirement(requirement: Requirement) { // {{{
 		@requirements.push(requirement)
@@ -225,18 +214,6 @@ export class Module {
 		}
 		else if @includePaths[path] == true {
 			return ['']
-		}
-		else {
-			return null
-		}
-	} // }}}
-	listReferences(key) { // {{{
-		if @references[key] {
-			let references = @references[key]
-
-			@references[key] = null
-
-			return references
 		}
 		else {
 			return null

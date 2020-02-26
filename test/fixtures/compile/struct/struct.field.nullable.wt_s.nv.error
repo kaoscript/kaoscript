@@ -1,0 +1,1 @@
+TypeException: The variable "f.x" of type "String" can't be assigned with the value "null" (line 7, file "fixtures/compile/struct/struct.field.nullable.wt_s.nv.ks")
