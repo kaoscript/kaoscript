@@ -34,7 +34,7 @@ module.exports = function() {
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
-			this.bar = "Hello " + name;
+			Foo.bar = "Hello " + name;
 		}
 		qux() {
 			if(arguments.length === 1) {

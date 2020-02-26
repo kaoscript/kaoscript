@@ -1633,7 +1633,6 @@ class ClassMethodDeclaration extends Statement {
 	private lateinit {
 		_block: FunctionBlock
 		_internalName: String
-		_parameters: Array<Parameter>
 		_type: Type
 	}
 	private {
@@ -1646,6 +1645,7 @@ class ClassMethodDeclaration extends Statement {
 		_instance: Boolean				= true
 		_name: String
 		_override: Boolean				= false
+		_parameters: Array<Parameter>	= []
 		_returnNull: Boolean			= false
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
@@ -1811,7 +1811,6 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		@parameters = []
 		for parameter in @data.parameters {
 			@parameters.push(parameter = new Parameter(parameter, this))
 
@@ -1964,6 +1963,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	getFunctionNode() => this
+	getParameterOffset() => 0
 	isAbstract() => @abstract
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -2211,6 +2211,7 @@ class ClassConstructorDeclaration extends Statement {
 		return -1
 	} // }}}
 	getFunctionNode() => this
+	getParameterOffset() => 0
 	private getSuperIndex(body: Array) { // {{{
 		for statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
@@ -2384,6 +2385,7 @@ class ClassDestructorDeclaration extends Statement {
 		@block.translate()
 	} // }}}
 	getFunctionNode() => this
+	getParameterOffset() => 0
 	isAbstract() { // {{{
 		for modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::Abstract {
@@ -2424,14 +2426,14 @@ class ClassVariableDeclaration extends AbstractNode {
 		_type: ClassVariableType
 	}
 	private {
-		_autoTyping: Boolean				= false
-		_defaultValue						= null
-		_hasDefaultValue: Boolean			= false
-		_immutable: Boolean					= false
-		_instance: Boolean					= true
-		_initialized: Boolean				= true
-		_lateInit: Boolean					= false
+		_autoTyping: Boolean		= false
+		_defaultValue: Boolean		= false
+		_immutable: Boolean			= false
+		_instance: Boolean			= true
+		_initialized: Boolean		= true
+		_lateInit: Boolean			= false
 		_name: String
+		_value						= null
 	}
 	constructor(data, parent) { // {{{
 		super(data, parent)
@@ -2480,13 +2482,13 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 	} // }}}
 	analyse() { // {{{
-		if @data.defaultValue? {
-			@hasDefaultValue = true
+		if @data.value? {
+			@defaultValue = true
 			@lateInit = false
 
 			if !@instance {
-				@defaultValue = $compile.expression(@data.defaultValue, this)
-				@defaultValue.analyse()
+				@value = $compile.expression(@data.value, this)
+				@value.analyse()
 			}
 		}
 	} // }}}
@@ -2510,13 +2512,13 @@ class ClassVariableDeclaration extends AbstractNode {
 
 		@parent.addReference(@type, this)
 
-		if @hasDefaultValue {
+		if @defaultValue {
 			if @instance {
-				@defaultValue = $compile.expression(@data.defaultValue, this, @parent._instanceVariableScope)
-				@defaultValue.analyse()
+				@value = $compile.expression(@data.value, this, @parent._instanceVariableScope)
+				@value.analyse()
 
 				if @autoTyping {
-					@type.type(@defaultValue.type())
+					@type.type(@value.type())
 				}
 			}
 		}
@@ -2527,20 +2529,20 @@ class ClassVariableDeclaration extends AbstractNode {
 		}
 	} // }}}
 	translate() { // {{{
-		if @hasDefaultValue {
-			@defaultValue.prepare()
+		if @defaultValue {
+			@value.prepare()
 
 			if @autoTyping {
-				@type.type(@defaultValue.type())
+				@type.type(@value.type())
 			}
-			else if !@defaultValue.isMatchingType(@type.type()) {
-				TypeException.throwInvalidAssignement(@name, @type, @defaultValue.type(), this)
+			else if !@value.isMatchingType(@type.type()) {
+				TypeException.throwInvalidAssignement(@name, @type, @value.type(), this)
 			}
 
-			@defaultValue.translate()
+			@value.translate()
 		}
 	} // }}}
-	hasDefaultValue() => @hasDefaultValue
+	hasDefaultValue() => @defaultValue
 	initialize(type, node) { // {{{
 		if !@initialized {
 			@initialized = true
@@ -2557,19 +2559,19 @@ class ClassVariableDeclaration extends AbstractNode {
 	isRequiringInitialization() => @type.isRequiringInitialization()
 	name() => @name
 	toFragments(fragments) { // {{{
-		if @hasDefaultValue {
+		if @defaultValue {
 			if @instance {
 				fragments
 					.newLine()
 					.code(`this.\(@name) = `)
-					.compile(@defaultValue)
+					.compile(@value)
 					.done()
 			}
 			else {
 				fragments
 					.newLine()
 					.code(`\(@parent.name()).\(@name) = `)
-					.compile(@defaultValue)
+					.compile(@value)
 					.done()
 			}
 		}

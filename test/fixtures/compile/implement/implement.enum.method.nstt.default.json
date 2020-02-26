@@ -1,0 +1,41 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Weekday"
+  ],
+  "references": [
+    {
+      "kind": "enum",
+      "type": "number",
+      "index": 6,
+      "exhaustive": true,
+      "variables": [
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY"
+      ],
+      "instanceMethods": {
+        "isWeekend": [
+          {
+            "id": 0,
+            "access": 4,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Boolean",
+            "throws": []
+          }
+        ]
+      },
+      "staticMethods": {}
+    }
+  ],
+  "macros": []
+}

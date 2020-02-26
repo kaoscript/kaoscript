@@ -1,5 +1,4 @@
-#[flags]
-enum AnimalFlags {
+flagged enum AnimalFlags {
 	None
 	HasClaws
 	CanFly

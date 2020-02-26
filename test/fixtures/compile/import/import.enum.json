@@ -34,8 +34,10 @@
     },
     {
       "kind": "enum",
+      "type": "number",
+      "index": 5,
       "exhaustive": true,
-      "elements": [
+      "variables": [
         "Red",
         "Green",
         "Blue",
@@ -43,8 +45,8 @@
         "DarkGreen",
         "DarkBlue"
       ],
-      "index": 5,
-      "type": "number"
+      "instanceMethods": {},
+      "staticMethods": {}
     }
   ],
   "macros": []

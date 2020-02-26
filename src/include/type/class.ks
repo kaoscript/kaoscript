@@ -1540,7 +1540,7 @@ class ClassVariableType extends Type {
 				}
 			}
 
-			if data.defaultValue? {
+			if data.value? {
 				type._default = true
 				type._lateInit = false
 			}
@@ -1606,6 +1606,8 @@ class ClassVariableType extends Type {
 	type(@type): this
 	unflagAlteration() { // {{{
 		@alteration = false
+
+		return this
 	} // }}}
 }
 

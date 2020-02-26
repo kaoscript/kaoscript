@@ -2,8 +2,7 @@ enum AttributeData {
 	Conditional
 }
 
-#[flags]
-enum AttributeTarget {
+flagged enum AttributeTarget {
 	Class			= 1
 	Conditional
 	Constructor

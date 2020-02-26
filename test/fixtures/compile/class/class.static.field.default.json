@@ -1,37 +1,14 @@
 {
   "aliens": [
-    0,
+    "Any?",
     "console"
   ],
   "requirements": [],
   "exports": [
-    1,
+    0,
     "Foo"
   ],
   "references": [
-    {
-      "kind": "dictionary",
-      "properties": {
-        "log": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "name": "args",
-              "type": "Any",
-              "min": 0,
-              "max": "Infinity",
-              "default": 0
-            }
-          ],
-          "returns": "Any?",
-          "throws": []
-        }
-      }
-    },
     {
       "kind": "class",
       "abstract": false,

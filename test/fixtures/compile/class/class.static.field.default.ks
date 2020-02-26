@@ -1,8 +1,4 @@
-#![rules(ignore-misfit)]
-
-extern console: {
-	log(...args)
-}
+extern console
 
 class Foo {
 	static {
@@ -16,7 +12,7 @@ class Foo {
 	constructor(@name)
 
 	qux(name) {
-		this.bar = 'Hello ' + name
+		Foo.bar = 'Hello ' + name
 	}
 }
 

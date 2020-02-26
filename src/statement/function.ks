@@ -447,6 +447,7 @@ class FunctionDeclarator extends AbstractNode {
 	} // }}}
 	addInitializableVariable(variable, node)
 	getFunctionNode() => this
+	getParameterOffset() => 0
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType

@@ -1,0 +1,30 @@
+{
+  "aliens": [
+    "Any?",
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Color"
+  ],
+  "references": [
+    {
+      "kind": "enum",
+      "type": "number",
+      "index": 5,
+      "exhaustive": true,
+      "variables": [
+        "Red",
+        "Green",
+        "Blue",
+        "DarkRed",
+        "DarkGreen",
+        "DarkBlue"
+      ],
+      "instanceMethods": {},
+      "staticMethods": {}
+    }
+  ],
+  "macros": []
+}

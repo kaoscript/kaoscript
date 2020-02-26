@@ -191,6 +191,7 @@ class TupleFunction extends AbstractNode {
 		}
 	} // }}}
 	translate()
+	getParameterOffset() => 0
 	isAssertingParameter() => @options.rules.assertNewTuple
 	isAssertingParameterType() => this.isAssertingParameter()
 	parameters() => @parameters

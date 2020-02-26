@@ -172,6 +172,7 @@ class StructFunction extends AbstractNode {
 		}
 	} // }}}
 	translate()
+	getParameterOffset() => 0
 	isAssertingParameter() => @options.rules.assertNewStruct
 	isAssertingParameterType() => this.isAssertingParameter()
 	parameters() => @parameters

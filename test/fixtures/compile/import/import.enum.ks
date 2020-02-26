@@ -8,7 +8,7 @@ let color = Color::Red
 
 console.log(color)
 
-enum Color {
+impl Color {
 	DarkRed = 3
 	DarkGreen
 	DarkBlue

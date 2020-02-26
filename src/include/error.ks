@@ -207,12 +207,20 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" in namespace \(namespace.toQuote(true)) can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
 			}
 		} // }}}
-		throwNoMatchingMethod(method, class, arguments, node) ~ ReferenceException { // {{{
+		throwNoMatchingClassMethod(method, class, arguments, node) ~ ReferenceException { // {{{
 			if arguments.length == 0 {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to no arguments`, node)
 			}
 			else {
 				throw new ReferenceException(`The method "\(method)" of the class "\(class)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
+			}
+		} // }}}
+		throwNoMatchingEnumMethod(method, enum, arguments, node) ~ ReferenceException { // {{{
+			if arguments.length == 0 {
+				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to no arguments`, node)
+			}
+			else {
+				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
 			}
 		} // }}}
 		throwNoMatchingStruct(name, arguments, node) ~ ReferenceException { // {{{
@@ -249,8 +257,11 @@ export class ReferenceException extends Exception {
 		throwNotExportable(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`The exported variable "\(name)" is not exportable`, node)
 		} // }}}
-		throwNotFoundMethod(method, class, node) ~ ReferenceException { // {{{
+		throwNotFoundClassMethod(method, class, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`The method "\(method)" can't be found in the class "\(class)"`, node)
+		} // }}}
+		throwNotFoundEnumMethod(method, enum, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The method "\(method)" can't be found in the enum "\(enum)"`, node)
 		} // }}}
 		throwNotPassed(name, module, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`To overwrite "\(name)", it needs to be passed to the module "\(module)"`, node)

@@ -1,5 +1,4 @@
-#[flags]
-enum Foobar {
+flagged enum Foobar {
 	NoFeatures			// 0
 
 	Feature1			// 2^0 = 1

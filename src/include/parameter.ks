@@ -208,14 +208,14 @@ class Parameter extends AbstractNode {
 		}
 
 		if restIndex == -1 {
-			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1)`)
+			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1 + node.getParameterOffset())`)
 
 			Parameter.toBeforeRestParameterFragments(fragments, name, signature, parameters, lastHeaderParameterIndex, restIndex, context, wrongdoer)
 
 			return fragments
 		}
 		else if lastHeaderParameterIndex < restIndex {
-			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1)`)
+			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1 + node.getParameterOffset())`)
 
 			Parameter.toBeforeRestParameterFragments(fragments, name, signature, parameters, lastHeaderParameterIndex, restIndex, context, wrongdoer)
 
@@ -233,7 +233,7 @@ class Parameter extends AbstractNode {
 			}
 		}
 		else if minAfter != 0 {
-			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1)`)
+			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1 + node.getParameterOffset())`)
 		}
 
 		Parameter.toAfterRestParameterFragments(fragments, name, parameters, restIndex, context, wrongdoer)
@@ -241,6 +241,8 @@ class Parameter extends AbstractNode {
 		return fragments
 	} // }}}
 	static toHeaderParameterFragments(fragments, node, parameters, minAfter, context) { // {{{
+		const offset = node.getParameterOffset()
+
 		let til = -1
 
 		for const parameter, i in parameters {
@@ -248,7 +250,7 @@ class Parameter extends AbstractNode {
 
 			if type.max() == Infinity {
 				if minAfter == 0 && type.isAny() && node._options.format.parameters == 'es6' {
-					fragments.code($comma) if i > 0
+					fragments.code($comma) if i + offset > 0
 
 					parameter.toParameterFragments(fragments)
 
@@ -262,7 +264,7 @@ class Parameter extends AbstractNode {
 				return i
 			}
 			else if parameter.isRequired() || i + 1 == parameters.length || i < (til == -1 ? (til = Parameter.getUntilDifferentTypeIndex(parameters, i)) : til) {
-				fragments.code($comma) if i > 0
+				fragments.code($comma) if i + offset > 0
 
 				parameter.toParameterFragments(fragments)
 
@@ -368,7 +370,7 @@ class Parameter extends AbstractNode {
 			else if node.isAssertingParameter() {
 				fragments
 					.newControl()
-					.code(`if(\(name).length < \(signature.min()))`)
+					.code(`if(\(name).length < \(signature.min() + node.getParameterOffset()))`)
 					.step()
 					.line(`throw new SyntaxError("Wrong number of arguments (" + \(name).length + " for \(signature.min()))")`)
 					.done()
@@ -397,7 +399,7 @@ class Parameter extends AbstractNode {
 		if parameter.type().isAny() {
 			if minAfter > 0 {
 				if !declared {
-					fragments.line($runtime.scope(node), `__ks_i = \(restIndex - 1)`)
+					fragments.line($runtime.scope(node), `__ks_i = \(restIndex - 1 + node.getParameterOffset())`)
 				}
 
 				if parameter.isAnonymous() {

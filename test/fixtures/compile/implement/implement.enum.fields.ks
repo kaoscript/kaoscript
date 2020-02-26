@@ -1,6 +1,4 @@
-extern console: {
-	log(...args)
-}
+extern console
 
 enum Color {
 	Red
@@ -10,10 +8,12 @@ enum Color {
 
 console.log(Color::Red)
 
-enum Color {
+impl Color {
 	DarkRed = 3
 	DarkGreen
 	DarkBlue
 }
 
 console.log(Color::DarkGreen)
+
+export Color

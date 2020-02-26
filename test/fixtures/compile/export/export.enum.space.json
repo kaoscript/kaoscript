@@ -8,13 +8,15 @@
   "references": [
     {
       "kind": "enum",
+      "type": "string",
+      "index": -1,
       "exhaustive": true,
-      "elements": [
+      "variables": [
         "RGB",
         "SRGB"
       ],
-      "index": -1,
-      "type": "string"
+      "instanceMethods": {},
+      "staticMethods": {}
     }
   ],
   "macros": []

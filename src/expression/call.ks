@@ -444,6 +444,8 @@ class CallExpression extends Expression {
 				this.makeMemberCalleeFromReference(value.type())
 			}
 			is ClassType => {
+				name = name as NamedType
+
 				if value.hasClassMethod(@property) {
 					const arguments = [argument.type() for const argument in @arguments]
 
@@ -462,11 +464,9 @@ class CallExpression extends Expression {
 						union.addType(method.returnType())
 					}
 
-					name = name as NamedType
-
 					if union.length() == 0 {
 						if value.isExhaustiveClassMethod(@property, this) {
-							ReferenceException.throwNoMatchingMethod(@property, name:NamedType.name(), arguments, this)
+							ReferenceException.throwNoMatchingClassMethod(@property, name.name(), arguments, this)
 						}
 						else if sealed {
 							this.addCallee(new SealedMethodCallee(@data, name, false, this))
@@ -485,7 +485,7 @@ class CallExpression extends Expression {
 					}
 				}
 				else if value.isExhaustive(this) {
-					ReferenceException.throwNotFoundMethod(@property, name:NamedType.name(), this)
+					ReferenceException.throwNotFoundClassMethod(@property, name.name(), this)
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, null, this))
@@ -497,6 +497,41 @@ class CallExpression extends Expression {
 				}
 				else {
 					this.makeMemberCalleeFromReference(@scope.reference('Dictionary'))
+				}
+			}
+			is EnumType => {
+				name = name as NamedType
+
+				if value.hasStaticMethod(@property) {
+					const arguments = [argument.type() for const argument in @arguments]
+
+					const assessment = value.getStaticAssessment(@property)
+
+					const methods = Router.matchArguments(assessment, arguments)
+
+					const union = new UnionType(this.scope())
+
+					for const method in methods {
+						union.addType(method.returnType())
+					}
+
+					if union.length() == 0 {
+						if value.isExhaustiveStaticMethod(@property, this) {
+							ReferenceException.throwNoMatchingEnumMethod(@property, name.name(), arguments, this)
+						}
+						else {
+							this.addCallee(new DefaultCallee(@data, @object, null, this))
+						}
+					}
+					else {
+						this.addCallee(new DefaultCallee(@data, @object, methods, union.type(), this))
+					}
+				}
+				else if value.isExhaustive(this) {
+					ReferenceException.throwNotFoundEnumMethod(@property, name.name(), this)
+				}
+				else {
+					this.addCallee(new DefaultCallee(@data, @object, null, this))
 				}
 			}
 			is ExclusionType => {
@@ -585,7 +620,7 @@ class CallExpression extends Expression {
 
 					if union.length() == 0 {
 						if value.isExhaustiveInstanceMethod(@property, this) {
-							ReferenceException.throwNoMatchingMethod(@property, reference.name(), arguments, this)
+							ReferenceException.throwNoMatchingClassMethod(@property, reference.name(), arguments, this)
 						}
 						else if sealed {
 							this.addCallee(new SealedMethodCallee(@data, reference.type(), true, this))
@@ -628,10 +663,43 @@ class CallExpression extends Expression {
 					this.addCallee(new SubstituteCallee(@data, substitute, Type.Any, this))
 				}
 				else if reference.isExhaustive(this) {
-					ReferenceException.throwNotFoundMethod(@property, reference.name(), this)
+					ReferenceException.throwNotFoundClassMethod(@property, reference.name(), this)
 				}
 				else {
 					this.addCallee(new DefaultCallee(@data, @object, null, this))
+				}
+			}
+			is EnumType => {
+				if value.hasInstanceMethod(@property) {
+					const arguments = [argument.type() for const argument in @arguments]
+
+					const assessment = value.getInstanceAssessment(@property)
+
+					const methods = Router.matchArguments(assessment, arguments)
+
+					const union = new UnionType(this.scope())
+
+					for const method in methods {
+						union.addType(method.returnType())
+					}
+
+					if union.length() == 0 {
+						if value.isExhaustiveInstanceMethod(@property, this) {
+							ReferenceException.throwNoMatchingEnumMethod(@property, reference.name(), arguments, this)
+						}
+						else {
+							this.addCallee(new EnumMethodCallee(@data, reference.discardReference(), `__ks_func_\(@property)`, null, null, this))
+						}
+					}
+					else {
+						this.addCallee(new EnumMethodCallee(@data, reference.discardReference(), `__ks_func_\(@property)`, methods, union.type(), this))
+					}
+				}
+				else if reference.isExhaustive(this) {
+					ReferenceException.throwNotFoundEnumMethod(@property, reference.name(), this)
+				}
+				else {
+					this.addCallee(new EnumMethodCallee(@data, reference.discardReference(), `__ks_func_\(@property)`, null, null, this))
 				}
 			}
 			is FunctionType => {
@@ -1305,6 +1373,88 @@ class SubstituteCallee extends Callee {
 		@substitute.toFragments(fragments, mode)
 	} // }}}
 	translate()
+	type() => @type
+}
+
+class EnumMethodCallee extends Callee {
+	private {
+		_enum: NamedType<EnumType>
+		_expression
+		_flatten: Boolean
+		_methodName: String
+		_methods: Array<FunctionType>?
+		_scope: ScopeKind
+		_type: Type
+	}
+	constructor(@data, @enum, @methodName, @methods, type: Type?, node) { // {{{
+		super(data)
+
+		@expression = new MemberExpression(data.callee, node, node.scope(), node._object)
+		@expression.analyse()
+		@expression.prepare()
+
+		@flatten = node._flatten
+		@nullableProperty = @expression.isNullable()
+		@scope = data.scope.kind
+
+		@type = type ?? @expression.type()
+
+		for method in methods {
+			this.validate(method, node)
+		}
+	} // }}}
+	acquireReusable(acquire) { // {{{
+		@expression.acquireReusable(@nullable || (@flatten && @scope == ScopeKind::This))
+	} // }}}
+	isInitializingInstanceVariable(name: String): Boolean { // {{{
+		if @methods? {
+			for const method in @methods {
+				if !method.isInitializingInstanceVariable(name) {
+					return false
+				}
+			}
+
+			return true
+		}
+		else {
+			return false
+		}
+	} // }}}
+	releaseReusable() { // {{{
+		@expression.releaseReusable()
+	} // }}}
+	toFragments(fragments, mode, node) { // {{{
+		if @flatten {
+			NotImplementedException.throw(node)
+		}
+		else {
+			switch @scope {
+				ScopeKind::Argument => {
+					NotImplementedException.throw(node)
+				}
+				ScopeKind::Null => {
+					NotImplementedException.throw(node)
+				}
+				ScopeKind::This => {
+					fragments.code(`\(@enum.name()).\(@methodName)(`)
+
+					fragments.wrap(@expression._object, mode)
+
+					for const argument, index in node._arguments {
+						fragments.code($comma)
+
+						argument.toArgumentFragments(fragments, mode)
+					}
+				}
+			}
+		}
+	} // }}}
+	toNullableFragments(fragments, node) { // {{{
+		NotImplementedException.throw(node)
+	} // }}}
+	translate() { // {{{
+		@expression.translate()
+	} // }}}
 	type() => @type
 }
 

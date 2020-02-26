@@ -65,16 +65,14 @@ const $virtuals = {
 	Tuple: true
 }
 
-#[flags]
-enum ExportMode {
+flagged enum ExportMode {
 	Default
 
 	IgnoreAlteration
 	OverloadedFunction
 }
 
-#[flags]
-enum MatchingMode {
+flagged enum MatchingMode {
 	Default
 
 	Exact
@@ -96,8 +94,7 @@ enum MatchingMode {
 	Signature = Similar + MissingParameters + ShiftableParameters + MissingParameterType + RequireAllParameters + MissingReturn
 }
 
-#[flags]
-enum QuoteMode {
+flagged enum QuoteMode {
 	None
 	Double
 	Single

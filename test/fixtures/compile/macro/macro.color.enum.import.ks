@@ -38,7 +38,7 @@ class Color {
 	setField(name, value)
 }
 
-enum Space {
+impl Space {
 	HSB
 	HSL
 }

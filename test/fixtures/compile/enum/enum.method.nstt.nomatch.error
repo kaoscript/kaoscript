@@ -1,0 +1,1 @@
+ReferenceException: The method "isWeekend" can't be found in the enum "Weekday" (line 12, file "fixtures/compile/enum/enum.method.nstt.nomatch.ks")

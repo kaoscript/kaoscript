@@ -60,6 +60,7 @@ class AnonymousFunctionExpression extends Expression {
 	} // }}}
 	addInitializableVariable(variable, node)
 	getFunctionNode() => this
+	getParameterOffset() => 0
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -154,6 +155,7 @@ class ArrowFunctionExpression extends Expression {
 	} // }}}
 	addInitializableVariable(variable, node)
 	getFunctionNode() => this
+	getParameterOffset() => 0
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType

@@ -47,14 +47,16 @@
         },
         "Type": {
           "kind": "enum",
+          "type": "number",
+          "index": 2,
           "exhaustive": true,
-          "elements": [
+          "variables": [
             "FOO",
             "BAR",
             "QUX"
           ],
-          "index": 2,
-          "type": "number",
+          "instanceMethods": {},
+          "staticMethods": {},
           "sealed": false
         }
       }

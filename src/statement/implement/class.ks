@@ -1,118 +1,3 @@
-class ImplementDeclaration extends Statement {
-	private lateinit {
-		_newSealedClass		= false
-		_properties			= []
-		_sharingProperties	= {}
-		_type: NamedType
-		_variable: Variable
-	}
-	analyse() { // {{{
-		if @variable !?= @scope.getVariable(@data.variable.name) {
-			ReferenceException.throwNotDefined(@data.variable.name, this)
-		}
-
-		if @variable.isPredefined() {
-			const type = @variable.getDeclaredType().clone().condense()
-
-			@variable = @scope.define(@variable.name(), true, type, this)
-
-			@newSealedClass = type.isSealed() && type.isExtendable()
-		}
-	} // }}}
-	prepare() { // {{{
-		@variable.prepareAlteration()
-
-		@type = @variable.getDeclaredType()
-
-		unless @type is NamedType {
-			TypeException.throwImplInvalidType(this)
-		}
-
-		const type = @type.type()
-
-		if type is ClassType {
-			for const data in @data.properties {
-				let property: Statement
-
-				switch data.kind {
-					NodeKind::FieldDeclaration => {
-						property = new ImplementClassFieldDeclaration(data, this, @type)
-					}
-					NodeKind::MethodDeclaration => {
-						if type.isConstructor(data.name.name) {
-							property = new ImplementClassConstructorDeclaration(data, this, @type)
-						}
-						else if type.isDestructor(data.name.name) {
-							NotImplementedException.throw(this)
-						}
-						else {
-							property = new ImplementClassMethodDeclaration(data, this, @type)
-						}
-					}
-					=> {
-						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
-					}
-				}
-
-				property.analyse()
-
-				@properties.push(property)
-			}
-		}
-		else if type is NamespaceType {
-			for data in @data.properties {
-				let property: Statement
-
-				switch data.kind {
-					NodeKind::FieldDeclaration => {
-						property = new ImplementNamespaceVariableDeclaration(data, this, @type)
-					}
-					NodeKind::MethodDeclaration => {
-						property = new ImplementNamespaceFunctionDeclaration(data, this, @type)
-					}
-					=> {
-						throw new NotSupportedException(`Unexpected kind \(data.kind)`, this)
-					}
-				}
-
-				property.analyse()
-
-				@properties.push(property)
-			}
-		}
-		else {
-			TypeException.throwImplInvalidType(this)
-		}
-
-		for const property in @properties {
-			property.prepare()
-
-			if const name = property.getSharedName() {
-				@sharingProperties[name] = property
-			}
-		}
-	} // }}}
-	translate() { // {{{
-		for property in @properties {
-			property.translate()
-		}
-	} // }}}
-	toStatementFragments(fragments, mode) { // {{{
-		if @newSealedClass {
-			fragments.line(`var \(@type.getSealedName()) = {}`)
-		}
-
-		for property in @properties {
-			property.toFragments(fragments, Mode::None)
-		}
-
-		for const property of @sharingProperties {
-			property.toSharedFragments(fragments)
-		}
-	} // }}}
-	type() => @type
-}
-
 class ImplementClassFieldDeclaration extends Statement {
 	private lateinit {
 		_type: ClassVariableType
@@ -121,14 +6,14 @@ class ImplementClassFieldDeclaration extends Statement {
 		_autoTyping: Boolean				= false
 		_class: ClassType
 		_classRef: ReferenceType
-		_defaultValue						= null
-		_hasDefaultValue: Boolean			= false
+		_defaultValue: Boolean				= false
 		_immutable: Boolean					= false
 		_init: Number						= 0
 		_instance: Boolean					= true
 		_internalName: String
 		_lateInit: Boolean					= false
 		_name: String
+		_value								= null
 		_variable: NamedType<ClassType>
 	}
 	constructor(data, parent, @variable) { // {{{
@@ -176,11 +61,11 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 	} // }}}
 	analyse() { // {{{
-		if @data.defaultValue? {
-			@hasDefaultValue = true
+		if @data.value? {
+			@defaultValue = true
 
-			@defaultValue = $compile.expression(@data.defaultValue, this)
-			@defaultValue.analyse()
+			@value = $compile.expression(@data.value, this)
+			@value.analyse()
 		}
 	} // }}}
 	prepare() { // {{{
@@ -199,15 +84,15 @@ class ImplementClassFieldDeclaration extends Statement {
 			@class.addClassVariable(@internalName, @type)
 		}
 
-		if @hasDefaultValue {
+		if @defaultValue {
 			if @instance {
 				@init = @class.incInitializer()
 			}
 
-			@defaultValue.prepare()
+			@value.prepare()
 
 			if @autoTyping {
-				@type.type(@defaultValue.type())
+				@type.type(@value.type())
 			}
 		}
 		else if !@lateInit && !@type.isNullable() {
@@ -215,13 +100,13 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 	} // }}}
 	translate() { // {{{
-		if @hasDefaultValue {
-			@defaultValue.translate()
+		if @defaultValue {
+			@value.translate()
 		}
 	} // }}}
-	getSharedName() => @hasDefaultValue && @instance ? '__ks_init' : null
+	getSharedName() => @defaultValue && @instance ? '__ks_init' : null
 	toFragments(fragments, mode) { // {{{
-		if @hasDefaultValue {
+		if @defaultValue {
 			if @class.isSealed() {
 				if @instance {
 					let line, block, ctrl
@@ -233,7 +118,7 @@ class ImplementClassFieldDeclaration extends Statement {
 
 					block = line.newBlock()
 
-					block.newLine().code(`that.\(@internalName) = `).compile(@defaultValue).done()
+					block.newLine().code(`that.\(@internalName) = `).compile(@value).done()
 
 					block.done()
 					line.done()
@@ -273,7 +158,7 @@ class ImplementClassFieldDeclaration extends Statement {
 					line.done()
 				}
 				else {
-					fragments.newLine().code(`\(@variable.getSealedName()).\(@internalName) = `).compile(@defaultValue).done()
+					fragments.newLine().code(`\(@variable.getSealedName()).\(@internalName) = `).compile(@value).done()
 				}
 			}
 			else {
@@ -284,13 +169,13 @@ class ImplementClassFieldDeclaration extends Statement {
 
 					const block = line.newBlock()
 
-					block.newLine().code(`this.\(@internalName) = `).compile(@defaultValue).done()
+					block.newLine().code(`this.\(@internalName) = `).compile(@value).done()
 
 					block.done()
 					line.done()
 				}
 				else {
-					fragments.newLine().code(`\(@variable.name()).\(@internalName) = `).compile(@defaultValue).done()
+					fragments.newLine().code(`\(@variable.name()).\(@internalName) = `).compile(@value).done()
 				}
 			}
 		}
@@ -537,6 +422,7 @@ class ImplementClassMethodDeclaration extends Statement {
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	class() => @variable
+	getParameterOffset() => 0
 	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_cm_\(@name)`
 	isConstructor() => false
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
@@ -863,6 +749,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		}
 	} // }}}
 	class() => @variable
+	getParameterOffset() => 0
 	getSharedName() => '__ks_cons'
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -1022,161 +909,6 @@ class ImplementClassConstructorDeclaration extends Statement {
 	type() => @type
 }
 
-class ImplementNamespaceVariableDeclaration extends Statement {
-	private lateinit {
-		_type: Type
-		_value
-	}
-	private {
-		_namespace: NamespaceType
-		_variable: NamedType<NamespaceType>
-	}
-	constructor(data, parent, @variable) { // {{{
-		super(data, parent)
-
-		@namespace = @variable.type()
-	} // }}}
-	analyse() { // {{{
-		@value = $compile.expression(@data.defaultValue, this)
-		@value.analyse()
-	} // }}}
-	prepare() { // {{{
-		@value.prepare()
-
-		const property = NamespacePropertyType.fromAST(@data.type, this)
-
-		property.flagAlteration()
-
-		if @namespace.isSealed() {
-			property.flagSealed()
-		}
-
-		@namespace.addProperty(@data.name.name, property)
-
-		@type = property.type()
-	} // }}}
-	translate() { // {{{
-		@value.translate()
-	} // }}}
-	getSharedName() => null
-	toFragments(fragments, mode) { // {{{
-		if @namespace.isSealed() {
-			fragments
-				.newLine()
-				.code(@variable.getSealedName(), '.', @data.name.name, ' = ')
-				.compile(@value)
-				.done()
-		}
-		else {
-			fragments
-				.newLine()
-				.code(@variable.name(), '.', @data.name.name, ' = ')
-				.compile(@value)
-				.done()
-		}
-	} // }}}
-	type() => @type
-}
-
-class ImplementNamespaceFunctionDeclaration extends Statement {
-	private lateinit {
-		_block: Block
-		_type: FunctionType
-	}
-	private {
-		_autoTyping: Boolean					= false
-		_namespace: NamespaceType
-		_namespaceRef: ReferenceType
-		_parameters: Array						 = []
-		_variable: NamedType<NamespaceType>
-	}
-	constructor(data, parent, @variable) { // {{{
-		super(data, parent, parent.scope(), ScopeType::Block)
-
-		@namespace = @variable.type()
-		@namespaceRef = @scope.reference(@variable)
-	} // }}}
-	analyse() { // {{{
-		for const data in @data.parameters {
-			const parameter = new Parameter(data, this)
-
-			parameter.analyse()
-
-			@parameters.push(parameter)
-		}
-	} // }}}
-	prepare() { // {{{
-		for const parameter in @parameters {
-			parameter.prepare()
-		}
-
-		const property = NamespacePropertyType.fromAST(@data, this)
-
-		property.flagAlteration()
-
-		if @namespace.isSealed() {
-			property.flagSealed()
-		}
-
-		@namespace.addProperty(@data.name.name, property)
-
-		@type = property.type()
-
-		@block = $compile.function($ast.body(@data), this)
-		@block.analyse()
-
-		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
-
-		if @autoTyping {
-			@type.returnType(@block.getUnpreparedType())
-		}
-	} // }}}
-	translate() { // {{{
-		for const parameter in @parameters {
-			parameter.translate()
-		}
-
-		if @autoTyping {
-			@block.prepare()
-
-			@type.returnType(@block.type())
-		}
-		else {
-			@block.type(@type.returnType()).prepare()
-		}
-
-		@block.translate()
-	} // }}}
-	getSharedName() => null
-	isAssertingParameter() => @options.rules.assertParameter
-	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
-	isConsumedError(error): Boolean => @type.isCatchingError(error)
-	isInstanceMethod() => false
-	parameters() => @parameters
-	toFragments(fragments, mode) { // {{{
-		const line = fragments.newLine()
-
-		if @namespace.isSealed() {
-			line.code(@variable.getSealedName())
-		}
-		else {
-			line.code(@variable.name())
-		}
-
-		line.code('.', @data.name.name, ' = function(')
-
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
-			return fragments.code(')').newBlock()
-		})
-
-		block.compile(@block)
-
-		block.done()
-
-		line.done()
-	} // }}}
-	type() => @type
-}
 
 class CallOverwrittenMethodSubstitude {
 	private lateinit {

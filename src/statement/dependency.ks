@@ -75,20 +75,11 @@ abstract class DependencyStatement extends Statement {
 				let type = new EnumType(scope, ekind)
 				const variable = scope.define(declaration.name.name, true, type, this)
 
-				if kind != DependencyKind::Extern {
-					type.flagRequired()
-				}
-
-				if	kind == DependencyKind::Extern ||
-					kind == DependencyKind::ExternOrRequire ||
-					kind == DependencyKind::RequireOrExtern
-				{
-					type = type.flagAlien()
-				}
+				type.flagRequired()
 
 				if declaration.members.length != 0 {
 					for member in declaration.members {
-						type.addElement(member.name.name)
+						type.addPropertyFromAST(member, this)
 					}
 
 					type.setExhaustive(true)

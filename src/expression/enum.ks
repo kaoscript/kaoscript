@@ -14,7 +14,7 @@ class EnumExpression extends Expression {
 		if !named.type().isEnum() {
 			TypeException.throwNotEnum(@data.enum.name, this)
 		}
-		else if !named.type().hasElement(@data.member.name) {
+		else if !named.type().hasVariable(@data.member.name) {
 			ReferenceException.throwNotDefinedEnumElement(@data.member.name, named.name(), this)
 		}
 

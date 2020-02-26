@@ -87,14 +87,16 @@
     },
     {
       "kind": "enum",
+      "type": "number",
+      "index": 2,
       "exhaustive": true,
-      "elements": [
+      "variables": [
         "Red",
         "Green",
         "Blue"
       ],
-      "index": 2,
-      "type": "number"
+      "instanceMethods": {},
+      "staticMethods": {}
     }
   ],
   "macros": []

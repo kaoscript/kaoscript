@@ -112,7 +112,7 @@ include {
 	'../statement/for-range'
 	'../statement/function'
 	'../statement/if'
-	'../statement/implement'
+	'../statement/implement/index'
 	'../statement/import'
 	'../statement/dependency'
 	'../statement/include'
