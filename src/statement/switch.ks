@@ -263,7 +263,7 @@ class SwitchStatement extends Statement {
 			@scope.releaseTempName(@name)
 		}
 		else {
-			@name = @data.expression.name
+			@name = @scope.getVariable(@data.expression.name).getSecureName()
 		}
 	} // }}}
 	translate() { // {{{

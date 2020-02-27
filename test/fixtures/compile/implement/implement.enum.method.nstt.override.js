@@ -10,10 +10,10 @@ module.exports = function() {
 		SUNDAY: 6
 	});
 	Weekday.__ks_func_isWeekend = function(that) {
-		return that.value === Weekday.SATURDAY || that.value === Weekday.SUNDAY;
+		return that === Weekday.SATURDAY || that === Weekday.SUNDAY;
 	};
 	Weekday.__ks_func_isWeekend = function(that) {
-		return that.value === Weekday.SATURDAY || that.value === Weekday.SUNDAY || that.value === Weekday.FRIDAY;
+		return that === Weekday.SATURDAY || that === Weekday.SUNDAY || that === Weekday.FRIDAY;
 	};
 	function foobar(day) {
 		if(arguments.length < 1) {

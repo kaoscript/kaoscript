@@ -19,8 +19,7 @@ module.exports = function() {
 		else if(!Type.isString(day)) {
 			throw new TypeError("'day' is not of type 'String'");
 		}
-		let __ks_0 = this.value;
-		if(__ks_0 === Weekday.MONDAY) {
+		if(that === Weekday.MONDAY) {
 			return day === "monday";
 		}
 		return false;

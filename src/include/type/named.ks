@@ -318,7 +318,7 @@ class NamedType extends Type {
 					return @name == that.name()
 				}
 				else {
-					return this.matchContentOf(that.type().type())
+					return this.matchContentOf(that.type())
 				}
 			}
 			else if that.type() is StructType {

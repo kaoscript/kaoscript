@@ -384,11 +384,7 @@ namespace Router {
 				return aTypes[0].compareTo(bTypes[0])
 			}
 			else {
-				let aGreater: Number = 0
-
 				for const aType in aTypes {
-					let bGreater: Number = 0
-
 					for const bType in bTypes {
 						if aType.isMorePreciseThan(bType) {
 							return -1
@@ -396,13 +392,6 @@ namespace Router {
 						else if bType.isMorePreciseThan(aType) {
 							return 1
 						}
-						else if bType.compareTo(aType) > 0 {
-							++bGreater
-						}
-					}
-
-					if bGreater == bTypes.length {
-						++aGreater
 					}
 				}
 

@@ -171,7 +171,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 
 		for const name in @enum.listVariables() {
-			const var = @scope.define(name, true, @enum.type(), true, @parent)
+			const var = @scope.define(name, true, @enumRef, true, @parent)
 
 			var.renameAs(`\(@enumName.name()).\(name)`)
 		}

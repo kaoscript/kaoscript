@@ -348,15 +348,16 @@ class EnumMethodDeclaration extends Statement {
 	} // }}}
 	prepare() { // {{{
 		const enumName = @parent.name()
+		const enumRef = @scope.reference(enumName)
 
 		for const variable, name of @parent._variables {
-			const var = @scope.define(name, true, variable.type(), true, @parent)
+			const var = @scope.define(name, true, enumRef, true, @parent)
 
 			var.renameAs(`\(enumName).\(name)`)
 		}
 
 		if @instance {
-			@scope.define('this', true, @scope.reference(enumName), true, this)
+			@scope.define('this', true, enumRef, true, this)
 			@scope.rename('this', 'that')
 		}
 

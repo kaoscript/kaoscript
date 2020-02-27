@@ -17,40 +17,11 @@ class Block extends AbstractNode {
 
 		@empty = @data.statements.length == 0
 	} // }}}
-	addInitializableVariable(variable, node) { // {{{
-		if !@scope.hasDeclaredVariable(variable.name()) {
-			@parent.addInitializableVariable(variable, this)
-		}
-	} // }}}
 	analyse() { // {{{
 		for statement in @data.statements {
 			@scope.line(statement.start.line)
 
 			@statements.push(statement = $compile.statement(statement, this))
-
-			statement.analyse()
-
-			if statement.isAwait() {
-				@awaiting = true
-			}
-		}
-	} // }}}
-	analyse(from: Number, to: Number = @data.statements.length + 1) { // {{{
-		for statement in @data.statements from from to to {
-			@scope.line(statement.start.line)
-
-			@statements.push(statement = $compile.statement(statement, this))
-
-			statement.analyse()
-
-			if statement.isAwait() {
-				@awaiting = true
-			}
-		}
-	} // }}}
-	analyse(statements: Array<AbstractNode>) { // {{{
-		for statement in statements {
-			@statements.push(statement)
 
 			statement.analyse()
 
@@ -91,6 +62,48 @@ class Block extends AbstractNode {
 			}
 		}
 
+		this.checkExit()
+	} // }}}
+	translate() { // {{{
+		for statement in @statements {
+			@scope.line(statement.line())
+
+			statement.translate()
+		}
+	} // }}}
+	addInitializableVariable(variable, node) { // {{{
+		if !@scope.hasDeclaredVariable(variable.name()) {
+			@parent.addInitializableVariable(variable, this)
+		}
+	} // }}}
+	addStatement(statement) { // {{{
+		@data.statements.push(statement)
+	} // }}}
+	analyse(from: Number, to: Number = @data.statements.length + 1) { // {{{
+		for statement in @data.statements from from to to {
+			@scope.line(statement.start.line)
+
+			@statements.push(statement = $compile.statement(statement, this))
+
+			statement.analyse()
+
+			if statement.isAwait() {
+				@awaiting = true
+			}
+		}
+	} // }}}
+	analyse(statements: Array<AbstractNode>) { // {{{
+		for statement in statements {
+			@statements.push(statement)
+
+			statement.analyse()
+
+			if statement.isAwait() {
+				@awaiting = true
+			}
+		}
+	} // }}}
+	checkExit() { // {{{
 		if !@exit && @type != null && !@type.isVoid() {
 			if @type.isNever() {
 				TypeException.throwExpectedThrownError(this)
@@ -102,16 +115,6 @@ class Block extends AbstractNode {
 				TypeException.throwExpectedReturnedValue(@type, this)
 			}
 		}
-	} // }}}
-	translate() { // {{{
-		for statement in @statements {
-			@scope.line(statement.line())
-
-			statement.translate()
-		}
-	} // }}}
-	addStatement(statement) { // {{{
-		@data.statements.push(statement)
 	} // }}}
 	checkReturnType(type: Type) { // {{{
 		for const statement in @statements {
@@ -240,15 +243,32 @@ class Block extends AbstractNode {
 }
 
 class FunctionBlock extends Block {
-	addReturn(value: Expression) { // {{{
-		if const statement = @statements.last() {
-			if !statement.isExit() {
-				@statements.push(new ReturnStatement(value, this))
+	private {
+		@return: Expression		= null
+	}
+	addReturn(@return)
+	override checkExit() { // {{{
+		if @return != null {
+			auto toAdd = false
+
+			if const statement = @statements.last() {
+				toAdd = !statement.isExit()
+			}
+			else {
+				toAdd = true
+			}
+
+			if toAdd {
+				const statement = new ReturnStatement(@return, this)
+
+				statement.analyse()
+				statement.prepare()
+
+				@statements.push(statement)
 			}
 		}
-		else {
-			@statements.push(new ReturnStatement(value, this))
-		}
+
+		super()
 	} // }}}
 	isInitializedVariable(name: String): Boolean => true
 }
