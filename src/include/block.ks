@@ -241,7 +241,12 @@ class Block extends AbstractNode {
 
 class FunctionBlock extends Block {
 	addReturn(value: Expression) { // {{{
-		if !@exit || !@statements.last().isExit() {
+		if const statement = @statements.last() {
+			if !statement.isExit() {
+				@statements.push(new ReturnStatement(value, this))
+			}
+		}
+		else {
 			@statements.push(new ReturnStatement(value, this))
 		}
 	} // }}}
