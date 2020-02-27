@@ -85,7 +85,7 @@ class TryExpression extends Expression {
 		if @unwrap {
 			fragments.compileBoolean(@argument)
 		}
-		else {
+		else if @defaultValue == null {
 			fragments.code($runtime.helper(this), '.tryTest(')
 
 			if @options.format.functions == 'es5' {
@@ -96,6 +96,9 @@ class TryExpression extends Expression {
 			}
 
 			fragments.code(')')
+		}
+		else {
+			this.toFragments(fragments, mode)
 		}
 	} // }}}
 	toReusableFragments(fragments) { // {{{

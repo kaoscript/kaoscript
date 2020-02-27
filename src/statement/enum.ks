@@ -398,6 +398,7 @@ class EnumMethodDeclaration extends Statement {
 	getParameterOffset() => @instance ? 1 : 0
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		const line = fragments.newLine()
