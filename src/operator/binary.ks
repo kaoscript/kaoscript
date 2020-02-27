@@ -36,6 +36,7 @@ class BinaryOperatorExpression extends Expression {
 		@right.acquireReusable(false)
 	} // }}}
 	hasExceptions() => false
+	inferTypes(inferables) => @right.inferTypes(@left.inferTypes(inferables))
 	isAwait() => @await
 	isAwaiting() => @left.isAwaiting() || @right.isAwaiting()
 	isComputed() => true
@@ -475,6 +476,7 @@ class BinaryOperatorMatch extends Expression {
 			@await = true
 		}
 	} // }}}
+	inferTypes(inferables) => @subject.inferTypes(inferables)
 	isComputed() => true
 	operator() => '!=='
 	releaseReusable() { // {{{
@@ -641,6 +643,7 @@ class BinaryOperatorNullCoalescing extends BinaryOperatorExpression {
 	releaseReusable() { // {{{
 		@left.releaseReusable()
 	} // }}}
+	inferTypes(inferables) => @left.inferTypes(inferables)
 	toFragments(fragments, mode) { // {{{
 		if @left.isNullable() {
 			fragments.code('(')
@@ -741,6 +744,7 @@ class BinaryOperatorTypeCasting extends Expression {
 		@left.translate()
 	} // }}}
 	hasExceptions() => false
+	inferTypes(inferables) => @left.inferTypes(inferables)
 	isComputed() => false
 	isNullable() => @left.isNullable()
 	isUsingVariable(name) => @left.isUsingVariable(name)
@@ -919,6 +923,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		@left.translate()
 	} // }}}
 	hasExceptions() => false
+	inferTypes(inferables) => @left.inferTypes(inferables)
 	isComputed() => false
 	isNullable() => false
 	isUsingVariable(name) => @left.isUsingVariable(name)

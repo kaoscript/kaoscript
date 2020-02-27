@@ -227,8 +227,10 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 	inferWhenTrueTypes(inferables) { // {{{
 		const scope = this.statement().scope()
 
+		const whenTrue = {}
+
 		for const operand, index in @operands {
-			for const data, name of operand.inferWhenTrueTypes({}) {
+			for const data, name of operand.inferTypes({}) {
 				if inferables[name]? {
 					if data.type.equals(inferables[name].type) || data.type.isMorePreciseThan(inferables[name].type) {
 						inferables[name] = data
@@ -240,28 +242,46 @@ class PolyadicOperatorOr extends PolyadicOperatorExpression {
 						}
 					}
 				}
-				else {
-					if index != 0 && data.isVariable {
-						if const variable = scope.getVariable(name) {
-							const type = variable.getRealType()
+				else if index != 0 && data.isVariable {
+					if const variable = scope.getVariable(name) {
+						const type = variable.getRealType()
 
-							if data.type.equals(type) || data.type.isMorePreciseThan(type) {
-								inferables[name] = data
-							}
-							else {
-								inferables[name] = {
-									isVariable: true
-									type: Type.union(@scope, type, data.type)
-								}
-							}
+						if data.type.equals(type) || data.type.isMorePreciseThan(type) {
+							inferables[name] = data
 						}
 						else {
-							inferables[name] = data
+							inferables[name] = {
+								isVariable: true
+								type: Type.union(@scope, type, data.type)
+							}
 						}
 					}
 					else {
 						inferables[name] = data
 					}
+				}
+				else {
+					inferables[name] = data
+				}
+			}
+
+			if index == 0 {
+				for const data, name of operand.inferWhenTrueTypes({}) when data.isVariable {
+					whenTrue[name] = [data.type]
+				}
+			}
+			else {
+				for const data, name of operand.inferWhenTrueTypes({}) when data.isVariable && whenTrue[name]? {
+					whenTrue[name].push(data.type)
+				}
+			}
+		}
+
+		for const types, name of whenTrue when types.length != 1 {
+			if const variable = scope.getVariable(name) {
+				inferables[name] = {
+					isVariable: true
+					type: Type.union(@scope, ...types)
 				}
 			}
 		}

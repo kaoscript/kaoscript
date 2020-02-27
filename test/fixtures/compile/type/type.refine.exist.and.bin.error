@@ -1,0 +1,1 @@
+TypeException: The existential test of "z" is always positive (line 3, file "fixtures/compile/type/type.refine.exist.and.bin.ks")

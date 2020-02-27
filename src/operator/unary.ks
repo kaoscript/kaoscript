@@ -18,6 +18,7 @@ class UnaryOperatorExpression extends Expression {
 	} // }}}
 	argument() => @argument
 	hasExceptions() => false
+	inferTypes(inferables) => @argument.inferTypes(inferables)
 	isUsingVariable(name) => @argument.isUsingVariable(name)
 	listAssignments(array) => @argument.listAssignments(array)
 }
@@ -109,7 +110,7 @@ class UnaryOperatorExistential extends UnaryOperatorExpression {
 
 		@type = @argument.type().setNullable(false)
 	} // }}}
-	inferTypes(inferables) { // {{{
+	inferWhenTrueTypes(inferables) { // {{{
 		@argument.inferTypes(inferables)
 
 		if @argument.isInferable() {
