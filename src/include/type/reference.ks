@@ -380,8 +380,6 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	isMorePreciseThan(that: Type) { // {{{
-		// console.log(this)
-		// console.log(that)
 		if that.isAny() {
 			return !this.isAny() || (that.isNullable() && !@nullable)
 		}

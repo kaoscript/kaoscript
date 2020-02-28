@@ -2,12 +2,10 @@ language: node_js
 cache:
   npm: false
 node_js:
+  - "13"
   - "12"
-  - "11"
   - "10"
-  - "9"
   - "8"
-  - "7"
   - "6"
   - "5"
   - "4"

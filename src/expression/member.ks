@@ -182,7 +182,9 @@ class MemberExpression extends Expression {
 		}
 
 		if @nullable && !@object.type().isNullable() && !@options.rules.ignoreMisfit {
-			TypeException.throwNotNullableExistential(@object, this)
+			unless @object is MemberExpression && @object.isComputedMember() {
+				TypeException.throwNotNullableExistential(@object, this)
+			}
 		}
 	} // }}}
 	translate() { // {{{
@@ -275,6 +277,7 @@ class MemberExpression extends Expression {
 	} // }}}
 	isCallable() => @object.isCallable() || (@computed && !@stringProperty && @property.isCallable())
 	isComputed() => this.isNullable() && !@tested
+	isComputedMember() => @computed
 	isInferable() => @inferable
 	isLooseComposite() => this.isCallable() || this.isNullable()
 	isMacro() => false

@@ -100,7 +100,7 @@ namespace Router {
 				}
 			}
 			else {
-				matchingFilters = [...matchingFilters]
+				matchingFilters = [cloneRouteFilter(filter) for const filter in matchingFilters]
 
 				addMatchingFilter(matchingFilters, max, max, Filter(
 					index: index - 1
@@ -375,6 +375,13 @@ namespace Router {
 				}
 			}
 		} // }}}
+
+		func cloneRouteFilter(filter: RouteFilter): RouteFilter => RouteFilter( // {{{
+			min: filter.min
+			max: filter.max
+			filters: [...filter.filters]
+			rest: filter.rest
+		) // }}}
 
 		func compareTypes(aType: Type, bType: Type): Number => compareTypes([aType], [bType])
 		func compareTypes(aType: Type, bTypes: Array<Type>): Number => compareTypes([aType], bTypes)
@@ -1928,7 +1935,7 @@ namespace Router {
 						}
 					}
 
-					if route.matchingFilters.length != 0 {
+					if matched && route.matchingFilters.length != 0 {
 						let notFound = true
 
 						for const line in route.matchingFilters while notFound when line.min <= length <= line.max {

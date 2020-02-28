@@ -408,7 +408,6 @@ class FunctionType extends Type {
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
 	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => this.isParametersMatching(0, -1, arguments, 0, -1, mode)
 	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { // {{{
-		// console.log(pIndex, pStep, aIndex, aStep)
 		if pStep == -1 {
 			if pIndex >= @parameters.length {
 				if mode !~ MatchingMode::RequireAllParameters {
@@ -496,8 +495,6 @@ class FunctionType extends Type {
 		}
 	} // }}}
 	matchArguments(arguments: Array) { // {{{
-		// console.log(@parameters)
-		// console.log(arguments)
 		if arguments.length == 0 {
 			return @min == 0
 		}
