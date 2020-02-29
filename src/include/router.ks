@@ -1016,59 +1016,34 @@ namespace Router {
 		} // }}}
 
 		export func sortTreeMin(routes: Array<Route>, max: Number) { // {{{
-			if max == Infinity {
-				const tree = {
+			const tree = {
+				equal: []
+				midway: {
 					keys: []
 				}
+			}
 
-				for const route in routes {
-					if tree[route.min]? {
-						tree[route.min].push(route)
-					}
-					else {
-						tree[route.min] = [route]
-
-						tree.keys.push(route.min)
-					}
-				}
-
-				if tree.keys.length == 1 && tree.keys[0] == 0 {
-					return tree['0']
+			for const route in routes {
+				if route.min == max {
+					tree.equal.push(route)
 				}
 				else {
-					return tree
+					if tree.midway[route.min]? {
+						tree.midway[route.min].push(route)
+					}
+					else {
+						tree.midway[route.min] = [route]
+
+						tree.midway.keys.push(route.min)
+					}
 				}
 			}
+
+			if tree.equal.length == 1 && tree.midway.keys.length == 0 {
+				return tree.equal
+			}
 			else {
-				const tree = {
-					equal: []
-					midway: {
-						keys: []
-					}
-				}
-
-				for const route in routes {
-					if route.min == max {
-						tree.equal.push(route)
-					}
-					else {
-						if tree.midway[route.min]? {
-							tree.midway[route.min].push(route)
-						}
-						else {
-							tree.midway[route.min] = [route]
-
-							tree.midway.keys.push(route.min)
-						}
-					}
-				}
-
-				if tree.equal.length == 1 && tree.midway.keys.length == 0 {
-					return tree.equal
-				}
-				else {
-					return tree
-				}
+				return tree
 			}
 		} // }}}
 
@@ -1877,7 +1852,24 @@ namespace Router {
 					))
 				}
 				else if infinities.length > 1 {
-					throw new NotImplementedException()
+					const indexes = []
+					for const function, index in infinities {
+						indexes.push([function._index, index])
+
+						function._index = index
+					}
+
+					const unbounds = Unbounded.resolveRoutes(infinities, infinities, async)
+
+					for const [old, new] in indexes {
+						infinities[new]._index = old
+					}
+
+					for const route in unbounds when route.max == Infinity {
+						route.index = route.function.index()
+
+						assessment.routes.push(route)
+					}
 				}
 
 				assessment.flattenable = flattenable && isFlattenable(assessment.routes)
