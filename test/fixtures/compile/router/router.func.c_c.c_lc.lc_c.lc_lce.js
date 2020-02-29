@@ -45,7 +45,7 @@ module.exports = function() {
 			if(bTypes === void 0 || bTypes === null) {
 				throw new TypeError("'bTypes' is not nullable");
 			}
-			else if(!Type.isArray(bTypes, Quxbaz)) {
+			else if(!Type.isArray(bTypes)) {
 				throw new TypeError("'bTypes' is not of type 'Array<Quxbaz>'");
 			}
 			return foobar([aType], bTypes);
@@ -56,7 +56,7 @@ module.exports = function() {
 			if(aTypes === void 0 || aTypes === null) {
 				throw new TypeError("'aTypes' is not nullable");
 			}
-			else if(!Type.isArray(aTypes, Quxbaz)) {
+			else if(!Type.isArray(aTypes)) {
 				throw new TypeError("'aTypes' is not of type 'Array<Quxbaz>'");
 			}
 			let bType = arguments[++__ks_i];
@@ -74,14 +74,14 @@ module.exports = function() {
 			if(aTypes === void 0 || aTypes === null) {
 				throw new TypeError("'aTypes' is not nullable");
 			}
-			else if(!Type.isArray(aTypes, Quxbaz)) {
+			else if(!Type.isArray(aTypes)) {
 				throw new TypeError("'aTypes' is not of type 'Array<Quxbaz>'");
 			}
 			let bTypes = arguments[++__ks_i];
 			if(bTypes === void 0 || bTypes === null) {
 				throw new TypeError("'bTypes' is not nullable");
 			}
-			else if(!Type.isArray(bTypes, Quxbaz)) {
+			else if(!Type.isArray(bTypes)) {
 				throw new TypeError("'bTypes' is not of type 'Array<Quxbaz>'");
 			}
 		}

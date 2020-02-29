@@ -671,12 +671,6 @@ class ReferenceType extends Type {
 				}
 			}
 
-			for parameter in @parameters {
-				fragments.code($comma)
-
-				parameter.toFragments(fragments, node)
-			}
-
 			fragments.code(')')
 		}
 	} // }}}

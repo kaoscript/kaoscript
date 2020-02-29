@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (String?) (line 13, file "fixtures/compile/generics/generics.array.call.el_ine.ks")

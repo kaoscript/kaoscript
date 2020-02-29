@@ -8,7 +8,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!Type.isArray(x, String)) {
+		else if(!Type.isArray(x)) {
 			throw new TypeError("'x' is not of type 'Array<String?>'");
 		}
 	}

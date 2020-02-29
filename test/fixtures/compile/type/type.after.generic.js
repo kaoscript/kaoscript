@@ -14,7 +14,7 @@ module.exports = function() {
 			if(values === void 0 || values === null) {
 				throw new TypeError("'values' is not nullable");
 			}
-			else if(!Type.isArray(values, ClassA)) {
+			else if(!Type.isArray(values)) {
 				throw new TypeError("'values' is not of type 'Array<ClassA>'");
 			}
 		}

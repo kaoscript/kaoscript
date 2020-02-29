@@ -9,7 +9,7 @@ module.exports = function() {
 		if(values === void 0 || values === null) {
 			throw new TypeError("'values' is not nullable");
 		}
-		else if(!Type.isArray(values, String)) {
+		else if(!Type.isArray(values)) {
 			throw new TypeError("'values' is not of type 'Array<String>'");
 		}
 		return Type.isValue(values[0]) ? __ks_String._im_toInt(values[0]) : null;

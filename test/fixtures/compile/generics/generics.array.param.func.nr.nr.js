@@ -7,7 +7,7 @@ module.exports = function() {
 		if(functions === void 0 || functions === null) {
 			throw new TypeError("'functions' is not nullable");
 		}
-		else if(!Type.isArray(functions, Function)) {
+		else if(!Type.isArray(functions)) {
 			throw new TypeError("'functions' is not of type 'Array<(x: String)>'");
 		}
 		for(let __ks_0 = 0, __ks_1 = functions.length, fn; __ks_0 < __ks_1; ++__ks_0) {

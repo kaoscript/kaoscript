@@ -42,7 +42,7 @@ module.exports = function() {
 		if(points === void 0 || points === null) {
 			throw new TypeError("'points' is not nullable");
 		}
-		else if(!Type.isArray(points, Point)) {
+		else if(!Type.isArray(points)) {
 			throw new TypeError("'points' is not of type 'Array<Point>'");
 		}
 		return Type.isValue(points[0]) ? points[0].x : null;

@@ -7,7 +7,7 @@ module.exports = function() {
 		if(values === void 0 || values === null) {
 			throw new TypeError("'values' is not nullable");
 		}
-		else if(!Type.isArray(values, String)) {
+		else if(!Type.isArray(values)) {
 			throw new TypeError("'values' is not of type 'Array<String>'");
 		}
 		const _ = new Dictionary();
@@ -21,7 +21,7 @@ module.exports = function() {
 		if(values === void 0 || values === null) {
 			throw new TypeError("'values' is not nullable");
 		}
-		else if(!Type.isArray(values, Number)) {
+		else if(!Type.isArray(values)) {
 			throw new TypeError("'values' is not of type 'Array<Number>'");
 		}
 		const _ = new Dictionary();

@@ -1197,7 +1197,7 @@ module.exports = function() {
 			if(functions === void 0 || functions === null) {
 				throw new TypeError("'functions' is not nullable");
 			}
-			else if(!Type.isArray(functions, Function)) {
+			else if(!Type.isArray(functions)) {
 				throw new TypeError("'functions' is not of type 'Array<(color: Color): Color>'");
 			}
 			return Helper.mapArray(functions, (fn) => {

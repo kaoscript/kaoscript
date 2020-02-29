@@ -20,7 +20,7 @@ module.exports = function() {
 				let __ks_i = -1;
 				let tokens = [];
 				while(arguments.length > ++__ks_i) {
-					if(Type.isArray(arguments[__ks_i], Token)) {
+					if(Type.isArray(arguments[__ks_i])) {
 						tokens.push(arguments[__ks_i]);
 					}
 					else {
