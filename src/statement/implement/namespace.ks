@@ -35,6 +35,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 		@value.translate()
 	} // }}}
 	getSharedName() => null
+	isMethod() => false
 	toFragments(fragments, mode) { // {{{
 		if @namespace.isSealed() {
 			fragments
@@ -57,6 +58,7 @@ class ImplementNamespaceVariableDeclaration extends Statement {
 class ImplementNamespaceFunctionDeclaration extends Statement {
 	private lateinit {
 		_block: Block
+		_name: String
 		_type: FunctionType
 	}
 	private {
@@ -73,6 +75,8 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@namespaceRef = @scope.reference(@variable)
 	} // }}}
 	analyse() { // {{{
+		@name = @data.name.name
+
 		for const data in @data.parameters {
 			const parameter = new Parameter(data, this)
 
@@ -94,7 +98,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 			property.flagSealed()
 		}
 
-		@namespace.addProperty(@data.name.name, property)
+		@namespace.addProperty(@name, property)
 
 		@type = property.type()
 
@@ -123,12 +127,16 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		@block.translate()
 	} // }}}
+	getMatchingMode(): MatchingMode => MatchingMode::ExactParameters
 	getParameterOffset() => 0
 	getSharedName() => null
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
+	isInstance() => false
 	isInstanceMethod() => false
+	isMethod() => true
+	name() => @name
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
 		const line = fragments.newLine()

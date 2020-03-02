@@ -105,6 +105,7 @@ class ImplementClassFieldDeclaration extends Statement {
 		}
 	} // }}}
 	getSharedName() => @defaultValue && @instance ? '__ks_init' : null
+	isMethod() => false
 	toFragments(fragments, mode) { // {{{
 		if @defaultValue {
 			if @class.isSealed() {
@@ -422,12 +423,25 @@ class ImplementClassMethodDeclaration extends Statement {
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	class() => @variable
+	getMatchingMode(): MatchingMode { // {{{
+		if @override {
+			return MatchingMode::ShiftableParameters
+		}
+		else if @overwrite {
+			return MatchingMode::SimilarParameters + MatchingMode::ShiftableParameters
+		}
+		else {
+			return MatchingMode::ExactParameters
+		}
+	} // }}}
 	getParameterOffset() => 0
 	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_cm_\(@name)`
 	isConstructor() => false
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
 	isInstanceMethod() => @instance
+	isMethod() => true
+	name() => @name
 	parameters() => @parameters
 	toSharedFragments(fragments) { // {{{
 		return if @override
@@ -749,13 +763,6 @@ class ImplementClassConstructorDeclaration extends Statement {
 		}
 	} // }}}
 	class() => @variable
-	getParameterOffset() => 0
-	getSharedName() => '__ks_cons'
-	isAssertingParameter() => @options.rules.assertParameter
-	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
-	isConstructor() => true
-	isConsumedError(error): Boolean => @type.isCatchingError(error)
-	isExtending() => @class.isExtending()
 	private getConstructorIndex(body: Array) { // {{{
 		for const statement, index in body {
 			if statement.kind == NodeKind::CallExpression {
@@ -772,6 +779,24 @@ class ImplementClassConstructorDeclaration extends Statement {
 
 		return -1
 	} // }}}
+	getMatchingMode(): MatchingMode { // {{{
+		if @overwrite {
+			return MatchingMode::SimilarParameters + MatchingMode::ShiftableParameters
+		}
+		else {
+			return MatchingMode::ExactParameters
+		}
+	} // }}}
+	getParameterOffset() => 0
+	getSharedName() => '__ks_cons'
+	isAssertingParameter() => @options.rules.assertParameter
+	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
+	isConstructor() => true
+	isConsumedError(error): Boolean => @type.isCatchingError(error)
+	isExtending() => @class.isExtending()
+	isInstance() => false
+	isMethod() => true
+	name() => 'constructor'
 	parameters() => @parameters
 	toSharedFragments(fragments) { // {{{
 		if @class.isSealed() {

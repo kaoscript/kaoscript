@@ -545,14 +545,12 @@ class ClassType extends Type {
 					break
 				}
 			}
-
-			type.overwrite(null)
 		}
 
 		return this.addInstanceMethod(name, type)
 	} // }}}
 	destructors() => @destructors
-	export(references, mode) { // {{{
+	export(references, mode: ExportMode) { // {{{
 		const exhaustive = this.isExhaustive()
 
 		let export
@@ -619,7 +617,7 @@ class ClassType extends Type {
 			}
 
 			for const methods, name of @instanceMethods {
-				const m = [method.export(references, mode) for const method in methods when method.isExportable()]
+				const m = [method.unflagAlteration().export(references, mode) for const method in methods when method.isExportable()]
 
 				if m.length != 0 {
 					export.instanceMethods[name] = m
@@ -627,7 +625,7 @@ class ClassType extends Type {
 			}
 
 			for const methods, name of @classMethods {
-				export.classMethods[name] = [method.export(references, mode) for const method in methods when method.isExportable()]
+				export.classMethods[name] = [method.unflagAlteration().export(references, mode) for const method in methods when method.isExportable()]
 			}
 
 			if @abstract {
@@ -1678,7 +1676,7 @@ class ClassMethodType extends FunctionType {
 
 		return clone
 	} // }}}
-	export(references, mode) { // {{{
+	export(references, mode: ExportMode) { // {{{
 		const export = {
 			id: @identifier
 			access: @access
@@ -1762,8 +1760,9 @@ class ClassMethodType extends FunctionType {
 		}
 	} // }}}
 	returnType(@returnType)
-	unflagAlteration() { // {{{
+	unflagAlteration(): this { // {{{
 		@alteration = false
+		@overwrite = null
 	} // }}}
 }
 

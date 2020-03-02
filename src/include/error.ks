@@ -298,6 +298,9 @@ export class SyntaxException extends Exception {
 		throwDeadCode(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Dead code`, node)
 		} // }}}
+		throwDuplicateConstructor(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The constructor is matching an existing constructor`, node)
+		} // }}}
 		throwDuplicateKey(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Duplicate key has been found in object`, node)
 		} // }}}

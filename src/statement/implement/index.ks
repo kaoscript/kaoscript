@@ -105,11 +105,41 @@ class ImplementDeclaration extends Statement {
 			TypeException.throwImplInvalidType(this)
 		}
 
+		const methods = {
+			false: {}
+			true: {}
+		}
+
 		for const property in @properties {
 			property.prepare()
 
 			if const name = property.getSharedName() {
 				@sharingProperties[name] = property
+			}
+
+			if property.isMethod() {
+				const name = property.name()
+				const type = property.type()
+				const instance = property.isInstance()
+				const mode = property.getMatchingMode()
+
+				if const methods = methods[instance][name] {
+					for const method in methods {
+						if method.isMatching(type, mode) {
+							if property.isConstructor() {
+								SyntaxException.throwDuplicateConstructor(property)
+							}
+							else {
+								SyntaxException.throwDuplicateMethod(name, property)
+							}
+						}
+					}
+
+					methods.push(type)
+				}
+				else {
+					methods[instance][name] = [type]
+				}
 			}
 		}
 	} // }}}

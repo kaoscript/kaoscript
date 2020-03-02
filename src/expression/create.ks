@@ -74,36 +74,47 @@ class CreateExpression extends Expression {
 		return false
 	} // }}}
 	toFragments(fragments, mode) { // {{{
-		if @sealed {
-			fragments.code(`\(@type.type().getSealedName()).new(`)
+		if @flatten {
+			if @sealed {
+				fragments.code(`\(@type.type().getSealedName()).new.apply(null`)
 
-			for const argument, i in @arguments {
-				fragments.code($comma) if i != 0
+				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
 
-				fragments.compile(argument)
+				fragments.code(')')
 			}
+			else {
+				this.module().flag('Helper')
 
-			fragments.code(')')
-		}
-		else if @flatten {
-			this.module().flag('Helper')
+				fragments.code(`\($runtime.helper(this)).create(`).compile(@factory)
 
-			fragments.code(`\($runtime.helper(this)).create(`).compile(@factory)
+				CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
 
-			CallExpression.toFlattenArgumentsFragments(fragments.code($comma), @arguments)
-
-			fragments.code(')')
+				fragments.code(')')
+			}
 		}
 		else {
-			fragments.code('new ').compile(@factory).code('(')
+			if @sealed {
+				fragments.code(`\(@type.type().getSealedName()).new(`)
 
-			for const argument, i in @arguments {
-				fragments.code($comma) if i != 0
+				for const argument, i in @arguments {
+					fragments.code($comma) if i != 0
 
-				fragments.compile(argument)
+					fragments.compile(argument)
+				}
+
+				fragments.code(')')
 			}
+			else {
+				fragments.code('new ').compile(@factory).code('(')
 
-			fragments.code(')')
+				for const argument, i in @arguments {
+					fragments.code($comma) if i != 0
+
+					fragments.compile(argument)
+				}
+
+				fragments.code(')')
+			}
 		}
 	} // }}}
 	type() => @type

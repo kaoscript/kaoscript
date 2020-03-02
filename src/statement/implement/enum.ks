@@ -96,6 +96,7 @@ class ImplementEnumFieldDeclaration extends Statement {
 	translate() { // {{{
 	} // }}}
 	getSharedName() => null
+	isMethod() => false
 	toFragments(fragments, mode) { // {{{
 		const name = @enumName.name()
 		const line = fragments.newLine().code(name, '.', @name, ' = ', name, '(')
@@ -252,10 +253,22 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		@block.translate()
 	} // }}}
+	getMatchingMode(): MatchingMode { // {{{
+		if @override {
+			return MatchingMode::ShiftableParameters
+		}
+		else {
+			return MatchingMode::ExactParameters
+		}
+	} // }}}
 	getParameterOffset() => @instance ? 1 : 0
 	getSharedName() => null
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
+	isInstance() => @instance
+	isInstanceMethod() => @instance
+	isMethod() => true
+	name() => @name
 	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		const line = fragments.newLine()
