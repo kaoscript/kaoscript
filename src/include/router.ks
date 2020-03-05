@@ -874,7 +874,7 @@ namespace Router {
 				}
 			}
 
-			weights.sort((a, b) => a < b)
+			weights.sort((a, b) => b - a)
 
 			for const weight in weights {
 				const list: Array = weighted[weight]
