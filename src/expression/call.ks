@@ -387,6 +387,24 @@ class CallExpression extends Expression {
 
 		return false
 	} // }}}
+	override listUsedVariables(scope, variables) { // {{{
+		if @object != null {
+			@object.listUsedVariables(scope, variables)
+		}
+		else if @data.callee.kind == NodeKind::Identifier {
+			const variable = @scope.getVariable(@data.callee.name)
+
+			if !variable.isModule() && !scope.hasDeclaredVariable(variable.name()) {
+				variables.pushUniq(variable)
+			}
+		}
+
+		for const argument in @arguments {
+			argument.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	makeCallee(type: Type, name: String?) { // {{{
 		if type is FunctionType {
 			if type.isExhaustive(this) && !type.matchArguments(@arguments) {
@@ -399,7 +417,7 @@ class CallExpression extends Expression {
 		else if type is OverloadedFunctionType {
 			const arguments = [argument.type() for argument in @arguments]
 
-			const matches = Router.matchArguments(type.assessment(), arguments)
+			const matches = Router.matchArguments(type.assessment(name!!, this), arguments)
 
 			if matches.length == 0 {
 				if type.isExhaustive(this) {
@@ -449,7 +467,7 @@ class CallExpression extends Expression {
 				if value.hasClassMethod(@property) {
 					const arguments = [argument.type() for const argument in @arguments]
 
-					const assessment = value.getClassAssessment(@property)
+					const assessment = value.getClassAssessment(@property, this)
 
 					const methods = Router.matchArguments(assessment, arguments)
 
@@ -505,7 +523,7 @@ class CallExpression extends Expression {
 				if value.hasStaticMethod(@property) {
 					const arguments = [argument.type() for const argument in @arguments]
 
-					const assessment = value.getStaticAssessment(@property)
+					const assessment = value.getStaticAssessment(@property, this)
 
 					const methods = Router.matchArguments(assessment, arguments)
 
@@ -603,7 +621,7 @@ class CallExpression extends Expression {
 				if value.hasInstantiableMethod(@property) {
 					const arguments = [argument.type() for const argument in @arguments]
 
-					const assessment = value.getInstantiableAssessment(@property)
+					const assessment = value.getInstantiableAssessment(@property, this)
 
 					const methods = Router.matchArguments(assessment, arguments)
 
@@ -673,7 +691,7 @@ class CallExpression extends Expression {
 				if value.hasInstanceMethod(@property) {
 					const arguments = [argument.type() for const argument in @arguments]
 
-					const assessment = value.getInstanceAssessment(@property)
+					const assessment = value.getInstanceAssessment(@property, this)
 
 					const methods = Router.matchArguments(assessment, arguments)
 
@@ -833,7 +851,7 @@ class CallExpression extends Expression {
 			this.module().flag('Type')
 
 			for const callee in @callees til -1 {
-				callee.toTestFragments(fragments, this)
+				callee.toPositiveTestFragments(fragments, this)
 
 				fragments.code(' ? ')
 
@@ -1199,8 +1217,8 @@ class SealedFunctionCallee extends Callee {
 			}
 		}
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
-		@type.toTestFragments(fragments, @object)
+	toPositiveTestFragments(fragments, node) { // {{{
+		@type.toPositiveTestFragments(fragments, @object)
 	} // }}}
 	type() => @type
 }
@@ -1345,8 +1363,8 @@ class SealedMethodCallee extends Callee {
 			.compile(@object)
 			.code(')')
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
-		@node.scope().reference(@variable).toTestFragments(fragments, @object)
+	toPositiveTestFragments(fragments, node) { // {{{
+		@node.scope().reference(@variable).toPositiveTestFragments(fragments, @object)
 	} // }}}
 	type() => @type
 }

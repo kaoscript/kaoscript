@@ -1,5 +1,6 @@
 class BlockScope extends Scope {
 	private {
+		_authority: Scope
 		_chunkTypes					= {}
 		_declarations				= {}
 		_macros						= {}
@@ -8,6 +9,7 @@ class BlockScope extends Scope {
 		_references					= {}
 		_renamedIndexes 			= {}
 		_renamedVariables			= {}
+		_reservedIndex				= -1
 		_stashes					= {}
 		_tempDeclarations: Array	= []
 		_tempIndex 					= -1
@@ -17,6 +19,7 @@ class BlockScope extends Scope {
 	constructor(@parent) { // {{{
 		super()
 
+		@authority = @parent.authority()
 		@module = @parent.module()
 	} // }}}
 	acquireTempName(declare: Boolean = true): String { // {{{
@@ -27,6 +30,8 @@ class BlockScope extends Scope {
 		}
 
 		const name = `__ks_\(++@tempIndex)`
+
+		@tempNames[name] = false
 
 		@tempNames[name] = false
 
@@ -74,6 +79,7 @@ class BlockScope extends Scope {
 			@stashes[name] = [fn]
 		}
 	} // }}}
+	authority() => @authority
 	block() => this
 	commitTempVariables(variables: Array) { // {{{
 		variables.pushUniq(...@tempDeclarations)
@@ -221,6 +227,7 @@ class BlockScope extends Scope {
 	} // }}}
 	getRawLine() => @module.getRawLine()
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
+	getReservedName() => `__ks_00\(++@reservedIndex)`
 	getTempIndex() => @tempIndex
 	getVariable(name): Variable? => this.getVariable(name, @line)
 	getVariable(name, line: Number): Variable? { // {{{
@@ -247,7 +254,7 @@ class BlockScope extends Scope {
 
 		return @parent.getVariable(name, -1)
 	} // }}}
-	hasDeclaredVariable(name: String) => @declarations[name] == true
+	hasDeclaredVariable(name: String) => @declarations[name] || @renamedVariables[name]?
 	hasDefinedVariable(name: String) => this.hasDefinedVariable(name, @line)
 	hasDefinedVariable(name: String, line: Number) { // {{{
 		if @variables[name] is Array {

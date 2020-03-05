@@ -84,8 +84,8 @@ class ParameterType extends Type {
 
 		return fragments.join('')
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
-		@type.toTestFragments(fragments, node)
+	toPositiveTestFragments(fragments, node) { // {{{
+		@type.toPositiveTestFragments(fragments, node)
 	} // }}}
 	type() => @type
 }

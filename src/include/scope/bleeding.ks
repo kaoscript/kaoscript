@@ -9,6 +9,7 @@ class BleedingScope extends Scope {
 	constructor(@parent)
 	acquireTempName(declare: Boolean = true): String => @parent.acquireTempName(declare)
 	acquireUnusedTempName() => @parent.acquireUnusedTempName()
+	authority() => @parent.authority()
 	block() => @parent.block()
 	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
 	private declareVariable(name: String, scope: Scope) => @parent.declareVariable(name, scope)

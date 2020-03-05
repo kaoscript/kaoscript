@@ -14,7 +14,7 @@ module.exports = function() {
 			}
 		}
 		__ks_func_compile_0() {
-			return function() {
+			return () => {
 				return 42;
 			};
 		}

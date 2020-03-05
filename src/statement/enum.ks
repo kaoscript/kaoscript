@@ -306,6 +306,7 @@ class EnumMethodDeclaration extends Statement {
 		@name: String
 		@instance: Boolean				= true
 		@parameters: Array<Parameter>	= []
+		@topNodes: Array				= []
 	}
 	constructor(data, parent) { // {{{
 		super(data, parent, this.newScope(parent.scope(), ScopeType::Function))
@@ -396,6 +397,10 @@ class EnumMethodDeclaration extends Statement {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	getParameterOffset() => @instance ? 1 : 0
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -413,6 +418,10 @@ class EnumMethodDeclaration extends Statement {
 		}
 
 		Parameter.toFragments(this, ctrl, ParameterMode::Default, node => node.code(')').step())
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(ctrl)
+		}
 
 		if @awaiting {
 			throw new NotImplementedException(this)

@@ -152,7 +152,7 @@ class DictionaryType extends Type {
 			return str + '}'
 		}
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	walk(fn) { // {{{

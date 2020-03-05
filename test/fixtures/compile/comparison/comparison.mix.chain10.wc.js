@@ -38,25 +38,25 @@ module.exports = function() {
 		if(Operator.lt(a(), __ks_0 = b()) && Operator.lte(__ks_0, __ks_0 = c()) && Operator.lt(__ks_0, __ks_0 = d()) && __ks_0 === (__ks_0 = e()) && Operator.gt(__ks_0, __ks_0 = f()) && Operator.gte(__ks_0, __ks_0 = g()) && __ks_0 === (__ks_0 = h()) && Operator.lt(__ks_0, __ks_0 = i()) && __ks_0 !== j()) {
 		}
 	}
-	foobar(function() {
+	foobar(() => {
 		return 1;
-	}, function() {
+	}, () => {
 		return 2;
-	}, function() {
+	}, () => {
 		return 2;
-	}, function() {
+	}, () => {
 		return 3;
-	}, function() {
+	}, () => {
 		return 3;
-	}, function() {
+	}, () => {
 		return 2;
-	}, function() {
+	}, () => {
 		return 1;
-	}, function() {
+	}, () => {
 		return 1;
-	}, function() {
+	}, () => {
 		return 3;
-	}, function() {
+	}, () => {
 		return 5;
 	});
 };

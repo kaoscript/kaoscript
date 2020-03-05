@@ -9,6 +9,7 @@ class Variable {
 		// true: the value can be set only once
 		_immutable: Boolean			= true
 		_initialized: Boolean		= false
+		_module: Boolean			= false
 		_name: String
 		_new: Boolean				= true
 		_lateInit: Boolean			= false
@@ -60,6 +61,7 @@ class Variable {
 
 		@definitive = @immutable
 		@secureName = @name
+		@module = @predefined
 	} // }}}
 	clone() { // {{{
 		const clone = new Variable()
@@ -90,6 +92,11 @@ class Variable {
 
 		return this
 	} // }}}
+	flagModule() { // {{{
+		@module = true
+
+		return this
+	} // }}}
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
 	getSecureName() => @secureName
@@ -97,6 +104,7 @@ class Variable {
 	isImmutable() => @immutable
 	isInitialized() => @initialized
 	isLateInit() => @lateInit
+	isModule() => @module
 	isPredefined() => @predefined
 	isRenamed() => @name != @secureName
 	name() => @name

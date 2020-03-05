@@ -2,8 +2,11 @@ class FunctionScope extends BlockScope {
 	private {
 		_extending: Boolean		= false
 	}
-	flagExtending() { // {{{
-		@extending = true
+	constructor(@parent) { // {{{
+		super(parent)
+
+		@parent = @authority
+		@authority = this
 	} // }}}
 	protected declareVariable(name: String, scope: Scope) { // {{{
 		if name == 'this' || (@extending && name == 'super') {
@@ -25,5 +28,8 @@ class FunctionScope extends BlockScope {
 
 			return null
 		}
+	} // }}}
+	flagExtending() { // {{{
+		@extending = true
 	} // }}}
 }

@@ -635,11 +635,11 @@ class ReferenceType extends Type {
 			return this.export(references, mode, @type.toReference(references, mode))
 		}
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		this.resolveType()
 
 		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
-			@type.toTestFragments(fragments, node)
+			@type.toPositiveTestFragments(fragments, node)
 		}
 		else {
 			if tof ?= $runtime.typeof(@name, node) {

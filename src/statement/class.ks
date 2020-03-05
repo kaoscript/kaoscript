@@ -166,6 +166,10 @@ class ClassDeclaration extends Statement {
 			}
 
 			@extendsName = `\(member.name)\(name)`
+
+			if @extendsName == @name {
+				SyntaxException.throwInheritanceLoop(@name, this)
+			}
 		}
 
 		for const modifier in @data.modifiers {
@@ -528,7 +532,7 @@ class ClassDeclaration extends Statement {
 					}
 				}
 
-				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 			}
 
 			ctrl.done()
@@ -614,7 +618,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 		}
 
 		clazz.done()
@@ -727,7 +731,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -754,7 +758,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -806,7 +810,7 @@ class ClassDeclaration extends Statement {
 				.newLine()
 				.code('const __ks_cons = (__ks_arguments) =>')
 
-			const assessment = Router.assess(m, false)
+			const assessment = Router.assess(m, false, 'constructor', this)
 
 			Router.toFragments(
 				assessment
@@ -901,7 +905,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -928,7 +932,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -985,7 +989,7 @@ class ClassDeclaration extends Statement {
 					}
 				}
 
-				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+				ClassMethodDeclaration.toClassSwitchFragments(this, ctrl.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 			}
 
 			ctrl.done()
@@ -1028,7 +1032,7 @@ class ClassDeclaration extends Statement {
 			m.push(method.type())
 		}
 
-		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
+		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, (node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
 
 		for const methods, name of @instanceMethods {
 			m.clear()
@@ -1052,7 +1056,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`\(name): function()`).step(), func(fragments) {})
 		}
 
 		clazz.done()
@@ -1111,7 +1115,7 @@ class ClassDeclaration extends Statement {
 			m.push(method.type())
 		}
 
-		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons(args)').step(), func(fragments) {
+		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, (node, fragments) => fragments.code('__ks_cons(args)').step(), func(fragments) {
 			fragments.done()
 		})
 
@@ -1143,7 +1147,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
+			ClassMethodDeclaration.toInstanceSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`\(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -1170,7 +1174,7 @@ class ClassDeclaration extends Statement {
 				}
 			}
 
-			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, func(node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
+			ClassMethodDeclaration.toClassSwitchFragments(this, clazz.newControl(), @type, m, overflow, name, (node, fragments) => fragments.code(`static \(name)()`).step(), func(fragments) {
 				fragments.done()
 			})
 		}
@@ -1596,9 +1600,10 @@ class ClassMethodDeclaration extends Statement {
 		_override: Boolean				= false
 		_parameters: Array<Parameter>	= []
 		_returnNull: Boolean			= false
+		_topNodes: Array				= []
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
-		const assessment = Router.assess(methods, false, overflow)
+		const assessment = Router.assess(methods, false, name, node, overflow)
 
 		if variable.type().isExtending() {
 			return Router.toFragments(
@@ -1647,7 +1652,7 @@ class ClassMethodDeclaration extends Statement {
 		}
 	} // }}}
 	static toInstanceSwitchFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
-		const assessment = Router.assess(methods, false, overflow)
+		const assessment = Router.assess(methods, false, name, node, overflow)
 
 		if variable.type().isExtending() {
 			return Router.toFragments(
@@ -1907,6 +1912,10 @@ class ClassMethodDeclaration extends Statement {
 			@aliases.push(statement)
 		}
 	} // }}}
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
 	isAbstract() => @abstract
@@ -1933,6 +1942,10 @@ class ClassMethodDeclaration extends Statement {
 		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
 			return node.code(')').step()
 		})
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(ctrl)
+		}
 
 		if @awaiting {
 			throw new NotImplementedException(this)
@@ -1971,12 +1984,13 @@ class ClassConstructorDeclaration extends Statement {
 		_type: ClassConstructorType
 	}
 	private {
-		_aliases: Array								= []
-		_abstract: Boolean							= false
+		_aliases: Array						= []
+		_abstract: Boolean					= false
 		_internalName: String
+		_topNodes: Array					= []
 	}
 	static toRouterFragments(node, fragments, variable, methods, header, footer) { // {{{
-		const assessment = Router.assess(methods, false)
+		const assessment = Router.assess(methods, false, 'constructor', node)
 
 		if node.isExtending() {
 			return Router.toFragments(
@@ -2127,6 +2141,10 @@ class ClassConstructorDeclaration extends Statement {
 			SyntaxException.throwNoSuperCall(this)
 		}
 	} // }}}
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	checkVariableInitialization(name) { // {{{
 		if @block.isInitializingInstanceVariable(name) {
 			@type.addInitializingInstanceVariable(name)
@@ -2256,6 +2274,10 @@ class ClassConstructorDeclaration extends Statement {
 			Parameter.toFragments(this, ctrl, ParameterMode::Default, func(node) {
 				return node.code(')').step()
 			})
+
+			for const node in @topNodes {
+				node.toAuthorityFragments(ctrl)
+			}
 
 			ctrl.compile(@block)
 

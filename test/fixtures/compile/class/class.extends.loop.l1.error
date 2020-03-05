@@ -1,0 +1,1 @@
+ReferenceException: "ClassC" is not defined (line 4, file "fixtures/compile/class/class.extends.loop.l1.ks")

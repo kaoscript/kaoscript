@@ -6,6 +6,7 @@ class AnonymousFunctionExpression extends Expression {
 		_exit: Boolean					= false
 		_isObjectMember: Boolean		= false
 		_parameters: Array<Parameter>
+		_topNodes: Array				= []
 		_type: Type
 	}
 	constructor(data, parent, scope) { // {{{
@@ -59,6 +60,10 @@ class AnonymousFunctionExpression extends Expression {
 		@exit = @block.isExit()
 	} // }}}
 	addInitializableVariable(variable, node)
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
 	initializeVariable(variable, expression, node)
@@ -70,17 +75,15 @@ class AnonymousFunctionExpression extends Expression {
 	isUsingVariable(name) => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
-		const surround = {
-			beforeParameters: 'function('
-			afterParameters: ')'
-			footer: ''
-		}
-
-		fragments.code(surround.beforeParameters)
+		fragments.code('function(')
 
 		const block = Parameter.toFragments(this, fragments, ParameterMode::Default, func(fragments) {
-			return fragments.code(surround.afterParameters).newBlock()
+			return fragments.code(')').newBlock()
 		})
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(block)
+		}
 
 		block.compile(@block)
 
@@ -89,10 +92,6 @@ class AnonymousFunctionExpression extends Expression {
 		}
 
 		block.done()
-
-		if surround.footer.length > 0 {
-			fragments.code(surround.footer)
-		}
 	} // }}}
 	type() => @type
 }
@@ -102,14 +101,20 @@ class ArrowFunctionExpression extends Expression {
 		_autoTyping: Boolean			= false
 		_awaiting: Boolean				= false
 		_block: Block
+		_es5: Boolean					= false
 		_exit: Boolean					= false
+		_name: String
 		_parameters: Array<Parameter>
+		_shiftToAuthority: Boolean		= false
 		_type: Type
+		_usingThis: Boolean				= false
+		_variables: Array<Variable>
 	}
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, scope, ScopeType::Block)
 	} // }}}
 	analyse() { // {{{
+		@es5 = @options.format.functions == 'es5'
 		@block = $compile.function($ast.body(@data), this)
 
 		@parameters = []
@@ -133,6 +138,22 @@ class ArrowFunctionExpression extends Expression {
 		if @autoTyping {
 			@type.returnType(@block.getUnpreparedType())
 		}
+
+		@usingThis = this.isUsingVariable('this')
+
+		if @es5 {
+			@variables = @block.listUsedVariables(@scope, [])
+
+			if @usingThis || @variables.length != 0 {
+				@shiftToAuthority = true
+
+				const authority = this.authority()
+
+				@name = authority.scope().getReservedName()
+
+				authority.addTopNode(this)
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		for parameter in @parameters {
@@ -155,7 +176,14 @@ class ArrowFunctionExpression extends Expression {
 	} // }}}
 	addInitializableVariable(variable, node)
 	getFunctionNode() => this
-	getParameterOffset() => 0
+	getParameterOffset() { // {{{
+		if @shiftToAuthority {
+			return @variables.length
+		}
+		else {
+			return 0
+		}
+	} // }}}
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -173,51 +201,82 @@ class ArrowFunctionExpression extends Expression {
 	} // }}}
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
-		let surround
-		if this.isUsingVariable('this') {
-			if @options.format.functions == 'es5' {
-				surround = {
-					arrow: false
-					beforeParameters: '(function('
-					afterParameters: ')'
-					footer: ').bind(this)'
+		if @shiftToAuthority {
+			if @variables.length == 0 {
+				if @usingThis {
+					fragments.code(`\(@name).bind(this)`)
+				}
+				else {
+					fragments.code(@name)
 				}
 			}
 			else {
-				surround = {
-					arrow: true
-					beforeParameters: '('
-					afterParameters: ') =>'
-					footer: ''
+				const bind = @usingThis ? 'this' : 'null'
+
+				fragments.code(`\($runtime.helper(this)).vcurry(\(@name), \(bind)`)
+
+				for const variable in @variables {
+					fragments.code(`, \(variable.getSecureName())`)
 				}
+
+				fragments.code(')')
 			}
 		}
 		else {
-			surround = {
-				arrow: false
-				beforeParameters: 'function('
-				afterParameters: ')'
-				footer: ''
+			if @es5 || (@parameters.length != 0 && !@usingThis) {
+				fragments.code('function(')
+
+				const block = Parameter.toFragments(this, fragments, ParameterMode::Default, func(fragments) {
+					return fragments.code(')').newBlock()
+				})
+
+				block.compile(@block)
+
+				if !@awaiting && !@exit && @type.isAsync() {
+					block.line('__ks_cb()')
+				}
+
+				block.done()
+			}
+			else {
+				fragments.code('(')
+
+				const block = Parameter.toFragments(this, fragments, ParameterMode::ArrowFunction, func(fragments) {
+					return fragments.code(') =>').newBlock()
+				})
+
+				block.compile(@block)
+
+				if !@awaiting && !@exit && @type.isAsync() {
+					block.line('__ks_cb()')
+				}
+
+				block.done()
 			}
 		}
+	} // }}}
+	toAuthorityFragments(fragments) { // {{{
+		const ctrl = fragments.newControl().code(`var \(@name) = function(`)
 
-		fragments.code(surround.beforeParameters)
+		for const variable, index in @variables {
+			if index != 0 {
+				ctrl.code($comma)
+			}
 
-		let block = Parameter.toFragments(this, fragments, surround.arrow ? ParameterMode::ArrowFunction : ParameterMode::Default, func(fragments) {
-			return fragments.code(surround.afterParameters).newBlock()
+			ctrl.code(variable.getSecureName())
+		}
+
+		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(fragments) {
+			return fragments.code(')').step()
 		})
 
-		block.compile(@block)
+		ctrl.compile(@block)
 
 		if !@awaiting && !@exit && @type.isAsync() {
-			block.line('__ks_cb()')
+			ctrl.line('__ks_cb()')
 		}
 
-		block.done()
-
-		if surround.footer.length > 0 {
-			fragments.code(surround.footer)
-		}
+		ctrl.done()
 	} // }}}
 	type() => @type
 }

@@ -14,6 +14,7 @@ class Literal extends Expression {
 	hasExceptions() => false
 	isComposite() => false
 	listAssignments(array) => array
+	override listUsedVariables(scope, variables) => variables
 	toFragments(fragments, mode) { // {{{
 		if @data {
 			fragments.code(@value, @data)
@@ -147,6 +148,17 @@ class IdentifierLiteral extends Literal {
 		array.push(@name)
 
 		return array
+	} // }}}
+	override listUsedVariables(scope, variables) { // {{{
+		if @isVariable {
+			const variable = @scope.getVariable(@value, @line)
+
+			if @value != 'this' && !variable.isModule() && !scope.hasDeclaredVariable(@value) {
+				variables.pushUniq(variable)
+			}
+		}
+
+		return variables
 	} // }}}
 	name() => @value
 	path() => @value

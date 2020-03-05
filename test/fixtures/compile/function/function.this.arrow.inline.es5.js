@@ -1,7 +1,8 @@
 module.exports = function() {
 	function foobar() {
-		return (function() {
+		var __ks_000 = function() {
 			return this;
-		}).bind(this);
+		}
+		return __ks_000.bind(this);
 	}
 };

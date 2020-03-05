@@ -46,7 +46,7 @@ class ArrayType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	walk(fn)

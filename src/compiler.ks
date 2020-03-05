@@ -195,6 +195,7 @@ abstract class AbstractNode {
 	abstract analyse()
 	abstract prepare()
 	abstract translate()
+	authority() => @parent.authority()
 	data() => @data
 	directory() => @parent.directory()
 	file() => @parent.file()

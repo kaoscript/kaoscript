@@ -461,6 +461,7 @@ class ModuleBlock extends AbstractNode {
 		_attributeDatas			= {}
 		_module
 		_statements: Array		= []
+		_topNodes: Array		= []
 	}
 	constructor(@data, @module) { // {{{
 		super()
@@ -515,6 +516,10 @@ class ModuleBlock extends AbstractNode {
 		}
 	} // }}}
 	addInitializableVariable(variable, node)
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	directory() => @module.directory()
 	exportMacro(name, macro) { // {{{
 		@module.exportMacro(name, macro.toMetadata())
@@ -559,6 +564,10 @@ class ModuleBlock extends AbstractNode {
 	} // }}}
 	target() => @options.target
 	toFragments(fragments) { // {{{
+		for const node in @topNodes {
+			node.toAuthorityFragments(fragments)
+		}
+
 		let index = -1
 		let item
 

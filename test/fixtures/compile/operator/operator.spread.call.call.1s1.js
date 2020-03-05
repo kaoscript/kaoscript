@@ -1,5 +1,5 @@
 module.exports = function() {
-	let foo = (function() {
+	let foo = (() => {
 		return [1, 2];
 	})();
 	let bar = [];

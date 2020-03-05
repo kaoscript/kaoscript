@@ -23,6 +23,12 @@ class UnlessExpression extends Expression {
 	} // }}}
 	isComputed() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenFalse.isUsingVariable(name)
+	override listUsedVariables(scope, variables) { // {{{
+		@condition.listUsedVariables(scope, variables)
+		@whenFalse.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments
 			.wrapBoolean(@condition)

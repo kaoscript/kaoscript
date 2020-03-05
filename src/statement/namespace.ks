@@ -1,17 +1,18 @@
 class NamespaceDeclaration extends Statement {
 	private lateinit {
-		_exports				= {}
+		_exports									= {}
 		_name: String
 		_statements: Array
+		_topNodes: Array							= []
 		_type: NamedContainerType<NamespaceType>
 		_variable: Variable
 	}
 	constructor(data, parent, scope) { // {{{
-		super(data, parent, scope, ScopeType::Block)
+		super(data, parent, new NamespaceScope(scope))
 	} // }}}
 	analyse() { // {{{
 		@name = @data.name.name
-		@type = new NamedContainerType(@name, new NamespaceType(@scope:Scope))
+		@type = new NamedContainerType(@name, new NamespaceType(@scope))
 
 		@variable = @scope.parent().define(@name, true, @type, this)
 
@@ -45,6 +46,10 @@ class NamespaceDeclaration extends Statement {
 		}
 	} // }}}
 	addInitializableVariable(variable, node)
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	export(recipient) { // {{{
 		recipient.export(@name, @variable)
 	} // }}}
@@ -86,6 +91,10 @@ class NamespaceDeclaration extends Statement {
 	toStatementFragments(fragments, mode) { // {{{
 		const line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.namespace(function()')
 		const block = line.newBlock()
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(block)
+		}
 
 		for statement in @statements {
 			block.compile(statement)

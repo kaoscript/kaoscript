@@ -1,7 +1,6 @@
 class FusionType extends Type {
 	private {
-		_array: Boolean			= false
-		_nullable: Boolean		= false
+		_nullable: Boolean			= false
 		_types: Array<Type>
 	}
 	static {
@@ -13,12 +12,18 @@ class FusionType extends Type {
 		super(scope)
 
 		for const type in @types {
-			if type.isArray() {
-				@array = true
-			}
 			if type.isNullable() {
 				@nullable = true
+
+				break
 			}
+		}
+	} // }}}
+	addType(type: Type) { // {{{
+		@types.push(type)
+
+		if type.isNullable() {
+			@nullable = true
 		}
 	} // }}}
 	clone() { // {{{
@@ -39,8 +44,24 @@ class FusionType extends Type {
 
 		return null
 	} // }}}
-	isArray() => @array
+	isArray() { // {{{
+		if @types.length != 0 {
+			return @types[0].isArray()
+		}
+		else {
+			return false
+		}
+	} // }}}
+	isDictionary() { // {{{
+		if @types.length != 0 {
+			return @types[0].isDictionary()
+		}
+		else {
+			return false
+		}
+	} // }}}
 	isExportable() => true
+	isFusion() => true
 	isMatching(value: FusionType, mode: MatchingMode) { // {{{
 		if @types.length != value._types.length {
 			return false
@@ -69,12 +90,42 @@ class FusionType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
-		throw new NotImplementedException(node)
+	toNegativeTestFragments(fragments, node) { // {{{
+		fragments.code('(')
+
+		for type, i in @types {
+			if i != 0 {
+				fragments.code(' && ')
+			}
+
+			type.toNegativeTestFragments(fragments, node)
+		}
+
+		fragments.code(')')
+	} // }}}
+	toPositiveTestFragments(fragments, node) { // {{{
+		fragments.code('(')
+
+		for type, i in @types {
+			if i != 0 {
+				fragments.code(' && ')
+			}
+
+			type.toPositiveTestFragments(fragments, node)
+		}
+
+		fragments.code(')')
 	} // }}}
 	type() { // {{{
 		if @types.length == 1 {
-			return @types[0]
+			const type = @types[0]
+
+			if @nullable == type.isNullable() {
+				return type
+			}
+			else {
+				return type.setNullable(@nullable)
+			}
 		}
 		else {
 			return this

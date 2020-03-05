@@ -66,6 +66,15 @@ class ArrayComprehensionForFrom extends Expression {
 								(@by != null && @by.isUsingVariable(name)) ||
 								(@when != null && @when.isUsingVariable(name)) ||
 								@body.isUsingVariable(name)
+	override listUsedVariables(scope, variables) { // {{{
+		@from.listUsedVariables(scope, variables)
+		@to.listUsedVariables(scope, variables)
+		@by?.listUsedVariables(scope, variables)
+		@when?.listUsedVariables(scope, variables)
+		@body?.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 
@@ -212,6 +221,13 @@ class ArrayComprehensionForIn extends Expression {
 		@when.translate() if @when?
 	} // }}}
 	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
+	override listUsedVariables(scope, variables) { // {{{
+		@expression.listUsedVariables(scope, variables)
+		@when?.listUsedVariables(scope, variables)
+		@body?.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 
@@ -347,6 +363,13 @@ class ArrayComprehensionForOf extends Expression {
 		@when.translate() if @when?
 	} // }}}
 	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
+	override listUsedVariables(scope, variables) { // {{{
+		@expression.listUsedVariables(scope, variables)
+		@when?.listUsedVariables(scope, variables)
+		@body?.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 
@@ -453,6 +476,15 @@ class ArrayComprehensionForRange extends Expression {
 								(@by != null && @by.isUsingVariable(name)) ||
 								(@when != null && @when.isUsingVariable(name)) ||
 								@body.isUsingVariable(name)
+	override listUsedVariables(scope, variables) { // {{{
+		@from.listUsedVariables(scope, variables)
+		@to.listUsedVariables(scope, variables)
+		@by?.listUsedVariables(scope, variables)
+		@when?.listUsedVariables(scope, variables)
+		@body?.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 

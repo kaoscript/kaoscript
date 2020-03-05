@@ -234,6 +234,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_override: Boolean				= false
 		_overwrite: Boolean				= false
 		_variable: NamedType<ClassType>
+		_topNodes: Array				= []
 	}
 	constructor(data, parent, @variable) { // {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
@@ -420,6 +421,10 @@ class ImplementClassMethodDeclaration extends Statement {
 			@aliases.push(statement)
 		}
 	} // }}}
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	class() => @variable
@@ -448,7 +453,7 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @class.isSealed() {
-				const assessment = Router.assess(@class.listInstanceMethods(@name), false)
+				const assessment = Router.assess(@class.listInstanceMethods(@name), false, @name, this)
 
 				Router.toFragments(
 					assessment
@@ -491,7 +496,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		}
 		else {
 			if @class.isSealed() {
-				const assessment = Router.assess(@class.listClassMethods(@name), false)
+				const assessment = Router.assess(@class.listClassMethods(@name), false, @name, this)
 
 				Router.toFragments(
 					assessment
@@ -548,11 +553,15 @@ class ImplementClassMethodDeclaration extends Statement {
 			}
 		}
 
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(node) {
-			line.code(')')
+		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+			fragments.code(')')
 
-			return line.newBlock()
+			return fragments.newBlock()
 		})
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(block)
+		}
 
 		block.compile(@block)
 
@@ -577,6 +586,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 		_dependent: Boolean				= false
 		_overwrite: Boolean				= false
 		_variable: NamedType<ClassType>
+		_topNodes: Array				= []
 	}
 	constructor(data, parent, @variable) { // {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
@@ -754,6 +764,10 @@ class ImplementClassConstructorDeclaration extends Statement {
 			SyntaxException.throwNoSuperCall(this)
 		}
 	} // }}}
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	checkVariableInitialization(name) { // {{{
 		if @block.isInitializingInstanceVariable(name) {
 			@type.addInitializingInstanceVariable(name)
@@ -800,7 +814,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 	parameters() => @parameters
 	toSharedFragments(fragments) { // {{{
 		if @class.isSealed() {
-			const assessment = Router.assess([constructor for const constructor in @class.listConstructors()], false, false, groups => {
+			const assessment = Router.assess([constructor for const constructor in @class.listConstructors()], false, 'constructor', this, false, groups => {
 				for const group of groups {
 					auto sealed = 0
 					auto notsealed = 0
@@ -916,11 +930,15 @@ class ImplementClassConstructorDeclaration extends Statement {
 			line.code(`\(@variable.name()).prototype.\(@internalName) = function(`)
 		}
 
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(node) {
-			line.code(')')
+		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+			fragments.code(')')
 
-			return line.newBlock()
+			return fragments.newBlock()
 		})
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(block)
+		}
 
 		block.compile(@block)
 

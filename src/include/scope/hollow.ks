@@ -8,6 +8,7 @@ class HollowScope extends Scope {
 	acquireTempName(declare: Boolean = true): String => @parent.acquireTempName(declare)
 	acquireUnusedTempName() => @parent.acquireUnusedTempName()
 	commitTempVariables(variables: Array) => @parent.commitTempVariables(variables)
+	authority() => @parent.authority()
 	block() => @parent.block()
 	private declareVariable(name: String, scope: Scope): String? => @parent.declareVariable(name, scope)
 	define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable { // {{{

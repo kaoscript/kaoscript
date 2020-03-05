@@ -471,16 +471,16 @@ namespace Router {
 			return tree
 		} // }}}
 
-		func expandGroup(group): Void { // {{{
+		func expandGroup(group, name: String, node: AbstractNode): Void { // {{{
 			group.rows = {}
 			group.rowCount = 0
 
 			for const function in group.functions {
-				expandFunction(group, function, function.parameters(), group.n, function.min(), 0, 0, '', [])
+				expandFunction(group, name, node, function, function.parameters(), group.n, function.min(), 0, 0, '', [])
 			}
 		} // }}}
 
-		func expandFunction(group, function: FunctionType, parameters: Array<ParameterType>, target: Number, count: Number, pIndex: Number, pCount: Number, key: String, types: Array<Type>): Void { // {{{
+		func expandFunction(group, name: String, node: AbstractNode, function: FunctionType, parameters: Array<ParameterType>, target: Number, count: Number, pIndex: Number, pCount: Number, key: String, types: Array<Type>): Void { // {{{
 			if pIndex == parameters.length {
 				if types.length != target {
 					// do nothing
@@ -490,7 +490,7 @@ namespace Router {
 						// do nothing
 					}
 					else if function.max() == match.function.max() {
-						NotImplementedException.throw()
+						SyntaxException.throwIndistinguishableFunctions(name, [function, match.function], target, node)
 					}
 					else if function.max() < match.function.max() {
 						group.rows[key] = Row(
@@ -514,39 +514,39 @@ namespace Router {
 				if pCount < parameter.min() {
 					const type = parameter.type()
 
-					expandParameter(group, function, parameters, target, count, pIndex, pCount + 1, key, types, type)
+					expandParameter(group, name, node, function, parameters, target, count, pIndex, pCount + 1, key, types, type)
 				}
 				else if parameter.max() == Infinity {
 					if count < target {
 						const type = parameter.type()
 
-						expandParameter(group, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, type)
+						expandParameter(group, name, node, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, type)
 					}
 					else {
-						expandFunction(group, function, parameters, target, count, pIndex + 1, 0, key, types)
+						expandFunction(group, name, node, function, parameters, target, count, pIndex + 1, 0, key, types)
 					}
 				}
 				else {
 					if count < target && pCount < parameter.max() {
 						const type = parameter.type()
 
-						expandParameter(group, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, type)
+						expandParameter(group, name, node, function, parameters, target, count + 1, pIndex, pCount + 1, key, types, type)
 					}
 					else {
-						expandFunction(group, function, parameters, target, count, pIndex + 1, 0, key, types)
+						expandFunction(group, name, node, function, parameters, target, count, pIndex + 1, 0, key, types)
 					}
 				}
 
 				if pCount == 0 && parameter.hasDefaultValue() {
-					expandFunction(group, function, parameters, target, count, pIndex + 1, 0, key, [...types])
+					expandFunction(group, name, node, function, parameters, target, count, pIndex + 1, 0, key, [...types])
 				}
 			}
 		} // }}}
 
-		func expandParameter(group, function: FunctionType, parameters: Array<ParameterType>, target: Number, count: Number, pIndex: Number, pCount: Number, key: String, types: Array<Type>, type: Type): Void { // {{{
+		func expandParameter(group, name: String, node: AbstractNode, function: FunctionType, parameters: Array<ParameterType>, target: Number, count: Number, pIndex: Number, pCount: Number, key: String, types: Array<Type>, type: Type): Void { // {{{
 			if type.isUnion() {
 				for const value in type.discard():UnionType.types() {
-					expandParameter(group, function, parameters, target, count, pIndex, pCount, key, types, value)
+					expandParameter(group, name, node, function, parameters, target, count, pIndex, pCount, key, types, value)
 				}
 			}
 			else {
@@ -556,7 +556,7 @@ namespace Router {
 
 				types.push(type)
 
-				expandFunction(group, function, parameters, target, count, pIndex, pCount, key, types)
+				expandFunction(group, name, node, function, parameters, target, count, pIndex, pCount, key, types)
 			}
 		} // }}}
 
@@ -720,49 +720,56 @@ namespace Router {
 		} // }}}
 
 		func regroupRoutes(routes: Array<Route>): Array<Route> { // {{{
-			let min = routes[0].min
+			const flattenable = isFlattenable(routes)
+			const max = routes[routes.length - 1].max
 
+			let min = -1
 			let index = 0
+
 			while index < routes.length {
 				const route = routes[index]
 
 				if route.min > min {
 					min = route.min
-				}
 
-				const matches = []
-				let next = route.min + 1
+					const matches = []
+					let next = route.min + 1
 
-				for const rt in routes from index + 1 when rt.min >= next {
-					if rt.function == route.function && sameFilters(route.filters, rt.filters) && rt.matchingFilters.length >= route.matchingFilters.length {
-						matches.push(rt)
+					for const rt in routes from index + 1 when rt.min >= next {
+						if rt.function == route.function && sameFilters(route.filters, rt.filters) && rt.matchingFilters.length >= route.matchingFilters.length {
+							matches.push(rt)
 
-						next = rt.min + 1
-					}
-					else {
-						break
-					}
-				}
-
-				if matches.length != 0 {
-					for const match in matches {
-						if match.max > route.max {
-							route.max = match.max
+							next = rt.min + 1
 						}
+						else {
+							break
+						}
+					}
 
-						if match.matchingFilters.length != 0 {
-							if route.matchingFilters.length == 0 {
-								route.matchingFilters.push(RouteFilter(
-									min: route.min
-									max: route.min
-								))
+					if matches.length != 0 {
+						for const match in matches {
+							if match.max > route.max {
+								route.max = match.max
 							}
 
-							route.matchingFilters.push(...match.matchingFilters)
-						}
-					}
+							if match.matchingFilters.length != 0 {
+								if route.matchingFilters.length == 0 {
+									route.matchingFilters.push(RouteFilter(
+										min: route.min
+										max: route.min
+									))
+								}
 
-					routes.remove(...matches)
+								route.matchingFilters.push(...match.matchingFilters)
+							}
+						}
+
+						routes.remove(...matches)
+					}
+				}
+
+				if route.max == max {
+					min = -1
 				}
 
 				++index
@@ -913,11 +920,11 @@ namespace Router {
 			return true
 		} // }}}
 
-		export func resolveRoutes(functions: Array<FunctionType>, groups: Dictionary, min: Number, max: Number, overflow: Boolean): Array<Route> { // {{{
+		export func resolveRoutes(functions: Array<FunctionType>, groups: Dictionary, min: Number, max: Number, overflow: Boolean, name: String, node: AbstractNode): Array<Route> { // {{{
 			const routes: Array<Route> = []
 
 			for const group of groups {
-				expandGroup(group)
+				expandGroup(group, name, node)
 
 				if group.n == 0 {
 					const function = group.rows[''].function
@@ -967,10 +974,10 @@ namespace Router {
 				ctrl.code(' && ')
 
 				if filter.index >= 0 {
-					filter.type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
+					filter.type.toPositiveTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
 				}
 				else {
-					filter.type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
+					filter.type.toPositiveTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
 				}
 			}
 
@@ -1000,10 +1007,10 @@ namespace Router {
 					}
 
 					if filter.index >= 0 {
-						filter.type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
+						filter.type.toPositiveTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
 					}
 					else {
-						filter.type.toTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
+						filter.type.toPositiveTestFragments(ctrl, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
 					}
 				}
 
@@ -1175,10 +1182,10 @@ namespace Router {
 					}
 
 					if filter.index >= 0 {
-						filter.type.toTestFragments(ctrl2, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
+						filter.type.toPositiveTestFragments(ctrl2, new Literal(false, node, node.scope(), `\(argName)[\(filter.index)]`))
 					}
 					else {
-						filter.type.toTestFragments(ctrl2, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
+						filter.type.toPositiveTestFragments(ctrl2, new Literal(false, node, node.scope(), `\(argName)[\(argName).length - \(-filter.index - 1)]`))
 					}
 				}
 
@@ -1770,7 +1777,7 @@ namespace Router {
 	export {
 		#![rules(assert-parameter)]
 
-		func assess(functions: Array<FunctionType>, flattenable: Boolean, overflow: Boolean = false, filterGroups: Function = null): Assessement { // {{{
+		func assess(functions: Array<FunctionType>, flattenable: Boolean, name: String, node: AbstractNode, overflow: Boolean = false, filterGroups: Function = null): Assessement { // {{{
 			if functions.length == 0 {
 				return Assessement()
 			}
@@ -1832,7 +1839,7 @@ namespace Router {
 
 				const assessment = Assessement(
 					async
-					routes: Bounded.resolveRoutes(functions, groups, min, max, overflow)
+					routes: Bounded.resolveRoutes(functions, groups, min, max, overflow, name, node)
 				)
 
 				if infinities.length == 1 {

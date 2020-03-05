@@ -861,7 +861,7 @@ class SwitchConditionType extends AbstractNode {
 	translate()
 	isEnum() => false
 	toBooleanFragments(fragments, name) { // {{{
-		@type.toTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
+		@type.toPositiveTestFragments(fragments, new Literal(false, this, @scope:Scope, name))
 	} // }}}
 	toStatementFragments(fragments)
 }

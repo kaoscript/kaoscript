@@ -18,7 +18,7 @@ class DoWhileStatement extends Statement {
 
 		for const inferable, name of @bodyScope.listUpdatedInferables() {
 			if inferable.isVariable && @scope.hasVariable(name) {
-				@scope.replaceVariable(name, inferable.type, true, false, this)
+				@scope.replaceVariable(name, inferable.type, true, true, this)
 			}
 		}
 

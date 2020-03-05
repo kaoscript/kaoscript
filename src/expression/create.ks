@@ -73,6 +73,15 @@ class CreateExpression extends Expression {
 
 		return false
 	} // }}}
+	override listUsedVariables(scope, variables) { // {{{
+		@factory.listUsedVariables(scope, variables)
+
+		for const argument in @arguments {
+			argument.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @flatten {
 			if @sealed {

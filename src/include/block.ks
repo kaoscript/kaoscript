@@ -192,6 +192,13 @@ class Block extends AbstractNode {
 
 		return false
 	} // }}}
+	listUsedVariables(scope: Scope, variables: Array) { // {{{
+		for const statement in @statements {
+			statement.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	statements() => @data.statements
 	toFragments(fragments, mode) { // {{{
 		if @awaiting {

@@ -10,7 +10,7 @@ module.exports = function() {
 			throw new TypeError("'x' is not of type 'Null'");
 		}
 	}
-	foobar((function() {
+	foobar((() => {
 		return 42;
 	})());
 	return {

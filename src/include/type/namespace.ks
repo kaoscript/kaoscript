@@ -45,7 +45,7 @@ class NamespaceType extends Type {
 		} // }}}
 	}
 	constructor(scope: Scope) { // {{{
-		super(new NamespaceScope(scope))
+		super(new NamespaceTypeScope(scope))
 	} // }}}
 	addProperty(name: String, property: Type) { // {{{
 		if property is not NamespacePropertyType {
@@ -211,7 +211,7 @@ class NamespaceType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	walk(fn) { // {{{
@@ -307,6 +307,6 @@ class NamespacePropertyType extends Type {
 	} // }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
-	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
+	toPositiveTestFragments(fragments, node) => @type.toPositiveTestFragments(fragments, node)
 	type() => @type
 }

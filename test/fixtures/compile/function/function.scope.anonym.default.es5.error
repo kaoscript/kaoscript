@@ -1,0 +1,1 @@
+ReferenceException: "year" is not defined (line 16, file "fixtures/compile/function/function.scope.anonym.default.es5.ks")

@@ -239,7 +239,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The tuple "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
 			}
 		} // }}}
-		throwNotDefined(name, node) ~ ReferenceException { // {{{
+		throwNotDefined(name, node): Never ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" is not defined`, node)
 		} // }}}
 		throwNotDefinedEnumElement(element, enum, node) ~ ReferenceException { // {{{
@@ -321,6 +321,35 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwIllegalStatement(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The statement "\(name)" is illegal`, node)
+		} // }}}
+		throwIndistinguishableFunctions(name, functions: Array<Type>, count: Number, node) ~ SyntaxException { // {{{
+			const last = functions.length - 1
+			auto fragments = ''
+
+
+			for const function, i in functions {
+				if i == last {
+					fragments += ' and '
+				}
+				else if i != 0 {
+					fragments += ', '
+				}
+
+				fragments += `"\(name)\(function.toQuote())"`
+			}
+
+			if count == 0 {
+				throw new SyntaxException(`The functions \(fragments) can't be distinguished when there are no arguments`, node)
+			}
+			else if count == 1 {
+				throw new SyntaxException(`The functions \(fragments) can't be distinguished when there is only one argument`, node)
+			}
+			else {
+				throw new SyntaxException(`The functions \(fragments) can't be distinguished when there are \(count) arguments`, node)
+			}
+		} // }}}
+		throwInheritanceLoop(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`An inheritance loop is occurring the class "\(name)"`, node)
 		} // }}}
 		throwInvalidAwait(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`"await" can only be used in functions or binary module`, node)

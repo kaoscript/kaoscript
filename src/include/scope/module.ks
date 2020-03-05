@@ -11,6 +11,7 @@ class ModuleScope extends Scope {
 		_references							= {}
 		_renamedIndexes 					= {}
 		_renamedVariables					= {}
+		_reservedIndex		 				= -1
 		_stashes							= {}
 		_tempDeclarations: Array			= []
 		_tempIndex		 					= -1
@@ -100,6 +101,7 @@ class ModuleScope extends Scope {
 			@stashes[name] = [fn]
 		}
 	} // }}}
+	authority() => this
 	block() => this
 	commitTempVariables(variables: Array) { // {{{
 		variables.pushUniq(...@tempDeclarations)
@@ -128,6 +130,8 @@ class ModuleScope extends Scope {
 		}
 
 		const variable = new Variable(name, immutable, false, type, initialized)
+
+		variable.flagModule()
 
 		if node is Statement {
 			variable.declaration(node)
@@ -254,6 +258,7 @@ class ModuleScope extends Scope {
 	} // }}}
 	getRawLine() => @line - @lineOffset
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
+	getReservedName() => `__ks_00\(++@reservedIndex)`
 	getTempIndex() => @tempIndex
 	getVariable(name): Variable? => this.getVariable(name, @line)
 	getVariable(name, line: Number): Variable? { // {{{

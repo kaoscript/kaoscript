@@ -84,27 +84,27 @@ class ExclusionType extends Type {
 	} // }}}
 	toQuote() => [type.toQuote() for const type in @types].join('^')
 	toReference(references, mode) => this.export(references, mode)
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		fragments.code('(')
 
 		if @types[0].isAny() {
 			fragments.code('!')
 
-			@types[1].toTestFragments(fragments, node)
+			@types[1].toPositiveTestFragments(fragments, node)
 
 			for const type in @types from 2 {
 				fragments.code(' && !')
 
-				type.toTestFragments(fragments, node)
+				type.toPositiveTestFragments(fragments, node)
 			}
 		}
 		else {
-			@types[0].toTestFragments(fragments, node)
+			@types[0].toPositiveTestFragments(fragments, node)
 
 			for const type in @types from 1 {
 				fragments.code(' && !')
 
-				type.toTestFragments(fragments, node)
+				type.toPositiveTestFragments(fragments, node)
 			}
 		}
 

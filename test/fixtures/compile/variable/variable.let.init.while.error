@@ -1,0 +1,1 @@
+TypeException: The return type must be "String" and not "String?" (line 8, file "fixtures/compile/variable/variable.let.init.while.ks")

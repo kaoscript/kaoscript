@@ -37,6 +37,12 @@ class MemberExpression extends Expression {
 		if @prepareObject {
 			@object = $compile.expression(@data.object, this)
 			@object.analyse()
+
+			if @computed {
+				@property = $compile.expression(@data.property, this)
+
+				@property.analyse()
+			}
 		}
 	} // }}}
 	prepare() { // {{{
@@ -50,9 +56,6 @@ class MemberExpression extends Expression {
 			}
 
 			if @computed {
-				@property = $compile.expression(@data.property, this)
-
-				@property.analyse()
 				@property.prepare()
 
 				if type.isTuple() {
@@ -288,6 +291,15 @@ class MemberExpression extends Expression {
 	isUsingInstanceVariable(name) => @property == name && @object is IdentifierLiteral && @object.name() == 'this' && @object.type().discard().hasInstanceVariable(@property)
 	isUsingStaticVariable(class, varname) => @property == varname && @object is IdentifierLiteral && @object.name() == class
 	listAssignments(array) => array
+	override listUsedVariables(scope, variables) { // {{{
+		@object.listUsedVariables(scope, variables)
+
+		if @computed {
+			@property.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	path() => @path
 	releaseReusable() { // {{{
 		if @object.isCallable() {

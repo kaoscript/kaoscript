@@ -335,7 +335,7 @@ class StructType extends Type {
 	override toFragments(fragments, node) { // {{{
 		NotImplementedException.throw()
 	} // }}}
-	override toTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node) { // {{{
 		NotImplementedException.throw()
 	} // }}}
 }
@@ -373,7 +373,7 @@ class StructFieldType extends Type {
 		NotImplementedException.throw()
 	} // }}}
 	toQuote() => @type.toQuote()
-	override toTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node) { // {{{
 		NotImplementedException.throw()
 	} // }}}
 	type() => @type

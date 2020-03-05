@@ -1,0 +1,1 @@
+SyntaxException: The functions "foobar(d: Number|String)" and "foobar(c: Boolean?)" can't be distinguished when there are no arguments (line 1, file "fixtures/compile/router/router.class.bd.nsd.ns_os_bde.ks")

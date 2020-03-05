@@ -9,7 +9,7 @@ class CurryExpression extends CallExpression {
 		else if @callees.length == 2 {
 			this.module().flag('Type')
 
-			@callees[0].toTestFragments(fragments, this)
+			@callees[0].toPositiveTestFragments(fragments, this)
 
 			fragments.code(' ? ')
 

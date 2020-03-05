@@ -1,6 +1,6 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function(expect) {
-	let foo = (function() {
+	let foo = (() => {
 		return function(x) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
@@ -52,27 +52,27 @@ module.exports = function(expect) {
 			return [x, y, z, a];
 		};
 	})();
-	expect(function() {
+	expect(() => {
 		return foo();
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo");
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo(true);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo(42);
 	}).to.throw();
 	expect(foo("foo", 42)).to.eql(["foo", null, false, 42]);
 	expect(foo("foo", null)).to.eql(["foo", null, false, 0]);
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar");
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", true);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", []);
 	}).to.throw();
 	expect(foo("foo", "bar", 42)).to.eql(["foo", "bar", false, 42]);
@@ -80,25 +80,25 @@ module.exports = function(expect) {
 	expect(foo("foo", null, null)).to.eql(["foo", null, false, 0]);
 	expect(foo("foo", null, 42)).to.eql(["foo", null, false, 42]);
 	expect(foo("foo", true, 42)).to.eql(["foo", null, true, 42]);
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar", true);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar", "qux");
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar", []);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", 42, "qux");
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", true, "qux");
 	}).to.throw();
 	expect(foo("foo", "bar", true, 42)).to.eql(["foo", "bar", true, 42]);
 	expect(foo("foo", "bar", true, null)).to.eql(["foo", "bar", true, 0]);
 	expect(foo("foo", null, null, null)).to.eql(["foo", null, false, 0]);
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar", true, "qux");
 	}).to.throw();
 };

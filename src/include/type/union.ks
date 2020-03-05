@@ -42,13 +42,19 @@ class UnionType extends Type {
 				@nullable = true
 				@explicitNullity = true
 			}
+			else if @any {
+				if type.isNullable() {
+					@nullable = true
+				}
+			}
 			else if type.isAny() {
 				@types = [type]
 
 				@any = true
-				@nullable = type.isNullable()
 
-				break
+				if type.isNullable() {
+					@nullable = true
+				}
 			}
 			else {
 				@types.push(type)
@@ -74,14 +80,17 @@ class UnionType extends Type {
 			@types = [type]
 
 			@any = true
-			@nullable = type.isNullable()
+
+			if type.isNullable() {
+				@nullable = true
+			}
 		}
 		else if type.isUnion() {
 			for const type in type.discardAlias().types() {
 				this.addType(type)
 			}
 
-			if !@nullable && type.isNullable() {
+			if type.isNullable() {
 				@nullable = true
 			}
 		}
@@ -403,7 +412,7 @@ class UnionType extends Type {
 		}
 	} // }}}
 	toReference(references, mode) => this.export(references, mode)
-	toTestFragments(fragments, node) { // {{{
+	toNegativeTestFragments(fragments, node) { // {{{
 		fragments.code('(')
 
 		for type, i in @types {
@@ -411,7 +420,20 @@ class UnionType extends Type {
 				fragments.code(' || ')
 			}
 
-			type.toTestFragments(fragments, node)
+			type.toNegativeTestFragments(fragments, node)
+		}
+
+		fragments.code(')')
+	} // }}}
+	toPositiveTestFragments(fragments, node) { // {{{
+		fragments.code('(')
+
+		for type, i in @types {
+			if i != 0 {
+				fragments.code(' || ')
+			}
+
+			type.toPositiveTestFragments(fragments, node)
 		}
 
 		fragments.code(')')

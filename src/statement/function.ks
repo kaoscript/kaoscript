@@ -275,7 +275,7 @@ class FunctionDeclaration extends Statement {
 		if @extended {
 			fragments.line($const(this), @oldVariableName, $equals, name)
 
-			const assessment = Router.assess([declarator.type() for const declarator in @variable._declarators], true, true)
+			const assessment = Router.assess([declarator.type() for const declarator in @variable._declarators], true, @variable.name(), this, true)
 
 			Router.toFragments(
 				assessment
@@ -313,7 +313,7 @@ class FunctionDeclaration extends Statement {
 			@variable.getDeclarator(0).toStatementFragments(fragments, name, mode)
 		}
 		else {
-			const assessment = this.type().assessment()
+			const assessment = this.type().assessment(@variable.name(), this)
 
 			if assessment.flattenable {
 				const argName = @variable.isAsync() ? '__ks_arguments' : 'arguments'
@@ -382,6 +382,7 @@ class FunctionDeclarator extends AbstractNode {
 		_parameters: Array<Parameter>	= []
 		_returnNull: Boolean			= false
 		_variable: FunctionVariable
+		_topNodes: Array				= []
 		_type: FunctionType
 	}
 	constructor(@variable, @data, @parent) { // {{{
@@ -446,6 +447,10 @@ class FunctionDeclarator extends AbstractNode {
 		@exit = @block.isExit()
 	} // }}}
 	addInitializableVariable(variable, node)
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
 	initializeVariable(variable, expression, node)
@@ -518,6 +523,10 @@ class FunctionDeclarator extends AbstractNode {
 		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').step()
 		})
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(ctrl)
+		}
 
 		ctrl.compile(@block, Mode::None)
 

@@ -66,5 +66,5 @@ class AliasType extends Type {
 	toCastFragments(fragments) { // {{{
 		@type.toCastFragments(fragments)
 	} // }}}
-	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
+	toPositiveTestFragments(fragments, node) => @type.toPositiveTestFragments(fragments, node)
 }

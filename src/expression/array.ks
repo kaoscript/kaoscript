@@ -64,6 +64,13 @@ class ArrayExpression extends Expression {
 
 		return false
 	} // }}}
+	override listUsedVariables(scope, variables) { // {{{
+		for const value in @values {
+			value.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @flatten {
 			if @values.length == 1 {
@@ -126,6 +133,13 @@ class ArrayRange extends Expression {
 		}
 	} // }}}
 	isUsingVariable(name) => @from.isUsingVariable(name) || @to.isUsingVariable(name) || @by?.isUsingVariable(name)
+	override listUsedVariables(scope, variables) { // {{{
+		@from.listUsedVariables(scope, variables)
+		@to.listUsedVariables(scope, variables)
+		@by?.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		this.module().flag('Helper')
 

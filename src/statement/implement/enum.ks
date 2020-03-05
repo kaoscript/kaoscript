@@ -130,6 +130,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		@enumRef: ReferenceType
 		@instance: Boolean					= true
 		@override: Boolean					= false
+		@topNodes: Array					= []
 	}
 	constructor(data, parent, @enumName) { // {{{
 		super(data, parent, parent.scope(), ScopeType::Function)
@@ -253,6 +254,10 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		@block.translate()
 	} // }}}
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	getMatchingMode(): MatchingMode { // {{{
 		if @override {
 			return MatchingMode::ShiftableParameters
@@ -280,11 +285,15 @@ class ImplementEnumMethodDeclaration extends Statement {
 			line.code(`\(@enumName.name()).\(@name) = function(`)
 		}
 
-		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(node) {
-			line.code(')')
+		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+			fragments.code(')')
 
-			return line.newBlock()
+			return fragments.newBlock()
 		})
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(block)
+		}
 
 		block.compile(@block)
 

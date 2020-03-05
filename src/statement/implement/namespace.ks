@@ -65,8 +65,9 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		_autoTyping: Boolean					= false
 		_namespace: NamespaceType
 		_namespaceRef: ReferenceType
-		_parameters: Array						 = []
+		_parameters: Array						= []
 		_variable: NamedType<NamespaceType>
+		_topNodes: Array						= []
 	}
 	constructor(data, parent, @variable) { // {{{
 		super(data, parent, parent.scope(), ScopeType::Block)
@@ -127,6 +128,10 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 
 		@block.translate()
 	} // }}}
+	addTopNode(node) { // {{{
+		@topNodes.push(node)
+	} // }}}
+	authority() => this
 	getMatchingMode(): MatchingMode => MatchingMode::ExactParameters
 	getParameterOffset() => 0
 	getSharedName() => null
@@ -153,6 +158,10 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
+
+		for const node in @topNodes {
+			node.toAuthorityFragments(block)
+		}
 
 		block.compile(@block)
 

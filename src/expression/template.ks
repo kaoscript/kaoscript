@@ -42,6 +42,13 @@ class TemplateExpression extends Expression {
 		return false
 	} // }}}
 	isComputed() => @elements.length > 1 || !@isString
+	override listUsedVariables(scope, variables) { // {{{
+		for const element in @elements {
+			element.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @elements.length == 0 {
 			fragments.code('""')

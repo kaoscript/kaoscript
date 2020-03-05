@@ -84,6 +84,7 @@ abstract class Scope {
 		isTempName(name: String): Boolean => name.length > 5 && name.substr(0, 5) == '__ks_'
 	}
 	abstract acquireTempName(declare: Boolean = true): String
+	abstract authority(): Scope
 	abstract block(): Scope
 	private abstract declareVariable(name: String, scope: Scope): String?
 	abstract define(name: String, immutable: Boolean, type: Type = null, initialized: Boolean = false, node: AbstractNode): Variable
@@ -101,6 +102,7 @@ abstract class Scope {
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
 	isPredefinedVariable(name: String): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
+	parent() => null
 	abstract reference(value, nullable: Boolean = false, parameters: Array = []): ReferenceType
 	abstract resolveReference(name: String, nullable: Boolean, parameters: Array): ReferenceType
 }

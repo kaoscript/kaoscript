@@ -42,6 +42,7 @@ class MacroScope extends Scope {
 	acquireTempName(declare: Boolean = true) { // {{{
 		throw new NotSupportedException()
 	} // }}}
+	authority() => this
 	block() => this
 	private declareVariable(name: String, scope: Scope) { // {{{
 		if $keywords[name] == true || @renamedIndexes[name] is Number {

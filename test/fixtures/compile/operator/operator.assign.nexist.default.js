@@ -1,7 +1,7 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
 	function qux() {
-		let foo = function() {
+		let foo = () => {
 			return "otto";
 		};
 		let bar, __ks_0;

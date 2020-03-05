@@ -98,6 +98,11 @@ class ExpressionStatement extends Statement {
 	isUsingVariable(name) => @expression.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @expression.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @expression.isUsingStaticVariable(class, varname)
+	listUsedVariables(scope: Scope, variables: Array) { // {{{
+		@expression.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 

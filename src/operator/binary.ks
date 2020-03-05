@@ -51,6 +51,12 @@ class BinaryOperatorExpression extends Expression {
 
 		return array
 	} // }}}
+	listUsedVariables(scope: Scope, variables: Array) { // {{{
+		@left.listUsedVariables(scope, variables)
+		@right.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	releaseReusable() { // {{{
 		@left.releaseReusable()
 		@right.releaseReusable()
@@ -775,64 +781,73 @@ class BinaryOperatorTypeCasting extends Expression {
 class BinaryOperatorTypeEquality extends Expression {
 	private lateinit {
 		_falseType: Type
-		_left
+		_subject
 		_trueType: Type
 	}
 	analyse() { // {{{
-		@left = $compile.expression(@data.left, this)
-		@left.analyse()
+		@subject = $compile.expression(@data.left, this)
+		@subject.analyse()
+
 	} // }}}
 	prepare() { // {{{
-		@left.prepare()
+		@subject.prepare()
 
-		if @left.type().isInoperative() {
-			TypeException.throwUnexpectedInoperative(@left, this)
+		if @subject.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@subject, this)
 		}
 
-		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
-			if const variable = @scope.getVariable(@data.right.typeName.name) {
-				const type = variable.getRealType()
+		if @data.right.kind == NodeKind::JunctionExpression {
+			lateinit const type: Type
 
-				if @left.type().isNull() {
-					TypeException.throwNullTypeChecking(type, this)
-				}
+			if @data.right.operator.kind == BinaryOperatorKind::And {
+				type = new FusionType(@scope)
+			}
+			else {
+				type = new UnionType(@scope)
+			}
 
-				if type.isVirtual() {
-					if !@left.type().isAny() && !@left.type().canBeVirtual(type.name()) {
-						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
+			for const operand in @data.right.operands {
+				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
+					if const variable = @scope.getVariable(operand.typeName.name) {
+						type.addType(this.validateType(variable))
 					}
-				}
-				else if type.isClass() || type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isExclusion() {
-					unless type.isAssignableToVariable(@left.type(), true) {
-						TypeException.throwInvalidTypeChecking(@left.type(), type, this)
+					else {
+						ReferenceException.throwNotDefined(operand.typeName.name, this)
 					}
 				}
 				else {
-					TypeException.throwNotClass(variable.name(), this)
+					throw new NotImplementedException(this)
 				}
+			}
 
-				@trueType = type.reference()
-
-				if @left.isInferable() {
-					@falseType = @left.type().reduce(type)
+			@trueType = type.type()
+		}
+		else {
+			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
+				if const variable = @scope.getVariable(@data.right.typeName.name) {
+					@trueType = this.validateType(variable)
+				}
+				else {
+					ReferenceException.throwNotDefined(@data.right.typeName.name, this)
 				}
 			}
 			else {
-				ReferenceException.throwNotDefined(@data.right.typeName.name, this)
+				throw new NotImplementedException(this)
 			}
 		}
-		else {
-			throw new NotImplementedException(this)
+
+		if @subject.isInferable() {
+			@falseType = @subject.type().reduce(@trueType)
 		}
 	} // }}}
 	translate() { // {{{
-		@left.translate()
+		@subject.translate()
 	} // }}}
 	hasExceptions() => false
 	inferWhenTrueTypes(inferables) { // {{{
-		if @left.isInferable() {
-			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+		if @subject.isInferable() {
+			inferables[@subject.path()] = {
+				isVariable: @subject is IdentifierLiteral
 				isTyping: true
 				type: @trueType
 			}
@@ -841,9 +856,9 @@ class BinaryOperatorTypeEquality extends Expression {
 		return inferables
 	} // }}}
 	inferWhenFalseTypes(inferables) { // {{{
-		if @left.isInferable() {
-			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+		if @subject.isInferable() {
+			inferables[@subject.path()] = {
+				isVariable: @subject is IdentifierLiteral
 				type: @falseType
 			}
 		}
@@ -852,86 +867,113 @@ class BinaryOperatorTypeEquality extends Expression {
 	} // }}}
 	isComputed() => false
 	isNullable() => false
-	isUsingVariable(name) => @left.isUsingVariable(name)
-	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
-	listAssignments(array) => @left.listAssignments(array)
+	isUsingVariable(name) => @subject.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @subject.isUsingInstanceVariable(name)
+	listAssignments(array) => @subject.listAssignments(array)
 	toFragments(fragments, mode) { // {{{
-		@trueType.toTestFragments(fragments, @left)
+		@trueType.toPositiveTestFragments(fragments, @subject)
 	} // }}}
 	type() => @scope.reference('Boolean')
+	private validateType(variable) { // {{{
+		const type = variable.getRealType()
+
+		if @subject.type().isNull() {
+			TypeException.throwNullTypeChecking(type, this)
+		}
+
+		if type.isVirtual() {
+			if !@subject.type().isAny() && !@subject.type().canBeVirtual(type.name()) {
+				TypeException.throwInvalidTypeChecking(@subject.type(), type, this)
+			}
+		}
+		else if type.isClass() || type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isFusion() || type.isExclusion() {
+			unless type.isAssignableToVariable(@subject.type(), true) {
+				TypeException.throwInvalidTypeChecking(@subject.type(), type, this)
+			}
+		}
+		else {
+			TypeException.throwNotClass(variable.name(), this)
+		}
+
+		return type.reference()
+	} // }}}
 }
 
 class BinaryOperatorTypeInequality extends Expression {
 	private lateinit {
 		_falseType: Type
-		_left
+		_subject
 		_trueType: Type
 	}
 	analyse() { // {{{
-		@left = $compile.expression(@data.left, this)
-		@left.analyse()
+		@subject = $compile.expression(@data.left, this)
+		@subject.analyse()
+
 	} // }}}
 	prepare() { // {{{
-		@left.prepare()
+		@subject.prepare()
 
-		if @left.type().isInoperative() {
-			TypeException.throwUnexpectedInoperative(@left, this)
+		if @subject.type().isInoperative() {
+			TypeException.throwUnexpectedInoperative(@subject, this)
 		}
 
-		if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
-			if variable ?= @scope.getVariable(@data.right.typeName.name) {
-				type = variable.getRealType()
+		if @data.right.kind == NodeKind::JunctionExpression {
+			lateinit const type: Type
 
-				if @left.type().isNull() {
-					TypeException.throwNullTypeChecking(type, this)
-				}
+			if @data.right.operator.kind == BinaryOperatorKind::And {
+				type = new FusionType(@scope)
+			}
+			else {
+				type = new UnionType(@scope)
+			}
 
-				if type.isVirtual() {
-					if !@left.type().isAny() && !@left.type().canBeVirtual(type.name()) {
-						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
+			for const operand in @data.right.operands {
+				if operand.kind == NodeKind::TypeReference && operand.typeName?.kind == NodeKind::Identifier {
+					if const variable = @scope.getVariable(operand.typeName.name) {
+						type.addType(this.validateType(variable))
 					}
-				}
-				else if type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isExclusion() {
-					if !@left.type().isAny() && !type.matchContentOf(@left.type()) {
-						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
-					}
-				}
-				else if type.isClass() {
-					if !@left.type().isAny() && (!type.matchContentOf(@left.type()) || type.matchClassName(@left.type())) {
-						TypeException.throwUnnecessaryTypeChecking(@left.type(), this)
+					else {
+						ReferenceException.throwNotDefined(operand.typeName.name, this)
 					}
 				}
 				else {
-					TypeException.throwNotClass(variable.name(), this)
+					throw new NotImplementedException(this)
 				}
+			}
 
-				@falseType = type.reference()
-
-				if @left.isInferable() {
-					@trueType = @left.type().reduce(type)
+			@falseType = type.type()
+		}
+		else {
+			if @data.right.kind == NodeKind::TypeReference && @data.right.typeName?.kind == NodeKind::Identifier {
+				if const variable = @scope.getVariable(@data.right.typeName.name) {
+					@falseType = this.validateType(variable)
+				}
+				else {
+					ReferenceException.throwNotDefined(@data.right.typeName.name, this)
 				}
 			}
 			else {
-				ReferenceException.throwNotDefined(@data.right.typeName.name, this)
+				throw new NotImplementedException(this)
 			}
 		}
-		else {
-			throw new NotImplementedException(this)
+
+		if @subject.isInferable() {
+			@trueType = @subject.type().reduce(@falseType)
 		}
 	} // }}}
 	translate() { // {{{
-		@left.translate()
+		@subject.translate()
 	} // }}}
 	hasExceptions() => false
-	inferTypes(inferables) => @left.inferTypes(inferables)
+	inferTypes(inferables) => @subject.inferTypes(inferables)
 	isComputed() => false
 	isNullable() => false
-	isUsingVariable(name) => @left.isUsingVariable(name)
-	isUsingInstanceVariable(name) => @left.isUsingInstanceVariable(name)
+	isUsingVariable(name) => @subject.isUsingVariable(name)
+	isUsingInstanceVariable(name) => @subject.isUsingInstanceVariable(name)
 	inferWhenTrueTypes(inferables) { // {{{
-		if @left.isInferable() {
-			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+		if @subject.isInferable() {
+			inferables[@subject.path()] = {
+				isVariable: @subject is IdentifierLiteral
 				isTyping: true
 				type: @trueType
 			}
@@ -940,20 +982,46 @@ class BinaryOperatorTypeInequality extends Expression {
 		return inferables
 	} // }}}
 	inferWhenFalseTypes(inferables) { // {{{
-		if @left.isInferable() {
-			inferables[@left.path()] = {
-				isVariable: @left is IdentifierLiteral
+		if @subject.isInferable() {
+			inferables[@subject.path()] = {
+				isVariable: @subject is IdentifierLiteral
 				type: @falseType
 			}
 		}
 
 		return inferables
 	} // }}}
-	listAssignments(array) => @left.listAssignments(array)
+	listAssignments(array) => @subject.listAssignments(array)
 	toFragments(fragments, mode) { // {{{
-		fragments.code('!')
-
-		@falseType.toTestFragments(fragments, @left)
+		@falseType.toNegativeTestFragments(fragments, @subject)
 	} // }}}
 	type() => @scope.reference('Boolean')
+	private validateType(variable) { // {{{
+		const type = variable.getRealType()
+
+		if @subject.type().isNull() {
+			TypeException.throwNullTypeChecking(type, this)
+		}
+
+		if type.isVirtual() {
+			if !@subject.type().isAny() && !@subject.type().canBeVirtual(type.name()) {
+				TypeException.throwUnnecessaryTypeChecking(@subject.type(), this)
+			}
+		}
+		else if type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isFusion() || type.isExclusion() {
+			if !@subject.type().isAny() && !type.matchContentOf(@subject.type()) {
+				TypeException.throwUnnecessaryTypeChecking(@subject.type(), this)
+			}
+		}
+		else if type.isClass() {
+			if !@subject.type().isAny() && (!type.matchContentOf(@subject.type()) || type.matchClassName(@subject.type())) {
+				TypeException.throwUnnecessaryTypeChecking(@subject.type(), this)
+			}
+		}
+		else {
+			TypeException.throwNotClass(variable.name(), this)
+		}
+
+		return type.reference()
+	} // }}}
 }

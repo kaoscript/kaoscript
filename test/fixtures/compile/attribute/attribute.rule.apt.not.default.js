@@ -7,7 +7,7 @@ module.exports = function() {
 			throw new TypeError("'x' is not nullable");
 		}
 	}
-	foobar((function() {
+	foobar((() => {
 		return "foobar";
 	})());
 };

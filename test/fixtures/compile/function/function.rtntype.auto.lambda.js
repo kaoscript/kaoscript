@@ -1,6 +1,6 @@
 module.exports = function() {
 	function quzbaz() {
-		const foobar = function() {
+		const foobar = () => {
 			return "foobar";
 		};
 		console.log(foobar());

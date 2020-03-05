@@ -19,7 +19,7 @@ module.exports = function() {
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
-			return Operator.addOrConcat(this.toLowerCase(value.charAt(0)), value.substr(1).replace(/[-_\s]+(.)/g, (function(__ks_0, l) {
+			var __ks_000 = function(__ks_0, l) {
 				if(arguments.length < 2) {
 					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
 				}
@@ -27,7 +27,8 @@ module.exports = function() {
 					throw new TypeError("'l' is not nullable");
 				}
 				return this.toUpperCase(l);
-			}).bind(this)));
+			}
+			return Operator.addOrConcat(this.toLowerCase(value.charAt(0)), value.substr(1).replace(/[-_\s]+(.)/g, __ks_000.bind(this)));
 		}
 		camelize() {
 			if(arguments.length === 1) {

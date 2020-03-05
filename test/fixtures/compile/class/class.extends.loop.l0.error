@@ -1,0 +1,1 @@
+SyntaxException: An inheritance loop is occurring the class "ClassB" (line 4, file "fixtures/compile/class/class.extends.loop.l0.ks")

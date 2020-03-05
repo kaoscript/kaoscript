@@ -33,6 +33,13 @@ class SequenceExpression extends Expression {
 
 		return false
 	} // }}}
+	override listUsedVariables(scope, variables) { // {{{
+		for const expression in @expressions {
+			expression.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.code('(')
 

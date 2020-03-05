@@ -517,7 +517,7 @@ class Parameter extends AbstractNode {
 
 			const ctrl2 = ctrl.newControl().code('if(')
 
-			parameter.type().toTestFragments(ctrl2, new Literal(false, node, node.scope(), 'arguments[__ks_i]'))
+			parameter.type().toPositiveTestFragments(ctrl2, new Literal(false, node, node.scope(), 'arguments[__ks_i]'))
 
 			ctrl2.code(')').step()
 
@@ -905,7 +905,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || !')
 					}
 
-					type.toTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'))
+					type.toPositiveTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'))
 
 					ctrl2
 						.code(')')
@@ -1006,12 +1006,12 @@ class IdentifierParameter extends IdentifierLiteral {
 						if declaredType.isNullable() {
 							line.code('(__ks__ === null || ')
 
-							declaredType.toTestFragments(line, new Literal(false, that, that.scope(), '__ks__'))
+							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'))
 
 							line.code(')')
 						}
 						else {
-							declaredType.toTestFragments(line, new Literal(false, that, that.scope(), '__ks__'))
+							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'))
 						}
 
 						line
@@ -1127,7 +1127,7 @@ class IdentifierParameter extends IdentifierLiteral {
 						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || !')
 					}
 
-					type.toTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'))
+					type.toPositiveTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'))
 
 					ctrl2
 						.code(')')
@@ -1250,7 +1250,7 @@ class IdentifierParameter extends IdentifierLiteral {
 							ctrl2.code('!')
 						}
 
-						declaredType.toTestFragments(ctrl2, that)
+						declaredType.toPositiveTestFragments(ctrl2, that)
 
 						ctrl2
 							.code(')')
@@ -1398,7 +1398,7 @@ class IdentifierParameter extends IdentifierLiteral {
 
 					ctrl.code('!')
 
-					declaredType.toTestFragments(ctrl, that)
+					declaredType.toPositiveTestFragments(ctrl, that)
 				}
 
 				ctrl
@@ -1686,7 +1686,7 @@ class AnonymousParameter extends AbstractNode {
 
 			ctrl.code('!')
 
-			@type.toTestFragments(ctrl, this)
+			@type.toPositiveTestFragments(ctrl, this)
 
 			ctrl
 				.code(')')

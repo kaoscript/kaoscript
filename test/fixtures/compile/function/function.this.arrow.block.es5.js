@@ -1,11 +1,12 @@
 var Dictionary = require("@kaoscript/runtime").Dictionary;
 module.exports = function() {
 	function foobar() {
-		this.foobar = true;
-		return (function() {
+		var __ks_000 = function() {
 			this.arrow = true;
 			return this;
-		}).bind(this);
+		}
+		this.foobar = true;
+		return __ks_000.bind(this);
 	}
 	console.log(foobar.call(new Dictionary())());
 };

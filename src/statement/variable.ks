@@ -236,6 +236,13 @@ class VariableDeclaration extends Statement {
 	isUsingVariable(name) => @hasInit && @init.isUsingVariable(name)
 	isUsingInstanceVariable(name) => @hasInit && @init.isUsingInstanceVariable(name)
 	isUsingStaticVariable(class, varname) => @hasInit && @init.isUsingStaticVariable(class, varname)
+	listUsedVariables(scope: Scope, variables: Array) { // {{{
+		if @hasInit {
+			@init.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	toAwaitStatementFragments(fragments, statements) { // {{{
 		const line = fragments.newLine()
 

@@ -671,6 +671,19 @@ class ClassType extends Type {
 
 		return export
 	} // }}}
+	extends() => @extends
+	extends(@extends) { // {{{
+		@extending = true
+
+		const type = @extends.type()
+
+		if type.isAlien() || type.isHybrid() {
+			@hybrid = true
+		}
+
+		@sequences.classMethods = Dictionary.clone(type._sequences.classMethods)
+		@sequences.instanceMethods = Dictionary.clone(type._sequences.instanceMethods)
+	} // }}}
 	flagAbstract() { // {{{
 		@abstract = true
 	} // }}}
@@ -711,27 +724,6 @@ class ClassType extends Type {
 		}
 
 		return this
-	} // }}}
-	hasExportableAlteration() { // {{{
-		if ?@alterationReference {
-			return @alterationReference._referenceIndex != -1 || @alterationReference.hasExportableAlteration()
-		}
-		else {
-			return false
-		}
-	} // }}}
-	extends() => @extends
-	extends(@extends) { // {{{
-		@extending = true
-
-		const type = @extends.type()
-
-		if type.isAlien() || type.isHybrid() {
-			@hybrid = true
-		}
-
-		@sequences.classMethods = Dictionary.clone(type._sequences.classMethods)
-		@sequences.instanceMethods = Dictionary.clone(type._sequences.instanceMethods)
 	} // }}}
 	filterAbstractMethods(abstractMethods) { // {{{
 		if @extending {
@@ -812,10 +804,10 @@ class ClassType extends Type {
 			return null
 		}
 	} // }}}
-	getClassAssessment(name: String) { // {{{
+	getClassAssessment(name: String, node: AbstractNode) { // {{{
 		if @classMethods[name] is not Array {
 			if @extending {
-				return @extends.type().getClassAssessment(name)
+				return @extends.type().getClassAssessment(name, node)
 			}
 			else {
 				return null
@@ -836,7 +828,7 @@ class ClassType extends Type {
 				}
 			}
 
-			@classAssessments[name] = Router.assess(methods, false)
+			@classAssessments[name] = Router.assess(methods, false, name, node)
 		}
 
 		return @classAssessments[name]
@@ -960,7 +952,7 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
-	getInstantiableAssessment(name: String) { // {{{
+	getInstantiableAssessment(name: String, node: AbstractNode) { // {{{
 		if const assessment = @instanceAssessments[name] {
 			return assessment
 		}
@@ -976,7 +968,7 @@ class ClassType extends Type {
 			}
 		}
 
-		const assessment = Router.assess(methods, false)
+		const assessment = Router.assess(methods, false, name, node)
 
 		@instanceAssessments[name] = assessment
 
@@ -1066,6 +1058,14 @@ class ClassType extends Type {
 	} // }}}
 	hasConstructors() => @constructors.length != 0
 	hasDestructors() => @destructors != 0
+	hasExportableAlteration() { // {{{
+		if ?@alterationReference {
+			return @alterationReference._referenceIndex != -1 || @alterationReference.hasExportableAlteration()
+		}
+		else {
+			return false
+		}
+	} // }}}
 	hasInstanceMethod(name) { // {{{
 		if @instanceMethods[name] is Array {
 			return true
@@ -1489,7 +1489,7 @@ class ClassType extends Type {
 			return super.toReference(references, mode)
 		}
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
 }
@@ -1602,7 +1602,7 @@ class ClassVariableType extends Type {
 	isUsingSetter() => @sealed && @default
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
-	toTestFragments(fragments, node) => @type.toTestFragments(fragments, node)
+	toPositiveTestFragments(fragments, node) => @type.toPositiveTestFragments(fragments, node)
 	type(): @type
 	type(@type): this
 	unflagAlteration() { // {{{

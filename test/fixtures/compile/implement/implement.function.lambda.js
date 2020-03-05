@@ -11,7 +11,7 @@ module.exports = function() {
 		}
 		throw new SyntaxError("Wrong number of arguments");
 	};
-	console.log(__ks_Function._im_foo(function() {
+	console.log(__ks_Function._im_foo(() => {
 		return "bar";
 	}));
 };

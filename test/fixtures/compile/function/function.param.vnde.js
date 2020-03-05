@@ -1,5 +1,5 @@
 module.exports = function(expect) {
-	let foo = (function() {
+	let foo = (() => {
 		return function(x = null) {
 			return [x];
 		};

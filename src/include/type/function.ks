@@ -706,7 +706,7 @@ class FunctionType extends Type {
 
 		return fragments
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		fragments
 			.code($runtime.type(node) + '.isFunction(')
 			.compile(node)
@@ -819,9 +819,9 @@ class OverloadedFunctionType extends Type {
 
 		@references.pushUniq(type)
 	} // }}}
-	assessment() { // {{{
+	assessment(name, node: AbstractNode) { // {{{
 		if @assessment == null {
-			@assessment = Router.assess(@functions, true)
+			@assessment = Router.assess(@functions, true, name, node)
 		}
 
 		return @assessment
@@ -942,7 +942,7 @@ class OverloadedFunctionType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 }

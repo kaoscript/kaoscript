@@ -1,6 +1,6 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function(expect) {
-	let foo = (function() {
+	let foo = (() => {
 		return function() {
 			let __ks_i = -1;
 			let items = [];
@@ -16,27 +16,27 @@ module.exports = function(expect) {
 		};
 	})();
 	expect(foo()).to.eql([[]]);
-	expect(function() {
+	expect(() => {
 		return foo(1);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo(null);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo(true);
 	}).to.throw();
 	expect(foo("foo")).to.eql([["foo"]]);
-	expect(function() {
+	expect(() => {
 		return foo("true", 1);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("true", true);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("true", null);
 	}).to.throw();
 	expect(foo("foo", "bar", "qux")).to.eql([["foo", "bar", "qux"]]);
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar", "qux", 4);
 	}).to.throw();
 };

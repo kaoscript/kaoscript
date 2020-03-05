@@ -280,12 +280,12 @@ class EnumType extends Type {
 		return export
 	} // }}}
 	hasVariable(name: String) => @variables[name]?
-	getInstanceAssessment(name: String) { // {{{
+	getInstanceAssessment(name: String, node: AbstractNode) { // {{{
 		if const assessment = @instanceAssessments[name] {
 			return assessment
 		}
 		else if const methods = @instanceMethods[name] {
-			const assessment = Router.assess([...methods], false)
+			const assessment = Router.assess([...methods], false, name, node)
 
 			@instanceAssessments[name] = assessment
 
@@ -295,12 +295,12 @@ class EnumType extends Type {
 			return null
 		}
 	} // }}}
-	getStaticAssessment(name: String) { // {{{
+	getStaticAssessment(name: String, node: AbstractNode) { // {{{
 		if const assessment = @staticAssessments[name] {
 			return assessment
 		}
 		else if const methods = @staticMethods[name] {
-			const assessment = Router.assess([...methods], false)
+			const assessment = Router.assess([...methods], false, name, node)
 
 			@staticAssessments[name] = assessment
 
@@ -421,7 +421,7 @@ class EnumType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	type() => @type

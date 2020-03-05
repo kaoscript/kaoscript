@@ -102,6 +102,13 @@ class DictionaryExpression extends Expression {
 
 		return false
 	} // }}}
+	override listUsedVariables(scope, variables) { // {{{
+		for const property in @properties {
+			property.listUsedVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
 	reference() => @parent.reference()
 	releaseReusable() { // {{{
 		if @reuseName != null {
@@ -264,6 +271,7 @@ class DictionaryLiteralMember extends Expression {
 	} // }}}
 	acquireReusable(acquire) => @value.acquireReusable(acquire)
 	isUsingVariable(name) => @value.isUsingVariable(name)
+	override listUsedVariables(scope, variables) => @value.listUsedVariables(scope, variables)
 	name() => @name.value()
 	releaseReusable() => @value.releaseReusable()
 	toFragments(fragments, mode) { // {{{
@@ -323,6 +331,12 @@ class DictionaryComputedMember extends Expression {
 		@value.acquireReusable(acquire)
 	} // }}}
 	isUsingVariable(name) => @name.isUsingVariable(name) || @value.isUsingVariable(name)
+	override listUsedVariables(scope, variables) { // {{{
+		@name.listUsedVariables(scope, variables)
+		@value.listUsedVariables(scope, variables)
+
+		return variables
+	} // }}}
 	releaseReusable() { // {{{
 		@name.releaseReusable()
 		@value.releaseReusable()
@@ -363,6 +377,7 @@ class DictionaryThisMember extends Expression {
 		@value.translate()
 	} // }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
+	override listUsedVariables(scope, variables) => @value.listUsedVariables(scope, variables)
 	toComputedFragments(fragments, name) { // {{{
 		fragments
 			.code(name)
@@ -397,6 +412,7 @@ class DictionarySpreadMember extends Expression {
 		@value.translate()
 	} // }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
+	override listUsedVariables(scope, variables) => @value.listUsedVariables(scope, variables)
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@value)
 	} // }}}

@@ -460,12 +460,12 @@ class NamedType extends Type {
 			return @type.toReference(references, mode)
 		}
 	} // }}}
-	toTestFragments(fragments, node) { // {{{
+	toPositiveTestFragments(fragments, node) { // {{{
 		if const tof = $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else {
-			@type.toTestFragments(fragments, node)
+			@type.toPositiveTestFragments(fragments, node)
 		}
 	} // }}}
 	type() => @type

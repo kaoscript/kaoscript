@@ -67,6 +67,7 @@ abstract class Expression extends AbstractNode {
 	isUsingVariable(name) => false
 	// if the expression generates multiple assignments
 	isSplitAssignment() => false
+	listUsedVariables(scope: Scope, variables: Array): Array => variables
 	releaseReusable()
 	setAssignment(type: AssignmentType)
 	setCastingEnum(@castingEnum)

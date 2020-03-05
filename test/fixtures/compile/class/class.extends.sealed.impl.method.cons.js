@@ -20,7 +20,7 @@ module.exports = function() {
 	}
 	const d = new Date();
 	const f = new FDate();
-	const x = (function() {
+	const x = (() => {
 		return new FDate();
 	})();
 	__ks_Date._im_foobar(d);

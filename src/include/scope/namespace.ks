@@ -1,4 +1,13 @@
 class NamespaceScope extends BlockScope {
+	constructor(@parent) { // {{{
+		super(parent)
+
+		@parent = parent.authority()
+		@authority = this
+	} // }}}
+}
+
+class NamespaceTypeScope extends BlockScope {
 	private {
 		_matchingTypes: Dictionary<Array>	= {}
 	}

@@ -1,5 +1,5 @@
 module.exports = function(expect) {
-	let foo = (function() {
+	let foo = (() => {
 		return function(x, __ks_0, y) {
 			if(arguments.length < 3) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
@@ -13,13 +13,13 @@ module.exports = function(expect) {
 			return [x, y];
 		};
 	})();
-	expect(function() {
+	expect(() => {
 		return foo();
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo(1);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo(1, 2);
 	}).to.throw();
 	expect(foo(1, 2, 3)).to.eql([1, 3]);

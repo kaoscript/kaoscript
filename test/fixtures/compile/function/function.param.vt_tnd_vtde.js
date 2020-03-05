@@ -1,6 +1,6 @@
 var Type = require("@kaoscript/runtime").Type;
 module.exports = function(expect) {
-	let foo = (function() {
+	let foo = (() => {
 		return function(x) {
 			if(arguments.length < 2) {
 				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
@@ -31,38 +31,38 @@ module.exports = function(expect) {
 			return [x, y, z];
 		};
 	})();
-	expect(function() {
+	expect(() => {
 		return foo();
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo");
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo(true);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo(42);
 	}).to.throw();
 	expect(foo("foo", true)).to.eql(["foo", null, true]);
 	expect(foo("foo", null)).to.eql(["foo", null, false]);
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar");
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", 42);
 	}).to.throw();
 	expect(foo("foo", "bar", true)).to.eql(["foo", "bar", true]);
 	expect(foo("foo", "bar", null)).to.eql(["foo", "bar", false]);
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar", "qux");
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", "bar", 42);
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", 42, "qux");
 	}).to.throw();
-	expect(function() {
+	expect(() => {
 		return foo("foo", true, "qux");
 	}).to.throw();
 };

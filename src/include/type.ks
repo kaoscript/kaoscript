@@ -553,7 +553,7 @@ abstract class Type {
 	abstract clone(): Type
 	abstract export(references, mode)
 	abstract toFragments(fragments, node)
-	abstract toTestFragments(fragments, node)
+	abstract toPositiveTestFragments(fragments, node)
 	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
 	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
 	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()
@@ -671,6 +671,7 @@ abstract class Type {
 	isExtendable() => false
 	isFlexible() => false
 	isFunction() => false
+	isFusion() => false
 	isHybrid() => false
 	isImmutable() => false
 	isInoperative() => this.isNever() || this.isVoid()
@@ -761,6 +762,7 @@ abstract class Type {
 
 		return @referenceIndex
 	} // }}}
+	toNegativeTestFragments(fragments, node) => this.toPositiveTestFragments(fragments.code('!'), node)
 	toQuote(): String { // {{{
 		throw new NotSupportedException()
 	} // }}}
