@@ -30,16 +30,16 @@ class SwitchStatement extends Statement {
 		_lateInitVariables					= {}
 		_name: String?						= null
 		_nextClauseIndex: Number
+		_reusableValue: Boolean				= false
 		_usingFallthrough: Boolean			= false
 		_value								= null
 		_valueType: Type
 	}
 	analyse() { // {{{
-		if @data.expression.kind != NodeKind::Identifier {
-			@value = $compile.expression(@data.expression, this)
-			@value.analyse()
-		}
+		@value = $compile.expression(@data.expression, this)
+		@value.analyse()
 
+		@reusableValue = @value is not IdentifierLiteral
 		@hasDefaultClause = false
 
 		let condition, binding
@@ -122,14 +122,12 @@ class SwitchStatement extends Statement {
 		}
 	} // }}}
 	prepare() { // {{{
-		if @value == null {
-			@valueType = @scope.getVariable(@data.expression.name).getRealType()
-		}
-		else {
-			@value.prepare()
+		@value.prepare()
 
+		@valueType = @value.type()
+
+		if @reusableValue {
 			@name = @scope.acquireTempName(false)
-			@valueType = @value.type()
 		}
 
 		const enumValue = @valueType.isEnum()
@@ -204,8 +202,10 @@ class SwitchStatement extends Statement {
 				if enumValue || @valueType.isAny() {
 					@castingEnum = true
 
-					if @name == null {
+					if !@reusableValue {
 						@name = @scope.acquireTempName(false)
+
+						@reusableValue = true
 					}
 				}
 			}
@@ -259,7 +259,7 @@ class SwitchStatement extends Statement {
 			}
 		}
 
-		if @name != null {
+		if @reusableValue {
 			@scope.releaseTempName(@name)
 		}
 		else {
@@ -267,9 +267,7 @@ class SwitchStatement extends Statement {
 		}
 	} // }}}
 	translate() { // {{{
-		if @value != null {
-			@value.translate()
-		}
+		@value.translate()
 
 		for clause in @clauses {
 			for condition in clause.conditions {
@@ -496,7 +494,7 @@ class SwitchStatement extends Statement {
 			return
 		}
 
-		if @value != null {
+		if @reusableValue {
 			const line = fragments.newLine().code($runtime.scope(this), @name, ' = ').compile(@value)
 
 			if @castingEnum {
