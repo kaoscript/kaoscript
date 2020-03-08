@@ -83,6 +83,9 @@ class TupleDeclaration extends Statement {
 			field.translate()
 		}
 	} // }}}
+	export(recipient) { // {{{
+		recipient.export(@name, @variable)
+	} // }}}
 	fields() => @fields
 	isExtending() => @extending
 	toArrayFragments(fragments, mode) { // {{{

@@ -1,0 +1,27 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar"
+  ],
+  "references": [
+    {
+      "kind": "alias",
+      "of": {
+        "kind": "dictionary",
+        "properties": {
+          "values": {
+            "kind": "reference",
+            "name": "Array",
+            "nullable": true,
+            "parameters": [
+              "String"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "macros": []
+}

@@ -1,0 +1,31 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar"
+  ],
+  "references": [
+    {
+      "kind": "alias",
+      "of": {
+        "kind": "dictionary",
+        "properties": {
+          "x": "Number",
+          "y": "Number",
+          "foo": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "throws": []
+          }
+        }
+      }
+    }
+  ],
+  "macros": []
+}

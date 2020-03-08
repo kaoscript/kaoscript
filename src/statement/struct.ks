@@ -69,6 +69,9 @@ class StructDeclaration extends Statement {
 			field.translate()
 		}
 	} // }}}
+	export(recipient) { // {{{
+		recipient.export(@name, @variable)
+	} // }}}
 	fields() => @fields
 	isExtending() => @extending
 	toObjectFragments(fragments, mode) { // {{{

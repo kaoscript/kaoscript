@@ -14,12 +14,7 @@ class DictionaryType extends Type {
 			}
 
 			for const property, name of data.properties {
-				if property.parameters? {
-					type.addProperty(name, FunctionType.fromMetadata(property, metadata, references, alterations, queue, scope, node))
-				}
-				else {
-					type.addProperty(name, Type.fromMetadata(property, metadata, references, alterations, queue, scope, node))
-				}
+				type.addProperty(name, Type.fromMetadata(property, metadata, references, alterations, queue, scope, node))
 			}
 
 			return type
@@ -36,12 +31,7 @@ class DictionaryType extends Type {
 
 			queue.push(() => {
 				for const property, name of data.properties {
-					if property.parameters? {
-						type.addProperty(name, FunctionType.fromMetadata(property, metadata, references, alterations, queue, scope, node))
-					}
-					else {
-						type.addProperty(name, Type.fromMetadata(property, metadata, references, alterations, queue, scope, node))
-					}
+					type.addProperty(name, Type.fromMetadata(property, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
