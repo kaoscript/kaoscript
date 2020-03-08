@@ -1489,7 +1489,7 @@ class ClassType extends Type {
 			return super.toReference(references, mode)
 		}
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
 }
@@ -1602,7 +1602,7 @@ class ClassVariableType extends Type {
 	isUsingSetter() => @sealed && @default
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
-	toPositiveTestFragments(fragments, node) => @type.toPositiveTestFragments(fragments, node)
+	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	type(): @type
 	type(@type): this
 	unflagAlteration() { // {{{

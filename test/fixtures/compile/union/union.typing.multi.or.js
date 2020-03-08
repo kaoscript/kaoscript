@@ -10,7 +10,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isString(x) || Type.isNumber(x) || Type.isArray(x))) {
+		else if(!Type.isString(x) && !Type.isNumber(x) && !Type.isArray(x)) {
 			throw new TypeError("'x' is not of type 'String', 'Number' or 'Array'");
 		}
 		if(Type.isString(x) || Type.isNumber(x)) {

@@ -1,5 +1,13 @@
 abstract class TupleType extends Type {
 	static {
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+			if data.named {
+				return NamedTupleType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
+			}
+			else {
+				return UnnamedTupleType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
+			}
+		} // }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			if data.named {
 				return NamedTupleType.import(data, metadata, references, alterations, queue, scope, node)
@@ -57,13 +65,26 @@ abstract class TupleType extends Type {
 	override toFragments(fragments, node) { // {{{
 		NotImplementedException.throw()
 	} // }}}
-	override toPositiveTestFragments(fragments, node) { // {{{
-		NotImplementedException.throw()
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
+		NotImplementedException.throw(node)
 	} // }}}
 }
 
 class NamedTupleType extends TupleType {
 	static {
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+			const value = new NamedTupleType(scope)
+
+			if data.extends? {
+				value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+			}
+
+			for const type, name of data.fields {
+				value.addField(TupleFieldType.fromMetadata(name, type, metadata, references, alterations, queue, scope, node))
+			}
+
+			return value
+		} // }}}
 		import(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new NamedTupleType(scope)
 
@@ -370,6 +391,19 @@ class NamedTupleType extends TupleType {
 
 class UnnamedTupleType extends TupleType {
 	static {
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+			const value = new UnnamedTupleType(scope)
+
+			if data.extends? {
+				value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+			}
+
+			for const type in data.fields {
+				value.addField(TupleFieldType.fromMetadata(null, type, metadata, references, alterations, queue, scope, node))
+			}
+
+			return value
+		} // }}}
 		import(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new UnnamedTupleType(scope)
 
@@ -509,8 +543,8 @@ class TupleFieldType extends Type {
 		NotImplementedException.throw()
 	} // }}}
 	toQuote() => @type.toQuote()
-	override toPositiveTestFragments(fragments, node) { // {{{
-		NotImplementedException.throw()
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
+		NotImplementedException.throw(node)
 	} // }}}
 	type() => @type
 }

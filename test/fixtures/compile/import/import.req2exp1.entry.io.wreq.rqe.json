@@ -1,0 +1,31 @@
+{
+  "aliens": [
+    "Any?",
+    "console"
+  ],
+  "requirements": [
+    0,
+    "Quxbaz",
+    false
+  ],
+  "exports": [],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "systemic": false,
+      "exhaustive": true,
+      "init": 0,
+      "constructors": [],
+      "destructors": 0,
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {}
+    }
+  ],
+  "macros": []
+}

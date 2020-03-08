@@ -211,7 +211,7 @@ class NamespaceType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	walk(fn) { // {{{
@@ -307,6 +307,6 @@ class NamespacePropertyType extends Type {
 	} // }}}
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
-	toPositiveTestFragments(fragments, node) => @type.toPositiveTestFragments(fragments, node)
+	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	type() => @type
 }

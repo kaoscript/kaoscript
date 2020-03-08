@@ -25,7 +25,7 @@ module.exports = function() {
 		if(pair === void 0 || pair === null) {
 			throw new TypeError("'pair' is not nullable");
 		}
-		else if(!(Type.isArray(pair) || Type.isTupleInstance(pair, Pair))) {
+		else if(!Type.isArray(pair) && !Type.isTupleInstance(pair, Pair)) {
 			throw new TypeError("'pair' is not of type 'Array' or 'Pair'");
 		}
 		if(!Type.isTupleInstance(pair, Pair)) {

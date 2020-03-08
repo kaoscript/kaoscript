@@ -673,7 +673,7 @@ module.exports = function() {
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
-			else if(!(Type.isString(value) || Type.isNumber(value))) {
+			else if(!Type.isString(value) && !Type.isNumber(value)) {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			this._alpha = $caster.alpha(value);
@@ -772,7 +772,7 @@ module.exports = function() {
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
-			else if(!(Type.isString(value) || Type.isNumber(value))) {
+			else if(!Type.isString(value) && !Type.isNumber(value)) {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			if(Type.isString(value) && (value.endsWith("%") === true)) {
@@ -1145,7 +1145,7 @@ module.exports = function() {
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
-			else if(!(Type.isString(value) || Type.isNumber(value))) {
+			else if(!Type.isString(value) && !Type.isNumber(value)) {
 				throw new TypeError("'value' is not of type 'String' or 'Number'");
 			}
 			if(Type.isString(value) && (value.endsWith("%") === true)) {
@@ -1220,7 +1220,7 @@ module.exports = function() {
 			if(value === void 0 || value === null) {
 				throw new TypeError("'value' is not nullable");
 			}
-			else if(!(Type.isNumber(value) || Type.isString(value))) {
+			else if(!Type.isNumber(value) && !Type.isString(value)) {
 				throw new TypeError("'value' is not of type 'Number' or 'String'");
 			}
 			let component = $components[name];

@@ -10,7 +10,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		else if(!(Type.isDictionary(y) || Type.isString(y))) {
+		else if(!Type.isDictionary(y) && !Type.isString(y)) {
 			throw new TypeError("'y' is not of type 'Dictionary' or 'String'");
 		}
 		let z = y.y;

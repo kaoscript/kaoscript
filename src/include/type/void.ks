@@ -12,7 +12,7 @@ class VoidType extends Type {
 		fragments.code('Void')
 	} // }}}
 	toQuote(): String => `Void`
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotSupportedException(node)
 	} // }}}
 }

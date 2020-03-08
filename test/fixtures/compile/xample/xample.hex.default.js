@@ -9,7 +9,7 @@ module.exports = function() {
 		if(n === void 0 || n === null) {
 			throw new TypeError("'n' is not nullable");
 		}
-		else if(!(Type.isString(n) || Type.isNumber(n))) {
+		else if(!Type.isString(n) && !Type.isNumber(n)) {
 			throw new TypeError("'n' is not of type 'String' or 'Number'");
 		}
 		return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 255));

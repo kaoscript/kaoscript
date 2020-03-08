@@ -899,13 +899,15 @@ class IdentifierParameter extends IdentifierLiteral {
 
 						ctrl2
 							.step()
-							.code('else if(!')
+							.code('else if(')
+
+						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction::NONE)
 					}
 					else {
-						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || !')
-					}
+						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || ')
 
-					type.toPositiveTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'))
+						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction::OR)
+					}
 
 					ctrl2
 						.code(')')
@@ -1121,13 +1123,15 @@ class IdentifierParameter extends IdentifierLiteral {
 
 						ctrl2
 							.step()
-							.code('else if(!')
+							.code('else if(')
+
+						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction::NONE)
 					}
 					else {
-						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || !')
-					}
+						ctrl2.code('if(__ks__ === void 0 || __ks__ === null || ')
 
-					type.toPositiveTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'))
+						type.toNegativeTestFragments(ctrl2, new Literal(false, that, that.scope(), '__ks__'), Junction::OR)
+					}
 
 					ctrl2
 						.code(')')
@@ -1244,13 +1248,13 @@ class IdentifierParameter extends IdentifierLiteral {
 						const ctrl2 = ctrl.newControl().code('if(')
 
 						if declaredType.isNullable() {
-							ctrl2.compile(that).code(' !== null && !')
+							ctrl2.compile(that).code(' !== null && ')
+
+							declaredType.toNegativeTestFragments(ctrl2, that, Junction::AND)
 						}
 						else {
-							ctrl2.code('!')
+							declaredType.toNegativeTestFragments(ctrl2, that, Junction::NONE)
 						}
-
-						declaredType.toPositiveTestFragments(ctrl2, that)
 
 						ctrl2
 							.code(')')
@@ -1394,11 +1398,12 @@ class IdentifierParameter extends IdentifierLiteral {
 				else {
 					if declaredType.isNullable() {
 						ctrl.compile(that).code(' !== null && ')
+
+						declaredType.toNegativeTestFragments(ctrl, that, Junction::AND)
 					}
-
-					ctrl.code('!')
-
-					declaredType.toPositiveTestFragments(ctrl, that)
+					else {
+						declaredType.toNegativeTestFragments(ctrl, that, Junction::NONE)
+					}
 				}
 
 				ctrl
@@ -1682,11 +1687,12 @@ class AnonymousParameter extends AbstractNode {
 
 			if @type.isNullable() {
 				ctrl.compile(this).code(' !== null && ')
+
+				@type.toNegativeTestFragments(ctrl, this, Junction::AND)
 			}
-
-			ctrl.code('!')
-
-			@type.toPositiveTestFragments(ctrl, this)
+			else {
+				@type.toNegativeTestFragments(ctrl, this, Junction::NONE)
+			}
 
 			ctrl
 				.code(')')

@@ -3,6 +3,27 @@ class DictionaryType extends Type {
 		_properties: Dictionary			= {}
 	}
 	static {
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+			const type = new DictionaryType(scope)
+
+			if data.systemic {
+				type.flagSystemic()
+			}
+			else if data.sealed {
+				type.flagSealed()
+			}
+
+			for const property, name of data.properties {
+				if property.parameters? {
+					type.addProperty(name, FunctionType.fromMetadata(property, metadata, references, alterations, queue, scope, node))
+				}
+				else {
+					type.addProperty(name, Type.fromMetadata(property, metadata, references, alterations, queue, scope, node))
+				}
+			}
+
+			return type
+		} // }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new DictionaryType(scope)
 
@@ -110,6 +131,7 @@ class DictionaryType extends Type {
 	isNullable() => false
 	isDictionary() => true
 	isExhaustive() => false
+	isExportable() => true
 	isSealable() => true
 	matchContentOf(type: Type) { // {{{
 		if type.isAny() || type.isDictionary() {
@@ -152,8 +174,31 @@ class DictionaryType extends Type {
 			return str + '}'
 		}
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
-		throw new NotImplementedException()
+	override toNegativeTestFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if junction == Junction::AND
+
+		fragments.code('!', $runtime.type(node), '.isDictionary(').compile(node).code(')')
+
+		for const value, name of @properties {
+			fragments.code(' || ')
+
+			value.toNegativeTestFragments(fragments, new Literal(false, node, node.scope(), `\(node.path()).\(name)`))
+		}
+
+		fragments.code(')') if junction == Junction::AND
+	} // }}}
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if junction == Junction::OR
+
+		fragments.code($runtime.type(node), '.isDictionary(').compile(node).code(')')
+
+		for const value, name of @properties {
+			fragments.code(' && ')
+
+			value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `\(node.path()).\(name)`))
+		}
+
+		fragments.code(')') if junction == Junction::OR
 	} // }}}
 	walk(fn) { // {{{
 		for const type, name of @properties {

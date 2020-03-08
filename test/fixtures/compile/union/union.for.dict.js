@@ -35,7 +35,7 @@ module.exports = function() {
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
 		}
-		else if(!(Type.isStructInstance(item, Foobar) || Type.isStructInstance(item, Quxbaz))) {
+		else if(!Type.isStructInstance(item, Foobar) && !Type.isStructInstance(item, Quxbaz)) {
 			throw new TypeError("'item' is not of type 'Foobar' or 'Quxbaz'");
 		}
 		for(let __ks_0 in item.values) {

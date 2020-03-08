@@ -59,7 +59,7 @@ module.exports = function() {
 			if(x === void 0 || x === null) {
 				throw new TypeError("'x' is not nullable");
 			}
-			else if(!(Type.isClassInstance(x, Master) || Type.isClassInstance(x, Disturb))) {
+			else if(!Type.isClassInstance(x, Master) && !Type.isClassInstance(x, Disturb)) {
 				throw new TypeError("'x' is not of type 'Master' or 'Disturb'");
 			}
 		}

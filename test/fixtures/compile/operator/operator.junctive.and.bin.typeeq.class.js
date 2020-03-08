@@ -28,7 +28,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		if((Type.isClassInstance(x, ClassA) && Type.isClassInstance(x, ClassB))) {
+		if(Type.isClassInstance(x, ClassA) && Type.isClassInstance(x, ClassB)) {
 		}
 		if(Type.isClassInstance(x, ClassA) && Type.isClassInstance(x, ClassB)) {
 		}

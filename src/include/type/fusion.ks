@@ -90,31 +90,31 @@ class FusionType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toNegativeTestFragments(fragments, node) { // {{{
-		fragments.code('(')
+	override toNegativeTestFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if junction == Junction::OR
 
 		for type, i in @types {
 			if i != 0 {
 				fragments.code(' && ')
 			}
 
-			type.toNegativeTestFragments(fragments, node)
+			type.toNegativeTestFragments(fragments, node, Junction::AND)
 		}
 
-		fragments.code(')')
+		fragments.code(')') if junction == Junction::OR
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
-		fragments.code('(')
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if junction == Junction::OR
 
 		for type, i in @types {
 			if i != 0 {
 				fragments.code(' && ')
 			}
 
-			type.toPositiveTestFragments(fragments, node)
+			type.toPositiveTestFragments(fragments, node, Junction::AND)
 		}
 
-		fragments.code(')')
+		fragments.code(')') if junction == Junction::OR
 	} // }}}
 	type() { // {{{
 		if @types.length == 1 {

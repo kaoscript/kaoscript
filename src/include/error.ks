@@ -310,6 +310,9 @@ export class SyntaxException extends Exception {
 		throwEnumOverflow(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The bit flags enum "\(name)" can only have at most 53 bits.`, node)
 		} // }}}
+		throwExcessiveRequirement(name, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`import don't require the argument "\(name)"`, node)
+		} // }}}
 		throwIdenticalConstructor(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The constructor is identical with another constructor`, node)
 		} // }}}

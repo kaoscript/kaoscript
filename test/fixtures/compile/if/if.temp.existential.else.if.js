@@ -7,7 +7,7 @@ module.exports = function() {
 		if(color === void 0 || color === null) {
 			throw new TypeError("'color' is not nullable");
 		}
-		else if(!(Type.isDictionary(color) || Type.isString(color))) {
+		else if(!Type.isDictionary(color) && !Type.isString(color)) {
 			throw new TypeError("'color' is not of type 'Dictionary' or 'String'");
 		}
 		if(Type.isString(color)) {

@@ -84,31 +84,29 @@ class ExclusionType extends Type {
 	} // }}}
 	toQuote() => [type.toQuote() for const type in @types].join('^')
 	toReference(references, mode) => this.export(references, mode)
-	toPositiveTestFragments(fragments, node) { // {{{
-		fragments.code('(')
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if junction == Junction::OR
 
 		if @types[0].isAny() {
-			fragments.code('!')
-
-			@types[1].toPositiveTestFragments(fragments, node)
+			@types[1].toNegativeTestFragments(fragments, node, Junction::AND)
 
 			for const type in @types from 2 {
-				fragments.code(' && !')
+				fragments.code(' && ')
 
-				type.toPositiveTestFragments(fragments, node)
+				type.toNegativeTestFragments(fragments, node, Junction::AND)
 			}
 		}
 		else {
-			@types[0].toPositiveTestFragments(fragments, node)
+			@types[0].toPositiveTestFragments(fragments, node, Junction::AND)
 
 			for const type in @types from 1 {
-				fragments.code(' && !')
+				fragments.code(' && ')
 
-				type.toPositiveTestFragments(fragments, node)
+				type.toNegativeTestFragments(fragments, node, Junction::AND)
 			}
 		}
 
-		fragments.code(')')
+		fragments.code(')') if junction == Junction::OR
 	} // }}}
 	types() => @types
 }

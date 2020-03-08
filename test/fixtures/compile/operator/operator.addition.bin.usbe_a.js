@@ -7,7 +7,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isString(x) || Type.isBoolean(x))) {
+		else if(!Type.isString(x) && !Type.isBoolean(x)) {
 			throw new TypeError("'x' is not of type 'String' or 'Boolean'");
 		}
 		if(y === void 0 || y === null) {

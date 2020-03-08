@@ -126,21 +126,27 @@ class Importer extends Statement {
 			@scope.line(this.line() - 1)
 
 			for const argument in @arguments {
-				argument.value.prepare()
-				argument.type = argument.value.type()
+				if !argument.required {
+					argument.value.prepare()
+					argument.type = argument.value.type()
+				}
 
 				arguments[argument.name] = argument
 			}
 
 			@worker.prepare(arguments)
 
+			@scope.line(this.line())
+
 			for const argument in @arguments when argument.required {
 				module.addRequirement(new ImportingRequirement(argument.name, argument.type, this))
+
+				if !@scope.hasVariable(argument.name) {
+					@scope.define(argument.name, true, argument.type, true, this)
+				}
 			}
 
 			const matchables = []
-
-			@scope.line(this.line())
 
 			for const def, name of @imports {
 				const variable = @scope.getVariable(def.local)
@@ -292,15 +298,20 @@ class Importer extends Statement {
 
 			@argumentNames[argument.name] = @arguments.length
 			@argumentValues[data.value.name] = @arguments.length
+
+			argument.value.analyse()
 		}
 		else if data.name? {
 			argument.isNamed = true
 			argument.name = data.name.name
 
 			@argumentNames[argument.name] = @arguments.length
-		}
 
-		argument.value.analyse()
+			argument.value.analyse()
+		}
+		else {
+			argument.value.analyse()
+		}
 
 		@arguments.push(argument)
 	} // }}}
@@ -1113,6 +1124,7 @@ class ImportWorker {
 	prepare(arguments) { // {{{
 		const references = []
 		const queue = []
+		const matchedArguments = {}
 
 		let index, name, type, argument
 
@@ -1136,25 +1148,39 @@ class ImportWorker {
 			for const i from 0 til @metadata.requirements.length by 3 {
 				name = @metadata.requirements[i + 1]
 
-				if (argument ?= arguments[name]) && !argument.required && !reqReferences[@metadata.requirements[i]].isAny() && !argument.type.isMatching(reqReferences[@metadata.requirements[i]], MatchingMode::Signature) {
-					if argument.isAutofill {
-						argument.isApproved = false
-					}
-					else {
-						TypeException.throwNotCompatibleArgument(argument.name, name, @node.data().source.value, @node)
+				if const argument = arguments[name] {
+					matchedArguments[name] = true
+
+					if !argument.required && !reqReferences[@metadata.requirements[i]].isAny() && !argument.type.isMatching(reqReferences[@metadata.requirements[i]], MatchingMode::Signature) {
+						if argument.isAutofill {
+							argument.isApproved = false
+						}
+						else {
+							TypeException.throwNotCompatibleArgument(argument.name, name, @node.data().source.value, @node)
+						}
 					}
 				}
 			}
 
 			for const i from 0 til @metadata.requirements.length by 3 {
-				if (argument ?= arguments[@metadata.requirements[i + 1]]) && argument.isApproved {
-					if argument.required {
-						argument.type = reqReferences[@metadata.requirements[i]]
-					}
+				const name = @metadata.requirements[i + 1]
 
-					references[@metadata.requirements[i]] = argument.type
+				if const argument = arguments[name] {
+					matchedArguments[name] = true
+
+					if argument.isApproved {
+						if argument.required {
+							argument.type = reqReferences[@metadata.requirements[i]]
+						}
+
+						references[@metadata.requirements[i]] = argument.type
+					}
 				}
 			}
+		}
+
+		for const _, name of arguments when !matchedArguments[name] {
+			SyntaxException.throwExcessiveRequirement(name, @node)
 		}
 
 		const alterations = {}
@@ -1187,6 +1213,8 @@ class ImportWorker {
 			references[index] = Type.toNamedType(name, type)
 		}
 
+		const variables = {}
+
 		for const i from 0 til @metadata.exports.length by 2 {
 			index = @metadata.exports[i]
 			name = @metadata.exports[i + 1]
@@ -1201,6 +1229,8 @@ class ImportWorker {
 			type = references[index] = Type.toNamedType(name, type)
 
 			@scope.addVariable(name, new Variable(name, false, false, type), @node)
+
+			variables[index] = true
 		}
 
 		for const i from 0 til @metadata.aliens.length by 2 {
@@ -1209,6 +1239,8 @@ class ImportWorker {
 
 			if !@scope.hasVariable(name) {
 				@scope.addVariable(name, new Variable(name, false, false, references[index]), @node)
+
+				variables[index] = true
 			}
 		}
 
@@ -1216,7 +1248,7 @@ class ImportWorker {
 			if !?references[index] {
 				let type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
 
-				if type is AliasType || type is ClassType || type is EnumType {
+				if type is AliasType || type is ClassType || type is EnumType || type is StructType || type is TupleType {
 					type = new NamedType(@scope.acquireTempName(), type)
 
 					@scope.define(type.name(), true, type, @node)
@@ -1228,6 +1260,13 @@ class ImportWorker {
 				}
 
 				references[index] = type
+			}
+			else if !variables[index] {
+				const type = references[index]
+
+				if type is NamedType && !@scope.hasVariable(type.name()) {
+					@scope.define(type.name(), true, type, @node)
+				}
 			}
 		}
 

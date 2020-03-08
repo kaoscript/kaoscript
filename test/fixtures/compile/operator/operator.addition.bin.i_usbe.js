@@ -13,7 +13,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		else if(!(Type.isString(y) || Type.isBoolean(y))) {
+		else if(!Type.isString(y) && !Type.isBoolean(y)) {
 			throw new TypeError("'y' is not of type 'String' or 'Boolean'");
 		}
 		return Helper.concatString(x, y);

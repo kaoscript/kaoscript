@@ -10,7 +10,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isString(x) || Type.isNumber(x))) {
+		else if(!Type.isString(x) && !Type.isNumber(x)) {
 			throw new TypeError("'x' is not of type 'String' or 'Number'");
 		}
 		if((Type.isString(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x)) === 42) {

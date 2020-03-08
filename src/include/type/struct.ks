@@ -1,5 +1,22 @@
 class StructType extends Type {
 	static {
+		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+			const value = new StructType(scope)
+
+			let index = 0
+
+			for const type, name of data.fields {
+				value.addField(StructFieldType.fromMetadata(index, name, type, metadata, references, alterations, queue, scope, node))
+
+				++index
+			}
+
+			if data.extends? {
+				value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+			}
+
+			return value
+		} // }}}
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const value = new StructType(scope)
 
@@ -335,8 +352,8 @@ class StructType extends Type {
 	override toFragments(fragments, node) { // {{{
 		NotImplementedException.throw()
 	} // }}}
-	override toPositiveTestFragments(fragments, node) { // {{{
-		NotImplementedException.throw()
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
+		NotImplementedException.throw(node)
 	} // }}}
 }
 
@@ -373,8 +390,8 @@ class StructFieldType extends Type {
 		NotImplementedException.throw()
 	} // }}}
 	toQuote() => @type.toQuote()
-	override toPositiveTestFragments(fragments, node) { // {{{
-		NotImplementedException.throw()
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
+		NotImplementedException.throw(node)
 	} // }}}
 	type() => @type
 }

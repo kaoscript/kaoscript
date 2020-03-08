@@ -44,7 +44,7 @@ module.exports = function() {
 			if(name === void 0 || name === null) {
 				throw new TypeError("'name' is not nullable");
 			}
-			else if(!(Type.isString(name) || Type.isNumber(name))) {
+			else if(!Type.isString(name) && !Type.isNumber(name)) {
 				throw new TypeError("'name' is not of type 'String' or 'Number'");
 			}
 			return this._message + "\nIt's nice to meet you, " + name + ".";

@@ -25,7 +25,7 @@ module.exports = function() {
 		if(item === void 0 || item === null) {
 			throw new TypeError("'item' is not nullable");
 		}
-		else if(!(Type.isArray(item) || Type.isStruct(item))) {
+		else if(!Type.isArray(item) && !Type.isStruct(item)) {
 			throw new TypeError("'item' is not of type 'Array' or 'Struct'");
 		}
 		if(!Type.isStruct(item)) {

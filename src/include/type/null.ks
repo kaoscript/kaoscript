@@ -38,5 +38,5 @@ class NullType extends Type {
 	toFragments(fragments, node)
 	toQuote() => 'Null'
 	toReference(references, mode) => 'Null'
-	toPositiveTestFragments(fragments, node)
+	override toPositiveTestFragments(fragments, node, junction)
 }

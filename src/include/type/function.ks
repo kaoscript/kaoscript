@@ -706,7 +706,7 @@ class FunctionType extends Type {
 
 		return fragments
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		fragments
 			.code($runtime.type(node) + '.isFunction(')
 			.compile(node)
@@ -942,7 +942,7 @@ class OverloadedFunctionType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 }

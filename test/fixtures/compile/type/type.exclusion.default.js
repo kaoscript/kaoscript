@@ -20,7 +20,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(!Type.isPrimitive(x) && !Type.isArray(x))) {
+		else if(!!Type.isPrimitive(x) && !Type.isArray(x)) {
 			throw new TypeError("'x' is not of type 'Instance'");
 		}
 	}

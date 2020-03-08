@@ -118,6 +118,12 @@ enum TypeKind<String> {
 	Union
 }
 
+enum Junction {
+	NONE
+	AND
+	OR
+}
+
 abstract class Type {
 	private {
 		_alien: Boolean				= false
@@ -398,6 +404,9 @@ abstract class Type {
 					TypeKind::Class => {
 						return ClassType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind::Dictionary => {
+						return DictionaryType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
+					}
 					TypeKind::Enum => {
 						return EnumType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
@@ -415,6 +424,12 @@ abstract class Type {
 					}
 					TypeKind::Sealable => {
 						return SealableType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind::Struct => {
+						return StructType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind::Tuple => {
+						return TupleType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Union => {
 						return UnionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
@@ -553,7 +568,7 @@ abstract class Type {
 	abstract clone(): Type
 	abstract export(references, mode)
 	abstract toFragments(fragments, node)
-	abstract toPositiveTestFragments(fragments, node)
+	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE)
 	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
 	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
 	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()
@@ -762,7 +777,7 @@ abstract class Type {
 
 		return @referenceIndex
 	} // }}}
-	toNegativeTestFragments(fragments, node) => this.toPositiveTestFragments(fragments.code('!'), node)
+	toNegativeTestFragments(fragments, node, junction: Junction = Junction::NONE) => this.toPositiveTestFragments(fragments.code('!'), node, junction)
 	toQuote(): String { // {{{
 		throw new NotSupportedException()
 	} // }}}

@@ -460,12 +460,20 @@ class NamedType extends Type {
 			return @type.toReference(references, mode)
 		}
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toNegativeTestFragments(fragments, node, junction) { // {{{
+		if const tof = $runtime.typeof(@name, node) {
+			fragments.code(`!\(tof)(`).compile(node).code(')')
+		}
+		else {
+			@type.toNegativeTestFragments(fragments, node, junction)
+		}
+	} // }}}
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		if const tof = $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node).code(')')
 		}
 		else {
-			@type.toPositiveTestFragments(fragments, node)
+			@type.toPositiveTestFragments(fragments, node, junction)
 		}
 	} // }}}
 	type() => @type

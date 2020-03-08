@@ -10,7 +10,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isString(x) || Type.isNumber(x))) {
+		else if(!Type.isString(x) && !Type.isNumber(x)) {
 			throw new TypeError("'x' is not of type 'String' or 'Number'");
 		}
 		return 42 - (Type.isString(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x));
@@ -22,13 +22,13 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isString(x) || Type.isNumber(x))) {
+		else if(!Type.isString(x) && !Type.isNumber(x)) {
 			throw new TypeError("'x' is not of type 'String' or 'Number'");
 		}
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		else if(!(Type.isString(y) || Type.isNumber(y))) {
+		else if(!Type.isString(y) && !Type.isNumber(y)) {
 			throw new TypeError("'y' is not of type 'String' or 'Number'");
 		}
 		return (Type.isString(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x)) - (Type.isString(y) ? __ks_String._im_toFloat(y) : __ks_Number._im_toFloat(y));

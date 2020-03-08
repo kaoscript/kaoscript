@@ -58,6 +58,6 @@ class SealableType extends Type {
 	isSealed() => @sealed || @type.isSealed()
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
 	toQuote(...args) => @type.toQuote(...args)
-	toPositiveTestFragments(fragments, node) => @type.toPositiveTestFragments(fragments, node)
+	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
 	type() => @type
 }

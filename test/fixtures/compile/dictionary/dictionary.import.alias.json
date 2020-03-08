@@ -1,0 +1,21 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Coord"
+  ],
+  "references": [
+    {
+      "kind": "alias",
+      "of": {
+        "kind": "dictionary",
+        "properties": {
+          "x": "Number",
+          "y": "Number"
+        }
+      }
+    }
+  ],
+  "macros": []
+}

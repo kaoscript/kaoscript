@@ -25,13 +25,13 @@ module.exports = function() {
 			if(c === void 0 || c === null) {
 				c = 0;
 			}
-			else if(!(Type.isNumber(c) || Type.isString(c))) {
+			else if(!Type.isNumber(c) && !Type.isString(c)) {
 				throw new TypeError("'c' is not of type 'Number' or 'String'");
 			}
 			if(d === void 0 || d === null) {
 				d = 0;
 			}
-			else if(!(Type.isNumber(d) || Type.isString(d))) {
+			else if(!Type.isNumber(d) && !Type.isString(d)) {
 				throw new TypeError("'d' is not of type 'Number' or 'String'");
 			}
 			return 1;
@@ -43,19 +43,19 @@ module.exports = function() {
 			if(c === void 0 || c === null) {
 				throw new TypeError("'c' is not nullable");
 			}
-			else if(!(Type.isNumber(c) || Type.isString(c))) {
+			else if(!Type.isNumber(c) && !Type.isString(c)) {
 				throw new TypeError("'c' is not of type 'Number' or 'String'");
 			}
 			if(d === void 0 || d === null) {
 				throw new TypeError("'d' is not nullable");
 			}
-			else if(!(Type.isNumber(d) || Type.isString(d))) {
+			else if(!Type.isNumber(d) && !Type.isString(d)) {
 				throw new TypeError("'d' is not of type 'Number' or 'String'");
 			}
 			if(e === void 0 || e === null) {
 				throw new TypeError("'e' is not nullable");
 			}
-			else if(!(Type.isDictionary(e) || Type.isString(e))) {
+			else if(!Type.isDictionary(e) && !Type.isString(e)) {
 				throw new TypeError("'e' is not of type 'Dictionary' or 'String'");
 			}
 			if(f === void 0 || f === null) {

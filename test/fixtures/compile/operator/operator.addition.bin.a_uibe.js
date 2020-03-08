@@ -10,7 +10,7 @@ module.exports = function() {
 		if(y === void 0 || y === null) {
 			throw new TypeError("'y' is not nullable");
 		}
-		else if(!(Type.isNumber(y) || Type.isBoolean(y))) {
+		else if(!Type.isNumber(y) && !Type.isBoolean(y)) {
 			throw new TypeError("'y' is not of type 'Number' or 'Boolean'");
 		}
 		return Operator.addOrConcat(x, y);

@@ -12,7 +12,7 @@ module.exports = function() {
 			}
 			let position;
 			if(arguments.length > ++__ks_i && (position = arguments[__ks_i]) !== void 0 && position !== null) {
-				if(!(Type.isBoolean(position) || Type.isNumber(position))) {
+				if(!Type.isBoolean(position) && !Type.isNumber(position)) {
 					if(arguments.length - __ks_i < 2) {
 						position = 0;
 						--__ks_i;
@@ -47,7 +47,7 @@ module.exports = function() {
 			}
 			let position;
 			if(arguments.length > ++__ks_i && (position = arguments[__ks_i]) !== void 0 && position !== null) {
-				if(!(Type.isBoolean(position) || Type.isNumber(position))) {
+				if(!Type.isBoolean(position) && !Type.isNumber(position)) {
 					if(arguments.length - __ks_i < 2) {
 						position = 0;
 						--__ks_i;

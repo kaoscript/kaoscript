@@ -11,43 +11,43 @@ module.exports = function(__ks_Date) {
 		if(year === void 0 || year === null) {
 			throw new TypeError("'year' is not nullable");
 		}
-		else if(!(Type.isNumber(year) || Type.isString(year))) {
+		else if(!Type.isNumber(year) && !Type.isString(year)) {
 			throw new TypeError("'year' is not of type 'NS'");
 		}
 		if(month === void 0 || month === null) {
 			throw new TypeError("'month' is not nullable");
 		}
-		else if(!(Type.isNumber(month) || Type.isString(month))) {
+		else if(!Type.isNumber(month) && !Type.isString(month)) {
 			throw new TypeError("'month' is not of type 'NS'");
 		}
 		if(day === void 0 || day === null) {
 			day = 1;
 		}
-		else if(!(Type.isNumber(day) || Type.isString(day))) {
+		else if(!Type.isNumber(day) && !Type.isString(day)) {
 			throw new TypeError("'day' is not of type 'NS'");
 		}
 		if(hours === void 0 || hours === null) {
 			hours = 0;
 		}
-		else if(!(Type.isNumber(hours) || Type.isString(hours))) {
+		else if(!Type.isNumber(hours) && !Type.isString(hours)) {
 			throw new TypeError("'hours' is not of type 'NS'");
 		}
 		if(minutes === void 0 || minutes === null) {
 			minutes = 0;
 		}
-		else if(!(Type.isNumber(minutes) || Type.isString(minutes))) {
+		else if(!Type.isNumber(minutes) && !Type.isString(minutes)) {
 			throw new TypeError("'minutes' is not of type 'NS'");
 		}
 		if(seconds === void 0 || seconds === null) {
 			seconds = 0;
 		}
-		else if(!(Type.isNumber(seconds) || Type.isString(seconds))) {
+		else if(!Type.isNumber(seconds) && !Type.isString(seconds)) {
 			throw new TypeError("'seconds' is not of type 'NS'");
 		}
 		if(milliseconds === void 0 || milliseconds === null) {
 			milliseconds = 0;
 		}
-		else if(!(Type.isNumber(milliseconds) || Type.isString(milliseconds))) {
+		else if(!Type.isNumber(milliseconds) && !Type.isString(milliseconds)) {
 			throw new TypeError("'milliseconds' is not of type 'NS'");
 		}
 		var that = new Date(year, Operator.subtraction(month, 1), day, hours, minutes, seconds, milliseconds);

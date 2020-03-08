@@ -635,44 +635,57 @@ class ReferenceType extends Type {
 			return this.export(references, mode, @type.toReference(references, mode))
 		}
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toNegativeTestFragments(fragments, node, junction) { // {{{
 		this.resolveType()
 
 		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
-			@type.toPositiveTestFragments(fragments, node)
+			@type.toNegativeTestFragments(fragments, node, junction)
 		}
 		else {
-			if tof ?= $runtime.typeof(@name, node) {
-				fragments.code(`\(tof)(`).compile(node)
+			this.toTestFragments(fragments.code('!'), node)
+		}
+	} // }}}
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
+		this.resolveType()
+
+		if @type.isAlias() || @type.isUnion() || @type.isExclusion() {
+			@type.toPositiveTestFragments(fragments, node, junction)
+		}
+		else {
+			this.toTestFragments(fragments, node)
+		}
+	} // }}}
+	private toTestFragments(fragments, node) { // {{{
+		if tof ?= $runtime.typeof(@name, node) {
+			fragments.code(`\(tof)(`).compile(node)
+		}
+		else {
+			fragments.code(`\($runtime.type(node)).`)
+
+			if @type.isClass() {
+				fragments.code(`isClassInstance`)
+			}
+			else if @type.isEnum() {
+				fragments.code(`isEnumInstance`)
+			}
+			else if @type.isStruct() {
+				fragments.code(`isStructInstance`)
+			}
+			else if @type.isTuple() {
+				fragments.code(`isTupleInstance`)
+			}
+
+			fragments.code(`(`).compile(node).code(`, `)
+
+			if @type is NamedType {
+				fragments.code(@type.path())
 			}
 			else {
-				fragments.code(`\($runtime.type(node)).`)
-
-				if @type.isClass() {
-					fragments.code(`isClassInstance`)
-				}
-				else if @type.isEnum() {
-					fragments.code(`isEnumInstance`)
-				}
-				else if @type.isStruct() {
-					fragments.code(`isStructInstance`)
-				}
-				else if @type.isTuple() {
-					fragments.code(`isTupleInstance`)
-				}
-
-				fragments.code(`(`).compile(node).code(`, `)
-
-				if @type is NamedType {
-					fragments.code(@type.path())
-				}
-				else {
-					fragments.code(@name)
-				}
+				fragments.code(@name)
 			}
-
-			fragments.code(')')
 		}
+
+		fragments.code(')')
 	} // }}}
 	type() { // {{{
 		this.resolveType()

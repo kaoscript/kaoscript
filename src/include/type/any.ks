@@ -118,7 +118,7 @@ class AnyType extends Type {
 			return @nullable ? `Any?` : `Any`
 		}
 	} // }}}
-	toNegativeTestFragments(fragments, node) { // {{{
+	override toNegativeTestFragments(fragments, node, junction) { // {{{
 		if @nullable {
 			fragments.code('false')
 		}
@@ -126,7 +126,7 @@ class AnyType extends Type {
 			fragments.code(`!\($runtime.type(node)).isValue(`).compile(node).code(`)`)
 		}
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		if @nullable {
 			fragments.code('true')
 		}

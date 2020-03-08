@@ -7,7 +7,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isDictionary(x) || Type.isString(x))) {
+		else if(!Type.isDictionary(x) && !Type.isString(x)) {
 			throw new TypeError("'x' is not of type 'Dictionary' or 'String'");
 		}
 	}
@@ -18,7 +18,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		else if(!(Type.isDictionary(x) || Type.isString(x))) {
+		else if(!Type.isDictionary(x) && !Type.isString(x)) {
 			throw new TypeError("'x' is not of type 'Dictionary' or 'String'");
 		}
 		foo(x);

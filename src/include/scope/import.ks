@@ -48,4 +48,13 @@ class ImportScope extends BlockScope {
 
 		return match
 	} // }}}
+	resolveReference(name: String, nullable: Boolean, parameters: Array) { // {{{
+		const hash = ReferenceType.toQuote(name, nullable, parameters)
+
+		if @references[hash] is not ReferenceType {
+			@references[hash] = new ReferenceType(this, name, nullable, parameters)
+		}
+
+		return @references[hash]
+	} // }}}
 }

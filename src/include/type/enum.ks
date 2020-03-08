@@ -421,7 +421,7 @@ class EnumType extends Type {
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
-	toPositiveTestFragments(fragments, node) { // {{{
+	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	type() => @type

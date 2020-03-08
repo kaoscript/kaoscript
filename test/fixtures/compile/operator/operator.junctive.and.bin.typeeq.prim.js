@@ -7,7 +7,7 @@ module.exports = function() {
 		if(x === void 0 || x === null) {
 			throw new TypeError("'x' is not nullable");
 		}
-		if((Type.isNumber(x) && Type.isString(x))) {
+		if(Type.isNumber(x) && Type.isString(x)) {
 		}
 	}
 };

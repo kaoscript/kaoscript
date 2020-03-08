@@ -35,7 +35,7 @@ module.exports = function() {
 		if(value === void 0 || value === null) {
 			throw new TypeError("'value' is not nullable");
 		}
-		else if(!(Type.isString(value) || Type.isNumber(value))) {
+		else if(!Type.isString(value) && !Type.isNumber(value)) {
 			throw new TypeError("'value' is not of type 'String' or 'Number'");
 		}
 		if(Type.isString(value) && __ks_String._im_endsWith(value, "%")) {

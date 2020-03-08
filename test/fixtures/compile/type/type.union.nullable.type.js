@@ -32,7 +32,7 @@ module.exports = function() {
 		}
 	}
 	function foobar(x = null) {
-		if(x !== null && !(Type.isClassInstance(x, Foobar) || Type.isString(x))) {
+		if(x !== null && !Type.isClassInstance(x, Foobar) && !Type.isString(x)) {
 			throw new TypeError("'x' is not of type 'Foobar', 'String' or 'Null'");
 		}
 		if(!Type.isValue(x)) {
