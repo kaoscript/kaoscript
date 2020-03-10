@@ -26,7 +26,7 @@
               "type": "Any",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "returns": "Any?",
@@ -42,7 +42,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 1,
       "constructors": [
         {
           "id": 0,
@@ -66,14 +65,13 @@
               "type": "String",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": [],
           "inits": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {
         "_message": {
           "access": 2,
@@ -102,7 +100,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "String",
@@ -110,7 +108,12 @@
             "inits": []
           }
         ]
-      }
+      },
+      "sequences": [
+        0,
+        -1,
+        -1
+      ]
     },
     {
       "kind": "class",
@@ -120,15 +123,13 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
         "greet": [
           {
-            "id": 1,
+            "id": 0,
             "access": 4,
             "sealed": false,
             "async": false,
@@ -140,7 +141,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "String",
@@ -153,6 +154,11 @@
       "extends": [
         1,
         "AbstractGreetings"
+      ],
+      "sequences": [
+        -1,
+        -1,
+        -1
       ]
     }
   ],

@@ -51,9 +51,9 @@ class BinaryOperatorExpression extends Expression {
 
 		return array
 	} // }}}
-	listUsedVariables(scope: Scope, variables: Array) { // {{{
-		@left.listUsedVariables(scope, variables)
-		@right.listUsedVariables(scope, variables)
+	listNonLocalVariables(scope: Scope, variables: Array) { // {{{
+		@left.listNonLocalVariables(scope, variables)
+		@right.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}

@@ -30,7 +30,7 @@ class FunctionType extends Type {
 		fromAST(data, node: AbstractNode): Type => FunctionType.fromAST(data, node.scope(), true, node)
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): Type { // {{{
 			if data.parameters? {
-				return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
+				return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
 			}
 			else {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
@@ -275,6 +275,7 @@ class FunctionType extends Type {
 		return this
 	} // }}}
 	getProperty(name: String) => Type.Any
+	getReturnType() => @returnType
 	index() => @index
 	index(@index) => this
 	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
@@ -679,8 +680,7 @@ class FunctionType extends Type {
 		methods.push(this)
 	} // }}}
 	restIndex() => @restIndex
-	returnType() => @returnType
-	returnType(@returnType) => this
+	setReturnType(@returnType) => this
 	throws() => @throws
 	toFragments(fragments, node) { // {{{
 		fragments.code('Function')

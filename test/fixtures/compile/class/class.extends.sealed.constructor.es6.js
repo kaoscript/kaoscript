@@ -57,12 +57,12 @@ module.exports = function() {
 			};
 			__ks_cons(arguments);
 		}
-		__ks_init_1() {
+		__ks_init_0() {
 			this.fileName = null;
 			this.lineNumber = 0;
 		}
 		__ks_init() {
-			Exception.prototype.__ks_init_1.call(this);
+			Exception.prototype.__ks_init_0.call(this);
 		}
 	}
 };

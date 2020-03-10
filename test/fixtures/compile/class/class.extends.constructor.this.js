@@ -14,12 +14,12 @@ module.exports = function() {
 		}
 	}
 	class ClassB extends ClassA {
-		__ks_init_1() {
+		__ks_init_0() {
 			this._x = 42;
 		}
 		__ks_init() {
 			ClassA.prototype.__ks_init.call(this);
-			ClassB.prototype.__ks_init_1.call(this);
+			ClassB.prototype.__ks_init_0.call(this);
 		}
 		__ks_cons_0() {
 			ClassA.prototype.__ks_cons.call(this, []);

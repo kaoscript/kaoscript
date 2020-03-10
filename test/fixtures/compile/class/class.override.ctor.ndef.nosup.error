@@ -1,0 +1,1 @@
+SyntaxException: The constructor "Foobar(x: String)" can't override a suitable constructor (line 3, file "fixtures/compile/class/class.override.ctor.ndef.nosup.ks")

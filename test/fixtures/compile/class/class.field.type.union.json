@@ -14,7 +14,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [
         {
           "id": 0,
@@ -26,7 +25,6 @@
           "throws": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {
         "_x": {
           "access": 2,
@@ -45,7 +43,12 @@
       },
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

@@ -21,13 +21,16 @@
       "sealed": true,
       "systemic": false,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -38,7 +41,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": false,
-      "init": 1,
       "constructors": [
         {
           "id": 0,
@@ -52,20 +54,19 @@
               "type": "Number",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             },
             {
               "name": "y",
               "type": "Number",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {
         "_z": {
           "access": 2,
@@ -82,6 +83,11 @@
       "extends": [
         0,
         "ClassA"
+      ],
+      "sequences": [
+        0,
+        -1,
+        -1
       ]
     },
     {
@@ -92,7 +98,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": false,
-      "init": 1,
       "constructors": [
         {
           "id": 0,
@@ -106,20 +111,19 @@
               "type": "Number",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             },
             {
               "name": "y",
               "type": "Number",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {
         "_w": {
           "access": 2,
@@ -136,6 +140,11 @@
       "extends": [
         1,
         "ClassB"
+      ],
+      "sequences": [
+        0,
+        -1,
+        -1
       ]
     }
   ],

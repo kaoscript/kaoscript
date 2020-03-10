@@ -1,0 +1,103 @@
+{
+  "aliens": [
+    "Any?",
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Foobar",
+    1,
+    "Quxbaz"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "systemic": false,
+      "exhaustive": true,
+      "constructors": [
+        {
+          "id": 0,
+          "access": 4,
+          "sealed": false,
+          "min": 0,
+          "max": 0,
+          "parameters": [],
+          "throws": []
+        },
+        {
+          "id": 1,
+          "access": 4,
+          "sealed": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "name": "x",
+              "type": "String",
+              "min": 1,
+              "max": 1,
+              "default": false
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "systemic": false,
+      "exhaustive": true,
+      "constructors": [
+        {
+          "id": 1,
+          "access": 4,
+          "sealed": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "name": "x",
+              "type": "String",
+              "min": 1,
+              "max": 1,
+              "default": false
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {},
+      "classMethods": {},
+      "extends": [
+        0,
+        "Foobar"
+      ],
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
+    }
+  ],
+  "macros": []
+}

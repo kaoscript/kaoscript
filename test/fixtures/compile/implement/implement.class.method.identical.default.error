@@ -1,0 +1,1 @@
+SyntaxException: The method "draw" is matching an existing method (line 27, file "fixtures/compile/implement/implement.class.method.identical.default.ks")

@@ -15,7 +15,6 @@ class ClassType extends Type {
 		_classMethods: Dictionary			= {}
 		_classVariables: Dictionary			= {}
 		_constructors: Array				= []
-		_destructors: Number				= 0
 		_exhaustiveness						= {
 			constructor: null
 			classMethods: {}
@@ -29,6 +28,7 @@ class ClassType extends Type {
 		_instanceAssessments: Dictionary	= {}
 		_instanceMethods: Dictionary		= {}
 		_instanceVariables: Dictionary		= {}
+		_level: Number						= 0
 		_predefined: Boolean				= false
 		_sharedMethods: Dictionary<Number>	= {}
 		_seal								= {
@@ -39,7 +39,10 @@ class ClassType extends Type {
 			instanceVariables: {}
 		}
 		_sequences	 						= {
-			constructor:		0
+			constructors:		-1
+			defaults:			-1
+			destructors:		-1
+			initializations:	-1
 			classMethods:		{}
 			instanceMethods:	{}
 		}
@@ -51,7 +54,6 @@ class ClassType extends Type {
 			type._abstract = data.abstract
 			type._alien = data.alien
 			type._hybrid = data.hybrid
-			type._init = data.init
 
 			type._exhaustive = data.exhaustive
 
@@ -69,12 +71,24 @@ class ClassType extends Type {
 				}
 			}
 
+			type._sequences.initializations = data.sequences[0]
+			type._sequences.defaults = data.sequences[1]
+			type._sequences.destructors = data.sequences[2]
+
 			if data.sealed {
 				type.flagSealed()
 			}
 
 			if data.extends? {
 				type.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+			}
+
+			if data.abstract {
+				for const methods, name of data.abstractMethods {
+					for method in methods {
+						type.dedupAbstractMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+					}
+				}
 			}
 
 			for method in data.constructors {
@@ -106,6 +120,10 @@ class ClassType extends Type {
 		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
 			const type = new ClassType(scope)
 
+			type._sequences.initializations = data.sequences[0]
+			type._sequences.defaults = data.sequences[1]
+			type._sequences.destructors = data.sequences[2]
+
 			type._exhaustive = data.exhaustive
 
 			if data.exhaustive && data.exhaustiveness? {
@@ -133,6 +151,14 @@ class ClassType extends Type {
 					const source = references[data.class.reference]
 
 					type.copyFrom(source.type())
+
+					if type.isAbstract() {
+						for const methods, name of data.abstractMethods {
+							for method in methods {
+								type.dedupAbstractMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+							}
+						}
+					}
 
 					for const constructor in data.constructors {
 						type.addConstructor(ClassConstructorType.fromMetadata(constructor, metadata, references, alterations, queue, scope, node))
@@ -163,7 +189,6 @@ class ClassType extends Type {
 				type._abstract = data.abstract
 				type._alien = data.alien
 				type._hybrid = data.hybrid
-				type._init = data.init
 
 				if data.systemic {
 					type.flagSystemic()
@@ -175,6 +200,14 @@ class ClassType extends Type {
 				queue.push(() => {
 					if data.extends? {
 						type.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+					}
+
+					if data.abstract {
+						for const methods, name of data.abstractMethods {
+							for method in methods {
+								type.dedupAbstractMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+							}
+						}
 					}
 
 					for method in data.constructors {
@@ -233,18 +266,18 @@ class ClassType extends Type {
 	addClassMethod(name: String, type: ClassMethodType): Number? { // {{{
 		if @classMethods[name] is not Array {
 			@classMethods[name] = []
-			@sequences.classMethods[name] = 0
+			@sequences.classMethods[name] = -1
 		}
 
 		let id = type.identifier()
 		if id == -1 {
-			id = @sequences.classMethods[name]++
+			id = ++@sequences.classMethods[name]
 
 			type.identifier(id)
 		}
 		else {
-			if id >= @sequences.classMethods[name] {
-				@sequences.classMethods[name] = id + 1
+			if id > @sequences.classMethods[name] {
+				@sequences.classMethods[name] = id
 			}
 		}
 
@@ -274,13 +307,13 @@ class ClassType extends Type {
 	addConstructor(type: ClassConstructorType) { // {{{
 		let id = type.identifier()
 		if id == -1 {
-			id = @sequences.constructor++
+			id = ++@sequences.constructors
 
 			type.identifier(id)
 		}
 		else {
-			if id >= @sequences.constructor {
-				@sequences.constructor = id + 1
+			if id > @sequences.constructors {
+				@sequences.constructors = id
 			}
 		}
 
@@ -298,30 +331,25 @@ class ClassType extends Type {
 
 		return id
 	} // }}}
-	addDestructor() { // {{{
-		@destructors++
-	} // }}}
 	addInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
-		@sequences.instanceMethods[name] ??= 0
+		if @instanceMethods[name] is not Array {
+			@instanceMethods[name] = []
+			@sequences.instanceMethods[name] = -1
+		}
 
 		let id = type.identifier()
 		if id == -1 {
-			id = @sequences.instanceMethods[name]++
+			id = ++@sequences.instanceMethods[name]
 
 			type.identifier(id)
 		}
 		else {
-			if id >= @sequences.instanceMethods[name] {
-				@sequences.instanceMethods[name] = id + 1
+			if id > @sequences.instanceMethods[name] {
+				@sequences.instanceMethods[name] = id
 			}
 		}
 
-		if @instanceMethods[name] is Array {
-			@instanceMethods[name].push(type)
-		}
-		else {
-			@instanceMethods[name] = [type]
-		}
+		@instanceMethods[name].push(type)
 
 		if @alteration {
 			type.flagAlteration()
@@ -460,11 +488,9 @@ class ClassType extends Type {
 	copyFrom(src: ClassType) { // {{{
 		@abstract = src._abstract
 		@alien = src._alien
-		@destructors = src._destructors
 		@extending = src._extending
 		@extends = src._extends
 		@hybrid = src._hybrid
-		@init = src._init
 		@sealed = src._sealed
 		@systemic = src._systemic
 
@@ -498,6 +524,19 @@ class ClassType extends Type {
 		}
 
 		return this
+	} // }}}
+	dedupAbstractMethod(name: String, type: ClassMethodType): Number? { // {{{
+		if const id = type.identifier() {
+			if @abstractMethods[name] is Array {
+				for const method in @abstractMethods[name] {
+					if method.identifier() == id {
+						return id
+					}
+				}
+			}
+		}
+
+		return this.addAbstractMethod(name, type)
 	} // }}}
 	dedupClassMethod(name: String, type: ClassMethodType): Number? { // {{{
 		if const id = type.identifier() {
@@ -549,7 +588,6 @@ class ClassType extends Type {
 
 		return this.addInstanceMethod(name, type)
 	} // }}}
-	destructors() => @destructors
 	export(references, mode: ExportMode) { // {{{
 		const exhaustive = this.isExhaustive()
 
@@ -560,7 +598,6 @@ class ClassType extends Type {
 				kind: TypeKind::Class
 				class: @alterationReference.toAlterationReference(references, mode)
 				exhaustive
-				init: @init
 				constructors: [constructor.export(references, mode) for const constructor in @constructors when constructor.isAlteration() && constructor.isExportable()]
 				instanceVariables: {}
 				classVariables: {}
@@ -599,9 +636,7 @@ class ClassType extends Type {
 				sealed: @sealed
 				systemic: @systemic
 				exhaustive
-				init: @init
 				constructors: [constructor.export(references, mode) for const constructor in @constructors]
-				destructors: @destructors
 				instanceVariables: {}
 				classVariables: {}
 				instanceMethods: {}
@@ -640,6 +675,12 @@ class ClassType extends Type {
 				export.extends = @extends.metaReference(references, mode)
 			}
 		}
+
+		export.sequences = [
+			@sequences.initializations
+			@sequences.defaults
+			@sequences.destructors
+		]
 
 		if exhaustive {
 			const exhaustiveness = {}
@@ -683,6 +724,8 @@ class ClassType extends Type {
 
 		@sequences.classMethods = Dictionary.clone(type._sequences.classMethods)
 		@sequences.instanceMethods = Dictionary.clone(type._sequences.instanceMethods)
+
+		@level = type.level():Number + 1
 	} // }}}
 	flagAbstract() { // {{{
 		@abstract = true
@@ -871,6 +914,7 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
+	getConstructorCount() => @sequences.destructors + 1
 	getHierarchy(name) { // {{{
 		if @extending {
 			let class = this.extends()
@@ -886,6 +930,18 @@ class ClassType extends Type {
 		else {
 			return [name]
 		}
+	} // }}}
+	getHybridConstructor(namedClass: NamedType<ClassType>): NamedType<ClassType>? { // {{{
+		if @sealed {
+			if @seal.constructors {
+				return namedClass
+			}
+		}
+		else if @extending {
+			return @extends.type().getHybridConstructor(@extends)
+		}
+
+		return null
 	} // }}}
 	getHybridMethod(name: String, namedClass: NamedType<ClassType>): NamedType<ClassType>? { // {{{
 		if @sealed {
@@ -979,7 +1035,7 @@ class ClassType extends Type {
 		if @instanceMethods[name] is Array {
 			for method in @instanceMethods[name] {
 				if method.min() == 0 && method.max() == 0 {
-					return method.returnType()
+					return method.getReturnType()
 				}
 			}
 		}
@@ -1057,7 +1113,7 @@ class ClassType extends Type {
 		}
 	} // }}}
 	hasConstructors() => @constructors.length != 0
-	hasDestructors() => @destructors != 0
+	hasDestructors() => @sequences.destructors != -1
 	hasExportableAlteration() { // {{{
 		if ?@alterationReference {
 			return @alterationReference._referenceIndex != -1 || @alterationReference.hasExportableAlteration()
@@ -1146,8 +1202,14 @@ class ClassType extends Type {
 		return false
 	} // }}}
 	hasSealedConstructors(): Boolean => @seal?.constructors
-	incInitializer() { // {{{
-		return ++@init
+	incDefaultSequence() { // {{{
+		return ++@sequences.defaults
+	} // }}}
+	incDestructorSequence() { // {{{
+		return ++@sequences.destructors
+	} // }}}
+	incInitializationSequence() { // {{{
+		return ++@sequences.initializations
 	} // }}}
 	incSharedMethod(name: String): Number { // {{{
 		if const value = @sharedMethods[name] {
@@ -1244,7 +1306,7 @@ class ClassType extends Type {
 	isExtending() => @extending
 	isFlexible() => @sealed
 	isHybrid() => @hybrid
-	isInitializing() => @init != 0
+	isInitializing() => @sequences.initializations != -1
 	isInstanceOf(target: ClassType) { // {{{
 		if this.equals(target) {
 			return true
@@ -1308,6 +1370,7 @@ class ClassType extends Type {
 	isMergeable(type) => type.isClass()
 	isPredefined() => @predefined
 	isSealable() => true
+	level() => @level
 	listClassMethods(name: String) { // {{{
 		if @classMethods[name] is Array {
 			return @classMethods[name]
@@ -1624,7 +1687,7 @@ class ClassMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
 			const scope = node.scope()
 
-			return new ClassMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
+			return new ClassMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} // }}}
 		fromMetadata(data, metadata, references, alterations, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { // {{{
 			const type = new ClassMethodType(scope)
@@ -1759,7 +1822,7 @@ class ClassMethodType extends FunctionType {
 			}
 		}
 	} // }}}
-	returnType(@returnType)
+	setReturnType(@returnType)
 	unflagAlteration(): this { // {{{
 		@alteration = false
 		@overwrite = null
@@ -1794,7 +1857,7 @@ class ClassConstructorType extends FunctionType {
 		fromAST(data, node: AbstractNode): ClassConstructorType { // {{{
 			const scope = node.scope()
 
-			return new ClassConstructorType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
+			return new ClassConstructorType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} // }}}
 		fromMetadata(data, metadata, references, alterations, queue, scope: Scope, node: AbstractNode): ClassConstructorType { // {{{
 			const type = new ClassConstructorType(scope)
@@ -1844,7 +1907,6 @@ class ClassConstructorType extends FunctionType {
 			parameters: [parameter.export(references, mode) for parameter in @parameters]
 			throws: [throw.toReference(references, mode) for throw in @throws]
 		}
-
 
 		if @class.isAbstract() {
 			export.inits = Dictionary.keys(@initVariables)

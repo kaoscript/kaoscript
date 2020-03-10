@@ -16,9 +16,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": false,
-      "init": 1,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {
         "_blue": {
           "access": 2,
@@ -93,7 +91,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -129,7 +127,7 @@
                 "type": "Number",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -138,7 +136,12 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        0,
+        -1,
+        -1
+      ]
     },
     {
       "kind": "enum",
@@ -149,7 +152,10 @@
         "RGB"
       ],
       "instanceMethods": {},
-      "staticMethods": {}
+      "staticMethods": {},
+      "sequences": [
+        -1
+      ]
     }
   ],
   "macros": []

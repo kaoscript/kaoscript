@@ -128,6 +128,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		@enum: EnumType
 		@enumName: NamedType<EnumType>
 		@enumRef: ReferenceType
+		@indigentValues: Array				= []
 		@instance: Boolean					= true
 		@override: Boolean					= false
 		@topNodes: Array					= []
@@ -188,11 +189,17 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		if @instance {
 			if @override {
-				const methods = @enum.listMatchingInstanceMethods(@name, @type, MatchingMode::ShiftableParameters)
+				if const method = @enum.getInstantiableMethod(@name, @parameters) {
+					@type = method.clone().flagAlteration()
 
-				if methods.length == 0 {
-					@override = false
-					@enum.addInstanceMethod(@name, @type)
+					const parameters = @type.parameters()
+
+					for const parameter, index in @parameters {
+						parameter.type(parameters[index])
+					}
+				}
+				else {
+					SyntaxException.throwNoOverridableMethod(@enum, @name, @parameters, this)
 				}
 			}
 			else {
@@ -206,7 +213,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 		}
 		else {
 			if @override {
-				NotImplementedException.throw(this)
+				NotSupportedException.throw(this)
 			}
 			else {
 				if @enum.hasMatchingStaticMethod(@name, @type, MatchingMode::ExactParameters) {
@@ -224,7 +231,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			switch @data.type.value.kind {
 				NodeKind::Identifier => {
 					if @data.type.value.name == 'auto' {
-						@type.returnType(@block.getUnpreparedType())
+						@type.setReturnType(@block.getUnpreparedType())
 
 						@autoTyping = true
 					}
@@ -243,16 +250,32 @@ class ImplementEnumMethodDeclaration extends Statement {
 			parameter.translate()
 		}
 
+		for const indigent in @indigentValues {
+			indigent.value.prepare()
+			indigent.value.translate()
+		}
+
 		if @autoTyping {
 			@block.prepare()
 
-			@type.returnType(@block.type())
+			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.returnType()).prepare()
+			@block.type(@type.getReturnType()).prepare()
 		}
 
 		@block.translate()
+	} // }}}
+	addIndigentValue(value: Expression, parameters) { // {{{
+		const name = `__ks_default_\(@enum.incDefaultSequence())`
+
+		@indigentValues.push({
+			name
+			value
+			parameters
+		})
+
+		return name
 	} // }}}
 	addTopNode(node) { // {{{
 		@topNodes.push(node)
@@ -266,6 +289,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 			return MatchingMode::ExactParameters
 		}
 	} // }}}
+	getOverridableVarname() => @enumName.name()
 	getParameterOffset() => @instance ? 1 : 0
 	getSharedName() => null
 	isAssertingParameter() => @options.rules.assertParameter
@@ -273,8 +297,24 @@ class ImplementEnumMethodDeclaration extends Statement {
 	isInstance() => @instance
 	isInstanceMethod() => @instance
 	isMethod() => true
+	isOverridableFunction() => true
 	name() => @name
 	parameters() => @parameters
+	toIndigentFragments(fragments) { // {{{
+		/* for const {name, value, parameters} in @indigentValues {
+		} */
+		for const indigent in @indigentValues {
+			const line = fragments.newLine()
+			const ctrl = line.newControl(null, false, false)
+
+			ctrl.code(`\(@enumName.name()).\(indigent.name) = function(\(indigent.parameters.join(', ')))`).step()
+
+			ctrl.newLine().code('return ').compile(indigent.value).done()
+
+			ctrl.done()
+			line.done()
+		}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const line = fragments.newLine()
 
@@ -299,6 +339,8 @@ class ImplementEnumMethodDeclaration extends Statement {
 
 		block.done()
 		line.done()
+
+		this.toIndigentFragments(fragments)
 	} // }}}
 	type() => @type
 }

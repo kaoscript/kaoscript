@@ -19,13 +19,16 @@
       "sealed": true,
       "systemic": false,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -36,9 +39,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -61,7 +62,12 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     },
     {
       "kind": "class",
@@ -71,9 +77,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
@@ -92,7 +96,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -108,6 +112,11 @@
       "extends": [
         0,
         "Error"
+      ],
+      "sequences": [
+        -1,
+        -1,
+        -1
       ]
     }
   ],

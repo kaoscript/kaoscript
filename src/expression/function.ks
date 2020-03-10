@@ -37,7 +37,7 @@ class AnonymousFunctionExpression extends Expression {
 		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
 
 		if @autoTyping {
-			@type.returnType(@block.getUnpreparedType())
+			@type.setReturnType(@block.getUnpreparedType())
 		}
 	} // }}}
 	translate() { // {{{
@@ -48,10 +48,10 @@ class AnonymousFunctionExpression extends Expression {
 		if @autoTyping {
 			@block.prepare()
 
-			@type.returnType(@block.type())
+			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.returnType()).prepare()
+			@block.type(@type.getReturnType()).prepare()
 		}
 
 		@block.translate()
@@ -72,6 +72,7 @@ class AnonymousFunctionExpression extends Expression {
 	isComputed() => true
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
+	isOverridableFunction() => false
 	isUsingVariable(name) => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
@@ -136,13 +137,13 @@ class ArrowFunctionExpression extends Expression {
 		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
 
 		if @autoTyping {
-			@type.returnType(@block.getUnpreparedType())
+			@type.setReturnType(@block.getUnpreparedType())
 		}
 
 		@usingThis = this.isUsingVariable('this')
 
 		if @es5 {
-			@variables = @block.listUsedVariables(@scope, [])
+			@variables = @block.listNonLocalVariables(@scope, [])
 
 			if @usingThis || @variables.length != 0 {
 				@shiftToAuthority = true
@@ -163,10 +164,10 @@ class ArrowFunctionExpression extends Expression {
 		if @autoTyping {
 			@block.prepare()
 
-			@type.returnType(@block.type())
+			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.returnType()).prepare()
+			@block.type(@type.getReturnType()).prepare()
 		}
 
 		@block.translate()
@@ -190,6 +191,7 @@ class ArrowFunctionExpression extends Expression {
 	isComputed() => true
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
+	isOverridableFunction() => false
 	isUsingVariable(name) { // {{{
 		for parameter in @parameters {
 			if parameter.isUsingVariable(name) {

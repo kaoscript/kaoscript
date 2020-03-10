@@ -66,12 +66,12 @@ class ArrayComprehensionForFrom extends Expression {
 								(@by != null && @by.isUsingVariable(name)) ||
 								(@when != null && @when.isUsingVariable(name)) ||
 								@body.isUsingVariable(name)
-	override listUsedVariables(scope, variables) { // {{{
-		@from.listUsedVariables(scope, variables)
-		@to.listUsedVariables(scope, variables)
-		@by?.listUsedVariables(scope, variables)
-		@when?.listUsedVariables(scope, variables)
-		@body?.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@from.listNonLocalVariables(scope, variables)
+		@to.listNonLocalVariables(scope, variables)
+		@by?.listNonLocalVariables(scope, variables)
+		@when?.listNonLocalVariables(scope, variables)
+		@body?.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}
@@ -221,10 +221,10 @@ class ArrayComprehensionForIn extends Expression {
 		@when.translate() if @when?
 	} // }}}
 	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
-	override listUsedVariables(scope, variables) { // {{{
-		@expression.listUsedVariables(scope, variables)
-		@when?.listUsedVariables(scope, variables)
-		@body?.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@expression.listNonLocalVariables(scope, variables)
+		@when?.listNonLocalVariables(scope, variables)
+		@body?.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}
@@ -363,10 +363,10 @@ class ArrayComprehensionForOf extends Expression {
 		@when.translate() if @when?
 	} // }}}
 	isUsingVariable(name) => @expression.isUsingVariable(name) || (@when != null && @when.isUsingVariable(name)) || @body.isUsingVariable(name)
-	override listUsedVariables(scope, variables) { // {{{
-		@expression.listUsedVariables(scope, variables)
-		@when?.listUsedVariables(scope, variables)
-		@body?.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@expression.listNonLocalVariables(scope, variables)
+		@when?.listNonLocalVariables(scope, variables)
+		@body?.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}
@@ -476,12 +476,12 @@ class ArrayComprehensionForRange extends Expression {
 								(@by != null && @by.isUsingVariable(name)) ||
 								(@when != null && @when.isUsingVariable(name)) ||
 								@body.isUsingVariable(name)
-	override listUsedVariables(scope, variables) { // {{{
-		@from.listUsedVariables(scope, variables)
-		@to.listUsedVariables(scope, variables)
-		@by?.listUsedVariables(scope, variables)
-		@when?.listUsedVariables(scope, variables)
-		@body?.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@from.listNonLocalVariables(scope, variables)
+		@to.listNonLocalVariables(scope, variables)
+		@by?.listNonLocalVariables(scope, variables)
+		@when?.listNonLocalVariables(scope, variables)
+		@body?.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}

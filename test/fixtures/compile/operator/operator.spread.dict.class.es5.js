@@ -7,11 +7,11 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		},
-		__ks_init_1: function() {
+		__ks_init_0: function() {
 			this._values = new Dictionary();
 		},
 		__ks_init: function() {
-			Foobar.prototype.__ks_init_1.call(this);
+			Foobar.prototype.__ks_init_0.call(this);
 		},
 		__ks_cons: function(args) {
 			if(args.length !== 0) {

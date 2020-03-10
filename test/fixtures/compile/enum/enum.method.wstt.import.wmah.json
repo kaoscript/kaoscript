@@ -35,7 +35,7 @@
                 "type": "String",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -44,7 +44,10 @@
             "throws": []
           }
         ]
-      }
+      },
+      "sequences": [
+        -1
+      ]
     }
   ],
   "macros": []

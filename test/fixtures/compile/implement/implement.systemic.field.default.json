@@ -17,13 +17,16 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -32,7 +35,6 @@
         "reference": 0
       },
       "exhaustive": true,
-      "init": 1,
       "constructors": [
         {
           "id": 0,
@@ -57,7 +59,7 @@
               },
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": []
@@ -74,7 +76,7 @@
               "type": "Number",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": []
@@ -91,49 +93,59 @@
               "type": "Any",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             },
             {
               "name": "month",
               "type": "Any",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             },
             {
               "name": "day",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6MzN9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjozNH19"
             },
             {
               "name": "hours",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NDR9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo0NX19"
             },
             {
               "name": "minutes",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NTd9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo1OH19"
             },
             {
               "name": "seconds",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NzB9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo3MX19"
             },
             {
               "name": "milliseconds",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6ODh9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo4OX19"
             }
           ],
           "throws": []
@@ -150,56 +162,66 @@
               "type": "Any",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             },
             {
               "name": "month",
               "type": "Any",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             },
             {
               "name": "day",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjMzfSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjM0fX0="
             },
             {
               "name": "hours",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjQ0fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjQ1fX0="
             },
             {
               "name": "minutes",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjU3fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjU4fX0="
             },
             {
               "name": "seconds",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjcwfSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjcxfX0="
             },
             {
               "name": "milliseconds",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true,
+              "comprehensive": true,
+              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjg4fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjg5fX0="
             },
             {
               "name": "timezone",
               "type": "Any",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": [],
@@ -219,6 +241,11 @@
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
+      "sequences": [
+        0,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     }
   ],

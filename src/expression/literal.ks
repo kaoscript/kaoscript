@@ -14,7 +14,7 @@ class Literal extends Expression {
 	hasExceptions() => false
 	isComposite() => false
 	listAssignments(array) => array
-	override listUsedVariables(scope, variables) => variables
+	override listNonLocalVariables(scope, variables) => variables
 	toFragments(fragments, mode) { // {{{
 		if @data {
 			fragments.code(@value, @data)
@@ -143,13 +143,35 @@ class IdentifierLiteral extends Literal {
 	isRedeclared() => @scope.isRedeclaredVariable(@value)
 	isRenamed() => @scope.isRenamedVariable(@value)
 	isInferable() => true
+	override isUsingNonLocalVariables(scope) { // {{{
+		if @isVariable {
+			const variable = @scope.getVariable(@value, @line)
+
+			if @value != 'this' && !variable.isPredefined() && !scope.hasDeclaredVariable(@value) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
 	isUsingVariable(name) => @value == name
 	listAssignments(array) { // {{{
 		array.push(@name)
 
 		return array
 	} // }}}
-	override listUsedVariables(scope, variables) { // {{{
+	override listLocalVariables(scope, variables) { // {{{
+		if @isVariable {
+			const variable = @scope.getVariable(@value, @line)
+
+			if @value != 'this' && !variable.isPredefined() && scope.hasDeclaredVariable(@value) {
+				variables.pushUniq(variable)
+			}
+		}
+
+		return variables
+	} // }}}
+	override listNonLocalVariables(scope, variables) { // {{{
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 

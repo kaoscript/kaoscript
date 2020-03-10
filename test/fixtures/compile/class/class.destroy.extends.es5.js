@@ -20,11 +20,11 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		},
-		__ks_init_1: function() {
+		__ks_init_0: function() {
 			this._color = "black";
 		},
 		__ks_init: function() {
-			Shape.prototype.__ks_init_1.call(this);
+			Shape.prototype.__ks_init_0.call(this);
 		},
 		__ks_cons_0: function(color) {
 			if(arguments.length < 1) {
@@ -74,12 +74,12 @@ module.exports = function() {
 				Rectangle.__ks_destroy_0(that);
 			}
 		},
-		__ks_init_1: function() {
+		__ks_init_0: function() {
 			this._foo = "bar";
 		},
 		__ks_init: function() {
 			Shape.prototype.__ks_init.call(this);
-			Rectangle.prototype.__ks_init_1.call(this);
+			Rectangle.prototype.__ks_init_0.call(this);
 		},
 		__ks_cons_0: function(color) {
 			if(arguments.length < 1) {

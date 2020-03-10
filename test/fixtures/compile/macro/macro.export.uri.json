@@ -12,15 +12,18 @@
       "alien": false,
       "hybrid": false,
       "sealed": false,
-	  "systemic": false,
-	  "exhaustive": true,
-      "init": 0,
+      "systemic": false,
+      "exhaustive": true,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": [

@@ -56,9 +56,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 1,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {
         "_name": {
           "access": 2,
@@ -113,7 +111,7 @@
                 "type": "String",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -124,7 +122,12 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        0,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

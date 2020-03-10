@@ -14,9 +14,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 1,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {
         "_name": {
           "access": 2,
@@ -33,6 +31,11 @@
       "extends": [
         1,
         "Shape"
+      ],
+      "sequences": [
+        0,
+        -1,
+        -1
       ]
     },
     {
@@ -43,7 +46,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 1,
       "constructors": [
         {
           "id": 0,
@@ -57,13 +59,12 @@
               "type": "String",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {
         "_color": {
           "access": 2,
@@ -84,7 +85,12 @@
       },
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        0,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

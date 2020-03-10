@@ -304,6 +304,7 @@ class EnumMethodDeclaration extends Statement {
 		@awaiting: Boolean				= false
 		@exit: Boolean					= false
 		@name: String
+		@indigentValues: Array			= []
 		@instance: Boolean				= true
 		@parameters: Array<Parameter>	= []
 		@topNodes: Array				= []
@@ -375,7 +376,7 @@ class EnumMethodDeclaration extends Statement {
 		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
 
 		if @autoTyping {
-			@type.returnType(@block.getUnpreparedType())
+			@type.setReturnType(@block.getUnpreparedType())
 		}
 	} // }}}
 	translate() { // {{{
@@ -383,13 +384,18 @@ class EnumMethodDeclaration extends Statement {
 			parameter.translate()
 		}
 
+		for const indigent in @indigentValues {
+			indigent.value.prepare()
+			indigent.value.translate()
+		}
+
 		if @autoTyping {
 			@block.prepare()
 
-			@type.returnType(@block.type())
+			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.returnType()).prepare()
+			@block.type(@type.getReturnType()).prepare()
 		}
 
 		@block.translate()
@@ -397,15 +403,43 @@ class EnumMethodDeclaration extends Statement {
 		@awaiting = @block.isAwait()
 		@exit = @block.isExit()
 	} // }}}
+	addIndigentValue(value: Expression, parameters) { // {{{
+		const name = `__ks_default_\(@parent.type().type().incDefaultSequence())`
+
+		@indigentValues.push({
+			name
+			value
+			parameters
+		})
+
+		return name
+	} // }}}
 	addTopNode(node) { // {{{
 		@topNodes.push(node)
 	} // }}}
 	authority() => this
+	getOverridableVarname() => @parent.name()
 	getParameterOffset() => @instance ? 1 : 0
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
+	isOverridableFunction() => true
 	parameters() => @parameters
+	toIndigentFragments(fragments) { // {{{
+		/* for const {name, value, parameters} in @indigentValues {
+		} */
+		for const indigent in @indigentValues {
+			const line = fragments.newLine()
+			const ctrl = line.newControl(null, false, false)
+
+			ctrl.code(`\(@parent.name()).\(indigent.name) = function(\(indigent.parameters.join(', ')))`).step()
+
+			ctrl.newLine().code('return ').compile(indigent.value).done()
+
+			ctrl.done()
+			line.done()
+		}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const line = fragments.newLine()
 		const ctrl = line.newControl(null, false, false)
@@ -432,6 +466,8 @@ class EnumMethodDeclaration extends Statement {
 
 		ctrl.done()
 		line.done()
+
+		this.toIndigentFragments(fragments)
 	} // }}}
 	type() => @type
 }

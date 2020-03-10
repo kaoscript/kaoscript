@@ -1,0 +1,1 @@
+SyntaxException: The method "Shape.draw()" can't override a suitable method (line 16, file "fixtures/compile/class/class.override.ndef.wk.missing.ks")

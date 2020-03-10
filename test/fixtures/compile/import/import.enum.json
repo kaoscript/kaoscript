@@ -24,7 +24,7 @@
               "type": "Any",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "returns": "Any?",
@@ -46,7 +46,10 @@
         "DarkBlue"
       ],
       "instanceMethods": {},
-      "staticMethods": {}
+      "staticMethods": {},
+      "sequences": [
+        -1
+      ]
     }
   ],
   "macros": []

@@ -1,4 +1,7 @@
 class DiscloseDeclaration extends Statement {
+	private lateinit {
+		@type: Type
+	}
 	analyse()
 	prepare() { // {{{
 		const variable = @scope.getVariable(@data.name.name)
@@ -17,16 +20,16 @@ class DiscloseDeclaration extends Statement {
 
 		variable.prepareAlteration()
 
-		const type = variable.getDeclaredType().type()
+		@type = variable.getDeclaredType().type()
 
-		type.setExhaustive(true)
+		@type.setExhaustive(true)
 
 		if @options.rules.nonExhaustive {
-			type.setExhaustive(false)
+			@type.setExhaustive(false)
 		}
 
 		for const data in @data.members {
-			type.addPropertyFromAST(data, this)
+			@type.addPropertyFromAST(data, this)
 		}
 	} // }}}
 	translate()

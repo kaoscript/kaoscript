@@ -336,24 +336,6 @@ class CallExpression extends Expression {
 	} // }}}
 	isNullable() => @nullable
 	isNullableComputed() => @nullableComputed
-	isUsingVariable(name) { // {{{
-		if @object != null {
-			if @object.isUsingVariable(name) {
-				return true
-			}
-		}
-		else if @data.callee.kind == NodeKind::Identifier && @data.callee.name == name {
-			return true
-		}
-
-		for const argument in @arguments {
-			if argument.isUsingVariable(name) {
-				return true
-			}
-		}
-
-		return false
-	} // }}}
 	isUsingInstanceVariable(name) { // {{{
 		if @object != null {
 			if @object.isUsingInstanceVariable(name) {
@@ -368,6 +350,24 @@ class CallExpression extends Expression {
 			if argument.isUsingInstanceVariable(name) {
 				return true
 			}
+		}
+
+		return false
+	} // }}}
+	override isUsingNonLocalVariables(scope) { // {{{
+		if @object != null {
+			return true if @object.isUsingNonLocalVariables(scope)
+		}
+		else if @data.callee.kind == NodeKind::Identifier {
+			const variable = @scope.getVariable(@data.callee.name)
+
+			if !scope.hasDeclaredVariable(variable.name()) {
+				return true
+			}
+		}
+
+		for const argument in @arguments {
+			return true if argument.isUsingNonLocalVariables(scope)
 		}
 
 		return false
@@ -387,9 +387,45 @@ class CallExpression extends Expression {
 
 		return false
 	} // }}}
-	override listUsedVariables(scope, variables) { // {{{
+	isUsingVariable(name) { // {{{
 		if @object != null {
-			@object.listUsedVariables(scope, variables)
+			if @object.isUsingVariable(name) {
+				return true
+			}
+		}
+		else if @data.callee.kind == NodeKind::Identifier && @data.callee.name == name {
+			return true
+		}
+
+		for const argument in @arguments {
+			if argument.isUsingVariable(name) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	override listLocalVariables(scope, variables) { // {{{
+		if @object != null {
+			@object.listLocalVariables(scope, variables)
+		}
+		else if @data.callee.kind == NodeKind::Identifier {
+			const variable = @scope.getVariable(@data.callee.name)
+
+			if scope.hasDeclaredVariable(variable.name()) {
+				variables.pushUniq(variable)
+			}
+		}
+
+		for const argument in @arguments {
+			argument.listLocalVariables(scope, variables)
+		}
+
+		return variables
+	} // }}}
+	override listNonLocalVariables(scope, variables) { // {{{
+		if @object != null {
+			@object.listNonLocalVariables(scope, variables)
 		}
 		else if @data.callee.kind == NodeKind::Identifier {
 			const variable = @scope.getVariable(@data.callee.name)
@@ -400,7 +436,7 @@ class CallExpression extends Expression {
 		}
 
 		for const argument in @arguments {
-			argument.listUsedVariables(scope, variables)
+			argument.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
@@ -434,7 +470,7 @@ class CallExpression extends Expression {
 				const union = new UnionType(this.scope())
 
 				for const function in matches {
-					union.addType(function.returnType())
+					union.addType(function.getReturnType())
 				}
 
 				this.addCallee(new DefaultCallee(@data, @object, union.type(), this))
@@ -479,7 +515,7 @@ class CallExpression extends Expression {
 							sealed = true
 						}
 
-						union.addType(method.returnType())
+						union.addType(method.getReturnType())
 					}
 
 					if union.length() == 0 {
@@ -530,7 +566,7 @@ class CallExpression extends Expression {
 					const union = new UnionType(this.scope())
 
 					for const method in methods {
-						union.addType(method.returnType())
+						union.addType(method.getReturnType())
 					}
 
 					if union.length() == 0 {
@@ -633,7 +669,7 @@ class CallExpression extends Expression {
 							sealed = true
 						}
 
-						union.addType(method.returnType())
+						union.addType(method.getReturnType())
 					}
 
 					if union.length() == 0 {
@@ -698,7 +734,7 @@ class CallExpression extends Expression {
 					const union = new UnionType(this.scope())
 
 					for const method in methods {
-						union.addType(method.returnType())
+						union.addType(method.getReturnType())
 					}
 
 					if union.length() == 0 {
@@ -745,7 +781,7 @@ class CallExpression extends Expression {
 	makeNamespaceCallee(property, sealed, name) { // {{{
 		if property is FunctionType {
 			if sealed {
-				this.addCallee(new SealedFunctionCallee(@data, name, property, property.returnType(), this))
+				this.addCallee(new SealedFunctionCallee(@data, name, property, property.getReturnType(), this))
 			}
 			else {
 				this.makeCallee(property, @property)
@@ -963,7 +999,7 @@ class DefaultCallee extends Callee {
 		else if type is FunctionType {
 			this.validate(type, node)
 
-			@type = type.returnType()
+			@type = type.getReturnType()
 		}
 		else if type.isStruct() || type.isTuple() {
 			@type = node.scope().reference(type)

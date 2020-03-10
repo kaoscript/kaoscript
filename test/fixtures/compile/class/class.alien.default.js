@@ -22,11 +22,11 @@ module.exports = function() {
 			this.constructor.prototype.__ks_init();
 			this._z = x * y;
 		}
-		__ks_init_1() {
+		__ks_init_0() {
 			this._z = 0;
 		}
 		__ks_init() {
-			ClassB.prototype.__ks_init_1.call(this);
+			ClassB.prototype.__ks_init_0.call(this);
 		}
 	}
 	class ClassC extends ClassB {
@@ -49,12 +49,12 @@ module.exports = function() {
 			super(x, y);
 			this._w = this._z * this._z;
 		}
-		__ks_init_1() {
+		__ks_init_0() {
 			this._w = 0;
 		}
 		__ks_init() {
 			ClassB.prototype.__ks_init.call(this);
-			ClassC.prototype.__ks_init_1.call(this);
+			ClassC.prototype.__ks_init_0.call(this);
 		}
 	}
 	return {

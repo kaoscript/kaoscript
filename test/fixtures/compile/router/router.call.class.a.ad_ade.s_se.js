@@ -4,11 +4,11 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		}
-		__ks_init_1() {
+		__ks_init_0() {
 			this.a = "";
 		}
 		__ks_init() {
-			Master.prototype.__ks_init_1.call(this);
+			Master.prototype.__ks_init_0.call(this);
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
@@ -31,12 +31,12 @@ module.exports = function() {
 		}
 	}
 	class Foobar extends Master {
-		__ks_init_1() {
+		__ks_init_0() {
 			this.b = "";
 		}
 		__ks_init() {
 			Master.prototype.__ks_init.call(this);
-			Foobar.prototype.__ks_init_1.call(this);
+			Foobar.prototype.__ks_init_0.call(this);
 		}
 		__ks_cons(args) {
 			Master.prototype.__ks_cons.call(this, args);

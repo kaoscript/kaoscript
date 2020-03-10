@@ -14,7 +14,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [
         {
           "id": 0,
@@ -26,7 +25,6 @@
           "throws": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
@@ -34,6 +32,11 @@
       "extends": [
         1,
         "Bar"
+      ],
+      "sequences": [
+        -1,
+        -1,
+        -1
       ]
     },
     {
@@ -44,7 +47,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [
         {
           "id": 0,
@@ -62,13 +64,12 @@
               },
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {
         "_foo": {
           "access": 2,
@@ -104,7 +105,12 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     },
     {
       "kind": "class",
@@ -114,9 +120,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -135,7 +139,12 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

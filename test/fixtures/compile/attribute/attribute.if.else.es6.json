@@ -17,9 +17,7 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {
         "length": {
           "access": 4,
@@ -33,6 +31,11 @@
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -41,7 +44,6 @@
         "reference": 0
       },
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
@@ -62,14 +64,16 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "length",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0NH0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0Nn19"
               }
             ],
             "returns": "Boolean",
@@ -79,6 +83,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     }
   ],

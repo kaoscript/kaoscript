@@ -49,12 +49,12 @@ module.exports = function() {
 	}
 	var __ks_Shape = {};
 	class Rectangle extends Shape {
-		__ks_init_1() {
+		__ks_init_0() {
 			this._foo = "bar";
 		}
 		__ks_init() {
 			Shape.prototype.__ks_init.call(this);
-			Rectangle.prototype.__ks_init_1.call(this);
+			Rectangle.prototype.__ks_init_0.call(this);
 		}
 		__ks_cons_0(color) {
 			if(arguments.length < 1) {

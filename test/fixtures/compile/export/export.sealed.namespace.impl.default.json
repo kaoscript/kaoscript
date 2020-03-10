@@ -25,9 +25,7 @@
       "sealed": true,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -47,6 +45,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {

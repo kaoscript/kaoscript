@@ -59,6 +59,8 @@ abstract class Expression extends AbstractNode {
 	isNullableComputed() => this.isComputed()
 	// if the expression is the given instance variable
 	isUsingInstanceVariable(name) => false
+	// if the expression is using any non-local vraiables
+	isUsingNonLocalVariables(scope: Scope): Boolean => false
 	// if the expression needs to use a setter function to assign a value
 	isUsingSetter() => false
 	// if the expression is the given static variable
@@ -67,7 +69,8 @@ abstract class Expression extends AbstractNode {
 	isUsingVariable(name) => false
 	// if the expression generates multiple assignments
 	isSplitAssignment() => false
-	listUsedVariables(scope: Scope, variables: Array): Array => variables
+	listLocalVariables(scope: Scope, variables: Array): Array => variables
+	listNonLocalVariables(scope: Scope, variables: Array): Array => variables
 	releaseReusable()
 	setAssignment(type: AssignmentType)
 	setCastingEnum(@castingEnum)

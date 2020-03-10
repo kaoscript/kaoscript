@@ -84,7 +84,7 @@ module.exports = function() {
 		})();
 		return d;
 	})());
-	Color.prototype.__ks_init_1 = function() {
+	Color.prototype.__ks_init_0 = function() {
 		this._green = 0;
 	};
 	Color.prototype.__ks_func_green_0 = function() {
@@ -100,7 +100,7 @@ module.exports = function() {
 		return this.setField("green", value);
 	};
 	Color.prototype.__ks_init = function() {
-		Color.prototype.__ks_init_1.call(this);
+		Color.prototype.__ks_init_0.call(this);
 	};
 	Color.prototype.green = function() {
 		if(arguments.length === 0) {

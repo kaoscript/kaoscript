@@ -420,7 +420,7 @@ class FunctionDeclarator extends AbstractNode {
 		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
 
 		if @autoTyping {
-			@type.returnType(@block.getUnpreparedType())
+			@type.setReturnType(@block.getUnpreparedType())
 		}
 	} // }}}
 	translate() { // {{{
@@ -435,10 +435,10 @@ class FunctionDeclarator extends AbstractNode {
 		if @autoTyping {
 			@block.prepare()
 
-			@type.returnType(@block.type())
+			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.returnType()).prepare()
+			@block.type(@type.getReturnType()).prepare()
 		}
 
 		@block.translate()
@@ -461,6 +461,7 @@ class FunctionDeclarator extends AbstractNode {
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => false
 	isJumpable() => false
+	isOverridableFunction() => false
 	parameters() => @parameters
 	toAwaitExpressionFragments(fragments, parameters, statements) { // {{{
 		fragments.code('(__ks_e')

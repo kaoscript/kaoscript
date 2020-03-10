@@ -33,9 +33,9 @@ class SequenceExpression extends Expression {
 
 		return false
 	} // }}}
-	override listUsedVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { // {{{
 		for const expression in @expressions {
-			expression.listUsedVariables(scope, variables)
+			expression.listNonLocalVariables(scope, variables)
 		}
 
 		return variables

@@ -102,9 +102,9 @@ class DictionaryExpression extends Expression {
 
 		return false
 	} // }}}
-	override listUsedVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { // {{{
 		for const property in @properties {
-			property.listUsedVariables(scope, variables)
+			property.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
@@ -271,7 +271,7 @@ class DictionaryLiteralMember extends Expression {
 	} // }}}
 	acquireReusable(acquire) => @value.acquireReusable(acquire)
 	isUsingVariable(name) => @value.isUsingVariable(name)
-	override listUsedVariables(scope, variables) => @value.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
 	name() => @name.value()
 	releaseReusable() => @value.releaseReusable()
 	toFragments(fragments, mode) { // {{{
@@ -331,9 +331,9 @@ class DictionaryComputedMember extends Expression {
 		@value.acquireReusable(acquire)
 	} // }}}
 	isUsingVariable(name) => @name.isUsingVariable(name) || @value.isUsingVariable(name)
-	override listUsedVariables(scope, variables) { // {{{
-		@name.listUsedVariables(scope, variables)
-		@value.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@name.listNonLocalVariables(scope, variables)
+		@value.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}
@@ -377,7 +377,7 @@ class DictionaryThisMember extends Expression {
 		@value.translate()
 	} // }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
-	override listUsedVariables(scope, variables) => @value.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
 	toComputedFragments(fragments, name) { // {{{
 		fragments
 			.code(name)
@@ -412,7 +412,7 @@ class DictionarySpreadMember extends Expression {
 		@value.translate()
 	} // }}}
 	isUsingVariable(name) => @value.isUsingVariable(name)
-	override listUsedVariables(scope, variables) => @value.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) => @value.listNonLocalVariables(scope, variables)
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@value)
 	} // }}}

@@ -1,7 +1,7 @@
 var {initFlag, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Date = {};
-	__ks_Date.__ks_init_1 = function(that) {
+	__ks_Date.__ks_init_0 = function(that) {
 		that._timezone = "Etc/UTC";
 	};
 	__ks_Date.__ks_get_timezone = function(that) {
@@ -48,7 +48,7 @@ module.exports = function() {
 		return that;
 	};
 	__ks_Date.__ks_init = function(that) {
-		__ks_Date.__ks_init_1(that);
+		__ks_Date.__ks_init_0(that);
 		that[initFlag] = true;
 	};
 	__ks_Date.new = function() {

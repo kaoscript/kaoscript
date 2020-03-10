@@ -50,12 +50,12 @@ module.exports = function() {
 			};
 			__ks_cons(arguments);
 		}
-		__ks_init_1() {
+		__ks_init_0() {
 			this.foobar = "foobar";
 			this.quxbaz = 42;
 		}
 		__ks_init() {
-			ClassB.prototype.__ks_init_1.call(this);
+			ClassB.prototype.__ks_init_0.call(this);
 		}
 	}
 	class ClassC extends ClassB {

@@ -27,14 +27,14 @@
               "type": "Any?",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true
             },
             {
               "name": "radix",
               "type": "Any?",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true
             }
           ],
           "returns": "Number",

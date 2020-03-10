@@ -192,9 +192,9 @@ class Block extends AbstractNode {
 
 		return false
 	} // }}}
-	listUsedVariables(scope: Scope, variables: Array) { // {{{
+	listNonLocalVariables(scope: Scope, variables: Array) { // {{{
 		for const statement in @statements {
-			statement.listUsedVariables(scope, variables)
+			statement.listNonLocalVariables(scope, variables)
 		}
 
 		return variables

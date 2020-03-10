@@ -109,7 +109,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		@autoTyping = @data.type?.kind == NodeKind::ReturnTypeReference
 
 		if @autoTyping {
-			@type.returnType(@block.getUnpreparedType())
+			@type.setReturnType(@block.getUnpreparedType())
 		}
 	} // }}}
 	translate() { // {{{
@@ -120,10 +120,10 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 		if @autoTyping {
 			@block.prepare()
 
-			@type.returnType(@block.type())
+			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.returnType()).prepare()
+			@block.type(@type.getReturnType()).prepare()
 		}
 
 		@block.translate()
@@ -141,6 +141,7 @@ class ImplementNamespaceFunctionDeclaration extends Statement {
 	isInstance() => false
 	isInstanceMethod() => false
 	isMethod() => true
+	isOverridableFunction() => false
 	name() => @name
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{

@@ -14,9 +14,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 1,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {
         "PI": {
           "access": 4,
@@ -29,7 +27,12 @@
       },
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        0,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

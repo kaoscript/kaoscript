@@ -19,9 +19,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
@@ -41,6 +39,11 @@
           }
         ]
       },
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "exhaustiveness": {
         "classMethods": {
           "foobar": false

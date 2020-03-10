@@ -169,14 +169,14 @@ abstract class Type {
 				}
 				NodeKind::FunctionDeclaration, NodeKind::MethodDeclaration => {
 					if data.parameters? {
-						return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters], data, node)
+						return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters], data, node)
 					}
 					else {
 						return new FunctionType([new ParameterType(scope, AnyType.NullableUnexplicit, 0, Infinity)] as Array<ParameterType>, data, node)
 					}
 				}
 				NodeKind::FunctionExpression, NodeKind::MethodDeclaration => {
-					return new FunctionType([Type.fromAST(parameter, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
+					return new FunctionType([ParameterType.fromAST(parameter, false, scope, defined, node) for parameter in data.parameters] as Array<ParameterType>, data, node)
 				}
 				NodeKind::FusionType => {
 					return new FusionType(scope, [Type.fromAST(type, scope, defined, node) for type in data.types])
@@ -204,47 +204,6 @@ abstract class Type {
 				}
 				NodeKind::NumericExpression => {
 					return scope.reference('Number')
-				}
-				NodeKind::Parameter => {
-					let type = ?data.type ? Type.fromAST(data.type, scope, defined, node) : AnyType.Unexplicit
-
-					let default: Number = 0
-					let min: Number = 1
-					let max: Number = 1
-
-					if data.defaultValue? {
-						default = 1
-						min = 0
-					}
-
-					let nf = true
-					for modifier in data.modifiers while nf {
-						if modifier.kind == ModifierKind::Rest {
-							if modifier.arity {
-								min = modifier.arity.min
-								max = modifier.arity.max
-							}
-							else {
-								min = 0
-								max = Infinity
-							}
-
-							nf = true
-						}
-					}
-
-					let name = null
-					if data.name? {
-						if data.name.kind == NodeKind::Identifier {
-							name = data.name.name
-						}
-					}
-					else {
-						type = type.setNullable(true)
-					}
-
-
-					return new ParameterType(scope, name, type, min, max, default)
 				}
 				NodeKind::TypeReference => {
 					if data.elements? {

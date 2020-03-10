@@ -56,10 +56,10 @@ class IfExpression extends Expression {
 	} // }}}
 	isComputed() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenTrue.isUsingVariable(name) || @whenFalse?.isUsingVariable(name)
-	override listUsedVariables(scope, variables) { // {{{
-		@condition.listUsedVariables(scope, variables)
-		@whenTrue.listUsedVariables(scope, variables)
-		@whenFalse?.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@condition.listNonLocalVariables(scope, variables)
+		@whenTrue.listNonLocalVariables(scope, variables)
+		@whenFalse?.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}

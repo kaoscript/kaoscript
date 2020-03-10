@@ -42,9 +42,9 @@ class TemplateExpression extends Expression {
 		return false
 	} // }}}
 	isComputed() => @elements.length > 1 || !@isString
-	override listUsedVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { // {{{
 		for const element in @elements {
-			element.listUsedVariables(scope, variables)
+			element.listNonLocalVariables(scope, variables)
 		}
 
 		return variables

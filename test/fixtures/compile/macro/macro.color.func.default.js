@@ -9,11 +9,11 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		}
-		__ks_init_1() {
+		__ks_init_0() {
 			this._alpha = 1;
 		}
 		__ks_init() {
-			Color.prototype.__ks_init_1.call(this);
+			Color.prototype.__ks_init_0.call(this);
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {
@@ -127,13 +127,13 @@ module.exports = function() {
 		})();
 		return d;
 	})());
-	Color.prototype.__ks_init_2 = function() {
+	Color.prototype.__ks_init_1 = function() {
 		this._red = 0;
 	};
-	Color.prototype.__ks_init_3 = function() {
+	Color.prototype.__ks_init_2 = function() {
 		this._green = 0;
 	};
-	Color.prototype.__ks_init_4 = function() {
+	Color.prototype.__ks_init_3 = function() {
 		this._blue = 0;
 	};
 	Color.prototype.__ks_func_red_0 = function() {
@@ -173,10 +173,10 @@ module.exports = function() {
 		return this.setField("blue", value);
 	};
 	Color.prototype.__ks_init = function() {
+		Color.prototype.__ks_init_0.call(this);
 		Color.prototype.__ks_init_1.call(this);
 		Color.prototype.__ks_init_2.call(this);
 		Color.prototype.__ks_init_3.call(this);
-		Color.prototype.__ks_init_4.call(this);
 	};
 	Color.prototype.red = function() {
 		if(arguments.length === 0) {

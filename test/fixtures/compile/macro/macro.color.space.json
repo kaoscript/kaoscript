@@ -14,7 +14,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 7,
       "constructors": [
         {
           "id": 0,
@@ -28,13 +27,12 @@
               "type": "Any",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "throws": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {
         "_dummy": {
           "access": 2,
@@ -141,7 +139,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -169,7 +167,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "percentage",
@@ -178,7 +176,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "space",
@@ -187,14 +185,18 @@
                 },
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjozMiwiZW51bSI6eyJraW5kIjo1MiwibmFtZSI6IlNwYWNlIiwic3RhcnQiOnsibGluZSI6NjkxLCJjb2x1bW4iOjU2fSwiZW5kIjp7ImxpbmUiOjY5MSwiY29sdW1uIjo2MX19LCJtZW1iZXIiOnsia2luZCI6NTIsIm5hbWUiOiJTUkdCIiwic3RhcnQiOnsibGluZSI6NjkxLCJjb2x1bW4iOjYzfSwiZW5kIjp7ImxpbmUiOjY5MSwiY29sdW1uIjo2N319LCJzdGFydCI6eyJsaW5lIjo2OTEsImNvbHVtbiI6NTZ9LCJlbmQiOnsibGluZSI6NjkxLCJjb2x1bW4iOjY3fX0="
               },
               {
                 "name": "alpha",
-                "type": "Boolean?",
+                "type": "Boolean",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NjkxLCJjb2x1bW4iOjgzfSwiZW5kIjp7ImxpbmUiOjY5MSwiY29sdW1uIjo4OH19"
               }
             ],
             "returns": {
@@ -226,7 +228,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -268,7 +270,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -294,7 +296,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -320,7 +322,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -346,7 +348,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Boolean",
@@ -365,10 +367,12 @@
             "parameters": [
               {
                 "name": "format",
-                "type": "String?",
+                "type": "String",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3MSwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjUyLCJuYW1lIjoidGhpcyIsInN0YXJ0Ijp7ImxpbmUiOjgyNSwiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo4MjUsImNvbHVtbiI6MzB9fSwicHJvcGVydHkiOnsia2luZCI6NTIsIm5hbWUiOiJfc3BhY2UiLCJzdGFydCI6eyJsaW5lIjo4MjUsImNvbHVtbiI6MzF9LCJlbmQiOnsibGluZSI6ODI1LCJjb2x1bW4iOjM3fX0sInN0YXJ0Ijp7ImxpbmUiOjgyNSwiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo4MjUsImNvbHVtbiI6Mzd9fQ=="
               }
             ],
             "returns": "Any?",
@@ -390,7 +394,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -414,7 +418,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -438,7 +442,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "length",
@@ -447,7 +451,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -474,10 +478,12 @@
             "parameters": [
               {
                 "name": "model",
-                "type": "String?",
+                "type": "String",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo2OCwidmFsdWUiOiJCVDcwOSIsInN0YXJ0Ijp7ImxpbmUiOjg4NCwiY29sdW1uIjoyOH0sImVuZCI6eyJsaW5lIjo4ODQsImNvbHVtbiI6MzV9fQ=="
               }
             ],
             "returns": {
@@ -557,7 +563,7 @@
                 "type": "String",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -617,7 +623,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -643,14 +649,16 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "tripleA",
-                "type": "Boolean?",
+                "type": "Boolean",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6OTgxLCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjk4MSwiY29sdW1uIjo0Nn19"
               }
             ],
             "returns": "Boolean",
@@ -682,7 +690,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -712,7 +720,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "value",
@@ -725,7 +733,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -751,7 +759,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -789,7 +797,7 @@
                 "type": "String",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -817,7 +825,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -843,7 +851,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -879,7 +887,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -913,7 +921,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -947,7 +955,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -981,7 +989,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -1015,7 +1023,7 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -1039,7 +1047,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -1069,7 +1077,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -1099,7 +1107,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -1127,7 +1135,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -1157,14 +1165,14 @@
                 "type": "String",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "formatter",
                 "type": "Function",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Void",
@@ -1186,14 +1194,14 @@
                 "type": "String",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "parser",
                 "type": "Function",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Void",
@@ -1215,7 +1223,7 @@
                 "type": "Dictionary",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Any?",
@@ -1223,7 +1231,12 @@
             "inits": []
           }
         ]
-      }
+      },
+      "sequences": [
+        6,
+        -1,
+        -1
+      ]
     },
     {
       "kind": "enum",
@@ -1235,7 +1248,10 @@
         "SRGB"
       ],
       "instanceMethods": {},
-      "staticMethods": {}
+      "staticMethods": {},
+      "sequences": [
+        -1
+      ]
     },
     {
       "kind": "alias",
@@ -1259,7 +1275,7 @@
           },
           "min": 1,
           "max": 1,
-          "default": 0
+          "default": false
         }
       ],
       "returns": {

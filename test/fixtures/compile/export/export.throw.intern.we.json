@@ -30,14 +30,17 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
-      "extends": "Error"
+      "extends": "Error",
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

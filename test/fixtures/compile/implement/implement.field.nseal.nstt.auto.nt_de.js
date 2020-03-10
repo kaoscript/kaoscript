@@ -43,7 +43,7 @@ module.exports = function() {
 			throw new SyntaxError("Wrong number of arguments");
 		}
 	}
-	Shape.prototype.__ks_init_1 = function() {
+	Shape.prototype.__ks_init_0 = function() {
 		this._name = "circle";
 	};
 	Shape.prototype.__ks_func_name_0 = function() {
@@ -66,7 +66,7 @@ module.exports = function() {
 		return "I'm drawing a " + this._color + " " + this._name + ".";
 	};
 	Shape.prototype.__ks_init = function() {
-		Shape.prototype.__ks_init_1.call(this);
+		Shape.prototype.__ks_init_0.call(this);
 	};
 	Shape.prototype.name = function() {
 		if(arguments.length === 0) {

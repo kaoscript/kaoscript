@@ -376,6 +376,16 @@ namespace Router {
 			}
 		} // }}}
 
+		func buildRouteHash(route: Route): String { // {{{
+			let hash = `\(route.index):`
+
+			for const filter in route.filters {
+				hash += `\(filter.index);\(filter.type.toQuote());`
+			}
+
+			return hash
+		} // }}}
+
 		func cloneRouteFilter(filter: RouteFilter): RouteFilter => RouteFilter( // {{{
 			min: filter.min
 			max: filter.max
@@ -720,38 +730,44 @@ namespace Router {
 		} // }}}
 
 		func regroupRoutes(routes: Array<Route>): Array<Route> { // {{{
-			const flattenable = isFlattenable(routes)
+			const hashes = {}
+			const routesByIndex = {}
+
+			for const route, r in routes {
+				const hash = buildRouteHash(route)
+
+				for const i from route.min to route.max {
+					if hashes[i]? {
+						hashes[i] += `#\(hash)`
+						routesByIndex[i].push(route)
+					}
+					else {
+						hashes[i] = `#\(hash)`
+						routesByIndex[i] = [route]
+					}
+				}
+			}
+
 			const max = routes[routes.length - 1].max
 
-			let min = -1
-			let index = 0
+			for let r from routes[0].min to max when hashes[r]? {
+				const h = hashes[r]
+				const matches = []
+				let i = r
 
-			while index < routes.length {
-				const route = routes[index]
+				while hashes[++i] == h {
+					matches.push(...routesByIndex[i])
+				}
 
-				if route.min > min {
-					min = route.min
+				if matches.length != 0 {
+					routes.remove(...matches)
 
-					const matches = []
-					let next = route.min + 1
+					const max = i - 1
 
-					for const rt in routes from index + 1 when rt.min >= next {
-						if rt.function == route.function && sameFilters(route.filters, rt.filters) && rt.matchingFilters.length >= route.matchingFilters.length {
-							matches.push(rt)
+					for const route in routesByIndex[r] {
+						route.max = max
 
-							next = rt.min + 1
-						}
-						else {
-							break
-						}
-					}
-
-					if matches.length != 0 {
 						for const match in matches {
-							if match.max > route.max {
-								route.max = match.max
-							}
-
 							if match.matchingFilters.length != 0 {
 								if route.matchingFilters.length == 0 {
 									route.matchingFilters.push(RouteFilter(
@@ -763,16 +779,10 @@ namespace Router {
 								route.matchingFilters.push(...match.matchingFilters)
 							}
 						}
-
-						routes.remove(...matches)
 					}
-				}
 
-				if route.max == max {
-					min = -1
+					r = max
 				}
-
-				++index
 			}
 
 			return routes
@@ -949,7 +959,7 @@ namespace Router {
 
 	namespace Fragment { // {{{
 		func toFlatTestFragments(route: Route, ctrl: ControlBuilder, wrap: Boolean, argName: String, node: AbstractNode) { // {{{
-			wrap = wrap && route.filters.length != 0
+			wrap = wrap && (route.filters.length != 0 || (route.max != Infinity && route.max > route.min + 1))
 
 			if wrap {
 				ctrl.code('(')

@@ -447,12 +447,12 @@ class MacroParameterType extends ParameterType {
 		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): MacroParameterType { // {{{
 			const type = Type.fromAST(data.type, scope, false, node)
 
-			let default: Number = 0
-			let min: Number = 1
-			let max: Number = 1
+			auto default = false
+			auto min = 1
+			auto max = 1
 
 			if data.defaultValue? {
-				default = 1
+				default = true
 				min = 0
 			}
 

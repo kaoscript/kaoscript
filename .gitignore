@@ -6,6 +6,7 @@ node_modules
 lib/compiler.js
 lib/compiler2.js
 lib/compiler3.js
+lib/compiler4.js
 coverage
 .coveralls.yml
 *.no

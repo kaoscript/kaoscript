@@ -73,11 +73,11 @@ class CreateExpression extends Expression {
 
 		return false
 	} // }}}
-	override listUsedVariables(scope, variables) { // {{{
-		@factory.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@factory.listNonLocalVariables(scope, variables)
 
 		for const argument in @arguments {
-			argument.listUsedVariables(scope, variables)
+			argument.listNonLocalVariables(scope, variables)
 		}
 
 		return variables

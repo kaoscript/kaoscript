@@ -19,9 +19,7 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {
         "message": {
           "access": 4,
@@ -58,6 +56,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -68,9 +71,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -93,6 +94,11 @@
       "extends": [
         0,
         "Error"
+      ],
+      "sequences": [
+        -1,
+        -1,
+        -1
       ]
     }
   ],

@@ -5,7 +5,7 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		}
-		__ks_init_1() {
+		__ks_init_0() {
 			this._likes = (() => {
 				const d = new Dictionary();
 				d.leto = "spice";
@@ -15,7 +15,7 @@ module.exports = function() {
 			})();
 		}
 		__ks_init() {
-			Matcher.prototype.__ks_init_1.call(this);
+			Matcher.prototype.__ks_init_0.call(this);
 		}
 		__ks_cons(args) {
 			if(args.length !== 0) {

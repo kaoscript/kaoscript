@@ -8,12 +8,12 @@ module.exports = function() {
 			this.__ks_init();
 			this.__ks_cons(arguments);
 		},
-		__ks_init_1: function() {
+		__ks_init_0: function() {
 			this.fileName = null;
 			this.lineNumber = 0;
 		},
 		__ks_init: function() {
-			Exception.prototype.__ks_init_1.call(this);
+			Exception.prototype.__ks_init_0.call(this);
 		},
 		__ks_cons_0: function(message) {
 			if(arguments.length < 1) {

@@ -94,7 +94,7 @@ abstract class DependencyStatement extends Statement {
 			NodeKind::FunctionDeclaration => {
 				let type
 				if declaration.parameters? {
-					const parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
+					const parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 
 					type = new FunctionType(parameters, declaration, this)
 					type.setExhaustive(true)
@@ -225,7 +225,7 @@ class ExternDeclaration extends DependencyStatement {
 				if declaration.kind == NodeKind::FunctionDeclaration {
 					let parameters
 					if declaration.parameters?.length != 0 {
-						parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
+						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 					}
 					else {
 						parameters = [new ParameterType(@scope, Type.Any, 0, Infinity)]
@@ -295,7 +295,7 @@ class RequireDeclaration extends DependencyStatement {
 
 					let parameters
 					if declaration.parameters?.length != 0 {
-						parameters = [Type.fromAST(parameter, this) for parameter in declaration.parameters]
+						parameters = [ParameterType.fromAST(parameter, this) for parameter in declaration.parameters]
 					}
 					else {
 						parameters = [new ParameterType(@scope, Type.Any, 0, Infinity)]

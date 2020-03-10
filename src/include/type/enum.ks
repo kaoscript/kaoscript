@@ -21,6 +21,7 @@ class EnumType extends Type {
 		@type: Type
 		@variables: Dictionary<EnumVariableType>		= {}
 		@sequences	 									= {
+			defaults:			-1
 			instanceMethods:	{}
 			staticMethods:		{}
 		}
@@ -31,6 +32,10 @@ class EnumType extends Type {
 
 			type._exhaustive = data.exhaustive
 			type._index = data.index
+
+			if data.sequences? {
+				type._sequences.defaults = data.sequences[0]
+			}
 
 			for const name in data.variables {
 				type.addVariable(name)
@@ -65,6 +70,10 @@ class EnumType extends Type {
 
 			type._exhaustive = data.exhaustive
 			type._index = data.index
+
+			if data.sequences? {
+				type._sequences.defaults = data.sequences[0]
+			}
 
 			for const name in data.variables {
 				type.addVariable(name)
@@ -258,6 +267,10 @@ class EnumType extends Type {
 			export.staticMethods[name] = [method.export(references, mode) for const method in methods when method.isExportable()]
 		}
 
+		export.sequences = [
+			@sequences.defaults
+		]
+
 		if exhaustive {
 			const exhaustiveness = {}
 			let notEmpty = false
@@ -294,6 +307,17 @@ class EnumType extends Type {
 		else {
 			return null
 		}
+	} // }}}
+	getInstantiableMethod(name: String, arguments: Array) { // {{{
+		if const methods = @instanceMethods[name] {
+			for method in methods {
+				if method.matchArguments(arguments) {
+					return method
+				}
+			}
+		}
+
+		return null
 	} // }}}
 	getStaticAssessment(name: String, node: AbstractNode) { // {{{
 		if const assessment = @staticAssessments[name] {
@@ -357,6 +381,9 @@ class EnumType extends Type {
 		return false
 	} // }}}
 	hasProperty(name: String) => name == 'value'
+	incDefaultSequence() { // {{{
+		return ++@sequences.defaults
+	} // }}}
 	index() => @index
 	index(@index) => @index
 	override isComparableWith(type) { // {{{
@@ -454,7 +481,7 @@ class EnumMethodType extends FunctionType {
 		fromAST(data, node: AbstractNode): EnumMethodType { // {{{
 			const scope = node.scope()
 
-			return new EnumMethodType([Type.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
+			return new EnumMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
 		} // }}}
 		fromMetadata(data, metadata, references, alterations, queue: Array, scope: Scope, node: AbstractNode): EnumMethodType { // {{{
 			const type = new EnumMethodType(scope)
@@ -475,6 +502,17 @@ class EnumMethodType extends FunctionType {
 			return type
 		} // }}}
 	}
+	clone() { // {{{
+		const clone = new EnumMethodType(@scope)
+
+		FunctionType.clone(this, clone)
+
+		clone._access = @access
+		clone._alteration = @alteration
+		clone._identifier = @identifier
+
+		return clone
+	} // }}}
 	export(references, mode) { // {{{
 		const export = {
 			id: @identifier

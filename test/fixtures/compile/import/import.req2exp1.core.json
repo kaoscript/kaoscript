@@ -16,9 +16,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {
         "_x": {
           "access": 2,
@@ -50,7 +48,12 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     },
     {
       "kind": "class",
@@ -60,13 +63,16 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

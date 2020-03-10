@@ -16,9 +16,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
@@ -43,6 +41,11 @@
       "extends": [
         1,
         "Quxbaz"
+      ],
+      "sequences": [
+        -1,
+        -1,
+        -1
       ]
     },
     {
@@ -53,9 +56,7 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
@@ -76,7 +77,12 @@
             "inits": []
           }
         ]
-      }
+      },
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

@@ -47,7 +47,7 @@ class TryExpression extends Expression {
 	isComputed() => true
 	isConsumedError(error) => true
 	isUsingVariable(name) => @argument.isUsingVariable(name)
-	override listUsedVariables(scope, variables) => @argument.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) => @argument.listNonLocalVariables(scope, variables)
 	releaseReusable() { // {{{
 		if @reuseName != null {
 			@scope.releaseTempName(@reuseName)

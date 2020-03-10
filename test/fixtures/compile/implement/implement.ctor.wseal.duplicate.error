@@ -1,0 +1,1 @@
+SyntaxException: The constructor is matching an existing constructor (line 8, file "fixtures/compile/implement/implement.ctor.wseal.duplicate.ks")

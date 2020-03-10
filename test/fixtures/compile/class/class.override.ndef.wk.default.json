@@ -1,0 +1,133 @@
+{
+  "aliens": [
+    "Any?",
+    "console"
+  ],
+  "requirements": [],
+  "exports": [
+    0,
+    "Shape",
+    1,
+    "Rectangle"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "systemic": false,
+      "exhaustive": true,
+      "constructors": [
+        {
+          "id": 0,
+          "access": 4,
+          "sealed": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "name": "color",
+              "type": "String",
+              "min": 1,
+              "max": 1,
+              "default": false
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "instanceVariables": {
+        "_color": {
+          "access": 2,
+          "type": "String",
+          "default": false,
+          "immutable": false,
+          "lateInit": false,
+          "sealed": false
+        }
+      },
+      "classVariables": {},
+      "instanceMethods": {
+        "draw": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": false,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "throws": [],
+            "inits": []
+          }
+        ]
+      },
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
+    },
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "systemic": false,
+      "exhaustive": true,
+      "constructors": [
+        {
+          "id": 0,
+          "access": 4,
+          "sealed": false,
+          "min": 1,
+          "max": 1,
+          "parameters": [
+            {
+              "name": "color",
+              "type": "String",
+              "min": 1,
+              "max": 1,
+              "default": false
+            }
+          ],
+          "throws": []
+        }
+      ],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "draw": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": false,
+            "async": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "throws": [],
+            "inits": []
+          }
+        ]
+      },
+      "classMethods": {},
+      "extends": [
+        0,
+        "Shape"
+      ],
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
+    }
+  ],
+  "macros": []
+}

@@ -21,9 +21,7 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -40,7 +38,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Number",
@@ -61,7 +59,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Number",
@@ -82,7 +80,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -94,6 +92,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -102,7 +105,6 @@
         "reference": 0
       },
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
@@ -121,14 +123,16 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "from",
-                "type": "Any?",
+                "type": "Any",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjksImNvbHVtbiI6MjR9LCJlbmQiOnsibGluZSI6OSwiY29sdW1uIjoyNX19"
               }
             ],
             "returns": "Boolean",
@@ -150,7 +154,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -162,6 +166,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     }
   ],

@@ -437,11 +437,14 @@ export class SyntaxException extends Exception {
 		throwNoNullParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't be nullable`, node)
 		} // }}}
+		throwNoOverridableConstructor(class, parameters, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The constructor "\(class.toQuote())\(FunctionType.toQuote(parameters))" can't override a suitable constructor`, node)
+		} // }}}
+		throwNoOverridableMethod(class, name, parameters, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The method "\(class.toQuote()).\(name)\(FunctionType.toQuote(parameters))" can't override a suitable method`, node)
+		} // }}}
 		throwNoRestParameter(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Parameter can't be a rest parameter`, node)
-		} // }}}
-		throwNoSuitableOverride(class, name, parameters, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`"\(class.toQuote()).\(name)\(FunctionType.toQuote(parameters))" can't be matched to any suitable method to override`, node)
 		} // }}}
 		throwNoSuitableOverwrite(class, name, type, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`"\(class.toQuote()).\(name)\(type.toQuote())" can't be matched to any suitable method to overwrite`, node)

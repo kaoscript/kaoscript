@@ -64,7 +64,7 @@ abstract class Statement extends AbstractNode {
 	isUsingInstanceVariable(name) => false
 	isUsingStaticVariable(class, varname) => false
 	line() => @line
-	listUsedVariables(scope: Scope, variables: Array) => variables
+	listNonLocalVariables(scope: Scope, variables: Array) => variables
 	setAttributeData(key: AttributeData, data) { // {{{
 		@attributeDatas[key] = data
 	} // }}}

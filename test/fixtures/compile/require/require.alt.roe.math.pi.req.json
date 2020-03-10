@@ -28,9 +28,7 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -50,6 +48,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -73,7 +76,7 @@
               "type": "Any?",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "returns": {
@@ -90,7 +93,6 @@
         "reference": 0
       },
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
@@ -107,13 +109,13 @@
               {
                 "name": "precision",
                 "type": {
-                  "kind": "reference",
-                  "name": 2,
-                  "nullable": true
+                  "reference": 2
                 },
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE2LCJjb2x1bW4iOjI4fSwiZW5kIjp7ImxpbmUiOjE2LCJjb2x1bW4iOjI5fX0="
               }
             ],
             "returns": {
@@ -125,6 +127,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     }
   ],

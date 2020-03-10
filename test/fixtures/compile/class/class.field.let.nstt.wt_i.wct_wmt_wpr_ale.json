@@ -14,7 +14,6 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": true,
-      "init": 0,
       "constructors": [
         {
           "id": 0,
@@ -28,13 +27,12 @@
               "type": "Number",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "throws": []
         }
       ],
-      "destructors": 0,
       "instanceVariables": {
         "_x": {
           "access": 2,
@@ -61,7 +59,7 @@
                 "type": "Number",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -74,7 +72,12 @@
           }
         ]
       },
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     }
   ],
   "macros": []

@@ -23,9 +23,9 @@ class UnlessExpression extends Expression {
 	} // }}}
 	isComputed() => true
 	isUsingVariable(name) => @condition.isUsingVariable(name) || @whenFalse.isUsingVariable(name)
-	override listUsedVariables(scope, variables) { // {{{
-		@condition.listUsedVariables(scope, variables)
-		@whenFalse.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@condition.listNonLocalVariables(scope, variables)
+		@whenFalse.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}

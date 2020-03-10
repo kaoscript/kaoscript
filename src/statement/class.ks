@@ -15,6 +15,7 @@ class ClassDeclaration extends Statement {
 		_class: ClassType
 		_extendsName: String
 		_extendsType: NamedType<ClassType>
+		_initsId: String
 		_name: String
 		_type: NamedType<ClassType>
 		_variable: Variable
@@ -32,6 +33,7 @@ class ClassDeclaration extends Statement {
 		_extending: Boolean					= false
 		_forcefullyRebinded: Boolean		= false
 		_hybrid: Boolean					= false
+		_inits: Boolean						= false
 		_instanceMethods					= {}
 		_instanceVariables					= {}
 		_instanceVariableScope
@@ -196,6 +198,10 @@ class ClassDeclaration extends Statement {
 					declaration = new ClassVariableDeclaration(data, this)
 
 					declaration.analyse()
+
+					if declaration.isInstance() && declaration.hasDefaultValue() {
+						@inits = true
+					}
 				}
 				NodeKind::MacroDeclaration => {
 					const name = data.name.name
@@ -228,8 +234,8 @@ class ClassDeclaration extends Statement {
 			}
 		}
 
-		if this.hasInits() {
-			@class.incInitializer()
+		if @inits {
+			@initsId = @class.incInitializationSequence()
 		}
 	} // }}}
 	prepare() { // {{{
@@ -345,7 +351,7 @@ class ClassDeclaration extends Statement {
 		if @destructor != null {
 			@destructor.prepare()
 
-			@class.addDestructor()
+			@class.incDestructorSequence()
 		}
 
 		if @extending && !@abstract && !Dictionary.isEmpty(notImplemented = @class.listMissingAbstractMethods()) {
@@ -451,15 +457,6 @@ class ClassDeclaration extends Statement {
 	getClassVariable(name: String) => @classVariables[name]
 	getInstanceVariable(name: String) => @instanceVariables[name]
 	hasConstructors() => @constructors.length != 0
-	hasInits() { // {{{
-		for const field of @instanceVariables {
-			if field.hasDefaultValue() {
-				return true
-			}
-		}
-
-		return false
-	} // }}}
 	isAbstract() => @abstract
 	isExtending() => @extending
 	isHybrid() => @hybrid
@@ -547,10 +544,10 @@ class ClassDeclaration extends Statement {
 				.line('this.__ks_cons(arguments)')
 		}
 
-		if this.hasInits() {
+		if @inits {
 			ctrl = clazz
 				.newControl()
-				.code('__ks_init_1: function()')
+				.code(`__ks_init_\(@initsId): function()`)
 				.step()
 
 			for const field of @instanceVariables {
@@ -563,7 +560,7 @@ class ClassDeclaration extends Statement {
 				ctrl.line(@extendsName + '.prototype.__ks_init.call(this)')
 			}
 
-			ctrl.line(@name + '.prototype.__ks_init_1.call(this)')
+			ctrl.line(`\(@name).prototype.__ks_init_\(@initsId).call(this)`)
 		}
 		else {
 			if @extending {
@@ -595,6 +592,12 @@ class ClassDeclaration extends Statement {
 		}
 
 		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, func(node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
+
+		for const methods of @abstractMethods {
+			for const method in methods {
+				method.toIndigentFragments(clazz)
+			}
+		}
 
 		for const methods, name of @instanceMethods {
 			m.clear()
@@ -654,10 +657,10 @@ class ClassDeclaration extends Statement {
 				.done()
 		}
 
-		if this.hasInits() {
+		if @inits {
 			ctrl = clazz
 				.newControl()
-				.code('__ks_init_1()')
+				.code(`__ks_init_\(@initsId)()`)
 				.step()
 
 			for const field of @instanceVariables {
@@ -672,7 +675,7 @@ class ClassDeclaration extends Statement {
 				ctrl.line(@extendsName + '.prototype.__ks_init.call(this)')
 			}
 
-			ctrl.line(@name + '.prototype.__ks_init_1.call(this)')
+			ctrl.line(`\(@name).prototype.__ks_init_\(@initsId).call(this)`)
 
 			ctrl.done()
 		}
@@ -706,6 +709,12 @@ class ClassDeclaration extends Statement {
 			@destructor.toFragments(clazz, Mode::None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
+		}
+
+		for const methods of @abstractMethods {
+			for const method in methods {
+				method.toIndigentFragments(clazz)
+			}
 		}
 
 		for const methods, name of @instanceMethods {
@@ -835,10 +844,10 @@ class ClassDeclaration extends Statement {
 				.done()
 		}
 
-		if this.hasInits() {
+		if @inits {
 			ctrl = clazz
 				.newControl()
-				.code('__ks_init_1()')
+				.code(`__ks_init_\(@initsId)()`)
 				.step()
 
 			for const field of @instanceVariables {
@@ -852,7 +861,7 @@ class ClassDeclaration extends Statement {
 					.newControl()
 					.code('__ks_init()')
 					.step()
-					.line(`\(@name).prototype.__ks_init_1.call(this)`)
+					.line(`\(@name).prototype.__ks_init_\(@initsId).call(this)`)
 					.done()
 			}
 			else {
@@ -861,7 +870,7 @@ class ClassDeclaration extends Statement {
 					.code('__ks_init()')
 					.step()
 					.line(`\(@extendsName).prototype.__ks_init.call(this)`)
-					.line(`\(@name).prototype.__ks_init_1.call(this)`)
+					.line(`\(@name).prototype.__ks_init_\(@initsId).call(this)`)
 					.done()
 			}
 		}
@@ -881,6 +890,12 @@ class ClassDeclaration extends Statement {
 			@destructor.toFragments(clazz, Mode::None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
+		}
+
+		for const methods of @abstractMethods {
+			for const method in methods {
+				method.toIndigentFragments(clazz)
+			}
 		}
 
 		for const methods, name of @instanceMethods {
@@ -1003,7 +1018,7 @@ class ClassDeclaration extends Statement {
 
 			ctrl.line(@extendsName, '.prototype.__ks_init.call(this)')
 
-			if this.hasInits() {
+			if @inits {
 				for const field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
@@ -1015,7 +1030,7 @@ class ClassDeclaration extends Statement {
 				.code('$create: function()')
 				.step()
 
-			if this.hasInits() {
+			if @inits {
 				for const field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
@@ -1033,6 +1048,12 @@ class ClassDeclaration extends Statement {
 		}
 
 		ClassConstructorDeclaration.toRouterFragments(this, clazz.newControl(), @type, m, (node, fragments) => fragments.code('__ks_cons: function(args)').step(), func(fragments) {})
+
+		for const methods of @abstractMethods {
+			for const method in methods {
+				method.toIndigentFragments(clazz)
+			}
+		}
 
 		for const methods, name of @instanceMethods {
 			m.clear()
@@ -1082,7 +1103,7 @@ class ClassDeclaration extends Statement {
 
 			ctrl.line(@extendsName, '.prototype.__ks_init.call(this)')
 
-			if this.hasInits() {
+			if @inits {
 				for const field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
@@ -1096,7 +1117,7 @@ class ClassDeclaration extends Statement {
 				.code('constructor()')
 				.step()
 
-			if this.hasInits() {
+			if @inits {
 				for const field of @instanceVariables {
 					field.toFragments(ctrl)
 				}
@@ -1123,6 +1144,12 @@ class ClassDeclaration extends Statement {
 			@destructor.toFragments(clazz, Mode::None)
 
 			ClassDestructorDeclaration.toRouterFragments(this, clazz, @type)
+		}
+
+		for const methods of @abstractMethods {
+			for const method in methods {
+				method.toIndigentFragments(clazz)
+			}
 		}
 
 		for const methods, name of @instanceMethods {
@@ -1438,7 +1465,7 @@ class CallSuperMethodES5Substitude {
 
 		fragments.code(']')
 	} // }}}
-	type() => @method.type().returnType()
+	type() => @method.type().getReturnType()
 }
 
 class CallSuperMethodES6Substitude {
@@ -1462,7 +1489,7 @@ class CallSuperMethodES6Substitude {
 			fragments.compile(argument)
 		}
 	} // }}}
-	type() => @method.type().returnType()
+	type() => @method.type().getReturnType()
 }
 
 class CallSealedSuperMethodSubstitude {
@@ -1505,7 +1532,7 @@ class CallSealedSuperMethodSubstitude {
 			}
 		}
 	} // }}}
-	type() => @method.type().returnType()
+	type() => @method.type().getReturnType()
 }
 
 class MemberSuperMethodES5Substitude {
@@ -1589,18 +1616,19 @@ class ClassMethodDeclaration extends Statement {
 		_type: Type
 	}
 	private {
-		_abstract: Boolean				= false
-		_aliases: Array					= []
-		_analysed: Boolean				= false
-		_autoTyping: Boolean			= false
-		_awaiting: Boolean				= false
-		_exit: Boolean					= false
-		_instance: Boolean				= true
+		_abstract: Boolean					= false
+		_aliases: Array						= []
+		_analysed: Boolean					= false
+		_autoTyping: Boolean				= false
+		_awaiting: Boolean					= false
+		_exit: Boolean						= false
+		_indigentValues: Array				= []
+		_instance: Boolean					= true
 		_name: String
-		_override: Boolean				= false
-		_parameters: Array<Parameter>	= []
-		_returnNull: Boolean			= false
-		_topNodes: Array				= []
+		_override: Boolean					= false
+		_parameters: Array<Parameter>		= []
+		_returnNull: Boolean				= false
+		_topNodes: Array					= []
 	}
 	static toClassSwitchFragments(node, fragments, variable, methods, overflow, name, header, footer) { // {{{
 		const assessment = Router.assess(methods, false, name, node, overflow)
@@ -1721,9 +1749,13 @@ class ClassMethodDeclaration extends Statement {
 			if @abstract {
 				if parent._abstract {
 					if parent._abstractMethods[@name] is Array {
+						@internalName = `__ks_func_\(@name)_\(parent._abstractMethods[@name].length)`
+
 						parent._abstractMethods[@name].push(this)
 					}
 					else {
+						@internalName = `__ks_func_\(@name)_0`
+
 						parent._abstractMethods[@name] = [this]
 					}
 				}
@@ -1784,7 +1816,7 @@ class ClassMethodDeclaration extends Statement {
 
 		if @override {
 			unless @parent.isExtending() {
-				SyntaxException.throwNoSuitableOverride(@parent.type(), @name, @parameters, this)
+				SyntaxException.throwNoOverridableMethod(@parent.type(), @name, @parameters, this)
 			}
 
 			const superclass = @parent.extends().type()
@@ -1804,7 +1836,7 @@ class ClassMethodDeclaration extends Statement {
 				}
 			}
 			else {
-				SyntaxException.throwNoSuitableOverride(@parent.extends(), @name, @parameters, this)
+				SyntaxException.throwNoOverridableMethod(@parent.extends(), @name, @parameters, this)
 			}
 
 			if const sealedclass = superclass.getHybridMethod(@name, @parent.extends()) {
@@ -1821,12 +1853,12 @@ class ClassMethodDeclaration extends Statement {
 
 				if const method = superclass.getInstantiableMethod(@name, @parameters) {
 					if @data.type? {
-						if !@type.returnType().isInstanceOf(method.returnType()) {
+						if !@type.getReturnType().isInstanceOf(method.getReturnType()) {
 							SyntaxException.throwInvalidMethodReturn(@parent.name(), @name, this)
 						}
 					}
 					else {
-						@type.returnType(method.returnType())
+						@type.setReturnType(method.getReturnType())
 					}
 				}
 
@@ -1849,14 +1881,14 @@ class ClassMethodDeclaration extends Statement {
 				NodeKind::Identifier => {
 					if @data.type.value.name == 'auto' {
 						if !@override {
-							@type.returnType(@block.getUnpreparedType())
+							@type.setReturnType(@block.getUnpreparedType())
 
 							@autoTyping = true
 						}
 					}
 					else {
 						if !@override {
-							@type.returnType(@parent.type().reference(@scope))
+							@type.setReturnType(@parent.type().reference(@scope))
 						}
 
 						if @instance {
@@ -1874,7 +1906,7 @@ class ClassMethodDeclaration extends Statement {
 					return.analyse()
 
 					if !@override {
-						@type.returnType(return.getUnpreparedType())
+						@type.setReturnType(return.getUnpreparedType())
 					}
 
 					@block.addReturn(return)
@@ -1885,18 +1917,24 @@ class ClassMethodDeclaration extends Statement {
 		@analysed = true
 	} // }}}
 	translate() { // {{{
-		for parameter in @parameters {
+		for const parameter in @parameters {
 			parameter.translate()
+		}
+
+		/* for const {value} in @indigentValues { */
+		for const indigent in @indigentValues {
+			indigent.value.prepare()
+			indigent.value.translate()
 		}
 
 		if @autoTyping {
 			@block.prepare()
 
-			@type.returnType(@block.type())
+			@type.setReturnType(@block.type())
 		}
 		else {
 			if !@abstract {
-				@block.type(@type.returnType())
+				@block.type(@type.getReturnType())
 			}
 
 			@block.prepare()
@@ -1912,11 +1950,24 @@ class ClassMethodDeclaration extends Statement {
 			@aliases.push(statement)
 		}
 	} // }}}
+	addIndigentValue(value: Expression, parameters) { // {{{
+		const class = @parent.type().type()
+		const name = `__ks_default_\(class.level())_\(class.incDefaultSequence())`
+
+		@indigentValues.push({
+			name
+			value
+			parameters
+		})
+
+		return name
+	} // }}}
 	addTopNode(node) { // {{{
 		@topNodes.push(node)
 	} // }}}
 	authority() => this
 	getFunctionNode() => this
+	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	isAbstract() => @abstract
 	isAssertingParameter() => @options.rules.assertParameter
@@ -1924,11 +1975,30 @@ class ClassMethodDeclaration extends Statement {
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstance() => @instance
 	isInstanceMethod() => @instance
+	isOverridableFunction() => true
 	length() => @parameters.length
 	name() => @name
 	parameters() => @parameters
+	toIndigentFragments(fragments) { // {{{
+		/* for const {name, value, parameters} in @indigentValues {
+		} */
+		for const indigent in @indigentValues {
+			const ctrl = fragments.newControl()
+
+			if @parent._es5 {
+				ctrl.code(`\(indigent.name): function(\(indigent.parameters.join(', ')))`).step()
+			}
+			else {
+				ctrl.code(`\(indigent.name)(\(indigent.parameters.join(', ')))`).step()
+			}
+
+			ctrl.newLine().code('return ').compile(indigent.value).done()
+
+			ctrl.done() unless @parent._es5
+		}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		let ctrl = fragments.newControl()
+		const ctrl = fragments.newControl()
 
 		if @parent._es5 {
 			ctrl.code(`\(@internalName): function(`)
@@ -1964,6 +2034,8 @@ class ClassMethodDeclaration extends Statement {
 		}
 
 		ctrl.done() unless @parent._es5
+
+		this.toIndigentFragments(fragments)
 	} // }}}
 	type() { // {{{
 		if @analysed {
@@ -1985,8 +2057,10 @@ class ClassConstructorDeclaration extends Statement {
 	}
 	private {
 		_aliases: Array						= []
-		_abstract: Boolean					= false
+		_abstract: Boolean
+		_indigentValues: Array				= []
 		_internalName: String
+		_override: Boolean					= false
 		_topNodes: Array					= []
 	}
 	static toRouterFragments(node, fragments, variable, methods, header, footer) { // {{{
@@ -2037,8 +2111,15 @@ class ClassConstructorDeclaration extends Statement {
 	constructor(data, parent) { // {{{
 		super(data, parent, parent.newScope(parent._constructorScope, ScopeType::Block))
 
-		@abstract = parent.isAbstract()
 		@internalName = `__ks_cons_\(parent._constructors.length)`
+
+		@abstract = parent.isAbstract()
+
+		for modifier in data.modifiers {
+			if modifier.kind == ModifierKind::Override {
+				@override = true
+			}
+		}
 
 		parent._constructors.push(this)
 	} // }}}
@@ -2057,7 +2138,38 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.prepare()
 		}
 
-		@type = new ClassConstructorType([parameter.type() for const parameter in @parameters], @data, this)
+		if @override {
+			unless @parent.isExtending() {
+				SyntaxException.throwNoOverridableConstructor(@parent.type(), @parameters, this)
+			}
+
+			const superclass = @parent.extends().type()
+
+			if const method = superclass.getConstructor(@parameters) {
+				if method.isSealed() {
+					@type = method.clone()
+				}
+				else {
+					@type = method
+				}
+
+				const parameters = @type.parameters()
+
+				for const parameter, index in @parameters {
+					parameter.type(parameters[index])
+				}
+			}
+			else {
+				SyntaxException.throwNoOverridableConstructor(@parent.extends(), @parameters, this)
+			}
+
+			if const sealedclass = superclass.getHybridConstructor(@parent.extends()) {
+				@parent.addSharedConstructor(sealedclass)
+			}
+		}
+		else {
+			@type = new ClassConstructorType([parameter.type() for const parameter in @parameters], @data, this)
+		}
 
 		let index = 1
 		if @block.isEmpty() {
@@ -2103,8 +2215,13 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		@block.prepare()
+		/* for const {value} in @indigentValues { */
+		for const indigent in @indigentValues {
+			indigent.value.prepare()
+			indigent.value.translate()
+		}
 
+		@block.prepare()
 		@block.translate()
 	} // }}}
 	addAtThisParameter(statement: AliasStatement) { // {{{
@@ -2141,6 +2258,18 @@ class ClassConstructorDeclaration extends Statement {
 			SyntaxException.throwNoSuperCall(this)
 		}
 	} // }}}
+	addIndigentValue(value: Expression, parameters) { // {{{
+		const class = @parent.type().type()
+		const name = `__ks_default_\(class.level())_\(class.incDefaultSequence())`
+
+		@indigentValues.push({
+			name
+			value
+			parameters
+		})
+
+		return name
+	} // }}}
 	addTopNode(node) { // {{{
 		@topNodes.push(node)
 	} // }}}
@@ -2170,6 +2299,7 @@ class ClassConstructorDeclaration extends Statement {
 		return -1
 	} // }}}
 	getFunctionNode() => this
+	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	private getSuperIndex(body: Array) { // {{{
 		for statement, index in body {
@@ -2200,6 +2330,7 @@ class ClassConstructorDeclaration extends Statement {
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)
 	isInstanceMethod() => true
+	isOverridableFunction() => true
 	parameters() => @parameters
 	toHybridConstructorFragments(fragments) { // {{{
 		let ctrl = fragments
@@ -2232,6 +2363,36 @@ class ClassConstructorDeclaration extends Statement {
 		}
 
 		ctrl.done()
+	} // }}}
+	toIndigentFragments(fragments) { // {{{
+		/* for const {name, value, parameters} in @indigentValues {
+			const ctrl = fragments.newControl()
+
+			if @parent._es5 {
+				ctrl.code(`\(name): function(\(parameters.join(', ')))`).step()
+			}
+			else {
+				ctrl.code(`\(name)(\(parameters.join(', ')))`).step()
+			}
+
+			ctrl.newLine().code('return ').compile(value).done()
+
+			ctrl.done() unless @parent._es5
+		} */
+		for const indigent in @indigentValues {
+			const ctrl = fragments.newControl()
+
+			if @parent._es5 {
+				ctrl.code(`\(indigent.name): function(\(indigent.parameters.join(', ')))`).step()
+			}
+			else {
+				ctrl.code(`\(indigent.name)(\(indigent.parameters.join(', ')))`).step()
+			}
+
+			ctrl.newLine().code('return ').compile(indigent.value).done()
+
+			ctrl.done() unless @parent._es5
+		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if !@parent._es5 && @parent.isHybrid() {
@@ -2283,6 +2444,8 @@ class ClassConstructorDeclaration extends Statement {
 
 			ctrl.done() unless @parent._es5
 		}
+
+		this.toIndigentFragments(fragments)
 	} // }}}
 	type() => @type
 }
@@ -2312,7 +2475,7 @@ class ClassDestructorDeclaration extends Statement {
 			ctrl.line(`\(node._extendsName).__ks_destroy(that)`)
 		}
 
-		for i from 0 til variable.type().destructors() {
+		for i from 0 til variable.type().getConstructorCount() {
 			ctrl.line(`\(node._name).__ks_destroy_\(i)(that)`)
 		}
 
@@ -2362,6 +2525,7 @@ class ClassDestructorDeclaration extends Statement {
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isInstance() => false
 	isInstanceMethod() => true
+	isOverridableFunction() => false
 	parameters() => @parameters
 	toStatementFragments(fragments, mode) { // {{{
 		let ctrl = fragments.newControl()

@@ -15,6 +15,7 @@ class Parameter extends AbstractNode {
 	private lateinit {
 		_anonymous: Boolean					= false
 		_arity								= null
+		_comprehensive: Boolean				= true
 		_defaultValue						= null
 		_explicitlyRequired: Boolean		= false
 		_hasDefaultValue: Boolean			= false
@@ -517,7 +518,7 @@ class Parameter extends AbstractNode {
 
 			const ctrl2 = ctrl.newControl().code('if(')
 
-			parameter.type().toPositiveTestFragments(ctrl2, new Literal(false, node, node.scope(), 'arguments[__ks_i]'))
+			parameter.type().toPositiveTestFragments(ctrl2, new Literal(false, node, node.scope(), 'arguments[__ks_i]'), Junction::NONE)
 
 			ctrl2.code(')').step()
 
@@ -724,9 +725,31 @@ class Parameter extends AbstractNode {
 		}
 
 		const name = @name.name()
-		const default = @hasDefaultValue ? 1 : 0
 
-		@type = new ParameterType(@scope, name, type, min, max, default)
+		@type = new ParameterType(@scope, name, type, min, max, @hasDefaultValue)
+
+		if @hasDefaultValue && @parent.isOverridableFunction() {
+			const scope = @parent.scope()
+
+			@comprehensive = !@defaultValue.isUsingNonLocalVariables(scope)
+
+			if @comprehensive {
+				@type.setDefaultValue(@data.defaultValue, true)
+			}
+			else {
+				const variables = [variable.name() for const variable in @defaultValue.listLocalVariables(scope, [])]
+
+				const name = @parent.addIndigentValue(@defaultValue, variables)
+
+				const call = `\(name)(\(variables.join(', ')))`
+
+				@type.setDefaultValue(call, false)
+
+				@defaultValue = new Literal(`\(@parent.getOverridableVarname()).\(call)`, @parent)
+			}
+		}
+
+		type = @type.getVariableType()
 
 		@name.setDeclaredType(@rest ? Type.arrayOf(type, @scope) : type, true)
 	} // }}}
@@ -744,14 +767,15 @@ class Parameter extends AbstractNode {
 		return @scope.reference(alias.type())
 	} // }}}
 	arity() => @arity
+	getReturnType() => @type.getReturnType()
 	hasDefaultValue() => @hasDefaultValue
 	isAnonymous() => @anonymous
 	isAssertingParameter() => @parent.isAssertingParameter()
 	isAssertingParameterType() => @parent.isAssertingParameterType()
+	isComprehensive() => @comprehensive
 	isRequired() => @defaultValue == null || @explicitlyRequired
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
-	returnType() => @type.returnType()
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@name)
 	} // }}}
@@ -802,7 +826,18 @@ class Parameter extends AbstractNode {
 	} // }}}
 	type(): ParameterType => @type
 	type(@type) { // {{{
-		const t = @type.type()
+		const t = @type.getVariableType()
+
+		if @type.hasDefaultValue() {
+			if @type.isComprehensive() {
+				@defaultValue = $compile.expression(@type.getDefaultValue(), @parent)
+				@defaultValue.analyse()
+				@defaultValue.prepare()
+			}
+			else {
+				@defaultValue = new Literal(`\(@parent.getOverridableVarname()).\(@type.getDefaultValue())`, @parent)
+			}
+		}
 
 		@name.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
 	} // }}}
@@ -1008,12 +1043,12 @@ class IdentifierParameter extends IdentifierLiteral {
 						if declaredType.isNullable() {
 							line.code('(__ks__ === null || ')
 
-							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'))
+							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'), Junction::OR)
 
 							line.code(')')
 						}
 						else {
-							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'))
+							declaredType.toPositiveTestFragments(line, new Literal(false, that, that.scope(), '__ks__'), Junction::AND)
 						}
 
 						line

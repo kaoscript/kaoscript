@@ -78,13 +78,13 @@ module.exports = function() {
 		})();
 		return d;
 	})());
-	Color.prototype.__ks_init_5 = function() {
+	Color.prototype.__ks_init_4 = function() {
 		this._rouge = 0;
 	};
-	Color.prototype.__ks_init_6 = function() {
+	Color.prototype.__ks_init_5 = function() {
 		this._vert = 0;
 	};
-	Color.prototype.__ks_init_7 = function() {
+	Color.prototype.__ks_init_6 = function() {
 		this._blue = 0;
 	};
 	Color.prototype.__ks_func_rouge_0 = function() {
@@ -124,13 +124,13 @@ module.exports = function() {
 		return this.setField("blue", value);
 	};
 	Color.prototype.__ks_init = function() {
+		Color.prototype.__ks_init_0.call(this);
 		Color.prototype.__ks_init_1.call(this);
 		Color.prototype.__ks_init_2.call(this);
 		Color.prototype.__ks_init_3.call(this);
 		Color.prototype.__ks_init_4.call(this);
 		Color.prototype.__ks_init_5.call(this);
 		Color.prototype.__ks_init_6.call(this);
-		Color.prototype.__ks_init_7.call(this);
 	};
 	Color.prototype.rouge = function() {
 		if(arguments.length === 0) {

@@ -36,7 +36,10 @@
           }
         ]
       },
-      "staticMethods": {}
+      "staticMethods": {},
+      "sequences": [
+        -1
+      ]
     }
   ],
   "macros": []

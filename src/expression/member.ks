@@ -291,11 +291,11 @@ class MemberExpression extends Expression {
 	isUsingInstanceVariable(name) => @property == name && @object is IdentifierLiteral && @object.name() == 'this' && @object.type().discard().hasInstanceVariable(@property)
 	isUsingStaticVariable(class, varname) => @property == varname && @object is IdentifierLiteral && @object.name() == class
 	listAssignments(array) => array
-	override listUsedVariables(scope, variables) { // {{{
-		@object.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@object.listNonLocalVariables(scope, variables)
 
 		if @computed {
-			@property.listUsedVariables(scope, variables)
+			@property.listNonLocalVariables(scope, variables)
 		}
 
 		return variables

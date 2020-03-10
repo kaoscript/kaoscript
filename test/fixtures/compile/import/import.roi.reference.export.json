@@ -40,7 +40,7 @@
               "type": "Number",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "returns": "Number",
@@ -60,7 +60,7 @@
               },
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             }
           ],
           "returns": {
@@ -90,9 +90,7 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {
         "length": {
           "access": 4,
@@ -118,7 +116,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -141,7 +139,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Array?",
@@ -162,7 +160,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -185,7 +183,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -208,7 +206,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Array",
@@ -250,6 +248,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -258,7 +261,6 @@
         "reference": 1
       },
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
@@ -274,10 +276,12 @@
             "parameters": [
               {
                 "name": "emptyLines",
-                "type": "Any?",
+                "type": "Any",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6MTUsImNvbHVtbiI6MjF9LCJlbmQiOnsibGluZSI6MTUsImNvbHVtbiI6MjZ9fQ=="
               }
             ],
             "returns": "Array",
@@ -326,10 +330,12 @@
             "parameters": [
               {
                 "name": "base",
-                "type": "Any?",
+                "type": "Any",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjEwLCJzdGFydCI6eyJsaW5lIjoyOCwiY29sdW1uIjoxNX0sImVuZCI6eyJsaW5lIjoyOCwiY29sdW1uIjoxN319"
               }
             ],
             "returns": "Number",
@@ -339,6 +345,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     }
   ],

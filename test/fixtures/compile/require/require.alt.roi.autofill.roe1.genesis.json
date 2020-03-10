@@ -31,13 +31,16 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -48,13 +51,16 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -65,13 +71,16 @@
       "sealed": false,
       "systemic": false,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {},
-      "classMethods": {}
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
     },
     {
       "kind": "class",
@@ -79,7 +88,6 @@
         "reference": 0
       },
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
       "instanceVariables": {
         "length": {
@@ -107,7 +115,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -131,14 +139,16 @@
                 "type": "Function",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "thisArg",
-                "type": "Dictionary?",
+                "type": "Dictionary",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjUwfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6NTR9fQ=="
               }
             ],
             "returns": "Boolean",
@@ -160,14 +170,16 @@
                 "type": "Function",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "thisArg",
-                "type": "Dictionary?",
+                "type": "Dictionary",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo5LCJjb2x1bW4iOjUyfSwiZW5kIjp7ImxpbmUiOjksImNvbHVtbiI6NTZ9fQ=="
               }
             ],
             "returns": "Void",
@@ -189,14 +201,16 @@
                 "type": "Any",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "fromIndex",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjEwLCJjb2x1bW4iOjQ1fSwiZW5kIjp7ImxpbmUiOjEwLCJjb2x1bW4iOjQ2fX0="
               }
             ],
             "returns": "Number",
@@ -216,13 +230,13 @@
               {
                 "name": "separator",
                 "type": {
-                  "kind": "reference",
-                  "name": 4,
-                  "nullable": true
+                  "reference": 4
                 },
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo2OCwidmFsdWUiOiIsIiwic3RhcnQiOnsibGluZSI6MTEsImNvbHVtbiI6Mjd9LCJlbmQiOnsibGluZSI6MTEsImNvbHVtbiI6MzB9fQ=="
               }
             ],
             "returns": {
@@ -260,7 +274,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Number",
@@ -293,17 +307,21 @@
             "parameters": [
               {
                 "name": "begin",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjI0fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjI1fX0="
               },
               {
                 "name": "end",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0M319"
               }
             ],
             "returns": "Any?",
@@ -325,14 +343,16 @@
                 "type": "Function",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "thisArg",
-                "type": "Dictionary?",
+                "type": "Dictionary",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNiwiY29sdW1uIjo0OX0sImVuZCI6eyJsaW5lIjoxNiwiY29sdW1uIjo1M319"
               }
             ],
             "returns": "Boolean",
@@ -351,10 +371,12 @@
             "parameters": [
               {
                 "name": "compare",
-                "type": "Function?",
+                "type": "Function",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNywiY29sdW1uIjoyN30sImVuZCI6eyJsaW5lIjoxNywiY29sdW1uIjozMX19"
               }
             ],
             "returns": {
@@ -378,21 +400,23 @@
                 "type": "Number",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "delete",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0M319"
               },
               {
                 "name": "items",
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -432,7 +456,7 @@
                 "type": "Any",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Number",
@@ -451,10 +475,12 @@
             "parameters": [
               {
                 "name": "index",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjEsInN0YXJ0Ijp7ImxpbmUiOjQ2LCJjb2x1bW4iOjIzfSwiZW5kIjp7ImxpbmUiOjQ2LCJjb2x1bW4iOjI0fX0="
               }
             ],
             "returns": "Any?",
@@ -464,6 +490,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -472,7 +503,6 @@
         "reference": 1
       },
       "exhaustive": true,
-      "init": 0,
       "constructors": [],
       "instanceVariables": {
         "length": {
@@ -500,7 +530,7 @@
                 "type": "Number",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -524,7 +554,7 @@
                 "type": "Number",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Number",
@@ -554,7 +584,7 @@
                 },
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -584,7 +614,7 @@
                 },
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -610,14 +640,16 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "fromIndex",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjI5LCJjb2x1bW4iOjQ2fSwiZW5kIjp7ImxpbmUiOjI5LCJjb2x1bW4iOjQ3fX0="
               }
             ],
             "returns": "Number",
@@ -641,14 +673,16 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "fromIndex",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjMwLCJjb2x1bW4iOjUwfSwiZW5kIjp7ImxpbmUiOjMwLCJjb2x1bW4iOjUxfX0="
               }
             ],
             "returns": "Number",
@@ -670,7 +704,7 @@
                 "type": "RegExp",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -709,7 +743,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "replacement",
@@ -724,7 +758,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -748,7 +782,7 @@
                 "type": "RegExp",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": "Number",
@@ -770,14 +804,16 @@
                 "type": "Number",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "endIndex",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNCwiY29sdW1uIjo0N30sImVuZCI6eyJsaW5lIjozNCwiY29sdW1uIjo0OX19"
               }
             ],
             "returns": {
@@ -800,7 +836,6 @@
                 "name": "separator",
                 "type": {
                   "kind": "union",
-                  "nullable": true,
                   "types": [
                     "RegExp",
                     {
@@ -810,14 +845,18 @@
                 },
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjozNSwiY29sdW1uIjozN30sImVuZCI6eyJsaW5lIjozNSwiY29sdW1uIjo0MX19"
               },
               {
                 "name": "limit",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNSwiY29sdW1uIjo1OX0sImVuZCI6eyJsaW5lIjozNSwiY29sdW1uIjo2MX19"
               }
             ],
             "returns": {
@@ -847,14 +886,16 @@
                 "type": "Number",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "length",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNiwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjozNiwiY29sdW1uIjo0M319"
               }
             ],
             "returns": {
@@ -878,14 +919,16 @@
                 "type": "Number",
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "indexEnd",
-                "type": "Number?",
+                "type": "Number",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNywiY29sdW1uIjo1MX0sImVuZCI6eyJsaW5lIjozNywiY29sdW1uIjo1M319"
               }
             ],
             "returns": {
@@ -986,10 +1029,12 @@
             "parameters": [
               {
                 "name": "emptyLines",
-                "type": "Boolean?",
+                "type": "Boolean",
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NTIsImNvbHVtbiI6MzB9LCJlbmQiOnsibGluZSI6NTIsImNvbHVtbiI6MzV9fQ=="
               }
             ],
             "returns": {
@@ -1007,6 +1052,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     }
   ],

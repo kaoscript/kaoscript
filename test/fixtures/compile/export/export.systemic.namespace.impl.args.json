@@ -39,7 +39,7 @@
               "type": "Any?",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "returns": "Number",
@@ -67,21 +67,21 @@
               "type": "Any",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             },
             {
               "name": "y",
               "type": "Any!?",
               "min": 1,
               "max": 1,
-              "default": 0
+              "default": false
             },
             {
               "name": "z",
-              "type": "Any?",
+              "type": "Any",
               "min": 0,
               "max": 1,
-              "default": 1
+              "default": true
             }
           ],
           "returns": "String",

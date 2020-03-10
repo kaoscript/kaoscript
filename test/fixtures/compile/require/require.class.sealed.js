@@ -1,6 +1,6 @@
 var {initFlag, Type} = require("@kaoscript/runtime");
 module.exports = function(Color, __ks_Color) {
-	__ks_Color.__ks_init_1 = function(that) {
+	__ks_Color.__ks_init_0 = function(that) {
 		that._luma = 0;
 	};
 	__ks_Color.__ks_get_luma = function(that) {
@@ -32,7 +32,7 @@ module.exports = function(Color, __ks_Color) {
 		return this;
 	};
 	__ks_Color.__ks_init = function(that) {
-		__ks_Color.__ks_init_1(that);
+		__ks_Color.__ks_init_0(that);
 		that[initFlag] = true;
 	};
 	__ks_Color._im_luma = function(that) {

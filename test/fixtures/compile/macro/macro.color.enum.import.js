@@ -90,13 +90,13 @@ module.exports = function() {
 		})();
 		return d;
 	})());
-	Color.prototype.__ks_init_1 = function() {
+	Color.prototype.__ks_init_0 = function() {
 		this._hue = 0;
 	};
-	Color.prototype.__ks_init_2 = function() {
+	Color.prototype.__ks_init_1 = function() {
 		this._saturation = 0;
 	};
-	Color.prototype.__ks_init_3 = function() {
+	Color.prototype.__ks_init_2 = function() {
 		this._lightness = 0;
 	};
 	Color.prototype.__ks_func_hue_0 = function() {
@@ -136,9 +136,9 @@ module.exports = function() {
 		return this.setField("lightness", value);
 	};
 	Color.prototype.__ks_init = function() {
+		Color.prototype.__ks_init_0.call(this);
 		Color.prototype.__ks_init_1.call(this);
 		Color.prototype.__ks_init_2.call(this);
-		Color.prototype.__ks_init_3.call(this);
 	};
 	Color.prototype.hue = function() {
 		if(arguments.length === 0) {

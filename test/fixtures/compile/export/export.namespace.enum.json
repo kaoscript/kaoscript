@@ -57,6 +57,9 @@
           ],
           "instanceMethods": {},
           "staticMethods": {},
+          "sequences": [
+            -1
+          ],
           "sealed": false
         }
       }

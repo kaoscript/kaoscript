@@ -8,7 +8,7 @@ class ImplementClassFieldDeclaration extends Statement {
 		_classRef: ReferenceType
 		_defaultValue: Boolean				= false
 		_immutable: Boolean					= false
-		_init: Number						= 0
+		_init: Number						= -1
 		_instance: Boolean					= true
 		_internalName: String
 		_lateInit: Boolean					= false
@@ -86,7 +86,7 @@ class ImplementClassFieldDeclaration extends Statement {
 
 		if @defaultValue {
 			if @instance {
-				@init = @class.incInitializer()
+				@init = @class.incInitializationSequence()
 			}
 
 			@value.prepare()
@@ -189,7 +189,7 @@ class ImplementClassFieldDeclaration extends Statement {
 
 			const block = line.newBlock()
 
-			for let i from 1 to @init {
+			for let i from 0 to @init {
 				block.line(`\(@variable.getSealedName()).__ks_init_\(i)(that)`)
 			}
 
@@ -205,7 +205,7 @@ class ImplementClassFieldDeclaration extends Statement {
 
 			const block = line.newBlock()
 
-			for let i from 1 to @init {
+			for let i from 0 to @init {
 				block.line(`\(@variable.name()).prototype.__ks_init_\(i).call(this)`)
 			}
 
@@ -230,6 +230,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		_autoTyping: Boolean			= false
 		_class: ClassType
 		_classRef: ReferenceType
+		_indigentValues: Array			= []
 		_instance: Boolean				= true
 		_override: Boolean				= false
 		_overwrite: Boolean				= false
@@ -287,14 +288,20 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		if @instance {
 			if @override {
-				const methods = @class.listMatchingInstanceMethods(@name, @type, MatchingMode::ShiftableParameters)
+				if const method = @class.getInstantiableMethod(@name, @parameters) {
+					@type = method.clone().flagAlteration()
+					@internalName = `__ks_func_\(@name)_\(method.identifier())`
 
-				if methods.length == 0 {
-					@override = false
-					@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
+					const parameters = @type.parameters()
+
+					for const parameter, index in @parameters {
+						parameter.type(parameters[index])
+					}
 				}
 				else {
-					@internalName = `__ks_func_\(@name)_\(methods[0].identifier())`
+					/* SyntaxException.throwNoOverridableMethod(@class, @name, @parameters, this) */
+					@override = false
+					@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
 				}
 			}
 			else if @overwrite {
@@ -367,14 +374,14 @@ class ImplementClassMethodDeclaration extends Statement {
 				NodeKind::Identifier => {
 					if @data.type.value.name == 'auto' {
 						if !@override {
-							@type.returnType(@block.getUnpreparedType())
+							@type.setReturnType(@block.getUnpreparedType())
 
 							@autoTyping = true
 						}
 					}
 					else {
 						if !@override {
-							@type.returnType(@parent.type().reference(@scope))
+							@type.setReturnType(@parent.type().reference(@scope))
 						}
 
 						if @instance {
@@ -392,7 +399,7 @@ class ImplementClassMethodDeclaration extends Statement {
 					return.analyse()
 
 					if !@override {
-						@type.returnType(return.getUnpreparedType())
+						@type.setReturnType(return.getUnpreparedType())
 					}
 
 					@block.addReturn(return)
@@ -405,13 +412,18 @@ class ImplementClassMethodDeclaration extends Statement {
 			parameter.translate()
 		}
 
+		for const indigent in @indigentValues {
+			indigent.value.prepare()
+			indigent.value.translate()
+		}
+
 		if @autoTyping {
 			@block.prepare()
 
-			@type.returnType(@block.type())
+			@type.setReturnType(@block.type())
 		}
 		else {
-			@block.type(@type.returnType()).prepare()
+			@block.type(@type.getReturnType()).prepare()
 		}
 
 		@block.translate()
@@ -420,6 +432,17 @@ class ImplementClassMethodDeclaration extends Statement {
 		if !ClassDeclaration.isAssigningAlias(@block.statements(), statement.name(), false, false) {
 			@aliases.push(statement)
 		}
+	} // }}}
+	addIndigentValue(value: Expression, parameters) { // {{{
+		const name = `__ks_default_\(@class.level())_\(@class.incDefaultSequence())`
+
+		@indigentValues.push({
+			name
+			value
+			parameters
+		})
+
+		return name
 	} // }}}
 	addTopNode(node) { // {{{
 		@topNodes.push(node)
@@ -439,6 +462,7 @@ class ImplementClassMethodDeclaration extends Statement {
 			return MatchingMode::ExactParameters
 		}
 	} // }}}
+	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	getSharedName() => @override ? null : @instance ? `_im_\(@name)` : `_cm_\(@name)`
 	isConstructor() => false
@@ -446,8 +470,29 @@ class ImplementClassMethodDeclaration extends Statement {
 	isInstance() => @instance
 	isInstanceMethod() => @instance
 	isMethod() => true
+	isOverridableFunction() => true
 	name() => @name
 	parameters() => @parameters
+	toIndigentFragments(fragments) { // {{{
+		/* for const {name, value, parameters} in @indigentValues {
+		} */
+		for const indigent in @indigentValues {
+			const line = fragments.newLine()
+			const ctrl = line.newControl(null, false, false)
+
+			if @class.isSealed() {
+				ctrl.code(`\(@variable.getSealedName()).\(indigent.name) = function(\(indigent.parameters.join(', ')))`).step()
+			}
+			else {
+				ctrl.code(`\(@variable.name()).prototype.\(indigent.name) = function(\(indigent.parameters.join(', ')))`).step()
+			}
+
+			ctrl.newLine().code('return ').compile(indigent.value).done()
+
+			ctrl.done()
+			line.done()
+		}
+	} // }}}
 	toSharedFragments(fragments) { // {{{
 		return if @override
 
@@ -567,6 +612,8 @@ class ImplementClassMethodDeclaration extends Statement {
 
 		block.done()
 		line.done()
+
+		this.toIndigentFragments(fragments)
 	} // }}}
 	type() => @type
 }
@@ -801,6 +848,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 			return MatchingMode::ExactParameters
 		}
 	} // }}}
+	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	getSharedName() => '__ks_cons'
 	isAssertingParameter() => @options.rules.assertParameter
@@ -810,6 +858,7 @@ class ImplementClassConstructorDeclaration extends Statement {
 	isExtending() => @class.isExtending()
 	isInstance() => false
 	isMethod() => true
+	isOverridableFunction() => true
 	name() => 'constructor'
 	parameters() => @parameters
 	toSharedFragments(fragments) { // {{{
@@ -970,7 +1019,7 @@ class CallOverwrittenMethodSubstitude {
 
 		for const method in methods {
 			if method.matchArguments(@arguments) {
-				types.push(method.returnType())
+				types.push(method.getReturnType())
 
 				@methods.push(method)
 			}

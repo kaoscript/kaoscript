@@ -64,9 +64,9 @@ class ArrayExpression extends Expression {
 
 		return false
 	} // }}}
-	override listUsedVariables(scope, variables) { // {{{
+	override listNonLocalVariables(scope, variables) { // {{{
 		for const value in @values {
-			value.listUsedVariables(scope, variables)
+			value.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
@@ -133,10 +133,10 @@ class ArrayRange extends Expression {
 		}
 	} // }}}
 	isUsingVariable(name) => @from.isUsingVariable(name) || @to.isUsingVariable(name) || @by?.isUsingVariable(name)
-	override listUsedVariables(scope, variables) { // {{{
-		@from.listUsedVariables(scope, variables)
-		@to.listUsedVariables(scope, variables)
-		@by?.listUsedVariables(scope, variables)
+	override listNonLocalVariables(scope, variables) { // {{{
+		@from.listNonLocalVariables(scope, variables)
+		@to.listNonLocalVariables(scope, variables)
+		@by?.listNonLocalVariables(scope, variables)
 
 		return variables
 	} // }}}

@@ -1,6 +1,6 @@
 extern console
 
-import '../class/class.extends.override.wk.default.ks'
+import '../class/class.override.ndef.wk.default.ks'
 
 let r = new Rectangle('black')
 

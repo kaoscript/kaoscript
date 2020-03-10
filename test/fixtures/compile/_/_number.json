@@ -25,9 +25,7 @@
       "sealed": true,
       "systemic": true,
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
-      "destructors": 0,
       "instanceVariables": {},
       "classVariables": {},
       "instanceMethods": {
@@ -44,7 +42,7 @@
                 "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -56,6 +54,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     },
     {
@@ -75,7 +78,7 @@
               "type": "Any?",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "returns": {
@@ -95,7 +98,7 @@
               "type": "Any?",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "returns": {
@@ -115,7 +118,7 @@
               "type": "Any?",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "returns": {
@@ -135,7 +138,7 @@
               "type": "Any?",
               "min": 0,
               "max": "Infinity",
-              "default": 0
+              "default": false
             }
           ],
           "returns": {
@@ -152,7 +155,6 @@
         "reference": 0
       },
       "exhaustive": false,
-      "init": 0,
       "constructors": [],
       "instanceVariables": {},
       "classVariables": {},
@@ -173,7 +175,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               },
               {
                 "name": "max",
@@ -182,7 +184,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -208,7 +210,7 @@
                 },
                 "min": 1,
                 "max": 1,
-                "default": 0
+                "default": false
               }
             ],
             "returns": {
@@ -230,13 +232,13 @@
               {
                 "name": "precision",
                 "type": {
-                  "kind": "reference",
-                  "name": 2,
-                  "nullable": true
+                  "reference": 2
                 },
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjMzLCJjb2x1bW4iOjI4fSwiZW5kIjp7ImxpbmUiOjMzLCJjb2x1bW4iOjI5fX0="
               }
             ],
             "returns": {
@@ -274,13 +276,13 @@
               {
                 "name": "base",
                 "type": {
-                  "kind": "reference",
-                  "name": 2,
-                  "nullable": true
+                  "reference": 2
                 },
                 "min": 0,
                 "max": 1,
-                "default": 1
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjEwLCJzdGFydCI6eyJsaW5lIjozOCwiY29sdW1uIjoyM30sImVuZCI6eyJsaW5lIjozOCwiY29sdW1uIjoyNX19"
               }
             ],
             "returns": {
@@ -292,6 +294,11 @@
         ]
       },
       "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ],
       "sharedMethods": {}
     }
   ],

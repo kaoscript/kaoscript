@@ -92,9 +92,9 @@ class ReturnStatement extends Statement {
 	isExit() => true
 	isExpectingType() => true
 	isUsingVariable(name) => @value != null && @value.isUsingVariable(name)
-	listUsedVariables(scope: Scope, variables: Array) { // {{{
+	listNonLocalVariables(scope: Scope, variables: Array) { // {{{
 		if @value != null {
-			@value.listUsedVariables(scope, variables)
+			@value.listNonLocalVariables(scope, variables)
 		}
 
 		return variables
