@@ -426,15 +426,13 @@ class EnumMethodDeclaration extends Statement {
 	isOverridableFunction() => true
 	parameters() => @parameters
 	toIndigentFragments(fragments) { // {{{
-		/* for const {name, value, parameters} in @indigentValues {
-		} */
-		for const indigent in @indigentValues {
+		for const {name, value, parameters} in @indigentValues {
 			const line = fragments.newLine()
 			const ctrl = line.newControl(null, false, false)
 
-			ctrl.code(`\(@parent.name()).\(indigent.name) = function(\(indigent.parameters.join(', ')))`).step()
+			ctrl.code(`\(@parent.name()).\(name) = function(\(parameters.join(', ')))`).step()
 
-			ctrl.newLine().code('return ').compile(indigent.value).done()
+			ctrl.newLine().code('return ').compile(value).done()
 
 			ctrl.done()
 			line.done()

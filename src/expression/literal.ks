@@ -185,6 +185,9 @@ class IdentifierLiteral extends Literal {
 	name() => @value
 	path() => @value
 	setAssignment(@assignment)
+	toAssignmentFragments(fragments, value) { // {{{
+		fragments.compile(this).code($equals).compile(value)
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @isVariable {
 			fragments.compile(@scope.getVariable(@value, @line))

@@ -7,7 +7,7 @@ module.exports = function() {
 			throw new TypeError("'values' is not nullable");
 		}
 		for(let __ks_0 = 0, __ks_1 = values.length, line, element; __ks_0 < __ks_1; ++__ks_0) {
-			{line, element} = values[__ks_0];
+			({line, element} = values[__ks_0]);
 		}
 	}
 };

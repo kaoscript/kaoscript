@@ -1921,10 +1921,9 @@ class ClassMethodDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		/* for const {value} in @indigentValues { */
-		for const indigent in @indigentValues {
-			indigent.value.prepare()
-			indigent.value.translate()
+		for const {value} in @indigentValues {
+			value.prepare()
+			value.translate()
 		}
 
 		if @autoTyping {
@@ -1980,19 +1979,17 @@ class ClassMethodDeclaration extends Statement {
 	name() => @name
 	parameters() => @parameters
 	toIndigentFragments(fragments) { // {{{
-		/* for const {name, value, parameters} in @indigentValues {
-		} */
-		for const indigent in @indigentValues {
+		for const {name, value, parameters} in @indigentValues {
 			const ctrl = fragments.newControl()
 
 			if @parent._es5 {
-				ctrl.code(`\(indigent.name): function(\(indigent.parameters.join(', ')))`).step()
+				ctrl.code(`\(name): function(\(parameters.join(', ')))`).step()
 			}
 			else {
-				ctrl.code(`\(indigent.name)(\(indigent.parameters.join(', ')))`).step()
+				ctrl.code(`\(name)(\(parameters.join(', ')))`).step()
 			}
 
-			ctrl.newLine().code('return ').compile(indigent.value).done()
+			ctrl.newLine().code('return ').compile(value).done()
 
 			ctrl.done() unless @parent._es5
 		}
@@ -2215,10 +2212,9 @@ class ClassConstructorDeclaration extends Statement {
 			parameter.translate()
 		}
 
-		/* for const {value} in @indigentValues { */
-		for const indigent in @indigentValues {
-			indigent.value.prepare()
-			indigent.value.translate()
+		for const {value} in @indigentValues {
+			value.prepare()
+			value.translate()
 		}
 
 		@block.prepare()
@@ -2365,7 +2361,7 @@ class ClassConstructorDeclaration extends Statement {
 		ctrl.done()
 	} // }}}
 	toIndigentFragments(fragments) { // {{{
-		/* for const {name, value, parameters} in @indigentValues {
+		for const {name, value, parameters} in @indigentValues {
 			const ctrl = fragments.newControl()
 
 			if @parent._es5 {
@@ -2376,20 +2372,6 @@ class ClassConstructorDeclaration extends Statement {
 			}
 
 			ctrl.newLine().code('return ').compile(value).done()
-
-			ctrl.done() unless @parent._es5
-		} */
-		for const indigent in @indigentValues {
-			const ctrl = fragments.newControl()
-
-			if @parent._es5 {
-				ctrl.code(`\(indigent.name): function(\(indigent.parameters.join(', ')))`).step()
-			}
-			else {
-				ctrl.code(`\(indigent.name)(\(indigent.parameters.join(', ')))`).step()
-			}
-
-			ctrl.newLine().code('return ').compile(indigent.value).done()
 
 			ctrl.done() unless @parent._es5
 		}

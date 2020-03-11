@@ -120,17 +120,17 @@ class ForOfStatement extends Statement {
 
 			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
 
-			if @defineValue {
-				@value.type(realType, @bindingScope, this)
-			}
-			else {
-				if @value is IdentifierLiteral {
+			if @value is IdentifierLiteral {
+				if @defineValue {
+					@value.type(realType, @bindingScope, this)
+				}
+				else  {
 					@bindingScope.replaceVariable(@value.name(), realType, this)
 				}
-				else {
-					for const name in @value.listAssignments([]) {
-						@bindingScope.replaceVariable(name, realType.getProperty(name), this)
-					}
+			}
+			else {
+				for const name in @value.listAssignments([]) {
+					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
 				}
 			}
 		}

@@ -8,7 +8,7 @@ module.exports = function() {
 		}
 		let line = null;
 		for(let __ks_0 = 0, __ks_1 = values.length, element; __ks_0 < __ks_1; ++__ks_0) {
-			{line, element} = values[__ks_0];
+			({line, element} = values[__ks_0]);
 		}
 	}
 };

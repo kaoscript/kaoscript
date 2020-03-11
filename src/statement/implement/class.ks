@@ -474,20 +474,18 @@ class ImplementClassMethodDeclaration extends Statement {
 	name() => @name
 	parameters() => @parameters
 	toIndigentFragments(fragments) { // {{{
-		/* for const {name, value, parameters} in @indigentValues {
-		} */
-		for const indigent in @indigentValues {
+		for const {name, value, parameters} in @indigentValues {
 			const line = fragments.newLine()
 			const ctrl = line.newControl(null, false, false)
 
 			if @class.isSealed() {
-				ctrl.code(`\(@variable.getSealedName()).\(indigent.name) = function(\(indigent.parameters.join(', ')))`).step()
+				ctrl.code(`\(@variable.getSealedName()).\(name) = function(\(parameters.join(', ')))`).step()
 			}
 			else {
-				ctrl.code(`\(@variable.name()).prototype.\(indigent.name) = function(\(indigent.parameters.join(', ')))`).step()
+				ctrl.code(`\(@variable.name()).prototype.\(name) = function(\(parameters.join(', ')))`).step()
 			}
 
-			ctrl.newLine().code('return ').compile(indigent.value).done()
+			ctrl.newLine().code('return ').compile(value).done()
 
 			ctrl.done()
 			line.done()

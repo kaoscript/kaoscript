@@ -164,17 +164,17 @@ class ForInStatement extends Statement {
 
 			const realType = parameterType.isMorePreciseThan(valueType) ? parameterType : valueType
 
-			if @declareValue {
-				@value.type(realType, @bindingScope, this)
-			}
-			else  {
-				if @value is IdentifierLiteral {
+			if @value is IdentifierLiteral {
+				if @declareValue {
+					@value.type(realType, @bindingScope, this)
+				}
+				else  {
 					@bindingScope.replaceVariable(@value.name(), realType, this)
 				}
-				else {
-					for const name in @value.listAssignments([]) {
-						@bindingScope.replaceVariable(name, realType.getProperty(name), this)
-					}
+			}
+			else {
+				for const name in @value.listAssignments([]) {
+					@bindingScope.replaceVariable(name, realType.getProperty(name), this)
 				}
 			}
 		}
@@ -196,9 +196,9 @@ class ForInStatement extends Statement {
 
 		@boundName = @bindingScope.acquireTempName(false)
 
-		if @options.format.destructuring == 'es5' && @value is not IdentifierLiteral {
-			@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @indexName ?? @index, true, this, @bindingScope)
+		@bindingValue = new TempMemberExpression(@expressionName ?? @expression, @indexName ?? @index, true, this, @bindingScope)
 
+		if @options.format.destructuring == 'es5' && @value is not IdentifierLiteral {
 			@bindingValue.acquireReusable(true)
 		}
 
@@ -623,24 +623,11 @@ class ForInStatement extends Statement {
 		ctrl.code(')').step()
 
 		if @value? {
-			if @bindingValue == null {
-				ctrl
-					.newLine()
-					.compile(@value)
-					.code($equals)
-					.compile(@expressionName ?? @expression)
-					.code('[')
-					.compile(@indexName ?? @index)
-					.code(']')
-					.done()
-			}
-			else {
-				const line = ctrl.newLine()
+			const line = ctrl.newLine()
 
-				@value.toAssignmentFragments(line, @bindingValue)
+			@value.toAssignmentFragments(line, @bindingValue)
 
-				line.done()
-			}
+			line.done()
 
 			if @useBreak {
 				if @until? {
