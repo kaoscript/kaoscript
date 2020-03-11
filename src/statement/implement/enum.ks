@@ -198,8 +198,12 @@ class ImplementEnumMethodDeclaration extends Statement {
 						parameter.type(parameters[index])
 					}
 				}
+				else if this.isAssertingOverride() {
+					SyntaxException.throwNoOverridableMethod(@enumName, @name, @parameters, this)
+				}
 				else {
-					SyntaxException.throwNoOverridableMethod(@enum, @name, @parameters, this)
+					@override = false
+					@enum.addInstanceMethod(@name, @type)
 				}
 			}
 			else {
@@ -292,6 +296,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 	getOverridableVarname() => @enumName.name()
 	getParameterOffset() => @instance ? 1 : 0
 	getSharedName() => null
+	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isInstance() => @instance

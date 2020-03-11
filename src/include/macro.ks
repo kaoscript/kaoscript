@@ -544,6 +544,10 @@ class CallMacroStatement extends Statement {
 
 		@scope.setLineOffset(@offsetStart)
 
+		const file = `\(this.file())!#\(macro.name())`
+
+		@options = Attribute.configure(data, @options, AttributeTarget::Global, file)
+
 		for const data in data.body {
 			@scope.line(data.start.line)
 

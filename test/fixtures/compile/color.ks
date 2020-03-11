@@ -522,6 +522,8 @@ export class Color {
 			}
 
 			macro {
+				#![rules(dont-assert-override)]
+
 				Color.registerSpace(#(space))
 
 				impl Color {

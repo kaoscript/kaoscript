@@ -623,6 +623,7 @@ export class Compiler {
 			rules: {
 				assertNewStruct: true
 				assertNewTuple: true
+				assertOverride: true
 				assertParameter: true
 				assertParameterType: true
 				noUndefined: false

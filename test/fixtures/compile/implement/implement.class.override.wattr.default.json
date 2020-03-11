@@ -1,0 +1,53 @@
+{
+  "aliens": [],
+  "requirements": [],
+  "exports": [
+    0,
+    "Shape"
+  ],
+  "references": [
+    {
+      "kind": "class",
+      "abstract": false,
+      "alien": false,
+      "hybrid": false,
+      "sealed": false,
+      "systemic": false,
+      "exhaustive": true,
+      "constructors": [],
+      "instanceVariables": {},
+      "classVariables": {},
+      "instanceMethods": {
+        "draw": [
+          {
+            "id": 0,
+            "access": 4,
+            "sealed": false,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "text",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Any?",
+            "throws": [],
+            "inits": []
+          }
+        ]
+      },
+      "classMethods": {},
+      "sequences": [
+        -1,
+        -1,
+        -1
+      ]
+    }
+  ],
+  "macros": []
+}

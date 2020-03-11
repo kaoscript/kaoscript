@@ -1835,15 +1835,21 @@ class ClassMethodDeclaration extends Statement {
 					parameter.type(parameters[index])
 				}
 			}
-			else {
+			else if this.isAssertingOverride() {
 				SyntaxException.throwNoOverridableMethod(@parent.extends(), @name, @parameters, this)
 			}
+			else {
+				@override = false
+			}
 
-			if const sealedclass = superclass.getHybridMethod(@name, @parent.extends()) {
-				@parent.addSharedMethod(@name, sealedclass)
+			if @override {
+				if const sealedclass = superclass.getHybridMethod(@name, @parent.extends()) {
+					@parent.addSharedMethod(@name, sealedclass)
+				}
 			}
 		}
-		else {
+
+		if !@override {
 			const arguments = [parameter.type() for const parameter in @parameters]
 
 			@type = new ClassMethodType(arguments, @data, this)
@@ -1969,6 +1975,7 @@ class ClassMethodDeclaration extends Statement {
 	getOverridableVarname() => 'this'
 	getParameterOffset() => 0
 	isAbstract() => @abstract
+	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	isConsumedError(error): Boolean => @type.isCatchingError(error)

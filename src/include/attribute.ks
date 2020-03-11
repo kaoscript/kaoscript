@@ -21,6 +21,8 @@ const $rules = {
 	'non-exhaustive':				['nonExhaustive', true]
 	'ignore-misfit':				['ignoreMisfit', true]
 	'dont-ignore-misfit':			['ignoreMisfit', false]
+	'assert-override':				['assertOverride', true]
+	'dont-assert-override':			['assertOverride', false]
 	'assert-parameter':				['assertParameter', true]
 	'dont-assert-parameter':		['assertParameter', false]
 	'assert-parameter-type':		['assertParameterType', true]

@@ -298,8 +298,10 @@ class ImplementClassMethodDeclaration extends Statement {
 						parameter.type(parameters[index])
 					}
 				}
+				else if this.isAssertingOverride() {
+					SyntaxException.throwNoOverridableMethod(@variable, @name, @parameters, this)
+				}
 				else {
-					/* SyntaxException.throwNoOverridableMethod(@class, @name, @parameters, this) */
 					@override = false
 					@internalName = `__ks_func_\(@name)_\(@class.addInstanceMethod(@name, @type))`
 				}
@@ -448,6 +450,7 @@ class ImplementClassMethodDeclaration extends Statement {
 		@topNodes.push(node)
 	} // }}}
 	authority() => this
+	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
 	class() => @variable

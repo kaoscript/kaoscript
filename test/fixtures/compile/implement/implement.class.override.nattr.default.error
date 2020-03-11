@@ -1,0 +1,1 @@
+SyntaxException: The method "Shape.draw(text: Any)" can't override a suitable method (line 5, file "fixtures/compile/implement/implement.class.override.nattr.default.ks")
