@@ -226,7 +226,7 @@ func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): C
 
 		s.converters[space](...args)
 
-		result._space = Space.from(space)
+		result._space = Space(space)!?
 
 		return result
 	}
@@ -620,7 +620,7 @@ export class Color {
 			if ?space.alias {
 				for alias in space.alias {
 					$spaces[space.name].alias[alias] = true
-					$aliases[alias] = Space.from(space.name)
+					$aliases[alias] = Space(space.name)
 				}
 
 				if ?$parsers[space.name] {
@@ -938,7 +938,7 @@ export class Color {
 	like(space: string) { // {{{
 		space = $aliases[space] ?? space
 
-		if const value = Space.from(space) {
+		if const value = Space(space) {
 			if this._space != value && ?$spaces[this._space].converters[space] {
 				return $convert(this, value)
 			}
@@ -1043,7 +1043,7 @@ export class Color {
 			}
 		}
 
-		if const value = Space.from(space) {
+		if const value = Space(space) {
 			if this._space != value && ?$spaces[this._space].converters[space] {
 				$convert(this, value, this)
 			}

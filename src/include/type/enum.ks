@@ -30,7 +30,7 @@ class EnumType extends Type {
 	}
 	static {
 		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): EnumType { // {{{
-			const type = new EnumType(scope, EnumTypeKind.from(data.type))
+			const type = new EnumType(scope, EnumTypeKind(data.type))
 
 			type._exhaustive = data.exhaustive
 			type._index = data.sequenceIndex

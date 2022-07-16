@@ -42,6 +42,9 @@ old:
 std:
 	gsed -i -E 's/compiler(.new|.old).js/compiler.js/' lib/bin.js
 
+save:
+	cp lib/compiler.js lib/compiler.old.js
+
 dev: export DEBUG = 1
 dev: export XARGS = 1
 dev:
