@@ -1,34 +1,39 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "Coord"
-  ],
-  "references": [
-    {
-      "kind": "struct",
-      "fields": {
-        "x": {
-          "required": true,
-          "type": "Number"
-        },
-        "y": {
-          "required": true,
-          "type": "Number"
-        },
-        "elevation": {
-          "required": true,
-          "type": {
-            "kind": "dictionary",
-            "properties": {
-              "unit": "String",
-              "value": "Number"
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Coord"
+    ],
+    "references": [
+      {
+        "kind": "struct",
+        "fields": {
+          "x": {
+            "required": true,
+            "type": "Number"
+          },
+          "y": {
+            "required": true,
+            "type": "Number"
+          },
+          "elevation": {
+            "required": true,
+            "type": {
+              "kind": "dictionary",
+              "properties": {
+                "unit": "String",
+                "value": "Number"
+              }
             }
           }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

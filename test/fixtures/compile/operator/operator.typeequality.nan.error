@@ -1,1 +1,1 @@
-TypeException: Identifier "NaN" is not a class (line 2, file "fixtures/compile/operator/operator.typeequality.nan.ks")
+TypeException: Identifier "NaN" is not a class (fixtures/compile/operator/operator.typeequality.nan.ks:2)

@@ -1,18 +1,21 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_String = {};
-	function foo(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!Type.isString(value)) {
-			throw new TypeError("'value' is not of type 'String'");
-		}
+	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function(value) {
 		console.log(value.trim());
 		const list = value.split(",");
 		console.log(list[0]);
-	}
+	};
+	foo.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foo.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

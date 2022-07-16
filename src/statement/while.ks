@@ -8,7 +8,7 @@ class WhileStatement extends Statement {
 		_declared: Boolean					= false
 		_declaration: VariableDeclaration
 	}
-	analyse() { // {{{
+	initiate() { // {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
 			@declared = true
 			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
@@ -16,6 +16,11 @@ class WhileStatement extends Statement {
 			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
 
 			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, true)
+			@declaration.initiate()
+		}
+	} // }}}
+	analyse() { // {{{
+		if @declared {
 			@declaration.analyse()
 
 			if @bindingDeclaration {
@@ -126,7 +131,7 @@ class WhileStatement extends Statement {
 			else {
 				let first = true
 
-				@declaration.walk(name => {
+				@declaration.walk((name, _) => {
 					if first {
 						ctrl.code($runtime.type(this) + '.isValue(')
 

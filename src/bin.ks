@@ -49,7 +49,7 @@ program
 	.parse(process.argv)
 
 if program.clean {
-	execSync(`find -L \(process.cwd()) -type f \\( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksm" \\) -exec rm {} \\;`)
+	execSync(`find -L \(process.cwd()) -type f \\( -name "*.ksb" -o -name "*.ksh" -o -name "*.ksr" -o -name "*.kse" \\) -exec rm {} \\;`)
 
 	if program.args.length == 0 {
 		console.log('all clean!')
@@ -95,10 +95,6 @@ if program.compile {
 	}
 
 	compiler.writeOutput()
-
-	if program.metadata {
-		compiler.writeMetadata()
-	}
 }
 else if program.print {
 	const compiler = new Compiler(file, options)

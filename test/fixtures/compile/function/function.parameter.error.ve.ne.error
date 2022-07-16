@@ -1,1 +1,1 @@
-ReferenceException: The function "foobar" can't be matched to given arguments (Null) (line 5, file "fixtures/compile/function/function.parameter.error.ve.ne.ks")
+ReferenceException: The function "foobar" can't be matched to given arguments (Null) (fixtures/compile/function/function.parameter.error.ve.ne.ks:5)

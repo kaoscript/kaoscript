@@ -1,36 +1,38 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foo {
+		static __ks_new_0() {
+			const o = Object.create(Foo.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
-			}
-		}
-		__ks_func_equals_0(b) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(b === void 0 || b === null) {
-				throw new TypeError("'b' is not nullable");
-			}
-			else if(!Type.isClassInstance(b, Foo)) {
-				throw new TypeError("'b' is not of type 'Foo'");
+				throw Helper.badArgs();
 			}
 		}
 		equals() {
-			if(arguments.length === 1) {
-				return Foo.prototype.__ks_func_equals_0.apply(this, arguments);
+			return this.__ks_func_equals_rt.call(null, this, this, arguments);
+		}
+		__ks_func_equals_0(b) {
+		}
+		__ks_func_equals_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Foo);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_equals_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	return {
-		Foo: Foo
+		Foo
 	};
 };

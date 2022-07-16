@@ -29,8 +29,9 @@ include {
 
 const $extensions = { // {{{
 	binary: '.ksb',
+	exports: '.kse',
 	hash: '.ksh',
-	metadata: '.ksm',
+	requirements: '.ksr',
 	source: '.ks'
 } // }}}
 
@@ -142,6 +143,9 @@ const $runtime = {
 
 		return node._options.runtime.helper.alias
 	} // }}}
+	immutableScope(node) { // {{{
+		return node._options.format.variables == 'es5' ? 'var ' : 'const '
+	} // }}}
 	initFlag(node) { // {{{
 		node.module?().flag('initFlag')
 
@@ -177,7 +181,7 @@ const $runtime = {
 
 abstract class AbstractNode {
 	private {
-		_data
+		_data: Any?				= null
 		_options
 		_parent: AbstractNode?	= null
 		_reference
@@ -198,8 +202,10 @@ abstract class AbstractNode {
 	authority() => @parent.authority()
 	data() => @data
 	directory() => @parent.directory()
+	enhance()
 	file() => @parent.file()
 	getFunctionNode() => @parent?.getFunctionNode()
+	initiate()
 	isConsumedError(error): Boolean => @parent.isConsumedError(error)
 	isIncluded(): Boolean => this.file() != this.module().file()
 	module() => @parent.module()
@@ -231,6 +237,9 @@ abstract class AbstractNode {
 		}
 	} // }}}
 	parent() => @parent
+	printDebug() { // {{{
+		console.log(`\(this.file()):\(@data.start.line)`)
+	} // }}}
 	reference() { // {{{
 		if @parent?.reference()? {
 			return @parent.reference() + @reference
@@ -498,7 +507,7 @@ func $expandOptions(options) { // {{{
 	}
 
 	if engine is Function {
-		if const opts = engine(options.target.version.split('.').map(v => parseInt(v)), $targets) {
+		if const opts = engine(options.target.version.split('.').map((value, _, _) => parseInt(value)), $targets) {
 			return Dictionary.defaults(options, opts)
 		}
 		else {
@@ -674,37 +683,38 @@ export class Compiler {
 
 		@options = $expandOptions(@options)
 	} // }}}
-	compile(data = null) { // {{{
-		//console.time('parse')
+	initiate(data: String = null) { // {{{
 		@module = new Module(data ?? fs.readFile(@file), this, @file)
-		//console.timeEnd('parse')
 
-		//console.time('compile')
-		@module.compile()
-		//console.timeEnd('compile')
-
-		//console.time('toFragments')
-		@fragments = @module.toFragments()
-		//console.timeEnd('toFragments')
+		@module.initiate()
 
 		return this
+	} // }}}
+	compile(data: String = null) { // {{{
+		return this.initiate(data).finish()
 	} // }}}
 	createServant(file) { // {{{
 		return new Compiler(file, Dictionary.defaults(@options, {
 			register: false
 		}), @hashes, [...@hierarchy, file])
 	} // }}}
+	finish() { // {{{
+		@module.finish()
+
+		@fragments = @module.toFragments()
+
+		return this
+	} // }}}
 	isInHierarchy(file) => @hierarchy.contains(file)
+	module(): @module
 	readFile() => fs.readFile(@file)
+	setArguments(arguments: Array, module: String = null, node: AbstractNode = null) => @module.setArguments(arguments, module, node)
 	sha256(file, data = null) { // {{{
 		return @hashes[file] ?? (@hashes[file] = fs.sha256(data ?? fs.readFile(file)))
 	} // }}}
-	toHashes() { // {{{
-		return @module.toHashes()
-	} // }}}
-	toMetadata() { // {{{
-		return @module.toMetadata()
-	} // }}}
+	toExports() => @module.toExports()
+	toHashes() => @module.toHashes()
+	toRequirements() => @module.toRequirements()
 	toSource() { // {{{
 		let source = ''
 
@@ -719,34 +729,61 @@ export class Compiler {
 			return source
 		}
 	} // }}}
-	toSourceMap() { // {{{
-		return @module.toSourceMap()
-	} // }}}
+	toSourceMap() => @module.toSourceMap()
+	toVariationId() => @module.toVariationId()
 	writeFiles() { // {{{
 		fs.mkdir(path.dirname(@file))
 
-		fs.writeFile(getBinaryPath(@file, @options.target), this.toSource())
-
-		if !@module._binary {
-			const metadata = this.toMetadata()
-
-			fs.writeFile(getMetadataPath(@file, @options.target), JSON.stringify(metadata, func(key, value) => key == 'max' && value == Infinity ? 'Infinity' : value))
+		if @module._binary {
+			this.writeBinaryFiles()
 		}
-
-		fs.writeFile(getHashPath(@file, @options.target), JSON.stringify(@module.toHashes()))
+		else {
+			this.writeModuleFiles()
+		}
 	} // }}}
-	writeMetadata() { // {{{
-		if @options.output is not String {
-			throw new Error('Undefined option: output')
+	private writeBinaryFiles() { // {{{
+		const variationId = @module.toVariationId()
+
+		fs.writeFile(getBinaryPath(@file, variationId), this.toSource())
+
+		this.writeHashFile(variationId)
+	} // }}}
+	private writeHashFile(variationId: String) { // {{{
+		const hashPath = getHashPath(@file)
+
+		let data
+
+		try {
+			data = JSON.parse(fs.readFile(hashPath))
+		}
+		catch {
+			data = {
+				hashes: {}
+			}
 		}
 
-		const metadata = this.toMetadata()
+		if @module.isUpToDate(data.hashes) {
+			data.variations.push(variationId)
+		}
+		else {
+			data = {
+				hashes: @module.toHashes()
+				variations: [variationId]
+			}
+		}
 
-		const filename = path.join(@options.output, path.basename(@file)).slice(0, -3) + '.json'
+		fs.writeFile(hashPath, JSON.stringify(data))
+	} // }}}
+	private writeModuleFiles() { // {{{
+		const variationId = @module.toVariationId()
 
-		fs.writeFile(filename, JSON.stringify(metadata, func(key, value) => key == 'max' && value == Infinity ? 'Infinity' : value))
+		fs.writeFile(getBinaryPath(@file, variationId), this.toSource())
 
-		return this
+		fs.writeFile(getRequirementsPath(@file), JSON.stringify(this.toRequirements(), fs.escapeJSON))
+
+		fs.writeFile(getExportsPath(@file, variationId), JSON.stringify(this.toExports(), fs.escapeJSON))
+
+		this.writeHashFile(variationId)
 	} // }}}
 	writeOutput() { // {{{
 		if @options.output is not String {
@@ -769,24 +806,30 @@ export func compileFile(file, options = null) { // {{{
 	return compiler.compile().toSource()
 } // }}}
 
-export func getBinaryPath(file, target) => fs.hidden(file, target.name, target.version, $extensions.binary)
+export func getBinaryPath(file, variationId = null) => fs.hidden(file, variationId, $extensions.binary)
 
-export func getHashPath(file, target) => fs.hidden(file, target.name, target.version, $extensions.hash)
+export func getExportsPath(file, variationId) => fs.hidden(file, variationId, $extensions.exports)
 
-export func getMetadataPath(file, target) => fs.hidden(file, target.name, target.version, $extensions.metadata)
+export func getHashPath(file) => fs.hidden(file, null, $extensions.hash)
 
-export func isUpToDate(file, target, source) { // {{{
-	let hashes
+export func getRequirementsPath(file) => fs.hidden(file, null, $extensions.requirements)
+
+export func isUpToDate(file, variationId, source) { // {{{
+	let data
 	try {
-		hashes = JSON.parse(fs.readFile(getHashPath(file, target)))
+		data = JSON.parse(fs.readFile(getHashPath(file)))
 	}
 	catch {
 		return false
 	}
 
+	if !data.variations:Array.contains(variationId) {
+		return false
+	}
+
 	let root = path.dirname(file)
 
-	for const hash, name of hashes {
+	for const hash, name of data.hashes {
 		if name == '.' {
 			return null if fs.sha256(source) != hash
 		}

@@ -1,23 +1,28 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "Foobar"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {
-        "x": {
-          "type": "String",
-          "sealed": false
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Foobar"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {
+          "x": {
+            "type": "String",
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

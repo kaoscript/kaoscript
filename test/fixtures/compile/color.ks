@@ -1,4 +1,5 @@
 #![rules(ignore-misfit)]
+#![error(off)]
 
 extern console
 
@@ -217,7 +218,7 @@ func $component(component, name: string, space: string): void { // {{{
 	$components[name].spaces[space] = true
 } // }}}
 
-func $convert(that: Color, space: string, result: dict = {_alpha: 0}): dict ~ Error { // {{{
+func $convert(that: Color, space: string, result: Color | dict = {_alpha: 0}): Color | dict ~ Error { // {{{
 	if ?(s = $spaces[that._space]).converters[space] {
 		let args = [that[component.field] for component, name of s.components]
 
@@ -225,7 +226,7 @@ func $convert(that: Color, space: string, result: dict = {_alpha: 0}): dict ~ Er
 
 		s.converters[space](...args)
 
-		result._space = space
+		result._space = Space.from(space)
 
 		return result
 	}
@@ -397,7 +398,7 @@ let $parsers = {
 					that._red = $caster.ff(match[1])
 					that._green = $caster.ff(match[2])
 					that._blue = $caster.ff(match[3])
-					that._alpha = $caster.alpha(match[5], match[6])
+					that._alpha = $caster.alpha(match[5], ?match[6])
 					return true
 				}
 				// rgb(66%, 55%, 44%) in [0,100]%, [0,100]%, [0,100]%
@@ -406,7 +407,7 @@ let $parsers = {
 					that._red = Math.round(2.55 * $caster.percentage(match[1]))
 					that._green = Math.round(2.55 * $caster.percentage(match[2]))
 					that._blue = Math.round(2.55 * $caster.percentage(match[3]))
-					that._alpha = $caster.alpha(match[5], match[6])
+					that._alpha = $caster.alpha(match[5], ?match[6])
 					return true
 				}
 				// rgba(#ff0000, 1)
@@ -415,7 +416,7 @@ let $parsers = {
 					that._red = Integer.parse(match[1], 16)
 					that._green = Integer.parse(match[2], 16)
 					that._blue = Integer.parse(match[3], 16)
-					that._alpha = $caster.alpha(match[4], match[5])
+					that._alpha = $caster.alpha(match[4], ?match[5])
 					return true
 				}
 				// rgba(#f00, 1)
@@ -424,7 +425,7 @@ let $parsers = {
 					that._red = Integer.parse(match[1] + match[1], 16)
 					that._green = Integer.parse(match[2] + match[2], 16)
 					that._blue = Integer.parse(match[3] + match[3], 16)
-					that._alpha = $caster.alpha(match[4], match[5])
+					that._alpha = $caster.alpha(match[4], ?match[5])
 					return true
 				}
 				// 1, 234, 56
@@ -464,14 +465,14 @@ let $parsers = {
 				if match ?= /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
 					that._space = Space::SRGB
 					that._red = that._green = that._blue = $caster.ff(match[1])
-					that._alpha = $caster.alpha(match[2], match[3])
+					that._alpha = $caster.alpha(match[2], ?match[3])
 					return true
 				}
 				// gray(66%)
 				else if match ?= /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color) {
 					that._space = Space::SRGB
 					that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]))
-					that._alpha = $caster.alpha(match[2], match[3])
+					that._alpha = $caster.alpha(match[2], ?match[3])
 					return true
 				}
 			}
@@ -490,8 +491,6 @@ func $space(name: string): void { // {{{
 } // }}}
 
 export enum Space<string> {
-	RGB
-	SRGB
 }
 
 export class Color {
@@ -505,6 +504,20 @@ export class Color {
 	}
 
 	macro registerSpace(@space: Dictionary) {
+		const spaces: Array = [space.name.toUpperCase()]
+
+		if space.alias? {
+			for const name in space.alias {
+				spaces.push(name.toUpperCase())
+			}
+		}
+
+		macro {
+			impl Space {
+				#s(spaces)
+			}
+		}
+
 		if space.components? {
 			const fields: Array = []
 			const methods: Array = []
@@ -607,7 +620,7 @@ export class Color {
 			if ?space.alias {
 				for alias in space.alias {
 					$spaces[space.name].alias[alias] = true
-					$aliases[alias] = space.name
+					$aliases[alias] = Space.from(space.name)
 				}
 
 				if ?$parsers[space.name] {
@@ -690,7 +703,7 @@ export class Color {
 		return this
 	} // }}}
 
-	blend(color: Color, percentage: float, space: Space = Space::SRGB, alpha: bool = false): Color ~ Error { // {{{
+	blend(color: Color, percentage: float, space: Space = Space::SRGB, alpha: bool = false): Color { // {{{
 		if alpha {
 			let w = (percentage * 2) - 1
 			let a = color._alpha - this._alpha
@@ -742,7 +755,7 @@ export class Color {
 		return this.copy(new Color())
 	} // }}}
 
-	contrast(color: Color) ~ Error { // {{{
+	contrast(color: Color) { // {{{
 		let a = this._alpha
 
 		if a == 1 {
@@ -790,7 +803,6 @@ export class Color {
 		}
 	} // }}}
 
-	#[error(off)]
 	copy(target: Color): Color { // {{{
 		let s1 = this._space
 		let s2 = target._space
@@ -810,7 +822,6 @@ export class Color {
 		return target
 	} // }}}
 
-	#[error(off)]
 	distance(color: Color): float { // {{{
 		const that: {_red: float, _green: float, _blue: float} = this.like(Space::SRGB)
 		color = color.like(Space::SRGB)
@@ -822,8 +833,6 @@ export class Color {
 		return this.hex() == color.hex()
 	} // }}}
 
-	/* format(format: string = this._space): string | bool ~ Error { // {{{ */
-	#[error(off)]
 	format(format: string = this._space) { // {{{
 		if const format = $formatters[format] {
 			return format.formatter(?format.space ? this.like(format.space) : this)
@@ -837,7 +846,6 @@ export class Color {
 		return $from(this, args)
 	} // }}}
 
-	#[error(off)]
 	private getField(name) { // {{{
 		const component = $components[name]
 
@@ -852,7 +860,6 @@ export class Color {
 		}
 	} // }}}
 
-	#[error(off)]
 	gradient(endColor: Color, length: int): array<Color> { // {{{
 		let gradient: array<Color> = [this]
 
@@ -882,7 +889,6 @@ export class Color {
 		return gradient
 	} // }}}
 
-	#[error(off)]
 	greyscale(model: string = 'BT709'): Color { // {{{
 		this.space(Space::SRGB)
 
@@ -905,18 +911,15 @@ export class Color {
 		return this
 	} // }}}
 
-	#[error(off)]
 	hex(): string { // {{{
 		return $hex(this.like(Space::SRGB))
 	} // }}}
 
-	#[error(off)]
 	isBlack(): bool { // {{{
 		let that = this.like(Space::SRGB)
 		return that._red == 0 && that._green == 0 && that._blue == 0
 	} // }}}
 
-	#[error(off)]
 	isTransparent(): bool { // {{{
 		if this._alpha == 0 {
 			let that = this.like(Space::SRGB)
@@ -927,24 +930,23 @@ export class Color {
 		}
 	} // }}}
 
-	#[error(off)]
 	isWhite(): bool { // {{{
 		let that = this.like(Space::SRGB)
 		return that._red == 255 && that._green == 255 && that._blue == 255
 	} // }}}
 
-	like(space: string) ~ Error { // {{{
+	like(space: string) { // {{{
 		space = $aliases[space] ?? space
 
-		if this._space == space || $spaces[this._space][space]? {
-			return this
+		if const value = Space.from(space) {
+			if this._space != value && ?$spaces[this._space].converters[space] {
+				return $convert(this, value)
+			}
 		}
-		else {
-			return $convert(this, space)
-		}
+
+		return this
 	} // }}}
 
-	#[error(off)]
 	luminance(): Number { // {{{
 		const that = this.like(Space::SRGB)
 
@@ -960,7 +962,6 @@ export class Color {
 		return (0.2126 * r) + (0.7152 * g) + (0.0722 * b)
 	} // }}}
 
-	#[error(off)]
 	negative(): Color { // {{{
 		this.space(Space::SRGB)
 
@@ -980,7 +981,7 @@ export class Color {
 		}
 	} // }}}
 
-	readable(color: Color, tripleA: bool = false): bool ~ Error { // {{{
+	readable(color: Color, tripleA: bool = false): bool { // {{{
 		if tripleA {
 			return this.contrast(color).ratio >= 7
 		}
@@ -993,7 +994,6 @@ export class Color {
 		return [fn(this.clone()) for fn in functions]
 	} // }}}
 
-	#[error(off)]
 	private setField(name, value: number | string): Color { // {{{
 		let component = $components[name]
 
@@ -1022,14 +1022,13 @@ export class Color {
 		return this
 	} // }}}
 
-	#[error(off)]
 	shade(percentage: float): Color { // {{{
 		return this.blend($static.black, percentage)
 	} // }}}
 
 	space(): Space => this._space
 
-	space(space: string): Color ~ Error { // {{{
+	space(space: string): Color { // {{{
 		space = $aliases[space] ?? space
 
 		if !?$spaces[space] && ?$components[space] {
@@ -1044,27 +1043,30 @@ export class Color {
 			}
 		}
 
-		if this._space != space && !?$spaces[this._space][space] {
+		if const value = Space.from(space) {
+			if this._space != value && ?$spaces[this._space].converters[space] {
+				$convert(this, value, this)
+			}
+		}
+		else {
 			$convert(this, space, this)
 		}
 
 		return this
 	} // }}}
 
-	#[error(off)]
 	tint(percentage: float): Color { // {{{
 		return this.blend($static.white, percentage)
 	} // }}}
 
-	#[error(off)]
 	tone(percentage: float): Color { // {{{
 		return this.blend($static.gray, percentage)
 	} // }}}
 }
 
 Color.registerSpace!({
-	name: Space::SRGB
-	alias: [Space::RGB]
+	name: 'srgb'
+	alias: ['rgb']
 	formatters: {
 		hex(that: Color): string { // {{{
 			return $hex(that)

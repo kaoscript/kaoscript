@@ -1,78 +1,82 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
+		}
+		isNamed() {
+			return this.__ks_func_isNamed_rt.call(null, this, this, arguments);
 		}
 		__ks_func_isNamed_0() {
 			return false;
 		}
-		isNamed() {
-			if(arguments.length === 0) {
-				return Foobar.prototype.__ks_func_isNamed_0.apply(this);
+		__ks_func_isNamed_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_isNamed_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Quxbaz extends Foobar {
-		__ks_init() {
-			Foobar.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(Quxbaz.prototype);
+			o.__ks_init();
+			return o;
 		}
-		__ks_cons(args) {
-			Foobar.prototype.__ks_cons.call(this, args);
-		}
-		__ks_func_foobar_0(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isClassInstance(x, Foobar)) {
-				throw new TypeError("'x' is not of type 'Foobar'");
-			}
-			if(!Type.isClassInstance(x, Quxbaz) || !(x.isNamed() === true)) {
-				return false;
-			}
-			const name = x.name();
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 		foobar() {
-			if(arguments.length === 1) {
-				return Quxbaz.prototype.__ks_func_foobar_0.apply(this, arguments);
+			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
+		}
+		__ks_func_foobar_0(x) {
+			if(!Type.isClassInstance(x, Quxbaz) || !(x.__ks_func_isNamed_0() === true)) {
+				return false;
 			}
-			else if(Foobar.prototype.foobar) {
-				return Foobar.prototype.foobar.apply(this, arguments);
+			const name = x.__ks_func_name_0();
+		}
+		__ks_func_foobar_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Foobar);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_foobar_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			if(super.__ks_func_foobar_rt) {
+				return super.__ks_func_foobar_rt.call(null, that, Foobar.prototype, args);
+			}
+			throw Helper.badArgs();
 		}
 		__ks_func_isNamed_0() {
 			return true;
 		}
-		isNamed() {
-			if(arguments.length === 0) {
-				return Quxbaz.prototype.__ks_func_isNamed_0.apply(this);
-			}
-			return Foobar.prototype.isNamed.apply(this, arguments);
+		name() {
+			return this.__ks_func_name_rt.call(null, this, this, arguments);
 		}
 		__ks_func_name_0() {
 			return "quxbaz";
 		}
-		name() {
-			if(arguments.length === 0) {
-				return Quxbaz.prototype.__ks_func_name_0.apply(this);
+		__ks_func_name_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_name_0.call(that);
 			}
-			else if(Foobar.prototype.name) {
-				return Foobar.prototype.name.apply(this, arguments);
+			if(super.__ks_func_name_rt) {
+				return super.__ks_func_name_rt.call(null, that, Foobar.prototype, args);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

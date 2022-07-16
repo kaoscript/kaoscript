@@ -1,1 +1,1 @@
-TypeException: The type "Foobar" must be declared externally (line 4, file "fixtures/compile/extern/extern.disclose.noext.ks")
+TypeException: The type "Foobar" must be declared externally (fixtures/compile/extern/extern.disclose.noext.ks:4)

@@ -3,23 +3,7 @@ class DictionaryType extends Type {
 		_properties: Dictionary			= {}
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const type = new DictionaryType(scope)
-
-			if data.systemic {
-				type.flagSystemic()
-			}
-			else if data.sealed {
-				type.flagSealed()
-			}
-
-			for const property, name of data.properties {
-				type.addProperty(name, Type.fromMetadata(property, metadata, references, alterations, queue, scope, node))
-			}
-
-			return type
-		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): DictionaryType { // {{{
 			const type = new DictionaryType(scope)
 
 			if data.systemic {
@@ -31,7 +15,7 @@ class DictionaryType extends Type {
 
 			queue.push(() => {
 				for const property, name of data.properties {
-					type.addProperty(name, Type.fromMetadata(property, metadata, references, alterations, queue, scope, node))
+					type.addProperty(name, Type.import(property, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
@@ -44,7 +28,7 @@ class DictionaryType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	export(references, mode) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		const export = {
 			kind: TypeKind::Dictionary
 		}
@@ -59,20 +43,37 @@ class DictionaryType extends Type {
 		export.properties = {}
 
 		for const value, name of @properties {
-			export.properties[name] = value.export(references, mode)
+			export.properties[name] = value.export(references, indexDelta, mode, module)
 		}
 
 		return export
 	} // }}}
+	flagAlien() { // {{{
+		@alien = true
+
+		for const property of @properties {
+			property.flagAlien()
+		}
+
+		return this
+	} // }}}
 	getProperty(name: String): Type? => @properties[name]
-	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
-		if value.isAny() || value.isDictionary() {
+	hashCode() => this.toQuote()
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
+		if value.isAny() {
 			if this.isNullable() {
 				return nullcast || value.isNullable()
 			}
 			else {
 				return true
 			}
+		}
+		else if value.isDictionary() {
+			if this.isNullable() && !nullcast && !value.isNullable() {
+				return false
+			}
+
+			return this.isSubsetOf(value, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast)
 		}
 		else if value is UnionType {
 			for const type in value.types() {
@@ -84,35 +85,8 @@ class DictionaryType extends Type {
 
 		return false
 	} // }}}
-	isMatching(value: DictionaryType, mode: MatchingMode) { // {{{
-		if this == value {
-			return true
-		}
-
-		if this.isSealed() != value.isSealed() {
-			return false
-		}
-
-		let nf
-		for const property of value._properties {
-			nf = true
-
-			for const prop of @properties while nf {
-				if prop.isMatching(property, mode) {
-					nf = false
-				}
-			}
-
-			if nf {
-				return false
-			}
-		}
-
-		return true
-	} // }}}
-	isMatching(value: Type, mode: MatchingMode) => false
-	isMorePreciseThan(type: Type) { // {{{
-		if type.isAny() {
+	isMorePreciseThan(value: Type) { // {{{
+		if value.isAny() {
 			return true
 		}
 
@@ -123,13 +97,51 @@ class DictionaryType extends Type {
 	isExhaustive() => false
 	isExportable() => true
 	isSealable() => true
-	matchContentOf(type: Type) { // {{{
-		if type.isAny() || type.isDictionary() {
+	isSubsetOf(value: DictionaryType, mode: MatchingMode) { // {{{
+		if this == value {
 			return true
 		}
 
-		if type is UnionType {
-			for const type in type.types() {
+		if this.isSealed() != value.isSealed() {
+			return false
+		}
+
+		for const type, name of value.properties() {
+			if const prop = @properties[name] {
+				if !prop.isSubsetOf(type, mode) {
+					return false
+				}
+			}
+			else if !type.isNullable() {
+				return false
+			}
+		}
+
+		return true
+	} // }}}
+	isSubsetOf(value: ReferenceType, mode: MatchingMode) { // {{{
+		return false unless value.isDictionary()
+
+		if value.hasParameters() {
+			const parameter = value.parameter(0)
+
+			for const type, name of @properties {
+				if !type.isSubsetOf(parameter, mode) {
+					return false
+				}
+			}
+		}
+
+		return true
+	} // }}}
+	isMatching(value: Type, mode: MatchingMode) => false
+	matchContentOf(value: Type) { // {{{
+		if value.isAny() || value.isDictionary() {
+			return true
+		}
+
+		if value is UnionType {
+			for const type in value.types() {
 				if this.matchContentOf(type) {
 					return true
 				}
@@ -139,6 +151,14 @@ class DictionaryType extends Type {
 		return false
 	} // }}}
 	parameter() => AnyType.NullableUnexplicit
+	properties() => @properties
+	setExhaustive(@exhaustive) { // {{{
+		for const property of @properties {
+			property.setExhaustive(exhaustive)
+		}
+
+		return this
+	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
@@ -189,6 +209,29 @@ class DictionaryType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::OR
+	} // }}}
+	override toTestFunctionFragments(fragments, node) { // {{{
+		if Dictionary.isEmpty(@properties) {
+			fragments.code($runtime.type(node), '.isDictionary')
+		}
+		else {
+			fragments.code(`value => `, $runtime.type(node), '.isDictionary(value)')
+
+			for const value, name of @properties {
+				fragments.code(' && ')
+
+				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value.\(name)`), Junction::AND)
+			}
+		}
+	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('dict')
+
+		for const type, name of @properties {
+			variations.push(name)
+
+			type.toVariations(variations)
+		}
 	} // }}}
 	walk(fn) { // {{{
 		for const type, name of @properties {

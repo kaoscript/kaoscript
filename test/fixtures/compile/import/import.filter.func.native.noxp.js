@@ -1,6 +1,6 @@
 require("kaoscript/register");
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var foobar = require("../export/export.filter.func.native.noxp.ks")().foobar;
-	console.log(Helper.toString(foobar("foobar").toSource()));
+	var foobar = require("../export/.export.filter.func.native.noxp.ks.j5k8r9.ksb")().foobar;
+	console.log(Helper.toString(foobar.__ks_0("foobar").toSource()));
 };

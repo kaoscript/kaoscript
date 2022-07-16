@@ -1,41 +1,40 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Date = {};
 	__ks_Date.__ks_func_setDate_2 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!Type.isNumber(value) && !Type.isString(value)) {
-			throw new TypeError("'value' is not of type 'Number' or 'String'");
-		}
 		this.setDate(value);
 		return this;
 	};
-	__ks_Date._im_setDate = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length === 1) {
-			return __ks_Date.__ks_func_setDate_2.apply(that, args);
-		}
-		throw new SyntaxError("Wrong number of arguments");
+	__ks_Date._im_setDate = function(that, ...args) {
+		return __ks_Date.__ks_func_setDate_rt(that, args);
 	};
-	function foobar(d) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	__ks_Date.__ks_func_setDate_rt = function(that, args) {
+		const t0 = value => Type.isNumber(value) || Type.isString(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return __ks_Date.__ks_func_setDate_2.call(that, args[0]);
+			}
 		}
-		if(d === void 0 || d === null) {
-			throw new TypeError("'d' is not nullable");
+		throw Helper.badArgs();
+	};
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(d) {
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Date);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		else if(!Type.isClassInstance(d, Date)) {
-			throw new TypeError("'d' is not of type 'Date'");
-		}
-	}
+		throw Helper.badArgs();
+	};
 	const d = new Date();
-	foobar(__ks_Date._im_setDate(d, 1));
+	foobar.__ks_0(__ks_Date.__ks_func_setDate_2.call(d, 1));
 	return {
-		Date: Date,
-		__ks_Date: __ks_Date
+		Date,
+		__ks_Date
 	};
 };

@@ -1,1 +1,1 @@
-SyntaxException: Class "FunctionType" doesn't implement the following abstract method: "equals(b: Any?): Boolean" (line 5, file "fixtures/compile/class/class.abstract.nullable.super.ks")
+SyntaxException: Class "FunctionType" doesn't implement the following abstract method: "equals(b: Any?): Boolean" (fixtures/compile/class/class.abstract.nullable.super.ks:5)

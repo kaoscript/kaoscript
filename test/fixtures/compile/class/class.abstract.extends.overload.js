@@ -1,56 +1,55 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class AbstractGreetings {
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	class Greetings extends AbstractGreetings {
-		__ks_init_0() {
-			this._message = "";
+		static __ks_new_0() {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			return o;
 		}
 		__ks_init() {
-			AbstractGreetings.prototype.__ks_init.call(this);
-			Greetings.prototype.__ks_init_0.call(this);
+			super.__ks_init();
+			this._message = "";
 		}
-		__ks_cons(args) {
-			AbstractGreetings.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
+		}
+		message() {
+			return this.__ks_func_message_rt.call(null, this, this, arguments);
 		}
 		__ks_func_message_0() {
 			return this._message;
 		}
 		__ks_func_message_1(message) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
-			}
-			else if(!Type.isString(message)) {
-				throw new TypeError("'message' is not of type 'String'");
-			}
 			this._message = message;
 			return this;
 		}
-		message() {
-			if(arguments.length === 0) {
-				return Greetings.prototype.__ks_func_message_0.apply(this);
+		__ks_func_message_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 0) {
+				return proto.__ks_func_message_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_message_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_message_1.call(that, args[0]);
+				}
 			}
-			else if(AbstractGreetings.prototype.message) {
-				return AbstractGreetings.prototype.message.apply(this, arguments);
+			if(super.__ks_func_message_rt) {
+				return super.__ks_func_message_rt.call(null, that, AbstractGreetings.prototype, args);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

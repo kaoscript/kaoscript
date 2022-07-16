@@ -1,10 +1,10 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Space = Helper.enum(String, {
+	const Space = Helper.enum(String, {
 		RGB: "rgb",
 		SRGB: "srgb"
 	});
 	return {
-		Space: Space
+		Space
 	};
 };

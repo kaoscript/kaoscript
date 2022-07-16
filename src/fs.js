@@ -13,6 +13,26 @@ var fs = require('fs');
 var path = require('path');
 
 var _ = module.exports = {
+	djb2a: function(data) { // {{{
+		var h = 5381;
+
+		for(var i = 0, l = data.length; i < l; i++) {
+			h = ((h << 5) + h) ^ data.charCodeAt(i);
+		}
+
+		return (h >>> 0).toString(36);
+	}, // }}}
+	escapeJSON: function(key, value) { // {{{
+		if(key === 'max' && value === Infinity) {
+			return 'Infinity';
+		}
+		else if(value instanceof BigInt){
+			return 'BIGINT::' + value;
+		}
+		else {
+			return value;
+		}
+	}, // }}}
 	exists: function(file) { // {{{
 		try {
 			fs.accessSync(file);
@@ -30,8 +50,13 @@ var _ = module.exports = {
 			}
 		}
 	}, // }}}
-	hidden: function(file, targetName, targetVersion, ext) { // {{{
-		return path.join(path.dirname(file), '.' + path.basename(file) + '.' + targetName + '-v' + targetVersion + ext)
+	hidden: function(file, variationId, extension) { // {{{
+		if(variationId) {
+			return path.join(path.dirname(file), '.' + path.basename(file) + '.' + variationId + extension)
+		}
+		else {
+			return path.join(path.dirname(file), '.' + path.basename(file) + extension)
+		}
 	}, // }}}
 	isFile: function(file) { // {{{
 		file = path.resolve(_.resolve(file));
@@ -90,6 +115,17 @@ var _ = module.exports = {
 	}, // }}}
 	sha256: function(data) { // {{{
 		return crypto.createHash('sha256').update(data).digest('hex');
+	}, // }}}
+	unescapeJSON: function(key, value) { // {{{
+		if(key === 'max' && value === 'Infinity') {
+			return Infinity;
+		}
+		else if(typeof value === 'string' && value.startsWith('BIGINT::')) {
+			return BigInt(value.substring(8));
+		}
+		else {
+			return value;
+		}
 	}, // }}}
 	writeFile: fs.writeFileSync
 };

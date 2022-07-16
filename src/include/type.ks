@@ -68,7 +68,10 @@ const $virtuals = {
 flagged enum ExportMode {
 	Default
 
-	IgnoreAlteration
+	Alien
+	Export
+	Requirement
+
 	OverloadedFunction
 }
 
@@ -76,22 +79,70 @@ flagged enum MatchingMode {
 	Default
 
 	Exact
-	ExactParameters
+	ExactError
+	ExactParameter
 	ExactReturn
+
 	Similar
-	SimilarParameters
+	SimilarErrors
+	SimilarParameter
 	SimilarReturn
 
-	MissingParameters
-	MissingReturn
-
-	MissingType
+	Missing
+	MissingArity
+	MissingDefault
+	MissingError
+	MissingParameter
+	MissingParameterArity
+	MissingParameterDefault
 	MissingParameterType
+	MissingReturn
+	MissingType
+
+	Subclass
+	SubclassError
+	SubclassParameter
+	SubclassReturn
+
+	Subset
+	SubsetParameter
+
+	Superclass
+
+	NonNullToNull
+	NonNullToNullParameter
+
+	NullToNonNull
+	NullToNonNullParameter
+
+	AdditionalParameter
+	// TODO reenable
+	// AdditionalDefault
+	// TODO reenable
+	// AdditionalParameterDefault
 
 	ShiftableParameters
 	RequireAllParameters
 
-	Signature = Similar + MissingParameters + ShiftableParameters + MissingParameterType + RequireAllParameters + MissingReturn
+	Renamed
+
+	IgnoreError
+	IgnoreName
+	IgnoreReturn
+
+	AutoCast
+
+	Signature = Similar + MissingParameter + ShiftableParameters + MissingParameterType + RequireAllParameters + MissingReturn
+	FunctionSignature = ExactParameter +
+		SubclassParameter +
+		NonNullToNullParameter +
+		MissingParameterDefault +
+		AdditionalParameter +
+		// TODO reenable
+		// AdditionalParameterDefault +
+		// AdditionalDefault +
+		MissingParameterType +
+		MissingParameterArity
 }
 
 flagged enum QuoteMode {
@@ -124,17 +175,29 @@ enum Junction {
 	OR
 }
 
+flagged enum TypeOrigin {
+	None
+
+	Extern
+	ExternOrRequire
+	Import
+	Require
+	RequireOrExtern
+}
+
 abstract class Type {
 	private {
-		_alien: Boolean				= false
-		_exhaustive: Boolean? 		= null
-		_exported: Boolean			= false
-		_referenced: Boolean		= false
-		_referenceIndex: Number		= -1
-		_required: Boolean 			= false
+		_alien: Boolean					= false
+		_exhaustive: Boolean? 			= null
+		_exported: Boolean				= false
+		_origin: TypeOrigin?			= null
+		_referenced: Boolean			= false
+		_referenceIndex: Number			= -1
+		_required: Boolean 				= false
+		_requirement: Boolean			= false
 		_scope: Scope?
-		_sealed: Boolean			= false
-		_systemic: Boolean			= false
+		_sealed: Boolean				= false
+		_systemic: Boolean				= false
 	}
 	static {
 		arrayOf(parameter: Type, scope: Scope) => new ReferenceType(scope, 'Array', false, [parameter])
@@ -283,37 +346,14 @@ abstract class Type {
 			console.info(data)
 			throw new NotImplementedException(node)
 		} // }}}
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			// console.log('-- fromMetadata --')
+		import(index, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): Type { // {{{
+			const data = index is Number ? metadata[index] : index
+
+			// console.log('-- import --')
 			// console.log(JSON.stringify(data, null, 2))
 
-			if data is Number {
-				let index = data
-				while alterations[index]? {
-					index = alterations[index]
-				}
-
-				if type ?= references[index] {
-					return type
-				}
-				else {
-					let type = Type.import(index, metadata, references, alterations, queue, scope, node)
-
-					if type is AliasType || type is ClassType || type is EnumType {
-						type = new NamedType(scope.acquireTempName(), type)
-
-						scope.define(type.name(), true, type, node)
-					}
-					else if type is NamespaceType {
-						type = new NamedContainerType(scope.acquireTempName(), type)
-
-						scope.define(type.name(), true, type, node)
-					}
-
-					references[index] = type
-
-					return type
-				}
+			if !?data {
+				return Type.Any
 			}
 			else if data is String {
 				if data == 'Null' {
@@ -340,97 +380,24 @@ abstract class Type {
 				}
 			}
 			else if data is Array {
-				const index = data[0]
-
-				if index is Number {
-					let type = references[index]
-
-					if !?type {
-						type = Type.fromMetadata(index, metadata, references, alterations, queue, scope, node)
-					}
-
-					if type is not NamedType {
-						type = new NamedType(data[1], type)
-
-						references[index] = type
-					}
-
-					return type
-				}
-			}
-			else if data.kind? {
-				switch data.kind {
-					TypeKind::Class => {
-						return ClassType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Dictionary => {
-						return DictionaryType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Enum => {
-						return EnumType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Function => {
-						return FunctionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Fusion => {
-						return FusionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::OverloadedFunction => {
-						return OverloadedFunctionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Reference => {
-						return ReferenceType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Sealable => {
-						return SealableType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Struct => {
-						return StructType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Tuple => {
-						return TupleType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-					TypeKind::Union => {
-						return UnionType.fromMetadata(data, metadata, references, alterations, queue, scope, node)
-					}
-				}
-			}
-			else if data.reference? {
-				const type = Type.fromMetadata(data.reference, metadata, references, alterations, queue, scope, node)
-
-				if type is NamedType {
-					return scope.reference(type)
-				}
-				else {
-					return type
-				}
-			}
-			else if data.type? {
-				return Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node)
-			}
-
-			console.info(data)
-			throw new NotImplementedException(node)
-		} // }}}
-		import(index, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const data = metadata.references[index]
-
-			// console.log('-- import --')
-			// console.log(JSON.stringify(data, null, 2))
-
-			if !?data {
-				return Type.Any
-			}
-			else if data is String {
-				return data == 'Any' ? Type.Any : scope.reference(data)
-			}
-			else if data is Array {
 				if data[0] is Number {
 					if data[0] == -1 {
 						throw new NotImplementedException(node)
 					}
-					else {
+					else if const type = references[data[0]] {
 						return references[data[0]].name(data[1])
+					}
+					else {
+						const type = Type.toNamedType(
+							Type.import(data[0], metadata, references, alterations, queue, scope, node)
+							false
+							scope
+							node
+						)
+
+						references[data[0]] = type
+
+						return scope.reference(type)
 					}
 				}
 			}
@@ -439,18 +406,12 @@ abstract class Type {
 					return scope.reference(references[data.reference])
 				}
 				else {
-					let type = Type.import(data.reference, metadata, references, alterations, queue, scope, node)
-
-					if type is AliasType || type is ClassType || type is EnumType {
-						type = new NamedType(scope.acquireTempName(), type)
-
-						scope.define(type.name(), true, type, node)
-					}
-					else if type is NamespaceType {
-						type = new NamedContainerType(scope.acquireTempName(), type)
-
-						scope.define(type.name(), true, type, node)
-					}
+					const type = Type.toNamedType(
+						Type.import(data.reference, metadata, references, alterations, queue, scope, node)
+						false
+						scope
+						node
+					)
 
 					references[data.reference] = type
 
@@ -474,11 +435,17 @@ abstract class Type {
 					TypeKind::Function => {
 						return FunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
+					TypeKind::Fusion => {
+						return FusionType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
 					TypeKind::Namespace => {
 						return NamespaceType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::OverloadedFunction => {
 						return OverloadedFunctionType.import(index, data, metadata, references, alterations, queue, scope, node)
+					}
+					TypeKind::Reference => {
+						return ReferenceType.import(index, data, metadata, references, alterations, queue, scope, node)
 					}
 					TypeKind::Struct => {
 						return StructType.import(index, data, metadata, references, alterations, queue, scope, node)
@@ -491,7 +458,27 @@ abstract class Type {
 					}
 				}
 			}
+			else if data.type? {
+				return Type.import(data.type, metadata, references, alterations, queue, scope, node)
+			}
+			else if data.originals? {
+				const first = references[data.originals[0]]
+				const second = references[data.originals[1]]
 
+				const requirement = first.origin() ~~ TypeOrigin::Require
+				const [major, minor] = requirement ? [first, second] : [second, first]
+				const origin = requirement ? TypeOrigin::RequireOrExtern : TypeOrigin::ExternOrRequire
+
+				const type = new ClassType(scope)
+
+				type.origin(origin).originals(major.type(), minor.type())
+
+				queue.push(() => {
+					type.copyFrom(major.type())
+				})
+
+				return type
+			}
 
 			console.info(data)
 			throw new NotImplementedException(node)
@@ -499,15 +486,23 @@ abstract class Type {
 		isNative(name: String) => $natives[name] == true
 		renameNative(name: String) => $types[name] is String ? $types[name] : name
 		toNamedType(name: String, type: Type): Type { // {{{
-			if type is AliasType || type is ClassType || type is EnumType || type is StructType || type is TupleType {
-				return new NamedType(name, type)
-			}
-			else if type is NamespaceType {
+			return type unless type.shallBeNamed()
+
+			if type.isContainer() {
 				return new NamedContainerType(name, type)
 			}
 			else {
-				return type
+				return new NamedType(name, type)
 			}
+		} // }}}
+		toNamedType(type: Type, declare: Boolean, scope: Scope, node: AbstractNode): Type { // {{{
+			return type unless type.shallBeNamed()
+
+			const namedType = type.isContainer() ? new NamedContainerType(scope.acquireTempName(declare), type) : new NamedType(scope.acquireTempName(declare), type)
+
+			scope.define(namedType.name(), true, namedType, node)
+
+			return namedType
 		} // }}}
 		union(scope: Scope, ...types) { // {{{
 			if types.length == 1 {
@@ -525,9 +520,10 @@ abstract class Type {
 	}
 	constructor(@scope)
 	abstract clone(): Type
-	abstract export(references, mode)
+	abstract export(references: Array, indexDelta: Number, mode: ExportMode, module: Module)
 	abstract toFragments(fragments, node)
 	abstract toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE)
+	abstract toVariations(variations: Array<String>): Void
 	canBeBoolean(): Boolean => this.isAny() || this.isBoolean()
 	canBeNumber(any: Boolean = true): Boolean => (any && this.isAny()) || this.isNumber()
 	canBeString(any: Boolean = true): Boolean => (any && this.isAny()) || this.isString()
@@ -545,20 +541,27 @@ abstract class Type {
 
 		return false
 	} // }}}
-	compareTo(type: Type) => false
-	condense(): Type => this
+	clone(scope: Scope): Type { // {{{
+		const clone = this.clone()
+
+		clone._scope = scope
+
+		return clone
+	} // }}}
+	compareTo(value: Type) => false
 	discard(): Type? => this
 	discardAlias(): Type => this
 	discardName(): Type => this
 	discardReference(): Type? => this
 	discardSpread(): Type => this
 	discardVariable(): Type => this
-	equals(value?): Boolean => value? && this.isMatching(value, MatchingMode::Exact)
+	equals(value?): Boolean => value? && this.isSubsetOf(value, MatchingMode::Exact)
 	flagAlien() { // {{{
 		@alien = true
 
 		return this
 	} // }}}
+	flagAltering(): this
 	flagExported(explicitly: Boolean) { // {{{
 		@exported = true
 
@@ -574,6 +577,11 @@ abstract class Type {
 
 		return this
 	} // }}}
+	flagRequirement() { // {{{
+		@requirement = true
+
+		return this
+	} // }}}
 	flagSealed() { // {{{
 		@sealed = true
 
@@ -584,30 +592,34 @@ abstract class Type {
 
 		return this.flagSealed()
 	} // }}}
+	getExhaustive() => @exhaustive
 	getProperty(name: String) => null
+	getMajorReferenceIndex() => @referenceIndex
 	hashCode(): String => ''
+	hashCode(fattenNull: Boolean) => this.hashCode()
 	hasProperty(name: String): Boolean => false
 	isAlias() => false
 	isAlien() => @alien
-	isAlteration() => false
+	isAltering() => false
 	isAny() => false
 	isAnonymous() => false
 	isArray() => false
-	isAssignableToVariable(type: Type, downcast: Boolean): Boolean => this.isAssignableToVariable(type, true, false, downcast)
-	isAssignableToVariable(type: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean): Boolean { // {{{
-		if this == type {
+	isAssignableToVariable(value: Type): Boolean => this.isAssignableToVariable(value, true, false, true)
+	isAssignableToVariable(value: Type, downcast: Boolean): Boolean => this.isAssignableToVariable(value, true, false, downcast)
+	isAssignableToVariable(value: Type, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+		if this == value {
 			return true
 		}
-		else if type.isAny() {
+		else if value.isAny() {
 			if this.isNullable() {
-				return nullcast || type.isNullable()
+				return nullcast || value.isNullable()
 			}
 			else {
 				return true
 			}
 		}
 		else if this.isAlias() {
-			return this.discardAlias().isAssignableToVariable(type, anycast, nullcast, downcast)
+			return this.discardAlias().isAssignableToVariable(value, anycast, nullcast, downcast)
 		}
 		else {
 			return false
@@ -616,6 +628,7 @@ abstract class Type {
 	isBoolean() => false
 	isCloned() => false
 	isClass() => false
+	isClassInstance() => false
 	isComparableWith(type: Type): Boolean => type.isAssignableToVariable(this, true, false, false)
 	isContainedIn(types) { // {{{
 		for type in types {
@@ -626,6 +639,7 @@ abstract class Type {
 
 		return false
 	} // }}}
+	isContainer() => false
 	isDictionary() => false
 	isEnum() => false
 	isExclusion() => false
@@ -638,8 +652,10 @@ abstract class Type {
 		}
 	} // }}}
 	isExhaustive(node) => this.isExhaustive() && !node._options.rules.ignoreMisfit
+	isExplicit() => true
 	isExplicitlyExported() => @exported
-	isExportable() => this.isAlien() || this.isExported() || this.isNative() || this.isRequired()
+	isExportable() => this.isAlien() || this.isExported() || this.isNative() || this.isRequirement() || @referenceIndex != -1
+	isExportable(mode: ExportMode) => mode ~~ ExportMode::Requirement || this.isExportable()
 	isExportingFragment() => (!this.isVirtual() && !this.isSystemic()) || (this.isSealed() && this.isExtendable())
 	isExported() => @exported
 	isExtendable() => false
@@ -649,10 +665,10 @@ abstract class Type {
 	isHybrid() => false
 	isImmutable() => false
 	isInoperative() => this.isNever() || this.isVoid()
-	isMatching(value, mode: MatchingMode) => false
+	isInstance() => false
 	isMergeable(type) => false
 	isMethod() => false
-	isMorePreciseThan(that: Type): Boolean => false
+	isMorePreciseThan(value: Type): Boolean => false
 	isNamed() => false
 	isNamespace() => false
 	isNative() => false
@@ -667,22 +683,31 @@ abstract class Type {
 	isReference() => false
 	isReferenced() => @referenced
 	isRequired() => @required
+	isRequirement() => @requirement
 	isSealable() => false
 	isSealed() => @sealed
 	isSealedAlien() => @alien && @sealed
+	isSplittable() => @isNullable() || @isUnion()
 	isSpread() => false
 	isString() => false
 	isStruct() => false
+	isSubsetOf(value: Type, mode: MatchingMode) => false
 	isSystemic() => @systemic
 	isTuple() => false
 	isTypeOf() => false
 	isUnion() => false
 	isVirtual() => false
 	isVoid() => false
-	matchContentOf(that: Type?): Boolean => this.equals(that)
+	matchContentOf(value: Type?): Boolean => this.equals(value)
+	minorOriginal() => null
+	origin(): @origin
+	origin(@origin): this
 	reduce(type: Type) => this
 	reference(scope = @scope) => scope.reference(this)
 	referenceIndex() => @referenceIndex
+	resetReferences() { // {{{
+		@referenceIndex = -1
+	} // }}}
 	scope() => @scope
 	setExhaustive(@exhaustive) => this
 	setNullable(nullable: Boolean) => this
@@ -694,44 +719,91 @@ abstract class Type {
 			return this
 		}
 	} // }}}
+	shallBeNamed() => false
+	sort() => this
+	split(types: Array): Array { // {{{
+		if @isNullable() {
+			types.pushUniq(@setNullable(false), Type.Null)
+		}
+		else {
+			types.pushUniq(this)
+		}
+
+		return types
+	} // }}}
 	toExportFragment(fragments, name, variable) { // {{{
 		if !this.isVirtual() && !this.isSystemic() {
-			fragments.newLine().code(`\(name): `).compile(variable).done()
+			const varname = variable.name?()
+
+			if name == varname {
+				fragments.line(name)
+			}
+			else {
+				fragments.newLine().code(`\(name): `).compile(variable).done()
+			}
 		}
 
 		if this.isSealed() && this.isExtendable() {
-			fragments.line(`__ks_\(name): \(this.getSealedName())`)
+			const varname = this.getSealedName()
+
+			if `__ks_\(name)` == varname {
+				fragments.line(varname)
+			}
+			else {
+				fragments.line(`__ks_\(name): \(this.getSealedName())`)
+			}
 		}
 	} // }}}
-	toExportOrIndex(references, mode) { // {{{
+	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
 		else if this.isReferenced() {
-			return this.toMetadata(references, mode)
+			return this.toMetadata(references, indexDelta, mode, module)
 		}
 		else {
-			return this.export(references, mode)
+			return this.export(references, indexDelta, mode, module)
 		}
 	} // }}}
-	toExportOrReference(references, mode) { // {{{
-		if @referenceIndex == -1 {
-			return this.export(references, mode)
+	toExportOrReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+		if @referenceIndex != -1 {
+			return @referenceIndex
 		}
-		else {
+		else if this.isReferenced() {
 			return {
-				reference: @referenceIndex
+				reference: this.toMetadata(references, indexDelta, mode, module)
 			}
 		}
+		else {
+			return this.export(references, indexDelta, mode, module)
+		}
 	} // }}}
-	toMetadata(references, mode) { // {{{
+	toGenericParameter(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+		const reference = this.getMajorReferenceIndex()
+		if reference != -1 {
+			return {
+				reference
+			}
+		}
+		else if this.isReferenced() {
+			return {
+				reference: this.toMetadata(references, indexDelta, mode, module)
+			}
+		}
+		else {
+			return this.export(references, indexDelta, mode, module)
+		}
+	} // }}}
+	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @referenceIndex == -1 {
-			@referenceIndex = references.length
+			const index = references.length
+
+			@referenceIndex = index + indexDelta
 
 			// reserve position
 			references.push(null)
 
-			references[@referenceIndex] = this.export(references, mode)
+			references[index] = this.export(references, indexDelta, mode, module)
 		}
 
 		return @referenceIndex
@@ -748,10 +820,51 @@ abstract class Type {
 			return `'\(this.toQuote())'`
 		}
 	} // }}}
-	toReference(references, mode) => { // {{{
-		reference: this.toMetadata(references, mode)
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => { // {{{
+		reference: this.toMetadata(references, indexDelta, mode, module)
 	} // }}}
+	toRequiredMetadata(requirements: Array<Requirement>) { // {{{
+		if @required {
+			return true
+		}
+
+		for const requirement in requirements {
+			if this == requirement.alternative() {
+				return requirement.type().referenceIndex()
+			}
+		}
+
+		return false
+	} // }}}
+	toRouteTestFragments(fragments, node, junction: Junction) { // {{{
+		NotImplementedException.throw()
+	} // }}}
+	toRouteTestFragments(fragments, node, argName: String, from: Number, to: Number, default: Boolean, junction: Junction) { // {{{
+		NotImplementedException.throw()
+	} // }}}
+	toTestFunctionFragments(fragments, node) { // {{{
+		if node._options.format.functions == 'es5' {
+			fragments.code('function(value) { return ')
+		}
+		else {
+			fragments.code('value => ')
+		}
+
+		this.toTestFunctionFragments(fragments, node, Junction::NONE)
+
+		if node._options.format.functions == 'es5' {
+			fragments.code('; }')
+		}
+	} // }}}
+	toTestFunctionFragments(fragments, node, junction) { // {{{
+		NotImplementedException.throw()
+	} // }}}
+	toTypeQuote() => this.toQuote()
 	type() => this
+	unflagAltering(): this
+	unflagRequired(): this { // {{{
+		@required = false
+	} // }}}
 }
 
 include {
@@ -763,6 +876,11 @@ include {
 	'./type/any'
 	'./type/array'
 	'./type/class'
+	'./type/class-constructor'
+	'./type/class-destructor'
+	'./type/class-method'
+	'./type/class-variable'
+	'./type/destructurable-object'
 	'./type/enum'
 	'./type/namespace'
 	'./type/never'
@@ -778,6 +896,7 @@ include {
 }
 
 Type.Any = AnyType.Unexplicit
+Type.DestructurableObject = new DestructurableObjectType()
 Type.Never = new NeverType()
 Type.Null = NullType.Unexplicit
 Type.Void = new VoidType()

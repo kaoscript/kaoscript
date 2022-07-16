@@ -1,25 +1,18 @@
-var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Point = Helper.struct(function(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'Number'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'Number'");
-		}
+	const Point = Helper.struct(function(x, y) {
 		const _ = new Dictionary();
 		_.x = x;
 		_.y = y;
 		return _;
+	}, function(__ks_new, args) {
+		const t0 = Type.isNumber;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return __ks_new(args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
 	});
-	const {x, y} = Point(0, 0);
+	const {x, y} = Point.__ks_new(0, 0);
 };

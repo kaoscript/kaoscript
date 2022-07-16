@@ -1,60 +1,68 @@
-{
-  "aliens": [
-    "Any?",
-    "parseFloat"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Float"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {
-        "toFloat": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "String",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
-        },
-        "toString": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "String",
-          "throws": [],
-          "sealed": false
+[
+  {
+    "aliens": [
+      "Any?",
+      "parseFloat",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Float"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {
+          "toFloat": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "String",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "toString": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "String",
+            "errors": [],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

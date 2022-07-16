@@ -1,0 +1,58 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "foobar"
+    ],
+    "references": [
+      {
+        "kind": "overloadedfunction",
+        "exhaustive": true,
+        "functions": [
+          {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "name": "args",
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Any?",
+            "errors": []
+          },
+          {
+            "kind": "function",
+            "index": 1,
+            "async": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "name": "args",
+                "type": "String?",
+                "min": 0,
+                "max": "Infinity",
+                "default": true
+              }
+            ],
+            "returns": "Any?",
+            "errors": []
+          }
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

@@ -1,1 +1,1 @@
-SyntaxException: An error "Exception" is unreported, it must be caught or declared to be thrown (line 8, file "fixtures/compile/attribute/attribute.error.ignore.raise.ks")
+SyntaxException: An error "Exception" is unreported, it must be caught or declared to be thrown (fixtures/compile/attribute/attribute.error.ignore.raise.ks:8)

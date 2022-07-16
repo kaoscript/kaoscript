@@ -1,7 +1,7 @@
 require("kaoscript/register");
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var exec = require("./type.fusion.export.wrt.ks")().exec;
+	var exec = require("./.type.fusion.export.wrt.ks.j5k8r9.ksb")().exec;
 	const match = exec();
 	console.log(match.input);
 	console.log(Helper.toString(match[0]));

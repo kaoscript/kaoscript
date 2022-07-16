@@ -1,4 +1,4 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let NS = Helper.namespace(function() {
 		var __ks_String = {};
@@ -29,36 +29,44 @@ module.exports = function() {
 			}
 			return parseInt(this, base);
 		};
-		__ks_String._im_lines = function(that) {
-			var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-			if(args.length >= 0 && args.length <= 1) {
-				return __ks_String.__ks_func_lines_0.apply(that, args);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+		__ks_String._im_lines = function(that, ...args) {
+			return __ks_String.__ks_func_lines_rt(that, args);
 		};
-		__ks_String._im_lower = function(that) {
-			var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		__ks_String.__ks_func_lines_rt = function(that, args) {
+			if(args.length <= 1) {
+				return __ks_String.__ks_func_lines_0.call(that, args[0]);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_String._im_lower = function(that, ...args) {
+			return __ks_String.__ks_func_lower_rt(that, args);
+		};
+		__ks_String.__ks_func_lower_rt = function(that, args) {
 			if(args.length === 0) {
-				return __ks_String.__ks_func_lower_0.apply(that);
+				return __ks_String.__ks_func_lower_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		};
-		__ks_String._im_toFloat = function(that) {
-			var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+		__ks_String._im_toFloat = function(that, ...args) {
+			return __ks_String.__ks_func_toFloat_rt(that, args);
+		};
+		__ks_String.__ks_func_toFloat_rt = function(that, args) {
 			if(args.length === 0) {
-				return __ks_String.__ks_func_toFloat_0.apply(that);
+				return __ks_String.__ks_func_toFloat_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		};
-		__ks_String._im_toInt = function(that) {
-			var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-			if(args.length >= 0 && args.length <= 1) {
-				return __ks_String.__ks_func_toInt_0.apply(that, args);
+		__ks_String._im_toInt = function(that, ...args) {
+			return __ks_String.__ks_func_toInt_rt(that, args);
+		};
+		__ks_String.__ks_func_toInt_rt = function(that, args) {
+			if(args.length <= 1) {
+				return __ks_String.__ks_func_toInt_0.call(that, args[0]);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		};
 		return {
-			__ks_String: __ks_String
+			__ks_String
 		};
 	});
 };

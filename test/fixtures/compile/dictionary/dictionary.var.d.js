@@ -1,4 +1,4 @@
-var Dictionary = require("@kaoscript/runtime").Dictionary;
+const {Dictionary} = require("@kaoscript/runtime");
 module.exports = function() {
 	let d = 42;
 	let foobar = (() => {

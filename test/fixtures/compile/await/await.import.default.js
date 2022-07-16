@@ -1,15 +1,12 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var foo = require("../async/async.export.default.ks")().foo;
-	function bar(__ks_cb) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 0 + 1)");
-		}
-		else if(!Type.isFunction(__ks_cb)) {
-			throw new TypeError("'callback' must be a function");
-		}
-		foo(42, (__ks_e, __ks_0) => {
+	var foo = require("../async/.async.export.default.ks.j5k8r9.ksb")().foo;
+	function bar() {
+		return bar.__ks_rt(this, arguments);
+	};
+	bar.__ks_0 = function(__ks_cb) {
+		foo.__ks_0(42, (__ks_e, __ks_0) => {
 			if(__ks_e) {
 				__ks_cb(__ks_e);
 			}
@@ -17,5 +14,14 @@ module.exports = function() {
 				return __ks_cb(null, __ks_0);
 			}
 		});
-	}
+	};
+	bar.__ks_rt = function(that, args) {
+		const t0 = Type.isFunction;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return bar.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

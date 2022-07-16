@@ -1,57 +1,47 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Timezone {
+		static __ks_new_0(...args) {
+			const o = Object.create(Timezone.prototype);
+			o.__ks_init();
+			o.__ks_cons_0(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
 		__ks_cons_0(name, rules) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			if(rules === void 0 || rules === null) {
-				throw new TypeError("'rules' is not nullable");
-			}
 			for(let __ks_0 = 0, __ks_1 = rules.length, rule; __ks_0 < __ks_1; ++__ks_0) {
 				rule = rules[__ks_0];
 			}
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isValue;
 			if(args.length === 2) {
-				Timezone.prototype.__ks_cons_0.apply(this, args);
+				if(t0(args[0]) && t0(args[1])) {
+					return Timezone.prototype.__ks_cons_0.call(that, args[0], args[1]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		}
 		static __ks_sttc_add_0(zones, links, rules) {
-			if(arguments.length < 3) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-			}
-			if(zones === void 0 || zones === null) {
-				throw new TypeError("'zones' is not nullable");
-			}
-			if(links === void 0 || links === null) {
-				throw new TypeError("'links' is not nullable");
-			}
-			if(rules === void 0 || rules === null) {
-				throw new TypeError("'rules' is not nullable");
-			}
 			for(const name in zones) {
 			}
 		}
 		static add() {
+			const t0 = Type.isValue;
 			if(arguments.length === 3) {
-				return Timezone.__ks_sttc_add_0.apply(this, arguments);
+				if(t0(arguments[0]) && t0(arguments[1]) && t0(arguments[2])) {
+					return Timezone.__ks_sttc_add_0(arguments[0], arguments[1], arguments[2]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	return {
-		Timezone: Timezone
+		Timezone
 	};
 };

@@ -1,0 +1,1 @@
+SyntaxException: The function "foobar(...args: Number|String)" is a duplicate (fixtures/compile/router/router.func._.ruis.ruise.ks:7)

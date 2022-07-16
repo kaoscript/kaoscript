@@ -1,0 +1,1 @@
+ReferenceException: The constructor of class "Point3D" can't be matched to given arguments (Number, Number) (fixtures/compile/class/class.ctor.limit.ks:18)

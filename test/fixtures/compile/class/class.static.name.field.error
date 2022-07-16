@@ -1,1 +1,1 @@
-SyntaxException: Class variable "name" is reserved (line 3, file "fixtures/compile/class/class.static.name.field.ks")
+SyntaxException: The class variable "name" is reserved (fixtures/compile/class/class.static.name.field.ks:3)

@@ -1,1 +1,1 @@
-ReferenceException: To overwrite "name", it needs to be passed to the module "../export/export.default.ks" (line 2, file "fixtures/compile/import/import.duplicate.ks")
+ReferenceException: To overwrite "name", it needs to be passed to the module "../export/export.default.ks" (fixtures/compile/import/import.duplicate.ks:2)

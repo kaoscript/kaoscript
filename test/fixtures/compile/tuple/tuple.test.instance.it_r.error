@@ -1,1 +1,1 @@
-TypeException: The variable is always of type "Array" (line 6, file "fixtures/compile/tuple/tuple.test.instance.it_r.ks")
+TypeException: The variable is always of type "Array" (fixtures/compile/tuple/tuple.test.instance.it_r.ks:6)

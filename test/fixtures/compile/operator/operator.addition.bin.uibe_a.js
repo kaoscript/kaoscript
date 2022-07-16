@@ -1,18 +1,19 @@
-var {Operator, Type} = require("@kaoscript/runtime");
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x) && !Type.isBoolean(x)) {
-			throw new TypeError("'x' is not of type 'Number' or 'Boolean'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x, y) {
 		return Operator.addOrConcat(x, y);
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isBoolean(value) || Type.isNumber(value);
+		const t1 = Type.isValue;
+		if(args.length === 2) {
+			if(t0(args[0]) && t1(args[1])) {
+				return foobar.__ks_0.call(that, args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

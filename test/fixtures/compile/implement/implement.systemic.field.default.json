@@ -1,253 +1,258 @@
-{
-  "aliens": [
-    0,
-    "Date"
-  ],
-  "requirements": [],
-  "exports": [
-    1,
-    "Date"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 0
-      },
-      "exhaustive": true,
-      "constructors": [
-        {
-          "id": 0,
-          "access": 4,
-          "sealed": false,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "throws": []
-        },
-        {
-          "id": 1,
-          "access": 4,
-          "sealed": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "date",
-              "type": {
-                "reference": 1
+[
+  {
+    "aliens": [
+      0,
+      "Date",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "Date"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": true,
+        "constructors": [
+          {
+            "index": 0,
+            "access": 4,
+            "sealed": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "errors": []
+          },
+          {
+            "index": 1,
+            "access": 4,
+            "sealed": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "date",
+                "type": {
+                  "reference": 1
+                },
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "errors": []
+          },
+          {
+            "index": 2,
+            "access": 4,
+            "sealed": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "time",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "errors": []
+          },
+          {
+            "index": 3,
+            "access": 4,
+            "sealed": false,
+            "min": 2,
+            "max": 7,
+            "parameters": [
+              {
+                "name": "year",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": false
               },
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "throws": []
+              {
+                "name": "month",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "day",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6MzN9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjozNH19"
+              },
+              {
+                "name": "hours",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NDR9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo0NX19"
+              },
+              {
+                "name": "minutes",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NTd9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo1OH19"
+              },
+              {
+                "name": "seconds",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NzB9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo3MX19"
+              },
+              {
+                "name": "milliseconds",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6ODh9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo4OX19"
+              }
+            ],
+            "errors": []
+          },
+          {
+            "index": 4,
+            "access": 4,
+            "sealed": true,
+            "min": 3,
+            "max": 8,
+            "parameters": [
+              {
+                "name": "year",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "month",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "day",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjMzfSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjM0fX0="
+              },
+              {
+                "name": "hours",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjQ0fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjQ1fX0="
+              },
+              {
+                "name": "minutes",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjU3fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjU4fX0="
+              },
+              {
+                "name": "seconds",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjcwfSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjcxfX0="
+              },
+              {
+                "name": "milliseconds",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjg4fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjg5fX0="
+              },
+              {
+                "name": "timezone",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "errors": [],
+            "dependent": true
+          }
+        ],
+        "instanceVariables": {
+          "_timezone": {
+            "access": 2,
+            "type": "String",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": true
+          }
         },
-        {
-          "id": 2,
-          "access": 4,
-          "sealed": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "time",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "throws": []
-        },
-        {
-          "id": 3,
-          "access": 4,
-          "sealed": false,
-          "min": 2,
-          "max": 7,
-          "parameters": [
-            {
-              "name": "year",
-              "type": "Any",
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "month",
-              "type": "Any",
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "day",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6MzN9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjozNH19"
-            },
-            {
-              "name": "hours",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NDR9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo0NX19"
-            },
-            {
-              "name": "minutes",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NTd9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo1OH19"
-            },
-            {
-              "name": "seconds",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6NzB9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo3MX19"
-            },
-            {
-              "name": "milliseconds",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjcsImNvbHVtbiI6ODh9LCJlbmQiOnsibGluZSI6NywiY29sdW1uIjo4OX19"
-            }
-          ],
-          "throws": []
-        },
-        {
-          "id": 4,
-          "access": 4,
-          "sealed": true,
-          "min": 3,
-          "max": 8,
-          "parameters": [
-            {
-              "name": "year",
-              "type": "Any",
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "month",
-              "type": "Any",
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "day",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjMzfSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjM0fX0="
-            },
-            {
-              "name": "hours",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjQ0fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjQ1fX0="
-            },
-            {
-              "name": "minutes",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjU3fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjU4fX0="
-            },
-            {
-              "name": "seconds",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjcwfSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjcxfX0="
-            },
-            {
-              "name": "milliseconds",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE0LCJjb2x1bW4iOjg4fSwiZW5kIjp7ImxpbmUiOjE0LCJjb2x1bW4iOjg5fX0="
-            },
-            {
-              "name": "timezone",
-              "type": "Any",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "throws": [],
-          "dependent": true
-        }
-      ],
-      "instanceVariables": {
-        "_timezone": {
-          "access": 2,
-          "type": "String",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": true
-        }
-      },
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        0,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    }
-  ],
-  "macros": []
-}
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          0,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

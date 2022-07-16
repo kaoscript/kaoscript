@@ -1,31 +1,43 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = require("../_/_number.ks")().__ks_Number;
-	var __ks_String = require("../_/_string.ks")().__ks_String;
+	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
+	var __ks_String = require("../_/._string.ks.j5k8r9.ksb")().__ks_String;
 	let n = 0;
-	console.log(__ks_Number._im_toInt(n));
+	console.log(__ks_Number.__ks_func_toInt_0.call(n));
 	let s = "";
-	console.log(__ks_String._im_toInt(s));
-	function foobar(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	console.log(__ks_String.__ks_func_toInt_0.call(s));
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+		console.log(Type.isNumber(x) ? __ks_Number.__ks_func_toInt_0.call(x) : __ks_String.__ks_func_toInt_0.call(x));
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isNumber(value) || Type.isString(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x) && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'T'");
-		}
-		console.log(Type.isNumber(x) ? __ks_Number._im_toInt(x) : __ks_String._im_toInt(x));
-	}
+		throw Helper.badArgs();
+	};
 	n = "";
-	console.log(__ks_String._im_toInt(n));
+	console.log(__ks_String.__ks_func_toInt_0.call(n));
 	n = 42;
-	console.log(__ks_Number._im_toInt(n));
+	console.log(__ks_Number.__ks_func_toInt_0.call(n));
 	function qux() {
+		return qux.__ks_rt(this, arguments);
+	};
+	qux.__ks_0 = function() {
 		return 42;
-	}
-	n = qux();
-	console.log(Type.isNumber(n) ? __ks_Number._im_toInt(n) : __ks_String._im_toInt(n));
+	};
+	qux.__ks_rt = function(that, args) {
+		if(args.length === 0) {
+			return qux.__ks_0.call(that);
+		}
+		throw Helper.badArgs();
+	};
+	n = qux.__ks_0();
+	console.log(Type.isNumber(n) ? __ks_Number.__ks_func_toInt_0.call(n) : __ks_String.__ks_func_toInt_0.call(n));
 };

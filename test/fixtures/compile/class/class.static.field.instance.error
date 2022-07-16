@@ -1,1 +1,1 @@
-ReferenceException: The class field "x" isn't defined (line 7, file "fixtures/compile/class/class.static.field.instance.ks")
+ReferenceException: The class field "x" isn't defined (fixtures/compile/class/class.static.field.instance.ks:7)

@@ -1,1 +1,1 @@
-TypeException: The variable "x" of type "Foobar" can't be assigned with a value of type "Class" (line 6, file "fixtures/compile/operator/operator.typeequality.class.instance.ks")
+TypeException: The variable of type "Foobar" can never be of type "Class" (fixtures/compile/operator/operator.typeequality.class.instance.ks:6)

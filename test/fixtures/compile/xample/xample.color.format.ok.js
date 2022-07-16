@@ -1,18 +1,12 @@
 require("kaoscript/register");
-var {Dictionary, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_String = require("../_/_string.ks")().__ks_String;
+	var __ks_String = require("../_/._string.ks.j5k8r9.ksb")().__ks_String;
 	const $formatters = new Dictionary();
-	function format(format) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(format === void 0 || format === null) {
-			throw new TypeError("'format' is not nullable");
-		}
-		else if(!Type.isString(format)) {
-			throw new TypeError("'format' is not of type 'String'");
-		}
+	function format() {
+		return format.__ks_rt(this, arguments);
+	};
+	format.__ks_0 = function(format) {
 		let __ks_format_1 = $formatters[format];
 		if(Type.isValue(__ks_format_1)) {
 			return __ks_format_1.formatter(__ks_format_1.space);
@@ -20,5 +14,14 @@ module.exports = function() {
 		else {
 			return false;
 		}
-	}
+	};
+	format.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return format.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

@@ -1,1 +1,1 @@
-TypeException: The expression "x" of type "Null" can't be compared to a value of type "Boolean" (line 4, file "fixtures/compile/operator/operator.equality.vl_i.cd_b.ks")
+TypeException: The expression "x" of type "Null" can't be compared to a value of type "Boolean" (fixtures/compile/operator/operator.equality.vl_i.cd_b.ks:4)

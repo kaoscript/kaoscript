@@ -1,73 +1,71 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class AbstractGreetings {
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._message = "";
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			AbstractGreetings.prototype.__ks_init_0.call(this);
+			this._message = "";
 		}
 		__ks_cons_0() {
-			AbstractGreetings.prototype.__ks_cons.call(this, ["Hello!"]);
+			AbstractGreetings.prototype.__ks_cons_1.call(this, "Hello!");
 		}
 		__ks_cons_1(message) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
-			}
-			else if(!Type.isString(message)) {
-				throw new TypeError("'message' is not of type 'String'");
-			}
 			this._message = message;
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isString;
 			if(args.length === 0) {
-				AbstractGreetings.prototype.__ks_cons_0.apply(this);
+				return AbstractGreetings.prototype.__ks_cons_0.call(that);
 			}
-			else if(args.length === 1) {
-				AbstractGreetings.prototype.__ks_cons_1.apply(this, args);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return AbstractGreetings.prototype.__ks_cons_1.call(that, args[0]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		}
 	}
 	class Greetings extends AbstractGreetings {
-		__ks_init() {
-			AbstractGreetings.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			o.__ks_cons_0();
+			return o;
 		}
-		__ks_cons(args) {
-			AbstractGreetings.prototype.__ks_cons.call(this, args);
+		static __ks_new_1(...args) {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			o.__ks_cons_1(...args);
+			return o;
 		}
-		__ks_func_greet_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			return Helper.concatString(this._message, "\nIt's nice to meet you, ", name, ".");
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 		greet() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_greet_0.apply(this, arguments);
+			return this.__ks_func_greet_rt.call(null, this, this, arguments);
+		}
+		__ks_func_greet_0(name) {
+			return Helper.concatString(this._message, "\nIt's nice to meet you, ", name, ".");
+		}
+		__ks_func_greet_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_greet_0.call(that, args[0]);
+				}
 			}
-			else if(AbstractGreetings.prototype.greet) {
-				return AbstractGreetings.prototype.greet.apply(this, arguments);
+			if(super.__ks_func_greet_rt) {
+				return super.__ks_func_greet_rt.call(null, that, AbstractGreetings.prototype, args);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
-	const hello = new Greetings("Hello world!");
-	console.log(hello.greet("miss White"));
+	const hello = Greetings.__ks_new_1("Hello world!");
+	console.log(hello.__ks_func_greet_0("miss White"));
 	return {
-		AbstractGreetings: AbstractGreetings,
-		Greetings: Greetings
+		AbstractGreetings,
+		Greetings
 	};
 };

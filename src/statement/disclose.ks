@@ -3,7 +3,7 @@ class DiscloseDeclaration extends Statement {
 		@type: Type
 	}
 	analyse()
-	prepare() { // {{{
+	enhance() { // {{{
 		const variable = @scope.getVariable(@data.name.name)
 
 		unless variable? {
@@ -22,16 +22,18 @@ class DiscloseDeclaration extends Statement {
 
 		@type = variable.getDeclaredType().type()
 
-		@type.setExhaustive(true)
+		for const data in @data.members {
+			@type.addPropertyFromAST(data, this)
+		}
 
 		if @options.rules.nonExhaustive {
 			@type.setExhaustive(false)
 		}
-
-		for const data in @data.members {
-			@type.addPropertyFromAST(data, this)
+		else {
+			@type.setExhaustive(true)
 		}
 	} // }}}
+	prepare()
 	translate()
 	toStatementFragments(fragments, mode)
 }

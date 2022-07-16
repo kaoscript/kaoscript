@@ -1,9 +1,10 @@
 abstract class Expression extends AbstractNode {
 	private {
-		_castingEnum: Boolean		= false
+		@leftMost: Expression?		= null
+		@statement: Statement?		= null
 	}
 	acquireReusable(acquire)
-	checkIfAssignable() { // {{{
+	flagAssignable() { // {{{
 		if !this.isAssignable() {
 			ReferenceException.throwInvalidAssignment(this)
 		}
@@ -57,6 +58,8 @@ abstract class Expression extends AbstractNode {
 	isNullable() => false
 	// if the generated code, to test if the expression is null, requires to be wrapped inside parentheses
 	isNullableComputed() => this.isComputed()
+	// if the expression should be skipped or not
+	isSkippable() => false
 	// if the expression is the given instance variable
 	isUsingInstanceVariable(name) => false
 	// if the expression is using any non-local vraiables
@@ -72,24 +75,26 @@ abstract class Expression extends AbstractNode {
 	listLocalVariables(scope: Scope, variables: Array): Array => variables
 	listNonLocalVariables(scope: Scope, variables: Array): Array => variables
 	releaseReusable()
-	setAssignment(type: AssignmentType)
-	setCastingEnum(@castingEnum)
+	setAssignment(assignment: AssignmentType)
 	setExpectedType(type: Type): Void
-	statement(data) { // {{{
-		let expression = this
+	statement() { // {{{
+		if !?@statement {
+			@leftMost = this
 
-		while expression._parent is not Statement {
-			expression = expression._parent
+			while @leftMost._parent is not Statement {
+				@leftMost = @leftMost._parent!!
+			}
+
+			@statement = @leftMost._parent!!
 		}
 
-		return expression._parent
+		return @statement
 	} // }}}
 	toArgumentFragments(fragments, mode = Mode::None) { // {{{
 		this.toFragments(fragments, mode)
-
-		if @castingEnum {
-			fragments.code('.value')
-		}
+	} // }}}
+	toArgumentFragments(fragments, type: Type, mode = Mode::None) { // {{{
+		this.toArgumentFragments(fragments, mode)
 	} // }}}
 	toBooleanFragments(fragments, mode = Mode::None) { // {{{
 		this.toFragments(fragments, mode)
@@ -97,6 +102,13 @@ abstract class Expression extends AbstractNode {
 		if !this.type().isBoolean() || this.type().isNullable() {
 			fragments.code(' === true')
 		}
+	} // }}}
+	toCastingFragments(fragments, mode) { // {{{
+		fragments.code($runtime.helper(this), '.valueOf(')
+
+		this.toFragments(fragments, mode)
+
+		fragments.code(')')
 	} // }}}
 	toNullableFragments(fragments) => this.toFragments(fragments, Mode::None)
 	toOperandFragments(fragments, operator, type) => this.toFragments(fragments, Mode::None)
@@ -121,7 +133,9 @@ abstract class Expression extends AbstractNode {
 			fragments.wrap(this)
 		}
 	} // }}}
+	toTypeQuote() => this.type().toQuote()
 	type() => AnyType.NullableUnexplicit
+	validateType(type: Type)
 	variable() => null
 }
 
@@ -131,7 +145,7 @@ include {
 	'../expression/array-comprehension'
 	'../expression/await'
 	'../expression/binding'
-	'../expression/call'
+	'../expression/call/index'
 	'../expression/conditional'
 	'../expression/create'
 	'../expression/curry'

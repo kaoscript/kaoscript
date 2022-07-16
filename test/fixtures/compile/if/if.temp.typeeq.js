@@ -1,25 +1,37 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
 		return x;
-	}
-	function quxbaz(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
+		throw Helper.badArgs();
+	};
+	function quxbaz() {
+		return quxbaz.__ks_rt(this, arguments);
+	};
+	quxbaz.__ks_0 = function(x) {
 		let y, __ks_0;
 		if(x === true) {
 		}
-		else if((Type.isValue(__ks_0 = foobar(x)) ? (y = __ks_0, true) : false) && !Type.isString(y)) {
+		else if((Type.isValue(__ks_0 = foobar.__ks_0(x)) ? (y = __ks_0, true) : false) && !Type.isString(y)) {
 		}
-	}
+	};
+	quxbaz.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return quxbaz.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

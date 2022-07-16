@@ -1,15 +1,9 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(scope, name) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(scope === void 0 || scope === null) {
-			throw new TypeError("'scope' is not nullable");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(scope, name) {
 		let variable, __ks_0;
 		if((Type.isValue(__ks_0 = scope.getVariable(name)) ? (variable = __ks_0, true) : false) && ((variable.name() !== name) || (variable.scope() !== scope))) {
 			return variable.discard();
@@ -17,5 +11,14 @@ module.exports = function() {
 		else {
 			return null;
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return foobar.__ks_0.call(that, args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

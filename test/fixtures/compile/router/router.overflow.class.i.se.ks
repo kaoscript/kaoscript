@@ -1,5 +1,5 @@
 class Foobar {
-	foobar(...args) {
+	foobar(...a) {
 		return 0
 	}
 }

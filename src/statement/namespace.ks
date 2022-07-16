@@ -10,9 +10,9 @@ class NamespaceDeclaration extends Statement {
 	constructor(data, parent, scope) { // {{{
 		super(data, parent, new NamespaceScope(scope))
 	} // }}}
-	analyse() { // {{{
+	initiate() { // {{{
 		@name = @data.name.name
-		@type = new NamedContainerType(@name, new NamespaceType(@scope))
+		@type = new NamedContainerType(@name, new NamespaceType(@scope!?))
 
 		@variable = @scope.parent().define(@name, true, @type, this)
 
@@ -22,20 +22,40 @@ class NamespaceDeclaration extends Statement {
 
 			@statements.push(statement = $compile.statement(statement, this))
 
+			statement.initiate()
+		}
+	} // }}}
+	analyse() { // {{{
+		for statement in @statements {
+			@scope.line(statement.line())
+
 			statement.analyse()
 		}
 	} // }}}
+	enhance() { // {{{
+		for const statement in @statements {
+			@scope.line(statement.line())
+
+			statement.enhance()
+		}
+
+		for const statement in @statements when statement.isExportable() {
+			@scope.line(statement.line())
+
+			statement.export(this, true)
+		}
+	} // }}}
 	prepare() { // {{{
-		for statement in @statements {
+		for const statement in @statements {
 			@scope.line(statement.line())
 
 			statement.prepare()
 		}
 
-		for statement in @statements when statement.isExportable() {
+		for const statement in @statements when statement.isExportable() {
 			@scope.line(statement.line())
 
-			statement.export(this)
+			statement.export(this, false)
 		}
 	} // }}}
 	translate() { // {{{

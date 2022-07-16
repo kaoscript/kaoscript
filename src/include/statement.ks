@@ -29,8 +29,8 @@ abstract class Statement extends AbstractNode {
 	} // }}}
 	assignments() => @assignments
 	checkReturnType(type: Type)
-	defineVariables(left, scope, expression = null, leftMost = false) { // {{{
-		for const name in left.listAssignments([]) {
+	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { // {{{
+		for const name in names {
 			if const variable = scope.getVariable(name) {
 				if variable.isImmutable() {
 					ReferenceException.throwImmutable(name, this)
@@ -48,12 +48,21 @@ abstract class Statement extends AbstractNode {
 			}
 		}
 	} // }}}
+	defineVariables(left: AbstractNode, scope: Scope, expression = null, leftMost: Boolean = false) { // {{{
+		this.defineVariables(left, left.listAssignments([]), scope, expression, leftMost)
+	} // }}}
 	export(recipient)
+	export(recipient, enhancement: Boolean) { // {{{
+		if !enhancement {
+			this.export(recipient)
+		}
+	} // }}}
 	getAttributeData(key: AttributeData) => @attributeDatas[key]
 	includePath() => @parent.includePath()
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode)
 	isAwait() => false
 	isCascade() => false
+	isEnhancementExport() => false
 	isExit() => false
 	isExportable() => false
 	isInitializingInstanceVariable(name) => false
@@ -97,7 +106,7 @@ abstract class Statement extends AbstractNode {
 
 include {
 	'../statement/break'
-	'../statement/class'
+	'../statement/class/index'
 	'../statement/continue'
 	'../statement/destroy'
 	'../statement/disclose'

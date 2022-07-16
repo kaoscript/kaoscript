@@ -1,70 +1,79 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Master {
+		static __ks_new_0() {
+			const o = Object.create(Master.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	class SubClassA extends Master {
-		__ks_init() {
-			Master.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(SubClassA.prototype);
+			o.__ks_init();
+			return o;
 		}
-		__ks_cons(args) {
-			Master.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 	}
 	class SubClassB extends Master {
-		__ks_init() {
-			Master.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(SubClassB.prototype);
+			o.__ks_init();
+			return o;
 		}
-		__ks_cons(args) {
-			Master.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 	}
 	class Disturb {
+		static __ks_new_0() {
+			const o = Object.create(Disturb.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	function foobar() {
-		if(arguments.length === 1 && Type.isClassInstance(arguments[0], SubClassA)) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+	};
+	foobar.__ks_1 = function(x) {
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, SubClassA);
+		const t1 = value => Type.isClassInstance(value, Master) || Type.isClassInstance(value, Disturb);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
 			}
-			else if(!Type.isClassInstance(x, SubClassA)) {
-				throw new TypeError("'x' is not of type 'SubClassA'");
-			}
-		}
-		else if(arguments.length === 1) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isClassInstance(x, Master) && !Type.isClassInstance(x, Disturb)) {
-				throw new TypeError("'x' is not of type 'Master' or 'Disturb'");
+			if(t1(args[0])) {
+				return foobar.__ks_1.call(that, args[0]);
 			}
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 };

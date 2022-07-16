@@ -1,47 +1,53 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Pair",
-    1,
-    "Triple"
-  ],
-  "references": [
-    {
-      "kind": "tuple",
-      "named": true,
-      "fields": {
-        "x": {
-          "index": 0,
-          "required": false,
-          "type": "String"
-        },
-        "y": {
-          "index": 1,
-          "required": false,
-          "type": "Number"
-        }
-      }
-    },
-    {
-      "kind": "tuple",
-      "named": true,
-      "fields": {
-        "z": {
-          "index": 2,
-          "required": false,
-          "type": "Boolean"
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Pair",
+      1,
+      "Triple"
+    ],
+    "references": [
+      {
+        "kind": "tuple",
+        "named": true,
+        "fields": {
+          "x": {
+            "index": 0,
+            "required": false,
+            "type": "String"
+          },
+          "y": {
+            "index": 1,
+            "required": false,
+            "type": "Number"
+          }
         }
       },
-      "extends": [
-        0,
-        "Pair"
-      ]
-    }
-  ],
-  "macros": []
-}
+      {
+        "kind": "tuple",
+        "named": true,
+        "fields": {
+          "z": {
+            "index": 2,
+            "required": false,
+            "type": "Boolean"
+          }
+        },
+        "extends": [
+          0,
+          "Pair"
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

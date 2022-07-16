@@ -1,18 +1,18 @@
-var Operator = require("@kaoscript/runtime").Operator;
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function add3(x0, x1, x2) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(x0 === void 0 || x0 === null) {
-			throw new TypeError("'x0' is not nullable");
-		}
-		if(x1 === void 0 || x1 === null) {
-			throw new TypeError("'x1' is not nullable");
-		}
-		if(x2 === void 0 || x2 === null) {
-			throw new TypeError("'x2' is not nullable");
-		}
+	function add3() {
+		return add3.__ks_rt(this, arguments);
+	};
+	add3.__ks_0 = function(x0, x1, x2) {
 		return Operator.addOrConcat(x0, x1, x2);
-	}
+	};
+	add3.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 3) {
+			if(t0(args[0]) && t0(args[1]) && t0(args[2])) {
+				return add3.__ks_0.call(that, args[0], args[1], args[2]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

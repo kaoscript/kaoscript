@@ -1,1 +1,1 @@
-TypeException: The variable "_foo" of type "Array" can't be assigned with a value of type "Dictionary" (line 3, file "fixtures/compile/class/class.field.init.bad.ks")
+TypeException: The variable "_foo" of type "Array" can't be assigned with a value of type "Dictionary" (fixtures/compile/class/class.field.init.bad.ks:3)

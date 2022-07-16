@@ -1,1 +1,1 @@
-ReferenceException: Property "space" is not defined (line 9, file "fixtures/compile/xample/xample.color.format.bad.ks")
+ReferenceException: Property "space" is not defined (fixtures/compile/xample/xample.color.format.bad.ks:9)

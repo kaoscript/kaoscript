@@ -1,45 +1,46 @@
-var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Foobar = Helper.struct(function(values) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(values === void 0 || values === null) {
-			throw new TypeError("'values' is not nullable");
-		}
-		else if(!Type.isDictionary(values)) {
-			throw new TypeError("'values' is not of type 'Dictionary<String>'");
-		}
+	const Foobar = Helper.struct(function(values) {
 		const _ = new Dictionary();
 		_.values = values;
 		return _;
+	}, function(__ks_new, args) {
+		const t0 = value => Type.isDictionary(value, Type.isString);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return __ks_new(args[0]);
+			}
+		}
+		throw Helper.badArgs();
 	});
-	var Quxbaz = Helper.struct(function(values) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(values === void 0 || values === null) {
-			throw new TypeError("'values' is not nullable");
-		}
-		else if(!Type.isDictionary(values)) {
-			throw new TypeError("'values' is not of type 'Dictionary<Number>'");
-		}
+	const Quxbaz = Helper.struct(function(values) {
 		const _ = new Dictionary();
 		_.values = values;
 		return _;
+	}, function(__ks_new, args) {
+		const t0 = value => Type.isDictionary(value, Type.isNumber);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return __ks_new(args[0]);
+			}
+		}
+		throw Helper.badArgs();
 	});
-	function foobar(item) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(item === void 0 || item === null) {
-			throw new TypeError("'item' is not nullable");
-		}
-		else if(!Type.isStructInstance(item, Foobar) && !Type.isStructInstance(item, Quxbaz)) {
-			throw new TypeError("'item' is not of type 'Foobar' or 'Quxbaz'");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(item) {
 		for(let __ks_0 in item.values) {
 			const value = item.values[__ks_0];
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isStructInstance(value, Foobar) || Type.isStructInstance(value, Quxbaz);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

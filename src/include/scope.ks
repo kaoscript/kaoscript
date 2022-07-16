@@ -98,13 +98,14 @@ abstract class Scope {
 	abstract hasDefinedVariable(name: String): Boolean
 	hasMacro(name: String): Boolean => false
 	abstract hasVariable(name: String, line: Number = -1): Boolean
-	line(): Number => 0
 	isBleeding(): Boolean => false
 	isInline(): Boolean => false
 	isPredefinedVariable(name: String): Boolean => (variable ?= this.getVariable(name)) && variable.isPredefined()
+	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) => name == newName
+	line(): Number => 0
 	parent() => null
-	abstract reference(value, nullable: Boolean = false, parameters: Array = []): ReferenceType
-	abstract resolveReference(name: String, nullable: Boolean, parameters: Array): ReferenceType
+	abstract reference(value): ReferenceType
+	abstract resolveReference(name: String): ReferenceType
 }
 
 struct VariableBrief {

@@ -1,1 +1,1 @@
-TypeException: The return type must be "Number" or "String" and not "Number?" or "String" (line 2, file "fixtures/compile/operator/operator.addition.bin.a_ane.rb.ks")
+TypeException: The return type must be "Number" or "String" and not "Number?" or "String" (fixtures/compile/operator/operator.addition.bin.a_ane.rb.ks:2)

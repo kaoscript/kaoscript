@@ -1,99 +1,103 @@
-{
-  "aliens": [],
-  "requirements": [
-    0,
-    "Color",
-    true
-  ],
-  "exports": [
-    1,
-    "Color"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": false,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 0
-      },
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {
-        "_luma": {
-          "access": 2,
-          "type": "Number",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": true
-        }
-      },
-      "classVariables": {},
-      "instanceMethods": {
-        "luma": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "luma",
-                "type": "Number",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
+[
+  {
+    "aliens": [],
+    "requirements": [
+      0,
+      "Color",
+      true
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "Color"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {
+          "_luma": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": true
           }
-        ]
-      },
-      "classMethods": {},
-      "sequences": [
-        0,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    }
-  ],
-  "macros": []
-}
+        },
+        "classVariables": {},
+        "instanceMethods": {
+          "luma": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "luma",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          0,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

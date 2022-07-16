@@ -1,25 +1,45 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let foo = (() => {
-		return function() {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			let __ks_i = -1;
-			let __ks__;
-			let u = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-			let v = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			let y = arguments.length > 3 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-			let z = arguments.length > 4 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-			return [u, v, x, y, z];
-		};
+		return (() => {
+			const __ks_rt = (...args) => {
+				const t0 = () => true;
+				const t1 = Type.isValue;
+				const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+				let pts;
+				if(args.length >= 1 && args.length <= 2) {
+					if(Helper.isVarargs(args, 0, args.length - 1, t0, pts = [0], 0) && Helper.isVarargs(args, 1, 1, t1, pts, 1) && te(pts, 2)) {
+						return __ks_rt.__ks_0.call(this, Helper.getVararg(args, 0, pts[1]), void 0, Helper.getVararg(args, pts[1], pts[2]), void 0, void 0);
+					}
+					throw Helper.badArgs();
+				}
+				if(args.length >= 3 && args.length <= 5) {
+					if(t1(args[2])) {
+						if(Helper.isVarargs(args, 0, 1, t0, pts = [3], 0) && Helper.isVarargs(args, 0, 1, t0, pts, 1) && te(pts, 2)) {
+							return __ks_rt.__ks_0.call(this, args[0], args[1], args[2], Helper.getVararg(args, 3, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+						}
+					}
+				}
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = (u = null, v = null, x, y = null, z = null) => {
+				return [u, v, x, y, z];
+			};
+			return __ks_rt;
+		})();
 	})();
-	expect(() => {
-		return foo();
-	}).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo();
+		};
+		return __ks_rt;
+	})()).to.throw();
 	expect(foo(1)).to.eql([null, null, 1, null, null]);
 	expect(foo(1, 2)).to.eql([1, null, 2, null, null]);
 	expect(foo(1, 2, 3)).to.eql([1, 2, 3, null, null]);

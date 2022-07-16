@@ -1,1 +1,1 @@
-TypeException: The expression "x" of type "String" is expected to be of type "Number" or "Any" in a less-than operation (line 2, file "fixtures/compile/comparison/comparison.lt.bt.ks")
+TypeException: The expression "x" of type "String" is expected to be of type "Number" or "Any" in a less-than operation (fixtures/compile/comparison/comparison.lt.bt.ks:2)

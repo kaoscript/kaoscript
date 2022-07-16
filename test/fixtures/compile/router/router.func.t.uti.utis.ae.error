@@ -1,0 +1,1 @@
+SyntaxException: When the arguments are ("Number"), the function "foobar" can be matched with "foobar(x: Date|Number|String)" or "foobar(x: Date|Number)" (fixtures/compile/router/router.func.t.uti.utis.ae.ks:1)

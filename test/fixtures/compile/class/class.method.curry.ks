@@ -1,3 +1,8 @@
+#[rules(non-exhaustive)]
+extern systemic class Array {
+	join(...): String
+}
+
 class Message {
 	static build(...lines): String => lines.join('\n')
 }

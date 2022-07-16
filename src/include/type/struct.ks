@@ -1,36 +1,19 @@
 class StructType extends Type {
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const value = new StructType(scope)
-
-			let index = 0
-
-			for const type, name of data.fields {
-				value.addField(StructFieldType.fromMetadata(index, name, type, metadata, references, alterations, queue, scope, node))
-
-				++index
-			}
-
-			if data.extends? {
-				value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
-			}
-
-			return value
-		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): StructType { // {{{
 			const value = new StructType(scope)
 
 			queue.push(() => {
 				let index = 0
 
 				for const type, name of data.fields {
-					value.addField(StructFieldType.fromMetadata(index, name, type, metadata, references, alterations, queue, scope, node))
+					value.addField(StructFieldType.import(index, name, type, metadata, references, alterations, queue, scope, node))
 
 					++index
 				}
 
 				if data.extends? {
-					value.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+					value.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 				}
 			})
 
@@ -38,14 +21,23 @@ class StructType extends Type {
 		} // }}}
 	}
 	private {
-		_count: Number							= 0
-		_extending: Boolean						= false
-		_extends: NamedType<StructType>?		= null
-		_fields: Dictionary<StructFieldType>	= {}
+		@assessment								= null
+		@count: Number							= 0
+		@extending: Boolean						= false
+		@extends: NamedType<StructType>?		= null
+		@fields: Dictionary<StructFieldType>	= {}
+		@function: FunctionType					= null
 	}
 	addField(field: StructFieldType) { // {{{
 		@fields[field.name()] = field
 		++@count
+	} // }}}
+	assessment(reference: ReferenceType, node: AbstractNode) { // {{{
+		if @assessment == null {
+			@assessment = Router.assess([this.function(reference, node)], reference.name(), node)
+		}
+
+		return @assessment
 	} // }}}
 	override clone() { // {{{
 		NotImplementedException.throw()
@@ -58,18 +50,18 @@ class StructType extends Type {
 			return @count
 		}
 	} // }}}
-	override export(references, mode) { // {{{
+	override export(references, indexDelta, mode, module) { // {{{
 		const export = {
 			kind: TypeKind::Struct
 			fields: {}
 		}
 
 		for const field of @fields {
-			export.fields[field.name()] = field.export(references, mode)
+			export.fields[field.name()] = field.export(references, indexDelta, mode, module)
 		}
 
 		if @extending {
-			export.extends = @extends.metaReference(references, mode)
+			export.extends = @extends.metaReference(references, indexDelta, mode, module)
 		}
 
 		return export
@@ -77,6 +69,26 @@ class StructType extends Type {
 	extends() => @extends
 	extends(@extends) { // {{{
 		@extending = true
+	} // }}}
+	function(reference, node) { // {{{
+		if @function == null {
+			const scope = node.scope()
+
+			@function = new FunctionType(scope)
+
+			for const field, index in this.listAllFields([]) {
+				if field.isRequired() {
+					@function.addParameter(field.type(), field.name(), 1, 1)
+				}
+				else {
+					@function.addParameter(field.type().setNullable(true), field.name(), 0, 1)
+				}
+			}
+
+			@function.setReturnType(reference)
+		}
+
+		return @function
 	} // }}}
 	getAllFieldsMap(list = {}) { // {{{
 		if @extending {
@@ -101,17 +113,37 @@ class StructType extends Type {
 			return null
 		}
 	} // }}}
-	override isDictionary() => true
 	isExtending() => @extending
-	isMatching(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
-	isMatching(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
-		if value.name() == 'Struct' {
-			return true
+	override isStruct() => true
+	isSubsetOf(value: StructType, mode: MatchingMode) => mode ~~ MatchingMode::Similar
+	// TODO uncomment
+	// isSubsetOf(value: NamedType | ReferenceType, mode: MatchingMode) { // {{{
+	// 	if value.name() == 'Struct' {
+	// 		return true
+	// 	}
+
+	// 	return false
+	// } // }}}
+	isSubsetOf(value: NullType, mode: MatchingMode) => false
+	isSubsetOf(value: UnionType, mode: MatchingMode) { // {{{
+		for const type in value.types() {
+			if this.isSubsetOf(type) {
+				return true
+			}
 		}
 
 		return false
 	} // }}}
-	override isStruct() => true
+	// TODO remove
+	isSubsetOf(value: Type, mode: MatchingMode) {
+		if value is NamedType | ReferenceType {
+			if value.name() == 'Struct' {
+				return true
+			}
+		}
+
+		return false
+	}
 	listAllFields(list = []) { // {{{
 		if @extending {
 			@extends.type().listAllFields(list)
@@ -232,7 +264,8 @@ class StructType extends Type {
 
 		return true
 	} // }}}
-	metaReference(references, name, mode) => [this.toMetadata(references, mode), name]
+	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) => [this.toMetadata(references, indexDelta, mode, module), name]
+	shallBeNamed() => true
 	sortArguments(arguments: Array, node) { // {{{
 		const order = []
 
@@ -355,17 +388,20 @@ class StructType extends Type {
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		NotImplementedException.throw(node)
 	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('struct', @count)
+	} // }}}
 }
 
 class StructFieldType extends Type {
 	private {
-		_index: Number
-		_name: String?
-		_type: Type
+		@index: Number
+		@name: String?
+		@type: Type
 	}
 	static {
-		fromMetadata(index, name?, data, metadata, references, alterations, queue, scope, node) { // {{{
-			const fieldType = Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node)
+		import(index: Number, name: String?, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): StructFieldType { // {{{
+			const fieldType = Type.import(data.type, metadata, references, alterations, queue, scope, node)
 
 			return new StructFieldType(scope, name, index, fieldType, data.required)
 		} // }}}
@@ -377,9 +413,9 @@ class StructFieldType extends Type {
 		NotImplementedException.throw()
 	} // }}}
 	discardVariable() => @type
-	override export(references, mode) => { // {{{
+	override export(references, indexDelta, mode, module) => { // {{{
 		required: @required
-		type: @type.export(references, mode)
+		type: @type.export(references, indexDelta, mode, module)
 	} // }}}
 	flagNullable() { // {{{
 		@type = @type.setNullable(true)
@@ -393,5 +429,6 @@ class StructFieldType extends Type {
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		NotImplementedException.throw(node)
 	} // }}}
+	override toVariations(variations)
 	type() => @type
 }

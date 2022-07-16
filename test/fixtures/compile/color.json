@@ -1,1214 +1,1789 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Space",
-    1,
-    "Color"
-  ],
-  "references": [
-    {
-      "kind": "enum",
-      "type": "string",
-      "index": -1,
-      "exhaustive": true,
-      "variables": [
-        "RGB",
-        "SRGB"
-      ],
-      "instanceMethods": {},
-      "staticMethods": {},
-      "sequences": [
-        -1
-      ]
-    },
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "constructors": [
-        {
-          "id": 0,
-          "access": 4,
-          "sealed": false,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true,
+      0,
+      "Array",
+      true,
+      1,
+      "parseFloat",
+      true,
+      3,
+      "parseInt",
+      true,
+      4,
+      "Math",
+      true,
+      5,
+      "isNaN",
+      true,
+      2,
+      "Number",
+      true,
+      6,
+      "String",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
+            "access": 4,
+            "type": "Number",
+            "default": false,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "classVariables": {},
+        "instanceMethods": {
+          "concat": [
             {
-              "name": "args",
-              "type": "Any",
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
               "min": 0,
               "max": "Infinity",
-              "default": false
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 0
+              },
+              "errors": [],
+              "inits": []
             }
           ],
-          "throws": []
-        }
-      ],
-      "instanceVariables": {
-        "_dummy": {
-          "access": 2,
-          "type": "Boolean",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
+          "indexOf": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "push": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "shift": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any!",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "splice": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 0
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "unshift": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
         },
-        "_space": {
-          "access": 2,
-          "type": {
-            "reference": 0
-          },
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
         },
-        "_alpha": {
-          "access": 2,
-          "type": {
-            "reference": 2
-          },
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        },
-        "_red": {
-          "access": 2,
-          "type": "Number",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        },
-        "_green": {
-          "access": 2,
-          "type": "Number",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        },
-        "_blue": {
-          "access": 2,
-          "type": "Number",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
+        "sharedMethods": {}
       },
-      "classVariables": {},
-      "instanceMethods": {
-        "alpha": [
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": "Infinity",
+        "parameters": [
           {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": {
+          "reference": 2
+        },
+        "errors": []
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "toFixed": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 2
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": "Infinity",
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": {
+          "reference": 2
+        },
+        "errors": []
+      },
+      {
+        "kind": "namespace",
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": true,
+        "properties": {
+          "abs": {
+            "kind": "function",
             "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 2
+            },
+            "errors": [],
+            "sealed": false
+          },
+          "max": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 2
+            },
+            "errors": [],
+            "sealed": false
+          },
+          "min": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 2
+            },
+            "errors": [],
+            "sealed": false
+          },
+          "pow": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 2
+            },
+            "errors": [],
+            "sealed": false
+          },
+          "random": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
             "min": 0,
             "max": 0,
             "parameters": [],
             "returns": {
               "reference": 2
             },
-            "throws": [],
-            "inits": []
+            "errors": [],
+            "sealed": false
           },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": false,
+          "round": {
+            "kind": "function",
             "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "value",
-                "type": {
-                  "kind": "union",
-                  "types": [
-                    "String",
-                    "Number"
-                  ]
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": [
-              "_alpha"
-            ]
-          }
-        ],
-        "blend": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 2,
-            "max": 4,
-            "parameters": [
-              {
-                "name": "color",
-                "type": {
-                  "reference": 1
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "percentage",
-                "type": {
-                  "reference": 3
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "space",
-                "type": {
-                  "reference": 0
-                },
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjozMiwiZW51bSI6eyJraW5kIjo1MiwibmFtZSI6IlNwYWNlIiwic3RhcnQiOnsibGluZSI6NjkzLCJjb2x1bW4iOjU2fSwiZW5kIjp7ImxpbmUiOjY5MywiY29sdW1uIjo2MX19LCJtZW1iZXIiOnsia2luZCI6NTIsIm5hbWUiOiJTUkdCIiwic3RhcnQiOnsibGluZSI6NjkzLCJjb2x1bW4iOjYzfSwiZW5kIjp7ImxpbmUiOjY5MywiY29sdW1uIjo2N319LCJzdGFydCI6eyJsaW5lIjo2OTMsImNvbHVtbiI6NTZ9LCJlbmQiOnsibGluZSI6NjkzLCJjb2x1bW4iOjY3fX0="
-              },
-              {
-                "name": "alpha",
-                "type": "Boolean",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NjkzLCJjb2x1bW4iOjgzfSwiZW5kIjp7ImxpbmUiOjY5MywiY29sdW1uIjo4OH19"
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [
-              "Error"
-            ],
-            "inits": []
-          }
-        ],
-        "clearer": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "value",
-                "type": {
-                  "kind": "union",
-                  "types": [
-                    "String",
-                    "Number"
-                  ]
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "clone": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "contrast": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "color",
-                "type": {
-                  "reference": 1
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [
-              "Error"
-            ],
-            "inits": []
-          }
-        ],
-        "copy": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "target",
-                "type": {
-                  "reference": 1
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "distance": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "color",
-                "type": {
-                  "reference": 1
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 3
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "equals": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "color",
-                "type": {
-                  "reference": 1
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Boolean",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "format": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "format",
-                "type": "String",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3MSwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjUyLCJuYW1lIjoidGhpcyIsInN0YXJ0Ijp7ImxpbmUiOjgyNywiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo4MjcsImNvbHVtbiI6MzB9fSwicHJvcGVydHkiOnsia2luZCI6NTIsIm5hbWUiOiJfc3BhY2UiLCJzdGFydCI6eyJsaW5lIjo4MjcsImNvbHVtbiI6MzF9LCJlbmQiOnsibGluZSI6ODI3LCJjb2x1bW4iOjM3fX0sInN0YXJ0Ijp7ImxpbmUiOjgyNywiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo4MjcsImNvbHVtbiI6Mzd9fQ=="
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "from": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
+            "exhaustive": true,
             "min": 0,
             "max": "Infinity",
             "parameters": [
               {
-                "name": "args",
-                "type": "Any",
+                "type": "Any?",
                 "min": 0,
                 "max": "Infinity",
                 "default": false
               }
             ],
             "returns": {
-              "reference": 1
+              "reference": 2
             },
-            "throws": [],
-            "inits": []
+            "errors": [],
+            "sealed": false
           }
-        ],
-        "getField": [
-          {
-            "id": 0,
-            "access": 2,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "name",
-                "type": "Any",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "gradient": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 2,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "endColor",
-                "type": {
-                  "reference": 1
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "length",
-                "type": {
-                  "reference": 2
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "kind": "reference",
-              "name": "Array",
-              "parameters": [
-                {
-                  "reference": 1
-                }
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "greyscale": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "model",
-                "type": "String",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo2OCwidmFsdWUiOiJCVDcwOSIsInN0YXJ0Ijp7ImxpbmUiOjg4NiwiY29sdW1uIjoyOH0sImVuZCI6eyJsaW5lIjo4ODYsImNvbHVtbiI6MzV9fQ=="
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "hex": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "String",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "isBlack": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Boolean",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "isTransparent": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Boolean",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "isWhite": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Boolean",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "like": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "space",
-                "type": "String",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [
-              "Error"
-            ],
-            "inits": []
-          }
-        ],
-        "luminance": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "negative": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "opaquer": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "value",
-                "type": {
-                  "kind": "union",
-                  "types": [
-                    "String",
-                    "Number"
-                  ]
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "readable": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "color",
-                "type": {
-                  "reference": 1
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "tripleA",
-                "type": "Boolean",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6OTgzLCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjk4MywiY29sdW1uIjo0Nn19"
-              }
-            ],
-            "returns": "Boolean",
-            "throws": [
-              "Error"
-            ],
-            "inits": []
-          }
-        ],
-        "scheme": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "functions",
-                "type": {
-                  "kind": "reference",
-                  "name": "Array",
-                  "parameters": [
-                    {
-                      "reference": 4
-                    }
-                  ]
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "kind": "reference",
-              "name": "Array",
-              "parameters": [
-                {
-                  "reference": 1
-                }
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "setField": [
-          {
-            "id": 0,
-            "access": 2,
-            "sealed": false,
-            "async": false,
-            "min": 2,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "name",
-                "type": "Any",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "value",
-                "type": {
-                  "kind": "union",
-                  "types": [
-                    "Number",
-                    "String"
-                  ]
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "shade": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "percentage",
-                "type": {
-                  "reference": 3
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "space": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 0
-            },
-            "throws": [],
-            "inits": []
-          },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "space",
-                "type": "String",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [
-              "Error"
-            ],
-            "inits": []
-          }
-        ],
-        "tint": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "percentage",
-                "type": {
-                  "reference": 3
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "tone": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "percentage",
-                "type": {
-                  "reference": 3
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "red": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "value",
-                "type": "Any",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "green": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "value",
-                "type": "Any",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "blue": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "value",
-                "type": "Any",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ]
-      },
-      "classMethods": {
-        "from": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "args",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "kind": "union",
-              "types": [
-                {
-                  "reference": 1
-                },
-                "Boolean"
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "greyscale": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "args",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "kind": "union",
-              "types": [
-                {
-                  "reference": 1
-                },
-                "Boolean"
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "hex": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "args",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "kind": "union",
-              "types": [
-                "String",
-                "Boolean"
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "negative": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "args",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "kind": "union",
-              "types": [
-                {
-                  "reference": 1
-                },
-                "Boolean"
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "registerFormatter": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 2,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "format",
-                "type": "String",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "formatter",
-                "type": "Function",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Void",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "registerParser": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 2,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "format",
-                "type": "String",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "parser",
-                "type": "Function",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Void",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "registerSpace": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "space",
-                "type": "Dictionary",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ]
-      },
-      "sequences": [
-        3,
-        -1,
-        -1
-      ]
-    },
-    {
-      "kind": "alias",
-      "of": "Number"
-    },
-    {
-      "kind": "alias",
-      "of": "Number"
-    },
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 1,
-      "max": 1,
-      "parameters": [
-        {
-          "name": "color",
-          "type": {
-            "reference": 1
-          },
-          "min": 1,
-          "max": 1,
-          "default": false
         }
-      ],
-      "returns": {
-        "reference": 1
       },
-      "throws": []
-    }
-  ],
-  "macros": [
-    "Color.registerSpace",
-    [
-      "eyJwYXJhbWV0ZXJzIjpbeyJraW5kIjo4MywibW9kaWZpZXJzIjpbeyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6MjJ9LCJlbmQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjIzfX1dLCJzdGFydCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6MjJ9LCJlbmQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjQwfSwibmFtZSI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlIiwic3RhcnQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjIzfSwiZW5kIjp7ImxpbmUiOjUwNywiY29sdW1uIjoyOH19LCJ0eXBlIjp7ImtpbmQiOjExNiwibW9kaWZpZXJzIjpbXSwidHlwZU5hbWUiOnsia2luZCI6NTIsIm5hbWUiOiJEaWN0aW9uYXJ5Iiwic3RhcnQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjMwfSwiZW5kIjp7ImxpbmUiOjUwNywiY29sdW1uIjo0MH19LCJzdGFydCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6MzB9LCJlbmQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjQwfX19XSwiYm9keSI6eyJraW5kIjoxMiwiYXR0cmlidXRlcyI6W10sInN0YXRlbWVudHMiOlt7ImtpbmQiOjU0LCJhdHRyaWJ1dGVzIjpbXSwiY29uZGl0aW9uIjp7ImtpbmQiOjExNywib3BlcmF0b3IiOnsia2luZCI6NCwic3RhcnQiOnsibGluZSI6NTA4LCJjb2x1bW4iOjIyfSwiZW5kIjp7ImxpbmUiOjUwOCwiY29sdW1uIjoyM319LCJhcmd1bWVudCI6eyJraW5kIjo3MSwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjUyLCJuYW1lIjoic3BhY2UiLCJzdGFydCI6eyJsaW5lIjo1MDgsImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1MDgsImNvbHVtbiI6MTF9fSwicHJvcGVydHkiOnsia2luZCI6NTIsIm5hbWUiOiJjb21wb25lbnRzIiwic3RhcnQiOnsibGluZSI6NTA4LCJjb2x1bW4iOjEyfSwiZW5kIjp7ImxpbmUiOjUwOCwiY29sdW1uIjoyMn19LCJzdGFydCI6eyJsaW5lIjo1MDgsImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1MDgsImNvbHVtbiI6MjJ9fSwic3RhcnQiOnsibGluZSI6NTA4LCJjb2x1bW4iOjZ9LCJlbmQiOnsibGluZSI6NTA4LCJjb2x1bW4iOjIzfX0sIndoZW5UcnVlIjp7ImtpbmQiOjEyLCJhdHRyaWJ1dGVzIjpbXSwic3RhdGVtZW50cyI6W3sia2luZCI6MTIyLCJtb2RpZmllcnMiOlt7ImtpbmQiOjEzLCJzdGFydCI6eyJsaW5lIjo1MDksImNvbHVtbiI6NH0sImVuZCI6eyJsaW5lIjo1MDksImNvbHVtbiI6OX19XSwiYXR0cmlidXRlcyI6W10sInZhcmlhYmxlcyI6W3sia2luZCI6MTIzLCJtb2RpZmllcnMiOltdLCJuYW1lIjp7ImtpbmQiOjUyLCJuYW1lIjoiZmllbGRzIiwic3RhcnQiOnsibGluZSI6NTA5LCJjb2x1bW4iOjEwfSwiZW5kIjp7ImxpbmUiOjUwOSwiY29sdW1uIjoxNn19LCJzdGFydCI6eyJsaW5lIjo1MDksImNvbHVtbiI6MTB9LCJlbmQiOnsibGluZSI6NTA5LCJjb2x1bW4iOjIzfSwidHlwZSI6eyJraW5kIjoxMTYsIm1vZGlmaWVycyI6W10sInR5cGVOYW1lIjp7ImtpbmQiOjUyLCJuYW1lIjoiQXJyYXkiLCJzdGFydCI6eyJsaW5lIjo1MDksImNvbHVtbiI6MTh9LCJlbmQiOnsibGluZSI6NTA5LCJjb2x1bW4iOjIzfX0sInN0YXJ0Ijp7ImxpbmUiOjUwOSwiY29sdW1uIjoxOH0sImVuZCI6eyJsaW5lIjo1MDksImNvbHVtbiI6MjN9fX1dLCJzdGFydCI6eyJsaW5lIjo1MDksImNvbHVtbiI6NH0sImVuZCI6eyJsaW5lIjo1MDksImNvbHVtbiI6Mjh9LCJpbml0Ijp7ImtpbmQiOjQsInZhbHVlcyI6W10sInN0YXJ0Ijp7ImxpbmUiOjUwOSwiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo1MDksImNvbHVtbiI6Mjh9fX0seyJraW5kIjoxMjIsIm1vZGlmaWVycyI6W3sia2luZCI6MTMsInN0YXJ0Ijp7ImxpbmUiOjUxMCwiY29sdW1uIjo0fSwiZW5kIjp7ImxpbmUiOjUxMCwiY29sdW1uIjo5fX1dLCJhdHRyaWJ1dGVzIjpbXSwidmFyaWFibGVzIjpbeyJraW5kIjoxMjMsIm1vZGlmaWVycyI6W10sIm5hbWUiOnsia2luZCI6NTIsIm5hbWUiOiJtZXRob2RzIiwic3RhcnQiOnsibGluZSI6NTEwLCJjb2x1bW4iOjEwfSwiZW5kIjp7ImxpbmUiOjUxMCwiY29sdW1uIjoxN319LCJzdGFydCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6MTB9LCJlbmQiOnsibGluZSI6NTEwLCJjb2x1bW4iOjI0fSwidHlwZSI6eyJraW5kIjoxMTYsIm1vZGlmaWVycyI6W10sInR5cGVOYW1lIjp7ImtpbmQiOjUyLCJuYW1lIjoiQXJyYXkiLCJzdGFydCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6MTl9LCJlbmQiOnsibGluZSI6NTEwLCJjb2x1bW4iOjI0fX0sInN0YXJ0Ijp7ImxpbmUiOjUxMCwiY29sdW1uIjoxOX0sImVuZCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6MjR9fX1dLCJzdGFydCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6NH0sImVuZCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6Mjl9LCJpbml0Ijp7ImtpbmQiOjQsInZhbHVlcyI6W10sInN0YXJ0Ijp7ImxpbmUiOjUxMCwiY29sdW1uIjoyN30sImVuZCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6Mjl9fX0seyJraW5kIjoxMjIsIm1vZGlmaWVycyI6W10sImF0dHJpYnV0ZXMiOltdLCJ2YXJpYWJsZXMiOlt7ImtpbmQiOjEyMywibW9kaWZpZXJzIjpbXSwibmFtZSI6eyJraW5kIjo1MiwibmFtZSI6ImZpZWxkIiwic3RhcnQiOnsibGluZSI6NTEyLCJjb2x1bW4iOjh9LCJlbmQiOnsibGluZSI6NTEyLCJjb2x1bW4iOjEzfX0sInN0YXJ0Ijp7ImxpbmUiOjUxMiwiY29sdW1uIjo4fSwiZW5kIjp7ImxpbmUiOjUxMiwiY29sdW1uIjoxM319XSwic3RhcnQiOnsibGluZSI6NTEyLCJjb2x1bW4iOjR9LCJlbmQiOnsibGluZSI6NTEyLCJjb2x1bW4iOjEzfX0seyJraW5kIjo0NywiYXR0cmlidXRlcyI6W10sIm1vZGlmaWVycyI6W3sia2luZCI6Nywic3RhcnQiOnsibGluZSI6NTEzLCJjb2x1bW4iOjh9LCJlbmQiOnsibGluZSI6NTEzLCJjb2x1bW4iOjEzfX0seyJraW5kIjoxMywic3RhcnQiOnsibGluZSI6NTEzLCJjb2x1bW4iOjh9LCJlbmQiOnsibGluZSI6NTEzLCJjb2x1bW4iOjEzfX1dLCJleHByZXNzaW9uIjp7ImtpbmQiOjcxLCJtb2RpZmllcnMiOltdLCJvYmplY3QiOnsia2luZCI6NTIsIm5hbWUiOiJzcGFjZSIsInN0YXJ0Ijp7ImxpbmUiOjUxMywiY29sdW1uIjozM30sImVuZCI6eyJsaW5lIjo1MTMsImNvbHVtbiI6Mzh9fSwicHJvcGVydHkiOnsia2luZCI6NTIsIm5hbWUiOiJjb21wb25lbnRzIiwic3RhcnQiOnsibGluZSI6NTEzLCJjb2x1bW4iOjM5fSwiZW5kIjp7ImxpbmUiOjUxMywiY29sdW1uIjo0OX19LCJzdGFydCI6eyJsaW5lIjo1MTMsImNvbHVtbiI6MzN9LCJlbmQiOnsibGluZSI6NTEzLCJjb2x1bW4iOjQ5fX0sInN0YXJ0Ijp7ImxpbmUiOjUxMywiY29sdW1uIjo0fSwiZW5kIjp7ImxpbmUiOjUyMiwiY29sdW1uIjo1fSwidmFsdWUiOnsia2luZCI6NTIsIm5hbWUiOiJjb21wb25lbnQiLCJzdGFydCI6eyJsaW5lIjo1MTMsImNvbHVtbiI6MTR9LCJlbmQiOnsibGluZSI6NTEzLCJjb2x1bW4iOjIzfX0sImtleSI6eyJraW5kIjo1MiwibmFtZSI6Im5hbWUiLCJzdGFydCI6eyJsaW5lIjo1MTMsImNvbHVtbiI6MjV9LCJlbmQiOnsibGluZSI6NTEzLCJjb2x1bW4iOjI5fX0sImJvZHkiOnsia2luZCI6MTIsImF0dHJpYnV0ZXMiOltdLCJzdGF0ZW1lbnRzIjpbeyJraW5kIjoxMCwib3BlcmF0b3IiOnsia2luZCI6MywiYXNzaWdubWVudCI6OCwic3RhcnQiOnsibGluZSI6NTE0LCJjb2x1bW4iOjExfSwiZW5kIjp7ImxpbmUiOjUxNCwiY29sdW1uIjoxMn19LCJsZWZ0Ijp7ImtpbmQiOjUyLCJuYW1lIjoiZmllbGQiLCJzdGFydCI6eyJsaW5lIjo1MTQsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1MTQsImNvbHVtbiI6MTB9fSwicmlnaHQiOnsia2luZCI6MTA3LCJlbGVtZW50cyI6W3sia2luZCI6NjgsInZhbHVlIjoiXyIsInN0YXJ0Ijp7ImxpbmUiOjUxNCwiY29sdW1uIjoxNH0sImVuZCI6eyJsaW5lIjo1MTQsImNvbHVtbiI6MTV9fSx7ImtpbmQiOjUyLCJuYW1lIjoibmFtZSIsInN0YXJ0Ijp7ImxpbmUiOjUxNCwiY29sdW1uIjoxN30sImVuZCI6eyJsaW5lIjo1MTQsImNvbHVtbiI6MjF9fV0sInN0YXJ0Ijp7ImxpbmUiOjUxNCwiY29sdW1uIjoxM30sImVuZCI6eyJsaW5lIjo1MTQsImNvbHVtbiI6MjN9fSwic3RhcnQiOnsibGluZSI6NTE0LCJjb2x1bW4iOjV9LCJlbmQiOnsibGluZSI6NTE0LCJjb2x1bW4iOjIzfSwiYXR0cmlidXRlcyI6W119LHsia2luZCI6MTQsIm1vZGlmaWVycyI6W10sInNjb3BlIjp7ImtpbmQiOjN9LCJjYWxsZWUiOnsia2luZCI6NzEsIm1vZGlmaWVycyI6W10sIm9iamVjdCI6eyJraW5kIjo1MiwibmFtZSI6ImZpZWxkcyIsInN0YXJ0Ijp7ImxpbmUiOjUxNiwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUxNiwiY29sdW1uIjoxMX19LCJwcm9wZXJ0eSI6eyJraW5kIjo1MiwibmFtZSI6InB1c2giLCJzdGFydCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6MTJ9LCJlbmQiOnsibGluZSI6NTE2LCJjb2x1bW4iOjE2fX0sInN0YXJ0Ijp7ImxpbmUiOjUxNiwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUxNiwiY29sdW1uIjoxNn19LCJhcmd1bWVudHMiOlt7ImtpbmQiOjcwLCJhdHRyaWJ1dGVzIjpbXSwiZWxlbWVudHMiOlt7ImtpbmQiOjIsInZhbHVlIjoicHJpdmF0ZSAiLCJzdGFydCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6NTE2LCJjb2x1bW4iOjMxfX0seyJraW5kIjoxLCJleHByZXNzaW9uIjp7ImtpbmQiOjUyLCJuYW1lIjoiZmllbGQiLCJzdGFydCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6MzR9LCJlbmQiOnsibGluZSI6NTE2LCJjb2x1bW4iOjM5fX0sInN0YXJ0Ijp7ImxpbmUiOjUxNiwiY29sdW1uIjozMX0sImVuZCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6NDB9LCJyZWlmaWNhdGlvbiI6eyJraW5kIjo1LCJzdGFydCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6MzJ9LCJlbmQiOnsibGluZSI6NTE2LCJjb2x1bW4iOjMzfX19LHsia2luZCI6MiwidmFsdWUiOiI6IE51bWJlciA9IDAiLCJzdGFydCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6NDB9LCJlbmQiOnsibGluZSI6NTE2LCJjb2x1bW4iOjUyfX1dLCJzdGFydCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6MTd9LCJlbmQiOnsibGluZSI6NTE2LCJjb2x1bW4iOjUyfX1dLCJzdGFydCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6NTN9LCJhdHRyaWJ1dGVzIjpbXX0seyJraW5kIjoxNCwibW9kaWZpZXJzIjpbXSwic2NvcGUiOnsia2luZCI6M30sImNhbGxlZSI6eyJraW5kIjo3MSwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjUyLCJuYW1lIjoibWV0aG9kcyIsInN0YXJ0Ijp7ImxpbmUiOjUxOCwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUxOCwiY29sdW1uIjoxMn19LCJwcm9wZXJ0eSI6eyJraW5kIjo1MiwibmFtZSI6InB1c2giLCJzdGFydCI6eyJsaW5lIjo1MTgsImNvbHVtbiI6MTN9LCJlbmQiOnsibGluZSI6NTE4LCJjb2x1bW4iOjE3fX0sInN0YXJ0Ijp7ImxpbmUiOjUxOCwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUxOCwiY29sdW1uIjoxN319LCJhcmd1bWVudHMiOlt7ImtpbmQiOjcwLCJhdHRyaWJ1dGVzIjpbXSwiZWxlbWVudHMiOlt7ImtpbmQiOjIsInZhbHVlIjoib3ZlcnJpZGUgIiwic3RhcnQiOnsibGluZSI6NTE5LCJjb2x1bW4iOjZ9LCJlbmQiOnsibGluZSI6NTE5LCJjb2x1bW4iOjE1fX0seyJraW5kIjoxLCJleHByZXNzaW9uIjp7ImtpbmQiOjUyLCJuYW1lIjoibmFtZSIsInN0YXJ0Ijp7ImxpbmUiOjUxOSwiY29sdW1uIjoxOH0sImVuZCI6eyJsaW5lIjo1MTksImNvbHVtbiI6MjJ9fSwic3RhcnQiOnsibGluZSI6NTE5LCJjb2x1bW4iOjE1fSwiZW5kIjp7ImxpbmUiOjUxOSwiY29sdW1uIjoyM30sInJlaWZpY2F0aW9uIjp7ImtpbmQiOjUsInN0YXJ0Ijp7ImxpbmUiOjUxOSwiY29sdW1uIjoxNn0sImVuZCI6eyJsaW5lIjo1MTksImNvbHVtbiI6MTd9fX0seyJraW5kIjoyLCJ2YWx1ZSI6IigpID0+IHRoaXMuZ2V0RmllbGQoIiwic3RhcnQiOnsibGluZSI6NTE5LCJjb2x1bW4iOjIzfSwiZW5kIjp7ImxpbmUiOjUxOSwiY29sdW1uIjo0M319LHsia2luZCI6MSwiZXhwcmVzc2lvbiI6eyJraW5kIjo1MiwibmFtZSI6Im5hbWUiLCJzdGFydCI6eyJsaW5lIjo1MTksImNvbHVtbiI6NDV9LCJlbmQiOnsibGluZSI6NTE5LCJjb2x1bW4iOjQ5fX0sInN0YXJ0Ijp7ImxpbmUiOjUxOSwiY29sdW1uIjo0M30sImVuZCI6eyJsaW5lIjo1MTksImNvbHVtbiI6NTB9LCJyZWlmaWNhdGlvbiI6eyJraW5kIjoyfX0seyJraW5kIjoyLCJ2YWx1ZSI6IikiLCJzdGFydCI6eyJsaW5lIjo1MTksImNvbHVtbiI6NTB9LCJlbmQiOnsibGluZSI6NTE5LCJjb2x1bW4iOjUxfX0seyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1MTksImNvbHVtbiI6NTF9LCJlbmQiOnsibGluZSI6NTIwLCJjb2x1bW4iOjF9fSx7ImtpbmQiOjIsInZhbHVlIjoib3ZlcnJpZGUgIiwic3RhcnQiOnsibGluZSI6NTIwLCJjb2x1bW4iOjZ9LCJlbmQiOnsibGluZSI6NTIwLCJjb2x1bW4iOjE1fX0seyJraW5kIjoxLCJleHByZXNzaW9uIjp7ImtpbmQiOjUyLCJuYW1lIjoibmFtZSIsInN0YXJ0Ijp7ImxpbmUiOjUyMCwiY29sdW1uIjoxOH0sImVuZCI6eyJsaW5lIjo1MjAsImNvbHVtbiI6MjJ9fSwic3RhcnQiOnsibGluZSI6NTIwLCJjb2x1bW4iOjE1fSwiZW5kIjp7ImxpbmUiOjUyMCwiY29sdW1uIjoyM30sInJlaWZpY2F0aW9uIjp7ImtpbmQiOjUsInN0YXJ0Ijp7ImxpbmUiOjUyMCwiY29sdW1uIjoxNn0sImVuZCI6eyJsaW5lIjo1MjAsImNvbHVtbiI6MTd9fX0seyJraW5kIjoyLCJ2YWx1ZSI6Iih2YWx1ZSkgPT4gdGhpcy5zZXRGaWVsZCgiLCJzdGFydCI6eyJsaW5lIjo1MjAsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6NTIwLCJjb2x1bW4iOjQ4fX0seyJraW5kIjoxLCJleHByZXNzaW9uIjp7ImtpbmQiOjUyLCJuYW1lIjoibmFtZSIsInN0YXJ0Ijp7ImxpbmUiOjUyMCwiY29sdW1uIjo1MH0sImVuZCI6eyJsaW5lIjo1MjAsImNvbHVtbiI6NTR9fSwic3RhcnQiOnsibGluZSI6NTIwLCJjb2x1bW4iOjQ4fSwiZW5kIjp7ImxpbmUiOjUyMCwiY29sdW1uIjo1NX0sInJlaWZpY2F0aW9uIjp7ImtpbmQiOjJ9fSx7ImtpbmQiOjIsInZhbHVlIjoiLCB2YWx1ZSkiLCJzdGFydCI6eyJsaW5lIjo1MjAsImNvbHVtbiI6NTV9LCJlbmQiOnsibGluZSI6NTIwLCJjb2x1bW4iOjYzfX0seyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1MjAsImNvbHVtbiI6NjN9LCJlbmQiOnsibGluZSI6NTIxLCJjb2x1bW4iOjF9fV0sInN0YXJ0Ijp7ImxpbmUiOjUxOCwiY29sdW1uIjoxOH0sImVuZCI6eyJsaW5lIjo1MjEsImNvbHVtbiI6Nn19XSwic3RhcnQiOnsibGluZSI6NTE4LCJjb2x1bW4iOjV9LCJlbmQiOnsibGluZSI6NTIxLCJjb2x1bW4iOjd9LCJhdHRyaWJ1dGVzIjpbXX1dLCJzdGFydCI6eyJsaW5lIjo1MTMsImNvbHVtbiI6NTB9LCJlbmQiOnsibGluZSI6NTIyLCJjb2x1bW4iOjV9fX0seyJraW5kIjo3MCwiYXR0cmlidXRlcyI6W10sImVsZW1lbnRzIjpbeyJraW5kIjoyLCJ2YWx1ZSI6IiMhW3J1bGVzKGRvbnQtYXNzZXJ0LW92ZXJyaWRlKV0iLCJzdGFydCI6eyJsaW5lIjo1MjUsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1MjUsImNvbHVtbiI6MzZ9fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjUyNSwiY29sdW1uIjozNn0sImVuZCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6MX19LHsia2luZCI6Mywic3RhcnQiOnsibGluZSI6NTI2LCJjb2x1bW4iOjF9LCJlbmQiOnsibGluZSI6NTI3LCJjb2x1bW4iOjF9fSx7ImtpbmQiOjIsInZhbHVlIjoiQ29sb3IucmVnaXN0ZXJTcGFjZSgiLCJzdGFydCI6eyJsaW5lIjo1MjcsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1MjcsImNvbHVtbiI6MjV9fSx7ImtpbmQiOjEsImV4cHJlc3Npb24iOnsia2luZCI6NTIsIm5hbWUiOiJzcGFjZSIsInN0YXJ0Ijp7ImxpbmUiOjUyNywiY29sdW1uIjoyN30sImVuZCI6eyJsaW5lIjo1MjcsImNvbHVtbiI6MzJ9fSwic3RhcnQiOnsibGluZSI6NTI3LCJjb2x1bW4iOjI1fSwiZW5kIjp7ImxpbmUiOjUyNywiY29sdW1uIjozM30sInJlaWZpY2F0aW9uIjp7ImtpbmQiOjJ9fSx7ImtpbmQiOjIsInZhbHVlIjoiKSIsInN0YXJ0Ijp7ImxpbmUiOjUyNywiY29sdW1uIjozM30sImVuZCI6eyJsaW5lIjo1MjcsImNvbHVtbiI6MzR9fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjUyNywiY29sdW1uIjozNH0sImVuZCI6eyJsaW5lIjo1MjgsImNvbHVtbiI6MX19LHsia2luZCI6Mywic3RhcnQiOnsibGluZSI6NTI4LCJjb2x1bW4iOjF9LCJlbmQiOnsibGluZSI6NTI5LCJjb2x1bW4iOjF9fSx7ImtpbmQiOjIsInZhbHVlIjoiaW1wbCBDb2xvciB7Iiwic3RhcnQiOnsibGluZSI6NTI5LCJjb2x1bW4iOjV9LCJlbmQiOnsibGluZSI6NTI5LCJjb2x1bW4iOjE3fX0seyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1MjksImNvbHVtbiI6MTd9LCJlbmQiOnsibGluZSI6NTMwLCJjb2x1bW4iOjF9fSx7ImtpbmQiOjEsImV4cHJlc3Npb24iOnsia2luZCI6NTIsIm5hbWUiOiJmaWVsZHMiLCJzdGFydCI6eyJsaW5lIjo1MzAsImNvbHVtbiI6OX0sImVuZCI6eyJsaW5lIjo1MzAsImNvbHVtbiI6MTV9fSwic3RhcnQiOnsibGluZSI6NTMwLCJjb2x1bW4iOjZ9LCJlbmQiOnsibGluZSI6NTMwLCJjb2x1bW4iOjE2fSwicmVpZmljYXRpb24iOnsia2luZCI6NCwic3RhcnQiOnsibGluZSI6NTMwLCJjb2x1bW4iOjd9LCJlbmQiOnsibGluZSI6NTMwLCJjb2x1bW4iOjh9fX0seyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1MzAsImNvbHVtbiI6MTZ9LCJlbmQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjF9fSx7ImtpbmQiOjEsImV4cHJlc3Npb24iOnsia2luZCI6NTIsIm5hbWUiOiJtZXRob2RzIiwic3RhcnQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjl9LCJlbmQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjE2fX0sInN0YXJ0Ijp7ImxpbmUiOjUzMSwiY29sdW1uIjo2fSwiZW5kIjp7ImxpbmUiOjUzMSwiY29sdW1uIjoxN30sInJlaWZpY2F0aW9uIjp7ImtpbmQiOjQsInN0YXJ0Ijp7ImxpbmUiOjUzMSwiY29sdW1uIjo3fSwiZW5kIjp7ImxpbmUiOjUzMSwiY29sdW1uIjo4fX19LHsia2luZCI6Mywic3RhcnQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjE3fSwiZW5kIjp7ImxpbmUiOjUzMiwiY29sdW1uIjoxfX0seyJraW5kIjoyLCJ2YWx1ZSI6In0iLCJzdGFydCI6eyJsaW5lIjo1MzIsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1MzIsImNvbHVtbiI6Nn19LHsia2luZCI6Mywic3RhcnQiOnsibGluZSI6NTMyLCJjb2x1bW4iOjZ9LCJlbmQiOnsibGluZSI6NTMzLCJjb2x1bW4iOjF9fV0sInN0YXJ0Ijp7ImxpbmUiOjUyNCwiY29sdW1uIjo0fSwiZW5kIjp7ImxpbmUiOjUzMywiY29sdW1uIjo1fX1dLCJzdGFydCI6eyJsaW5lIjo1MDgsImNvbHVtbiI6MjR9LCJlbmQiOnsibGluZSI6NTM0LCJjb2x1bW4iOjR9fSwic3RhcnQiOnsibGluZSI6NTA4LCJjb2x1bW4iOjN9LCJlbmQiOnsibGluZSI6NTM3LCJjb2x1bW4iOjR9LCJ3aGVuRmFsc2UiOnsia2luZCI6MTIsImF0dHJpYnV0ZXMiOltdLCJzdGF0ZW1lbnRzIjpbeyJraW5kIjo3MCwiYXR0cmlidXRlcyI6W10sImVsZW1lbnRzIjpbeyJraW5kIjoyLCJ2YWx1ZSI6IkNvbG9yLnJlZ2lzdGVyU3BhY2UoIiwic3RhcnQiOnsibGluZSI6NTM2LCJjb2x1bW4iOjEwfSwiZW5kIjp7ImxpbmUiOjUzNiwiY29sdW1uIjozMH19LHsia2luZCI6MSwiZXhwcmVzc2lvbiI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlIiwic3RhcnQiOnsibGluZSI6NTM2LCJjb2x1bW4iOjMyfSwiZW5kIjp7ImxpbmUiOjUzNiwiY29sdW1uIjozN319LCJzdGFydCI6eyJsaW5lIjo1MzYsImNvbHVtbiI6MzB9LCJlbmQiOnsibGluZSI6NTM2LCJjb2x1bW4iOjM4fSwicmVpZmljYXRpb24iOnsia2luZCI6Mn19LHsia2luZCI6MiwidmFsdWUiOiIpIiwic3RhcnQiOnsibGluZSI6NTM2LCJjb2x1bW4iOjM4fSwiZW5kIjp7ImxpbmUiOjUzNiwiY29sdW1uIjozOX19XSwic3RhcnQiOnsibGluZSI6NTM2LCJjb2x1bW4iOjR9LCJlbmQiOnsibGluZSI6NTM2LCJjb2x1bW4iOjM5fX1dLCJzdGFydCI6eyJsaW5lIjo1MzUsImNvbHVtbiI6OH0sImVuZCI6eyJsaW5lIjo1MzcsImNvbHVtbiI6NH19fV0sInN0YXJ0Ijp7ImxpbmUiOjUwNywiY29sdW1uIjo0Mn0sImVuZCI6eyJsaW5lIjo1MzgsImNvbHVtbiI6M319fQ=="
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": "Infinity",
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": "Boolean",
+        "errors": []
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
+            "access": 4,
+            "type": {
+              "reference": 2
+            },
+            "default": false,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "classVariables": {},
+        "instanceMethods": {
+          "charAt": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 6
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "match": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": 0,
+                "nullable": true
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "replace": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 6
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "slice": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 6
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "split": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 0
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toLowerCase": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 6
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "trim": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 6
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      }
     ]
-  ]
-}
+  },
+  {
+    "exports": [
+      7,
+      "Color",
+      8,
+      "Space"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [
+          {
+            "index": 0,
+            "access": 4,
+            "sealed": false,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "name": "args",
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "errors": []
+          }
+        ],
+        "instanceVariables": {
+          "_dummy": {
+            "access": 2,
+            "type": "Boolean",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_space": {
+            "access": 2,
+            "type": {
+              "reference": 8
+            },
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_alpha": {
+            "access": 2,
+            "type": {
+              "reference": 9
+            },
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_red": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_green": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_blue": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "classVariables": {},
+        "instanceMethods": {
+          "alpha": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 9
+              },
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Number",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": [
+                "_alpha"
+              ]
+            }
+          ],
+          "blend": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 2,
+              "max": 4,
+              "parameters": [
+                {
+                  "name": "color",
+                  "type": {
+                    "reference": 7
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "percentage",
+                  "type": {
+                    "reference": 10
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "space",
+                  "type": {
+                    "reference": 8
+                  },
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjozMiwiZW51bSI6eyJraW5kIjo1MiwibmFtZSI6IlNwYWNlIiwic3RhcnQiOnsibGluZSI6NzA2LCJjb2x1bW4iOjU2fSwiZW5kIjp7ImxpbmUiOjcwNiwiY29sdW1uIjo2MX19LCJtZW1iZXIiOnsia2luZCI6NTIsIm5hbWUiOiJTUkdCIiwic3RhcnQiOnsibGluZSI6NzA2LCJjb2x1bW4iOjYzfSwiZW5kIjp7ImxpbmUiOjcwNiwiY29sdW1uIjo2N319LCJzdGFydCI6eyJsaW5lIjo3MDYsImNvbHVtbiI6NTZ9LCJlbmQiOnsibGluZSI6NzA2LCJjb2x1bW4iOjY3fX0="
+                },
+                {
+                  "name": "alpha",
+                  "type": "Boolean",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NzA2LCJjb2x1bW4iOjgzfSwiZW5kIjp7ImxpbmUiOjcwNiwiY29sdW1uIjo4OH19"
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "clearer": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Number",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "clone": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "contrast": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "color",
+                  "type": {
+                    "reference": 7
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "copy": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "target",
+                  "type": {
+                    "reference": 7
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "distance": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "color",
+                  "type": {
+                    "reference": 7
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 10
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "equals": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "color",
+                  "type": {
+                    "reference": 7
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "format": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "format",
+                  "type": "String",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3MSwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjUyLCJuYW1lIjoidGhpcyIsInN0YXJ0Ijp7ImxpbmUiOjgzNiwiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo4MzYsImNvbHVtbiI6MzB9fSwicHJvcGVydHkiOnsia2luZCI6NTIsIm5hbWUiOiJfc3BhY2UiLCJzdGFydCI6eyJsaW5lIjo4MzYsImNvbHVtbiI6MzF9LCJlbmQiOnsibGluZSI6ODM2LCJjb2x1bW4iOjM3fX0sInN0YXJ0Ijp7ImxpbmUiOjgzNiwiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo4MzYsImNvbHVtbiI6Mzd9fQ=="
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "from": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "getField": [
+            {
+              "index": 0,
+              "access": 2,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "gradient": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "endColor",
+                  "type": {
+                    "reference": 7
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "length",
+                  "type": {
+                    "reference": 9
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": "Array",
+                "parameters": [
+                  {
+                    "reference": 7
+                  }
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "greyscale": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "model",
+                  "type": "String",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo2OCwidmFsdWUiOiJCVDcwOSIsInN0YXJ0Ijp7ImxpbmUiOjg5MiwiY29sdW1uIjoyOH0sImVuZCI6eyJsaW5lIjo4OTIsImNvbHVtbiI6MzV9fQ=="
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "hex": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "isBlack": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "isTransparent": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "isWhite": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "like": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "space",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "luminance": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "negative": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "opaquer": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Number",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "readable": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "color",
+                  "type": {
+                    "reference": 7
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "tripleA",
+                  "type": "Boolean",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6OTg0LCJjb2x1bW4iOjQxfSwiZW5kIjp7ImxpbmUiOjk4NCwiY29sdW1uIjo0Nn19"
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "scheme": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "functions",
+                  "type": {
+                    "kind": "reference",
+                    "name": "Array",
+                    "parameters": [
+                      {
+                        "kind": "function",
+                        "async": false,
+                        "exhaustive": true,
+                        "min": 1,
+                        "max": 1,
+                        "parameters": [
+                          {
+                            "name": "color",
+                            "type": {
+                              "reference": 7
+                            },
+                            "min": 1,
+                            "max": 1,
+                            "default": false
+                          }
+                        ],
+                        "returns": {
+                          "reference": 7
+                        },
+                        "errors": []
+                      }
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": "Array",
+                "parameters": [
+                  {
+                    "reference": 7
+                  }
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "setField": [
+            {
+              "index": 0,
+              "access": 2,
+              "sealed": false,
+              "async": false,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "name",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "value",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Number",
+                      "String"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "shade": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "percentage",
+                  "type": {
+                    "reference": 10
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "space": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 8
+              },
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "space",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "tint": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "percentage",
+                  "type": {
+                    "reference": 10
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "tone": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "percentage",
+                  "type": {
+                    "reference": 10
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 7
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "red": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "green": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "blue": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {
+          "from": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "union",
+                "types": [
+                  {
+                    "reference": 7
+                  },
+                  "Boolean"
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "greyscale": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "union",
+                "types": [
+                  {
+                    "reference": 7
+                  },
+                  "Boolean"
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "hex": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "union",
+                "types": [
+                  "String",
+                  "Boolean"
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "negative": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "args",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "union",
+                "types": [
+                  {
+                    "reference": 7
+                  },
+                  "Boolean"
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "registerFormatter": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "format",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "formatter",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Void",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "registerParser": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "format",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "parser",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Void",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "registerSpace": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "space",
+                  "type": "Dictionary",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "sequences": [
+          3,
+          -1,
+          -1
+        ]
+      },
+      {
+        "kind": "enum",
+        "type": "string",
+        "sequenceIndex": -1,
+        "exhaustive": true,
+        "variables": [
+          "SRGB",
+          "RGB"
+        ],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      },
+      {
+        "kind": "alias",
+        "of": "Number"
+      },
+      {
+        "kind": "alias",
+        "of": "Number"
+      }
+    ],
+    "macros": [
+      "Color.registerSpace",
+      [
+        "eyJwYXJhbWV0ZXJzIjpbeyJraW5kIjo4MywibW9kaWZpZXJzIjpbeyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1MDYsImNvbHVtbiI6MjJ9LCJlbmQiOnsibGluZSI6NTA2LCJjb2x1bW4iOjIzfX1dLCJzdGFydCI6eyJsaW5lIjo1MDYsImNvbHVtbiI6MjJ9LCJlbmQiOnsibGluZSI6NTA2LCJjb2x1bW4iOjQwfSwibmFtZSI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlIiwic3RhcnQiOnsibGluZSI6NTA2LCJjb2x1bW4iOjIzfSwiZW5kIjp7ImxpbmUiOjUwNiwiY29sdW1uIjoyOH19LCJ0eXBlIjp7ImtpbmQiOjExNiwibW9kaWZpZXJzIjpbXSwidHlwZU5hbWUiOnsia2luZCI6NTIsIm5hbWUiOiJEaWN0aW9uYXJ5Iiwic3RhcnQiOnsibGluZSI6NTA2LCJjb2x1bW4iOjMwfSwiZW5kIjp7ImxpbmUiOjUwNiwiY29sdW1uIjo0MH19LCJzdGFydCI6eyJsaW5lIjo1MDYsImNvbHVtbiI6MzB9LCJlbmQiOnsibGluZSI6NTA2LCJjb2x1bW4iOjQwfX19XSwiYm9keSI6eyJraW5kIjoxMiwiYXR0cmlidXRlcyI6W10sInN0YXRlbWVudHMiOlt7ImtpbmQiOjEyMiwibW9kaWZpZXJzIjpbeyJraW5kIjoxMywic3RhcnQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjN9LCJlbmQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjh9fV0sImF0dHJpYnV0ZXMiOltdLCJ2YXJpYWJsZXMiOlt7ImtpbmQiOjEyMywibW9kaWZpZXJzIjpbXSwibmFtZSI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlcyIsInN0YXJ0Ijp7ImxpbmUiOjUwNywiY29sdW1uIjo5fSwiZW5kIjp7ImxpbmUiOjUwNywiY29sdW1uIjoxNX19LCJzdGFydCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6OX0sImVuZCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6MjJ9LCJ0eXBlIjp7ImtpbmQiOjExNiwibW9kaWZpZXJzIjpbXSwidHlwZU5hbWUiOnsia2luZCI6NTIsIm5hbWUiOiJBcnJheSIsInN0YXJ0Ijp7ImxpbmUiOjUwNywiY29sdW1uIjoxN30sImVuZCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6MjJ9fSwic3RhcnQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjE3fSwiZW5kIjp7ImxpbmUiOjUwNywiY29sdW1uIjoyMn19fV0sInN0YXJ0Ijp7ImxpbmUiOjUwNywiY29sdW1uIjozfSwiZW5kIjp7ImxpbmUiOjUwNywiY29sdW1uIjo1MX0sImluaXQiOnsia2luZCI6NCwidmFsdWVzIjpbeyJraW5kIjoxNCwibW9kaWZpZXJzIjpbXSwic2NvcGUiOnsia2luZCI6M30sImNhbGxlZSI6eyJraW5kIjo3MSwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjcxLCJtb2RpZmllcnMiOltdLCJvYmplY3QiOnsia2luZCI6NTIsIm5hbWUiOiJzcGFjZSIsInN0YXJ0Ijp7ImxpbmUiOjUwNywiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6MzF9fSwicHJvcGVydHkiOnsia2luZCI6NTIsIm5hbWUiOiJuYW1lIiwic3RhcnQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjMyfSwiZW5kIjp7ImxpbmUiOjUwNywiY29sdW1uIjozNn19LCJzdGFydCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6MjZ9LCJlbmQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjM2fX0sInByb3BlcnR5Ijp7ImtpbmQiOjUyLCJuYW1lIjoidG9VcHBlckNhc2UiLCJzdGFydCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6Mzd9LCJlbmQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjQ4fX0sInN0YXJ0Ijp7ImxpbmUiOjUwNywiY29sdW1uIjoyNn0sImVuZCI6eyJsaW5lIjo1MDcsImNvbHVtbiI6NDh9fSwiYXJndW1lbnRzIjpbXSwic3RhcnQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjI2fSwiZW5kIjp7ImxpbmUiOjUwNywiY29sdW1uIjo1MH19XSwic3RhcnQiOnsibGluZSI6NTA3LCJjb2x1bW4iOjI1fSwiZW5kIjp7ImxpbmUiOjUwNywiY29sdW1uIjo1MX19fSx7ImtpbmQiOjU0LCJhdHRyaWJ1dGVzIjpbXSwiY29uZGl0aW9uIjp7ImtpbmQiOjExNywib3BlcmF0b3IiOnsia2luZCI6NCwic3RhcnQiOnsibGluZSI6NTA5LCJjb2x1bW4iOjE3fSwiZW5kIjp7ImxpbmUiOjUwOSwiY29sdW1uIjoxOH19LCJhcmd1bWVudCI6eyJraW5kIjo3MSwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjUyLCJuYW1lIjoic3BhY2UiLCJzdGFydCI6eyJsaW5lIjo1MDksImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1MDksImNvbHVtbiI6MTF9fSwicHJvcGVydHkiOnsia2luZCI6NTIsIm5hbWUiOiJhbGlhcyIsInN0YXJ0Ijp7ImxpbmUiOjUwOSwiY29sdW1uIjoxMn0sImVuZCI6eyJsaW5lIjo1MDksImNvbHVtbiI6MTd9fSwic3RhcnQiOnsibGluZSI6NTA5LCJjb2x1bW4iOjZ9LCJlbmQiOnsibGluZSI6NTA5LCJjb2x1bW4iOjE3fX0sInN0YXJ0Ijp7ImxpbmUiOjUwOSwiY29sdW1uIjo2fSwiZW5kIjp7ImxpbmUiOjUwOSwiY29sdW1uIjoxOH19LCJ3aGVuVHJ1ZSI6eyJraW5kIjoxMiwiYXR0cmlidXRlcyI6W10sInN0YXRlbWVudHMiOlt7ImtpbmQiOjQ2LCJhdHRyaWJ1dGVzIjpbXSwibW9kaWZpZXJzIjpbeyJraW5kIjo3LCJzdGFydCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6OH0sImVuZCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6MTN9fSx7ImtpbmQiOjEzLCJzdGFydCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6OH0sImVuZCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6MTN9fV0sImV4cHJlc3Npb24iOnsia2luZCI6NzEsIm1vZGlmaWVycyI6W10sIm9iamVjdCI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlIiwic3RhcnQiOnsibGluZSI6NTEwLCJjb2x1bW4iOjIyfSwiZW5kIjp7ImxpbmUiOjUxMCwiY29sdW1uIjoyN319LCJwcm9wZXJ0eSI6eyJraW5kIjo1MiwibmFtZSI6ImFsaWFzIiwic3RhcnQiOnsibGluZSI6NTEwLCJjb2x1bW4iOjI4fSwiZW5kIjp7ImxpbmUiOjUxMCwiY29sdW1uIjozM319LCJzdGFydCI6eyJsaW5lIjo1MTAsImNvbHVtbiI6MjJ9LCJlbmQiOnsibGluZSI6NTEwLCJjb2x1bW4iOjMzfX0sInN0YXJ0Ijp7ImxpbmUiOjUxMCwiY29sdW1uIjo0fSwiZW5kIjp7ImxpbmUiOjUxMiwiY29sdW1uIjo1fSwidmFsdWUiOnsia2luZCI6NTIsIm5hbWUiOiJuYW1lIiwic3RhcnQiOnsibGluZSI6NTEwLCJjb2x1bW4iOjE0fSwiZW5kIjp7ImxpbmUiOjUxMCwiY29sdW1uIjoxOH19LCJib2R5Ijp7ImtpbmQiOjEyLCJhdHRyaWJ1dGVzIjpbXSwic3RhdGVtZW50cyI6W3sia2luZCI6MTQsIm1vZGlmaWVycyI6W10sInNjb3BlIjp7ImtpbmQiOjN9LCJjYWxsZWUiOnsia2luZCI6NzEsIm1vZGlmaWVycyI6W10sIm9iamVjdCI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlcyIsInN0YXJ0Ijp7ImxpbmUiOjUxMSwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUxMSwiY29sdW1uIjoxMX19LCJwcm9wZXJ0eSI6eyJraW5kIjo1MiwibmFtZSI6InB1c2giLCJzdGFydCI6eyJsaW5lIjo1MTEsImNvbHVtbiI6MTJ9LCJlbmQiOnsibGluZSI6NTExLCJjb2x1bW4iOjE2fX0sInN0YXJ0Ijp7ImxpbmUiOjUxMSwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUxMSwiY29sdW1uIjoxNn19LCJhcmd1bWVudHMiOlt7ImtpbmQiOjE0LCJtb2RpZmllcnMiOltdLCJzY29wZSI6eyJraW5kIjozfSwiY2FsbGVlIjp7ImtpbmQiOjcxLCJtb2RpZmllcnMiOltdLCJvYmplY3QiOnsia2luZCI6NTIsIm5hbWUiOiJuYW1lIiwic3RhcnQiOnsibGluZSI6NTExLCJjb2x1bW4iOjE3fSwiZW5kIjp7ImxpbmUiOjUxMSwiY29sdW1uIjoyMX19LCJwcm9wZXJ0eSI6eyJraW5kIjo1MiwibmFtZSI6InRvVXBwZXJDYXNlIiwic3RhcnQiOnsibGluZSI6NTExLCJjb2x1bW4iOjIyfSwiZW5kIjp7ImxpbmUiOjUxMSwiY29sdW1uIjozM319LCJzdGFydCI6eyJsaW5lIjo1MTEsImNvbHVtbiI6MTd9LCJlbmQiOnsibGluZSI6NTExLCJjb2x1bW4iOjMzfX0sImFyZ3VtZW50cyI6W10sInN0YXJ0Ijp7ImxpbmUiOjUxMSwiY29sdW1uIjoxN30sImVuZCI6eyJsaW5lIjo1MTEsImNvbHVtbiI6MzV9fV0sInN0YXJ0Ijp7ImxpbmUiOjUxMSwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUxMSwiY29sdW1uIjozNn0sImF0dHJpYnV0ZXMiOltdfV0sInN0YXJ0Ijp7ImxpbmUiOjUxMCwiY29sdW1uIjozNH0sImVuZCI6eyJsaW5lIjo1MTIsImNvbHVtbiI6NX19fV0sInN0YXJ0Ijp7ImxpbmUiOjUwOSwiY29sdW1uIjoxOX0sImVuZCI6eyJsaW5lIjo1MTMsImNvbHVtbiI6NH19LCJzdGFydCI6eyJsaW5lIjo1MDksImNvbHVtbiI6M30sImVuZCI6eyJsaW5lIjo1MTMsImNvbHVtbiI6NH19LHsia2luZCI6NzAsImF0dHJpYnV0ZXMiOltdLCJlbGVtZW50cyI6W3sia2luZCI6MiwidmFsdWUiOiJpbXBsIFNwYWNlIHsiLCJzdGFydCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6NH0sImVuZCI6eyJsaW5lIjo1MTYsImNvbHVtbiI6MTZ9fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjUxNiwiY29sdW1uIjoxNn0sImVuZCI6eyJsaW5lIjo1MTcsImNvbHVtbiI6MX19LHsia2luZCI6MSwiZXhwcmVzc2lvbiI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlcyIsInN0YXJ0Ijp7ImxpbmUiOjUxNywiY29sdW1uIjo4fSwiZW5kIjp7ImxpbmUiOjUxNywiY29sdW1uIjoxNH19LCJzdGFydCI6eyJsaW5lIjo1MTcsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1MTcsImNvbHVtbiI6MTV9LCJyZWlmaWNhdGlvbiI6eyJraW5kIjo0LCJzdGFydCI6eyJsaW5lIjo1MTcsImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1MTcsImNvbHVtbiI6N319fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjUxNywiY29sdW1uIjoxNX0sImVuZCI6eyJsaW5lIjo1MTgsImNvbHVtbiI6MX19LHsia2luZCI6MiwidmFsdWUiOiJ9Iiwic3RhcnQiOnsibGluZSI6NTE4LCJjb2x1bW4iOjR9LCJlbmQiOnsibGluZSI6NTE4LCJjb2x1bW4iOjV9fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjUxOCwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUxOSwiY29sdW1uIjoxfX1dLCJzdGFydCI6eyJsaW5lIjo1MTUsImNvbHVtbiI6M30sImVuZCI6eyJsaW5lIjo1MTksImNvbHVtbiI6NH19LHsia2luZCI6NTQsImF0dHJpYnV0ZXMiOltdLCJjb25kaXRpb24iOnsia2luZCI6MTE3LCJvcGVyYXRvciI6eyJraW5kIjo0LCJzdGFydCI6eyJsaW5lIjo1MjEsImNvbHVtbiI6MjJ9LCJlbmQiOnsibGluZSI6NTIxLCJjb2x1bW4iOjIzfX0sImFyZ3VtZW50Ijp7ImtpbmQiOjcxLCJtb2RpZmllcnMiOltdLCJvYmplY3QiOnsia2luZCI6NTIsIm5hbWUiOiJzcGFjZSIsInN0YXJ0Ijp7ImxpbmUiOjUyMSwiY29sdW1uIjo2fSwiZW5kIjp7ImxpbmUiOjUyMSwiY29sdW1uIjoxMX19LCJwcm9wZXJ0eSI6eyJraW5kIjo1MiwibmFtZSI6ImNvbXBvbmVudHMiLCJzdGFydCI6eyJsaW5lIjo1MjEsImNvbHVtbiI6MTJ9LCJlbmQiOnsibGluZSI6NTIxLCJjb2x1bW4iOjIyfX0sInN0YXJ0Ijp7ImxpbmUiOjUyMSwiY29sdW1uIjo2fSwiZW5kIjp7ImxpbmUiOjUyMSwiY29sdW1uIjoyMn19LCJzdGFydCI6eyJsaW5lIjo1MjEsImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1MjEsImNvbHVtbiI6MjN9fSwid2hlblRydWUiOnsia2luZCI6MTIsImF0dHJpYnV0ZXMiOltdLCJzdGF0ZW1lbnRzIjpbeyJraW5kIjoxMjIsIm1vZGlmaWVycyI6W3sia2luZCI6MTMsInN0YXJ0Ijp7ImxpbmUiOjUyMiwiY29sdW1uIjo0fSwiZW5kIjp7ImxpbmUiOjUyMiwiY29sdW1uIjo5fX1dLCJhdHRyaWJ1dGVzIjpbXSwidmFyaWFibGVzIjpbeyJraW5kIjoxMjMsIm1vZGlmaWVycyI6W10sIm5hbWUiOnsia2luZCI6NTIsIm5hbWUiOiJmaWVsZHMiLCJzdGFydCI6eyJsaW5lIjo1MjIsImNvbHVtbiI6MTB9LCJlbmQiOnsibGluZSI6NTIyLCJjb2x1bW4iOjE2fX0sInN0YXJ0Ijp7ImxpbmUiOjUyMiwiY29sdW1uIjoxMH0sImVuZCI6eyJsaW5lIjo1MjIsImNvbHVtbiI6MjN9LCJ0eXBlIjp7ImtpbmQiOjExNiwibW9kaWZpZXJzIjpbXSwidHlwZU5hbWUiOnsia2luZCI6NTIsIm5hbWUiOiJBcnJheSIsInN0YXJ0Ijp7ImxpbmUiOjUyMiwiY29sdW1uIjoxOH0sImVuZCI6eyJsaW5lIjo1MjIsImNvbHVtbiI6MjN9fSwic3RhcnQiOnsibGluZSI6NTIyLCJjb2x1bW4iOjE4fSwiZW5kIjp7ImxpbmUiOjUyMiwiY29sdW1uIjoyM319fV0sInN0YXJ0Ijp7ImxpbmUiOjUyMiwiY29sdW1uIjo0fSwiZW5kIjp7ImxpbmUiOjUyMiwiY29sdW1uIjoyOH0sImluaXQiOnsia2luZCI6NCwidmFsdWVzIjpbXSwic3RhcnQiOnsibGluZSI6NTIyLCJjb2x1bW4iOjI2fSwiZW5kIjp7ImxpbmUiOjUyMiwiY29sdW1uIjoyOH19fSx7ImtpbmQiOjEyMiwibW9kaWZpZXJzIjpbeyJraW5kIjoxMywic3RhcnQiOnsibGluZSI6NTIzLCJjb2x1bW4iOjR9LCJlbmQiOnsibGluZSI6NTIzLCJjb2x1bW4iOjl9fV0sImF0dHJpYnV0ZXMiOltdLCJ2YXJpYWJsZXMiOlt7ImtpbmQiOjEyMywibW9kaWZpZXJzIjpbXSwibmFtZSI6eyJraW5kIjo1MiwibmFtZSI6Im1ldGhvZHMiLCJzdGFydCI6eyJsaW5lIjo1MjMsImNvbHVtbiI6MTB9LCJlbmQiOnsibGluZSI6NTIzLCJjb2x1bW4iOjE3fX0sInN0YXJ0Ijp7ImxpbmUiOjUyMywiY29sdW1uIjoxMH0sImVuZCI6eyJsaW5lIjo1MjMsImNvbHVtbiI6MjR9LCJ0eXBlIjp7ImtpbmQiOjExNiwibW9kaWZpZXJzIjpbXSwidHlwZU5hbWUiOnsia2luZCI6NTIsIm5hbWUiOiJBcnJheSIsInN0YXJ0Ijp7ImxpbmUiOjUyMywiY29sdW1uIjoxOX0sImVuZCI6eyJsaW5lIjo1MjMsImNvbHVtbiI6MjR9fSwic3RhcnQiOnsibGluZSI6NTIzLCJjb2x1bW4iOjE5fSwiZW5kIjp7ImxpbmUiOjUyMywiY29sdW1uIjoyNH19fV0sInN0YXJ0Ijp7ImxpbmUiOjUyMywiY29sdW1uIjo0fSwiZW5kIjp7ImxpbmUiOjUyMywiY29sdW1uIjoyOX0sImluaXQiOnsia2luZCI6NCwidmFsdWVzIjpbXSwic3RhcnQiOnsibGluZSI6NTIzLCJjb2x1bW4iOjI3fSwiZW5kIjp7ImxpbmUiOjUyMywiY29sdW1uIjoyOX19fSx7ImtpbmQiOjEyMiwibW9kaWZpZXJzIjpbXSwiYXR0cmlidXRlcyI6W10sInZhcmlhYmxlcyI6W3sia2luZCI6MTIzLCJtb2RpZmllcnMiOltdLCJuYW1lIjp7ImtpbmQiOjUyLCJuYW1lIjoiZmllbGQiLCJzdGFydCI6eyJsaW5lIjo1MjUsImNvbHVtbiI6OH0sImVuZCI6eyJsaW5lIjo1MjUsImNvbHVtbiI6MTN9fSwic3RhcnQiOnsibGluZSI6NTI1LCJjb2x1bW4iOjh9LCJlbmQiOnsibGluZSI6NTI1LCJjb2x1bW4iOjEzfX1dLCJzdGFydCI6eyJsaW5lIjo1MjUsImNvbHVtbiI6NH0sImVuZCI6eyJsaW5lIjo1MjUsImNvbHVtbiI6MTN9fSx7ImtpbmQiOjQ3LCJhdHRyaWJ1dGVzIjpbXSwibW9kaWZpZXJzIjpbeyJraW5kIjo3LCJzdGFydCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6OH0sImVuZCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6MTN9fSx7ImtpbmQiOjEzLCJzdGFydCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6OH0sImVuZCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6MTN9fV0sImV4cHJlc3Npb24iOnsia2luZCI6NzEsIm1vZGlmaWVycyI6W10sIm9iamVjdCI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlIiwic3RhcnQiOnsibGluZSI6NTI2LCJjb2x1bW4iOjMzfSwiZW5kIjp7ImxpbmUiOjUyNiwiY29sdW1uIjozOH19LCJwcm9wZXJ0eSI6eyJraW5kIjo1MiwibmFtZSI6ImNvbXBvbmVudHMiLCJzdGFydCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6Mzl9LCJlbmQiOnsibGluZSI6NTI2LCJjb2x1bW4iOjQ5fX0sInN0YXJ0Ijp7ImxpbmUiOjUyNiwiY29sdW1uIjozM30sImVuZCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6NDl9fSwic3RhcnQiOnsibGluZSI6NTI2LCJjb2x1bW4iOjR9LCJlbmQiOnsibGluZSI6NTM1LCJjb2x1bW4iOjV9LCJ2YWx1ZSI6eyJraW5kIjo1MiwibmFtZSI6ImNvbXBvbmVudCIsInN0YXJ0Ijp7ImxpbmUiOjUyNiwiY29sdW1uIjoxNH0sImVuZCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6MjN9fSwia2V5Ijp7ImtpbmQiOjUyLCJuYW1lIjoibmFtZSIsInN0YXJ0Ijp7ImxpbmUiOjUyNiwiY29sdW1uIjoyNX0sImVuZCI6eyJsaW5lIjo1MjYsImNvbHVtbiI6Mjl9fSwiYm9keSI6eyJraW5kIjoxMiwiYXR0cmlidXRlcyI6W10sInN0YXRlbWVudHMiOlt7ImtpbmQiOjEwLCJvcGVyYXRvciI6eyJraW5kIjozLCJhc3NpZ25tZW50Ijo4LCJzdGFydCI6eyJsaW5lIjo1MjcsImNvbHVtbiI6MTF9LCJlbmQiOnsibGluZSI6NTI3LCJjb2x1bW4iOjEyfX0sImxlZnQiOnsia2luZCI6NTIsIm5hbWUiOiJmaWVsZCIsInN0YXJ0Ijp7ImxpbmUiOjUyNywiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUyNywiY29sdW1uIjoxMH19LCJyaWdodCI6eyJraW5kIjoxMDcsImVsZW1lbnRzIjpbeyJraW5kIjo2OCwidmFsdWUiOiJfIiwic3RhcnQiOnsibGluZSI6NTI3LCJjb2x1bW4iOjE0fSwiZW5kIjp7ImxpbmUiOjUyNywiY29sdW1uIjoxNX19LHsia2luZCI6NTIsIm5hbWUiOiJuYW1lIiwic3RhcnQiOnsibGluZSI6NTI3LCJjb2x1bW4iOjE3fSwiZW5kIjp7ImxpbmUiOjUyNywiY29sdW1uIjoyMX19XSwic3RhcnQiOnsibGluZSI6NTI3LCJjb2x1bW4iOjEzfSwiZW5kIjp7ImxpbmUiOjUyNywiY29sdW1uIjoyM319LCJzdGFydCI6eyJsaW5lIjo1MjcsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1MjcsImNvbHVtbiI6MjN9LCJhdHRyaWJ1dGVzIjpbXX0seyJraW5kIjoxNCwibW9kaWZpZXJzIjpbXSwic2NvcGUiOnsia2luZCI6M30sImNhbGxlZSI6eyJraW5kIjo3MSwibW9kaWZpZXJzIjpbXSwib2JqZWN0Ijp7ImtpbmQiOjUyLCJuYW1lIjoiZmllbGRzIiwic3RhcnQiOnsibGluZSI6NTI5LCJjb2x1bW4iOjV9LCJlbmQiOnsibGluZSI6NTI5LCJjb2x1bW4iOjExfX0sInByb3BlcnR5Ijp7ImtpbmQiOjUyLCJuYW1lIjoicHVzaCIsInN0YXJ0Ijp7ImxpbmUiOjUyOSwiY29sdW1uIjoxMn0sImVuZCI6eyJsaW5lIjo1MjksImNvbHVtbiI6MTZ9fSwic3RhcnQiOnsibGluZSI6NTI5LCJjb2x1bW4iOjV9LCJlbmQiOnsibGluZSI6NTI5LCJjb2x1bW4iOjE2fX0sImFyZ3VtZW50cyI6W3sia2luZCI6NzAsImF0dHJpYnV0ZXMiOltdLCJlbGVtZW50cyI6W3sia2luZCI6MiwidmFsdWUiOiJwcml2YXRlICIsInN0YXJ0Ijp7ImxpbmUiOjUyOSwiY29sdW1uIjoyM30sImVuZCI6eyJsaW5lIjo1MjksImNvbHVtbiI6MzF9fSx7ImtpbmQiOjEsImV4cHJlc3Npb24iOnsia2luZCI6NTIsIm5hbWUiOiJmaWVsZCIsInN0YXJ0Ijp7ImxpbmUiOjUyOSwiY29sdW1uIjozNH0sImVuZCI6eyJsaW5lIjo1MjksImNvbHVtbiI6Mzl9fSwic3RhcnQiOnsibGluZSI6NTI5LCJjb2x1bW4iOjMxfSwiZW5kIjp7ImxpbmUiOjUyOSwiY29sdW1uIjo0MH0sInJlaWZpY2F0aW9uIjp7ImtpbmQiOjUsInN0YXJ0Ijp7ImxpbmUiOjUyOSwiY29sdW1uIjozMn0sImVuZCI6eyJsaW5lIjo1MjksImNvbHVtbiI6MzN9fX0seyJraW5kIjoyLCJ2YWx1ZSI6IjogTnVtYmVyID0gMCIsInN0YXJ0Ijp7ImxpbmUiOjUyOSwiY29sdW1uIjo0MH0sImVuZCI6eyJsaW5lIjo1MjksImNvbHVtbiI6NTJ9fV0sInN0YXJ0Ijp7ImxpbmUiOjUyOSwiY29sdW1uIjoxN30sImVuZCI6eyJsaW5lIjo1MjksImNvbHVtbiI6NTJ9fV0sInN0YXJ0Ijp7ImxpbmUiOjUyOSwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUyOSwiY29sdW1uIjo1M30sImF0dHJpYnV0ZXMiOltdfSx7ImtpbmQiOjE0LCJtb2RpZmllcnMiOltdLCJzY29wZSI6eyJraW5kIjozfSwiY2FsbGVlIjp7ImtpbmQiOjcxLCJtb2RpZmllcnMiOltdLCJvYmplY3QiOnsia2luZCI6NTIsIm5hbWUiOiJtZXRob2RzIiwic3RhcnQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjV9LCJlbmQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjEyfX0sInByb3BlcnR5Ijp7ImtpbmQiOjUyLCJuYW1lIjoicHVzaCIsInN0YXJ0Ijp7ImxpbmUiOjUzMSwiY29sdW1uIjoxM30sImVuZCI6eyJsaW5lIjo1MzEsImNvbHVtbiI6MTd9fSwic3RhcnQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjV9LCJlbmQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjE3fX0sImFyZ3VtZW50cyI6W3sia2luZCI6NzAsImF0dHJpYnV0ZXMiOltdLCJlbGVtZW50cyI6W3sia2luZCI6MiwidmFsdWUiOiJvdmVycmlkZSAiLCJzdGFydCI6eyJsaW5lIjo1MzIsImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1MzIsImNvbHVtbiI6MTV9fSx7ImtpbmQiOjEsImV4cHJlc3Npb24iOnsia2luZCI6NTIsIm5hbWUiOiJuYW1lIiwic3RhcnQiOnsibGluZSI6NTMyLCJjb2x1bW4iOjE4fSwiZW5kIjp7ImxpbmUiOjUzMiwiY29sdW1uIjoyMn19LCJzdGFydCI6eyJsaW5lIjo1MzIsImNvbHVtbiI6MTV9LCJlbmQiOnsibGluZSI6NTMyLCJjb2x1bW4iOjIzfSwicmVpZmljYXRpb24iOnsia2luZCI6NSwic3RhcnQiOnsibGluZSI6NTMyLCJjb2x1bW4iOjE2fSwiZW5kIjp7ImxpbmUiOjUzMiwiY29sdW1uIjoxN319fSx7ImtpbmQiOjIsInZhbHVlIjoiKCkgPT4gdGhpcy5nZXRGaWVsZCgiLCJzdGFydCI6eyJsaW5lIjo1MzIsImNvbHVtbiI6MjN9LCJlbmQiOnsibGluZSI6NTMyLCJjb2x1bW4iOjQzfX0seyJraW5kIjoxLCJleHByZXNzaW9uIjp7ImtpbmQiOjUyLCJuYW1lIjoibmFtZSIsInN0YXJ0Ijp7ImxpbmUiOjUzMiwiY29sdW1uIjo0NX0sImVuZCI6eyJsaW5lIjo1MzIsImNvbHVtbiI6NDl9fSwic3RhcnQiOnsibGluZSI6NTMyLCJjb2x1bW4iOjQzfSwiZW5kIjp7ImxpbmUiOjUzMiwiY29sdW1uIjo1MH0sInJlaWZpY2F0aW9uIjp7ImtpbmQiOjJ9fSx7ImtpbmQiOjIsInZhbHVlIjoiKSIsInN0YXJ0Ijp7ImxpbmUiOjUzMiwiY29sdW1uIjo1MH0sImVuZCI6eyJsaW5lIjo1MzIsImNvbHVtbiI6NTF9fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjUzMiwiY29sdW1uIjo1MX0sImVuZCI6eyJsaW5lIjo1MzMsImNvbHVtbiI6MX19LHsia2luZCI6MiwidmFsdWUiOiJvdmVycmlkZSAiLCJzdGFydCI6eyJsaW5lIjo1MzMsImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1MzMsImNvbHVtbiI6MTV9fSx7ImtpbmQiOjEsImV4cHJlc3Npb24iOnsia2luZCI6NTIsIm5hbWUiOiJuYW1lIiwic3RhcnQiOnsibGluZSI6NTMzLCJjb2x1bW4iOjE4fSwiZW5kIjp7ImxpbmUiOjUzMywiY29sdW1uIjoyMn19LCJzdGFydCI6eyJsaW5lIjo1MzMsImNvbHVtbiI6MTV9LCJlbmQiOnsibGluZSI6NTMzLCJjb2x1bW4iOjIzfSwicmVpZmljYXRpb24iOnsia2luZCI6NSwic3RhcnQiOnsibGluZSI6NTMzLCJjb2x1bW4iOjE2fSwiZW5kIjp7ImxpbmUiOjUzMywiY29sdW1uIjoxN319fSx7ImtpbmQiOjIsInZhbHVlIjoiKHZhbHVlKSA9PiB0aGlzLnNldEZpZWxkKCIsInN0YXJ0Ijp7ImxpbmUiOjUzMywiY29sdW1uIjoyM30sImVuZCI6eyJsaW5lIjo1MzMsImNvbHVtbiI6NDh9fSx7ImtpbmQiOjEsImV4cHJlc3Npb24iOnsia2luZCI6NTIsIm5hbWUiOiJuYW1lIiwic3RhcnQiOnsibGluZSI6NTMzLCJjb2x1bW4iOjUwfSwiZW5kIjp7ImxpbmUiOjUzMywiY29sdW1uIjo1NH19LCJzdGFydCI6eyJsaW5lIjo1MzMsImNvbHVtbiI6NDh9LCJlbmQiOnsibGluZSI6NTMzLCJjb2x1bW4iOjU1fSwicmVpZmljYXRpb24iOnsia2luZCI6Mn19LHsia2luZCI6MiwidmFsdWUiOiIsIHZhbHVlKSIsInN0YXJ0Ijp7ImxpbmUiOjUzMywiY29sdW1uIjo1NX0sImVuZCI6eyJsaW5lIjo1MzMsImNvbHVtbiI6NjN9fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjUzMywiY29sdW1uIjo2M30sImVuZCI6eyJsaW5lIjo1MzQsImNvbHVtbiI6MX19XSwic3RhcnQiOnsibGluZSI6NTMxLCJjb2x1bW4iOjE4fSwiZW5kIjp7ImxpbmUiOjUzNCwiY29sdW1uIjo2fX1dLCJzdGFydCI6eyJsaW5lIjo1MzEsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1MzQsImNvbHVtbiI6N30sImF0dHJpYnV0ZXMiOltdfV0sInN0YXJ0Ijp7ImxpbmUiOjUyNiwiY29sdW1uIjo1MH0sImVuZCI6eyJsaW5lIjo1MzUsImNvbHVtbiI6NX19fSx7ImtpbmQiOjcwLCJhdHRyaWJ1dGVzIjpbXSwiZWxlbWVudHMiOlt7ImtpbmQiOjIsInZhbHVlIjoiIyFbcnVsZXMoZG9udC1hc3NlcnQtb3ZlcnJpZGUpXSIsInN0YXJ0Ijp7ImxpbmUiOjUzOCwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjUzOCwiY29sdW1uIjozNn19LHsia2luZCI6Mywic3RhcnQiOnsibGluZSI6NTM4LCJjb2x1bW4iOjM2fSwiZW5kIjp7ImxpbmUiOjUzOSwiY29sdW1uIjoxfX0seyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1MzksImNvbHVtbiI6MX0sImVuZCI6eyJsaW5lIjo1NDAsImNvbHVtbiI6MX19LHsia2luZCI6MiwidmFsdWUiOiJDb2xvci5yZWdpc3RlclNwYWNlKCIsInN0YXJ0Ijp7ImxpbmUiOjU0MCwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjU0MCwiY29sdW1uIjoyNX19LHsia2luZCI6MSwiZXhwcmVzc2lvbiI6eyJraW5kIjo1MiwibmFtZSI6InNwYWNlIiwic3RhcnQiOnsibGluZSI6NTQwLCJjb2x1bW4iOjI3fSwiZW5kIjp7ImxpbmUiOjU0MCwiY29sdW1uIjozMn19LCJzdGFydCI6eyJsaW5lIjo1NDAsImNvbHVtbiI6MjV9LCJlbmQiOnsibGluZSI6NTQwLCJjb2x1bW4iOjMzfSwicmVpZmljYXRpb24iOnsia2luZCI6Mn19LHsia2luZCI6MiwidmFsdWUiOiIpIiwic3RhcnQiOnsibGluZSI6NTQwLCJjb2x1bW4iOjMzfSwiZW5kIjp7ImxpbmUiOjU0MCwiY29sdW1uIjozNH19LHsia2luZCI6Mywic3RhcnQiOnsibGluZSI6NTQwLCJjb2x1bW4iOjM0fSwiZW5kIjp7ImxpbmUiOjU0MSwiY29sdW1uIjoxfX0seyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1NDEsImNvbHVtbiI6MX0sImVuZCI6eyJsaW5lIjo1NDIsImNvbHVtbiI6MX19LHsia2luZCI6MiwidmFsdWUiOiJpbXBsIENvbG9yIHsiLCJzdGFydCI6eyJsaW5lIjo1NDIsImNvbHVtbiI6NX0sImVuZCI6eyJsaW5lIjo1NDIsImNvbHVtbiI6MTd9fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjU0MiwiY29sdW1uIjoxN30sImVuZCI6eyJsaW5lIjo1NDMsImNvbHVtbiI6MX19LHsia2luZCI6MSwiZXhwcmVzc2lvbiI6eyJraW5kIjo1MiwibmFtZSI6ImZpZWxkcyIsInN0YXJ0Ijp7ImxpbmUiOjU0MywiY29sdW1uIjo5fSwiZW5kIjp7ImxpbmUiOjU0MywiY29sdW1uIjoxNX19LCJzdGFydCI6eyJsaW5lIjo1NDMsImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1NDMsImNvbHVtbiI6MTZ9LCJyZWlmaWNhdGlvbiI6eyJraW5kIjo0LCJzdGFydCI6eyJsaW5lIjo1NDMsImNvbHVtbiI6N30sImVuZCI6eyJsaW5lIjo1NDMsImNvbHVtbiI6OH19fSx7ImtpbmQiOjMsInN0YXJ0Ijp7ImxpbmUiOjU0MywiY29sdW1uIjoxNn0sImVuZCI6eyJsaW5lIjo1NDQsImNvbHVtbiI6MX19LHsia2luZCI6MSwiZXhwcmVzc2lvbiI6eyJraW5kIjo1MiwibmFtZSI6Im1ldGhvZHMiLCJzdGFydCI6eyJsaW5lIjo1NDQsImNvbHVtbiI6OX0sImVuZCI6eyJsaW5lIjo1NDQsImNvbHVtbiI6MTZ9fSwic3RhcnQiOnsibGluZSI6NTQ0LCJjb2x1bW4iOjZ9LCJlbmQiOnsibGluZSI6NTQ0LCJjb2x1bW4iOjE3fSwicmVpZmljYXRpb24iOnsia2luZCI6NCwic3RhcnQiOnsibGluZSI6NTQ0LCJjb2x1bW4iOjd9LCJlbmQiOnsibGluZSI6NTQ0LCJjb2x1bW4iOjh9fX0seyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1NDQsImNvbHVtbiI6MTd9LCJlbmQiOnsibGluZSI6NTQ1LCJjb2x1bW4iOjF9fSx7ImtpbmQiOjIsInZhbHVlIjoifSIsInN0YXJ0Ijp7ImxpbmUiOjU0NSwiY29sdW1uIjo1fSwiZW5kIjp7ImxpbmUiOjU0NSwiY29sdW1uIjo2fX0seyJraW5kIjozLCJzdGFydCI6eyJsaW5lIjo1NDUsImNvbHVtbiI6Nn0sImVuZCI6eyJsaW5lIjo1NDYsImNvbHVtbiI6MX19XSwic3RhcnQiOnsibGluZSI6NTM3LCJjb2x1bW4iOjR9LCJlbmQiOnsibGluZSI6NTQ2LCJjb2x1bW4iOjV9fV0sInN0YXJ0Ijp7ImxpbmUiOjUyMSwiY29sdW1uIjoyNH0sImVuZCI6eyJsaW5lIjo1NDcsImNvbHVtbiI6NH19LCJzdGFydCI6eyJsaW5lIjo1MjEsImNvbHVtbiI6M30sImVuZCI6eyJsaW5lIjo1NTAsImNvbHVtbiI6NH0sIndoZW5GYWxzZSI6eyJraW5kIjoxMiwiYXR0cmlidXRlcyI6W10sInN0YXRlbWVudHMiOlt7ImtpbmQiOjcwLCJhdHRyaWJ1dGVzIjpbXSwiZWxlbWVudHMiOlt7ImtpbmQiOjIsInZhbHVlIjoiQ29sb3IucmVnaXN0ZXJTcGFjZSgiLCJzdGFydCI6eyJsaW5lIjo1NDksImNvbHVtbiI6MTB9LCJlbmQiOnsibGluZSI6NTQ5LCJjb2x1bW4iOjMwfX0seyJraW5kIjoxLCJleHByZXNzaW9uIjp7ImtpbmQiOjUyLCJuYW1lIjoic3BhY2UiLCJzdGFydCI6eyJsaW5lIjo1NDksImNvbHVtbiI6MzJ9LCJlbmQiOnsibGluZSI6NTQ5LCJjb2x1bW4iOjM3fX0sInN0YXJ0Ijp7ImxpbmUiOjU0OSwiY29sdW1uIjozMH0sImVuZCI6eyJsaW5lIjo1NDksImNvbHVtbiI6Mzh9LCJyZWlmaWNhdGlvbiI6eyJraW5kIjoyfX0seyJraW5kIjoyLCJ2YWx1ZSI6IikiLCJzdGFydCI6eyJsaW5lIjo1NDksImNvbHVtbiI6Mzh9LCJlbmQiOnsibGluZSI6NTQ5LCJjb2x1bW4iOjM5fX1dLCJzdGFydCI6eyJsaW5lIjo1NDksImNvbHVtbiI6NH0sImVuZCI6eyJsaW5lIjo1NDksImNvbHVtbiI6Mzl9fV0sInN0YXJ0Ijp7ImxpbmUiOjU0OCwiY29sdW1uIjo4fSwiZW5kIjp7ImxpbmUiOjU1MCwiY29sdW1uIjo0fX19XSwic3RhcnQiOnsibGluZSI6NTA2LCJjb2x1bW4iOjQyfSwiZW5kIjp7ImxpbmUiOjU1MSwiY29sdW1uIjozfX19"
+      ]
+    ]
+  }
+]

@@ -1,1 +1,1 @@
-TypeException: The variable "x" of type "Any" can't be assigned with a value of type "Number?" (line 2, file "fixtures/compile/operator/operator.modulo.assign.a_ane.ks")
+TypeException: The variable "x" of type "Any" can't be assigned with a value of type "Number?" (fixtures/compile/operator/operator.modulo.assign.a_ane.ks:2)

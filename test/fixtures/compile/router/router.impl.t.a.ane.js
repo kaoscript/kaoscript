@@ -1,49 +1,36 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Date = {};
 	__ks_Date.__ks_func_equals_0 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!Type.isClassInstance(value, Date)) {
-			throw new TypeError("'value' is not of type 'Date'");
-		}
 		return this.getTime() === value.getTime();
 	};
 	__ks_Date.__ks_func_equals_1 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
 		return false;
 	};
 	__ks_Date.__ks_func_equals_2 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
 		if(value === void 0) {
 			value = null;
 		}
 		return false;
 	};
-	__ks_Date._im_equals = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Date._im_equals = function(that, ...args) {
+		return __ks_Date.__ks_func_equals_rt(that, args);
+	};
+	__ks_Date.__ks_func_equals_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Date);
+		const t1 = Type.isValue;
 		if(args.length === 1) {
-			if(Type.isClassInstance(args[0], Date)) {
-				return __ks_Date.__ks_func_equals_0.apply(that, args);
+			if(t0(args[0])) {
+				return __ks_Date.__ks_func_equals_0.call(that, args[0]);
 			}
-			else if(Type.isValue(args[0])) {
-				return __ks_Date.__ks_func_equals_1.apply(that, args);
+			if(t1(args[0])) {
+				return __ks_Date.__ks_func_equals_1.call(that, args[0]);
 			}
-			else {
-				return __ks_Date.__ks_func_equals_2.apply(that, args);
-			}
+			return __ks_Date.__ks_func_equals_2.call(that, args[0]);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.equals) {
+			return that.equals(...args);
+		}
+		throw Helper.badArgs();
 	};
 };

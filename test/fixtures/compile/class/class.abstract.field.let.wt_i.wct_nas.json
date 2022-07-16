@@ -1,59 +1,64 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "ClassA"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": true,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "constructors": [
-        {
-          "id": 0,
-          "access": 4,
-          "sealed": false,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "throws": [],
-          "inits": []
-        }
-      ],
-      "instanceVariables": {
-        "_x": {
-          "access": 2,
-          "type": "Number",
-          "default": false,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "ClassA"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": true,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [
+          {
+            "index": 0,
+            "access": 4,
+            "sealed": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "errors": [],
+            "inits": []
+          }
+        ],
+        "instanceVariables": {
+          "_x": {
+            "access": 2,
+            "type": "Number",
+            "default": false,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          },
+          "_y": {
+            "access": 2,
+            "type": "Number",
+            "default": false,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
         },
-        "_y": {
-          "access": 2,
-          "type": "Number",
-          "default": false,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
-      },
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "abstractMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "abstractMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

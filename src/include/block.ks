@@ -23,6 +23,7 @@ class Block extends AbstractNode {
 
 			@statements.push(statement = $compile.statement(statement, this))
 
+			statement.initiate()
 			statement.analyse()
 
 			if statement.isAwait() {
@@ -85,6 +86,7 @@ class Block extends AbstractNode {
 
 			@statements.push(statement = $compile.statement(statement, this))
 
+			statement.initiate()
 			statement.analyse()
 
 			if statement.isAwait() {

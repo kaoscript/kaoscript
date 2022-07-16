@@ -1,9 +1,9 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {foo, MyError} = require("../export/export.throw.intern.we.ks")();
+	var {foo, MyError} = require("../export/.export.throw.intern.we.ks.j5k8r9.ksb")();
 	try {
-		foo();
+		foo.__ks_0();
 	}
 	catch(__ks_0) {
 		if(Type.isClassInstance(__ks_0, MyError)) {

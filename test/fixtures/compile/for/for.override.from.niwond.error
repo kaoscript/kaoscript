@@ -1,1 +1,1 @@
-SyntaxException: Identifier "x" has already been declared (line 5, file "fixtures/compile/for/for.override.from.niwond.ks")
+SyntaxException: Identifier "x" has already been declared (fixtures/compile/for/for.override.from.niwond.ks:5)

@@ -1,90 +1,58 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function __ks_foobar_0(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'Number'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'Number'");
-		}
-		return 0;
-	}
-	function __ks_foobar_1(x, ...args) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'Number'");
-		}
-		return 1;
-	}
-	function __ks_foobar_2(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'String'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'Number'");
-		}
-		return 2;
-	}
-	function __ks_foobar_3(x, ...args) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'String'");
-		}
-		return 3;
-	}
 	function foobar() {
-		if(arguments.length === 2) {
-			if(Type.isNumber(arguments[0]) && Type.isNumber(arguments[1])) {
-				return __ks_foobar_0(...arguments);
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x, y) {
+		return 0;
+	};
+	foobar.__ks_1 = function(x, args) {
+		return 1;
+	};
+	foobar.__ks_2 = function(x, y) {
+		return 2;
+	};
+	foobar.__ks_3 = function(x, args) {
+		return 3;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		const t1 = Type.isValue;
+		const t2 = Type.isString;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t0(args[1])) {
+					return foobar.__ks_0.call(that, args[0], args[1]);
+				}
+				if(t1(args[1])) {
+					return foobar.__ks_1.call(that, args[0], [args[1]]);
+				}
+				throw Helper.badArgs();
 			}
-			else if(Type.isNumber(arguments[0])) {
-				return __ks_foobar_1(...arguments);
+			if(t2(args[0])) {
+				if(t0(args[1])) {
+					return foobar.__ks_2.call(that, args[0], args[1]);
+				}
+				if(t1(args[1])) {
+					return foobar.__ks_3.call(that, args[0], [args[1]]);
+				}
+				throw Helper.badArgs();
 			}
-			else if(Type.isNumber(arguments[1])) {
-				return __ks_foobar_2(...arguments);
+			throw Helper.badArgs();
+		}
+		if(args.length >= 1) {
+			if(t0(args[0])) {
+				if(Helper.isVarargs(args, 0, args.length - 1, t1, pts = [1], 0) && te(pts, 1)) {
+					return foobar.__ks_1.call(that, args[0], Helper.getVarargs(args, 1, pts[1]));
+				}
+				throw Helper.badArgs();
 			}
-			else {
-				return __ks_foobar_3(...arguments);
+			if(t2(args[0]) && Helper.isVarargs(args, 0, args.length - 1, t1, pts = [1], 0) && te(pts, 1)) {
+				return foobar.__ks_3.call(that, args[0], Helper.getVarargs(args, 1, pts[1]));
 			}
 		}
-		else if(arguments.length >= 1) {
-			if(Type.isNumber(arguments[0])) {
-				return __ks_foobar_1(...arguments);
-			}
-			else if(Type.isString(arguments[0])) {
-				return __ks_foobar_3(...arguments);
-			}
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 };

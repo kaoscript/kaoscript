@@ -1,27 +1,33 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "foo"
-  ],
-  "references": [
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 0,
-      "max": 0,
-      "parameters": [],
-      "returns": {
-        "kind": "union",
-        "types": [
-          "String",
-          "Number"
-        ]
-      },
-      "throws": []
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "foo"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": 0,
+        "parameters": [],
+        "returns": {
+          "kind": "union",
+          "types": [
+            "String",
+            "Number"
+          ]
+        },
+        "errors": []
+      }
+    ],
+    "macros": []
+  }
+]

@@ -1,1 +1,1 @@
-TypeException: The caller of "toString" can't be nullable (line 7, file "fixtures/compile/import/import.filter.class.nullable.default.ks")
+TypeException: The caller of "toString" can't be nullable (fixtures/compile/import/import.filter.class.nullable.default.ks:7)

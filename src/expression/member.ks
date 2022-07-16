@@ -1,5 +1,6 @@
 class MemberExpression extends Expression {
 	private lateinit {
+		_assignable: Boolean		= false
 		_assignment: AssignmentType	= AssignmentType::Neither
 		_callee
 		_computed: Boolean			= false
@@ -112,6 +113,9 @@ class MemberExpression extends Expression {
 						@property = `\(property.index())`
 						@type = property.type()
 					}
+					else if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
+					}
 					else if type.isExhaustive(this) {
 						ReferenceException.throwNotDefinedProperty(@property, this)
 					}
@@ -124,6 +128,9 @@ class MemberExpression extends Expression {
 				else if type.isStruct() {
 					if const property = type.getProperty(@property) {
 						@type = property.type()
+					}
+					else if @assignable {
+						ReferenceException.throwInvalidAssignment(this)
 					}
 					else if type.isExhaustive(this) {
 						ReferenceException.throwNotDefinedProperty(@property, this)
@@ -150,13 +157,38 @@ class MemberExpression extends Expression {
 							SyntaxException.throwInvalidEnumAccess(this)
 						}
 						else if type.isExhaustive(this) {
-							ReferenceException.throwNotDefinedProperty(@property, this)
+							if @assignable {
+								ReferenceException.throwInvalidAssignment(this)
+							}
+							else {
+								ReferenceException.throwNotDefinedProperty(@property, this)
+							}
 						}
 					}
 
 					if @object.isInferable() {
 						@inferable = true
 						@path = `\(@object.path()).\(@property)`
+					}
+				}
+
+				if @assignable {
+					if const variable = this.declaration() {
+						if variable.isImmutable() {
+							if variable.isLateInit() {
+								if variable.isInitialized() {
+									ReferenceException.throwImmutable(this)
+								}
+							}
+							else {
+								ReferenceException.throwImmutable(this)
+							}
+						}
+					}
+					else if const property = @object.type().getProperty(@property) {
+						if property.isImmutable() {
+							ReferenceException.throwImmutable(this)
+						}
 					}
 				}
 			}
@@ -207,27 +239,6 @@ class MemberExpression extends Expression {
 		}
 	} // }}}
 	caller() => @object
-	checkIfAssignable() { // {{{
-		return if @computed
-
-		if const variable = this.declaration() {
-			if variable.isImmutable() {
-				if variable.isLateInit() {
-					if variable.isInitialized() {
-						ReferenceException.throwImmutable(this)
-					}
-				}
-				else {
-					ReferenceException.throwImmutable(this)
-				}
-			}
-		}
-		else if const property = @object.type().getProperty(@property) {
-			if property.isImmutable() {
-				ReferenceException.throwImmutable(this)
-			}
-		}
-	} // }}}
 	declaration() { // {{{
 		return null if @computed
 
@@ -243,6 +254,9 @@ class MemberExpression extends Expression {
 		}
 
 		return null
+	} // }}}
+	flagAssignable() { // {{{
+		@assignable = true
 	} // }}}
 	inferTypes(inferables) { // {{{
 		@object.inferTypes(inferables)
@@ -335,6 +349,30 @@ class MemberExpression extends Expression {
 					NotImplementedException.throw(this)
 				}
 			}
+			else if @prepareObject && @type.isMethod() && @parent is not UnaryOperatorExpression {
+				fragments.code(`\($runtime.helper(this)).bindMethod(`)
+
+				if @object.isComputed() || @object._data.kind == NodeKind::NumericExpression {
+					fragments.compile(@object)
+				}
+				else if type.isNamespace() && type.isSealed() && type.type().isSealedProperty(@property) {
+					fragments.code(type.getSealedName())
+				}
+				else {
+					fragments.compile(@object)
+				}
+
+				fragments.code($comma)
+
+				if @computed {
+					fragments.compile(@property)
+				}
+				else {
+					fragments.code('"').compile(@property).code('"')
+				}
+
+				fragments.code(')')
+			}
 			else {
 				if @object.isComputed() || @object._data.kind == NodeKind::NumericExpression {
 					fragments.code('(').compile(@object).code(')')
@@ -351,10 +389,6 @@ class MemberExpression extends Expression {
 				}
 				else {
 					fragments.code($dot).compile(@property)
-				}
-
-				if @prepareObject && @type.isMethod() && @parent is not UnaryOperatorExpression{
-					fragments.code('.bind(').compile(@object).code(')')
 				}
 			}
 		}

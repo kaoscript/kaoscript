@@ -1,8 +1,8 @@
 require("kaoscript/register");
-var Dictionary = require("@kaoscript/runtime").Dictionary;
+const {Dictionary} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Dictionary = require("./require.dict.genesis.ks")().__ks_Dictionary;
+	var __ks_Dictionary = require("./.require.dict.genesis.ks.1runl5l.ksb")().__ks_Dictionary;
 	return {
-		__ks_Dictionary: __ks_Dictionary
+		__ks_Dictionary
 	};
 };

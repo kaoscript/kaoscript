@@ -1,35 +1,33 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Shape {
+		static __ks_new_0(...args) {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			o.__ks_cons_0(...args);
+			return o;
+		}
 		constructor() {
-			this.__ks_cons(arguments);
+			this.__ks_init();
+			this.__ks_cons_rt(arguments);
+		}
+		__ks_init() {
 		}
 		__ks_cons_0(shape) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(shape === void 0 || shape === null) {
-				throw new TypeError("'shape' is not nullable");
-			}
-			else if(!Type.isString(shape)) {
-				throw new TypeError("'shape' is not of type 'String'");
-			}
 			this._shape = shape;
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(args) {
+			const t0 = Type.isString;
 			if(args.length === 1) {
-				Shape.prototype.__ks_cons_0.apply(this, args);
+				if(t0(args[0])) {
+					return Shape.prototype.__ks_cons_0.call(this, args[0]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		}
 	}
-	var __ks_Shape = {};
+	const __ks_Shape = {};
 	__ks_Shape.__ks_func_draw_0 = function(color) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
 		if(color === void 0) {
 			color = null;
 		}
@@ -40,16 +38,18 @@ module.exports = function() {
 			return "I'm drawing a " + this._shape + ".";
 		}
 	};
-	__ks_Shape._im_draw = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Shape._im_draw = function(that, ...args) {
+		return __ks_Shape.__ks_func_draw_rt(that, args);
+	};
+	__ks_Shape.__ks_func_draw_rt = function(that, args) {
 		if(args.length === 1) {
-			return __ks_Shape.__ks_func_draw_0.apply(that, args);
+			return __ks_Shape.__ks_func_draw_0.call(that, args[0]);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 	return {
-		console: console,
-		Shape: Shape,
-		__ks_Shape: __ks_Shape
+		console,
+		Shape,
+		__ks_Shape
 	};
 };

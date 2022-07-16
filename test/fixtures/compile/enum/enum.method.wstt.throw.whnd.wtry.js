@@ -1,6 +1,6 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Weekday = Helper.enum(Number, {
+	const Weekday = Helper.enum(Number, {
 		MONDAY: 0,
 		TUESDAY: 1,
 		WEDNESDAY: 2,
@@ -9,23 +9,23 @@ module.exports = function() {
 		SATURDAY: 5,
 		SUNDAY: 6
 	});
-	Weekday.fromString = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!Type.isString(value)) {
-			throw new TypeError("'value' is not of type 'String'");
-		}
+	Weekday.__ks_sttc_fromString_0 = function(value) {
 		if(value === "monday") {
 			return Weekday.MONDAY;
 		}
 		throw new Error();
 	};
-	const day = Helper.try(() => Weekday.fromString("monday"), null);
+	Weekday.fromString = function() {
+		const t0 = Type.isString;
+		if(arguments.length === 1) {
+			if(t0(arguments[0])) {
+				return Weekday.__ks_sttc_fromString_0(arguments[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+	const day = Helper.try(() => Weekday.__ks_sttc_fromString_0("monday"), null);
 	return {
-		Weekday: Weekday
+		Weekday
 	};
 };

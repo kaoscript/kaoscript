@@ -1,1 +1,1 @@
-ReferenceException: The function "quxbaz" can't be matched to given arguments (Foobar|String|Number) (line 9, file "fixtures/compile/type/type.union.is.log.bin.and.is_s.eq_ie.ks")
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Foobar|String|Number) (fixtures/compile/type/type.union.is.log.bin.and.is_s.eq_ie.ks:9)

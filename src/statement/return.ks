@@ -2,8 +2,9 @@ class ReturnStatement extends Statement {
 	private {
 		_await: Boolean			= false
 		_async: Boolean			= false
-		_function				= null
+		_enumCasting: Boolean	= false
 		_exceptions: Boolean	= false
+		_function				= null
 		_value					= null
 		_temp: String?			= null
 		_type: Type				= Type.Any
@@ -63,8 +64,43 @@ class ReturnStatement extends Statement {
 		}
 	} // }}}
 	checkReturnType(type: Type) { // {{{
-		if @value != null && !@value.isMatchingType(type) {
-			TypeException.throwUnexpectedReturnType(type, @value.type(), this)
+		if ?@value {
+			if @value is UnaryOperatorForcedTypeCasting {
+				@type = type
+			}
+			else if !@type.isExplicit() && @type.isAny() {
+				// do nothing
+			}
+			else if @type.isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
+				// do nothing
+			}
+			else if @type.isEnum() && @type.isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass + MatchingMode::AutoCast) {
+				@type = type
+				@enumCasting = true
+			}
+			else if @type.isUnion() {
+				let cast = false
+
+				for const tt in @type.types() {
+					if tt.isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
+						// do nothing
+					}
+					else if tt.isEnum() && tt.discard().type().isSubsetOf(type, MatchingMode::Exact + MatchingMode::NonNullToNull + MatchingMode::Subclass) {
+						cast = true
+					}
+					else {
+						TypeException.throwUnexpectedReturnType(type, @type, this)
+					}
+				}
+
+				if cast {
+					@type = type
+					@enumCasting = true
+				}
+			}
+			else {
+				TypeException.throwUnexpectedReturnType(type, @type, this)
+			}
 		}
 	} // }}}
 	hasExceptions() => @exceptions
@@ -132,6 +168,14 @@ class ReturnStatement extends Statement {
 
 		line.done()
 	} // }}}
+	toCastingFragments(fragments, mode) { // {{{
+		if @enumCasting {
+			@value.toCastingFragments(fragments, mode)
+		}
+		else {
+			fragments.compile(@value)
+		}
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		if @value == null {
 			if @async {
@@ -150,21 +194,20 @@ class ReturnStatement extends Statement {
 				return this.toAwaitStatementFragments^@(fragments)
 			}
 			else {
+				const line = fragments.newLine().code('return ')
+
 				if @async {
-					fragments
-						.newLine()
-						.code('return __ks_cb(null, ')
-						.compile(@value)
-						.code(')')
-						.done()
+					line.code('__ks_cb(null, ')
+
+					@toCastingFragments(line, mode)
+
+					line.code(')')
 				}
 				else {
-					fragments
-						.newLine()
-						.code('return ')
-						.compile(@value)
-						.done()
+					@toCastingFragments(line, mode)
 				}
+
+				line.done()
 			}
 		}
 		else {
@@ -178,11 +221,11 @@ class ReturnStatement extends Statement {
 					fragments.newLine().code($runtime.scope(this) + @assignments.join(', ')).done()
 				}
 
-				fragments
-					.newLine()
-					.code(`\($runtime.scope(this))\(@temp) = `)
-					.compile(@value)
-					.done()
+				const line = fragments.newLine().code(`\($runtime.scope(this))\(@temp) = `)
+
+				@toCastingFragments(line, mode)
+
+				line.done()
 
 				for afterward in @afterwards {
 					afterward.toAfterwardFragments(fragments)
@@ -197,5 +240,5 @@ class ReturnStatement extends Statement {
 			}
 		}
 	} // }}}
-	type() => @value.type()
+	type() => @type
 }

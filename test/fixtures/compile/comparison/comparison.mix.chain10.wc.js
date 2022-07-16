@@ -1,62 +1,131 @@
-var Operator = require("@kaoscript/runtime").Operator;
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(a, b, c, d, e, f, g, h, i, j) {
-		if(arguments.length < 10) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 10)");
-		}
-		if(a === void 0 || a === null) {
-			throw new TypeError("'a' is not nullable");
-		}
-		if(b === void 0 || b === null) {
-			throw new TypeError("'b' is not nullable");
-		}
-		if(c === void 0 || c === null) {
-			throw new TypeError("'c' is not nullable");
-		}
-		if(d === void 0 || d === null) {
-			throw new TypeError("'d' is not nullable");
-		}
-		if(e === void 0 || e === null) {
-			throw new TypeError("'e' is not nullable");
-		}
-		if(f === void 0 || f === null) {
-			throw new TypeError("'f' is not nullable");
-		}
-		if(g === void 0 || g === null) {
-			throw new TypeError("'g' is not nullable");
-		}
-		if(h === void 0 || h === null) {
-			throw new TypeError("'h' is not nullable");
-		}
-		if(i === void 0 || i === null) {
-			throw new TypeError("'i' is not nullable");
-		}
-		if(j === void 0 || j === null) {
-			throw new TypeError("'j' is not nullable");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(a, b, c, d, e, f, g, h, i, j) {
 		let __ks_0;
 		if(Operator.lt(a(), __ks_0 = b()) && Operator.lte(__ks_0, __ks_0 = c()) && Operator.lt(__ks_0, __ks_0 = d()) && __ks_0 === (__ks_0 = e()) && Operator.gt(__ks_0, __ks_0 = f()) && Operator.gte(__ks_0, __ks_0 = g()) && __ks_0 === (__ks_0 = h()) && Operator.lt(__ks_0, __ks_0 = i()) && __ks_0 !== j()) {
 		}
-	}
-	foobar(() => {
-		return 1;
-	}, () => {
-		return 2;
-	}, () => {
-		return 2;
-	}, () => {
-		return 3;
-	}, () => {
-		return 3;
-	}, () => {
-		return 2;
-	}, () => {
-		return 1;
-	}, () => {
-		return 1;
-	}, () => {
-		return 3;
-	}, () => {
-		return 5;
-	});
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 10) {
+			if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3]) && t0(args[4]) && t0(args[5]) && t0(args[6]) && t0(args[7]) && t0(args[8]) && t0(args[9])) {
+				return foobar.__ks_0.call(that, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+	foobar.__ks_0((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 1;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 2;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 2;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 3;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 3;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 2;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 1;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 1;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 3;
+		};
+		return __ks_rt;
+	})(), (() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return 5;
+		};
+		return __ks_rt;
+	})());
 };

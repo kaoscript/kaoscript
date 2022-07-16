@@ -1,1 +1,1 @@
-TypeException: The return type must be "String" and not "Any" (line 2, file "fixtures/compile/function/function.return.tsnn.waa.ks")
+TypeException: The return type must be "String" and not "Any" (fixtures/compile/function/function.return.tsnn.waa.ks:2)

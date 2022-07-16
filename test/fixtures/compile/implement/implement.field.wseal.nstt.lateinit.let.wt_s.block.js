@@ -6,7 +6,7 @@ module.exports = function(expect) {
 	expect(d.culture).to.equal("en");
 	const culture = d.culture;
 	return {
-		Date: Date,
-		__ks_Date: __ks_Date
+		Date,
+		__ks_Date
 	};
 };

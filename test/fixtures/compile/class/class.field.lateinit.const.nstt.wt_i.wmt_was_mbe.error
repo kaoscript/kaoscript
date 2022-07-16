@@ -1,1 +1,1 @@
-ReferenceException: The expression "this.PI" is immutable (line 4, file "fixtures/compile/class/class.field.lateinit.const.nstt.wt_i.wmt_was_mbe.ks")
+ReferenceException: The expression "this.PI" is immutable (fixtures/compile/class/class.field.lateinit.const.nstt.wt_i.wmt_was_mbe.ks:4)

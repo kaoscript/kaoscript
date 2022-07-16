@@ -1,1 +1,1 @@
-ReferenceException: The identifier "bar" is immutable (line 6, file "fixtures/compile/destruct/destruct.object.exists.const.ks")
+ReferenceException: The identifier "bar" is immutable (fixtures/compile/destruct/destruct.object.exists.const.ks:6)

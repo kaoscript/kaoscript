@@ -1,1 +1,1 @@
-TypeException: No values are expected to be returned (line 2, file "fixtures/compile/function/function.never.return.ks")
+TypeException: No values are expected to be returned (fixtures/compile/function/function.never.return.ks:2)

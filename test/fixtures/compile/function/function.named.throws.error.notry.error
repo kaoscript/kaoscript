@@ -1,1 +1,1 @@
-SyntaxException: An error "Error" is unreported, it must be caught or declared to be thrown (line 6, file "fixtures/compile/function/function.named.throws.error.notry.ks")
+SyntaxException: An error "Error" is unreported, it must be caught or declared to be thrown (fixtures/compile/function/function.named.throws.error.notry.ks:6)

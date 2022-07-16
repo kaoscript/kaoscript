@@ -1,1 +1,1 @@
-SyntaxException: Identifier "name" has already been declared (line 4, file "fixtures/compile/variable/variable.overwrite.class.redecl.default.ks")
+SyntaxException: Identifier "name" has already been declared (fixtures/compile/variable/variable.overwrite.class.redecl.default.ks:4)

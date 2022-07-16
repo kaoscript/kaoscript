@@ -1,23 +1,26 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let AnimalFlags = Helper.enum(Number, {
-		None: 0,
-		HasClaws: 1,
-		CanFly: 2,
-		EatsFish: 4,
-		Endangered: 8
+	const AnimalFlags = Helper.enum(Object, {
+		None: 0n,
+		HasClaws: 1n,
+		CanFly: 2n,
+		EatsFish: 4n,
+		Endangered: 8n
 	});
-	function foobar(abilities) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(abilities) {
+		if((abilities & AnimalFlags.CanFly) !== 0n || (abilities & AnimalFlags.EatsFish) !== 0n) {
 		}
-		if(abilities === void 0 || abilities === null) {
-			throw new TypeError("'abilities' is not nullable");
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, AnimalFlags);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		else if(!Type.isEnumInstance(abilities, AnimalFlags)) {
-			throw new TypeError("'abilities' is not of type 'AnimalFlags'");
-		}
-		if((abilities & AnimalFlags.CanFly) !== 0 || (abilities & AnimalFlags.EatsFish) !== 0) {
-		}
-	}
+		throw Helper.badArgs();
+	};
 };

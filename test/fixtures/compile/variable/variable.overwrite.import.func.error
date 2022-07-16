@@ -1,1 +1,1 @@
-ReferenceException: The identifier "name" is immutable (line 4, file "fixtures/compile/variable/variable.overwrite.import.func.ks")
+ReferenceException: The identifier "name" is immutable (fixtures/compile/variable/variable.overwrite.import.func.ks:4)

@@ -1,1 +1,1 @@
-ReferenceException: The function "foo" can't be matched to given arguments (String, Number, Number) (line 3, file "fixtures/compile/extern/extern.func.bad.0arg.ks")
+ReferenceException: The function "foo" can't be matched to given arguments (String, Number, Number) (fixtures/compile/extern/extern.func.bad.0arg.ks:3)

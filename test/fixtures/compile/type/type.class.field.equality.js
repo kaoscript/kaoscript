@@ -1,63 +1,78 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	class Quxbaz extends Foobar {
-		__ks_init() {
-			Foobar.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(Quxbaz.prototype);
+			o.__ks_init();
+			return o;
 		}
-		__ks_cons(args) {
-			Foobar.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
+		}
+		quxbaz() {
+			return this.__ks_func_quxbaz_rt.call(null, this, this, arguments);
 		}
 		__ks_func_quxbaz_0() {
 		}
-		quxbaz() {
-			if(arguments.length === 0) {
-				return Quxbaz.prototype.__ks_func_quxbaz_0.apply(this);
+		__ks_func_quxbaz_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_quxbaz_0.call(that);
 			}
-			else if(Foobar.prototype.quxbaz) {
-				return Foobar.prototype.quxbaz.apply(this, arguments);
+			if(super.__ks_func_quxbaz_rt) {
+				return super.__ks_func_quxbaz_rt.call(null, that, Foobar.prototype, args);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Corge {
+		static __ks_new_0() {
+			const o = Object.create(Corge.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._foo = new Foobar();
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Corge.prototype.__ks_init_0.call(this);
+			this._foo = Foobar.__ks_new_0();
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
-			}
-		}
-		__ks_func_qux_0() {
-			if(Type.isClassInstance(this._foo, Quxbaz)) {
-				this._foo.quxbaz();
+				throw Helper.badArgs();
 			}
 		}
 		qux() {
-			if(arguments.length === 0) {
-				return Corge.prototype.__ks_func_qux_0.apply(this);
+			return this.__ks_func_qux_rt.call(null, this, this, arguments);
+		}
+		__ks_func_qux_0() {
+			if(Type.isClassInstance(this._foo, Quxbaz)) {
+				this._foo.__ks_func_quxbaz_0();
 			}
-			throw new SyntaxError("Wrong number of arguments");
+		}
+		__ks_func_qux_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_qux_0.call(that);
+			}
+			throw Helper.badArgs();
 		}
 	}
 };

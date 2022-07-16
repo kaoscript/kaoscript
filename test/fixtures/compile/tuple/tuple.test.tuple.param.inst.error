@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (Pair) (fixtures/compile/tuple/tuple.test.tuple.param.inst.ks:6)

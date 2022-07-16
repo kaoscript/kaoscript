@@ -1,1 +1,1 @@
-TypeException: The condition "x" is expected to be of type "Boolean" or "Any" and not of type "String" (line 2, file "fixtures/compile/until/until.type.se.ks")
+TypeException: The condition "x" is expected to be of type "Boolean" or "Any" and not of type "String" (fixtures/compile/until/until.type.se.ks:2)

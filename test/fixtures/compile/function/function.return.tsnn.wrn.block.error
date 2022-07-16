@@ -1,1 +1,1 @@
-TypeException: The return type must be "String" and not "Null" (line 2, file "fixtures/compile/function/function.return.tsnn.wrn.block.ks")
+TypeException: The return type must be "String" and not "Null" (fixtures/compile/function/function.return.tsnn.wrn.block.ks:2)

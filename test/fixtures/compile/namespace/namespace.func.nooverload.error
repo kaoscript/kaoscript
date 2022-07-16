@@ -1,1 +1,1 @@
-ReferenceException: The function "reverse" in namespace "Util" can't be matched to given arguments (String, Number) (line 9, file "fixtures/compile/namespace/namespace.func.nooverload.ks")
+ReferenceException: The function "reverse" in namespace "Util" can't be matched to given arguments (String, Number) (fixtures/compile/namespace/namespace.func.nooverload.ks:9)

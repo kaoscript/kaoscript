@@ -1,66 +1,70 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
-			}
-		}
-		__ks_func_foo_0(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isString(x)) {
-				throw new TypeError("'x' is not of type 'String'");
+				throw Helper.badArgs();
 			}
 		}
 		foo() {
-			if(arguments.length === 1) {
-				return Foobar.prototype.__ks_func_foo_0.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_foo_rt.call(null, this, this, arguments);
 		}
-		__ks_func_qux_0(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_func_foo_0(x) {
+		}
+		__ks_func_foo_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_foo_0.call(that, args[0]);
+				}
 			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isClassInstance(x, Qux)) {
-				throw new TypeError("'x' is not of type 'Qux'");
-			}
+			throw Helper.badArgs();
 		}
 		qux() {
-			if(arguments.length === 1) {
-				return Foobar.prototype.__ks_func_qux_0.apply(this, arguments);
+			return this.__ks_func_qux_rt.call(null, this, this, arguments);
+		}
+		__ks_func_qux_0(x) {
+		}
+		__ks_func_qux_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Qux);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_qux_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Qux {
+		static __ks_new_0() {
+			const o = Object.create(Qux.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	return {
-		Foobar: Foobar
+		Foobar
 	};
 };

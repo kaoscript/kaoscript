@@ -1,4 +1,4 @@
-var {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	const likes = (() => {
 		const d = new Dictionary();
@@ -14,6 +14,6 @@ module.exports = function() {
 		return like === "spice";
 	}) : [];
 	return {
-		spicyHeroes: spicyHeroes
+		spicyHeroes
 	};
 };

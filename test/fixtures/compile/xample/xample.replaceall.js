@@ -1,19 +1,8 @@
-var {Operator, Type} = require("@kaoscript/runtime");
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
+	var __ks_Array = {};
 	var __ks_String = {};
 	__ks_String.__ks_func_replaceAll_0 = function(find, replacement) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(find === void 0 || find === null) {
-			throw new TypeError("'find' is not nullable");
-		}
-		else if(!Type.isString(find)) {
-			throw new TypeError("'find' is not of type 'String'");
-		}
-		if(replacement === void 0 || replacement === null) {
-			throw new TypeError("'replacement' is not nullable");
-		}
 		if(find.length === 0) {
 			return this.valueOf();
 		}
@@ -24,11 +13,20 @@ module.exports = function() {
 			return this.replace(new RegExp(find.escapeRegex(), "g"), replacement);
 		}
 	};
-	__ks_String._im_replaceAll = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_String._im_replaceAll = function(that, ...args) {
+		return __ks_String.__ks_func_replaceAll_rt(that, args);
+	};
+	__ks_String.__ks_func_replaceAll_rt = function(that, args) {
+		const t0 = Type.isString;
+		const t1 = Type.isValue;
 		if(args.length === 2) {
-			return __ks_String.__ks_func_replaceAll_0.apply(that, args);
+			if(t0(args[0]) && t1(args[1])) {
+				return __ks_String.__ks_func_replaceAll_0.call(that, args[0], args[1]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.replaceAll) {
+			return that.replaceAll(...args);
+		}
+		throw Helper.badArgs();
 	};
 };

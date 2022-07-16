@@ -1,1 +1,1 @@
-ReferenceException: The expression "x" is "null" (line 3, file "fixtures/compile/operator/operator.member.null.set.ks")
+ReferenceException: The expression "x" is "null" (fixtures/compile/operator/operator.member.null.set.ks:3)

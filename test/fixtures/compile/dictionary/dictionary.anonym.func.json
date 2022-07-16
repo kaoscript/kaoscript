@@ -1,38 +1,44 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "foobar"
-  ],
-  "references": [
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 1,
-      "max": 1,
-      "parameters": [
-        {
-          "name": "coord",
-          "type": {
-            "reference": 1
-          },
-          "min": 1,
-          "max": 1,
-          "default": false
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "foobar"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 1,
+        "max": 1,
+        "parameters": [
+          {
+            "name": "coord",
+            "type": {
+              "reference": 1
+            },
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      },
+      {
+        "kind": "dictionary",
+        "properties": {
+          "x": "Number",
+          "y": "Number"
         }
-      ],
-      "returns": "Any?",
-      "throws": []
-    },
-    {
-      "kind": "dictionary",
-      "properties": {
-        "x": "Number",
-        "y": "Number"
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

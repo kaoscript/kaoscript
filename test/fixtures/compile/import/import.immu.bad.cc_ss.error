@@ -1,0 +1,1 @@
+TypeException: The variable "Space" and the argument "Space" of the module "../require/require.class.default.ks" aren't compatible (fixtures/compile/import/import.immu.bad.cc_ss.ks:4)

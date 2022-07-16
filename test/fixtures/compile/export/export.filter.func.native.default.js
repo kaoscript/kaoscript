@@ -1,23 +1,35 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Function = require("../_/_function.ks")().__ks_Function;
-	function foobar(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	var __ks_Function = require("../_/._function.ks.j5k8r9.ksb")().__ks_Function;
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+		return (() => {
+			const __ks_rt = (...args) => {
+				if(args.length === 0) {
+					return __ks_rt.__ks_0.call(this);
+				}
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = () => {
+				return x;
+			};
+			return __ks_rt;
+		})();
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'String'");
-		}
-		return () => {
-			return x;
-		};
-	}
+		throw Helper.badArgs();
+	};
 	return {
-		foobar: foobar,
-		__ks_Function: __ks_Function
+		foobar,
+		__ks_Function
 	};
 };

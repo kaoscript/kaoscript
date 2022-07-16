@@ -1,21 +1,19 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(x, y, z) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		if(z === void 0 || z === null) {
-			throw new TypeError("'z' is not nullable");
-		}
-		else if(!Type.isString(z)) {
-			throw new TypeError("'z' is not of type 'String'");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x, y, z) {
 		return x + y + z;
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const t1 = Type.isString;
+		if(args.length === 3) {
+			if(t0(args[0]) && t0(args[1]) && t1(args[2])) {
+				return foobar.__ks_0.call(that, args[0], args[1], args[2]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

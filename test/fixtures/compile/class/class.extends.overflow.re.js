@@ -1,86 +1,81 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
-		}
-		__ks_func_message_0(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			return x.toString();
 		}
 		message() {
-			if(arguments.length === 1) {
-				return Foobar.prototype.__ks_func_message_0.apply(this, arguments);
+			return this.__ks_func_message_rt.call(null, this, this, arguments);
+		}
+		__ks_func_message_0(x) {
+			return x.toString();
+		}
+		__ks_func_message_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_message_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Quxbaz extends Foobar {
-		__ks_init() {
-			Foobar.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(Quxbaz.prototype);
+			o.__ks_init();
+			return o;
 		}
-		__ks_cons(args) {
-			Foobar.prototype.__ks_cons.call(this, args);
-		}
-		__ks_func_message_0(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isString(x)) {
-				throw new TypeError("'x' is not of type 'String'");
-			}
-			return x;
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 		__ks_func_message_1(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
-			}
-			return Helper.toString(x);
+			return x;
 		}
 		__ks_func_message_2(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+			return Helper.toString(x);
+		}
+		__ks_func_message_0(x) {
+			if(Type.isString(x)) {
+				return this.__ks_func_message_1(x);
 			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
+			if(Type.isNumber(x)) {
+				return this.__ks_func_message_2(x);
 			}
+			return this.__ks_func_message_3(x);
+		}
+		__ks_func_message_3(x) {
 			return "null";
 		}
-		message() {
-			if(arguments.length === 1) {
-				if(Type.isNumber(arguments[0])) {
-					return Quxbaz.prototype.__ks_func_message_1.apply(this, arguments);
+		__ks_func_message_rt(that, proto, args) {
+			const t0 = Type.isNumber;
+			const t1 = Type.isString;
+			const t2 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_message_2.call(that, args[0]);
 				}
-				else if(Type.isString(arguments[0])) {
-					return Quxbaz.prototype.__ks_func_message_0.apply(this, arguments);
+				if(t1(args[0])) {
+					return proto.__ks_func_message_1.call(that, args[0]);
 				}
-				else {
-					return Quxbaz.prototype.__ks_func_message_2.apply(this, arguments);
+				if(t2(args[0])) {
+					return proto.__ks_func_message_3.call(that, args[0]);
 				}
 			}
-			return Foobar.prototype.message.apply(this, arguments);
+			return super.__ks_func_message_rt.call(null, that, Foobar.prototype, args);
 		}
 	}
 };

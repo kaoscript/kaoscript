@@ -1,1 +1,1 @@
-SyntaxException: Identifier "super" has already been declared (line 8, file "fixtures/compile/keyword/keyword.super.class.variable.overwrite.ks")
+SyntaxException: Identifier "super" has already been declared (fixtures/compile/keyword/keyword.super.class.variable.overwrite.ks:8)

@@ -1,11 +1,11 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Date) {
 	if(!Type.isValue(__ks_Date)) {
-		var __ks_Date = require("../_/_date.ks")().__ks_Date;
+		var __ks_Date = require("../_/._date.ks.j5k8r9.ksb")().__ks_Date;
 	}
 	__ks_Date.__ks_sttc_today_0 = function() {
-		return __ks_Date._im_midnight(new Date());
+		return __ks_Date.__ks_func_midnight_0.call(new Date());
 	};
 	__ks_Date.__ks_func_midnight_0 = function() {
 		this.setHours(0);
@@ -14,23 +14,30 @@ module.exports = function(__ks_Date) {
 		this.setMilliseconds(0);
 		return this;
 	};
-	__ks_Date._cm_today = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 0) {
+	__ks_Date._sm_today = function() {
+		if(arguments.length === 0) {
 			return __ks_Date.__ks_sttc_today_0();
 		}
-		throw new SyntaxError("Wrong number of arguments");
-	};
-	__ks_Date._im_midnight = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length === 0) {
-			return __ks_Date.__ks_func_midnight_0.apply(that);
+		if(Date.today) {
+			return Date.today(...arguments);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
-	console.log(__ks_Date._cm_today());
-	console.log(__ks_Date._im_midnight(new Date()));
+	__ks_Date._im_midnight = function(that, ...args) {
+		return __ks_Date.__ks_func_midnight_rt(that, args);
+	};
+	__ks_Date.__ks_func_midnight_rt = function(that, args) {
+		if(args.length === 0) {
+			return __ks_Date.__ks_func_midnight_0.call(that);
+		}
+		if(that.midnight) {
+			return that.midnight(...args);
+		}
+		throw Helper.badArgs();
+	};
+	console.log(__ks_Date.__ks_sttc_today_0());
+	console.log(__ks_Date.__ks_func_midnight_0.call(new Date()));
 	return {
-		__ks_Date: __ks_Date
+		__ks_Date
 	};
 };

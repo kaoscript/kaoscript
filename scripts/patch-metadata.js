@@ -1,4 +1,5 @@
 var Compiler = require('../lib/compiler.js')().Compiler;
+var escapeJSON = require('../src/fs.js').escapeJSON
 var fs = require('fs');
 var klaw = require('klaw-sync');
 var path = require('path');
@@ -6,9 +7,17 @@ var program = require('commander');
 
 program.parse(process.argv);
 
-var filter = function(item) {
+function filter(item) { // {{{
 	return item.path.slice(-3) === '.js'
-}
+} // }}}
+
+/* function replacer(key, value) { // {{{
+	if(value === undefined) {
+		throw new Error('the value of "' + key + '" is not nullable');
+	}
+
+	return value === Infinity ? 'Infinity' : value;
+} // }}} */
 
 if (program.args.length > 0) {
 	var directory = program.args[0];
@@ -47,11 +56,11 @@ function patch(file) {
 
 		compiler.compile().toSource();
 
-		var data = compiler.toMetadata();
+		var data = JSON.stringify([compiler.toRequirements(), compiler.toExports()], escapeJSON, 2);
 
 		fs.writeFileSync(
 			path.join(root, name + '.json'),
-			JSON.stringify(data, function(key, value){return value === Infinity ? 'Infinity' : value;}, 2),
+			data,
 			{
 				encoding: 'utf8'
 			}

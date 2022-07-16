@@ -1,1 +1,0 @@
-TypeException: The variable "Color" and the argument "Color" of the module "../require/require.class.default.ks" aren't compatible (line 4, file "fixtures/compile/import/import.immu.let.bad.default.ks")

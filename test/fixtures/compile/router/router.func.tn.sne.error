@@ -1,0 +1,1 @@
+SyntaxException: When the arguments are ("Null"), the function "foobar" can be matched with "foobar(x: String?)" or "foobar(x: Date?)" (fixtures/compile/router/router.func.tn.sne.ks:1)

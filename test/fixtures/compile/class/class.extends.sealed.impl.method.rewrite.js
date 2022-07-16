@@ -1,14 +1,19 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_func_foobar_0 = function() {
 	};
-	__ks_Date._im_foobar = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Date._im_foobar = function(that, ...args) {
+		return __ks_Date.__ks_func_foobar_rt(that, args);
+	};
+	__ks_Date.__ks_func_foobar_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Date.__ks_func_foobar_0.apply(that);
+			return __ks_Date.__ks_func_foobar_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.foobar) {
+			return that.foobar(...args);
+		}
+		throw Helper.badArgs();
 	};
 	class FDate extends Date {
 		constructor() {
@@ -17,31 +22,31 @@ module.exports = function() {
 		}
 		__ks_init() {
 		}
-		__ks_func_foobar_0() {
-			__ks_Date._im_0_foobar(this);
-		}
 		foobar() {
-			if(arguments.length === 0) {
-				return FDate.prototype.__ks_func_foobar_0.apply(this);
+			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
+		}
+		__ks_func_foobar_0() {
+			__ks_Date.__ks_func_foobar_0.call(this);
+		}
+		__ks_func_foobar_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_foobar_0.call(that);
 			}
-			return Date.prototype.foobar.apply(this, arguments);
+			return __ks_Date.__ks_func_foobar_rt(that, args);
 		}
 	}
-	__ks_Date._im_0_foobar = __ks_Date._im_foobar;
-	__ks_Date._im_foobar = function(that) {
-		if(Type.isClassInstance(that, FDate)) {
-			return that.foobar.apply(that, Array.prototype.slice.call(arguments, 1, arguments.length));
+	__ks_Date._im_foobar = function(that, ...args) {
+		if(that.__ks_func_foobar_rt) {
+			return that.__ks_func_foobar_rt.call(null, that, args);
 		}
-		else {
-			return __ks_Date._im_0_foobar.apply(null, arguments);
-		}
+		return __ks_Date.__ks_func_foobar_rt(that, args);
 	};
 	const d = new Date();
 	const f = new FDate();
 	const x = (() => {
 		return new FDate();
 	})();
-	__ks_Date._im_foobar(d);
-	f.foobar();
-	__ks_Date._im_foobar(x);
+	__ks_Date.__ks_func_foobar_0.call(d);
+	f.__ks_func_foobar_0();
+	__ks_Date.__ks_func_foobar_0.call(x);
 };

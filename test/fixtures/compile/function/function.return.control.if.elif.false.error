@@ -1,1 +1,1 @@
-TypeException: The return type must be "String" and not "Number" (line 9, file "fixtures/compile/function/function.return.control.if.elif.false.ks")
+TypeException: The return type must be "String" and not "Number" (fixtures/compile/function/function.return.control.if.elif.false.ks:9)

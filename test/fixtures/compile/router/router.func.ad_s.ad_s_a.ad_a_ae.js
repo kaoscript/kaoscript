@@ -1,83 +1,61 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function __ks_foobar_0() {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		let __ks_i = -1;
-		let __ks__;
-		let a = arguments.length > 1 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "hello";
-		let b = arguments[++__ks_i];
-		if(b === void 0 || b === null) {
-			throw new TypeError("'b' is not nullable");
-		}
-		else if(!Type.isString(b)) {
-			throw new TypeError("'b' is not of type 'String'");
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(a, b) {
+		if(a === void 0 || a === null) {
+			a = "hello";
 		}
 		return 1;
-	}
-	function __ks_foobar_1() {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		let __ks_i = -1;
-		let __ks__;
-		let a = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "hello";
-		let b = arguments[++__ks_i];
-		if(b === void 0 || b === null) {
-			throw new TypeError("'b' is not nullable");
-		}
-		else if(!Type.isString(b)) {
-			throw new TypeError("'b' is not of type 'String'");
-		}
-		let c = arguments[++__ks_i];
-		if(c === void 0 || c === null) {
-			throw new TypeError("'c' is not nullable");
+	};
+	foobar.__ks_1 = function(a, b, c) {
+		if(a === void 0 || a === null) {
+			a = "hello";
 		}
 		return 2;
-	}
-	function __ks_foobar_2() {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		let __ks_i = -1;
-		let __ks__;
-		let a = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : "hello";
-		let b = arguments[++__ks_i];
-		if(b === void 0 || b === null) {
-			throw new TypeError("'b' is not nullable");
-		}
-		let c = arguments[++__ks_i];
-		if(c === void 0 || c === null) {
-			throw new TypeError("'c' is not nullable");
+	};
+	foobar.__ks_2 = function(a, b, c) {
+		if(a === void 0 || a === null) {
+			a = "hello";
 		}
 		return 3;
-	}
-	function foobar() {
-		if(arguments.length === 1) {
-			return __ks_foobar_0(...arguments);
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		const t1 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, void 0, args[0]);
+			}
+			throw Helper.badArgs();
 		}
-		else if(arguments.length === 2) {
-			if(Type.isString(arguments[0])) {
-				return __ks_foobar_1(...arguments);
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t1(args[1])) {
+					return foobar.__ks_1.call(that, void 0, args[0], args[1]);
+				}
 			}
-			else if(Type.isValue(arguments[0])) {
-				return __ks_foobar_2(...arguments);
+			if(t1(args[0])) {
+				if(t1(args[1])) {
+					return foobar.__ks_2.call(that, void 0, args[0], args[1]);
+				}
 			}
-			else {
-				return __ks_foobar_0(...arguments);
+			if(t0(args[1])) {
+				return foobar.__ks_0.call(that, args[0], args[1]);
+			}
+			throw Helper.badArgs();
+		}
+		if(args.length === 3) {
+			if(t0(args[1])) {
+				if(t1(args[2])) {
+					return foobar.__ks_1.call(that, args[0], args[1], args[2]);
+				}
+			}
+			if(t1(args[1]) && t1(args[2])) {
+				return foobar.__ks_2.call(that, args[0], args[1], args[2]);
 			}
 		}
-		else if(arguments.length === 3) {
-			if(Type.isString(arguments[1])) {
-				return __ks_foobar_1(...arguments);
-			}
-			else {
-				return __ks_foobar_2(...arguments);
-			}
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 };

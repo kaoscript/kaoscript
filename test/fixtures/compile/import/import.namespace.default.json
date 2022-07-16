@@ -1,55 +1,64 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "NS"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {
-        "foo": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "Any?",
-          "throws": [],
-          "sealed": false
-        },
-        "bar": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "Any?",
-          "throws": [],
-          "sealed": false
-        },
-        "qux": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "Any?",
-          "throws": [],
-          "sealed": false
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "NS"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {
+          "foo": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          },
+          "bar": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          },
+          "qux": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

@@ -1,22 +1,25 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let CardSuit = Helper.enum(String, {
+	const CardSuit = Helper.enum(String, {
 		Clubs: "clubs",
 		Diamonds: "diamonds",
 		Hearts: "hearts",
 		Spades: "spades"
 	});
-	function foobar(card) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(card === void 0 || card === null) {
-			throw new TypeError("'card' is not nullable");
-		}
-		else if(!Type.isEnumInstance(card, CardSuit)) {
-			throw new TypeError("'card' is not of type 'CardSuit'");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(card) {
 		if(card.value === "hearts") {
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, CardSuit);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

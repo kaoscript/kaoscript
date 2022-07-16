@@ -10,7 +10,7 @@ class TupleDeclaration extends Statement {
 		_type: NamedType<TupleType>
 		_variable: Variable
 	}
-	override analyse() { // {{{
+	override initiate() { // {{{
 		@name = @data.name.name
 
 		let named = false
@@ -47,8 +47,9 @@ class TupleDeclaration extends Statement {
 		@type = new NamedType(@name, @tuple)
 
 		@variable = @scope.define(@name, true, @type, this)
-
-		@function = new TupleFunction(@data, this, new BlockScope(@scope))
+	} // }}}
+	override analyse() { // {{{
+		@function = new TupleFunction(@data, this, new BlockScope(@scope!?))
 
 		for const data in @data.fields {
 			const field = new TupleFieldDeclaration(data, this)
@@ -87,6 +88,7 @@ class TupleDeclaration extends Statement {
 		recipient.export(@name, @variable)
 	} // }}}
 	fields() => @fields
+	isEnhancementExport() => true
 	isExtending() => @extending
 	toArrayFragments(fragments, mode) { // {{{
 		if @extending {
@@ -94,22 +96,16 @@ class TupleDeclaration extends Statement {
 
 			const line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_builder(')
 
-			let nf = false
-			for const field in @extendsType.type().listAllFields() {
-				if nf {
-					line.code($comma)
-				}
-				else {
-					nf = true
-				}
+			for const field, index in @extendsType.type().listAllFields() {
+				line.code($comma) if index != 0
 
-				line.code(`__ks_\(field.index())`)
+				line.code(field.name())
 			}
 
 			line.code(')').done()
 
 			for const field in @fields {
-				fragments.line(varname, '.push(__ks_', field.index(), ')')
+				fragments.line(varname, '.push(', field.type().name(), ')')
 			}
 
 			fragments.line(`return \(varname)`)
@@ -117,10 +113,8 @@ class TupleDeclaration extends Statement {
 		else {
 			const line = fragments.newLine().code('return [')
 
-			for const field, i in @fields {
-				if i != 0 {
-					line.code($comma)
-				}
+			for const field, index in @fields {
+				line.code($comma) if index != 0
 
 				line.compile(field.parameter().name())
 			}
@@ -129,15 +123,33 @@ class TupleDeclaration extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		const line = fragments.newLine().code(`var \(@name) = \($runtime.helper(this)).tuple(`)
+		const line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@name) = \($runtime.helper(this)).tuple(`)
 
-		const ctrl = line.newControl(null, false, false).code(`function(`)
+		let ctrl = line.newControl(null, false, false).code(`function(`)
 
 		Parameter.toFragments(@function, ctrl, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').step()
 		})
 
 		this.toArrayFragments(ctrl, mode)
+
+		ctrl.done()
+
+		const assessment = @type.type().assessment(@type.reference(@scope), this)
+
+		ctrl = line.newControl(null, false, false).code(`, function(__ks_new, args)`).step()
+
+		Router.toFragments(
+			(function, line) => {
+				line.code(`__ks_new(`)
+
+				return false
+			}
+			null
+			assessment
+			ctrl.block()
+			this
+		)
 
 		ctrl.done()
 
@@ -167,7 +179,7 @@ class TupleFunction extends AbstractNode {
 			const parent = @parent._extendsType.type()
 
 			for const type in parent.listAllFields() {
-				const field = new TupleFieldDeclaration(type, @parent)
+				const field = new TupleFieldDeclaration(type, @parent!?)
 				field.analyse()
 				field.prepare()
 
@@ -284,9 +296,9 @@ class TupleFieldParameter extends Parameter {
 		}
 	} // }}}
 	name() => @name
-	toValidationFragments(fragments, wrongdoer) { // {{{
+	toValidationFragments(fragments) { // {{{
 		if @validation {
-			super(fragments, wrongdoer)
+			super(fragments)
 		}
 	} // }}}
 	unflagValidation() { // {{{

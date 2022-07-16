@@ -1,0 +1,1 @@
+SyntaxException: The method "Waldo.foobar(...args: Any)" hides the method "Waldo.foobar(x: Number)" (fixtures/compile/class/class.override.imth.fork.c__i.c_rae.ks:7)

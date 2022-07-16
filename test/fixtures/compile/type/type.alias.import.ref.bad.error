@@ -1,1 +1,1 @@
-ReferenceException: The function "toInt" can't be matched to given arguments (String) (line 5, file "fixtures/compile/type/type.alias.import.ref.bad.ks")
+ReferenceException: The function "toInt" can't be matched to given arguments (String) (fixtures/compile/type/type.alias.import.ref.bad.ks:5)

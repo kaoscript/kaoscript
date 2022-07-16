@@ -1,31 +1,39 @@
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	class ClassA {
+		static __ks_new_0() {
+			const o = Object.create(ClassA.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._x = new ClassB();
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			ClassA.prototype.__ks_init_0.call(this);
+			this._x = ClassB.__ks_new_0();
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	class ClassB {
+		static __ks_new_0() {
+			const o = Object.create(ClassB.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}

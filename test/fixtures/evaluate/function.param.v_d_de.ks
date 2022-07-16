@@ -8,4 +8,4 @@ expect(foo(1)).to.eql([1, 42, 24])
 
 expect(foo(1, 2)).to.eql([1, 2, 24])
 
-expect(foo(1, 2, 3, 4)).to.eql([1, 2, 3])
+expect(() => foo(1, 2, 3, 4)).to.throw()

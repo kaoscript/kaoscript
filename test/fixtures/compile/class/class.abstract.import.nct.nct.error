@@ -1,1 +1,1 @@
-SyntaxException: The class variable "_x" isn't initialized (line 3, file "fixtures/compile/class/class.abstract.import.nct.nct.ks")
+SyntaxException: The class variable "_x" isn't initialized (fixtures/compile/class/class.abstract.import.nct.nct.ks:3)

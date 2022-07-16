@@ -1,6 +1,6 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	let CardSuit = Helper.enum(String, {
+	const CardSuit = Helper.enum(String, {
 		Clubs: "clubs",
 		Diamonds: "diamonds",
 		Hearts: "hearts",

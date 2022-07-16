@@ -1,11 +1,21 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(x, y = null, ...z) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x, y = null, z) {
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const t1 = () => true;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length >= 1) {
+			if(t0(args[0]) && Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && Helper.isVarargs(args, 0, args.length - 1, t0, pts, 1) && te(pts, 2)) {
+				return foobar.__ks_0.call(that, args[0], Helper.getVararg(args, 1, pts[1]), Helper.getVarargs(args, pts[1], pts[2]));
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-	}
-	foobar(42);
+		throw Helper.badArgs();
+	};
+	foobar.__ks_0(42, void 0, []);
 };

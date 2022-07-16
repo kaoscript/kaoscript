@@ -9,14 +9,21 @@ class ClassType extends Type {
 	private {
 		_abstract: Boolean					= false
 		_abstractMethods: Dictionary		= {}
-		_alteration: Boolean				= false
-		_alterationReference: ClassType?
+		_alterations						= {
+			classMethods: {}
+			classVariables: {}
+			constructors: {}
+			instanceMethods: {}
+			instanceVariables: {}
+		}
+		_altering: Boolean					= false
 		_classAssessments: Dictionary		= {}
 		_classMethods: Dictionary			= {}
 		_classVariables: Dictionary			= {}
 		_constructors: Array				= []
+		_constructorAssessment				= null
 		_exhaustiveness						= {
-			constructor: null
+			constructor: false
 			classMethods: {}
 			instanceMethods: {}
 		}
@@ -29,13 +36,20 @@ class ClassType extends Type {
 		_instanceMethods: Dictionary		= {}
 		_instanceVariables: Dictionary		= {}
 		_level: Number						= 0
+		_majorOriginal: ClassType?
+		_minorOriginal: ClassType?
+		_overwritten						= {
+			constructors: null
+			classMethods: {}
+			instanceMethods: {}
+		}
 		_predefined: Boolean				= false
 		_sharedMethods: Dictionary<Number>	= {}
 		_seal								= {
 			constructors: false
-			instanceMethods: {}
-			classVariables: {}
 			classMethods: {}
+			classVariables: {}
+			instanceMethods: {}
 			instanceVariables: {}
 		}
 		_sequences	 						= {
@@ -48,76 +62,49 @@ class ClassType extends Type {
 		}
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const type = new ClassType(scope)
-
-			type._abstract = data.abstract
-			type._alien = data.alien
-			type._hybrid = data.hybrid
-
-			type._exhaustive = data.exhaustive
-
-			if data.exhaustive && data.exhaustiveness? {
-				if data.exhaustive.constructor {
-					type._exhaustiveness.constructor = true
+		getExternReference(...types?): Number? { // {{{
+			for const type in types when ?type {
+				if type.isAlien() && !type.isRequirement() && type.referenceIndex() != -1 {
+					return type.referenceIndex()
 				}
 
-				if data.exhaustiveness.classMethods? {
-					type._exhaustiveness.classMethods = data.exhaustiveness.classMethods
-				}
-
-				if data.exhaustiveness.instanceMethods? {
-					type._exhaustiveness.instanceMethods = data.exhaustiveness.instanceMethods
-				}
-			}
-
-			type._sequences.initializations = data.sequences[0]
-			type._sequences.defaults = data.sequences[1]
-			type._sequences.destructors = data.sequences[2]
-
-			if data.sealed {
-				type.flagSealed()
-			}
-
-			if data.extends? {
-				type.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
-			}
-
-			if data.abstract {
-				for const methods, name of data.abstractMethods {
-					for method in methods {
-						type.dedupAbstractMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+				if ?type._majorOriginal {
+					if const reference = ClassType.getExternReference(type._majorOriginal) {
+						return reference
+					}
+					else if ?type._minorOriginal {
+						return ClassType.getExternReference(type._minorOriginal)
 					}
 				}
 			}
 
-			for method in data.constructors {
-				type.addConstructor(ClassConstructorType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
-			}
-
-			for const vtype, name of data.instanceVariables {
-				type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
-			}
-
-			for const vtype, name of data.classVariables {
-				type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
-			}
-
-			for const methods, name of data.instanceMethods {
-				for method in methods {
-					type.dedupInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
-				}
-			}
-
-			for const methods, name of data.classMethods {
-				for method in methods {
-					type.dedupClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
-				}
-			}
-
-			return type
+			return null
 		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		getOriginReference(type: ClassType): Number? { // {{{
+			if type.origin()? {
+				return type.referenceIndex()
+			}
+
+			if ?type._majorOriginal {
+				return ClassType.getOriginReference(type._majorOriginal)
+			}
+			else {
+				return null
+			}
+		} // }}}
+		getRequireReference(type: ClassType): Number? { // {{{
+			if type.isRequirement() && type.referenceIndex() != -1 {
+				return type.referenceIndex()
+			}
+
+			if ?type._majorOriginal {
+				return ClassType.getRequireReference(type._majorOriginal)
+			}
+			else {
+				return null
+			}
+		} // }}}
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ClassType { // {{{
 			const type = new ClassType(scope)
 
 			type._sequences.initializations = data.sequences[0]
@@ -126,9 +113,9 @@ class ClassType extends Type {
 
 			type._exhaustive = data.exhaustive
 
-			if data.exhaustive && data.exhaustiveness? {
-				if data.exhaustiveness.constructor {
-					type._exhaustiveness.constructor = true
+			if data.exhaustiveness? {
+				if data.exhaustiveness.constructor? {
+					type._exhaustiveness.constructor = data.exhaustiveness.constructor
 				}
 
 				if data.exhaustiveness.classMethods? {
@@ -144,45 +131,34 @@ class ClassType extends Type {
 				type._sharedMethods = data.sharedMethods
 			}
 
-			if data.class? {
-				alterations[data.class.reference] = index
+			if data.origin? {
+				type._origin = TypeOrigin(data.origin)
+			}
+
+			if data.original? {
+				queue.push(() => {
+					const original = references[data.original].discardName()
+
+					ClassType.importFromOriginal(data, type, original, alterations[data.original], metadata, references, alterations, queue, scope, node)
+
+					references[data.original].reference().reset()
+				})
+			}
+			else if data.originals? {
 
 				queue.push(() => {
-					const source = references[data.class.reference]
+					const first = references[data.originals[0]].discardName()
+					const second = references[data.originals[1]].discardName()
 
-					type.copyFrom(source.type())
+					const [major, minor] = first.origin() ~~ TypeOrigin::Require ? [first, second] : [second, first]
+					const isArgument = alterations[major == first ? data.originals[0] : data.originals[1]]
 
-					if type.isAbstract() {
-						for const methods, name of data.abstractMethods {
-							for method in methods {
-								type.dedupAbstractMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
-							}
-						}
-					}
+					ClassType.importFromOriginal(data, type, major, isArgument, metadata, references, alterations, queue, scope, node)
 
-					for const constructor in data.constructors {
-						type.addConstructor(ClassConstructorType.fromMetadata(constructor, metadata, references, alterations, queue, scope, node))
-					}
+					type._minorOriginal = minor
 
-					for const vtype, name of data.instanceVariables {
-						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
-					}
-
-					for const vtype, name of data.classVariables {
-						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
-					}
-
-					for const methods, name of data.instanceMethods {
-						for method in methods {
-							type.dedupInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
-						}
-					}
-
-					for const methods, name of data.classMethods {
-						for method in methods {
-							type.dedupClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
-						}
-					}
+					references[data.originals[0]].reference().reset()
+					references[data.originals[1]].reference().reset()
 				})
 			}
 			else {
@@ -199,58 +175,107 @@ class ClassType extends Type {
 
 				queue.push(() => {
 					if data.extends? {
-						type.extends(Type.fromMetadata(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
+						type.extends(Type.import(data.extends, metadata, references, alterations, queue, scope, node).discardReference())
 					}
 
 					if data.abstract {
 						for const methods, name of data.abstractMethods {
 							for method in methods {
-								type.dedupAbstractMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+								type.dedupAbstractMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 							}
 						}
 					}
 
 					for method in data.constructors {
-						type.addConstructor(ClassConstructorType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+						type.addConstructor(ClassConstructorType.import(method, metadata, references, alterations, queue, scope, node))
 					}
 
 					for const vtype, name of data.instanceVariables {
-						type.addInstanceVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
+						if !type.hasInstanceVariable(name) {
+							type.addInstanceVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
+						}
 					}
 
 					for const vtype, name of data.classVariables {
-						type.addClassVariable(name, ClassVariableType.fromMetadata(vtype, metadata, references, alterations, queue, scope, node))
+						if !type.hasClassVariable(name) {
+							type.addClassVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
+						}
 					}
 
 					for const methods, name of data.instanceMethods {
 						for method in methods {
-							type.dedupInstanceMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+							type.dedupInstanceMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
 
 					for const methods, name of data.classMethods {
 						for method in methods {
-							type.dedupClassMethod(name, ClassMethodType.fromMetadata(method, metadata, references, alterations, queue, scope, node))
+							type.dedupClassMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
 						}
 					}
+
+					type.setExhaustive(data.exhaustive)
 				})
 			}
 
 			return type
 		} // }}}
+		importFromOriginal(data, type: ClassType, original: ClassType, isArgument: Boolean?, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+			type.copyFrom(original)
+
+			if type.isAbstract() {
+				for const methods, name of data.abstractMethods {
+					for method in methods {
+						type.dedupAbstractMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
+					}
+				}
+			}
+
+			for const constructor in data.constructors {
+				type.addConstructor(ClassConstructorType.import(constructor, metadata, references, alterations, queue, scope, node))
+			}
+
+			for const vtype, name of data.instanceVariables {
+				if !type.hasInstanceVariable(name) {
+					type.addInstanceVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
+				}
+			}
+
+			for const vtype, name of data.classVariables {
+				if !type.hasClassVariable(name) {
+					type.addClassVariable(name, ClassVariableType.import(vtype, metadata, references, alterations, queue, scope, node))
+				}
+			}
+
+			for const methods, name of data.instanceMethods {
+				for const method in methods {
+					type.dedupInstanceMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
+				}
+			}
+
+			for const methods, name of data.classMethods {
+				for const method in methods {
+					type.dedupClassMethod(name, ClassMethodType.import(method, metadata, references, alterations, queue, scope, node))
+				}
+			}
+
+			type.setExhaustive(data.exhaustive)
+		} // }}}
 	}
 	addAbstractMethod(name: String, type: ClassMethodType): Number { // {{{
-		@sequences.instanceMethods[name] ??= 0
+		const sequences = @sequences.instanceMethods
+		sequences[name] = sequences[name] ?? -1
 
-		let id = type.identifier()
-		if id == -1 {
-			id = @sequences.instanceMethods[name]++
+		let index = type.index()
 
-			type.identifier(id)
+		if index == -1 {
+			index = ++sequences[name]
+
+			type.index(index)
 		}
 		else {
-			if id >= @sequences.instanceMethods[name] {
-				@sequences.instanceMethods[name] = id + 1
+			if index > sequences[name] {
+				sequences[name] = index
 			}
 		}
 
@@ -261,59 +286,64 @@ class ClassType extends Type {
 			@abstractMethods[name] = [type]
 		}
 
-		return id
+		type.flagAbstract()
+		type.flagInstance()
+
+		return index
 	} // }}}
 	addClassMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if @classMethods[name] is not Array {
-			@classMethods[name] = []
-			@sequences.classMethods[name] = -1
-		}
+		const root = this.ancestor()
+		const sequences = root._sequences.classMethods
 
-		let id = type.identifier()
-		if id == -1 {
-			id = ++@sequences.classMethods[name]
+		@classMethods[name] = @classMethods[name] ?? []
+		sequences[name] = sequences[name] ?? -1
 
-			type.identifier(id)
+		let index = type.index()
+
+		if index == -1 {
+			index = ++sequences[name]
+
+			type.index(index)
 		}
 		else {
-			if id > @sequences.classMethods[name] {
-				@sequences.classMethods[name] = id
+			if index > sequences[name] {
+				sequences[name] = index
 			}
 		}
 
 		@classMethods[name].push(type)
 
-		if @alteration {
-			type.flagAlteration()
-		}
-
 		if type.isSealed() {
 			@seal.classMethods[name] = true
 		}
+		else if @alien {
+			type.flagAlien()
+		}
 
-		return id
+		@alterations.classMethods[name] ??= {}
+		@alterations.classMethods[name][index] = true
+
+		return index
 	} // }}}
 	addClassVariable(name: String, type: ClassVariableType) { // {{{
 		@classVariables[name] = type
 
-		if @alteration {
-			type.flagAlteration()
-		}
-
 		if type.isSealed() {
 			@seal.classVariables[name] = true
 		}
+
+		@alterations.classVariables[name] = true
 	} // }}}
 	addConstructor(type: ClassConstructorType) { // {{{
-		let id = type.identifier()
-		if id == -1 {
-			id = ++@sequences.constructors
+		let index = type.index()
+		if index == -1 {
+			index = ++@sequences.constructors
 
-			type.identifier(id)
+			type.index(index)
 		}
 		else {
-			if id > @sequences.constructors {
-				@sequences.constructors = id
+			if index > @sequences.constructors {
+				@sequences.constructors = index
 			}
 		}
 
@@ -321,52 +351,51 @@ class ClassType extends Type {
 
 		@constructors.push(type)
 
-		if @alteration {
-			type.flagAlteration()
-		}
-
 		if type.isSealed() {
 			@seal.constructors = true
 		}
 
-		return id
+		@alterations.constructors[index] = true
+
+		return index
 	} // }}}
 	addInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if @instanceMethods[name] is not Array {
-			@instanceMethods[name] = []
-			@sequences.instanceMethods[name] = -1
-		}
+		const root = this.ancestor()
+		const sequences = root._sequences.instanceMethods
 
-		let id = type.identifier()
-		if id == -1 {
-			id = ++@sequences.instanceMethods[name]
+		@instanceMethods[name] = @instanceMethods[name] ?? []
+		sequences[name] = sequences[name] ?? -1
 
-			type.identifier(id)
+		let index = type.index()
+		if index == -1 {
+			index = ++sequences[name]
+
+			type.index(index)
 		}
 		else {
-			if id > @sequences.instanceMethods[name] {
-				@sequences.instanceMethods[name] = id
+			if index > sequences[name] {
+				sequences[name] = index
 			}
 		}
 
 		@instanceMethods[name].push(type)
 
-		if @alteration {
-			type.flagAlteration()
-		}
+		type.flagInstance()
 
 		if type.isSealed() {
 			@seal.instanceMethods[name] = true
 		}
+		else if @alien {
+			type.flagAlien()
+		}
 
-		return id
+		@alterations.instanceMethods[name] ??= {}
+		@alterations.instanceMethods[name][index] = true
+
+		return index
 	} // }}}
 	addInstanceVariable(name: String, type: ClassVariableType) { // {{{
 		@instanceVariables[name] = type
-
-		if @alteration {
-			type.flagAlteration()
-		}
 
 		if @alien {
 			type.flagAlien()
@@ -375,6 +404,8 @@ class ClassType extends Type {
 		if type.isSealed() {
 			@seal.instanceVariables[name] = true
 		}
+
+		@alterations.instanceVariables[name] = true
 	} // }}}
 	addPropertyFromAST(data, node) { // {{{
 		const options = Attribute.configure(data, null, AttributeTarget::Property, node.file())
@@ -425,6 +456,10 @@ class ClassType extends Type {
 						}
 					}
 
+					if this.isAlien() {
+						type.flagAlien()
+					}
+
 					if instance {
 						this.dedupInstanceMethod(data.name.name:String, type)
 					}
@@ -436,6 +471,14 @@ class ClassType extends Type {
 			=> {
 				throw new NotSupportedException(`Unexpected kind \(data.kind)`, node)
 			}
+		}
+	} // }}}
+	ancestor() { // {{{
+		if @extending {
+			return @extends.type().ancestor()
+		}
+		else {
+			return this
 		}
 	} // }}}
 	checkVariablesInitializations(node) { // {{{
@@ -454,36 +497,13 @@ class ClassType extends Type {
 	clone() { // {{{
 		const that = new ClassType(@scope)
 
-		return that.copyFrom(this)
-	} // }}}
-	condense() { // {{{
-		for const methods of this._abstractMethods {
-			for const method in methods {
-				method.unflagAlteration()
-			}
-		}
-		for const methods of this._classMethods {
-			for const method in methods {
-				method.unflagAlteration()
-			}
-		}
-		for const methods of this._instanceMethods {
-			for const method in methods {
-				method.unflagAlteration()
-			}
+		that.copyFrom(this)
+
+		if @requirement || @alien {
+			that.originals(this)
 		}
 
-		for const variable of this._classVariables {
-			variable.unflagAlteration()
-		}
-		for const variable of this._instanceVariables {
-			variable.unflagAlteration()
-		}
-
-		@alteration = false
-		@alterationReference = null
-
-		return this
+		return that
 	} // }}}
 	copyFrom(src: ClassType) { // {{{
 		@abstract = src._abstract
@@ -517,19 +537,21 @@ class ClassType extends Type {
 			@seal = Dictionary.clone(src._seal)
 		}
 
+		@exhaustive = src._exhaustive
+		@exhaustiveness = Dictionary.clone(src._exhaustiveness)
 		@sequences = Dictionary.clone(src._sequences)
 
-		if src.isRequired() || src.isAlien() {
-			this.setAlterationReference(src)
+		if src._requirement || src._alien {
+			this.originals(src)
 		}
 
 		return this
 	} // }}}
 	dedupAbstractMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if const id = type.identifier() {
+		if const id = type.index() {
 			if @abstractMethods[name] is Array {
 				for const method in @abstractMethods[name] {
-					if method.identifier() == id {
+					if method.index() == id {
 						return id
 					}
 				}
@@ -539,10 +561,10 @@ class ClassType extends Type {
 		return this.addAbstractMethod(name, type)
 	} // }}}
 	dedupClassMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if const id = type.identifier() {
+		if const id = type.index() {
 			if @classMethods[name] is Array {
 				for const method in @classMethods[name] {
-					if method.identifier() == id {
+					if method.index() == id {
 						return id
 					}
 				}
@@ -553,7 +575,7 @@ class ClassType extends Type {
 			const methods = @classMethods[name]
 
 			for const data in overwrite {
-				for const i from methods.length - 1 to 0 by -1 when methods[i].identifier() == data.id {
+				for const i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
 					methods.splice(i, 1)
 					break
 				}
@@ -565,10 +587,10 @@ class ClassType extends Type {
 		return this.addClassMethod(name, type)
 	} // }}}
 	dedupInstanceMethod(name: String, type: ClassMethodType): Number? { // {{{
-		if const id = type.identifier() {
+		if const id = type.index() {
 			if @instanceMethods[name] is Array {
 				for const method in @instanceMethods[name] {
-					if method.identifier() == id {
+					if method.index() == id {
 						return id
 					}
 				}
@@ -576,53 +598,137 @@ class ClassType extends Type {
 		}
 
 		if const overwrite = type.overwrite() {
-			const methods = @instanceMethods[name]
-
-			for const data in overwrite {
-				for const i from methods.length - 1 to 0 by -1 when methods[i].identifier() == data.id {
-					methods.splice(i, 1)
-					break
+			if const methods = @instanceMethods[name] {
+				for const data in overwrite {
+					for const i from methods.length - 1 to 0 by -1 when methods[i].index() == data {
+						methods.splice(i, 1)
+						break
+					}
 				}
 			}
 		}
 
 		return this.addInstanceMethod(name, type)
 	} // }}}
-	export(references, mode: ExportMode) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+
 		const exhaustive = this.isExhaustive()
 
 		let export
 
-		if this.hasExportableAlteration() {
+		let exportSuper = false
+		if @majorOriginal? {
+			if mode ~~ ExportMode::Export {
+				exportSuper = this.hasExportableOriginals()
+			}
+			else if mode ~~ ExportMode::Requirement {
+				let original = @majorOriginal
+
+				while ?original {
+					if original.isRequirement() || original.referenceIndex() != -1 {
+						exportSuper = true
+						break
+					}
+					else {
+						original = original._majorOriginal
+					}
+				}
+			}
+		}
+
+		if exportSuper {
 			export = {
 				kind: TypeKind::Class
-				class: @alterationReference.toAlterationReference(references, mode)
-				exhaustive
-				constructors: [constructor.export(references, mode) for const constructor in @constructors when constructor.isAlteration() && constructor.isExportable()]
-				instanceVariables: {}
-				classVariables: {}
-				instanceMethods: {}
-				classMethods: {}
 			}
 
-			for const variable, name of @instanceVariables when variable.isAlteration() {
-				export.instanceVariables[name] = variable.export(references, mode)
+			if mode ~~ ExportMode::Export {
+				const origin = this.origin()
+				const extern = ClassType.getExternReference(@majorOriginal, @minorOriginal)
+				const require = ClassType.getRequireReference(@majorOriginal)
+
+				if extern? {
+					if require? {
+						if origin ~~ TypeOrigin::ExternOrRequire {
+							export.originals = [extern, require]
+						}
+						else if origin ~~ TypeOrigin::RequireOrExtern {
+							export.originals = [require, extern]
+						}
+						else {
+							export.original = require
+						}
+					}
+					else {
+						export.original = extern
+					}
+				}
+				else {
+					export.original = require
+				}
+			}
+			else {
+				export.original = ClassType.getRequireReference(@majorOriginal) ?? ClassType.getExternReference(@majorOriginal)
 			}
 
-			for const variable, name of @classVariables when variable.isAlteration() {
-				export.classVariables[name] = variable.export(references, mode)
+			export.exhaustive = exhaustive
+			export.constructors = []
+			export.instanceVariables = {}
+			export.classVariables = {}
+			export.instanceMethods = {}
+			export.classMethods = {}
+
+			@majorOriginal.exportProperties(export, references, indexDelta, mode, module, @overwritten)
+
+			let original = @majorOriginal
+			while original.referenceIndex() == -1 {
+				original = original.majorOriginal()
+			}
+
+			const originalConstructors = original?.listConstructors()?.map((method, _, _) => method.index())
+			for const constructor in @constructors when constructor.isExportable(mode) {
+				if @alterations.constructors[constructor.index()] {
+					export.constructors.push(constructor.export(references, indexDelta, mode, module, originalConstructors))
+				}
+			}
+
+			for const variable, name of @instanceVariables {
+				if @alterations.instanceVariables[name] {
+					export.instanceVariables[name] = variable.export(references, indexDelta, mode, module)
+				}
+			}
+
+			for const variable, name of @classVariables {
+				if @alterations.classVariables[name] {
+					export.classVariables[name] = variable.export(references, indexDelta, mode, module)
+				}
 			}
 
 			for const methods, name of @instanceMethods {
-				const exportedMethods = [method.export(references, mode) for const method in methods when method.isAlteration() && method.isExportable()]
-				if exportedMethods.length > 0 {
+				const exportedMethods = export.instanceMethods[name] ?? []
+				const originalMethods = original?.listInstanceMethods(name)?.map((method, _, _) => method.index())
+
+				for const method in methods when method.isExportable(mode) {
+					if @alterations.instanceMethods[name]?[method.index()] {
+						exportedMethods.push(method.export(references, indexDelta, mode, module, originalMethods))
+					}
+				}
+
+				if exportedMethods.length != 0 {
 					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
 			for const methods, name of @classMethods {
-				const exportedMethods = [method.export(references, mode) for const method in methods when method.isAlteration() && method.isExportable()]
-				if exportedMethods.length > 0 {
+				const exportedMethods = export.classMethods[name] ?? []
+				const originalMethods = original?.listClassMethods(name)?.map((method, _, _) => method.index())
+
+				for const method in methods when method.isExportable(mode) {
+					if @alterations.classMethods[name]?[method.index()] {
+						exportedMethods.push(method.export(references, indexDelta, mode, module, originalMethods))
+					}
+				}
+
+				if exportedMethods.length != 0 {
 					export.classMethods[name] = exportedMethods
 				}
 			}
@@ -636,7 +742,7 @@ class ClassType extends Type {
 				sealed: @sealed
 				systemic: @systemic
 				exhaustive
-				constructors: [constructor.export(references, mode) for const constructor in @constructors]
+				constructors: [constructor.export(references, indexDelta, mode, module, null) for const constructor in @constructors]
 				instanceVariables: {}
 				classVariables: {}
 				instanceMethods: {}
@@ -644,35 +750,51 @@ class ClassType extends Type {
 			}
 
 			for const variable, name of @instanceVariables {
-				export.instanceVariables[name] = variable.export(references, mode)
+				export.instanceVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 
 			for const variable, name of @classVariables {
-				export.classVariables[name] = variable.export(references, mode)
+				export.classVariables[name] = variable.export(references, indexDelta, mode, module)
 			}
 
 			for const methods, name of @instanceMethods {
-				const m = [method.unflagAlteration().export(references, mode) for const method in methods when method.isExportable()]
+				const exportedMethods = [method.export(references, indexDelta, mode, module, null) for const method in methods when method.isExportable(mode)]
 
-				if m.length != 0 {
-					export.instanceMethods[name] = m
+				if exportedMethods.length != 0 {
+					export.instanceMethods[name] = exportedMethods
 				}
 			}
 
 			for const methods, name of @classMethods {
-				export.classMethods[name] = [method.unflagAlteration().export(references, mode) for const method in methods when method.isExportable()]
+				const exportedMethods = [method.export(references, indexDelta, mode, module, null) for const method in methods when method.isExportable(mode)]
+
+				if exportedMethods.length != 0 {
+					export.classMethods[name] = exportedMethods
+				}
 			}
 
 			if @abstract {
 				export.abstractMethods = {}
 
 				for const methods, name of @abstractMethods {
-					export.abstractMethods[name] = [method.export(references, mode) for const method in methods when method.isExportable()]
+					const exportedMethods = [method.export(references, indexDelta, mode, module, null) for const method in methods when method.isExportable(mode)]
+
+					if exportedMethods.length != 0 {
+						export.abstractMethods[name] = exportedMethods
+					}
 				}
 			}
 
 			if @extending {
-				export.extends = @extends.metaReference(references, mode)
+				export.extends = @extends.metaReference(references, indexDelta, mode, module)
+			}
+		}
+
+		if mode !~ ExportMode::Export && @origin? && @origin ~~ TypeOrigin::Extern && @origin !~ TypeOrigin::Import {
+			const origin = @origin - TypeOrigin::Extern - TypeOrigin::Require
+
+			if origin != 0 {
+				export.origin = origin
 			}
 		}
 
@@ -682,28 +804,24 @@ class ClassType extends Type {
 			@sequences.destructors
 		]
 
-		if exhaustive {
-			const exhaustiveness = {}
-			let notEmpty = false
+		const exhaustiveness = {}
 
-			if @exhaustiveness.constructor == false {
-				exhaustiveness.constructor = false
-				notEmpty = true
-			}
+		if @exhaustiveness.constructor != exhaustive {
+			exhaustiveness.constructor = @exhaustiveness.constructor
+		}
 
-			if !Dictionary.isEmpty(@exhaustiveness.classMethods) {
-				exhaustiveness.classMethods = @exhaustiveness.classMethods
-				notEmpty = true
-			}
+		for const value, name of @exhaustiveness.classMethods when value != exhaustive {
+			exhaustiveness.classMethods ??= {}
+			exhaustiveness.classMethods[name] = value
+		}
 
-			if !Dictionary.isEmpty(@exhaustiveness.instanceMethods) {
-				exhaustiveness.instanceMethods = @exhaustiveness.instanceMethods
-				notEmpty = true
-			}
+		for const value, name of @exhaustiveness.instanceMethods when value != exhaustive {
+			exhaustiveness.instanceMethods ??= {}
+			exhaustiveness.instanceMethods[name] = value
+		}
 
-			if notEmpty {
-				export.exhaustiveness = exhaustiveness
-			}
+		if !Dictionary.isEmpty(exhaustiveness) {
+			export.exhaustiveness = exhaustiveness
 		}
 
 		if @sealed {
@@ -711,6 +829,59 @@ class ClassType extends Type {
 		}
 
 		return export
+	} // }}}
+	exportProperties(export, references, indexDelta, mode, module, overwritten) { // {{{
+		return unless @referenceIndex == -1
+
+		@majorOriginal?.exportProperties(export, references, indexDelta, mode, module, overwritten)
+
+		for const variable, name of @instanceVariables {
+			if @alterations.instanceVariables[name] {
+				export.instanceVariables[name] = variable.export(references, indexDelta, mode, module)
+			}
+		}
+
+		for const variable, name of @classVariables {
+			if @alterations.classVariables[name] {
+				export.classVariables[name] = variable.export(references, indexDelta, mode, module)
+			}
+		}
+
+		const ignoredConstructors = overwritten.constructors ?? []
+		for const constructor in @constructors when constructor.isExportable(mode) {
+			if @alterations.constructors[constructor.index()] && !ignoredConstructors:Array.contains(constructor.index()) {
+				export.constructors.push(constructor.export(references, indexDelta, mode, module, true))
+			}
+		}
+
+		for const methods, name of @instanceMethods {
+			const exportedMethods = export.instanceMethods[name] ?? []
+			const ignoredMethods = overwritten.instanceMethods[name] ?? []
+
+			for const method in methods when method.isExportable(mode) {
+				if @alterations.instanceMethods[name]?[method.index()] && !ignoredMethods:Array.contains(method.index()) {
+					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
+				}
+			}
+
+			if exportedMethods.length != 0 {
+				export.instanceMethods[name] = exportedMethods
+			}
+		}
+
+		for const methods, name of @classMethods {
+			const exportedMethods = export.classMethods[name] ?? []
+
+			for const method in methods when method.isExportable(mode) {
+				if @alterations.classMethods[name]?[method.index()] {
+					exportedMethods.push(method.export(references, indexDelta, mode, module, true))
+				}
+			}
+
+			if exportedMethods.length != 0 {
+				export.classMethods[name] = exportedMethods
+			}
+		}
 	} // }}}
 	extends() => @extends
 	extends(@extends) { // {{{
@@ -788,7 +959,7 @@ class ClassType extends Type {
 		let method, index
 		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
-				if method.isMatched(@instanceMethods[name], MatchingMode::Signature) {
+				if method.isSubsetOf(@instanceMethods[name], MatchingMode::FunctionSignature) {
 					methods.splice(index, 1)
 				}
 			}
@@ -798,8 +969,18 @@ class ClassType extends Type {
 			}
 		}
 	} // }}}
+	flagAltering(): this { // {{{
+		if ?@majorOriginal {
+			@altering = true
+		}
+	} // }}}
 	flagPredefined() { // {{{
 		@predefined = true
+	} // }}}
+	flagRequirement(): this { // {{{
+		super()
+
+		@majorOriginal?.unflagRequired()
 	} // }}}
 	flagSealed() { // {{{
 		@sealed = true
@@ -815,26 +996,10 @@ class ClassType extends Type {
 			@extends.type().forEachInstanceVariables(fn)
 		}
 	} // }}}
-	getAbstractMethod(name: String, arguments: Array) { // {{{
-		if @abstractMethods[name] is Array {
-			for method in @abstractMethods[name] {
-				if method.matchArguments(arguments) {
-					return method
-				}
-			}
-		}
-
-		if @extending {
-			return @extends.type().getAbstractMethod(name, arguments)
-		}
-		else {
-			return null
-		}
-	} // }}}
 	getAbstractMethod(name: String, type: Type) { // {{{
 		if @abstractMethods[name] is Array {
 			for method in @abstractMethods[name] {
-				if type.isMatching(method, MatchingMode::Signature) {
+				if type.isMatching(method, MatchingMode::FunctionSignature) {
 					return method
 				}
 			}
@@ -861,7 +1026,7 @@ class ClassType extends Type {
 			const methods = [...@classMethods[name]]
 
 			let that = this
-			while that.isExtending() {
+			while methods.length == 0 && that.isExtending() {
 				that = that.extends().type()
 
 				if const m = that.listClassMethods(name) {
@@ -871,7 +1036,7 @@ class ClassType extends Type {
 				}
 			}
 
-			@classAssessments[name] = Router.assess(methods, false, name, node)
+			@classAssessments[name] = Router.assess(methods, name, node)
 		}
 
 		return @classAssessments[name]
@@ -898,23 +1063,37 @@ class ClassType extends Type {
 
 		return @extends.type().getClassWithInstanceMethod(name, @extends)
 	} // }}}
-	getConstructor(arguments: Array) { // {{{
-		if @constructors.length == 0 {
-			if @extending {
-				return @extends.type().getConstructor(arguments)
-			}
+	getConstructor(type: FunctionType, mode: MatchingMode) { // {{{
+		if @constructors.length == 0 && @extending {
+			return @extends.type().getConstructor(type)
 		}
-		else {
-			for method in @constructors {
-				if method.matchArguments(arguments) {
-					return method
-				}
+
+		const result = []
+
+		for method in @constructors {
+			if method.isSubsetOf(type, mode) {
+				return method
 			}
 		}
 
-		return null
+		if result.length == 1 {
+			return result[0]
+		}
+		else {
+			return null
+		}
 	} // }}}
-	getConstructorCount() => @sequences.destructors + 1
+	getConstructorAssessment(name: String, node: AbstractNode) { // {{{
+		if @constructorAssessment == null {
+			const methods = this.listAccessibleConstructors()
+
+			@constructorAssessment = Router.assess(methods, name, node)
+		}
+
+		return @constructorAssessment
+	} // }}}
+	getConstructorCount() => @sequences.constructors + 1
+	getDestructorCount() => @sequences.destructors + 1
 	getHierarchy(name) { // {{{
 		if @extending {
 			let class = this.extends()
@@ -955,31 +1134,6 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
-	getInstantiableMethod(name: String, arguments: Array) { // {{{
-		if const methods = @instanceMethods[name] {
-			for method in methods {
-				if method.matchArguments(arguments) {
-					return method
-				}
-			}
-		}
-		if @abstract {
-			if const methods = @abstractMethods[name] {
-				for method in methods {
-					if method.matchArguments(arguments) {
-						return method
-					}
-				}
-			}
-		}
-
-		if @extending {
-			return @extends.type().getInstantiableMethod(name, arguments)
-		}
-		else {
-			return null
-		}
-	} // }}}
 	getInstanceProperty(name: String) { // {{{
 		if @instanceMethods[name] is Array {
 			if @instanceMethods[name].length == 1 {
@@ -1016,7 +1170,7 @@ class ClassType extends Type {
 		const methods = this.listInstantiableMethods(name)
 
 		let that = this
-		while that.isExtending() {
+		while methods.length == 0 && that.isExtending() {
 			that = that.extends().type()
 
 			for const method in that.listInstantiableMethods(name) {
@@ -1024,12 +1178,13 @@ class ClassType extends Type {
 			}
 		}
 
-		const assessment = Router.assess(methods, false, name, node)
+		const assessment = Router.assess(methods, name, node)
 
 		@instanceAssessments[name] = assessment
 
 		return assessment
 	} // }}}
+	getMajorReferenceIndex() => @referenceIndex == -1 && @majorOriginal? ? @majorOriginal.getMajorReferenceIndex() : @referenceIndex
 	getProperty(name: String) => this.getClassProperty(name)
 	getPropertyGetter(name: String) { // {{{
 		if @instanceMethods[name] is Array {
@@ -1072,22 +1227,6 @@ class ClassType extends Type {
 			return false
 		}
 	} // }}}
-	hasAbstractMethod(name: String, arguments: Array) { // {{{
-		if @abstractMethods[name] is Array {
-			for method in @abstractMethods[name] {
-				if method.matchArguments(arguments) {
-					return true
-				}
-			}
-		}
-
-		if @extending {
-			return @extends.type().hasAbstractMethod(name, arguments)
-		}
-		else {
-			return false
-		}
-	} // }}}
 	hasClassMethod(name) { // {{{
 		if @classMethods[name] is Array {
 			return true
@@ -1114,9 +1253,13 @@ class ClassType extends Type {
 	} // }}}
 	hasConstructors() => @constructors.length != 0
 	hasDestructors() => @sequences.destructors != -1
-	hasExportableAlteration() { // {{{
-		if ?@alterationReference {
-			return @alterationReference._referenceIndex != -1 || @alterationReference.hasExportableAlteration()
+	hasExportableOriginals() { // {{{
+		if @minorOriginal? {
+			return true if @minorOriginal._referenceIndex != -1 || @minorOriginal.hasExportableOriginals()
+		}
+
+		if ?@majorOriginal {
+			return @majorOriginal._referenceIndex != -1 || @majorOriginal.hasExportableOriginals()
 		}
 		else {
 			return false
@@ -1163,10 +1306,14 @@ class ClassType extends Type {
 	hasMatchingClassMethod(name, type: FunctionType, mode: MatchingMode) { // {{{
 		if @classMethods[name] is Array {
 			for const method in @classMethods[name] {
-				if method.isMatching(type, mode) {
+				if method.isSubsetOf(type, mode) {
 					return true
 				}
 			}
+		}
+
+		if @extending && mode ~~ MatchingMode::Superclass {
+			return @extends.type().hasMatchingClassMethod(name, type, mode)
 		}
 
 		return false
@@ -1174,7 +1321,7 @@ class ClassType extends Type {
 	hasMatchingConstructor(type: FunctionType, mode: MatchingMode) { // {{{
 		if @constructors.length != 0 {
 			for const constructor in @constructors {
-				if constructor.isMatching(type, mode) {
+				if constructor.isSubsetOf(type, mode) {
 					return true
 				}
 			}
@@ -1185,7 +1332,7 @@ class ClassType extends Type {
 	hasMatchingInstanceMethod(name, type: FunctionType, mode: MatchingMode) { // {{{
 		if @instanceMethods[name] is Array {
 			for const method in @instanceMethods[name] {
-				if method.isMatching(type, mode) {
+				if method.isSubsetOf(type, mode) {
 					return true
 				}
 			}
@@ -1193,15 +1340,31 @@ class ClassType extends Type {
 
 		if @abstract && @abstractMethods[name] is Array {
 			for const method in @abstractMethods[name] {
-				if method.isMatching(type, mode) {
+				if method.isSubsetOf(type, mode) {
 					return true
 				}
 			}
 		}
 
+		if @extending && mode ~~ MatchingMode::Superclass {
+			return @extends.type().hasMatchingInstanceMethod(name, type, mode)
+		}
+
 		return false
 	} // }}}
 	hasSealedConstructors(): Boolean => @seal?.constructors
+	hasSealedInstanceMethod(name) { // {{{
+		if @seal.instanceMethods[name] {
+			return true
+		}
+
+		if @extending {
+			return @extends.type().hasSealedInstanceMethod(name)
+		}
+		else {
+			return false
+		}
+	} // }}}
 	incDefaultSequence() { // {{{
 		return ++@sequences.defaults
 	} // }}}
@@ -1222,7 +1385,7 @@ class ClassType extends Type {
 		return @sharedMethods[name]
 	} // }}}
 	isAbstract() => @abstract
-	isAlteration() => @alteration
+	isAltering() => @altering
 	isAsyncClassMethod(name) { // {{{
 		if @classMethods[name] is Array {
 			return @classMethods[name][0].isAsync()
@@ -1257,8 +1420,8 @@ class ClassType extends Type {
 			return true
 		}
 
-		if @alteration {
-			return @alterationReference.isExhaustive()
+		if @altering {
+			return @majorOriginal.isExhaustive()
 		}
 
 		if @extending {
@@ -1268,36 +1431,32 @@ class ClassType extends Type {
 			return super.isExhaustive()
 		}
 	} // }}}
-	isExhaustiveConstructor() { // {{{
-		if @exhaustiveness.constructor == false {
-			return false
-		}
-		else {
-			return true
-		}
-	} // }}}
+	isExhaustiveConstructor() => @exhaustiveness.constructor
 	isExhaustiveConstructor(node) => this.isExhaustive(node) && this.isExhaustiveConstructor()
 	isExhaustiveClassMethod(name) { // {{{
-		if @exhaustiveness.classMethods[name] == false {
-			return false
+		if @exhaustiveness.classMethods[name]? {
+			return @exhaustiveness.classMethods[name]
 		}
 		else if @extending {
 			return @extends.type().isExhaustiveClassMethod(name)
 		}
 		else {
-			return true
+			return @exhaustive
 		}
 	} // }}}
 	isExhaustiveClassMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveClassMethod(name)
 	isExhaustiveInstanceMethod(name) { // {{{
-		if @exhaustiveness.instanceMethods[name] == false {
-			return false
+		if @exhaustiveness.instanceMethods[name]? {
+			return @exhaustiveness.instanceMethods[name]
+		}
+		else if @abstract && this.hasAbstractMethod(name) {
+			return true
 		}
 		else if @extending {
 			return @extends.type().isExhaustiveInstanceMethod(name)
 		}
 		else {
-			return true
+			return @exhaustive
 		}
 	} // }}}
 	isExhaustiveInstanceMethod(name, node) => this.isExhaustive(node) && this.isExhaustiveInstanceMethod(name)
@@ -1307,70 +1466,94 @@ class ClassType extends Type {
 	isFlexible() => @sealed
 	isHybrid() => @hybrid
 	isInitializing() => @sequences.initializations != -1
-	isInstanceOf(target: ClassType) { // {{{
-		if this.equals(target) {
-			return true
-		}
-		else if @extending {
-			return @extends.type().isInstanceOf(target)
-		}
-		else {
-			return false
-		}
-	} // }}}
-	isMatching(value: ClassType, mode: MatchingMode) { // {{{
+	// TODO rename to `isSubclassOf`
+	isInstanceOf(value: ClassType) { // {{{
 		if this == value {
 			return true
 		}
+
+		if @extending && @extends.type().isInstanceOf(value) {
+			return true
+		}
+
+		return false
+	} // }}}
+	isInstanceOf(value: NamedType) => this.isInstanceOf(value.type())
+	isMergeable(type) => type.isClass()
+	isPredefined() => @predefined
+	isSealable() => true
+	isSealedInstanceMethod(name: String) => @seal.instanceMethods[name] ?? false
+	isSubsetOf(value: ClassType, mode: MatchingMode) { // {{{
+		if this == value {
+			return true
+		}
+
+		if mode ~~ MatchingMode::Subclass && @extending && @extends.type().isInstanceOf(value) {
+			return true
+		}
+
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
-		for const variable, name of value._instanceVariables {
-			if !@instanceVariables[name]?.isMatching(variable, mode) {
-				return false
-			}
-		}
-
-		for const variable, name of value._classVariables {
-			if !@classVariables[name]?.isMatching(variable, mode) {
-				return false
-			}
-		}
-
-		for const methods, name of value._instanceMethods {
-			if @instanceMethods[name] is not Array {
-				return false
-			}
-
-			for method in methods {
-				if !method.isMatched(@instanceMethods[name], MatchingMode::Signature) {
+		if mode ~~ MatchingMode::Similar {
+			for const variable, name of value._instanceVariables {
+				if !@instanceVariables[name]?.isSubsetOf(variable, mode) {
 					return false
 				}
 			}
-		}
 
-		for const methods, name of value._classMethods {
-			if @classMethods[name] is not Array {
-				return false
-			}
-
-			for method in methods {
-				if !method.isMatched(@classMethods[name], MatchingMode::Signature) {
+			for const variable, name of value._classVariables {
+				if !@classVariables[name]?.isSubsetOf(variable, mode) {
 					return false
 				}
 			}
+
+			let functionMode = MatchingMode::FunctionSignature + MatchingMode::Similar
+			functionMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
+
+			for const methods, name of value._instanceMethods {
+				if @instanceMethods[name] is not Array {
+					return false
+				}
+
+				for const method in methods {
+					if !method.isSupersetOf(@instanceMethods[name], functionMode) {
+						return false
+					}
+				}
+			}
+
+			for const methods, name of value._classMethods {
+				if @classMethods[name] is not Array {
+					return false
+				}
+
+				for const method in methods {
+					if !method.isSupersetOf(@classMethods[name], functionMode) {
+						return false
+					}
+				}
+			}
+
+			return true
 		}
 
-		return true
+		return false
 	} // }}}
-	isMatching(value: NamedType, mode: MatchingMode) { // {{{
-		return this.isMatching(value.type(), mode)
-	} // }}}
-	isMergeable(type) => type.isClass()
-	isPredefined() => @predefined
-	isSealable() => true
+	isSubsetOf(value: NamedType, mode: MatchingMode) => this.isSubsetOf(value.type(), mode)
 	level() => @level
+	listAccessibleConstructors() { // {{{
+		if @constructors.length != 0 {
+			return @constructors
+		}
+		else if @extending {
+			return @extends.type().listAccessibleConstructors()
+		}
+		else {
+			return []
+		}
+	} // }}}
 	listClassMethods(name: String) { // {{{
 		if @classMethods[name] is Array {
 			return @classMethods[name]
@@ -1378,7 +1561,47 @@ class ClassType extends Type {
 
 		return null
 	} // }}}
+	listClassMethods(name: String, type: FunctionType, mode: MatchingMode): Array { // {{{
+		const result = []
+
+		if const methods = @classMethods[name] {
+			for method in methods {
+				if method.isSubsetOf(type, mode) {
+					result.push(method)
+				}
+			}
+		}
+
+		if result.length > 0 {
+			return result
+		}
+
+		if @extending {
+			return @extends.type().listClassMethods(name, type, mode)
+		}
+
+		return result
+	} // }}}
 	listConstructors() => @constructors
+	listConstructors(type: FunctionType, mode: MatchingMode): Array { // {{{
+		const result = []
+
+		for const method in @constructors {
+			if method.isSubsetOf(type, mode) {
+				result.push(method)
+			}
+		}
+
+		if result.length > 0 {
+			return result
+		}
+
+		if @extending {
+			return @extends.type().listConstructors(type, mode)
+		}
+
+		return result
+	} // }}}
 	listInstanceMethods(name: String) { // {{{
 		if @instanceMethods[name] is Array {
 			return @instanceMethods[name]
@@ -1401,11 +1624,46 @@ class ClassType extends Type {
 
 		return methods
 	} // }}}
+	listInstantiableMethods(name: String, type: FunctionType, mode: MatchingMode): Array { // {{{
+		const result = []
+
+		if const methods = @instanceMethods[name] {
+			for method in methods {
+				if method.isSubsetOf(type, mode) {
+					result.push(method)
+				}
+			}
+		}
+
+		if result.length > 0 {
+			return result
+		}
+
+		if @abstract {
+			if const methods = @abstractMethods[name] {
+				for method in methods {
+					if method.isSubsetOf(type, mode) {
+						result.push(method)
+					}
+				}
+			}
+		}
+
+		if result.length > 0 {
+			return result
+		}
+
+		if @extending {
+			return @extends.type().listInstantiableMethods(name, type, mode)
+		}
+
+		return result
+	} // }}}
 	listMatchingConstructors(type: FunctionType, mode: MatchingMode) { // {{{
 		const results: Array = []
 
 		for const constructor in @constructors {
-			if constructor.isMatching(type, mode) {
+			if constructor.isSubsetOf(type, mode) {
 				results.push(constructor)
 			}
 		}
@@ -1417,7 +1675,7 @@ class ClassType extends Type {
 
 		if @instanceMethods[name] is Array {
 			for const method in @instanceMethods[name] {
-				if method.isMatching(type, mode) {
+				if method.isSubsetOf(type, mode) {
 					results.push(method)
 				}
 			}
@@ -1425,7 +1683,7 @@ class ClassType extends Type {
 
 		if @abstract && @abstractMethods[name] is Array {
 			for const method in @abstractMethods[name] {
-				if method.isMatching(type, mode) {
+				if method.isSubsetOf(type, mode) {
 					results.push(method)
 				}
 			}
@@ -1442,12 +1700,14 @@ class ClassType extends Type {
 
 		@extends.type().filterAbstractMethods(abstractMethods)
 
+		const mode = MatchingMode::Signature - MatchingMode::MissingParameterType
+
 		const matchables = []
 
 		let method, index
 		for const methods, name of abstractMethods when @instanceMethods[name] is Array {
 			for method, index in methods desc {
-				if method.isMatched(@instanceMethods[name], MatchingMode::Signature) {
+				if method.isSubsetOf(@instanceMethods[name], mode) {
 					methods.splice(index, 1)
 				}
 			}
@@ -1459,10 +1719,11 @@ class ClassType extends Type {
 
 		return abstractMethods
 	} // }}}
-	matchArguments(arguments: Array<Type>) { // {{{
+	majorOriginal() => @majorOriginal
+	matchArguments(arguments: Array<Type>, node: AbstractNode) { // {{{
 		if @constructors.length == 0 {
 			if @extending {
-				return @extends.type().matchArguments(arguments)
+				return @extends.type().matchArguments(arguments, node)
 			}
 			else {
 				return @alien || arguments.length == 0
@@ -1470,7 +1731,7 @@ class ClassType extends Type {
 		}
 		else {
 			for constructor in @constructors {
-				if constructor.matchArguments(arguments) {
+				if constructor.matchArguments(arguments, node) {
 					return true
 				}
 			}
@@ -1480,13 +1741,13 @@ class ClassType extends Type {
 	} // }}}
 	matchInstanceWith(object: DictionaryType, matchables) { // {{{
 		for const property, name of object._properties {
-			if @instanceVariables[name]?.isMatching(property, MatchingMode::Signature) {
+			if @instanceVariables[name]?.isSubsetOf(property, MatchingMode::Signature) {
 			}
 			else if @instanceMethods[name] is Array {
 				let nf = true
 
 				for method in @instanceMethods[name] while nf {
-					if method.isMatching(property, MatchingMode::Signature) {
+					if method.isSubsetOf(property, MatchingMode::FunctionSignature) {
 						nf = false
 					}
 				}
@@ -1502,330 +1763,218 @@ class ClassType extends Type {
 
 		return true
 	} // }}}
-	metaReference(references, name, mode) { // {{{
+	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name: String) { // {{{
 		if @predefined {
 			return name
 		}
 		else {
-			return [this.toMetadata(references, mode), name]
+			return [this.toMetadata(references, indexDelta, mode, module), name]
 		}
+	} // }}}
+	minorOriginal() => @minorOriginal ?? @majorOriginal
+	origin() { // {{{
+		if @origin? {
+			return @origin
+		}
+		else if @majorOriginal? {
+			return @majorOriginal.origin()
+		}
+		else {
+			return null
+		}
+	} // }}}
+	originals(@majorOriginal, @minorOriginal = null): this { // {{{
+		@altering = true
 	} // }}}
 	overwriteConstructor(type, methods) { // {{{
 		@constructors.remove(...methods)
 
-		type.overwrite([{id: method.identifier(), export: !method.isAlteration()} for const method in methods])
+		if const alterMethods = @majorOriginal?._constructors {
+			const indexes = [method.index() for const method in alterMethods]
+			const overwrite = [method.index() for const method in methods when indexes.contains(method.index())]
+
+			if overwrite.length != 0 {
+				type.overwrite(overwrite)
+
+				@overwritten.constructors = overwrite
+			}
+		}
 
 		return this.addConstructor(type)
 	} // }}}
-	overwriteInstanceMethod(name, type, methods) { // {{{
+	overwriteInstanceMethod(name: String, type, methods) { // {{{
 		@instanceMethods[name]:Array.remove(...methods)
 
-		type.overwrite([{id: method.identifier(), export: !method.isAlteration()} for const method in methods])
+		if const alterMethods = @majorOriginal?._instanceMethods[name] {
+			const indexes = [method.index() for const method in alterMethods]
+			const overwrite = [method.index() for const method in methods when indexes.contains(method.index())]
+
+			if overwrite.length != 0 {
+				type.overwrite(overwrite)
+
+				@overwritten.instanceMethods[name] = overwrite
+			}
+		}
 
 		return this.addInstanceMethod(name, type)
 	} // }}}
 	parameter() => AnyType.NullableUnexplicit
-	setAlterationReference(@alterationReference) { // {{{
-		@alteration = true
+	setExhaustive(@exhaustive) { // {{{
+		if @exhaustive {
+			if @extending {
+				const extends = @extends.type()
+
+				@exhaustiveness.constructor = @constructors.length != 0 || extends.isExhaustiveConstructor()
+
+				for const _, name of @instanceMethods {
+					@exhaustiveness.instanceMethods[name] = extends.isExhaustiveInstanceMethod(name)
+				}
+
+				for const _, name of @classMethods {
+					@exhaustiveness.classMethods[name] = extends.isExhaustiveClassMethod(name)
+				}
+			}
+			else {
+				if @alien {
+					@exhaustiveness.constructor = @constructors.length != 0
+				}
+				else {
+					@exhaustiveness.constructor = true
+				}
+
+				for const _, name of @instanceMethods {
+					@exhaustiveness.instanceMethods[name] ??= true
+				}
+
+				for const _, name of @classMethods {
+					@exhaustiveness.classMethods[name] ??= true
+				}
+			}
+		}
+		else {
+			@exhaustiveness.constructor = false
+
+			for const _, name of @instanceMethods {
+				@exhaustiveness.instanceMethods[name] ??= false
+			}
+
+			for const _, name of @classMethods {
+				@exhaustiveness.classMethods[name] ??= false
+			}
+		}
+
+		return this
 	} // }}}
-	toAlterationReference(references, mode) { // {{{
+	shallBeNamed() => true
+	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @referenceIndex != -1 {
 			return {
 				reference: @referenceIndex
 			}
 		}
-		else if ?@alterationReference {
-			return @alterationReference.toAlterationReference(references, mode)
+		else if ?@majorOriginal {
+			return @majorOriginal.toAlterationReference(references, indexDelta, mode, module)
 		}
 		else {
-			return this.toReference(references, mode)
+			return this.toReference(references, indexDelta, mode, module)
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-	toReference(references, mode) { // {{{
-		if @alteration && !@explicitlyExported {
-			return @alterationReference.toReference(references, mode)
+	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+		if mode ~~ ExportMode::Export {
+			if !?@minorOriginal && ?@origin && @origin ~~ TypeOrigin::ExternOrRequire | TypeOrigin::RequireOrExtern {
+				const require = ClassType.getRequireReference(this)
+				const extern = ClassType.getExternReference(this)
+
+				if require? && extern? {
+					const referenceIndex = references.length + indexDelta
+
+					references.push({
+						originals: @origin ~~ TypeOrigin::ExternOrRequire ? [extern, require] : [require, extern]
+					})
+
+					@referenceIndex = referenceIndex
+
+					return @referenceIndex
+				}
+				else {
+					return require ?? extern
+				}
+			}
+
+			if ?@majorOriginal && !(@exported || @alien) {
+				return @majorOriginal.toMetadata(references, indexDelta, mode, module)
+			}
 		}
-		else {
-			return super.toReference(references, mode)
+
+		return super(references, indexDelta, mode, module)
+	} // }}}
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+		if mode ~~ ExportMode::Alien {
+			if @minorOriginal? {
+				return @minorOriginal.toReference(references, indexDelta, mode, module)
+			}
+			else if @majorOriginal? && !@majorOriginal.isPredefined() {
+				return @majorOriginal.toReference(references, indexDelta, mode, module)
+			}
 		}
+		else if mode ~~ ExportMode::Requirement {
+			if @majorOriginal? && !this.isRequirement() {
+				return @majorOriginal.toReference(references, indexDelta, mode, module)
+			}
+		}
+
+		return super(references, indexDelta, mode, module)
 	} // }}}
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotImplementedException(node)
 	} // }}}
-}
+	override toVariations(variations) { // {{{
+		variations.push('class', @sequences.initializations, @sequences.defaults, @sequences.constructors, @sequences.destructors)
 
-class ClassVariableType extends Type {
-	private {
-		_access: Accessibility	= Accessibility::Public
-		_alteration: Boolean	= false
-		_default: Boolean		= false
-		_immutable: Boolean		= false
-		_lateInit: Boolean		= false
-		_type: Type
-	}
-	static {
-		fromAST(data, node: AbstractNode) { // {{{
-			const scope = node.scope()
-
-			let type: ClassVariableType
-
-			if data.type? {
-				type = new ClassVariableType(scope, Type.fromAST(data.type, node))
-			}
-			else {
-				type = new ClassVariableType(scope, AnyType.NullableUnexplicit)
-			}
-
-			if data.modifiers? {
-				for const modifier in data.modifiers {
-					switch modifier.kind {
-						ModifierKind::Immutable => {
-							type._immutable = true
-						}
-						ModifierKind::Internal => {
-							type.access(Accessibility::Internal)
-						}
-						ModifierKind::LateInit => {
-							type._lateInit = true
-						}
-						ModifierKind::Private => {
-							type.access(Accessibility::Private)
-						}
-						ModifierKind::Protected => {
-							type.access(Accessibility::Protected)
-						}
-					}
-				}
-			}
-
-			if data.value? {
-				type._default = true
-				type._lateInit = false
-			}
-
-			return type
-		} // }}}
-		fromMetadata(data, metadata, references, alterations, queue, scope: Scope, node: AbstractNode): ClassVariableType { // {{{
-			const type = new ClassVariableType(scope, Type.fromMetadata(data.type, metadata, references, alterations, queue, scope, node))
-
-			type._access = data.access
-			type._default = data.default
-			type._immutable = data.immutable
-			type._lateInit = data.lateInit
-
-			return type
-		} // }}}
-	}
-	constructor(@scope, @type) { // {{{
-		super(scope)
-	} // }}}
-	clone() { // {{{
-		throw new NotSupportedException()
-	} // }}}
-	discardVariable() => @type
-	access(@access) => this
-	export(references, mode) { // {{{
-		const data = {
-			access: @access
-			type: @type.toReference(references, mode)
-			default: @default
-			immutable: @immutable
-			lateInit: @lateInit
-			sealed: @sealed
+		for const sequence, name of @sequences.classMethods {
+			variations.push(name, sequence)
 		}
 
-		return data
-	} // }}}
-	flagAlteration() { // {{{
-		@alteration = true
-
-		return this
-	} // }}}
-	flagNullable() { // {{{
-		@type = @type.setNullable(true)
-	} // }}}
-	hasDefaultValue() => @default
-	isAlteration() => @alteration
-	isImmutable() => @immutable
-	isLateInit() => @lateInit
-	isMatching(value: ClassVariableType, mode: MatchingMode) { // {{{
-		if mode ~~ MatchingMode::Exact {
-			return @type.isMatching(value.type(), MatchingMode::Exact)
-		}
-		else {
-			return true
+		for const sequence, name of @sequences.instanceMethods {
+			variations.push(name, sequence)
 		}
 	} // }}}
-	isNullable() => @type.isNullable()
-	isRequiringInitialization() => !(@lateInit || @default || @type.isNullable()) || (@lateInit && @immutable)
-	isUsingGetter() => @sealed && @default
-	isUsingSetter() => @sealed && @default
-	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	toQuote(...args) => @type.toQuote(...args)
-	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
-	type(): @type
-	type(@type): this
-	unflagAlteration() { // {{{
-		@alteration = false
-
-		return this
-	} // }}}
-}
-
-class ClassMethodType extends FunctionType {
-	private {
-		_access: Accessibility					= Accessibility::Public
-		_alteration: Boolean					= false
-		_identifier: Number						= -1
-		_initVariables: Dictionary<Boolean>		= {}
-		_overwrite: Array?						= null
-	}
-	static {
-		fromAST(data, node: AbstractNode): ClassMethodType { // {{{
-			const scope = node.scope()
-
-			return new ClassMethodType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
-		} // }}}
-		fromMetadata(data, metadata, references, alterations, queue: Array, scope: Scope, node: AbstractNode): ClassMethodType { // {{{
-			const type = new ClassMethodType(scope)
-
-			type._identifier = data.id
-			type._access = data.access
-			type._sealed = data.sealed
-			type._async = data.async
-			type._min = data.min
-			type._max = data.max
-			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
-
-			type._returnType = Type.fromMetadata(data.returns, metadata, references, alterations, queue, scope, node)
-
-			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
-
-			if data.overwrite? {
-				type._overwrite = [{id: id, export: true} for id in data.overwrite]
+	unflagAltering(): this { // {{{
+		for const methods of this._abstractMethods {
+			for const method in methods {
+				method.unflagAltering()
 			}
-
-			if data.inits? {
-				for const name in data.inits {
-					type._initVariables[name] = true
-				}
+		}
+		for const methods of this._classMethods {
+			for const method in methods {
+				method.unflagAltering()
 			}
-
-			type.updateArguments()
-
-			return type
-		} // }}}
-	}
-	access(@access) => this
-	addInitializingInstanceVariable(name: String) { // {{{
-		@initVariables[name] = true
-	} // }}}
-	clone() { // {{{
-		const clone = new ClassMethodType(@scope)
-
-		FunctionType.clone(this, clone)
-
-		clone._access = @access
-		clone._alteration = @alteration
-		clone._identifier = @identifier
-		clone._initVariables = {...@initVariables}
-
-		if @overwrite != null {
-			clone._overwrite = [...@overwrite]
 		}
-
-		return clone
-	} // }}}
-	export(references, mode: ExportMode) { // {{{
-		const export = {
-			id: @identifier
-			access: @access
-			sealed: @sealed
-			async: @async
-			min: @min
-			max: @max
-			parameters: [parameter.export(references, mode) for parameter in @parameters]
-			returns: @returnType.toReference(references, mode)
-			throws: [throw.toReference(references, mode) for throw in @throws]
-			inits: Dictionary.keys(@initVariables)
-		}
-
-		if @overwrite != null {
-			const overwrite = [data.id for const data in @overwrite when data.export]
-
-			if overwrite.length != 0 {
-				export.overwrite = overwrite
+		for const methods of this._instanceMethods {
+			for const method in methods {
+				method.unflagAltering()
 			}
 		}
 
-		return export
-	} // }}}
-	flagAlteration() { // {{{
-		@alteration = true
-
-		return this
-	} // }}}
-	identifier() => @identifier
-	identifier(@identifier)
-	isAlteration() => @alteration
-	isExportable() { // {{{
-		if !super() {
-			return false
+		for const variable of this._classVariables {
+			variable.unflagAltering()
+		}
+		for const variable of this._instanceVariables {
+			variable.unflagAltering()
 		}
 
-		return @access != Accessibility::Internal
+		@altering = false
 	} // }}}
-	isInitializingInstanceVariable(name) => @initVariables[name]
-	isMatched(methods: Array<ClassMethodType>, mode: MatchingMode): Boolean { // {{{
-		for const method in methods {
-			if method.isMatching(this, mode) {
-				return true
-			}
-		}
+	updateInstanceMethodIndex(name: String, type: ClassMethodType): Number? { // {{{
+		const root = this.ancestor()
+		const index = ++root._sequences.instanceMethods[name]
 
-		return false
-	} // }}}
-	isMethod() => true
-	isOverflowing(methods: Array<ClassMethodType>) { // {{{
-		const mode = MatchingMode::SimilarParameters + MatchingMode::MissingParameters + MatchingMode::ShiftableParameters + MatchingMode::RequireAllParameters
+		type.setForkedIndex(index)
 
-		for const method in methods {
-			if this.isMatching(method, mode) {
-				return false
-			}
-		}
-
-		return true
-	} // }}}
-	isSealable() => true
-	overwrite() => @overwrite
-	overwrite(@overwrite)
-	private processModifiers(modifiers) { // {{{
-		for modifier in modifiers {
-			if modifier.kind == ModifierKind::Async {
-				this.async()
-			}
-			else if modifier.kind == ModifierKind::Internal {
-				@access = Accessibility::Internal
-			}
-			else if modifier.kind == ModifierKind::Private {
-				@access = Accessibility::Private
-			}
-			else if modifier.kind == ModifierKind::Protected {
-				@access = Accessibility::Protected
-			}
-			else if modifier.kind == ModifierKind::Sealed {
-				@sealed = true
-			}
-		}
-	} // }}}
-	setReturnType(@returnType)
-	unflagAlteration(): this { // {{{
-		@alteration = false
-		@overwrite = null
+		return index
 	} // }}}
 }
 
@@ -1841,151 +1990,4 @@ class ClassMethodSetType extends OverloadedFunctionType {
 		}
 	} // }}}
 	isMethod() => true
-}
-
-class ClassConstructorType extends FunctionType {
-	private lateinit {
-		_access: Accessibility					= Accessibility::Public
-		_alteration: Boolean					= false
-		_class: ClassType
-		_dependent: Boolean						= false
-		_identifier: Number						= -1
-		_initVariables: Dictionary<Boolean>		= {}
-		_overwrite: Array?						= null
-	}
-	static {
-		fromAST(data, node: AbstractNode): ClassConstructorType { // {{{
-			const scope = node.scope()
-
-			return new ClassConstructorType([ParameterType.fromAST(parameter, true, scope, false, node) for parameter in data.parameters], data, node)
-		} // }}}
-		fromMetadata(data, metadata, references, alterations, queue, scope: Scope, node: AbstractNode): ClassConstructorType { // {{{
-			const type = new ClassConstructorType(scope)
-
-			type._identifier = data.id
-			type._access = data.access
-			type._sealed = data.sealed
-			type._min = data.min
-			type._max = data.max
-
-			if data.dependent {
-				type._dependent = true
-			}
-
-			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
-			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
-
-			if data.inits? {
-				for const name in data.inits {
-					type._initVariables[name] = true
-				}
-			}
-
-			type.updateArguments()
-
-			return type
-		} // }}}
-	}
-	access(@access) => this
-	addInitializingInstanceVariable(name: String) { // {{{
-		@initVariables[name] = true
-	} // }}}
-	checkVariablesInitializations(node: AbstractNode, class: ClassType = @class) { // {{{
-		class.forEachInstanceVariables((name, variable) => {
-			if variable.isRequiringInitialization() && !@initVariables[name] {
-				SyntaxException.throwNotInitializedField(name, node)
-			}
-		})
-	} // }}}
-	export(references, mode) { // {{{
-		const export = {
-			id: @identifier
-			access: @access
-			sealed: @sealed
-			min: @min
-			max: @max
-			parameters: [parameter.export(references, mode) for parameter in @parameters]
-			throws: [throw.toReference(references, mode) for throw in @throws]
-		}
-
-		if @class.isAbstract() {
-			export.inits = Dictionary.keys(@initVariables)
-		}
-
-		if @dependent {
-			export.dependent = true
-		}
-
-		if @overwrite != null {
-			const overwrite = [data.id for const data in @overwrite when data.export]
-
-			if overwrite.length != 0 {
-				export.overwrite = overwrite
-			}
-		}
-
-		return export
-	} // }}}
-	flagAlteration() { // {{{
-		@alteration = true
-
-		return this
-	} // }}}
-	flagDependent() { // {{{
-		@dependent = true
-
-		return this
-	} // }}}
-	identifier() => @identifier
-	identifier(@identifier)
-	isAlteration() => @alteration
-	isDependent() => @dependent
-	isInitializingInstanceVariable(name) => @initVariables[name]
-	isOverwritten() => @overwrite != null
-	overwrite() => @overwrite
-	overwrite(@overwrite)
-	private processModifiers(modifiers) { // {{{
-		for modifier in modifiers {
-			if modifier.kind == ModifierKind::Async {
-				throw new NotImplementedException()
-			}
-			else if modifier.kind == ModifierKind::Private {
-				@access = Accessibility::Private
-			}
-			else if modifier.kind == ModifierKind::Protected {
-				@access = Accessibility::Protected
-			}
-		}
-	} // }}}
-	setClass(@class): this
-}
-
-class ClassDestructorType extends FunctionType {
-	private {
-		_access: Accessibility	= Accessibility::Public
-	}
-	constructor(data, node) { // {{{
-		super([], data, node)
-
-		@min = 1
-		@max = 1
-	} // }}}
-	access(@access) => this
-	export(references, mode) => { // {{{
-		access: @access
-		throws: [throw.toReference(references, mode) for throw in @throws]
-	} // }}}
-	private processModifiers(modifiers) { // {{{
-		for modifier in modifiers {
-			if modifier.kind == ModifierKind::Async {
-				throw new NotImplementedException()
-			}
-			else if modifier.kind == ModifierKind::Private {
-				@access = Accessibility::Private
-			}
-			else if modifier.kind == ModifierKind::Protected {
-				@access = Accessibility::Protected
-			}
-		}
-	} // }}}
 }

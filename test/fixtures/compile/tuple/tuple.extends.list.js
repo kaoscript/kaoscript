@@ -1,41 +1,36 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Pair = Helper.tuple(function(__ks_0, __ks_1) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(__ks_0 === void 0 || __ks_0 === null) {
-			throw new TypeError("'__ks_0' is not nullable");
-		}
-		else if(!Type.isString(__ks_0)) {
-			throw new TypeError("'__ks_0' is not of type 'String'");
-		}
-		if(__ks_1 === void 0 || __ks_1 === null) {
-			throw new TypeError("'__ks_1' is not nullable");
-		}
-		else if(!Type.isNumber(__ks_1)) {
-			throw new TypeError("'__ks_1' is not of type 'Number'");
-		}
+	const Pair = Helper.tuple(function(__ks_0, __ks_1) {
 		return [__ks_0, __ks_1];
+	}, function(__ks_new, args) {
+		const t0 = Type.isString;
+		const t1 = Type.isNumber;
+		if(args.length === 2) {
+			if(t0(args[0]) && t1(args[1])) {
+				return __ks_new(args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
 	});
-	var Triple = Helper.tuple(function(__ks_0, __ks_1, __ks_2) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(__ks_2 === void 0 || __ks_2 === null) {
-			throw new TypeError("'__ks_2' is not nullable");
-		}
-		else if(!Type.isBoolean(__ks_2)) {
-			throw new TypeError("'__ks_2' is not of type 'Boolean'");
-		}
+	const Triple = Helper.tuple(function(__ks_0, __ks_1, __ks_2) {
 		const _ = Pair.__ks_builder(__ks_0, __ks_1);
 		_.push(__ks_2);
 		return _;
+	}, function(__ks_new, args) {
+		const t0 = Type.isString;
+		const t1 = Type.isNumber;
+		const t2 = Type.isBoolean;
+		if(args.length === 3) {
+			if(t0(args[0]) && t1(args[1]) && t2(args[2])) {
+				return __ks_new(args[0], args[1], args[2]);
+			}
+		}
+		throw Helper.badArgs();
 	}, Pair);
-	const triple = Triple("x", 0.1, true);
+	const triple = Triple.__ks_new("x", 0.1, true);
 	console.log(triple[0], triple[1] + 1, !triple[2]);
 	return {
-		Pair: Pair,
-		Triple: Triple
+		Pair,
+		Triple
 	};
 };

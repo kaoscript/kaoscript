@@ -1,124 +1,122 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Color {
+		static __ks_new_0() {
+			const o = Object.create(Color.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	class Shape {
+		static __ks_new_0() {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			o.__ks_cons_0();
+			return o;
+		}
+		static __ks_new_1(...args) {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			o.__ks_cons_1(...args);
+			return o;
+		}
+		static __ks_new_2(...args) {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			o.__ks_cons_2(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
 		__ks_cons_0() {
 		}
 		__ks_cons_1(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			else if(!Type.isString(name)) {
-				throw new TypeError("'name' is not of type 'String'");
-			}
 			this._name = name;
 		}
 		__ks_cons_2(name, color) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			else if(!Type.isString(name)) {
-				throw new TypeError("'name' is not of type 'String'");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isClassInstance(color, Color)) {
-				throw new TypeError("'color' is not of type 'Color'");
-			}
 			this._name = name;
 			this._color = color;
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isString;
+			const t1 = value => Type.isClassInstance(value, Color);
 			if(args.length === 0) {
-				Shape.prototype.__ks_cons_0.apply(this);
+				return Shape.prototype.__ks_cons_0.call(that);
 			}
-			else if(args.length === 1) {
-				Shape.prototype.__ks_cons_1.apply(this, args);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return Shape.prototype.__ks_cons_1.call(that, args[0]);
+				}
+				throw Helper.badArgs();
 			}
-			else if(args.length === 2) {
-				Shape.prototype.__ks_cons_2.apply(this, args);
+			if(args.length === 2) {
+				if(t0(args[0]) && t1(args[1])) {
+					return Shape.prototype.__ks_cons_2.call(that, args[0], args[1]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
+		}
+		color() {
+			return this.__ks_func_color_rt.call(null, this, this, arguments);
 		}
 		__ks_func_color_0() {
 			return this._color;
 		}
 		__ks_func_color_1(color) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isClassInstance(color, Color)) {
-				throw new TypeError("'color' is not of type 'Color'");
-			}
 			this._color = color;
 			return this;
 		}
-		color() {
-			if(arguments.length === 0) {
-				return Shape.prototype.__ks_func_color_0.apply(this);
+		__ks_func_color_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Color);
+			if(args.length === 0) {
+				return proto.__ks_func_color_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Shape.prototype.__ks_func_color_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_color_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		name() {
+			return this.__ks_func_name_rt.call(null, this, this, arguments);
 		}
 		__ks_func_name_0() {
 			return this._name;
 		}
 		__ks_func_name_1(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			else if(!Type.isString(name)) {
-				throw new TypeError("'name' is not of type 'String'");
-			}
 			this._name = name;
 			return this;
 		}
-		name() {
-			if(arguments.length === 0) {
-				return Shape.prototype.__ks_func_name_0.apply(this);
+		__ks_func_name_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 0) {
+				return proto.__ks_func_name_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Shape.prototype.__ks_func_name_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_name_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	return {
-		Shape: Shape
+		Shape
 	};
 };

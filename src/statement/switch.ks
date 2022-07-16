@@ -333,10 +333,10 @@ class SwitchStatement extends Statement {
 
 		@parent.addInitializableVariable(variable, node)
 	} // }}}
-	defineVariables(declarator, scope) { // {{{
+	defineVariables(left, scope) { // {{{
 		let alreadyDeclared
 
-		for const name in declarator.listAssignments([]) {
+		for const name in left.listAssignments([]) {
 			if scope.hasDefinedVariable(name) {
 				SyntaxException.throwAlreadyDeclared(name, this)
 			}

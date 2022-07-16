@@ -1,15 +1,9 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function parse(color) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(color === void 0 || color === null) {
-			throw new TypeError("'color' is not nullable");
-		}
-		else if(!Type.isDictionary(color) && !Type.isString(color)) {
-			throw new TypeError("'color' is not of type 'Dictionary' or 'String'");
-		}
+	function parse() {
+		return parse.__ks_rt(this, arguments);
+	};
+	parse.__ks_0 = function(color) {
 		if(Type.isString(color)) {
 			let match, __ks_0;
 			if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
@@ -40,5 +34,14 @@ module.exports = function() {
 				console.log(match);
 			}
 		}
-	}
+	};
+	parse.__ks_rt = function(that, args) {
+		const t0 = value => Type.isString(value) || Type.isDictionary(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return parse.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

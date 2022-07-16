@@ -1,103 +1,211 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let foo = (() => {
-		return function(x) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isString(x)) {
-				throw new TypeError("'x' is not of type 'String'");
-			}
-			let __ks_i = 0;
-			let y;
-			if(arguments.length > __ks_i + 2 && (y = arguments[++__ks_i]) !== void 0) {
-				if(y !== null && !Type.isString(y)) {
-					if(arguments.length - __ks_i < 3) {
-						y = null;
-						--__ks_i;
-					}
-					else {
-						throw new TypeError("'y' is not of type 'String?'");
+		return (() => {
+			const __ks_rt = (...args) => {
+				const t0 = Type.isString;
+				const t1 = value => Type.isString(value) || Type.isNull(value);
+				const t2 = value => Type.isBoolean(value) || Type.isNull(value);
+				const t3 = Type.isNumber;
+				const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+				let pts;
+				if(args.length >= 2 && args.length <= 4) {
+					if(t0(args[0]) && Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && Helper.isVarargs(args, 0, 1, t2, pts, 1) && Helper.isVarargs(args, 1, 1, t3, pts, 2) && te(pts, 3)) {
+						return __ks_rt.__ks_0.call(this, args[0], Helper.getVararg(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]), Helper.getVararg(args, pts[2], pts[3]));
 					}
 				}
-			}
-			else {
-				y = null;
-			}
-			let z;
-			if(arguments.length > __ks_i + 2 && (z = arguments[++__ks_i]) !== void 0 && z !== null) {
-				if(!Type.isBoolean(z)) {
-					if(arguments.length - __ks_i < 2) {
-						z = false;
-						--__ks_i;
-					}
-					else {
-						throw new TypeError("'z' is not of type 'Boolean'");
-					}
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = (x, y = null, z, a) => {
+				if(z === void 0 || z === null) {
+					z = false;
 				}
-			}
-			else {
-				z = false;
-			}
-			let a = arguments[++__ks_i];
-			if(a === void 0 || a === null) {
-				throw new TypeError("'a' is not nullable");
-			}
-			else if(!Type.isNumber(a)) {
-				throw new TypeError("'a' is not of type 'Number'");
-			}
-			return [x, y, z, a];
-		};
+				return [x, y, z, a];
+			};
+			return __ks_rt;
+		})();
 	})();
-	expect(() => {
-		return foo();
-	}).to.throw();
-	expect(() => {
-		return foo("foo");
-	}).to.throw();
-	expect(() => {
-		return foo(true);
-	}).to.throw();
-	expect(() => {
-		return foo(42);
-	}).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo();
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo");
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo(true);
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo(42);
+		};
+		return __ks_rt;
+	})()).to.throw();
 	expect(foo("foo", 42)).to.eql(["foo", null, false, 42]);
-	expect(() => {
-		return foo("foo", "bar");
-	}).to.throw();
-	expect(() => {
-		return foo("foo", true);
-	}).to.throw();
-	expect(() => {
-		return foo("foo", null);
-	}).to.throw();
-	expect(() => {
-		return foo("foo", []);
-	}).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", "bar");
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", true);
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", null);
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", []);
+		};
+		return __ks_rt;
+	})()).to.throw();
 	expect(foo("foo", "bar", 42)).to.eql(["foo", "bar", false, 42]);
-	expect(() => {
-		return foo("foo", "bar", true);
-	}).to.throw();
-	expect(() => {
-		return foo("foo", "bar", "qux");
-	}).to.throw();
-	expect(() => {
-		return foo("foo", "bar", []);
-	}).to.throw();
-	expect(() => {
-		return foo("foo", 42, "qux");
-	}).to.throw();
-	expect(() => {
-		return foo("foo", true, "qux");
-	}).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", "bar", true);
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", "bar", "qux");
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", "bar", []);
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", 42, "qux");
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", true, "qux");
+		};
+		return __ks_rt;
+	})()).to.throw();
 	expect(foo("foo", "bar", true, 42)).to.eql(["foo", "bar", true, 42]);
-	expect(() => {
-		return foo("foo", "bar", true, "qux");
-	}).to.throw();
-	expect(() => {
-		return foo("foo", "bar", true, null);
-	}).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", "bar", true, "qux");
+		};
+		return __ks_rt;
+	})()).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo("foo", "bar", true, null);
+		};
+		return __ks_rt;
+	})()).to.throw();
 };

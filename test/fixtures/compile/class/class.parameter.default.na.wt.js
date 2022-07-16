@@ -1,57 +1,54 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Greetings {
+		static __ks_new_0() {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			o.__ks_cons_0();
+			return o;
+		}
+		static __ks_new_1(...args) {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			o.__ks_cons_1(...args);
+			return o;
+		}
+		static __ks_new_2(...args) {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			o.__ks_cons_2(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._message = "Hello!";
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Greetings.prototype.__ks_init_0.call(this);
+			this._message = "Hello!";
 		}
 		__ks_cons_0() {
 		}
 		__ks_cons_1(message) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
-			}
-			else if(!Type.isString(message)) {
-				throw new TypeError("'message' is not of type 'String'");
-			}
 			this._message = message;
 		}
 		__ks_cons_2(number) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(number === void 0 || number === null) {
-				throw new TypeError("'number' is not nullable");
-			}
-			else if(!Type.isNumber(number)) {
-				throw new TypeError("'number' is not of type 'Number'");
-			}
-			Greetings.prototype.__ks_cons.call(this, [Helper.toString(number)]);
+			Greetings.prototype.__ks_cons_1.call(this, Helper.toString(number));
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isNumber;
+			const t1 = Type.isString;
 			if(args.length === 0) {
-				Greetings.prototype.__ks_cons_0.apply(this);
+				return Greetings.prototype.__ks_cons_0.call(that);
 			}
-			else if(args.length === 1) {
-				if(Type.isNumber(args[0])) {
-					Greetings.prototype.__ks_cons_2.apply(this, args);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return Greetings.prototype.__ks_cons_2.call(that, args[0]);
 				}
-				else {
-					Greetings.prototype.__ks_cons_1.apply(this, args);
+				if(t1(args[0])) {
+					return Greetings.prototype.__ks_cons_1.call(that, args[0]);
 				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		}
 	}
 };

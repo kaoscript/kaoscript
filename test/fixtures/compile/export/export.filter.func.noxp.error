@@ -1,1 +1,1 @@
-ReferenceException: The exported variable "foobar" is not exportable (line 1, file "fixtures/compile/export/export.filter.func.noxp.ks")
+ReferenceException: The exported variable "foobar" is not exportable (fixtures/compile/export/export.filter.func.noxp.ks:1)

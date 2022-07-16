@@ -1,1 +1,1 @@
-TypeException: The expression "x" of type "Boolean" is expected to be of type "Number" or "Any" in a additive operation (line 2, file "fixtures/compile/operator/operator.addition.assign.b_be.ks")
+TypeException: The expression "x" of type "Boolean" is expected to be of type "Number" or "Any" in a additive operation (fixtures/compile/operator/operator.addition.assign.b_be.ks:2)

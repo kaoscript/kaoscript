@@ -1,90 +1,98 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [
-    0,
-    "Date",
-    false
-  ],
-  "exports": [
-    1,
-    "Date"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 0
-      },
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {
-        "midnight": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ]
-      },
-      "classMethods": {
-        "today": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ]
-      },
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true,
+      0,
+      "Date",
+      true
+    ],
+    "requirements": [
+      0,
+      "Date",
+      true
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "Date"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "midnight": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {
+          "today": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

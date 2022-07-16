@@ -1,1 +1,1 @@
-SyntaxException: The class variable "_x" isn't initialized (line 5, file "fixtures/compile/class/class.field.let.nstt.wt_i.wct_nas.wct_was_al_gte.ks")
+SyntaxException: The class variable "_x" isn't initialized (fixtures/compile/class/class.field.let.nstt.wt_i.wct_nas.wct_was_al_gte.ks:5)

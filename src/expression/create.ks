@@ -1,10 +1,14 @@
 class CreateExpression extends Expression {
 	private lateinit {
-		_arguments: Array		= []
+		_alien: Boolean				= false
+		_arguments: Array			= []
+		_computed: Boolean			= true
 		_factory: Expression
-		_flatten: Boolean		= false
-		_sealed: Boolean		= false
-		_type: Type				= Type.Any
+		_flatten: Boolean			= false
+		_hybrid: Boolean			= false
+		_result: CallMatchResult?
+		_sealed: Boolean			= false
+		_type: Type					= Type.Any
 	}
 	analyse() { // {{{
 		@factory = $compile.expression(@data.class, this)
@@ -36,20 +40,56 @@ class CreateExpression extends Expression {
 			if type.type().isAbstract() {
 				TypeException.throwCannotBeInstantiated(type.name(), this)
 			}
-			else if type.type().isExhaustiveConstructor(this) {
-				if !type.type().matchArguments(@arguments) {
-					ReferenceException.throwNoMatchingConstructor(type.name(), @arguments, this)
-				}
-			}
 
 			if type.type().hasSealedConstructors() {
 				@sealed = true
 			}
 
+			const assessment = type.type().getConstructorAssessment(type.name(), this)
+
+			if const result = Router.matchArguments2(assessment, @arguments, this) {
+				@result = result
+			}
+			else if type.type().isExhaustiveConstructor(this) {
+				ReferenceException.throwNoMatchingConstructor(type.name(), @arguments, this)
+			}
+
+			@alien = type.isAlien()
+			@hybrid = type.isHybrid()
 			@type = @scope.reference(type)
 		}
 		else if !(type.isAny() || type.isClass()) {
 			TypeException.throwNotClass(type.toQuote(), this)
+		}
+
+		if @flatten {
+			@computed = false
+		}
+		else if !?@result || @result is LenientCallMatchResult {
+			if @sealed {
+				@computed = false
+			}
+			else {
+				@computed = true
+			}
+		}
+		else {
+			if @hybrid {
+				@computed = true
+			}
+			else if @result.matches.length == 0 {
+				@computed = @alien
+			}
+			else if @result.matches.length == 1 {
+				const { function, arguments } = @result.matches[0]
+
+				if @sealed && !function.isSealed() {
+					@computed = true
+				}
+				else {
+					@computed = false
+				}
+			}
 		}
 	} // }}}
 	translate() { // {{{
@@ -59,7 +99,7 @@ class CreateExpression extends Expression {
 			argument.translate()
 		}
 	} // }}}
-	isComputed() => true
+	isComputed() => @computed
 	isUsingVariable(name) { // {{{
 		if @factory.isUsingVariable(name) {
 			return true
@@ -102,8 +142,13 @@ class CreateExpression extends Expression {
 			}
 		}
 		else {
-			if @sealed {
-				fragments.code(`\(@type.type().getSealedName()).new(`)
+			if !?@result || @result is LenientCallMatchResult {
+				if @sealed {
+					fragments.code(`\(@type.type().getSealedName()).new(`)
+				}
+				else {
+					fragments.code('new ').compile(@factory).code('(')
+				}
 
 				for const argument, i in @arguments {
 					fragments.code($comma) if i != 0
@@ -114,15 +159,47 @@ class CreateExpression extends Expression {
 				fragments.code(')')
 			}
 			else {
-				fragments.code('new ').compile(@factory).code('(')
+				if @hybrid {
+					fragments.code('new ').compile(@factory).code('(')
 
-				for const argument, i in @arguments {
-					fragments.code($comma) if i != 0
+					for const argument, i in @arguments {
+						fragments.code($comma) if i != 0
 
-					fragments.compile(argument)
+						fragments.compile(argument)
+					}
+
+					fragments.code(')')
 				}
+				else if @result.matches.length == 0 {
+					if @alien {
+						fragments.code('new ').compile(@factory).code('()')
+					}
+					else {
+						fragments.code(`\(@type.type().path()).__ks_new_0`).code('()')
+					}
+				}
+				else if @result.matches.length == 1 {
+					const { function, arguments } = @result.matches[0]
 
-				fragments.code(')')
+					if @sealed {
+						if function.isSealed() {
+							fragments.code(`\(@type.type().getSealedName()).__ks_new_\(function.index())`).code('(')
+						}
+						else {
+							fragments.code('new ').compile(@factory).code('(')
+						}
+					}
+					else {
+						fragments.code(`\(@type.type().path()).__ks_new_\(function.index())`).code('(')
+					}
+
+					Router.toArgumentsFragments(arguments, @arguments, function, false, fragments, mode)
+
+					fragments.code(')')
+				}
+				else {
+					throw new NotImplementedException()
+				}
 			}
 		}
 	} // }}}

@@ -1,1 +1,1 @@
-ReferenceException: The identifier "x" is immutable (line 3, file "fixtures/compile/variable/variable.overwrite.const.default.ks")
+ReferenceException: The identifier "x" is immutable (fixtures/compile/variable/variable.overwrite.const.default.ks:3)

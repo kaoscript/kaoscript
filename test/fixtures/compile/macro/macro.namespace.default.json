@@ -1,18 +1,23 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "NS"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {}
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "NS"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {}
+      }
+    ],
+    "macros": []
+  }
+]

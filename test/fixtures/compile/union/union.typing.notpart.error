@@ -1,1 +1,1 @@
-TypeException: The variable of type "String" or "Number" can never be of type "Array" (line 7, file "fixtures/compile/union/union.typing.notpart.ks")
+TypeException: The variable of type "String" or "Number" can never be of type "Array" (fixtures/compile/union/union.typing.notpart.ks:7)

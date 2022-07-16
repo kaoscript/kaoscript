@@ -1,95 +1,82 @@
-var {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	let Foobar = Helper.enum(Number, {
-		foo: 1,
-		bar: 2,
-		qux: 4
+	const Foobar = Helper.enum(Object, {
+		foo: 1n,
+		bar: 2n,
+		qux: 4n
 	});
 	function foobar() {
-		if(arguments.length === 1 && Type.isEnumInstance(arguments[0], Foobar)) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isEnumInstance(x, Foobar)) {
-				throw new TypeError("'x' is not of type 'Foobar'");
-			}
-			return "enum";
-		}
-		else if(arguments.length === 1 && Type.isNumber(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
-			}
-			return "number";
-		}
-		else if(arguments.length === 1) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isDictionary(x)) {
-				throw new TypeError("'x' is not of type 'Dictionary'");
-			}
-			return "dictionary";
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		return foobar.__ks_rt(this, arguments);
 	};
-	expect(foobar(Foobar.foo)).to.equal("enum");
-	expect(foobar(Foobar(Foobar.foo | Foobar.bar))).to.equal("enum");
-	expect(foobar(0)).to.equal("number");
-	expect(foobar(new Dictionary())).to.equal("dictionary");
-	function testIf(x, y, z) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
+	foobar.__ks_0 = function(x) {
+		return "enum";
+	};
+	foobar.__ks_1 = function(x) {
+		return "number";
+	};
+	foobar.__ks_2 = function(x) {
+		return "dictionary";
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, Foobar);
+		const t1 = Type.isNumber;
+		const t2 = Type.isDictionary;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+			if(t1(args[0])) {
+				return foobar.__ks_1.call(that, args[0]);
+			}
+			if(t2(args[0])) {
+				return foobar.__ks_2.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isEnumInstance(x, Foobar)) {
-			throw new TypeError("'x' is not of type 'Foobar'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'Number'");
-		}
-		if(z === void 0 || z === null) {
-			throw new TypeError("'z' is not nullable");
-		}
+		throw Helper.badArgs();
+	};
+	expect(foobar.__ks_0(Foobar.foo)).to.equal("enum");
+	expect(foobar.__ks_0(Foobar(Foobar.foo | Foobar.bar))).to.equal("enum");
+	expect(foobar.__ks_1(0)).to.equal("number");
+	expect(foobar.__ks_2(new Dictionary())).to.equal("dictionary");
+	function testIf() {
+		return testIf.__ks_rt(this, arguments);
+	};
+	testIf.__ks_0 = function(x, y, z) {
 		const results = [];
-		if((x & Foobar.foo) !== 0) {
+		if((x & Foobar.foo) !== 0n) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
-		if((y & Foobar.foo) !== 0) {
+		if((y & Foobar.foo) !== 0n) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
-		if(Operator.bitwiseAnd(z, Foobar.foo) !== 0) {
+		if(Operator.bitwiseAnd(z, Foobar.foo) !== 0n) {
 			results.push("c");
 		}
 		else {
 			results.push(null);
 		}
-		results.push(((x & Foobar.foo) !== 0) ? "c" : null);
-		results.push(((y & Foobar.foo) !== 0) ? "c" : null);
-		results.push((Operator.bitwiseAnd(z, Foobar.foo) !== 0) ? "c" : null);
+		results.push(((x & Foobar.foo) !== 0n) ? "c" : null);
+		results.push(((y & Foobar.foo) !== 0n) ? "c" : null);
+		results.push((Operator.bitwiseAnd(z, Foobar.foo) !== 0n) ? "c" : null);
 		return results;
-	}
-	expect(testIf(Foobar(Foobar.foo | Foobar.bar), Foobar(Foobar.foo | Foobar.bar).value, Foobar(Foobar.foo | Foobar.bar))).to.eql(["c", "c", "c", "c", "c", "c"]);
-	expect(testIf(Foobar.bar, Foobar.foo.value | Foobar.bar.value, Foobar.foo.value | Foobar.bar.value)).to.eql([null, "c", "c", null, "c", "c"]);
+	};
+	testIf.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, Foobar);
+		const t1 = Type.isNumber;
+		const t2 = Type.isValue;
+		if(args.length === 3) {
+			if(t0(args[0]) && t1(args[1]) && t2(args[2])) {
+				return testIf.__ks_0.call(that, args[0], args[1], args[2]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+	expect(testIf.__ks_0(Foobar(Foobar.foo | Foobar.bar), Foobar(Foobar.foo | Foobar.bar), Foobar(Foobar.foo | Foobar.bar))).to.eql(["c", "c", "c", "c", "c", "c"]);
+	expect(testIf.__ks_0(Foobar.bar, Foobar.foo.value | Foobar.bar.value, Foobar.foo.value | Foobar.bar.value)).to.eql([null, "c", "c", null, "c", "c"]);
 };

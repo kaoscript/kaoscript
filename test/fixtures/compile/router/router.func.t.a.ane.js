@@ -1,32 +1,32 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		if(arguments.length === 1 && Type.isClassInstance(arguments[0], Date)) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isClassInstance(x, Date)) {
-				throw new TypeError("'x' is not of type 'Date'");
-			}
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+		return 0;
+	};
+	foobar.__ks_1 = function(x) {
+		return 1;
+	};
+	foobar.__ks_2 = function(x) {
+		if(x === void 0) {
+			x = null;
 		}
-		else if(arguments.length === 1 && Type.isValue(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
+		return 2;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Date);
+		const t1 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
 			}
-		}
-		else if(arguments.length === 1) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0) {
-				x = null;
+			if(t1(args[0])) {
+				return foobar.__ks_1.call(that, args[0]);
 			}
+			return foobar.__ks_2.call(that, args[0]);
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 };

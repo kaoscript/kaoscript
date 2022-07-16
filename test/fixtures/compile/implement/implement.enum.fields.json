@@ -1,33 +1,39 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Color"
-  ],
-  "references": [
-    {
-      "kind": "enum",
-      "type": "number",
-      "index": 5,
-      "exhaustive": true,
-      "variables": [
-        "Red",
-        "Green",
-        "Blue",
-        "DarkRed",
-        "DarkGreen",
-        "DarkBlue"
-      ],
-      "instanceMethods": {},
-      "staticMethods": {},
-      "sequences": [
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Color"
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "number",
+        "sequenceIndex": 5,
+        "exhaustive": true,
+        "variables": [
+          "Red",
+          "Green",
+          "Blue",
+          "DarkRed",
+          "DarkGreen",
+          "DarkBlue"
+        ],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

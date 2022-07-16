@@ -1,1 +1,1 @@
-ReferenceException: The method "foobar" of the class "Master" can't be matched to given arguments (Null) (line 7, file "fixtures/compile/class/class.parameter.ve.ne.ks")
+ReferenceException: The method "foobar" of the class "Master" can't be matched to given arguments (Null) (fixtures/compile/class/class.parameter.ve.ne.ks:7)

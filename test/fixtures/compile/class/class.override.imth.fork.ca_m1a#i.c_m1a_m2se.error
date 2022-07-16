@@ -1,0 +1,1 @@
+SyntaxException: The method "Quxbaz.foobar(x: Any): Number" hides the method "Quxbaz.foobar(y: String)" (fixtures/compile/class/class.override.imth.fork.ca_m1a#i.c_m1a_m2se.ks:7)

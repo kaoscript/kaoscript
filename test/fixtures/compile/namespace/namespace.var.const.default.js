@@ -1,11 +1,11 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Float = Helper.namespace(function() {
 		const PI = 3.14;
 		const name = "john";
 		return {
-			PI: PI,
-			name: name
+			PI,
+			name
 		};
 	});
 	console.log(Float.PI);

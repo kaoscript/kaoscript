@@ -1,26 +1,9 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(x, y, z, foo, bar, qux) {
-		if(arguments.length < 6) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 6)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		if(z === void 0 || z === null) {
-			throw new TypeError("'z' is not nullable");
-		}
-		if(foo === void 0 || foo === null) {
-			throw new TypeError("'foo' is not nullable");
-		}
-		if(bar === void 0 || bar === null) {
-			throw new TypeError("'bar' is not nullable");
-		}
-		if(qux === void 0 || qux === null) {
-			throw new TypeError("'qux' is not nullable");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x, y, z, foo, bar, qux) {
 		if(x === true) {
 			if(foo === true) {
 			}
@@ -53,5 +36,14 @@ module.exports = function() {
 			else {
 			}
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 6) {
+			if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3]) && t0(args[4]) && t0(args[5])) {
+				return foobar.__ks_0.call(that, args[0], args[1], args[2], args[3], args[4], args[5]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

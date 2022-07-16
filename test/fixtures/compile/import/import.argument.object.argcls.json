@@ -1,0 +1,107 @@
+[
+  {
+    "aliens": [],
+    "requirements": [
+      0,
+      "NewString",
+      true
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "foobar"
+    ],
+    "references": [
+      {
+        "kind": "dictionary",
+        "properties": {
+          "corge": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Number",
+            "errors": []
+          },
+          "grault": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "n",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": []
+          },
+          "garply": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "s",
+                "type": {
+                  "reference": 0
+                },
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 0
+            },
+            "errors": []
+          },
+          "waldo": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": {
+              "reference": 0
+            },
+            "errors": []
+          }
+        }
+      }
+    ],
+    "macros": []
+  }
+]

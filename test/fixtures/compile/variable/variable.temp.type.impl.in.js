@@ -1,4 +1,4 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_capitalize_0 = function() {
@@ -6,21 +6,25 @@ module.exports = function() {
 	};
 	__ks_String.__ks_func_capitalizeWords_0 = function() {
 		return Helper.mapArray(this.split(" "), function(item) {
-			return __ks_String._im_capitalize(item);
+			return __ks_String.__ks_func_capitalize_0.call(item);
 		}).join(" ");
 	};
-	__ks_String._im_capitalize = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length === 0) {
-			return __ks_String.__ks_func_capitalize_0.apply(that);
-		}
-		throw new SyntaxError("Wrong number of arguments");
+	__ks_String._im_capitalize = function(that, ...args) {
+		return __ks_String.__ks_func_capitalize_rt(that, args);
 	};
-	__ks_String._im_capitalizeWords = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_String.__ks_func_capitalize_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_String.__ks_func_capitalizeWords_0.apply(that);
+			return __ks_String.__ks_func_capitalize_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
+	};
+	__ks_String._im_capitalizeWords = function(that, ...args) {
+		return __ks_String.__ks_func_capitalizeWords_rt(that, args);
+	};
+	__ks_String.__ks_func_capitalizeWords_rt = function(that, args) {
+		if(args.length === 0) {
+			return __ks_String.__ks_func_capitalizeWords_0.call(that);
+		}
+		throw Helper.badArgs();
 	};
 };

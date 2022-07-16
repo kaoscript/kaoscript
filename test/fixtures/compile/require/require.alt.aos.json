@@ -1,92 +1,100 @@
-{
-  "aliens": [
-    0,
-    "Array",
-    1,
-    "Dictionary",
-    2,
-    "String"
-  ],
-  "requirements": [
-    0,
-    "Array",
-    false,
-    1,
-    "Dictionary",
-    false,
-    2,
-    "String",
-    false
-  ],
-  "exports": [
-    0,
-    "Array",
-    1,
-    "Dictionary",
-    2,
-    "String"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      0,
+      "Array",
+      false,
+      1,
+      "Dictionary",
+      false,
+      2,
+      "String",
+      false
+    ],
+    "requirements": [
+      0,
+      "Array",
+      false,
+      1,
+      "Dictionary",
+      false,
+      2,
+      "String",
+      false
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "Array",
+      1,
+      "Dictionary",
+      2,
+      "String"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

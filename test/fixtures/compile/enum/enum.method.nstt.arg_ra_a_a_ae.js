@@ -1,6 +1,6 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Weekday = Helper.enum(Number, {
+	const Weekday = Helper.enum(Number, {
 		MONDAY: 0,
 		TUESDAY: 1,
 		WEDNESDAY: 2,
@@ -9,40 +9,37 @@ module.exports = function() {
 		SATURDAY: 5,
 		SUNDAY: 6
 	});
-	Weekday.__ks_func_foobar = function(that) {
-		if(arguments.length < 4) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		let __ks_i = 0;
-		let values = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 3);
-		let x = arguments[__ks_i];
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		let y = arguments[++__ks_i];
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		let z = arguments[++__ks_i];
-		if(z === void 0 || z === null) {
-			throw new TypeError("'z' is not nullable");
-		}
+	Weekday.__ks_func_foobar_0 = function(that, values, x, y, z) {
 		return false;
 	};
-	function foobar(day) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	Weekday.__ks_func_foobar = function(that, ...args) {
+		const t0 = Type.isValue;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length >= 3) {
+			if(Helper.isVarargs(args, 0, args.length - 3, t0, pts = [0], 0) && Helper.isVarargs(args, 1, 1, t0, pts, 1) && Helper.isVarargs(args, 1, 1, t0, pts, 2) && Helper.isVarargs(args, 1, 1, t0, pts, 3) && te(pts, 4)) {
+				return Weekday.__ks_func_foobar_0(that, Helper.getVarargs(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]), Helper.getVararg(args, pts[2], pts[3]), Helper.getVararg(args, pts[3], pts[4]));
+			}
 		}
-		if(day === void 0 || day === null) {
-			throw new TypeError("'day' is not nullable");
+		throw Helper.badArgs();
+	};
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(day) {
+		if(Weekday.__ks_func_foobar_0(day, [], 1, 2, 3)) {
 		}
-		else if(!Type.isEnumInstance(day, Weekday)) {
-			throw new TypeError("'day' is not of type 'Weekday'");
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, Weekday);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		if(Weekday.__ks_func_foobar(day, 1, 2, 3)) {
-		}
-	}
+		throw Helper.badArgs();
+	};
 	return {
-		Weekday: Weekday
+		Weekday
 	};
 };

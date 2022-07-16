@@ -1,78 +1,56 @@
 require("kaoscript/register");
-var {Operator, Type} = require("@kaoscript/runtime");
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Date) {
 	if(!Type.isValue(__ks_Date)) {
-		var __ks_Date = require("./require.alt.roi.loop3.genesis.ks")().__ks_Date;
+		var __ks_Date = require("./.require.alt.roi.loop3.genesis.ks.1runl5l.ksb")().__ks_Date;
 	}
+	__ks_Date.__ks_new_1 = function(...args) {
+		return __ks_Date.__ks_cons_1(...args);
+	};
 	__ks_Date.__ks_cons_1 = function(year, month, day, hours, minutes, seconds, milliseconds) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(year === void 0 || year === null) {
-			throw new TypeError("'year' is not nullable");
-		}
-		else if(!Type.isNumber(year) && !Type.isString(year)) {
-			throw new TypeError("'year' is not of type 'NS'");
-		}
-		if(month === void 0 || month === null) {
-			throw new TypeError("'month' is not nullable");
-		}
-		else if(!Type.isNumber(month) && !Type.isString(month)) {
-			throw new TypeError("'month' is not of type 'NS'");
-		}
 		if(day === void 0 || day === null) {
 			day = 1;
-		}
-		else if(!Type.isNumber(day) && !Type.isString(day)) {
-			throw new TypeError("'day' is not of type 'NS'");
 		}
 		if(hours === void 0 || hours === null) {
 			hours = 0;
 		}
-		else if(!Type.isNumber(hours) && !Type.isString(hours)) {
-			throw new TypeError("'hours' is not of type 'NS'");
-		}
 		if(minutes === void 0 || minutes === null) {
 			minutes = 0;
-		}
-		else if(!Type.isNumber(minutes) && !Type.isString(minutes)) {
-			throw new TypeError("'minutes' is not of type 'NS'");
 		}
 		if(seconds === void 0 || seconds === null) {
 			seconds = 0;
 		}
-		else if(!Type.isNumber(seconds) && !Type.isString(seconds)) {
-			throw new TypeError("'seconds' is not of type 'NS'");
-		}
 		if(milliseconds === void 0 || milliseconds === null) {
 			milliseconds = 0;
 		}
-		else if(!Type.isNumber(milliseconds) && !Type.isString(milliseconds)) {
-			throw new TypeError("'milliseconds' is not of type 'NS'");
-		}
-		var that = new Date(year, Operator.subtraction(month, 1), day, hours, minutes, seconds, milliseconds);
+		const that = new Date(year, Operator.subtraction(month, 1), day, hours, minutes, seconds, milliseconds);
 		that.setUTCMinutes(that.getUTCMinutes() - that.getTimezoneOffset());
 		return that;
 	};
 	__ks_Date.__ks_func_fromAugment_0 = function() {
 	};
 	__ks_Date.new = function() {
+		const t0 = value => Type.isNumber(value) || Type.isString(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+		let pts;
 		if(arguments.length >= 2 && arguments.length <= 7) {
-			return __ks_Date.__ks_cons_1(...arguments);
+			if(t0(arguments[0]) && t0(arguments[1]) && Helper.isVarargs(arguments, 0, 1, t0, pts = [2], 0) && Helper.isVarargs(arguments, 0, 1, t0, pts, 1) && Helper.isVarargs(arguments, 0, 1, t0, pts, 2) && Helper.isVarargs(arguments, 0, 1, t0, pts, 3) && Helper.isVarargs(arguments, 0, 1, t0, pts, 4) && te(pts, 5)) {
+				return __ks_Date.__ks_cons_1(arguments[0], arguments[1], Helper.getVararg(arguments, 2, pts[1]), Helper.getVararg(arguments, pts[1], pts[2]), Helper.getVararg(arguments, pts[2], pts[3]), Helper.getVararg(arguments, pts[3], pts[4]), Helper.getVararg(arguments, pts[4], pts[5]));
+			}
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
-	__ks_Date._im_fromAugment = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Date._im_fromAugment = function(that, ...args) {
+		return __ks_Date.__ks_func_fromAugment_rt(that, args);
+	};
+	__ks_Date.__ks_func_fromAugment_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Date.__ks_func_fromAugment_0.apply(that);
+			return __ks_Date.__ks_func_fromAugment_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
-	const d = __ks_Date.new(2000, 1, 20, 3, 45, 6, 789);
+	const d = __ks_Date.__ks_new_1(2000, 1, 20, 3, 45, 6, 789);
 	return {
-		__ks_Date: __ks_Date
+		__ks_Date
 	};
 };

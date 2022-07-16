@@ -1,22 +1,7 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Array = {};
 	__ks_Array.__ks_sttc_map_0 = function(array, iterator) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(array === void 0 || array === null) {
-			throw new TypeError("'array' is not nullable");
-		}
-		else if(!Type.isArray(array)) {
-			throw new TypeError("'array' is not of type 'Array'");
-		}
-		if(iterator === void 0 || iterator === null) {
-			throw new TypeError("'iterator' is not nullable");
-		}
-		else if(!Type.isFunction(iterator)) {
-			throw new TypeError("'iterator' is not of type 'Function'");
-		}
 		let results = [];
 		for(let index = 0, __ks_0 = array.length, item; index < __ks_0; ++index) {
 			item = array[index];
@@ -25,27 +10,6 @@ module.exports = function() {
 		return results;
 	};
 	__ks_Array.__ks_sttc_map_1 = function(array, iterator, condition) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(array === void 0 || array === null) {
-			throw new TypeError("'array' is not nullable");
-		}
-		else if(!Type.isArray(array)) {
-			throw new TypeError("'array' is not of type 'Array'");
-		}
-		if(iterator === void 0 || iterator === null) {
-			throw new TypeError("'iterator' is not nullable");
-		}
-		else if(!Type.isFunction(iterator)) {
-			throw new TypeError("'iterator' is not of type 'Function'");
-		}
-		if(condition === void 0 || condition === null) {
-			throw new TypeError("'condition' is not nullable");
-		}
-		else if(!Type.isFunction(condition)) {
-			throw new TypeError("'condition' is not of type 'Function'");
-		}
 		let results = [];
 		for(let index = 0, __ks_0 = array.length, item; index < __ks_0; ++index) {
 			item = array[index];
@@ -59,27 +23,37 @@ module.exports = function() {
 		if(index === void 0 || index === null) {
 			index = 1;
 		}
-		else if(!Type.isNumber(index)) {
-			throw new TypeError("'index' is not of type 'Number'");
-		}
 		return (this.length !== 0) ? this[this.length - index] : null;
 	};
-	__ks_Array._cm_map = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 2) {
-			return __ks_Array.__ks_sttc_map_0.apply(null, args);
+	__ks_Array._sm_map = function() {
+		const t0 = Type.isArray;
+		const t1 = Type.isFunction;
+		if(arguments.length === 2) {
+			if(t0(arguments[0]) && t1(arguments[1])) {
+				return __ks_Array.__ks_sttc_map_0(arguments[0], arguments[1]);
+			}
+			throw Helper.badArgs();
 		}
-		else if(args.length === 3) {
-			return __ks_Array.__ks_sttc_map_1.apply(null, args);
+		if(arguments.length === 3) {
+			if(t0(arguments[0]) && t1(arguments[1]) && t1(arguments[2])) {
+				return __ks_Array.__ks_sttc_map_1(arguments[0], arguments[1], arguments[2]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
-	__ks_Array._im_last = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 0 && args.length <= 1) {
-			return __ks_Array.__ks_func_last_0.apply(that, args);
+	__ks_Array._im_last = function(that, ...args) {
+		return __ks_Array.__ks_func_last_rt(that, args);
+	};
+	__ks_Array.__ks_func_last_rt = function(that, args) {
+		const t0 = value => Type.isNumber(value) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length <= 1) {
+			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
+				return __ks_Array.__ks_func_last_0.call(that, Helper.getVararg(args, 0, pts[1]));
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 	var __ks_String = {};
 	__ks_String.__ks_func_lines_0 = function(emptyLines) {
@@ -109,36 +83,44 @@ module.exports = function() {
 		}
 		return parseInt(this, base);
 	};
-	__ks_String._im_lines = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 0 && args.length <= 1) {
-			return __ks_String.__ks_func_lines_0.apply(that, args);
-		}
-		throw new SyntaxError("Wrong number of arguments");
+	__ks_String._im_lines = function(that, ...args) {
+		return __ks_String.__ks_func_lines_rt(that, args);
 	};
-	__ks_String._im_lower = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_String.__ks_func_lines_rt = function(that, args) {
+		if(args.length <= 1) {
+			return __ks_String.__ks_func_lines_0.call(that, args[0]);
+		}
+		throw Helper.badArgs();
+	};
+	__ks_String._im_lower = function(that, ...args) {
+		return __ks_String.__ks_func_lower_rt(that, args);
+	};
+	__ks_String.__ks_func_lower_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_String.__ks_func_lower_0.apply(that);
+			return __ks_String.__ks_func_lower_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
-	__ks_String._im_toFloat = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_String._im_toFloat = function(that, ...args) {
+		return __ks_String.__ks_func_toFloat_rt(that, args);
+	};
+	__ks_String.__ks_func_toFloat_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_String.__ks_func_toFloat_0.apply(that);
+			return __ks_String.__ks_func_toFloat_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
-	__ks_String._im_toInt = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 0 && args.length <= 1) {
-			return __ks_String.__ks_func_toInt_0.apply(that, args);
+	__ks_String._im_toInt = function(that, ...args) {
+		return __ks_String.__ks_func_toInt_rt(that, args);
+	};
+	__ks_String.__ks_func_toInt_rt = function(that, args) {
+		if(args.length <= 1) {
+			return __ks_String.__ks_func_toInt_0.call(that, args[0]);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 	return {
-		__ks_Array: __ks_Array,
-		__ks_String: __ks_String
+		__ks_Array,
+		__ks_String
 	};
 };

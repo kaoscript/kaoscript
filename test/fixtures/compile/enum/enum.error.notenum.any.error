@@ -1,1 +1,1 @@
-TypeException: Identifier "Foobar" is not an enum (line 3, file "fixtures/compile/enum/enum.error.notenum.any.ks")
+TypeException: Identifier "Foobar" is not an enum (fixtures/compile/enum/enum.error.notenum.any.ks:3)

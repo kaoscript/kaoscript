@@ -1,123 +1,129 @@
-{
-  "aliens": [
-    0,
-    "Math"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Math"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": true,
-      "properties": {
-        "abs": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "type": "Any?",
-              "min": 0,
-              "max": "Infinity",
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
-        },
-        "max": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "type": "Any?",
-              "min": 0,
-              "max": "Infinity",
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
-        },
-        "min": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "type": "Any?",
-              "min": 0,
-              "max": "Infinity",
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
-        },
-        "pow": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "type": "Any?",
-              "min": 0,
-              "max": "Infinity",
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
-        },
-        "random": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
-        },
-        "round": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "type": "Any?",
-              "min": 0,
-              "max": "Infinity",
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
+[
+  {
+    "aliens": [
+      0,
+      "Math",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": true,
+        "properties": {
+          "abs": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "max": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "min": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "pow": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "random": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "round": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "Math"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

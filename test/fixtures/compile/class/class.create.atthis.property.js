@@ -1,46 +1,56 @@
-var Dictionary = require("@kaoscript/runtime").Dictionary;
+const {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	class Quxbaz {
+		static __ks_new_0() {
+			const o = Object.create(Quxbaz.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
-		__ks_init_0() {
+		__ks_init() {
 			this._options = (() => {
 				const d = new Dictionary();
 				d.class = Foobar;
 				return d;
 			})();
 		}
-		__ks_init() {
-			Quxbaz.prototype.__ks_init_0.call(this);
-		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
+		}
+		new() {
+			return this.__ks_func_new_rt.call(null, this, this, arguments);
 		}
 		__ks_func_new_0() {
 			const foo = new this._options.class();
 		}
-		new() {
-			if(arguments.length === 0) {
-				return Quxbaz.prototype.__ks_func_new_0.apply(this);
+		__ks_func_new_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_new_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

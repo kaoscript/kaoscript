@@ -1,17 +1,24 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
 		if(x === void 0) {
 			x = null;
 		}
-		else if(x !== null) {
-			throw new TypeError("'x' is not of type 'Null'");
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isNull;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-	}
-	foobar(null);
+		throw Helper.badArgs();
+	};
+	foobar.__ks_0(null);
 	return {
-		foobar: foobar
+		foobar
 	};
 };

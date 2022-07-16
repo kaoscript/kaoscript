@@ -1,17 +1,24 @@
-{
-  "aliens": [
-    "Any?",
-    "console",
-    0,
-    "foobar"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "foobar"
-  ],
-  "references": [
-    "Function"
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true,
+      0,
+      "foobar",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      "Function"
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "foobar"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

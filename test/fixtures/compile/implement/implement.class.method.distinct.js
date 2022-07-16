@@ -1,33 +1,43 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	Foobar.prototype.__ks_func_foobar_0 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
 	};
-	Foobar.prototype.__ks_func_foobar_1 = function(...values) {
+	Foobar.prototype.__ks_func_foobar_1 = function(values) {
+	};
+	Foobar.prototype.__ks_func_foobar_rt = function(that, proto, args) {
+		const t0 = Type.isValue;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return proto.__ks_func_foobar_0.call(that, args[0]);
+			}
+			throw Helper.badArgs();
+		}
+		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+			return proto.__ks_func_foobar_1.call(that, Helper.getVarargs(args, 0, pts[1]));
+		}
+		throw Helper.badArgs();
 	};
 	Foobar.prototype.foobar = function() {
-		if(arguments.length === 1) {
-			return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
-		}
-		else {
-			return Foobar.prototype.__ks_func_foobar_1.apply(this, arguments);
-		}
+		return this.__ks_func_foobar_rt.call(null, this, this, arguments);
 	};
 };

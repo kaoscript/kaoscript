@@ -2,6 +2,8 @@ class Variable {
 	private lateinit {
 		// true: can be altered by `impl` declaration
 		_altereable: Boolean		= false
+		_class: Boolean				= false
+		_complete: Boolean			= false
 		_declaration: Statement?	= null
 		_declaredType: Type			= AnyType.NullableUnexplicit
 		// true: the type can't be changed
@@ -19,14 +21,10 @@ class Variable {
 	}
 	static {
 		createPredefinedClass(name, scope) { // {{{
-			const fn = new ClassConstructorType(scope)
-			fn.addParameter(Type.Any, 0, Infinity)
-
 			type = new ClassType(scope)
 			type.flagAlien()
 			type.flagPredefined()
 			type.flagSystemic()
-			type.addConstructor(fn)
 
 			return new Variable(name, true, true, type)
 		} // }}}
@@ -80,6 +78,11 @@ class Variable {
 	} // }}}
 	declaration() => @declaration
 	declaration(@declaration) => this
+	flagClassStatement() { // {{{
+		@class = true
+
+		return this
+	} // }}}
 	flagDefinitive() { // {{{
 		@definitive = true
 
@@ -100,6 +103,9 @@ class Variable {
 	getDeclaredType() => @declaredType
 	getRealType() => @realType
 	getSecureName() => @secureName
+	isAltereable() => @altereable
+	isClassStatement() => @class
+	isComplete() => @complete
 	isDefinitive() => @definitive
 	isImmutable() => @immutable
 	isInitialized() => @initialized
@@ -116,6 +122,7 @@ class Variable {
 		}
 	} // }}}
 	renameAs(@secureName)
+	setComplete(@complete) => this
 	setDeclaredType(@declaredType, initialize: Boolean = true) { // {{{
 		@declaredType = Type.toNamedType(@name, declaredType)
 

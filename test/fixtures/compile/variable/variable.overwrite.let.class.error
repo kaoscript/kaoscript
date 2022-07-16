@@ -1,1 +1,1 @@
-SyntaxException: Identifier "foo" has already been declared (line 3, file "fixtures/compile/variable/variable.overwrite.let.class.ks")
+SyntaxException: Identifier "foo" has already been declared (fixtures/compile/variable/variable.overwrite.let.class.ks:3)

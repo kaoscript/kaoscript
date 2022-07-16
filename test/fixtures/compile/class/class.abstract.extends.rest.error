@@ -1,0 +1,1 @@
+SyntaxException: Class "ProxyGreetings" doesn't implement the following abstract method: "greet(name: Any): String" (fixtures/compile/class/class.abstract.extends.rest.ks:21)

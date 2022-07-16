@@ -4,6 +4,6 @@ module.exports = function() {
 	x = true;
 	x = "foobar";
 	return {
-		x: x
+		x
 	};
 };

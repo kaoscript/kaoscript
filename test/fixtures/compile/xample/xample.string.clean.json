@@ -1,142 +1,154 @@
-{
-  "aliens": [
-    0,
-    "String"
-  ],
-  "requirements": [
-    0,
-    "String",
-    false
-  ],
-  "exports": [
-    1,
-    "String"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {
-        "split": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "type": "Any?",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "kind": "reference",
-              "name": "Array",
+[
+  {
+    "aliens": [
+      0,
+      "String",
+      false
+    ],
+    "requirements": [
+      0,
+      "String",
+      false
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "split": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
               "parameters": [
                 {
-                  "reference": 0
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
                 }
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": "Array",
+                "parameters": [
+                  {
+                    "reference": 0
+                  }
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "replace": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 0
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "trim": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 0
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "origin": "BIGINT::16",
+        "sequences": [
+          -1,
+          -1,
+          -1
         ],
-        "replace": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "type": "Any?",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 0
-            },
-            "throws": [],
-            "inits": []
-          }
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "String"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "clean": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
         ],
-        "trim": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 0
-            },
-            "throws": [],
-            "inits": []
-          }
-        ]
-      },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 0
-      },
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {
-        "clean": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 1
-            },
-            "throws": [],
-            "inits": []
-          }
-        ]
-      },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    }
-  ],
-  "macros": []
-}
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

@@ -1,29 +1,43 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Array = {};
-	__ks_Array.__ks_func_pushUniq_0 = function(...args) {
+	__ks_Array.__ks_func_pushUniq_0 = function(args) {
 		return this;
 	};
-	__ks_Array._im_pushUniq = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		return __ks_Array.__ks_func_pushUniq_0.apply(that, args);
+	__ks_Array._im_pushUniq = function(that, ...args) {
+		return __ks_Array.__ks_func_pushUniq_rt(that, args);
+	};
+	__ks_Array.__ks_func_pushUniq_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+			return __ks_Array.__ks_func_pushUniq_0.call(that, Helper.getVarargs(args, 0, pts[1]));
+		}
+		if(that.pushUniq) {
+			return that.pushUniq(...args);
+		}
+		throw Helper.badArgs();
 	};
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this.values = [];
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Foobar.prototype.__ks_init_0.call(this);
+			this.values = [];
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
-	const foobar = new Foobar();
-	__ks_Array._im_pushUniq(foobar.values, 42);
+	const foobar = Foobar.__ks_new_0();
+	__ks_Array.__ks_func_pushUniq_0.call(foobar.values, [42]);
 };

@@ -8,7 +8,7 @@ class ArrayType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	export(references, mode) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		const export = {
 			kind: TypeKind::Array
 		}
@@ -17,13 +17,16 @@ class ArrayType extends Type {
 			export.sealed = @sealed
 		}
 
-		export.elements = [element.export(references, mode) for const element in @elements]
+		export.elements = [element.export(references, indexDelta, mode, module) for const element in @elements]
 
 		return export
 	} // }}}
 	getElement(index: Number): Type => index >= @elements.length ? AnyType.NullableUnexplicit : @elements[index]
 	isArray() => true
-	isMatching(value: ArrayType, mode: MatchingMode) { // {{{
+	isMorePreciseThan(value) => true
+	isNullable() => false
+	isSealable() => true
+	isSubsetOf(value: ArrayType, mode: MatchingMode) { // {{{
 		if this.length() != value.length() {
 			return false
 		}
@@ -33,21 +36,40 @@ class ArrayType extends Type {
 		}
 
 		for const element, index in value._elements {
-			unless @elements[index].isMatching(element, mode) {
+			unless @elements[index].isSubsetOf(element, mode) {
 				return false
 			}
 		}
 
 		return true
 	} // }}}
-	isNullable() => false
-	isSealable() => true
 	length() => @elements.length
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotImplementedException()
+	} // }}}
+	override toTestFunctionFragments(fragments, node) { // {{{
+		if @elements.length == 0 {
+			fragments.code($runtime.type(node), '.isArray')
+		}
+		else {
+			fragments.code(`value => `, $runtime.type(node), '.isArray(value)')
+
+			for const value, index in @elements {
+				fragments.code(' && ')
+
+				value.toPositiveTestFragments(fragments, new Literal(false, node, node.scope(), `value[\(index)]`))
+			}
+		}
+	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('array')
+
+		for const element in @elements {
+			element.toVariations(variations)
+		}
 	} // }}}
 	walk(fn)
 }

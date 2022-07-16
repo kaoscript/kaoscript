@@ -1,1 +1,1 @@
-SyntaxException: Dead code (line 11, file "fixtures/compile/deadcode/deadcode.try.default.ks")
+SyntaxException: Dead code (fixtures/compile/deadcode/deadcode.try.default.ks:11)

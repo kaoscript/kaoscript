@@ -1,47 +1,52 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Master {
+		static __ks_new_0() {
+			const o = Object.create(Master.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this.a = "";
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Master.prototype.__ks_init_0.call(this);
+			this.a = "";
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
-			}
-		}
-		__ks_func_foobar_0(a) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(a === void 0 || a === null) {
-				throw new TypeError("'a' is not nullable");
+				throw Helper.badArgs();
 			}
 		}
 		foobar() {
-			if(arguments.length === 1) {
-				return Master.prototype.__ks_func_foobar_0.apply(this, arguments);
+			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
+		}
+		__ks_func_foobar_0(a) {
+		}
+		__ks_func_foobar_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_foobar_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Foobar extends Master {
-		__ks_init_0() {
-			this.b = "";
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
 		}
 		__ks_init() {
-			Master.prototype.__ks_init.call(this);
-			Foobar.prototype.__ks_init_0.call(this);
+			super.__ks_init();
+			this.b = "";
 		}
-		__ks_cons(args) {
-			Master.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
-		__ks_func_foobar_0(a, b) {
+		__ks_func_foobar_1(a, b) {
 			if(a === void 0 || a === null) {
 				a = this.a;
 			}
@@ -50,26 +55,21 @@ module.exports = function() {
 			}
 			return b;
 		}
-		foobar() {
-			if(arguments.length === 0) {
-				return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
-			}
-			else if(arguments.length === 1) {
-				if(true) {
-					return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
-				}
-				else if(true) {
-					return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
-				}
-			}
-			else if(arguments.length === 2) {
-				if(true && true) {
-					return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
+		__ks_func_foobar_0(a) {
+			return this.__ks_func_foobar_1(a);
+		}
+		__ks_func_foobar_rt(that, proto, args) {
+			const t0 = () => true;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length <= 2) {
+				if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t0, pts, 1) && te(pts, 2)) {
+					return proto.__ks_func_foobar_1.call(that, Helper.getVararg(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
 				}
 			}
-			return Master.prototype.foobar.apply(this, arguments);
+			return super.__ks_func_foobar_rt.call(null, that, Master.prototype, args);
 		}
 	}
-	const f = new Foobar();
-	f.foobar("", "");
+	const f = Foobar.__ks_new_0();
+	f.__ks_func_foobar_1("", "");
 };

@@ -1,57 +1,63 @@
-{
-  "aliens": [
-    1,
-    "console"
-  ],
-  "requirements": [
-    0,
-    "Color",
-    true
-  ],
-  "exports": [],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ]
-    },
-    {
-      "kind": "dictionary",
-      "properties": {
-        "log": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "name": "args",
-              "type": "Any",
-              "min": 0,
-              "max": "Infinity",
-              "default": false
-            }
-          ],
-          "returns": "Any?",
-          "throws": []
+[
+  {
+    "aliens": [
+      0,
+      "console",
+      true
+    ],
+    "requirements": [
+      1,
+      "Color",
+      true
+    ],
+    "references": [
+      {
+        "kind": "dictionary",
+        "properties": {
+          "log": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "name": "args",
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Any?",
+            "errors": []
+          }
         }
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
       }
-    }
-  ],
-  "macros": []
-}
+    ]
+  },
+  {
+    "exports": [],
+    "references": [],
+    "macros": []
+  }
+]

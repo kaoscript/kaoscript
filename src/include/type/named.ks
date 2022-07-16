@@ -16,29 +16,27 @@ class NamedType extends Type {
 
 		return new NamedType(@name, @type.clone())
 	} // }}}
-	condense() { // {{{
-		@type.condense()
-
-		return this
-	} // }}}
 	container() => @container
 	container(@container) => this
 	discard() => @type.discard()
 	discardAlias() => this.isAlias() ? @type.discardAlias() : this
 	discardName() => @type
 	duplicate() => new NamedType(@name, @type)
-	export(references, mode) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @type is ClassType && (@type.isPredefined() || !(@type.isExported() || @type.isAlien())) {
 			return @name
 		}
 		else {
-			return @type.export(references, mode)
+			return @type.export(references, indexDelta, mode, module)
 		}
 	} // }}}
 	flagAlien() { // {{{
 		@type.flagAlien()
 
 		return this
+	} // }}}
+	flagAltering(): this { // {{{
+		@type.flagAltering()
 	} // }}}
 	flagExported(explicitly: Boolean) { // {{{
 		@type.flagExported(explicitly)
@@ -55,11 +53,15 @@ class NamedType extends Type {
 
 		return this
 	} // }}}
+	flagRequirement(): this { // {{{
+		@type.flagRequirement()
+	} // }}}
 	flagSealed() { // {{{
 		@type.flagSealed()
 
 		return this
 	} // }}}
+	getAlterationReference() => @type.getAlterationReference()
 	getHierarchy() { // {{{
 		if @type is ClassType {
 			return @type.getHierarchy(@name)
@@ -68,6 +70,7 @@ class NamedType extends Type {
 			return [@name]
 		}
 	} // }}}
+	getMajorReferenceIndex() => @type.getMajorReferenceIndex()
 	getProperty(name: String) => @type.getProperty(name)
 	getSealedName() => `__ks_\(@name)`
 	getSealedPath() { // {{{
@@ -79,12 +82,13 @@ class NamedType extends Type {
 		}
 	} // }}}
 	hasContainer() => ?@container
+	hashCode() => `&\(@name)`
 	hasProperty(name: String) => @type.hasProperty(name)
 	isAlias() => @type.isAlias()
 	isAlien() => @type.isAlien()
-	isAlteration() => @type.isAlteration()
+	isAltering() => @type.isAltering()
 	isArray() => @type.isArray()
-	override isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
 		if super(value, anycast, nullcast, downcast) {
 			return true
 		}
@@ -100,6 +104,9 @@ class NamedType extends Type {
 			else if @type.isClass() && value.isClass() {
 				return @name == 'Class' || this.isInheriting(value) || (downcast && value.isInheriting(this))
 			}
+			else if @type.isEnum() {
+				return @type.type().isAssignableToVariable(value, anycast, nullcast, downcast)
+			}
 			else if @type.isStruct() && value.isStruct() {
 				return @name == 'Struct' || this.isInheriting(value) || (downcast && value.isInheriting(this))
 			}
@@ -111,11 +118,43 @@ class NamedType extends Type {
 			}
 		}
 		else if value is ReferenceType {
-			return this.isAssignableToVariable(value.type(), anycast, nullcast, downcast)
+			if value.name() == 'Class' {
+				return @type.isClass()
+			}
+			else if value.name() == 'Enum' {
+				return @type.isEnum()
+			}
+			else if value.name() == 'Namespace' {
+				return @type.isNamespace()
+			}
+			else if value.name() == 'Struct' {
+				return @type.isStruct()
+			}
+			else if value.name() == 'Tuple' {
+				return @type.isTuple()
+			}
+			else if @type.isClass() {
+				return value.name() == 'Class'
+			}
+			else if @type.isEnum() {
+				return value.name() == 'Enum'
+			}
+			else if @type.isNamespace() {
+				return value.name() == 'Namespace'
+			}
+			else if @type.isStruct() {
+				return value.name() == 'Struct'
+			}
+			else if @type.isTuple() {
+				return value.name() == 'Tuple'
+			}
+			else {
+				return this.isAssignableToVariable(value.type(), anycast, nullcast, downcast, limited)
+			}
 		}
 		else if value is UnionType {
 			for const type in value.types() {
-				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
+				if this.isAssignableToVariable(type.discardReference(), anycast, nullcast, downcast, limited) {
 					return true
 				}
 			}
@@ -125,12 +164,12 @@ class NamedType extends Type {
 		else if value is ExclusionType {
 			const types = value.types()
 
-			if !this.isAssignableToVariable(types[0], anycast, nullcast, downcast) {
+			if !this.isAssignableToVariable(types[0].discardReference(), anycast, nullcast, downcast) {
 				return false
 			}
 
 			for const type in types from 1 {
-				if this.isAssignableToVariable(type, anycast, nullcast, downcast) {
+				if this.isAssignableToVariable(type.discardReference(), anycast, nullcast, downcast) {
 					return false
 				}
 			}
@@ -172,87 +211,19 @@ class NamedType extends Type {
 
 		return false
 	} // }}}
-	isMatching(value: Type, mode: MatchingMode) { // {{{
-		if this == value {
-			return true
-		}
-		else if mode ~~ MatchingMode::Exact {
-			return false
-		}
-		else {
-			if value.isAny() {
-				return true
+	isInstanceOf(value: Type) => @type.isInstanceOf(value)
+	isMorePreciseThan(value: Type) { // {{{
+		if value is NamedType {
+			if this.isClass() && value.isClass() {
+				return @name != value.name() && this.matchInheritanceOf(value)
 			}
-			else if value is NamedType {
-				if @type is ClassType && value.type() is ClassType {
-					if value.isSystemic() && !@type.isSystemic() {
-						return false
-					}
-					else if value.isSealed() && !@type.isSealed() {
-						return false
-					}
-					else if @type.isPredefined() && value.isPredefined() {
-						return @name == value.name()
-					}
-					else {
-						return this.isInheriting(value) || @type.isMatching(value.type(), mode)
-					}
-				}
-				else if value.type() is EnumType {
-					if @type is EnumType {
-						return @name == value.name()
-					}
-					else {
-						return this.isMatching(value.type().type(), mode)
-					}
-				}
-				else if value.type() is ClassType && value.name() == 'Enum' {
-					return this.isEnum()
-				}
-				else if value.isAlias() {
-					if this.isAlias() {
-						return @name == value.name() || this.discardAlias().isMatching(value.discardAlias(), mode)
-					}
-					else {
-						return this.isMatching(value.discardAlias(), mode)
-					}
-				}
-				else {
-					return @type.isMatching(value.type(), mode)
-				}
-			}
-			else if this.isAlias() {
-				return this.discardAlias().isMatching(value, mode)
-			}
-			else if value is UnionType {
-				for const type in value.types() {
-					if this.isMatching(type, mode) {
-						return true
-					}
-				}
-
-				return false
-			}
-			else if value is ReferenceType {
-				return @name == value.name() || this.isMatching(value.discardReference(), mode)
-			}
-			else {
-				return @type.isMatching(value, mode)
+			else if value.isAlias() {
+				return this.isMorePreciseThan(value.discardAlias())
 			}
 		}
-	} // }}}
-	isMorePreciseThan(that: Type) { // {{{
-		if that is NamedType {
-			if this.isClass() && that.isClass() {
-				return @name != that.name() && this.matchInheritanceOf(that)
-			}
-			else if that.isAlias() {
-				return this.isMorePreciseThan(that.discardAlias())
-			}
-		}
-		else if that is UnionType {
-			for const type in that.types() {
-				if this.matchContentOf(type) {
+		else if value is UnionType {
+			for const type in value.types() {
+				if this.matchContentOf(value) {
 					return true
 				}
 			}
@@ -271,16 +242,90 @@ class NamedType extends Type {
 	isReducible() => true
 	isReferenced() => @type.isReferenced()
 	isRequired() => @type.isRequired()
+	isRequirement() => @type.isRequirement()
 	isSealable() => @type.isSealable()
 	isSealed() => @type.isSealed()
 	isSealedAlien() => @type.isSealedAlien()
 	isString() => @type.isString()
 	isStruct() => @type.isStruct()
+	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
+		if this == value {
+			return true
+		}
+		else if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			return false
+		}
+		else {
+			if value.isAny() {
+				return true
+			}
+			else if value.isVoid() {
+				return false
+			}
+			else if value is NamedType {
+				if @type is ClassType && value.type() is ClassType {
+					if value.isSystemic() && !@type.isSystemic() {
+						return false
+					}
+					else if value.isSealed() && !@type.isSealed() {
+						return false
+					}
+					else if @type.isPredefined() && value.isPredefined() {
+						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
+					}
+					else {
+						return @type.isSubsetOf(value.type(), mode + MatchingMode::Subclass)
+					}
+				}
+				else if value.type() is EnumType {
+					if @type is EnumType {
+						return @scope.isRenamed(@name, value.name(), value.scope(), mode)
+					}
+					else {
+						return this.isSubsetOf(value.type().type(), mode)
+					}
+				}
+				else if value.type() is ClassType && value.name() == 'Enum' {
+					return this.isEnum()
+				}
+				else if value.isAlias() {
+					if this.isAlias() {
+						return @scope.isRenamed(@name, value.name(), value.scope(), mode) || this.discardAlias().isSubsetOf(value.discardAlias(), mode)
+					}
+					else {
+						return this.isSubsetOf(value.discardAlias(), mode)
+					}
+				}
+				else {
+					return @type.isSubsetOf(value.type(), mode)
+				}
+			}
+			else if this.isAlias() {
+				return this.discardAlias().isSubsetOf(value, mode)
+			}
+			else if value is UnionType {
+				for const type in value.types() {
+					if this.isSubsetOf(type, mode) {
+						return true
+					}
+				}
+
+				return false
+			}
+			else if value is ReferenceType {
+				return @scope.isRenamed(@name, value.name(), value.scope(), mode) || this.isSubsetOf(value.discardReference(), mode)
+			}
+			else {
+				return @type.isSubsetOf(value, mode)
+			}
+		}
+	} // }}}
 	isSystemic() => @type.isSystemic()
 	isTuple() => @type.isTuple()
 	isTypeOf() => $typeofs[@name]
 	isUnion() => @type.isUnion()
 	isVirtual() => $virtuals[@name]
+	majorOriginal() => @type.majorOriginal()
 	matchClassName(that: Type?) { // {{{
 		if that == null {
 			return false
@@ -296,64 +341,64 @@ class NamedType extends Type {
 
 		return false
 	} // }}}
-	matchContentOf(that: Type?) { // {{{
-		if that == null {
+	matchContentOf(value: Type?) { // {{{
+		if value == null {
 			return false
 		}
-		else if that.isAny() {
+		else if value.isAny() {
 			return true
 		}
 		else if @name == 'Object' && @type is ClassType {
-			return @scope.module().getPredefined('Object')!?.matchContentOf(that)
+			return @scope.module().getPredefined('Object')!?.matchContentOf(value)
 		}
-		else if that is NamedType {
-			if that.name() == 'Object' && that.type() is ClassType {
+		else if value is NamedType {
+			if value.name() == 'Object' && value.type() is ClassType {
 				return this.matchContentOf(@scope.module().getPredefined('Object'))
 			}
-			else if @type is ClassType && that.type() is ClassType {
-				return this.matchInheritanceOf(that)
+			else if @type is ClassType && value.type() is ClassType {
+				return this.matchInheritanceOf(value)
 			}
-			else if that.type() is EnumType {
+			else if value.type() is EnumType {
 				if @type is EnumType {
-					return @name == that.name()
+					return @name == value.name()
 				}
 				else {
-					return this.matchContentOf(that.type())
+					return this.matchContentOf(value.type())
 				}
 			}
-			else if that.type() is StructType {
+			else if value.type() is StructType {
 				if @type is StructType {
-					return this.matchInheritanceOf(that)
+					return this.matchInheritanceOf(value)
 				}
 				else {
-					return @type.matchContentOf(that.type())
+					return @type.matchContentOf(value.type())
 				}
 			}
-			else if that.type() is TupleType {
+			else if value.type() is TupleType {
 				if @type is TupleType {
-					return this.matchInheritanceOf(that)
+					return this.matchInheritanceOf(value)
 				}
 				else {
-					return @type.matchContentOf(that.type())
+					return @type.matchContentOf(value.type())
 				}
 			}
-			else if that.isAlias() {
+			else if value.isAlias() {
 				if this.isAlias() {
-					return @name == that.name() || @type.discardAlias().matchContentOf(that.discardAlias())
+					return @name == value.name() || @type.discardAlias().matchContentOf(value.discardAlias())
 				}
 				else {
-					return this.matchContentOf(that.discardAlias())
+					return this.matchContentOf(value.discardAlias())
 				}
 			}
 			else {
-				return @type.matchContentOf(that)
+				return @type.matchContentOf(value)
 			}
 		}
 		else if this.isAlias() {
-			return @type.discardAlias().matchContentOf(that)
+			return @type.discardAlias().matchContentOf(value)
 		}
-		else if that is UnionType {
-			for const type in that.types() {
+		else if value is UnionType {
+			for const type in value.types() {
 				if this.matchContentOf(type) {
 					return true
 				}
@@ -361,8 +406,8 @@ class NamedType extends Type {
 
 			return false
 		}
-		else if that is ExclusionType {
-			const types = that.types()
+		else if value is ExclusionType {
+			const types = value.types()
 
 			if !this.matchContentOf(types[0]) {
 				return false
@@ -376,14 +421,14 @@ class NamedType extends Type {
 
 			return true
 		}
-		else if that is ReferenceType {
-			return @name == that.name() || this.matchContentOf(that.discardReference())
+		else if value is ReferenceType {
+			return @name == value.name() || this.matchContentOf(value.discardReference())
 		}
-		else if that is DictionaryType {
+		else if value is DictionaryType {
 			return @name == 'Dictionary'
 		}
 		else {
-			return @type.matchContentOf(that)
+			return @type.matchContentOf(value)
 		}
 	} // }}}
 	matchInheritanceOf(base: Type) { // {{{
@@ -404,16 +449,22 @@ class NamedType extends Type {
 
 		return false
 	} // }}}
-	metaReference(references, mode) { // {{{
+	metaReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @type is ClassType || @type is StructType || @type is TupleType {
-			return @type.metaReference(references, @name, mode)
+			return @type.metaReference(references, indexDelta, mode, module, @name)
 		}
 		else {
 			throw new NotSupportedException()
 		}
 	} // }}}
+	minorOriginal() => @type.minorOriginal()
 	name() => @name
 	name(@name) => this
+	origin() => @type.origin()
+	origin(origin) => @type.origin(origin)
+	originals(...originals): this { // {{{
+		@type.originals(...originals)
+	} // }}}
 	parameter() => @type.parameter()
 	path() { // {{{
 		if @container? {
@@ -432,9 +483,24 @@ class NamedType extends Type {
 		}
 	} // }}}
 	referenceIndex() => @type.referenceIndex()
-	toAlterationReference(references, mode) { // {{{
+	resetReferences() => @type.resetReferences()
+	setAlterationReference(type: Type) => @type.setAlterationReference(type)
+	split(types: Array) { // {{{
+		if @type.isAlias() || @type.isUnion() {
+			@type.split(types)
+		}
+		else if @isNullable() {
+			types.pushUniq(@setNullable(false), Type.Null)
+		}
+		else {
+			types.pushUniq(this)
+		}
+
+		return types
+	} // }}}
+	toAlterationReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @type is ClassType {
-			return @type.toAlterationReference(references, mode)
+			return @type.toAlterationReference(references, indexDelta, mode, module)
 		}
 		else {
 			throw new NotSupportedException()
@@ -448,16 +514,16 @@ class NamedType extends Type {
 			super(fragments, name, variable)
 		}
 	} // }}}
-	toExportOrIndex(references, mode) => @type.toExportOrIndex(references, mode)
+	toExportOrIndex(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toExportOrIndex(references, indexDelta, mode, module)
 	toFragments(fragments, node)
-	toMetadata(references, mode) => @type.toMetadata(references, mode)
+	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => @type.toMetadata(references, indexDelta, mode, module)
 	toQuote() => @name
-	toReference(references, mode) { // {{{
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @type is ClassType && @type.isPredefined() {
 			return @name
 		}
 		else {
-			return @type.toReference(references, mode)
+			return @type.toReference(references, indexDelta, mode, module)
 		}
 	} // }}}
 	override toNegativeTestFragments(fragments, node, junction) { // {{{
@@ -476,7 +542,16 @@ class NamedType extends Type {
 			@type.toPositiveTestFragments(fragments, node, junction)
 		}
 	} // }}}
+	override toRequiredMetadata(requirements) => @type.toRequiredMetadata(requirements)
+	override toVariations(variations) { // {{{
+		variations.push('named', @name)
+
+		@type.toVariations(variations)
+	} // }}}
 	type() => @type
+	unflagAltering(): this { // {{{
+		@type.unflagAltering()
+	} // }}}
 	walk(fn) { // {{{
 		if @type is DictionaryType || @type is NamespaceType {
 			@type.walk(fn)
@@ -521,18 +596,18 @@ class NamedContainerType extends NamedType {
 		}
 	} // }}}
 	hasProperty(name: String): Boolean => @type.hasProperty(name)
-	matchContentOf(that: Type?) { // {{{
-		if that == null {
+	matchContentOf(value: Type?) { // {{{
+		if value == null {
 			return false
 		}
-		else if that.isAny() {
+		else if value.isAny() {
 			return true
 		}
-		else if that is NamedContainerType {
-			return @name == that.name()
+		else if value is NamedContainerType {
+			return @name == value.name()
 		}
-		else if that is UnionType {
-			for const type in that.types() {
+		else if value is UnionType {
+			for const type in value.types() {
 				if this.matchContentOf(type) {
 					return true
 				}
@@ -540,8 +615,8 @@ class NamedContainerType extends NamedType {
 
 			return false
 		}
-		else if that is ExclusionType {
-			const types = that.types()
+		else if value is ExclusionType {
+			const types = value.types()
 
 			if !this.matchContentOf(types[0]) {
 				return false
@@ -555,11 +630,11 @@ class NamedContainerType extends NamedType {
 
 			return true
 		}
-		else if that is ReferenceType {
-			return @name == that.name() || this.matchContentOf(that.discardReference())
+		else if value is ReferenceType {
+			return @name == value.name() || this.matchContentOf(value.discardReference())
 		}
 		else {
-			return @type.matchContentOf(that)
+			return @type.matchContentOf(value)
 		}
 	} // }}}
 }

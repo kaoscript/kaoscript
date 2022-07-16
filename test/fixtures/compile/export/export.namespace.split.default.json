@@ -1,57 +1,65 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "NS",
-    1,
-    "foobar"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {
-        "foo": {
-          "sealed": false,
-          "type": 1
-        },
-        "bar": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "String",
-          "throws": [],
-          "sealed": false
-        },
-        "qux": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "String",
-          "throws": [],
-          "sealed": false
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "NS",
+      1,
+      "foobar"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {
+          "foo": {
+            "sealed": false,
+            "type": 1
+          },
+          "bar": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "errors": [],
+            "sealed": false
+          },
+          "qux": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "String",
+            "errors": [],
+            "sealed": false
+          }
         }
+      },
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": 0,
+        "parameters": [],
+        "returns": "String",
+        "errors": []
       }
-    },
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 0,
-      "max": 0,
-      "parameters": [],
-      "returns": "String",
-      "throws": []
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

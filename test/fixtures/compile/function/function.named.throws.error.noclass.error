@@ -1,1 +1,1 @@
-TypeException: Identifier "BadError" is not a class (line 3, file "fixtures/compile/function/function.named.throws.error.noclass.ks")
+TypeException: Identifier "BadError" is not a class (fixtures/compile/function/function.named.throws.error.noclass.ks:3)

@@ -1,51 +1,63 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Greetings {
+		static __ks_new_0() {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
-		__ks_func_foo_0(...args) {
+		foo() {
+			return this.__ks_func_foo_rt.call(null, this, this, arguments);
+		}
+		__ks_func_foo_0(args) {
 			console.log(args);
 		}
-		foo() {
-			return Greetings.prototype.__ks_func_foo_0.apply(this, arguments);
+		__ks_func_foo_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return proto.__ks_func_foo_0.call(that, Helper.getVarargs(args, 0, pts[1]));
+			}
+			throw Helper.badArgs();
+		}
+		bar() {
+			return this.__ks_func_bar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_bar_0() {
 		}
-		__ks_func_bar_1(name, ...messages) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
+		__ks_func_bar_1(name, messages) {
 			console.log(name, messages);
 		}
-		bar() {
-			if(arguments.length === 0) {
-				return Greetings.prototype.__ks_func_bar_0.apply(this);
+		__ks_func_bar_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length === 0) {
+				return proto.__ks_func_bar_0.call(that);
 			}
-			else {
-				return Greetings.prototype.__ks_func_bar_1.apply(this, arguments);
+			if(t0(args[0]) && Helper.isVarargs(args, 0, args.length - 1, t0, pts = [1], 0) && te(pts, 1)) {
+				return proto.__ks_func_bar_1.call(that, args[0], Helper.getVarargs(args, 1, pts[1]));
 			}
+			throw Helper.badArgs();
+		}
+		baz() {
+			return this.__ks_func_baz_rt.call(null, this, this, arguments);
 		}
 		__ks_func_baz_0() {
 		}
 		__ks_func_baz_1(foo, bar, qux) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(foo === void 0 || foo === null) {
-				throw new TypeError("'foo' is not nullable");
-			}
 			if(bar === void 0 || bar === null) {
 				bar = "bar";
 			}
@@ -54,210 +66,186 @@ module.exports = function() {
 			}
 			console.log(foo, bar, qux);
 		}
-		baz() {
-			if(arguments.length === 0) {
-				return Greetings.prototype.__ks_func_baz_0.apply(this);
+		__ks_func_baz_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const t1 = () => true;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length === 0) {
+				return proto.__ks_func_baz_0.call(that);
 			}
-			else if(arguments.length >= 1 && arguments.length <= 3) {
-				return Greetings.prototype.__ks_func_baz_1.apply(this, arguments);
+			if(args.length >= 1 && args.length <= 3) {
+				if(t0(args[0])) {
+					if(Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && Helper.isVarargs(args, 0, 1, t1, pts, 1) && te(pts, 2)) {
+						return proto.__ks_func_baz_1.call(that, args[0], Helper.getVararg(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+					}
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		qux() {
+			return this.__ks_func_qux_rt.call(null, this, this, arguments);
 		}
 		__ks_func_qux_0() {
 		}
-		__ks_func_qux_1(name, priority, ...messages) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
+		__ks_func_qux_1(name, priority, messages) {
 			if(priority === void 0 || priority === null) {
 				priority = 1;
 			}
 			console.log(name, priority, messages);
 		}
-		qux() {
-			if(arguments.length === 0) {
-				return Greetings.prototype.__ks_func_qux_0.apply(this);
+		__ks_func_qux_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const t1 = () => true;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length === 0) {
+				return proto.__ks_func_qux_0.call(that);
 			}
-			else {
-				return Greetings.prototype.__ks_func_qux_1.apply(this, arguments);
+			if(t0(args[0]) && Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && Helper.isVarargs(args, 0, args.length - 1, t0, pts, 1) && te(pts, 2)) {
+				return proto.__ks_func_qux_1.call(that, args[0], Helper.getVararg(args, 1, pts[1]), Helper.getVarargs(args, pts[1], pts[2]));
 			}
+			throw Helper.badArgs();
+		}
+		corge() {
+			return this.__ks_func_corge_rt.call(null, this, this, arguments);
 		}
 		__ks_func_corge_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
 			console.log(name);
 		}
 		__ks_func_corge_1(name, message, priority) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
-			}
 			if(priority === void 0 || priority === null) {
 				priority = 1;
 			}
 			console.log(name, priority, message);
 		}
-		corge() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_corge_0.apply(this, arguments);
+		__ks_func_corge_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_corge_0.call(that, args[0]);
+				}
+				throw Helper.badArgs();
 			}
-			else if(arguments.length === 2 || arguments.length === 3) {
-				return Greetings.prototype.__ks_func_corge_1.apply(this, arguments);
+			if(args.length >= 2 && args.length <= 3) {
+				if(t0(args[0]) && t0(args[1])) {
+					return proto.__ks_func_corge_1.call(that, args[0], args[1], args[2]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		grault() {
+			return this.__ks_func_grault_rt.call(null, this, this, arguments);
 		}
 		__ks_func_grault_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
 			console.log(name);
 		}
-		__ks_func_grault_1(name) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			let __ks_i = 0;
-			let __ks__;
-			let priority = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 1;
-			let message = arguments[++__ks_i];
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
+		__ks_func_grault_1(name, priority, message) {
+			if(priority === void 0 || priority === null) {
+				priority = 1;
 			}
 			console.log(name, priority, message);
 		}
-		grault() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_grault_0.apply(this, arguments);
+		__ks_func_grault_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_grault_0.call(that, args[0]);
+				}
+				throw Helper.badArgs();
 			}
-			else if(arguments.length === 2 || arguments.length === 3) {
-				return Greetings.prototype.__ks_func_grault_1.apply(this, arguments);
+			if(args.length === 2) {
+				if(t0(args[0]) && t0(args[1])) {
+					return proto.__ks_func_grault_1.call(that, args[0], void 0, args[1]);
+				}
+				throw Helper.badArgs();
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			if(args.length === 3) {
+				if(t0(args[0]) && t0(args[2])) {
+					return proto.__ks_func_grault_1.call(that, args[0], args[1], args[2]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+		garply() {
+			return this.__ks_func_garply_rt.call(null, this, this, arguments);
 		}
 		__ks_func_garply_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			else if(!Type.isString(name)) {
-				throw new TypeError("'name' is not of type 'String'");
-			}
 			console.log(name);
 		}
 		__ks_func_garply_1(name, message, priority) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			else if(!Type.isString(name)) {
-				throw new TypeError("'name' is not of type 'String'");
-			}
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
-			}
-			else if(!Type.isString(message)) {
-				throw new TypeError("'message' is not of type 'String'");
-			}
 			if(priority === void 0 || priority === null) {
 				priority = 1;
 			}
-			else if(!Type.isNumber(priority)) {
-				throw new TypeError("'priority' is not of type 'Number'");
-			}
 			console.log(name, priority, message);
 		}
-		__ks_func_garply_2(name) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			else if(!Type.isString(name)) {
-				throw new TypeError("'name' is not of type 'String'");
-			}
-			let __ks_i = 0;
-			let priority;
-			if(arguments.length > 2 && (priority = arguments[++__ks_i]) !== void 0 && priority !== null) {
-				if(!Type.isNumber(priority)) {
-					throw new TypeError("'priority' is not of type 'Number'");
-				}
-			}
-			else {
+		__ks_func_garply_2(name, priority, messages) {
+			if(priority === void 0 || priority === null) {
 				priority = 1;
-			}
-			let messages = arguments[++__ks_i];
-			if(messages === void 0 || messages === null) {
-				throw new TypeError("'messages' is not nullable");
-			}
-			else if(!Type.isArray(messages)) {
-				throw new TypeError("'messages' is not of type 'Array'");
 			}
 			console.log(name, priority, messages);
 		}
-		garply() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_garply_0.apply(this, arguments);
+		__ks_func_garply_rt(that, proto, args) {
+			const t0 = Type.isString;
+			const t1 = Type.isArray;
+			const t2 = value => Type.isNumber(value) || Type.isNull(value);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_garply_0.call(that, args[0]);
+				}
+				throw Helper.badArgs();
 			}
-			else if(arguments.length === 2) {
-				if(Type.isArray(arguments[1])) {
-					return Greetings.prototype.__ks_func_garply_2.apply(this, arguments);
+			if(args.length === 2) {
+				if(t0(args[0])) {
+					if(t1(args[1])) {
+						return proto.__ks_func_garply_2.call(that, args[0], void 0, args[1]);
+					}
+					if(t0(args[1])) {
+						return proto.__ks_func_garply_1.call(that, args[0], args[1], void 0);
+					}
+					throw Helper.badArgs();
 				}
-				else {
-					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
+				throw Helper.badArgs();
+			}
+			if(args.length === 3) {
+				if(t0(args[0])) {
+					if(t0(args[1])) {
+						if(t2(args[2])) {
+							return proto.__ks_func_garply_1.call(that, args[0], args[1], args[2]);
+						}
+						throw Helper.badArgs();
+					}
+					if(t2(args[1]) && t1(args[2])) {
+						return proto.__ks_func_garply_2.call(that, args[0], args[1], args[2]);
+					}
+					throw Helper.badArgs();
 				}
 			}
-			else if(arguments.length === 3) {
-				if(Type.isArray(arguments[2])) {
-					return Greetings.prototype.__ks_func_garply_2.apply(this, arguments);
-				}
-				else {
-					return Greetings.prototype.__ks_func_garply_1.apply(this, arguments);
-				}
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		waldo() {
+			return this.__ks_func_waldo_rt.call(null, this, this, arguments);
 		}
 		__ks_func_waldo_0() {
 		}
-		__ks_func_waldo_1(name, ...messages) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_func_waldo_1(name, messages, priority) {
+			if(priority === void 0 || priority === null) {
+				priority = 1;
 			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			let priority = 1;
 			console.log(name, priority, messages);
 		}
-		waldo() {
-			if(arguments.length === 0) {
-				return Greetings.prototype.__ks_func_waldo_0.apply(this);
+		__ks_func_waldo_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const t1 = () => true;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length === 0) {
+				return proto.__ks_func_waldo_0.call(that);
 			}
-			else {
-				return Greetings.prototype.__ks_func_waldo_1.apply(this, arguments);
+			if(t0(args[0]) && Helper.isVarargs(args, 0, args.length - 2, t0, pts = [1], 0) && Helper.isVarargs(args, 0, 1, t1, pts, 1) && te(pts, 2)) {
+				return proto.__ks_func_waldo_1.call(that, args[0], Helper.getVarargs(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
 			}
+			throw Helper.badArgs();
 		}
 	}
 };

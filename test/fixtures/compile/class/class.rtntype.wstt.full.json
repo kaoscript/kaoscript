@@ -1,133 +1,139 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Foobar"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {
-        "_value": {
-          "access": 2,
-          "type": "String",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
-      },
-      "classVariables": {
-        "_instance": {
-          "access": 2,
-          "type": {
-            "reference": 0
-          },
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
-      },
-      "instanceMethods": {
-        "value": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "String",
-            "throws": [],
-            "inits": []
-          },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "value",
-                "type": "String",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Foobar"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "_value": {
+            "access": 2,
+            "type": "String",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "classVariables": {
+          "_instance": {
+            "access": 2,
+            "type": {
               "reference": 0
             },
-            "throws": [],
-            "inits": [
-              "_value"
-            ]
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
           }
-        ]
-      },
-      "classMethods": {
-        "instance": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 0
+        },
+        "instanceMethods": {
+          "value": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "String",
+              "errors": [],
+              "inits": []
             },
-            "throws": [],
-            "inits": []
-          },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "instance",
-                "type": {
-                  "reference": 0
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": [
-              "_instance"
-            ]
-          }
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 0
+              },
+              "errors": [],
+              "inits": [
+                "_value"
+              ]
+            }
+          ]
+        },
+        "classMethods": {
+          "instance": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 0
+              },
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "instance",
+                  "type": {
+                    "reference": 0
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": [
+                "_instance"
+              ]
+            }
+          ]
+        },
+        "sequences": [
+          0,
+          -1,
+          -1
         ]
-      },
-      "sequences": [
-        0,
-        -1,
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+      }
+    ],
+    "macros": []
+  }
+]

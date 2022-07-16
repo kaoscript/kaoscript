@@ -1,39 +1,40 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(...args) {
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(args) {
 		return quxbaz(...args);
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+			return foobar.__ks_0.call(that, Helper.getVarargs(args, 0, pts[1]));
+		}
+		throw Helper.badArgs();
+	};
 	function quxbaz() {
-		if(arguments.length === 2 && Type.isNumber(arguments[0]) && Type.isNumber(arguments[1])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
+		return quxbaz.__ks_rt(this, arguments);
+	};
+	quxbaz.__ks_0 = function(x, y) {
+	};
+	quxbaz.__ks_1 = function(x, y) {
+	};
+	quxbaz.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		const t1 = Type.isValue;
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t0(args[1])) {
+					return quxbaz.__ks_0.call(that, args[0], args[1]);
+				}
 			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
-			}
-			let y = arguments[++__ks_i];
-			if(y === void 0 || y === null) {
-				throw new TypeError("'y' is not nullable");
-			}
-			else if(!Type.isNumber(y)) {
-				throw new TypeError("'y' is not of type 'Number'");
-			}
-		}
-		else if(arguments.length === 2) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			let y = arguments[++__ks_i];
-			if(y === void 0 || y === null) {
-				throw new TypeError("'y' is not nullable");
+			if(t1(args[0]) && t1(args[1])) {
+				return quxbaz.__ks_1.call(that, args[0], args[1]);
 			}
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 };

@@ -1,56 +1,40 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		if(arguments.length >= 2 && Type.isArray(arguments[arguments.length - 1])) {
-			let __ks_i = -1;
-			let begin = arguments[++__ks_i];
-			if(begin === void 0 || begin === null) {
-				throw new TypeError("'begin' is not nullable");
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(begin, args, end) {
+		console.log("Array");
+	};
+	foobar.__ks_1 = function(begin, args, end) {
+		console.log("String");
+	};
+	foobar.__ks_2 = function(begin, args, end) {
+		console.log("Any");
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const t1 = Type.isArray;
+		const t2 = Type.isString;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length >= 2) {
+			if(t0(args[0]) && Helper.isVarargs(args, 0, args.length - 2, t0, pts = [1], 0)) {
+				if(Helper.isVarargs(args, 1, 1, t1, pts, 1) && te(pts, 2)) {
+					return foobar.__ks_0.call(that, args[0], Helper.getVarargs(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
+				if(Helper.isVarargs(args, 1, 1, t2, pts, 1) && te(pts, 2)) {
+					return foobar.__ks_1.call(that, args[0], Helper.getVarargs(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
+				if(Helper.isVarargs(args, 1, 1, t0, pts, 1) && te(pts, 2)) {
+					return foobar.__ks_2.call(that, args[0], Helper.getVarargs(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
+				throw Helper.badArgs();
 			}
-			let args = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
-			let end = arguments[__ks_i];
-			if(end === void 0 || end === null) {
-				throw new TypeError("'end' is not nullable");
-			}
-			else if(!Type.isArray(end)) {
-				throw new TypeError("'end' is not of type 'Array'");
-			}
-			console.log("Array");
 		}
-		else if(arguments.length >= 2 && Type.isString(arguments[arguments.length - 1])) {
-			let __ks_i = -1;
-			let begin = arguments[++__ks_i];
-			if(begin === void 0 || begin === null) {
-				throw new TypeError("'begin' is not nullable");
-			}
-			let args = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
-			let end = arguments[__ks_i];
-			if(end === void 0 || end === null) {
-				throw new TypeError("'end' is not nullable");
-			}
-			else if(!Type.isString(end)) {
-				throw new TypeError("'end' is not of type 'String'");
-			}
-			console.log("String");
-		}
-		else if(arguments.length >= 2) {
-			let __ks_i = -1;
-			let begin = arguments[++__ks_i];
-			if(begin === void 0 || begin === null) {
-				throw new TypeError("'begin' is not nullable");
-			}
-			let args = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
-			let end = arguments[__ks_i];
-			if(end === void 0 || end === null) {
-				throw new TypeError("'end' is not nullable");
-			}
-			console.log("Any");
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 	return {
-		foobar: foobar
+		foobar
 	};
 };

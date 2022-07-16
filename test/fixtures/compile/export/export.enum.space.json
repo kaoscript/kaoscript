@@ -1,26 +1,31 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "Space"
-  ],
-  "references": [
-    {
-      "kind": "enum",
-      "type": "string",
-      "index": -1,
-      "exhaustive": true,
-      "variables": [
-        "RGB",
-        "SRGB"
-      ],
-      "instanceMethods": {},
-      "staticMethods": {},
-      "sequences": [
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Space"
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "string",
+        "sequenceIndex": -1,
+        "exhaustive": true,
+        "variables": [
+          "RGB",
+          "SRGB"
+        ],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

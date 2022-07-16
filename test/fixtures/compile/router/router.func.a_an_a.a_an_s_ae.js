@@ -1,61 +1,42 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function __ks_foobar_0(a) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(a === void 0 || a === null) {
-			throw new TypeError("'a' is not nullable");
-		}
-		let __ks_i = 0;
-		let __ks__;
-		let b = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-		let c = arguments[++__ks_i];
-		if(c === void 0 || c === null) {
-			throw new TypeError("'c' is not nullable");
-		}
-		console.log(a, b, c);
-	}
-	function __ks_foobar_1(a) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(a === void 0 || a === null) {
-			throw new TypeError("'a' is not nullable");
-		}
-		let __ks_i = 0;
-		let __ks__;
-		let b = arguments.length > 3 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-		let c = arguments[++__ks_i];
-		if(c === void 0 || c === null) {
-			throw new TypeError("'c' is not nullable");
-		}
-		else if(!Type.isString(c)) {
-			throw new TypeError("'c' is not of type 'String'");
-		}
-		let d = arguments[++__ks_i];
-		if(d === void 0 || d === null) {
-			throw new TypeError("'d' is not nullable");
-		}
-		console.log(a, b, c, d);
-	}
 	function foobar() {
-		if(arguments.length === 2) {
-			return __ks_foobar_0(...arguments);
-		}
-		else if(arguments.length === 3) {
-			if(Type.isString(arguments[1])) {
-				return __ks_foobar_1(...arguments);
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(a, b = null, c) {
+		console.log(a, b, c);
+	};
+	foobar.__ks_1 = function(a, b = null, c, d) {
+		console.log(a, b, c, d);
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const t1 = Type.isString;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return foobar.__ks_0.call(that, args[0], void 0, args[1]);
 			}
-			else {
-				return __ks_foobar_0(...arguments);
+			throw Helper.badArgs();
+		}
+		if(args.length === 3) {
+			if(t0(args[0])) {
+				if(t1(args[1])) {
+					if(t0(args[2])) {
+						return foobar.__ks_1.call(that, args[0], void 0, args[1], args[2]);
+					}
+				}
+				if(t0(args[2])) {
+					return foobar.__ks_0.call(that, args[0], args[1], args[2]);
+				}
+				throw Helper.badArgs();
+			}
+			throw Helper.badArgs();
+		}
+		if(args.length === 4) {
+			if(t0(args[0]) && t1(args[2]) && t0(args[3])) {
+				return foobar.__ks_1.call(that, args[0], args[1], args[2], args[3]);
 			}
 		}
-		else if(arguments.length === 4) {
-			return __ks_foobar_1(...arguments);
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 };

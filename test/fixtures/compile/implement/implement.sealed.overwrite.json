@@ -1,96 +1,104 @@
-{
-  "aliens": [
-    1,
-    "Date"
-  ],
-  "requirements": [
-    0,
-    "expect",
-    true
-  ],
-  "exports": [
-    2,
-    "Date"
-  ],
-  "references": [
-    "Function",
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": false,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 1
-      },
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {
-        "getHours": [
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
+[
+  {
+    "aliens": [
+      0,
+      "Date",
+      true
+    ],
+    "requirements": [
+      1,
+      "expect",
+      true
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
         ],
-        "setHours": [
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "hours",
-                "type": "Number",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 2
-            },
-            "throws": [],
-            "inits": []
-          }
-        ]
+        "sharedMethods": {}
       },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    }
-  ],
-  "macros": []
-}
+      "Function"
+    ]
+  },
+  {
+    "exports": [
+      2,
+      "Date"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "getHours": [
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "setHours": [
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "hours",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 2
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

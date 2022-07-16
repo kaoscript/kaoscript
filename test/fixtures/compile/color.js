@@ -1,12 +1,12 @@
 require("kaoscript/register");
-var {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = require("./_/_array.ks")().__ks_Array;
-	var Float = require("./_/_float.ks")().Float;
-	var Integer = require("./_/_integer.ks")().Integer;
-	var __ks_Math = require("./_/_math.ks")().__ks_Math;
-	var __ks_Number = require("./_/_number.ks")().__ks_Number;
-	var __ks_String = require("./_/_string.ks")().__ks_String;
+	var __ks_Array = require("./_/._array.ks.j5k8r9.ksb")().__ks_Array;
+	var Float = require("./_/._float.ks.j5k8r9.ksb")().Float;
+	var Integer = require("./_/._integer.ks.j5k8r9.ksb")().Integer;
+	var __ks_Math = require("./_/._math.ks.j5k8r9.ksb")().__ks_Math;
+	var __ks_Number = require("./_/._number.ks.j5k8r9.ksb")().__ks_Number;
+	var __ks_String = require("./_/._string.ks.j5k8r9.ksb")().__ks_String;
 	let $spaces = new Dictionary();
 	let $aliases = new Dictionary();
 	let $components = new Dictionary();
@@ -163,116 +163,107 @@ module.exports = function() {
 		d["yellowgreen"] = "9acd32";
 		return d;
 	})();
-	function $blend(x, y, percentage) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'float'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'float'");
-		}
-		if(percentage === void 0 || percentage === null) {
-			throw new TypeError("'percentage' is not nullable");
-		}
-		else if(!Type.isNumber(percentage)) {
-			throw new TypeError("'percentage' is not of type 'float'");
-		}
+	function $blend() {
+		return $blend.__ks_rt(this, arguments);
+	};
+	$blend.__ks_0 = function(x, y, percentage) {
 		return ((1 - percentage) * x) + (percentage * y);
-	}
-	function $binder(last, components, first, ...firstArgs) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
+	};
+	$blend.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		if(args.length === 3) {
+			if(t0(args[0]) && t0(args[1]) && t0(args[2])) {
+				return $blend.__ks_0.call(that, args[0], args[1], args[2]);
+			}
 		}
-		if(last === void 0 || last === null) {
-			throw new TypeError("'last' is not nullable");
-		}
-		else if(!Type.isFunction(last)) {
-			throw new TypeError("'last' is not of type 'Function'");
-		}
-		if(components === void 0 || components === null) {
-			throw new TypeError("'components' is not nullable");
-		}
-		if(first === void 0 || first === null) {
-			throw new TypeError("'first' is not nullable");
-		}
-		else if(!Type.isFunction(first)) {
-			throw new TypeError("'first' is not of type 'Function'");
-		}
+		throw Helper.badArgs();
+	};
+	function $binder() {
+		return $binder.__ks_rt(this, arguments);
+	};
+	$binder.__ks_0 = function(last, components, first, firstArgs) {
 		let that = first.call(null, ...firstArgs);
 		let lastArgs = Helper.mapDictionary(components, function(name, component) {
 			return that[component.field];
 		});
 		lastArgs.push(that);
 		return last.call(null, ...lastArgs);
-	}
+	};
+	$binder.__ks_rt = function(that, args) {
+		const t0 = Type.isFunction;
+		const t1 = Type.isValue;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length >= 3) {
+			if(t0(args[0]) && t1(args[1]) && t0(args[2]) && Helper.isVarargs(args, 0, args.length - 3, t1, pts = [3], 0) && te(pts, 1)) {
+				return $binder.__ks_0.call(that, args[0], args[1], args[2], Helper.getVarargs(args, 3, pts[1]));
+			}
+		}
+		throw Helper.badArgs();
+	};
 	let $caster = Helper.namespace(function() {
 		function alpha() {
-			let __ks_i = -1;
-			let __ks__;
-			let n = arguments.length > 0 && (__ks__ = arguments[++__ks_i]) !== void 0 ? __ks__ : null;
-			let percentage;
-			if(arguments.length > ++__ks_i && (percentage = arguments[__ks_i]) !== void 0 && percentage !== null) {
-				if(!Type.isBoolean(percentage)) {
-					throw new TypeError("'percentage' is not of type 'Boolean'");
-				}
-			}
-			else {
+			return alpha.__ks_rt(this, arguments);
+		};
+		alpha.__ks_0 = function(n = null, percentage) {
+			if(percentage === void 0 || percentage === null) {
 				percentage = false;
 			}
-			let i = Float.parse(n);
-			return Number.isNaN(i) ? 1 : __ks_Number._im_round(__ks_Number._im_limit(percentage ? i / 100 : i, 0, 1), 3);
-		}
-		function ff(n) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+			let i = Float.parse.__ks_0(n);
+			return Number.isNaN(i) ? 1 : __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(percentage ? i / 100 : i, 0, 1), 3);
+		};
+		alpha.__ks_rt = function(that, args) {
+			const t0 = () => true;
+			const t1 = value => Type.isBoolean(value) || Type.isNull(value);
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length <= 2) {
+				if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t1, pts, 1) && te(pts, 2)) {
+					return alpha.__ks_0.call(that, Helper.getVararg(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
 			}
-			if(n === void 0 || n === null) {
-				throw new TypeError("'n' is not nullable");
+			throw Helper.badArgs();
+		};
+		function ff() {
+			return ff.__ks_rt(this, arguments);
+		};
+		ff.__ks_0 = function(n) {
+			return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse.__ks_0(n), 0, 255));
+		};
+		ff.__ks_rt = function(that, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return ff.__ks_0.call(that, args[0]);
+				}
 			}
-			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 255));
-		}
-		function percentage(n) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+			throw Helper.badArgs();
+		};
+		function percentage() {
+			return percentage.__ks_rt(this, arguments);
+		};
+		percentage.__ks_0 = function(n) {
+			return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse.__ks_0(n), 0, 100), 1);
+		};
+		percentage.__ks_rt = function(that, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return percentage.__ks_0.call(that, args[0]);
+				}
 			}
-			if(n === void 0 || n === null) {
-				throw new TypeError("'n' is not nullable");
-			}
-			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 100), 1);
-		}
+			throw Helper.badArgs();
+		};
 		return {
-			alpha: alpha,
-			ff: ff,
-			percentage: percentage
+			alpha,
+			ff,
+			percentage
 		};
 	});
-	function $component(component, name, space) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-		}
-		if(component === void 0 || component === null) {
-			throw new TypeError("'component' is not nullable");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
-		else if(!Type.isString(name)) {
-			throw new TypeError("'name' is not of type 'String'");
-		}
-		if(space === void 0 || space === null) {
-			throw new TypeError("'space' is not nullable");
-		}
-		else if(!Type.isString(space)) {
-			throw new TypeError("'space' is not of type 'String'");
-		}
+	function $component() {
+		return $component.__ks_rt(this, arguments);
+	};
+	$component.__ks_0 = function(component, name, space) {
 		component.field = "_" + name;
 		$spaces[space].components[name] = component;
 		if(!Type.isValue($components[name])) {
@@ -286,32 +277,27 @@ module.exports = function() {
 		}
 		$components[name].families.push(space);
 		$components[name].spaces[space] = true;
-	}
-	function $convert(that, space, result) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
+	};
+	$component.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const t1 = Type.isString;
+		if(args.length === 3) {
+			if(t0(args[0]) && t1(args[1]) && t1(args[2])) {
+				return $component.__ks_0.call(that, args[0], args[1], args[2]);
+			}
 		}
-		if(that === void 0 || that === null) {
-			throw new TypeError("'that' is not nullable");
-		}
-		else if(!Type.isClassInstance(that, Color)) {
-			throw new TypeError("'that' is not of type 'Color'");
-		}
-		if(space === void 0 || space === null) {
-			throw new TypeError("'space' is not nullable");
-		}
-		else if(!Type.isString(space)) {
-			throw new TypeError("'space' is not of type 'String'");
-		}
+		throw Helper.badArgs();
+	};
+	function $convert() {
+		return $convert.__ks_rt(this, arguments);
+	};
+	$convert.__ks_0 = function(that, space, result) {
 		if(result === void 0 || result === null) {
 			result = (() => {
 				const d = new Dictionary();
 				d._alpha = 0;
 				return d;
 			})();
-		}
-		else if(!Type.isDictionary(result)) {
-			throw new TypeError("'result' is not of type 'Dictionary'");
 		}
 		let s;
 		if(Type.isValue((s = $spaces[that._space]).converters[space])) {
@@ -320,52 +306,50 @@ module.exports = function() {
 			});
 			args.push(result);
 			s.converters[space](...args);
-			result._space = space;
+			result._space = Space.from(space);
 			return result;
 		}
 		else {
 			throw new Error("It can't convert a color from '" + that._space + "' to '" + space + "' spaces.");
 		}
-	}
-	function $find(from, to) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
+	};
+	$convert.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Color);
+		const t1 = Type.isString;
+		const t2 = value => Type.isDictionary(value) || Type.isClassInstance(value, Color) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length >= 2 && args.length <= 3) {
+			if(t0(args[0]) && t1(args[1]) && Helper.isVarargs(args, 0, 1, t2, pts = [2], 0) && te(pts, 1)) {
+				return $convert.__ks_0.call(that, args[0], args[1], Helper.getVararg(args, 2, pts[1]));
+			}
 		}
-		if(from === void 0 || from === null) {
-			throw new TypeError("'from' is not nullable");
-		}
-		else if(!Type.isString(from)) {
-			throw new TypeError("'from' is not of type 'String'");
-		}
-		if(to === void 0 || to === null) {
-			throw new TypeError("'to' is not nullable");
-		}
-		else if(!Type.isString(to)) {
-			throw new TypeError("'to' is not of type 'String'");
-		}
+		throw Helper.badArgs();
+	};
+	function $find() {
+		return $find.__ks_rt(this, arguments);
+	};
+	$find.__ks_0 = function(from, to) {
 		for(const name in $spaces[from].converters) {
 			if(Type.isValue($spaces[name].converters[to])) {
 				$spaces[from].converters[to] = Helper.vcurry($binder, null, $spaces[name].converters[to], $spaces[name].components, $spaces[from].converters[name]);
 				return;
 			}
 		}
-	}
-	function $from(that, args) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
+	};
+	$find.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return $find.__ks_0.call(that, args[0], args[1]);
+			}
 		}
-		if(that === void 0 || that === null) {
-			throw new TypeError("'that' is not nullable");
-		}
-		else if(!Type.isClassInstance(that, Color)) {
-			throw new TypeError("'that' is not of type 'Color'");
-		}
-		if(args === void 0 || args === null) {
-			throw new TypeError("'args' is not nullable");
-		}
-		else if(!Type.isArray(args)) {
-			throw new TypeError("'args' is not of type 'Array'");
-		}
+		throw Helper.badArgs();
+	};
+	function $from() {
+		return $from.__ks_rt(this, arguments);
+	};
+	$from.__ks_0 = function(that, args) {
 		that._dummy = false;
 		if(args.length === 0) {
 			return that;
@@ -385,17 +369,21 @@ module.exports = function() {
 		}
 		that._dummy = true;
 		return that;
-	}
-	function $hex(that) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	};
+	$from.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Color);
+		const t1 = Type.isArray;
+		if(args.length === 2) {
+			if(t0(args[0]) && t1(args[1])) {
+				return $from.__ks_0.call(that, args[0], args[1]);
+			}
 		}
-		if(that === void 0 || that === null) {
-			throw new TypeError("'that' is not nullable");
-		}
-		else if(!Type.isClassInstance(that, Color)) {
-			throw new TypeError("'that' is not of type 'Color'");
-		}
+		throw Helper.badArgs();
+	};
+	function $hex() {
+		return $hex.__ks_rt(this, arguments);
+	};
+	$hex.__ks_0 = function(that) {
 		let chars = "0123456789abcdef";
 		let r1 = that._red >> 4;
 		let g1 = that._green >> 4;
@@ -418,217 +406,216 @@ module.exports = function() {
 			}
 			return "#" + chars.charAt(r1) + chars.charAt(r2) + chars.charAt(g1) + chars.charAt(g2) + chars.charAt(b1) + chars.charAt(b2) + chars.charAt(a1) + chars.charAt(a2);
 		}
-	}
+	};
+	$hex.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Color);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return $hex.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	let $parsers = (() => {
 		const d = new Dictionary();
-		d.srgb = function(that, args) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(that === void 0 || that === null) {
-				throw new TypeError("'that' is not nullable");
-			}
-			else if(!Type.isClassInstance(that, Color)) {
-				throw new TypeError("'that' is not of type 'Color'");
-			}
-			if(args === void 0 || args === null) {
-				throw new TypeError("'args' is not nullable");
-			}
-			else if(!Type.isArray(args)) {
-				throw new TypeError("'args' is not of type 'Array'");
-			}
-			if(args.length === 1) {
-				if(Type.isNumber(args[0])) {
+		d.srgb = (() => {
+			const __ks_rt = (...args) => {
+				const t0 = value => Type.isClassInstance(value, Color);
+				const t1 = Type.isArray;
+				if(args.length === 2) {
+					if(t0(args[0]) && t1(args[1])) {
+						return __ks_rt.__ks_0.call(null, args[0], args[1]);
+					}
+				}
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = function(that, args) {
+				if(args.length === 1) {
+					if(Type.isNumber(args[0])) {
+						that._space = Space.SRGB;
+						that._alpha = $caster.alpha.__ks_0(((args[0] >> 24) & 255) / 255);
+						that._red = (args[0] >> 16) & 255;
+						that._green = (args[0] >> 8) & 255;
+						that._blue = args[0] & 255;
+						return true;
+					}
+					else if(Type.isArray(args[0])) {
+						that._space = Space.SRGB;
+						that._alpha = (args[0].length === 4) ? $caster.alpha.__ks_0(args[0][3]) : 1;
+						that._red = $caster.ff(args[0][0]);
+						that._green = $caster.ff(args[0][1]);
+						that._blue = $caster.ff(args[0][2]);
+						return true;
+					}
+					else if(Type.isDictionary(args[0])) {
+						if(Type.isValue(args[0].r) && Type.isValue(args[0].g) && Type.isValue(args[0].b)) {
+							that._space = Space.SRGB;
+							that._alpha = $caster.alpha.__ks_0(args[0].a);
+							that._red = $caster.ff(args[0].r);
+							that._green = $caster.ff(args[0].g);
+							that._blue = $caster.ff(args[0].b);
+							return true;
+						}
+						if(Type.isValue(args[0].red) && Type.isValue(args[0].green) && Type.isValue(args[0].blue)) {
+							that._space = Space.SRGB;
+							that._alpha = $caster.alpha.__ks_0(args[0].alpha);
+							that._red = $caster.ff(args[0].red);
+							that._green = $caster.ff(args[0].green);
+							that._blue = $caster.ff(args[0].blue);
+							return true;
+						}
+					}
+					else if(Type.isString(args[0])) {
+						let color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
+						if("transparent" === color) {
+							that._alpha = that._red = that._green = that._blue = 0;
+							return true;
+						}
+						else if("rand" === color) {
+							let c = (Math.random() * 16777215) | 0;
+							that._space = Space.SRGB;
+							that._alpha = 1;
+							that._red = (c >> 16) & 255;
+							that._green = (c >> 8) & 255;
+							that._blue = c & 255;
+							return true;
+						}
+						if(Type.isValue($names[color])) {
+							color = Helper.concatString("#", $names[color]);
+						}
+						let match, __ks_0;
+						if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = Integer.parse.__ks_0(match[1], 16);
+							that._green = Integer.parse.__ks_0(match[2], 16);
+							that._blue = Integer.parse.__ks_0(match[3], 16);
+							that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(match[4], 16) / 255);
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = Integer.parse.__ks_0(match[1], 16);
+							that._green = Integer.parse.__ks_0(match[2], 16);
+							that._blue = Integer.parse.__ks_0(match[3], 16);
+							that._alpha = 1;
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = Integer.parse.__ks_0(Operator.addOrConcat(match[1], match[1]), 16);
+							that._green = Integer.parse.__ks_0(Operator.addOrConcat(match[2], match[2]), 16);
+							that._blue = Integer.parse.__ks_0(Operator.addOrConcat(match[3], match[3]), 16);
+							that._alpha = $caster.alpha.__ks_0(Integer.parse.__ks_0(Operator.addOrConcat(match[4], match[4]), 16) / 255);
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = Integer.parse.__ks_0(Operator.addOrConcat(match[1], match[1]), 16);
+							that._green = Integer.parse.__ks_0(Operator.addOrConcat(match[2], match[2]), 16);
+							that._blue = Integer.parse.__ks_0(Operator.addOrConcat(match[3], match[3]), 16);
+							that._alpha = 1;
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = $caster.ff(match[1]);
+							that._green = $caster.ff(match[2]);
+							that._blue = $caster.ff(match[3]);
+							that._alpha = $caster.alpha.__ks_0(match[5], Type.isValue(match[6]));
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = Math.round(2.55 * $caster.percentage(match[1]));
+							that._green = Math.round(2.55 * $caster.percentage(match[2]));
+							that._blue = Math.round(2.55 * $caster.percentage(match[3]));
+							that._alpha = $caster.alpha.__ks_0(match[5], Type.isValue(match[6]));
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = Integer.parse.__ks_0(match[1], 16);
+							that._green = Integer.parse.__ks_0(match[2], 16);
+							that._blue = Integer.parse.__ks_0(match[3], 16);
+							that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = Integer.parse.__ks_0(Operator.addOrConcat(match[1], match[1]), 16);
+							that._green = Integer.parse.__ks_0(Operator.addOrConcat(match[2], match[2]), 16);
+							that._blue = Integer.parse.__ks_0(Operator.addOrConcat(match[3], match[3]), 16);
+							that._alpha = $caster.alpha.__ks_0(match[4], Type.isValue(match[5]));
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = $caster.ff(match[1]);
+							that._green = $caster.ff(match[2]);
+							that._blue = $caster.ff(match[3]);
+							that._alpha = $caster.alpha.__ks_0(match[4]);
+							return true;
+						}
+					}
+				}
+				else if(args.length >= 3) {
 					that._space = Space.SRGB;
-					that._alpha = $caster.alpha(((args[0] >> 24) & 255) / 255);
-					that._red = (args[0] >> 16) & 255;
-					that._green = (args[0] >> 8) & 255;
-					that._blue = args[0] & 255;
+					that._alpha = (args.length >= 4) ? $caster.alpha.__ks_0(args[3]) : 1;
+					that._red = $caster.ff(args[0]);
+					that._green = $caster.ff(args[1]);
+					that._blue = $caster.ff(args[2]);
 					return true;
 				}
-				else if(Type.isArray(args[0])) {
-					that._space = Space.SRGB;
-					that._alpha = (args[0].length === 4) ? $caster.alpha(args[0][3]) : 1;
-					that._red = $caster.ff(args[0][0]);
-					that._green = $caster.ff(args[0][1]);
-					that._blue = $caster.ff(args[0][2]);
-					return true;
-				}
-				else if(Type.isDictionary(args[0])) {
-					if(Type.isValue(args[0].r) && Type.isValue(args[0].g) && Type.isValue(args[0].b)) {
-						that._space = Space.SRGB;
-						that._alpha = $caster.alpha(args[0].a);
-						that._red = $caster.ff(args[0].r);
-						that._green = $caster.ff(args[0].g);
-						that._blue = $caster.ff(args[0].b);
-						return true;
-					}
-					if(Type.isValue(args[0].red) && Type.isValue(args[0].green) && Type.isValue(args[0].blue)) {
-						that._space = Space.SRGB;
-						that._alpha = $caster.alpha(args[0].alpha);
-						that._red = $caster.ff(args[0].red);
-						that._green = $caster.ff(args[0].green);
-						that._blue = $caster.ff(args[0].blue);
-						return true;
+				return false;
+			};
+			return __ks_rt;
+		})();
+		d.gray = (() => {
+			const __ks_rt = (...args) => {
+				const t0 = value => Type.isClassInstance(value, Color);
+				const t1 = Type.isArray;
+				if(args.length === 2) {
+					if(t0(args[0]) && t1(args[1])) {
+						return __ks_rt.__ks_0.call(null, args[0], args[1]);
 					}
 				}
-				else if(Type.isString(args[0])) {
-					let color = __ks_String._im_lower(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
-					if("transparent" === color) {
-						that._alpha = that._red = that._green = that._blue = 0;
-						return true;
-					}
-					else if("rand" === color) {
-						let c = (Math.random() * 16777215) | 0;
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = function(that, args) {
+				if(args.length >= 1) {
+					if(Number.isFinite(Float.parse.__ks_0(args[0])) === true) {
 						that._space = Space.SRGB;
-						that._alpha = 1;
-						that._red = (c >> 16) & 255;
-						that._green = (c >> 8) & 255;
-						that._blue = c & 255;
+						that._red = that._green = that._blue = $caster.ff(args[0]);
+						that._alpha = (args.length >= 2) ? $caster.alpha.__ks_0(args[1]) : 1;
 						return true;
 					}
-					if(Type.isValue($names[color])) {
-						color = Helper.concatString("#", $names[color]);
-					}
-					let match, __ks_0;
-					if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = Integer.parse(match[1], 16);
-						that._green = Integer.parse(match[2], 16);
-						that._blue = Integer.parse(match[3], 16);
-						that._alpha = $caster.alpha(Integer.parse(match[4], 16) / 255);
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = Integer.parse(match[1], 16);
-						that._green = Integer.parse(match[2], 16);
-						that._blue = Integer.parse(match[3], 16);
-						that._alpha = 1;
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = Integer.parse(Operator.addOrConcat(match[1], match[1]), 16);
-						that._green = Integer.parse(Operator.addOrConcat(match[2], match[2]), 16);
-						that._blue = Integer.parse(Operator.addOrConcat(match[3], match[3]), 16);
-						that._alpha = $caster.alpha(Integer.parse(Operator.addOrConcat(match[4], match[4]), 16) / 255);
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^#?([0-9a-f])([0-9a-f])([0-9a-f])$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = Integer.parse(Operator.addOrConcat(match[1], match[1]), 16);
-						that._green = Integer.parse(Operator.addOrConcat(match[2], match[2]), 16);
-						that._blue = Integer.parse(Operator.addOrConcat(match[3], match[3]), 16);
-						that._alpha = 1;
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^rgba?\((\d{1,3}),(\d{1,3}),(\d{1,3})(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = $caster.ff(match[1]);
-						that._green = $caster.ff(match[2]);
-						that._blue = $caster.ff(match[3]);
-						that._alpha = $caster.alpha(match[5], match[6]);
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = Math.round(2.55 * $caster.percentage(match[1]));
-						that._green = Math.round(2.55 * $caster.percentage(match[2]));
-						that._blue = Math.round(2.55 * $caster.percentage(match[3]));
-						that._alpha = $caster.alpha(match[5], match[6]);
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^rgba?\(#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2}),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = Integer.parse(match[1], 16);
-						that._green = Integer.parse(match[2], 16);
-						that._blue = Integer.parse(match[3], 16);
-						that._alpha = $caster.alpha(match[4], match[5]);
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^rgba\(#?([0-9a-f])([0-9a-f])([0-9a-f]),([0-9.]+)(\%)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = Integer.parse(Operator.addOrConcat(match[1], match[1]), 16);
-						that._green = Integer.parse(Operator.addOrConcat(match[2], match[2]), 16);
-						that._blue = Integer.parse(Operator.addOrConcat(match[3], match[3]), 16);
-						that._alpha = $caster.alpha(match[4], match[5]);
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^(\d{1,3}),(\d{1,3}),(\d{1,3})(?:,([0-9.]+))?$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = $caster.ff(match[1]);
-						that._green = $caster.ff(match[2]);
-						that._blue = $caster.ff(match[3]);
-						that._alpha = $caster.alpha(match[4]);
-						return true;
+					else if(Type.isString(args[0])) {
+						let color = __ks_String.__ks_func_lower_0.call(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
+						let match, __ks_0;
+						if(Type.isValue(__ks_0 = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = that._green = that._blue = $caster.ff(match[1]);
+							that._alpha = $caster.alpha.__ks_0(match[2], Type.isValue(match[3]));
+							return true;
+						}
+						else if(Type.isValue(__ks_0 = /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
+							that._space = Space.SRGB;
+							that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]));
+							that._alpha = $caster.alpha.__ks_0(match[2], Type.isValue(match[3]));
+							return true;
+						}
 					}
 				}
-			}
-			else if(args.length >= 3) {
-				that._space = Space.SRGB;
-				that._alpha = (args.length >= 4) ? $caster.alpha(args[3]) : 1;
-				that._red = $caster.ff(args[0]);
-				that._green = $caster.ff(args[1]);
-				that._blue = $caster.ff(args[2]);
-				return true;
-			}
-			return false;
-		};
-		d.gray = function(that, args) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(that === void 0 || that === null) {
-				throw new TypeError("'that' is not nullable");
-			}
-			else if(!Type.isClassInstance(that, Color)) {
-				throw new TypeError("'that' is not of type 'Color'");
-			}
-			if(args === void 0 || args === null) {
-				throw new TypeError("'args' is not nullable");
-			}
-			else if(!Type.isArray(args)) {
-				throw new TypeError("'args' is not of type 'Array'");
-			}
-			if(args.length >= 1) {
-				if(Number.isFinite(Float.parse(args[0])) === true) {
-					that._space = Space.SRGB;
-					that._red = that._green = that._blue = $caster.ff(args[0]);
-					that._alpha = (args.length >= 2) ? $caster.alpha(args[1]) : 1;
-					return true;
-				}
-				else if(Type.isString(args[0])) {
-					let color = __ks_String._im_lower(args[0]).replace(/[^a-z0-9,.()#%]/g, "");
-					let match, __ks_0;
-					if(Type.isValue(__ks_0 = /^gray\((\d{1,3})(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = that._green = that._blue = $caster.ff(match[1]);
-						that._alpha = $caster.alpha(match[2], match[3]);
-						return true;
-					}
-					else if(Type.isValue(__ks_0 = /^gray\(([0-9.]+\%)(?:,([0-9.]+)(\%)?)?\)$/.exec(color)) ? (match = __ks_0, true) : false) {
-						that._space = Space.SRGB;
-						that._red = that._green = that._blue = Math.round(2.55 * $caster.percentage(match[1]));
-						that._alpha = $caster.alpha(match[2], match[3]);
-						return true;
-					}
-				}
-			}
-			return false;
-		};
+				return false;
+			};
+			return __ks_rt;
+		})();
 		return d;
 	})();
-	function $space(name) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
-		else if(!Type.isString(name)) {
-			throw new TypeError("'name' is not of type 'String'");
-		}
+	function $space() {
+		return $space.__ks_rt(this, arguments);
+	};
+	$space.__ks_0 = function(name) {
 		$spaces[name] = Type.isValue($spaces[name]) ? $spaces[name] : (() => {
 			const d = new Dictionary();
 			d.alias = new Dictionary();
@@ -636,17 +623,29 @@ module.exports = function() {
 			d.components = new Dictionary();
 			return d;
 		})();
-	}
-	let Space = Helper.enum(String, {
-		RGB: "rgb",
-		SRGB: "srgb"
-	});
+	};
+	$space.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return $space.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+	const Space = Helper.enum(String, {});
 	class Color {
+		static __ks_new_0(...args) {
+			const o = Object.create(Color.prototype);
+			o.__ks_init();
+			o.__ks_cons_0(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
-		__ks_init_0() {
+		__ks_init() {
 			this._dummy = false;
 			this._space = Space.SRGB;
 			this._alpha = 0;
@@ -654,85 +653,54 @@ module.exports = function() {
 			this._green = 0;
 			this._blue = 0;
 		}
-		__ks_init() {
-			Color.prototype.__ks_init_0.call(this);
+		__ks_cons_0(args) {
+			$from.__ks_0(this, args);
 		}
-		__ks_cons_0(...args) {
-			$from(this, args);
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.prototype.__ks_cons_0.call(that, Helper.getVarargs(args, 0, pts[1]));
+			}
+			throw Helper.badArgs();
 		}
-		__ks_cons(args) {
-			Color.prototype.__ks_cons_0.apply(this, args);
+		alpha() {
+			return this.__ks_func_alpha_rt.call(null, this, this, arguments);
 		}
 		__ks_func_alpha_0() {
 			return this._alpha;
 		}
 		__ks_func_alpha_1(value) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isString(value) && !Type.isNumber(value)) {
-				throw new TypeError("'value' is not of type 'String' or 'Number'");
-			}
-			this._alpha = $caster.alpha(value);
+			this._alpha = $caster.alpha.__ks_0(value);
 			return this;
 		}
-		alpha() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_alpha_0.apply(this);
+		__ks_func_alpha_rt(that, proto, args) {
+			const t0 = value => Type.isNumber(value) || Type.isString(value);
+			if(args.length === 0) {
+				return proto.__ks_func_alpha_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Color.prototype.__ks_func_alpha_1.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_blend_0(color, percentage) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isClassInstance(color, Color)) {
-				throw new TypeError("'color' is not of type 'Color'");
-			}
-			if(percentage === void 0 || percentage === null) {
-				throw new TypeError("'percentage' is not nullable");
-			}
-			else if(!Type.isNumber(percentage)) {
-				throw new TypeError("'percentage' is not of type 'float'");
-			}
-			let __ks_i = 1;
-			let space;
-			if(arguments.length > ++__ks_i && (space = arguments[__ks_i]) !== void 0 && space !== null) {
-				if(!Type.isEnumInstance(space, Space)) {
-					if(arguments.length - __ks_i < 2) {
-						space = Space.SRGB;
-						--__ks_i;
-					}
-					else {
-						throw new TypeError("'space' is not of type 'Space'");
-					}
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_alpha_1.call(that, args[0]);
 				}
 			}
-			else {
+			throw Helper.badArgs();
+		}
+		blend() {
+			return this.__ks_func_blend_rt.call(null, this, this, arguments);
+		}
+		__ks_func_blend_0(color, percentage, space, alpha) {
+			if(space === void 0 || space === null) {
 				space = Space.SRGB;
 			}
-			let alpha;
-			if(arguments.length > ++__ks_i && (alpha = arguments[__ks_i]) !== void 0 && alpha !== null) {
-				if(!Type.isBoolean(alpha)) {
-					throw new TypeError("'alpha' is not of type 'Boolean'");
-				}
-			}
-			else {
+			if(alpha === void 0 || alpha === null) {
 				alpha = false;
 			}
 			if(alpha) {
 				let w = (percentage * 2) - 1;
 				let a = color._alpha - this._alpha;
-				this._alpha = __ks_Number._im_round($blend(this._alpha, color._alpha, percentage), 2);
+				this._alpha = __ks_Number.__ks_func_round_0.call($blend.__ks_0(this._alpha, color._alpha, percentage), 2);
 				if((w * a) === -1) {
 					percentage = w;
 				}
@@ -741,8 +709,8 @@ module.exports = function() {
 				}
 			}
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
-			this.space(space);
-			color = color.like(space);
+			this.__ks_func_space_1(space);
+			color = color.__ks_func_like_0(space);
 			let components = $spaces[space].components;
 			for(let name in components) {
 				let component = components[name];
@@ -759,66 +727,68 @@ module.exports = function() {
 			}
 			return this;
 		}
-		blend() {
-			if(arguments.length >= 2 && arguments.length <= 4) {
-				return Color.prototype.__ks_func_blend_0.apply(this, arguments);
+		__ks_func_blend_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Color);
+			const t1 = Type.isNumber;
+			const t2 = value => Type.isEnumInstance(value, Space) || Type.isNull(value);
+			const t3 = value => Type.isBoolean(value) || Type.isNull(value);
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length >= 2 && args.length <= 4) {
+				if(t0(args[0]) && t1(args[1]) && Helper.isVarargs(args, 0, 1, t2, pts = [2], 0) && Helper.isVarargs(args, 0, 1, t3, pts, 1) && te(pts, 2)) {
+					return proto.__ks_func_blend_0.call(that, args[0], args[1], Helper.getVararg(args, 2, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_clearer_0(value) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isString(value) && !Type.isNumber(value)) {
-				throw new TypeError("'value' is not of type 'String' or 'Number'");
-			}
-			if(Type.isString(value) && (value.endsWith("%") === true)) {
-				return this.alpha(this._alpha * ((100 - __ks_String._im_toFloat(value)) / 100));
-			}
-			else {
-				return this.alpha(this._alpha - (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value)));
-			}
+			throw Helper.badArgs();
 		}
 		clearer() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_clearer_0.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_clearer_rt.call(null, this, this, arguments);
 		}
-		__ks_func_clone_0() {
-			return this.copy(new Color());
+		__ks_func_clearer_0(value) {
+			if(Type.isString(value) && (value.endsWith("%") === true)) {
+				return this.__ks_func_alpha_1(this._alpha * ((100 - __ks_String.__ks_func_toFloat_0.call(value)) / 100));
+			}
+			else {
+				return this.__ks_func_alpha_1(this._alpha - (Type.isString(value) ? __ks_String.__ks_func_toFloat_0.call(value) : __ks_Number.__ks_func_toFloat_0.call(value)));
+			}
+		}
+		__ks_func_clearer_rt(that, proto, args) {
+			const t0 = value => Type.isNumber(value) || Type.isString(value);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_clearer_0.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
 		}
 		clone() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_clone_0.apply(this);
+			return this.__ks_func_clone_rt.call(null, this, this, arguments);
+		}
+		__ks_func_clone_0() {
+			return this.__ks_func_copy_0(Color.__ks_new_0([]));
+		}
+		__ks_func_clone_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_clone_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		contrast() {
+			return this.__ks_func_contrast_rt.call(null, this, this, arguments);
 		}
 		__ks_func_contrast_0(color) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isClassInstance(color, Color)) {
-				throw new TypeError("'color' is not of type 'Color'");
-			}
 			let a = this._alpha;
 			if(a === 1) {
 				if(color._alpha !== 1) {
-					color = color.clone().blend(this, 0.5, Space.SRGB, true);
+					color = color.__ks_func_clone_0().__ks_func_blend_0(this, 0.5, Space.SRGB, true);
 				}
-				let l1 = this.luminance() + 0.05;
-				let l2 = color.luminance() + 0.05;
+				let l1 = this.__ks_func_luminance_0() + 0.05;
+				let l2 = color.__ks_func_luminance_0() + 0.05;
 				let ratio = l1 / l2;
 				if(l2 > l1) {
 					ratio = 1 / ratio;
 				}
-				ratio = __ks_Number._im_round(ratio, 2);
+				ratio = __ks_Number.__ks_func_round_0.call(ratio, 2);
 				return (() => {
 					const d = new Dictionary();
 					d.ratio = ratio;
@@ -829,100 +799,94 @@ module.exports = function() {
 				})();
 			}
 			else {
-				let black = this.clone().blend($static.black, 0.5, Space.SRGB, true).contrast(color).ratio;
-				let white = this.clone().blend($static.white, 0.5, Space.SRGB, true).contrast(color).ratio;
+				let black = this.__ks_func_clone_0().blend($static.black, 0.5, Space.SRGB, true).contrast(color).ratio;
+				let white = this.__ks_func_clone_0().blend($static.white, 0.5, Space.SRGB, true).contrast(color).ratio;
 				const max = Math.max(black, white);
-				let closest = new Color(__ks_Number._im_limit((color._red - (this._red * a)) / (1 - a), 0, 255), __ks_Number._im_limit((color._green - (this._green * a)) / (1 - a), 0, 255), __ks_Number._im_limit((color._blue - (this._blue * a)) / (1 - a), 0, 255));
-				const min = this.clone().blend(closest, 0.5, Space.SRGB, true).contrast(color).ratio;
+				let closest = Color.__ks_new_0([__ks_Number.__ks_func_limit_0.call((color._red - (this._red * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._green - (this._green * a)) / (1 - a), 0, 255), __ks_Number.__ks_func_limit_0.call((color._blue - (this._blue * a)) / (1 - a), 0, 255)]);
+				const min = this.__ks_func_clone_0().__ks_func_blend_0(closest, 0.5, Space.SRGB, true).__ks_func_contrast_0(color).ratio;
 				return (() => {
 					const d = new Dictionary();
-					d.ratio = __ks_Number._im_round((min + max) / 2, 2);
-					d.error = __ks_Number._im_round((max - min) / 2, 2);
+					d.ratio = __ks_Number.__ks_func_round_0.call((min + max) / 2, 2);
+					d.error = __ks_Number.__ks_func_round_0.call((max - min) / 2, 2);
 					d.min = min;
 					d.max = max;
 					return d;
 				})();
 			}
 		}
-		contrast() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_contrast_0.apply(this, arguments);
+		__ks_func_contrast_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Color);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_contrast_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		copy() {
+			return this.__ks_func_copy_rt.call(null, this, this, arguments);
 		}
 		__ks_func_copy_0(target) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(target === void 0 || target === null) {
-				throw new TypeError("'target' is not nullable");
-			}
-			else if(!Type.isClassInstance(target, Color)) {
-				throw new TypeError("'target' is not of type 'Color'");
-			}
 			let s1 = this._space;
 			let s2 = target._space;
-			this.space(Space.SRGB);
-			target.space(Space.SRGB);
+			this.__ks_func_space_1(Space.SRGB.value);
+			target.__ks_func_space_1(Space.SRGB.value);
 			target._red = this._red;
 			target._green = this._green;
 			target._blue = this._blue;
 			target._alpha = this._alpha;
 			target._dummy = this._dummy;
-			this.space(s1);
-			target.space(s2);
+			this.__ks_func_space_1(s1);
+			target.__ks_func_space_1(s2);
 			return target;
 		}
-		copy() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_copy_0.apply(this, arguments);
+		__ks_func_copy_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Color);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_copy_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_distance_0(color) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isClassInstance(color, Color)) {
-				throw new TypeError("'color' is not of type 'Color'");
-			}
-			const that = this.like(Space.SRGB);
-			color = color.like(Space.SRGB);
-			return Math.sqrt((3 * (color._red - that._red) * (color._red - that._red)) + (4 * (color._green - that._green) * (color._green - that._green)) + (2 * (color._blue - that._blue) * (color._blue - that._blue)));
+			throw Helper.badArgs();
 		}
 		distance() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_distance_0.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_distance_rt.call(null, this, this, arguments);
 		}
-		__ks_func_equals_0(color) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_func_distance_0(color) {
+			const that = this.__ks_func_like_0(Space.SRGB.value);
+			color = color.__ks_func_like_0(Space.SRGB.value);
+			return Math.sqrt((3 * (color._red - that._red) * (color._red - that._red)) + (4 * (color._green - that._green) * (color._green - that._green)) + (2 * (color._blue - that._blue) * (color._blue - that._blue)));
+		}
+		__ks_func_distance_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Color);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_distance_0.call(that, args[0]);
+				}
 			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isClassInstance(color, Color)) {
-				throw new TypeError("'color' is not of type 'Color'");
-			}
-			return this.hex() === color.hex();
+			throw Helper.badArgs();
 		}
 		equals() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_equals_0.apply(this, arguments);
+			return this.__ks_func_equals_rt.call(null, this, this, arguments);
+		}
+		__ks_func_equals_0(color) {
+			return this.__ks_func_hex_0() === color.__ks_func_hex_0();
+		}
+		__ks_func_equals_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Color);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_equals_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		format() {
+			return this.__ks_func_format_rt.call(null, this, this, arguments);
 		}
 		__ks_func_format_0(format) {
 			if(format === void 0 || format === null) {
 				format = this._space;
-			}
-			else if(!Type.isString(format)) {
-				throw new TypeError("'format' is not of type 'String'");
 			}
 			let __ks_format_1 = $formatters[format];
 			if(Type.isValue(__ks_format_1)) {
@@ -932,25 +896,36 @@ module.exports = function() {
 				return false;
 			}
 		}
-		format() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
-				return Color.prototype.__ks_func_format_0.apply(this, arguments);
+		__ks_func_format_rt(that, proto, args) {
+			const t0 = value => Type.isString(value) || Type.isNull(value);
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length <= 1) {
+				if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
+					return proto.__ks_func_format_0.call(that, Helper.getVararg(args, 0, pts[1]));
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_from_0(...args) {
-			return $from(this, args);
+			throw Helper.badArgs();
 		}
 		from() {
-			return Color.prototype.__ks_func_from_0.apply(this, arguments);
+			return this.__ks_func_from_rt.call(null, this, this, arguments);
+		}
+		__ks_func_from_0(args) {
+			return $from.__ks_0(this, args);
+		}
+		__ks_func_from_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return proto.__ks_func_from_0.call(that, Helper.getVarargs(args, 0, pts[1]));
+			}
+			throw Helper.badArgs();
+		}
+		getField() {
+			return this.__ks_func_getField_rt.call(null, this, this, arguments);
 		}
 		__ks_func_getField_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
 			const component = $components[name];
 			if(Type.isValue(component.spaces[this._space])) {
 				return this[component.field];
@@ -962,39 +937,30 @@ module.exports = function() {
 				return this.like(component.families[0])[component.field];
 			}
 		}
-		getField() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_getField_0.apply(this, arguments);
+		__ks_func_getField_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_getField_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		gradient() {
+			return this.__ks_func_gradient_rt.call(null, this, this, arguments);
 		}
 		__ks_func_gradient_0(endColor, length) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(endColor === void 0 || endColor === null) {
-				throw new TypeError("'endColor' is not nullable");
-			}
-			else if(!Type.isClassInstance(endColor, Color)) {
-				throw new TypeError("'endColor' is not of type 'Color'");
-			}
-			if(length === void 0 || length === null) {
-				throw new TypeError("'length' is not nullable");
-			}
-			else if(!Type.isNumber(length)) {
-				throw new TypeError("'length' is not of type 'int'");
-			}
 			let gradient = [this];
 			if(length > 0) {
-				this.space(Space.SRGB);
-				endColor.space(Space.SRGB);
+				this.__ks_func_space_1(Space.SRGB.value);
+				endColor.__ks_func_space_1(Space.SRGB.value);
 				++length;
 				let red = endColor._red - this._red;
 				let green = endColor._green - this._green;
 				let blue = endColor._blue - this._blue;
 				for(let i = 1; i < length; ++i) {
 					const offset = i / length;
-					const color = this.clone();
+					const color = this.__ks_func_clone_0();
 					color._red += Math.round(red * offset);
 					color._green += Math.round(green * offset);
 					color._blue += Math.round(blue * offset);
@@ -1004,20 +970,24 @@ module.exports = function() {
 			gradient.push(endColor);
 			return gradient;
 		}
-		gradient() {
-			if(arguments.length === 2) {
-				return Color.prototype.__ks_func_gradient_0.apply(this, arguments);
+		__ks_func_gradient_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Color);
+			const t1 = Type.isNumber;
+			if(args.length === 2) {
+				if(t0(args[0]) && t1(args[1])) {
+					return proto.__ks_func_gradient_0.call(that, args[0], args[1]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		greyscale() {
+			return this.__ks_func_greyscale_rt.call(null, this, this, arguments);
 		}
 		__ks_func_greyscale_0(model) {
 			if(model === void 0 || model === null) {
 				model = "BT709";
 			}
-			else if(!Type.isString(model)) {
-				throw new TypeError("'model' is not of type 'String'");
-			}
-			this.space(Space.SRGB);
+			this.__ks_func_space_1(Space.SRGB.value);
 			if(model === "BT709") {
 				this._red = this._green = this._blue = Math.round((0.2126 * this._red) + (0.7152 * this._green) + (0.0722 * this._blue));
 			}
@@ -1035,82 +1005,100 @@ module.exports = function() {
 			}
 			return this;
 		}
-		greyscale() {
-			if(arguments.length >= 0 && arguments.length <= 1) {
-				return Color.prototype.__ks_func_greyscale_0.apply(this, arguments);
+		__ks_func_greyscale_rt(that, proto, args) {
+			const t0 = value => Type.isString(value) || Type.isNull(value);
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length <= 1) {
+				if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
+					return proto.__ks_func_greyscale_0.call(that, Helper.getVararg(args, 0, pts[1]));
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_hex_0() {
-			return $hex(this.like(Space.SRGB));
+			throw Helper.badArgs();
 		}
 		hex() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_hex_0.apply(this);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_hex_rt.call(null, this, this, arguments);
 		}
-		__ks_func_isBlack_0() {
-			let that = this.like(Space.SRGB);
-			return (that._red === 0) && (that._green === 0) && (that._blue === 0);
+		__ks_func_hex_0() {
+			return $hex(this.__ks_func_like_0(Space.SRGB.value));
+		}
+		__ks_func_hex_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_hex_0.call(that);
+			}
+			throw Helper.badArgs();
 		}
 		isBlack() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_isBlack_0.apply(this);
+			return this.__ks_func_isBlack_rt.call(null, this, this, arguments);
+		}
+		__ks_func_isBlack_0() {
+			let that = this.__ks_func_like_0(Space.SRGB.value);
+			return (that._red === 0) && (that._green === 0) && (that._blue === 0);
+		}
+		__ks_func_isBlack_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_isBlack_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		isTransparent() {
+			return this.__ks_func_isTransparent_rt.call(null, this, this, arguments);
 		}
 		__ks_func_isTransparent_0() {
 			if(this._alpha === 0) {
-				let that = this.like(Space.SRGB);
+				let that = this.__ks_func_like_0(Space.SRGB.value);
 				return (that._red === 0) && (that._green === 0) && (that._blue === 0);
 			}
 			else {
 				return false;
 			}
 		}
-		isTransparent() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_isTransparent_0.apply(this);
+		__ks_func_isTransparent_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_isTransparent_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_isWhite_0() {
-			let that = this.like(Space.SRGB);
-			return (that._red === 255) && (that._green === 255) && (that._blue === 255);
+			throw Helper.badArgs();
 		}
 		isWhite() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_isWhite_0.apply(this);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_isWhite_rt.call(null, this, this, arguments);
 		}
-		__ks_func_like_0(space) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_func_isWhite_0() {
+			let that = this.__ks_func_like_0(Space.SRGB.value);
+			return (that._red === 255) && (that._green === 255) && (that._blue === 255);
+		}
+		__ks_func_isWhite_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_isWhite_0.call(that);
 			}
-			if(space === void 0 || space === null) {
-				throw new TypeError("'space' is not nullable");
-			}
-			else if(!Type.isString(space)) {
-				throw new TypeError("'space' is not of type 'String'");
-			}
-			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
-			if((this._space.value === space) || Type.isValue($spaces[this._space][space])) {
-				return this;
-			}
-			else {
-				return $convert(this, space);
-			}
+			throw Helper.badArgs();
 		}
 		like() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_like_0.apply(this, arguments);
+			return this.__ks_func_like_rt.call(null, this, this, arguments);
+		}
+		__ks_func_like_0(space) {
+			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
+			let value = Space.from(space);
+			if(Type.isValue(value)) {
+				if((this._space.value !== value.valueOf()) && Type.isValue($spaces[this._space].converters[space])) {
+					return $convert(this, value);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this;
+		}
+		__ks_func_like_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_like_0.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+		luminance() {
+			return this.__ks_func_luminance_rt.call(null, this, this, arguments);
 		}
 		__ks_func_luminance_0() {
-			const that = this.like(Space.SRGB);
+			const that = this.__ks_func_like_0(Space.SRGB.value);
 			let r = that._red / 255;
 			r = (r < 0.03928) ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
 			let g = that._green / 255;
@@ -1119,110 +1107,95 @@ module.exports = function() {
 			b = (b < 0.03928) ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
 			return (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
 		}
-		luminance() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_luminance_0.apply(this);
+		__ks_func_luminance_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_luminance_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		negative() {
+			return this.__ks_func_negative_rt.call(null, this, this, arguments);
 		}
 		__ks_func_negative_0() {
-			this.space(Space.SRGB);
+			this.__ks_func_space_1(Space.SRGB.value);
 			this._red ^= 255;
 			this._green ^= 255;
 			this._blue ^= 255;
 			return this;
 		}
-		negative() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_negative_0.apply(this);
+		__ks_func_negative_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_negative_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_opaquer_0(value) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isString(value) && !Type.isNumber(value)) {
-				throw new TypeError("'value' is not of type 'String' or 'Number'");
-			}
-			if(Type.isString(value) && (value.endsWith("%") === true)) {
-				return this.alpha(this._alpha * ((100 + __ks_String._im_toFloat(value)) / 100));
-			}
-			else {
-				return this.alpha(this._alpha + (Type.isString(value) ? __ks_String._im_toFloat(value) : __ks_Number._im_toFloat(value)));
-			}
+			throw Helper.badArgs();
 		}
 		opaquer() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_opaquer_0.apply(this, arguments);
+			return this.__ks_func_opaquer_rt.call(null, this, this, arguments);
+		}
+		__ks_func_opaquer_0(value) {
+			if(Type.isString(value) && (value.endsWith("%") === true)) {
+				return this.__ks_func_alpha_1(this._alpha * ((100 + __ks_String.__ks_func_toFloat_0.call(value)) / 100));
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			else {
+				return this.__ks_func_alpha_1(this._alpha + (Type.isString(value) ? __ks_String.__ks_func_toFloat_0.call(value) : __ks_Number.__ks_func_toFloat_0.call(value)));
+			}
+		}
+		__ks_func_opaquer_rt(that, proto, args) {
+			const t0 = value => Type.isNumber(value) || Type.isString(value);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_opaquer_0.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+		readable() {
+			return this.__ks_func_readable_rt.call(null, this, this, arguments);
 		}
 		__ks_func_readable_0(color, tripleA) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isClassInstance(color, Color)) {
-				throw new TypeError("'color' is not of type 'Color'");
-			}
 			if(tripleA === void 0 || tripleA === null) {
 				tripleA = false;
 			}
-			else if(!Type.isBoolean(tripleA)) {
-				throw new TypeError("'tripleA' is not of type 'Boolean'");
-			}
 			if(tripleA) {
-				return Operator.gte(this.contrast(color).ratio, 7);
+				return Operator.gte(this.__ks_func_contrast_0(color).ratio, 7);
 			}
 			else {
-				return Operator.gte(this.contrast(color).ratio, 4.5);
+				return Operator.gte(this.__ks_func_contrast_0(color).ratio, 4.5);
 			}
 		}
-		readable() {
-			if(arguments.length >= 1 && arguments.length <= 2) {
-				return Color.prototype.__ks_func_readable_0.apply(this, arguments);
+		__ks_func_readable_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Color);
+			const t1 = value => Type.isBoolean(value) || Type.isNull(value);
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length >= 1 && args.length <= 2) {
+				if(t0(args[0]) && Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && te(pts, 1)) {
+					return proto.__ks_func_readable_0.call(that, args[0], Helper.getVararg(args, 1, pts[1]));
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_scheme_0(functions) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(functions === void 0 || functions === null) {
-				throw new TypeError("'functions' is not nullable");
-			}
-			else if(!Type.isArray(functions)) {
-				throw new TypeError("'functions' is not of type 'Array<(color: Color): Color>'");
-			}
-			return Helper.mapArray(functions, (fn) => {
-				return fn(this.clone());
-			});
+			throw Helper.badArgs();
 		}
 		scheme() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_scheme_0.apply(this, arguments);
+			return this.__ks_func_scheme_rt.call(null, this, this, arguments);
+		}
+		__ks_func_scheme_0(functions) {
+			return Helper.mapArray(functions, (fn) => {
+				return fn(this.__ks_func_clone_0());
+			});
+		}
+		__ks_func_scheme_rt(that, proto, args) {
+			const t0 = value => Type.isArray(value, Type.isFunction);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_scheme_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		setField() {
+			return this.__ks_func_setField_rt.call(null, this, this, arguments);
 		}
 		__ks_func_setField_0(name, value) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isNumber(value) && !Type.isString(value)) {
-				throw new TypeError("'value' is not of type 'Number' or 'String'");
-			}
 			let component = $components[name];
 			if(Type.isValue(component.spaces[this._space])) {
 				component = $spaces[this._space].components[name];
@@ -1238,50 +1211,45 @@ module.exports = function() {
 				this[component.field] = component.parser(value);
 			}
 			else if(component.loop === true) {
-				this[component.field] = __ks_Number._im_round(__ks_Number._im_mod(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.mod), component.round);
+				this[component.field] = __ks_Number._im_round(__ks_Number._im_mod(Type.isNumber(value) ? __ks_Number.__ks_func_toFloat_0.call(value) : __ks_String.__ks_func_toFloat_0.call(value), component.mod), component.round);
 			}
 			else {
-				this[component.field] = __ks_Number._im_round(__ks_Number._im_limit(Type.isNumber(value) ? __ks_Number._im_toFloat(value) : __ks_String._im_toFloat(value), component.min, component.max), component.round);
+				this[component.field] = __ks_Number._im_round(__ks_Number._im_limit(Type.isNumber(value) ? __ks_Number.__ks_func_toFloat_0.call(value) : __ks_String.__ks_func_toFloat_0.call(value), component.min, component.max), component.round);
 			}
 			return this;
 		}
-		setField() {
-			if(arguments.length === 2) {
-				return Color.prototype.__ks_func_setField_0.apply(this, arguments);
+		__ks_func_setField_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const t1 = value => Type.isNumber(value) || Type.isString(value);
+			if(args.length === 2) {
+				if(t0(args[0]) && t1(args[1])) {
+					return proto.__ks_func_setField_0.call(that, args[0], args[1]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_shade_0(percentage) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(percentage === void 0 || percentage === null) {
-				throw new TypeError("'percentage' is not nullable");
-			}
-			else if(!Type.isNumber(percentage)) {
-				throw new TypeError("'percentage' is not of type 'float'");
-			}
-			return this.blend($static.black, percentage);
+			throw Helper.badArgs();
 		}
 		shade() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_shade_0.apply(this, arguments);
+			return this.__ks_func_shade_rt.call(null, this, this, arguments);
+		}
+		__ks_func_shade_0(percentage) {
+			return this.blend($static.black, percentage);
+		}
+		__ks_func_shade_rt(that, proto, args) {
+			const t0 = Type.isNumber;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_shade_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		space() {
+			return this.__ks_func_space_rt.call(null, this, this, arguments);
 		}
 		__ks_func_space_0() {
 			return this._space;
 		}
 		__ks_func_space_1(space) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(space === void 0 || space === null) {
-				throw new TypeError("'space' is not nullable");
-			}
-			else if(!Type.isString(space)) {
-				throw new TypeError("'space' is not of type 'String'");
-			}
 			space = Type.isValue($aliases[space]) ? $aliases[space] : space;
 			if(!Type.isValue($spaces[space]) && Type.isValue($components[space])) {
 				if(Type.isValue($spaces[this._space].components[space])) {
@@ -1294,107 +1262,119 @@ module.exports = function() {
 					throw new Error(Helper.concatString("The component '", space, "' has a conflict between the spaces '", $components[space].families.join("', '"), "'"));
 				}
 			}
-			if((this._space.value !== space) && !Type.isValue($spaces[this._space][space])) {
-				$convert(this, space, this);
+			let value = Space.from(space);
+			if(Type.isValue(value)) {
+				if((this._space.value !== value.valueOf()) && Type.isValue($spaces[this._space].converters[space])) {
+					$convert(this, value, this);
+				}
+			}
+			else {
+				$convert.__ks_0(this, space, this);
 			}
 			return this;
 		}
-		space() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_space_0.apply(this);
+		__ks_func_space_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 0) {
+				return proto.__ks_func_space_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Color.prototype.__ks_func_space_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_space_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
-		}
-		__ks_func_tint_0(percentage) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(percentage === void 0 || percentage === null) {
-				throw new TypeError("'percentage' is not nullable");
-			}
-			else if(!Type.isNumber(percentage)) {
-				throw new TypeError("'percentage' is not of type 'float'");
-			}
-			return this.blend($static.white, percentage);
+			throw Helper.badArgs();
 		}
 		tint() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_tint_0.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_tint_rt.call(null, this, this, arguments);
 		}
-		__ks_func_tone_0(percentage) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_func_tint_0(percentage) {
+			return this.blend($static.white, percentage);
+		}
+		__ks_func_tint_rt(that, proto, args) {
+			const t0 = Type.isNumber;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_tint_0.call(that, args[0]);
+				}
 			}
-			if(percentage === void 0 || percentage === null) {
-				throw new TypeError("'percentage' is not nullable");
-			}
-			else if(!Type.isNumber(percentage)) {
-				throw new TypeError("'percentage' is not of type 'float'");
-			}
-			return this.blend($static.gray, percentage);
+			throw Helper.badArgs();
 		}
 		tone() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_tone_0.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_tone_rt.call(null, this, this, arguments);
 		}
-		static __ks_sttc_from_0(...args) {
-			let color = $from(new Color(), args);
+		__ks_func_tone_0(percentage) {
+			return this.blend($static.gray, percentage);
+		}
+		__ks_func_tone_rt(that, proto, args) {
+			const t0 = Type.isNumber;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_tone_0.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		}
+		static __ks_sttc_from_0(args) {
+			let color = $from.__ks_0(Color.__ks_new_0([]), args);
 			return color._dummy ? false : color;
 		}
 		static from() {
-			return Color.__ks_sttc_from_0.apply(this, arguments);
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+			let pts;
+			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.__ks_sttc_from_0(Helper.getVarargs(arguments, 0, pts[1]));
+			}
+			throw Helper.badArgs();
 		}
-		static __ks_sttc_greyscale_0(...args) {
-			let model = __ks_Array._im_last(args);
+		static __ks_sttc_greyscale_0(args) {
+			let model = __ks_Array.__ks_func_last_0.call(args);
 			if((model === "BT709") || (model === "average") || (model === "lightness") || (model === "Y") || (model === "RMY")) {
 				args.pop();
 			}
 			else {
 				model = null;
 			}
-			let color = $from(new Color(), args);
+			let color = $from.__ks_0(Color.__ks_new_0([]), args);
 			return color._dummy ? false : color.greyscale(model);
 		}
 		static greyscale() {
-			return Color.__ks_sttc_greyscale_0.apply(this, arguments);
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+			let pts;
+			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.__ks_sttc_greyscale_0(Helper.getVarargs(arguments, 0, pts[1]));
+			}
+			throw Helper.badArgs();
 		}
-		static __ks_sttc_hex_0(...args) {
-			let color = $from(new Color(), args);
-			return color._dummy ? false : color.hex();
+		static __ks_sttc_hex_0(args) {
+			let color = $from.__ks_0(Color.__ks_new_0([]), args);
+			return color._dummy ? false : color.__ks_func_hex_0();
 		}
 		static hex() {
-			return Color.__ks_sttc_hex_0.apply(this, arguments);
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+			let pts;
+			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.__ks_sttc_hex_0(Helper.getVarargs(arguments, 0, pts[1]));
+			}
+			throw Helper.badArgs();
 		}
-		static __ks_sttc_negative_0(...args) {
-			let color = $from(new Color(), args);
-			return color._dummy ? false : color.negative();
+		static __ks_sttc_negative_0(args) {
+			let color = $from.__ks_0(Color.__ks_new_0([]), args);
+			return color._dummy ? false : color.__ks_func_negative_0();
 		}
 		static negative() {
-			return Color.__ks_sttc_negative_0.apply(this, arguments);
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(arguments, pts, idx);
+			let pts;
+			if(Helper.isVarargs(arguments, 0, arguments.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return Color.__ks_sttc_negative_0(Helper.getVarargs(arguments, 0, pts[1]));
+			}
+			throw Helper.badArgs();
 		}
 		static __ks_sttc_registerFormatter_0(format, formatter) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(format === void 0 || format === null) {
-				throw new TypeError("'format' is not nullable");
-			}
-			else if(!Type.isString(format)) {
-				throw new TypeError("'format' is not of type 'String'");
-			}
-			if(formatter === void 0 || formatter === null) {
-				throw new TypeError("'formatter' is not nullable");
-			}
-			else if(!Type.isFunction(formatter)) {
-				throw new TypeError("'formatter' is not of type 'Function'");
-			}
 			$formatters[format] = (() => {
 				const d = new Dictionary();
 				d.formatter = formatter;
@@ -1402,45 +1382,29 @@ module.exports = function() {
 			})();
 		}
 		static registerFormatter() {
+			const t0 = Type.isString;
+			const t1 = Type.isFunction;
 			if(arguments.length === 2) {
-				return Color.__ks_sttc_registerFormatter_0.apply(this, arguments);
+				if(t0(arguments[0]) && t1(arguments[1])) {
+					return Color.__ks_sttc_registerFormatter_0(arguments[0], arguments[1]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 		static __ks_sttc_registerParser_0(format, parser) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(format === void 0 || format === null) {
-				throw new TypeError("'format' is not nullable");
-			}
-			else if(!Type.isString(format)) {
-				throw new TypeError("'format' is not of type 'String'");
-			}
-			if(parser === void 0 || parser === null) {
-				throw new TypeError("'parser' is not nullable");
-			}
-			else if(!Type.isFunction(parser)) {
-				throw new TypeError("'parser' is not of type 'Function'");
-			}
 			$parsers[format] = parser;
 		}
 		static registerParser() {
+			const t0 = Type.isString;
+			const t1 = Type.isFunction;
 			if(arguments.length === 2) {
-				return Color.__ks_sttc_registerParser_0.apply(this, arguments);
+				if(t0(arguments[0]) && t1(arguments[1])) {
+					return Color.__ks_sttc_registerParser_0(arguments[0], arguments[1]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 		static __ks_sttc_registerSpace_0(space) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(space === void 0 || space === null) {
-				throw new TypeError("'space' is not nullable");
-			}
-			else if(!Type.isDictionary(space)) {
-				throw new TypeError("'space' is not of type 'Dictionary'");
-			}
 			let spaces = Dictionary.keys($spaces);
 			$space(space.name);
 			if(Type.isValue(space.parser)) {
@@ -1469,7 +1433,7 @@ module.exports = function() {
 				for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
 					alias = space.alias[__ks_0];
 					$spaces[space.name].alias[alias] = true;
-					$aliases[alias] = space.name;
+					$aliases[alias] = Space.from(space.name);
 				}
 				if(Type.isValue($parsers[space.name])) {
 					for(let __ks_0 = 0, __ks_1 = space.alias.length, alias; __ks_0 < __ks_1; ++__ks_0) {
@@ -1489,7 +1453,7 @@ module.exports = function() {
 					for(let name in space.converters.from) {
 						let converter = space.converters.from[name];
 						if(!Type.isValue($spaces[name])) {
-							$space(name);
+							$space.__ks_0(name);
 						}
 						$spaces[name].converters[space.name] = converter;
 					}
@@ -1540,47 +1504,58 @@ module.exports = function() {
 			}
 		}
 		static registerSpace() {
+			const t0 = Type.isDictionary;
 			if(arguments.length === 1) {
-				return Color.__ks_sttc_registerSpace_0.apply(this, arguments);
+				if(t0(arguments[0])) {
+					return Color.__ks_sttc_registerSpace_0(arguments[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
-	Color.registerSpace((() => {
+	Space.SRGB = Space("srgb");
+	Space.RGB = Space("rgb");
+	Color.__ks_sttc_registerSpace_0((() => {
 		const d = new Dictionary();
-		d.name = Space.SRGB;
-		d["alias"] = [Space.RGB];
+		d["name"] = "srgb";
+		d["alias"] = ["rgb"];
 		d["formatters"] = (() => {
 			const d = new Dictionary();
-			d.hex = function(that) {
-				if(arguments.length < 1) {
-					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-				}
-				if(that === void 0 || that === null) {
-					throw new TypeError("'that' is not nullable");
-				}
-				else if(!Type.isClassInstance(that, Color)) {
-					throw new TypeError("'that' is not of type 'Color'");
-				}
-				return $hex(that);
-			};
-			d.srgb = function(that) {
-				if(arguments.length < 1) {
-					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-				}
-				if(that === void 0 || that === null) {
-					throw new TypeError("'that' is not nullable");
-				}
-				else if(!Type.isClassInstance(that, Color)) {
-					throw new TypeError("'that' is not of type 'Color'");
-				}
-				if(that._alpha === 1) {
-					return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
-				}
-				else {
-					return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
-				}
-			};
+			d.hex = (() => {
+				const __ks_rt = (...args) => {
+					const t0 = value => Type.isClassInstance(value, Color);
+					if(args.length === 1) {
+						if(t0(args[0])) {
+							return __ks_rt.__ks_0.call(null, args[0]);
+						}
+					}
+					throw Helper.badArgs();
+				};
+				__ks_rt.__ks_0 = function(that) {
+					return $hex.__ks_0(that);
+				};
+				return __ks_rt;
+			})();
+			d.srgb = (() => {
+				const __ks_rt = (...args) => {
+					const t0 = value => Type.isClassInstance(value, Color);
+					if(args.length === 1) {
+						if(t0(args[0])) {
+							return __ks_rt.__ks_0.call(null, args[0]);
+						}
+					}
+					throw Helper.badArgs();
+				};
+				__ks_rt.__ks_0 = function(that) {
+					if(that._alpha === 1) {
+						return "rgb(" + that._red + ", " + that._green + ", " + that._blue + ")";
+					}
+					else {
+						return "rgba(" + that._red + ", " + that._green + ", " + that._blue + ", " + that._alpha + ")";
+					}
+				};
+				return __ks_rt;
+			})();
 			return d;
 		})();
 		d["components"] = (() => {
@@ -1604,93 +1579,85 @@ module.exports = function() {
 		})();
 		return d;
 	})());
-	Color.prototype.__ks_init_1 = function() {
-		this._red = 0;
-	};
-	Color.prototype.__ks_init_2 = function() {
-		this._green = 0;
-	};
-	Color.prototype.__ks_init_3 = function() {
-		this._blue = 0;
-	};
 	Color.prototype.__ks_func_red_0 = function() {
-		return this.getField("red");
+		return this.__ks_func_getField_0("red");
 	};
 	Color.prototype.__ks_func_red_1 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
 		return this.setField("red", value);
 	};
 	Color.prototype.__ks_func_green_0 = function() {
-		return this.getField("green");
+		return this.__ks_func_getField_0("green");
 	};
 	Color.prototype.__ks_func_green_1 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
 		return this.setField("green", value);
 	};
 	Color.prototype.__ks_func_blue_0 = function() {
-		return this.getField("blue");
+		return this.__ks_func_getField_0("blue");
 	};
 	Color.prototype.__ks_func_blue_1 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
 		return this.setField("blue", value);
 	};
+	Color.prototype.__ks_init_1 = Color.prototype.__ks_init;
 	Color.prototype.__ks_init = function() {
-		Color.prototype.__ks_init_0.call(this);
-		Color.prototype.__ks_init_1.call(this);
-		Color.prototype.__ks_init_2.call(this);
-		Color.prototype.__ks_init_3.call(this);
+		this.__ks_init_1();
+		this._red = 0;
+		this._green = 0;
+		this._blue = 0;
+	};
+	Color.prototype.__ks_func_red_rt = function(that, proto, args) {
+		const t0 = Type.isValue;
+		if(args.length === 0) {
+			return proto.__ks_func_red_0.call(that);
+		}
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return proto.__ks_func_red_1.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
 	};
 	Color.prototype.red = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_red_0.apply(this);
+		return this.__ks_func_red_rt.call(null, this, this, arguments);
+	};
+	Color.prototype.__ks_func_green_rt = function(that, proto, args) {
+		const t0 = Type.isValue;
+		if(args.length === 0) {
+			return proto.__ks_func_green_0.call(that);
 		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_red_1.apply(this, arguments);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return proto.__ks_func_green_1.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 	Color.prototype.green = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_green_0.apply(this);
+		return this.__ks_func_green_rt.call(null, this, this, arguments);
+	};
+	Color.prototype.__ks_func_blue_rt = function(that, proto, args) {
+		const t0 = Type.isValue;
+		if(args.length === 0) {
+			return proto.__ks_func_blue_0.call(that);
 		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_green_1.apply(this, arguments);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return proto.__ks_func_blue_1.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 	Color.prototype.blue = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_blue_0.apply(this);
-		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_blue_1.apply(this, arguments);
-		}
-		throw new SyntaxError("Wrong number of arguments");
+		return this.__ks_func_blue_rt.call(null, this, this, arguments);
 	};
 	let $static = (() => {
 		const d = new Dictionary();
-		d.black = Color.from("#000");
-		d.gray = Color.from("#808080");
-		d.white = Color.from("#fff");
+		d.black = Color.__ks_sttc_from_0(["#000"]);
+		d.gray = Color.__ks_sttc_from_0(["#808080"]);
+		d.white = Color.__ks_sttc_from_0(["#fff"]);
 		return d;
 	})();
 	return {
-		Space: Space,
-		Color: Color
+		Color,
+		Space
 	};
 };

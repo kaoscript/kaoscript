@@ -16,12 +16,14 @@ var target = {
 	name: 'v8',
 	version: process.versions.v8.split('.').slice(0, 2).join('.')
 };
+var variationId = fs.djb2a(target.name + ',' + target.version);
 
 var loadFile = function(module, filename) { // {{{
 	var source = fs.readFile(filename);
+	var binary = _.getBinaryPath(filename, variationId);
 
-	if(fs.isFile(_.getBinaryPath(filename, target)) && fs.isFile(_.getHashPath(filename, target)) && _.isUpToDate(filename, target, source)) {
-		var data = fs.readFile(_.getBinaryPath(filename, target));
+	if(fs.isFile(binary) && fs.isFile(_.getHashPath(filename)) && _.isUpToDate(filename, variationId, source)) {
+		var data = fs.readFile(binary);
 	}
 	else {
 		var options = {

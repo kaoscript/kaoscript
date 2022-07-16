@@ -4,7 +4,7 @@ class DestroyStatement extends Statement {
 		_identifier: Boolean		= false
 		_type: Type
 	}
-	analyse() { // {{{
+	initiate() { // {{{
 		if @data.variable.kind == NodeKind::Identifier {
 			if !@scope.hasVariable(@data.variable.name) {
 				ReferenceException.throwNotDefined(@data.variable.name, this)
@@ -17,6 +17,11 @@ class DestroyStatement extends Statement {
 		else {
 			@expression = $compile.expression(@data.variable, this)
 
+
+		}
+	} // }}}
+	analyse() { // {{{
+		if !@identifier {
 			@expression.analyse()
 		}
 	} // }}}

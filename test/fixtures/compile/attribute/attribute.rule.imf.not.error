@@ -1,1 +1,1 @@
-ReferenceException: The function "foobar" can't be matched to given arguments (Number) (line 11, file "fixtures/compile/attribute/attribute.rule.imf.not.ks")
+ReferenceException: The function "foobar" can't be matched to given arguments (Number) (fixtures/compile/attribute/attribute.rule.imf.not.ks:11)

@@ -1,21 +1,26 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "T"
-  ],
-  "references": [
-    {
-      "kind": "alias",
-      "of": {
-        "kind": "union",
-        "types": [
-          "Number",
-          "String"
-        ]
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "T"
+    ],
+    "references": [
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "union",
+          "types": [
+            "Number",
+            "String"
+          ]
+        }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

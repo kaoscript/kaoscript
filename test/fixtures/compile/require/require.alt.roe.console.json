@@ -1,17 +1,23 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [
-    "Any?",
-    "console",
-    false
-  ],
-  "exports": [
-    "Any?",
-    "console"
-  ],
-  "references": [],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      false
+    ],
+    "requirements": [
+      "Any?",
+      "console",
+      false
+    ],
+    "references": []
+  },
+  {
+    "exports": [
+      "Any?",
+      "console"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

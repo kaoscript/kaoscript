@@ -1,12 +1,11 @@
 node_modules
 *.ksb
+*.kse
 *.ksh
-*.ksm
+*.ksr
 *.marks
 lib/compiler.js
-lib/compiler2.js
-lib/compiler3.js
-lib/compiler4.js
+lib/compiler.new.js
+lib/compiler.old*.js
 coverage
 .coveralls.yml
-*.no

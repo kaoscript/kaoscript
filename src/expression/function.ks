@@ -29,7 +29,7 @@ class AnonymousFunctionExpression extends Expression {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
 
 		@block = $compile.function($ast.body(@data), this)
 		@block.analyse()
@@ -76,23 +76,54 @@ class AnonymousFunctionExpression extends Expression {
 	isUsingVariable(name) => false
 	parameters() => @parameters
 	toFragments(fragments, mode) { // {{{
-		fragments.code('function(')
+		const assessment = this.type().assessment('__ks_rt', this)
 
-		const block = Parameter.toFragments(this, fragments, ParameterMode::Default, func(fragments) {
+		const block = fragments.code('(() =>').newBlock()
+
+		const lineRouter = block.newLine()
+		const blockRouter = lineRouter.code(`const __ks_rt = (...args) =>`).newBlock()
+
+		Router.toFragments(
+			(function, line) => {
+				line.code(`__ks_rt.__ks_\(function.index()).call(null`)
+
+				return true
+			}
+			null
+			assessment
+			blockRouter
+			this
+		)
+
+		blockRouter.done()
+		lineRouter.done()
+
+		const lineFunction = block.newLine()
+
+		lineFunction.code('__ks_rt.__ks_0 = function(')
+
+		const blockFunction = Parameter.toFragments(this, lineFunction, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').newBlock()
 		})
 
 		for const node in @topNodes {
-			node.toAuthorityFragments(block)
+			blockFunction.toAuthorityFragments(block)
 		}
 
-		block.compile(@block)
+		blockFunction.compile(@block, Mode::None)
 
 		if !@awaiting && !@exit && @type.isAsync() {
-			block.line('__ks_cb()')
+			blockFunction.line('__ks_cb()')
 		}
 
+		blockFunction.done()
+		lineFunction.done()
+
+		block.line('return __ks_rt')
+
 		block.done()
+
+		fragments.code(')()')
 	} // }}}
 	type() => @type
 }
@@ -130,7 +161,7 @@ class ArrowFunctionExpression extends Expression {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, 0, this)
 
 		@block.analyse()
 
@@ -225,40 +256,59 @@ class ArrowFunctionExpression extends Expression {
 			}
 		}
 		else {
-			if @es5 || (@parameters.length != 0 && !@usingThis) {
-				fragments.code('function(')
-
-				const block = Parameter.toFragments(this, fragments, ParameterMode::Default, func(fragments) {
-					return fragments.code(')').newBlock()
-				})
-
-				block.compile(@block)
-
-				if !@awaiting && !@exit && @type.isAsync() {
-					block.line('__ks_cb()')
-				}
-
-				block.done()
+			if @es5 {
+				throw new NotImplementedException(this)
 			}
 			else {
-				fragments.code('(')
+				const assessment = @type.assessment('__ks_rt', this)
 
-				const block = Parameter.toFragments(this, fragments, ParameterMode::ArrowFunction, func(fragments) {
+				const block = fragments.code('(() =>').newBlock()
+
+				const lineRouter = block.newLine()
+				const blockRouter = lineRouter.code(`const __ks_rt = (...args) =>`).newBlock()
+
+				Router.toFragments(
+					(function, line) => {
+						line.code(`__ks_rt.__ks_\(function.index()).call(this`)
+
+						return true
+					}
+					null
+					assessment
+					blockRouter
+					this
+				)
+
+				blockRouter.done()
+				lineRouter.done()
+
+				const lineFunction = block.newLine()
+
+				lineFunction.code('__ks_rt.__ks_0 = (')
+
+				const blockFunction = Parameter.toFragments(this, lineFunction, ParameterMode::Default, func(fragments) {
 					return fragments.code(') =>').newBlock()
 				})
 
-				block.compile(@block)
+				blockFunction.compile(@block, Mode::None)
 
 				if !@awaiting && !@exit && @type.isAsync() {
-					block.line('__ks_cb()')
+					blockFunction.line('__ks_cb()')
 				}
 
+				blockFunction.done()
+				lineFunction.done()
+
+				block.line('return __ks_rt')
+
 				block.done()
+
+				fragments.code(')()')
 			}
 		}
 	} // }}}
 	toAuthorityFragments(fragments) { // {{{
-		const ctrl = fragments.newControl().code(`var \(@name) = function(`)
+		const ctrl = fragments.newControl().code(`\($runtime.immutableScope(this))\(@name) = function(`)
 
 		for const variable, index in @variables {
 			if index != 0 {

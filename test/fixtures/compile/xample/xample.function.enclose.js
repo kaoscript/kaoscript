@@ -1,22 +1,37 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Function = {};
 	__ks_Function.__ks_func_enclose_0 = function(enclosure) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(enclosure === void 0 || enclosure === null) {
-			throw new TypeError("'enclosure' is not nullable");
-		}
 		let f = this;
-		return function(...args) {
-			return enclosure(f, ...args);
-		};
+		return (() => {
+			const __ks_rt = (...args) => {
+				const t0 = Type.isValue;
+				const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+				let pts;
+				if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+					return __ks_rt.__ks_0.call(this, Helper.getVarargs(args, 0, pts[1]));
+				}
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = (args) => {
+				return enclosure(f, ...args);
+			};
+			return __ks_rt;
+		})();
 	};
-	__ks_Function._im_enclose = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Function._im_enclose = function(that, ...args) {
+		return __ks_Function.__ks_func_enclose_rt(that, args);
+	};
+	__ks_Function.__ks_func_enclose_rt = function(that, args) {
+		const t0 = Type.isValue;
 		if(args.length === 1) {
-			return __ks_Function.__ks_func_enclose_0.apply(that, args);
+			if(t0(args[0])) {
+				return __ks_Function.__ks_func_enclose_0.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.enclose) {
+			return that.enclose(...args);
+		}
+		throw Helper.badArgs();
 	};
 };

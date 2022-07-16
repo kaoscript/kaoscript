@@ -1,1 +1,1 @@
-SyntaxException: An error is unreported, it must be caught or declared to be thrown (line 4, file "fixtures/compile/throw/throw.default.if.ks")
+SyntaxException: An error is unreported, it must be caught or declared to be thrown (fixtures/compile/throw/throw.default.if.ks:4)

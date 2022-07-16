@@ -1,36 +1,69 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let foo = (() => {
-		return function() {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			let __ks_i = -1;
-			let items = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
-			let __ks__;
-			let values = [];
-			--__ks_i;
-			let __ks_l = __ks_i + 2;
-			while(++__ks_i < __ks_l) {
-				__ks__ = arguments[__ks_i];
-				if(__ks__ === void 0 || __ks__ === null || !Type.isNumber(__ks__)) {
-					throw new TypeError("'values' is not of type 'Number'");
+		return (() => {
+			const __ks_rt = (...args) => {
+				const t0 = Type.isNumber;
+				const t1 = Type.isValue;
+				const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+				let pts;
+				if(args.length === 1) {
+					if(t0(args[0])) {
+						return __ks_rt.__ks_0.call(this, [], [args[0]]);
+					}
+					throw Helper.badArgs();
 				}
-				else {
-					values.push(__ks__);
+				if(args.length === 2) {
+					if(t0(args[0]) && t0(args[1])) {
+						return __ks_rt.__ks_0.call(this, [], [args[0], args[1]]);
+					}
+					if(t1(args[0]) && t0(args[1])) {
+						return __ks_rt.__ks_0.call(this, [args[0]], [args[1]]);
+					}
+					throw Helper.badArgs();
 				}
-			}
-			return [items, values];
-		};
+				if(args.length >= 3) {
+					if(Helper.isVarargs(args, 0, args.length - 3, t1, pts = [0], 0)) {
+						if(Helper.isVarargs(args, 3, 3, t0, pts, 1) && te(pts, 2)) {
+							return __ks_rt.__ks_0.call(this, Helper.getVarargs(args, 0, pts[1]), Helper.getVarargs(args, pts[1], pts[2]));
+						}
+						if(Helper.isVarargs(args, 1, 1, t1, pts, 1)) {
+							if(Helper.isVarargs(args, 2, 2, t0, pts, 2) && te(pts, 3)) {
+								return __ks_rt.__ks_0.call(this, Helper.getVarargs(args, 0, pts[2]), Helper.getVarargs(args, pts[2], pts[3]));
+							}
+							if(Helper.isVarargs(args, 1, 1, t1, pts, 2) && Helper.isVarargs(args, 1, 1, t0, pts, 3) && te(pts, 4)) {
+								return __ks_rt.__ks_0.call(this, Helper.getVarargs(args, 0, pts[3]), Helper.getVarargs(args, pts[3], pts[4]));
+							}
+							throw Helper.badArgs();
+						}
+						throw Helper.badArgs();
+					}
+				}
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = (items, values) => {
+				return [items, values];
+			};
+			return __ks_rt;
+		})();
 	})();
-	expect(() => {
-		return foo();
-	}).to.throw();
+	expect((() => {
+		const __ks_rt = (...args) => {
+			if(args.length === 0) {
+				return __ks_rt.__ks_0.call(this);
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = () => {
+			return foo();
+		};
+		return __ks_rt;
+	})()).to.throw();
 	expect(foo(1)).to.eql([[], [1]]);
-	expect(foo(1, 2)).to.eql([[1], [2]]);
-	expect(foo(1, 2, 3)).to.eql([[1, 2], [3]]);
-	expect(foo(1, 2, 3, 4)).to.eql([[1, 2, 3], [4]]);
-	expect(foo(1, 2, 3, 4, 5)).to.eql([[1, 2, 3, 4], [5]]);
-	expect(foo(1, 2, 3, 4, 5, 6)).to.eql([[1, 2, 3, 4, 5], [6]]);
-	expect(foo(1, 2, 3, 4, 5, 6, 7)).to.eql([[1, 2, 3, 4, 5, 6], [7]]);
+	expect(foo(1, 2)).to.eql([[], [1, 2]]);
+	expect(foo(1, 2, 3)).to.eql([[], [1, 2, 3]]);
+	expect(foo(1, 2, 3, 4)).to.eql([[1], [2, 3, 4]]);
+	expect(foo(1, 2, 3, 4, 5)).to.eql([[1, 2], [3, 4, 5]]);
+	expect(foo(1, 2, 3, 4, 5, 6)).to.eql([[1, 2, 3], [4, 5, 6]]);
+	expect(foo(1, 2, 3, 4, 5, 6, 7)).to.eql([[1, 2, 3, 4], [5, 6, 7]]);
 };

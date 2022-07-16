@@ -1,6 +1,6 @@
 require("kaoscript/register");
 module.exports = function() {
-	var {Shape, __ks_Shape, console} = require("../export/export.sealed.class.default.ks")();
-	let shape = new Shape("yellow");
-	console.log(__ks_Shape._im_draw(shape, "rectangle"));
+	var {Shape, __ks_Shape, console} = require("../export/.export.sealed.class.default.ks.j5k8r9.ksb")();
+	let shape = Shape.__ks_new_0("yellow");
+	console.log(__ks_Shape.__ks_func_draw_0.call(shape, "rectangle"));
 };

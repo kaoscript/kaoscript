@@ -1,19 +1,25 @@
-var {Dictionary, Helper, Operator} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let o = (() => {
 		const d = new Dictionary();
 		d.name = "White";
 		return d;
 	})();
-	function fff(prefix) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(prefix === void 0 || prefix === null) {
-			throw new TypeError("'prefix' is not nullable");
-		}
+	function fff() {
+		return fff.__ks_rt(this, arguments);
+	};
+	fff.__ks_0 = function(prefix) {
 		return Operator.addOrConcat(prefix, this.name);
-	}
+	};
+	fff.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return fff.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	let f = Helper.vcurry(fff, o);
 	let s = f("Hello ");
 };

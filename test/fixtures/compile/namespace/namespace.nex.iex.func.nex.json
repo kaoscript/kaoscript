@@ -1,35 +1,42 @@
-{
-  "aliens": [
-    "Any?",
-    "console",
-    0,
-    "NS"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "NS"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {
-        "foobar": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": false,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "Any?",
-          "throws": [],
-          "sealed": false
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true,
+      0,
+      "NS",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {
+          "foobar": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": false,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "NS"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

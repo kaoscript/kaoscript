@@ -1,69 +1,77 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "NS"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {
-        "foo": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "Any?",
-          "throws": [],
-          "sealed": false
-        },
-        "bar": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "Any?",
-          "throws": [],
-          "sealed": false
-        },
-        "qux": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 0,
-          "parameters": [],
-          "returns": "Any?",
-          "throws": [],
-          "sealed": false
-        },
-        "Type": {
-          "kind": "enum",
-          "type": "number",
-          "index": 2,
-          "exhaustive": true,
-          "variables": [
-            "FOO",
-            "BAR",
-            "QUX"
-          ],
-          "instanceMethods": {},
-          "staticMethods": {},
-          "sequences": [
-            -1
-          ],
-          "sealed": false
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "NS"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {
+          "foo": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          },
+          "bar": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          },
+          "qux": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 0,
+            "parameters": [],
+            "returns": "Any?",
+            "errors": [],
+            "sealed": false
+          },
+          "Type": {
+            "kind": "enum",
+            "type": "number",
+            "sequenceIndex": 2,
+            "exhaustive": true,
+            "variables": [
+              "FOO",
+              "BAR",
+              "QUX"
+            ],
+            "instanceMethods": {},
+            "staticMethods": {},
+            "sequences": [
+              -1
+            ],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

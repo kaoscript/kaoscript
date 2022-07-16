@@ -1,96 +1,96 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Shape {
+		static __ks_new_0(...args) {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			o.__ks_cons_0(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._color = "";
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Shape.prototype.__ks_init_0.call(this);
+			this._color = "";
 		}
 		__ks_cons_0(color) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isString(color)) {
-				throw new TypeError("'color' is not of type 'String'");
-			}
 			this._color = color;
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isString;
 			if(args.length === 1) {
-				Shape.prototype.__ks_cons_0.apply(this, args);
+				if(t0(args[0])) {
+					return Shape.prototype.__ks_cons_0.call(that, args[0]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
+		}
+		color() {
+			return this.__ks_func_color_rt.call(null, this, this, arguments);
 		}
 		__ks_func_color_0() {
 			return this._color;
 		}
 		__ks_func_color_1(color) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isString(color)) {
-				throw new TypeError("'color' is not of type 'String'");
-			}
 			this._color = color;
 			return this;
 		}
-		color() {
-			if(arguments.length === 0) {
-				return Shape.prototype.__ks_func_color_0.apply(this);
+		__ks_func_color_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 0) {
+				return proto.__ks_func_color_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Shape.prototype.__ks_func_color_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_color_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
-	function error(message) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(message === void 0 || message === null) {
-			throw new TypeError("'message' is not nullable");
-		}
-		throw new Error(message);
-	}
-	Shape.prototype.__ks_cons_1 = function(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		error("not supported");
+	function error() {
+		return error.__ks_rt(this, arguments);
 	};
-	Shape.prototype.__ks_cons = function(args) {
+	error.__ks_0 = function(message) {
+		throw new Error(message);
+	};
+	error.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
 		if(args.length === 1) {
-			Shape.prototype.__ks_cons_0.apply(this, args);
+			if(t0(args[0])) {
+				return error.__ks_0.call(that, args[0]);
+			}
 		}
-		else if(args.length === 2) {
-			Shape.prototype.__ks_cons_1.apply(this, args);
+		throw Helper.badArgs();
+	};
+	Shape.__ks_new_1 = function(...args) {
+		const o = Object.create(Shape.prototype);
+		o.__ks_init();
+		o.__ks_cons_1(...args);
+		return o;
+	};
+	Shape.prototype.__ks_cons_1 = function(x, y) {
+		error.__ks_0("not supported");
+	};
+	Shape.prototype.__ks_cons_rt = function(that, args) {
+		const t0 = Type.isString;
+		const t1 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return Shape.prototype.__ks_cons_0.call(that, args[0]);
+			}
+			throw Helper.badArgs();
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
+		if(args.length === 2) {
+			if(t1(args[0]) && t1(args[1])) {
+				return Shape.prototype.__ks_cons_1.call(that, args[0], args[1]);
+			}
 		}
-	}
-	const s = new Shape("x", "y");
+		throw Helper.badArgs();
+	};
+	const s = Shape.__ks_new_1("x", "y");
 	return {
-		Shape: Shape
+		Shape
 	};
 };

@@ -7,18 +7,21 @@ module.exports = function() {
 		}
 		__ks_init() {
 		}
+		toString() {
+			return this.__ks_func_toString_rt.call(null, this, this, arguments);
+		}
 		__ks_func_toString_0() {
 			return "FooError: " + this.message;
 		}
-		toString() {
-			if(arguments.length === 0) {
-				return FooError.prototype.__ks_func_toString_0.apply(this);
+		__ks_func_toString_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_toString_0.call(that);
 			}
-			return Error.prototype.toString.apply(this, arguments);
+			return super.toString.apply(that, args);
 		}
 	}
 	return {
-		__ks_Error: __ks_Error,
-		FooError: FooError
+		__ks_Error,
+		FooError
 	};
 };

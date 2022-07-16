@@ -1,1 +1,1 @@
-ReferenceException: The method "foobar" can't be found in the class "Foobar" (line 6, file "fixtures/compile/attribute/attribute.rule.nex.class.ext.nex.nmet.ks")
+ReferenceException: The method "foobar" can't be found in the class "Foobar" (fixtures/compile/attribute/attribute.rule.nex.class.ext.nex.nmet.ks:6)

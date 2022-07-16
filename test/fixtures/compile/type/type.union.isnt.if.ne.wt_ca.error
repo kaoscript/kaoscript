@@ -1,1 +1,1 @@
-ReferenceException: The function "quxbaz" can't be matched to given arguments (Foobar|Number) (line 6, file "fixtures/compile/type/type.union.isnt.if.ne.wt_ca.ks")
+ReferenceException: The function "quxbaz" can't be matched to given arguments (Foobar|Number) (fixtures/compile/type/type.union.isnt.if.ne.wt_ca.ks:6)

@@ -1,71 +1,76 @@
-{
-  "aliens": [],
-  "requirements": [
-    0,
-    "Weekday",
-    true
-  ],
-  "exports": [
-    0,
-    "Weekday"
-  ],
-  "references": [
-    {
-      "kind": "enum",
-      "type": "number",
-      "index": -1,
-      "exhaustive": true,
-      "variables": [
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-        "SUNDAY"
-      ],
-      "instanceMethods": {
-        "isWeekend": [
-          {
-            "id": 0,
-            "access": 4,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Boolean",
-            "throws": []
-          }
+[
+  {
+    "aliens": [],
+    "requirements": [
+      0,
+      "Weekday",
+      true
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "number",
+        "sequenceIndex": -1,
+        "exhaustive": true,
+        "variables": [
+          "MONDAY",
+          "TUESDAY",
+          "WEDNESDAY",
+          "THURSDAY",
+          "FRIDAY",
+          "SATURDAY",
+          "SUNDAY"
+        ],
+        "instanceMethods": {
+          "isWeekend": [
+            {
+              "index": 0,
+              "access": 4,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Boolean",
+              "errors": []
+            }
+          ]
+        },
+        "staticMethods": {
+          "fromString": [
+            {
+              "index": 0,
+              "access": 4,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "value",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 0
+              },
+              "errors": []
+            }
+          ]
+        },
+        "sequences": [
+          -1
         ]
-      },
-      "staticMethods": {
-        "fromString": [
-          {
-            "id": 0,
-            "access": 4,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "value",
-                "type": "String",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 0
-            },
-            "throws": []
-          }
-        ]
-      },
-      "sequences": [
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+      }
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "Weekday"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

@@ -1,17 +1,20 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_String = require("../_/_string.ks")().__ks_String;
-	function foobar(values) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(values === void 0 || values === null) {
-			throw new TypeError("'values' is not nullable");
-		}
-		else if(!Type.isArray(values)) {
-			throw new TypeError("'values' is not of type 'Array<String>'");
-		}
+	var __ks_String = require("../_/._string.ks.j5k8r9.ksb")().__ks_String;
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(values) {
 		return Type.isValue(values[0]) ? values[0].toInt : null;
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isArray(value, Type.isString);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

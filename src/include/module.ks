@@ -1,26 +1,29 @@
 export class Module {
 	private {
-		_aliens					= {}
-		_binary: Boolean		= false
+		_aliens							= {}
+		_arguments: Array				= null
+		_binary: Boolean				= false
 		_body
 		_compiler: Compiler
 		_data
 		_directory
-		_exports				= {}
-		_exportedMacros			= {}
+		_exports						= {}
+		_exportedMacros					= {}
 		_file
-		_flags					= {}
-		_hashes					= {}
-		_imports				= {}
-		_includeModules			= {}
-		_includePaths			= {}
-		_metadata				= null
+		_flags							= {}
+		_hashes							= {}
+		_imports						= {}
+		_includeModules					= {}
+		_includePaths					= {}
+		_metaExports					= null
+		_metaRequirements				= null
 		_options
 		_output
-		_register				= false
-		_requirements			= []
-		_requirementByNames		= {}
+		_register						= false
+		_requirements					= []
+		_requirementByNames				= {}
 		_rewire
+		_variationId
 	}
 	constructor(data, @compiler, @file) { // {{{
 		@data = this.parse(data, file)
@@ -50,8 +53,10 @@ export class Module {
 
 		@hashes['.'] = @compiler.sha256(file, data)
 	} // }}}
-	addAlien(name: String, type: Type) { // {{{
+	addAlien(name: String, type: Type): this { // {{{
 		@aliens[name] = type
+
+		return this
 	} // }}}
 	addHash(file, hash) { // {{{
 		@hashes[path.relative(@directory, file)] = hash
@@ -90,27 +95,23 @@ export class Module {
 		}
 	} // }}}
 	addRequirement(requirement: Requirement) { // {{{
+		if ?@requirementByNames[requirement.name()] {
+			return this
+		}
+
+		requirement.index(@requirements.length)
+
 		@requirements.push(requirement)
 		@requirementByNames[requirement.name()] = requirement
 
-		if requirement.isAlien() {
-			this.addAlien(requirement.name(), requirement.type())
-		}
+		requirement.type().flagRequirement()
+
+		return this
 	} // }}}
 	compile() { // {{{
-		@body = new ModuleBlock(@data, this)
+		this.initiate()
 
-		@body.analyse()
-
-		@body.prepare()
-
-		@body.translate()
-
-		for const export, name of @exports {
-			if !export.type.isExportable() {
-				ReferenceException.throwNotExportable(name, @body)
-			}
-		}
+		this.finish()
 	} // }}}
 	compiler() => @compiler
 	directory() => @directory
@@ -172,24 +173,47 @@ export class Module {
 		@body.exportMacro(name, macro)
 	} // }}}
 	file() => @file
+	finish() { // {{{
+		@body.analyse()
+
+		@body.enhance()
+
+		@body.prepare()
+
+		@body.translate()
+
+		for const export, name of @exports {
+			if !export.type.isExportable() {
+				ReferenceException.throwNotExportable(name, @body)
+			}
+		}
+	} // }}}
 	flag(name) { // {{{
 		@flags[name] = true
 	} // }}}
 	flagRegister() { // {{{
 		@register = true
 	} // }}}
+	getAlien(name: String) => @aliens[name]
 	getRequirement(name: String) => @requirementByNames[name]
+	hasArgument(index: Number) => @arguments?[index]?
+	hasUnknownArguments() => !?@arguments
 	hasInclude(path) { // {{{
 		return @includePaths[path] == true || @includePaths[path] is String
 	} // }}}
 	import(name: String) { // {{{
 		@imports[name] = true
 	} // }}}
+	initiate() { // {{{
+		@body = new ModuleBlock(@data, this)
+
+		@body.initiate()
+	} // }}}
 	isBinary() => @binary
-	isUpToDate(file, target, data) { // {{{
-		let hashes
+	isUpToDate(file: String, source: String) { // {{{
+		let data
 		try {
-			hashes = JSON.parse(fs.readFile(getHashPath(file, target)))
+			data = JSON.parse(fs.readFile(getHashPath(file)))
 		}
 		catch {
 			return null
@@ -197,16 +221,31 @@ export class Module {
 
 		let root = path.dirname(file)
 
-		for const hash, name of hashes {
+		for const hash, name of data.hashes {
 			if name == '.' {
-				return null if @compiler.sha256(file, data) != hash
+				return null if @compiler.sha256(file, source) != hash
 			}
 			else {
 				return null if @compiler.sha256(path.join(root, name)) != hash
 			}
 		}
 
-		return hashes
+		return data
+	} // }}}
+	isUpToDate(hashes): Boolean { // {{{
+		for const hash, name of @hashes {
+			const h = hashes[name]
+			if h? {
+				if h != hash {
+					return false
+				}
+			}
+			else {
+				return false
+			}
+		}
+
+		return true
 	} // }}}
 	listIncludeVersions(path, modulePath) { // {{{
 		if @includeModules[modulePath] is Dictionary {
@@ -254,6 +293,65 @@ export class Module {
 		return output
 	} // }}}
 	scope() => @body.scope()
+	setArguments(arguments: Array, module: String = path.basename(@file), node: AbstractNode = @body) { // {{{
+		const scope = @body.scope()
+
+		@arguments = []
+
+		if arguments.length != 0 {
+			const references = {}
+			const queue = []
+			const alterations = {}
+			const resets = []
+			const metadata = []
+
+			for const requirement, index in @requirements {
+				if const { name, type } = arguments[index] {
+					if type.isSubsetOf(requirement.type(), MatchingMode::Signature) {
+						if !requirement.type().isSubsetOf(type, MatchingMode::Signature) {
+							const index = type.toMetadata(metadata, 0, ExportMode::Requirement, this)
+							const newType = Type.toNamedType(requirement.name(), references[index] ?? Type.import(index, metadata, references, alterations, queue, scope, @body))
+
+							references[index] = newType
+
+							if requirement.type().isExtendable() {
+								newType.originals(requirement.type().type())
+							}
+
+							newType.flagRequirement()
+
+							const variable = scope.getVariable(requirement.name())
+
+							variable.setDeclaredType(newType)
+
+							resets.pushUniq(type, type.scope())
+						}
+					}
+					else {
+						TypeException.throwNotCompatibleArgument(name, requirement.name(), module, node)
+					}
+
+					@arguments.push(type)
+				}
+				else {
+					if requirement.isRequired() {
+						SyntaxException.throwMissingRequirement(requirement.name(), module, node)
+					}
+					else {
+						@arguments.push(null)
+					}
+				}
+			}
+
+			while queue.length > 0 {
+				queue.shift()()
+			}
+
+			for const reset in resets {
+				reset.resetReferences()
+			}
+		}
+	} // }}}
 	toHashes() => @hashes
 	toFragments() { // {{{
 		const fragments = new FragmentBuilder(0)
@@ -274,12 +372,10 @@ export class Module {
 		else {
 			const line = fragments.newLine().code('module.exports = function(')
 
-			for const requirement, index in @requirements {
-				if index != 0 {
-					line.code($comma)
-				}
+			let comma = false
 
-				requirement.toParameterFragments(line)
+			for const requirement in @requirements {
+				comma = requirement.toParameterFragments(line, comma)
 			}
 
 			line.code(')')
@@ -383,76 +479,112 @@ export class Module {
 		}
 
 		for const package, name of packages {
-			if package.length == 1 {
-				mark.line(`var \(package[0].name) = require("\(package[0].options.package)").\(package[0].options.member)`)
-			}
-			else if @options.format.destructuring == 'es5' {
-				mark.line(`var __ks__ = require("\(name)")`)
+			const line = mark.newLine().code('const {')
 
-				const line = mark.newLine().code('var ')
+			for const item, index in package {
+				line.code(', ') if index != 0
 
-				for const item, index in package {
-					line.code(', ') if index != 0
-
-					line.code(`\(item.name) = __ks__.\(item.options.member)`)
+				if item.name == item.options.member {
+					line.code(item.name)
 				}
-
-				line.done()
-			}
-			else {
-				const line = mark.newLine().code('var {')
-
-				for const item, index in package {
-					line.code(', ') if index != 0
-
-					if item.name == item.options.member {
-						line.code(item.name)
-					}
-					else {
-						line.code(`\(item.options.member): \(item.name)`)
-					}
+				else {
+					line.code(`\(item.options.member): \(item.name)`)
 				}
-
-				line.code(`} = require("\(name)")`)
-
-				line.done()
 			}
+
+			line.code(`} = require("\(name)")`)
+
+			line.done()
 		}
 
 		return fragments.toArray()
 	} // }}}
-	toMetadata() { // {{{
-		if @metadata == null {
-			@metadata = {
-				aliens: []
-				requirements: []
+	toExports() { // {{{
+		if @metaRequirements == null {
+			this.toRequirements()
+		}
+
+		if @metaExports == null {
+			@metaExports = {
 				exports: []
 				references: []
 				macros: []
 			}
 
-			for const requirement in @requirements {
-				@metadata.requirements.push(
-					requirement.type().toMetadata(@metadata.references, ExportMode::IgnoreAlteration)
-					requirement.name()
-					requirement.isRequired()
-				)
-			}
+			const delta = @metaRequirements.references.length
 
-			for const type, name of @aliens {
-				@metadata.aliens.push(type.toMetadata(@metadata.references, ExportMode::IgnoreAlteration), name)
-			}
+			for const { variable }, name of @exports {
+				let type
 
-			for const export, name of @exports {
-				@metadata.exports.push(export.type.toMetadata(@metadata.references, ExportMode::Default), name)
+				if variable is IdentifierLiteral | Variable {
+					type = variable.getDeclaredType()
+				}
+				else {
+					type = variable.type()
+				}
+
+				@metaExports.exports.push(type.toMetadata(@metaExports.references, delta, ExportMode::Export, this), name)
 			}
 
 			for const datas, name of @exportedMacros {
-				@metadata.macros.push(name, datas)
+				@metaExports.macros.push(name, datas)
 			}
 		}
 
-		return @metadata
+		return @metaExports
+	} // }}}
+	toRequirements() { // {{{
+		if @metaRequirements == null {
+			@metaRequirements = {
+				aliens: []
+				requirements: []
+				references: []
+			}
+			for const type, name of @aliens {
+				@metaRequirements.aliens.push(
+					type.toMetadata(@metaRequirements.references, 0, ExportMode::Alien, this)
+					name,
+					null
+				)
+			}
+
+			for const requirement in @requirements {
+				@metaRequirements.requirements.push(
+					requirement.type().toMetadata(@metaRequirements.references, 0, ExportMode::Requirement, this)
+					requirement.name()
+					requirement.toRequiredMetadata()
+				)
+			}
+
+			let index = 2
+			for const type, name of @aliens {
+				@metaRequirements.aliens[index] = type.toRequiredMetadata(@requirements)
+
+				index += 3
+			}
+		}
+
+		return @metaRequirements
+	} // }}}
+	toVariationId() { // {{{
+		if !?@variationId {
+			const variations = [@options.target.name, @options.target.version]
+
+			if @arguments? {
+				for const type in @arguments {
+					if type? {
+						type.toVariations(variations)
+					}
+					else {
+						variations.push(null)
+					}
+				}
+			}
+
+			@variationId = fs.djb2a(variations.join())
+		}
+
+		return @variationId
 	} // }}}
 }
 
@@ -469,15 +601,36 @@ class ModuleBlock extends AbstractNode {
 		@options = module._options
 		@scope = new ModuleScope()
 	} // }}}
-	analyse() { // {{{
+	initiate() { // {{{
 		for const statement in @data.body {
 			@scope.line(statement.start.line)
 
 			if const statement = $compile.statement(statement, this) {
 				@statements.push(statement)
 
-				statement.analyse()
+				statement.initiate()
 			}
+		}
+	} // }}}
+	analyse() { // {{{
+		for const statement in @statements {
+			@scope.line(statement.line())
+
+			statement.analyse()
+		}
+	} // }}}
+	enhance() { // {{{
+		for const statement in @statements {
+			@scope.line(statement.line())
+
+			statement.enhance()
+		}
+
+		const recipient = this.recipient()
+		for const statement in @statements when statement.isExportable() {
+			@scope.line(statement.line())
+
+			statement.export(recipient, true)
 		}
 	} // }}}
 	prepare() { // {{{
@@ -491,7 +644,7 @@ class ModuleBlock extends AbstractNode {
 		for const statement in @statements when statement.isExportable() {
 			@scope.line(statement.line())
 
-			statement.export(recipient)
+			statement.export(recipient, false)
 		}
 
 		let type: Type

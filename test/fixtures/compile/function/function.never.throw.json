@@ -1,47 +1,53 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "FoobarError",
-    1,
-    "foobar"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": true,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "extends": "Error",
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ]
-    },
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 0,
-      "max": 0,
-      "parameters": [],
-      "returns": "Never",
-      "throws": [
-        {
-          "reference": 0
-        }
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "FoobarError",
+      1,
+      "foobar"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": true,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "extends": "Error",
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
+      },
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": 0,
+        "parameters": [],
+        "returns": "Never",
+        "errors": [
+          {
+            "reference": 0
+          }
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

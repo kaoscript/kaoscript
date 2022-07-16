@@ -1,4 +1,4 @@
-// natives
+/// natives
 class MacroScope extends Scope {
 	private {
 		_matchingTypes: Dictionary<Array>	= {}
@@ -86,6 +86,10 @@ class MacroScope extends Scope {
 
 			variable.renameAs(newName)
 		}
+
+		if const reference = @references[name] {
+			reference.reset()
+		}
 	} // }}}
 	getDefinedVariable(name: String) { // {{{
 		if @variables[name] is Variable {
@@ -128,38 +132,40 @@ class MacroScope extends Scope {
 
 		const index = @matchingTypes[hash].length
 
-		const match = a.isMatching(b, mode)
+		const match = a.isSubsetOf(b, mode)
 
 		@matchingTypes[hash][index - 1] = match
 
 		return match
 	} // }}}
-	reference(value, nullable: Boolean = false, parameters: Array = []) { // {{{
+	reference(value) { // {{{
 		switch value {
-			is AnyType => return this.resolveReference('Any', nullable, parameters)
-			is ClassVariableType => return this.reference(value.type(), nullable, parameters)
+			is AnyType => return this.resolveReference('Any')
+			is ClassVariableType => return this.reference(value.type())
 			is NamedType => {
 				if value.hasContainer() {
-					return value.container().scope().reference(value.name(), nullable, parameters)
+					return value.container().scope().reference(value.name())
 				}
 				else {
-					return this.resolveReference(value.name(), nullable, parameters)
+					return this.resolveReference(value.name())
 				}
 			}
-			is ReferenceType => return this.resolveReference(value.name(), value.isNullable(), parameters)
-			is String => return this.resolveReference(value, nullable, parameters)
-			is Variable => return this.resolveReference(value.name(), nullable, parameters)
+			is ReferenceType => return this.resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()])
+			is Variable => return this.resolveReference(value.name())
 			=> {
 				console.info(value)
 				throw new NotImplementedException()
 			}
 		}
 	} // }}}
-	resolveReference(name: String, nullable: Boolean, parameters: Array) { // {{{
-		const hash = ReferenceType.toQuote(name, nullable, parameters)
+	reference(value: String, nullable: Boolean = false, parameters: Array = []) { // {{{
+		return this.resolveReference(value, nullable, parameters)
+	} // }}}
+	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { // {{{
+		const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
-			@references[hash] = new ReferenceType(this, name, nullable, parameters)
+			@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)
 		}
 
 		return @references[hash]

@@ -1,1 +1,1 @@
-SyntaxException: Identifier "x" has already been declared (line 1, file "fixtures/compile/extern/extern.default.ks")
+SyntaxException: Identifier "x" has already been declared (fixtures/compile/extern/extern.default.ks:1)

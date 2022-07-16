@@ -1,6 +1,6 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Weekday = Helper.enum(Number, {
+	const Weekday = Helper.enum(Number, {
 		MONDAY: 0,
 		TUESDAY: 1,
 		WEDNESDAY: 2,
@@ -9,35 +9,38 @@ module.exports = function() {
 		SATURDAY: 5,
 		SUNDAY: 6
 	});
-	Weekday.__ks_func_isSameAs = function(that, day) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(day === void 0 || day === null) {
-			throw new TypeError("'day' is not nullable");
-		}
-		else if(!Type.isString(day)) {
-			throw new TypeError("'day' is not of type 'String'");
-		}
+	Weekday.__ks_func_isSameAs_0 = function(that, day) {
 		if(that === Weekday.MONDAY) {
 			return day === "monday";
 		}
 		return false;
 	};
-	function foobar(day) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	Weekday.__ks_func_isSameAs = function(that, ...args) {
+		const t0 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return Weekday.__ks_func_isSameAs_0(that, args[0]);
+			}
 		}
-		if(day === void 0 || day === null) {
-			throw new TypeError("'day' is not nullable");
+		throw Helper.badArgs();
+	};
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(day) {
+		if(Weekday.__ks_func_isSameAs_0(day, "tuesday")) {
 		}
-		else if(!Type.isEnumInstance(day, Weekday)) {
-			throw new TypeError("'day' is not of type 'Weekday'");
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, Weekday);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		if(Weekday.__ks_func_isSameAs(day, "tuesday")) {
-		}
-	}
+		throw Helper.badArgs();
+	};
 	return {
-		Weekday: Weekday
+		Weekday
 	};
 };

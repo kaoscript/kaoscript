@@ -1,13 +1,22 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	function min() {
+		return min.__ks_rt(this, arguments);
+	};
+	min.__ks_0 = function() {
 		return ["female", 24];
-	}
+	};
+	min.__ks_rt = function(that, args) {
+		if(args.length === 0) {
+			return min.__ks_0.call(that);
+		}
+		throw Helper.badArgs();
+	};
 	let foo = Helper.namespace(function() {
-		let [gender, age] = min();
+		let [gender, age] = min.__ks_0();
 		return {
-			gender: gender,
-			age: age
+			gender,
+			age
 		};
 	});
 	console.log(foo.age);

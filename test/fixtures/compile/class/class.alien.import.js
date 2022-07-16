@@ -1,24 +1,8 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
 module.exports = function() {
-	var {ClassA, __ks_ClassA, ClassB, ClassC} = require("../class/class.alien.default.ks")();
+	var {ClassA, __ks_ClassA, ClassB, ClassC} = require("../class/.class.alien.default.ks.j5k8r9.ksb")();
 	class ClassD extends ClassB {
 		constructor(x, y) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
-			}
-			if(y === void 0 || y === null) {
-				throw new TypeError("'y' is not nullable");
-			}
-			else if(!Type.isNumber(y)) {
-				throw new TypeError("'y' is not of type 'Number'");
-			}
 			super(x, y);
 			this._w = this._z * this._z;
 		}

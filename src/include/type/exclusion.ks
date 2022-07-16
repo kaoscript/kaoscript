@@ -30,10 +30,10 @@ class ExclusionType extends Type {
 
 		return that
 	} // }}}
-	export(references, mode) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		return {
 			kind: TypeKind::Exclusion
-			types: [type.toReference(references, mode) for type in @types]
+			types: [type.toReference(references, indexDelta, mode, module) for type in @types]
 		}
 	} // }}}
 	flagExported(explicitly: Boolean) { // {{{
@@ -61,7 +61,7 @@ class ExclusionType extends Type {
 
 		return true
 	} // }}}
-	isMatching(value: Type, mode: MatchingMode) { // {{{
+	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
 		console.error(value)
 		NotImplementedException.throw()
 	} // }}}
@@ -83,7 +83,7 @@ class ExclusionType extends Type {
 		throw new NotImplementedException(node)
 	} // }}}
 	toQuote() => [type.toQuote() for const type in @types].join('^')
-	toReference(references, mode) => this.export(references, mode)
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.export(references, indexDelta, mode, module)
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		fragments.code('(') if junction == Junction::OR
 
@@ -107,6 +107,33 @@ class ExclusionType extends Type {
 		}
 
 		fragments.code(')') if junction == Junction::OR
+	} // }}}
+	toTestFunctionFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if junction == Junction::OR
+
+		if @types[0].isAny() {
+			@types[1].toTestFunctionFragments(fragments.code('!'), node, Junction::AND)
+
+			for const type in @types from 2 {
+				fragments.code(' && ')
+
+				type.toTestFunctionFragments(fragments.code('!'), node, Junction::AND)
+			}
+		}
+		else {
+			@types[0].toTestFunctionFragments(fragments, node, Junction::AND)
+
+			for const type in @types from 1 {
+				fragments.code(' && ')
+
+				type.toTestFunctionFragments(fragments.code('!'), node, Junction::AND)
+			}
+		}
+
+		fragments.code(')') if junction == Junction::OR
+	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('exclusion')
 	} // }}}
 	types() => @types
 }

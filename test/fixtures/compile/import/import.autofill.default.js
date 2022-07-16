@@ -1,17 +1,5 @@
 require("kaoscript/register");
 module.exports = function() {
-	class Color {
-		constructor() {
-			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init() {
-		}
-		__ks_cons(args) {
-			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
-			}
-		}
-	}
-	var Color = require("../require/require.default.ks")(Color).Color;
+	var Color = require("./.import.immu.import.cc.ks.j5k8r9.ksb")().Color;
+	var Color = require("../require/.require.default.ks.t0gvux.ksb")(Color).Color;
 };

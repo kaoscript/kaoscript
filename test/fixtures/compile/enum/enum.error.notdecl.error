@@ -1,1 +1,1 @@
-ReferenceException: Element "Z" is not defined in enum "Kind" (line 7, file "fixtures/compile/enum/enum.error.notdecl.ks")
+ReferenceException: Element "Z" is not defined in enum "Kind" (fixtures/compile/enum/enum.error.notdecl.ks:7)

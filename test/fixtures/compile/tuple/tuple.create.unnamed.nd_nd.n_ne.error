@@ -1,1 +1,1 @@
-ReferenceException: The tuple "Pair" can't be matched to no arguments (line 3, file "fixtures/compile/tuple/tuple.create.unnamed.nd_nd.n_ne.ks")
+ReferenceException: The tuple "Pair" can't be matched to no arguments (fixtures/compile/tuple/tuple.create.unnamed.nd_nd.n_ne.ks:3)

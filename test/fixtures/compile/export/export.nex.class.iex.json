@@ -1,50 +1,60 @@
-{
-  "aliens": [
-    "Any?",
-    "console",
-    0,
-    "Foobar"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Foobar"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {
-        "foobar": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ]
-      },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true,
+      0,
+      "Foobar",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "foobar": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        }
+      }
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "Foobar"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

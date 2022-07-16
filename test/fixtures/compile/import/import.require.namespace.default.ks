@@ -1,4 +1,3 @@
-namespace Foobar {
-}
+import '../namespace/namespace.export.default.ks'
 
-import './import.require.namespace.source.ks'(Foobar)
+import './import.require.namespace.source.ks'(Float)

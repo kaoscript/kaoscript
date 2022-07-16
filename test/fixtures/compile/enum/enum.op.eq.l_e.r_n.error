@@ -1,1 +1,1 @@
-TypeException: The expression "color" of type "Color" can't be compared to a value of type "Null" (line 8, file "fixtures/compile/enum/enum.op.eq.l_e.r_n.ks")
+TypeException: The expression "color" of type "Color" can't be compared to a value of type "Null" (fixtures/compile/enum/enum.op.eq.l_e.r_n.ks:8)

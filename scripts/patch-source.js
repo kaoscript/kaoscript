@@ -10,11 +10,19 @@ var filter = function(item) {
 	return item.path.slice(-3) === '.js'
 }
 
-if (program.args.length > 0) {
+if(program.args.length === 1) {
 	var directory = program.args[0];
 
 	filter = function(item) {
 		return item.path.slice(-3) === '.js' && path.basename(path.dirname(item.path)) === directory
+	}
+}
+else if(program.args.length === 2) {
+	var directory = program.args[0];
+	var basename = program.args[1];
+
+	filter = function(item) {
+		return item.path.slice(-3) === '.js' && path.basename(path.dirname(item.path)) === directory && path.basename(item.path).startsWith(basename)
 	}
 }
 

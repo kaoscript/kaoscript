@@ -1,17 +1,23 @@
 require("kaoscript/register");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Foobar, __ks_Foobar, __ks_Error, FooError} = require("./require.tangled.genesis.ks")();
+	var {Foobar, __ks_Foobar, __ks_Error, FooError} = require("./.require.tangled.genesis.ks.1b7cst1.ksb")();
 	__ks_Foobar.__ks_func_foobar_0 = function() {
 	};
-	__ks_Foobar._im_foobar = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Foobar._im_foobar = function(that, ...args) {
+		return __ks_Foobar.__ks_func_foobar_rt(that, args);
+	};
+	__ks_Foobar.__ks_func_foobar_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Foobar.__ks_func_foobar_0.apply(that);
+			return __ks_Foobar.__ks_func_foobar_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.foobar) {
+			return that.foobar(...args);
+		}
+		throw Helper.badArgs();
 	};
 	return {
-		Foobar: Foobar,
-		__ks_Foobar: __ks_Foobar
+		Foobar,
+		__ks_Foobar
 	};
 };

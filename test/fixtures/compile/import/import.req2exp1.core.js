@@ -1,41 +1,55 @@
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
+		}
+		x() {
+			return this.__ks_func_x_rt.call(null, this, this, arguments);
 		}
 		__ks_func_x_0() {
 			return this._x;
 		}
-		x() {
-			if(arguments.length === 0) {
-				return Foobar.prototype.__ks_func_x_0.apply(this);
+		__ks_func_x_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_x_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Quxbaz {
+		static __ks_new_0() {
+			const o = Object.create(Quxbaz.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	return {
-		Foobar: Foobar,
-		Quxbaz: Quxbaz
+		Foobar,
+		Quxbaz
 	};
 };

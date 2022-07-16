@@ -1,74 +1,67 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._value = "";
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Foobar.prototype.__ks_init_0.call(this);
+			this._value = "";
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
+		}
+		value() {
+			return this.__ks_func_value_rt.call(null, this, this, arguments);
 		}
 		__ks_func_value_0() {
 			return this._value;
 		}
 		__ks_func_value_1(value) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isString(value)) {
-				throw new TypeError("'value' is not of type 'String'");
-			}
 			this._value = value;
 			return this;
 		}
-		value() {
-			if(arguments.length === 0) {
-				return Foobar.prototype.__ks_func_value_0.apply(this);
+		__ks_func_value_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 0) {
+				return proto.__ks_func_value_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Foobar.prototype.__ks_func_value_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_value_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 		static __ks_sttc_instance_0() {
 			return Foobar._instance;
 		}
 		static __ks_sttc_instance_1(instance) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(instance === void 0 || instance === null) {
-				throw new TypeError("'instance' is not nullable");
-			}
-			else if(!Type.isClassInstance(instance, Foobar)) {
-				throw new TypeError("'instance' is not of type 'Foobar'");
-			}
 			Foobar._instance = instance;
 		}
 		static instance() {
+			const t0 = value => Type.isClassInstance(value, Foobar);
 			if(arguments.length === 0) {
-				return Foobar.__ks_sttc_instance_0.apply(this);
+				return Foobar.__ks_sttc_instance_0();
 			}
-			else if(arguments.length === 1) {
-				return Foobar.__ks_sttc_instance_1.apply(this, arguments);
+			if(arguments.length === 1) {
+				if(t0(arguments[0])) {
+					return Foobar.__ks_sttc_instance_1(arguments[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
-	Foobar._instance = new Foobar();
-	console.log(Foobar.instance().value());
+	Foobar._instance = Foobar.__ks_new_0();
+	console.log(Foobar.__ks_sttc_instance_0().__ks_func_value_0());
 	return {
-		Foobar: Foobar
+		Foobar
 	};
 };

@@ -1,26 +1,25 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_endsWith_0 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!Type.isString(value)) {
-			throw new TypeError("'value' is not of type 'String'");
-		}
 		return (this.length >= value.length) && (this.slice(this.length - value.length) === value);
 	};
-	__ks_String._im_endsWith = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_String._im_endsWith = function(that, ...args) {
+		return __ks_String.__ks_func_endsWith_rt(that, args);
+	};
+	__ks_String.__ks_func_endsWith_rt = function(that, args) {
+		var t0 = Type.isString;
 		if(args.length === 1) {
-			return __ks_String.__ks_func_endsWith_0.apply(that, args);
+			if(t0(args[0])) {
+				return __ks_String.__ks_func_endsWith_0.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.endsWith) {
+			return that.endsWith(...args);
+		}
+		throw Helper.badArgs();
 	};
 	return {
-		__ks_String: __ks_String
+		__ks_String
 	};
 };

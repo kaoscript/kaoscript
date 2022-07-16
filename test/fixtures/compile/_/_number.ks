@@ -1,15 +1,19 @@
-extern isNaN, parseFloat, parseInt
+extern {
+	func parseFloat(...): Number
+	func parseInt(...): Number
+	func isNaN(...): Boolean
 
-#[rules(non-exhaustive)]
-extern systemic class Number {
-	toFixed(...): Number
-}
+	#[rules(non-exhaustive)]
+	systemic class Number {
+		toFixed(...): Number
+	}
 
-extern systemic namespace Math {
-	max(...): Number
-	min(...): Number
-	pow(...): Number
-	round(...): Number
+	systemic namespace Math {
+		max(...): Number
+		min(...): Number
+		pow(...): Number
+		round(...): Number
+	}
 }
 
 impl Number {

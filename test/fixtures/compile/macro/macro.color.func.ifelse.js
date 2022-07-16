@@ -1,15 +1,20 @@
-var {Dictionary, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Color {
+		static __ks_new_0() {
+			const o = Object.create(Color.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
@@ -18,27 +23,30 @@ module.exports = function() {
 		d["name"] = "FBQ";
 		d["formatters"] = (() => {
 			const d = new Dictionary();
-			d.srgb = function(that) {
-				if(arguments.length < 1) {
-					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-				}
-				if(that === void 0 || that === null) {
-					throw new TypeError("'that' is not nullable");
-				}
-				else if(!Type.isClassInstance(that, Color)) {
-					throw new TypeError("'that' is not of type 'Color'");
-				}
-				if(that._foo === true) {
-				}
-				else if(that._bar === true) {
-				}
-				return "";
-			};
+			d.srgb = (() => {
+				const __ks_rt = (...args) => {
+					const t0 = value => Type.isClassInstance(value, Color);
+					if(args.length === 1) {
+						if(t0(args[0])) {
+							return __ks_rt.__ks_0.call(null, args[0]);
+						}
+					}
+					throw Helper.badArgs();
+				};
+				__ks_rt.__ks_0 = function(that) {
+					if(that._foo === true) {
+					}
+					else if(that._bar === true) {
+					}
+					return "";
+				};
+				return __ks_rt;
+			})();
 			return d;
 		})();
 		return d;
 	})());
 	return {
-		Color: Color
+		Color
 	};
 };

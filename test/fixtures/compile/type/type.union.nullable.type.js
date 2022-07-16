@@ -1,62 +1,75 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 		static __ks_sttc_get_0(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isString(x)) {
-				throw new TypeError("'x' is not of type 'String'");
-			}
-			return new Foobar();
+			return Foobar.__ks_new_0();
 		}
 		static get() {
+			const t0 = Type.isString;
 			if(arguments.length === 1) {
-				return Foobar.__ks_sttc_get_0.apply(this, arguments);
+				if(t0(arguments[0])) {
+					return Foobar.__ks_sttc_get_0(arguments[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
-	function foobar(x = null) {
-		if(x !== null && !Type.isClassInstance(x, Foobar) && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'Foobar', 'String' or 'Null'");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x = null) {
 		if(!Type.isValue(x)) {
-			x = Foobar.get("foobar");
+			x = Foobar.__ks_sttc_get_0("foobar");
 		}
 		if(Type.isString(x)) {
-			x = Foobar.get(x);
+			x = Foobar.__ks_sttc_get_0(x);
 		}
-		quxbaz(x);
-	}
-	function quxbaz(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		quxbaz.__ks_0(x);
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isString(value) || Type.isClassInstance(value, Foobar) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length <= 1) {
+			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
+				return foobar.__ks_0.call(that, Helper.getVararg(args, 0, pts[1]));
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
+		throw Helper.badArgs();
+	};
+	function quxbaz() {
+		return quxbaz.__ks_rt(this, arguments);
+	};
+	quxbaz.__ks_0 = function(x) {
+	};
+	quxbaz.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Foobar);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return quxbaz.__ks_0.call(that, args[0]);
+			}
 		}
-		else if(!Type.isClassInstance(x, Foobar)) {
-			throw new TypeError("'x' is not of type 'Foobar'");
-		}
-	}
+		throw Helper.badArgs();
+	};
 	return {
-		Foobar: Foobar,
-		foobar: foobar,
-		quxbaz: quxbaz
+		Foobar,
+		foobar,
+		quxbaz
 	};
 };

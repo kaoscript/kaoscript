@@ -130,7 +130,6 @@ abstract class NumericBinaryOperatorExpression extends BinaryOperatorExpression 
 			else {
 				TypeException.throwInvalidOperand(@left, this.operator(), this)
 			}
-
 			if @left.type().isNullable() || @right.type().isNullable() {
 				@type = @scope.reference('Number').setNullable(true)
 
@@ -571,7 +570,7 @@ class BinaryOperatorMatch extends Expression {
 		if @composite {
 			if assignable {
 				if native {
-					fragments.code(`((\(@reuseName) = `).compile(@subject).code(') & ').wrap(operand).code(`) \(operator) 0`)
+					fragments.code(`((\(@reuseName) = `).compile(@subject).code(') & ').wrap(operand).code(`) \(operator) 0n`)
 				}
 				else {
 					fragments
@@ -579,21 +578,21 @@ class BinaryOperatorMatch extends Expression {
 						.compile(@subject)
 						.code($comma)
 						.compile(operand)
-						.code(`) \(operator) 0`)
+						.code(`) \(operator) 0n`)
 				}
 			}
 			else {
 				if native {
-					fragments.code(`(\(@reuseName) & `).wrap(operand).code(`) \(operator) 0`)
+					fragments.code(`(\(@reuseName) & `).wrap(operand).code(`) \(operator) 0n`)
 				}
 				else {
-					fragments.code($runtime.operator(this), `.bitwiseAnd(\(@reuseName), `).compile(operand).code(`) \(operator) 0`)
+					fragments.code($runtime.operator(this), `.bitwiseAnd(\(@reuseName), `).compile(operand).code(`) \(operator) 0n`)
 				}
 			}
 		}
 		else {
 			if native {
-				fragments.code('(').wrap(@subject).code(' & ').wrap(operand).code(`) \(operator) 0`)
+				fragments.code('(').wrap(@subject).code(' & ').wrap(operand).code(`) \(operator) 0n`)
 			}
 			else {
 				fragments
@@ -601,7 +600,7 @@ class BinaryOperatorMatch extends Expression {
 					.compile(@subject)
 					.code($comma)
 					.compile(operand)
-					.code(`) \(operator) 0`)
+					.code(`) \(operator) 0n`)
 			}
 		}
 	} // }}}
@@ -787,7 +786,6 @@ class BinaryOperatorTypeEquality extends Expression {
 	analyse() { // {{{
 		@subject = $compile.expression(@data.left, this)
 		@subject.analyse()
-
 	} // }}}
 	prepare() { // {{{
 		@subject.prepare()
@@ -874,7 +872,7 @@ class BinaryOperatorTypeEquality extends Expression {
 		@trueType.toPositiveTestFragments(fragments, @subject)
 	} // }}}
 	type() => @scope.reference('Boolean')
-	private validateType(variable) { // {{{
+	private validateType(variable: Variable) { // {{{
 		const type = variable.getRealType()
 
 		if @subject.type().isNull() {
@@ -887,7 +885,7 @@ class BinaryOperatorTypeEquality extends Expression {
 			}
 		}
 		else if type.isClass() || type.isEnum() || type.isStruct() || type.isTuple() || type.isUnion() || type.isFusion() || type.isExclusion() {
-			unless type.isAssignableToVariable(@subject.type(), true) {
+			unless @scope.reference(type).isAssignableToVariable(@subject.type(), false, false, true) {
 				TypeException.throwInvalidTypeChecking(@subject.type(), type, this)
 			}
 		}
@@ -996,7 +994,7 @@ class BinaryOperatorTypeInequality extends Expression {
 		@falseType.toNegativeTestFragments(fragments, @subject)
 	} // }}}
 	type() => @scope.reference('Boolean')
-	private validateType(variable) { // {{{
+	private validateType(variable: Variable) { // {{{
 		const type = variable.getRealType()
 
 		if @subject.type().isNull() {

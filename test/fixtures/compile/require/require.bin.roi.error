@@ -1,1 +1,1 @@
-SyntaxException: Binary file can't use "require|import" statement (line 3, file "fixtures/compile/require/require.bin.roi.ks")
+SyntaxException: Binary file can't use "require|import" statement (fixtures/compile/require/require.bin.roi.ks:3)

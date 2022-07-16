@@ -1,44 +1,68 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function corge() {
+		return corge.__ks_rt(this, arguments);
+	};
+	corge.__ks_0 = function() {
 		return 42;
-	}
-	function grault(n) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	};
+	corge.__ks_rt = function(that, args) {
+		if(args.length === 0) {
+			return corge.__ks_0.call(that);
 		}
-		if(n === void 0 || n === null) {
-			throw new TypeError("'n' is not nullable");
-		}
-		else if(!Type.isNumber(n)) {
-			throw new TypeError("'n' is not of type 'Number'");
-		}
+		throw Helper.badArgs();
+	};
+	function grault() {
+		return grault.__ks_rt(this, arguments);
+	};
+	grault.__ks_0 = function(n) {
 		return n + 42;
-	}
-	function garply(s) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	};
+	grault.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return grault.__ks_0.call(that, args[0]);
+			}
 		}
-		if(s === void 0 || s === null) {
-			throw new TypeError("'s' is not nullable");
-		}
-		else if(!Type.isString(s)) {
-			throw new TypeError("'s' is not of type 'String'");
-		}
+		throw Helper.badArgs();
+	};
+	function garply() {
+		return garply.__ks_rt(this, arguments);
+	};
+	garply.__ks_0 = function(s) {
 		return s.toUpperCase();
-	}
+	};
+	garply.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return garply.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	function waldo() {
+		return waldo.__ks_rt(this, arguments);
+	};
+	waldo.__ks_0 = function() {
 		return "miss White";
-	}
+	};
+	waldo.__ks_rt = function(that, args) {
+		if(args.length === 0) {
+			return waldo.__ks_0.call(that);
+		}
+		throw Helper.badArgs();
+	};
 	let foobar = Helper.namespace(function() {
 		return {
-			corge: corge,
-			grault: grault,
-			garply: garply,
-			waldo: waldo
+			corge,
+			grault,
+			garply,
+			waldo
 		};
 	});
 	return {
-		foobar: foobar
+		foobar
 	};
 };

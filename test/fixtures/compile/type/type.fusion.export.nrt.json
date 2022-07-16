@@ -1,51 +1,54 @@
-{
-  "aliens": [
-    0,
-    "exec"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "exec"
-  ],
-  "references": [
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 0,
-      "max": 0,
-      "parameters": [],
-      "returns": {
-        "reference": 1
+[
+  {
+    "aliens": [
+      0,
+      "exec",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": 0,
+        "parameters": [],
+        "returns": {
+          "reference": 1
+        },
+        "errors": []
       },
-      "throws": []
-    },
-    {
-      "kind": "alias",
-      "of": {
-        "kind": "fusion",
-        "types": [
-          {
-            "kind": "reference",
-            "name": "Array",
-            "parameters": [
-              "String?"
-            ]
-          },
-          {
-            "reference": 2
-          }
-        ]
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "fusion",
+          "types": [
+            {
+              "kind": "reference",
+              "name": "Array",
+              "parameters": [
+                "String?"
+              ]
+            },
+            {
+              "kind": "dictionary",
+              "properties": {
+                "index": "Number",
+                "input": "String"
+              }
+            }
+          ]
+        }
       }
-    },
-    {
-      "kind": "dictionary",
-      "properties": {
-        "index": "Number",
-        "input": "String"
-      }
-    }
-  ],
-  "macros": []
-}
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "exec"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

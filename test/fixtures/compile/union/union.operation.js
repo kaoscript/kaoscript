@@ -1,36 +1,36 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = require("../_/_number.ks")().__ks_Number;
-	var __ks_String = require("../_/_string.ks")().__ks_String;
-	function foo(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
+	var __ks_String = require("../_/._string.ks.j5k8r9.ksb")().__ks_String;
+	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function(x) {
+		return 42 - (Type.isString(x) ? __ks_String.__ks_func_toFloat_0.call(x) : __ks_Number.__ks_func_toFloat_0.call(x));
+	};
+	foo.__ks_rt = function(that, args) {
+		const t0 = value => Type.isNumber(value) || Type.isString(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foo.__ks_0.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
+		throw Helper.badArgs();
+	};
+	function bar() {
+		return bar.__ks_rt(this, arguments);
+	};
+	bar.__ks_0 = function(x, y) {
+		return (Type.isString(x) ? __ks_String.__ks_func_toFloat_0.call(x) : __ks_Number.__ks_func_toFloat_0.call(x)) - (Type.isString(y) ? __ks_String.__ks_func_toFloat_0.call(y) : __ks_Number.__ks_func_toFloat_0.call(y));
+	};
+	bar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isNumber(value) || Type.isString(value);
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return bar.__ks_0.call(that, args[0], args[1]);
+			}
 		}
-		else if(!Type.isString(x) && !Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'String' or 'Number'");
-		}
-		return 42 - (Type.isString(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x));
-	}
-	function bar(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isString(x) && !Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'String' or 'Number'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isString(y) && !Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'String' or 'Number'");
-		}
-		return (Type.isString(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x)) - (Type.isString(y) ? __ks_String._im_toFloat(y) : __ks_Number._im_toFloat(y));
-	}
+		throw Helper.badArgs();
+	};
 };

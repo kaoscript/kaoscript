@@ -1,4 +1,4 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let d = "foo";
 	let u = 42;

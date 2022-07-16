@@ -1,1 +1,1 @@
-ReferenceException: Property "quxbaz" is not defined (line 5, file "fixtures/compile/import/import.nex.namespace.iex.nm.ks")
+ReferenceException: Property "quxbaz" is not defined (fixtures/compile/import/import.nex.namespace.iex.nm.ks:5)

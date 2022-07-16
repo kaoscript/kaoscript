@@ -1,41 +1,66 @@
-{
-  "aliens": [
-    "Any?",
-    "parseFloat"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Float"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {
-        "parse": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "Any?",
-              "min": 0,
-              "max": 1,
-              "default": true
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
+[
+  {
+    "aliens": [
+      0,
+      "parseFloat",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": "Infinity",
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": "Number",
+        "errors": []
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "Float"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {
+          "parse": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Any?",
+                "min": 0,
+                "max": 1,
+                "default": true
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

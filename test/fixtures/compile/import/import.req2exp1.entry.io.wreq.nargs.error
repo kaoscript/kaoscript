@@ -1,1 +1,1 @@
-SyntaxException: import don't require the argument "Foobar" (line 1, file "fixtures/compile/import/import.req2exp1.entry.io.wreq.nargs.ks")
+SyntaxException: The import can't match the arguments: "Foobar", "Quxbaz" (fixtures/compile/import/import.req2exp1.entry.io.wreq.nargs.ks:1)

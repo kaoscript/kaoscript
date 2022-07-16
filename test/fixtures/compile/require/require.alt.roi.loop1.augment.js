@@ -1,11 +1,11 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Array, __ks_Object, clone) {
 	var __ks_0_valuable = Type.isValue(__ks_Array);
 	var __ks_1_valuable = Type.isValue(__ks_Object);
 	var __ks_2_valuable = Type.isValue(clone);
 	if(!__ks_0_valuable || !__ks_1_valuable || !__ks_2_valuable) {
-		var __ks__ = require("./require.alt.roi.loop1.genesis.ks")();
+		var __ks__ = require("./.require.alt.roi.loop1.genesis.ks.1b7cst1.ksb")();
 		if(!__ks_0_valuable) {
 			__ks_Array = __ks__.__ks_Array;
 		}
@@ -17,7 +17,7 @@ module.exports = function(__ks_Array, __ks_Object, clone) {
 		}
 	}
 	return {
-		__ks_Array: __ks_Array,
-		__ks_Object: __ks_Object
+		__ks_Array,
+		__ks_Object
 	};
 };

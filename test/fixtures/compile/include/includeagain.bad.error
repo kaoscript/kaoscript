@@ -1,1 +1,1 @@
-SyntaxException: Identifier "parseFloat" has already been declared (line 1, file "fixtures/compile/_/_string.ks")
+SyntaxException: Identifier "String" has already been declared (fixtures/compile/_/_string.ks:1)

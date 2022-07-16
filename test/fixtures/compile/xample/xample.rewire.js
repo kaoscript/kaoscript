@@ -1,12 +1,9 @@
-var Dictionary = require("@kaoscript/runtime").Dictionary;
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function rewire(option) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(option === void 0 || option === null) {
-			throw new TypeError("'option' is not nullable");
-		}
+	function rewire() {
+		return rewire.__ks_rt(this, arguments);
+	};
+	rewire.__ks_0 = function(option) {
 		let files = [];
 		for(let __ks_0 = 0, __ks_1 = option.split(","), __ks_2 = __ks_1.length, item; __ks_0 < __ks_2; ++__ks_0) {
 			item = __ks_1[__ks_0];
@@ -19,5 +16,14 @@ module.exports = function() {
 			})());
 		}
 		return files;
-	}
+	};
+	rewire.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return rewire.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

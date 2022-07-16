@@ -1,1 +1,1 @@
-TypeException: A value of type "Number" is expected to be returned (line 1, file "fixtures/compile/function/function.exit.nret.if.ne.ks")
+TypeException: A value of type "Number" is expected to be returned (fixtures/compile/function/function.exit.nret.if.ne.ks:1)

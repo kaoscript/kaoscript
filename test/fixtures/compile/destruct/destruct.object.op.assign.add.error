@@ -1,1 +1,1 @@
-SyntaxException: The current destructuring assignment is unsupported (line 7, file "fixtures/compile/destruct/destruct.object.op.assign.add.ks")
+SyntaxException: The current destructuring assignment is unsupported (fixtures/compile/destruct/destruct.object.op.assign.add.ks:7)

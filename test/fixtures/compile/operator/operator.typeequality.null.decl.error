@@ -1,1 +1,1 @@
-TypeException: The variable is "null" and can't be checked against the type "Array" (line 3, file "fixtures/compile/operator/operator.typeequality.null.decl.ks")
+TypeException: The variable is "null" and can't be checked against the type "Array" (fixtures/compile/operator/operator.typeequality.null.decl.ks:3)

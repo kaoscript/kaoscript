@@ -1,38 +1,27 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ks_foobar_1 = foobar;
-	function foobar() {
-		if(arguments.length === 1 && Type.isNumber(arguments[0])) {
-			let __ks_i = -1;
-			let a = arguments[++__ks_i];
-			if(a === void 0 || a === null) {
-				return __ks_foobar_1(...arguments);
+	foobar.__ks_1 = function(a) {
+		return 0;
+	};
+	foobar.__ks_2 = function(a, b) {
+		return 1;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_1.call(that, args[0]);
 			}
-			else if(!Type.isNumber(a)) {
-				return __ks_foobar_1(...arguments);
-			}
-			return 1;
+			return foobar.__ks_0.call(that, Array.from(args));
 		}
-		else if(arguments.length === 2 && Type.isNumber(arguments[0]) && Type.isNumber(arguments[1])) {
-			let __ks_i = -1;
-			let a = arguments[++__ks_i];
-			if(a === void 0 || a === null) {
-				return __ks_foobar_1(...arguments);
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t0(args[1])) {
+					return foobar.__ks_2.call(that, args[0], args[1]);
+				}
 			}
-			else if(!Type.isNumber(a)) {
-				return __ks_foobar_1(...arguments);
-			}
-			let b = arguments[++__ks_i];
-			if(b === void 0 || b === null) {
-				return __ks_foobar_1(...arguments);
-			}
-			else if(!Type.isNumber(b)) {
-				return __ks_foobar_1(...arguments);
-			}
-			return 1;
+			return foobar.__ks_0.call(that, Array.from(args));
 		}
-		else {
-			return __ks_foobar_1(...arguments);
-		}
+		return foobar.__ks_0.call(that, Array.from(args));
 	};
 };

@@ -1,6 +1,9 @@
-var Dictionary = require("@kaoscript/runtime").Dictionary;
+const {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(x) {
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
 		if(x === void 0 || x === null) {
 			x = (() => {
 				const d = new Dictionary();
@@ -8,5 +11,11 @@ module.exports = function() {
 				return d;
 			})();
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		if(args.length <= 1) {
+			return foobar.__ks_0.call(that, args[0]);
+		}
+		throw Helper.badArgs();
+	};
 };

@@ -24,11 +24,17 @@ class Literal extends Expression {
 		}
 	} // }}}
 	toQuote() => @value
+	validateType(type: ReferenceType) { // {{{
+		if !@type().isAssignableToVariable(type, false) {
+			TypeException.throwInvalidAssignement(type, @type(), this)
+		}
+	} // }}}
 	value() => @value
 }
 
 class IdentifierLiteral extends Literal {
 	private lateinit {
+		_assignable: Boolean		= false
 		_assignment: AssignmentType		= AssignmentType::Neither
 		_declaredType: Type
 		_isMacro: Boolean				= false
@@ -69,6 +75,19 @@ class IdentifierLiteral extends Literal {
 		if @isVariable {
 			const variable = @scope.getVariable(@value, @line)
 
+			if @assignable {
+				if variable.isImmutable() {
+					if variable.isLateInit() {
+						if variable.isInitialized() {
+							ReferenceException.throwImmutable(@value, this)
+						}
+					}
+					else {
+						ReferenceException.throwImmutable(@value, this)
+					}
+				}
+			}
+
 			if @scope.hasDeclaredVariable(@value) && !@scope.hasDefinedVariable(@value, @line) && !variable.isPredefined() {
 				@scope.renameNext(@value, @line)
 			}
@@ -81,24 +100,11 @@ class IdentifierLiteral extends Literal {
 			@realType = variable.getRealType()
 		}
 	} // }}}
-	checkIfAssignable() { // {{{
-		if @isVariable {
-			if const variable = @scope.getVariable(@value, @line) {
-				if variable.isImmutable() {
-					if variable.isLateInit() {
-						if variable.isInitialized() {
-							ReferenceException.throwImmutable(@value, this)
-						}
-					}
-					else {
-						ReferenceException.throwImmutable(@value, this)
-					}
-				}
-			}
-		}
-	} // }}}
 	export(recipient) { // {{{
 		recipient.export(@value, this)
+	} // }}}
+	flagAssignable() { // {{{
+		@assignable = true
 	} // }}}
 	getVariableDeclaration(class) { // {{{
 		return class.getInstanceVariable(@value)

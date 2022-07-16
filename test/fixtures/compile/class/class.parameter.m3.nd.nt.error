@@ -1,1 +1,1 @@
-SyntaxException: The constructor is identical with another constructor (line 6, file "fixtures/compile/class/class.parameter.m3.nd.nt.ks")
+SyntaxException: The constructor is identical with another constructor (fixtures/compile/class/class.parameter.m3.nd.nt.ks:6)

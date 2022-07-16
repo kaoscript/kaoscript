@@ -1,37 +1,32 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Util = Helper.namespace(function() {
 		function reverse() {
-			if(arguments.length === 1 && Type.isArray(arguments[0])) {
-				let __ks_i = -1;
-				let value = arguments[++__ks_i];
-				if(value === void 0 || value === null) {
-					throw new TypeError("'value' is not nullable");
+			return reverse.__ks_rt(this, arguments);
+		};
+		reverse.__ks_0 = function(value) {
+			return value.split("").reverse().join("");
+		};
+		reverse.__ks_1 = function(value) {
+			return value.slice().reverse();
+		};
+		reverse.__ks_rt = function(that, args) {
+			const t0 = Type.isArray;
+			const t1 = Type.isString;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return reverse.__ks_1.call(that, args[0]);
 				}
-				else if(!Type.isArray(value)) {
-					throw new TypeError("'value' is not of type 'Array'");
+				if(t1(args[0])) {
+					return reverse.__ks_0.call(that, args[0]);
 				}
-				return value.slice().reverse();
 			}
-			else if(arguments.length === 1) {
-				let __ks_i = -1;
-				let value = arguments[++__ks_i];
-				if(value === void 0 || value === null) {
-					throw new TypeError("'value' is not nullable");
-				}
-				else if(!Type.isString(value)) {
-					throw new TypeError("'value' is not of type 'String'");
-				}
-				return value.split("").reverse().join("");
-			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		};
 		return {
-			reverse: reverse
+			reverse
 		};
 	});
-	const foo = Util.reverse("hello");
+	const foo = Util.reverse.__ks_0("hello");
 	console.log(foo);
 };

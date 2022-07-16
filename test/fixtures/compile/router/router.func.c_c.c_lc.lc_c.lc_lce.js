@@ -1,92 +1,60 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Quxbaz {
+		static __ks_new_0() {
+			const o = Object.create(Quxbaz.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	function foobar() {
-		if(arguments.length === 2 && Type.isClassInstance(arguments[0], Quxbaz) && Type.isClassInstance(arguments[1], Quxbaz)) {
-			let __ks_i = -1;
-			let aType = arguments[++__ks_i];
-			if(aType === void 0 || aType === null) {
-				throw new TypeError("'aType' is not nullable");
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(aType, bType) {
+		return foobar.__ks_3([aType], [bType]);
+	};
+	foobar.__ks_1 = function(aType, bTypes) {
+		return foobar.__ks_3([aType], bTypes);
+	};
+	foobar.__ks_2 = function(aTypes, bType) {
+		return foobar.__ks_3(aTypes, [bType]);
+	};
+	foobar.__ks_3 = function(aTypes, bTypes) {
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Quxbaz);
+		const t1 = value => Type.isArray(value, value => Type.isClassInstance(value, Quxbaz));
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t0(args[1])) {
+					return foobar.__ks_0.call(that, args[0], args[1]);
+				}
+				if(t1(args[1])) {
+					return foobar.__ks_1.call(that, args[0], args[1]);
+				}
+				throw Helper.badArgs();
 			}
-			else if(!Type.isClassInstance(aType, Quxbaz)) {
-				throw new TypeError("'aType' is not of type 'Quxbaz'");
-			}
-			let bType = arguments[++__ks_i];
-			if(bType === void 0 || bType === null) {
-				throw new TypeError("'bType' is not nullable");
-			}
-			else if(!Type.isClassInstance(bType, Quxbaz)) {
-				throw new TypeError("'bType' is not of type 'Quxbaz'");
-			}
-			return foobar([aType], [bType]);
-		}
-		else if(arguments.length === 2 && Type.isClassInstance(arguments[0], Quxbaz)) {
-			let __ks_i = -1;
-			let aType = arguments[++__ks_i];
-			if(aType === void 0 || aType === null) {
-				throw new TypeError("'aType' is not nullable");
-			}
-			else if(!Type.isClassInstance(aType, Quxbaz)) {
-				throw new TypeError("'aType' is not of type 'Quxbaz'");
-			}
-			let bTypes = arguments[++__ks_i];
-			if(bTypes === void 0 || bTypes === null) {
-				throw new TypeError("'bTypes' is not nullable");
-			}
-			else if(!Type.isArray(bTypes)) {
-				throw new TypeError("'bTypes' is not of type 'Array<Quxbaz>'");
-			}
-			return foobar([aType], bTypes);
-		}
-		else if(arguments.length === 2 && Type.isClassInstance(arguments[1], Quxbaz)) {
-			let __ks_i = -1;
-			let aTypes = arguments[++__ks_i];
-			if(aTypes === void 0 || aTypes === null) {
-				throw new TypeError("'aTypes' is not nullable");
-			}
-			else if(!Type.isArray(aTypes)) {
-				throw new TypeError("'aTypes' is not of type 'Array<Quxbaz>'");
-			}
-			let bType = arguments[++__ks_i];
-			if(bType === void 0 || bType === null) {
-				throw new TypeError("'bType' is not nullable");
-			}
-			else if(!Type.isClassInstance(bType, Quxbaz)) {
-				throw new TypeError("'bType' is not of type 'Quxbaz'");
-			}
-			return foobar(aTypes, [bType]);
-		}
-		else if(arguments.length === 2) {
-			let __ks_i = -1;
-			let aTypes = arguments[++__ks_i];
-			if(aTypes === void 0 || aTypes === null) {
-				throw new TypeError("'aTypes' is not nullable");
-			}
-			else if(!Type.isArray(aTypes)) {
-				throw new TypeError("'aTypes' is not of type 'Array<Quxbaz>'");
-			}
-			let bTypes = arguments[++__ks_i];
-			if(bTypes === void 0 || bTypes === null) {
-				throw new TypeError("'bTypes' is not nullable");
-			}
-			else if(!Type.isArray(bTypes)) {
-				throw new TypeError("'bTypes' is not of type 'Array<Quxbaz>'");
+			if(t1(args[0])) {
+				if(t0(args[1])) {
+					return foobar.__ks_2.call(that, args[0], args[1]);
+				}
+				if(t1(args[1])) {
+					return foobar.__ks_3.call(that, args[0], args[1]);
+				}
+				throw Helper.badArgs();
 			}
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 };

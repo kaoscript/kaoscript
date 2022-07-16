@@ -1,20 +1,22 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Array) {
 	if(!Type.isValue(__ks_Array)) {
-		var __ks_Array = require("../require/require.alt.roi.systemic.es6.ks")().__ks_Array;
+		var __ks_Array = require("../require/.require.alt.roi.systemic.ks.1runl5l.ksb")().__ks_Array;
 	}
 	__ks_Array.__ks_func_foo_0 = function() {
 		return 42;
 	};
-	__ks_Array._im_foo = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Array._im_foo = function(that, ...args) {
+		return __ks_Array.__ks_func_foo_rt(that, args);
+	};
+	__ks_Array.__ks_func_foo_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Array.__ks_func_foo_0.apply(that);
+			return __ks_Array.__ks_func_foo_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 	return {
-		__ks_Array: __ks_Array
+		__ks_Array
 	};
 };

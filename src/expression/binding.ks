@@ -30,6 +30,8 @@ class ArrayBinding extends Expression {
 			for const element in @elements {
 				element.prepare()
 			}
+
+			@type = @scope.reference('Array')
 		}
 		else if @type is ArrayType {
 			if @type.length() < @elements.length {
@@ -157,6 +159,7 @@ class ArrayBinding extends Expression {
 			}
 		}
 	} // }}}
+	type() => @type
 	type(@type) => this
 	type(type: Type, scope: Scope, node)
 	walk(fn) { // {{{
@@ -397,6 +400,8 @@ class ObjectBinding extends Expression {
 			for const element in @elements {
 				element.prepare()
 			}
+
+			@type = Type.DestructurableObject
 		}
 		else if @type is DictionaryType {
 			for const element in @elements {
@@ -534,6 +539,22 @@ class ObjectBinding extends Expression {
 			}
 		}
 	} // }}}
+	override toQuote() { // {{{
+		let fragments = '{'
+
+		for const element, index in @elements {
+			if index != 0 {
+				fragments += ', '
+			}
+
+			fragments += element.name()
+		}
+
+		fragments += '}'
+
+		return fragments
+	} // }}}
+	type() => @type
 	type(@type) => this
 	type(type: Type, scope: Scope, node)
 	walk(fn) { // {{{

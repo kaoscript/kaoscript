@@ -22,7 +22,7 @@ export func acquire(): NS.Foobar {
 		return new NS.Foobar()
 	}
 	else {
-		return $available.pop()
+		return $available.pop()!!
 	}
 }
 

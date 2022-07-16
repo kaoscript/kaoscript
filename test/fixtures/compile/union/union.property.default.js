@@ -1,18 +1,19 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foo(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isDictionary(y) && !Type.isString(y)) {
-			throw new TypeError("'y' is not of type 'Dictionary' or 'String'");
-		}
+	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function(x, y) {
 		let z = y.y;
-	}
+	};
+	foo.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const t1 = value => Type.isString(value) || Type.isDictionary(value);
+		if(args.length === 2) {
+			if(t0(args[0]) && t1(args[1])) {
+				return foo.__ks_0.call(that, args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

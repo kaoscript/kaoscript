@@ -1,8 +1,9 @@
 class ImplementDeclaration extends Statement {
 	private lateinit {
-		_newSealedClass		= false
-		_properties			= []
-		_sharingProperties	= {}
+		_forkedMethods			= {}
+		_newSealedClass			= false
+		_properties				= []
+		_sharingProperties		= {}
 		_type: NamedType
 		_variable: Variable
 	}
@@ -11,21 +12,43 @@ class ImplementDeclaration extends Statement {
 			ReferenceException.throwNotDefined(@data.variable.name, this)
 		}
 
-		if @variable.isPredefined() {
-			const type = @variable.getDeclaredType().clone().condense()
-
-			@variable = @scope.define(@variable.name(), true, type, this)
-
-			@newSealedClass = type.isSealed() && type.isExtendable()
+		@variable.setComplete(false)
+	} // }}}
+	enhance() { // {{{
+		if !@variable.isClassStatement() {
+			@resolveType(false)
 		}
 	} // }}}
-	prepare() { // {{{
+	resolveType(class: Boolean) { // {{{
+		@type = @variable.getDeclaredType()
+
+		unless @type is NamedType {
+			TypeException.throwImplInvalidType(this)
+		}
+
+		if @variable.isPredefined() {
+			@variable = @scope.define(@variable.name(), true, @type.clone().unflagAltering(), this)
+
+			@newSealedClass = @type.isSealed() && @type.isExtendable()
+		}
+		else if (@type.isAlien() || @type.isRequired()) && !@variable.isAltereable() {
+			@variable.setDeclaredType(@type.unflagAltering())
+		}
+		else if class || @type.isAltering() {
+			@variable.setDeclaredType(@type.clone().unflagAltering())
+		}
+
 		@variable.prepareAlteration()
 
 		@type = @variable.getDeclaredType()
 
 		unless @type is NamedType {
 			TypeException.throwImplInvalidType(this)
+		}
+	} // }}}
+	prepare() { // {{{
+		if @variable.isClassStatement() {
+			@resolveType(true)
 		}
 
 		const type = @type.type()
@@ -114,7 +137,12 @@ class ImplementDeclaration extends Statement {
 			property.prepare()
 
 			if const name = property.getSharedName() {
-				@sharingProperties[name] = property
+				if @sharingProperties[name]? {
+					@sharingProperties[name].push(property)
+				}
+				else {
+					@sharingProperties[name] = [property]
+				}
 			}
 
 			if property.isMethod() {
@@ -125,7 +153,7 @@ class ImplementDeclaration extends Statement {
 
 				if const methods = methods[instance][name] {
 					for const method in methods {
-						if method.isMatching(type, mode) {
+						if method.isSubsetOf(type, mode) {
 							if property.isConstructor() {
 								SyntaxException.throwDuplicateConstructor(property)
 							}
@@ -142,23 +170,57 @@ class ImplementDeclaration extends Statement {
 				}
 			}
 		}
+
+		for const methods, name of @forkedMethods {
+			for const { original, forks } of methods {
+				const index = original.index()
+				let found = false
+
+				for const method in @type.listInstanceMethods(name) until found {
+					if index == method.type().index() {
+						method.flagForked(@type, forks)
+
+						found = true
+					}
+				}
+
+				if !found {
+					throw new NotImplementedException()
+				}
+			}
+		}
 	} // }}}
 	translate() { // {{{
 		for property in @properties {
 			property.translate()
 		}
 	} // }}}
+	addForkedMethod(name: String, oldMethod: ClassMethodType, newMethod: ClassMethodType) { // {{{
+		const index = oldMethod.index()
+
+		@forkedMethods[name] ??= {}
+
+		if !?@forkedMethods[name][index] {
+			@forkedMethods[name][index] = {
+				original: oldMethod
+				forks: [newMethod]
+			}
+		}
+		else {
+			@forkedMethods[name][index].forks.push(newMethod)
+		}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		if @newSealedClass {
-			fragments.line(`var \(@type.getSealedName()) = {}`)
+			fragments.line(`\($runtime.immutableScope(this))\(@type.getSealedName()) = {}`)
 		}
 
 		for property in @properties {
 			property.toFragments(fragments, Mode::None)
 		}
 
-		for const property of @sharingProperties {
-			property.toSharedFragments(fragments)
+		for const properties of @sharingProperties {
+			properties[0].toSharedFragments(fragments, properties)
 		}
 	} // }}}
 	type() => @type

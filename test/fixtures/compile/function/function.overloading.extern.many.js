@@ -1,23 +1,26 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	const __ks_reverse_1 = reverse;
-	function reverse() {
-		if(arguments.length === 1 && Type.isString(arguments[0])) {
-			let __ks_i = -1;
-			let value = arguments[++__ks_i];
-			if(value === void 0 || value === null) {
-				return __ks_reverse_1(...arguments);
+	reverse.__ks_2 = function(value) {
+		return value.split("").reverse().join("");
+	};
+	reverse.__ks_rt = function(that, args) {
+		const t0 = Type.isArray;
+		const t1 = Type.isNumber;
+		const t2 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return reverse.__ks_0.call(that, args[0]);
 			}
-			else if(!Type.isString(value)) {
-				return __ks_reverse_1(...arguments);
+			if(t1(args[0])) {
+				return reverse.__ks_0.call(that, args[0]);
 			}
-			return value.split("").reverse().join("");
+			if(t2(args[0])) {
+				return reverse.__ks_2.call(that, args[0]);
+			}
 		}
-		else {
-			return __ks_reverse_1(...arguments);
-		}
+		throw Helper.badArgs();
 	};
 	return {
-		reverse: reverse
+		reverse
 	};
 };

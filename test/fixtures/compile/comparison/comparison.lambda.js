@@ -1,35 +1,47 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
-		}
-		__ks_func_qux_0() {
-			const test = function(x, y) {
-				if(arguments.length < 2) {
-					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-				}
-				if(x === void 0 || x === null) {
-					throw new TypeError("'x' is not nullable");
-				}
-				if(y === void 0 || y === null) {
-					throw new TypeError("'y' is not nullable");
-				}
-				return x === y;
-			};
 		}
 		qux() {
-			if(arguments.length === 0) {
-				return Foobar.prototype.__ks_func_qux_0.apply(this);
+			return this.__ks_func_qux_rt.call(null, this, this, arguments);
+		}
+		__ks_func_qux_0() {
+			const test = (() => {
+				const __ks_rt = (...args) => {
+					const t0 = Type.isValue;
+					if(args.length === 2) {
+						if(t0(args[0]) && t0(args[1])) {
+							return __ks_rt.__ks_0.call(this, args[0], args[1]);
+						}
+					}
+					throw Helper.badArgs();
+				};
+				__ks_rt.__ks_0 = (x, y) => {
+					return x === y;
+				};
+				return __ks_rt;
+			})();
+		}
+		__ks_func_qux_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_qux_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

@@ -1,1 +1,1 @@
-TypeException: The expression "x" of type "String" is expected to be of type "Number" or "Any" in a negative operation (line 2, file "fixtures/compile/operator/operator.negative.se.ks")
+TypeException: The expression "x" of type "String" is expected to be of type "Number" or "Any" in a negative operation (fixtures/compile/operator/operator.negative.se.ks:2)

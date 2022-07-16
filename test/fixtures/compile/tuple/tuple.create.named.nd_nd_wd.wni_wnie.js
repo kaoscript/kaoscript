@@ -1,28 +1,21 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Point = Helper.tuple(function(x, y, z) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'Number'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isNumber(y)) {
-			throw new TypeError("'y' is not of type 'Number'");
-		}
+	const Point = Helper.tuple(function(x, y, z) {
 		if(z === void 0 || z === null) {
 			z = 0;
 		}
-		else if(!Type.isNumber(z)) {
-			throw new TypeError("'z' is not of type 'Number'");
-		}
 		return [x, y, z];
+	}, function(__ks_new, args) {
+		const t0 = Type.isNumber;
+		const t1 = value => Type.isNumber(value) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length >= 2 && args.length <= 3) {
+			if(t0(args[0]) && t0(args[1]) && Helper.isVarargs(args, 0, 1, t1, pts = [2], 0) && te(pts, 1)) {
+				return __ks_new(args[0], args[1], Helper.getVararg(args, 2, pts[1]));
+			}
+		}
+		throw Helper.badArgs();
 	});
-	const point = Point(0, 0, null);
+	const point = Point.__ks_new(0, 0);
 };

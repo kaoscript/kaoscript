@@ -1,1 +1,1 @@
-ReferenceException: "x" is not defined (line 3, file "fixtures/compile/attribute/attribute.rule.noundef.nd.ks")
+ReferenceException: "x" is not defined (fixtures/compile/attribute/attribute.rule.noundef.nd.ks:3)

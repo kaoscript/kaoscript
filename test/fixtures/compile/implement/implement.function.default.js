@@ -1,18 +1,32 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Function = {};
 	__ks_Function.__ks_func_foo_0 = function() {
 		return Helper.concatString("foo", this());
 	};
-	__ks_Function._im_foo = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Function._im_foo = function(that, ...args) {
+		return __ks_Function.__ks_func_foo_rt(that, args);
+	};
+	__ks_Function.__ks_func_foo_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Function.__ks_func_foo_0.apply(that);
+			return __ks_Function.__ks_func_foo_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.foo) {
+			return that.foo(...args);
+		}
+		throw Helper.badArgs();
 	};
 	function bar() {
+		return bar.__ks_rt(this, arguments);
+	};
+	bar.__ks_0 = function() {
 		return "bar";
-	}
-	console.log(__ks_Function._im_foo(bar));
+	};
+	bar.__ks_rt = function(that, args) {
+		if(args.length === 0) {
+			return bar.__ks_0.call(that);
+		}
+		throw Helper.badArgs();
+	};
+	console.log(__ks_Function.__ks_func_foo_0.call(bar));
 };

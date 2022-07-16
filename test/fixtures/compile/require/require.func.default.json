@@ -1,42 +1,47 @@
-{
-  "aliens": [],
-  "requirements": [
-    0,
-    "reverse",
-    true
-  ],
-  "exports": [
-    1,
-    "reverse"
-  ],
-  "references": [
-    "Function",
-    {
-      "kind": "overloadedfunction",
-      "exhaustive": true,
-      "functions": [
-        {
-          "reference": 0
-        },
-        {
-          "kind": "function",
-          "async": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": []
-        }
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [
+      0,
+      "reverse",
+      true
+    ],
+    "references": [
+      "Function"
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "reverse"
+    ],
+    "references": [
+      {
+        "kind": "overloadedfunction",
+        "exhaustive": true,
+        "functions": [
+          0,
+          {
+            "kind": "function",
+            "index": 1,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": []
+          }
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

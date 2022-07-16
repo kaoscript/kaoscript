@@ -1,18 +1,27 @@
 {
+	"explorer.fileNesting.patterns": {
+		"*.ks": "${capture}.js, ${capture}.json, ${capture}.error, .${capture}.ks.*",
+	},
+	"files.exclude": {
+		"**/.git": true,
+		"**/.svn": true,
+		"**/.hg": true,
+		"**/CVS": true,
+		"**/.DS_Store": true,
+		"**/Thumbs.db": true,
+		"**/*.ksb": false,
+		"**/*.ksh": false,
+		"**/*.ksm": false,
+		"**/*.marks": true,
+		"coverage": true,
+	},
 	"search.exclude": {
 		"node_modules": true,
 		"**/*.ksb": true,
 		"**/*.ksh": true,
 		"**/*.ksm": true,
 		"**/*.marks": true,
-		"lib/compiler2.js": true,
-		"coverage": true
+		"lib/compiler*.js": true,
+		"coverage": true,
 	},
-	"files.exclude": {
-		"**/*.ksb": true,
-		"**/*.ksh": true,
-		"**/*.ksm": true,
-		"**/*.marks": true,
-		"coverage": true
-	}
 }

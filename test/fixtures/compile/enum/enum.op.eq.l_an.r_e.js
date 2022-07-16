@@ -1,18 +1,24 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Color = Helper.enum(Number, {
+	const Color = Helper.enum(Number, {
 		Red: 0,
 		Green: 1,
 		Blue: 2
 	});
-	function foobar(color) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(color) {
 		if(color === void 0) {
 			color = null;
 		}
 		if(Helper.valueOf(color) === Color.Red.value) {
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		if(args.length === 1) {
+			return foobar.__ks_0.call(that, args[0]);
+		}
+		throw Helper.badArgs();
+	};
 };

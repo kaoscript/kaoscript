@@ -38,10 +38,12 @@ class ArrayComprehensionForFrom extends Expression {
 		}
 
 		@body = $compile.statement($return(@data.body), this, @bodyScope)
+		@body.initiate()
 		@body.analyse()
 
 		if @data.loop.when? {
 			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
+			@when.initiate()
 			@when.analyse()
 		}
 	} // }}}
@@ -164,10 +166,12 @@ class ArrayComprehensionForIn extends Expression {
 		}
 
 		@body = $compile.statement($return(@data.body), this, @bodyScope)
+		@body.initiate()
 		@body.analyse()
 
 		if @data.loop.when? {
 			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
+			@when.initiate()
 			@when.analyse()
 		}
 
@@ -313,10 +317,12 @@ class ArrayComprehensionForOf extends Expression {
 		}
 
 		@body = $compile.statement($return(@data.body), this, @bodyScope)
+		@body.initiate()
 		@body.analyse()
 
 		if @data.loop.when? {
 			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
+			@when.initiate()
 			@when.analyse()
 		}
 
@@ -448,10 +454,12 @@ class ArrayComprehensionForRange extends Expression {
 		}
 
 		@body = $compile.statement($return(@data.body), this, @bodyScope)
+		@body.initiate()
 		@body.analyse()
 
 		if @data.loop.when? {
 			@when = $compile.statement($return(@data.loop.when), this, @bodyScope)
+			@when.initiate()
 			@when.analyse()
 		}
 	} // }}}

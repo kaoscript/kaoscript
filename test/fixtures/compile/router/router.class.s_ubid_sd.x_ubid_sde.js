@@ -1,99 +1,60 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
-			}
-		}
-		__ks_func_foobar_0(pattern) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(pattern === void 0 || pattern === null) {
-				throw new TypeError("'pattern' is not nullable");
-			}
-			else if(!Type.isString(pattern)) {
-				throw new TypeError("'pattern' is not of type 'String'");
-			}
-			let __ks_i = 0;
-			let position;
-			if(arguments.length > ++__ks_i && (position = arguments[__ks_i]) !== void 0 && position !== null) {
-				if(!Type.isBoolean(position) && !Type.isNumber(position)) {
-					if(arguments.length - __ks_i < 2) {
-						position = 0;
-						--__ks_i;
-					}
-					else {
-						throw new TypeError("'position' is not of type 'Boolean' or 'Number'");
-					}
-				}
-			}
-			else {
-				position = 0;
-			}
-			let __ks_default_1;
-			if(arguments.length > ++__ks_i && (__ks_default_1 = arguments[__ks_i]) !== void 0 && __ks_default_1 !== null) {
-				if(!Type.isString(__ks_default_1)) {
-					throw new TypeError("'default' is not of type 'String'");
-				}
-			}
-			else {
-				__ks_default_1 = "";
-			}
-		}
-		__ks_func_foobar_1(pattern) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(pattern === void 0 || pattern === null) {
-				throw new TypeError("'pattern' is not nullable");
-			}
-			else if(!Type.isRegExp(pattern)) {
-				throw new TypeError("'pattern' is not of type 'RegExp'");
-			}
-			let __ks_i = 0;
-			let position;
-			if(arguments.length > ++__ks_i && (position = arguments[__ks_i]) !== void 0 && position !== null) {
-				if(!Type.isBoolean(position) && !Type.isNumber(position)) {
-					if(arguments.length - __ks_i < 2) {
-						position = 0;
-						--__ks_i;
-					}
-					else {
-						throw new TypeError("'position' is not of type 'Boolean' or 'Number'");
-					}
-				}
-			}
-			else {
-				position = 0;
-			}
-			let __ks_default_1;
-			if(arguments.length > ++__ks_i && (__ks_default_1 = arguments[__ks_i]) !== void 0 && __ks_default_1 !== null) {
-				if(!Type.isString(__ks_default_1)) {
-					throw new TypeError("'default' is not of type 'String'");
-				}
-			}
-			else {
-				__ks_default_1 = "";
+				throw Helper.badArgs();
 			}
 		}
 		foobar() {
-			if(arguments.length >= 1 && arguments.length <= 3) {
-				if(Type.isString(arguments[0])) {
-					return Foobar.prototype.__ks_func_foobar_0.apply(this, arguments);
+			return this.__ks_func_foobar_rt.call(null, this, this, arguments);
+		}
+		__ks_func_foobar_0(pattern, position, __ks_default_1) {
+			if(position === void 0 || position === null) {
+				position = 0;
+			}
+			if(__ks_default_1 === void 0 || __ks_default_1 === null) {
+				__ks_default_1 = "";
+			}
+		}
+		__ks_func_foobar_1(pattern, position, __ks_default_1) {
+			if(position === void 0 || position === null) {
+				position = 0;
+			}
+			if(__ks_default_1 === void 0 || __ks_default_1 === null) {
+				__ks_default_1 = "";
+			}
+		}
+		__ks_func_foobar_rt(that, proto, args) {
+			const t0 = Type.isString;
+			const t1 = value => Type.isBoolean(value) || Type.isNumber(value) || Type.isNull(value);
+			const t2 = value => Type.isString(value) || Type.isNull(value);
+			const t3 = Type.isRegExp;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(args.length >= 1 && args.length <= 3) {
+				if(t0(args[0])) {
+					if(Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && Helper.isVarargs(args, 0, 1, t2, pts, 1) && te(pts, 2)) {
+						return proto.__ks_func_foobar_0.call(that, args[0], Helper.getVararg(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+					}
+					throw Helper.badArgs();
 				}
-				else {
-					return Foobar.prototype.__ks_func_foobar_1.apply(this, arguments);
+				if(t3(args[0]) && Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && Helper.isVarargs(args, 0, 1, t2, pts, 1) && te(pts, 2)) {
+					return proto.__ks_func_foobar_1.call(that, args[0], Helper.getVararg(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
 				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

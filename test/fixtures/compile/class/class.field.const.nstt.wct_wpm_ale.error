@@ -1,1 +1,1 @@
-ReferenceException: The expression "@x" is immutable (line 3, file "fixtures/compile/class/class.field.const.nstt.wct_wpm_ale.ks")
+ReferenceException: The expression "@x" is immutable (fixtures/compile/class/class.field.const.nstt.wct_wpm_ale.ks:3)

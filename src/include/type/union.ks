@@ -7,17 +7,7 @@ class UnionType extends Type {
 		_types: Array<Type>			= []
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const type = new UnionType(scope, [Type.fromMetadata(item, metadata, references, alterations, queue, scope, node) for const item in data.types])
-
-			if data.nullable? {
-				type._nullable = data.nullable
-				type._explicitNullity = true
-			}
-
-			return type
-		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): UnionType { // {{{
 			const type = new UnionType(scope)
 
 			if data.nullable? {
@@ -27,7 +17,7 @@ class UnionType extends Type {
 
 			queue.push(() => {
 				for const item in data.types {
-					type.addType(Type.fromMetadata(item, metadata, references, alterations, queue, scope, node))
+					type.addType(Type.import(item, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
@@ -38,8 +28,13 @@ class UnionType extends Type {
 		super(scope)
 
 		for const type in types {
-			if type.isNull() && (type.isReference() || type.isExplicit()) {
-				@nullable = true
+			if type.isNull() {
+				if !@nullable {
+					@types.push(Type.Null)
+
+					@nullable = true
+				}
+
 				@explicitNullity = true
 			}
 			else if @any {
@@ -74,7 +69,12 @@ class UnionType extends Type {
 			}
 		}
 		else if type.isNull() {
-			@nullable = true
+			if !@nullable {
+				@types.push(Type.Null)
+
+				@nullable = true
+			}
+			@explicitNullity = true
 		}
 		else if type.isAny() {
 			@types = [type]
@@ -86,12 +86,8 @@ class UnionType extends Type {
 			}
 		}
 		else if type.isUnion() {
-			for const type in type.discardAlias().types() {
+			for const type in type.discard().types() {
 				this.addType(type)
-			}
-
-			if type.isNullable() {
-				@nullable = true
 			}
 		}
 		else {
@@ -132,6 +128,8 @@ class UnionType extends Type {
 				}
 			}
 		}
+
+		return this
 	} // }}}
 	canBeBoolean() { // {{{
 		for const type in @types {
@@ -180,18 +178,30 @@ class UnionType extends Type {
 
 		return that
 	} // }}}
-	export(references, mode) { // {{{
+	compareToRef(value: AnyType) { // {{{
+		return -1
+	} // }}}
+	compareToRef(value: NullType) { // {{{
+		return -1
+	} // }}}
+	compareToRef(value: ReferenceType) { // {{{
+		return 1
+	} // }}}
+	compareToRef(value: UnionType) { // {{{
+		return 1
+	} // }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @explicitNullity {
 			return {
 				kind: TypeKind::Union
 				nullable: @nullable
-				types: [type.toReference(references, mode) for type in @types]
+				types: [type.toReference(references, indexDelta, mode, module) for type in @types]
 			}
 		}
 		else {
 			return {
 				kind: TypeKind::Union
-				types: [type.toReference(references, mode) for type in @types]
+				types: [type.toReference(references, indexDelta, mode, module) for type in @types]
 			}
 		}
 	} // }}}
@@ -219,7 +229,7 @@ class UnionType extends Type {
 				property = property.discardVariable()
 			}
 
-			if !types.some(t => property.matchContentOf(t)) {
+			if !types.some((t, _, _) => property.matchContentOf(t)) {
 				types.push(property)
 			}
 		}
@@ -245,14 +255,23 @@ class UnionType extends Type {
 
 		return true
 	} // }}}
-	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
 		if value.isAny() {
 			if this.isNullable() {
-				return nullcast || value.isNullable()
+				return nullcast || limited || value.isNullable()
 			}
 			else {
 				return true
 			}
+		}
+		else if limited {
+			for const type in @types {
+				if type.isAssignableToVariable(value, anycast, nullcast, downcast) {
+					return true
+				}
+			}
+
+			return false
 		}
 		else {
 			for const type in @types {
@@ -292,53 +311,73 @@ class UnionType extends Type {
 
 		return false
 	} // }}}
-	isMatching(value: Type, mode: MatchingMode) { // {{{
-		if value is not UnionType || @types.length != value._types.length {
-			return false
-		}
-
-		let match = 0
-		for aType in @types {
-			for bType in value._types {
-				if aType.isMatching(bType, mode) {
-					match++
-					break
-				}
+	isMatchingParameter(value) { // {{{
+		for const type in @types {
+			if type.isMatchingParameter(value) {
+				return true
 			}
 		}
 
-		return match == @types.length
+		return false
 	} // }}}
-	isMorePreciseThan(that: Type) { // {{{
-		if that.isAny() {
+	isMorePreciseThan(value: Type) { // {{{
+		if value.isAny() {
 			return true
 		}
 
-		if that is ReferenceType {
-			if !@nullable && that.isNullable() {
+		if value is ReferenceType {
+			if !@nullable && value.isNullable() {
 				return true
 			}
 
-			that = that.discardAlias()
+			value = value.discardAlias()
 		}
 
-		if that is UnionType {
-			if !@nullable && that.isNullable() {
+		if value is UnionType {
+			if !@nullable && value.isNullable() {
 				return true
 			}
 
-			return @types.length < that.types().length
+			return @types.length < value.types().length
 		}
 
 		return false
 	} // }}}
 	isNullable() => @nullable
 	isReducible() => true
+	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
+		if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			if value is not UnionType || @types.length != value.length() {
+				return false
+			}
+
+			let match = 0
+			for const aType in @types {
+				for const bType in value.types() {
+					if aType.isSubsetOf(bType, mode) {
+						match++
+						break
+					}
+				}
+			}
+
+			return match == @types.length
+		}
+		else {
+			for const type in @types {
+				if !type.isSubsetOf(value, mode) {
+					return false
+				}
+			}
+
+			return true
+		}
+	} // }}}
 	isUnion() => true
 	length() => @types.length
-	matchContentOf(that: Type) { // {{{
+	matchContentOf(value: Type) { // {{{
 		for const type in @types {
-			if !type.matchContentOf(that) {
+			if !type.matchContentOf(value) {
 				return false
 			}
 		}
@@ -365,16 +404,12 @@ class UnionType extends Type {
 			return this
 		}
 		else if nullable {
-			const that = this.clone()
-
-			that._nullable = true
-			that._explicitNullity = true
-
-			return that
+			return this.clone().addType(Type.Null)
 		}
 		else if @explicitNullity {
 			const that = this.clone()
 
+			that._types:Array.remove(Type.Null)
 			that._nullable = false
 			that._explicitNullity = false
 
@@ -383,6 +418,25 @@ class UnionType extends Type {
 		else {
 			NotImplementedException.throw()
 		}
+	} // }}}
+	sort(): UnionType { // {{{
+		@types.sort((a, b) => {
+			const index = a.compareToRef(b)
+			if index == 0 {
+				return a.hashCode().localeCompare(b.hashCode())
+			}
+			else {
+				return index
+			}
+		})
+		return this
+	} // }}}
+	split(types: Array) { // {{{
+		for const type in @types {
+			type.split(types)
+		}
+
+		return types
 	} // }}}
 	toCastFragments(fragments) { // {{{
 		for const type in @types {
@@ -411,7 +465,7 @@ class UnionType extends Type {
 			return `'\(elements.join(`', '`))' or '\(last)'`
 		}
 	} // }}}
-	toReference(references, mode) => this.export(references, mode)
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => this.export(references, indexDelta, mode, module)
 	override toNegativeTestFragments(fragments, node, junction) { // {{{
 		fragments.code('(') if junction == Junction::OR
 
@@ -438,6 +492,37 @@ class UnionType extends Type {
 
 		fragments.code(')') if junction == Junction::AND
 	} // }}}
+	override toRouteTestFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if junction == Junction::AND
+
+		for type, i in @types {
+			if i != 0 {
+				fragments.code(' || ')
+			}
+
+			type.toRouteTestFragments(fragments, node, Junction::OR)
+		}
+
+		fragments.code(')') if junction == Junction::AND
+	} // }}}
+	toTestFunctionFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if junction == Junction::AND
+
+		for const type, index in @types {
+			fragments.code(' || ') if index != 0
+
+			type.toTestFunctionFragments(fragments, node, Junction::OR)
+		}
+
+		fragments.code(')') if junction == Junction::AND
+	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('union')
+
+		for const type in @types {
+			type.toVariations(variations)
+		}
+	} // }}}
 	type() { // {{{
 		if @types.length == 1 {
 			const type = @types[0]
@@ -449,9 +534,8 @@ class UnionType extends Type {
 				return type.setNullable(@nullable)
 			}
 		}
-		else {
-			return this
-		}
+
+		return this
 	} // }}}
 	types() => @types
 }

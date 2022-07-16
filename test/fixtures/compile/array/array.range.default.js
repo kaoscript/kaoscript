@@ -1,4 +1,4 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let a = Helper.newArrayRange(1, 5, 1, true, true);
 	let b = Helper.newArrayRange(1, 5, 1, true, false);

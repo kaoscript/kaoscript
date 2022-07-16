@@ -1,1 +1,1 @@
-SyntaxException: The argument "x" isn't recognized to create the struct (line 6, file "fixtures/compile/struct/struct.named.unrecognized.ks")
+ReferenceException: The struct "Foobar" can't be matched to given arguments (Number, Number, Number) (fixtures/compile/struct/struct.named.unrecognized.ks:6)

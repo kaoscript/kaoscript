@@ -1,1 +1,1 @@
-ReferenceException: Field "_x" is already defined by its parent class (line 9, file "fixtures/compile/class/class.extends.field.redecl.ks")
+ReferenceException: Field "_x" is already defined by its parent class (fixtures/compile/class/class.extends.field.redecl.ks:9)

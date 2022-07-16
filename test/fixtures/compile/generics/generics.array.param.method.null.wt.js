@@ -1,20 +1,25 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_RegExp = {};
 	var __ks_String = {};
 	__ks_String.__ks_func_foobar_0 = function() {
 		return this;
 	};
-	__ks_String._im_foobar = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_String._im_foobar = function(that, ...args) {
+		return __ks_String.__ks_func_foobar_rt(that, args);
+	};
+	__ks_String.__ks_func_foobar_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_String.__ks_func_foobar_0.apply(that);
+			return __ks_String.__ks_func_foobar_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.foobar) {
+			return that.foobar(...args);
+		}
+		throw Helper.badArgs();
 	};
 	const regex = /foo/;
 	let match = regex.exec("foobar");
 	if(Type.isValue(match)) {
-		Type.isValue(match[0]) ? __ks_String._im_foobar(match[0]) : null;
+		Type.isValue(match[0]) ? __ks_String.__ks_func_foobar_0.call(match[0]) : null;
 	}
 };

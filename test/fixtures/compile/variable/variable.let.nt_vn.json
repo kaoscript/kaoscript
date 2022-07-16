@@ -1,10 +1,15 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    "Any?",
-    "x"
-  ],
-  "references": [],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      "Any?",
+      "x"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

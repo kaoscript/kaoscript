@@ -1,11 +1,16 @@
-{
-  "aliens": [],
-  "requirements": [
-    "Any?",
-    "Foobar",
-    true
-  ],
-  "exports": [],
-  "references": [],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [
+      "Any?",
+      "Float",
+      true
+    ],
+    "references": []
+  },
+  {
+    "exports": [],
+    "references": [],
+    "macros": []
+  }
+]

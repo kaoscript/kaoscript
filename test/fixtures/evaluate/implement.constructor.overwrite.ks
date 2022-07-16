@@ -2,7 +2,8 @@ require expect: func
 
 extern sealed class Date
 
-impl Date {
+#[rules(non-exhaustive)]
+disclose Date {
 	internal {
 		constructor(year, month, day = 1, hours = 0, minutes = 0, seconds = 0, milliseconds = 0)
 	}

@@ -1,19 +1,21 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._value = "";
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Foobar.prototype.__ks_init_0.call(this);
+			this._value = "";
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
@@ -21,30 +23,27 @@ module.exports = function() {
 		return this._value;
 	};
 	Foobar.prototype.__ks_func_value_1 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!Type.isString(value)) {
-			throw new TypeError("'value' is not of type 'String'");
-		}
 		this._value = value;
 		return this;
 	};
-	Foobar.prototype.value = function() {
-		if(arguments.length === 0) {
-			return Foobar.prototype.__ks_func_value_0.apply(this);
+	Foobar.prototype.__ks_func_value_rt = function(that, proto, args) {
+		const t0 = Type.isString;
+		if(args.length === 0) {
+			return proto.__ks_func_value_0.call(that);
 		}
-		else if(arguments.length === 1) {
-			return Foobar.prototype.__ks_func_value_1.apply(this, arguments);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return proto.__ks_func_value_1.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
-	const f = new Foobar();
-	console.log(f.value("foobar").value());
+	Foobar.prototype.value = function() {
+		return this.__ks_func_value_rt.call(null, this, this, arguments);
+	};
+	const f = Foobar.__ks_new_0();
+	console.log(f.__ks_func_value_1("foobar").__ks_func_value_0());
 	return {
-		Foobar: Foobar
+		Foobar
 	};
 };

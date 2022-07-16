@@ -1,1 +1,1 @@
-TypeException: The variable "pair[0]" of type "String" can't be assigned with a value of type "Number" (line 9, file "fixtures/compile/tuple/tuple.set.computed.bt.ks")
+TypeException: The variable "pair[0]" of type "String" can't be assigned with a value of type "Number" (fixtures/compile/tuple/tuple.set.computed.bt.ks:9)

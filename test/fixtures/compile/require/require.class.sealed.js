@@ -1,8 +1,5 @@
-var {initFlag, Type} = require("@kaoscript/runtime");
+const {Helper, initFlag, Type} = require("@kaoscript/runtime");
 module.exports = function(Color, __ks_Color) {
-	__ks_Color.__ks_init_0 = function(that) {
-		that._luma = 0;
-	};
 	__ks_Color.__ks_get_luma = function(that) {
 		if(!that[initFlag]) {
 			__ks_Color.__ks_init(that);
@@ -19,34 +16,33 @@ module.exports = function(Color, __ks_Color) {
 		return __ks_Color.__ks_get_luma(this);
 	};
 	__ks_Color.__ks_func_luma_1 = function(luma) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(luma === void 0 || luma === null) {
-			throw new TypeError("'luma' is not nullable");
-		}
-		else if(!Type.isNumber(luma)) {
-			throw new TypeError("'luma' is not of type 'Number'");
-		}
 		__ks_Color.__ks_set_luma(this, luma);
 		return this;
 	};
 	__ks_Color.__ks_init = function(that) {
-		__ks_Color.__ks_init_0(that);
+		that._luma = 0;
 		that[initFlag] = true;
 	};
-	__ks_Color._im_luma = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Color._im_luma = function(that, ...args) {
+		return __ks_Color.__ks_func_luma_rt(that, args);
+	};
+	__ks_Color.__ks_func_luma_rt = function(that, args) {
+		const t0 = Type.isNumber;
 		if(args.length === 0) {
-			return __ks_Color.__ks_func_luma_0.apply(that);
+			return __ks_Color.__ks_func_luma_0.call(that);
 		}
-		else if(args.length === 1) {
-			return __ks_Color.__ks_func_luma_1.apply(that, args);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return __ks_Color.__ks_func_luma_1.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.luma) {
+			return that.luma(...args);
+		}
+		throw Helper.badArgs();
 	};
 	return {
-		Color: Color,
-		__ks_Color: __ks_Color
+		Color,
+		__ks_Color
 	};
 };

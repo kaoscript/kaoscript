@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Date) {
 	if(!Type.isValue(__ks_Date)) {
 		__ks_Date = {};
@@ -6,14 +6,16 @@ module.exports = function(__ks_Date) {
 	__ks_Date.__ks_func_getEpochTime_0 = function() {
 		return this.getTime();
 	};
-	__ks_Date._im_getEpochTime = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Date._im_getEpochTime = function(that, ...args) {
+		return __ks_Date.__ks_func_getEpochTime_rt(that, args);
+	};
+	__ks_Date.__ks_func_getEpochTime_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Date.__ks_func_getEpochTime_0.apply(that);
+			return __ks_Date.__ks_func_getEpochTime_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 	return {
-		__ks_Date: __ks_Date
+		__ks_Date
 	};
 };

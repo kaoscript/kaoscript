@@ -1,6 +1,6 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Color = Helper.enum(Number, {
+	const Color = Helper.enum(Number, {
 		Red: 0,
 		Green: 1,
 		Blue: 2
@@ -11,6 +11,6 @@ module.exports = function() {
 	Color.DarkBlue = Color(5);
 	console.log(Color.DarkGreen);
 	return {
-		Color: Color
+		Color
 	};
 };

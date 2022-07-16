@@ -1,0 +1,1 @@
+TypeException: The return type must be "{xy: Array<Point>}" and not "{xy: Point}" (fixtures/compile/return/return.dict.#olqe.oqe.ks:7)

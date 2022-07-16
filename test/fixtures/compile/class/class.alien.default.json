@@ -1,152 +1,159 @@
-{
-  "aliens": [
-    0,
-    "ClassA"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "ClassA",
-    1,
-    "ClassB",
-    2,
-    "ClassC"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": false,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": true,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": false,
-      "constructors": [
-        {
-          "id": 0,
-          "access": 4,
-          "sealed": false,
-          "min": 2,
-          "max": 2,
-          "parameters": [
-            {
-              "name": "x",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "y",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "throws": []
-        }
-      ],
-      "instanceVariables": {
-        "_z": {
-          "access": 2,
-          "type": "Number",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
+[
+  {
+    "aliens": [
+      0,
+      "ClassA",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "ClassA",
+      1,
+      "ClassB",
+      2,
+      "ClassC"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": true,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [
+          {
+            "index": 0,
+            "access": 4,
+            "sealed": false,
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "name": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "y",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "errors": []
+          }
+        ],
+        "instanceVariables": {
+          "_z": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "extends": [
+          0,
+          "ClassA"
+        ],
+        "sequences": [
+          0,
+          -1,
+          -1
+        ]
       },
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "extends": [
-        0,
-        "ClassA"
-      ],
-      "sequences": [
-        0,
-        -1,
-        -1
-      ]
-    },
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": true,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": false,
-      "constructors": [
-        {
-          "id": 0,
-          "access": 4,
-          "sealed": false,
-          "min": 2,
-          "max": 2,
-          "parameters": [
-            {
-              "name": "x",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "y",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "throws": []
-        }
-      ],
-      "instanceVariables": {
-        "_w": {
-          "access": 2,
-          "type": "Number",
-          "default": true,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
-      },
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "extends": [
-        1,
-        "ClassB"
-      ],
-      "sequences": [
-        0,
-        -1,
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": true,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [
+          {
+            "index": 0,
+            "access": 4,
+            "sealed": false,
+            "min": 2,
+            "max": 2,
+            "parameters": [
+              {
+                "name": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "y",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "errors": []
+          }
+        ],
+        "instanceVariables": {
+          "_w": {
+            "access": 2,
+            "type": "Number",
+            "default": true,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "extends": [
+          1,
+          "ClassB"
+        ],
+        "sequences": [
+          0,
+          -1,
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

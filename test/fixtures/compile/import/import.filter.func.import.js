@@ -1,5 +1,5 @@
 require("kaoscript/register");
 module.exports = function() {
-	var foobar = require("../export/export.filter.func.import.ks")().foobar;
-	console.log(foobar("foobar"));
+	var foobar = require("../export/.export.filter.func.import.ks.j5k8r9.ksb")().foobar;
+	console.log(foobar.__ks_0("foobar"));
 };

@@ -1,38 +1,65 @@
 require("kaoscript/register");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Function = require("../_/_function.ks")().__ks_Function;
+	var __ks_Function = require("../_/._function.ks.j5k8r9.ksb")().__ks_Function;
 	class Template {
+		static __ks_new_0() {
+			const o = Object.create(Template.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
-		}
-		__ks_func_compile_0() {
-			return () => {
-				return 42;
-			};
 		}
 		compile() {
-			if(arguments.length === 0) {
-				return Template.prototype.__ks_func_compile_0.apply(this);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_compile_rt.call(null, this, this, arguments);
 		}
-		__ks_func_run_0(...args) {
+		__ks_func_compile_0() {
+			return (() => {
+				const __ks_rt = (...args) => {
+					if(args.length === 0) {
+						return __ks_rt.__ks_0.call(this);
+					}
+					throw Helper.badArgs();
+				};
+				__ks_rt.__ks_0 = () => {
+					return 42;
+				};
+				return __ks_rt;
+			})();
+		}
+		__ks_func_compile_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_compile_0.call(that);
+			}
+			throw Helper.badArgs();
 		}
 		run() {
-			return Template.prototype.__ks_func_run_0.apply(this, arguments);
+			return this.__ks_func_run_rt.call(null, this, this, arguments);
+		}
+		__ks_func_run_0(args) {
+		}
+		__ks_func_run_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+			let pts;
+			if(Helper.isVarargs(args, 0, args.length, t0, pts = [0], 0) && te(pts, 1)) {
+				return proto.__ks_func_run_0.call(that, Helper.getVarargs(args, 0, pts[1]));
+			}
+			throw Helper.badArgs();
 		}
 	}
-	const template = new Template();
+	const template = Template.__ks_new_0();
 	return {
-		Template: Template,
-		template: template
+		Template,
+		template
 	};
 };

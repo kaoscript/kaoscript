@@ -1,1 +1,1 @@
-SyntaxException: The lateinit variable "x" isn't initialized (line 3, file "fixtures/compile/variable/variable.lateinit.ninit.nuse.const.ks")
+SyntaxException: The lateinit variable "x" isn't initialized (fixtures/compile/variable/variable.lateinit.ninit.nuse.const.ks:3)

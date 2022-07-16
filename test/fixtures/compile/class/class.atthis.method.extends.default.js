@@ -1,128 +1,135 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Messenger {
+		static __ks_new_0() {
+			const o = Object.create(Messenger.prototype);
+			o.__ks_init();
+			o.__ks_cons_0();
+			return o;
+		}
+		static __ks_new_1(...args) {
+			const o = Object.create(Messenger.prototype);
+			o.__ks_init();
+			o.__ks_cons_1(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._message = "";
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Messenger.prototype.__ks_init_0.call(this);
+			this._message = "";
 		}
 		__ks_cons_0() {
-			Messenger.prototype.__ks_cons.call(this, ["Hello!"]);
+			Messenger.prototype.__ks_cons_1.call(this, "Hello!");
 		}
 		__ks_cons_1(message) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
-			}
-			else if(!Type.isString(message)) {
-				throw new TypeError("'message' is not of type 'String'");
-			}
 			this._message = message;
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isString;
 			if(args.length === 0) {
-				Messenger.prototype.__ks_cons_0.apply(this);
+				return Messenger.prototype.__ks_cons_0.call(that);
 			}
-			else if(args.length === 1) {
-				Messenger.prototype.__ks_cons_1.apply(this, args);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return Messenger.prototype.__ks_cons_1.call(that, args[0]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
+		}
+		message() {
+			return this.__ks_func_message_rt.call(null, this, this, arguments);
 		}
 		__ks_func_message_0(message) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
-			}
-			else if(!Type.isString(message)) {
-				throw new TypeError("'message' is not of type 'String'");
-			}
 			this._message = message;
 			return this;
 		}
 		__ks_func_message_1() {
 			return this._message;
 		}
-		message() {
-			if(arguments.length === 0) {
-				return Messenger.prototype.__ks_func_message_1.apply(this);
+		__ks_func_message_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 0) {
+				return proto.__ks_func_message_1.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Messenger.prototype.__ks_func_message_0.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_message_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Greetings extends Messenger {
-		__ks_init() {
-			Messenger.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			o.__ks_cons_0();
+			return o;
 		}
-		__ks_cons(args) {
-			Messenger.prototype.__ks_cons.call(this, args);
+		static __ks_new_1(...args) {
+			const o = Object.create(Greetings.prototype);
+			o.__ks_init();
+			o.__ks_cons_1(...args);
+			return o;
 		}
-		__ks_func_greet_01_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			return Helper.concatString(this._message, "\nIt's nice to meet you, ", name, ".");
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 		greet_01() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_greet_01_0.apply(this, arguments);
-			}
-			else if(Messenger.prototype.greet_01) {
-				return Messenger.prototype.greet_01.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_greet_01_rt.call(null, this, this, arguments);
 		}
-		__ks_func_greet_02_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_func_greet_01_0(name) {
+			return Helper.concatString(this._message, "\nIt's nice to meet you, ", name, ".");
+		}
+		__ks_func_greet_01_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_greet_01_0.call(that, args[0]);
+				}
 			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
+			if(super.__ks_func_greet_01_rt) {
+				return super.__ks_func_greet_01_rt.call(null, that, Messenger.prototype, args);
 			}
-			return Helper.concatString(this.message(), "\nIt's nice to meet you, ", name, ".");
+			throw Helper.badArgs();
 		}
 		greet_02() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_greet_02_0.apply(this, arguments);
-			}
-			else if(Messenger.prototype.greet_02) {
-				return Messenger.prototype.greet_02.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_greet_02_rt.call(null, this, this, arguments);
 		}
-		__ks_func_greet_03_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		__ks_func_greet_02_0(name) {
+			return Helper.concatString(this.message(), "\nIt's nice to meet you, ", name, ".");
+		}
+		__ks_func_greet_02_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_greet_02_0.call(that, args[0]);
+				}
 			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
+			if(super.__ks_func_greet_02_rt) {
+				return super.__ks_func_greet_02_rt.call(null, that, Messenger.prototype, args);
 			}
-			return Helper.concatString(this._message.toUpperCase(), "\nIt's nice to meet you, ", name, ".");
+			throw Helper.badArgs();
 		}
 		greet_03() {
-			if(arguments.length === 1) {
-				return Greetings.prototype.__ks_func_greet_03_0.apply(this, arguments);
+			return this.__ks_func_greet_03_rt.call(null, this, this, arguments);
+		}
+		__ks_func_greet_03_0(name) {
+			return Helper.concatString(this._message.toUpperCase(), "\nIt's nice to meet you, ", name, ".");
+		}
+		__ks_func_greet_03_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_greet_03_0.call(that, args[0]);
+				}
 			}
-			else if(Messenger.prototype.greet_03) {
-				return Messenger.prototype.greet_03.apply(this, arguments);
+			if(super.__ks_func_greet_03_rt) {
+				return super.__ks_func_greet_03_rt.call(null, that, Messenger.prototype, args);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

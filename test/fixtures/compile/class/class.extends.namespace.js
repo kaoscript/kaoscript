@@ -1,32 +1,39 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let T = Helper.namespace(function() {
 		class FooX {
+			static __ks_new_0() {
+				const o = Object.create(FooX.prototype);
+				o.__ks_init();
+				return o;
+			}
 			constructor() {
 				this.__ks_init();
-				this.__ks_cons(arguments);
+				this.__ks_cons_rt.call(null, this, arguments);
 			}
 			__ks_init() {
 			}
-			__ks_cons(args) {
+			__ks_cons_rt(that, args) {
 				if(args.length !== 0) {
-					throw new SyntaxError("Wrong number of arguments");
+					throw Helper.badArgs();
 				}
 			}
 		}
-		const fox = new FooX();
+		const fox = FooX.__ks_new_0();
 		return {
-			FooX: FooX
+			FooX
 		};
 	});
-	const fox = new T.FooX();
+	const fox = T.FooX.__ks_new_0();
 	class FooY extends T.FooX {
-		__ks_init() {
-			T.FooX.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(FooY.prototype);
+			o.__ks_init();
+			return o;
 		}
-		__ks_cons(args) {
-			T.FooX.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 	}
-	const foy = new FooY();
+	const foy = FooY.__ks_new_0();
 };

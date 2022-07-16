@@ -1,27 +1,22 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foo(x, __ks_cb) {
-		if(arguments.length < 2) {
-			let __ks_error = new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1 + 1)");
-			if(arguments.length > 0 && Type.isFunction((__ks_cb = arguments[arguments.length - 1]))) {
-				return __ks_cb(__ks_error);
-			}
-			else {
-				throw __ks_error;
-			}
-		}
-		else if(!Type.isFunction(__ks_cb)) {
-			throw new TypeError("'callback' must be a function");
-		}
-		if(x === void 0 || x === null) {
-			return __ks_cb(new TypeError("'x' is not nullable"));
-		}
-		else if(!Type.isNumber(x)) {
-			return __ks_cb(new TypeError("'x' is not of type 'Number'"));
-		}
+	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function(x, __ks_cb) {
 		return __ks_cb(null, Helper.toString(x * 3));
-	}
+	};
+	foo.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		const t1 = Type.isFunction;
+		if(args.length === 2) {
+			if(t0(args[0]) && t1(args[1])) {
+				return foo.__ks_0.call(that, args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	return {
-		foo: foo
+		foo
 	};
 };

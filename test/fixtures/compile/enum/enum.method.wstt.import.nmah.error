@@ -1,1 +1,1 @@
-ReferenceException: The method "fromStringOrNull" can't be found in the enum "Weekday" (line 3, file "fixtures/compile/enum/enum.method.wstt.import.nmah.ks")
+ReferenceException: The method "fromStringOrNull" can't be found in the enum "Weekday" (fixtures/compile/enum/enum.method.wstt.import.nmah.ks:3)

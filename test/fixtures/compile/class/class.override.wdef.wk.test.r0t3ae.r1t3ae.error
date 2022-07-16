@@ -1,0 +1,1 @@
+SyntaxException: The method "Quxbaz.foobar(...{1,3}args: Any)" can't override a suitable method (fixtures/compile/class/class.override.wdef.wk.test.r0t3ae.r1t3ae.ks:6)

@@ -1,27 +1,30 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var reverse = require("../function/function.overloading.export.ks")().reverse;
-	const __ks_reverse_1 = reverse;
-	function reverse() {
-		if(arguments.length === 1 && Type.isNumber(arguments[0])) {
-			let __ks_i = -1;
-			let value = arguments[++__ks_i];
-			if(value === void 0 || value === null) {
-				return __ks_reverse_1(...arguments);
-			}
-			else if(!Type.isNumber(value)) {
-				return __ks_reverse_1(...arguments);
-			}
-			return -value;
-		}
-		else {
-			return __ks_reverse_1(...arguments);
-		}
+	var reverse = require("../function/.function.overloading.export.ks.j5k8r9.ksb")().reverse;
+	reverse.__ks_2 = function(value) {
+		return -value;
 	};
-	const foo = reverse("hello");
+	reverse.__ks_rt = function(that, args) {
+		const t0 = Type.isArray;
+		const t1 = Type.isNumber;
+		const t2 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return reverse.__ks_1.call(that, args[0]);
+			}
+			if(t1(args[0])) {
+				return reverse.__ks_2.call(that, args[0]);
+			}
+			if(t2(args[0])) {
+				return reverse.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+	const foo = reverse.__ks_0("hello");
 	console.log(foo);
 	return {
-		reverse: reverse
+		reverse
 	};
 };

@@ -1,28 +1,35 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "foo",
-    "Any?",
-    "x",
-    "Any?",
-    "y"
-  ],
-  "references": [
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 0,
-      "max": 0,
-      "parameters": [],
-      "returns": "String",
-      "throws": []
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "foo",
+      "Any?",
+      "x",
+      "Any?",
+      "y"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": 0,
+        "parameters": [],
+        "returns": "String",
+        "errors": []
+      }
+    ],
+    "macros": []
+  }
+]

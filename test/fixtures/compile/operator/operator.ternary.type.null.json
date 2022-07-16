@@ -1,12 +1,17 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "foo"
-  ],
-  "references": [
-    "Array?"
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "foo"
+    ],
+    "references": [
+      "Array?"
+    ],
+    "macros": []
+  }
+]

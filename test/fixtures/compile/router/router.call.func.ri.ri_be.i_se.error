@@ -1,0 +1,1 @@
+ReferenceException: The function "foobar" can't be matched to given arguments (Number, String) (fixtures/compile/router/router.call.func.ri.ri_be.i_se.ks:8)

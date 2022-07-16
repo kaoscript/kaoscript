@@ -1,37 +1,47 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foo(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isClassInstance(x, Foo)) {
-			throw new TypeError("'x' is not of type 'Foo'");
-		}
+	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function(x) {
 		while(!Type.isClassInstance(x, Bar)) {
 		}
-	}
+	};
+	foo.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Foo);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foo.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	class Foo {
+		static __ks_new_0() {
+			const o = Object.create(Foo.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	class Bar extends Foo {
-		__ks_init() {
-			Foo.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(Bar.prototype);
+			o.__ks_init();
+			return o;
 		}
-		__ks_cons(args) {
-			Foo.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 	}
 };

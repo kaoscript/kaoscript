@@ -1,1 +1,1 @@
-TypeException: Class constructor "Foo" cannot be invoked without 'new' (line 4, file "fixtures/compile/new/new.default.no.ks")
+TypeException: Class constructor "Foo" cannot be invoked without 'new' (fixtures/compile/new/new.default.no.ks:4)

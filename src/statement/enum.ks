@@ -8,7 +8,7 @@ class EnumDeclaration extends Statement {
 		@variable: Variable
 		@variables: Dictionary			= {}
 	}
-	analyse() { // {{{
+	initiate() { // {{{
 		@name = @data.name.name
 
 		const type = Type.fromAST(@data.type, this)
@@ -37,7 +37,8 @@ class EnumDeclaration extends Statement {
 		@type = new NamedType(@name, @enum)
 
 		@variable = @scope.define(@name, true, @type, this)
-
+	} // }}}
+	analyse() { // {{{
 		let declaration
 		for const data in @data.members {
 			switch data.kind {
@@ -84,7 +85,7 @@ class EnumDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @enum.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameters) {
+				if @enum.hasMatchingInstanceMethod(name, method.type(), MatchingMode::ExactParameter) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -105,7 +106,7 @@ class EnumDeclaration extends Statement {
 					SyntaxException.throwInvalidSyncMethods(@name, name, this)
 				}
 
-				if @enum.hasMatchingStaticMethod(name, method.type(), MatchingMode::ExactParameters) {
+				if @enum.hasMatchingStaticMethod(name, method.type(), MatchingMode::ExactParameter) {
 					SyntaxException.throwIdenticalMethod(name, method)
 				}
 
@@ -135,10 +136,13 @@ class EnumDeclaration extends Statement {
 	} // }}}
 	name() => @name
 	toStatementFragments(fragments, mode) { // {{{
-		const line = fragments.newLine().code($runtime.scope(this), @name, $equals, $runtime.helper(this), '.enum(')
+		const line = fragments.newLine().code($runtime.immutableScope(this), @name, $equals, $runtime.helper(this), '.enum(')
 
-		if @type.isString() {
+		if @enum.isString() {
 			line.code('String, ')
+		}
+		else if @enum.isFlags() {
+			line.code('Object, ')
 		}
 		else {
 			line.code('Number, ')
@@ -158,22 +162,68 @@ class EnumDeclaration extends Statement {
 			variable.toFragments(fragments)
 		}
 
-		for const methods of @staticMethods {
-			if methods.length == 1 {
-				fragments.compile(methods[0])
+		for const methods, name of @staticMethods {
+			const types = []
+
+			for const method in methods {
+				method.toFragments(fragments, Mode::None)
+
+				types.push(method.type())
 			}
-			else {
-				NotImplementedException.throw(methods[0])
-			}
+
+			const assessment = Router.assess(types, name, this)
+
+			const line = fragments.newLine()
+			const ctrl = line.newControl(null, false, false)
+
+			ctrl.code(`\(@name).\(name) = function()`).step()
+
+			Router.toFragments(
+				(function, line) => {
+					line.code(`\(@name).__ks_sttc_\(name)_\(function.index())(`)
+
+					return false
+				}
+				`arguments`
+				assessment
+				ctrl.block()
+				this
+			)
+
+			ctrl.done()
+			line.done()
 		}
 
-		for const methods of @instanceMethods {
-			if methods.length == 1 {
-				fragments.compile(methods[0])
+		for const methods, name of @instanceMethods {
+			const types = []
+
+			for const method in methods {
+				method.toFragments(fragments, Mode::None)
+
+				types.push(method.type())
 			}
-			else {
-				NotImplementedException.throw(methods[0])
-			}
+
+			const assessment = Router.assess(types, name, this)
+
+			const line = fragments.newLine()
+			const ctrl = line.newControl(null, false, false)
+
+			ctrl.code(`\(@name).__ks_func_\(name) = function(that, ...args)`).step()
+
+			Router.toFragments(
+				(function, line) => {
+					line.code(`\(@name).__ks_func_\(name)_\(function.index())(that`)
+
+					return true
+				}
+				`args`
+				assessment
+				ctrl.block()
+				this
+			)
+
+			ctrl.done()
+			line.done()
 		}
 	} // }}}
 	type() => @type
@@ -225,7 +275,7 @@ class EnumVariableDeclaration extends AbstractNode {
 							SyntaxException.throwInvalidEnumValue(value, this)
 						}
 
-						@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))`
+						@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))n`
 					}
 				}
 				else {
@@ -233,7 +283,7 @@ class EnumVariableDeclaration extends AbstractNode {
 						SyntaxException.throwEnumOverflow(@parent.name(), this)
 					}
 
-					@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))`
+					@value = `\(enum.index() <= 0 ? 0 : Math.pow(2, enum.index() - 1))n`
 				}
 
 				@type = @scope.reference('Number')
@@ -297,6 +347,7 @@ class EnumVariableDeclaration extends AbstractNode {
 class EnumMethodDeclaration extends Statement {
 	private lateinit {
 		@block: FunctionBlock
+		@internalName: String
 		@type: Type
 	}
 	private {
@@ -380,6 +431,13 @@ class EnumMethodDeclaration extends Statement {
 		}
 	} // }}}
 	translate() { // {{{
+		if @instance {
+			@internalName = `__ks_func_\(@name)_\(@type.index())`
+		}
+		else {
+			@internalName = `__ks_sttc_\(@name)_\(@type.index())`
+		}
+
 		for const parameter in @parameters {
 			parameter.translate()
 		}
@@ -442,11 +500,10 @@ class EnumMethodDeclaration extends Statement {
 		const line = fragments.newLine()
 		const ctrl = line.newControl(null, false, false)
 
+		ctrl.code(`\(@parent.name()).\(@internalName) = function(`)
+
 		if @instance {
-			ctrl.code(`\(@parent.name()).__ks_func_\(@name) = function(that`)
-		}
-		else {
-			ctrl.code(`\(@parent.name()).\(@name) = function(`)
+			ctrl.code('that')
 		}
 
 		Parameter.toFragments(this, ctrl, ParameterMode::Default, node => node.code(')').step())

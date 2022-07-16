@@ -81,8 +81,7 @@ class HollowScope extends Scope {
 	getRawLine() => @parent.getRawLine()
 	getRenamedIndex(name: String): Number => @parent.getRenamedIndex(name)
 	getTempIndex() => @parent.getTempIndex()
-	getVariable(name): Variable? => this.getVariable(name, @parent.line())
-	getVariable(name, line: Number): Variable? { // {{{
+	getVariable(name, line: Number = @parent.line()): Variable? { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			const currentLine = @parent.line()
@@ -112,8 +111,7 @@ class HollowScope extends Scope {
 	hasDefinedVariable(name: String, line: Number): Boolean => @parent.hasDefinedVariable(name, line)
 	hasDeclaredVariable(name: String): Boolean => @parent.hasDeclaredVariable(name)
 	hasMacro(name) => @parent.hasMacro(name)
-	hasVariable(name: String): Boolean => @parent.hasVariable(name)
-	hasVariable(name: String, line: Number) => @parent.hasVariable(name, line)
+	hasVariable(name: String, line: Number = null) => @parent.hasVariable(name, line)
 	isBleeding() => true
 	isInline() => true
 	isRedeclaredVariable(name: String) { // {{{
@@ -129,7 +127,8 @@ class HollowScope extends Scope {
 	line(line: Number) => @parent.line(line)
 	module() => @parent.module()
 	parent() => @parent
-	override reference(value, nullable: Boolean, parameters: Array) => @parent.reference(value, nullable, parameters)
+	reference(value) => @parent.reference(value)
+	reference(value: String, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(value, nullable, parameters)
 	releaseTempName(name: String) => @parent.releaseTempName(name)
 	rename(name, newName) { // {{{
 		if newName != name {
@@ -171,7 +170,7 @@ class HollowScope extends Scope {
 
 		return variable
 	} // }}}
-	override resolveReference(name, nullable: Boolean, parameters: Array) => @parent.resolveReference(name, nullable, parameters)
+	resolveReference(name: String, nullable: Boolean = false, parameters: Array = []) => @parent.resolveReference(name, nullable, parameters)
 	updateInferable(name, data, node) { // {{{
 		if data.isVariable {
 			this.replaceVariable(name, data.type, true, true, node)

@@ -1,11 +1,21 @@
 require("kaoscript/register");
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Function = require("../_/_function.ks")().__ks_Function;
-	var {Template, template} = require("./import.systemic.function.source.ks")();
+	var __ks_Function = require("../_/._function.ks.j5k8r9.ksb")().__ks_Function;
+	var {Template, template} = require("./.import.systemic.function.source.ks.j5k8r9.ksb")();
 	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function() {
 		return 42;
-	}
-	console.log(__ks_Function._im_toSource(foo));
-	console.log(__ks_Function._im_toSource(template.compile()));
-	console.log(__ks_Function._im_toSource((new Template()).compile()));
+	};
+	foo.__ks_rt = function(that, args) {
+		if(args.length === 0) {
+			return foo.__ks_0.call(that);
+		}
+		throw Helper.badArgs();
+	};
+	console.log(__ks_Function.__ks_func_toSource_0.call(foo));
+	console.log(__ks_Function.__ks_func_toSource_0.call(template.__ks_func_compile_0()));
+	console.log(__ks_Function.__ks_func_toSource_0.call(Template.__ks_new_0().__ks_func_compile_0()));
 };

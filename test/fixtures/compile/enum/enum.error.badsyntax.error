@@ -1,1 +1,1 @@
-ReferenceException: "A" is not defined (line 7, file "fixtures/compile/enum/enum.error.badsyntax.ks")
+ReferenceException: "A" is not defined (fixtures/compile/enum/enum.error.badsyntax.ks:7)

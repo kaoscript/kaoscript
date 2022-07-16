@@ -1,29 +1,31 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		if(arguments.length === 1 && Type.isNumber(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+		return x;
+	};
+	foobar.__ks_1 = function(values) {
+		return -1;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		const t1 = Type.isString;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
 			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
+			if(t1(args[0])) {
+				return foobar.__ks_1.call(that, [args[0]]);
 			}
-			return x;
+			throw Helper.badArgs();
 		}
-		else {
-			let __ks_i = -1;
-			let values = [];
-			while(arguments.length > ++__ks_i) {
-				if(Type.isString(arguments[__ks_i])) {
-					values.push(arguments[__ks_i]);
-				}
-				else {
-					throw new TypeError("'values' is not of type 'String'");
-				}
-			}
-			return -1;
+		if(Helper.isVarargs(args, 0, args.length, t1, pts = [0], 0) && te(pts, 1)) {
+			return foobar.__ks_1.call(that, Helper.getVarargs(args, 0, pts[1]));
 		}
+		throw Helper.badArgs();
 	};
 };

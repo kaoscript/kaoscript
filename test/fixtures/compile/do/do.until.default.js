@@ -1,4 +1,4 @@
-var Operator = require("@kaoscript/runtime").Operator;
+const {Operator} = require("@kaoscript/runtime");
 module.exports = function() {
 	do {
 		sell();

@@ -45,3 +45,5 @@ printAnimalAbilities(animal)
 animal.flags += AnimalFlags::HasClaws + AnimalFlags::CanFly
 printAnimalAbilities(animal)
 // -> animal has claws, animal can fly
+
+export AnimalFlags, printAnimalAbilities

@@ -1,1 +1,1 @@
-TypeException: The expression "x" of type "Number?" can't be compared to a value of type "String" (line 8, file "fixtures/compile/type/type.refine.eq.if.ne.t_an_i.ps_in.cd_s.ks")
+TypeException: The expression "x" of type "Number?" can't be compared to a value of type "String" (fixtures/compile/type/type.refine.eq.if.ne.t_an_i.ps_in.cd_s.ks:8)

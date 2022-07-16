@@ -1,4 +1,4 @@
-var {Dictionary, Helper} = require("@kaoscript/runtime");
+const {Dictionary, Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	let key = "you";
 	let value = 42;

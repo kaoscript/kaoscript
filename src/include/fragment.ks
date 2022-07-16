@@ -96,6 +96,14 @@ class BlockBuilder extends BlockWriter {
 }
 
 class ControlBuilder extends ControlWriter {
+	block(): BlockBuilder? { // {{{
+		if @step is BlockBuilder {
+			return @step
+		}
+		else {
+			return null
+		}
+	} // }}}
 	compile(node, mode = Mode::None) { // {{{
 		@step.compile(node, mode)
 
@@ -256,6 +264,7 @@ class LineBuilder extends ExpressionBuilder {
 	private {
 		_whenDone: Function?	= null
 	}
+	block() => this.newBlock()
 	done() { // {{{
 		if @undone {
 			@writer.push(@writer.lineTerminator)

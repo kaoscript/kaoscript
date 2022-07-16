@@ -5,8 +5,10 @@ class VoidType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	export(references, mode) => 'Void'
-	isMatching(value: VoidType, mode: MatchingMode) => true
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Void'
+	hashCode() => `Void`
+	isExportable() => true
+	isSubsetOf(value: VoidType, mode: MatchingMode) => true
 	isVoid() => true
 	toFragments(fragments, node) { // {{{
 		fragments.code('Void')
@@ -14,5 +16,8 @@ class VoidType extends Type {
 	toQuote(): String => `Void`
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotSupportedException(node)
+	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('void')
 	} // }}}
 }

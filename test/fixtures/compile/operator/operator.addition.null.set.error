@@ -1,1 +1,1 @@
-ReferenceException: The expression "data" is "null" (line 11, file "fixtures/compile/operator/operator.addition.null.set.ks")
+ReferenceException: The expression "data" is "null" (fixtures/compile/operator/operator.addition.null.set.ks:11)

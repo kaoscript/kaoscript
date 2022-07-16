@@ -1,60 +1,126 @@
-{
-  "aliens": [
-    "Any?",
-    "parseFloat"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Float"
-  ],
-  "references": [
-    {
-      "kind": "namespace",
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "properties": {
-        "toFloat": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "String",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
+[
+  {
+    "aliens": [
+      0,
+      "parseFloat",
+      true,
+      1,
+      "Number",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": "Infinity",
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": {
+          "reference": 1
         },
-        "toString": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 1,
-          "max": 1,
-          "parameters": [
+        "errors": []
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "toString": [
             {
-              "name": "value",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "String",
+              "errors": [],
+              "inits": []
             }
-          ],
-          "returns": "String",
-          "throws": [],
-          "sealed": false
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      2,
+      "Float"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "properties": {
+          "toFloat": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "String",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          },
+          "toString": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "String",
+            "errors": [],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

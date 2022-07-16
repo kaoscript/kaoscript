@@ -1,35 +1,245 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "toInt"
-  ],
-  "references": [
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 1,
-      "max": 1,
-      "parameters": [
-        {
-          "name": "n",
-          "type": {
-            "reference": 1
+[
+  {
+    "aliens": [
+      0,
+      "parseFloat",
+      true,
+      2,
+      "parseInt",
+      true,
+      3,
+      "isNaN",
+      true,
+      1,
+      "Number",
+      true,
+      4,
+      "Math",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": "Infinity",
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": {
+          "reference": 1
+        },
+        "errors": []
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "toFixed": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "type": "Any?",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      },
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": "Infinity",
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": {
+          "reference": 1
+        },
+        "errors": []
+      },
+      {
+        "kind": "function",
+        "async": false,
+        "exhaustive": true,
+        "min": 0,
+        "max": "Infinity",
+        "parameters": [
+          {
+            "type": "Any?",
+            "min": 0,
+            "max": "Infinity",
+            "default": false
+          }
+        ],
+        "returns": "Boolean",
+        "errors": []
+      },
+      {
+        "kind": "namespace",
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": true,
+        "properties": {
+          "max": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 1
+            },
+            "errors": [],
+            "sealed": false
           },
-          "min": 1,
-          "max": 1,
-          "default": false
+          "min": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 1
+            },
+            "errors": [],
+            "sealed": false
+          },
+          "pow": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 1
+            },
+            "errors": [],
+            "sealed": false
+          },
+          "round": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": {
+              "reference": 1
+            },
+            "errors": [],
+            "sealed": false
+          }
         }
-      ],
-      "returns": "Any?",
-      "throws": []
-    },
-    {
-      "kind": "alias",
-      "of": "Number"
-    }
-  ],
-  "macros": []
-}
+      }
+    ]
+  },
+  {
+    "exports": [
+      5,
+      "toInt"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 1,
+        "max": 1,
+        "parameters": [
+          {
+            "name": "n",
+            "type": {
+              "reference": 6
+            },
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      },
+      {
+        "kind": "alias",
+        "of": "Number"
+      }
+    ],
+    "macros": []
+  }
+]

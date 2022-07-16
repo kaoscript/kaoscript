@@ -1,1 +1,1 @@
-SyntaxException: Method "greet" is abstract but the class "Greetings" is not (line 1, file "fixtures/compile/class/class.abstract.error.noabs.ks")
+SyntaxException: Method "greet" is abstract but the class "Greetings" is not (fixtures/compile/class/class.abstract.error.noabs.ks:1)

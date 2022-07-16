@@ -1,0 +1,1 @@
+SyntaxException: When there are no arguments, the function "foobar" can be matched with "foobar(...args: Any)" or "foobar(x: Boolean?, ...args: Number)" (fixtures/compile/router/router.func.ra.bd_rie.ks:1)

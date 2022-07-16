@@ -1,6 +1,6 @@
-var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
-	let CardSuit = Helper.enum(String, {
+	const CardSuit = Helper.enum(String, {
 		Clubs: "clubs",
 		Diamonds: "diamonds",
 		Hearts: "hearts",
@@ -23,98 +23,65 @@ module.exports = function(expect) {
 		return d;
 	})())).to.equal("{\"id\":\"clubs\"}");
 	function foobar() {
-		if(arguments.length === 1 && Type.isEnumInstance(arguments[0], CardSuit)) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isEnumInstance(x, CardSuit)) {
-				throw new TypeError("'x' is not of type 'CardSuit'");
-			}
-			return "enum-member";
-		}
-		else if(arguments.length === 1 && Type.isEnum(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isEnum(x)) {
-				throw new TypeError("'x' is not of type 'Enum'");
-			}
-			return "enum";
-		}
-		else if(arguments.length === 1 && Type.isNumber(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
-			}
-			return "number";
-		}
-		else if(arguments.length === 1 && Type.isString(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isString(x)) {
-				throw new TypeError("'x' is not of type 'String'");
-			}
-			return "string";
-		}
-		else if(arguments.length === 1 && Type.isDictionary(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isDictionary(x)) {
-				throw new TypeError("'x' is not of type 'Dictionary'");
-			}
-			return "dictionary";
-		}
-		else if(arguments.length === 1) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			return "any";
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		return foobar.__ks_rt(this, arguments);
 	};
-	expect(foobar(CardSuit)).to.equal("enum");
-	expect(foobar(CardSuit.Clubs)).to.equal("enum-member");
-	expect(foobar(CardSuit.Clubs.value)).to.equal("string");
-	expect(foobar(0)).to.equal("number");
-	expect(foobar(new Dictionary())).to.equal("dictionary");
-	expect(foobar("foo")).to.equal("string");
-	function testIf(x, y, z) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
+	foobar.__ks_0 = function(x) {
+		return "enum";
+	};
+	foobar.__ks_1 = function(x) {
+		return "enum-member";
+	};
+	foobar.__ks_2 = function(x) {
+		return "number";
+	};
+	foobar.__ks_3 = function(x) {
+		return "dictionary";
+	};
+	foobar.__ks_4 = function(x) {
+		return "string";
+	};
+	foobar.__ks_5 = function(x) {
+		return "any";
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isEnum;
+		const t1 = value => Type.isEnumInstance(value, CardSuit);
+		const t2 = Type.isNumber;
+		const t3 = Type.isString;
+		const t4 = Type.isDictionary;
+		const t5 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+			if(t1(args[0])) {
+				return foobar.__ks_1.call(that, args[0]);
+			}
+			if(t2(args[0])) {
+				return foobar.__ks_2.call(that, args[0]);
+			}
+			if(t3(args[0])) {
+				return foobar.__ks_4.call(that, args[0]);
+			}
+			if(t4(args[0])) {
+				return foobar.__ks_3.call(that, args[0]);
+			}
+			if(t5(args[0])) {
+				return foobar.__ks_5.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isEnumInstance(x, CardSuit)) {
-			throw new TypeError("'x' is not of type 'CardSuit'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isString(y)) {
-			throw new TypeError("'y' is not of type 'String'");
-		}
-		if(z === void 0 || z === null) {
-			throw new TypeError("'z' is not nullable");
-		}
+		throw Helper.badArgs();
+	};
+	expect(foobar.__ks_0(CardSuit)).to.equal("enum");
+	expect(foobar.__ks_1(CardSuit.Clubs)).to.equal("enum-member");
+	expect(foobar.__ks_4(CardSuit.Clubs.value)).to.equal("string");
+	expect(foobar.__ks_2(0)).to.equal("number");
+	expect(foobar.__ks_3(new Dictionary())).to.equal("dictionary");
+	expect(foobar.__ks_4("foo")).to.equal("string");
+	function testIf() {
+		return testIf.__ks_rt(this, arguments);
+	};
+	testIf.__ks_0 = function(x, y, z) {
 		const results = [];
 		if(x === CardSuit.Clubs) {
 			results.push("c");
@@ -138,28 +105,24 @@ module.exports = function(expect) {
 		results.push((y === CardSuit.Clubs.value) ? "c" : null);
 		results.push((z.valueOf() === CardSuit.Clubs.value) ? "c" : null);
 		return results;
-	}
-	expect(testIf(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(["c", "c", "c", "c", "c", "c"]);
-	expect(testIf(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql([null, "c", "c", null, "c", "c"]);
-	function testSwitch(x, y, z) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
+	};
+	testIf.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, CardSuit);
+		const t1 = Type.isString;
+		const t2 = Type.isValue;
+		if(args.length === 3) {
+			if(t0(args[0]) && t1(args[1]) && t2(args[2])) {
+				return testIf.__ks_0.call(that, args[0], args[1], args[2]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isEnumInstance(x, CardSuit)) {
-			throw new TypeError("'x' is not of type 'CardSuit'");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		else if(!Type.isString(y)) {
-			throw new TypeError("'y' is not of type 'String'");
-		}
-		if(z === void 0 || z === null) {
-			throw new TypeError("'z' is not nullable");
-		}
+		throw Helper.badArgs();
+	};
+	expect(testIf.__ks_0(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(["c", "c", "c", "c", "c", "c"]);
+	expect(testIf.__ks_0(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql([null, "c", "c", null, "c", "c"]);
+	function testSwitch() {
+		return testSwitch.__ks_rt(this, arguments);
+	};
+	testSwitch.__ks_0 = function(x, y, z) {
 		const results = [];
 		if(x === CardSuit.Clubs) {
 			results.push("c");
@@ -190,7 +153,18 @@ module.exports = function(expect) {
 			results.push(null);
 		}
 		return results;
-	}
-	expect(testSwitch(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(["c", "c", "c"]);
-	expect(testSwitch(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql(["d", "c", "c"]);
+	};
+	testSwitch.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, CardSuit);
+		const t1 = Type.isString;
+		const t2 = Type.isValue;
+		if(args.length === 3) {
+			if(t0(args[0]) && t1(args[1]) && t2(args[2])) {
+				return testSwitch.__ks_0.call(that, args[0], args[1], args[2]);
+			}
+		}
+		throw Helper.badArgs();
+	};
+	expect(testSwitch.__ks_0(CardSuit.Clubs, CardSuit.Clubs.value, CardSuit.Clubs)).to.eql(["c", "c", "c"]);
+	expect(testSwitch.__ks_0(CardSuit.Diamonds, CardSuit.Clubs.value, CardSuit.Clubs.value)).to.eql(["d", "c", "c"]);
 };

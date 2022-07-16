@@ -19,19 +19,19 @@ class SealableType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	export(references, mode) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @systemic {
 			return {
 				kind: TypeKind::Sealable
 				systemic: true
-				type: @type.toReference(references, mode)
+				type: @type.toReference(references, indexDelta, mode, module)
 			}
 		}
 		else {
 			return {
 				kind: TypeKind::Sealable
 				sealed: this.isSealed()
-				type: @type.toReference(references, mode)
+				type: @type.toReference(references, indexDelta, mode, module)
 			}
 		}
 	} // }}}
@@ -45,19 +45,27 @@ class SealableType extends Type {
 
 		return this
 	} // }}}
-	isMatching(value: SealableType, mode: MatchingMode) => @type.isMatching(value.type(), mode)
-	isMatching(value: Type, mode: MatchingMode) { // {{{
+	isSealable() => true
+	isSealed() => @sealed || @type.isSealed()
+	isSubsetOf(value: SealableType, mode: MatchingMode) => @type.isSubsetOf(value.type(), mode)
+	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
 		if mode ~~ MatchingMode::Similar {
-			return @type.isMatching(value, mode)
+			return @type.isSubsetOf(value, mode)
 		}
 		else {
 			return false
 		}
 	} // }}}
-	isSealable() => true
-	isSealed() => @sealed || @type.isSealed()
 	toFragments(fragments, node) => @type.toFragments(fragments, node)
-	toQuote(...args) => @type.toQuote(...args)
+	// TODO add alias
+	// toQuote(...args) => @type.toQuote(...args)
+	toQuote() => @type.toQuote()
+	toQuote(double) => @type.toQuote(double)
 	override toPositiveTestFragments(fragments, node, junction) => @type.toPositiveTestFragments(fragments, node, junction)
+	override toVariations(variations) { // {{{
+		variations.push('sealable')
+
+		@type.toVariations(variations)
+	} // }}}
 	type() => @type
 }

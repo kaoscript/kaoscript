@@ -1,0 +1,1 @@
+SyntaxException: Method "foobar" of the class "Quxbaz" has an invalid return type (fixtures/compile/class/class.override.smth.c_rti.c_rtse.ks:8)

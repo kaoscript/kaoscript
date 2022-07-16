@@ -1,6 +1,6 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Weekday = Helper.enum(Number, {
+	const Weekday = Helper.enum(Number, {
 		MONDAY: 0,
 		TUESDAY: 1,
 		WEDNESDAY: 2,
@@ -10,81 +10,45 @@ module.exports = function() {
 		SUNDAY: 6
 	});
 	function foobar() {
-		if(arguments.length === 2 && Type.isEnumInstance(arguments[0], Weekday) && Type.isNumber(arguments[1])) {
-			let __ks_i = -1;
-			let day = arguments[++__ks_i];
-			if(day === void 0 || day === null) {
-				throw new TypeError("'day' is not nullable");
-			}
-			else if(!Type.isEnumInstance(day, Weekday)) {
-				throw new TypeError("'day' is not of type 'Weekday'");
-			}
-			let month = arguments[++__ks_i];
-			if(month === void 0 || month === null) {
-				throw new TypeError("'month' is not nullable");
-			}
-			else if(!Type.isNumber(month)) {
-				throw new TypeError("'month' is not of type 'Number'");
-			}
-			return 0;
-		}
-		else if(arguments.length === 2 && Type.isEnumInstance(arguments[0], Weekday)) {
-			let __ks_i = -1;
-			let day = arguments[++__ks_i];
-			if(day === void 0 || day === null) {
-				throw new TypeError("'day' is not nullable");
-			}
-			else if(!Type.isEnumInstance(day, Weekday)) {
-				throw new TypeError("'day' is not of type 'Weekday'");
-			}
-			let month = arguments[++__ks_i];
-			if(month === void 0 || month === null) {
-				throw new TypeError("'month' is not nullable");
-			}
-			else if(!Type.isString(month)) {
-				throw new TypeError("'month' is not of type 'String'");
-			}
-			return 1;
-		}
-		else if(arguments.length === 2 && Type.isNumber(arguments[1])) {
-			let __ks_i = -1;
-			let day = arguments[++__ks_i];
-			if(day === void 0 || day === null) {
-				throw new TypeError("'day' is not nullable");
-			}
-			else if(!Type.isString(day)) {
-				throw new TypeError("'day' is not of type 'String'");
-			}
-			let month = arguments[++__ks_i];
-			if(month === void 0 || month === null) {
-				throw new TypeError("'month' is not nullable");
-			}
-			else if(!Type.isNumber(month)) {
-				throw new TypeError("'month' is not of type 'Number'");
-			}
-			return 2;
-		}
-		else if(arguments.length === 2) {
-			let __ks_i = -1;
-			let day = arguments[++__ks_i];
-			if(day === void 0 || day === null) {
-				throw new TypeError("'day' is not nullable");
-			}
-			else if(!Type.isString(day)) {
-				throw new TypeError("'day' is not of type 'String'");
-			}
-			let month = arguments[++__ks_i];
-			if(month === void 0 || month === null) {
-				throw new TypeError("'month' is not nullable");
-			}
-			else if(!Type.isString(month)) {
-				throw new TypeError("'month' is not of type 'String'");
-			}
-			return 3;
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		return foobar.__ks_rt(this, arguments);
 	};
-	foobar("", -1);
+	foobar.__ks_0 = function(day, month) {
+		return 0;
+	};
+	foobar.__ks_1 = function(day, month) {
+		return 1;
+	};
+	foobar.__ks_2 = function(day, month) {
+		return 2;
+	};
+	foobar.__ks_3 = function(day, month) {
+		return 3;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, Weekday);
+		const t1 = Type.isNumber;
+		const t2 = Type.isString;
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t1(args[1])) {
+					return foobar.__ks_0.call(that, args[0], args[1]);
+				}
+				if(t2(args[1])) {
+					return foobar.__ks_1.call(that, args[0], args[1]);
+				}
+				throw Helper.badArgs();
+			}
+			if(t2(args[0])) {
+				if(t1(args[1])) {
+					return foobar.__ks_2.call(that, args[0], args[1]);
+				}
+				if(t2(args[1])) {
+					return foobar.__ks_3.call(that, args[0], args[1]);
+				}
+				throw Helper.badArgs();
+			}
+		}
+		throw Helper.badArgs();
+	};
+	foobar.__ks_2("", -1);
 };

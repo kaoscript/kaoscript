@@ -1,1 +1,1 @@
-TypeException: The return type must be "Number" and not "Number?" (line 8, file "fixtures/compile/type/type.refine.return.rt_i.t_in_n.ps_i.rt.ks")
+TypeException: The return type must be "Number" and not "Number?" (fixtures/compile/type/type.refine.return.rt_i.t_in_n.ps_i.rt.ks:8)

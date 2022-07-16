@@ -1,1 +1,1 @@
-TypeException: The return type must be "Number" and not "String" (line 3, file "fixtures/compile/function/function.return.block.if.ks")
+TypeException: The return type must be "Number" and not "String" (fixtures/compile/function/function.return.block.if.ks:3)

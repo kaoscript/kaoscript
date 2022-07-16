@@ -21,6 +21,7 @@ const $rules = {
 	'non-exhaustive':				['nonExhaustive', true]
 	'ignore-misfit':				['ignoreMisfit', true]
 	'dont-ignore-misfit':			['ignoreMisfit', false]
+	// TODO delete followings rules:
 	'assert-override':				['assertOverride', true]
 	'dont-assert-override':			['assertOverride', false]
 	'assert-parameter':				['assertParameter', true]

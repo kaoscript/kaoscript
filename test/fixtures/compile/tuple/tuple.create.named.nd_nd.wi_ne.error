@@ -1,1 +1,1 @@
-ReferenceException: The tuple "Point" can't be matched to given arguments (Number) (line 6, file "fixtures/compile/tuple/tuple.create.named.nd_nd.wi_ne.ks")
+ReferenceException: The tuple "Point" can't be matched to given arguments (Number) (fixtures/compile/tuple/tuple.create.named.nd_nd.wi_ne.ks:6)

@@ -3,7 +3,7 @@ class ExportDeclaration extends Statement {
 		_declarations	= []
 		_statements		= []
 	}
-	analyse() { // {{{
+	override initiate() { // {{{
 		let statement
 
 		if @parent.includePath() == null {
@@ -30,7 +30,7 @@ class ExportDeclaration extends Statement {
 					}
 				}
 
-				statement.analyse()
+				statement.initiate()
 
 				@statements.push(statement)
 				@declarations.push(statement)
@@ -40,8 +40,18 @@ class ExportDeclaration extends Statement {
 			for const declaration in @data.declarations when declaration.kind == NodeKind::ExportDeclarationSpecifier {
 				@statements.push(statement = $compile.statement(declaration.declaration, this))
 
-				statement.analyse()
+				statement.initiate()
 			}
+		}
+	} // }}}
+	analyse() { // {{{
+		for const statement in @statements {
+			statement.analyse()
+		}
+	} // }}}
+	enhance() { // {{{
+		for const statement in @statements {
+			statement.enhance()
 		}
 	} // }}}
 	prepare() { // {{{
@@ -54,9 +64,16 @@ class ExportDeclaration extends Statement {
 			statement.translate()
 		}
 	} // }}}
-	export(recipient) { // {{{
-		for const declaration in @declarations {
-			declaration.export(recipient)
+	export(recipient, enhancement: Boolean = false) { // {{{
+		if enhancement {
+			for const declaration in @declarations when declaration.isEnhancementExport() {
+				declaration.export(recipient)
+			}
+		}
+		else {
+			for const declaration in @declarations when !declaration.isEnhancementExport() {
+				declaration.export(recipient)
+			}
 		}
 	} // }}}
 	isExportable() => true
@@ -92,6 +109,7 @@ class ExportExclusionSpecifier extends AbstractNode {
 			recipient.export(variable.name(), variable)
 		}
 	} // }}}
+	isEnhancementExport() => false
 	toFragments(fragments, mode)
 }
 
@@ -133,6 +151,7 @@ class ExportNamedSpecifier extends AbstractNode {
 			}
 		}
 	} // }}}
+	isEnhancementExport() => false
 	toFragments(fragments, mode)
 	walk(fn) { // {{{
 		if !@expression.isMacro() {
@@ -158,6 +177,7 @@ class ExportPropertiesSpecifier extends AbstractNode {
 			recipient.export(property.exported.name, new ExportProperty(@object, property.local.name))
 		}
 	} // }}}
+	isEnhancementExport() => false
 	toFragments(fragments, mode)
 }
 
@@ -178,6 +198,7 @@ class ExportWildcardSpecifier extends AbstractNode {
 			recipient.export(name, new ExportProperty(@expression, name))
 		})
 	} // }}}
+	isEnhancementExport() => false
 	toFragments(fragments, mode)
 }
 

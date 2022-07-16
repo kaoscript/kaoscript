@@ -1,1 +1,1 @@
-SyntaxException: The function "name" is identical with another function "name" (line 4, file "fixtures/compile/variable/variable.overwrite.func.twice.ks")
+SyntaxException: The function "name()" is a duplicate (fixtures/compile/variable/variable.overwrite.func.twice.ks:4)

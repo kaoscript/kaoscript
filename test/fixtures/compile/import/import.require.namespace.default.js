@@ -1,7 +1,5 @@
-var Helper = require("@kaoscript/runtime").Helper;
+require("kaoscript/register");
 module.exports = function() {
-	let Foobar = Helper.namespace(function() {
-		return {};
-	});
-	require("./import.require.namespace.source.ks")(Foobar);
+	var Float = require("../namespace/.namespace.export.default.ks.j5k8r9.ksb")().Float;
+	require("./.import.require.namespace.source.ks.1yt4xbg.ksb")(Float);
 };

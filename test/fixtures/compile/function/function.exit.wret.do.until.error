@@ -1,1 +1,1 @@
-SyntaxException: Dead code (line 7, file "fixtures/compile/function/function.exit.wret.do.until.ks")
+SyntaxException: Dead code (fixtures/compile/function/function.exit.wret.do.until.ks:7)

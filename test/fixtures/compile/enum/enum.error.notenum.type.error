@@ -1,1 +1,1 @@
-TypeException: Identifier "Type" is not an enum (line 1, file "fixtures/compile/enum/enum.error.notenum.type.ks")
+TypeException: Identifier "Type" is not an enum (fixtures/compile/enum/enum.error.notenum.type.ks:1)

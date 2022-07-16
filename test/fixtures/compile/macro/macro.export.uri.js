@@ -1,30 +1,38 @@
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	class URI {
+		static __ks_new_0() {
+			const o = Object.create(URI.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}
 	class FileURI extends URI {
-		__ks_init_0() {
-			this._e = 3.14;
+		static __ks_new_0() {
+			const o = Object.create(FileURI.prototype);
+			o.__ks_init();
+			return o;
 		}
 		__ks_init() {
-			URI.prototype.__ks_init.call(this);
-			FileURI.prototype.__ks_init_0.call(this);
+			super.__ks_init();
+			this._e = 3.14;
 		}
-		__ks_cons(args) {
-			URI.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 	}
 	return {
-		URI: URI
+		URI
 	};
 };

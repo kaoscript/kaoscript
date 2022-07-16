@@ -1,1 +1,1 @@
-TypeException: The variable "x" of type "String" can't be assigned with a value of type "Number" (line 13, file "fixtures/compile/type/type.refine.assign.check.nomatch.ks")
+TypeException: The variable "x" of type "String" can't be assigned with a value of type "Number" (fixtures/compile/type/type.refine.assign.check.nomatch.ks:13)

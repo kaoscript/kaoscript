@@ -1,8 +1,10 @@
 class FunctionType extends Type {
 	private lateinit {
+		_assessment							= null
 		_async: Boolean						= false
+		_errors: Array<Type>				= []
 		_hasRest: Boolean					= false
-		_index: Number
+		_index: Number						= -1
 		_max: Number						= 0
 		_maxBefore: Number					= 0
 		_maxAfter: Number					= 0
@@ -14,7 +16,6 @@ class FunctionType extends Type {
 		_parameters: Array<ParameterType>	= []
 		_restIndex: Number					= -1
 		_returnType: Type					= AnyType.NullableUnexplicit
-		_throws: Array<Type>				= []
 	}
 	static {
 		clone(source: FunctionType, target: FunctionType): FunctionType { // {{{
@@ -23,7 +24,7 @@ class FunctionType extends Type {
 			}
 
 			target._parameters = [...source._parameters]
-			target._throws = [...source._throws]
+			target._errors = [...source._errors]
 
 			return target
 		} // }}}
@@ -36,38 +37,10 @@ class FunctionType extends Type {
 				return new FunctionType([new ParameterType(scope, Type.Any, 0, Infinity)], data, node)
 			}
 		} // }}}
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): FunctionType { // {{{
 			const type = new FunctionType(scope)
 
-			type._async = data.async
-			type._min = data.min
-			type._max = data.max
-
-			if data.exhaustive? {
-				type._exhaustive = data.exhaustive
-			}
-
-			type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
-
-			if data.returns? {
-				type._returnType = Type.fromMetadata(data.returns, metadata, references, alterations, queue, scope, node)
-				type._missingReturn = false
-			}
-
-			type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
-
-			type.updateArguments()
-
-			if data.sealed {
-				type.flagSealed()
-			}
-
-
-			return type
-		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const type = new FunctionType(scope)
-
+			type._index = data.index ?? -1
 			type._async = data.async
 			type._min = data.min
 			type._max = data.max
@@ -77,16 +50,16 @@ class FunctionType extends Type {
 			}
 
 			queue.push(() => {
-				type._throws = [Type.fromMetadata(throw, metadata, references, alterations, queue, scope, node) for throw in data.throws]
+				type._errors = [Type.import(throw, metadata, references, alterations, queue, scope, node) for throw in data.errors]
 
 				if data.returns? {
-					type._returnType = Type.fromMetadata(data.returns, metadata, references, alterations, queue, scope, node)
+					type._returnType = Type.import(data.returns, metadata, references, alterations, queue, scope, node)
 					type._missingReturn = false
 				}
 
-				type._parameters = [ParameterType.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
+				type._parameters = [ParameterType.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters]
 
-				type.updateArguments()
+				type.updateParameters()
 			})
 
 			return type
@@ -130,6 +103,9 @@ class FunctionType extends Type {
 	constructor(@scope) { // {{{
 		super(scope)
 	} // }}}
+	constructor(@scope, @index) { // {{{
+		super(scope)
+	} // }}}
 	constructor(parameters: Array<ParameterType>, data, node) { // {{{
 		super(node.scope())
 
@@ -168,7 +144,7 @@ class FunctionType extends Type {
 
 			for const throw in data.throws {
 				if (type ?= Type.fromAST(throw, node).discardReference()) && type.isNamed() && type.isClass() {
-					@throws.push(type)
+					@errors.push(type)
 				}
 				else {
 					TypeException.throwNotClass(throw.name, node)
@@ -176,12 +152,18 @@ class FunctionType extends Type {
 			}
 		}
 
-		this.updateArguments()
+		this.updateParameters()
+	} // }}}
+	constructor(parameters: Array<ParameterType>, data, @index, node) { // {{{
+		this(parameters, data, node)
 	} // }}}
 	absoluteMax() => @async ? @max + 1 : @max
 	absoluteMin() => @async ? @min + 1 : @min
-	addParameter(type: Type, min = 1, max = 1) { // {{{
-		@parameters.push(new ParameterType(@scope, type, min, max))
+	addError(...types: Type) { // {{{
+		@errors.pushUniq(...types)
+	} // }}}
+	addParameter(type: Type, name: String?, min, max) { // {{{
+		@parameters.push(new ParameterType(@scope, name, type, min, max))
 
 		if @hasRest {
 			@max += max
@@ -228,36 +210,41 @@ class FunctionType extends Type {
 
 		@min += type.min()
 	} // }}}
+	assessment(name: String, node: AbstractNode) { // {{{
+		if @assessment == null {
+			@assessment = Router.assess([this], name, node)
+		}
+
+		return @assessment
+	} // }}}
 	async() { // {{{
 		@async = true
 	} // }}}
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	export(references, mode) { // {{{
-		if mode ~~ ExportMode::OverloadedFunction {
-			return {
-				kind: TypeKind::Function
-				async: @async
-				min: @min
-				max: @max
-				parameters: [parameter.export(references, mode) for const parameter in @parameters]
-				returns: @returnType.toReference(references, mode)
-				throws: [throw.toReference(references, mode) for const throw in @throws]
-			}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+		const result = {
+			kind: TypeKind::Function
 		}
-		else {
-			return {
-				kind: TypeKind::Function
-				async: @async
-				exhaustive: this.isExhaustive()
-				min: @min
-				max: @max
-				parameters: [parameter.export(references, mode) for const parameter in @parameters]
-				returns: @returnType.toReference(references, mode)
-				throws: [throw.toReference(references, mode) for const throw in @throws]
-			}
+
+		if !this.isAlien() && @index != -1 {
+			result.index = @index
 		}
+
+		result.async = @async
+
+		if mode !~ ExportMode::OverloadedFunction {
+			result.exhaustive = this.isExhaustive()
+		}
+
+		result.min = @min
+		result.max = @max
+		result.parameters = [parameter.export(references, indexDelta, mode, module) for const parameter in @parameters]
+		result.returns = @returnType.toReference(references, indexDelta, mode, module)
+		result.errors = [throw.toReference(references, indexDelta, mode, module) for const throw in @errors]
+
+		return result
 	} // }}}
 	flagExported(explicitly: Boolean) { // {{{
 		if @exported {
@@ -266,7 +253,7 @@ class FunctionType extends Type {
 
 		@exported = true
 
-		for error in @throws {
+		for error in @errors {
 			error.flagExported(false)
 		}
 
@@ -274,11 +261,91 @@ class FunctionType extends Type {
 
 		return this
 	} // }}}
+	getCallIndex() => @alien ? 0 : @index
+	getMaxAfter(): @maxAfter
+	getMaxAfter(excludes: Array<String>?): Number { // {{{
+		return 0 unless @hasRest
+
+		if excludes? {
+			auto max = 0
+
+			for const parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
+				max += parameter.max()
+			}
+
+			return max
+		}
+		else {
+			return @maxAfter
+		}
+	} // }}}
+	getMaxBefore(): @maxBefore
+	getMaxBefore(excludes: Array<String>?): Number { // {{{
+		return 0 unless @hasRest
+
+		if excludes? {
+			auto max = 0
+
+			for const parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
+				max += parameter.max()
+			}
+
+			return max
+		}
+		else {
+			return @maxBefore
+		}
+	} // }}}
+	getMinAfter(): @minAfter
+	getMinAfter(excludes: Array<String>?): Number { // {{{
+		return 0 unless @hasRest
+
+		if excludes? {
+			auto min = 0
+
+			for const parameter in @parameters from @restIndex + 1 when !excludes.contains(parameter.name()) {
+				min += parameter.min()
+			}
+
+			return min
+		}
+		else {
+			return @minAfter
+		}
+	} // }}}
+	getMinBefore(): @minBefore
+	getMinBefore(excludes: Array<String>?): Number { // {{{
+		return 0 unless @hasRest
+
+		if excludes? {
+			auto min = 0
+
+			for const parameter in @parameters til @restIndex when !excludes.contains(parameter.name()) {
+				min += parameter.min()
+			}
+
+			return min
+		}
+		else {
+			return @minBefore
+		}
+	} // }}}
 	getProperty(name: String) => Type.Any
-	getReturnType() => @returnType
-	index() => @index
-	index(@index) => this
-	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
+	getRestIndex(): @restIndex
+	getRestParameter() => @parameters[@restIndex]
+	getReturnType(): @returnType
+	hashCode() => `Function`
+	hasRestParameter(): @hasRest
+	hasVarargsParameter() { // {{{
+		for const parameter in @parameters {
+			return true if parameter.isVarargs()
+		}
+
+		return false
+	} // }}}
+	index(): @index
+	index(@index): this
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
 		if value.isAny() || value.isFunction() {
 			return true
 		}
@@ -292,10 +359,10 @@ class FunctionType extends Type {
 
 		return false
 	} // }}}
-	isAsync() => @async
+	isAsync(): @async
 	isCatchingError(error): Boolean { // {{{
-		if @throws.length != 0 {
-			for type in @throws {
+		if @errors.length != 0 {
+			for type in @errors {
 				if error.matchInheritanceOf(type) {
 					return true
 				}
@@ -314,98 +381,30 @@ class FunctionType extends Type {
 			}
 		}
 
+		if !@returnType.isExportable() {
+			return false
+		}
+
 		return true
 	} // }}}
+	isExtendable() => true
 	isFunction() => true
-	isMatching(value: ReferenceType, mode: MatchingMode) { // {{{
-		if value.name() != 'Function' {
+	isMissingError() => @errors.length == 0
+	isMissingReturn() => @missingReturn
+	isMorePreciseThan(value: FunctionType) { // {{{
+		if @parameters.length != value._parameters.length {
 			return false
 		}
 
-		if mode ~~ MatchingMode::Exact || mode ~~ MatchingMode::ExactParameters {
-			return @min == 0 && @max == Infinity
-		}
-		else {
-			return true
-		}
-	} // }}}
-	isMatching(value: FunctionType, mode: MatchingMode) { // {{{
-		if @async != value._async {
-			return false
-		}
-
-		if mode ~~ MatchingMode::Exact {
-			mode += MatchingMode::ExactParameters + MatchingMode::ExactReturn
-		}
-		else if mode ~~ MatchingMode::Similar {
-			mode += MatchingMode::SimilarParameters + MatchingMode::SimilarReturn
-		}
-
-		if mode ~~ MatchingMode::MissingParameters && @missingParameters {
-			// do nothing
-		}
-		else if mode ~~ MatchingMode::ShiftableParameters {
-			let parameterMode: MatchingMode
-
-			if mode ~~ MatchingMode::ExactParameters {
-				parameterMode = MatchingMode::Exact
+		for const parameter, i in @parameters {
+			if parameter.isMorePreciseThan(value._parameters[i]) {
+				return true
 			}
-			else if mode ~~ MatchingMode::MissingParameterType {
-				parameterMode = MatchingMode::Similar + MatchingMode::MissingType
-			}
-			else {
-				parameterMode = MatchingMode::Similar
-			}
-
-			if mode ~~ MatchingMode::RequireAllParameters {
-				parameterMode += MatchingMode::RequireAllParameters
-			}
-
-			if !this.isParametersMatching(value._parameters, parameterMode) {
-				return false
-			}
-		}
-		else {
-			if @hasRest != value._hasRest || @max != value._max || @min != value._min || @restIndex != value._restIndex || @parameters.length != value._parameters.length {
-				return false
-			}
-
-			if mode ~~ MatchingMode::ExactParameters {
-				for const parameter, index in @parameters {
-					if !parameter.isMatching(value._parameters[index], MatchingMode::Exact) {
-						return false
-					}
-				}
-			}
-			else if mode ~~ MatchingMode::SimilarParameters {
-				for const parameter, index in @parameters {
-					if !parameter.isMatching(value._parameters[index], MatchingMode::Similar) {
-						return false
-					}
-				}
-			}
-		}
-
-		if mode ~~ MatchingMode::MissingReturn && @missingReturn {
-			return true
-		}
-		else if mode ~~ MatchingMode::ExactReturn {
-			return @returnType.isMatching(value._returnType, MatchingMode::Exact)
-		}
-		else if mode ~~ MatchingMode::SimilarReturn {
-			return @returnType.isMatching(value._returnType, MatchingMode::Similar)
-		}
-		else {
-			return true
-		}
-	} // }}}
-	isMorePreciseThan(type: Type) { // {{{
-		if type.isAny() {
-			return true
 		}
 
 		return false
 	} // }}}
+	isMorePreciseThan(value: Type) => value.isAny()
 	isInstanceOf(target: ReferenceType) => target.name() == 'Function'
 	private isParametersMatching(arguments: Array, mode: MatchingMode): Boolean => this.isParametersMatching(0, -1, arguments, 0, -1, mode)
 	private isParametersMatching(pIndex, pStep, arguments, aIndex, aStep, mode: MatchingMode) { // {{{
@@ -478,7 +477,7 @@ class FunctionType extends Type {
 		else if aStep > arguments[aIndex].max() {
 			return this.isParametersMatching(pIndex, pStep, arguments, aIndex + 1, -1, mode)
 		}
-		else if @parameters[pIndex].isMatching(arguments[aIndex], mode) {
+		else if arguments[aIndex].isSubsetOf(@parameters[pIndex], mode) {
 			if @parameters[pIndex].max() == Infinity {
 				if arguments[aIndex].max() == Infinity {
 					return true
@@ -495,162 +494,192 @@ class FunctionType extends Type {
 			return false
 		}
 	} // }}}
-	matchArguments(arguments: Array) { // {{{
-		if arguments.length == 0 {
-			return @min == 0
-		}
-		if arguments.length > @max {
+	isSubsetOf(value: ReferenceType, mode: MatchingMode) { // {{{
+		return value.isFunction()
+	} // }}}
+	isSubsetOf(value: FunctionType, mode: MatchingMode) { // {{{
+		if @async != value._async {
 			return false
 		}
-
-		let spreadIndex: Number = -1
-
-		for const argument, index in arguments {
-			if argument is UnaryOperatorSpread {
-				spreadIndex = index
-
-				break
-			}
+		if mode ~~ MatchingMode::Exact {
+			mode += MatchingMode::ExactParameter + MatchingMode::ExactReturn
+		}
+		else if mode ~~ MatchingMode::Similar {
+			mode += MatchingMode::SimilarParameter + MatchingMode::SimilarReturn
 		}
 
-		if spreadIndex != -1 {
-			if arguments.length == 1 {
-				const argument = arguments[0].type().parameter()
+		if mode ~~ MatchingMode::MissingParameter && @missingParameters {
+			// do nothing
+		}
+		else if mode ~~ MatchingMode::ShiftableParameters {
+			let parameterMode: MatchingMode
 
-				for const parameter in @parameters {
-					if !parameter.matchArgument(argument) {
+			if mode ~~ MatchingMode::ExactParameter {
+				parameterMode = MatchingMode::Exact
+			}
+			else if mode ~~ MatchingMode::MissingParameterType {
+				parameterMode = MatchingMode::Similar + MatchingMode::Missing
+			}
+			else {
+				parameterMode = MatchingMode::Similar
+			}
+
+			if mode ~~ MatchingMode::RequireAllParameters {
+				parameterMode += MatchingMode::RequireAllParameters
+			}
+
+			if !value.isParametersMatching(@parameters, parameterMode) {
+				return false
+			}
+		}
+		else {
+			if mode ~~ MatchingMode::AdditionalParameter {
+				if @parameters.length < value._parameters.length {
+					if mode !~ MatchingMode::MissingParameterDefault && @min < value._min {
 						return false
 					}
+
+					for const parameter in value._parameters from @parameters.length {
+						if parameter.min() != 0 {
+							return false
+						}
+					}
+				}
+				else {
+					if mode !~ MatchingMode::MissingParameterArity {
+						if @max < value._max {
+							return false
+						}
+
+						if mode !~ MatchingMode::MissingParameterDefault && @min < value._min {
+							return false
+						}
+					}
+
+					for const parameter in @parameters from value._parameters.length {
+						if parameter.min() != 0 {
+							return false
+						}
+					}
+				}
+			}
+			else if mode ~~ MatchingMode::MissingParameter {
+				if @parameters.length > value._parameters.length {
+					return false
+				}
+
+				for const parameter in value._parameters from @parameters.length {
+					return false unless parameter.min() == 0
+				}
+
+				if mode !~ MatchingMode::MissingParameterArity && (@hasRest != value._hasRest || @restIndex != value._restIndex) {
+					return false
+				}
+
+				if mode !~ MatchingMode::MissingParameterDefault && @min != value._min {
+					return false
 				}
 			}
 			else {
-				let argIndex = 0
-				let parIndex = 0
-
-				for argIndex from 0 til spreadIndex {
-					if parIndex + 1 > @parameters.length {
-						return false
-					}
-					if !@parameters[parIndex].matchArgument(arguments[argIndex]) {
-						return false
-					}
-
-					++parIndex
+				if @parameters.length != value._parameters.length {
+					return false
 				}
 
-				const argument = arguments[spreadIndex].type().parameter()
-
-				for const parameter in @parameters from parIndex {
-					if !parameter.matchArgument(argument) {
-						return false
-					}
+				if mode !~ MatchingMode::MissingParameterArity && (@hasRest != value._hasRest || @restIndex != value._restIndex) {
+					return false
 				}
 
-			}
-
-			return true
-		}
-
-		if arguments.length < @min {
-			return false
-		}
-
-		if @parameters.length == 1 {
-			const parameter = @parameters[0]
-
-			for const argument in arguments {
-				if !parameter.matchArgument(argument) {
+				if mode !~ MatchingMode::MissingParameterDefault && (@min != value._min || @max != value._max) {
 					return false
 				}
 			}
 
-			return true
-		}
-		else if @hasRest {
-			let a = 0
-			let b = arguments.length - 1
+			let paramMode = MatchingMode::Default
 
-			for const parameter in @parameters from @parameters.length - 1 til @restIndex by -1 {
-				for const j from 0 til parameter.min() {
-					if !parameter.matchArgument(arguments[b]) {
-						return false
+			paramMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactParameter
+			paramMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarParameter
+			paramMode += MatchingMode::MissingType if mode ~~ MatchingMode::MissingParameterType
+			paramMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassParameter
+			paramMode += MatchingMode::Subset if mode ~~ MatchingMode::SubsetParameter
+			paramMode += MatchingMode::NonNullToNull if mode ~~ MatchingMode::NonNullToNullParameter
+			paramMode += MatchingMode::MissingDefault if mode ~~ MatchingMode::MissingParameterDefault
+			paramMode += MatchingMode::MissingArity if mode ~~ MatchingMode::MissingParameterArity
+			paramMode += MatchingMode::Renamed if mode ~~ MatchingMode::Renamed
+			paramMode += MatchingMode::IgnoreName if mode ~~ MatchingMode::IgnoreName
+
+			if paramMode != 0 {
+				for const parameter, index in @parameters til value._parameters.length {
+					return false unless parameter.isSubsetOf(value._parameters[index], paramMode)
+				}
+			}
+		}
+
+		if mode ~~ MatchingMode::IgnoreReturn {
+			// do nothing
+		}
+		else if !?@returnType {
+			return false unless value.isMissingReturn()
+		}
+		else if !(mode ~~ MatchingMode::MissingReturn && value.isMissingReturn()) {
+			let returnMode = MatchingMode::Default
+
+			returnMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactReturn
+			returnMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarReturn
+			returnMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassReturn
+
+			if returnMode != 0 {
+				const newType = value.getReturnType()
+
+				return false unless newType.isSubsetOf(@returnType, returnMode) || @returnType.isInstanceOf(newType)
+			}
+		}
+
+		if mode ~~ MatchingMode::IgnoreError {
+			// do nothing
+		}
+		else if @errors.length == 0 {
+			return false unless value.isMissingError()
+		}
+		else if !(mode ~~ MatchingMode::MissingError && value.isMissingError()) {
+			let errorMode = MatchingMode::Default
+
+			errorMode += MatchingMode::Exact if mode ~~ MatchingMode::ExactError
+			errorMode += MatchingMode::Similar if mode ~~ MatchingMode::SimilarErrors
+			errorMode += MatchingMode::Subclass if mode ~~ MatchingMode::SubclassError
+
+			if errorMode != 0 {
+				const newTypes = value.listErrors()
+
+				for const oldType in @errors {
+					let matched = false
+
+					for const newType in newTypes until matched {
+						if newType.isSubsetOf(oldType, errorMode) || oldType.isInstanceOf(newType) {
+							matched = true
+						}
 					}
 
-					--b
+					return false unless matched
 				}
 			}
-
-			for const parameter in @parameters from 0 til @restIndex {
-				for const j from 0 til parameter.min() {
-					if !parameter.matchArgument(arguments[a]) {
-						return false
-					}
-
-					++a
-				}
-
-				for const j from parameter.min() til parameter.max() while a < b && parameter.matchArgument(arguments[a]) {
-					++a
-				}
-			}
-
-			const parameter = @parameters[@restIndex]
-
-			for const j from 0 til parameter.min() {
-				if !parameter.matchArgument(arguments[a]) {
-					return false
-				}
-
-				++a
-			}
-
-			return true
 		}
-		else if arguments.length == @max {
-			let a = 0
 
-			let p
-			for parameter in @parameters {
-				for p from 0 til parameter.max() {
-					if !parameter.matchArgument(arguments[a]) {
-						return false
-					}
-
-					++a
-				}
-			}
-
-			return true
-		}
-		else {
-			let a = 0
-			let optional = arguments.length - @min
-
-			for const parameter in @parameters {
-				for i from 0 til parameter.min() {
-					if !parameter.matchArgument(arguments[a]) {
-						return false
-					}
-
-					++a
-				}
-
-				for i from parameter.min() til parameter.max() while optional > 0 when parameter.matchArgument(arguments[a]) {
-					++a
-					--optional
-				}
-			}
-
-			return optional == 0
-		}
+		return true
 	} // }}}
-	matchContentOf(type: Type) { // {{{
-		if type.isAny() || type.isFunction() {
+	length() => 1
+	listErrors() => @errors
+	matchArguments(arguments: Array, node: AbstractNode) { // {{{
+		const assessment = this.assessment('', node)
+
+		return ?Router.matchArguments2(assessment, arguments, node)
+	} // }}}
+	matchContentOf(value: Type) { // {{{
+		if value.isAny() || value.isFunction() {
 			return true
 		}
 
-		if type is UnionType {
-			for const type in type.types() {
+		if value is UnionType {
+			for const type in value.types() {
 				if this.matchContentOf(type) {
 					return true
 				}
@@ -659,10 +688,46 @@ class FunctionType extends Type {
 
 		return false
 	} // }}}
-	max() => @max
-	min() => @min
+	max(): @max
+	max(excludes: Array<String>?): Number { // {{{
+		if excludes? {
+			auto max = 0
+
+			for const parameter in @parameters when !excludes.contains(parameter.name()) {
+				max += parameter.max()
+			}
+
+			return max
+		}
+		else {
+			return @max
+		}
+	} // }}}
+	min(): @min
+	min(excludes: Array<String>?): Number { // {{{
+		if excludes? {
+			auto min = 0
+
+			for const parameter in @parameters when !excludes.contains(parameter.name()) {
+				min += parameter.min()
+			}
+
+			return min
+		}
+		else {
+			return @min
+		}
+	} // }}}
 	parameter(index) => @parameters[index]
-	parameters() => @parameters
+	parameters(): Array<ParameterType> => @parameters
+	parameters(excludes: Array<String>?): Array<ParameterType> { // {{{
+		if excludes? {
+			return [parameter for const parameter in @parameters when !excludes.contains(parameter.name())]
+		}
+		else {
+			return @parameters
+		}
+	} // }}}
 	private processModifiers(modifiers) { // {{{
 		for modifier in modifiers {
 			if modifier.kind == ModifierKind::Async {
@@ -672,16 +737,14 @@ class FunctionType extends Type {
 	} // }}}
 	pushTo(methods) { // {{{
 		for const method in methods {
-			if this.isMatching(method, MatchingMode::SimilarParameters) {
+			if this.isSubsetOf(method, MatchingMode::SimilarParameter) {
 				return
 			}
 		}
 
 		methods.push(this)
 	} // }}}
-	restIndex() => @restIndex
-	setReturnType(@returnType) => this
-	throws() => @throws
+	setReturnType(@returnType): this
 	toFragments(fragments, node) { // {{{
 		fragments.code('Function')
 	} // }}}
@@ -712,8 +775,14 @@ class FunctionType extends Type {
 			.compile(node)
 			.code(')')
 	} // }}}
-	updateArguments() { // {{{
-		for parameter, i in @parameters {
+	toTestFunctionFragments(fragments, node) { // {{{
+		fragments.code(`\($runtime.typeof('Function', node))`)
+	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('func', 1)
+	} // }}}
+	updateParameters() { // {{{
+		for const parameter, i in @parameters {
 			if @hasRest {
 				@minAfter += parameter.min()
 				@maxAfter += parameter.max()
@@ -732,26 +801,15 @@ class FunctionType extends Type {
 
 class OverloadedFunctionType extends Type {
 	private {
+		_altering: Boolean					= false
 		_assessment							= null
 		_async: Boolean						= false
 		_functions: Array<FunctionType>		= []
+		_majorOriginal: Type?
 		_references: Array<Type>			= []
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const type = new OverloadedFunctionType(scope)
-
-			if data.exhaustive? {
-				type._exhaustive = data.exhaustive
-			}
-
-			for function in data.functions {
-				type.addFunction(Type.fromMetadata(function, metadata, references, alterations, queue, scope, node))
-			}
-
-			return type
-		} // }}}
-		import(index, data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): OverloadedFunctionType { // {{{
 			const type = new OverloadedFunctionType(scope)
 
 			if data.exhaustive? {
@@ -759,8 +817,8 @@ class OverloadedFunctionType extends Type {
 			}
 
 			queue.push(() => {
-				for function in data.functions {
-					type.addFunction(Type.fromMetadata(function, metadata, references, alterations, queue, scope, node))
+				for const function in data.functions {
+					type.addFunction(Type.import(function, metadata, references, alterations, queue, scope, node))
 				}
 			})
 
@@ -772,9 +830,13 @@ class OverloadedFunctionType extends Type {
 			@async = type.isAsync()
 		}
 
-		@functions.push(type)
+		if type.index() == -1 {
+			type.index(@functions.length)
+		}
 
 		@references.pushUniq(type)
+
+		@functions.push(type)
 
 		if type._exhaustive != null {
 			if type._exhaustive {
@@ -793,6 +855,10 @@ class OverloadedFunctionType extends Type {
 		@references.pushUniq(type)
 
 		for const function in type.functions() {
+			if function.index() == -1 {
+				function.index(@functions.length)
+			}
+
 			@functions.push(function)
 
 			if function._exhaustive != null {
@@ -810,8 +876,8 @@ class OverloadedFunctionType extends Type {
 			@async = type.isAsync()
 		}
 
-		const fn = new FunctionType(@scope)
-		fn.addParameter(Type.Any, 0, Infinity)
+		const fn = new FunctionType(@scope, 0)
+		fn.addParameter(AnyType.NullableExplicit, null, 0, Infinity)
 
 		fn._missingParameters = true
 
@@ -819,9 +885,9 @@ class OverloadedFunctionType extends Type {
 
 		@references.pushUniq(type)
 	} // }}}
-	assessment(name, node: AbstractNode) { // {{{
+	assessment(name: String, node: AbstractNode) { // {{{
 		if @assessment == null {
-			@assessment = Router.assess(@functions, true, name, node)
+			@assessment = Router.assess(@functions, name, node)
 		}
 
 		return @assessment
@@ -829,26 +895,26 @@ class OverloadedFunctionType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	export(references, mode) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		const functions = []
 
 		const overloadedMode = mode + ExportMode::OverloadedFunction
 
 		for const reference in @references {
 			if reference._referenceIndex == -1 && reference is OverloadedFunctionType {
-				for const fn in reference.functions() when fn.isExportable() {
-					functions.push(fn.toExportOrReference(references, overloadedMode))
+				for const fn in reference.functions() when fn.isExportable(mode) {
+					functions.push(fn.toExportOrReference(references, indexDelta, overloadedMode, module))
 				}
 			}
-			else if reference.isExportable() {
-				functions.push(reference.toExportOrReference(references, overloadedMode))
+			else if reference.isExportable(mode) {
+				functions.push(reference.toExportOrReference(references, indexDelta, overloadedMode, module))
 			}
 		}
 
 		return {
 			kind: TypeKind::OverloadedFunction
 			exhaustive: this.isExhaustive()
-			functions: functions
+			functions
 		}
 	} // }}}
 	functions() => @functions
@@ -871,28 +937,37 @@ class OverloadedFunctionType extends Type {
 
 		return false
 	} // }}}
+	isExtendable() => true
 	isFunction() => true
-	isMatching(value: ReferenceType, mode: MatchingMode) { // {{{
+	isMergeable(type) => type is OverloadedFunctionType && @async == type.isAsync()
+	isMorePreciseThan(value: Type) { // {{{
+		if value.isAny() {
+			return true
+		}
+
+		return false
+	} // }}}
+	isSubsetOf(value: ReferenceType, mode: MatchingMode) { // {{{
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
 		return value.isFunction()
 	} // }}}
-	isMatching(value: FunctionType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: FunctionType, mode: MatchingMode) { // {{{
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
 		for fn in @functions {
-			if fn.isMatching(value, mode) {
+			if fn.isSubsetOf(value, mode) {
 				return true
 			}
 		}
 
 		return false
 	} // }}}
-	isMatching(value: OverloadedFunctionType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: OverloadedFunctionType, mode: MatchingMode) { // {{{
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
@@ -902,7 +977,7 @@ class OverloadedFunctionType extends Type {
 			nf = true
 
 			for fn in @functions while nf {
-				if fn.isMatching(fb, mode) {
+				if fn.isSubsetOf(fb, mode) {
 					nf = false
 				}
 			}
@@ -914,35 +989,29 @@ class OverloadedFunctionType extends Type {
 
 		return true
 	} // }}}
-	isMatching(value: NamedType, mode: MatchingMode) { // {{{
+	isSubsetOf(value: NamedType, mode: MatchingMode) { // {{{
 		if mode ~~ MatchingMode::Exact {
 			return false
 		}
 
-		return this.isMatching(value.type(), mode)
-	} // }}}
-	isMergeable(type) => type is OverloadedFunctionType && @async == type.isAsync()
-	isMorePreciseThan(type: Type) { // {{{
-		if type.isAny() {
-			return true
-		}
-
-		return false
+		return this.isSubsetOf(value.type(), mode)
 	} // }}}
 	length() => @functions.length
-	matchArguments(arguments: Array) { // {{{
-		for const fn in @functions {
-			if fn.matchArguments(arguments) {
-				return true
-			}
-		}
+	matchArguments(arguments: Array, node: AbstractNode) { // {{{
+		const assessment = this.assessment('', node)
 
-		return false
+		return ?Router.matchArguments2(assessment, arguments, node)
+	} // }}}
+	originals(@majorOriginal): this { // {{{
+		@altering = true
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		throw new NotImplementedException()
 	} // }}}
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotImplementedException()
+	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('func', @functions.length)
 	} // }}}
 }

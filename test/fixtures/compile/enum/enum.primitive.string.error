@@ -1,1 +1,1 @@
-ReferenceException: The function "foobar" can't be matched to given arguments (String) (line 11, file "fixtures/compile/enum/enum.primitive.string.ks")
+ReferenceException: The function "foobar" can't be matched to given arguments (String) (fixtures/compile/enum/enum.primitive.string.ks:11)

@@ -1,1 +1,1 @@
-TypeException: The type of export "x" must be "Number" and not "Null" (line 1, file "fixtures/compile/export/export.var.nv.default.ks")
+TypeException: The type of export "x" must be "Number" and not "Null" (fixtures/compile/export/export.var.nv.default.ks:1)

@@ -1,42 +1,40 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x) && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'NS'");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
 		quxbaz(x);
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isNumber(value) || Type.isString(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	function quxbaz() {
-		if(arguments.length === 1 && Type.isNumber(arguments[0])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
+		return quxbaz.__ks_rt(this, arguments);
+	};
+	quxbaz.__ks_0 = function(x) {
+		return 1;
+	};
+	quxbaz.__ks_1 = function(x) {
+		return 2;
+	};
+	quxbaz.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		const t1 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return quxbaz.__ks_0.call(that, args[0]);
 			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
+			if(t1(args[0])) {
+				return quxbaz.__ks_1.call(that, args[0]);
 			}
-			return 1;
 		}
-		else if(arguments.length === 1) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isString(x)) {
-				throw new TypeError("'x' is not of type 'String'");
-			}
-			return 2;
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 };

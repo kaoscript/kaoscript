@@ -1,51 +1,58 @@
-{
-  "aliens": [
-    0,
-    "console",
-    1,
-    "Math"
-  ],
-  "requirements": [],
-  "exports": [
-    1,
-    "Math"
-  ],
-  "references": [
-    {
-      "kind": "sealable",
-      "systemic": true,
-      "type": "Any?"
-    },
-    {
-      "kind": "namespace",
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": true,
-      "properties": {
-        "PI": {
-          "type": "Number",
-          "sealed": false
-        },
-        "pow": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "type": "Any?",
-              "min": 0,
-              "max": "Infinity",
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
+[
+  {
+    "aliens": [
+      0,
+      "console",
+      true,
+      1,
+      "Math",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "sealable",
+        "systemic": true,
+        "type": "Any?"
+      },
+      {
+        "kind": "namespace",
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": true,
+        "properties": {
+          "PI": {
+            "type": "Number",
+            "sealed": false
+          },
+          "pow": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "Math"
+    ],
+    "references": [],
+    "macros": []
+  }
+]

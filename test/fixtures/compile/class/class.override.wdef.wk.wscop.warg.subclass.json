@@ -1,0 +1,125 @@
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Foobar",
+      1,
+      "Quxbaz"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": true,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "abstractMethods": {
+          "foobar": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "y",
+                  "type": "String",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": false,
+                  "defaultValue": "__ks_default_0_0(x)"
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "sequences": [
+          -1,
+          0,
+          -1
+        ]
+      },
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "foobar": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "x",
+                  "type": "String",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "y",
+                  "type": "String",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": false,
+                  "defaultValue": "__ks_default_0_0(x)"
+                }
+              ],
+              "returns": "String",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "extends": [
+          0,
+          "Foobar"
+        ],
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

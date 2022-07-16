@@ -1,9 +1,9 @@
 extern console
 
-func foobar(...args: Array<Array>) {
+func foobar(...args: Array) {
 	console.log('Array')
 }
-func foobar(...args: Array<String>) {
+func foobar(...args: String) {
 	console.log('String')
 }
 func foobar(...args) {

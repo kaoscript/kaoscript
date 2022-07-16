@@ -1,1 +1,0 @@
-SyntaxException: The function "foobar" is identical with another function "foobar" (line 6, file "fixtures/compile/function/function.overloading.spread.typed.default.ks")

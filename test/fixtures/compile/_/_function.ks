@@ -1,4 +1,6 @@
+#[rules(non-exhaustive)]
 extern systemic class Function {
+	toString(): String
 }
 
 impl Function {

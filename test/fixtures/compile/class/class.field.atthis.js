@@ -1,46 +1,45 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
-		__ks_init_0() {
+		__ks_init() {
 			this._foo = 42;
 			this.bar = "foobar";
 		}
-		__ks_init() {
-			Foobar.prototype.__ks_init_0.call(this);
-		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
+		}
+		foo() {
+			return this.__ks_func_foo_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foo_0() {
 			return this._foo;
 		}
 		__ks_func_foo_1(foo) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(foo === void 0 || foo === null) {
-				throw new TypeError("'foo' is not nullable");
-			}
-			else if(!Type.isNumber(foo)) {
-				throw new TypeError("'foo' is not of type 'Number'");
-			}
 			this._foo = foo;
 			return this;
 		}
-		foo() {
-			if(arguments.length === 0) {
-				return Foobar.prototype.__ks_func_foo_0.apply(this);
+		__ks_func_foo_rt(that, proto, args) {
+			const t0 = Type.isNumber;
+			if(args.length === 0) {
+				return proto.__ks_func_foo_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Foobar.prototype.__ks_func_foo_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_foo_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

@@ -1,1 +1,1 @@
-ReferenceException: The identifier "x" is immutable (line 5, file "fixtures/compile/variable/variable.lateinit.reass.ie.ks")
+ReferenceException: The identifier "x" is immutable (fixtures/compile/variable/variable.lateinit.reass.ie.ks:5)

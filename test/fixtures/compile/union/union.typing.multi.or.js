@@ -1,23 +1,26 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = require("../_/_number.ks")().__ks_Number;
-	var __ks_String = require("../_/_string.ks")().__ks_String;
-	function foo(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isString(x) && !Type.isNumber(x) && !Type.isArray(x)) {
-			throw new TypeError("'x' is not of type 'String', 'Number' or 'Array'");
-		}
+	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
+	var __ks_String = require("../_/._string.ks.j5k8r9.ksb")().__ks_String;
+	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function(x) {
 		if(Type.isString(x) || Type.isNumber(x)) {
-			return Type.isString(x) ? __ks_String._im_toFloat(x) : __ks_Number._im_toFloat(x);
+			return Type.isString(x) ? __ks_String.__ks_func_toFloat_0.call(x) : __ks_Number.__ks_func_toFloat_0.call(x);
 		}
 		else {
 			return x;
 		}
-	}
+	};
+	foo.__ks_rt = function(that, args) {
+		const t0 = value => Type.isArray(value) || Type.isNumber(value) || Type.isString(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foo.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

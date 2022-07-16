@@ -1,1 +1,1 @@
-TypeException: The variable "@PI" of type "Number" can't be assigned with a value of type "String" (line 5, file "fixtures/compile/class/class.field.lateinit.let.nstt.wt_i.was_ti.was_tse.ks")
+TypeException: The variable "@PI" of type "Number" can't be assigned with a value of type "String" (fixtures/compile/class/class.field.lateinit.let.nstt.wt_i.was_ti.was_tse.ks:5)

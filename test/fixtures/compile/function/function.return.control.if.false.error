@@ -1,1 +1,1 @@
-TypeException: The return type must be "String" and not "Number" (line 6, file "fixtures/compile/function/function.return.control.if.false.ks")
+TypeException: The return type must be "String" and not "Number" (fixtures/compile/function/function.return.control.if.false.ks:6)

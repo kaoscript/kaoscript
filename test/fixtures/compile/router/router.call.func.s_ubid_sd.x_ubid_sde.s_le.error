@@ -1,1 +1,1 @@
-ReferenceException: The function "foobar" can't be matched to given arguments (String, Array) (line 6, file "fixtures/compile/router/router.call.func.s_ubid_sd.x_ubid_sde.s_le.ks")
+ReferenceException: The function "foobar" can't be matched to given arguments (String, Array) (fixtures/compile/router/router.call.func.s_ubid_sd.x_ubid_sde.s_le.ks:6)

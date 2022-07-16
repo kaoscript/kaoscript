@@ -1,1 +1,1 @@
-ReferenceException: The method "fromString" can't be found in the enum "Weekday" (line 11, file "fixtures/compile/enum/enum.method.wstt.nomatch.ks")
+ReferenceException: The method "fromString" can't be found in the enum "Weekday" (fixtures/compile/enum/enum.method.wstt.nomatch.ks:11)

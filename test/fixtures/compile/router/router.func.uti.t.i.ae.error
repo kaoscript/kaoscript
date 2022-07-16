@@ -1,0 +1,1 @@
+SyntaxException: The function "foobar(x: Date|Number)" is been concealed by others functions (fixtures/compile/router/router.func.uti.t.i.ae.ks:1)

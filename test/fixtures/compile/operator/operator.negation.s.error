@@ -1,1 +1,1 @@
-TypeException: The expression "x" of type "String" is expected to be of type "Boolean" or "Any" in a negation operation (line 2, file "fixtures/compile/operator/operator.negation.s.ks")
+TypeException: The expression "x" of type "String" is expected to be of type "Boolean" or "Any" in a negation operation (fixtures/compile/operator/operator.negation.s.ks:2)

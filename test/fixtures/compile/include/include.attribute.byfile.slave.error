@@ -1,1 +1,1 @@
-ReferenceException: The function "foobar" can't be found (line 1, file "fixtures/compile/include/include.attribute.byfile.slave.ks")
+ReferenceException: The function "foobar" can't be found (fixtures/compile/include/include.attribute.byfile.slave.ks:1)

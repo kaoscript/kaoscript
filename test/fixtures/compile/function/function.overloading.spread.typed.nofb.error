@@ -1,1 +1,1 @@
-SyntaxException: The function "foobar" is identical with another function "foobar" (line 6, file "fixtures/compile/function/function.overloading.spread.typed.nofb.ks")
+SyntaxException: When there are no arguments, the function "foobar" can be matched with "foobar(...args: Array<Array>)" or "foobar(...args: Array<String>)" (fixtures/compile/function/function.overloading.spread.typed.nofb.ks:3)

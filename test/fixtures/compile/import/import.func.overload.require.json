@@ -1,71 +1,80 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "reverse"
-  ],
-  "references": [
-    {
-      "kind": "overloadedfunction",
-      "exhaustive": true,
-      "functions": [
-        {
-          "kind": "function",
-          "async": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "String",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "String",
-          "throws": []
-        },
-        {
-          "kind": "function",
-          "async": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "Array",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "Array",
-          "throws": []
-        },
-        {
-          "kind": "function",
-          "async": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": []
-        }
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "reverse"
+    ],
+    "references": [
+      {
+        "kind": "overloadedfunction",
+        "exhaustive": true,
+        "functions": [
+          {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "String",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "String",
+            "errors": []
+          },
+          {
+            "kind": "function",
+            "index": 1,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Array",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Array",
+            "errors": []
+          },
+          {
+            "kind": "function",
+            "index": 2,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": []
+          }
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

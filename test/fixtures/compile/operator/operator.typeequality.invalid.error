@@ -1,1 +1,1 @@
-TypeException: The variable of type "Array" can never be of type "String" (line 2, file "fixtures/compile/operator/operator.typeequality.invalid.ks")
+TypeException: The variable of type "Array" can never be of type "String" (fixtures/compile/operator/operator.typeequality.invalid.ks:2)

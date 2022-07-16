@@ -1,32 +1,32 @@
 require("kaoscript/register");
-var {Dictionary, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Float = require("../_/_float.ks")().Float;
-	var __ks_Math = require("../_/_math.ks")().__ks_Math;
-	var __ks_Number = require("../_/_number.ks")().__ks_Number;
+	var Float = require("../_/._float.ks.j5k8r9.ksb")().Float;
+	var __ks_Math = require("../_/._math.ks.j5k8r9.ksb")().__ks_Math;
+	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
 	const $caster = (() => {
 		const d = new Dictionary();
-		d.percentage = function(n) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(n === void 0 || n === null) {
-				throw new TypeError("'n' is not nullable");
-			}
-			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 100), 1);
-		};
+		d.percentage = (() => {
+			const __ks_rt = (...args) => {
+				const t0 = Type.isValue;
+				if(args.length === 1) {
+					if(t0(args[0])) {
+						return __ks_rt.__ks_0.call(null, args[0]);
+					}
+				}
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = function(n) {
+				return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse.__ks_0(n), 0, 100), 1);
+			};
+			return __ks_rt;
+		})();
 		return d;
 	})();
-	function srgb(that, color) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(that === void 0 || that === null) {
-			throw new TypeError("'that' is not nullable");
-		}
-		if(color === void 0 || color === null) {
-			throw new TypeError("'color' is not nullable");
-		}
+	function srgb() {
+		return srgb.__ks_rt(this, arguments);
+	};
+	srgb.__ks_0 = function(that, color) {
 		let match = /^rgba?\(([0-9.]+\%),([0-9.]+\%),([0-9.]+\%)(,([0-9.]+)(\%)?)?\)$/.exec(color);
 		if(Type.isValue(match)) {
 			that._red = Math.round(2.55 * $caster.percentage(match[1]));
@@ -37,5 +37,14 @@ module.exports = function() {
 		else {
 			return false;
 		}
-	}
+	};
+	srgb.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return srgb.__ks_0.call(that, args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

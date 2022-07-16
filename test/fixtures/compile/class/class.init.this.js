@@ -1,42 +1,46 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foo {
+		static __ks_new_0(...args) {
+			const o = Object.create(Foo.prototype);
+			o.__ks_init();
+			o.__ks_cons_0(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
 		__ks_cons_0(bar) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(bar === void 0 || bar === null) {
-				throw new TypeError("'bar' is not nullable");
-			}
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isValue;
 			if(args.length === 1) {
-				Foo.prototype.__ks_cons_0.apply(this, args);
+				if(t0(args[0])) {
+					return Foo.prototype.__ks_cons_0.call(that, args[0]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		}
 	}
 	class Bar {
+		static __ks_new_0() {
+			const o = Object.create(Bar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._foo = new Foo(this);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Bar.prototype.__ks_init_0.call(this);
+			this._foo = Foo.__ks_new_0(this);
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}

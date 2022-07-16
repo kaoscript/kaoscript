@@ -1,49 +1,42 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Shape {
+		static __ks_new_0() {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
-		}
-		__ks_func_draw_0(text) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(text === void 0 || text === null) {
-				throw new TypeError("'text' is not nullable");
-			}
-			else if(!Type.isString(text)) {
-				throw new TypeError("'text' is not of type 'String'");
-			}
-			return text;
 		}
 		draw() {
-			if(arguments.length === 1) {
-				return Shape.prototype.__ks_func_draw_0.apply(this, arguments);
+			return this.__ks_func_draw_rt.call(null, this, this, arguments);
+		}
+		__ks_func_draw_0(text) {
+			return text;
+		}
+		__ks_func_draw_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_draw_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	Shape.prototype.__ks_func_draw_0 = function(text) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(text === void 0 || text === null) {
-			throw new TypeError("'text' is not nullable");
-		}
-		else if(!Type.isString(text)) {
-			throw new TypeError("'text' is not of type 'String'");
-		}
 		return "I'm drawing a new shape.";
 	};
 	return {
-		Shape: Shape
+		Shape
 	};
 };

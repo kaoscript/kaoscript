@@ -1,1 +1,1 @@
-ReferenceException: "bar" is not defined (line 2, file "fixtures/compile/dictionary/dictionary.undefined.ks")
+ReferenceException: "bar" is not defined (fixtures/compile/dictionary/dictionary.undefined.ks:2)

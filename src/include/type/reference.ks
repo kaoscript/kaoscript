@@ -15,24 +15,36 @@ const $weightTOFs = { // {{{
 	Tuple: 11
 } // }}}
 
+// TODO add strict flag for router.call.func.cb.cre.vsr=cre.ks
 class ReferenceType extends Type {
 	private lateinit {
 		_type: Type
 		_variable: Variable
 	}
 	private {
+		_alias: String?
+		_explicitlyNull: Boolean
 		_name: String
-		_nullable: Boolean					= false
-		_parameters: Array<ReferenceType>
+		_nullable: Boolean
+		_parameters: Array<Type>
 		_predefined: Boolean				= false
 		_spread: Boolean					= false
 	}
 	static {
-		fromMetadata(data, metadata, references: Array, alterations, queue: Array, scope: Scope, node: AbstractNode) { // {{{
-			const name = data.name is Number ? Type.fromMetadata(data.name, metadata, references, alterations, queue, scope, node).name() : data.name
-			const parameters = ?data.parameters ? [Type.fromMetadata(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
+		import(index, data, metadata: Array, references: Dictionary, alterations: Dictionary, queue: Array, scope: Scope, node: AbstractNode): ReferenceType { // {{{
+			let name
+			if data.name is Number {
+				const reference = Type.import({ reference: data.name }, metadata, references, alterations, queue, scope, node)
 
-			return new ReferenceType(scope, name, data.nullable, parameters)
+				name = reference.name()
+			}
+			else {
+				name = data.name
+			}
+
+			const parameters = ?data.parameters ? [Type.import(parameter, metadata, references, alterations, queue, scope, node) for parameter in data.parameters] : null
+
+			return new ReferenceType(scope, name as String, data.nullable!?, parameters)
 		} // }}}
 		toQuote(name, nullable, parameters) { // {{{
 			const fragments = [name]
@@ -58,14 +70,11 @@ class ReferenceType extends Type {
 			return fragments.join('')
 		} // }}}
 	}
-	constructor(@scope, name: String, @nullable = false, @parameters = []) { // {{{
+	constructor(@scope, name: String, @explicitlyNull = false, @parameters = []) { // {{{
 		super(scope)
 
 		@name = $types[name] ?? name
-
-		if @name == 'Null' {
-			@nullable = true
-		}
+		@nullable = @explicitlyNull
 	} // }}}
 	canBeBoolean() => this.isUnion() ? @type.canBeBoolean() : super()
 	canBeNumber(any = true) => this.isUnion() ? @type.canBeNumber(any) : super(any)
@@ -109,6 +118,83 @@ class ReferenceType extends Type {
 			return -1
 		}
 	} // }}}
+	compareToRef(value: AnyType) { // {{{
+		if this.isAny() {
+			if @nullable == value.isNullable() {
+				return 0
+			}
+			else if @nullable {
+				return 1
+			}
+			else {
+				return -1
+			}
+		}
+		else {
+			return -1
+		}
+	} // }}}
+	compareToRef(value: NullType) { // {{{
+		if this.isNull() {
+			return 0
+		}
+		else {
+			return -1
+		}
+	} // }}}
+	compareToRef(value: ReferenceType) { // {{{
+		if @name == value.name() {
+			if @parameters.length == 0 {
+				if value.hasParameters() {
+					return -1
+				}
+				else {
+					return 1
+				}
+			}
+
+			return @parameters[0].compareTo(value.parameter(0))
+		}
+		else if this.isTypeOf() {
+			if this.hasParameters() {
+				return 1
+			}
+			else if this.isNullable() != value.isNullable() {
+				return this.isNullable() ? 1 : -1
+			}
+			else if value.isTypeOf() {
+				return $weightTOFs[@name] - $weightTOFs[value.name()]
+			}
+			else if value.isInstance() {
+				return -1
+			}
+			else {
+				return 1
+			}
+		}
+		else if value.isTypeOf() {
+			if value.hasParameters() {
+				return -1
+			}
+			else {
+				return 1
+			}
+		}
+		else if this.type().isClass() {
+			if value.type().isInstance() {
+				return Helper.compareString(@type.name(), value.name())
+			}
+			else {
+				return 1
+			}
+		}
+		else {
+			return -1
+		}
+	} // }}}
+	compareToRef(value: UnionType) { // {{{
+		return -1
+	} // }}}
 	discard() => this.discardReference()?.discard()
 	discardAlias() { // {{{
 		if @name == 'Any' {
@@ -145,7 +231,7 @@ class ReferenceType extends Type {
 			return this
 		}
 	} // }}}
-	export(references, mode) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		if @parameters.length == 0 {
 			return @nullable ? `\(@name)?` : @name
 		}
@@ -155,30 +241,30 @@ class ReferenceType extends Type {
 				name: @name
 			}
 
-			if @nullable {
-				export.nullable = @nullable
+			if @explicitlyNull {
+				export.nullable = @explicitlyNull
 			}
 
 			if @parameters.length != 0 {
-				export.parameters = [parameter.toReference(references, mode) for parameter in @parameters]
+				export.parameters = [parameter.toGenericParameter(references, indexDelta, mode, module) for parameter in @parameters]
 			}
 
 			return export
 		}
 	} // }}}
-	export(references, mode, name) { // {{{
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module, name) { // {{{
 		if @nullable || @parameters.length != 0 {
 			const export = {
 				kind: TypeKind::Reference
 				name: name.reference ?? name
 			}
 
-			if @nullable {
-				export.nullable = @nullable
+			if @explicitlyNull {
+				export.nullable = @explicitlyNull
 			}
 
 			if @parameters.length != 0 {
-				export.parameters = [parameter.toReference(references, mode) for parameter in @parameters]
+				export.parameters = [parameter.toReference(references, indexDelta, mode, module) for parameter in @parameters]
 			}
 
 			return export
@@ -208,6 +294,7 @@ class ReferenceType extends Type {
 
 		return type
 	} // }}}
+	getMajorReferenceIndex() => @referenceIndex == -1 ? this.type().getMajorReferenceIndex() : @referenceIndex
 	getProperty(name: String): Type { // {{{
 		if this.isAny() {
 			return AnyType.NullableUnexplicit
@@ -226,7 +313,10 @@ class ReferenceType extends Type {
 			return type.getProperty(name)
 		}
 	} // }}}
-	hashCode(): String { // {{{
+	// TODO: merge methods
+	hashCode(): String => this.hashCode(false)
+	hashCode(fattenNull: Boolean): String { // {{{
+	// hashCode(fattenNull: Boolean = false): String { // {{{
 		let hash = @name
 
 		if @parameters.length != 0 {
@@ -243,8 +333,13 @@ class ReferenceType extends Type {
 			hash += '>'
 		}
 
-		if @nullable {
-			hash += '?'
+		if @explicitlyNull {
+			if fattenNull {
+				hash += '|Null'
+			}
+			else {
+				hash += '?'
+			}
 		}
 
 		return hash
@@ -253,7 +348,7 @@ class ReferenceType extends Type {
 	isAlien() => this.type().isAlien()
 	isAny() => @name == 'Any'
 	isArray() => @name == 'Array' || this.type().isArray()
-	isAssignableToVariable(value, anycast, nullcast, downcast) { // {{{
+	override isAssignableToVariable(value, anycast, nullcast, downcast, limited) { // {{{
 		if this == value {
 			return true
 		}
@@ -265,25 +360,56 @@ class ReferenceType extends Type {
 				return true
 			}
 		}
-		else if value is ReferenceType && @name == value.name() {
-			if @nullable {
-				return nullcast || value.isNullable()
+		else if value is ReferenceType {
+			if @name == value.name() {
+				if @nullable && !nullcast && !value.isNullable() {
+					return false
+				}
+
+				for const index from 0 til Math.max(@parameters.length, value.parameters().length) {
+					if !this.parameter(index).isAssignableToVariable(value.parameter(index), true, nullcast, downcast) {
+						return false
+					}
+				}
+
+				return true
+			}
+			else if (value.name() == 'Class' && this.type().isClass()) || (@name == 'Class' && value.type().isClass()) {
+				return false
+			}
+			else if (value.name() == 'Enum' && this.type().isEnum()) || (@name == 'Enum' && value.type().isEnum()) {
+				return false
+			}
+			else if (value.name() == 'Namespace' && this.type().isNamespace()) || (@name == 'Namespace' && value.type().isNamespace()) {
+				return false
+			}
+			else if (value.name() == 'Struct' && this.type().isStruct()) || (@name == 'Struct' && value.type().isStruct()) {
+				return false
+			}
+			else if (value.name() == 'Tuple' && this.type().isTuple()) || (@name == 'Tuple' && value.type().isTuple()) {
+				return false
 			}
 			else {
-				return true
+				return this.type().isAssignableToVariable(value.type(), anycast, nullcast, downcast)
 			}
 		}
 		else if value is UnionType {
-			return this.type().isAssignableToVariable(value, anycast, nullcast, downcast)
-		}
-		else if @name == 'Class' {
-			return value.isClass()
-		}
-		else if @name == 'Struct' {
-			return value.isStruct()
-		}
-		else if @name == 'Tuple' {
-			return value.isTuple()
+			if @nullable {
+				if !nullcast && !value.isNullable() {
+					return false
+				}
+
+				return this.setNullable(false).isAssignableToVariable(value, anycast, nullcast, downcast, limited)
+			}
+			else {
+				for const type in value.types() {
+					if this.isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
+						return true
+					}
+				}
+
+				return false
+			}
 		}
 		else {
 			return this.type().isAssignableToVariable(value, anycast, nullcast, downcast)
@@ -292,42 +418,48 @@ class ReferenceType extends Type {
 	isAsync() => false
 	isBoolean() => @name == 'Boolean' || this.type().isBoolean()
 	isClass() => @name == 'Class'
+	isClassInstance() => this.type().isClass()
 	override isComparableWith(type) => this.type().isComparableWith(type)
 	isDictionary() => @name == 'Dictionary' || this.type().isDictionary()
 	isEnum() => @name == 'Enum' || this.type().isEnum()
 	isExhaustive() => this.type().isExhaustive()
 	isExplicit() => this.type().isExplicit()
 	isExplicitlyExported() => this.type().isExplicitlyExported()
+	isExplicitlyNull() => @explicitlyNull
 	isExportable() => this.type().isExportable()
 	isExported() => this.type().isExported()
 	isExportingFragment() => !this.isVirtual()
+	isExtendable() => @name == 'Function'
 	isFunction() => @name == 'Function' || this.type().isFunction()
 	isHybrid() => this.type().isHybrid()
-	isInstanceOf(target: AnyType) => true
-	isInstanceOf(target: ReferenceType) { // {{{
-		if @name == target.name() || target.isAny() {
+	isInstance() => this.type().isClass() || this.type().isStruct() || this.type().isTuple()
+	isInstanceOf(value: AnyType) => false
+	isInstanceOf(value: ReferenceType) { // {{{
+		@resolveType()
+
+		return false unless @type.isClass()
+
+		if @name == value.name() || value.isAny() {
 			return true
 		}
 
-		if const type = target.discardAlias() {
-			if type is ClassType {
-				if (thisClass ?= this.discardAlias()) && thisClass is ClassType {
-					return thisClass.isInstanceOf(type)
-				}
-			}
-			else if type is UnionType {
+		if const type = value.discardAlias() {
+			if type is UnionType {
 				for const type in type.types() {
 					if this.isInstanceOf(type) {
 						return true
 					}
 				}
 			}
+			else if type.isClass() {
+				return @type.type().isInstanceOf(type.discardAlias().type())
+			}
 		}
 
 		return false
 	} // }}}
-	isInstanceOf(target: UnionType) { // {{{
-		for type in target.types() {
+	isInstanceOf(value: UnionType) { // {{{
+		for type in value.types() {
 			if this.isInstanceOf(type) {
 				return true
 			}
@@ -335,39 +467,131 @@ class ReferenceType extends Type {
 
 		return false
 	} // }}}
-	isMatching(value: Type, mode: MatchingMode) { // {{{
-		if this == value {
-			return true
+	isMorePreciseThan(value: Type) { // {{{
+		if value.isAny() {
+			return !this.isAny() || (value.isNullable() && !@nullable)
 		}
-		else if mode ~~ MatchingMode::Exact {
-			if value is ReferenceType {
-				if @name != value._name || @nullable != value._nullable || @parameters.length != value._parameters.length {
-					return false
-				}
-
-				// TODO: test @parameters
-
+		else if this.isAny() {
+			return false
+		}
+		else if value is ReferenceType && value.name() == @name {
+			if value.isNullable() && !@nullable {
+				return true
+			}
+			else if this.hasParameters() && !value.hasParameters() {
 				return true
 			}
 			else {
-				return value.isMatching(this, mode)
+				return false
+			}
+		}
+		else {
+			const a: Type = this.discardReference()!?
+			const b: Type = value.discardReference()!?
+
+			return a.isMorePreciseThan(b)
+		}
+	} // }}}
+	isNamespace() => @name == 'Namespace' || this.type().isNamespace()
+	isNative() => $natives[@name] == true
+	isNever() => @name == 'Never' || this.type().isNever()
+	isNull() => @name == 'Null'
+	isNullable() { // {{{
+		@resolveType()
+
+		return @nullable
+	} // }}}
+	isNumber() => @name == 'Number' || this.type().isNumber()
+	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String' || @name == 'Struct' || @name == 'Tuple'))
+	isReference() => true
+	isReducible() => true
+	isSpread() => @spread
+	isString() => @name == 'String' || this.type().isString()
+	isStruct() => @name == 'Struct' || this.type().isStruct()
+	isSubsetOf(value: Type, mode: MatchingMode) { // {{{
+		if this == value {
+			return true
+		}
+		else if mode ~~ MatchingMode::Exact && mode !~ MatchingMode::Subclass {
+			if value is ReferenceType {
+				if @name != value._name || @parameters.length != value._parameters.length {
+					return false
+				}
+
+				if mode ~~ MatchingMode::NonNullToNull {
+					if @isNullable() && !value.isNullable() {
+						return false
+					}
+				}
+				else if @isNullable() != value.isNullable() {
+					return false
+				}
+
+				if @parameters? {
+					if value._parameters? && @parameters.length == value._parameters.length {
+						for const parameter, i in @parameters {
+							if !parameter.isSubsetOf(value._parameters[i], mode) {
+								return false
+							}
+						}
+					}
+					else {
+						return false
+					}
+				}
+				else {
+					if value._parameters? {
+						return false
+					}
+				}
+
+				return true
+			}
+			else if value.isAny() && !value.isExplicit() && mode ~~ MatchingMode::Missing {
+				return true
+			}
+			else {
+				return false
 			}
 		}
 		else {
 			if value is ReferenceType {
+				if @isNullable() && !value.isNullable() {
+					return false
+				}
+
+				if value.scope().isRenamed(value.name(), @name, @scope, mode) {
+					const parameters = value.parameters()
+
+					if parameters.length == @parameters.length {
+						for const parameter, index in @parameters {
+							if !parameter.isSubsetOf(parameters[index], mode) {
+								return false
+							}
+						}
+
+						return true
+					}
+				}
+
 				if $virtuals[value.name()] {
 					return this.type().canBeVirtual(value.name())
 				}
-				else {
-					return @scope.isMatchingType(this.discardReference()!?, value.discardReference()!?, mode)
+
+				if mode ~~ MatchingMode::AutoCast {
+					if @type().isEnum() {
+						return @type().discard().type().isSubsetOf(value, mode)
+					}
 				}
+
+				return @scope.isMatchingType(this.discardReference()!?, value.discardReference()!?, mode)
 			}
 			else if value.isDictionary() && this.type().isClass() {
 				return @type.type().matchInstanceWith(value, [])
 			}
 			else if value is UnionType {
 				for const type in value.types() {
-					if this.isMatching(type, mode) {
+					if this.isSubsetOf(type, mode) {
 						return true
 					}
 				}
@@ -379,69 +603,39 @@ class ReferenceType extends Type {
 			}
 		}
 	} // }}}
-	isMorePreciseThan(that: Type) { // {{{
-		if that.isAny() {
-			return !this.isAny() || (that.isNullable() && !@nullable)
-		}
-		else if this.isAny() {
-			return false
-		}
-		else if that is ReferenceType && that.name() == @name {
-			return that.isNullable() && !@nullable
-		}
-		else {
-			const a: Type = this.discardReference()!?
-			const b: Type = that.discardReference()!?
-
-			return a.isMorePreciseThan(b)
-		}
-	} // }}}
-	isNamespace() => @name == 'Namespace' || this.type().isNamespace()
-	isNative() => $natives[@name] == true
-	isNever() => @name == 'Never' || this.type().isNever()
-	isNull() => @name == 'Null'
-	isNullable() => @nullable || @name == 'Null'
-	isNumber() => @name == 'Number' || this.type().isNumber()
-	isObject() => @name == 'Object' || (this.type().isClass() && !(@name == 'Array' || @name == 'Boolean' || @name == 'Dictionary' || @name == 'Enum' || @name == 'Function' || @name == 'Namespace' || @name == 'Number' || @name == 'String' || @name == 'Struct' || @name == 'Tuple'))
-	isReference() => true
-	isReducible() => true
-	isRequired() => this.type().isRequired()
-	isSpread() => @spread
-	isString() => @name == 'String' || this.type().isString()
-	isStruct() => @name == 'Struct' || this.type().isStruct()
 	isTuple() => @name == 'Tuple' || this.type().isTuple()
 	isTypeOf(): Boolean => $typeofs[@name]
 	isUnion() => this.type().isUnion()
 	isVoid() => @name == 'Void' || this.type().isVoid()
-	matchContentOf(that: Type) { // {{{
-		if this == that {
+	matchContentOf(value: Type) { // {{{
+		if this == value {
 			return true
 		}
-		else if @nullable && !that.isNullable() {
+		else if @nullable && !value.isNullable() {
 			return false
 		}
-		else if that.isAny() {
+		else if value.isAny() {
 			return true
 		}
 		else if this.isFunction() {
-			return that.isFunction()
+			return value.isFunction()
 		}
 		else {
 			const a: Type = this.discardReference()!?
-			const b: Type = that.discardReference()!?
+			const b: Type = value.discardReference()!?
 
-			if a is ReferenceType || b is ReferenceType {
+			if a is ReferenceType || b is ReferenceType || !a.matchContentOf(b) {
 				return false
 			}
 
-			if that is ReferenceType && that.hasParameters() {
+			if value is ReferenceType && value.hasParameters() {
 				if @parameters.length == 0 {
 					return true
 				}
 
-				const parameters = that.parameters()
+				const parameters = value.parameters()
 
-				if @parameters.length != parameters.length || !a.matchContentOf(b) {
+				if @parameters.length != parameters.length {
 					return false
 				}
 
@@ -450,12 +644,9 @@ class ReferenceType extends Type {
 						return false
 					}
 				}
+			}
 
-				return true
-			}
-			else {
-				return a.matchContentOf(b)
-			}
+			return true
 		}
 	} // }}}
 	name(): String => @name
@@ -471,19 +662,30 @@ class ReferenceType extends Type {
 		}
 	} // }}}
 	parameters() => @parameters
-	reassign(@name, @scope) => this
+	reassign(@name, @scope) { // {{{
+		this.reset()
+
+		return this
+	} // }}}
 	reduce(type: Type) { // {{{
 		if this == type {
 			return this
 		}
 		else {
-			return @scope.reference(this.type().reduce(type))
+			const reduced = this.type().reduce(type)
+
+			if @nullable && !type.isNullable() {
+				return (reduced.isUnion() ? reduced : @scope.reference(reduced)).setNullable(true)
+			}
+			else {
+				return reduced.isUnion() ? reduced : @scope.reference(reduced)
+			}
 		}
 	} // }}}
 	resolveType() { // {{{
 		if !?@type || @type.isCloned() {
 			if @name == 'Any' {
-				@type = Type.Any
+				@type = AnyType.Unexplicit
 				@predefined = true
 			}
 			else if @name == 'Never' {
@@ -492,6 +694,7 @@ class ReferenceType extends Type {
 			}
 			else if @name == 'Null' {
 				@type = Type.Null
+				@nullable = true
 				@predefined = true
 			}
 			else if @name == 'Void' {
@@ -504,6 +707,7 @@ class ReferenceType extends Type {
 				if names.length == 1 {
 					if @variable ?= @scope.getVariable(@name, -1) {
 						@type = @variable.getRealType()
+						@nullable = @nullable || @type.isNullable()
 						@predefined = @variable.isPredefined() || @type.isPredefined()
 
 						if @type is AliasType {
@@ -533,6 +737,7 @@ class ReferenceType extends Type {
 					}
 
 					@type = type
+					@nullable = @nullable || type.isNullable()
 					@predefined = type.isPredefined()
 				}
 
@@ -545,12 +750,70 @@ class ReferenceType extends Type {
 			}
 		}
 	} // }}}
+	reset(): this { // {{{
+		delete @type
+		@nullable = @explicitlyNull
+		@predefined = false
+	} // }}}
 	setNullable(nullable: Boolean): ReferenceType { // {{{
-		if @nullable == nullable {
-			return this
+		if @explicitlyNull {
+			if nullable {
+				return this
+			}
+			else {
+				return @scope.reference(@name, false, [...@parameters])
+			}
 		}
 		else {
-			return @scope.reference(@name, nullable, [...@parameters])
+			@resolveType()
+
+			if @nullable == nullable {
+				return this
+			}
+			else if @type.isUnion() {
+				if nullable {
+					if @type.isAlias() {
+						return @scope.reference(@name, true, [...@parameters])
+					}
+
+					const types = @type.discard().types()
+
+					types.push(Type.Null)
+
+					return Type.union(@scope, ...types)
+				}
+				else {
+					const types = []
+
+					for const type in @type.discard().types() {
+						if type.isNull() {
+							continue
+						}
+
+						if type.isNullable() {
+							types.push(type.setNullable(false))
+						}
+						else {
+							types.push(type)
+						}
+					}
+
+					return Type.union(@scope, ...types)
+				}
+			}
+			else {
+				return @scope.reference(@name, nullable, [...@parameters])
+			}
+		}
+	} // }}}
+	split(types: Array) { // {{{
+		this.resolveType()
+
+		if @type.isAlias() || @type.isUnion() {
+			return @type.split(types)
+		}
+		else {
+			return super(types)
 		}
 	} // }}}
 	toCastFragments(fragments) { // {{{
@@ -579,60 +842,91 @@ class ReferenceType extends Type {
 	} // }}}
 	toExportFragment(fragments, name, variable) { // {{{
 		if !this.isVirtual() {
-			fragments.newLine().code(`\(name): `).compile(variable).done()
+			const varname = variable.name?()
+
+			if name == varname {
+				fragments.line(name)
+			}
+			else {
+				fragments.newLine().code(`\(name): `).compile(variable).done()
+			}
 		}
 	} // }}}
 	toFragments(fragments, node) { // {{{
 		fragments.code(@name)
 	} // }}}
-	toMetadata(references, mode) { // {{{
+	toMetadata(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		this.resolveType()
 
 		if @referenceIndex != -1 {
 			return @referenceIndex
 		}
 		else if @predefined {
-			return super.toMetadata(references, mode)
+			return super.toMetadata(references, indexDelta, mode, module)
 		}
 		else if !@variable.getRealType().isClass() {
-			@referenceIndex = @variable.getRealType().toMetadata(references, mode)
+			@referenceIndex = @variable.getRealType().toMetadata(references, indexDelta, mode, module)
 		}
 		else if @type.isAlien() && @type.isPredefined() {
-			return super.toMetadata(references, mode)
+			return super.toMetadata(references, indexDelta, mode, module)
 		}
 		else {
-			const reference = @variable.getRealType().toReference(references, mode)
+			const index = references.length
 
-			@referenceIndex = references.length
+			@referenceIndex = index + indexDelta
 
-			references.push(reference)
+			// reserve position
+			references.push(null)
+
+			references[index] = @variable.getRealType().toReference(references, indexDelta, mode, module)
 		}
 
 		return @referenceIndex
 	} // }}}
-	toQuote() => ReferenceType.toQuote(@name, @nullable, @parameters)
-	toReference(references, mode) { // {{{
+	toQuote() => ReferenceType.toQuote(@name, @explicitlyNull, @parameters)
+	toReference(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
 		this.resolveType()
 
 		if @predefined {
-			return this.export(references, mode)
+			return this.export(references, indexDelta, mode, module)
 		}
-		else if !@variable.getDeclaredType().isClass() {
-			return super.toReference(references, mode)
-		}
-		else if @type.isExplicitlyExported() {
-			if mode ~~ ExportMode::IgnoreAlteration && @type.isAlteration() {
-				return this.export(references, mode, @type.toAlterationReference(references, mode))
+		else if mode ~~ ExportMode::Alien {
+			if @type.isClass() {
+				return this.export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
 			}
 			else {
-				return this.export(references, mode, @type.toReference(references, mode))
+				return super(references, indexDelta, mode, module)
 			}
 		}
-		else if this.isNative() {
-			return this.export(references, mode)
+		else if mode ~~ ExportMode::Requirement {
+			if @type.isRequirement() || !@type.isNative() {
+				if @type.isClass() {
+					return this.export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
+				}
+				else {
+					return super(references, indexDelta, mode, module)
+				}
+			}
+			else if @type.isExplicitlyExported() {
+				return this.export(references, indexDelta, mode, module, @type.toAlterationReference(references, indexDelta, mode, module))
+			}
+			else {
+				return this.export(references, indexDelta, mode, module)
+			}
 		}
 		else {
-			return this.export(references, mode, @type.toReference(references, mode))
+			if !@type.isClass() {
+				return super.toReference(references, indexDelta, mode, module)
+			}
+			else if @type.isExplicitlyExported() || @type.isRequirement() {
+				return this.export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
+			}
+			else if this.isNative() {
+				return this.export(references, indexDelta, mode, module)
+			}
+			else {
+				return this.export(references, indexDelta, mode, module, @type.toReference(references, indexDelta, mode, module))
+			}
 		}
 	} // }}}
 	override toNegativeTestFragments(fragments, node, junction) { // {{{
@@ -642,7 +936,7 @@ class ReferenceType extends Type {
 			@type.toNegativeTestFragments(fragments, node, junction)
 		}
 		else {
-			this.toTestFragments(fragments.code('!'), node)
+			this.toTestFragments(fragments.code('!'), node, junction)
 		}
 	} // }}}
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
@@ -652,10 +946,61 @@ class ReferenceType extends Type {
 			@type.toPositiveTestFragments(fragments, node, junction)
 		}
 		else {
-			this.toTestFragments(fragments, node)
+			this.toTestFragments(fragments, node, junction)
 		}
 	} // }}}
-	private toTestFragments(fragments, node) { // {{{
+	override toRouteTestFragments(fragments, node, junction) { // {{{
+		fragments.code('(') if @nullable && junction == Junction::AND
+
+		this.toTestFragments(fragments, node, junction)
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(')')
+		}
+
+		fragments.code(')') if @nullable && junction == Junction::AND
+	} // }}}
+	override toRouteTestFragments(fragments, node, argName, from, to, default, junction) { // {{{
+		this.resolveType()
+
+		fragments.code(`\($runtime.type(node)).isVarargs(\(argName), \(from), \(to), \(default), `)
+
+		const literal = new Literal(false, node, node.scope(), 'value')
+
+		if node._options.format.functions == 'es5' {
+			fragments.code('function(value) { return ')
+
+			if @nullable {
+				this.toTestFragments(fragments, literal, Junction::OR)
+
+				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
+			}
+			else {
+				this.toTestFragments(fragments, literal, Junction::NONE)
+			}
+
+			fragments.code('; }')
+		}
+		else {
+			fragments.code('value => ')
+
+			if @nullable {
+				this.toTestFragments(fragments, literal, Junction::OR)
+
+				fragments.code(` || \($runtime.type(node)).isNull(`).compile(literal).code(')')
+			}
+			else {
+				this.toTestFragments(fragments, literal, Junction::NONE)
+			}
+		}
+
+		fragments.code(')')
+	} // }}}
+	private toTestFragments(fragments, node, junction) { // {{{
+		if @nullable && junction == Junction::AND {
+			fragments.code('(')
+		}
+
 		if tof ?= $runtime.typeof(@name, node) {
 			fragments.code(`\(tof)(`).compile(node)
 		}
@@ -685,7 +1030,140 @@ class ReferenceType extends Type {
 			}
 		}
 
+		if @parameters.length != 0 {
+			fragments.code(', ')
+
+			const literal = new Literal(false, node, node.scope(), 'value')
+
+			if node._options.format.functions == 'es5' {
+				fragments.code('function(value) { return ')
+
+				@parameters[0].toTestFragments(fragments, literal, Junction::NONE)
+
+				fragments.code('; }')
+			}
+			else {
+				fragments.code('value => ')
+
+				@parameters[0].toTestFragments(fragments, literal, Junction::NONE)
+			}
+		}
+
 		fragments.code(')')
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(`).compile(node).code(`)`)
+
+			if junction == Junction::AND {
+				fragments.code(')')
+			}
+		}
+	} // }}}
+	toTestFunctionFragments(fragments, node) { // {{{
+		const unalias = this.discardAlias()
+		const name = unalias.name?() ?? @name
+		const tof = $runtime.typeof(name, node)
+
+		if @parameters.length == 0 && ?tof && !@nullable {
+			fragments.code(`\(tof)`)
+		}
+		else if unalias.isDictionary() || unalias.isExclusion() || unalias.isFunction() || unalias.isUnion() {
+			unalias.toTestFunctionFragments(fragments, node)
+		}
+		else {
+			super.toTestFunctionFragments(fragments, node)
+		}
+	} // }}}
+	toTestFunctionFragments(fragments, node, junction) { // {{{
+		this.resolveType()
+
+		if @parameters.length == 0 && !@nullable {
+			if const tof = $runtime.typeof(@name, node) {
+				fragments.code(`\(tof)(value)`)
+
+				return
+			}
+		}
+
+		let subjunction = null
+		if @nullable && junction == Junction::AND {
+			fragments.code('(')
+
+			subjunction = Junction::OR
+		}
+
+		const unalias = this.discardAlias()
+
+		if unalias.isDictionary() || unalias.isExclusion() || unalias.isFunction() || unalias.isUnion() {
+			unalias.toTestFunctionFragments(fragments, node, subjunction ?? junction)
+		}
+		else {
+			const name = unalias.name?() ?? @name
+
+			if const tof = $runtime.typeof(name, node) {
+				fragments.code(`\(tof)(value`)
+			}
+			else {
+				fragments.code(`\($runtime.type(node)).`)
+
+				if unalias.isClass() {
+					fragments.code(`isClassInstance`)
+				}
+				else if unalias.isEnum() {
+					fragments.code(`isEnumInstance`)
+				}
+				else if unalias.isStruct() {
+					fragments.code(`isStructInstance`)
+				}
+				else if unalias.isTuple() {
+					fragments.code(`isTupleInstance`)
+				}
+				else {
+					throw new NotSupportedException()
+				}
+
+				fragments.code(`(value, `)
+
+				if unalias is NamedType {
+					fragments.code(unalias.path())
+				}
+				else {
+					fragments.code(name)
+				}
+			}
+		}
+
+		if @parameters.length != 0 {
+			fragments.code(', ')
+
+			const literal = new Literal(false, node, node.scope(), 'value')
+
+			@parameters[0].toTestFunctionFragments(fragments, literal)
+		}
+
+		if !@type.isAlias() {
+			fragments.code(')')
+		}
+
+		if @nullable {
+			fragments.code(` || \($runtime.type(node)).isNull(value)`)
+
+			if ?subjunction {
+				fragments.code(')')
+			}
+		}
+	} // }}}
+	override toVariations(variations) { // {{{
+		this.resolveType()
+
+		variations.push('ref', @name, @spread, @nullable)
+
+		if @type.isPredefined() {
+			variations.push(true)
+		}
+		else {
+			@type.toVariations(variations)
+		}
 	} // }}}
 	type() { // {{{
 		this.resolveType()

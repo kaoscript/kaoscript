@@ -1,120 +1,125 @@
-{
-  "aliens": [
-    0,
-    "Dictionary"
-  ],
-  "requirements": [],
-  "exports": [
-    1,
-    "Dictionary"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 0
-      },
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {
-        "map": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 2,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "dict",
-                "type": {
-                  "reference": 1
+[
+  {
+    "aliens": [
+      0,
+      "Dictionary",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "Dictionary"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {
+          "map": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "dict",
+                  "type": {
+                    "reference": 1
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
                 },
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "iterator",
-                "type": "Function",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          },
-          {
-            "id": 1,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 3,
-            "max": 3,
-            "parameters": [
-              {
-                "name": "dict",
-                "type": {
-                  "reference": 1
+                {
+                  "name": "iterator",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            },
+            {
+              "index": 1,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 3,
+              "max": 3,
+              "parameters": [
+                {
+                  "name": "dict",
+                  "type": {
+                    "reference": 1
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
                 },
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "iterator",
-                "type": "Function",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "condition",
-                "type": "Function",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ]
-      },
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    }
-  ],
-  "macros": []
-}
+                {
+                  "name": "iterator",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "condition",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

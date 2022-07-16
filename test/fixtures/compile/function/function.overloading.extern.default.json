@@ -1,41 +1,47 @@
-{
-  "aliens": [
-    0,
-    "reverse"
-  ],
-  "requirements": [],
-  "exports": [
-    1,
-    "reverse"
-  ],
-  "references": [
-    "Function",
-    {
-      "kind": "overloadedfunction",
-      "exhaustive": true,
-      "functions": [
-        {
-          "reference": 0
-        },
-        {
-          "kind": "function",
-          "async": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "String",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "String",
-          "throws": []
-        }
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      0,
+      "reverse",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      "Function"
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "reverse"
+    ],
+    "references": [
+      {
+        "kind": "overloadedfunction",
+        "exhaustive": true,
+        "functions": [
+          0,
+          {
+            "kind": "function",
+            "index": 1,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "String",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "String",
+            "errors": []
+          }
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

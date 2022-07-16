@@ -1,1 +1,1 @@
-SyntaxException: The lateinit variable "value" isn't fully initialized due to the missing default clause (line 4, file "fixtures/compile/variable/variable.lateinit.switch.noelse.ks")
+SyntaxException: The lateinit variable "value" isn't fully initialized due to the missing default clause (fixtures/compile/variable/variable.lateinit.switch.noelse.ks:4)

@@ -1,30 +1,36 @@
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foobar {
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._values = [];
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Foobar.prototype.__ks_init_0.call(this);
+			this._values = [];
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
+		clone() {
+			return this.__ks_func_clone_rt.call(null, this, this, arguments);
+		}
 		__ks_func_clone_0() {
-			const clone = new Foobar();
+			const clone = Foobar.__ks_new_0();
 			clone._values = [...this._values];
 			return clone;
 		}
-		clone() {
-			if(arguments.length === 0) {
-				return Foobar.prototype.__ks_func_clone_0.apply(this);
+		__ks_func_clone_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_clone_0.call(that);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

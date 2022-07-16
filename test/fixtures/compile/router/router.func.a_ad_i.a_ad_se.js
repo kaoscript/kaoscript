@@ -1,42 +1,46 @@
-var {Helper, Operator, Type} = require("@kaoscript/runtime");
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		if((arguments.length === 2 && Type.isNumber(arguments[1])) || (arguments.length === 3 && Type.isNumber(arguments[2]))) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			let __ks__;
-			let y = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
-			let z = arguments[++__ks_i];
-			if(z === void 0 || z === null) {
-				throw new TypeError("'z' is not nullable");
-			}
-			else if(!Type.isNumber(z)) {
-				throw new TypeError("'z' is not of type 'Number'");
-			}
-			return x.times(Operator.addOrConcat(y, z));
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x, y, z) {
+		if(y === void 0 || y === null) {
+			y = 0;
 		}
-		else if(arguments.length === 2 || arguments.length === 3) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			let __ks__;
-			let y = arguments.length > 2 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
-			let z = arguments[++__ks_i];
-			if(z === void 0 || z === null) {
-				throw new TypeError("'z' is not nullable");
-			}
-			else if(!Type.isString(z)) {
-				throw new TypeError("'z' is not of type 'String'");
-			}
-			return Helper.concatString(x.times(y), z);
+		return x.times(Operator.addOrConcat(y, z));
+	};
+	foobar.__ks_1 = function(x, y, z) {
+		if(y === void 0 || y === null) {
+			y = 0;
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
+		return Helper.concatString(x.times(y), z);
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const t1 = Type.isNumber;
+		const t2 = Type.isString;
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t1(args[1])) {
+					return foobar.__ks_0.call(that, args[0], void 0, args[1]);
+				}
+				if(t2(args[1])) {
+					return foobar.__ks_1.call(that, args[0], void 0, args[1]);
+				}
+				throw Helper.badArgs();
+			}
+			throw Helper.badArgs();
 		}
+		if(args.length === 3) {
+			if(t0(args[0])) {
+				if(t1(args[2])) {
+					return foobar.__ks_0.call(that, args[0], args[1], args[2]);
+				}
+				if(t2(args[2])) {
+					return foobar.__ks_1.call(that, args[0], args[1], args[2]);
+				}
+			}
+		}
+		throw Helper.badArgs();
 	};
 };

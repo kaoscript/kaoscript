@@ -1,64 +1,63 @@
-var Dictionary = require("@kaoscript/runtime").Dictionary;
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Color {
+		static __ks_new_0() {
+			const o = Object.create(Color.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
-			}
-		}
-		__ks_func_getField_0(name) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
+				throw Helper.badArgs();
 			}
 		}
 		getField() {
-			if(arguments.length === 1) {
-				return Color.prototype.__ks_func_getField_0.apply(this, arguments);
-			}
-			throw new SyntaxError("Wrong number of arguments");
+			return this.__ks_func_getField_rt.call(null, this, this, arguments);
 		}
-		__ks_func_setField_0(name, value) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
+		__ks_func_getField_0(name) {
+		}
+		__ks_func_getField_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_getField_0.call(that, args[0]);
+				}
 			}
-			if(name === void 0 || name === null) {
-				throw new TypeError("'name' is not nullable");
-			}
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
+			throw Helper.badArgs();
 		}
 		setField() {
-			if(arguments.length === 2) {
-				return Color.prototype.__ks_func_setField_0.apply(this, arguments);
+			return this.__ks_func_setField_rt.call(null, this, this, arguments);
+		}
+		__ks_func_setField_0(name, value) {
+		}
+		__ks_func_setField_rt(that, proto, args) {
+			const t0 = Type.isValue;
+			if(args.length === 2) {
+				if(t0(args[0]) && t0(args[1])) {
+					return proto.__ks_func_setField_0.call(that, args[0], args[1]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 		static __ks_sttc_registerSpace_0(data) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(data === void 0 || data === null) {
-				throw new TypeError("'data' is not nullable");
-			}
 		}
 		static registerSpace() {
+			const t0 = Type.isValue;
 			if(arguments.length === 1) {
-				return Color.__ks_sttc_registerSpace_0.apply(this, arguments);
+				if(t0(arguments[0])) {
+					return Color.__ks_sttc_registerSpace_0(arguments[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
-	Color.registerSpace((() => {
+	Color.__ks_sttc_registerSpace_0((() => {
 		const d = new Dictionary();
 		d["name"] = "srgb";
 		d["alias"] = ["rgb"];
@@ -84,34 +83,33 @@ module.exports = function() {
 		})();
 		return d;
 	})());
-	Color.prototype.__ks_init_0 = function() {
-		this._green = 0;
-	};
 	Color.prototype.__ks_func_green_0 = function() {
-		return this.getField("green");
+		return this.__ks_func_getField_0("green");
 	};
 	Color.prototype.__ks_func_green_1 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		return this.setField("green", value);
+		return this.__ks_func_setField_0("green", value);
 	};
+	Color.prototype.__ks_init_0 = Color.prototype.__ks_init;
 	Color.prototype.__ks_init = function() {
-		Color.prototype.__ks_init_0.call(this);
+		this.__ks_init_0();
+		this._green = 0;
+	};
+	Color.prototype.__ks_func_green_rt = function(that, proto, args) {
+		const t0 = Type.isValue;
+		if(args.length === 0) {
+			return proto.__ks_func_green_0.call(that);
+		}
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return proto.__ks_func_green_1.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
 	};
 	Color.prototype.green = function() {
-		if(arguments.length === 0) {
-			return Color.prototype.__ks_func_green_0.apply(this);
-		}
-		else if(arguments.length === 1) {
-			return Color.prototype.__ks_func_green_1.apply(this, arguments);
-		}
-		throw new SyntaxError("Wrong number of arguments");
+		return this.__ks_func_green_rt.call(null, this, this, arguments);
 	};
 	return {
-		Color: Color
+		Color
 	};
 };

@@ -1,55 +1,54 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let Space = Helper.enum(String, {
+	const Space = Helper.enum(String, {
 		RGB: "rgb"
 	});
 	class Color {
+		static __ks_new_0() {
+			const o = Object.create(Color.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
-		__ks_init_0() {
+		__ks_init() {
 			this._blue = 0;
 			this._green = 0;
 			this._red = 0;
 			this._space = Space.RGB;
 		}
-		__ks_init() {
-			Color.prototype.__ks_init_0.call(this);
-		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
+		}
+		space() {
+			return this.__ks_func_space_rt.call(null, this, this, arguments);
 		}
 		__ks_func_space_0() {
 			return this._space;
 		}
 		__ks_func_space_1(space) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(space === void 0 || space === null) {
-				throw new TypeError("'space' is not nullable");
-			}
-			else if(!Type.isEnumInstance(space, Space)) {
-				throw new TypeError("'space' is not of type 'Space'");
-			}
 			this._space = space;
 			return this;
 		}
-		space() {
-			if(arguments.length === 0) {
-				return Color.prototype.__ks_func_space_0.apply(this);
+		__ks_func_space_rt(that, proto, args) {
+			const t0 = value => Type.isEnumInstance(value, Space);
+			if(args.length === 0) {
+				return proto.__ks_func_space_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Color.prototype.__ks_func_space_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_space_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	return {
-		Color: Color,
-		Space: Space
+		Color,
+		Space
 	};
 };

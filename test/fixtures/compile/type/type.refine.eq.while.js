@@ -1,26 +1,24 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(i, b) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(i === void 0 || i === null) {
-			throw new TypeError("'i' is not nullable");
-		}
-		else if(!Type.isNumber(i)) {
-			throw new TypeError("'i' is not of type 'Number'");
-		}
-		if(b === void 0 || b === null) {
-			throw new TypeError("'b' is not nullable");
-		}
-		else if(!Type.isBoolean(b)) {
-			throw new TypeError("'b' is not of type 'Boolean'");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(i, b) {
 		let x = i;
 		while(b) {
 			x = null;
 		}
 		if(x === null) {
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		const t1 = Type.isBoolean;
+		if(args.length === 2) {
+			if(t0(args[0]) && t1(args[1])) {
+				return foobar.__ks_0.call(that, args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

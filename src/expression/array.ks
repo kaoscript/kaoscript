@@ -95,6 +95,15 @@ class ArrayExpression extends Expression {
 		}
 	} // }}}
 	type() => @type
+	validateType(type: ReferenceType) { // {{{
+		if type.hasParameters() {
+			const parameter = type.parameter(0)
+
+			for const value in @values {
+				value.validateType(parameter)
+			}
+		}
+	} // }}}
 }
 
 class ArrayRange extends Expression {

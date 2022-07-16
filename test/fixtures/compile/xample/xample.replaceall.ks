@@ -1,8 +1,14 @@
 #[rules(non-exhaustive)]
+extern sealed class Array {
+	join(...): String
+}
+
+#[rules(non-exhaustive)]
 extern sealed class String {
-	split(): Array<String>
-	replace(): String
+	split(...): Array<String>
+	replace(...): String
 	trim(): String
+	valueOf(): String
 }
 
 extern class RegExp

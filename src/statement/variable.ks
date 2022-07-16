@@ -34,7 +34,7 @@ class VariableDeclaration extends Statement {
 	constructor(@data, @parent, @scope, @initScope, @cascade) { // {{{
 		this(data, parent, scope)
 	} // }}}
-	analyse() { // {{{
+	override initiate() { // {{{
 		for const modifier in @data.modifiers {
 			if modifier.kind == ModifierKind::AutoTyping {
 				@autotype = true
@@ -45,31 +45,6 @@ class VariableDeclaration extends Statement {
 			}
 			else if modifier.kind == ModifierKind::LateInit {
 				@lateInit = true
-			}
-		}
-
-		if @data.init? {
-			@hasInit = true
-
-			if @immutable {
-				@rebindable = ?@initScope
-			}
-
-			@initScope ??= this.newScope(@scope, ScopeType::Hollow)
-
-			const line = @initScope.getRawLine()
-
-			@initScope.line(line - 1)
-
-			@init = $compile.expression(@data.init, this, @initScope)
-			@init.analyse()
-
-			@initScope.line(line)
-
-			@await = @init.isAwait()
-
-			if @await && !?@function && !this.module().isBinary() {
-				SyntaxException.throwInvalidAwait(this)
 			}
 		}
 
@@ -93,6 +68,32 @@ class VariableDeclaration extends Statement {
 			declarator.analyse()
 
 			@declarators.push(declarator)
+		}
+	} // }}}
+	analyse() { // {{{
+		if @data.init? {
+			@hasInit = true
+
+			if @immutable {
+				@rebindable = ?@initScope
+			}
+
+			@initScope ??= this.newScope(@scope, ScopeType::Hollow)
+
+			const line = @initScope.getRawLine()
+
+			@initScope.line(line - 1)
+
+			@init = $compile.expression(@data.init, this, @initScope)
+			@init.analyse()
+
+			@initScope.line(line)
+
+			@await = @init.isAwait()
+
+			if @await && !?@function && !this.module().isBinary() {
+				SyntaxException.throwInvalidAwait(this)
+			}
 		}
 
 		if @hasInit && @declarators.length == 1 {
@@ -145,6 +146,12 @@ class VariableDeclaration extends Statement {
 
 		if @hasInit {
 			declarator.setRealType(@type)
+
+			if declarator is VariableIdentifierDeclarator {
+				if const type = declarator.type() {
+					@init.validateType(type)
+				}
+			}
 
 			@init.acquireReusable(declarator.isSplitAssignment())
 			@init.releaseReusable()
@@ -368,12 +375,12 @@ class VariableBindingDeclarator extends AbstractNode {
 	setDeclaredType(@type) { // {{{
 		if !@type.isAny() {
 			if @binding is ArrayBinding {
-				unless @type.isArray() {
+				unless type.isArray() || type.isTuple() {
 					TypeException.throwInvalidBinding('Array', this)
 				}
 			}
 			else {
-				unless @type.isDictionary() {
+				unless type.isDictionary() || type.isStruct() {
 					TypeException.throwInvalidBinding('Dictionary', this)
 				}
 			}
@@ -384,12 +391,12 @@ class VariableBindingDeclarator extends AbstractNode {
 	setRealType(type: Type) { // {{{
 		if !type.isAny() {
 			if @binding is ArrayBinding {
-				unless type.isArray() {
+				unless type.isArray() || type.isTuple() {
 					TypeException.throwInvalidBinding('Array', this)
 				}
 			}
 			else {
-				unless type.isDictionary() {
+				unless type.isDictionary() || type.isStruct() {
 					TypeException.throwInvalidBinding('Dictionary', this)
 				}
 			}
@@ -510,6 +517,7 @@ class VariableIdentifierDeclarator extends AbstractNode {
 			.code($equals)
 			.compile(value)
 	} // }}}
+	type() => @type
 	variable() => @variable
 	walk(fn) { // {{{
 		fn(@variable.getSecureName(), @variable.getRealType())

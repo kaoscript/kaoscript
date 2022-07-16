@@ -1,1 +1,1 @@
-ReferenceException: "y" is not defined (line 3, file "fixtures/compile/operator/operator.assign.addition.undef.right.ks")
+ReferenceException: "y" is not defined (fixtures/compile/operator/operator.assign.addition.undef.right.ks:3)

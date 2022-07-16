@@ -1,1 +1,1 @@
-SyntaxException: Class method "version" is reserved (line 3, file "fixtures/compile/class/class.static.version.method.ks")
+SyntaxException: The class method "version" is reserved (fixtures/compile/class/class.static.version.method.ks:3)

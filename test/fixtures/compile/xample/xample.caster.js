@@ -1,22 +1,25 @@
 require("kaoscript/register");
-var {Dictionary, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Number = require("../_/_number.ks")().__ks_Number;
+	var __ks_Number = require("../_/._number.ks.j5k8r9.ksb")().__ks_Number;
 	let $caster = (() => {
 		const d = new Dictionary();
-		d.hex = function(n) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(n === void 0 || n === null) {
-				throw new TypeError("'n' is not nullable");
-			}
-			else if(!Type.isString(n) && !Type.isNumber(n)) {
-				throw new TypeError("'n' is not of type 'String' or 'Number'");
-			}
-			return __ks_Number._im_round(__ks_Number._im_limit(Float.parse(n), 0, 255));
-		};
+		d.hex = (() => {
+			const __ks_rt = (...args) => {
+				const t0 = value => Type.isNumber(value) || Type.isString(value);
+				if(args.length === 1) {
+					if(t0(args[0])) {
+						return __ks_rt.__ks_0.call(null, args[0]);
+					}
+				}
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = function(n) {
+				return __ks_Number.__ks_func_round_0.call(__ks_Number.__ks_func_limit_0.call(Float.parse(n), 0, 255));
+			};
+			return __ks_rt;
+		})();
 		return d;
 	})();
-	console.log($caster.hex(128));
+	console.log($caster.hex.__ks_0(128));
 };

@@ -1,80 +1,86 @@
-{
-  "aliens": [
-    0,
-    "reverse"
-  ],
-  "requirements": [],
-  "exports": [
-    1,
-    "reverse"
-  ],
-  "references": [
-    {
-      "kind": "overloadedfunction",
-      "exhaustive": true,
-      "functions": [
-        {
-          "kind": "function",
-          "async": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "Array",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "Array",
-          "throws": []
-        },
-        {
-          "kind": "function",
-          "async": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": []
-        }
-      ]
-    },
-    {
-      "kind": "overloadedfunction",
-      "exhaustive": true,
-      "functions": [
-        {
-          "reference": 0
-        },
-        {
-          "kind": "function",
-          "async": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "value",
-              "type": "String",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "returns": "String",
-          "throws": []
-        }
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      0,
+      "reverse",
+      false
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "overloadedfunction",
+        "exhaustive": true,
+        "functions": [
+          {
+            "kind": "function",
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Array",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Array",
+            "errors": []
+          },
+          {
+            "kind": "function",
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "exports": [
+      1,
+      "reverse"
+    ],
+    "references": [
+      {
+        "kind": "overloadedfunction",
+        "exhaustive": true,
+        "functions": [
+          0,
+          {
+            "kind": "function",
+            "index": 2,
+            "async": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "value",
+                "type": "String",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "returns": "String",
+            "errors": []
+          }
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

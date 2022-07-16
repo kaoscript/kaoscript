@@ -28,14 +28,13 @@ class ExpressionStatement extends Statement {
 	translate() { // {{{
 		@expression.translate()
 	} // }}}
-	defineVariables(left, scope, expression, leftMost) { // {{{
+	defineVariables(left: AbstractNode, names: Array<String>, scope: Scope, expression = null, leftMost: Boolean = false) { // {{{
 		const assignments = []
 		let variable = null
 
-		const variables = left.listAssignments([])
-		let declaration = variables.length != 0
+		let declaration = names.length != 0
 
-		for const name in variables {
+		for const name in names {
 			if const variable = scope.getVariable(name) {
 				if variable.isLateInit() {
 					@parent.addInitializableVariable(variable, this)
@@ -117,7 +116,10 @@ class ExpressionStatement extends Statement {
 	toFragments(fragments, mode) { // {{{
 		return if @ignorable
 
-		if @expression.isAwaiting() {
+		if @expression.isSkippable() {
+			// do nothing
+		}
+		else if @expression.isAwaiting() {
 			return this.toAwaitStatementFragments^@(fragments)
 		}
 		else if @expression.isDeclarable() {

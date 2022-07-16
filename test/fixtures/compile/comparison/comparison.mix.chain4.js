@@ -1,22 +1,19 @@
-var Operator = require("@kaoscript/runtime").Operator;
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(a, b, c, d) {
-		if(arguments.length < 4) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 4)");
-		}
-		if(a === void 0 || a === null) {
-			throw new TypeError("'a' is not nullable");
-		}
-		if(b === void 0 || b === null) {
-			throw new TypeError("'b' is not nullable");
-		}
-		if(c === void 0 || c === null) {
-			throw new TypeError("'c' is not nullable");
-		}
-		if(d === void 0 || d === null) {
-			throw new TypeError("'d' is not nullable");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(a, b, c, d) {
 		if(Operator.lt(a, b) && Operator.lte(b, c) && Operator.lt(c, d)) {
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 4) {
+			if(t0(args[0]) && t0(args[1]) && t0(args[2]) && t0(args[3])) {
+				return foobar.__ks_0.call(that, args[0], args[1], args[2], args[3]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

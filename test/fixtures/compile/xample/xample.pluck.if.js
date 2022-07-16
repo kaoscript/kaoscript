@@ -1,13 +1,7 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Array = {};
 	__ks_Array.__ks_func_pluck_0 = function(name) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
 		let result = [];
 		let value = null;
 		for(let __ks_0 = 0, __ks_1 = this.length, item; __ks_0 < __ks_1; ++__ks_0) {
@@ -26,11 +20,19 @@ module.exports = function() {
 		}
 		return result;
 	};
-	__ks_Array._im_pluck = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Array._im_pluck = function(that, ...args) {
+		return __ks_Array.__ks_func_pluck_rt(that, args);
+	};
+	__ks_Array.__ks_func_pluck_rt = function(that, args) {
+		const t0 = Type.isValue;
 		if(args.length === 1) {
-			return __ks_Array.__ks_func_pluck_0.apply(that, args);
+			if(t0(args[0])) {
+				return __ks_Array.__ks_func_pluck_0.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.pluck) {
+			return that.pluck(...args);
+		}
+		throw Helper.badArgs();
 	};
 };

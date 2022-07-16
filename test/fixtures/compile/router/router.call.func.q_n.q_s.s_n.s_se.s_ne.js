@@ -1,102 +1,60 @@
-var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Weekday = Helper.struct(function(index, name) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(index === void 0 || index === null) {
-			throw new TypeError("'index' is not nullable");
-		}
-		else if(!Type.isNumber(index)) {
-			throw new TypeError("'index' is not of type 'Number'");
-		}
-		if(name === void 0 || name === null) {
-			throw new TypeError("'name' is not nullable");
-		}
-		else if(!Type.isString(name)) {
-			throw new TypeError("'name' is not of type 'String'");
-		}
+	const Weekday = Helper.struct(function(index, name) {
 		const _ = new Dictionary();
 		_.index = index;
 		_.name = name;
 		return _;
+	}, function(__ks_new, args) {
+		const t0 = Type.isNumber;
+		const t1 = Type.isString;
+		if(args.length === 2) {
+			if(t0(args[0]) && t1(args[1])) {
+				return __ks_new(args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
 	});
 	function foobar() {
-		if(arguments.length === 2 && Type.isStructInstance(arguments[0], Weekday) && Type.isNumber(arguments[1])) {
-			let __ks_i = -1;
-			let day = arguments[++__ks_i];
-			if(day === void 0 || day === null) {
-				throw new TypeError("'day' is not nullable");
-			}
-			else if(!Type.isStructInstance(day, Weekday)) {
-				throw new TypeError("'day' is not of type 'Weekday'");
-			}
-			let month = arguments[++__ks_i];
-			if(month === void 0 || month === null) {
-				throw new TypeError("'month' is not nullable");
-			}
-			else if(!Type.isNumber(month)) {
-				throw new TypeError("'month' is not of type 'Number'");
-			}
-			return 0;
-		}
-		else if(arguments.length === 2 && Type.isStructInstance(arguments[0], Weekday)) {
-			let __ks_i = -1;
-			let day = arguments[++__ks_i];
-			if(day === void 0 || day === null) {
-				throw new TypeError("'day' is not nullable");
-			}
-			else if(!Type.isStructInstance(day, Weekday)) {
-				throw new TypeError("'day' is not of type 'Weekday'");
-			}
-			let month = arguments[++__ks_i];
-			if(month === void 0 || month === null) {
-				throw new TypeError("'month' is not nullable");
-			}
-			else if(!Type.isString(month)) {
-				throw new TypeError("'month' is not of type 'String'");
-			}
-			return 1;
-		}
-		else if(arguments.length === 2 && Type.isNumber(arguments[1])) {
-			let __ks_i = -1;
-			let day = arguments[++__ks_i];
-			if(day === void 0 || day === null) {
-				throw new TypeError("'day' is not nullable");
-			}
-			else if(!Type.isString(day)) {
-				throw new TypeError("'day' is not of type 'String'");
-			}
-			let month = arguments[++__ks_i];
-			if(month === void 0 || month === null) {
-				throw new TypeError("'month' is not nullable");
-			}
-			else if(!Type.isNumber(month)) {
-				throw new TypeError("'month' is not of type 'Number'");
-			}
-			return 2;
-		}
-		else if(arguments.length === 2) {
-			let __ks_i = -1;
-			let day = arguments[++__ks_i];
-			if(day === void 0 || day === null) {
-				throw new TypeError("'day' is not nullable");
-			}
-			else if(!Type.isString(day)) {
-				throw new TypeError("'day' is not of type 'String'");
-			}
-			let month = arguments[++__ks_i];
-			if(month === void 0 || month === null) {
-				throw new TypeError("'month' is not nullable");
-			}
-			else if(!Type.isString(month)) {
-				throw new TypeError("'month' is not of type 'String'");
-			}
-			return 3;
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		return foobar.__ks_rt(this, arguments);
 	};
-	foobar("", -1);
+	foobar.__ks_0 = function(day, month) {
+		return 0;
+	};
+	foobar.__ks_1 = function(day, month) {
+		return 1;
+	};
+	foobar.__ks_2 = function(day, month) {
+		return 2;
+	};
+	foobar.__ks_3 = function(day, month) {
+		return 3;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		const t1 = Type.isNumber;
+		const t2 = value => Type.isStructInstance(value, Weekday);
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t1(args[1])) {
+					return foobar.__ks_2.call(that, args[0], args[1]);
+				}
+				if(t0(args[1])) {
+					return foobar.__ks_3.call(that, args[0], args[1]);
+				}
+				throw Helper.badArgs();
+			}
+			if(t2(args[0])) {
+				if(t1(args[1])) {
+					return foobar.__ks_0.call(that, args[0], args[1]);
+				}
+				if(t0(args[1])) {
+					return foobar.__ks_1.call(that, args[0], args[1]);
+				}
+				throw Helper.badArgs();
+			}
+		}
+		throw Helper.badArgs();
+	};
+	foobar.__ks_2("", -1);
 };

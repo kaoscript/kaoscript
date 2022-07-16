@@ -1,0 +1,1 @@
+SyntaxException: The method "Rectangle.draw()" can't override a suitable method (fixtures/compile/class/class.override.ndef.wk.throw.cm.cr.ks:26)

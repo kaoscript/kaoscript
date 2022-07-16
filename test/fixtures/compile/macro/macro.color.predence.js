@@ -1,86 +1,76 @@
-var {Dictionary, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	const foo = t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
 	const bar = h + ((1 / 3) * -(i - 1));
 	class Color {
+		static __ks_new_0() {
+			const o = Object.create(Color.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 		static __ks_sttc_registerSpace_0(data) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(data === void 0 || data === null) {
-				throw new TypeError("'data' is not nullable");
-			}
 		}
 		static registerSpace() {
+			const t0 = Type.isValue;
 			if(arguments.length === 1) {
-				return Color.__ks_sttc_registerSpace_0.apply(this, arguments);
+				if(t0(arguments[0])) {
+					return Color.__ks_sttc_registerSpace_0(arguments[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
-	Color.registerSpace((() => {
+	Color.__ks_sttc_registerSpace_0((() => {
 		const d = new Dictionary();
 		d["name"] = "FBQ";
 		d["formatters"] = (() => {
 			const d = new Dictionary();
-			d.foo = function(t1, t2, t3) {
-				if(arguments.length < 3) {
-					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
-				}
-				if(t1 === void 0 || t1 === null) {
-					throw new TypeError("'t1' is not nullable");
-				}
-				else if(!Type.isNumber(t1)) {
-					throw new TypeError("'t1' is not of type 'Number'");
-				}
-				if(t2 === void 0 || t2 === null) {
-					throw new TypeError("'t2' is not nullable");
-				}
-				else if(!Type.isNumber(t2)) {
-					throw new TypeError("'t2' is not of type 'Number'");
-				}
-				if(t3 === void 0 || t3 === null) {
-					throw new TypeError("'t3' is not nullable");
-				}
-				else if(!Type.isNumber(t3)) {
-					throw new TypeError("'t3' is not of type 'Number'");
-				}
-				return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
-			};
-			d.bar = function(h, i) {
-				if(arguments.length < 2) {
-					throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-				}
-				if(h === void 0 || h === null) {
-					throw new TypeError("'h' is not nullable");
-				}
-				else if(!Type.isNumber(h)) {
-					throw new TypeError("'h' is not of type 'Number'");
-				}
-				if(i === void 0 || i === null) {
-					throw new TypeError("'i' is not nullable");
-				}
-				else if(!Type.isNumber(i)) {
-					throw new TypeError("'i' is not of type 'Number'");
-				}
-				return h + ((1 / 3) * -(i - 1));
-			};
+			d.foo = (() => {
+				const __ks_rt = (...args) => {
+					const t0 = Type.isNumber;
+					if(args.length === 3) {
+						if(t0(args[0]) && t0(args[1]) && t0(args[2])) {
+							return __ks_rt.__ks_0.call(null, args[0], args[1], args[2]);
+						}
+					}
+					throw Helper.badArgs();
+				};
+				__ks_rt.__ks_0 = function(t1, t2, t3) {
+					return t1 + ((t2 - t1) * ((2 / 3) - t3) * 6);
+				};
+				return __ks_rt;
+			})();
+			d.bar = (() => {
+				const __ks_rt = (...args) => {
+					const t0 = Type.isNumber;
+					if(args.length === 2) {
+						if(t0(args[0]) && t0(args[1])) {
+							return __ks_rt.__ks_0.call(null, args[0], args[1]);
+						}
+					}
+					throw Helper.badArgs();
+				};
+				__ks_rt.__ks_0 = function(h, i) {
+					return h + ((1 / 3) * -(i - 1));
+				};
+				return __ks_rt;
+			})();
 			return d;
 		})();
 		return d;
 	})());
 	return {
-		Color: Color
+		Color
 	};
 };

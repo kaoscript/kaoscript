@@ -1,84 +1,90 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [
-    0,
-    "Foobar",
-    false,
-    1,
-    "Quxbaz",
-    false
-  ],
-  "exports": [],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {
-        "_x": {
-          "access": 2,
-          "type": {
-            "reference": 1
-          },
-          "default": false,
-          "immutable": false,
-          "lateInit": true,
-          "sealed": false
-        }
-      },
-      "classVariables": {},
-      "instanceMethods": {
-        "x": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [
+      0,
+      "Foobar",
+      false,
+      1,
+      "Quxbaz",
+      false
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "_x": {
+            "access": 2,
+            "type": {
               "reference": 1
             },
-            "throws": [],
-            "inits": []
+            "default": false,
+            "immutable": false,
+            "lateInit": true,
+            "sealed": false
           }
+        },
+        "classVariables": {},
+        "instanceMethods": {
+          "x": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 1
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
         ]
       },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ]
-    },
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
+      }
+    ]
+  },
+  {
+    "exports": [],
+    "references": [],
+    "macros": []
+  }
+]

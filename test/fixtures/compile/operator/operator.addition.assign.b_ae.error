@@ -1,1 +1,1 @@
-TypeException: The variable "x" of type "Boolean" can't be assigned with a value of type "Number" or "String" (line 2, file "fixtures/compile/operator/operator.addition.assign.b_ae.ks")
+TypeException: The variable "x" of type "Boolean" can't be assigned with a value of type "Number" or "String" (fixtures/compile/operator/operator.addition.assign.b_ae.ks:2)

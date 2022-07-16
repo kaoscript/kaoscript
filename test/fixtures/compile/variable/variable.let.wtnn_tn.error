@@ -1,1 +1,1 @@
-TypeException: The variable "x" of type "Number" can't be assigned with a value of type "Number?" (line 3, file "fixtures/compile/variable/variable.let.wtnn_tn.ks")
+TypeException: The variable "x" of type "Number" can't be assigned with a value of type "Number?" (fixtures/compile/variable/variable.let.wtnn_tn.ks:3)

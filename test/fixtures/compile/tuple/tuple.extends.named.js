@@ -1,51 +1,49 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Pair = Helper.tuple(function() {
-		let __ks_i = -1;
-		let x;
-		if(arguments.length > ++__ks_i && (x = arguments[__ks_i]) !== void 0 && x !== null) {
-			if(!Type.isString(x)) {
-				if(arguments.length - __ks_i < 2) {
-					x = "";
-					--__ks_i;
-				}
-				else {
-					throw new TypeError("'x' is not of type 'String'");
-				}
-			}
-		}
-		else {
+	const Pair = Helper.tuple(function(x, y) {
+		if(x === void 0 || x === null) {
 			x = "";
 		}
-		let y;
-		if(arguments.length > ++__ks_i && (y = arguments[__ks_i]) !== void 0 && y !== null) {
-			if(!Type.isNumber(y)) {
-				throw new TypeError("'y' is not of type 'Number'");
-			}
-		}
-		else {
+		if(y === void 0 || y === null) {
 			y = 0;
 		}
 		return [x, y];
-	});
-	var Triple = Helper.tuple(function(x, y, z) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
+	}, function(__ks_new, args) {
+		const t0 = value => Type.isString(value) || Type.isNull(value);
+		const t1 = value => Type.isNumber(value) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length <= 2) {
+			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t1, pts, 1) && te(pts, 2)) {
+				return __ks_new(Helper.getVararg(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+			}
 		}
+		throw Helper.badArgs();
+	});
+	const Triple = Helper.tuple(function(x, y, z) {
 		if(z === void 0 || z === null) {
 			z = false;
 		}
-		else if(!Type.isBoolean(z)) {
-			throw new TypeError("'z' is not of type 'Boolean'");
-		}
-		const _ = Pair.__ks_builder(__ks_0, __ks_1);
-		_.push(__ks_2);
+		const _ = Pair.__ks_builder(x, y);
+		_.push(z);
 		return _;
+	}, function(__ks_new, args) {
+		const t0 = value => Type.isString(value) || Type.isNull(value);
+		const t1 = value => Type.isNumber(value) || Type.isNull(value);
+		const t2 = value => Type.isBoolean(value) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length <= 3) {
+			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t1, pts, 1) && Helper.isVarargs(args, 0, 1, t2, pts, 2) && te(pts, 3)) {
+				return __ks_new(Helper.getVararg(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]), Helper.getVararg(args, pts[2], pts[3]));
+			}
+		}
+		throw Helper.badArgs();
 	}, Pair);
-	const triple = Triple("x", 0.1, true);
+	const triple = Triple.__ks_new("x", 0.1, true);
 	console.log(triple[0], triple[1] + 1, !triple[2]);
 	return {
-		Pair: Pair,
-		Triple: Triple
+		Pair,
+		Triple
 	};
 };

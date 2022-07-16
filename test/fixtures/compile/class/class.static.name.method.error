@@ -1,1 +1,1 @@
-SyntaxException: Class method "name" is reserved (line 3, file "fixtures/compile/class/class.static.name.method.ks")
+SyntaxException: The class method "name" is reserved (fixtures/compile/class/class.static.name.method.ks:3)

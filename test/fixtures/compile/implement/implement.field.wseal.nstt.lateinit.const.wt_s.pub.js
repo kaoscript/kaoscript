@@ -3,7 +3,7 @@ module.exports = function(expect) {
 	const d = new Date();
 	expect(d.culture).to.not.exist;
 	return {
-		Date: Date,
-		__ks_Date: __ks_Date
+		Date,
+		__ks_Date
 	};
 };

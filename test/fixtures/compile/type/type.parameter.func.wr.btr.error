@@ -1,1 +1,1 @@
-TypeException: The return type must be "String" and not "Number" (line 2, file "fixtures/compile/type/type.parameter.func.wr.btr.ks")
+TypeException: The return type must be "String" and not "Number" (fixtures/compile/type/type.parameter.func.wr.btr.ks:2)

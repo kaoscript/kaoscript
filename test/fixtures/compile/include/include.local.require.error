@@ -1,1 +1,1 @@
-SyntaxException: Identifier "Color" has already been declared (line 5, file "fixtures/compile/require/require.default.ks")
+SyntaxException: Identifier "Color" has already been declared (fixtures/compile/require/require.default.ks:5)

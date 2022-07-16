@@ -1,21 +1,24 @@
 require("kaoscript/register");
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Weekday = require("./enum.method.nstt.default.ks")().Weekday;
-	function foobar(day) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	var Weekday = require("./.enum.method.nstt.default.ks.j5k8r9.ksb")().Weekday;
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(day) {
+		if(Weekday.__ks_func_isWeekend_0(day)) {
 		}
-		if(day === void 0 || day === null) {
-			throw new TypeError("'day' is not nullable");
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, Weekday);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		else if(!Type.isEnumInstance(day, Weekday)) {
-			throw new TypeError("'day' is not of type 'Weekday'");
-		}
-		if(Weekday.__ks_func_isWeekend(day)) {
-		}
-	}
+		throw Helper.badArgs();
+	};
 	return {
-		Weekday: Weekday
+		Weekday
 	};
 };

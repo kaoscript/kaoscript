@@ -1,1 +1,1 @@
-TypeException: An error is expected to be thrown (line 1, file "fixtures/compile/function/function.never.void.ks")
+TypeException: An error is expected to be thrown (fixtures/compile/function/function.never.void.ks:1)

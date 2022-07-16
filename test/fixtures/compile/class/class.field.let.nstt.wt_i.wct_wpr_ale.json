@@ -1,57 +1,62 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "Foobar"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": true,
-      "constructors": [
-        {
-          "id": 0,
-          "access": 4,
-          "sealed": false,
-          "min": 1,
-          "max": 1,
-          "parameters": [
-            {
-              "name": "x",
-              "type": "Number",
-              "min": 1,
-              "max": 1,
-              "default": false
-            }
-          ],
-          "throws": []
-        }
-      ],
-      "instanceVariables": {
-        "_x": {
-          "access": 2,
-          "type": "Number",
-          "default": false,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
-      },
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Foobar"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": true,
+        "constructors": [
+          {
+            "index": 0,
+            "access": 4,
+            "sealed": false,
+            "min": 1,
+            "max": 1,
+            "parameters": [
+              {
+                "name": "x",
+                "type": "Number",
+                "min": 1,
+                "max": 1,
+                "default": false
+              }
+            ],
+            "errors": []
+          }
+        ],
+        "instanceVariables": {
+          "_x": {
+            "access": 2,
+            "type": "Number",
+            "default": false,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ]
+      }
+    ],
+    "macros": []
+  }
+]

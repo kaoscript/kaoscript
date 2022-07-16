@@ -31,9 +31,9 @@ class AssignmentOperatorExpression extends Expression {
 		}
 	} // }}}
 	prepare() { // {{{
-		@left.prepare()
+		@left.flagAssignable()
 
-		@left.checkIfAssignable()
+		@left.prepare()
 
 		if const variable = @left.variable() {
 			if variable.isInitialized() {
@@ -58,15 +58,9 @@ class AssignmentOperatorExpression extends Expression {
 		@right.translate()
 	} // }}}
 	defineVariables(left) { // {{{
-		let leftMost = true
-		let expression = this
+		const statement = @statement()
 
-		while expression.parent() is not Statement {
-			expression = expression.parent()
-			leftMost = false
-		}
-
-		expression.parent().defineVariables(left, @scope, expression, leftMost)
+		statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
 	} // }}}
 	isAssigningBinding() => false
 	isAwait() => @await
@@ -317,13 +311,25 @@ class AssignmentOperatorDivision extends NumericAssignmentOperatorExpression {
 
 class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	private lateinit {
-		_ignorable: Boolean		= false
-		_type: Type
+		@condition: Boolean		= false
+		@ignorable: Boolean		= false
+		@lateinit: Boolean		= false
+		@type: Type
 	}
+	analyse() { // {{{
+		@condition = @statement() is IfStatement
+
+		super()
+	} // }}}
 	prepare() { // {{{
 		super()
 
-		@left.initializeVariables(@right.type(), this)
+		if @condition && @lateinit {
+			@statement.initializeLateVariable(@left.name(), @right.type(), true)
+		}
+		else {
+			@left.initializeVariables(@right.type(), this)
+		}
 
 		@type = @left.getDeclaredType()
 
@@ -331,7 +337,7 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 			@type = NullType.Explicit
 		}
 		else {
-			unless @right.type().matchContentOf(@type) {
+			unless @right.type().matchContentOf(@type) || (@left is ObjectBinding && @right.type().isDictionary()) {
 				TypeException.throwInvalidAssignement(@left, @type, @right.type(), this)
 			}
 
@@ -343,7 +349,33 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 	acquireReusable(acquire) { // {{{
 		@right.acquireReusable(@left.isSplitAssignment())
 	} // }}}
-	checkIfAssignable()
+	defineVariables(left) { // {{{
+		if @condition {
+			const names = []
+
+			for const name in left.listAssignments([]) {
+				if const variable = @scope.getVariable(name) {
+					if variable.isLateInit() {
+						throw new NotImplementedException(this)
+					}
+					else if variable.isImmutable() {
+						ReferenceException.throwImmutable(name, this)
+					}
+				}
+				else {
+					names.push(name)
+				}
+			}
+
+			if names.length > 0 {
+				@statement.defineVariables(left, names, @scope, @leftMost, @leftMost == this)
+			}
+		}
+		else {
+			@statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
+		}
+	} // }}}
+	flagAssignable()
 	hasExceptions() => @right.isAwaiting() && @right.hasExceptions()
 	inferTypes(inferables) { // {{{
 		if @left.isInferable() {
@@ -413,6 +445,15 @@ class AssignmentOperatorEquality extends AssignmentOperatorExpression {
 }
 
 class AssignmentOperatorExistential extends AssignmentOperatorExpression {
+	private {
+		@condition: Boolean		= false
+		@lateinit: Boolean		= false
+	}
+	analyse() { // {{{
+		@condition = @statement() is IfStatement
+
+		super()
+	} // }}}
 	prepare() { // {{{
 		super()
 
@@ -420,7 +461,46 @@ class AssignmentOperatorExistential extends AssignmentOperatorExpression {
 		@right.releaseReusable()
 
 		if @left is IdentifierLiteral {
-			@left.type(@right.type().setNullable(false), @scope, this)
+			const type = @right.type().setNullable(false)
+
+			if @condition {
+				if @lateinit {
+					@statement.initializeLateVariable(@left.name(), type, true)
+				}
+				else {
+					@left.type(type, @scope, this)
+				}
+			}
+			else {
+				@left.type(type, @scope, this)
+			}
+		}
+	} // }}}
+	defineVariables(left) { // {{{
+		if @condition {
+			const names = []
+
+			for const name in left.listAssignments([]) {
+				if const variable = @scope.getVariable(name) {
+					if variable.isLateInit() {
+						@statement.addInitializableVariable(variable, true, this)
+						@lateinit = true
+					}
+					else if variable.isImmutable() {
+						ReferenceException.throwImmutable(name, this)
+					}
+				}
+				else {
+					names.push(name)
+				}
+			}
+
+			if names.length > 0 {
+				@statement.defineVariables(left, names, @scope, @leftMost, @leftMost == this)
+			}
+		}
+		else {
+			@statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
 		}
 	} // }}}
 	inferWhenTrueTypes(inferables) { // {{{
@@ -508,6 +588,15 @@ class AssignmentOperatorMultiplication extends NumericAssignmentOperatorExpressi
 }
 
 class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
+	private {
+		@condition: Boolean		= false
+		@lateinit: Boolean		= false
+	}
+	analyse() { // {{{
+		@condition = @statement() is IfStatement
+
+		super()
+	} // }}}
 	prepare() { // {{{
 		super()
 
@@ -515,7 +604,53 @@ class AssignmentOperatorNonExistential extends AssignmentOperatorExpression {
 		@right.releaseReusable()
 
 		if @left is IdentifierLiteral {
-			@left.type(@right.type().setNullable(false), @scope, this)
+			const type = @right.type().setNullable(false)
+
+			if @condition {
+				if @lateinit {
+					@statement.initializeLateVariable(@left.name(), type, false)
+				}
+				else if const scope = @statement.getWhenFalseScope() {
+					@left.type(type, scope, this)
+				}
+			}
+			else {
+				@left.type(type, @scope, this)
+			}
+		}
+	} // }}}
+	defineVariables(left) { // {{{
+		if @condition {
+			const scope = @statement.scope()
+			const names = []
+
+			for const name in left.listAssignments([]) {
+				if const variable = scope.getVariable(name) {
+					if variable.isLateInit() {
+						if @parent == @statement {
+							@statement.addInitializableVariable(variable, false, this)
+						}
+						else {
+							throw new NotImplementedException(this)
+						}
+
+						@lateinit = true
+					}
+					else if variable.isImmutable() {
+						ReferenceException.throwImmutable(name, this)
+					}
+				}
+				else {
+					names.push(name)
+				}
+			}
+
+			if names.length > 0 {
+				@statement.defineVariables(left, names, @scope, @leftMost, @leftMost == this)
+			}
+		}
+		else {
+			@statement.defineVariables(left, @scope, @leftMost, @leftMost == this)
 		}
 	} // }}}
 	inferWhenFalseTypes(inferables) { // {{{

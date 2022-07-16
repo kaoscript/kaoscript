@@ -1,1 +1,1 @@
-SyntaxException: An error "RangeError" is unreported, it must be caught or declared to be thrown (line 7, file "fixtures/compile/function/function.named.throws.error.missingtype.ks")
+SyntaxException: An error "RangeError" is unreported, it must be caught or declared to be thrown (fixtures/compile/function/function.named.throws.error.missingtype.ks:7)

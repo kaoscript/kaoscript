@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Array, __ks_Object) {
 	if(!Type.isValue(__ks_Array)) {
 		__ks_Array = {};
@@ -7,81 +7,67 @@ module.exports = function(__ks_Array, __ks_Object) {
 		__ks_Object = {};
 	}
 	__ks_Array.__ks_sttc_clone_0 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!Type.isArray(value)) {
-			throw new TypeError("'value' is not of type 'Array'");
-		}
 		return this;
 	};
-	__ks_Array._cm_clone = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 1) {
-			return __ks_Array.__ks_sttc_clone_0.apply(null, args);
+	__ks_Array._sm_clone = function() {
+		const t0 = Type.isArray;
+		if(arguments.length === 1) {
+			if(t0(arguments[0])) {
+				return __ks_Array.__ks_sttc_clone_0(arguments[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(Array.clone) {
+			return Array.clone(...arguments);
+		}
+		throw Helper.badArgs();
 	};
 	__ks_Object.__ks_sttc_clone_0 = function(value) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		else if(!Type.isObject(value)) {
-			throw new TypeError("'value' is not of type 'Object'");
-		}
 		return this;
 	};
-	__ks_Object._cm_clone = function() {
-		var args = Array.prototype.slice.call(arguments);
-		if(args.length === 1) {
-			return __ks_Object.__ks_sttc_clone_0.apply(null, args);
+	__ks_Object._sm_clone = function() {
+		const t0 = Type.isObject;
+		if(arguments.length === 1) {
+			if(t0(arguments[0])) {
+				return __ks_Object.__ks_sttc_clone_0(arguments[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(Object.clone) {
+			return Object.clone(...arguments);
+		}
+		throw Helper.badArgs();
 	};
 	function clone() {
-		if(arguments.length === 1 && Type.isArray(arguments[0])) {
-			let __ks_i = -1;
-			let value = arguments[++__ks_i];
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isArray(value)) {
-				throw new TypeError("'value' is not of type 'Array'");
-			}
-			return this;
+		return clone.__ks_rt(this, arguments);
+	};
+	clone.__ks_0 = function(value) {
+		return this;
+	};
+	clone.__ks_1 = function(value) {
+		return this;
+	};
+	clone.__ks_2 = function(value) {
+		if(value === void 0) {
+			value = null;
 		}
-		else if(arguments.length === 1 && Type.isObject(arguments[0])) {
-			let __ks_i = -1;
-			let value = arguments[++__ks_i];
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
+		return value;
+	};
+	clone.__ks_rt = function(that, args) {
+		const t0 = Type.isArray;
+		const t1 = Type.isObject;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return clone.__ks_0.call(that, args[0]);
 			}
-			else if(!Type.isObject(value)) {
-				throw new TypeError("'value' is not of type 'Object'");
+			if(t1(args[0])) {
+				return clone.__ks_1.call(that, args[0]);
 			}
-			return this;
+			return clone.__ks_2.call(that, args[0]);
 		}
-		else if(arguments.length === 1) {
-			let __ks_i = -1;
-			let value = arguments[++__ks_i];
-			if(value === void 0) {
-				value = null;
-			}
-			return value;
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 	return {
-		__ks_Array: __ks_Array,
-		__ks_Object: __ks_Object,
-		clone: clone
+		__ks_Array,
+		__ks_Object,
+		clone
 	};
 };

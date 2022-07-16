@@ -145,6 +145,7 @@ const $function = {
 
 class FunctionDeclaration extends Statement {
 	private lateinit {
+		_continued: Boolean			= false
 		_extended: Boolean			= false
 		_main: Boolean				= false
 		_name: String
@@ -179,14 +180,16 @@ class FunctionDeclaration extends Statement {
 			}
 		}
 	} // }}}
-	analyse() { // {{{
+	initiate() { // {{{
 		@name = @data.name.name
 
 		if @variable ?= @scope.getDefinedVariable(@name) {
 			if @variable is FunctionVariable {
-				const declarator = new FunctionDeclarator(@variable, @data, this)
-
-				declarator.analyse()
+				@continued = true
+			}
+			else if @variable.getDeclaredType().isFunction() {
+				@main = true
+				@continued = true
 			}
 			else {
 				@scope.addStash(@name, variable => {
@@ -196,7 +199,7 @@ class FunctionDeclaration extends Statement {
 						@main = true
 						@extended = true
 
-						@variable = new FunctionVariable(@scope!?, @name, true)
+						@variable = new FunctionVariable(@scope!?, @name, true, type.length?() ?? 1)
 
 						@variable.getRealType().addFunction(type)
 
@@ -224,7 +227,33 @@ class FunctionDeclaration extends Statement {
 			@variable = new FunctionVariable(@scope!?, @name, false)
 
 			@scope.defineVariable(@variable, this)
+		}
+	} // }}}
+	analyse() { // {{{
+		if @main {
+			if @continued {
+				const variable = @scope.getDefinedVariable(@name)
 
+				if variable is FunctionVariable {
+					@main = false
+					@variable = variable
+				}
+				else {
+					const type = @variable.getDeclaredType()
+
+					@variable = new FunctionVariable(@scope!?, @name, true, type.length?() ?? 1)
+
+					@variable.getRealType().addFunction(type)
+
+					@scope.replaceVariable(@name, @variable)
+				}
+			}
+
+			const declarator = new FunctionDeclarator(@variable, @data, this)
+
+			declarator.analyse()
+		}
+		else if @continued {
 			const declarator = new FunctionDeclarator(@variable, @data, this)
 
 			declarator.analyse()
@@ -246,123 +275,73 @@ class FunctionDeclaration extends Statement {
 	} // }}}
 	initializeVariable(variable, expression, node)
 	name() => @name
-	toFlatFooterFragments(fragments) { // {{{
-		fragments.done()
-	} // }}}
-	toFlatHeaderFragments(fragments) { // {{{
-		const block = fragments.code(`function \(@variable.getSecureName())()`).newBlock()
+	toMainFragments(fragments) { // {{{
+		const name = @variable.getSecureName()
+		const line = fragments.newLine()
+		const block = line.code(`function \(name)()`).newBlock()
 
-		if @variable.isAsync() {
-			block.line('var __ks_cb = arguments[arguments.length - 1]')
+		block.line(`return \(name).__ks_rt(this, arguments)`)
 
-			block
-				.newControl()
-				.code('if(!Type.isFunction(__ks_cb))')
-				.step()
-				.line(`throw new SyntaxError("Callback can't be found")`)
-				.done()
-
-			block.line('var __ks_arguments = Array.prototype.slice.call(arguments, 0, arguments.length - 1)')
-		}
-
-		return block
+		block.done()
+		line.done()
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		return unless @main
 
-		const name = @variable.getSecureName()
+		if @continued {
+			for const declarator in @variable.declarators() {
+				declarator.toStatementFragments(fragments)
+			}
 
-		if @extended {
+			this.toRouterFragments(fragments)
+		}
+		else if @extended {
+			const name = @variable.getSecureName()
+
 			fragments.line($const(this), @oldVariableName, $equals, name)
 
-			const assessment = Router.assess([declarator.type() for const declarator in @variable._declarators], true, @variable.name(), this, true)
+			this.toMainFragments(fragments)
 
-			Router.toFragments(
-				assessment
-				fragments.newLine()
-				'arguments'
-				false
-				(node, fragments) => fragments.code(`function \(name)()`).newBlock()
-				(fragments) => fragments.done()
-				(fragments, method, index) => {
-					const declarator = @variable.getDeclarator(index)
+			fragments.line(`\(name).__ks_0 = \(@oldVariableName)`)
 
-					declarator.toRouterFragments(fragments, (fragments, wrongdoing, data) => {
-						if this._options.format.spreads == 'es5' {
-							fragments.line(`return \(@oldVariableName).apply(null, arguments)`)
-						}
-						else {
-							fragments.line(`return \(@oldVariableName)(...arguments)`)
-						}
-					})
+			for const declarator in @variable.declarators() {
+				declarator.toStatementFragments(fragments)
+			}
 
-					return false
-				}
-				(block, ctrl, async, returns) => {
-					if this._options.format.spreads == 'es5' {
-						ctrl.step().code('else').step().line(`return \(@oldVariableName).apply(null, arguments)`).done()
-					}
-					else {
-						ctrl.step().code('else').step().line(`return \(@oldVariableName)(...arguments)`).done()
-					}
-				}
-				this
-			).done()
-		}
-		else if @variable.length() == 1 {
-			@variable.getDeclarator(0).toStatementFragments(fragments, name, mode)
+			this.toRouterFragments(fragments)
 		}
 		else {
-			const assessment = this.type().assessment(@variable.name(), this)
+			this.toMainFragments(fragments)
 
-			if assessment.flattenable {
-				const argName = @variable.isAsync() ? '__ks_arguments' : 'arguments'
-
-				Router.toFragments(
-					assessment
-					fragments.newLine()
-					argName
-					false
-					(node, fragments) => this.toFlatHeaderFragments(fragments)
-					(fragments) => this.toFlatFooterFragments(fragments)
-					(fragments, method, index) => {
-						const declarator = @variable.getDeclarator(index)
-
-						declarator.toRouterFragments(fragments, Parameter.toWrongDoingFragments)
-
-						return declarator.isExit()
-					}
-					FunctionDeclaration.toFlatWrongDoingFragments
-					this
-				).done()
+			for const declarator in @variable.declarators() {
+				declarator.toStatementFragments(fragments)
 			}
-			else {
-				@variable.toStatementFragments(fragments, mode)
 
-				Router.toFragments(
-					assessment
-					fragments.newLine()
-					'arguments'
-					false
-					(node, fragments) => fragments.code(`function \(name)()`).newBlock()
-					(fragments) => fragments.done()
-					(fragments, method, index) => {
-						const name = @variable.getDeclaratorName(index)
-
-						if this._options.format.spreads == 'es5' {
-							fragments.line(`return \(name).apply(null, arguments)`)
-						}
-						else {
-							fragments.line(`return \(name)(...arguments)`)
-						}
-
-						return false
-					}
-					ClassDeclaration.toWrongDoingFragments
-					this
-				).done()
-			}
+			this.toRouterFragments(fragments)
 		}
+	} // }}}
+	toRouterFragments(fragments) { // {{{
+		const name = @variable.getSecureName()
+
+		const assessment = this.type().assessment(@variable.name(), this)
+
+		const line = fragments.newLine()
+		const block = line.code(`\(name).__ks_rt = function(that, args)`).newBlock()
+
+		Router.toFragments(
+			(function, line) => {
+				line.code(`\(name).__ks_\(function.getCallIndex()).call(that`)
+
+				return true
+			}
+			null
+			assessment
+			block
+			this
+		)
+
+		block.done()
+		line.done()
 	} // }}}
 	type() => @variable.getDeclaredType()
 	walk(fn) { // {{{
@@ -378,6 +357,7 @@ class FunctionDeclarator extends AbstractNode {
 		_awaiting: Boolean				= false
 		_block: Block
 		_exit: Boolean					= false
+		_index: Number					= 0
 		_offset: Number
 		_parameters: Array<Parameter>	= []
 		_returnNull: Boolean			= false
@@ -395,10 +375,12 @@ class FunctionDeclarator extends AbstractNode {
 
 		@scope.define('this', true, Type.Any, this)
 
-		for parameter in @data.parameters {
-			@parameters.push(parameter = new Parameter(parameter, this))
+		for const data in @data.parameters {
+			const parameter = new Parameter(data, this)
 
 			parameter.analyse()
+
+			@parameters.push(parameter)
 		}
 	} // }}}
 	prepare() { // {{{
@@ -410,7 +392,7 @@ class FunctionDeclarator extends AbstractNode {
 			parameter.prepare()
 		}
 
-		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, this)
+		@type = new FunctionType([parameter.type() for parameter in @parameters], @data, @index, this)
 
 		@returnNull = @data.body.kind == NodeKind::IfStatement || @data.body.kind == NodeKind::UnlessStatement
 
@@ -453,6 +435,7 @@ class FunctionDeclarator extends AbstractNode {
 	authority() => this
 	getFunctionNode() => this
 	getParameterOffset() => 0
+	index(@index): this
 	initializeVariable(variable, expression, node)
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -502,45 +485,26 @@ class FunctionDeclarator extends AbstractNode {
 
 		fragments.code(')').done()
 	} // }}}
-	toRouterFragments(fragments, wrongdoer) { // {{{
-		const mode = @type.isAsync() ? ParameterMode::AsyncFunction : ParameterMode::OverloadedFunction
+	toStatementFragments(fragments) { // {{{
+		const line = fragments.newLine().code(`\(@variable.getSecureName()).__ks_\(@type.index()) = function(`)
 
-		Parameter.toFragments(this, fragments, mode, (fragments) => fragments, wrongdoer)
-
-		fragments.compile(@block, Mode::None)
-
-		if !@exit {
-			if !@awaiting && @type.isAsync() {
-				fragments.line('__ks_cb()')
-			}
-			else if @returnNull {
-				fragments.line('return null')
-			}
-		}
-	} // }}}
-	toStatementFragments(fragments, name, mode) { // {{{
-		const ctrl = fragments.newControl().code(`function \(name)(`)
-
-		Parameter.toFragments(this, ctrl, ParameterMode::Default, func(fragments) {
-			return fragments.code(')').step()
+		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {
+			return fragments.code(')').newBlock()
 		})
 
-		for const node in @topNodes {
-			node.toAuthorityFragments(ctrl)
-		}
-
-		ctrl.compile(@block, Mode::None)
+		block.compile(@block, Mode::None)
 
 		if !@exit {
 			if !@awaiting && @type.isAsync() {
-				ctrl.line('__ks_cb()')
+				block.line('__ks_cb()')
 			}
 			else if @returnNull {
-				ctrl.line('return null')
+				block.line('return null')
 			}
 		}
 
-		ctrl.done()
+		block.done()
+		line.done()
 	} // }}}
 	type() => @type
 }
@@ -550,11 +514,17 @@ class FunctionVariable extends Variable {
 		_async: Boolean								= false
 		_extended: Boolean							= false
 		_declarators: Array<FunctionDeclarator>		= []
+		_indexDelta: Number							 = 0
 	}
-	constructor(scope: Scope, @name, @extended) { // {{{
+	constructor(scope: Scope, @name, @extended, @indexDelta = 0) { // {{{
 		super(name, true, false, new OverloadedFunctionType(scope))
 
 		@initialized = true
+	} // }}}
+	analyse() { // {{{
+		for declarator in @declarators {
+			declarator.analyse()
+		}
 	} // }}}
 	prepare() { // {{{
 		if @extended {
@@ -569,7 +539,7 @@ class FunctionVariable extends Variable {
 					SyntaxException.throwMixedOverloadedFunction(declarator)
 				}
 				else if @declaredType.hasFunction(type) {
-					SyntaxException.throwIdenticalFunction(@name, declarator)
+					SyntaxException.throwIdenticalFunction(@name, type, declarator)
 				}
 
 				@declaredType.addFunction(type)
@@ -601,7 +571,7 @@ class FunctionVariable extends Variable {
 					SyntaxException.throwMixedOverloadedFunction(declarator)
 				}
 				else if @declaredType.hasFunction(type) {
-					SyntaxException.throwIdenticalFunction(@name, declarator)
+					SyntaxException.throwIdenticalFunction(@name, type, declarator)
 				}
 
 				@declaredType.addFunction(type)
@@ -614,10 +584,11 @@ class FunctionVariable extends Variable {
 		}
 	} // }}}
 	addDeclarator(declarator: FunctionDeclarator) { // {{{
+		declarator.index(@indexDelta + @declarators.length)
+
 		@declarators.push(declarator)
 	} // }}}
-	getDeclarator(index: Number) => @declarators[index]
-	getDeclaratorName(index) => `__ks_\(@name)_\(index)`
+	declarators() => @declarators
 	isAsync() => @declaredType.isAsync()
 	length() => @declarators.length
 	toStatementFragments(fragments, mode) { // {{{

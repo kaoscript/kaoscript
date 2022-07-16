@@ -216,7 +216,7 @@ class MacroDeclaration extends AbstractNode {
 	constructor(@data, @parent, _: Scope?, @name = data.name.name) { // {{{
 		super(data, parent, new MacroScope())
 
-		@type = MacroType.fromAST(data, this)
+		@type = MacroType.fromAST(data!?, this)
 		@line = data.start?.line ?? -1
 
 		const builder = new Generator.KSWriter({
@@ -380,10 +380,11 @@ class MacroDeclaration extends AbstractNode {
 		}
 	} // }}}
 	getMark(index) => @marks[index]
+	isEnhancementExport() => false
 	isExportable() => false
 	isInstanceMethod() => false
 	line() => @line
-	matchArguments(arguments: Array) => @type.matchArguments(arguments)
+	matchArguments(arguments: Array) => @type.matchArguments(arguments, this)
 	name() => @name
 	statement() => this
 	toFragments(fragments, mode)
@@ -395,10 +396,10 @@ class MacroDeclaration extends AbstractNode {
 }
 
 class MacroType extends FunctionType {
-	static fromAST(data, node: AbstractNode) { // {{{
+	static fromAST(data, node: AbstractNode): MacroType { // {{{
 		const scope = node.scope()
 
-		return new MacroType([MacroParameterType.fromAST(parameter, scope, false, node) for parameter in data.parameters], data, node)
+		return new MacroType([ParameterType.fromAST(parameter, false, scope, false, node) for parameter in data.parameters], data, node)
 	} // }}}
 	static import(data, references, scope: Scope, node: AbstractNode): MacroType { // {{{
 		const type = new MacroType(scope)
@@ -406,23 +407,32 @@ class MacroType extends FunctionType {
 		type._min = data.min
 		type._max = data.max
 
-		type._parameters = [MacroParameterType.import(parameter, references, scope, node) for parameter in data.parameters]
+		type._parameters = [ParameterType.import(parameter, false, references, scope, node) for parameter in data.parameters]
 
-		type.updateArguments()
+		type.updateParameters()
 
 		return type
+	} // }}}
+	assessment(name: String, node: AbstractNode) { // {{{
+		if @assessment == null {
+			@assessment = Router.assess([this], name, node)
+
+			@assessment.macro = true
+		}
+
+		return @assessment
 	} // }}}
 	export() => { // {{{
 		min: @min
 		max: @max
 		parameters: [parameter.export() for parameter in @parameters]
 	} // }}}
-	matchContentOf(that: MacroType): Boolean { // {{{
-		if that.min() < @min || that.max() > @max {
+	matchContentOf(value: MacroType): Boolean { // {{{
+		if value.min() < @min || value.max() > @max {
 			return false
 		}
 
-		const params = that.parameters()
+		const params = value.parameters()
 
 		if @parameters.length == params.length {
 			for parameter, i in @parameters {
@@ -442,76 +452,78 @@ class MacroType extends FunctionType {
 	} // }}}
 }
 
-class MacroParameterType extends ParameterType {
-	static {
-		fromAST(data, scope: Scope, defined: Boolean, node: AbstractNode): MacroParameterType { // {{{
-			const type = Type.fromAST(data.type, scope, false, node)
-
-			auto default = false
-			auto min = 1
-			auto max = 1
-
-			if data.defaultValue? {
-				default = true
-				min = 0
-			}
-
-			let nf = true
-			for modifier in data.modifiers while nf {
-				if modifier.kind == ModifierKind::Rest {
-					if modifier.arity {
-						min = modifier.arity.min
-						max = modifier.arity.max
-					}
-					else {
-						min = 0
-						max = Infinity
-					}
-
-					nf = true
-				}
-			}
-
-			let name = null
-			if data.name?.kind == NodeKind::Identifier {
-				name = data.name.name
-			}
-
-			return new MacroParameterType(scope, name, type, min, max, default)
-		} // }}}
+// TODO remove extended type
+class MacroArgument extends Type {
+	private {
+		_data
 	}
-	clone() => new MacroParameterType(@scope, @name, @type, @min, @max, @default)
-	matchArgument(value) { // {{{
-		if @type.isAny() {
+	static build(arguments: Array) => [new MacroArgument(argument) for const argument in arguments]
+	constructor(@data) { // {{{
+		super(null)
+	} // }}}
+	clone() { // {{{
+		throw new NotSupportedException()
+	} // }}}
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) { // {{{
+		throw new NotSupportedException()
+	} // }}}
+	toFragments(fragments, node) { // {{{
+		throw new NotSupportedException()
+	} // }}}
+	toPositiveTestFragments(fragments, node, junction: Junction = Junction::NONE) { // {{{
+		throw new NotSupportedException()
+	} // }}}
+	toVariations(variations: Array<String>) { // {{{
+		throw new NotSupportedException()
+	} // }}}
+	isAssignableToVariable(value: AnyType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+		return true
+	} // }}}
+	isAssignableToVariable(value: NullType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+		return false
+	} // }}}
+	isAssignableToVariable(value: ReferenceType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+		if value.isAny() {
 			return true
 		}
 
-		switch @type.name() {
+		switch value.name() {
 			'Array' => {
-				return value.kind == NodeKind::ArrayExpression
+				return @data.kind == NodeKind::ArrayExpression
 			}
 			'Dictionary' => {
-				return value.kind == NodeKind::ObjectExpression
+				return @data.kind == NodeKind::ObjectExpression
 			}
 			'Expression' => {
-				return	value.kind == NodeKind::UnaryExpression ||
-						value.kind == NodeKind::BinaryExpression ||
-						value.kind == NodeKind::PolyadicExpression ||
-						$expressions[value.kind]?
+				return	@data.kind == NodeKind::UnaryExpression ||
+						@data.kind == NodeKind::BinaryExpression ||
+						@data.kind == NodeKind::PolyadicExpression ||
+						$expressions[@data.kind]?
 			}
 			'Identifier' => {
-				return value.kind == NodeKind::Identifier
+				return @data.kind == NodeKind::Identifier
 			}
 			'Number' => {
-				return value.kind == NodeKind::NumericExpression
+				return @data.kind == NodeKind::NumericExpression
 			}
 			'String' => {
-				return value.kind == NodeKind::Literal
+				return @data.kind == NodeKind::Literal
 			}
 		}
 
 		return false
 	} // }}}
+	isAssignableToVariable(value: UnionType, anycast: Boolean, nullcast: Boolean, downcast: Boolean, limited: Boolean = false): Boolean { // {{{
+		for const type in value.types() {
+			if @isAssignableToVariable(type, anycast, nullcast, downcast, limited) {
+				return true
+			}
+		}
+
+		return false
+	} // }}}
+	isSpread() => false
+	isUnion() => false
 }
 
 func $callMacroExpression(data, parent, scope) { // {{{
@@ -533,7 +545,7 @@ class CallMacroStatement extends Statement {
 		_offsetStart: Number	= 0
 		_statements: Array		= []
 	}
-	analyse() { // {{{
+	initiate() { // {{{
 		const macro = @scope.getMacro(@data, this)
 
 		const data = macro.execute(@data.arguments, this)
@@ -554,13 +566,35 @@ class CallMacroStatement extends Statement {
 			if const statement = $compile.statement(data, this) {
 				@statements.push(statement)
 
-				statement.analyse()
+				statement.initiate()
 			}
 		}
 
 		@scope.line(data.end.line)
 
 		@offsetEnd = offset + @scope.line() - @offsetStart
+		@scope.setLineOffset(@offsetEnd)
+	} // }}}
+	analyse() { // {{{
+		@scope.setLineOffset(@offsetStart)
+
+		for statement in @statements {
+			@scope.line(statement.line())
+
+			statement.analyse()
+		}
+
+		@scope.setLineOffset(@offsetEnd)
+	} // }}}
+	enhance() { // {{{
+		@scope.setLineOffset(@offsetStart)
+
+		for statement in @statements {
+			@scope.line(statement.line())
+
+			statement.enhance()
+		}
+
 		@scope.setLineOffset(@offsetEnd)
 	} // }}}
 	prepare() { // {{{

@@ -1,1 +1,1 @@
-SyntaxException: An error "Error" is unreported, it must be caught or declared to be thrown (line 11, file "fixtures/compile/attribute/attribute.error.multi.err.ks")
+SyntaxException: An error "Error" is unreported, it must be caught or declared to be thrown (fixtures/compile/attribute/attribute.error.multi.err.ks:11)

@@ -1,26 +1,32 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foo(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function(x) {
+	};
+	foo.__ks_rt = function(that, args) {
+		const t0 = value => Type.isString(value) || Type.isDictionary(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foo.__ks_0.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
+		throw Helper.badArgs();
+	};
+	function bar() {
+		return bar.__ks_rt(this, arguments);
+	};
+	bar.__ks_0 = function(x) {
+		foo.__ks_0(x);
+	};
+	bar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isString(value) || Type.isDictionary(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return bar.__ks_0.call(that, args[0]);
+			}
 		}
-		else if(!Type.isDictionary(x) && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'Dictionary' or 'String'");
-		}
-	}
-	function bar(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isDictionary(x) && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'Dictionary' or 'String'");
-		}
-		foo(x);
-	}
+		throw Helper.badArgs();
+	};
 };

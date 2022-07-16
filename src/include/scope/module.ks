@@ -37,7 +37,7 @@ class ModuleScope extends Scope {
 		@predefined.__Tuple = Variable.createPredefinedClass('Tuple', this)
 
 		@predefined.__false = new Variable('false', true, true, this.reference('Boolean'))
-		@predefined.__null = new Variable('null', true, true, Type.Null)
+		@predefined.__null = new Variable('null', true, true, NullType.Explicit)
 		@predefined.__true = new Variable('true', true, true, this.reference('Boolean'))
 		@predefined.__Infinity = new Variable('Infinity', true, true, this.reference('Number'))
 		@predefined.__Math = new Variable('Math', true, true, this.reference('Dictionary'))
@@ -78,7 +78,7 @@ class ModuleScope extends Scope {
 			let notAdded = true
 
 			for const m, index in @macros[name] while notAdded {
-				if m.type().isMatching(type, MatchingMode::Signature) {
+				if type.isSubsetOf(m.type(), MatchingMode::Signature) {
 					@macros[name].splice(index, 0, macro)
 
 					notAdded = false
@@ -147,8 +147,15 @@ class ModuleScope extends Scope {
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 
-			if variables.last() is Variable {
-				SyntaxException.throwAlreadyDeclared(name, node)
+			const last = variables.last()
+			if last is Variable {
+				const declaration = last.declaration()
+				if declaration is ImportDeclarator {
+					SyntaxException.throwAlreadyImported(name, declaration.getModuleName(), declaration.line(), node)
+				}
+				else {
+					SyntaxException.throwAlreadyDeclared(name, node)
+				}
 			}
 
 			variables.push(@line, variable)
@@ -161,6 +168,10 @@ class ModuleScope extends Scope {
 			}
 
 			@variables[name] = [@line, variable]
+		}
+
+		if const reference = @references[name] {
+			reference.reset()
 		}
 	} // }}}
 	getChunkType(name) => this.getChunkType(name, @line)
@@ -213,8 +224,10 @@ class ModuleScope extends Scope {
 	getMacro(data, parent) { // {{{
 		if data.callee.kind == NodeKind::Identifier {
 			if @macros[data.callee.name]? {
-				for macro in @macros[data.callee.name] {
-					if macro.matchArguments(data.arguments) {
+				const arguments = MacroArgument.build(data.arguments)
+
+				for const macro in @macros[data.callee.name] {
+					if macro.matchArguments(arguments) {
 						return macro
 					}
 				}
@@ -226,8 +239,10 @@ class ModuleScope extends Scope {
 			const path = Generator.generate(data.callee)
 
 			if @macros[path]? {
+				const arguments = MacroArgument.build(data.arguments)
+
 				for macro in @macros[path] {
-					if macro.matchArguments(data.arguments) {
+					if macro.matchArguments(arguments) {
 						return macro
 					}
 				}
@@ -260,8 +275,7 @@ class ModuleScope extends Scope {
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 	getReservedName() => `__ks_00\(++@reservedIndex)`
 	getTempIndex() => @tempIndex
-	getVariable(name): Variable? => this.getVariable(name, @line)
-	getVariable(name, line: Number): Variable? { // {{{
+	getVariable(name, line: Number = @line): Variable? { // {{{
 		if @variables[name] is not Array && $types[name] is String {
 			name = $types[name]
 		}
@@ -325,8 +339,7 @@ class ModuleScope extends Scope {
 		return false
 	} // }}}
 	hasMacro(name) => @macros[name] is Array
-	hasVariable(name: String) => this.hasVariable(name, @line)
-	hasVariable(name: String, line: Number) { // {{{
+	hasVariable(name: String, line: Number = @line) { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			let variable = null
@@ -366,7 +379,7 @@ class ModuleScope extends Scope {
 
 		const index = @matchingTypes[hash].length
 
-		const match = a.isMatching(b, mode)
+		const match = a.isSubsetOf(b, mode)
 
 		@matchingTypes[hash][index - 1] = match
 
@@ -438,32 +451,27 @@ class ModuleScope extends Scope {
 			return false
 		}
 	} // }}}
-	reassignReference(oldName, newName, newScope) { // {{{
-		if @references[oldName]? {
-			@references[oldName].reassign(newName, newScope)
-		}
-	} // }}}
-	reference(value, nullable: Boolean = false, parameters: Array = []) { // {{{
+	reference(value) { // {{{
 		switch value {
-			is AnyType => return this.resolveReference('Any', nullable, parameters)
-			is ClassVariableType => return this.reference(value.type(), nullable, parameters)
+			is AnyType => return this.resolveReference('Any')
+			is ClassVariableType => return this.reference(value.type())
 			is NamedType => {
 				if value.hasContainer() {
-					return value.container().scope().reference(value.name(), nullable, parameters)
+					return value.container().scope().reference(value.name())
 				}
 				else {
-					return this.resolveReference(value.name(), nullable, parameters)
+					return this.resolveReference(value.name())
 				}
 			}
-			is ReferenceType => return this.resolveReference(value.name(), value.isNullable(), parameters)
-			is String => return this.resolveReference(value, nullable, parameters)
-			is Variable => return this.resolveReference(value.name(), nullable, parameters)
+			is ReferenceType => return this.resolveReference(value.name(), value.isExplicitlyNull())
+			is Variable => return this.resolveReference(value.name())
 			=> {
 				console.info(value)
 				throw new NotImplementedException()
 			}
 		}
 	} // }}}
+	reference(value: String, nullable: Boolean = false, parameters: Array = []) => this.resolveReference(value, nullable, parameters)
 	releaseTempName(name) { // {{{
 		@tempNames[name] = true
 	} // }}}
@@ -488,6 +496,10 @@ class ModuleScope extends Scope {
 		}
 		else {
 			@variables[name] = [@line, variable]
+		}
+
+		if const reference = @references[name] {
+			reference.reset()
 		}
 
 		return variable
@@ -520,13 +532,17 @@ class ModuleScope extends Scope {
 			}
 		}
 
+		if const reference = @references[name] {
+			reference.reset()
+		}
+
 		return variable
 	} // }}}
-	resolveReference(name: String, nullable: Boolean, parameters: Array) { // {{{
-		const hash = ReferenceType.toQuote(name, nullable, parameters)
+	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { // {{{
+		const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
-			@references[hash] = new ReferenceType(this, name, nullable, parameters)
+			@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)
 		}
 
 		return @references[hash]

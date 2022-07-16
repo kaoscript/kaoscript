@@ -1,1 +1,1 @@
-TypeException: No values are expected to be returned (line 2, file "fixtures/compile/function/function.return.tv.wrs.ks")
+TypeException: No values are expected to be returned (fixtures/compile/function/function.return.tv.wrs.ks:2)

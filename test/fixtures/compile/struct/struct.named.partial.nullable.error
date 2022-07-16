@@ -1,1 +1,1 @@
-SyntaxException: The field "x" is missing to create the struct (line 8, file "fixtures/compile/struct/struct.named.partial.nullable.ks")
+ReferenceException: The struct "Point" can't be matched to given arguments (Number) (fixtures/compile/struct/struct.named.partial.nullable.ks:8)

@@ -1,27 +1,33 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "Point"
-  ],
-  "references": [
-    {
-      "kind": "struct",
-      "fields": {
-        "x": {
-          "required": true,
-          "type": "Number"
-        },
-        "y": {
-          "required": true,
-          "type": "Number"
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Point"
+    ],
+    "references": [
+      {
+        "kind": "struct",
+        "fields": {
+          "x": {
+            "required": true,
+            "type": "Number"
+          },
+          "y": {
+            "required": true,
+            "type": "Number"
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

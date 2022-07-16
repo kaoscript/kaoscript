@@ -1,1 +1,1 @@
-ReferenceException: Property "PI" is not defined (line 10, file "fixtures/compile/namespace/namespace.export.not.ks")
+ReferenceException: Property "PI" is not defined (fixtures/compile/namespace/namespace.export.not.ks:10)

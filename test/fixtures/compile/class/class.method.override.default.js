@@ -1,46 +1,39 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class LetterBox {
+		static __ks_new_0() {
+			const o = Object.create(LetterBox.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
-		}
-		__ks_func_format_0(message) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(message === void 0 || message === null) {
-				throw new TypeError("'message' is not nullable");
-			}
-			else if(!Type.isString(message)) {
-				throw new TypeError("'message' is not of type 'String'");
-			}
-			return message.toUpperCase();
 		}
 		format() {
-			if(arguments.length === 1) {
-				return LetterBox.prototype.__ks_func_format_0.apply(this, arguments);
+			return this.__ks_func_format_rt.call(null, this, this, arguments);
+		}
+		__ks_func_format_0(message) {
+			return message.toUpperCase();
+		}
+		__ks_func_format_rt(that, proto, args) {
+			const t0 = Type.isString;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_format_0.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	LetterBox.prototype.__ks_func_format_0 = function(message) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(message === void 0 || message === null) {
-			throw new TypeError("'message' is not nullable");
-		}
-		else if(!Type.isString(message)) {
-			throw new TypeError("'message' is not of type 'String'");
-		}
 		return message.toLowerCase();
 	};
 };

@@ -1,0 +1,1 @@
+SyntaxException: When the arguments are ("String"), the function "constructor" can be matched with "constructor(name: String)" or "constructor(color: String)" (fixtures/compile/class/class.extends.ctor.named.ks:11)

@@ -1,46 +1,51 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "Weekday"
-  ],
-  "references": [
-    {
-      "kind": "enum",
-      "type": "number",
-      "index": 6,
-      "exhaustive": true,
-      "variables": [
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-        "SUNDAY"
-      ],
-      "instanceMethods": {
-        "isWeekend": [
-          {
-            "id": 0,
-            "access": 4,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Boolean",
-            "throws": [
-              "Error"
-            ]
-          }
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "Weekday"
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "number",
+        "sequenceIndex": 6,
+        "exhaustive": true,
+        "variables": [
+          "MONDAY",
+          "TUESDAY",
+          "WEDNESDAY",
+          "THURSDAY",
+          "FRIDAY",
+          "SATURDAY",
+          "SUNDAY"
+        ],
+        "instanceMethods": {
+          "isWeekend": [
+            {
+              "index": 0,
+              "access": 4,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Boolean",
+              "errors": [
+                "Error"
+              ]
+            }
+          ]
+        },
+        "staticMethods": {},
+        "sequences": [
+          -1
         ]
-      },
-      "staticMethods": {},
-      "sequences": [
-        -1
-      ]
-    }
-  ],
-  "macros": []
-}
+      }
+    ],
+    "macros": []
+  }
+]

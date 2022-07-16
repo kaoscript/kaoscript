@@ -1,1 +1,1 @@
-SyntaxException: Identifier "this" has already been declared (line 2, file "fixtures/compile/keyword/keyword.this.function.overwrite.ks")
+SyntaxException: Identifier "this" has already been declared (fixtures/compile/keyword/keyword.this.function.overwrite.ks:2)

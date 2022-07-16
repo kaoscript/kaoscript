@@ -1,42 +1,45 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class ClassZ {
+		static __ks_new_0(...args) {
+			const o = Object.create(ClassZ.prototype);
+			o.__ks_init();
+			o.__ks_cons_0(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
 		__ks_cons_0(values) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(values === void 0 || values === null) {
-				throw new TypeError("'values' is not nullable");
-			}
-			else if(!Type.isArray(values)) {
-				throw new TypeError("'values' is not of type 'Array<ClassA>'");
-			}
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = value => Type.isArray(value, value => Type.isClassInstance(value, ClassA));
 			if(args.length === 1) {
-				ClassZ.prototype.__ks_cons_0.apply(this, args);
+				if(t0(args[0])) {
+					return ClassZ.prototype.__ks_cons_0.call(that, args[0]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		}
 	}
 	class ClassA {
+		static __ks_new_0() {
+			const o = Object.create(ClassA.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 	}

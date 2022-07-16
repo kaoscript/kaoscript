@@ -1,4 +1,4 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_String = {};
 	__ks_String.__ks_func_toInt_0 = function(base) {
@@ -7,14 +7,19 @@ module.exports = function() {
 		}
 		return parseInt(this, base);
 	};
-	__ks_String._im_toInt = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 0 && args.length <= 1) {
-			return __ks_String.__ks_func_toInt_0.apply(that, args);
+	__ks_String._im_toInt = function(that, ...args) {
+		return __ks_String.__ks_func_toInt_rt(that, args);
+	};
+	__ks_String.__ks_func_toInt_rt = function(that, args) {
+		if(args.length <= 1) {
+			return __ks_String.__ks_func_toInt_0.call(that, args[0]);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.toInt) {
+			return that.toInt(...args);
+		}
+		throw Helper.badArgs();
 	};
 	let d = 4;
 	let u = 2;
-	console.log(__ks_String._im_toInt(Helper.concatString(d, u)));
+	console.log(__ks_String.__ks_func_toInt_0.call(Helper.concatString(d, u)));
 };

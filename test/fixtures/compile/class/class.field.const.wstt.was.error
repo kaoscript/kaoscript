@@ -1,1 +1,1 @@
-ReferenceException: The expression "Foobar.PI" is immutable (line 5, file "fixtures/compile/class/class.field.const.wstt.was.ks")
+ReferenceException: The expression "Foobar.PI" is immutable (fixtures/compile/class/class.field.const.wstt.was.ks:5)

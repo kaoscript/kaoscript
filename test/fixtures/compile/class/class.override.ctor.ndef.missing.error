@@ -1,1 +1,1 @@
-SyntaxException: The constructor "Foobar(x: Any)" can't override a suitable constructor (line 8, file "fixtures/compile/class/class.override.ctor.ndef.missing.ks")
+SyntaxException: The constructor "Foobar(x: Any)" can't override a suitable constructor (fixtures/compile/class/class.override.ctor.ndef.missing.ks:8)

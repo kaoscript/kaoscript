@@ -23,6 +23,7 @@ class ProxyGreetings extends AbstractGreetings {
 		_greeting: AbstractGreetings
 	}
 	constructor(@greeting)
+	// TODO add syntax to make it possible
 	greet(...args) => @greeting.greet(...args)
 }
 

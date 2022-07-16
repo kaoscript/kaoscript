@@ -1,13 +1,19 @@
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Date = {};
+	const __ks_Date = {};
 	__ks_Date.__ks_func_foobar_0 = function() {
 	};
-	__ks_Date._im_foobar = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Date._im_foobar = function(that, ...args) {
+		return __ks_Date.__ks_func_foobar_rt(that, args);
+	};
+	__ks_Date.__ks_func_foobar_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Date.__ks_func_foobar_0.apply(that);
+			return __ks_Date.__ks_func_foobar_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.foobar) {
+			return that.foobar(...args);
+		}
+		throw Helper.badArgs();
 	};
 	class FDate extends Date {
 		constructor() {
@@ -19,6 +25,6 @@ module.exports = function() {
 	}
 	const d = new Date();
 	const f = new FDate();
-	__ks_Date._im_foobar(d);
-	__ks_Date._im_foobar(f);
+	__ks_Date.__ks_func_foobar_0.call(d);
+	__ks_Date.__ks_func_foobar_0.call(f);
 };

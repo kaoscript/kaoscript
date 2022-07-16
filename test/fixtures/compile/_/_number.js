@@ -1,36 +1,12 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Number = {};
 	var __ks_Math = {};
 	__ks_Number.__ks_func_limit_0 = function(min, max) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(min === void 0 || min === null) {
-			throw new TypeError("'min' is not nullable");
-		}
-		else if(!Type.isNumber(min)) {
-			throw new TypeError("'min' is not of type 'Number'");
-		}
-		if(max === void 0 || max === null) {
-			throw new TypeError("'max' is not nullable");
-		}
-		else if(!Type.isNumber(max)) {
-			throw new TypeError("'max' is not of type 'Number'");
-		}
-		return (isNaN(this) === true) ? min : Math.min(max, Math.max(min, this));
+		return isNaN(this) ? min : Math.min(max, Math.max(min, this));
 	};
 	__ks_Number.__ks_func_mod_0 = function(max) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(max === void 0 || max === null) {
-			throw new TypeError("'max' is not nullable");
-		}
-		else if(!Type.isNumber(max)) {
-			throw new TypeError("'max' is not of type 'Number'");
-		}
-		if(isNaN(this) === true) {
+		if(isNaN(this)) {
 			return 0;
 		}
 		else {
@@ -47,9 +23,6 @@ module.exports = function() {
 		if(precision === void 0 || precision === null) {
 			precision = 0;
 		}
-		else if(!Type.isNumber(precision)) {
-			throw new TypeError("'precision' is not of type 'Number'");
-		}
 		precision = Math.pow(10, precision).toFixed(0);
 		return Math.round(this * precision) / precision;
 	};
@@ -60,47 +33,85 @@ module.exports = function() {
 		if(base === void 0 || base === null) {
 			base = 10;
 		}
-		else if(!Type.isNumber(base)) {
-			throw new TypeError("'base' is not of type 'Number'");
-		}
 		return parseInt(this, base);
 	};
-	__ks_Number._im_limit = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Number._im_limit = function(that, ...args) {
+		return __ks_Number.__ks_func_limit_rt(that, args);
+	};
+	__ks_Number.__ks_func_limit_rt = function(that, args) {
+		const t0 = Type.isNumber;
 		if(args.length === 2) {
-			return __ks_Number.__ks_func_limit_0.apply(that, args);
+			if(t0(args[0]) && t0(args[1])) {
+				return __ks_Number.__ks_func_limit_0.call(that, args[0], args[1]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.limit) {
+			return that.limit(...args);
+		}
+		throw Helper.badArgs();
 	};
-	__ks_Number._im_mod = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Number._im_mod = function(that, ...args) {
+		return __ks_Number.__ks_func_mod_rt(that, args);
+	};
+	__ks_Number.__ks_func_mod_rt = function(that, args) {
+		const t0 = Type.isNumber;
 		if(args.length === 1) {
-			return __ks_Number.__ks_func_mod_0.apply(that, args);
+			if(t0(args[0])) {
+				return __ks_Number.__ks_func_mod_0.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
-	};
-	__ks_Number._im_round = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 0 && args.length <= 1) {
-			return __ks_Number.__ks_func_round_0.apply(that, args);
+		if(that.mod) {
+			return that.mod(...args);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
-	__ks_Number._im_toFloat = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Number._im_round = function(that, ...args) {
+		return __ks_Number.__ks_func_round_rt(that, args);
+	};
+	__ks_Number.__ks_func_round_rt = function(that, args) {
+		const t0 = value => Type.isNumber(value) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length <= 1) {
+			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
+				return __ks_Number.__ks_func_round_0.call(that, Helper.getVararg(args, 0, pts[1]));
+			}
+		}
+		if(that.round) {
+			return that.round(...args);
+		}
+		throw Helper.badArgs();
+	};
+	__ks_Number._im_toFloat = function(that, ...args) {
+		return __ks_Number.__ks_func_toFloat_rt(that, args);
+	};
+	__ks_Number.__ks_func_toFloat_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Number.__ks_func_toFloat_0.apply(that);
+			return __ks_Number.__ks_func_toFloat_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.toFloat) {
+			return that.toFloat(...args);
+		}
+		throw Helper.badArgs();
 	};
-	__ks_Number._im_toInt = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-		if(args.length >= 0 && args.length <= 1) {
-			return __ks_Number.__ks_func_toInt_0.apply(that, args);
+	__ks_Number._im_toInt = function(that, ...args) {
+		return __ks_Number.__ks_func_toInt_rt(that, args);
+	};
+	__ks_Number.__ks_func_toInt_rt = function(that, args) {
+		const t0 = value => Type.isNumber(value) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length <= 1) {
+			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && te(pts, 1)) {
+				return __ks_Number.__ks_func_toInt_0.call(that, Helper.getVararg(args, 0, pts[1]));
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		if(that.toInt) {
+			return that.toInt(...args);
+		}
+		throw Helper.badArgs();
 	};
 	return {
-		__ks_Number: __ks_Number
+		__ks_Number
 	};
 };

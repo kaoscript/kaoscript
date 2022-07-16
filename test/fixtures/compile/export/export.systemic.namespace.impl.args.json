@@ -1,95 +1,102 @@
-{
-  "aliens": [
-    0,
-    "console",
-    1,
-    "Math"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "console",
-    2,
-    "Math"
-  ],
-  "references": [
-    {
-      "kind": "sealable",
-      "systemic": true,
-      "type": "Any?"
-    },
-    {
-      "kind": "namespace",
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": true,
-      "properties": {
-        "PI": {
-          "type": "Number",
-          "sealed": false
-        },
-        "pow": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 0,
-          "max": "Infinity",
-          "parameters": [
-            {
-              "type": "Any?",
-              "min": 0,
-              "max": "Infinity",
-              "default": false
-            }
-          ],
-          "returns": "Number",
-          "throws": [],
-          "sealed": false
-        }
-      }
-    },
-    {
-      "kind": "namespace",
-      "exhaustive": true,
-      "namespace": {
-        "reference": 1
+[
+  {
+    "aliens": [
+      0,
+      "console",
+      true,
+      1,
+      "Math",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "sealable",
+        "systemic": true,
+        "type": "Any?"
       },
-      "properties": {
-        "foo": {
-          "kind": "function",
-          "async": false,
-          "exhaustive": true,
-          "min": 2,
-          "max": 3,
-          "parameters": [
-            {
-              "name": "x",
-              "type": "Any",
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "y",
-              "type": "Any!?",
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "z",
-              "type": "Any",
-              "min": 0,
-              "max": 1,
-              "default": true
-            }
-          ],
-          "returns": "String",
-          "throws": [],
-          "sealed": true
+      {
+        "kind": "namespace",
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": true,
+        "properties": {
+          "PI": {
+            "type": "Number",
+            "sealed": false
+          },
+          "pow": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "type": "Any?",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Number",
+            "errors": [],
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "console",
+      2,
+      "Math"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "original": 1,
+        "exhaustive": true,
+        "properties": {
+          "foo": {
+            "kind": "function",
+            "index": 0,
+            "async": false,
+            "exhaustive": true,
+            "min": 2,
+            "max": 3,
+            "parameters": [
+              {
+                "name": "x",
+                "type": "Any",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "y",
+                "type": "Any!?",
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "z",
+                "type": "Any",
+                "min": 0,
+                "max": 1,
+                "default": true
+              }
+            ],
+            "returns": "String",
+            "errors": [],
+            "sealed": true
+          }
+        }
+      }
+    ],
+    "macros": []
+  }
+]

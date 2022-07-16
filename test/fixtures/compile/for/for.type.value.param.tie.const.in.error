@@ -1,1 +1,1 @@
-TypeException: The variable "value" of type "String" can't be assigned with a value of type "Number" (line 4, file "fixtures/compile/for/for.type.value.param.tie.const.in.ks")
+TypeException: The variable "value" of type "String" can't be assigned with a value of type "Number" (fixtures/compile/for/for.type.value.param.tie.const.in.ks:4)

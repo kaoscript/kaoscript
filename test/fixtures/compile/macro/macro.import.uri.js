@@ -1,16 +1,18 @@
 require("kaoscript/register");
 module.exports = function() {
-	var URI = require("./macro.export.uri.ks")().URI;
+	var URI = require("./.macro.export.uri.ks.j5k8r9.ksb")().URI;
 	class FileURI extends URI {
-		__ks_init_0() {
-			this._e = 3.14;
+		static __ks_new_0() {
+			const o = Object.create(FileURI.prototype);
+			o.__ks_init();
+			return o;
 		}
 		__ks_init() {
-			URI.prototype.__ks_init.call(this);
-			FileURI.prototype.__ks_init_0.call(this);
+			super.__ks_init();
+			this._e = 3.14;
 		}
-		__ks_cons(args) {
-			URI.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 	}
 };

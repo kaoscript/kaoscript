@@ -1,1 +1,1 @@
-NotSupportedException: Unexpected junction expression (line 2, file "fixtures/compile/operator/operator.junctive.error.add.ks")
+NotSupportedException: Unexpected junction expression (fixtures/compile/operator/operator.junctive.error.add.ks:2)

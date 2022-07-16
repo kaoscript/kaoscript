@@ -5,7 +5,7 @@ class NeverType extends Type {
 	clone() { // {{{
 		throw new NotSupportedException()
 	} // }}}
-	export(references, mode) => 'Never'
+	export(references: Array, indexDelta: Number, mode: ExportMode, module: Module) => 'Never'
 	isNever() => true
 	toFragments(fragments, node) { // {{{
 		fragments.code('Never')
@@ -13,5 +13,8 @@ class NeverType extends Type {
 	toQuote(): String => `Never`
 	override toPositiveTestFragments(fragments, node, junction) { // {{{
 		throw new NotSupportedException(node)
+	} // }}}
+	override toVariations(variations) { // {{{
+		variations.push('never')
 	} // }}}
 }

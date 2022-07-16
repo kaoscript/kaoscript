@@ -220,16 +220,38 @@ class DictionaryExpression extends Expression {
 		@reusable = true
 	} // }}}
 	type() => @type
+	validateType(type: DictionaryType) { // {{{
+		for const property in @properties {
+			if property is DictionaryLiteralMember {
+				if const propertyType = type.getProperty(property.name()) {
+					property.validateType(propertyType)
+				}
+			}
+		}
+	} // }}}
+	validateType(type: ReferenceType) { // {{{
+		if type.hasParameters() {
+			const parameter = type.parameter(0)
+
+			for const property in @properties {
+				if property is DictionaryLiteralMember {
+					property.validateType(parameter)
+				}
+			}
+		}
+	} // }}}
 	varname() => @varname
 }
 
 class DictionaryLiteralMember extends Expression {
-	private {
+	private lateinit {
 		_computed: Boolean		= true
+		_enumCasting: Boolean	= false
 		_function: Boolean		= false
 		_shorthand: Boolean		= true
 		_name
 		_value
+		_type: Type
 	}
 	analyse() { // {{{
 		@options = Attribute.configure(@data, @options, AttributeTarget::Property, this.file())
@@ -265,6 +287,8 @@ class DictionaryLiteralMember extends Expression {
 	} // }}}
 	prepare() { // {{{
 		@value.prepare()
+
+		@type = @value.type()
 	} // }}}
 	translate() { // {{{
 		@value.translate()
@@ -282,18 +306,28 @@ class DictionaryLiteralMember extends Expression {
 				if !@function {
 					fragments.code(': ')
 				}
-
-				fragments.compile(@value)
 			}
 		}
 		else if @computed {
-			fragments.code(@parent.varname(), '[').compile(@name).code(']', $equals).compile(@value)
+			fragments.code(@parent.varname(), '[').compile(@name).code(']', $equals)
 		}
 		else {
-			fragments.code(@parent.varname(), '.').compile(@name).code($equals).compile(@value)
+			fragments.code(@parent.varname(), '.').compile(@name).code($equals)
+		}
+
+		if @enumCasting {
+			@value.toCastingFragments(fragments, mode)
+		}
+		else {
+			fragments.compile(@value)
 		}
 	} // }}}
-	type() => @value.type()
+	type() => @type
+	validateType(type: Type) { // {{{
+		if @type.isEnum() && !type.isEnum() {
+			@enumCasting = true
+		}
+	} // }}}
 	value() => @value
 }
 

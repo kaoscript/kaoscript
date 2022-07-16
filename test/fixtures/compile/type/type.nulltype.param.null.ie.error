@@ -1,1 +1,1 @@
-ReferenceException: The function "foobar" can't be matched to given arguments (Number) (line 5, file "fixtures/compile/type/type.nulltype.param.null.ie.ks")
+ReferenceException: The function "foobar" can't be matched to given arguments (Number) (fixtures/compile/type/type.nulltype.param.null.ie.ks:5)

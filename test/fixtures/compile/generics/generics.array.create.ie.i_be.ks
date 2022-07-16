@@ -1,0 +1,1 @@
+const map: Array<Number> = [0, true]

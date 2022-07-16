@@ -82,24 +82,43 @@ struct ImportedVariable {
 	systemic: Boolean	= false
 }
 
-class Importer extends Statement {
+struct Arguments {
+	values: Array					= []
+	fromLocal: Dictionary			= {}
+	toImport: Dictionary			= {}
+}
+
+enum ImportMode {
+	Default
+
+	Import
+	ExternOrImport
+	RequireOrImport
+}
+
+abstract class Importer extends Statement {
 	private lateinit {
 		_alias: String?								= null
-		_arguments: Array							= []
-		_argumentNames								= {}
-		_argumentValues								= {}
+		_arguments: Arguments						= Arguments()
+		_autofill: Boolean							= false
 		_count: Number								= 0
+		_extAddendum: String						= ''
+		_filename: String							= null
 		_hasArguments: Boolean						= true
 		_imports									= {}
 		_isKSFile: Boolean							= false
-		_metadata
+		_metaExports
+		_metaRequirements
 		_moduleName: String
+		_pathAddendum: String						= ''
 		_reusable: Boolean							= false
 		_reuseName: String
 		_variables: Dictionary<ImportedVariable>	= {}
+		_variationId: String
 		_worker: ImportWorker
 	}
-	analyse() { // {{{
+	abstract mode(): ImportMode
+	initiate() { // {{{
 		let x = @data.source.value
 		let y = this.directory()
 
@@ -107,7 +126,7 @@ class Importer extends Statement {
 		if /^(?:\.\.?(?:\/|$)|\/|([A-Za-z]:)?[\\\/])/.test(x) {
 			x = fs.resolve(y, x)
 
-			if !(this.loadFile(x, null) || this.loadDirectory(x, null)) {
+			if !(this.loadFile(x, '', null) || this.loadDirectory(x, null)) {
 				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
@@ -116,37 +135,31 @@ class Importer extends Statement {
 				IOException.throwNotFoundModule(x, y, this)
 			}
 		}
-	} // }}}
-	prepare() { // {{{
+
 		const module = this.module()
 
 		if @isKSFile {
-			const arguments = {}
-
-			@scope.line(this.line() - 1)
-
-			for const argument in @arguments {
-				if !argument.required {
-					argument.value.prepare()
-					argument.type = argument.value.type()
-				}
-
-				arguments[argument.name] = argument
-			}
-
-			@worker.prepare(arguments)
+			@worker.prepare(@arguments)
 
 			@scope.line(this.line())
 
-			for const argument in @arguments when argument.required {
+			for const argument in @arguments.values when argument.required {
 				module.addRequirement(new ImportingRequirement(argument.name, argument.type, this))
 
-				if !@scope.hasVariable(argument.name) {
+				if const variable = @scope.getVariable(argument.name) {
+					variable.setDeclaredType(argument.type)
+				}
+				else {
 					@scope.define(argument.name, true, argument.type, true, this)
 				}
 			}
 
 			const matchables = []
+			const workerScope = @worker.scope()
+
+			for const def, name of @imports {
+				workerScope.rename(name, def.local, @scope)
+			}
 
 			for const def, name of @imports {
 				const variable = @scope.getVariable(def.local)
@@ -154,8 +167,8 @@ class Importer extends Statement {
 				if def.isAlias {
 					const type = new NamedContainerType(def.local, new NamespaceType(@scope:Scope))
 
-					for i from 1 til @metadata.exports.length by 2 {
-						const name = @metadata.exports[i]
+					for i from 1 til @metaExports.exports.length by 2 {
+						const name = @metaExports.exports[i]
 
 						type.addProperty(name, @worker.getType(name))
 					}
@@ -168,21 +181,20 @@ class Importer extends Statement {
 					}
 
 					const type = @worker.getType(name)
-
-					if def.type != null && !type.isMatching(def.type, MatchingMode::Signature) {
+					if def.type != null && !type.isSubsetOf(def.type, MatchingMode::Signature) {
 						TypeException.throwNotCompatibleDefinition(def.local, name, @data.source.value, this)
 					}
 
 					if def.newVariable {
-						variable.setDeclaredType(def.type ?? type)
+						variable.setDeclaredType(type ?? def.type)
 					}
-					else if !variable.isPredefined() && @argumentValues[def.local] is not Number {
+					else if !variable.isPredefined() && @arguments.fromLocal[def.local] is not Number {
 						ReferenceException.throwNotPassed(def.local, @data.source.value, this)
 					}
-					else if type.isMatching(variable.getDeclaredType(), MatchingMode::Signature) {
+					else if type.isSubsetOf(variable.getDeclaredType(), MatchingMode::Signature + MatchingMode::Renamed) {
 						const alien = variable.getDeclaredType().isAlien()
 
-						variable.setDeclaredType(def.type ?? type)
+						variable.setDeclaredType(type ?? def.type)
 
 						if alien {
 							variable.getDeclaredType().flagAlien()
@@ -196,6 +208,7 @@ class Importer extends Statement {
 						type.name(def.local)
 
 						type.scope().reassignReference(name, def.local, @scope)
+
 					}
 
 					if !type.isAlias() {
@@ -222,6 +235,8 @@ class Importer extends Statement {
 						}
 					}
 				}
+
+				variable.setComplete(true)
 			}
 
 			if @count != 0 || @alias != null {
@@ -229,11 +244,6 @@ class Importer extends Statement {
 			}
 		}
 		else {
-			for const argument in @arguments when argument.isApproved {
-				argument.value.prepare()
-				argument.type = argument.value.type()
-			}
-
 			for const import of @imports {
 				module.import(import.local)
 			}
@@ -251,12 +261,18 @@ class Importer extends Statement {
 			}
 		}
 	} // }}}
-	translate() { // {{{
-		for const argument in @arguments when argument.isApproved {
-			argument.value.translate()
+	analyse() { // {{{
+		for const argument in @arguments.values when !argument.required {
+			const variable = @scope.getVariable(argument.identifier)
+
+			if !variable.isImmutable() || !variable.isComplete() {
+				SyntaxException.throwOnlyStaticImport(variable.name(), @data.source.value, this)
+			}
 		}
 	} // }}}
-	addArgument(data, autofill) { // {{{
+	prepare()
+	translate()
+	addArgument(data, autofill, arguments) { // {{{
 		const argument = {
 			index: @isKSFile ? null : 0
 			isApproved: true
@@ -286,34 +302,33 @@ class Importer extends Statement {
 			argument.isIdentifier = true
 			argument.identifier = data.value.name
 
-			@argumentNames[argument.name] = @arguments.length
-			@argumentValues[data.value.name] = @arguments.length
+			arguments.fromLocal[data.value.name] = arguments.values.length
+			arguments.toImport[argument.name] = arguments.values.length
 		}
 		else if data.value.kind == NodeKind::Identifier {
+
 			argument.isNamed = true
 			argument.name = data.name?.name ?? data.value.name
 
 			argument.isIdentifier = true
 			argument.identifier = data.value.name
 
-			@argumentNames[argument.name] = @arguments.length
-			@argumentValues[data.value.name] = @arguments.length
-
-			argument.value.analyse()
+			arguments.fromLocal[data.value.name] = arguments.values.length
+			arguments.toImport[argument.name] = arguments.values.length
 		}
 		else if data.name? {
 			argument.isNamed = true
 			argument.name = data.name.name
+			argument.identifier = data.name.name
 
-			@argumentNames[argument.name] = @arguments.length
-
-			argument.value.analyse()
+			arguments.fromLocal[argument.name] = arguments.values.length
+			arguments.toImport[argument.name] = arguments.values.length
 		}
 		else {
-			argument.value.analyse()
+			SyntaxException.throwOnlyStaticImport(@data.source.value, this)
 		}
 
-		@arguments.push(argument)
+		arguments.values.push(argument)
 	} // }}}
 	addImport(imported: String, local: String, isAlias: Boolean, type: Type = null) { // {{{
 		const newVariable = (variable !?= @scope.getVariable(local)) || variable.isPredefined()
@@ -342,7 +357,7 @@ class Importer extends Statement {
 				return
 			}
 			else if isVariable {
-				if @argumentValues[local] is not Number {
+				if @arguments.fromLocal[local] is not Number {
 					ReferenceException.throwNotPassed(local, @data.source.value, this)
 				}
 				else if variable.getDeclared().isMergeable(type) {
@@ -367,15 +382,160 @@ class Importer extends Statement {
 			++@count
 		}
 	} // }}}
-	loadCoreModule(x) { // {{{
-		if $nodeModules[x] == true {
-			return this.loadNodeFile(null, x)
+	buildArguments(metadata, arguments: Arguments = Arguments()): Arguments { // {{{
+		@scope.line(this.line() - 1)
+
+		if @data.arguments?.length != 0 {
+			for const argument in @data.arguments {
+				this.addArgument(argument, false, arguments)
+			}
+
+			if @autofill {
+				for const i from 0 til metadata.requirements.length by 3 {
+					const name = metadata.requirements[i + 1]
+
+					if !?arguments.toImport[name] {
+						if @scope.hasVariable(name) {
+							this.addArgument({
+								modifiers: []
+								value: {
+									kind: NodeKind::Identifier
+									name: name
+								}
+							}, true, arguments)
+						}
+						else {
+							this.validateRequirement(metadata.requirements[i + 2], name, metadata)
+						}
+					}
+				}
+			}
+		}
+		else if @autofill {
+			for const i from 0 til metadata.requirements.length by 3 {
+				const name = metadata.requirements[i + 1]
+
+				if @scope.hasVariable(name) {
+					this.addArgument({
+						modifiers: []
+						value: {
+							kind: NodeKind::Identifier
+							name: name
+						}
+					}, true, arguments)
+				}
+				else {
+					this.validateRequirement(metadata.requirements[i + 2], name, metadata)
+				}
+			}
+		}
+		else {
+			for const i from 0 til metadata.requirements.length by 3 {
+				this.validateRequirement(metadata.requirements[i + 2], metadata.requirements[i + 1], metadata)
+			}
+		}
+
+		if arguments.values.length != 0 {
+			const unmatchedArguments = [0..<arguments.values.length]
+			const requirements = []
+			const queue = []
+
+			const reqReferences = {}
+			const alterations = {}
+
+			for const i from 0 til metadata.aliens.length by 3 {
+				const index = metadata.aliens[i]
+				const name = metadata.aliens[i + 1]
+				lateinit const type
+
+				if !?reqReferences[index] {
+					type = Type.import(index, metadata.references, reqReferences, alterations, queue, @scope, this)
+				}
+				else {
+					type = reqReferences[index]
+				}
+
+				reqReferences[index] = Type.toNamedType(name, type)
+			}
+
+			for const i from 0 til metadata.requirements.length by 3 {
+				const index = metadata.requirements[i]
+				const name = metadata.requirements[i + 1]
+
+				if arguments.toImport[name] is Number {
+					const argument = arguments.values[arguments.toImport[name]]
+
+					argument.index = i / 3
+
+					argument.type = Type.import(index, metadata.references, reqReferences, alterations, queue, @scope, this)
+
+					reqReferences[index] = Type.toNamedType(name, argument.type)
+
+					unmatchedArguments.remove(arguments.toImport[name])
+				}
+				else {
+					requirements.push(metadata.requirements.slice(i, i + 3))
+				}
+			}
+
+			while queue.length > 0 {
+				queue.shift()()
+			}
+
+			const len = arguments.values.length
+			let nextArgument = 0
+			for const requirement in requirements {
+				while nextArgument < len && arguments.values[nextArgument].index != null {
+					++nextArgument
+				}
+
+				if nextArgument == len {
+					if requirement[2] {
+						SyntaxException.throwMissingRequirement(requirement[1], this)
+					}
+				}
+				else {
+					arguments.values[nextArgument].index = requirement[0]
+					arguments.values[nextArgument].name = requirement[1]
+
+					unmatchedArguments.remove(nextArgument)
+				}
+			}
+
+			if unmatchedArguments.length != 0 {
+				SyntaxException.throwUnmatchedImportArguments([arguments.values[i].name for const i in unmatchedArguments], this)
+			}
+		}
+
+		for const argument, index in [...arguments.values] when !argument.required {
+			const variable = @scope.getVariable(argument.identifier)
+
+			if variable.getRealType().isSubsetOf(argument.type, MatchingMode::Signature) {
+				argument.type = variable.getRealType()
+			}
+			else if argument.isAutofill {
+				arguments.values.splice(index, 1)
+
+				delete arguments.fromLocal[argument.identifier]
+				delete arguments.toImport[argument.name]
+			}
+			else {
+				TypeException.throwNotCompatibleArgument(argument.identifier, argument.name, @data.source.value, this)
+			}
+		}
+
+		return arguments
+	} // }}}
+	getModuleName() => @moduleName
+	loadCoreModule(moduleName) { // {{{
+		if $nodeModules[moduleName] == true {
+			return this.loadNodeFile(null, moduleName)
 		}
 
 		return false
 	} // }}}
-	loadDirectory(x, moduleName = null) { // {{{
-		let pkgfile = path.join(x, 'package.json')
+	loadDirectory(dir, moduleName = null) { // {{{
+		let pkgfile = path.join(dir, 'package.json')
 		if fs.isFile(pkgfile) {
 			let pkg
 			try {
@@ -386,117 +546,92 @@ class Importer extends Statement {
 				let metadata
 
 				if pkg.kaoscript? {
-					const metadata = pkg.kaoscript.metadata? ? path.join(x, pkg.kaoscript.metadata) : null
+					const metadata = pkg.kaoscript.metadata? ? path.join(dir, pkg.kaoscript.metadata) : null
 
 					if pkg.kaoscript.main? {
-						if this.loadKSFile(path.join(x, pkg.kaoscript.main), moduleName, metadata) {
+						if this.loadKSFile(path.join(dir, pkg.kaoscript.main), pkg.kaoscript.main, null, moduleName, metadata) {
 							return true
 						}
 					}
 					else if metadata? {
-						if this.loadKSFile(null, moduleName ?? x, metadata) {
+						if this.loadKSFile(null, null, null, moduleName ?? dir, metadata) {
 							return true
 						}
 					}
 				}
 
-				if pkg.main is String && (this.loadFile(path.join(x, pkg.main), moduleName) || this.loadDirectory(path.join(x, pkg.main), moduleName)) {
+				if pkg.main is String && (this.loadFile(path.join(dir, pkg.main), pkg.main, moduleName) || this.loadDirectory(path.join(dir, pkg.main), moduleName)) {
 					return true
 				}
 			}
 		}
 
-		return this.loadFile(path.join(x, 'index'), moduleName)
+		return this.loadFile(path.join(dir, 'index'), 'index', moduleName)
 	} // }}}
-	loadFile(x, moduleName = null) { // {{{
-		if fs.isFile(x) {
-			if x.endsWith($extensions.source) {
-				return this.loadKSFile(x, moduleName)
+	loadFile(filename, pathAddendum, moduleName = null) { // {{{
+		if fs.isFile(filename) {
+			if filename.endsWith($extensions.source) {
+				return this.loadKSFile(filename, pathAddendum, null, moduleName)
 			}
 			else {
-				return this.loadNodeFile(x, moduleName)
+				return this.loadNodeFile(filename, moduleName)
 			}
 		}
 
-		if fs.isFile(x + $extensions.source) {
-			return this.loadKSFile(x + $extensions.source, moduleName)
+		if fs.isFile(filename + $extensions.source) {
+			return this.loadKSFile(filename + $extensions.source, pathAddendum, $extensions.source, moduleName)
 		}
 		else {
 			for const _, ext of require.extensions {
-				if fs.isFile(x + ext) {
-					return this.loadNodeFile(x, moduleName)
+				if fs.isFile(filename + ext) {
+					return this.loadNodeFile(filename, moduleName)
 				}
 			}
 		}
 
 		return false
 	} // }}}
-	loadKSFile(x: String?, moduleName = null, metadataPath = null) { // {{{
+	loadKSFile(filename: String?, pathAddendum: String = '', extAddendum: String = '', moduleName = null, metadataPath = null) { // {{{
 		const module = this.module()
 
 		if moduleName == null {
-			moduleName = module.path(x, @data.source.value)
+			moduleName = module.path(filename, @data.source.value)
 
-			if moduleName.slice(-$extensions.source.length).toLowerCase() != $extensions.source && path.basename(x) == path.basename(moduleName + $extensions.source) {
+			if moduleName.slice(-$extensions.source.length).toLowerCase() != $extensions.source && path.basename(filename) == path.basename(moduleName + $extensions.source) {
 				moduleName += $extensions.source
 			}
 		}
 
-		let name, alias, variable, hashes
-
-		if module.compiler().isInHierarchy(x) {
+		if module.compiler().isInHierarchy(filename) {
 			SyntaxException.throwLoopingImport(@data.source.value, this)
 		}
 
-		if ?metadataPath && fs.isFile(metadataPath) && (@metadata ?= this.readMetadata(metadataPath)) {
-		}
-		else {
-			let source = fs.readFile(x)
-			let target = @options.target
-
-			x = x as String
-
-			if fs.isFile(getMetadataPath(x, target)) && fs.isFile(getHashPath(x, target)) && (hashes ?= module.isUpToDate(x, target, source)) && (@metadata ?= this.readMetadata(getMetadataPath(x, target))) {
-				module.addHashes(x, hashes)
-			}
-			else {
-				let compiler = module.compiler().createServant(x)
-
-				compiler.compile(source)
-
-				compiler.writeFiles()
-
-				@metadata = compiler.toMetadata()
-
-				hashes = compiler.toHashes()
-
-				module.addHashes(x, hashes)
-			}
-		}
-
 		@isKSFile = true
+		@filename = filename
+		@pathAddendum = pathAddendum
+		@extAddendum = extAddendum
 		@moduleName = moduleName
 
-		let autofill = false
-
-		for const modifer in @data.modifiers {
+		for const modifer in @data.modifiers until @autofill {
 			if modifer.kind == ModifierKind::Autofill {
-				autofill = true
+				@autofill = true
 			}
 		}
 
-		@worker = new ImportWorker(@metadata, this)
+		this.loadMetadata()
+
+		@worker = new ImportWorker(@metaRequirements, @metaExports, this)
 
 		const macros = {}
-		for const i from 0 til @metadata.macros.length by 2 {
-			macros[@metadata.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for data in @metadata.macros[i + 1]]
+		for const i from 0 til @metaExports.macros.length by 2 {
+			macros[@metaExports.macros[i]] = [JSON.parse(Buffer.from(data, 'base64').toString('utf8')) for data in @metaExports.macros[i + 1]]
 		}
 
 		@scope.line(this.line())
 
 		if @data.specifiers.length == 0 {
-			for const i from 1 til @metadata.exports.length by 2 {
-				name = @metadata.exports[i]
+			for const i from 1 til @metaExports.exports.length by 2 {
+				name = @metaExports.exports[i]
 
 				this.addImport(name, name, false)
 			}
@@ -513,8 +648,8 @@ class Importer extends Statement {
 				if specifier.kind == NodeKind::ImportExclusionSpecifier {
 					const exclusions = [exclusion.name for exclusion in specifier.exclusions]
 
-					for const i from 1 til @metadata.exports.length by 2 when exclusions.indexOf(@metadata.exports[i]) == -1 {
-						name = @metadata.exports[i]
+					for const i from 1 til @metaExports.exports.length by 2 when exclusions.indexOf(@metaExports.exports[i]) == -1 {
+						name = @metaExports.exports[i]
 
 						this.addImport(name, name, false)
 					}
@@ -566,101 +701,100 @@ class Importer extends Statement {
 
 		@scope.line(this.line() - 1)
 
-		if @data.arguments?.length != 0 {
-			for const argument in @data.arguments {
-				this.addArgument(argument, false)
-			}
-
-			if autofill {
-				for const i from 0 til @metadata.requirements.length by 3 {
-					const name = @metadata.requirements[i + 1]
-
-					if !?@argumentNames[name] {
-						if @scope.hasVariable(name) {
-							this.addArgument({
-								modifiers: []
-								value: {
-									kind: NodeKind::Identifier
-									name: name
-								}
-							}, true)
-						}
-						else if @metadata.requirements[i + 2] {
-							SyntaxException.throwMissingRequirement(name, this)
-						}
-					}
-				}
-			}
-		}
-		else if autofill {
-			for const i from 0 til @metadata.requirements.length by 3 {
-				const name = @metadata.requirements[i + 1]
-
-				if @scope.hasVariable(name) {
-					this.addArgument({
-						modifiers: []
-						value: {
-							kind: NodeKind::Identifier
-							name: name
-						}
-					}, true)
-				}
-				else if @metadata.requirements[i + 2] {
-					SyntaxException.throwMissingRequirement(name, this)
-				}
-			}
-		}
-		else {
-			for const i from 1 til @metadata.requirements.length by 3 {
-				if @metadata.requirements[i + 1] {
-					SyntaxException.throwMissingRequirement(@metadata.requirements[i], this)
-				}
-			}
-		}
-
-		if @arguments.length != 0 {
-			const requirements = []
-
-			for const i from 0 til @metadata.requirements.length by 3 {
-				const name = @metadata.requirements[i + 1]
-
-				if @argumentNames[name] is Number {
-					@arguments[@argumentNames[name]].index = @metadata.requirements[i]
-				}
-				else {
-					requirements.push(@metadata.requirements.slice(i, i + 3))
-				}
-			}
-
-			const len = @arguments.length
-			let nextArgument = 0
-			for const requirement in requirements {
-				while nextArgument < len && @arguments[nextArgument].index != null {
-					++nextArgument
-				}
-
-				if nextArgument == len {
-					if requirement[2] {
-						SyntaxException.throwMissingRequirement(requirement[1], this)
-					}
-				}
-				else {
-					@arguments[nextArgument].index = requirement[0]
-					@arguments[nextArgument].name = requirement[1]
-				}
-			}
-
-			@arguments.sort((a, b) => a.index - b.index)
-		}
-
 		return true
 	} // }}}
-	loadNodeFile(x = null, moduleName = null) { // {{{
+	loadMetadata() { // {{{
+		const module = this.module()
+		const source = fs.readFile(@filename)
+		const target = @options.target
+
+		if const upto = module.isUpToDate(@filename, source) {
+			if const metadata = this.readMetadata(getRequirementsPath(@filename)) {
+				const variations = [module._options.target.name, module._options.target.version]
+				const arguments = this.buildArguments(metadata)
+
+				let next = 0
+				for const argument in [...arguments.values].sort((a, b) => a.index - b.index) {
+					while next != argument.index {
+						variations.push(null)
+
+						++next
+					}
+
+					argument.type.toVariations(variations)
+
+					++next
+				}
+
+				const length = metadata.requirements.length / 3
+				while next != length {
+					variations.push(null)
+
+					++next
+				}
+
+				const variationId = fs.djb2a(variations.join())
+
+				if upto.variations:Array.contains(variationId) {
+					@metaRequirements = metadata
+					@arguments = arguments
+					@variationId = variationId
+
+					if const metadata = this.readMetadata(getExportsPath(@filename, variationId)) {
+						@metaExports = metadata
+
+						module.addHashes(@filename, upto.hashes)
+
+						return
+					}
+				}
+			}
+		}
+
+		const compiler = module.compiler().createServant(@filename)
+
+		compiler.initiate(source)
+
+		@metaRequirements = compiler.toRequirements()
+
+		this.buildArguments(@metaRequirements, @arguments)
+
+		const arguments = [null for const i from 0 til @metaRequirements.requirements.length / 3]
+
+		for const argument in @arguments.values {
+			arguments[argument.index] = {
+				name: argument.identifier
+				type: argument.type
+			}
+		}
+
+		@scope.line(this.line())
+
+		for const argument in @arguments.values when argument.required {
+
+			if !@scope.hasVariable(argument.name) {
+				@scope.define(argument.name, true, argument.type, true, this)
+			}
+		}
+
+		compiler.setArguments(arguments, @data.source.value, this)
+
+		compiler.finish()
+
+		compiler.writeFiles()
+
+		@metaExports = compiler.toExports()
+
+		module.addHashes(@filename, compiler.toHashes())
+
+		@variationId = compiler.toVariationId()
+	} // }}}
+	loadNodeFile(filename = null, moduleName = null) { // {{{
 		const module = this.module()
 
 		let file = null
 		if moduleName == null {
-			file = moduleName = module.path(x, @data.source.value)
+			file = moduleName = module.path(filename, @data.source.value)
 		}
 
 		if @data.arguments? {
@@ -669,7 +803,7 @@ class Importer extends Statement {
 					SyntaxException.throwInvalidImportAliasArgument(this)
 				}
 				else {
-					this.addArgument(argument, false)
+					this.addArgument(argument, false, @arguments)
 				}
 			}
 		}
@@ -688,16 +822,16 @@ class Importer extends Statement {
 				const last = dots.length - 1
 
 				if last == 0 {
-					@alias = dots[0].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
+					@alias = dots[0].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
 				}
 				else if $importExts.data[dots[last]] == true {
-					@alias = dots.slice(0, last).join('.').replace(/[-_.]+(.)/g, (m, l) => l.toUpperCase())
+					@alias = dots.slice(0, last).join('.').replace(/[-_.]+(.)/g, (m, l, ...) => l.toUpperCase())
 				}
 				else if $importExts.source[dots[last]] == true {
-					@alias = dots[last - 1].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
+					@alias = dots[last - 1].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
 				}
 				else {
-					@alias = dots[last].replace(/[-_]+(.)/g, (m, l) => l.toUpperCase())
+					@alias = dots[last].replace(/[-_]+(.)/g, (m, l, ...) => l.toUpperCase())
 				}
 			}
 
@@ -749,14 +883,14 @@ class Importer extends Statement {
 
 		return true
 	} // }}}
-	loadNodeModule(x, start) { // {{{
+	loadNodeModule(moduleName, start) { // {{{
 		let dirs = $nodeModulesPaths(start)
 
 		let file, metadata
 		for dir in dirs {
-			file = path.join(dir, x)
+			file = path.join(dir, moduleName)
 
-			if this.loadFile(file, x) || this.loadDirectory(file, x) {
+			if this.loadFile(file, '', moduleName) || this.loadDirectory(file, moduleName) {
 				return true
 			}
 		}
@@ -765,7 +899,7 @@ class Importer extends Statement {
 	} // }}}
 	readMetadata(file) { // {{{
 		try {
-			return JSON.parse(fs.readFile(file), func(key, value) => key == 'max' && value == 'Infinity' ? Infinity : value)
+			return JSON.parse(fs.readFile(file), fs.unescapeJSON)
 		}
 		catch {
 			return null
@@ -793,7 +927,7 @@ class Importer extends Statement {
 
 				line.done()
 			}
-			else if @arguments.length != 0 {
+			else if @arguments.values.length != 0 {
 				const line = fragments.newLine()
 
 				this.toRequireFragments(line)
@@ -1040,16 +1174,47 @@ class Importer extends Statement {
 			fragments.code(@reuseName)
 		}
 		else {
-			const modulePath = @isKSFile && $localFileRegex.test(@moduleName) && @parent.includePath() != null ? path.join(path.dirname(@parent.includePath()), @moduleName) : @moduleName
+			if @isKSFile {
+				let modulePath = ''
 
-			fragments.code(`require(\($quote(modulePath)))`)
+				if $localFileRegex.test(@moduleName) {
+					const basename = path.basename(@moduleName)
+					let dirname
+
+					if @parent.includePath() == null {
+						dirname = path.dirname(@moduleName)
+					}
+					else {
+						dirname = path.dirname(@parent.includePath())
+					}
+
+					modulePath = `\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
+				}
+				else if @pathAddendum.length > 0 {
+					const dirname = path.dirname(@pathAddendum)
+					const basename = path.basename(@pathAddendum)
+
+					modulePath = `\(@moduleName)\(path.sep)\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
+				}
+				else {
+					const dirname = path.dirname(@moduleName)
+					const basename = path.basename(@moduleName)
+
+					modulePath = `\(dirname)\(path.sep).\(basename)\(@extAddendum).\(@variationId).ksb`
+				}
+
+				fragments.code(`require(\($quote(modulePath)))`)
+			}
+			else {
+				fragments.code(`require(\($quote(@moduleName)))`)
+			}
 
 			if @hasArguments {
 				fragments.code(`(`)
 
 				let nf = false
 
-				for const argument in @arguments when argument.isApproved && argument.index != null {
+				for const argument in @arguments.values when argument.isApproved && argument.index != null {
 					if nf {
 						fragments.code($comma)
 					}
@@ -1075,16 +1240,34 @@ class Importer extends Statement {
 			@reusable = true
 		}
 	} // }}}
+	private validateRequirement(required: Boolean | Number, name: String, metadata) { // {{{
+		if required {
+			SyntaxException.throwMissingRequirement(name, this)
+		}
+		else if this.mode() == ImportMode::Import && required is Number {
+			for const i from 0 til metadata.aliens.length by 3 {
+				if metadata.aliens[i] == required {
+					metadata.aliens[i + 2] = true
+					break
+				}
+			}
+		}
+	} // }}}
 }
 
 class ImportDeclaration extends Statement {
 	private {
 		_declarators = []
 	}
-	analyse() { // {{{
+	initiate() { // {{{
 		for declarator in @data.declarations {
 			@declarators.push(declarator = new ImportDeclarator(declarator, this))
 
+			declarator.initiate()
+		}
+	} // }}}
+	analyse() { // {{{
+		for declarator in @declarators {
 			declarator.analyse()
 		}
 	} // }}}
@@ -1105,6 +1288,8 @@ class ImportDeclaration extends Statement {
 }
 
 class ImportDeclarator extends Importer {
+	flagForcefullyRebinded()
+	override mode() => ImportMode::Import
 	toStatementFragments(fragments, mode) { // {{{
 		this.toImportFragments(fragments)
 	} // }}}
@@ -1112,46 +1297,103 @@ class ImportDeclarator extends Importer {
 
 class ImportWorker {
 	private {
-		_metadata
+		_metaExports
+		_metaRequirements
 		_node
 		_scope: Scope
 	}
-	constructor(@metadata, @node) { // {{{
+	constructor(@metaRequirements, @metaExports, @node) { // {{{
 		@scope = new ImportScope(node.scope())
 	} // }}}
 	hasType(name: String) => @scope.hasDefinedVariable(name)
 	getType(name: String) => @scope.getDefinedVariable(name).getDeclaredType()
 	prepare(arguments) { // {{{
-		const references = []
+		const module = @node.module()
+		const references = {}
 		const queue = []
-		const matchedArguments = {}
+		const variables = {}
 
-		let index, name, type, argument
+		const metadata = [...@metaRequirements.references, ...@metaExports.references]
 
-		if @metadata.requirements.length > 0 {
-			const reqReferences = []
-			const alterations = {}
+		const alterations = {mode: @node.mode()}
 
-			for const i from 0 til @metadata.requirements.length by 3 {
-				index = @metadata.requirements[i]
-				type = Type.import(index, @metadata, reqReferences, alterations, queue, @scope, @node)
+		const newAliens = {}
+		const oldAliens = []
 
-				reqReferences[index] = Type.toNamedType(@metadata.requirements[i + 1], type)
+		for const i from 0 til @metaRequirements.aliens.length by 3 {
+			const index = @metaRequirements.aliens[i]
+			const name = @metaRequirements.aliens[i + 1]
+			let type
+
+			if !?references[index] {
+				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)
+
+				const origin = type.origin()
+				if origin? {
+					type.origin(origin:TypeOrigin + TypeOrigin::Extern + TypeOrigin::Import)
+				}
+				else {
+					type.origin(TypeOrigin::Extern + TypeOrigin::Import)
+				}
+			}
+			else {
+				type = references[index]
+			}
+
+			type = Type.toNamedType(name, type)
+
+			if @metaRequirements.aliens[i + 2] {
+				type = type.flagRequired()
+			}
+
+			if const alien = module.getAlien(name) {
+				oldAliens.push(name, type, alien)
+
+				references[index] = alien
+			}
+			else {
+				newAliens[name] = index
+
+				references[index] = type
+			}
+		}
+
+		while queue.length > 0 {
+			queue.shift()()
+		}
+
+		for const name, index in oldAliens by 3 {
+			const newType = oldAliens[index + 1]
+			const oldType = oldAliens[index + 1]
+
+			if !oldType.isSubsetOf(newType, MatchingMode::Signature) {
+				TypeException.throwNotCompatibleAlien(name, @node.data().source.value, @node)
+			}
+		}
+
+		if @metaRequirements.requirements.length > 0 {
+			const reqReferences = {...references}
+
+			for const i from 0 til @metaRequirements.requirements.length by 3 {
+				const index = @metaRequirements.requirements[i]
+				const name = @metaRequirements.requirements[i + 1]
+				const type = references[index] ?? Type.import(index, metadata, reqReferences, alterations, queue, @scope, @node)
+
+				reqReferences[index] = Type.toNamedType(name, type)
 			}
 
 			while queue.length > 0 {
 				queue.shift()()
 			}
 
-			const matchables = []
+			for const i from 0 til @metaRequirements.requirements.length by 3 {
+				const name = @metaRequirements.requirements[i + 1]
+				const type = reqReferences[@metaRequirements.requirements[i]]
 
-			for const i from 0 til @metadata.requirements.length by 3 {
-				name = @metadata.requirements[i + 1]
+				if const index = arguments.toImport[name] {
+					const argument = arguments.values[index]
 
-				if const argument = arguments[name] {
-					matchedArguments[name] = true
-
-					if !argument.required && !reqReferences[@metadata.requirements[i]].isAny() && !argument.type.isMatching(reqReferences[@metadata.requirements[i]], MatchingMode::Signature) {
+					if !argument.required && !type.isAny() && !argument.type.isSubsetOf(type, MatchingMode::Signature) {
 						if argument.isAutofill {
 							argument.isApproved = false
 						}
@@ -1162,80 +1404,91 @@ class ImportWorker {
 				}
 			}
 
-			for const i from 0 til @metadata.requirements.length by 3 {
-				const name = @metadata.requirements[i + 1]
+			for const i from 0 til @metaRequirements.requirements.length by 3 {
+				const reqIndex = @metaRequirements.requirements[i]
+				const name = @metaRequirements.requirements[i + 1]
 
-				if const argument = arguments[name] {
-					matchedArguments[name] = true
+				if const index = arguments.toImport[name] {
+					const argument = arguments.values[index]
 
 					if argument.isApproved {
 						if argument.required {
-							argument.type = reqReferences[@metadata.requirements[i]]
+							argument.type = reqReferences[reqIndex]
 						}
 
-						references[@metadata.requirements[i]] = argument.type
+						if const type = references[reqIndex] {
+							if !argument.type.isSubsetOf(type, MatchingMode::Signature) {
+								TypeException.throwNotCompatibleAlien(name, @node.data().source.value, @node)
+							}
+						}
+
+						references[reqIndex] = argument.type
 					}
+				}
+				else if const type = references[reqIndex] {
+					references[reqIndex] = type.flagRequired()
 				}
 			}
 		}
 
-		for const _, name of arguments when !matchedArguments[name] {
-			SyntaxException.throwExcessiveRequirement(name, @node)
+		for const index, name of newAliens {
+			module.addAlien(name, references[index])
 		}
 
-		const alterations = {}
-
-		for const i from 0 til @metadata.aliens.length by 2 {
-			index = @metadata.aliens[i]
-			name = @metadata.aliens[i + 1]
+		for const i from 0 til @metaRequirements.requirements.length by 3 {
+			const index = @metaRequirements.requirements[i]
+			const name = @metaRequirements.requirements[i + 1]
+			lateinit const type
 
 			if !?references[index] {
-				type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
+				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)
+
+				type.origin(TypeOrigin::Require)
 			}
 			else {
 				type = references[index]
-			}
 
-			type = references[index] = Type.toNamedType(name, type)
-		}
-
-		for const i from 0 til @metadata.requirements.length by 3 {
-			index = @metadata.requirements[i]
-			name = @metadata.requirements[i + 1]
-
-			if !?references[index] {
-				type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
-			}
-			else {
-				type = references[index]
+				const origin = type.origin()
+				if origin? {
+					type.origin(origin:TypeOrigin + TypeOrigin::Require)
+				}
+				else {
+					type.origin(TypeOrigin::Require + TypeOrigin::Import)
+				}
 			}
 
 			references[index] = Type.toNamedType(name, type)
 		}
 
-		const variables = {}
-
-		for const i from 0 til @metadata.exports.length by 2 {
-			index = @metadata.exports[i]
-			name = @metadata.exports[i + 1]
+		for const i from 0 til @metaExports.exports.length by 2 {
+			const index = @metaExports.exports[i]
+			const name = @metaExports.exports[i + 1]
+			let type
 
 			if !?references[index] {
-				type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
+				type = Type.import(index, metadata, references, alterations, queue, @scope, @node)
 			}
 			else {
 				type = references[index]
 			}
 
-			type = references[index] = Type.toNamedType(name, type)
+			type = Type.toNamedType(name, type)
 
-			@scope.addVariable(name, new Variable(name, false, false, type), @node)
+			if const variable = @scope.getDefinedVariable(name) {
+				variable.setDeclaredType(type)
+			}
+			else {
+				@scope.addVariable(name, new Variable(name, false, false, type), @node)
 
-			variables[index] = true
+				variables[index] = true
+			}
+
+			references[index] = type
 		}
 
-		for const i from 0 til @metadata.aliens.length by 2 {
-			index = @metadata.aliens[i]
-			name = @metadata.aliens[i + 1]
+		for const i from 0 til @metaRequirements.aliens.length by 3 {
+			const index = @metaRequirements.aliens[i]
+			const name = @metaRequirements.aliens[i + 1]
 
 			if !@scope.hasVariable(name) {
 				@scope.addVariable(name, new Variable(name, false, false, references[index]), @node)
@@ -1244,20 +1497,14 @@ class ImportWorker {
 			}
 		}
 
-		for const _, index in @metadata.references {
+		for const _, index in metadata {
 			if !?references[index] {
-				let type = Type.import(index, @metadata, references, alterations, queue, @scope, @node)
-
-				if type is AliasType || type is ClassType || type is EnumType || type is StructType || type is TupleType {
-					type = new NamedType(@scope.acquireTempName(), type)
-
-					@scope.define(type.name(), true, type, @node)
-				}
-				else if type is NamespaceType {
-					type = new NamedContainerType(@scope.acquireTempName(), type)
-
-					@scope.define(type.name(), true, type, @node)
-				}
+				const type = Type.toNamedType(
+					Type.import(index, metadata, references, alterations, queue, @scope, @node)
+					true
+					@scope
+					@node
+				)
 
 				references[index] = type
 			}

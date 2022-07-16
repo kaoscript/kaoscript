@@ -1,14 +1,19 @@
-{
-  "aliens": [],
-  "requirements": [],
-  "exports": [
-    0,
-    "E",
-    0,
-    "PI"
-  ],
-  "references": [
-    "Number"
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "E",
+      0,
+      "PI"
+    ],
+    "references": [
+      "Number"
+    ],
+    "macros": []
+  }
+]

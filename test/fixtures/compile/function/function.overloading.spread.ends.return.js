@@ -1,44 +1,40 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		if(arguments.length >= 1 && Type.isArray(arguments[arguments.length - 1])) {
-			let __ks_i = -1;
-			let args = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
-			let value = arguments[__ks_i];
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(args, value) {
+		return "Array";
+	};
+	foobar.__ks_1 = function(args, value) {
+		return "String";
+	};
+	foobar.__ks_2 = function(args, value) {
+		return "Any";
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		const t1 = Type.isArray;
+		const t2 = Type.isString;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length >= 1) {
+			if(Helper.isVarargs(args, 0, args.length - 1, t0, pts = [0], 0)) {
+				if(Helper.isVarargs(args, 1, 1, t1, pts, 1) && te(pts, 2)) {
+					return foobar.__ks_0.call(that, Helper.getVarargs(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
+				if(Helper.isVarargs(args, 1, 1, t2, pts, 1) && te(pts, 2)) {
+					return foobar.__ks_1.call(that, Helper.getVarargs(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
+				if(Helper.isVarargs(args, 1, 1, t0, pts, 1) && te(pts, 2)) {
+					return foobar.__ks_2.call(that, Helper.getVarargs(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
+				throw Helper.badArgs();
 			}
-			else if(!Type.isArray(value)) {
-				throw new TypeError("'value' is not of type 'Array'");
-			}
-			return "Array";
 		}
-		else if(arguments.length >= 1 && Type.isString(arguments[arguments.length - 1])) {
-			let __ks_i = -1;
-			let args = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
-			let value = arguments[__ks_i];
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isString(value)) {
-				throw new TypeError("'value' is not of type 'String'");
-			}
-			return "String";
-		}
-		else if(arguments.length >= 1) {
-			let __ks_i = -1;
-			let args = Array.prototype.slice.call(arguments, ++__ks_i, __ks_i = arguments.length - 1);
-			let value = arguments[__ks_i];
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			return "Any";
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
 	return {
-		foobar: foobar
+		foobar
 	};
 };

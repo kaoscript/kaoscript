@@ -1,1064 +1,1076 @@
-{
-  "aliens": [
-    0,
-    "Array",
-    1,
-    "String"
-  ],
-  "requirements": [
-    0,
-    "Array",
-    false,
-    1,
-    "String",
-    false,
-    2,
-    "Foobar",
-    true
-  ],
-  "exports": [
-    3,
-    "Array",
-    4,
-    "String"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": false,
-      "hybrid": false,
-      "sealed": false,
-      "systemic": false,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ]
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 0
+[
+  {
+    "aliens": [
+      0,
+      "Array",
+      false,
+      1,
+      "String",
+      false
+    ],
+    "requirements": [
+      0,
+      "Array",
+      false,
+      1,
+      "String",
+      false,
+      2,
+      "Foobar",
+      true
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "origin": "BIGINT::16",
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       },
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {
-        "length": {
-          "access": 4,
-          "type": "Number",
-          "default": false,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "origin": "BIGINT::16",
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       },
-      "classVariables": {},
-      "instanceMethods": {
-        "concat": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "values",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 3
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "every": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "callback",
-                "type": "Function",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "thisArg",
-                "type": "Dictionary",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjUwfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6NTR9fQ=="
-              }
-            ],
-            "returns": "Boolean",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "forEach": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "callback",
-                "type": "Function",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "thisArg",
-                "type": "Dictionary",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo5LCJjb2x1bW4iOjUyfSwiZW5kIjp7ImxpbmUiOjksImNvbHVtbiI6NTZ9fQ=="
-              }
-            ],
-            "returns": "Void",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "indexOf": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "searchElement",
-                "type": "Any",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "fromIndex",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjEwLCJjb2x1bW4iOjQ1fSwiZW5kIjp7ImxpbmUiOjEwLCJjb2x1bW4iOjQ2fX0="
-              }
-            ],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "join": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "separator",
-                "type": {
-                  "reference": 4
-                },
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo2OCwidmFsdWUiOiIsIiwic3RhcnQiOnsibGluZSI6MTEsImNvbHVtbiI6Mjd9LCJlbmQiOnsibGluZSI6MTEsImNvbHVtbiI6MzB9fQ=="
-              }
-            ],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "pop": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any!",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "push": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "elements",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "shift": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any!",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "slice": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "begin",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjI0fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjI1fX0="
-              },
-              {
-                "name": "end",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0M319"
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "some": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "callback",
-                "type": "Function",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "thisArg",
-                "type": "Dictionary",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNiwiY29sdW1uIjo0OX0sImVuZCI6eyJsaW5lIjoxNiwiY29sdW1uIjo1M319"
-              }
-            ],
-            "returns": "Boolean",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "sort": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "compare",
-                "type": "Function",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNywiY29sdW1uIjoyN30sImVuZCI6eyJsaW5lIjoxNywiY29sdW1uIjozMX19"
-              }
-            ],
-            "returns": {
-              "reference": 3
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "splice": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "start",
-                "type": "Number",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "delete",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0M319"
-              },
-              {
-                "name": "items",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 3
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "toString": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "unshift": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "elements",
-                "type": "Any",
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "last": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "index",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjEsInN0YXJ0Ijp7ImxpbmUiOjQ2LCJjb2x1bW4iOjIzfSwiZW5kIjp7ImxpbmUiOjQ2LCJjb2x1bW4iOjI0fX0="
-              }
-            ],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": false,
+        "hybrid": false,
+        "sealed": false,
+        "systemic": false,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
         ]
-      },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 1
-      },
-      "exhaustive": true,
-      "constructors": [],
-      "instanceVariables": {
-        "length": {
-          "access": 4,
-          "type": "Number",
-          "default": false,
-          "immutable": false,
-          "lateInit": false,
-          "sealed": false
-        }
-      },
-      "classVariables": {},
-      "instanceMethods": {
-        "charAt": [
-          {
-            "id": 0,
+      }
+    ]
+  },
+  {
+    "exports": [
+      3,
+      "Array",
+      4,
+      "String"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
             "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "index",
-                "type": "Number",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
+            "type": "Number",
+            "default": false,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
           }
-        ],
-        "charCodeAt": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "index",
-                "type": "Number",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "concat": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "strings",
-                "type": {
-                  "kind": "reference",
-                  "name": 3,
-                  "parameters": [
-                    {
-                      "reference": 4
-                    }
-                  ]
-                },
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "fromCharCode": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": "Infinity",
-            "parameters": [
-              {
-                "name": "numbers",
-                "type": {
-                  "kind": "reference",
-                  "name": 3,
-                  "parameters": [
-                    "Number"
-                  ]
-                },
-                "min": 0,
-                "max": "Infinity",
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "indexOf": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "search",
-                "type": {
-                  "reference": 4
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "fromIndex",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjI5LCJjb2x1bW4iOjQ2fSwiZW5kIjp7ImxpbmUiOjI5LCJjb2x1bW4iOjQ3fX0="
-              }
-            ],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "lastIndexOf": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "search",
-                "type": {
-                  "reference": 4
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "fromIndex",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjMwLCJjb2x1bW4iOjUwfSwiZW5kIjp7ImxpbmUiOjMwLCJjb2x1bW4iOjUxfX0="
-              }
-            ],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "match": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "regexp",
-                "type": "RegExp",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "kind": "reference",
-              "name": 3,
-              "nullable": true,
+        },
+        "classVariables": {},
+        "instanceMethods": {
+          "concat": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
               "parameters": [
                 {
-                  "reference": 4
+                  "name": "values",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
                 }
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "replace": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 2,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "pattern",
-                "type": {
-                  "kind": "union",
-                  "types": [
-                    "RegExp",
-                    {
-                      "reference": 4
-                    }
-                  ]
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
+              ],
+              "returns": {
+                "reference": 3
               },
-              {
-                "name": "replacement",
-                "type": {
-                  "kind": "union",
-                  "types": [
-                    "Function",
-                    {
-                      "reference": 4
-                    }
-                  ]
-                },
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "search": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "regexp",
-                "type": "RegExp",
-                "min": 1,
-                "max": 1,
-                "default": false
-              }
-            ],
-            "returns": "Number",
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "slice": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "beginIndex",
-                "type": "Number",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "endIndex",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNCwiY29sdW1uIjo0N30sImVuZCI6eyJsaW5lIjozNCwiY29sdW1uIjo0OX19"
-              }
-            ],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "split": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "separator",
-                "type": {
-                  "kind": "union",
-                  "types": [
-                    "RegExp",
-                    {
-                      "reference": 4
-                    }
-                  ]
-                },
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjozNSwiY29sdW1uIjozN30sImVuZCI6eyJsaW5lIjozNSwiY29sdW1uIjo0MX19"
-              },
-              {
-                "name": "limit",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNSwiY29sdW1uIjo1OX0sImVuZCI6eyJsaW5lIjozNSwiY29sdW1uIjo2MX19"
-              }
-            ],
-            "returns": {
-              "kind": "reference",
-              "name": 3,
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "every": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
               "parameters": [
                 {
-                  "reference": 4
+                  "name": "callback",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "thisArg",
+                  "type": "Dictionary",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo4LCJjb2x1bW4iOjUwfSwiZW5kIjp7ImxpbmUiOjgsImNvbHVtbiI6NTR9fQ=="
                 }
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "substr": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "start",
-                "type": "Number",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "length",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNiwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjozNiwiY29sdW1uIjo0M319"
-              }
-            ],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "substring": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 1,
-            "max": 2,
-            "parameters": [
-              {
-                "name": "indexStart",
-                "type": "Number",
-                "min": 1,
-                "max": 1,
-                "default": false
-              },
-              {
-                "name": "indexEnd",
-                "type": "Number",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNywiY29sdW1uIjo1MX0sImVuZCI6eyJsaW5lIjozNywiY29sdW1uIjo1M319"
-              }
-            ],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "toLowerCase": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "toString": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "toUpperCase": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "trim": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "valueOf": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": false,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": {
-              "reference": 4
-            },
-            "throws": [],
-            "inits": []
-          }
-        ],
-        "lines": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 1,
-            "parameters": [
-              {
-                "name": "emptyLines",
-                "type": "Boolean",
-                "min": 0,
-                "max": 1,
-                "default": true,
-                "comprehensive": true,
-                "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NTIsImNvbHVtbiI6MzB9LCJlbmQiOnsibGluZSI6NTIsImNvbHVtbiI6MzV9fQ=="
-              }
-            ],
-            "returns": {
-              "kind": "reference",
-              "name": 3,
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "forEach": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
               "parameters": [
                 {
-                  "reference": 4
+                  "name": "callback",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "thisArg",
+                  "type": "Dictionary",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjo5LCJjb2x1bW4iOjUyfSwiZW5kIjp7ImxpbmUiOjksImNvbHVtbiI6NTZ9fQ=="
                 }
-              ]
-            },
-            "throws": [],
-            "inits": []
-          }
-        ]
+              ],
+              "returns": "Void",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "indexOf": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "searchElement",
+                  "type": "Any",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "fromIndex",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjEwLCJjb2x1bW4iOjQ1fSwiZW5kIjp7ImxpbmUiOjEwLCJjb2x1bW4iOjQ2fX0="
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "join": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "separator",
+                  "type": {
+                    "reference": 4
+                  },
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo2OCwidmFsdWUiOiIsIiwic3RhcnQiOnsibGluZSI6MTEsImNvbHVtbiI6Mjd9LCJlbmQiOnsibGluZSI6MTEsImNvbHVtbiI6MzB9fQ=="
+                }
+              ],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "pop": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any!",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "push": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "elements",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "shift": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any!",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "slice": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "begin",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjI0fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjI1fX0="
+                },
+                {
+                  "name": "end",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjo0M319"
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "some": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "callback",
+                  "type": "Function",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "thisArg",
+                  "type": "Dictionary",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNiwiY29sdW1uIjo0OX0sImVuZCI6eyJsaW5lIjoxNiwiY29sdW1uIjo1M319"
+                }
+              ],
+              "returns": "Boolean",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "sort": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "compare",
+                  "type": "Function",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjoxNywiY29sdW1uIjoyN30sImVuZCI6eyJsaW5lIjoxNywiY29sdW1uIjozMX19"
+                }
+              ],
+              "returns": {
+                "reference": 3
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "splice": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "start",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "delete",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjoxOCwiY29sdW1uIjo0M319"
+                },
+                {
+                  "name": "items",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 3
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toString": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "unshift": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "elements",
+                  "type": "Any",
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "last": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "index",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjEsInN0YXJ0Ijp7ImxpbmUiOjQ2LCJjb2x1bW4iOjIzfSwiZW5kIjp7ImxpbmUiOjQ2LCJjb2x1bW4iOjI0fX0="
+                }
+              ],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
       },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    }
-  ],
-  "macros": []
-}
+      {
+        "kind": "class",
+        "original": 1,
+        "exhaustive": true,
+        "constructors": [],
+        "instanceVariables": {
+          "length": {
+            "access": 4,
+            "type": "Number",
+            "default": false,
+            "immutable": false,
+            "lateInit": false,
+            "sealed": false
+          }
+        },
+        "classVariables": {},
+        "instanceMethods": {
+          "charAt": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "index",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "charCodeAt": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "index",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "concat": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "strings",
+                  "type": {
+                    "kind": "reference",
+                    "name": 3,
+                    "parameters": [
+                      {
+                        "reference": 4
+                      }
+                    ]
+                  },
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "fromCharCode": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": "Infinity",
+              "parameters": [
+                {
+                  "name": "numbers",
+                  "type": {
+                    "kind": "reference",
+                    "name": 3,
+                    "parameters": [
+                      "Number"
+                    ]
+                  },
+                  "min": 0,
+                  "max": "Infinity",
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "indexOf": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "search",
+                  "type": {
+                    "reference": 4
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "fromIndex",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjI5LCJjb2x1bW4iOjQ2fSwiZW5kIjp7ImxpbmUiOjI5LCJjb2x1bW4iOjQ3fX0="
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "lastIndexOf": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "search",
+                  "type": {
+                    "reference": 4
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "fromIndex",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjMwLCJjb2x1bW4iOjUwfSwiZW5kIjp7ImxpbmUiOjMwLCJjb2x1bW4iOjUxfX0="
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "match": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "regexp",
+                  "type": "RegExp",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": 3,
+                "nullable": true,
+                "parameters": [
+                  {
+                    "reference": 4
+                  }
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "replace": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 2,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "pattern",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      {
+                        "reference": 4
+                      },
+                      "RegExp"
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "replacement",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "Function",
+                      {
+                        "reference": 4
+                      }
+                    ]
+                  },
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "search": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "regexp",
+                  "type": "RegExp",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                }
+              ],
+              "returns": "Number",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "slice": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "beginIndex",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "endIndex",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNCwiY29sdW1uIjo0N30sImVuZCI6eyJsaW5lIjozNCwiY29sdW1uIjo0OX19"
+                }
+              ],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "split": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "separator",
+                  "type": {
+                    "kind": "union",
+                    "types": [
+                      "RegExp",
+                      {
+                        "reference": 4
+                      }
+                    ]
+                  },
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6Im51bGwiLCJzdGFydCI6eyJsaW5lIjozNSwiY29sdW1uIjozN30sImVuZCI6eyJsaW5lIjozNSwiY29sdW1uIjo0MX19"
+                },
+                {
+                  "name": "limit",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNSwiY29sdW1uIjo1OX0sImVuZCI6eyJsaW5lIjozNSwiY29sdW1uIjo2MX19"
+                }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": 3,
+                "parameters": [
+                  {
+                    "reference": 4
+                  }
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "substr": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "start",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "length",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNiwiY29sdW1uIjo0MX0sImVuZCI6eyJsaW5lIjozNiwiY29sdW1uIjo0M319"
+                }
+              ],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "substring": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 1,
+              "max": 2,
+              "parameters": [
+                {
+                  "name": "indexStart",
+                  "type": "Number",
+                  "min": 1,
+                  "max": 1,
+                  "default": false
+                },
+                {
+                  "name": "indexEnd",
+                  "type": "Number",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOi0xLCJzdGFydCI6eyJsaW5lIjozNywiY29sdW1uIjo1MX0sImVuZCI6eyJsaW5lIjozNywiY29sdW1uIjo1M319"
+                }
+              ],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toLowerCase": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toString": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "toUpperCase": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "trim": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "valueOf": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": false,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": {
+                "reference": 4
+              },
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "lines": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 1,
+              "parameters": [
+                {
+                  "name": "emptyLines",
+                  "type": "Boolean",
+                  "min": 0,
+                  "max": 1,
+                  "default": true,
+                  "comprehensive": true,
+                  "defaultValue": "eyJraW5kIjo1MiwibmFtZSI6ImZhbHNlIiwic3RhcnQiOnsibGluZSI6NTIsImNvbHVtbiI6MzB9LCJlbmQiOnsibGluZSI6NTIsImNvbHVtbiI6MzV9fQ=="
+                }
+              ],
+              "returns": {
+                "kind": "reference",
+                "name": 3,
+                "parameters": [
+                  {
+                    "reference": 4
+                  }
+                ]
+              },
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "constructor": false
+        },
+        "sharedMethods": {}
+      }
+    ],
+    "macros": []
+  }
+]

@@ -1,1 +1,0 @@
-ReferenceException: The method "foobar" can't be found in the class "Foobar" (line 6, file "fixtures/compile/class/class.extends.method.missing.es6.ks")

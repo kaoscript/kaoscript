@@ -1,19 +1,21 @@
-var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Foobar = Helper.struct(function(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
+	const Foobar = Helper.struct(function(x) {
 		if(x === void 0) {
 			x = null;
-		}
-		else if(x !== null && !Type.isString(x)) {
-			throw new TypeError("'x' is not of type 'String?'");
 		}
 		const _ = new Dictionary();
 		_.x = x;
 		return _;
+	}, function(__ks_new, args) {
+		const t0 = value => Type.isString(value) || Type.isNull(value);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return __ks_new(args[0]);
+			}
+		}
+		throw Helper.badArgs();
 	});
-	const f = Foobar("");
+	const f = Foobar.__ks_new("");
 	f.x = null;
 };

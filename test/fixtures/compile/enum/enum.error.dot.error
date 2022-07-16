@@ -1,1 +1,1 @@
-SyntaxException: Accessing an enum can only be done with "::" (line 7, file "fixtures/compile/enum/enum.error.dot.ks")
+SyntaxException: Accessing an enum can only be done with "::" (fixtures/compile/enum/enum.error.dot.ks:7)

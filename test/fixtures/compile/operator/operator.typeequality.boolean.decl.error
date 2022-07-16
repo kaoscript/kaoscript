@@ -1,1 +1,1 @@
-TypeException: The variable of type "Boolean" can never be of type "Array" (line 3, file "fixtures/compile/operator/operator.typeequality.boolean.decl.ks")
+TypeException: The variable of type "Boolean" can never be of type "Array" (fixtures/compile/operator/operator.typeequality.boolean.decl.ks:3)

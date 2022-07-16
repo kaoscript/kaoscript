@@ -1,8 +1,8 @@
 require("kaoscript/register");
 module.exports = function() {
-	var Weekday = require("./enum.method.wstt.default.ks")().Weekday;
-	const day = Weekday.fromString("monday");
+	var Weekday = require("./.enum.method.wstt.default.ks.j5k8r9.ksb")().Weekday;
+	const day = Weekday.__ks_sttc_fromString_0("monday");
 	return {
-		Weekday: Weekday
+		Weekday
 	};
 };

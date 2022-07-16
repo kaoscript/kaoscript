@@ -1,79 +1,83 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Foo {
+		static __ks_new_0() {
+			const o = Object.create(Foo.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
+		}
+		bar() {
+			return this.__ks_func_bar_rt.call(null, this, this, arguments);
 		}
 		__ks_func_bar_0() {
 			return this._bar;
 		}
 		__ks_func_bar_1(bar) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(bar === void 0 || bar === null) {
-				throw new TypeError("'bar' is not nullable");
-			}
-			else if(!Type.isClassInstance(bar, Bar)) {
-				throw new TypeError("'bar' is not of type 'Bar'");
-			}
 			this._bar = bar;
 			return this;
 		}
-		bar() {
-			if(arguments.length === 0) {
-				return Foo.prototype.__ks_func_bar_0.apply(this);
+		__ks_func_bar_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Bar);
+			if(args.length === 0) {
+				return proto.__ks_func_bar_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Foo.prototype.__ks_func_bar_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_bar_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Bar {
+		static __ks_new_0() {
+			const o = Object.create(Bar.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
+		}
+		foo() {
+			return this.__ks_func_foo_rt.call(null, this, this, arguments);
 		}
 		__ks_func_foo_0() {
 			return this._foo;
 		}
 		__ks_func_foo_1(foo) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(foo === void 0 || foo === null) {
-				throw new TypeError("'foo' is not nullable");
-			}
-			else if(!Type.isClassInstance(foo, Foo)) {
-				throw new TypeError("'foo' is not of type 'Foo'");
-			}
 			this._foo = foo;
 			return this;
 		}
-		foo() {
-			if(arguments.length === 0) {
-				return Bar.prototype.__ks_func_foo_0.apply(this);
+		__ks_func_foo_rt(that, proto, args) {
+			const t0 = value => Type.isClassInstance(value, Foo);
+			if(args.length === 0) {
+				return proto.__ks_func_foo_0.call(that);
 			}
-			else if(arguments.length === 1) {
-				return Bar.prototype.__ks_func_foo_1.apply(this, arguments);
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return proto.__ks_func_foo_1.call(that, args[0]);
+				}
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

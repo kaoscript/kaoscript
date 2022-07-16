@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_ClassA = {};
 	class ClassB extends ClassA {
@@ -11,32 +11,26 @@ module.exports = function() {
 	}
 	class ClassC extends ClassB {
 		constructor(x) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
-			}
 			super();
 			this._x = x;
 		}
 		__ks_init() {
 			ClassB.prototype.__ks_init.call(this);
 		}
+		x() {
+			return this.__ks_func_x_rt.call(null, this, this, arguments);
+		}
 		__ks_func_x_0() {
 			return this._x;
 		}
-		x() {
-			if(arguments.length === 0) {
-				return ClassC.prototype.__ks_func_x_0.apply(this);
+		__ks_func_x_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_x_0.call(that);
 			}
-			else if(ClassB.prototype.x) {
-				return ClassB.prototype.x.apply(this, arguments);
+			if(super.__ks_func_x_rt) {
+				return super.__ks_func_x_rt.call(null, that, ClassB.prototype, args);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 };

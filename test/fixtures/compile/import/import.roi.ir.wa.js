@@ -1,21 +1,24 @@
 require("kaoscript/register");
-var {Helper, Operator} = require("@kaoscript/runtime");
+const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var __ks_Array = require("../_/_array.ks")().__ks_Array;
-	var __ks_Array = require("../require/require.alt.roi.systemic.es6.ks")(__ks_Array).__ks_Array;
-	const m = __ks_Array._cm_map(Helper.newArrayRange(1, 10, 1, true, true), function(value, index) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(value === void 0 || value === null) {
-			throw new TypeError("'value' is not nullable");
-		}
-		if(index === void 0 || index === null) {
-			throw new TypeError("'index' is not nullable");
-		}
-		return Operator.multiplication(value, index);
-	});
+	var __ks_Array = require("../_/._array.ks.j5k8r9.ksb")().__ks_Array;
+	var __ks_Array = require("../require/.require.alt.roi.systemic.ks.wbvwu4.ksb")(__ks_Array).__ks_Array;
+	const m = __ks_Array.__ks_sttc_map_0(Helper.newArrayRange(1, 10, 1, true, true), (() => {
+		const __ks_rt = (...args) => {
+			const t0 = Type.isValue;
+			if(args.length === 2) {
+				if(t0(args[0]) && t0(args[1])) {
+					return __ks_rt.__ks_0.call(this, args[0], args[1]);
+				}
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = (value, index) => {
+			return Operator.multiplication(value, index);
+		};
+		return __ks_rt;
+	})());
 	return {
-		__ks_Array: __ks_Array
+		__ks_Array
 	};
 };

@@ -251,5 +251,10 @@ class UnaryOperatorSpread extends UnaryOperatorExpression {
 			.code('...', @data.operator)
 			.wrap(@argument)
 	} // }}}
+	toTypeQuote() {
+		const type = @type.parameter(0)
+
+		return `...\(type.toQuote())`
+	}
 	type() => @type
 }

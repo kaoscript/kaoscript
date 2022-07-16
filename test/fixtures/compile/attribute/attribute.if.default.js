@@ -1,50 +1,45 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Shape {
+		static __ks_new_0(...args) {
+			const o = Object.create(Shape.prototype);
+			o.__ks_init();
+			o.__ks_cons_0(...args);
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
-		}
-		__ks_init_0() {
-			this._color = "";
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
-			Shape.prototype.__ks_init_0.call(this);
+			this._color = "";
 		}
 		__ks_cons_0(color) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(color === void 0 || color === null) {
-				throw new TypeError("'color' is not nullable");
-			}
-			else if(!Type.isString(color)) {
-				throw new TypeError("'color' is not of type 'String'");
-			}
 			this._color = color;
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
+			const t0 = Type.isString;
 			if(args.length === 1) {
-				Shape.prototype.__ks_cons_0.apply(this, args);
+				if(t0(args[0])) {
+					return Shape.prototype.__ks_cons_0.call(that, args[0]);
+				}
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		}
 	}
 	Shape.prototype.__ks_func_draw_es6_0 = function(canvas) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(canvas === void 0 || canvas === null) {
-			throw new TypeError("'canvas' is not nullable");
-		}
 		return "I'm drawing a " + this._color + " rectangle.";
 	};
-	Shape.prototype.draw_es6 = function() {
-		if(arguments.length === 1) {
-			return Shape.prototype.__ks_func_draw_es6_0.apply(this, arguments);
+	Shape.prototype.__ks_func_draw_es6_rt = function(that, proto, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return proto.__ks_func_draw_es6_0.call(that, args[0]);
+			}
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
+	};
+	Shape.prototype.draw_es6 = function() {
+		return this.__ks_func_draw_es6_rt.call(null, this, this, arguments);
 	};
 };

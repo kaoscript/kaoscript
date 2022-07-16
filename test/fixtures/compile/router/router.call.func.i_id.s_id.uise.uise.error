@@ -1,0 +1,1 @@
+TypeException: The return type must be "Number" and not "String" (fixtures/compile/router/router.call.func.i_id.s_id.uise.uise.ks:2)

@@ -1,9 +1,9 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(a, b) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(a, b) {
 		if(a === void 0) {
 			a = null;
 		}
@@ -16,5 +16,11 @@ module.exports = function() {
 		else {
 			return a.toLowerCase() === b.toLowerCase();
 		}
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		if(args.length === 2) {
+			return foobar.__ks_0.call(that, args[0], args[1]);
+		}
+		throw Helper.badArgs();
+	};
 };

@@ -1,54 +1,36 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_ClassA = {};
 	class ClassB extends ClassA {
 		constructor() {
-			const __ks_cons_0 = (__ks_arguments) => {
-				let __ks_i = -1;
-				let foobar = __ks_arguments[++__ks_i];
-				if(foobar === void 0 || foobar === null) {
-					throw new TypeError("'foobar' is not nullable");
-				}
-				else if(!Type.isString(foobar)) {
-					throw new TypeError("'foobar' is not of type 'String'");
-				}
+			const __ks_cons_0 = (foobar) => {
 				super();
 				this.__ks_init();
 				this.foobar = foobar;
 			};
-			const __ks_cons_1 = (__ks_arguments) => {
-				let __ks_i = -1;
-				let foobar = __ks_arguments[++__ks_i];
-				if(foobar === void 0 || foobar === null) {
-					throw new TypeError("'foobar' is not nullable");
-				}
-				else if(!Type.isString(foobar)) {
-					throw new TypeError("'foobar' is not of type 'String'");
-				}
-				let quxbaz = __ks_arguments[++__ks_i];
-				if(quxbaz === void 0 || quxbaz === null) {
-					throw new TypeError("'quxbaz' is not nullable");
-				}
-				else if(!Type.isNumber(quxbaz)) {
-					throw new TypeError("'quxbaz' is not of type 'Number'");
-				}
+			const __ks_cons_1 = (foobar, quxbaz) => {
 				super();
 				this.__ks_init();
 				this.foobar = foobar;
 				this.quxbaz = quxbaz;
 			};
-			const __ks_cons = (__ks_arguments) => {
-				if(__ks_arguments.length === 1) {
-					__ks_cons_0(__ks_arguments);
+			const __ks_cons_rt = (args) => {
+				const t0 = Type.isString;
+				const t1 = Type.isNumber;
+				if(args.length === 1) {
+					if(t0(args[0])) {
+						return __ks_cons_0(args[0]);
+					}
+					throw Helper.badArgs();
 				}
-				else if(__ks_arguments.length === 2) {
-					__ks_cons_1(__ks_arguments);
+				if(args.length === 2) {
+					if(t0(args[0]) && t1(args[1])) {
+						return __ks_cons_1(args[0], args[1]);
+					}
 				}
-				else {
-					throw new SyntaxError("Wrong number of arguments");
-				}
+				throw Helper.badArgs();
 			};
-			__ks_cons(arguments);
+			__ks_cons_rt(arguments);
 		}
 		__ks_init_0() {
 			this.foobar = "foobar";
@@ -63,50 +45,32 @@ module.exports = function() {
 			const __ks_cons_0 = () => {
 				super("foobar");
 			};
-			const __ks_cons_1 = (__ks_arguments) => {
-				let __ks_i = -1;
-				let foobar = __ks_arguments[++__ks_i];
-				if(foobar === void 0 || foobar === null) {
-					throw new TypeError("'foobar' is not nullable");
-				}
-				else if(!Type.isString(foobar)) {
-					throw new TypeError("'foobar' is not of type 'String'");
-				}
+			const __ks_cons_1 = (foobar) => {
 				super(foobar);
 			};
-			const __ks_cons_2 = (__ks_arguments) => {
-				let __ks_i = -1;
-				let foobar = __ks_arguments[++__ks_i];
-				if(foobar === void 0 || foobar === null) {
-					throw new TypeError("'foobar' is not nullable");
-				}
-				else if(!Type.isString(foobar)) {
-					throw new TypeError("'foobar' is not of type 'String'");
-				}
-				let quxbaz = __ks_arguments[++__ks_i];
-				if(quxbaz === void 0 || quxbaz === null) {
-					throw new TypeError("'quxbaz' is not nullable");
-				}
-				else if(!Type.isNumber(quxbaz)) {
-					throw new TypeError("'quxbaz' is not of type 'Number'");
-				}
+			const __ks_cons_2 = (foobar, quxbaz) => {
 				super(foobar, quxbaz);
 			};
-			const __ks_cons = (__ks_arguments) => {
-				if(__ks_arguments.length === 0) {
-					__ks_cons_0(__ks_arguments);
+			const __ks_cons_rt = (args) => {
+				const t0 = Type.isString;
+				const t1 = Type.isNumber;
+				if(args.length === 0) {
+					return __ks_cons_0();
 				}
-				else if(__ks_arguments.length === 1) {
-					__ks_cons_1(__ks_arguments);
+				if(args.length === 1) {
+					if(t0(args[0])) {
+						return __ks_cons_1(args[0]);
+					}
+					throw Helper.badArgs();
 				}
-				else if(__ks_arguments.length === 2) {
-					__ks_cons_2(__ks_arguments);
+				if(args.length === 2) {
+					if(t0(args[0]) && t1(args[1])) {
+						return __ks_cons_2(args[0], args[1]);
+					}
 				}
-				else {
-					throw new SyntaxError("Wrong number of arguments");
-				}
+				throw Helper.badArgs();
 			};
-			__ks_cons(arguments);
+			__ks_cons_rt(arguments);
 		}
 		__ks_init() {
 			ClassB.prototype.__ks_init.call(this);

@@ -1,23 +1,8 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_ClassA = {};
 	class ClassB extends ClassA {
 		constructor(x, y) {
-			if(arguments.length < 2) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-			}
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
-			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
-			}
-			if(y === void 0 || y === null) {
-				throw new TypeError("'y' is not nullable");
-			}
-			else if(!Type.isNumber(y)) {
-				throw new TypeError("'y' is not of type 'Number'");
-			}
 			super();
 			this.constructor.prototype.__ks_init();
 			this._x = x;
@@ -30,29 +15,35 @@ module.exports = function() {
 		__ks_init() {
 			ClassB.prototype.__ks_init_0.call(this);
 		}
+		x() {
+			return this.__ks_func_x_rt.call(null, this, this, arguments);
+		}
 		__ks_func_x_0() {
 			return this._x;
 		}
-		x() {
-			if(arguments.length === 0) {
-				return ClassB.prototype.__ks_func_x_0.apply(this);
+		__ks_func_x_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_x_0.call(that);
 			}
-			else if(ClassA.prototype.x) {
-				return ClassA.prototype.x.apply(this, arguments);
+			if(super.__ks_func_x_rt) {
+				return super.__ks_func_x_rt.call(null, that, ClassA.prototype, args);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
+		}
+		y() {
+			return this.__ks_func_y_rt.call(null, this, this, arguments);
 		}
 		__ks_func_y_0() {
 			return this._y;
 		}
-		y() {
-			if(arguments.length === 0) {
-				return ClassB.prototype.__ks_func_y_0.apply(this);
+		__ks_func_y_rt(that, proto, args) {
+			if(args.length === 0) {
+				return proto.__ks_func_y_0.call(that);
 			}
-			else if(ClassA.prototype.y) {
-				return ClassA.prototype.y.apply(this, arguments);
+			if(super.__ks_func_y_rt) {
+				return super.__ks_func_y_rt.call(null, that, ClassA.prototype, args);
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class ClassC extends ClassB {

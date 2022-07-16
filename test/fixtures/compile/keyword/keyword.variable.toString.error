@@ -1,1 +1,1 @@
-ReferenceException: "toString" is not defined (line 3, file "fixtures/compile/keyword/keyword.variable.toString.ks")
+ReferenceException: "toString" is not defined (fixtures/compile/keyword/keyword.variable.toString.ks:3)

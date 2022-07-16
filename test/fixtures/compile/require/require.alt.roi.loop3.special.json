@@ -1,192 +1,224 @@
-{
-  "aliens": [],
-  "requirements": [
-    0,
-    "Date",
-    false
-  ],
-  "exports": [
-    1,
-    "Date"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {
-        "fromGenesis": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
-          }
-        ]
+[
+  {
+    "aliens": [
+      0,
+      "Date",
+      1
+    ],
+    "requirements": [
+      1,
+      "Date",
+      0
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "class",
-      "class": {
-        "reference": 0
-      },
-      "exhaustive": true,
-      "constructors": [
-        {
-          "id": 1,
-          "access": 4,
-          "sealed": true,
-          "min": 2,
-          "max": 7,
-          "parameters": [
+      {
+        "kind": "class",
+        "original": 0,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "fromGenesis": [
             {
-              "name": "year",
-              "type": {
-                "reference": 2
-              },
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "month",
-              "type": {
-                "reference": 2
-              },
-              "min": 1,
-              "max": 1,
-              "default": false
-            },
-            {
-              "name": "day",
-              "type": {
-                "reference": 2
-              },
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
               "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjEsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjU1fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjU2fX0="
-            },
-            {
-              "name": "hours",
-              "type": {
-                "reference": 2
-              },
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjcwfSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjcxfX0="
-            },
-            {
-              "name": "minutes",
-              "type": {
-                "reference": 2
-              },
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjg3fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjg4fX0="
-            },
-            {
-              "name": "seconds",
-              "type": {
-                "reference": 2
-              },
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjEwNH0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjoxMDV9fQ=="
-            },
-            {
-              "name": "milliseconds",
-              "type": {
-                "reference": 2
-              },
-              "min": 0,
-              "max": 1,
-              "default": true,
-              "comprehensive": true,
-              "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjEyNn0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjoxMjd9fQ=="
+              "max": 0,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
             }
-          ],
-          "throws": [],
-          "dependent": true
-        }
-      ],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {
-        "fromAugment": [
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      2,
+      "Date"
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "originals": [
+          1,
+          0
+        ],
+        "exhaustive": true,
+        "constructors": [
           {
-            "id": 0,
+            "index": 1,
             "access": 4,
             "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
+            "min": 2,
+            "max": 7,
+            "parameters": [
+              {
+                "name": "year",
+                "type": {
+                  "reference": 3
+                },
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "month",
+                "type": {
+                  "reference": 3
+                },
+                "min": 1,
+                "max": 1,
+                "default": false
+              },
+              {
+                "name": "day",
+                "type": {
+                  "reference": 3
+                },
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjEsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjU1fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjU2fX0="
+              },
+              {
+                "name": "hours",
+                "type": {
+                  "reference": 3
+                },
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjcwfSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjcxfX0="
+              },
+              {
+                "name": "minutes",
+                "type": {
+                  "reference": 3
+                },
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjg3fSwiZW5kIjp7ImxpbmUiOjE1LCJjb2x1bW4iOjg4fX0="
+              },
+              {
+                "name": "seconds",
+                "type": {
+                  "reference": 3
+                },
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjEwNH0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjoxMDV9fQ=="
+              },
+              {
+                "name": "milliseconds",
+                "type": {
+                  "reference": 3
+                },
+                "min": 0,
+                "max": 1,
+                "default": true,
+                "comprehensive": true,
+                "defaultValue": "eyJraW5kIjo3OCwidmFsdWUiOjAsInN0YXJ0Ijp7ImxpbmUiOjE1LCJjb2x1bW4iOjEyNn0sImVuZCI6eyJsaW5lIjoxNSwiY29sdW1uIjoxMjd9fQ=="
+              }
+            ],
+            "errors": [],
+            "dependent": true
           }
         ],
-        "fromSpecial": [
-          {
-            "id": 0,
-            "access": 4,
-            "sealed": true,
-            "async": false,
-            "min": 0,
-            "max": 0,
-            "parameters": [],
-            "returns": "Any?",
-            "throws": [],
-            "inits": []
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {
+          "fromAugment": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ],
+          "fromSpecial": [
+            {
+              "index": 0,
+              "access": 4,
+              "sealed": true,
+              "async": false,
+              "min": 0,
+              "max": 0,
+              "parameters": [],
+              "returns": "Any?",
+              "errors": [],
+              "inits": []
+            }
+          ]
+        },
+        "classMethods": {},
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "exhaustiveness": {
+          "instanceMethods": {
+            "fromGenesis": false
           }
-        ]
+        },
+        "sharedMethods": {}
       },
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "alias",
-      "of": {
-        "kind": "union",
-        "types": [
-          "Number",
-          "String"
-        ]
+      {
+        "kind": "alias",
+        "of": {
+          "kind": "union",
+          "types": [
+            "Number",
+            "String"
+          ]
+        }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

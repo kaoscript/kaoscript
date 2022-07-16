@@ -1,34 +1,31 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Foobar = {};
+	__ks_Foobar.__ks_new_1 = function(...args) {
+		return __ks_Foobar.__ks_cons_1.call(new Foobar(), ...args);
+	};
 	__ks_Foobar.__ks_cons_1 = function(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'Number'");
-		}
-		__ks_Foobar._im_foobar(this);
+		__ks_Foobar.__ks_func_foobar_0.call(this);
 		return this;
 	};
 	__ks_Foobar.__ks_func_foobar_0 = function() {
 	};
 	__ks_Foobar.new = function() {
+		const t0 = Type.isNumber;
 		if(arguments.length === 1) {
-			return __ks_Foobar.__ks_cons_1.apply(new Foobar(), arguments);
+			if(t0(arguments[0])) {
+				return __ks_Foobar.__ks_cons_1.call(new Foobar(), arguments[0]);
+			}
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
-	__ks_Foobar._im_foobar = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_Foobar._im_foobar = function(that, ...args) {
+		return __ks_Foobar.__ks_func_foobar_rt(that, args);
+	};
+	__ks_Foobar.__ks_func_foobar_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_Foobar.__ks_func_foobar_0.apply(that);
+			return __ks_Foobar.__ks_func_foobar_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 };

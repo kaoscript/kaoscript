@@ -1,1 +1,1 @@
-ReferenceException: To overwrite "Color", it needs to be passed to the module "../class/class.color.ks" (line 4, file "fixtures/compile/import/import.immu.class.bad.ks")
+ReferenceException: To overwrite "Color", it needs to be passed to the module "../class/class.color.ks" (fixtures/compile/import/import.immu.class.bad.ks:4)

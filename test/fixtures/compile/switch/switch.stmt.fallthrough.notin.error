@@ -1,1 +1,1 @@
-SyntaxException: The statement "fallthrough" is illegal (line 4, file "fixtures/compile/switch/switch.stmt.fallthrough.notin.ks")
+SyntaxException: The statement "fallthrough" is illegal (fixtures/compile/switch/switch.stmt.fallthrough.notin.ks:4)

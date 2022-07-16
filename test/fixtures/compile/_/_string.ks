@@ -1,14 +1,17 @@
-extern parseFloat, parseInt
+extern {
+	func parseFloat(...): Number
+	func parseInt(...): Number
 
-extern systemic class String {
-	length: Number
-	charAt(...): String
-	match(...): Array?
-	replace(...): String
-	slice(...): String
-	split(...): Array
-	toLowerCase(): String
-	trim(): String
+	systemic class String {
+		length: Number
+		charAt(...): String
+		match(...): Array?
+		replace(...): String
+		slice(...): String
+		split(...): Array
+		toLowerCase(): String
+		trim(): String
+	}
 }
 
 impl String {

@@ -94,10 +94,10 @@ export class Exception extends Error {
 		}
 		else {
 			if @message.length == 0 {
-				return `\(this.name): line \(@lineNumber), file "\(@fileName)"`
+				return `\(this.name): \(@fileName):\(@lineNumber)`
 			}
 			else {
-				return `\(this.name): \(@message) (line \(@lineNumber), file "\(@fileName)")`
+				return `\(this.name): \(@message) (\(@fileName):\(@lineNumber))`
 			}
 		}
 	} // }}}
@@ -165,6 +165,9 @@ export class ReferenceException extends Exception {
 		throwBindingExceedArray(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`The destructuring variable "\(name)" can't be matched`, node)
 		} // }}}
+		throwConfusingArguments(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The arguments (indexed/named) can be matched to the function "\(name)" in multiple ways`, node)
+		} // }}}
 		throwDefined(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`"\(name)" should not be defined`, node)
 		} // }}}
@@ -176,6 +179,9 @@ export class ReferenceException extends Exception {
 		} // }}}
 		throwImmutableField(name, node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`The class variable "\(name)" is immutable`, node)
+		} // }}}
+		throwIncompleteVariable(argname, modname, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The variable "\(argname)" must be complete before passing it to the module "\(modname)"`, node)
 		} // }}}
 		throwInvalidAssignment(node) ~ ReferenceException { // {{{
 			throw new ReferenceException(`Invalid left-hand side in assignment`, node)
@@ -196,7 +202,7 @@ export class ReferenceException extends Exception {
 				throw new ReferenceException(`The function "\(name)" can't be matched to no arguments`, node)
 			}
 			else {
-				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.type().toQuote())` for const argument in arguments].join(', ')))`, node)
+				throw new ReferenceException(`The function "\(name)" can't be matched to given arguments (\([`\(argument.toTypeQuote())` for const argument in arguments].join(', ')))`, node)
 			}
 		} // }}}
 		throwNoMatchingFunctionInNamespace(name, namespace, arguments, node) ~ ReferenceException { // {{{
@@ -222,6 +228,9 @@ export class ReferenceException extends Exception {
 			else {
 				throw new ReferenceException(`The method "\(method)" of the enum "\(enum)" can't be matched to given arguments (\([`\(argument.toQuote())` for const argument in arguments].join(', ')))`, node)
 			}
+		} // }}}
+		throwUnrecognizedNamedArgument(name, node) ~ ReferenceException { // {{{
+			throw new ReferenceException(`The argument "\(name)" isn't recognized`, node)
 		} // }}}
 		throwNoMatchingStruct(name, arguments, node) ~ ReferenceException { // {{{
 			if arguments.length == 0 {
@@ -295,8 +304,14 @@ export class SyntaxException extends Exception {
 		throwAlreadyDeclared(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Identifier "\(name)" has already been declared`, node)
 		} // }}}
+		throwAlreadyImported(name, module, line, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The variable "\(name)" has already been imported by "\(module)" at line \(line)`, node)
+		} // }}}
 		throwDeadCode(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Dead code`, node)
+		} // }}}
+		throwDeadCodeParameter(node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The default value of a required and nullable parameter can only be 'null'`, node)
 		} // }}}
 		throwDuplicateConstructor(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The constructor is matching an existing constructor`, node)
@@ -311,24 +326,67 @@ export class SyntaxException extends Exception {
 			throw new SyntaxException(`The bit flags enum "\(name)" can only have at most 53 bits.`, node)
 		} // }}}
 		throwExcessiveRequirement(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`import don't require the argument "\(name)"`, node)
+			throw new SyntaxException(`The import don't require the argument "\(name)"`, node)
+		} // }}}
+		throwHiddenMethod(name, class1, method1, class2, method2, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The method "\(class1.toQuote()).\(name)\(method1.toQuote())" hides the method "\(class2.toQuote()).\(name)\(method2.toQuote())"`, node)
 		} // }}}
 		throwIdenticalConstructor(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The constructor is identical with another constructor`, node)
 		} // }}}
-		throwIdenticalFunction(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`The function "\(name)" is identical with another function "\(name)"`, node)
+		throwIdenticalFunction(name, type, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The function "\(name)\(type.toQuote())" is a duplicate`, node)
 		} // }}}
 		throwIdenticalMethod(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`The method "\(name)" is identical with another method "\(name)"`, node)
+			throw new SyntaxException(`The method "\(name)" is matching another method with the same types of parameters`, node)
 		} // }}}
 		throwIllegalStatement(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The statement "\(name)" is illegal`, node)
 		} // }}}
-		throwIndistinguishableFunctions(name, functions: Array<Type>, count: Number, node) ~ SyntaxException { // {{{
+		throwIndistinguishableFunctions(name: String, functions: Array<Type>, node) ~ SyntaxException { // {{{
 			const last = functions.length - 1
 			auto fragments = ''
 
+			for const function, i in functions {
+				if i == last {
+					fragments += ' and '
+				}
+				else if i != 0 {
+					fragments += ', '
+				}
+
+				fragments += `"\(name)\(function.toQuote())"`
+			}
+
+			throw new SyntaxException(`The functions \(fragments) can't be distinguished`, node)
+		} // }}}
+		throwIndistinguishableFunctions(name: String, arguments: Array<Type>, functions: Array<Type>, node) ~ SyntaxException { // {{{
+			const args = `(\(arguments.map((type, _, _) => type.toQuote(true)).join(', ')))`
+
+			const last = functions.length - 1
+			auto fragments = `the function "\(name)" can be matched with `
+
+			for const function, i in functions {
+				if i == last {
+					fragments += ' or '
+				}
+				else if i != 0 {
+					fragments += ', '
+				}
+
+				fragments += `"\(name)\(function.toQuote())"`
+			}
+
+			if arguments.length == 0 {
+				throw new SyntaxException(`When there are no arguments, \(fragments)`, node)
+			}
+			else {
+				throw new SyntaxException(`When the arguments are \(args), \(fragments)`, node)
+			}
+		} // }}}
+		throwIndistinguishableFunctions(name: String, functions: Array<Type>, count: Number, node) ~ SyntaxException { // {{{
+			const last = functions.length - 1
+			auto fragments = ''
 
 			for const function, i in functions {
 				if i == last {
@@ -419,6 +477,9 @@ export class SyntaxException extends Exception {
 		throwMissingRequirement(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`import is missing the argument "\(name)"`, node)
 		} // }}}
+		throwMissingRequirement(argname, modname, node) ~ ReferenceException { // {{{
+			throw new TypeException(`The module "\(modname)" is missing the argument "\(argname)"`, node)
+		} // }}}
 		throwMissingStructField(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The field "\(name)" is missing to create the struct`, node)
 		} // }}}
@@ -485,11 +546,20 @@ export class SyntaxException extends Exception {
 		throwNotSealedOverwrite(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`A method can be overwritten only in a sealed class`, node)
 		} // }}}
+		throwOnlyStaticImport(modname, node) ~ ReferenceException { // {{{
+			throw new TypeException(`The arguments of the module "\(modname)" must have unmodified types`, node)
+		} // }}}
+		throwOnlyStaticImport(argname, modname, node) ~ ReferenceException { // {{{
+			throw new TypeException(`The argument "\(argname)" of the module "\(modname)" must have an unmodified type`, node)
+		} // }}}
 		throwReservedClassMethod(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Class method "\(name)" is reserved`, node)
+			throw new SyntaxException(`The class method "\(name)" is reserved`, node)
 		} // }}}
 		throwReservedClassVariable(name, node) ~ SyntaxException { // {{{
-			throw new SyntaxException(`Class variable "\(name)" is reserved`, node)
+			throw new SyntaxException(`The class variable "\(name)" is reserved`, node)
+		} // }}}
+		throwShadowFunction(name, function, node) ~ SyntaxException { // {{{
+			throw new SyntaxException(`The function "\(name)\(function.toQuote())" is been concealed by others functions`, node)
 		} // }}}
 		throwTooMuchAttributesForIfAttribute() ~ SyntaxException { // {{{
 			throw new SyntaxException(`Expected 1 argument for 'if' attribute`)
@@ -505,6 +575,11 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwUnexpectedAlias(name, node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`Alias "@\(name)" is expected in an instance method/variable`, node)
+		} // }}}
+		throwUnmatchedImportArguments(names, node) ~ SyntaxException { // {{{
+			const fragments = [`"\(name)"` for const name in names]
+
+			throw new SyntaxException(`The import can't match the argument\(fragments.length > 1 ? 's' : ''): \(fragments.join(', '))`, node)
 		} // }}}
 		throwUnmatchedMacro(name, node, data) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The macro "\(name)" can't be matched`, node, data)
@@ -526,6 +601,14 @@ export class SyntaxException extends Exception {
 		} // }}}
 		throwUnsupportedDestructuringAssignment(node) ~ SyntaxException { // {{{
 			throw new SyntaxException(`The current destructuring assignment is unsupported`, node)
+		} // }}}
+	}
+}
+
+export class TargetException extends Exception {
+	static {
+		throwNotSupported(target, node) ~ TargetException { // {{{
+			throw new TargetException(`The target "\(target.name)-v\(target.version)" isn't supported`, node)
 		} // }}}
 	}
 }
@@ -552,6 +635,14 @@ export class TypeException extends Exception {
 		} // }}}
 		throwInvalid(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Invalid type "\(name)"`, node)
+		} // }}}
+		throwInvalidAssignement(declaredType: Type, valueType: Type, node) ~ TypeException { // {{{
+			if valueType.isNull() {
+				throw new TypeException(`The variable of type \(declaredType.toQuote(true)) can't be assigned with the value "null"`, node)
+			}
+			else {
+				throw new TypeException(`The variable of type \(declaredType.toQuote(true)) can't be assigned with a value of type \(valueType.toQuote(true))`, node)
+			}
 		} // }}}
 		throwInvalidAssignement(name: String, declaredType: Type, valueType: Type, node) ~ TypeException { // {{{
 			if valueType.isNull() {
@@ -607,6 +698,9 @@ export class TypeException extends Exception {
 		} // }}}
 		throwNotClass(name, node) ~ TypeException { // {{{
 			throw new TypeException(`Identifier "\(name)" is not a class`, node)
+		} // }}}
+		throwNotCompatibleArgument(argname, modname, node) ~ ReferenceException { // {{{
+			throw new TypeException(`The argument "\(argname)" of the module "\(modname)" isn't compatible`, node)
 		} // }}}
 		throwNotCompatibleArgument(varname, argname, modname, node) ~ ReferenceException { // {{{
 			throw new TypeException(`The variable "\(varname)" and the argument "\(argname)" of the module "\(modname)" aren't compatible`, node)

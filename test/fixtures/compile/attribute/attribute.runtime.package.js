@@ -1,20 +1,23 @@
-var Type = require("yourpackage").Type;
+const {Helper, Type} = require("yourpackage");
 module.exports = function() {
-	function foo(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
+	function foo() {
+		return foo.__ks_rt(this, arguments);
+	};
+	foo.__ks_0 = function(x, y) {
 		if(Type.isString(x)) {
 			return x.toInt();
 		}
 		else {
 			return y;
 		}
-	}
+	};
+	foo.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return foo.__ks_0.call(that, args[0], args[1]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

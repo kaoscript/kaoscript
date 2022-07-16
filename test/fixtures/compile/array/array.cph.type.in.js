@@ -1,4 +1,4 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	const heroes = ["leto", "duncan", "goku"];
 	const flag = false;
@@ -8,6 +8,6 @@ module.exports = function() {
 		return (index % 2) === 0;
 	}) : [];
 	return {
-		evenHeroes: evenHeroes
+		evenHeroes
 	};
 };

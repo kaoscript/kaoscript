@@ -1,1 +1,1 @@
-TypeException: The operand "quxbaz()" can't be of type "Void" (line 4, file "fixtures/compile/function/function.void.assign.ks")
+TypeException: The operand "quxbaz()" can't be of type "Void" (fixtures/compile/function/function.void.assign.ks:4)

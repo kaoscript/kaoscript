@@ -1,90 +1,53 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		if(arguments.length === 2) {
-			let __ks_i = -1;
-			let a = arguments[++__ks_i];
-			if(a === void 0 || a === null) {
-				throw new TypeError("'a' is not nullable");
-			}
-			else if(!Type.isString(a)) {
-				throw new TypeError("'a' is not of type 'String'");
-			}
-			let b = arguments[++__ks_i];
-			if(b === void 0 || b === null) {
-				throw new TypeError("'b' is not nullable");
-			}
-			else if(!Type.isString(b)) {
-				throw new TypeError("'b' is not of type 'String'");
-			}
-			return a;
-		}
-		else if(arguments.length === 3 || arguments.length === 4) {
-			let __ks_i = -1;
-			let a = arguments[++__ks_i];
-			if(a === void 0 || a === null) {
-				throw new TypeError("'a' is not nullable");
-			}
-			else if(!Type.isString(a)) {
-				throw new TypeError("'a' is not of type 'String'");
-			}
-			let b = arguments[++__ks_i];
-			if(b === void 0 || b === null) {
-				throw new TypeError("'b' is not nullable");
-			}
-			else if(!Type.isNumber(b)) {
-				throw new TypeError("'b' is not of type 'Number'");
-			}
-			let c;
-			if(arguments.length > 3 && (c = arguments[++__ks_i]) !== void 0 && c !== null) {
-				if(!Type.isBoolean(c)) {
-					throw new TypeError("'c' is not of type 'Boolean'");
-				}
-			}
-			else {
-				c = false;
-			}
-			let d = arguments[++__ks_i];
-			if(d === void 0 || d === null) {
-				throw new TypeError("'d' is not nullable");
-			}
-			else if(!Type.isArray(d)) {
-				throw new TypeError("'d' is not of type 'Array'");
-			}
-			return b;
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		return foobar.__ks_rt(this, arguments);
 	};
-	function quxbaz(a, b, c, d) {
-		if(arguments.length < 4) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 4)");
-		}
-		if(a === void 0 || a === null) {
-			throw new TypeError("'a' is not nullable");
-		}
-		else if(!Type.isString(a)) {
-			throw new TypeError("'a' is not of type 'String'");
-		}
-		if(b === void 0 || b === null) {
-			throw new TypeError("'b' is not nullable");
-		}
-		else if(!Type.isNumber(b)) {
-			throw new TypeError("'b' is not of type 'Number'");
-		}
+	foobar.__ks_0 = function(a, b) {
+		return a;
+	};
+	foobar.__ks_1 = function(a, b, c, d) {
 		if(c === void 0 || c === null) {
-			throw new TypeError("'c' is not nullable");
+			c = false;
 		}
-		else if(!Type.isBoolean(c)) {
-			throw new TypeError("'c' is not of type 'Boolean'");
+		return b;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		const t1 = Type.isNumber;
+		const t2 = value => Type.isBoolean(value) || Type.isNull(value);
+		const t3 = Type.isArray;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length === 2) {
+			if(t0(args[0]) && t0(args[1])) {
+				return foobar.__ks_0.call(that, args[0], args[1]);
+			}
+			throw Helper.badArgs();
 		}
-		if(d === void 0 || d === null) {
-			throw new TypeError("'d' is not nullable");
+		if(args.length >= 3 && args.length <= 4) {
+			if(t0(args[0]) && t1(args[1]) && Helper.isVarargs(args, 0, 1, t2, pts = [2], 0) && Helper.isVarargs(args, 1, 1, t3, pts, 1) && te(pts, 2)) {
+				return foobar.__ks_1.call(that, args[0], args[1], Helper.getVararg(args, 2, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+			}
 		}
-		else if(!Type.isArray(d)) {
-			throw new TypeError("'d' is not of type 'Array'");
+		throw Helper.badArgs();
+	};
+	function quxbaz() {
+		return quxbaz.__ks_rt(this, arguments);
+	};
+	quxbaz.__ks_0 = function(a, b, c, d) {
+		foobar.__ks_1(a, b, c, d);
+	};
+	quxbaz.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		const t1 = Type.isNumber;
+		const t2 = Type.isBoolean;
+		const t3 = Type.isArray;
+		if(args.length === 4) {
+			if(t0(args[0]) && t1(args[1]) && t2(args[2]) && t3(args[3])) {
+				return quxbaz.__ks_0.call(that, args[0], args[1], args[2], args[3]);
+			}
 		}
-		foobar(a, b, c, d);
-	}
+		throw Helper.badArgs();
+	};
 };

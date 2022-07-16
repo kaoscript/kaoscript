@@ -1,65 +1,72 @@
-{
-  "aliens": [
-    0,
-    "Date",
-    1,
-    "Math"
-  ],
-  "requirements": [
-    0,
-    "Date",
-    false,
-    1,
-    "Math",
-    false
-  ],
-  "exports": [
-    0,
-    "Date",
-    2,
-    "Math"
-  ],
-  "references": [
-    {
-      "kind": "class",
-      "abstract": false,
-      "alien": true,
-      "hybrid": false,
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "constructors": [],
-      "instanceVariables": {},
-      "classVariables": {},
-      "instanceMethods": {},
-      "classMethods": {},
-      "sequences": [
-        -1,
-        -1,
-        -1
-      ],
-      "sharedMethods": {}
-    },
-    {
-      "kind": "namespace",
-      "sealed": true,
-      "systemic": true,
-      "exhaustive": false,
-      "properties": {}
-    },
-    {
-      "kind": "namespace",
-      "exhaustive": true,
-      "namespace": {
-        "reference": 1
+[
+  {
+    "aliens": [
+      0,
+      "Date",
+      false,
+      1,
+      "Math",
+      false
+    ],
+    "requirements": [
+      0,
+      "Date",
+      false,
+      1,
+      "Math",
+      false
+    ],
+    "references": [
+      {
+        "kind": "class",
+        "abstract": false,
+        "alien": true,
+        "hybrid": false,
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "constructors": [],
+        "instanceVariables": {},
+        "classVariables": {},
+        "instanceMethods": {},
+        "classMethods": {},
+        "origin": "BIGINT::16",
+        "sequences": [
+          -1,
+          -1,
+          -1
+        ],
+        "sharedMethods": {}
       },
-      "properties": {
-        "PI": {
-          "type": "Number",
-          "sealed": false
+      {
+        "kind": "namespace",
+        "sealed": true,
+        "systemic": true,
+        "exhaustive": false,
+        "properties": {}
+      }
+    ]
+  },
+  {
+    "exports": [
+      0,
+      "Date",
+      2,
+      "Math"
+    ],
+    "references": [
+      {
+        "kind": "namespace",
+        "original": 1,
+        "exhaustive": true,
+        "properties": {
+          "PI": {
+            "type": "Number",
+            "sealed": false
+          }
         }
       }
-    }
-  ],
-  "macros": []
-}
+    ],
+    "macros": []
+  }
+]

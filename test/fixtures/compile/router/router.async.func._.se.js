@@ -1,27 +1,28 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		var __ks_cb = arguments[arguments.length - 1];
-		if(!Type.isFunction(__ks_cb)) {
-			throw new SyntaxError("Callback can't be found");
-		}
-		var __ks_arguments = Array.prototype.slice.call(arguments, 0, arguments.length - 1);
-		if(__ks_arguments.length === 0) {
-			__ks_cb();
-		}
-		else if(__ks_arguments.length === 1) {
-			let __ks_i = -1;
-			let a = __ks_arguments[++__ks_i];
-			if(a === void 0 || a === null) {
-				return __ks_cb(new TypeError("'a' is not nullable"));
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(__ks_cb) {
+		return __ks_cb(null, 0);
+	};
+	foobar.__ks_1 = function(a, __ks_cb) {
+		return __ks_cb(null, 1);
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isFunction;
+		const t1 = Type.isString;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
 			}
-			else if(!Type.isString(a)) {
-				return __ks_cb(new TypeError("'a' is not of type 'String'"));
+			throw Helper.badArgs();
+		}
+		if(args.length === 2) {
+			if(t1(args[0]) && t0(args[1])) {
+				return foobar.__ks_1.call(that, args[0], args[1]);
 			}
-			__ks_cb();
 		}
-		else {
-			return __ks_cb(new SyntaxError("Wrong number of arguments"));
-		}
+		throw Helper.badArgs();
 	};
 };

@@ -1,4 +1,4 @@
-import '../class/class.constructor.rest'
+import '../class/class.ctor.rest'
 
 const m0 = new Message()
 const m1 = new Message('foo')

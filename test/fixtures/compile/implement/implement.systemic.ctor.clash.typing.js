@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Date, __ks_Math) {
 	if(!Type.isValue(__ks_Date)) {
 		__ks_Date = {};
@@ -7,7 +7,7 @@ module.exports = function(__ks_Date, __ks_Math) {
 		__ks_Math = {};
 	}
 	return {
-		__ks_Date: __ks_Date,
-		__ks_Math: __ks_Math
+		__ks_Date,
+		__ks_Math
 	};
 };

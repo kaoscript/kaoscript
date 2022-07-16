@@ -188,8 +188,10 @@ class ImplementEnumMethodDeclaration extends Statement {
 		@type.flagAlteration()
 
 		if @instance {
+			let mode = MatchingMode::FunctionSignature + MatchingMode::IgnoreReturn + MatchingMode::MissingError
+
 			if @override {
-				if const method = @enum.getInstantiableMethod(@name, @parameters) {
+				if const method = @enum.getInstantiableMethod(@name, @type, mode) {
 					@type = method.clone().flagAlteration()
 
 					const parameters = @type.parameters()
@@ -207,7 +209,9 @@ class ImplementEnumMethodDeclaration extends Statement {
 				}
 			}
 			else {
-				if @enum.hasMatchingInstanceMethod(@name, @type, MatchingMode::ExactParameters) {
+				mode -= MatchingMode::MissingParameterType - MatchingMode::MissingParameterArity
+
+				if @enum.hasMatchingInstanceMethod(@name, @type, MatchingMode::ExactParameter) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {
@@ -220,7 +224,7 @@ class ImplementEnumMethodDeclaration extends Statement {
 				NotSupportedException.throw(this)
 			}
 			else {
-				if @enum.hasMatchingStaticMethod(@name, @type, MatchingMode::ExactParameters) {
+				if @enum.hasMatchingStaticMethod(@name, @type, MatchingMode::ExactParameter) {
 					SyntaxException.throwDuplicateMethod(@name, this)
 				}
 				else {
@@ -290,12 +294,12 @@ class ImplementEnumMethodDeclaration extends Statement {
 			return MatchingMode::ShiftableParameters
 		}
 		else {
-			return MatchingMode::ExactParameters
+			return MatchingMode::ExactParameter
 		}
 	} // }}}
 	getOverridableVarname() => @enumName.name()
 	getParameterOffset() => @instance ? 1 : 0
-	getSharedName() => null
+	getSharedName() => @override ? null : @instance ? `__ks_func_\(@name)` : @name
 	isAssertingOverride() => @options.rules.assertOverride
 	isAssertingParameter() => @options.rules.assertParameter
 	isAssertingParameterType() => @options.rules.assertParameter && @options.rules.assertParameterType
@@ -318,14 +322,64 @@ class ImplementEnumMethodDeclaration extends Statement {
 			line.done()
 		}
 	} // }}}
+	toSharedFragments(fragments, _) { // {{{
+		const name = @enumName.name()
+
+		if @instance {
+			const assessment = @enum.getInstanceAssessment(@name, this)
+
+			const line = fragments.newLine()
+			const ctrl = line.newControl(null, false, false)
+
+			ctrl.code(`\(name).__ks_func_\(@name) = function(that, ...args)`).step()
+
+			Router.toFragments(
+				(function, line) => {
+					line.code(`\(name).__ks_func_\(@name)_\(function.index())(that`)
+
+					return true
+				}
+				`args`
+				assessment
+				ctrl.block()
+				this
+			)
+
+			ctrl.done()
+			line.done()
+		}
+		else {
+			const assessment = @enum.getStaticAssessment(@name, this)
+
+			const line = fragments.newLine()
+			const ctrl = line.newControl(null, false, false)
+
+			ctrl.code(`\(name).\(@name) = function()`).step()
+
+			Router.toFragments(
+				(function, line) => {
+					line.code(`\(name).__ks_sttc_\(@name)_\(function.index())(`)
+
+					return false
+				}
+				`arguments`
+				assessment
+				ctrl.block()
+				this
+			)
+
+			ctrl.done()
+			line.done()
+		}
+	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
 		const line = fragments.newLine()
 
 		if @instance {
-			line.code(`\(@enumName.name()).__ks_func_\(@name) = function(that`)
+			line.code(`\(@enumName.name()).__ks_func_\(@name)_\(@type.index()) = function(that`)
 		}
 		else {
-			line.code(`\(@enumName.name()).\(@name) = function(`)
+			line.code(`\(@enumName.name()).__ks_sttc_\(@name)_\(@type.index()) = function(`)
 		}
 
 		const block = Parameter.toFragments(this, line, ParameterMode::Default, func(fragments) {

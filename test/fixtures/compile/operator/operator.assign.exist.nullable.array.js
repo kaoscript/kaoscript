@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let bar;
 	Type.isValue(foo) && Type.isValue(foo[qux]) ? bar = foo[qux] : null;

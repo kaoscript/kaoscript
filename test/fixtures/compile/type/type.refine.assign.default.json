@@ -1,57 +1,65 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [],
-  "exports": [
-    0,
-    "corge",
-    1,
-    "grault",
-    2,
-    "x",
-    "Any?",
-    "y"
-  ],
-  "references": [
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 1,
-      "max": 1,
-      "parameters": [
-        {
-          "name": "x",
-          "type": "String",
-          "min": 1,
-          "max": 1,
-          "default": false
-        }
-      ],
-      "returns": "Any?",
-      "throws": []
-    },
-    {
-      "kind": "function",
-      "async": false,
-      "exhaustive": true,
-      "min": 1,
-      "max": 1,
-      "parameters": [
-        {
-          "name": "x",
-          "type": "Any",
-          "min": 1,
-          "max": 1,
-          "default": false
-        }
-      ],
-      "returns": "Any?",
-      "throws": []
-    },
-    "String"
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "corge",
+      1,
+      "grault",
+      2,
+      "x",
+      "Any?",
+      "y"
+    ],
+    "references": [
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 1,
+        "max": 1,
+        "parameters": [
+          {
+            "name": "x",
+            "type": "String",
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      },
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 1,
+        "max": 1,
+        "parameters": [
+          {
+            "name": "x",
+            "type": "Any",
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      },
+      "String"
+    ],
+    "macros": []
+  }
+]

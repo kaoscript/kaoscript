@@ -16,7 +16,7 @@ class IfStatement extends Statement {
 		_whenTrueExpression									= null
 		_whenTrueScope: Scope?								= null
 	}
-	analyse() { // {{{
+	override initiate() { // {{{
 		if @data.condition.kind == NodeKind::VariableDeclaration {
 			@declared = true
 			@bindingScope = this.newScope(@scope, ScopeType::Bleeding)
@@ -24,6 +24,13 @@ class IfStatement extends Statement {
 			@bindingDeclaration = @data.condition.variables[0].name.kind != NodeKind::Identifier
 
 			@declaration = new VariableDeclaration(@data.condition, this, @bindingScope, @scope:Scope, @cascade || @bindingDeclaration)
+			@declaration.initiate()
+		}
+	} // }}}
+	override analyse() { // {{{
+		@hasWhenFalse = @data.whenFalse?
+
+		if @declared {
 			@declaration.analyse()
 
 			if @bindingDeclaration {
@@ -40,8 +47,6 @@ class IfStatement extends Statement {
 			@condition.analyse()
 		}
 
-		@hasWhenFalse = @data.whenFalse?
-
 		@scope.line(@data.whenTrue.start.line)
 
 		@whenTrueExpression = $compile.block(@data.whenTrue, this, @whenTrueScope)
@@ -55,6 +60,7 @@ class IfStatement extends Statement {
 			if @data.whenFalse.kind == NodeKind::IfStatement {
 				@whenFalseExpression = $compile.statement(@data.whenFalse, this, @whenFalseScope)
 				@whenFalseExpression.setCascade(true)
+				@whenFalseExpression.initiate()
 				@whenFalseExpression.analyse()
 			}
 			else {
@@ -108,11 +114,38 @@ class IfStatement extends Statement {
 
 			if !@declared {
 				if @whenTrueExpression.isExit() {
+					for const map, name of @lateInitVariables {
+						if map.false.initializable {
+							@parent.initializeVariable(VariableBrief(name, type: map.false.type), this, this)
+						}
+						else {
+							SyntaxException.throwMissingAssignmentIfFalse(name, @whenFalseExpression)
+						}
+					}
+
 					for const data, name of @condition.inferWhenFalseTypes({}) {
 						@scope.updateInferable(name, data, this)
 					}
 				}
 				else {
+					for const map, name of @lateInitVariables {
+						let type: Type
+
+						if map.true.initializable {
+							if map.false.initializable {
+								type = Type.union(@scope, map.true.type, map.false.type)
+							}
+							else {
+								SyntaxException.throwMissingAssignmentIfFalse(name, @whenFalseExpression)
+							}
+						}
+						else {
+							SyntaxException.throwMissingAssignmentIfTrue(name, @whenTrueExpression)
+						}
+
+						@parent.initializeVariable(VariableBrief(name, type), this, this)
+					}
+
 					const conditionInferables = @condition.inferWhenFalseTypes({})
 					const trueInferables = @whenTrueScope.listUpdatedInferables()
 
@@ -271,15 +304,50 @@ class IfStatement extends Statement {
 			@assignments.pushUniq(...variables)
 		}
 	} // }}}
-	addInitializableVariable(variable, node) { // {{{
+	addInitializableVariable(variable: Variable, node) { // {{{
 		const name = variable.name()
 		const whenTrue = node == @whenTrueExpression
 
-		if !@hasWhenFalse {
+		if const map = @lateInitVariables[name] {
+			if whenTrue {
+				if map[!whenTrue].initializable {
+					map[whenTrue].initializable = true
+				}
+				else if !@hasWhenFalse {
+					SyntaxException.throwMissingAssignmentIfNoElse(name, this)
+				}
+			}
+			else {
+				map[whenTrue].initializable = true
+			}
+		}
+		else if !@hasWhenFalse {
 			SyntaxException.throwMissingAssignmentIfNoElse(name, this)
 		}
-		else if const map = @lateInitVariables[name] {
+		else {
+			@lateInitVariables[name] = {
+				variable
+				[whenTrue]: {
+					initializable: true
+					type: null
+				}
+				[!whenTrue]: {
+					initializable: false
+					type: null
+				}
+			}
+		}
+
+		@parent.addInitializableVariable(variable, node)
+	} // }}}
+	addInitializableVariable(variable: Variable, whenTrue: Boolean, node) { // {{{
+		const name = variable.name()
+
+		if const map = @lateInitVariables[name] {
 			map[whenTrue].initializable = true
+		}
+		else if !@hasWhenFalse && whenTrue {
+			SyntaxException.throwMissingAssignmentIfNoElse(name, this)
 		}
 		else {
 			@lateInitVariables[name] = {
@@ -309,6 +377,17 @@ class IfStatement extends Statement {
 		@whenTrueExpression.checkReturnType(type)
 		@whenFalseExpression?.checkReturnType(type)
 	} // }}}
+	getWhenFalseScope(): @whenFalseScope
+	getWhenTrueScope(): @whenTrueScope
+	initializeLateVariable(name: String, type: Type, whenTrue: Boolean) { // {{{
+		if const map = @lateInitVariables[name] {
+			map[whenTrue].type = type
+		}
+		else {
+			throw new NotSupportedException(this)
+
+		}
+	} // }}}
 	initializeVariable(variable: VariableBrief, expression: AbstractNode, node: AbstractNode) { // {{{
 		const {name, type} = variable
 		const whenTrue = node == @whenTrueExpression
@@ -323,6 +402,7 @@ class IfStatement extends Statement {
 				}
 			}
 			else {
+				map[whenTrue].initializable = true
 				map[whenTrue].type = type
 			}
 
@@ -452,7 +532,7 @@ class IfStatement extends Statement {
 				if @cascade {
 					let first = true
 
-					@declaration.walk(name => {
+					@declaration.walk((name, _) => {
 						if first {
 							fragments.code($runtime.type(this) + '.isValue((')
 
@@ -470,7 +550,7 @@ class IfStatement extends Statement {
 				else {
 					let first = true
 
-					@declaration.walk(name => {
+					@declaration.walk((name, _) => {
 						if first {
 							first = false
 						}

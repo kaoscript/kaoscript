@@ -1,59 +1,72 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	class Quxbaz {
+		static __ks_new_0() {
+			const o = Object.create(Quxbaz.prototype);
+			o.__ks_init();
+			return o;
+		}
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length !== 0) {
-				throw new SyntaxError("Wrong number of arguments");
+				throw Helper.badArgs();
 			}
 		}
 		static __ks_sttc_get_0() {
-			return new Quxbaz();
+			return Quxbaz.__ks_new_0();
 		}
 		static get() {
 			if(arguments.length === 0) {
-				return Quxbaz.__ks_sttc_get_0.apply(this);
+				return Quxbaz.__ks_sttc_get_0();
 			}
-			throw new SyntaxError("Wrong number of arguments");
+			throw Helper.badArgs();
 		}
 	}
 	class Foobar extends Quxbaz {
-		__ks_init() {
-			Quxbaz.prototype.__ks_init.call(this);
+		static __ks_new_0() {
+			const o = Object.create(Foobar.prototype);
+			o.__ks_init();
+			return o;
 		}
-		__ks_cons(args) {
-			Quxbaz.prototype.__ks_cons.call(this, args);
+		__ks_cons_rt(that, args) {
+			super.__ks_cons_rt.call(null, that, args);
 		}
 		static __ks_sttc_get_0() {
-			return new Foobar();
+			return Foobar.__ks_new_0();
 		}
 		static get() {
 			if(arguments.length === 0) {
-				return Foobar.__ks_sttc_get_0.apply(this);
+				return Foobar.__ks_sttc_get_0();
 			}
-			return Quxbaz.get.apply(null, arguments);
+			if(Quxbaz.get) {
+				return Quxbaz.get.apply(null, arguments);
+			}
+			throw Helper.badArgs();
 		}
 	}
-	function foobar(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = value => Type.isClassInstance(value, Foobar);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isClassInstance(x, Foobar)) {
-			throw new TypeError("'x' is not of type 'Foobar'");
-		}
-	}
-	const x = Foobar.get();
-	foobar(x);
+		throw Helper.badArgs();
+	};
+	const x = Foobar.__ks_sttc_get_0();
+	foobar.__ks_0(x);
 	return {
-		Foobar: Foobar,
-		Quxbaz: Quxbaz
+		Foobar,
+		Quxbaz
 	};
 };

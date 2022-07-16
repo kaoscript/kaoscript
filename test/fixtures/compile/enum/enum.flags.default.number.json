@@ -1,0 +1,61 @@
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": []
+  },
+  {
+    "exports": [
+      0,
+      "AnimalFlags",
+      1,
+      "printAnimalAbilities"
+    ],
+    "references": [
+      {
+        "kind": "enum",
+        "type": "flags",
+        "sequenceIndex": 4,
+        "exhaustive": true,
+        "variables": [
+          "None",
+          "HasClaws",
+          "CanFly",
+          "EatsFish",
+          "Endangered",
+          "EndangeredFlyingClawedFishEating",
+          "Predator"
+        ],
+        "instanceMethods": {},
+        "staticMethods": {},
+        "sequences": [
+          -1
+        ]
+      },
+      {
+        "kind": "function",
+        "index": 0,
+        "async": false,
+        "exhaustive": true,
+        "min": 1,
+        "max": 1,
+        "parameters": [
+          {
+            "name": "animal",
+            "type": "Any",
+            "min": 1,
+            "max": 1,
+            "default": false
+          }
+        ],
+        "returns": "Any?",
+        "errors": []
+      }
+    ],
+    "macros": []
+  }
+]

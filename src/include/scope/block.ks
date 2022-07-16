@@ -1,20 +1,21 @@
 class BlockScope extends Scope {
 	private {
 		_authority: Scope
-		_chunkTypes					= {}
-		_declarations				= {}
-		_macros						= {}
+		_chunkTypes							= {}
+		_declarations						= {}
+		_macros								= {}
+		_matchingTypes: Dictionary<Array>	= {}
 		_module: ModuleScope
 		_parent: Scope
-		_references					= {}
-		_renamedIndexes 			= {}
-		_renamedVariables			= {}
-		_reservedIndex				= -1
-		_stashes					= {}
-		_tempDeclarations: Array	= []
-		_tempIndex 					= -1
-		_tempNames					= {}
-		_variables					= {}
+		_references							= {}
+		_renamedIndexes 					= {}
+		_renamedVariables					= {}
+		_reservedIndex						= -1
+		_stashes							= {}
+		_tempDeclarations: Array			= []
+		_tempIndex 							= -1
+		_tempNames							= {}
+		_variables							= {}
 	}
 	constructor(@parent) { // {{{
 		super()
@@ -56,7 +57,7 @@ class BlockScope extends Scope {
 			let notAdded = true
 
 			for const m, index in @macros[name] while notAdded {
-				if m.type().isMatching(type, MatchingMode::Signature) {
+				if m.type().isSubsetOf(type, MatchingMode::Signature) {
 					@macros[name].splice(index, 0, macro)
 
 					notAdded = false
@@ -134,6 +135,10 @@ class BlockScope extends Scope {
 
 			@variables[name] = [@line, variable]
 		}
+
+		if const reference = @references[name] {
+			reference.reset()
+		}
 	} // }}}
 	getChunkType(name, line: Number = @line) { // {{{
 		if @chunkTypes[name] is Array {
@@ -184,8 +189,10 @@ class BlockScope extends Scope {
 	getMacro(data, parent) { // {{{
 		if data.callee.kind == NodeKind::Identifier {
 			if @macros[data.callee.name]? {
+				const arguments = MacroArgument.build(data.arguments)
+
 				for macro in @macros[data.callee.name] {
-					if macro.matchArguments(data.arguments) {
+					if macro.matchArguments(arguments) {
 						return macro
 					}
 				}
@@ -200,8 +207,10 @@ class BlockScope extends Scope {
 			const path = Generator.generate(data.callee)
 
 			if @macros[path]? {
+				const arguments = MacroArgument.build(data.arguments)
+
 				for macro in @macros[path] {
-					if macro.matchArguments(data.arguments) {
+					if macro.matchArguments(arguments) {
 						return macro
 					}
 				}
@@ -229,8 +238,7 @@ class BlockScope extends Scope {
 	getRenamedIndex(name: String) => @renamedIndexes[name] is Number ? @renamedIndexes[name] : 0
 	getReservedName() => `__ks_00\(++@reservedIndex)`
 	getTempIndex() => @tempIndex
-	getVariable(name): Variable? => this.getVariable(name, @line)
-	getVariable(name, line: Number): Variable? { // {{{
+	getVariable(name, line: Number = @line): Variable? { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			let variable = null
@@ -278,8 +286,7 @@ class BlockScope extends Scope {
 		return false
 	} // }}}
 	hasMacro(name) => @macros[name] is Array || @parent.hasMacro(name)
-	hasVariable(name: String) => this.hasVariable(name, @line)
-	hasVariable(name: String, line: Number) { // {{{
+	hasVariable(name: String, line: Number = @line) { // {{{
 		if @variables[name] is Array {
 			const variables: Array = @variables[name]
 			let variable = null
@@ -301,6 +308,30 @@ class BlockScope extends Scope {
 		return @parent.hasVariable(name, -1)
 	} // }}}
 	isAtLastLine() => @module.isAtLastLine()
+	isMatchingType(a: Type, b: Type, mode: MatchingMode) { // {{{
+		const hash = a.toQuote()
+
+		if const matches = @matchingTypes[hash] {
+			for const type, i in matches by 2 {
+				if type == b {
+					return matches[i + 1]
+				}
+			}
+		}
+		else {
+			@matchingTypes[hash] = []
+		}
+
+		@matchingTypes[hash].push(b, false)
+
+		const index = @matchingTypes[hash].length
+
+		const match = a.isSubsetOf(b, mode)
+
+		@matchingTypes[hash][index - 1] = match
+
+		return match
+	} // }}}
 	isRedeclaredVariable(name: String) { // {{{
 		if @variables[name] is Array {
 			return @variables[name].length != 2
@@ -372,30 +403,36 @@ class BlockScope extends Scope {
 		}
 	} // }}}
 	reassignReference(oldName, newName, newScope) { // {{{
-		if @references[oldName]? {
-			@references[oldName].reassign(newName, newScope)
+		if const reference = @references[oldName] {
+			reference.reassign(newName, newScope)
+		}
+
+		if const reference = newScope._references[newName] {
+			reference.reset()
 		}
 	} // }}}
-	reference(value, nullable: Boolean = false, parameters: Array = []) { // {{{
+	reference(value) { // {{{
 		switch value {
-			is AnyType => return this.resolveReference('Any', nullable, parameters)
-			is ClassVariableType => return this.reference(value.type(), nullable, parameters)
+			is AnyType => return this.resolveReference('Any')
+			is ClassVariableType => return this.reference(value.type())
 			is NamedType => {
 				if value.hasContainer() {
-					return value.container().scope().reference(value.name(), nullable, parameters)
+					return value.container().scope().reference(value.name())
 				}
 				else {
-					return this.resolveReference(value.name(), nullable, parameters)
+					return this.resolveReference(value.name())
 				}
 			}
-			is ReferenceType => return this.resolveReference(value.name(), value.isNullable(), parameters)
-			is String => return this.resolveReference(value, nullable, parameters)
-			is Variable => return this.resolveReference(value.name(), nullable, parameters)
+			is ReferenceType => return this.resolveReference(value.name(), value.isExplicitlyNull(), [...value.parameters()])
+			is Variable => return this.resolveReference(value.name())
 			=> {
 				console.info(value)
 				throw new NotImplementedException()
 			}
 		}
+	} // }}}
+	reference(value: String, nullable: Boolean = false, parameters: Array = []) { // {{{
+		return this.resolveReference(value, nullable, parameters)
 	} // }}}
 	releaseTempName(name) { // {{{
 		@tempNames[name] = true
@@ -448,6 +485,10 @@ class BlockScope extends Scope {
 			@variables[name] = [@line, variable]
 		}
 
+		if const reference = @references[name] {
+			reference.reset()
+		}
+
 		return variable
 	} // }}}
 	replaceVariable(name: String, type: Type, downcast: Boolean = false, absolute: Boolean = true, node: AbstractNode): Variable { // {{{
@@ -480,20 +521,29 @@ class BlockScope extends Scope {
 			}
 		}
 
+		if const reference = @references[name] {
+			reference.reset()
+		}
+
 		return variable
 	} // }}}
-	resolveReference(name: String, nullable: Boolean, parameters: Array) { // {{{
+	resetReferences() { // {{{
+		for const reference of @references {
+			reference.reset()
+		}
+	} // }}}
+	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { // {{{
 		if @variables[name] is Array {
-			const hash = ReferenceType.toQuote(name, nullable, parameters)
+			const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 			if @references[hash] is not ReferenceType {
-				@references[hash] = new ReferenceType(this, name, nullable, parameters)
+				@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)
 			}
 
 			return @references[hash]
 		}
 		else {
-			return @parent.resolveReference(name, nullable, parameters)
+			return @parent.resolveReference(name, explicitlyNull, parameters)
 		}
 	} // }}}
 	setLineOffset(offset: Number) => @module.setLineOffset(offset)

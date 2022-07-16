@@ -1,1 +1,1 @@
-TypeException: The variable "x" of type "Number" can't be assigned with the value "null" (line 1, file "fixtures/compile/variable/variable.let.wtnn_vn.ks")
+TypeException: The variable "x" of type "Number" can't be assigned with the value "null" (fixtures/compile/variable/variable.let.wtnn_vn.ks:1)

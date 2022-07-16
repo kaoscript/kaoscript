@@ -1,3 +1,3 @@
-import '../require/require.alt.roe.cross.ks'(require String)
+import '../require/require.alt.roe.cross.default.ks'(require String)
 
 export Number, String

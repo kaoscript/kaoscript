@@ -1,8 +1,9 @@
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
 	class ClassA {
 		constructor() {
 			this.__ks_init();
-			this.__ks_cons(arguments);
+			this.__ks_cons_rt.call(null, this, arguments);
 		}
 		__ks_init() {
 		}
@@ -10,16 +11,14 @@ module.exports = function() {
 			this._x = 0;
 			this._y = 0;
 		}
-		__ks_cons(args) {
+		__ks_cons_rt(that, args) {
 			if(args.length === 0) {
-				ClassA.prototype.__ks_cons_0.apply(this);
+				return ClassA.prototype.__ks_cons_0.call(that);
 			}
-			else {
-				throw new SyntaxError("Wrong number of arguments");
-			}
+			throw Helper.badArgs();
 		}
 	}
 	return {
-		ClassA: ClassA
+		ClassA
 	};
 };

@@ -1,6 +1,6 @@
 class ImportScope extends BlockScope {
 	private {
-		_matchingTypes: Dictionary<Array>	= {}
+		_scopeRenames				= {}
 	}
 	addVariable(name: String, variable: Variable, node?) { // {{{
 		if this.hasDefinedVariable(name) {
@@ -24,35 +24,41 @@ class ImportScope extends BlockScope {
 
 		@variables[name] = [@line, variable]
 	} // }}}
-	isMatchingType(a: Type, b: Type, mode: MatchingMode) { // {{{
-		const hash = a.toQuote()
-
-		if const matches = @matchingTypes[hash] {
-			for const type, i in matches by 2 {
-				if type == b {
-					return matches[i + 1]
+	isRenamed(name: String, newName: String, scope: Scope, mode: MatchingMode) { // {{{
+		if mode ~~ MatchingMode::Renamed {
+			if const renames = @scopeRenames[name] {
+				for const rename in renames {
+					if rename.name == newName {
+						return true
+					}
 				}
 			}
 		}
-		else {
-			@matchingTypes[hash] = []
-		}
 
-		@matchingTypes[hash].push(b, false)
-
-		const index = @matchingTypes[hash].length
-
-		const match = a.isMatching(b, mode)
-
-		@matchingTypes[hash][index - 1] = match
-
-		return match
+		return name == newName
 	} // }}}
-	resolveReference(name: String, nullable: Boolean, parameters: Array) { // {{{
-		const hash = ReferenceType.toQuote(name, nullable, parameters)
+	rename(name: String, newName: String, scope: Scope) { // {{{
+		if newName != name {
+			if const renames = @scopeRenames[name] {
+				renames.push({
+					name: newName
+					scope
+				})
+			}
+			else {
+				@scopeRenames[name] = [{
+					name: newName
+					scope
+				}]
+			}
+		}
+	} // }}}
+	resetReference(name: String)
+	resolveReference(name: String, explicitlyNull: Boolean = false, parameters: Array = []) { // {{{
+		const hash = ReferenceType.toQuote(name, explicitlyNull, parameters)
 
 		if @references[hash] is not ReferenceType {
-			@references[hash] = new ReferenceType(this, name, nullable, parameters)
+			@references[hash] = new ReferenceType(this, name, explicitlyNull, parameters)
 		}
 
 		return @references[hash]

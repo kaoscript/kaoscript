@@ -1,38 +1,44 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	let Float = Helper.namespace(function() {
 		const PI = 3.14;
-		function toFloat(value) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-			}
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isString(value)) {
-				throw new TypeError("'value' is not of type 'String'");
-			}
+		function toFloat() {
+			return toFloat.__ks_rt(this, arguments);
+		};
+		toFloat.__ks_0 = function(value) {
 			return PI * parseFloat(value);
-		}
-		function toString(value) {
-			if(arguments.length < 1) {
-				throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+		};
+		toFloat.__ks_rt = function(that, args) {
+			const t0 = Type.isString;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return toFloat.__ks_0.call(that, args[0]);
+				}
 			}
-			if(value === void 0 || value === null) {
-				throw new TypeError("'value' is not nullable");
-			}
-			else if(!Type.isNumber(value)) {
-				throw new TypeError("'value' is not of type 'Number'");
-			}
+			throw Helper.badArgs();
+		};
+		function toString() {
+			return toString.__ks_rt(this, arguments);
+		};
+		toString.__ks_0 = function(value) {
 			return value.toString();
-		}
+		};
+		toString.__ks_rt = function(that, args) {
+			const t0 = Type.isNumber;
+			if(args.length === 1) {
+				if(t0(args[0])) {
+					return toString.__ks_0.call(that, args[0]);
+				}
+			}
+			throw Helper.badArgs();
+		};
 		return {
-			PI: PI,
-			toFloat: toFloat,
-			toString: toString
+			PI,
+			toFloat,
+			toString
 		};
 	});
 	console.log(Float.PI);
-	console.log(Float.toFloat("3.14"));
-	console.log(Float.toString(3.14));
+	console.log(Float.toFloat.__ks_0("3.14"));
+	console.log(Float.toString.__ks_0(3.14));
 };

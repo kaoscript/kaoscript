@@ -1,15 +1,18 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	function foobar(fn) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(fn === void 0 || fn === null) {
-			throw new TypeError("'fn' is not nullable");
-		}
-		else if(!Type.isFunction(fn)) {
-			throw new TypeError("'fn' is not of type '(x: String): String'");
-		}
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(fn) {
 		return fn("foobar");
-	}
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isFunction;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 };

@@ -1,27 +1,24 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		if(arguments.length === 2 && Type.isNumber(arguments[0]) && Type.isNumber(arguments[1])) {
-			let __ks_i = -1;
-			let x = arguments[++__ks_i];
-			if(x === void 0 || x === null) {
-				throw new TypeError("'x' is not nullable");
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x, y) {
+		return x + y;
+	};
+	foobar.__ks_1 = function(values) {
+		return -1;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		if(args.length === 2) {
+			if(t0(args[0])) {
+				if(t0(args[1])) {
+					return foobar.__ks_0.call(that, args[0], args[1]);
+				}
 			}
-			else if(!Type.isNumber(x)) {
-				throw new TypeError("'x' is not of type 'Number'");
-			}
-			let y = arguments[++__ks_i];
-			if(y === void 0 || y === null) {
-				throw new TypeError("'y' is not nullable");
-			}
-			else if(!Type.isNumber(y)) {
-				throw new TypeError("'y' is not of type 'Number'");
-			}
-			return x + y;
+			return foobar.__ks_1.call(that, Array.from(args));
 		}
-		else {
-			let values = Array.prototype.slice.call(arguments, 0, arguments.length);
-			return -1;
-		}
+		return foobar.__ks_1.call(that, Array.from(args));
 	};
 };

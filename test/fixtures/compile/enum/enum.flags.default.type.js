@@ -1,71 +1,74 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let AnimalFlags = Helper.enum(Number, {
-		None: 0,
-		HasClaws: 1,
-		CanFly: 2,
-		EatsFish: 4,
-		Endangered: 8
+	const AnimalFlags = Helper.enum(Object, {
+		None: 0n,
+		HasClaws: 1n,
+		CanFly: 2n,
+		EatsFish: 4n,
+		Endangered: 8n
 	});
 	AnimalFlags.EndangeredFlyingClawedFishEating = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.EatsFish | AnimalFlags.Endangered);
 	AnimalFlags.Predator = AnimalFlags(AnimalFlags.CanFly | AnimalFlags.HasClaws);
-	function foobar(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
+	function foobar() {
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(x) {
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isNumber;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return foobar.__ks_0.call(that, args[0]);
+			}
 		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
-		else if(!Type.isNumber(x)) {
-			throw new TypeError("'x' is not of type 'Number'");
-		}
-	}
-	foobar(AnimalFlags.Predator.value);
-	function printAnimalAbilities(abilities) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(abilities === void 0 || abilities === null) {
-			throw new TypeError("'abilities' is not nullable");
-		}
-		else if(!Type.isEnumInstance(abilities, AnimalFlags)) {
-			throw new TypeError("'abilities' is not of type 'AnimalFlags'");
-		}
-		if((abilities & AnimalFlags.HasClaws) !== 0) {
+		throw Helper.badArgs();
+	};
+	foobar.__ks_0(AnimalFlags.Predator.value);
+	function printAnimalAbilities() {
+		return printAnimalAbilities.__ks_rt(this, arguments);
+	};
+	printAnimalAbilities.__ks_0 = function(abilities) {
+		if((abilities & AnimalFlags.HasClaws) !== 0n) {
 			console.log("animal has claws");
 		}
-		if((abilities & AnimalFlags.CanFly) !== 0) {
+		if((abilities & AnimalFlags.CanFly) !== 0n) {
 			console.log("animal can fly");
 		}
 		if(abilities === AnimalFlags.None) {
 			console.log("nothing");
 		}
-	}
+	};
+	printAnimalAbilities.__ks_rt = function(that, args) {
+		const t0 = value => Type.isEnumInstance(value, AnimalFlags);
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return printAnimalAbilities.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	let abilities = AnimalFlags.None;
-	printAnimalAbilities(abilities);
+	printAnimalAbilities.__ks_0(abilities);
 	abilities = AnimalFlags(abilities | AnimalFlags.HasClaws);
-	printAnimalAbilities(abilities);
+	printAnimalAbilities.__ks_0(abilities);
 	abilities = AnimalFlags(abilities & ~AnimalFlags.HasClaws);
-	printAnimalAbilities(abilities);
+	printAnimalAbilities.__ks_0(abilities);
 	abilities = AnimalFlags(abilities | AnimalFlags.HasClaws | AnimalFlags.CanFly);
-	printAnimalAbilities(abilities);
+	printAnimalAbilities.__ks_0(abilities);
 	abilities = AnimalFlags(abilities | AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
-	printAnimalAbilities(abilities);
+	printAnimalAbilities.__ks_0(abilities);
 	abilities = AnimalFlags(abilities & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly);
-	printAnimalAbilities(abilities);
+	printAnimalAbilities.__ks_0(abilities);
 	abilities = AnimalFlags(abilities & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly & ~AnimalFlags.Endangered);
-	printAnimalAbilities(abilities);
-	printAnimalAbilities(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly));
-	printAnimalAbilities(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered));
-	printAnimalAbilities(AnimalFlags(AnimalFlags.EndangeredFlyingClawedFishEating & ~AnimalFlags.HasClaws));
-	printAnimalAbilities(AnimalFlags(AnimalFlags.EndangeredFlyingClawedFishEating & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly));
-	function quxbaz(x) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(x === void 0 || x === null) {
-			throw new TypeError("'x' is not nullable");
-		}
+	printAnimalAbilities.__ks_0(abilities);
+	printAnimalAbilities.__ks_0(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly));
+	printAnimalAbilities.__ks_0(AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered));
+	printAnimalAbilities.__ks_0(AnimalFlags(AnimalFlags.EndangeredFlyingClawedFishEating & ~AnimalFlags.HasClaws));
+	printAnimalAbilities.__ks_0(AnimalFlags(AnimalFlags.EndangeredFlyingClawedFishEating & ~AnimalFlags.HasClaws & ~AnimalFlags.CanFly));
+	function quxbaz() {
+		return quxbaz.__ks_rt(this, arguments);
+	};
+	quxbaz.__ks_0 = function(x) {
 		let abex = null;
 		if(x === true) {
 			abex = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
@@ -87,7 +90,16 @@ module.exports = function() {
 		else {
 			abez = AnimalFlags.HasClaws | AnimalFlags.CanFly;
 		}
-	}
+	};
+	quxbaz.__ks_rt = function(that, args) {
+		const t0 = Type.isValue;
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return quxbaz.__ks_0.call(that, args[0]);
+			}
+		}
+		throw Helper.badArgs();
+	};
 	const abyx = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly);
 	const abyy = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.Endangered);
 };

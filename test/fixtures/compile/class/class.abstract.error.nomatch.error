@@ -1,1 +1,1 @@
-SyntaxException: Class "Quxbaz" doesn't implement the following abstract method: "foobar(x: Any, y: Any?)" (line 5, file "fixtures/compile/class/class.abstract.error.nomatch.ks")
+SyntaxException: Class "Quxbaz" doesn't implement the following abstract method: "foobar(x: Any, y: Any?)" (fixtures/compile/class/class.abstract.error.nomatch.ks:5)

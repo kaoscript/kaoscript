@@ -1,5 +1,6 @@
 class ThisExpression extends Expression {
 	private lateinit {
+		_assignable: Boolean		= false
 		_assignment: AssignmentType	= AssignmentType::Neither
 		_calling: Boolean			= false
 		_class: NamedType
@@ -71,30 +72,44 @@ class ThisExpression extends Expression {
 			const name = @scope.getVariable('this').getSecureName()
 
 			if @calling {
-				if @type ?= @class.type().getInstantiableMethod(@name, @parent.arguments()) {
-					@fragment = `\(name).\(@name)`
-				}
-				else if @type ?= @class.type().getInstanceVariable(@name) {
-					@fragment = `\(name).\(@name)`
+				if @class.type().hasInstantiableMethod(@name) {
+					const assessment = @class.type().getInstantiableAssessment(@name, this)
 
-					@variableName = @name
-					@immutable = @type.isImmutable()
-					@lateInit = !@immutable && @type.isLateInit()
+					if const result = Router.matchArguments2(assessment, @parent.arguments(), this) {
+						@fragment = `\(name).\(@name)`
+
+						if result is PreciseCallMatchResult {
+							@type = Type.union(@scope, ...[match.function for const match in result.matches])
+						}
+						else {
+							@type = Type.union(@scope, ...result.possibilities)
+						}
+					}
 				}
-				else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
-					if @type.isSealed() && @type.hasDefaultValue() && @assignment == AssignmentType::Neither {
-						@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+
+				if !?@type {
+					if @type ?= @class.type().getInstanceVariable(@name) {
+						@fragment = `\(name).\(@name)`
+
+						@variableName = @name
+						@immutable = @type.isImmutable()
+						@lateInit = !@immutable && @type.isLateInit()
+					}
+					else if @type ?= @class.type().getInstanceVariable(`_\(@name)`) {
+						if @type.isSealed() && @type.hasDefaultValue() && @assignment == AssignmentType::Neither {
+							@fragment = `\(@class.getSealedName()).__ks_get_\(@name)(\(name))`
+						}
+						else {
+							@fragment = `\(name)._\(@name)`
+						}
+
+						@variableName = `_\(@name)`
+						@immutable = @type.isImmutable()
+						@lateInit = !@immutable && @type.isLateInit()
 					}
 					else {
-						@fragment = `\(name)._\(@name)`
+						ReferenceException.throwUndefinedInstanceField(@name, this)
 					}
-
-					@variableName = `_\(@name)`
-					@immutable = @type.isImmutable()
-					@lateInit = !@immutable && @type.isLateInit()
-				}
-				else {
-					ReferenceException.throwUndefinedInstanceField(@name, this)
 				}
 			}
 			else {
@@ -166,22 +181,23 @@ class ThisExpression extends Expression {
 				}
 			}
 		}
-	} // }}}
-	translate()
-	checkIfAssignable() { // {{{
-		if const variable = this.declaration() {
-			if variable.isImmutable() {
-				if variable.isLateInit() {
-					if variable.isInitialized() {
+
+		if @assignable {
+			if const variable = this.declaration() {
+				if variable.isImmutable() {
+					if variable.isLateInit() {
+						if variable.isInitialized() {
+							ReferenceException.throwImmutable(this)
+						}
+					}
+					else {
 						ReferenceException.throwImmutable(this)
 					}
-				}
-				else {
-					ReferenceException.throwImmutable(this)
 				}
 			}
 		}
 	} // }}}
+	translate()
 	declaration() { // {{{
 		if const node = @parent.getFunctionNode() {
 			if node is ClassConstructorDeclaration {
@@ -190,6 +206,9 @@ class ThisExpression extends Expression {
 		}
 
 		return null
+	} // }}}
+	flagAssignable() { // {{{
+		@assignable = true
 	} // }}}
 	fragment() => @fragment
 	getClass() => @class

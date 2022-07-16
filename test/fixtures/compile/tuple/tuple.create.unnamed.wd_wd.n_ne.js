@@ -1,19 +1,23 @@
-var {Helper, Type} = require("@kaoscript/runtime");
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Pair = Helper.tuple(function(__ks_0, __ks_1) {
+	const Pair = Helper.tuple(function(__ks_0, __ks_1) {
 		if(__ks_0 === void 0 || __ks_0 === null) {
 			__ks_0 = 0;
-		}
-		else if(!Type.isNumber(__ks_0)) {
-			throw new TypeError("'__ks_0' is not of type 'Number'");
 		}
 		if(__ks_1 === void 0 || __ks_1 === null) {
 			__ks_1 = 0;
 		}
-		else if(!Type.isNumber(__ks_1)) {
-			throw new TypeError("'__ks_1' is not of type 'Number'");
-		}
 		return [__ks_0, __ks_1];
+	}, function(__ks_new, args) {
+		const t0 = value => Type.isNumber(value) || Type.isNull(value);
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length <= 2) {
+			if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && Helper.isVarargs(args, 0, 1, t0, pts, 1) && te(pts, 2)) {
+				return __ks_new(Helper.getVararg(args, 0, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+			}
+		}
+		throw Helper.badArgs();
 	});
-	const pair = Pair();
+	const pair = Pair.__ks_new();
 };

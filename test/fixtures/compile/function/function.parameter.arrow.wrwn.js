@@ -1,14 +1,21 @@
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	let foo = function(x, y) {
-		if(arguments.length < 2) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 2)");
-		}
-		if(x === void 0) {
-			x = null;
-		}
-		if(y === void 0 || y === null) {
-			throw new TypeError("'y' is not nullable");
-		}
-		return [x, y];
-	};
+	let foo = (() => {
+		const __ks_rt = (...args) => {
+			const t0 = Type.isValue;
+			if(args.length === 2) {
+				if(t0(args[1])) {
+					return __ks_rt.__ks_0.call(this, args[0], args[1]);
+				}
+			}
+			throw Helper.badArgs();
+		};
+		__ks_rt.__ks_0 = (x, y) => {
+			if(x === void 0) {
+				x = null;
+			}
+			return [x, y];
+		};
+		return __ks_rt;
+	})();
 };

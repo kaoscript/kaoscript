@@ -1,9 +1,6 @@
-var initFlag = require("@kaoscript/runtime").initFlag;
+const {initFlag} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	var __ks_Date = {};
-	__ks_Date.__ks_init_0 = function(that) {
-		that.culture = "und";
-	};
 	__ks_Date.__ks_get_culture = function(that) {
 		if(!that[initFlag]) {
 			__ks_Date.__ks_init(that);
@@ -17,7 +14,7 @@ module.exports = function(expect) {
 		that.culture = value;
 	};
 	__ks_Date.__ks_init = function(that) {
-		__ks_Date.__ks_init_0(that);
+		that.culture = "und";
 		that[initFlag] = true;
 	};
 	const d = new Date();
@@ -26,7 +23,7 @@ module.exports = function(expect) {
 	expect(__ks_Date.__ks_get_culture(d)).to.equal("en");
 	const culture = __ks_Date.__ks_get_culture(d);
 	return {
-		Date: Date,
-		__ks_Date: __ks_Date
+		Date,
+		__ks_Date
 	};
 };

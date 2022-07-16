@@ -11,7 +11,7 @@ class StructDeclaration extends Statement {
 		_type: NamedType<StructType>
 		_variable: Variable
 	}
-	override analyse() { // {{{
+	override initiate() { // {{{
 		@name = @data.name.name
 
 		@struct = new StructType(@scope)
@@ -33,8 +33,9 @@ class StructDeclaration extends Statement {
 		@type = new NamedType(@name, @struct)
 
 		@variable = @scope.define(@name, true, @type, this)
-
-		@function = new StructFunction(@data, this, new BlockScope(@scope))
+	} // }}}
+	override analyse() { // {{{
+		@function = new StructFunction(@data, this, new BlockScope(@scope!?))
 
 		for const data in @data.fields {
 			const field = new StructFieldDeclaration(data, this)
@@ -73,6 +74,7 @@ class StructDeclaration extends Statement {
 		recipient.export(@name, @variable)
 	} // }}}
 	fields() => @fields
+	isEnhancementExport() => true
 	isExtending() => @extending
 	toObjectFragments(fragments, mode) { // {{{
 		if !@extending && @fields.length == 0 {
@@ -82,7 +84,7 @@ class StructDeclaration extends Statement {
 			let varname = '_'
 
 			if @extending {
-				const line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_builder(')
+				const line = fragments.newLine().code($const(this), varname, $equals, @extendsName, '.__ks_new(')
 
 				let nf = false
 				for const name in @extendsType.type().listAllFieldNames() {
@@ -110,15 +112,33 @@ class StructDeclaration extends Statement {
 		}
 	} // }}}
 	toStatementFragments(fragments, mode) { // {{{
-		const line = fragments.newLine().code(`var \(@name) = \($runtime.helper(this)).struct(`)
+		const line = fragments.newLine().code(`\($runtime.immutableScope(this))\(@name) = \($runtime.helper(this)).struct(`)
 
-		const ctrl = line.newControl(null, false, false).code(`function(`)
+		let ctrl = line.newControl(null, false, false).code(`function(`)
 
 		Parameter.toFragments(@function, ctrl, ParameterMode::Default, func(fragments) {
 			return fragments.code(')').step()
 		})
 
 		this.toObjectFragments(ctrl, mode)
+
+		ctrl.done()
+
+		const assessment = @type.type().assessment(@type.reference(@scope), this)
+
+		ctrl = line.newControl(null, false, false).code(`, function(__ks_new, args)`).step()
+
+		Router.toFragments(
+			(function, line) => {
+				line.code(`__ks_new(`)
+
+				return false
+			}
+			null
+			assessment
+			ctrl.block()
+			this
+		)
 
 		ctrl.done()
 
@@ -146,7 +166,7 @@ class StructFunction extends AbstractNode {
 
 		if @parent.isExtending() {
 			for const type in @parent._extendsType.type().listAllFields() {
-				const field = new StructFieldDeclaration(type, @parent)
+				const field = new StructFieldDeclaration(type as StructFieldType, @parent!?)
 				field.analyse()
 				field.prepare()
 
@@ -214,7 +234,20 @@ class StructFieldDeclaration extends AbstractNode {
 		@parameter.prepare()
 
 		if !?@type {
-			@type = new StructFieldType(@scope, @name, @index, Type.fromAST(@data.type, this), @parameter.isRequired())
+			let type: Type? = null
+
+			if @data.type? {
+				type = Type.fromAST(@data.type, this)
+			}
+
+			if type == null {
+				type = AnyType.Unexplicit
+			}
+			else if type.isNull() {
+				type = NullType.Explicit
+			}
+
+			@type = new StructFieldType(@scope!?, @name, @index, type!?, @parameter.isRequired() as Boolean)
 
 			if @data.defaultValue? && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
 				@type.flagNullable()
@@ -254,9 +287,9 @@ class StructFieldParameter extends Parameter {
 		}
 	} // }}}
 	name() => @name
-	toValidationFragments(fragments, wrongdoer) { // {{{
+	toValidationFragments(fragments) { // {{{
 		if @validation {
-			super(fragments, wrongdoer)
+			super(fragments)
 		}
 	} // }}}
 	unflagValidation() { // {{{

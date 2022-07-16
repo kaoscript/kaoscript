@@ -1,1 +1,1 @@
-ReferenceException: "foo" is not defined (line 1, file "fixtures/compile/variable/variable.self.let.ks")
+ReferenceException: "foo" is not defined (fixtures/compile/variable/variable.self.let.ks:1)

@@ -1,3 +1,3 @@
 module.exports = function(foobar) {
-	console.log(foobar.waldo());
+	console.log(foobar.waldo.__ks_0());
 };

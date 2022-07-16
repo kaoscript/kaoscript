@@ -4,7 +4,7 @@ class IncludeDeclaration extends Statement {
 	private {
 		_declarators			= []
 	}
-	analyse() { // {{{
+	initiate() { // {{{
 		let directory = this.directory()
 
 		let x
@@ -97,6 +97,16 @@ class IncludeDeclaration extends Statement {
 			}
 		}
 	} // }}}
+	analyse() { // {{{
+		for const declarator in @declarators {
+			declarator.analyse()
+		}
+	} // }}}
+	enhance() { // {{{
+		for const declarator in @declarators {
+			declarator.enhance()
+		}
+	} // }}}
 	prepare() { // {{{
 		for const declarator in @declarators {
 			declarator.prepare()
@@ -121,9 +131,9 @@ class IncludeDeclaration extends Statement {
 			return true
 		}
 	} // }}}
-	export(recipient) { // {{{
+	export(recipient, enhancement: Boolean = false) { // {{{
 		for const declarator in @declarators {
-			declarator.export(recipient)
+			declarator.export(recipient, enhancement)
 		}
 	} // }}}
 	isExportable() => true
@@ -148,7 +158,7 @@ class IncludeDeclaration extends Statement {
 
 		const declarator = new IncludeDeclarator(declaration, data, path, this)
 
-		declarator.analyse()
+		declarator.initiate()
 
 		@declarators.push(declarator)
 	} // }}}
@@ -173,7 +183,7 @@ class IncludeDeclaration extends Statement {
 
 		const declarator = new IncludeDeclarator(declaration, data, path, moduleName, this)
 
-		declarator.analyse()
+		declarator.initiate()
 
 		@declarators.push(declarator)
 	} // }}}
@@ -186,8 +196,8 @@ class IncludeDeclaration extends Statement {
 }
 
 class IncludeAgainDeclaration extends IncludeDeclaration {
-	canLoadLocalFile(...) => true
-	canLoadModuleFile(...) => true
+	canLoadLocalFile(file) => true
+	canLoadModuleFile(file, name, path, version) => true
 }
 
 class IncludeDeclarator extends Statement {
@@ -216,7 +226,7 @@ class IncludeDeclarator extends Statement {
 			@includePath = path.join(parent.includePath(), moduleName)
 		}
 	} // }}}
-	analyse() { // {{{
+	initiate() { // {{{
 		Attribute.configure(@data, @parent.parent()._options, AttributeTarget::Global, this.file())
 
 		const offset = @scope.getLineOffset()
@@ -231,13 +241,35 @@ class IncludeDeclarator extends Statement {
 			if const statement = $compile.statement(data, this) {
 				@statements.push(statement)
 
-				statement.analyse()
+				statement.initiate()
 			}
 		}
 
 		@scope.line(@data.end.line)
 
 		@offsetEnd = offset + @scope.line() - @offsetStart
+
+		@scope.setLineOffset(@offsetEnd)
+	} // }}}
+	analyse() { // {{{
+		@scope.setLineOffset(@offsetStart)
+
+		for const statement in @statements {
+			@scope.line(statement.line())
+
+			statement.analyse()
+		}
+
+		@scope.setLineOffset(@offsetEnd)
+	} // }}}
+	enhance() { // {{{
+		@scope.setLineOffset(@offsetStart)
+
+		for const statement in @statements {
+			@scope.line(statement.line())
+
+			statement.enhance()
+		}
 
 		@scope.setLineOffset(@offsetEnd)
 	} // }}}
@@ -264,9 +296,9 @@ class IncludeDeclarator extends Statement {
 		@scope.setLineOffset(@offsetEnd)
 	} // }}}
 	directory() => @directory
-	export(recipient) { // {{{
+	export(recipient, enhancement: Boolean = false) { // {{{
 		for const statement in @statements when statement.isExportable() {
-			statement.export(recipient)
+			statement.export(recipient, enhancement)
 		}
 	} // }}}
 	file() => @file

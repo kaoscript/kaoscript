@@ -1,1 +1,1 @@
-ReferenceException: The class variable "_x" is immutable (line 4, file "fixtures/compile/class/class.field.const.nstt.wmt_was_ale.ks")
+ReferenceException: The class variable "_x" is immutable (fixtures/compile/class/class.field.const.nstt.wmt_was_ale.ks:4)

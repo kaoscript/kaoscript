@@ -1,1 +1,1 @@
-ReferenceException: Alias "@foobar" is looping on itself (line 2, file "fixtures/compile/class/class.atthis.loop.return.ks")
+ReferenceException: Alias "@foobar" is looping on itself (fixtures/compile/class/class.atthis.loop.return.ks:2)

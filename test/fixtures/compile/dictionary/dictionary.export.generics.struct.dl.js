@@ -1,20 +1,19 @@
-var {Dictionary, Helper, Type} = require("@kaoscript/runtime");
+const {Dictionary, Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
-	var Foobar = Helper.struct(function(item) {
-		if(arguments.length < 1) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 1)");
-		}
-		if(item === void 0 || item === null) {
-			throw new TypeError("'item' is not nullable");
-		}
-		else if(!Type.isDictionary(item) || !Type.isArray(item.values)) {
-			throw new TypeError("'item' is not of type '{values: Array<String>?}'");
-		}
+	const Foobar = Helper.struct(function(item) {
 		const _ = new Dictionary();
 		_.item = item;
 		return _;
+	}, function(__ks_new, args) {
+		const t0 = value => Type.isDictionary(value) && (Type.isArray(value.values, value => Type.isString(value)) || Type.isNull(value.values));
+		if(args.length === 1) {
+			if(t0(args[0])) {
+				return __ks_new(args[0]);
+			}
+		}
+		throw Helper.badArgs();
 	});
 	return {
-		Foobar: Foobar
+		Foobar
 	};
 };

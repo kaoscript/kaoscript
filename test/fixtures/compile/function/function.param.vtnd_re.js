@@ -1,29 +1,27 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(expect) {
 	let foo = (() => {
-		return function() {
-			let __ks_i = -1;
-			let x;
-			if(arguments.length > 0 && (x = arguments[++__ks_i]) !== void 0) {
-				if(x !== null && !Type.isNumber(x)) {
-					throw new TypeError("'x' is not of type 'Number?'");
+		return (() => {
+			const __ks_rt = (...args) => {
+				const t0 = value => Type.isNumber(value) || Type.isNull(value);
+				const t1 = Type.isValue;
+				const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+				let pts;
+				if(Helper.isVarargs(args, 0, 1, t0, pts = [0], 0) && Helper.isVarargs(args, 0, args.length, t1, pts, 1) && te(pts, 2)) {
+					return __ks_rt.__ks_0.call(this, Helper.getVararg(args, 0, pts[1]), Helper.getVarargs(args, pts[1], pts[2]));
 				}
-			}
-			else {
-				x = null;
-			}
-			let items = Array.prototype.slice.call(arguments, ++__ks_i, arguments.length);
-			return [x, items];
-		};
+				throw Helper.badArgs();
+			};
+			__ks_rt.__ks_0 = (x = null, items) => {
+				return [x, items];
+			};
+			return __ks_rt;
+		})();
 	})();
 	expect(foo()).to.eql([null, []]);
 	expect(foo(1)).to.eql([1, []]);
-	expect(() => {
-		return foo("foo");
-	}).to.throw();
+	expect(foo("foo")).to.eql([null, ["foo"]]);
 	expect(foo(1, 2)).to.eql([1, [2]]);
-	expect(() => {
-		return foo("foo", 1);
-	}).to.throw();
+	expect(foo("foo", 1)).to.eql([null, ["foo", 1]]);
 	expect(foo(null, "foo", 1)).to.eql([null, ["foo", 1]]);
 };

@@ -1,0 +1,1 @@
+SyntaxException: When the arguments are ("Number"), the function "foobar" can be matched with "foobar(y: Number)" or "foobar(x: Number)" (fixtures/compile/router/router.func.m1i.m2ie.ks:1)

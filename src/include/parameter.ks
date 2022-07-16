@@ -2,6 +2,7 @@ enum ParameterMode {
 	ArrowFunction
 	AsyncFunction
 	Default
+	HelperConstructor
 	HybridConstructor
 	OverloadedFunction
 }
@@ -55,76 +56,14 @@ class Parameter extends AbstractNode {
 
 		return parameters.length
 	} // }}}
-	static toFragments(node, fragments, mode, fn, wrongdoer = Parameter.toWrongDoingFragments) { // {{{
-		if node._options.parse.parameters == 'es5' {
-			return Parameter.toES5Fragments(node, fragments, fn)
-		}
-		else if node._options.parse.parameters == 'es6' {
-			return Parameter.toES6Fragments(node, fragments, fn)
-		}
-		else {
-			return Parameter.toKSFragments(node, fragments, mode, fn, wrongdoer)
-		}
+	static toFragments(node, fragments, mode, fn) { // {{{
+		return Parameter.toKSFragments(node, fragments, mode, fn)
 	} // }}}
-	static toES5Fragments(node, fragments, fn) { // {{{
-		const data = node.data()
-
-		for parameter, i in node.parameters() {
-			if parameter.isRest() {
-				SyntaxException.throwNoRestParameter(node)
-			}
-			else if parameter.hasDefaultValue() {
-				SyntaxException.throwNoDefaultParameter(node)
-			}
-			else if parameter.type().isNullable() {
-				SyntaxException.throwNoNullParameter(node)
-			}
-			else if parameter.isAnonymous() {
-				SyntaxException.throwNotNamedParameter(node)
-			}
-
-			fragments.code($comma) if i != 0
-
-			parameter.toParameterFragments(fragments)
-		}
-
-		return fn(fragments)
-	} // }}}
-	static toES6Fragments(node, fragments, fn) { // {{{
-		const data = node.data()
-		let rest = false
-
-		for parameter, i in node.parameters() {
-			if parameter.isAnonymous() {
-				SyntaxException.throwNotNamedParameter(node)
-			}
-
-			fragments.code($comma) if i != 0
-
-			if parameter.isRest() {
-				parameter.toParameterFragments(fragments)
-
-				rest = true
-			}
-			else if rest {
-				SyntaxException.throwAfterRestParameter()
-			}
-			else {
-				parameter.toParameterFragments(fragments)
-			}
-
-			if parameter.hasDefaultValue() {
-				fragments.code(' = ').compile(parameter._defaultValue)
-			}
-		}
-
-		return fn(fragments)
-	} // }}}
-	static toKSFragments(node, fragments, mode: ParameterMode, fn, wrongdoer) { // {{{
+	static toKSFragments(node, fragments, mode: ParameterMode, fn) { // {{{
 		const parameters = node.parameters()
 		const signature = node.type()
 
-		const name = (mode == ParameterMode::Default || mode == ParameterMode::OverloadedFunction) ? 'arguments' : '__ks_arguments'
+		const name = (mode == ParameterMode::Default | ParameterMode::OverloadedFunction | ParameterMode::HelperConstructor) ? 'arguments' : '__ks_arguments'
 
 		let restIndex = -1
 		let minBefore = 0
@@ -186,58 +125,35 @@ class Parameter extends AbstractNode {
 			}
 		}
 
-		if mode == ParameterMode::Default {
-			lastHeaderParameterIndex = Parameter.toHeaderParameterFragments(fragments, node, parameters, minAfter, context)
+		if mode == ParameterMode::Default | ParameterMode::HelperConstructor {
+			const offset = node.getParameterOffset()
+
+			for const parameter, i in parameters {
+				fragments.code($comma) if i + offset > 0
+
+				parameter.toParameterFragments(fragments)
+			}
+
+			lastHeaderParameterIndex = parameters.length
 
 			if context.async {
-				asyncHeaderParameter = Parameter.toAsyncHeaderParameterFragments(fragments, parameters, lastHeaderParameterIndex)
+				fragments.code($comma) if offset + lastHeaderParameterIndex > 0
+
+				fragments.code('__ks_cb')
 			}
 		}
 
 		fragments = fn(fragments)
 
-		if mode == ParameterMode::Default || mode == ParameterMode::ArrowFunction {
-			Parameter.toLengthValidationFragments(fragments, node, name, signature, parameters, asyncHeaderParameter, restIndex, minBefore, minRest, minAfter)
-		}
-
-		for const parameter in parameters til lastHeaderParameterIndex {
-			parameter.toValidationFragments(fragments, wrongdoer)
+		if mode != ParameterMode::HelperConstructor {
+			for const parameter in parameters til lastHeaderParameterIndex {
+				parameter.toValidationFragments(fragments)
+			}
 		}
 
 		if lastHeaderParameterIndex == parameters.length {
 			return fragments
 		}
-
-		if restIndex == -1 {
-			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1 + node.getParameterOffset())`)
-
-			Parameter.toBeforeRestParameterFragments(fragments, name, signature, parameters, lastHeaderParameterIndex, restIndex, context, wrongdoer)
-
-			return fragments
-		}
-		else if lastHeaderParameterIndex < restIndex {
-			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1 + node.getParameterOffset())`)
-
-			Parameter.toBeforeRestParameterFragments(fragments, name, signature, parameters, lastHeaderParameterIndex, restIndex, context, wrongdoer)
-
-			Parameter.toRestParameterFragments(fragments, node, name, signature, parameters, true, restIndex, minBefore, minAfter, maxAfter, context, wrongdoer)
-
-			if restIndex + 1 == parameters.length {
-				return fragments
-			}
-		}
-		else if lastHeaderParameterIndex == restIndex {
-			Parameter.toRestParameterFragments(fragments, node, name, signature, parameters, false, restIndex, restIndex, minAfter, maxAfter, context, wrongdoer)
-
-			if restIndex + 1 == parameters.length {
-				return fragments
-			}
-		}
-		else if minAfter != 0 {
-			fragments.line($runtime.scope(node), `__ks_i = \(lastHeaderParameterIndex - 1 + node.getParameterOffset())`)
-		}
-
-		Parameter.toAfterRestParameterFragments(fragments, name, parameters, restIndex, context, wrongdoer)
 
 		return fragments
 	} // }}}
@@ -250,19 +166,14 @@ class Parameter extends AbstractNode {
 			const type = parameter.type()
 
 			if type.max() == Infinity {
-				if minAfter == 0 && type.isAny() && node._options.format.parameters == 'es6' {
-					fragments.code($comma) if i + offset > 0
+				fragments.code($comma) if i + offset > 0
 
-					parameter.toParameterFragments(fragments)
-
-					return i + 1
-				}
-				else {
-					return i
-				}
+				parameter.toParameterFragments(fragments)
 			}
 			else if type.max() > 1  {
-				return i
+				fragments.code($comma) if i + offset > 0
+
+				parameter.toParameterFragments(fragments)
 			}
 			else if parameter.isRequired() || i + 1 == parameters.length || i < (til == -1 ? (til = Parameter.getUntilDifferentTypeIndex(parameters, i)) : til) {
 				fragments.code($comma) if i + offset > 0
@@ -505,6 +416,25 @@ class Parameter extends AbstractNode {
 				context.increment = true
 			}
 
+			if parameter.hasDefaultValue() && !parameter.type().isNullable() {
+				const ctrl = fragments.newControl()
+
+				if minAfter > 0 {
+					ctrl.code('if(__ks__ > ++__ks_i)').step()
+				}
+				else {
+					ctrl.code('if(arguments.length > ++__ks_i)').step()
+				}
+
+				const ctrl2 = ctrl.newControl()
+
+				ctrl2.code(`if(arguments[__ks_i] === void 0 || arguments[__ks_i] === null)`).step()
+
+				ctrl2.step().code('else').step().line('--__ks_i').done()
+
+				ctrl.done()
+			}
+
 			const ctrl = fragments.newControl()
 
 			if minAfter > 0 {
@@ -516,11 +446,30 @@ class Parameter extends AbstractNode {
 
 			ctrl.step()
 
-			const ctrl2 = ctrl.newControl().code('if(')
+			const ctrl2 = ctrl.newControl()
 
-			parameter.type().toPositiveTestFragments(ctrl2, new Literal(false, node, node.scope(), 'arguments[__ks_i]'), Junction::NONE)
+			const literal = new Literal(false, node, node.scope(), 'arguments[__ks_i]')
 
-			ctrl2.code(')').step()
+			if parameter.type().isNullable() {
+				ctrl2.code(`if(arguments[__ks_i] === void 0)`).step()
+
+				ctrl2.newLine().compile(parameter).code('.push(null)').done()
+
+				ctrl2.step()
+
+				ctrl2.code(`else if(arguments[__ks_i] === null || `)
+
+				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::OR)
+
+				ctrl2.code(')').step()
+			}
+			else {
+				ctrl2.code('if(')
+
+				parameter.type().toPositiveTestFragments(ctrl2, literal, Junction::NONE)
+
+				ctrl2.code(')').step()
+			}
 
 			if !parameter.isAnonymous() {
 				ctrl2
@@ -602,46 +551,6 @@ class Parameter extends AbstractNode {
 			}
 		}
 	} // }}}
-	static toWrongDoingFragments(fragments, wrongdoing, data) { // {{{
-		switch wrongdoing {
-			ParameterWrongDoing::BadType => {
-				if data.name? {
-					if data.async {
-						fragments.line(`return __ks_cb(new TypeError("'\(data.name)' is not of type \(data.type.toQuote(false))"))`)
-					}
-					else {
-						fragments.line(`throw new TypeError("'\(data.name)' is not of type \(data.type.toQuote(false))")`)
-					}
-				}
-				else {
-					if data.async {
-						fragments.line(`return __ks_cb(new TypeError("Anonymous argument is not of type \(data.type.toQuote(false))"))`)
-					}
-					else {
-						fragments.line(`throw new TypeError("Anonymous argument is not of type \(data.type.toQuote(false))")`)
-					}
-				}
-			}
-			ParameterWrongDoing::NotNullable => {
-				if data.destructuring {
-					if data.async {
-						fragments.line(`return __ks_cb(new TypeError("Destructuring value is not nullable"))`)
-					}
-					else {
-						fragments.line(`throw new TypeError("Destructuring value is not nullable")`)
-					}
-				}
-				else {
-					if data.async {
-						fragments.line(`return __ks_cb(new TypeError("'\(data.name)' is not nullable"))`)
-					}
-					else {
-						fragments.line(`throw new TypeError("'\(data.name)' is not nullable")`)
-					}
-				}
-			}
-		}
-	} // }}}
 	analyse() { // {{{
 		@anonymous = !?@data.name
 
@@ -671,12 +580,16 @@ class Parameter extends AbstractNode {
 			type = null
 		}
 
-		if @data.type? && type == null {
-			type = Type.fromAST(@data.type, this)
+		if @data.type? {
+			const declaredType = Type.fromAST(@data.type, this)
+
+			if !?type || (type.isObject() && declaredType.isDictionary()) || declaredType.isMorePreciseThan(type) {
+				type = declaredType
+			}
 		}
 
 		if type == null {
-			type = @anonymous ? AnyType.NullableUnexplicit : AnyType.Unexplicit
+			type = AnyType.Unexplicit
 		}
 		else if type.isNull() {
 			type = NullType.Explicit
@@ -706,8 +619,13 @@ class Parameter extends AbstractNode {
 		}
 
 		if @data.defaultValue? {
-			if !type.isNullable() && @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
-				type = type.setNullable(true)
+			if @data.defaultValue.kind == NodeKind::Identifier && @data.defaultValue.name == 'null' {
+				if !type.isNullable() {
+					type = type.setNullable(true)
+				}
+			}
+			else if @explicitlyRequired && type.isNullable() {
+				SyntaxException.throwDeadCodeParameter(this)
 			}
 
 			if !(@explicitlyRequired && type.isNullable()) {
@@ -724,9 +642,9 @@ class Parameter extends AbstractNode {
 			}
 		}
 
-		const name = @name.name()
+		const name: String? = @name.name()
 
-		@type = new ParameterType(@scope, name, type, min, max, @hasDefaultValue)
+		@type = new ParameterType(@scope, name, type!?, min, max, @hasDefaultValue)
 
 		if @hasDefaultValue && @parent.isOverridableFunction() {
 			const scope = @parent.scope()
@@ -776,6 +694,16 @@ class Parameter extends AbstractNode {
 	isRequired() => @defaultValue == null || @explicitlyRequired
 	isRest() => @rest
 	isUsingVariable(name) => @hasDefaultValue && @defaultValue.isUsingVariable(name)
+	max() => @arity?.max ?? 1
+	min() => @arity?.min ?? 1
+	setDefaultValue(data) { // {{{
+		@defaultValue = $compile.expression(data, @parent)
+		@defaultValue.analyse()
+
+		@hasDefaultValue = true
+
+		@type.setDefaultValue(data)
+	} // }}}
 	toFragments(fragments, mode) { // {{{
 		fragments.compile(@name)
 	} // }}}
@@ -785,12 +713,10 @@ class Parameter extends AbstractNode {
 	toBeforeRestFragments(fragments, context, index, rest, wrongdoer) { // {{{
 		@name.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, @arity, this.isRequired(), @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
 	} // }}}
-	toErrorFragments(fragments, wrongdoer, async) { // {{{
-		@name.toErrorFragments(fragments, wrongdoer, async)
+	toErrorFragments(fragments, async) { // {{{
+		@name.toErrorFragments(fragments, async)
 	} // }}}
 	toParameterFragments(fragments) { // {{{
-		fragments.code('...') if @rest
-
 		@name.toParameterFragments(fragments)
 
 		if @maybeHeadedDefaultValue {
@@ -800,7 +726,7 @@ class Parameter extends AbstractNode {
 		@header = true
 	} // }}}
 	toQuote() => @type.toQuote()
-	toValidationFragments(fragments, wrongdoer) { // {{{
+	toValidationFragments(fragments) { // {{{
 		if @rest {
 			if @hasDefaultValue {
 				const ctrl = fragments
@@ -821,13 +747,11 @@ class Parameter extends AbstractNode {
 			}
 		}
 		else {
-			@name.toValidationFragments(fragments, wrongdoer, @rest, @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
+			@name.toValidationFragments(fragments, @rest, @defaultValue, @header && @maybeHeadedDefaultValue, @parent.type().isAsync())
 		}
 	} // }}}
 	type(): ParameterType => @type
 	type(@type) { // {{{
-		const t = @type.getVariableType()
-
 		if @type.hasDefaultValue() {
 			if @type.isComprehensive() {
 				@defaultValue = $compile.expression(@type.getDefaultValue(), @parent)
@@ -837,7 +761,14 @@ class Parameter extends AbstractNode {
 			else {
 				@defaultValue = new Literal(`\(@parent.getOverridableVarname()).\(@type.getDefaultValue())`, @parent)
 			}
+
+			@hasDefaultValue = true
 		}
+		else {
+			@hasDefaultValue = false
+		}
+
+		const t = @type.getVariableType()
 
 		@name.setDeclaredType(@rest ? Type.arrayOf(t, @scope) : t, true)
 	} // }}}
@@ -1068,7 +999,7 @@ class IdentifierParameter extends IdentifierLiteral {
 					.code(` = \(context.name)[`, context.increment ? '++' : '', '__ks_i]')
 					.done()
 
-				that.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async)
+				that.toValidationFragments(fragments, rest, defaultValue, header, async)
 
 				context.increment = true
 			}
@@ -1364,13 +1295,13 @@ class IdentifierParameter extends IdentifierLiteral {
 						.code(` = \(context.name)[++__ks_i]`)
 						.done()
 
-					that.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async)
+					that.toValidationFragments(fragments, rest, defaultValue, header, async)
 
 					--context.required
 				}
 			}
 		} // }}}
-		toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async, that) { // {{{
+		toValidationFragments(fragments, rest, defaultValue?, header, async, that) { // {{{
 			const declaredType = that.getDeclaredType()
 
 			let ctrl = null
@@ -1404,52 +1335,6 @@ class IdentifierParameter extends IdentifierLiteral {
 
 					ctrl.newLine().compile(that).code(' = null').done()
 				}
-				else if that.parent().isAssertingParameter() {
-					ctrl = fragments
-						.newControl()
-						.code('if(').compile(that).code(' === void 0').code(' || ').compile(that).code(' === null').code(')')
-						.step()
-
-					wrongdoer(ctrl, ParameterWrongDoing::NotNullable, {
-						async: async
-						name: that.name()
-					})
-				}
-			}
-
-			if !declaredType.isAny() && that.parent().isAssertingParameterType() {
-				if ctrl? {
-					ctrl.step().code('else ')
-				}
-				else {
-					ctrl = fragments.newControl()
-				}
-
-				ctrl.code('if(')
-
-				if declaredType.isNull() {
-					ctrl.compile(that).code(' !== null')
-				}
-				else {
-					if declaredType.isNullable() {
-						ctrl.compile(that).code(' !== null && ')
-
-						declaredType.toNegativeTestFragments(ctrl, that, Junction::AND)
-					}
-					else {
-						declaredType.toNegativeTestFragments(ctrl, that, Junction::NONE)
-					}
-				}
-
-				ctrl
-					.code(')')
-					.step()
-
-				wrongdoer(ctrl, ParameterWrongDoing::BadType, {
-					async: async
-					name: that.name()
-					type: declaredType
-				})
 			}
 
 			if ctrl != null {
@@ -1471,18 +1356,11 @@ class IdentifierParameter extends IdentifierLiteral {
 	toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity?, required, defaultValue?, header, async) { // {{{
 		IdentifierParameter.toBeforeRestFragments(fragments, context, index, wrongdoer, rest, arity, required, defaultValue, header, async, this)
 	} // }}}
-	toErrorFragments(fragments, wrongdoer, async) { // {{{
-		wrongdoer(fragments, ParameterWrongDoing::BadType, {
-			async
-			name: @value
-			type: @declaredType.parameter()
-		})
-	} // }}}
 	toParameterFragments(fragments) { // {{{
 		fragments.compile(this)
 	} // }}}
-	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
-		IdentifierParameter.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async, this)
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
+		IdentifierParameter.toValidationFragments(fragments, rest, defaultValue, header, async, this)
 	} // }}}
 }
 
@@ -1532,7 +1410,7 @@ class ArrayBindingParameter extends ArrayBinding {
 			fragments.compile(this)
 		}
 	} // }}}
-	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
 		if @flatten {
 			const ctrl = fragments
 				.newControl()
@@ -1546,13 +1424,6 @@ class ArrayBindingParameter extends ArrayBinding {
 					.code($equals)
 					.compile(defaultValue)
 					.done()
-			}
-			else {
-				wrongdoer(ctrl, ParameterWrongDoing::NotNullable, {
-					destructuring: true
-					async: async
-					name: @tempName.value()
-				})
 			}
 
 			ctrl.done()
@@ -1614,7 +1485,7 @@ class ObjectBindingParameter extends ObjectBinding {
 				}
 			}
 		}
-		else {
+		else if !type.isObject() {
 			TypeException.throwInvalidBinding('Object', this)
 		}
 	} // }}}
@@ -1626,7 +1497,7 @@ class ObjectBindingParameter extends ObjectBinding {
 			fragments.compile(this)
 		}
 	} // }}}
-	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
 		if @flatten {
 			const ctrl = fragments
 				.newControl()
@@ -1640,13 +1511,6 @@ class ObjectBindingParameter extends ObjectBinding {
 					.code($equals)
 					.compile(defaultValue)
 					.done()
-			}
-			else {
-				wrongdoer(ctrl, ParameterWrongDoing::NotNullable, {
-					destructuring: true
-					async: async
-					name: @tempName.value()
-				})
 			}
 
 			ctrl.done()
@@ -1705,7 +1569,7 @@ class AnonymousParameter extends AbstractNode {
 					.code(` = \(context.name)[++__ks_i]`)
 					.done()
 
-				this.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async)
+				this.toValidationFragments(fragments, rest, defaultValue, header, async)
 			}
 
 			--context.required
@@ -1714,32 +1578,7 @@ class AnonymousParameter extends AbstractNode {
 	toParameterFragments(fragments) { // {{{
 		fragments.compile(this)
 	} // }}}
-	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
-		if !@type.isAny() && @parent.isAssertingParameterType() {
-			let ctrl = fragments
-				.newControl()
-				.code('if(')
-
-			if @type.isNullable() {
-				ctrl.compile(this).code(' !== null && ')
-
-				@type.toNegativeTestFragments(ctrl, this, Junction::AND)
-			}
-			else {
-				@type.toNegativeTestFragments(ctrl, this, Junction::NONE)
-			}
-
-			ctrl
-				.code(')')
-				.step()
-
-			wrongdoer(ctrl, ParameterWrongDoing::BadType, {
-				async: async
-				type: @type
-			})
-
-			ctrl.done()
-		}
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
 	} // }}}
 	type() => null
 }
@@ -1806,8 +1645,8 @@ class ThisExpressionParameter extends ThisExpression {
 	toParameterFragments(fragments) { // {{{
 		fragments.compile(@scope.getVariable(@name))
 	} // }}}
-	toValidationFragments(fragments, wrongdoer, rest, defaultValue?, header, async) { // {{{
-		IdentifierParameter.toValidationFragments(fragments, wrongdoer, rest, defaultValue, header, async, this)
+	toValidationFragments(fragments, rest, defaultValue?, header, async) { // {{{
+		IdentifierParameter.toValidationFragments(fragments, rest, defaultValue, header, async, this)
 	} // }}}
 	type(type)
 }

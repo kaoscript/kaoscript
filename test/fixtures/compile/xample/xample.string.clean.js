@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_String) {
 	if(!Type.isValue(__ks_String)) {
 		__ks_String = {};
@@ -6,14 +6,16 @@ module.exports = function(__ks_String) {
 	__ks_String.__ks_func_clean_0 = function() {
 		return this.replace(/\s+/g, " ").trim();
 	};
-	__ks_String._im_clean = function(that) {
-		var args = Array.prototype.slice.call(arguments, 1, arguments.length);
+	__ks_String._im_clean = function(that, ...args) {
+		return __ks_String.__ks_func_clean_rt(that, args);
+	};
+	__ks_String.__ks_func_clean_rt = function(that, args) {
 		if(args.length === 0) {
-			return __ks_String.__ks_func_clean_0.apply(that);
+			return __ks_String.__ks_func_clean_0.call(that);
 		}
-		throw new SyntaxError("Wrong number of arguments");
+		throw Helper.badArgs();
 	};
 	return {
-		__ks_String: __ks_String
+		__ks_String
 	};
 };

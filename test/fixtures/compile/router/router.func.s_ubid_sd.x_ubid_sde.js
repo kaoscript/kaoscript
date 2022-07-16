@@ -1,78 +1,44 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Helper, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	function foobar() {
-		if(arguments.length >= 1 && arguments.length <= 3 && Type.isString(arguments[0])) {
-			let __ks_i = -1;
-			let pattern = arguments[++__ks_i];
-			if(pattern === void 0 || pattern === null) {
-				throw new TypeError("'pattern' is not nullable");
-			}
-			else if(!Type.isString(pattern)) {
-				throw new TypeError("'pattern' is not of type 'String'");
-			}
-			let position;
-			if(arguments.length > ++__ks_i && (position = arguments[__ks_i]) !== void 0 && position !== null) {
-				if(!Type.isBoolean(position) && !Type.isNumber(position)) {
-					if(arguments.length - __ks_i < 2) {
-						position = 0;
-						--__ks_i;
-					}
-					else {
-						throw new TypeError("'position' is not of type 'Boolean' or 'Number'");
-					}
-				}
-			}
-			else {
-				position = 0;
-			}
-			let __ks_default_1;
-			if(arguments.length > ++__ks_i && (__ks_default_1 = arguments[__ks_i]) !== void 0 && __ks_default_1 !== null) {
-				if(!Type.isString(__ks_default_1)) {
-					throw new TypeError("'default' is not of type 'String'");
-				}
-			}
-			else {
-				__ks_default_1 = "";
-			}
-			return 1;
+		return foobar.__ks_rt(this, arguments);
+	};
+	foobar.__ks_0 = function(pattern, position, __ks_default_1) {
+		if(position === void 0 || position === null) {
+			position = 0;
 		}
-		else if(arguments.length >= 1 && arguments.length <= 3) {
-			let __ks_i = -1;
-			let pattern = arguments[++__ks_i];
-			if(pattern === void 0 || pattern === null) {
-				throw new TypeError("'pattern' is not nullable");
-			}
-			else if(!Type.isRegExp(pattern)) {
-				throw new TypeError("'pattern' is not of type 'RegExp'");
-			}
-			let position;
-			if(arguments.length > ++__ks_i && (position = arguments[__ks_i]) !== void 0 && position !== null) {
-				if(!Type.isBoolean(position) && !Type.isNumber(position)) {
-					if(arguments.length - __ks_i < 2) {
-						position = 0;
-						--__ks_i;
-					}
-					else {
-						throw new TypeError("'position' is not of type 'Boolean' or 'Number'");
-					}
-				}
-			}
-			else {
-				position = 0;
-			}
-			let __ks_default_1;
-			if(arguments.length > ++__ks_i && (__ks_default_1 = arguments[__ks_i]) !== void 0 && __ks_default_1 !== null) {
-				if(!Type.isString(__ks_default_1)) {
-					throw new TypeError("'default' is not of type 'String'");
-				}
-			}
-			else {
-				__ks_default_1 = "";
-			}
-			return 2;
+		if(__ks_default_1 === void 0 || __ks_default_1 === null) {
+			__ks_default_1 = "";
 		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
+		return 1;
+	};
+	foobar.__ks_1 = function(pattern, position, __ks_default_1) {
+		if(position === void 0 || position === null) {
+			position = 0;
 		}
+		if(__ks_default_1 === void 0 || __ks_default_1 === null) {
+			__ks_default_1 = "";
+		}
+		return 2;
+	};
+	foobar.__ks_rt = function(that, args) {
+		const t0 = Type.isString;
+		const t1 = value => Type.isBoolean(value) || Type.isNumber(value) || Type.isNull(value);
+		const t2 = value => Type.isString(value) || Type.isNull(value);
+		const t3 = Type.isRegExp;
+		const te = (pts, idx) => Helper.isUsingAllArgs(args, pts, idx);
+		let pts;
+		if(args.length >= 1 && args.length <= 3) {
+			if(t0(args[0])) {
+				if(Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && Helper.isVarargs(args, 0, 1, t2, pts, 1) && te(pts, 2)) {
+					return foobar.__ks_0.call(that, args[0], Helper.getVararg(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+				}
+				throw Helper.badArgs();
+			}
+			if(t3(args[0]) && Helper.isVarargs(args, 0, 1, t1, pts = [1], 0) && Helper.isVarargs(args, 0, 1, t2, pts, 1) && te(pts, 2)) {
+				return foobar.__ks_1.call(that, args[0], Helper.getVararg(args, 1, pts[1]), Helper.getVararg(args, pts[1], pts[2]));
+			}
+		}
+		throw Helper.badArgs();
 	};
 };

@@ -1,9 +1,6 @@
-var {initFlag, Type} = require("@kaoscript/runtime");
+const {Helper, initFlag, Type} = require("@kaoscript/runtime");
 module.exports = function() {
 	var __ks_Date = {};
-	__ks_Date.__ks_init_0 = function(that) {
-		that._timezone = "Etc/UTC";
-	};
 	__ks_Date.__ks_get_timezone = function(that) {
 		if(!that[initFlag]) {
 			__ks_Date.__ks_init(that);
@@ -16,29 +13,24 @@ module.exports = function() {
 		}
 		that._timezone = value;
 	};
-	__ks_Date.__ks_cons_4 = function(year, month) {
-		if(arguments.length < 3) {
-			throw new SyntaxError("Wrong number of arguments (" + arguments.length + " for 3)");
+	__ks_Date.__ks_new_4 = function(...args) {
+		return __ks_Date.__ks_cons_4(...args);
+	};
+	__ks_Date.__ks_cons_4 = function(year, month, day, hours, minutes, seconds, milliseconds, timezone) {
+		if(day === void 0 || day === null) {
+			day = 0;
 		}
-		if(year === void 0 || year === null) {
-			throw new TypeError("'year' is not nullable");
+		if(hours === void 0 || hours === null) {
+			hours = 0;
 		}
-		if(month === void 0 || month === null) {
-			throw new TypeError("'month' is not nullable");
+		if(minutes === void 0 || minutes === null) {
+			minutes = 0;
 		}
-		let __ks_i = 1;
-		let __ks__;
-		let day = arguments.length > 3 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
-		let hours = arguments.length > 4 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
-		let minutes = arguments.length > 5 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
-		let seconds = arguments.length > 6 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
-		let milliseconds = arguments.length > 7 && (__ks__ = arguments[++__ks_i]) !== void 0 && __ks__ !== null ? __ks__ : 0;
-		let timezone = arguments[++__ks_i];
-		if(timezone === void 0 || timezone === null) {
-			throw new TypeError("'timezone' is not nullable");
+		if(seconds === void 0 || seconds === null) {
+			seconds = 0;
 		}
-		else if(!Type.isString(timezone)) {
-			throw new TypeError("'timezone' is not of type 'String'");
+		if(milliseconds === void 0 || milliseconds === null) {
+			milliseconds = 0;
 		}
 		var that = __ks_Date.new(year, month, day, hours, minutes, seconds, milliseconds);
 		if(!that[initFlag]) {
@@ -48,65 +40,83 @@ module.exports = function() {
 		return that;
 	};
 	__ks_Date.__ks_init = function(that) {
-		__ks_Date.__ks_init_0(that);
+		that._timezone = "Etc/UTC";
 		that[initFlag] = true;
 	};
 	__ks_Date.new = function() {
+		const t0 = Type.isNumber;
+		const t1 = value => Type.isClassInstance(value, Date);
+		const t2 = Type.isValue;
+		const t3 = Type.isString;
 		if(arguments.length === 0) {
 			return new Date();
 		}
-		else if(arguments.length === 1) {
-			return new Date(...arguments);
+		if(arguments.length === 1) {
+			if(t0(arguments[0])) {
+				return new Date(arguments[0]);
+			}
+			if(t1(arguments[0])) {
+				return new Date(arguments[0]);
+			}
+			throw Helper.badArgs();
 		}
-		else if(arguments.length === 2) {
-			return new Date(...arguments);
+		if(arguments.length === 2) {
+			if(t2(arguments[0]) && t2(arguments[1])) {
+				return new Date(arguments[0], arguments[1], void 0, void 0, void 0, void 0, void 0);
+			}
+			throw Helper.badArgs();
 		}
-		else if(arguments.length === 3) {
-			if(Type.isString(arguments[2])) {
-				return __ks_Date.__ks_cons_4(...arguments);
+		if(arguments.length === 3) {
+			if(t2(arguments[0]) && t2(arguments[1])) {
+				if(t3(arguments[2])) {
+					return __ks_Date.__ks_cons_4(arguments[0], arguments[1], void 0, void 0, void 0, void 0, void 0, arguments[2]);
+				}
+				return new Date(arguments[0], arguments[1], arguments[2], void 0, void 0, void 0, void 0);
 			}
-			else {
-				return new Date(...arguments);
+			throw Helper.badArgs();
+		}
+		if(arguments.length === 4) {
+			if(t2(arguments[0]) && t2(arguments[1])) {
+				if(t3(arguments[3])) {
+					return __ks_Date.__ks_cons_4(arguments[0], arguments[1], arguments[2], void 0, void 0, void 0, void 0, arguments[3]);
+				}
+				return new Date(arguments[0], arguments[1], arguments[2], arguments[3], void 0, void 0, void 0);
+			}
+			throw Helper.badArgs();
+		}
+		if(arguments.length === 5) {
+			if(t2(arguments[0]) && t2(arguments[1])) {
+				if(t3(arguments[4])) {
+					return __ks_Date.__ks_cons_4(arguments[0], arguments[1], arguments[2], arguments[3], void 0, void 0, void 0, arguments[4]);
+				}
+				return new Date(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], void 0, void 0);
+			}
+			throw Helper.badArgs();
+		}
+		if(arguments.length === 6) {
+			if(t2(arguments[0]) && t2(arguments[1])) {
+				if(t3(arguments[5])) {
+					return __ks_Date.__ks_cons_4(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], void 0, void 0, arguments[5]);
+				}
+				return new Date(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], void 0);
+			}
+			throw Helper.badArgs();
+		}
+		if(arguments.length === 7) {
+			if(t2(arguments[0]) && t2(arguments[1])) {
+				if(t3(arguments[6])) {
+					return __ks_Date.__ks_cons_4(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], void 0, arguments[6]);
+				}
+				return new Date(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], arguments[6]);
+			}
+			throw Helper.badArgs();
+		}
+		if(arguments.length === 8) {
+			if(t2(arguments[0]) && t2(arguments[1]) && t3(arguments[7])) {
+				return __ks_Date.__ks_cons_4(arguments[0], arguments[1], arguments[2], arguments[3], arguments[4], arguments[5], arguments[6], arguments[7]);
 			}
 		}
-		else if(arguments.length === 4) {
-			if(Type.isString(arguments[3])) {
-				return __ks_Date.__ks_cons_4(...arguments);
-			}
-			else {
-				return new Date(...arguments);
-			}
-		}
-		else if(arguments.length === 5) {
-			if(Type.isString(arguments[4])) {
-				return __ks_Date.__ks_cons_4(...arguments);
-			}
-			else {
-				return new Date(...arguments);
-			}
-		}
-		else if(arguments.length === 6) {
-			if(Type.isString(arguments[5])) {
-				return __ks_Date.__ks_cons_4(...arguments);
-			}
-			else {
-				return new Date(...arguments);
-			}
-		}
-		else if(arguments.length === 7) {
-			if(Type.isString(arguments[6])) {
-				return __ks_Date.__ks_cons_4(...arguments);
-			}
-			else {
-				return new Date(...arguments);
-			}
-		}
-		else if(arguments.length === 8) {
-			return __ks_Date.__ks_cons_4(...arguments);
-		}
-		else {
-			throw new SyntaxError("Wrong number of arguments");
-		}
+		throw Helper.badArgs();
 	};
-	const d = __ks_Date.new(2015, 6, 15, 9, 3, 1, 550, "Europe/Paris");
+	const d = __ks_Date.__ks_new_4(2015, 6, 15, 9, 3, 1, 550, "Europe/Paris");
 };

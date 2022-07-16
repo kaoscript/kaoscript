@@ -1,4 +1,4 @@
-var Type = require("@kaoscript/runtime").Type;
+const {Type} = require("@kaoscript/runtime");
 module.exports = function(assert, Assertion, config, expect, should, Should, use) {
 	var __ks_0_valuable = Type.isValue(assert);
 	var __ks_1_valuable = Type.isValue(Assertion);

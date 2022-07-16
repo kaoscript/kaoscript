@@ -1,16 +1,22 @@
-{
-  "aliens": [
-    "Any?",
-    "console"
-  ],
-  "requirements": [
-    0,
-    "file",
-    true
-  ],
-  "exports": [],
-  "references": [
-    "String"
-  ],
-  "macros": []
-}
+[
+  {
+    "aliens": [
+      "Any?",
+      "console",
+      true
+    ],
+    "requirements": [
+      0,
+      "file",
+      true
+    ],
+    "references": [
+      "String"
+    ]
+  },
+  {
+    "exports": [],
+    "references": [],
+    "macros": []
+  }
+]

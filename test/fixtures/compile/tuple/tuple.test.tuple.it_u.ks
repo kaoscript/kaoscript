@@ -1,7 +1,5 @@
-tuple Pair(String, Number)
-
-func foobar(item: Array | Struct) {
-	if item is not Struct {
+func foobar(item: Array | Tuple) {
+	if item is not Tuple {
 
 	}
 }

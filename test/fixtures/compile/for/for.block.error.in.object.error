@@ -1,1 +1,1 @@
-TypeException: "for..in" must be used with an array (line 5, file "fixtures/compile/for/for.block.error.in.object.ks")
+TypeException: "for..in" must be used with an array (fixtures/compile/for/for.block.error.in.object.ks:5)

@@ -1,0 +1,40 @@
+[
+  {
+    "aliens": [
+      0,
+      "console",
+      true
+    ],
+    "requirements": [],
+    "references": [
+      {
+        "kind": "dictionary",
+        "properties": {
+          "log": {
+            "kind": "function",
+            "async": false,
+            "exhaustive": true,
+            "min": 0,
+            "max": "Infinity",
+            "parameters": [
+              {
+                "name": "args",
+                "type": "Any",
+                "min": 0,
+                "max": "Infinity",
+                "default": false
+              }
+            ],
+            "returns": "Any?",
+            "errors": []
+          }
+        }
+      }
+    ]
+  },
+  {
+    "exports": [],
+    "references": [],
+    "macros": []
+  }
+]

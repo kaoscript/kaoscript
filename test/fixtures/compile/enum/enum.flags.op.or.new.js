@@ -1,11 +1,11 @@
-var Helper = require("@kaoscript/runtime").Helper;
+const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	let AnimalFlags = Helper.enum(Number, {
-		None: 0,
-		HasClaws: 1,
-		CanFly: 2,
-		EatsFish: 4,
-		Endangered: 8
+	const AnimalFlags = Helper.enum(Object, {
+		None: 0n,
+		HasClaws: 1n,
+		CanFly: 2n,
+		EatsFish: 4n,
+		Endangered: 8n
 	});
 	AnimalFlags.EndangeredFlyingClawedFishEating = AnimalFlags(AnimalFlags.HasClaws | AnimalFlags.CanFly | AnimalFlags.EatsFish | AnimalFlags.Endangered);
 	AnimalFlags.Predator = AnimalFlags(AnimalFlags.CanFly | AnimalFlags.HasClaws);
