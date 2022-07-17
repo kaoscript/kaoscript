@@ -14,7 +14,7 @@ class CallThisConstructorSubstitude extends Substitude {
 
 		const assessement = class.type().getConstructorAssessment(class.name(), node)
 
-		if const result = Router.matchArguments2(assessement, @arguments, node) {
+		if const result = Router.matchArguments(assessement, @arguments, node) {
 			@result = result
 		}
 		else {
@@ -103,7 +103,7 @@ class CallSuperConstructorSubstitude extends Substitude {
 		const extends = @class.type().extends()
 		const assessment = extends.type().getConstructorAssessment(extends.name(), node)
 
-		if const result = Router.matchArguments2(assessment, @arguments, node) {
+		if const result = Router.matchArguments(assessment, @arguments, node) {
 			@result = result
 			@skippable = !(extends.isAlien() || extends.isHybrid()) && @result.matches?.length == 0
 		}
@@ -215,7 +215,7 @@ class CallSuperMethodES6Substitude extends Substitude {
 
 		const assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
 
-		const result = Router.matchArguments2(assessment, @arguments, @method)
+		const result = Router.matchArguments(assessment, @arguments, @method)
 
 		if ?result {
 			@result = result
@@ -289,7 +289,7 @@ class CallSealedSuperMethodSubstitude extends Substitude {
 
 		const assessment = @class.type().extends().type().getInstantiableAssessment(@method.name(), @method)
 
-		const result = Router.matchArguments2(assessment, @arguments, @method)
+		const result = Router.matchArguments(assessment, @arguments, @method)
 
 		if ?result {
 			@result = result

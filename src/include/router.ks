@@ -286,7 +286,7 @@ namespace Router {
 			)
 		} // }}}
 
-		func matchArguments2(assessment: Assessement, arguments: Array<Expression>, exhaustive: Boolean = false, node: AbstractNode): CallMatchResult? { // {{{
+		func matchArguments(assessment: Assessement, arguments: Array<Expression>, exhaustive: Boolean = false, node: AbstractNode): CallMatchResult? { // {{{
 			if assessment.trees.length == 0 && arguments.length == 0 {
 				return PreciseCallMatchResult([])
 			}

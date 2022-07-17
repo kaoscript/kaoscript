@@ -671,7 +671,7 @@ class FunctionType extends Type {
 	matchArguments(arguments: Array, node: AbstractNode) { // {{{
 		const assessment = this.assessment('', node)
 
-		return ?Router.matchArguments2(assessment, arguments, node)
+		return ?Router.matchArguments(assessment, arguments, node)
 	} // }}}
 	matchContentOf(value: Type) { // {{{
 		if value.isAny() || value.isFunction() {
@@ -1000,7 +1000,7 @@ class OverloadedFunctionType extends Type {
 	matchArguments(arguments: Array, node: AbstractNode) { // {{{
 		const assessment = this.assessment('', node)
 
-		return ?Router.matchArguments2(assessment, arguments, node)
+		return ?Router.matchArguments(assessment, arguments, node)
 	} // }}}
 	originals(@majorOriginal): this { // {{{
 		@altering = true

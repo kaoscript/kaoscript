@@ -75,7 +75,7 @@ class ThisExpression extends Expression {
 				if @class.type().hasInstantiableMethod(@name) {
 					const assessment = @class.type().getInstantiableAssessment(@name, this)
 
-					if const result = Router.matchArguments2(assessment, @parent.arguments(), this) {
+					if const result = Router.matchArguments(assessment, @parent.arguments(), this) {
 						@fragment = `\(name).\(@name)`
 
 						if result is PreciseCallMatchResult {

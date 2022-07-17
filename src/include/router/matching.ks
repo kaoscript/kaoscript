@@ -420,7 +420,12 @@ func matchArguments(node: TreeNode, arguments: Array<Type>, cursor: ArgCursor, a
 			const last = Math.min(arguments.length - 1, cursor.index + arguments.length - 1 + node.max)
 
 			while cursor.index <= last {
-				if !cursor.argument.isAssignableToVariable(node.type, true, false, false) {
+				if cursor.argument.isSpread() {
+					if !cursor.argument.parameter(0).isAssignableToVariable(node.type, true, false, false) {
+						break
+					}
+				}
+				else if !cursor.argument.isAssignableToVariable(node.type, true, false, false) {
 					break
 				}
 

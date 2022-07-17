@@ -47,7 +47,7 @@ class CreateExpression extends Expression {
 
 			const assessment = type.type().getConstructorAssessment(type.name(), this)
 
-			if const result = Router.matchArguments2(assessment, @arguments, this) {
+			if const result = Router.matchArguments(assessment, @arguments, this) {
 				@result = result
 			}
 			else if type.type().isExhaustiveConstructor(this) {

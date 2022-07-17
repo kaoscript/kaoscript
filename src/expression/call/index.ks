@@ -177,7 +177,7 @@ class CallExpression extends Expression {
 
 				const assessment = function.assessment('', this)
 
-				if const result = Router.matchArguments2(assessment, @arguments, this) {
+				if const result = Router.matchArguments(assessment, @arguments, this) {
 					if result is LenientCallMatchResult {
 						this.addCallee(new DefaultCallee(@data, expression, this))
 					}
@@ -430,7 +430,7 @@ class CallExpression extends Expression {
 		if type is FunctionType | OverloadedFunctionType {
 			const assessment = type.assessment(name!!, this)
 
-			if const result = Router.matchArguments2(assessment, @arguments, this) {
+			if const result = Router.matchArguments(assessment, @arguments, this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, result.possibilities, result.arguments, this))
 				}
@@ -465,7 +465,7 @@ class CallExpression extends Expression {
 		else if type.isEnum() {
 			const assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if const result = Router.matchArguments2(assessment, @arguments, type.isExhaustive(this), this) {
+			if const result = Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type.setNullable(true), result.arguments, this))
 				}
@@ -485,7 +485,7 @@ class CallExpression extends Expression {
 		else if type.isStruct() {
 			const assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if const result = Router.matchArguments2(assessment, @arguments, type.isExhaustive(this), this) {
+			if const result = Router.matchArguments(assessment, @arguments, type.isExhaustive(this), this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
 				}
@@ -505,7 +505,7 @@ class CallExpression extends Expression {
 		else if type.isTuple() {
 			const assessment = type.discardName().assessment(type.reference(@scope), this)
 
-			if const result = Router.matchArguments2(assessment, @arguments, this) {
+			if const result = Router.matchArguments(assessment, @arguments, this) {
 				if result is LenientCallMatchResult {
 					this.addCallee(new DefaultCallee(@data, @object, type, result.arguments, this))
 				}
@@ -544,7 +544,7 @@ class CallExpression extends Expression {
 				if value.hasClassMethod(@property) {
 					const assessment = value.getClassAssessment(@property, this)
 
-					if const result = Router.matchArguments2(assessment, @arguments, this) {
+					if const result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							if result.possibilities.some((function, _, _) => function.isSealed()) {
 								this.addCallee(new SealedCallee(@data, name, false, result.possibilities, this))
@@ -602,7 +602,7 @@ class CallExpression extends Expression {
 				if value.hasStaticMethod(@property) {
 					const assessment = value.getStaticAssessment(@property, this)
 
-					if const result = Router.matchArguments2(assessment, @arguments, this) {
+					if const result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							this.addCallee(new EnumMethodCallee(@data, @object, @property, result.possibilities, this))
 						}
@@ -645,7 +645,7 @@ class CallExpression extends Expression {
 					if property is FunctionType || property is OverloadedFunctionType {
 						const assessment = property.assessment(@property, this)
 
-						if const result = Router.matchArguments2(assessment, @arguments, this) {
+						if const result = Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
 								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
@@ -726,7 +726,7 @@ class CallExpression extends Expression {
 				if value.hasInstantiableMethod(@property) {
 					const assessment = value.getInstantiableAssessment(@property, this)
 
-					if const result = Router.matchArguments2(assessment, @arguments, this) {
+					if const result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							if result.possibilities.some((function, _, _) => function.isSealed()) {
 								this.addCallee(new SealedCallee(@data, reference.type(), true, result.possibilities, this))
@@ -780,7 +780,7 @@ class CallExpression extends Expression {
 					if property is FunctionType || property is OverloadedFunctionType {
 						const assessment = property.assessment(@property, this)
 
-						if const result = Router.matchArguments2(assessment, @arguments, this) {
+						if const result = Router.matchArguments(assessment, @arguments, this) {
 							if result is LenientCallMatchResult {
 								this.addCallee(new DefaultCallee(@data, @object, result.possibilities, this))
 							}
@@ -824,7 +824,7 @@ class CallExpression extends Expression {
 				if value.hasInstanceMethod(@property) {
 					const assessment = value.getInstanceAssessment(@property, this)
 
-					if const result = Router.matchArguments2(assessment, @arguments, this) {
+					if const result = Router.matchArguments(assessment, @arguments, this) {
 						if result is LenientCallMatchResult {
 							this.addCallee(new EnumMethodCallee(@data, reference.discardReference() as NamedType<EnumType>, `__ks_func_\(@property)`, result.possibilities, this))
 						}
