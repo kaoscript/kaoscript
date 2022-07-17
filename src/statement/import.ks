@@ -1177,7 +1177,13 @@ abstract class Importer extends Statement {
 			if @isKSFile {
 				let modulePath = ''
 
-				if $localFileRegex.test(@moduleName) {
+				if @pathAddendum.length > 0 {
+					const dirname = path.dirname(@pathAddendum)
+					const basename = path.basename(@pathAddendum)
+
+					modulePath = `\(@moduleName)\(path.sep)\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
+				}
+				else if $localFileRegex.test(@moduleName) {
 					const basename = path.basename(@moduleName)
 					let dirname
 
@@ -1189,12 +1195,6 @@ abstract class Importer extends Statement {
 					}
 
 					modulePath = `\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
-				}
-				else if @pathAddendum.length > 0 {
-					const dirname = path.dirname(@pathAddendum)
-					const basename = path.basename(@pathAddendum)
-
-					modulePath = `\(@moduleName)\(path.sep)\(dirname)\(path.sep).\(basename).\(@variationId).ksb`
 				}
 				else {
 					const dirname = path.dirname(@moduleName)
