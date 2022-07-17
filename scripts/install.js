@@ -18,13 +18,21 @@ program
 	.command('dependency')
 	.action(function() {
 		if(metadata._requested && (metadata._requested.type === 'git' || metadata._requested.type === 'hosted')) {
-			console.log('github:kaoscript/' + getPackage('github'));
+			var library = 'github:kaoscript/' + getPackage('github');
 		}
 		else if(metadata._resolved && metadata._resolved.substr(0, 4) !== 'git:') {
-			console.log('@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.'));
+			var library = '@kaoscript/' + getPackage() + '@^' + metadata.version.split('.').slice(0, 2).join('.');
 		}
 		else {
-			console.log('github:kaoscript/' + getPackage('github'));
+			var library = 'github:kaoscript/' + getPackage('github');
+		}
+
+		var manager = process.env.npm_execpath;
+		if(manager.indexOf('yarn') != -1) {
+			console.log('yarn add-no-save ' + library);
+		}
+		else {
+			console.log('npm install --no-save ' + library + '');
 		}
 	});
 

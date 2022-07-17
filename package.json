@@ -56,10 +56,11 @@
 		"istanbul": "^0.4.5",
 		"klaw-sync": "^6.0.0",
 		"mocha": "^5.2.0",
-		"rimraf": "^2.7.1"
+		"rimraf": "^2.7.1",
+		"yarn-add-no-save": "^1.0.3"
 	},
 	"scripts": {
-		"postinstall": "npm install --no-save `node ./scripts/install.js dependency` && node ./scripts/install.js binary",
+		"postinstall": "`node ./scripts/install.js dependency` && node ./scripts/install.js binary",
 		"prepublishOnly": "rm -f ./lib/compiler.js",
 		"push-coverage": "npm run test-coverage && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
 		"test": "npx mocha --colors --check-leaks --reporter spec --require ./register.js test/*.test.js test/*.test.ks",
