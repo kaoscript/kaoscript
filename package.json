@@ -62,7 +62,7 @@
 		"postinstall": "npm install --no-save `node ./scripts/install.js dependency` && node ./scripts/install.js binary",
 		"prepublishOnly": "rm -f ./lib/compiler.js",
 		"push-coverage": "npm run test-coverage && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js",
-		"test": "npx mocha --colors --check-leaks --reporter spec --require ./register.js test/*.test.js test/*.ks",
+		"test": "npx mocha --colors --check-leaks --reporter spec --require ./register.js test/*.test.js test/*.test.ks",
 		"test-coverage": "node node_modules/@zokugun/istanbul.cover/src/cli.js"
 	},
 	"kaoscript": {
