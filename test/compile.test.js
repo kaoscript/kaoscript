@@ -10,14 +10,6 @@ var testXArgs = !(process.env.XARGS === '0' || process.env.XARGS === 'false' || 
 
 require('@kaoscript/target-commons')(Compiler)
 
-/* function replacer(key, value) { // {{{
-	if(value === undefined) {
-		throw new Error('the value of "' + key + '" is not nullable');
-	}
-
-	return value === Infinity ? 'Infinity' : value;
-} // }}} */
-
 var testings = [];
 if(process.argv[1].endsWith('/test/compile.dev.js') && process.argv.length > 2) {
 	var args = process.argv[2].split(' ');
@@ -36,7 +28,7 @@ describe('compile', function() {
 	});
 
 	for(var i = 0; i < files.length; i++) {
-		prepare(files[i].path)
+		prepare(files[i].path);
 	}
 
 	function doit(file, root, name, args) { // {{{
@@ -82,14 +74,14 @@ describe('compile', function() {
 							console.log(ex.toString());
 						}
 
-						throw ex2
+						throw ex2;
 					}
 				}
 
 				if(data && debug) {
 					console.log(data);
-					console.log('>----------------------------------------------------------<')
-					console.log('It should throw an error')
+					console.log('>----------------------------------------------------------<');
+					console.log('It should throw an error');
 				}
 
 				expect(data).to.not.exist;
@@ -111,7 +103,7 @@ describe('compile', function() {
 						console.log(data);
 					}
 
-					throw ex
+					throw ex;
 				}
 
 				try {
@@ -133,10 +125,10 @@ describe('compile', function() {
 							console.log(data);
 						}
 
-						throw ex
+						throw ex;
 					}
 
-					metadata = null
+					metadata = null;
 				}
 			}
 		});
@@ -179,8 +171,6 @@ describe('compile', function() {
 					var argz = [];
 
 					for(var k = 0; k < args[i].length; k++) {
-						// argz.push(args[i][k] ? scope.getVariable(metaReqs.requirements[(k * 3) + 1]).getRealType() : scope.reference('Void'));
-						// argz.push(args[i][k] ? scope.getVariable(metaReqs.requirements[(k * 3) + 1]).getRealType() : null);
 						argz.push(args[i][k] ? {
 							name: k,
 							type: scope.getVariable(metaReqs.requirements[(k * 3) + 1]).getRealType()
@@ -197,175 +187,5 @@ describe('compile', function() {
 		else {
 			doit(file, root, name)
 		}
-
-		/* it(name, function() {
-			this.timeout(5000);
-
-			var compiler = new Compiler(file, {
-				header: false
-			});
-
-			try {
-				var error = fs.readFileSync(path.join(root, name + '.error'), {
-					encoding: 'utf8'
-				});
-			}
-			catch(error) {
-			}
-
-			if(error) {
-				var data;
-
-				try {
-					data = compiler.compile().toSource();
-				}
-				catch(ex) {
-					if(process.env.DEBUG && !ex.fileName) {
-						console.log(ex);
-					}
-
-					expect(ex.fileName).to.exist;
-
-					ex.fileName = path.relative(__dirname, ex.fileName);
-
-					try {
-						expect(ex.toString()).to.equal(error);
-					}
-					catch(ex2) {
-						if(process.env.DEBUG) {
-							console.log(ex.toString());
-						}
-
-						throw ex2
-					}
-				}
-
-				if(data && process.env.DEBUG) {
-					console.log(data);
-					console.log('>----------------------------------------------------------<')
-					console.log('It should throw an error')
-				}
-
-				expect(data).to.not.exist;
-			}
-			else {
-				try {
-					var args = fs.readFileSync(path.join(root, name + '.args'), {
-						encoding: 'utf8'
-					});
-				}
-				catch(error) {
-				}
-
-				if(args) {
-					args = JSON.parse(args);
-
-					compiler.initiate();
-
-					var metaReqs = compiler.toRequirements();
-
-					for(var i = 0; i < args.length; i++) {
-						var compiler = new Compiler(file, {
-							header: false
-						});
-
-						compiler.initiate();
-
-						if(args[i]) {
-							var argz = [];
-
-							for(var k = 0; k < args[i].length; k++) {
-								argz.push(args[i][k] ? metaReqs.references[metaReqs.requirements[k * 3]] : null);
-							}
-
-							compiler.setArguments(argz);
-						}
-
-						var data = compiler.finish().toSource();
-
-						try {
-							expect(data).to.equal(fs.readFileSync(path.join(root, name + (args.length === 1 ? '' : '.' + i) + '.js'), {
-								encoding: 'utf8'
-							}));
-						}
-						catch(ex) {
-							if(process.env.DEBUG) {
-								console.log('CASE: ' + i);
-								console.log(data);
-							}
-
-							throw ex
-						}
-
-						try {
-							var metadata = fs.readFileSync(path.join(root, name + '.json'), {
-								encoding: 'utf8'
-							});
-						}
-						catch(error) {
-						}
-
-						if(metadata) {
-							var data = JSON.stringify([compiler.toRequirements(), compiler.toExports()], replacer, 2);
-
-							try {
-								expect(JSON.parse(data)).to.eql(JSON.parse(metadata));
-							}
-							catch(ex) {
-								if(process.env.DEBUG) {
-									console.log('CASE: ' + i);
-									console.log(data);
-								}
-
-								throw ex
-							}
-
-							metadata = null
-						}
-					}
-				}
-				else {
-					var data = compiler.compile().toSource();
-
-					try {
-						expect(data).to.equal(fs.readFileSync(path.join(root, name + '.js'), {
-							encoding: 'utf8'
-						}));
-					}
-					catch(ex) {
-						if(process.env.DEBUG) {
-							console.log(data);
-						}
-
-						throw ex
-					}
-
-					try {
-						var metadata = fs.readFileSync(path.join(root, name + '.json'), {
-							encoding: 'utf8'
-						});
-					}
-					catch(error) {
-					}
-
-					if(metadata) {
-						var data = JSON.stringify([compiler.toRequirements(), compiler.toExports()], replacer, 2);
-
-						try {
-							expect(JSON.parse(data)).to.eql(JSON.parse(metadata));
-						}
-						catch(ex) {
-							if(process.env.DEBUG) {
-								console.log(data);
-							}
-
-							throw ex
-						}
-
-						metadata = null
-					}
-				}
-			}
-		}); */
 	} // }}}
 });
