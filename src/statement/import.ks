@@ -759,7 +759,7 @@ abstract class Importer extends Statement {
 
 		this.buildArguments(@metaRequirements, @arguments)
 
-		const arguments = [null for const i from 0 til @metaRequirements.requirements.length / 3]
+		const arguments = [false for const i from 0 til @metaRequirements.requirements.length / 3]
 
 		for const argument in @arguments.values {
 			arguments[argument.index] = {

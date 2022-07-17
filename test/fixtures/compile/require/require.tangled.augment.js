@@ -1,7 +1,7 @@
 require("kaoscript/register");
 const {Helper} = require("@kaoscript/runtime");
 module.exports = function() {
-	var {Foobar, __ks_Foobar, __ks_Error, FooError} = require("./.require.tangled.genesis.ks.1b7cst1.ksb")();
+	var {Foobar, __ks_Foobar, __ks_Error, FooError} = require("./.require.tangled.genesis.ks.fpb9zp.ksb")();
 	__ks_Foobar.__ks_func_foobar_0 = function() {
 	};
 	__ks_Foobar._im_foobar = function(that, ...args) {

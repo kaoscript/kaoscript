@@ -1,0 +1,7 @@
+[
+	[false, false, false, false, false, false, false],
+	[true, true, true, true, true, true, true],
+	null,
+	[true, true, false, false, true, true, false],
+	[true, null, null, false, true, null, false]
+]

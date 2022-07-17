@@ -2,7 +2,7 @@ require("kaoscript/register");
 const {Helper, Operator, Type} = require("@kaoscript/runtime");
 module.exports = function(__ks_Date) {
 	if(!Type.isValue(__ks_Date)) {
-		var __ks_Date = require("./.require.alt.roi.loop3.genesis.ks.1runl5l.ksb")().__ks_Date;
+		var __ks_Date = require("./.require.alt.roi.loop3.genesis.ks.np51g.ksb")().__ks_Date;
 	}
 	__ks_Date.__ks_new_1 = function(...args) {
 		return __ks_Date.__ks_cons_1(...args);

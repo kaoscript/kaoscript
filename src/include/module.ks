@@ -1,7 +1,7 @@
 export class Module {
 	private {
 		_aliens							= {}
-		_arguments: Array				= null
+		_arguments: Array				= []
 		_binary: Boolean				= false
 		_body
 		_compiler: Compiler
@@ -195,9 +195,8 @@ export class Module {
 		@register = true
 	} // }}}
 	getAlien(name: String) => @aliens[name]
+	getArgument(index: Number) => @arguments[index]
 	getRequirement(name: String) => @requirementByNames[name]
-	hasArgument(index: Number) => @arguments?[index]?
-	hasUnknownArguments() => !?@arguments
 	hasInclude(path) { // {{{
 		return @includePaths[path] == true || @includePaths[path] is String
 	} // }}}
@@ -296,8 +295,6 @@ export class Module {
 	setArguments(arguments: Array, module: String = path.basename(@file), node: AbstractNode = @body) { // {{{
 		const scope = @body.scope()
 
-		@arguments = []
-
 		if arguments.length != 0 {
 			const references = {}
 			const queue = []
@@ -306,7 +303,15 @@ export class Module {
 			const metadata = []
 
 			for const requirement, index in @requirements {
-				if const { name, type } = arguments[index] {
+				if arguments[index] is Boolean {
+					if requirement.isRequired() {
+						SyntaxException.throwMissingRequirement(requirement.name(), module, node)
+					}
+					else {
+						@arguments.push(false)
+					}
+				}
+				else if const { name, type } = arguments[index] {
 					if type.isSubsetOf(requirement.type(), MatchingMode::Signature) {
 						if !requirement.type().isSubsetOf(type, MatchingMode::Signature) {
 							const index = type.toMetadata(metadata, 0, ExportMode::Requirement, this)
@@ -572,7 +577,10 @@ export class Module {
 
 			if @arguments? {
 				for const type in @arguments {
-					if type? {
+					if type is Boolean {
+						variations.push(false)
+					}
+					else if type? {
 						type.toVariations(variations)
 					}
 					else {

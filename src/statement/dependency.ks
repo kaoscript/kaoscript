@@ -522,8 +522,9 @@ class RequireOrImportDeclarator extends Importer {
 		}
 		else if @requirements.length == 1 {
 			const requirement = @requirements[0]
+			const argument = module.getArgument(requirement.index())
 
-			if module.hasUnknownArguments() {
+			if !?argument {
 				const ctrl = fragments.newControl()
 
 				if requirement.isSystemic() {
@@ -537,52 +538,88 @@ class RequireOrImportDeclarator extends Importer {
 
 				ctrl.done()
 			}
-			else if !module.hasArgument(requirement.index()) {
+			else if argument is Boolean {
 				this.toImportFragments(fragments)
 			}
 		}
 		else {
+			const unknowns = []
+			const notpasseds = []
+
 			for const requirement in @requirements {
-				if requirement.isSystemic() {
-					fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getSealedName()))`)
+				const argument = module.getArgument(requirement.index())
+
+				if !?argument {
+					if requirement.isSystemic() {
+						fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.getSealedName()))`)
+					}
+					else {
+						fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.name()))`)
+					}
+
+					unknowns.push(requirement)
 				}
-				else {
-					fragments.line(`var \(requirement.tempName())_valuable = \($runtime.type(this)).isValue(\(requirement.name()))`)
+				else if argument is Boolean {
+					notpasseds.push(requirement)
 				}
 			}
 
-			const ctrl = fragments.newControl().code(`if(`)
+			if notpasseds.length > 0 || unknowns.length > 0 {
+				let ctrl = fragments
 
-			for const requirement, index in @requirements {
-				if index != 0 {
-					ctrl.code(' || ')
+				if unknowns.length > 0 {
+					ctrl = fragments.newControl().code(`if(`)
+
+					for const requirement, index in unknowns {
+						ctrl.code(' || ') unless index == 0
+
+						ctrl.code(`!\(requirement.tempName())_valuable`)
+					}
+
+					ctrl.code(')').step()
 				}
 
-				ctrl.code(`!\(requirement.tempName())_valuable`)
-			}
-
-			ctrl.code(')').step()
-
-			this.toImportFragments(ctrl, false)
-
-			for const requirement in @requirements {
-				const control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
-
-				if requirement.isSystemic() {
-					control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+				if notpasseds.length == @requirements.length {
+					this.toImportFragments(ctrl, true)
 				}
 				else {
-					control.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
+					this.toImportFragments(ctrl, false)
 
-					if requirement.isSealed() {
-						control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+					for const requirement in notpasseds {
+						if requirement.isSystemic() {
+							ctrl.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+						}
+						else {
+							ctrl.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
+
+							if requirement.isSealed() {
+								ctrl.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+							}
+						}
+					}
+
+					for const requirement in unknowns {
+						const control = ctrl.newControl().code(`if(!\(requirement.tempName())_valuable)`).step()
+
+						if requirement.isSystemic() {
+							control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+						}
+						else {
+							control.line(`\(requirement.name()) = __ks__.\(requirement.name())`)
+
+							if requirement.isSealed() {
+								control.line(`\(requirement.getSealedName()) = __ks__.\(requirement.getSealedName())`)
+							}
+						}
+
+						control.done()
+					}
+
+					if unknowns.length > 0 {
+						ctrl.done()
 					}
 				}
-
-				control.done()
 			}
-
-			ctrl.done()
 		}
 	} // }}}
 }
@@ -800,8 +837,9 @@ class StaticRequirement extends Requirement {
 	toFragments(fragments)
 	toParameterFragments(fragments, comma) { // {{{
 		const module = @node.module()
+		const argument = module.getArgument(@index)
 
-		if module.hasUnknownArguments() {
+		if !?argument {
 			fragments.code($comma) if comma
 
 			if @type.isSystemic() {
@@ -817,7 +855,7 @@ class StaticRequirement extends Requirement {
 
 			return true
 		}
-		else if module.hasArgument(@index) {
+		else if argument is not Boolean {
 			fragments.code($comma) if comma
 
 			if @type.isSystemic() {
@@ -852,8 +890,9 @@ abstract class DynamicRequirement extends Requirement {
 	}
 	toParameterFragments(fragments, comma) { // {{{
 		const module = @node.module()
+		const argument = module.getArgument(@index)
 
-		if module.hasUnknownArguments() {
+		if !?argument {
 			fragments.code($comma) if comma
 
 			if @type.isSystemic() {
@@ -869,7 +908,7 @@ abstract class DynamicRequirement extends Requirement {
 
 			return true
 		}
-		else if module.hasArgument(@index) {
+		else if argument is not Boolean {
 			fragments.code($comma) if comma
 
 			if @type.isSystemic() {
@@ -901,8 +940,9 @@ class EORDynamicRequirement extends DynamicRequirement {
 	} // }}}
 	toFragments(fragments) { // {{{
 		const module = @node.module()
+		const argument = module.getArgument(@index)
 
-		if module.hasUnknownArguments() {
+		if !?argument {
 			if @type.isSystemic() {
 				const ctrl = fragments.newControl().code('if(!', $runtime.type(@node), '.isValue(', this.getSealedName(), '))').step()
 
@@ -939,8 +979,9 @@ class ROEDynamicRequirement extends DynamicRequirement {
 	} // }}}
 	toFragments(fragments) { // {{{
 		const module = @node.module()
+		const argument = module.getArgument(@index)
 
-		if module.hasUnknownArguments() {
+		if !?argument {
 			if @type.isSystemic() {
 				const ctrl = fragments.newControl().code('if(!', $runtime.type(@node), '.isValue(', @type.getSealedName(), '))').step()
 
@@ -964,7 +1005,7 @@ class ROEDynamicRequirement extends DynamicRequirement {
 				ctrl.done()
 			}
 		}
-		else if !module.hasArgument(@index) {
+		else if argument is Boolean {
 			if @type.isSealed() {
 				fragments.line(`\($runtime.immutableScope(@node))\(@type.getSealedName()) = {}`)
 			}

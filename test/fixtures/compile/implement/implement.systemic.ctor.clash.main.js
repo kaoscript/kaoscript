@@ -4,7 +4,7 @@ module.exports = function(__ks_Date, __ks_Math) {
 	var __ks_0_valuable = Type.isValue(__ks_Date);
 	var __ks_1_valuable = Type.isValue(__ks_Math);
 	if(!__ks_0_valuable || !__ks_1_valuable) {
-		var __ks__ = require("./.implement.systemic.ctor.clash.typing.ks.1b7cst1.ksb")();
+		var __ks__ = require("./.implement.systemic.ctor.clash.typing.ks.fpb9zp.ksb")();
 		if(!__ks_0_valuable) {
 			__ks_Date = __ks__.__ks_Date;
 		}

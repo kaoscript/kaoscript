@@ -171,21 +171,26 @@ describe('compile', function() {
 					var argz = [];
 
 					for(var k = 0; k < args[i].length; k++) {
-						argz.push(args[i][k] ? {
-							name: k,
-							type: scope.getVariable(metaReqs.requirements[(k * 3) + 1]).getRealType()
-						} : null);
+						if(args[i][k]) {
+							argz.push({
+								name: k,
+								type: scope.getVariable(metaReqs.requirements[(k * 3) + 1]).getRealType()
+							});
+						}
+						else {
+							argz.push(args[i][k]);
+						}
 					}
 
-					doit(file, root, name + '.' + i, argz)
+					doit(file, root, name + '.' + i, argz);
 				}
 				else {
-					doit(file, root, name + '.' + i)
+					doit(file, root, name + '.' + i);
 				}
 			}
 		}
 		else {
-			doit(file, root, name)
+			doit(file, root, name);
 		}
 	} // }}}
 });
